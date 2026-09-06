@@ -1,7 +1,7 @@
 {
-  "edge_count": 4154,
-  "external_import_count": 3122,
-  "module_count": 1095,
+  "edge_count": 4137,
+  "external_import_count": 3118,
+  "module_count": 1094,
   "modules": [
     {
       "external_imports": [],
@@ -344,7 +344,6 @@
       "imports": [
         "app.compatibility.routine_posts.canonical_interactions",
         "app.core.context_text",
-        "app.cruds.agent_runs",
         "app.domains.social.schemas.community",
         "app.runtime.persistence.model_registration",
         "app.runtime.relationships.sqlalchemy_social_event",
@@ -705,31 +704,6 @@
       "imports": [],
       "module": "app.cruds",
       "path": "backend/app/cruds/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.unit_of_work",
-        "app.domains.characters.models",
-        "app.domains.identity.repository.credentials",
-        "app.domains.relationships.constants",
-        "app.domains.relationships.repository.points",
-        "app.domains.relationships.service.points",
-        "app.domains.relationships.utils.points",
-        "app.domains.routines.models.resident",
-        "app.domains.world_characters.models",
-        "app.runtime.persistence.model_registration"
-      ],
-      "module": "app.cruds.agent_runs",
-      "path": "backend/app/cruds/agent_runs.py",
       "wildcard_imports": []
     },
     {
@@ -12800,7 +12774,6 @@
         "app.core.security",
         "app.credentials",
         "app.credentials.service_images",
-        "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
@@ -13688,6 +13661,27 @@
       ],
       "module": "app.runtime.memory.composition",
       "path": "backend/app/runtime/memory/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "datetime",
+        "functools",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.service.daypart_observations",
+        "app.domains.routines.contracts.action_context",
+        "app.domains.routines.service.action_candidates",
+        "app.domains.routines.utils.context_text",
+        "app.domains.social.repository.posts"
+      ],
+      "module": "app.runtime.memory.daypart_observations",
+      "path": "backend/app/runtime/memory/daypart_observations.py",
       "wildcard_imports": []
     },
     {
@@ -14669,6 +14663,8 @@
         "app.domains.identity.models",
         "app.domains.identity.repository.credentials",
         "app.domains.identity.service.credential_cooldown",
+        "app.domains.memory.service.daypart",
+        "app.domains.memory.service.daypart_observations",
         "app.domains.operations.service.maintenance",
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
@@ -14709,6 +14705,7 @@
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.integrations.direct_llm",
+        "app.runtime.memory.daypart_observations",
         "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
         "app.runtime.resident.context_references",
@@ -14723,7 +14720,6 @@
         "app.runtime.resident.request_options",
         "app.runtime.resident.slots",
         "app.runtime.search.binding",
-        "app.services.agent_runs",
         "app.services.community",
         "app.services.runtime_boundary"
       ],
@@ -14833,14 +14829,17 @@
         "app.core.redaction",
         "app.core.unit_of_work",
         "app.credentials",
-        "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.character_lore.service.documents",
         "app.domains.character_lore.service.presentation",
         "app.domains.identity.models",
         "app.domains.memory.models.daypart",
+        "app.domains.relationships.constants",
         "app.domains.relationships.models.points",
+        "app.domains.relationships.repository.points",
+        "app.domains.relationships.service.points",
+        "app.domains.relationships.utils.points",
         "app.domains.routines.contracts.action_planning",
         "app.domains.routines.contracts.context_reads",
         "app.domains.routines.contracts.resident",
@@ -15075,6 +15074,7 @@
         "app.domains.characters.service.state",
         "app.domains.identity.models",
         "app.domains.identity.repository.credentials",
+        "app.domains.memory.service.daypart",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.writing",
         "app.domains.routines.exceptions",
@@ -15084,7 +15084,6 @@
         "app.domains.routines.service.writing_results",
         "app.domains.social.schemas.community",
         "app.runtime.character_lore",
-        "app.services.agent_writing",
         "app.services.community",
         "app.services.runtime_boundary"
       ],
@@ -16416,9 +16415,6 @@
         "app.cruds.community",
         "app.domains.characters.models",
         "app.domains.identity.models",
-        "app.domains.memory.contracts.daypart",
-        "app.domains.memory.service.daypart",
-        "app.domains.memory.service.daypart_observations",
         "app.domains.routines.constants",
         "app.domains.routines.models.resident",
         "app.domains.routines.service.action_admission",
@@ -16443,31 +16439,6 @@
     {
       "external_imports": [
         "datetime",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.character_lore.contracts",
-        "app.domains.character_lore.service.presentation",
-        "app.domains.characters.models",
-        "app.domains.identity.models",
-        "app.domains.memory.models.daypart",
-        "app.domains.memory.service.daypart",
-        "app.domains.routines.models.resident",
-        "app.domains.social.service.agent_tool_authorization",
-        "app.domains.social.service.resident_affordances",
-        "app.runtime.character_lore",
-        "app.runtime.persistence.model_registration",
-        "app.runtime.social.agent_tool_authorization",
-        "app.runtime.social.agent_tools"
-      ],
-      "module": "app.services.agent_writing",
-      "path": "backend/app/services/agent_writing.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
         "hashlib",
         "json",
         "logging",
@@ -16483,7 +16454,6 @@
         "app.core.json_objects",
         "app.core.search_text",
         "app.core.unit_of_work",
-        "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.characters.exceptions",

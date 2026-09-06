@@ -1,8 +1,5 @@
-from app.domains.memory.service.daypart import purge_expired_events as _purge_expired_daypart_memory_events
 
-from app.domains.memory.service.daypart import event_exists as _daypart_memory_event_exists
 
-from app.domains.memory.service.daypart import record_memory_event as _record_daypart_memory_event
 
 from app.runtime.social import feed_history as resident_feed_history
 
@@ -10,13 +7,9 @@ from app.domains.routines.service import feed_history_values
 
 from app.domains.social.service import resident_affordances
 
-from app.domains.memory.service.daypart_observations import filter_daypart_duplicate_feed_interest as _filter_daypart_duplicate_feed_interest
 
-from app.domains.memory.service.daypart_observations import filter_daypart_duplicate_inbox_candidates as _filter_daypart_duplicate_inbox_candidates
 
-from app.domains.memory.service import daypart_observations
 
-from app.domains.memory.contracts.daypart import DaypartObservationReferences
 
 import logging
 
@@ -122,53 +115,7 @@ COMPLETE_TICK_ACTION_TYPES = (
     "observe",
 )
 
-def _build_daypart_memory_note(
-    *,
-    db: Session,
-    activity_daypart: str,
-    daypart_start_date: date,
-    character: _model_Character,
-    run_id: str,
-    inbox_candidates: list[dict[str, Any]],
-    feed_interest_payload: dict[str, Any],
-) -> str:
-    return daypart_observations.build_daypart_memory_note(
-        db=db,
-        activity_daypart=activity_daypart,
-        daypart_start_date=daypart_start_date,
-        character=character,
-        run_id=run_id,
-        inbox_candidates=inbox_candidates,
-        feed_interest_payload=feed_interest_payload,
-        references=DaypartObservationReferences(
-            post_author=_daypart_observation_author, clip_text=_clip_text
-        ),
-    )
 
-def _record_provided_daypart_observations(
-    db: Session,
-    *,
-    character_id: str,
-    memory_session_key: str,
-    daypart_start_date: date,
-    activity_daypart: str,
-    run_id: str,
-    inbox_candidates: list[dict[str, Any]],
-    feed_interest_payload: dict[str, Any],
-) -> None:
-    return daypart_observations.record_provided_daypart_observations(
-        db=db,
-        activity_daypart=activity_daypart,
-        memory_session_key=memory_session_key,
-        daypart_start_date=daypart_start_date,
-        character_id=character_id,
-        run_id=run_id,
-        inbox_candidates=inbox_candidates,
-        feed_interest_payload=feed_interest_payload,
-        references=DaypartObservationReferences(
-            post_author=_daypart_observation_author, clip_text=_clip_text
-        ),
-    )
 
 def _format_v6_action_menu(
     db: Session,
@@ -479,13 +426,3 @@ Call angmoo_save_character_state with:
 - memory_note: Korean first-person or character-style note about the concrete post/feed signal and what {character.name} privately felt, thought, or decided
 
 After the real tool call, finish with one short Korean sentence."""
-
-def _daypart_observation_author(db: Session, source_post_id: str | None, missing: str | None) -> str | None:
-    post = community_crud.get_post(db, source_post_id) if source_post_id else None
-    return (
-        _profile_display_name_for_action_menu(
-            SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id
-        )
-        if post is not None
-        else missing
-    )

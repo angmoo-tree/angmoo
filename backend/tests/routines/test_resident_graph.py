@@ -11,6 +11,7 @@ from model_fixture_support import models
 from app.domains.character_lore import contracts as character_lore
 from app.integrations import direct_llm as direct_llm
 from app.runtime.resident import langgraph as langgraph_resident
+from app.domains.relationships.service import points as relationship_points
 
 
 def test_langgraph_resident_does_not_call_agent_tools_http() -> None:
@@ -421,7 +422,7 @@ def test_relationship_point_crud_lifecycle() -> None:
     models.AgentRelationshipPoint.__table__.create(engine)
     now = datetime(2026, 6, 24, 3, 0, tzinfo=UTC)
     with Session(engine) as session:
-        point, reason = langgraph_resident.agent_run_crud.create_relationship_point(
+        point, reason = relationship_points.create_relationship_point(
             session,
             kind="mention_received",
             recipient_character_id="char-b",
@@ -431,7 +432,7 @@ def test_relationship_point_crud_lifecycle() -> None:
             expires_at=now + timedelta(hours=72),
         )
         duplicate, duplicate_reason = (
-            langgraph_resident.agent_run_crud.create_relationship_point(
+            relationship_points.create_relationship_point(
                 session,
                 kind="mention_received",
                 recipient_character_id="char-b",
@@ -441,7 +442,7 @@ def test_relationship_point_crud_lifecycle() -> None:
                 expires_at=now + timedelta(hours=72),
             )
         )
-        pending = langgraph_resident.agent_run_crud.list_pending_relationship_points(
+        pending = relationship_points.list_pending_relationship_points(
             session,
             recipient_character_id="char-b",
             now=now,
@@ -452,11 +453,11 @@ def test_relationship_point_crud_lifecycle() -> None:
         assert duplicate_reason == "duplicate"
         assert [item.id for item in pending] == [point.id]
 
-        selected = langgraph_resident.agent_run_crud.mark_relationship_point_selected(
+        selected = relationship_points.mark_relationship_point_selected(
             session, point, run_id="run-2", now=now
         )
         assert selected.status == "selected"
-        consumed = langgraph_resident.agent_run_crud.mark_relationship_point_consumed(
+        consumed = relationship_points.mark_relationship_point_consumed(
             session,
             point,
             run_id="run-2",
@@ -467,7 +468,7 @@ def test_relationship_point_crud_lifecycle() -> None:
         assert consumed.consumed_post_id == "post-2"
 
         retry_point, retry_reason = (
-            langgraph_resident.agent_run_crud.create_relationship_point(
+            relationship_points.create_relationship_point(
                 session,
                 kind="reply_received",
                 recipient_character_id="char-a",
@@ -479,11 +480,11 @@ def test_relationship_point_crud_lifecycle() -> None:
         )
         assert retry_reason is None
         assert retry_point is not None
-        langgraph_resident.agent_run_crud.mark_relationship_point_selected(
+        relationship_points.mark_relationship_point_selected(
             session, retry_point, run_id="run-3", now=now
         )
         released = (
-            langgraph_resident.agent_run_crud.release_relationship_point_selection(
+            relationship_points.release_relationship_point_selection(
                 session,
                 retry_point,
                 failure_class="publish_not_succeeded",
@@ -498,7 +499,7 @@ def test_relationship_point_consumed_survives_later_state_recorder_rollback() ->
     models.AgentRelationshipPoint.__table__.create(engine)
     now = datetime(2026, 6, 24, 3, 0, tzinfo=UTC)
     with Session(engine) as session:
-        point, reason = langgraph_resident.agent_run_crud.create_relationship_point(
+        point, reason = relationship_points.create_relationship_point(
             session,
             kind="mention_received",
             recipient_character_id="char-b",
@@ -509,7 +510,7 @@ def test_relationship_point_consumed_survives_later_state_recorder_rollback() ->
         )
         assert reason is None
         assert point is not None
-        langgraph_resident.agent_run_crud.mark_relationship_point_selected(
+        relationship_points.mark_relationship_point_selected(
             session, point, run_id="run-consume", now=now
         )
         ctx = SimpleNamespace(
@@ -619,7 +620,7 @@ def test_pending_relationship_points_filters_legacy_mentions(monkeypatch) -> Non
         SimpleNamespace(id=2, kind="reply_received"),
     ]
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        relationship_points,
         "list_pending_relationship_points",
         lambda *_args, **_kwargs: points,
     )
@@ -4347,7 +4348,7 @@ def test_finalize_closed_daypart_records_summary_without_relationship_creation(
     expired_calls: list[datetime] = []
 
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        relationship_points,
         "expire_relationship_points",
         lambda _db, *, now: expired_calls.append(now) or 2,
     )

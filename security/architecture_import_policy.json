@@ -54,10 +54,6 @@
         },
         {
           "importer": "app.runtime.characters.creator",
-          "imported": "app.cruds.agent_runs"
-        },
-        {
-          "importer": "app.runtime.characters.creator",
           "imported": "app.cruds.agents"
         },
         {
@@ -99,10 +95,6 @@
         {
           "imported": "app.services.community",
           "importer": "app.runtime.local_bot.composition"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.cruds.agent_runs"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -174,10 +166,6 @@
         },
         {
           "importer": "app.services.community",
-          "imported": "app.cruds.agent_runs"
-        },
-        {
-          "importer": "app.services.community",
           "imported": "app.cruds.agents"
         },
         {
@@ -201,10 +189,6 @@
     },
     {
       "edges": [
-        {
-          "importer": "app.compatibility.routine_posts.legacy",
-          "imported": "app.cruds.agent_runs"
-        },
         {
           "importer": "app.compatibility.routine_posts.legacy",
           "imported": "app.services.activity_state_contracts"
@@ -249,10 +233,6 @@
     {
       "id": "AR-B4-C6-execution-pending-owner-bindings",
       "edges": [
-        {
-          "importer": "app.runtime.resident.execution",
-          "imported": "app.services.agent_runs"
-        },
         {
           "importer": "app.runtime.resident.execution",
           "imported": "app.services.community"
@@ -303,19 +283,6 @@
         {
           "importer": "app.runtime.resident.writing",
           "imported": "app.services.runtime_boundary"
-        }
-      ]
-    },
-    {
-      "id": "ar-b4-writer-agent_writing",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B7 signed Daypart source integration.",
-      "removal_condition": "Connect the already implemented Memory action write; remove this exact final body only when that source joins.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.services.agent_writing"
         }
       ]
     },
@@ -2526,38 +2493,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.memory.service.daypart",
-        "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
-        "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
-        "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.memory.service.daypart_observations",
-        "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
-        "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
-        "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.memory.contracts.daypart",
-        "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
-        "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
-        "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_writing",
-        "target": "app.domains.memory.service.daypart",
-        "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
-        "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
-        "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.tree.schemas",
         "owner_stage": "AR-B8-A / AR-G5",
@@ -2571,22 +2506,6 @@
         "owner_stage": "AR-B8-A / AR-G5",
         "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
         "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_writing",
-        "target": "app.domains.character_lore.service.presentation",
-        "owner_stage": "AR-B4 / AR-B8-A",
-        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
-        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_writing",
-        "target": "app.domains.character_lore.contracts",
-        "owner_stage": "AR-B4 / AR-B8-A",
-        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
-        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
         "review_date": "2026-09-06"
       },
       {
@@ -2616,14 +2535,6 @@
       {
         "importer": "app.cruds.agents",
         "target": "app.domains.identity.service.character_credentials",
-        "owner_stage": "AR-B4/AR-B8-A",
-        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
-        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.identity.repository.credentials",
         "owner_stage": "AR-B4/AR-B8-A",
         "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
         "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
@@ -2854,38 +2765,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.constants",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.utils.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.repository.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.service.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.relationships.schemas",
         "owner_stage": "AR-B5 / AR-B8-A",
@@ -3102,14 +2981,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_writing",
-        "target": "app.domains.social.service.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.social.service.resident_affordances",
         "owner_stage": "AR-B5 / AR-B4",
@@ -3199,14 +3070,6 @@
       },
       {
         "importer": "app.services.community",
-        "target": "app.domains.social.service.agent_tool_authorization",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
-        "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_writing",
         "target": "app.domains.social.service.agent_tool_authorization",
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",

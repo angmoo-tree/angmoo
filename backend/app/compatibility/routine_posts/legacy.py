@@ -13,7 +13,6 @@ register_models()
 from app.compatibility.routine_posts.canonical_interactions import (
     CanonicalRoutineInteractionSource,
 )
-from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.schemas.community import PostCreate
 from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import activity_state_contracts
@@ -36,7 +35,6 @@ __all__ = [
     "PostCreate",
     "activity_state_contracts",
     "agent_activity_policy",
-    "agent_run_crud",
     "canonical_interaction_source",
     "community_service",
     "neutralize_context_text",

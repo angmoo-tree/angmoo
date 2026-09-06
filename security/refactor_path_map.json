@@ -563,7 +563,9 @@
     "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py",
     "backend/app/services/agent_briefs.py": "backend/app/domains/routines/service/action_briefs.py",
     "backend/app/services/langgraph_resident.py": "backend/app/runtime/resident/langgraph.py",
-    "backend/tests/test_tendency_note_action_selection.py": "backend/tests/routines/test_tendency.py"
+    "backend/tests/test_tendency_note_action_selection.py": "backend/tests/routines/test_tendency.py",
+    "backend/app/services/agent_writing.py": "backend/app/runtime/resident/writing.py",
+    "backend/app/cruds/agent_runs.py": "backend/app/domains/routines/repository/runs.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -12183,7 +12185,8 @@
           "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/execution_admission.py",
           "backend/app/domains/identity/service/credential_cooldown.py",
-          "backend/app/domains/routines/service/slot_requests.py"
+          "backend/app/domains/routines/service/slot_requests.py",
+          "backend/app/runtime/memory/daypart_observations.py"
         ],
         "backend/app/services/profile_media.py": [
           "backend/app/integrations/media/images.py",
@@ -12441,13 +12444,13 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
-          "new": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
+          "new": "backend/app/runtime/memory/daypart_observations.py::_build_daypart_memory_note",
           "direct_consumers": [
-            "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[character]",
+            "tests/memory/test_daypart_runtime_bindings.py::test_provided_observations_commit_inbox_before_same_session_author_read"
           ]
         },
         {
@@ -12462,13 +12465,13 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
-          "new": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
+          "new": "backend/app/runtime/memory/daypart_observations.py::_record_provided_daypart_observations",
           "direct_consumers": [
-            "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[character]",
+            "tests/memory/test_daypart_runtime_bindings.py::test_provided_observations_commit_inbox_before_same_session_author_read"
           ]
         },
         {
@@ -18142,7 +18145,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18157,7 +18160,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18172,7 +18175,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18187,7 +18190,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18202,7 +18205,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18230,7 +18233,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18245,7 +18248,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18260,7 +18263,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18275,7 +18278,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18415,7 +18418,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18430,7 +18433,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18445,7 +18448,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -18736,7 +18739,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -30674,7 +30677,7 @@
           "old": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
           "new": "backend/app/domains/memory/service/daypart_observations.py::build_daypart_memory_note",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/memory/daypart_observations.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -31784,7 +31787,7 @@
           "old": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
           "new": "backend/app/domains/memory/service/daypart_observations.py::record_provided_daypart_observations",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/memory/daypart_observations.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32184,7 +32187,7 @@
           "old": "backend/app/services/agent_writing.py::APP_TIMEZONE",
           "new": "backend/app/domains/routines/constants.py::WRITING_TIMEZONE",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32194,7 +32197,7 @@
           "old": "backend/app/services/agent_writing.py::KOREAN_WEEKDAYS",
           "new": "backend/app/domains/routines/constants.py::WRITING_KOREAN_WEEKDAYS",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32204,7 +32207,7 @@
           "old": "backend/app/services/agent_writing.py::TOOLS_ALLOW_WRITING_COMPOSITION",
           "new": "backend/app/domains/routines/constants.py::WRITING_TOOLS_ALLOWED",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32214,7 +32217,7 @@
           "old": "backend/app/services/agent_writing.py::WritingCompositionError",
           "new": "backend/app/domains/routines/exceptions.py::WritingCompositionError",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32224,7 +32227,7 @@
           "old": "backend/app/services/agent_writing.py::WritingCompositionInvalidError",
           "new": "backend/app/domains/routines/exceptions.py::WritingCompositionInvalidError",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32234,7 +32237,7 @@
           "old": "backend/app/services/agent_writing.py::WritingKind",
           "new": "backend/app/domains/routines/contracts/writing.py::WritingKind",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32244,7 +32247,7 @@
           "old": "backend/app/services/agent_writing.py::_agent_tool_header_source",
           "new": "backend/app/domains/routines/service/writing_results.py::_agent_tool_header_source",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32254,7 +32257,7 @@
           "old": "backend/app/services/agent_writing.py::_append_writing_composition_lane",
           "new": "backend/app/domains/routines/service/writing_results.py::_append_writing_composition_lane",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32264,7 +32267,7 @@
           "old": "backend/app/services/agent_writing.py::_build_compact_action_memory",
           "new": "backend/app/domains/routines/service/writing_results.py::_build_compact_action_memory",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32274,7 +32277,7 @@
           "old": "backend/app/services/agent_writing.py::_build_composition_prompt",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_build_composition_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32284,7 +32287,7 @@
           "old": "backend/app/services/agent_writing.py::_compact_memory_field",
           "new": "backend/app/domains/routines/service/writing_results.py::_compact_memory_field",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32294,7 +32297,7 @@
           "old": "backend/app/services/agent_writing.py::_compact_stored_llm_usage",
           "new": "backend/app/domains/routines/service/writing_results.py::_compact_stored_llm_usage",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32304,7 +32307,7 @@
           "old": "backend/app/services/agent_writing.py::_compact_tool_usage",
           "new": "backend/app/domains/routines/service/writing_results.py::_compact_tool_usage",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32314,7 +32317,7 @@
           "old": "backend/app/services/agent_writing.py::_compose_writing_from_brief",
           "new": "backend/app/runtime/resident/writing.py::_compose_writing_from_brief",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32324,7 +32327,7 @@
           "old": "backend/app/services/agent_writing.py::_composition_metadata_field",
           "new": "backend/app/domains/routines/service/writing_results.py::_composition_metadata_field",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32334,7 +32337,7 @@
           "old": "backend/app/services/agent_writing.py::_extract_gateway_llm_usage",
           "new": "backend/app/domains/routines/service/writing_results.py::_extract_gateway_llm_usage",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32344,7 +32347,7 @@
           "old": "backend/app/services/agent_writing.py::_extract_gateway_result_text",
           "new": "backend/app/domains/routines/service/writing_results.py::_extract_gateway_result_text",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32354,7 +32357,7 @@
           "old": "backend/app/services/agent_writing.py::_format_current_time",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_format_current_time",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32364,7 +32367,7 @@
           "old": "backend/app/services/agent_writing.py::_format_daypart",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_format_daypart",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32374,7 +32377,7 @@
           "old": "backend/app/services/agent_writing.py::_format_recent_activity",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_format_recent_activity",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32384,7 +32387,7 @@
           "old": "backend/app/services/agent_writing.py::_format_reply_context",
           "new": "backend/app/runtime/resident/writing.py::_format_reply_context",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32394,7 +32397,7 @@
           "old": "backend/app/services/agent_writing.py::_format_state",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_format_state",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32404,7 +32407,7 @@
           "old": "backend/app/services/agent_writing.py::_is_self_update_create_post_brief",
           "new": "backend/app/domains/routines/service/writing_prompts.py::_is_self_update_create_post_brief",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32414,7 +32417,7 @@
           "old": "backend/app/services/agent_writing.py::_parse_json_object",
           "new": "backend/app/domains/routines/service/writing_results.py::_parse_json_object",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32424,7 +32427,7 @@
           "old": "backend/app/services/agent_writing.py::_positive_int",
           "new": "backend/app/domains/routines/service/writing_results.py::_positive_int",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32434,7 +32437,8 @@
           "old": "backend/app/services/agent_writing.py::_record_daypart_action_memory",
           "new": "backend/app/domains/memory/service/daypart.py::record_action_memory",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_writing_composition.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32444,7 +32448,7 @@
           "old": "backend/app/services/agent_writing.py::_resolve_create_post_brief",
           "new": "backend/app/domains/routines/service/writing_results.py::_resolve_create_post_brief",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32454,7 +32458,7 @@
           "old": "backend/app/services/agent_writing.py::_run_composition_gateway",
           "new": "backend/app/runtime/resident/writing.py::_run_composition_gateway",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32464,7 +32468,7 @@
           "old": "backend/app/services/agent_writing.py::_run_credential",
           "new": "backend/app/runtime/resident/writing.py::_run_credential",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32474,7 +32478,7 @@
           "old": "backend/app/services/agent_writing.py::_writing_scratch_base_session_key",
           "new": "backend/app/runtime/resident/writing.py::_writing_scratch_base_session_key",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32484,7 +32488,7 @@
           "old": "backend/app/services/agent_writing.py::_writing_stream_params",
           "new": "backend/app/domains/routines/service/writing_results.py::_writing_stream_params",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32494,7 +32498,7 @@
           "old": "backend/app/services/agent_writing.py::create_agent_tool_post_from_brief",
           "new": "backend/app/runtime/resident/writing.py::create_agent_tool_post_from_brief",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32504,7 +32508,7 @@
           "old": "backend/app/services/agent_writing.py::logger",
           "new": "backend/app/runtime/resident/writing.py::logger",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -32514,7 +32518,7 @@
           "old": "backend/app/services/agent_writing.py::reply_agent_tool_post_from_brief",
           "new": "backend/app/runtime/resident/writing.py::reply_agent_tool_post_from_brief",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
@@ -37679,7 +37683,7 @@
           "old": "backend/app/services/character_lore.py::LoreRetrievalResult",
           "new": "backend/app/domains/character_lore/contracts.py::LoreRetrievalResult",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/domains/character_lore/service/documents.py",
             "backend/app/domains/character_lore/service/presentation.py"
@@ -37780,7 +37784,7 @@
           "old": "backend/app/services/character_lore.py::retrieve_lore_for_self_update",
           "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_self_update",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -37868,7 +37872,7 @@
           "old": "backend/app/services/character_lore.py::format_lore_prompt_context",
           "new": "backend/app/domains/character_lore/service/presentation.py::format_lore_prompt_context",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -37880,7 +37884,7 @@
           "old": "backend/app/services/character_lore.py::mark_lore_chunks_used",
           "new": "backend/app/domains/character_lore/service/documents.py::mark_lore_chunks_used",
           "direct_consumers": [
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -45704,7 +45708,7 @@
           "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
           "new": "backend/app/domains/routines/constants.py::ACTIVE_RUN_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45714,7 +45718,7 @@
           "old": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
           "new": "backend/app/domains/routines/constants.py::LAST_ERROR_MAX_LENGTH",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45724,7 +45728,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_EMPTY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45734,7 +45738,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_IDLE",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45744,7 +45748,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_BUSY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45754,7 +45758,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_ASSIGNED_IDLE",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45764,7 +45768,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_RUNNING",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45774,7 +45778,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_COOLDOWN",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45784,7 +45788,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_UNHEALTHY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45794,7 +45798,7 @@
           "old": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::FREE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45804,7 +45808,7 @@
           "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::DUE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45814,7 +45818,7 @@
           "old": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
           "new": "backend/app/domains/routines/constants.py::ORPHANED_RESIDENT_RUN_ERROR",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45824,7 +45828,7 @@
           "old": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
           "new": "backend/app/domains/routines/constants.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45834,7 +45838,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45844,7 +45848,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_PENDING",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45854,7 +45858,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_SELECTED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45864,7 +45868,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45874,7 +45878,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45884,7 +45888,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45894,7 +45898,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45904,7 +45908,7 @@
           "old": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45914,7 +45918,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_credential",
           "new": "backend/app/domains/identity/repository/credentials.py::get_credential",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45924,7 +45928,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_default_credential",
           "new": "backend/app/domains/identity/repository/credentials.py::get_default_credential",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45934,7 +45938,7 @@
           "old": "backend/app/cruds/agent_runs.py::create_agent_run",
           "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45944,7 +45948,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_agent_run_finished",
           "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45954,7 +45958,7 @@
           "old": "backend/app/cruds/agent_runs.py::set_agent_run_post_id",
           "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45964,7 +45968,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_public_action_execution_by_signature",
           "new": "backend/app/domains/routines/repository/public_action_executions.py::get_public_action_execution_by_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45974,7 +45978,7 @@
           "old": "backend/app/cruds/agent_runs.py::create_public_action_execution",
           "new": "backend/app/domains/routines/service/public_action_executions.py::create_public_action_execution",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45984,7 +45988,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_public_action_execution_finished",
           "new": "backend/app/domains/routines/service/public_action_executions.py::mark_public_action_execution_finished",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -45994,7 +45998,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_pair_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46004,7 +46008,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46014,7 +46018,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46024,7 +46028,7 @@
           "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
           "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46034,7 +46038,7 @@
           "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
           "new": "backend/app/domains/relationships/service/points.py::create_relationship_point",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46044,7 +46048,7 @@
           "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
           "new": "backend/app/domains/relationships/repository/points.py::count_relationship_points_for_pair_since",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46054,7 +46058,7 @@
           "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
           "new": "backend/app/domains/relationships/service/points.py::expire_relationship_points",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46064,7 +46068,7 @@
           "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
           "new": "backend/app/domains/relationships/service/points.py::list_pending_relationship_points",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46074,7 +46078,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_selected",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46084,7 +46088,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
           "new": "backend/app/domains/relationships/service/points.py::release_relationship_point_selection",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46094,7 +46098,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_consumed",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46104,7 +46108,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46114,7 +46118,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_failed",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46124,7 +46128,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
           "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_session",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46134,7 +46138,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_active_run_for_tool_auth_key",
           "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_tool_auth_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46144,7 +46148,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_session",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_session",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46154,7 +46158,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_tool_auth_key",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_tool_auth_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46164,7 +46168,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_manual_run_for_user",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_manual_run_for_user",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46174,7 +46178,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_first_greeting_run_for_user",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_first_greeting_run_for_user",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46184,7 +46188,7 @@
           "old": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
           "new": "backend/app/domains/routines/service/slot_pool.py::ensure_agent_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46194,7 +46198,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_agent_slot",
           "new": "backend/app/domains/routines/service/slot_pool.py::claim_agent_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46204,7 +46208,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_agent_slot",
           "new": "backend/app/domains/routines/service/slot_pool.py::release_agent_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46214,7 +46218,7 @@
           "old": "backend/app/cruds/agent_runs.py::list_agent_slots",
           "new": "backend/app/domains/routines/repository/slots.py::list_agent_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46224,7 +46228,7 @@
           "old": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
           "new": "backend/app/domains/routines/service/slot_recovery.py::recover_expired_resident_slot_runs",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46234,7 +46238,7 @@
           "old": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
           "new": "backend/app/domains/routines/service/slot_state.py::_clear_resident_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46244,7 +46248,7 @@
           "old": "backend/app/cruds/agent_runs.py::assign_resident_slot",
           "new": "backend/app/domains/routines/service/slot_assignments.py::assign_resident_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46254,7 +46258,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::claim_temporary_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46264,7 +46268,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_temporary_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46274,7 +46278,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46284,7 +46288,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_claims.py::claim_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46294,7 +46298,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
           "new": "backend/app/domains/routines/service/slot_claims.py::claim_due_resident_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46304,7 +46308,7 @@
           "old": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
           "new": "backend/app/domains/routines/repository/slots.py::has_active_resident_slot_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46314,7 +46318,7 @@
           "old": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
           "new": "backend/app/domains/routines/service/slot_leases.py::set_resident_slot_run_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46324,7 +46328,7 @@
           "old": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
           "new": "backend/app/domains/routines/service/slot_leases.py::extend_resident_slot_lease",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -46334,7 +46338,7 @@
           "old": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
           "new": "backend/app/domains/routines/service/slot_leases.py::complete_resident_slot_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/test_post_image_generation.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_initial_image_setting_uses_service_key_availability"
@@ -53683,7 +53687,7 @@
           "old": "backend/app/cruds/agent_runs.py::ACTIVE_RUN_STATUSES",
           "new": "backend/app/domains/routines/constants.py::ACTIVE_RUN_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53693,7 +53697,7 @@
           "old": "backend/app/cruds/agent_runs.py::LAST_ERROR_MAX_LENGTH",
           "new": "backend/app/domains/routines/constants.py::LAST_ERROR_MAX_LENGTH",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53703,7 +53707,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_EMPTY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_EMPTY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53713,7 +53717,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_IDLE",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_IDLE",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53723,7 +53727,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_BUSY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_BUSY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53733,7 +53737,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_ASSIGNED_IDLE",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_ASSIGNED_IDLE",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53743,7 +53747,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_RUNNING",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53753,7 +53757,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_COOLDOWN",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_COOLDOWN",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53763,7 +53767,7 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_UNHEALTHY",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_UNHEALTHY",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53773,7 +53777,7 @@
           "old": "backend/app/cruds/agent_runs.py::FREE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::FREE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53783,7 +53787,7 @@
           "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::DUE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53793,7 +53797,7 @@
           "old": "backend/app/cruds/agent_runs.py::ORPHANED_RESIDENT_RUN_ERROR",
           "new": "backend/app/domains/routines/constants.py::ORPHANED_RESIDENT_RUN_ERROR",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53803,7 +53807,7 @@
           "old": "backend/app/cruds/agent_runs.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
           "new": "backend/app/domains/routines/constants.py::TEMPORARY_MANUAL_SLOT_RELEASED_ERROR",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53813,7 +53817,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53825,7 +53828,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_PENDING",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53837,7 +53839,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_SELECTED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53849,7 +53850,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53861,7 +53861,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53873,7 +53872,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53885,7 +53883,6 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53897,7 +53894,7 @@
           "old": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53907,7 +53904,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_credential",
           "new": "backend/app/domains/identity/repository/credentials.py::get_credential",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53917,7 +53914,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_default_credential",
           "new": "backend/app/domains/identity/repository/credentials.py::get_default_credential",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53927,7 +53924,7 @@
           "old": "backend/app/cruds/agent_runs.py::create_agent_run",
           "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53937,7 +53934,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_agent_run_finished",
           "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53947,7 +53944,7 @@
           "old": "backend/app/cruds/agent_runs.py::set_agent_run_post_id",
           "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53957,7 +53954,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_public_action_execution_by_signature",
           "new": "backend/app/domains/routines/repository/public_action_executions.py::get_public_action_execution_by_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53967,7 +53964,7 @@
           "old": "backend/app/cruds/agent_runs.py::create_public_action_execution",
           "new": "backend/app/domains/routines/service/public_action_executions.py::create_public_action_execution",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53977,7 +53974,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_public_action_execution_finished",
           "new": "backend/app/domains/routines/service/public_action_executions.py::mark_public_action_execution_finished",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -53987,7 +53984,6 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_pair_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -53999,7 +53995,6 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54011,7 +54006,6 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54023,7 +54017,6 @@
           "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
           "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54035,7 +54028,6 @@
           "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
           "new": "backend/app/domains/relationships/service/points.py::create_relationship_point",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54047,7 +54039,6 @@
           "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
           "new": "backend/app/domains/relationships/repository/points.py::count_relationship_points_for_pair_since",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54059,7 +54050,6 @@
           "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
           "new": "backend/app/domains/relationships/service/points.py::expire_relationship_points",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54071,7 +54061,6 @@
           "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
           "new": "backend/app/domains/relationships/service/points.py::list_pending_relationship_points",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54083,7 +54072,6 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_selected",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54095,7 +54083,6 @@
           "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
           "new": "backend/app/domains/relationships/service/points.py::release_relationship_point_selection",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54107,7 +54094,6 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_consumed",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54119,7 +54105,6 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54131,7 +54116,6 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_failed",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -54143,7 +54127,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
           "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_session",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54153,7 +54137,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_active_run_for_tool_auth_key",
           "new": "backend/app/domains/routines/repository/runs.py::get_active_run_for_tool_auth_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54163,7 +54147,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_session",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_session",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54173,7 +54157,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_run_for_tool_auth_key",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_run_for_tool_auth_key",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54183,7 +54167,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_manual_run_for_user",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_manual_run_for_user",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54193,7 +54177,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_latest_first_greeting_run_for_user",
           "new": "backend/app/domains/routines/repository/runs.py::get_latest_first_greeting_run_for_user",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54203,7 +54187,7 @@
           "old": "backend/app/cruds/agent_runs.py::ensure_agent_slots",
           "new": "backend/app/domains/routines/service/slot_pool.py::ensure_agent_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54213,7 +54197,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_agent_slot",
           "new": "backend/app/domains/routines/service/slot_pool.py::claim_agent_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54223,7 +54207,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_agent_slot",
           "new": "backend/app/domains/routines/service/slot_pool.py::release_agent_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54233,7 +54217,7 @@
           "old": "backend/app/cruds/agent_runs.py::list_agent_slots",
           "new": "backend/app/domains/routines/repository/slots.py::list_agent_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54243,7 +54227,7 @@
           "old": "backend/app/cruds/agent_runs.py::recover_expired_resident_slot_runs",
           "new": "backend/app/domains/routines/service/slot_recovery.py::recover_expired_resident_slot_runs",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54253,7 +54237,7 @@
           "old": "backend/app/cruds/agent_runs.py::_clear_resident_slot",
           "new": "backend/app/domains/routines/service/slot_state.py::_clear_resident_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54263,7 +54247,7 @@
           "old": "backend/app/cruds/agent_runs.py::assign_resident_slot",
           "new": "backend/app/domains/routines/service/slot_assignments.py::assign_resident_slot",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54273,7 +54257,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_temporary_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::claim_temporary_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54283,7 +54267,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_temporary_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_temporary_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54293,7 +54277,7 @@
           "old": "backend/app/cruds/agent_runs.py::release_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54303,7 +54287,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_resident_slot_assignment",
           "new": "backend/app/domains/routines/service/slot_claims.py::claim_resident_slot_assignment",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54313,7 +54297,7 @@
           "old": "backend/app/cruds/agent_runs.py::claim_due_resident_slots",
           "new": "backend/app/domains/routines/service/slot_claims.py::claim_due_resident_slots",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54323,7 +54307,7 @@
           "old": "backend/app/cruds/agent_runs.py::has_active_resident_slot_run",
           "new": "backend/app/domains/routines/repository/slots.py::has_active_resident_slot_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54333,7 +54317,7 @@
           "old": "backend/app/cruds/agent_runs.py::set_resident_slot_run_id",
           "new": "backend/app/domains/routines/service/slot_leases.py::set_resident_slot_run_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54343,7 +54327,7 @@
           "old": "backend/app/cruds/agent_runs.py::extend_resident_slot_lease",
           "new": "backend/app/domains/routines/service/slot_leases.py::extend_resident_slot_lease",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -54353,7 +54337,7 @@
           "old": "backend/app/cruds/agent_runs.py::complete_resident_slot_run",
           "new": "backend/app/domains/routines/service/slot_leases.py::complete_resident_slot_run",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -71222,7 +71206,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71237,7 +71221,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71252,7 +71236,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71267,7 +71251,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71282,7 +71266,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71297,7 +71281,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71312,7 +71296,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71327,7 +71311,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71342,7 +71326,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71357,7 +71341,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71372,7 +71356,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71387,7 +71371,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -71402,7 +71386,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -75957,7 +75941,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -75972,7 +75956,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -75987,7 +75971,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76002,7 +75986,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76017,7 +76001,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76045,7 +76029,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76060,7 +76044,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76075,7 +76059,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76090,7 +76074,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76230,7 +76214,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76245,7 +76229,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76260,7 +76244,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -76551,7 +76535,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80785,7 +80769,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80800,7 +80784,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80815,7 +80799,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80830,7 +80814,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80845,7 +80829,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80873,7 +80857,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80888,7 +80872,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80903,7 +80887,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -80918,7 +80902,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -81058,7 +81042,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -81073,7 +81057,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -81088,7 +81072,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -81379,7 +81363,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83826,7 +83810,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83841,7 +83825,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83856,7 +83840,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83871,7 +83855,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83886,7 +83870,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83914,7 +83898,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83929,7 +83913,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83944,7 +83928,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -83959,7 +83943,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -84099,7 +84083,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -84114,7 +84098,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -84129,7 +84113,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -84420,7 +84404,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86859,7 +86843,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86874,7 +86858,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86889,7 +86873,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86904,7 +86888,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86919,7 +86903,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86947,7 +86931,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86962,7 +86946,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86977,7 +86961,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -86992,7 +86976,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -87132,7 +87116,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -87147,7 +87131,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -87162,7 +87146,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -87453,7 +87437,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89884,7 +89868,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89899,7 +89883,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89914,7 +89898,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89929,7 +89913,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89944,7 +89928,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89972,7 +89956,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -89987,7 +89971,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90002,7 +89986,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90017,7 +90001,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90157,7 +90141,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90172,7 +90156,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90187,7 +90171,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -90478,7 +90462,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -92921,7 +92905,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -92936,7 +92920,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -92951,7 +92935,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -92966,7 +92950,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -92981,7 +92965,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93009,7 +92993,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93024,7 +93008,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93039,7 +93023,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93054,7 +93038,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93194,7 +93178,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93209,7 +93193,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93224,7 +93208,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -93515,7 +93499,7 @@
           "direct_consumers": [
             "backend/app/services/community.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/agent_writing.py",
+            "backend/app/runtime/resident/writing.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -97056,7 +97040,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97092,7 +97076,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97104,7 +97088,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97116,7 +97100,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97128,7 +97112,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97292,7 +97276,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97304,7 +97288,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97316,7 +97300,7 @@
           "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
           "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -97412,7 +97396,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98574,7 +98558,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98610,7 +98594,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98622,7 +98606,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98634,7 +98618,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98646,7 +98630,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98810,7 +98794,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98822,7 +98806,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98834,7 +98818,7 @@
           "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
           "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -98930,7 +98914,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100094,7 +100078,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100130,7 +100114,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100142,7 +100126,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100154,7 +100138,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100166,7 +100150,7 @@
           "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100330,7 +100314,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100342,7 +100326,7 @@
           "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
           "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100354,7 +100338,7 @@
           "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
           "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -100450,7 +100434,7 @@
           "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
           "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
           "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
+            "backend/tests/routines/test_resident_graph.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle",
@@ -105765,9 +105749,7 @@
           ],
           "test_nodes": [
             "tests/routines/test_writing_composition.py::test_existing_daypart_writer_keeps_event_identity_and_single_commit"
-          ],
-          "remaining_owner": "AR-B7 signed Daypart source integration",
-          "removal_condition": "Replace this exact existing definition with the already introduced Memory service at parent integration; do not introduce a duplicate Daypart implementation."
+          ]
         },
         {
           "old": "backend/app/services/agent_writing.py::WritingCompositionError",
@@ -105848,12 +105830,56 @@
         "backend/app/domains/routines/service/writing_prompts.py",
         "backend/app/domains/routines/service/writing_results.py",
         "backend/app/runtime/resident/writing.py",
-        "backend/app/services/agent_writing.py",
         "backend/tests/routines/test_writing_composition.py"
       ],
       "preservation": "Original 29 function/class definitions plus 5 constants/type/logger assignments are accounted for. Twenty-eight actual definitions move by role; one exact Daypart persistence body remains until its already signed B7 owner joins. Whole-definition AST equality is checked after only declared owner imports, same-query lookup and typed callback wiring. Original four consumer-test files retain every assertion and suppression.",
       "runtime_order": "Original auth/admission -> prompt -> one provider call -> usage lane commit -> JSON validation -> Social write -> lore use where applicable -> Daypart event remains unchanged. No new retry, provider invocation, transaction or hidden domain-to-runtime import.",
       "remaining": "The two preserved legacy writer entry functions currently have no active product callers in this B4 source. Exact existing Social admission/write, Lore, Identity credential and Runtime gateway consumers await the independently signed owner sources at parent integration. This source does not claim those merges or B8 retirement complete."
+    },
+    "AR-B8-MEMORY-BINDINGS": {
+      "status": "IMPLEMENTED SOURCE — focused205 PASS / exact AST3+4+71 / original seven read-only guards0 / source introduction and stock gate pending parent",
+      "actual_paths": [
+        "backend/app/runtime/memory/daypart_observations.py",
+        "backend/app/runtime/resident/execution.py",
+        "backend/app/runtime/resident/writing.py",
+        "backend/app/runtime/resident/langgraph.py",
+        "backend/tests/memory/test_daypart_runtime_bindings.py"
+      ],
+      "ownership": "Memory observation rules and commits remain in the actual Memory services. runtime.memory supplies the exact existing Social post read and same-Session Character/Identity name lookup. Resident execution imports filters/purge directly from Memory; writer imports actual action-memory persistence. Relationships point flows/query/value/constants and Identity credential lookups no longer pass through a global CRUD facade.",
+      "source_evidence": {
+        "base_commit": "06ad6c80f0bde0172e00f5bcdd7022f1af6682d2",
+        "whole_definitions": [
+          "_build_daypart_memory_note",
+          "_record_provided_daypart_observations",
+          "_daypart_observation_author"
+        ],
+        "destination": "backend/app/runtime/memory/daypart_observations.py",
+        "proof": "Three complete definitions restore to signed base AST after only exact profile-reference factory argument/partial injection. Factory(db) stays inside the post-exists branch at the original point; the same canonical Social get_post object and caller Session are used. All 71 execution/graph/writer definitions restore to identical AST after declared owner imports and these two injected call keywords. Dormant four full bodies are unchanged."
+      },
+      "retired_facades": [
+        "backend/app/services/agent_writing.py",
+        "backend/app/cruds/agent_runs.py"
+      ],
+      "removed_unused_exports": [
+        "app.compatibility.routine_posts.legacy.agent_run_crud",
+        "app.runtime.routine_posts.sqlalchemy_runtime.agent_run_crud"
+      ],
+      "behavior_tests": [
+        "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[character]",
+        "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[user]",
+        "tests/memory/test_daypart_runtime_bindings.py::test_provided_observations_commit_inbox_before_same_session_author_read",
+        "tests/memory/test_daypart_runtime_bindings.py::test_cold_resident_imports_use_actual_owners_and_explicit_registration"
+      ],
+      "remaining": "The four unused original AgentRun menu/recovery bodies and constants are unchanged here and retained for signed b013974b9c1b49c86f64479754303272741a1b49 owner integration. schemas/agents and other B5/B8/G07 scopes are unchanged. No frozen baseline/checkpoint/additions, public profile or migration source is edited.",
+      "validation": {
+        "focused": "205 passed in 56.80s; immutable source during pytest and original preservation diagnostic",
+        "original_guards": "sources/split_symbols/assertions/suppressions/asgi_exports/api_orm/missing_nodes all 0; protected2311/current2496; read-only original routines model/schema signed-introduction supplement only",
+        "architecture": "Current1094modules/4137internalEdges/3118externalImports; pending existing legacy ORM16 plus package cycle through prior Memory subjective source -> Social -> Resident path. No added exceptions; two deleted facades and retired edges remove six prior ORM violations.",
+        "current_inventories": "L4 1094/14/99; ER0 92/87/24/44/7 unchanged; Memory batch current; Today current; owner-control frozen successor respected",
+        "frozen_sources": "baseline/checkpoint/additions and historical migrations unchanged",
+        "source_scope": "G07 test relocation, dormant4/CRUD3 b013 merge, global schemas and other pending B5/B8 owners remain outside this source",
+        "peer_review": "g0_preservation read-only: missing Post skips factory, existing Post uses same db at original branch, same canonical get_post query, no new commit/flush/provider call; no blocker found."
+      }
     }
   },
   "asgi_exports": {

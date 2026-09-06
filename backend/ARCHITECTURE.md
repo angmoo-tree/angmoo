@@ -200,7 +200,7 @@ Daypart는 resident가 실제로 제공받은 관찰과 완료한 행동을 시�
 
 LangGraph 실행·관계 행동 선택·provider 호출은 resident의 책임입니다. 관계 포인트 만료 후 Daypart 요약을 저장하는 조립도 실행 위치에 남습니다. Memory의 각 기존 저장은 원래처럼 개별 commit을 하고, 요약 한 그룹의 commit이 실패하면 rollback 후 다음 그룹을 계속 처리합니다. 이 경계를 임의로 하나의 transaction으로 합치면 실패·재시도 동작이 달라집니다. `contracts/daypart.py`는 실행 객체 전체를 import하는 대신 Memory가 읽는 필드와 Session 타입만 설명합니다.
 
-AR-B7 Daypart 전환 중 기존 resident 모듈은 위 실제 구현을 같은 호출명으로 연결합니다. 글로벌 모델 export와 계정·캐릭터 삭제의 기존 다중 업무 UoW는 동일 ORM 객체를 사용하며 AR-B4/AR-B8/G5의 소비자 정리에서 마무리합니다. 이 부분 전환은 전체 resident나 Memory 통합 완료를 뜻하지 않습니다.
+Daypart의 실행 연결은 `runtime/memory/daypart_observations.py`가 소유합니다. Resident는 기존 프로필 조회 factory를 전달하며, Memory 조립은 실제 Post가 있을 때만 같은 Session으로 이를 생성합니다. `runtime.memory`가 Resident 실행기를 역으로 import하지 않습니다. 실행의 중복 관찰 필터·보존 기간 정리와 Writer의 행동 기억 저장은 실제 Memory 서비스를 직접 사용합니다. 계정·캐릭터 삭제의 다중 업무 UoW는 동일 ORM 객체를 유지합니다. 전체 source 통합·CI·설치 검증은 별도 완료 조건입니다.
 
 업무 동작의 중심은 서비스입니다. HTTP와 예약 작업은 서로 다른 진입점이지만 같은 업무 규칙을 사용합니다.
 
@@ -1031,7 +1031,7 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 
 `runtime/resident/execution.py`는 수동 실행, 슬롯별 실행, 전체 tick의 실제 비동기 실행을 조립합니다. provider 호출, lease 수명, 실행 기록 생성 시점과 실패 보상이 이곳에서 연결됩니다. 오류 처리에서 사용하는 `run_created` 같은 상태는 원래 저장 성공 직후에 바뀌어야 하므로 별도 전달 계층으로 감추지 않습니다. Scheduler는 만료 루틴을 정리하는 실제 lifecycle 서비스를 직접 호출한 뒤 실행을 시작합니다.
 
-현재 원래 `services/agent_runs.py`에는 B7 소유 Memory 함수와 별도 정리 대상인 원래 미호출 함수만 남습니다. 순차 통합 전까지 실행이 참조하는 Memory 함수는 기존 구현 자체입니다. 같은 함수를 새 파일에 복사하지 않으며, Memory 소유 전환이 합류할 때 실제 서비스로 연결합니다.
+현재 원래 `services/agent_runs.py`에는 별도 B8 source로 보존 이전하는 미호출 메뉴·복구 함수 4개와 상수가 남습니다. 실제 Memory 조립은 `runtime/memory/daypart_observations.py`로 이동했고, 전체 호출자를 actual Memory·Relationships·Identity 소유에 연결한 `services/agent_writing.py`와 `cruds/agent_runs.py`의 순수 export 파일은 제거했습니다. 기존 실행 순서나 개별 commit을 변경하지 않습니다.
 
 
 ### 활동 설정과 성향 분석

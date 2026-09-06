@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.orm import Session
 
-from app.cruds.agent_runs import get_credential, get_default_credential
+from app.domains.identity.repository.credentials import get_credential, get_default_credential
 from app.domains.identity.models import LlmCredential
 from app.domains.routines.exceptions import CharacterOwnershipError, CredentialNotFoundError
 from app.domains.routines.service import execution_admission as admission
