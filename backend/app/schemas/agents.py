@@ -86,9 +86,9 @@ from app.domains.routines.schemas.runs import AgentSlotRead
 
 from app.domains.routines.schemas.runs import UtcInstantResponseModel
 
-from app.schemas.characters import CharacterRead
+from app.domains.characters.schemas import CharacterRead
 
-from app.schemas.characters import CharacterStateRead
+from app.domains.characters.schemas import CharacterStateRead
 
 from app.domains.characters.schemas import AgentCreate
 
@@ -104,7 +104,7 @@ from app.domains.characters.schemas import AgentPromotionUsageUpdate
 
 from app.domains.social.schemas.community import PostDetail
 
-from app.schemas.media_security import validate_profile_media_reference
+from app.domains.media.schemas import validate_profile_media_reference
 
 from app.domains.routines.schemas import AgentActivitySettingUpdate
 

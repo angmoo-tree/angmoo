@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.routines.schemas.runs as schemas
 
 from app.domains.identity.models import User as _model_User
 

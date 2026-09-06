@@ -30,7 +30,7 @@ from sqlalchemy import select
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+
 
 from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
 

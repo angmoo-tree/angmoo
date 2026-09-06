@@ -5,10 +5,6 @@
     {
       "edges": [
         {
-          "importer": "app.api.v1.routes.agent_runs",
-          "imported": "app.schemas"
-        },
-        {
           "importer": "app.api.v1.routes.agents",
           "imported": "app.runtime.characters.creator"
         },
@@ -18,19 +14,7 @@
         },
         {
           "importer": "app.api.v1.routes.agents",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.agents",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.api.v1.routes.world_character_setup",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.cruds.agents",
-          "imported": "app.schemas"
         },
         {
           "importer": "app.main",
@@ -50,10 +34,6 @@
         },
         {
           "importer": "app.runtime.characters.creator",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.characters.creator",
           "imported": "app.services.runtime_boundary"
         },
         {
@@ -66,19 +46,11 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.services.runtime_boundary"
         },
         {
           "importer": "app.runtime.resident.langgraph",
           "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.schemas"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -87,42 +59,6 @@
         {
           "importer": "app.runtime.social.image_job_worker",
           "imported": "app.runtime.social.image_generation"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.agents"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.characters"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.social_memory"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.world_activity_runtime"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.world_character_setup"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.worlds"
-        },
-        {
-          "importer": "app.schemas.agents",
-          "imported": "app.schemas.characters"
-        },
-        {
-          "importer": "app.schemas.agents",
-          "imported": "app.schemas.media_security"
-        },
-        {
-          "importer": "app.services.agent_runs",
-          "imported": "app.schemas"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -1829,22 +1765,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas.world_character_setup",
-        "target": "app.domains.world_characters.schemas.setup",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.worlds",
-        "target": "app.domains.worlds.schemas",
-        "owner_stage": "AR-B8-A",
-        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
-        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.world_character_contracts",
         "target": "app.domains.world_characters.service.setup_validation",
         "owner_stage": "AR-B2",
@@ -2063,14 +1983,6 @@
       {
         "importer": "app.domains.routines.public",
         "target": "app.domains.routines.utils.clock",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.world_activity_runtime",
-        "target": "app.domains.routines.schemas",
         "owner_stage": "AR-B4-A2 / AR-B4-A3",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
         "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
@@ -2533,14 +2445,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.schemas.social_memory",
-        "owner_stage": "AR-B5",
-        "removal_condition": "Redirect the remaining aggregate/schema callers to canonical Relationships response types in AR-B5-C6/B8, then remove this exact same-class alias.",
-        "reason": "Existing diagnostics schema export retains exactly the original class objects while current consumers follow the actual owner.",
-        "review_date": "2026-09-06",
-        "target": "app.domains.relationships.schemas"
-      },
-      {
         "importer": "app.api.v1.routes.world_activity_runtime",
         "target": "app.domains.relationships.router",
         "owner_stage": "AR-B5",
@@ -2626,6 +2530,62 @@
         "owner_stage": "AR-B5 / AR-B4 / AR-B8",
         "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
         "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.characters.schemas",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routines.schemas.first_greeting",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.social.schemas.activity",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.world_characters.schemas.setup",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.worlds.schemas",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.media.schemas",
+        "owner_stage": "AR-B8 schema compatibility retirement",
+        "reason": "Original historical identity tests still load this real old schema module. It imports the identical class from the actual owner after application and ordinary test consumers moved; no schema definition or runtime policy is copied.",
+        "removal_condition": "Retire the recorded original identity/structure checks through explicit evidence review, then remove this exact old import and schema facade. Do not turn the checks into self-comparisons.",
         "review_date": "2026-09-06"
       }
     ]

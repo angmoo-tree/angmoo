@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from model_fixture_support import models
-from app import schemas
+import app.domains.local_bot.schemas as schemas
 from tests.local_bot.support import bound_bot_actions
 from app.domains.local_bot.service import actions
 from app.runtime.local_bot import composition as bot_composition

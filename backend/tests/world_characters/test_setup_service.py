@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.world_characters.schemas.setup as schemas
 from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.world_characters.router import entry as world_routes

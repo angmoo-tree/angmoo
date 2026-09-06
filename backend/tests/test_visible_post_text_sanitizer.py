@@ -1,7 +1,7 @@
 import app.domains.social.service.source_posts as social_source_posts_service
 from types import SimpleNamespace
 
-from app import schemas
+import app.domains.social.schemas.community as schemas
 
 
 

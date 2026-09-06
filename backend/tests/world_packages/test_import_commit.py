@@ -1,4 +1,9 @@
 from __future__ import annotations
+import app.domains.routines.schemas as routine_schemas
+import app.domains.routines.schemas.first_greeting as routine_schemas_first_greeting
+import app.domains.routines.schemas.runs as routine_schemas_runs
+import app.domains.social.schemas.feed as feed_schemas
+import app.domains.world_characters.schemas.setup as world_setup_schemas
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
 from app.domains.routines.service import first_greeting as first_greeting_service
 from app.runtime.resident import tendency_analysis
@@ -19,7 +24,7 @@ import pytest
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import schemas
+
 from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
 from app.core import security
@@ -137,7 +142,7 @@ class _DeterministicImportedSetupProvider:
                 ],
                 "action_profile": {
                     key: {"weight": 50, "note": f"Use {key} when appropriate."}
-                    for key in schemas.WORLD_COMMUNITY_ACTION_KEYS
+                    for key in world_setup_schemas.WORLD_COMMUNITY_ACTION_KEYS
                 },
             },
             physical_request_count=1,
@@ -196,9 +201,9 @@ class _DeterministicNoActionFeedProvider:
     def __init__(self) -> None:
         self.plan_calls = 0
 
-    async def plan(self, **_kwargs) -> schemas.FeedReactionDecision:
+    async def plan(self, **_kwargs) -> feed_schemas.FeedReactionDecision:
         self.plan_calls += 1
-        return schemas.FeedReactionDecision(
+        return feed_schemas.FeedReactionDecision(
             selected_candidate_index=None,
             selected_action=None,
             interaction_intent=None,
@@ -943,7 +948,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
                 db,
                 world_character_id=world_character.id,
                 user=owner,
-                data=schemas.WorldCharacterSetupGenerateCreate(
+                data=world_setup_schemas.WorldCharacterSetupGenerateCreate(
                     idempotency_key="generate-imported-world-character",
                     consent_policy_version="p2-consent-v1",
                     consented=True,
@@ -960,7 +965,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             db,
             world_character_id=world_character.id,
             user=owner,
-            data=schemas.WorldCharacterSetupApproveCreate(
+            data=world_setup_schemas.WorldCharacterSetupApproveCreate(
                 idempotency_key="approve-imported-world-character",
                 profile_id=generated.profile.id,
                 repertoire_id=generated.repertoire.id,
@@ -982,7 +987,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             runner_calls += 1
             if not runner_allowed:
                 raise AssertionError("imported World ran before explicit autonomy enable")
-            return schemas.OpenClawAgentRunRead(
+            return routine_schemas_runs.OpenClawAgentRunRead(
                 run_id="imported-world-enabled-run",
                 status="completed",
                 summary="enabled runtime entered",
@@ -1008,7 +1013,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
                 db,
                 owner,
                 character.id,
-                schemas.AgentFeedCueCreate(
+                routine_schemas.AgentFeedCueCreate(
                     topic="가져온 World의 다음 활동",
                     manual_run=True,
                 ),
@@ -1020,7 +1025,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
                     db,
                     owner,
                     character.id,
-                    schemas.AgentFirstGreetingCreate(topic="가져온 World 첫인사"),
+                    routine_schemas_first_greeting.AgentFirstGreetingCreate(topic="가져온 World 첫인사"),
                     workflows=agent_service.build_first_greeting_workflows(),
                 )
             )

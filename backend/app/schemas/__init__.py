@@ -1,3 +1,9 @@
+"""Temporary original schema exports for historical identity checks.
+
+Active application code imports the owning domain or HTTP composition schema.
+These same-object imports remain until the original identity checks can retire
+under an explicit compatibility decision; no business implementation lives here.
+"""
 from app.domains.routines.schemas.runs import (
     AgentActivityLogRead,
     AgentSlotPublicRead,
@@ -7,12 +13,16 @@ from app.domains.routines.schemas.runs import (
     ResidentSlotTickCreate,
     ResidentSlotTickRead,
 )
-from app.schemas.agents import (
+from app.domains.routines.schemas import (
     AgentActionRangeRead,
     AgentActivitySettingRead,
     AgentActivitySettingUpdate,
-    AgentActivityProfileReadinessRead,
     AgentActivitySummaryRead,
+    AgentFeedCueCreate,
+    AgentFeedCueRead,
+)
+from app.domains.characters.schemas import (
+    AgentActivityProfileReadinessRead,
     AgentCreationDraftComplete,
     AgentCreationDraftCreate,
     AgentCreationDraftGenerateMediaCreate,
@@ -24,15 +34,9 @@ from app.schemas.agents import (
     AgentCreate,
     AgentDeleteCreate,
     AgentDetailRead,
-    AgentFeedCueCreate,
-    AgentFeedCueRead,
-    AgentFirstGreetingCreate,
-    AgentFirstGreetingRead,
     AgentImageGenerationSettingRead,
     AgentImageGenerationSettingUpdate,
     AgentImageSeedUpload,
-    AgentLocalConnectionRead,
-    AgentLocalKeyCreateRead,
     AgentPersonaUpdate,
     AgentPromotionUsageRead,
     AgentPromotionUsageUpdate,
@@ -42,11 +46,16 @@ from app.schemas.agents import (
     AgentProfileMediaGenerationRead,
     AgentProfileMediaUpload,
     AgentProfileUpdate,
+)
+from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
+from app.api.schemas.first_greeting import AgentFirstGreetingRead
+from app.domains.local_bot.schemas import (
+    AgentLocalConnectionRead,
+    AgentLocalKeyCreateRead,
     BotCharacterRead,
     BotMeRead,
-    CredentialRead,
-    CredentialUpsert,
 )
+from app.domains.identity.schemas import CredentialRead, CredentialUpsert
 from app.domains.identity.schemas import AccountDeletionCreate
 from app.domains.identity.schemas import AuthRead
 from app.domains.identity.schemas import GoogleLoginRead
@@ -58,12 +67,14 @@ from app.domains.identity.schemas import SignupCreate
 from app.domains.identity.schemas import UserDisplayNameUpdate
 from app.domains.identity.schemas import UserPreferencesUpdate
 from app.domains.identity.schemas import UserRead
-from app.schemas.characters import (
+from app.domains.characters.schemas import (
     AgentCharacterStateWrite,
-    CharacterActivityRead,
     CharacterRead,
     CharacterStateRead,
     CharacterStateWrite,
+)
+from app.domains.social.schemas.activity import (
+    CharacterActivityRead,
     PublicCharacterActivityEventRead,
     PublicCharacterActivityProfileRead,
     PublicCharacterActivityStateRead,
@@ -169,7 +180,7 @@ from app.domains.chat.schemas import (
     MessageThreadRead,
     MessageThreadUpdate,
 )
-from app.schemas.worlds import (
+from app.domains.worlds.schemas import (
     WorldBannerUpload,
     WorldCreatorContextRead,
     WorldDaypart,
@@ -197,7 +208,7 @@ from app.schemas.worlds import (
     WorldVisibility,
     validate_managed_world_banner,
 )
-from app.schemas.world_character_setup import (
+from app.domains.world_characters.schemas.setup import (
     WorldCharacterEntryCreate,
     WorldCharacterEntryRead,
     WorldCharacterLeaveCreate,
@@ -230,7 +241,7 @@ from app.domains.relationships.schemas import (
     RelationshipGraphQueryMetaRead,
     RelationshipGraphRead,
 )
-from app.schemas.social_memory import (
+from app.domains.relationships.schemas import (
     ActivityProposalRead,
     JointActivityParticipantRead,
     JointActivityRead,
@@ -239,7 +250,7 @@ from app.schemas.social_memory import (
     SocialEventRead,
     SocialMemoryDiagnosticsRead,
 )
-from app.schemas.world_activity_runtime import (
+from app.domains.routines.schemas import (
     ActivityDaypart,
     ActivityEpisodeRead,
     ActivityPlanItemStatus,

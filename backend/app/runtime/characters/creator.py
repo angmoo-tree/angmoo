@@ -72,7 +72,7 @@ from uuid import uuid4
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.characters.schemas as schemas
 from app.domains.identity.models import User as _model_User
 from app.runtime.persistence.model_registration import register_models
 register_models()

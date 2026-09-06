@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.tree.schemas as schemas
 from model_fixture_support import models
 from app.domains.tree import router as tree_routes
 from app.models import Base

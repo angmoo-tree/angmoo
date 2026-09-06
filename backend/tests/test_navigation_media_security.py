@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from app import schemas
+import app.domains.characters.schemas as schemas
 
 
 @pytest.mark.parametrize(

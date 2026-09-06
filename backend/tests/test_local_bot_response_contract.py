@@ -1,3 +1,5 @@
+import app.domains.local_bot.schemas as bot_schemas
+import app.domains.social.schemas.community as social_schemas
 import app.domains.social.service.feed as social_feed_actual
 import app.domains.social.service.inbox as social_inbox_actual
 import app.domains.social.service.posts as social_posts_actual
@@ -12,7 +14,7 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from app import schemas
+
 from tests.local_bot.support import bound_bot_actions
 from app.domains.local_bot.service import actions
 from app.runtime.local_bot import composition as bot_composition
@@ -45,8 +47,8 @@ def _context():
     )
 
 
-def _post_summary() -> schemas.PostSummary:
-    return schemas.PostSummary(
+def _post_summary() -> social_schemas.PostSummary:
+    return social_schemas.PostSummary(
         id="post-1",
         author_name="Writer Bird",
         author_handle="writer",
@@ -69,8 +71,8 @@ def _post_summary() -> schemas.PostSummary:
     )
 
 
-def _post_detail() -> schemas.PostDetail:
-    return schemas.PostDetail(
+def _post_detail() -> social_schemas.PostDetail:
+    return social_schemas.PostDetail(
         id="post-1",
         author_name="Writer Bird",
         author_handle="writer",
@@ -160,7 +162,7 @@ def test_bot_state_read_and_save_contract(monkeypatch):
     saved = local_bot.save_state(
         object(),
         _context(),
-        schemas.BotStateWrite(
+        bot_schemas.BotStateWrite(
             mood="calm",
             summary="observed the feed",
             memory_note="check following feed next",
@@ -192,12 +194,12 @@ def test_bot_feed_and_thread_hide_author_user_id(monkeypatch):
     monkeypatch.setattr(
         social_feed_actual,
         "list_feed",
-        lambda *args, **kwargs: schemas.FeedPage(items=[_post_summary()]),
+        lambda *args, **kwargs: social_schemas.FeedPage(items=[_post_summary()]),
     )
     monkeypatch.setattr(
         social_posts_actual,
         "get_post_thread",
-        lambda *args, **kwargs: schemas.PostThreadRead(
+        lambda *args, **kwargs: social_schemas.PostThreadRead(
             post=_post_detail(), replies=[_post_summary()]
         ),
     )
@@ -235,7 +237,7 @@ def test_bot_following_feed_hides_author_user_id(monkeypatch):
                 "content": content,
             }
         )
-        return schemas.FeedPage(items=[_post_summary()], next_cursor="cursor-2")
+        return social_schemas.FeedPage(items=[_post_summary()], next_cursor="cursor-2")
 
     monkeypatch.setattr(
         social_feed_actual, "list_character_following_feed", fake_following_feed
@@ -261,8 +263,8 @@ def test_bot_character_profile_hides_owner_and_persona(monkeypatch):
     monkeypatch.setattr(
         social_profiles_actual,
         "get_character_profile",
-        lambda *args, **kwargs: schemas.ProfileRead(
-            profile=schemas.ProfileRef(
+        lambda *args, **kwargs: social_schemas.ProfileRead(
+            profile=social_schemas.ProfileRef(
                 profile_type="character",
                 id="char-target",
                 display_name="Target Bird",
@@ -301,7 +303,7 @@ def test_bot_activity_hides_internal_result_fields(monkeypatch):
         actions.rate_limits,
         "_bot_activity_limits",
         lambda *args, **kwargs: [
-            schemas.BotActivityLimitRead(
+            bot_schemas.BotActivityLimitRead(
                 action="state",
                 used_today=1,
                 max_per_day=None,
@@ -347,7 +349,7 @@ def test_bot_activity_hides_internal_result_fields(monkeypatch):
 
 def test_bot_post_create_rejects_metadata_fields():
     with pytest.raises(ValidationError) as exc_info:
-        schemas.BotPostCreate.model_validate(
+        bot_schemas.BotPostCreate.model_validate(
             {
                 "title": "title",
                 "body": "body",
@@ -370,7 +372,7 @@ def test_bot_post_create_rejects_metadata_fields():
 
 
 def test_bot_post_create_image_prompt_requires_request_image():
-    valid = schemas.BotPostCreate(
+    valid = bot_schemas.BotPostCreate(
         title="title",
         body="body",
         request_image=True,
@@ -379,10 +381,10 @@ def test_bot_post_create_image_prompt_requires_request_image():
     assert valid.image_prompt == "cozy room illustration"
 
     with pytest.raises(ValidationError):
-        schemas.BotPostCreate(title="title", body="body", request_image=True)
+        bot_schemas.BotPostCreate(title="title", body="body", request_image=True)
 
     with pytest.raises(ValidationError):
-        schemas.BotPostCreate(
+        bot_schemas.BotPostCreate(
             title="title",
             body="body",
             request_image=False,
@@ -407,7 +409,7 @@ def test_bot_create_post_does_not_store_metadata(monkeypatch):
     response = local_bot.create_post(
         object(),
         _context(),
-        schemas.BotPostCreate(title="title", body="body"),
+        bot_schemas.BotPostCreate(title="title", body="body"),
     ).model_dump()
 
     assert captured["data"].author_character_id == "char-local"
@@ -427,7 +429,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
 
     def fake_image_request(**kwargs):
         captured.update(kwargs)
-        return schemas.BotImageRequestRead(status="queued", job_id=7)
+        return social_schemas.BotImageRequestRead(status="queued", job_id=7)
 
     monkeypatch.setattr(social_timeline_actual.timeline_service, "create_post", fake_create_post)
     monkeypatch.setattr(
@@ -439,7 +441,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
     response = local_bot.create_post(
         object(),
         _context(),
-        schemas.BotPostCreate(
+        bot_schemas.BotPostCreate(
             title="title",
             body="body",
             request_image=True,
@@ -459,7 +461,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
 
 def test_bot_notifications_hide_user_and_recipient_fields(monkeypatch):
     monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
-    notification = schemas.NotificationRead(
+    notification = social_schemas.NotificationRead(
         id=1,
         notification_type="reply",
         post_id="post-1",
@@ -485,7 +487,7 @@ def test_bot_notifications_hide_user_and_recipient_fields(monkeypatch):
     monkeypatch.setattr(
         social_inbox_actual,
         "list_notifications_for_character",
-        lambda *args, **kwargs: schemas.NotificationPage(items=[notification]),
+        lambda *args, **kwargs: social_schemas.NotificationPage(items=[notification]),
     )
 
     item = local_bot.list_notifications(object(), _context()).model_dump()["items"][0]
@@ -510,14 +512,14 @@ def test_bot_follow_response_is_character_profile_only(monkeypatch):
     monkeypatch.setattr(
         social_profiles_actual,
         "follow_profile",
-        lambda *args, **kwargs: schemas.FollowRead(
-            follower=schemas.ProfileRef(
+        lambda *args, **kwargs: social_schemas.FollowRead(
+            follower=social_schemas.ProfileRef(
                 profile_type="character",
                 id="char-local",
                 display_name="Local Bird",
                 handle="local_bird",
             ),
-            target=schemas.ProfileRef(
+            target=social_schemas.ProfileRef(
                 profile_type="character",
                 id="char-target",
                 display_name="Target Bird",
@@ -530,7 +532,7 @@ def test_bot_follow_response_is_character_profile_only(monkeypatch):
     response = local_bot.follow_profile(
         object(),
         _context(),
-        schemas.BotFollowCreate(target_type="character", target_id="char-target"),
+        bot_schemas.BotFollowCreate(target_type="character", target_id="char-target"),
     ).model_dump()
 
     assert response["follower"]["profile_type"] == "character"

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3128,
-      "internal_edge_count": 4128,
+      "external_import_count": 3127,
+      "internal_edge_count": 4129,
       "legacy_import_exception_count": 0,
-      "module_count": 1101,
+      "module_count": 1097,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2465,15 +2465,7 @@
             "path": "backend/app/runtime/social/world_feed_search.py"
           }
         ],
-        "legacy_horizontal": [
-          {
-            "imports": [
-              "app.domains.relationships.schemas"
-            ],
-            "module": "app.schemas.social_memory",
-            "path": "backend/app/schemas/social_memory.py"
-          }
-        ]
+        "legacy_horizontal": []
       },
       "policy_allowed_cycle_count": 0
     },
@@ -2868,7 +2860,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "1e7d4f129800a1b3e87674c560d584c0e56364821917f1f3611121feeee47177"
+        "sha256": "79aadc68b8876eea0e2a7d41d32ea7c87f40f5508c8f88630c61d7341edfced9"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2884,7 +2876,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "f8edb70ef5c728e77105e64e21ed8a97a89635878f83309f56b18df52970f178"
+        "sha256": "93bd324c4cf4560f0119cca843a5a31bab75b41ee86ec4ba4756077cd8ceff06"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2908,7 +2900,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "e730723fbfc1fc8081ee6de93d634f96296a3a18c4df2dca422f56985a4cdb7b"
+        "sha256": "3333d634194e7d31b3a8844a915dc645542aa6ae80b5a298d786957423d63e2d"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
@@ -2916,7 +2908,7 @@
       },
       {
         "path": "backend/tests/worlds/test_definition_contract.py",
-        "sha256": "1164e69bdb46fad84ddd44662f7ef22ccad08e4b6e7de6dc3ce8432dee63687d"
+        "sha256": "411f2158e3aa0ad88afa128c0f99c92f238b1ed85729053284f6382145d829f5"
       },
       {
         "path": "backend/tests/test_world_feed_search.py",

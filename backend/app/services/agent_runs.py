@@ -36,7 +36,7 @@ from sqlalchemy import select
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+
 
 from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
 

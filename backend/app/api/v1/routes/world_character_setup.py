@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.social.schemas.feed as schemas
 from app.domains.identity.models import User as _model_User
 from app.runtime.persistence.model_registration import register_models
 register_models()

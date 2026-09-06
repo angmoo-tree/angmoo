@@ -1182,3 +1182,19 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 
 
 옛 `cruds/community.py` 집합도 제거했다. Character 조회는 Character 서비스, Post 조회는 Social repository, 여러 업무의 초기 데이터 조립은 bootstrap이 소유한다. 소비자는 필요한 실제 기능을 직접 선택하며, 공개 Post 조회와 필터 없는 내부 근거 조회는 서로 다른 계약으로 유지한다.
+
+### 요청·응답 스키마의 소유자
+
+요청과 응답 타입은 해당 업무의 `schemas.py` 또는 `schemas/`에서 가져온다. Character 생성·상세·상태는 `domains.characters.schemas`, 활동 설정·슬롯·실행은 `domains.routines.schemas`, 게시물·피드·알림은 `domains.social.schemas`의 실제 파일을 사용한다. 여러 업무의 값을 함께 반환하는 HTTP 응답은 `api/schemas`가 조립한다. 예를 들어 첫인사 요청은 Routines가 소유하고, 실행 결과와 Social 게시물을 함께 반환하는 응답은 `api.schemas.first_greeting`이 소유한다.
+
+```python
+from app.domains.characters.schemas import AgentCreate, AgentDetailRead
+from app.domains.routines.schemas import AgentActivitySettingRead
+from app.domains.social.schemas.community import PostCreate
+```
+
+현재 앱 코드와 일반 기능 테스트는 `app.schemas` 집합을 사용하지 않는다. 각 스키마의 기존 class·검증기·필드·직렬화 순서는 유지하며, 다른 이름의 동일한 DTO를 다시 정의하지 않는다. 같은 클래스가 필요한 여러 호출자는 그 실제 정의를 함께 사용한다.
+
+`app/schemas`에 남은 `__init__`, `agents`, `characters`, `auth`, `messages`, `media_security`는 과거 import 경로의 객체 동일성 및 구조를 직접 확인하는 테스트 때문에 유지되는 호환 파일이다. 이 테스트에서 옛 import를 새 import로 바꾼 뒤 같은 객체를 자기 자신과 비교하는 방식으로 호환성 종료를 처리하지 않는다. 앱 소비자가 없는 Worlds·SocialMemory·WorldActivityRuntime·WorldCharacterSetup 호환 파일 네 개는 제거했다.
+
+`agents.py`의 원래 Literal 별칭 다섯 개는 현재 직접 소비자가 없지만 아직 원문을 보존한다. 값이 같은 `Literal` 두 개가 같은 객체라는 보장은 없으므로, 최종 호환 경로 종료 때 실제 타입 보존 위치 또는 미사용 export 종료를 따로 판단한다. 남은 범위와 검증 근거는 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md)에 정리한다.

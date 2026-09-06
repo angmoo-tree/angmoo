@@ -82,7 +82,7 @@ from fastapi.responses import FileResponse
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.characters.schemas as schemas
 
 from app.domains.identity.models import User as _model_User
 
