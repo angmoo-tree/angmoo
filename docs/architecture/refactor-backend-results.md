@@ -2497,3 +2497,9 @@ Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연
 Tree/Lore signed `ac8829f1cfa3f7b92ab9f80d020c449f7e14f299`의 기존166개 원장을 불변 prefix로 유지하고, 실제 순차 후보 `57a3c8bf6a6b863bac9b0ca273bfce842edae03b`에 포함된 원본10개 signed source의 파일46개·test node14개를 append했다. 원래 committed_snapshot cache는 commit/tree가 같은지 검증했고, 누락된 LocalBot 중간3단계만 같은 production collector로 isolated Git archive에서 수집했다. 각 source의 최초 도입·blob·단언·suppression·node 및 원장 과거 prefix를 쓰기 전/후 원래 checker로 확인한 결과는 오류0이며 최종176개다.
 
 `runtime/local_bot/composition.py`는 원래 `55d1c2f9e373a5b42b1ddafc0ac04ee12fd3e8b0`와 Git bytes가 같고, 파일 자체의 최초 도입은 `1565688ffa8095b37ec8fb843f5547c6c87705ae`다. 미래G06을 포함한55d 전체 ancestry를 이번 후보에 합류하지 않았다. Visual identity 원본734492bf는 기존파일 수정만 있으며 새로운 test/file 도입이 없어 추가record로 중복 등록하지 않는다. 제품·테스트·frozen 기준·검사 변경0이며 현재 navigation/stock·전체backend·CI/PR Gate는 다음 metadata 후보에서 별도로 확인한다.
+
+Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 **2,437 nodes**가 일치했고 API·ORM·원본 source·단언·suppression 손실이 없었다. 실패 항목은 삭제된 옛 파일과 테스트를 가리키는 현재 지도였다. 실제 정의·import·호출 위치를 대조해 split symbol 34개 행의 사라진 소비 경로를 현재 경로로 연결하고, 기존 node map에 따라 Tree 검사 참조 7개와 K03의 Lore HTTP 경로 1개를 수정했다. 기존 유효한 탐색 경로와 원본 source/symbol/node 이전 증거는 보존했고, 호출되지 않는 보존 함수에 새 소비자를 만들어 넣지 않았다.
+
+고정한 `ac8829f1`에서 backend 전체 첫 실행은 **2,413 PASS / 22 SKIP / 2 FAIL / 기존 warnings27 / 1,197.78초**다. 실패는 sidecar health/shutdown subprocess의 원래 30초 제한 초과와 B7에서 빠진 `app.core.context_clipping`의 현재 core 목록 한 항목이었다. 후자는 선행 보정 `ef0fac3f`와 동일한 `keep / AR-B7-DAYPART` 항목만 추가했다. sidecar 제품 코드·원래 30초 제한·15초 watchdog·검사 단언을 변경하지 않은 재검증에서 sidecar/L0/Daypart **11 PASS / 15.59초**를 확인했다. 시간 초과의 구체 원인을 확정하거나 최초 전체 실행을 전부 통과한 것으로 바꾸어 기록하지 않는다.
+
+현재 지도 보정 후 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`는 **PR #258 1,867 / PR #263 1,907 / protected 2,437 = current 2,437 / items37 PASS**다. 제품·테스트·검사기·동결 기준 자료 및 이미 연결한 원장166개는 이 보정에서 변경하지 않았다. 로컬 검증과 재검증 결과를 갖춘 Tree/Lore 순차 후보이며, Hosted CI·설치·post-merge와 후속 G5/G06/B8-B 완료 판정은 별도로 수행한다.
