@@ -1218,13 +1218,13 @@
     {
       "markers": {
         "row_lock": [
-          15
+          16
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "c29ae077be030addf153be4c1574b5d5b9d4dd2e709aa8dde2a3228f5b3b6ca3",
+      "source_sha256": "85327720cff06a71e7ce545e8caa4ba94f031df93fd80194071c2654200ad544",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

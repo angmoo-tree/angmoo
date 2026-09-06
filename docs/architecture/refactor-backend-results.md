@@ -2753,3 +2753,9 @@ Social11·Relationships7개 파일의 원래92개 노드와 fixture import/CI �
 기존 `behavior["parity_test_node_count"] == 97` 단언은 #263 immutable inventory의 원래 behavior에 그대로 적용한다. 현재 behavior는 policy가 가리키는 모든 파일의 SHA256·무필터 top-level test AST 목록·전체 수량과 직접 비교하고, 원래97개가 명시적 이동 후 모두 포함되는지 확인한다. Counter의 이름/값/노드도 원래 frozen 계약을 실제 경로로 연결한 결과와 전체 비교한다. 최신99를 새 고정 숫자로 쓰거나 검사에서 테스트를 제외하지 않는다.
 
 기존 검사와 stale 수량·누락 node·counter 변조 음성3개를 포함한 검증은 **10 PASS /15.93초**다. 이 후속의 신규3개 노드는 `tests/test_l4_parity_current_source.py`에 실제 최초 source 커밋으로 기록하며, 원장 append와 stock 검증을 이어서 수행한다. 앞선201 PASS/1 FAIL 이력은 그대로 유지한다.
+
+## G5/B8 통합 준비 — 전체 회귀와 검사 대상 연결
+
+고정 `16e0960ab780fe030a5f92cbbce13d66c3ac0120`의 전체 백엔드는 **2564 passed / 22 existing skipped / 5 failed / 28 warnings / 826.44초**다. 다섯 실패는 삭제된 Daily Plan facade의 과거 identity 검사1, 현재 ER0 목록의 scheduler lease import 이동에 따른 줄·hash 갱신 누락2, 삭제된 `services/agent_runs.py`를 읽는 OSS 정적 경계 검사2다. 이 결과를 전체 PASS로 표시하지 않는다.
+
+OSS 검사의 기존 함수9개 전체 AST를 유지하며 원래 AgentRun source의 검토된 분할 지도에 있는 실제 소유 파일50개 모두를 검사 대상으로 연결했다. 옛 파일 한곳을 비워 남기거나 대표 파일 한개만 검사하지 않는다. ER0는 현재 scheduler lease의 줄번호·hash만 갱신됐고 PostgreSQL 흔적 파일92·역사적 migration87·Neo4j 정적 query24·Next route44·parity workload7은 같다. 이 수정의 OSS·ER0 회귀 **16 passed / 13.92초**다. Daily Plan 원래 identity의 승계 검증, 선형 원장·후속 PR 및 최종 설치·전체 Gate는 계속 진행 중이다.
