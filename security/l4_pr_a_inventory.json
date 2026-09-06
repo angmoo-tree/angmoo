@@ -2755,7 +2755,7 @@
             "@/shared/ui/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "17006751fe765727ff084a32e1216aba3b22f7daee621e3f1bf083f82c41cf6f"
+          "sha256": "fcad4cf7709527375353c5e57c9a2f9c9ee749649deb54f18590722b56758e69"
         }
       ],
       "planned_feature_allowlist": [
@@ -2766,7 +2766,6 @@
         "features": [
           "frontend/src/features/characters/public.ts",
           "frontend/src/features/chat/public.ts",
-          "frontend/src/features/creator-studio/public.ts",
           "frontend/src/features/device-home/public.ts",
           "frontend/src/features/device-shell/public.ts",
           "frontend/src/features/memory/public.ts",

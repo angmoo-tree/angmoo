@@ -75,14 +75,14 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
-      "sha256": "761b48f129242697e5ca8c012f7667ebd3fe460c1e657ee670fa4d5708bc9f8b"
+      "sha256": "23a08c5168563214e8b2538fbabd1a09bdb813e24ff3fa5949c03944e42a94d1"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
-      "sha256": "10156f28f462af622f31d6472a08883ab54a9064576156a7258a548a8c2ba0fd"
+      "sha256": "42d611d7a725f971974c4c498a5d981483d577682243f8ba6fd7550130035a5b"
     },
     {
       "classifications": [
@@ -570,41 +570,6 @@
         }
       },
       {
-        "occurrences": 73,
-        "path": "frontend/src/components/world-creator-client.tsx",
-        "values": {
-          "#027a48": 1,
-          "#101828": 6,
-          "#12b76a": 1,
-          "#344054": 5,
-          "#475467": 7,
-          "#667085": 8,
-          "#98a2b3": 5,
-          "#b42318": 4,
-          "#b7ebcd": 1,
-          "#d0d5dd": 2,
-          "#d92d20": 1,
-          "#dfe3e8": 2,
-          "#e1e5eb": 6,
-          "#eaecf0": 1,
-          "#eef1f5": 1,
-          "#f0fff6": 1,
-          "#f2f4f7": 3,
-          "#f79009": 1,
-          "#f7f8fa": 1,
-          "#f8fafc": 1,
-          "#f9fafb": 2,
-          "#fbfcfd": 1,
-          "#fda29b": 1,
-          "#ff5252": 1,
-          "#ff6b6b": 4,
-          "#ffd2d2": 1,
-          "#ffe2e2": 2,
-          "#fff0f0": 1,
-          "#fff5f5": 2
-        }
-      },
-      {
         "occurrences": 97,
         "path": "frontend/src/composition/screens/agent-detail-screen.tsx",
         "values": {
@@ -982,6 +947,41 @@
         }
       },
       {
+        "occurrences": 73,
+        "path": "frontend/src/features/worlds/components/world-creator-client.tsx",
+        "values": {
+          "#027a48": 1,
+          "#101828": 6,
+          "#12b76a": 1,
+          "#344054": 5,
+          "#475467": 7,
+          "#667085": 8,
+          "#98a2b3": 5,
+          "#b42318": 4,
+          "#b7ebcd": 1,
+          "#d0d5dd": 2,
+          "#d92d20": 1,
+          "#dfe3e8": 2,
+          "#e1e5eb": 6,
+          "#eaecf0": 1,
+          "#eef1f5": 1,
+          "#f0fff6": 1,
+          "#f2f4f7": 3,
+          "#f79009": 1,
+          "#f7f8fa": 1,
+          "#f8fafc": 1,
+          "#f9fafb": 2,
+          "#fbfcfd": 1,
+          "#fda29b": 1,
+          "#ff5252": 1,
+          "#ff6b6b": 4,
+          "#ffd2d2": 1,
+          "#ffe2e2": 2,
+          "#fff0f0": 1,
+          "#fff5f5": 2
+        }
+      },
+      {
         "occurrences": 38,
         "path": "frontend/src/styles/semantic-tokens.css",
         "values": {
@@ -1148,7 +1148,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "19048efdc2d04a4489fbe5a6a355574d23c323001a3defe7249471fdf93f7ded",
+    "next_static_inventory_sha256": "7dacb62e7df1dcb4f63e52f18e96bc867f66fc7dd2fe4918ba8cd25f62cda870",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1234,7 +1234,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "5fa0b1f551ae278870d37ac20dc1389cfb33fdbebe5caaffeb6185dac7d3f53b"
+        "sha256": "69bbf430245b6153a0e7e07b98640f219e6ccdc5abbc560cf6cf7b6af410726d"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

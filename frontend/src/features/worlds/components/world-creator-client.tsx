@@ -12,43 +12,17 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-import { PRODUCT_ROUTES, studioWorldRoute } from "@/shared/navigation/public";
-import {
-  safeSameOriginMediaUrl,
-  useRuntimeMediaUrl,
-} from "@/shared/media/public";
+import { PRODUCT_ROUTES, studioWorldRoute } from "@/lib/navigation/product-routes";
+import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
+import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
-import { useAuth } from "@/components/auth-provider";
-import { StudioWorldCharacterList } from "@/features/creator-studio/public";
-import { WorldPackageExportPanel } from "@/features/world-packages/public";
-import {
-  createOwnerControlledIdentity,
-  createWorld,
-  getOwnerControlledIdentity,
-  getWorldCreatorContext,
-  publishWorld,
-  removeWorldBanner,
-  requestValidationFields,
-  updateWorld,
-  updateOwnerControlledIdentity,
-  uploadWorldBanner,
-  validateWorld,
-  WorldApiError,
-  type WorldCreatorContext,
-  type OwnerControlledIdentityRead,
-  type OwnerControlledProfileWrite,
-  type WorldDaypart,
-  type WorldDefinition,
-  type WorldGlossaryTermInput,
-  type WorldPlaceInput,
-  type WorldRoleInput,
-  type WorldRuleInput,
-  type WorldValidationIssue,
-} from "@/lib/worlds";
+import { useAuth } from "@/hooks/use-auth";
+import { createOwnerControlledIdentity, createWorld, getOwnerControlledIdentity, getWorldCreatorContext, publishWorld, removeWorldBanner, requestValidationFields, updateWorld, updateOwnerControlledIdentity, uploadWorldBanner, validateWorld, WorldApiError } from "@/features/worlds/api/worlds";
+import type { WorldCreatorContext, OwnerControlledIdentityRead, OwnerControlledProfileWrite, WorldDaypart, WorldDefinition, WorldGlossaryTermInput, WorldPlaceInput, WorldRoleInput, WorldRuleInput, WorldValidationIssue } from "@/features/worlds/types/worlds";
 
 const DAYPARTS: { key: WorldDaypart; label: string; hours: string }[] = [
   { key: "dawn", label: "새벽", hours: "00:00~06:00" },
@@ -195,7 +169,7 @@ function fileAsBase64(file: File) {
   });
 }
 
-export function WorldCreatorClient({ worldId }: { worldId?: string }) {
+export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: string; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode }) {
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const idempotencyKey = useRef(newIdempotencyKey());
@@ -480,11 +454,7 @@ export function WorldCreatorClient({ worldId }: { worldId?: string }) {
 
             {context ? (
               <>
-                <StudioWorldCharacterList
-                  worldId={context.world.id}
-                  roles={definition.roles}
-                />
-                <WorldPackageExportPanel worldId={context.world.id} />
+                {renderWorldTools(context.world.id, definition.roles)}
                 <div id="owner-controlled-identity" className="scroll-mt-6">
                   <OwnerControlledIdentityPanel
                     roles={definition.roles}

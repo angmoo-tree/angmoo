@@ -298,7 +298,7 @@ def test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes() -> No
     assert invalid.status_code == 422
 
     frontend_root = Path(__file__).parents[3] / "frontend" / "src"
-    client = (frontend_root / "components" / "world-creator-client.tsx").read_text(
+    client = (frontend_root / "features" / "worlds" / "components" / "world-creator-client.tsx").read_text(
         encoding="utf-8"
     )
     navigation = (frontend_root / "utils" / "safe-navigation.ts").read_text(

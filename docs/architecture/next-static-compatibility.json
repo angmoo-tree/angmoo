@@ -362,7 +362,7 @@
       "path": "frontend/src/app/studio/worlds/[worldId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/studio/worlds/[worldId]",
-      "source_sha256": "80caa61f1de5761edc7693ca476a2ce52bc2e65eb3913bcbb806b4c624980426",
+      "source_sha256": "5a50598998fe0cfd2d9c3306a158f15432718d5a865b6889dd37c9ef3f82d411",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -372,7 +372,7 @@
       "path": "frontend/src/app/studio/worlds/new/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/studio/worlds/new",
-      "source_sha256": "9d2a3e36cb14f4e5820487bf5edb8c132390861dcbd68d73ecc2e828975bb497",
+      "source_sha256": "c132db1991f3236f5d04e76fc9e5b40238def22392a5000d5f1f3e289c307294",
       "transition_pr": "ER5 PR K"
     },
     {

@@ -38,7 +38,7 @@ def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
 
 def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
     dashboard = _read(
-        "features/creator-studio/ui/creator-studio-dashboard.tsx"
+        "features/creator-studio/components/creator-studio-dashboard.tsx"
     )
     device_contract = _read("features/device-home/utils/device-home-presentation.ts")
 
@@ -54,7 +54,7 @@ def test_creator_studio_reads_owner_surface_and_groups_blocked_worlds() -> None:
 def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
     legacy_new = _read("app/worlds/new/page.tsx")
     legacy_edit = _read("app/worlds/[worldId]/creator/page.tsx")
-    creator = _read("components/world-creator-client.tsx")
+    creator = _read("features/worlds/components/world-creator-client.tsx") + _read("composition/screens/world-creator-screen.tsx")
 
     for source in (legacy_new, legacy_edit):
         assert "productRouteWithSearchParams" in source
@@ -73,7 +73,7 @@ def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
 def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> None:
     shell_css = _read("composition/shells/creator-studio-shell.module.css")
     dashboard_css = _read(
-        "features/creator-studio/ui/creator-studio-dashboard.module.css"
+        "features/creator-studio/components/creator-studio-dashboard.module.css"
     )
     frame = _read("composition/shells/creator-studio-frame.tsx")
 
@@ -85,9 +85,9 @@ def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> No
 
 
 def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -> None:
-    creator = _read("components/world-creator-client.tsx")
+    creator = _read("features/worlds/components/world-creator-client.tsx") + _read("composition/screens/world-creator-screen.tsx")
     surface = _read(
-        "features/creator-studio/ui/studio-world-character-list.tsx"
+        "features/creator-studio/components/studio-world-character-list.tsx"
     )
     create_client = _read("features/characters/components/agent-create-client.tsx")
     browser_create_page = _read("app/agents/new/page.tsx")

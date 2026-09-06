@@ -17,7 +17,7 @@ def _desktop(relative: str) -> str:
 def test_world_package_import_is_available_from_home_studio_and_static_router() -> None:
     device = _frontend("features/device-home/utils/device-home-presentation.ts")
     studio = _frontend("composition/shells/creator-studio-navigation.ts")
-    dashboard = _frontend("features/creator-studio/ui/creator-studio-dashboard.tsx")
+    dashboard = _frontend("features/creator-studio/components/creator-studio-dashboard.tsx")
     static_router = _frontend("composition/static-product-router.tsx")
     import_page = _frontend("app/studio/import/page.tsx")
 
@@ -48,7 +48,7 @@ def test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation() -
 
 
 def test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as() -> None:
-    creator = _frontend("components/world-creator-client.tsx")
+    creator = _frontend("features/worlds/components/world-creator-client.tsx") + _frontend("composition/screens/world-creator-screen.tsx")
     panel = _frontend(
         "features/world-packages/world-package-export-panel.tsx"
     )

@@ -47,7 +47,7 @@ def test_wide_product_shells_own_their_main_landmark() -> None:
     creator_shell = _read(
         "frontend/src/composition/shells/creator-studio-shell.tsx"
     )
-    creator_client = _read("frontend/src/components/world-creator-client.tsx")
+    creator_client = _read("frontend/src/features/worlds/components/world-creator-client.tsx")
 
     assert "<main" in relationship_frame
     assert (

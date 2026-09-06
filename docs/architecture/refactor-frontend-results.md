@@ -286,3 +286,22 @@ committed history were deleted.
   authorize an out-of-order merge: #295 post-merge PASS is still required first.
   Full history secret scan: 737 commits, 41.11 MB, no leaks after the verified
   exact blob exception. No credential or provider call was used by parity tests.
+
+## AR-F3-C World Creator and Studio — local validation
+
+- Move World API and DTOs to Worlds, retaining request paths, validation errors,
+  row versions, definition/readiness state, owner-controlled identity and media.
+- World editor receives a stable tool-rendering slot from the shared screen;
+  Studio participation receives the same edited role definitions, Package export
+  the same saved World ID. Next and static route consumers share this screen.
+- Studio dashboard accepts the existing surface loader from upper composition;
+  its own display shape, grouping, abort and error lifecycle remain unchanged.
+  No duplicated endpoint or Device Home-to-Studio type dependency is introduced.
+- Retire unused Creator Studio facade and map all 20 exports to actual owners.
+  Frozen browser assertions, fixtures, snapshots, locks/assets and 324-file stock
+  pass preservation; raw colors stay at 1408 occurrences in 34 files.
+- Web 21 PASS (1.1m), Settings 2 PASS (7.3s). Frontend-related backend suite had
+  485 PASS and two old single-file assertions; their unchanged assertions now
+  inspect editor plus real composition, and focused 12 PASS. New boundary PASS.
+- Builds, static browser, committed source capture, full preservation and final
+  CI/sequential merge are still required. F3-D through F5-B remain uncompleted.

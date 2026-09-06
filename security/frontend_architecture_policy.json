@@ -114,7 +114,7 @@
       "getMemoryItem",
       "listMemoryItems"
     ],
-    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": [
+    "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx": [
       "getLocalWorldSurface(\"creator_studio\"",
       "studioWorldRoute(world.world_id)",
       "worldAppRoute(world.world_id)"
@@ -279,8 +279,7 @@
     "frontend/src/features/chat/ui/messages-client.tsx",
     "frontend/src/features/chat/ui/world-chat.module.css",
     "frontend/src/features/chat/ui/world-chat.tsx",
-    "frontend/src/features/creator-studio/public.ts",
-    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
+    "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/device-home/utils/device-home-presentation.ts",
     "frontend/src/features/device-shell/public.ts",
@@ -343,6 +342,7 @@
   "refactor": {
     "features": [
       "characters",
+      "creator-studio",
       "device-home",
       "identity",
       "runtime-status",
@@ -400,12 +400,6 @@
       "utils/scroll-viewport"
     ],
     "bridges": [
-      {
-        "importer": "features/creator-studio/ui/creator-studio-dashboard",
-        "target": "features/device-home/public",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
       {
         "importer": "features/device-shell/public",
         "target": "components/layout/device-shell",
