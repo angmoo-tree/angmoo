@@ -1,6 +1,7 @@
 from __future__ import annotations
 from app.domains.routines.service import activity_logs as agent_crud
-
+import app.domains.characters.schemas as character_schemas
+import app.domains.social.schemas.community as social_schemas
 import app.domains.characters.service.profile as characters_profile_service
 import app.domains.social.repository.inbox as social_inbox_repository
 import app.domains.social.repository.posts as social_posts_repository
@@ -159,7 +160,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import schemas
+
 from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
 from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
 from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
@@ -1496,7 +1497,7 @@ async def _run_state_recorder(
             ctx.db,
             ctx.session_key,
             ctx.character.id,
-            schemas.AgentCharacterStateWrite(**state_payload),
+            character_schemas.AgentCharacterStateWrite(**state_payload),
         )
     except Exception as exc:
         if fallback_failure_class is None:
@@ -3358,7 +3359,7 @@ def _execute_planned_action(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
-                    schemas.TimelineReplyCreate(
+                    social_schemas.TimelineReplyCreate(
                         body=body, author_character_id=ctx.character.id
                     ),
                 )
@@ -3368,7 +3369,7 @@ def _execute_planned_action(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
-                    schemas.PostLikeCreate(character_id=ctx.character.id),
+                    social_schemas.PostLikeCreate(character_id=ctx.character.id),
                 )
                 payload = {"post_id": result.id}
             elif action_type == "repost":
@@ -3376,14 +3377,14 @@ def _execute_planned_action(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
-                    schemas.PostLikeCreate(character_id=ctx.character.id),
+                    social_schemas.PostLikeCreate(character_id=ctx.character.id),
                 )
                 payload = {"post_id": result.id}
             elif action_type == "follow":
                 result = social_agent_tools_runtime.agent_tool_actions.follow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
-                    schemas.FollowCreate(
+                    social_schemas.FollowCreate(
                         target_type="character",
                         target_id=target_id or "",
                         follower_character_id=ctx.character.id,
@@ -3397,7 +3398,7 @@ def _execute_planned_action(
                 social_agent_tools_runtime.agent_tool_actions.unfollow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
-                    schemas.FollowCreate(
+                    social_schemas.FollowCreate(
                         target_type="character",
                         target_id=target_id or "",
                         follower_character_id=ctx.character.id,
@@ -3615,7 +3616,7 @@ def _execute_writing_plan(
             result = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
-                schemas.PostCreate(
+                social_schemas.PostCreate(
                     title=title,
                     body=body,
                     author_character_id=ctx.character.id,

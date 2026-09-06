@@ -2,7 +2,13 @@ from __future__ import annotations
 from app.domains.identity.repository import credentials as identity_credentials
 from app.domains.identity.service import character_credentials as identity_credential_records
 from app.domains.routines.service import activity_logs as agent_crud
-
+import app.api.schemas.first_greeting as schema_api_schemas_first_greeting
+import app.domains.characters.schemas as character_schemas
+import app.domains.identity.schemas as schema_identity_schemas
+import app.domains.local_bot.schemas as bot_schemas
+import app.domains.routines.schemas as routine_schemas
+import app.domains.routines.schemas.runs as routine_schemas_runs
+import app.domains.social.schemas.community as social_schemas
 import app.domains.social.exceptions as social_errors
 import app.domains.social.service.activity_results as social_activity_results_service
 import app.domains.social.service.posts as social_posts_service
@@ -126,7 +132,7 @@ from sqlalchemy import update
 
 from sqlalchemy.orm import Session
 
-from app import schemas
+
 
 from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
 
@@ -489,15 +495,15 @@ class AgentDeletionCredentialSyncError(AgentServiceError):
 class AgentDeletionMediaCleanupError(AgentServiceError):
     pass
 
-def list_agents(db: Session, user: _model_User) -> list[schemas.AgentDetailRead]:
+def list_agents(db: Session, user: _model_User) -> list[character_schemas.AgentDetailRead]:
     return character_management.list_agents(db, user, workflows=build_character_management_workflows())
 
 def create_agent(
-    db: Session, user: _model_User, data: schemas.AgentCreate
-) -> schemas.AgentDetailRead:
+    db: Session, user: _model_User, data: character_schemas.AgentCreate
+) -> character_schemas.AgentDetailRead:
     return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
 
-def _after_character_created(db, user, character, data) -> schemas.AgentDetailRead:
+def _after_character_created(db, user, character, data) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     _apply_initial_activity_settings(db, setting, data)
     _ensure_initial_image_settings(db, character.id)
@@ -532,13 +538,13 @@ def _after_character_created(db, user, character, data) -> schemas.AgentDetailRe
 def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
     return image_settings_owner._ensure_initial_image_settings(db, character_id, workflows=build_image_settings_workflows())
 
-def get_agent(db: Session, user: _model_User, character_id: str) -> schemas.AgentDetailRead:
+def get_agent(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentDetailRead:
     return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
 
-def get_local_connection(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalConnectionRead:
+def get_local_connection(db: Session, user: _model_User, character_id: str) -> bot_schemas.AgentLocalConnectionRead:
     return local_key_management.get_local_connection(db, user, character_id)
 
-def issue_local_key(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
+def issue_local_key(db: Session, user: _model_User, character_id: str) -> bot_schemas.AgentLocalKeyCreateRead:
     return local_key_management.issue_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 def revoke_local_key(db: Session, user: _model_User, character_id: str) -> None:
@@ -548,11 +554,11 @@ def update_profile(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentProfileUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentProfileUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_profile(db, user, character_id, data, workflows=build_character_management_workflows())
 
-def _after_character_profile_updated(db, user, character, media_changed) -> schemas.AgentDetailRead:
+def _after_character_profile_updated(db, user, character, media_changed) -> character_schemas.AgentDetailRead:
     if media_changed:
         _invalidate_image_visual_identity_if_present(db, character.id)
     agent_crud.log_activity(
@@ -571,19 +577,19 @@ def update_promotion_usage(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentPromotionUsageUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentPromotionUsageUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_promotion_usage(db, user, character_id, data, workflows=build_character_management_workflows())
 
 def update_persona(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentPersonaUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentPersonaUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_persona(db, user, character_id, data, workflows=build_character_management_workflows())
 
-def _after_character_persona_updated(db, user, character) -> schemas.AgentDetailRead:
+def _after_character_persona_updated(db, user, character) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     _clear_tendency_analysis(setting)
     db.commit()
@@ -603,24 +609,24 @@ def upload_profile_media(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentProfileMediaUpload,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentProfileMediaUpload,
+) -> character_schemas.AgentDetailRead:
     return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
-def get_image_settings(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def get_image_settings(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.get_image_settings(db, user, character_id, workflows=build_image_settings_workflows())
 
-def update_image_settings(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
+def update_image_settings(db: Session, user: _model_User, character_id: str, data: character_schemas.AgentImageGenerationSettingUpdate) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=build_image_settings_workflows())
 
-def upload_image_seed(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
+def upload_image_seed(db: Session, user: _model_User, character_id: str, data: character_schemas.AgentImageSeedUpload) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=build_image_settings_workflows())
 
-def delete_image_seed(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def delete_image_seed(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.delete_image_seed(db, user, character_id, workflows=build_image_settings_workflows())
 
 def delete_agent(
-    db: Session, user: _model_User, character_id: str, data: schemas.AgentDeleteCreate
+    db: Session, user: _model_User, character_id: str, data: character_schemas.AgentDeleteCreate
 ) -> None:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
@@ -674,7 +680,7 @@ def _activity_profile_readiness(
     *,
     character: character_models.Character,
     setting: _model_AgentActivitySetting,
-) -> schemas.AgentActivityProfileReadinessRead:
+) -> character_schemas.AgentActivityProfileReadinessRead:
     return activity_profile_readiness.evaluate(
         db,
         character=character,
@@ -685,7 +691,7 @@ def _resident_openclaw_sync_enabled() -> bool:
     return settings.agent_activity_engine == "openclaw"
 
 def _bind_slot_auth_profile(
-    slot: schemas.AgentSlotRead,
+    slot: routine_schemas_runs.AgentSlotRead,
     *,
     user_id: str,
     character: character_models.Character,
@@ -740,7 +746,7 @@ def _reload_openclaw_secrets_sync() -> None:
     except OpenClawGatewayError as exc:
         raise CredentialSyncError(str(exc)) from exc
 
-def _local_connection_read(db: Session, character: character_models.Character) -> schemas.AgentLocalConnectionRead:
+def _local_connection_read(db: Session, character: character_models.Character) -> bot_schemas.AgentLocalConnectionRead:
     return local_key_management._local_connection_read(db, character)
 
 def _local_key_token_prefix(token: str) -> str:
@@ -1068,7 +1074,7 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
 
 def _build_agent_detail(
     db: Session, character: character_models.Character, *, recent_activity_limit: int = 20
-) -> schemas.AgentDetailRead:
+) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     credential = credential_repository.get_character_credential(db, character.id)
     slot = slot_queries.get_assigned_slot(db, character.id)
@@ -1085,23 +1091,23 @@ def _build_agent_detail(
         if character.owner_id
         else None
     )
-    return schemas.AgentDetailRead(
-        character=schemas.CharacterRead.model_validate(character),
+    return character_schemas.AgentDetailRead(
+        character=character_schemas.CharacterRead.model_validate(character),
         state=(
-            schemas.CharacterStateRead.model_validate(character.state)
+            character_schemas.CharacterStateRead.model_validate(character.state)
             if character.state
             else None
         ),
         credential=(
-            schemas.CredentialRead.model_validate(credential) if credential else None
+            schema_identity_schemas.CredentialRead.model_validate(credential) if credential else None
         ),
-        settings=schemas.AgentActivitySettingRead.model_validate(setting),
+        settings=routine_schemas.AgentActivitySettingRead.model_validate(setting),
         image_settings=_image_generation_setting_read(
             db,
             image_setting_repository.ensure_image_generation_setting(db, character.id)
         ),
         promotion_usage=_promotion_usage_read(character),
-        assigned_slot=schemas.AgentSlotRead.model_validate(slot) if slot else None,
+        assigned_slot=routine_schemas_runs.AgentSlotRead.model_validate(slot) if slot else None,
         activity_profile_readiness=_activity_profile_readiness(
             db,
             character=character,
@@ -1119,7 +1125,7 @@ def _build_agent_detail(
         ],
     )
 
-def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
+def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner._image_generation_setting_read(db, setting, workflows=build_image_settings_workflows())
 
 def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int | str]:
@@ -1139,7 +1145,7 @@ def build_character_management_workflows() -> CharacterManagementWorkflows:
         after_persona=_after_character_persona_updated,
     )
 
-def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
+def _build_full_character_detail(db: Session, character: character_models.Character) -> character_schemas.AgentDetailRead:
     return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)
 
 def build_character_media_workflows():
@@ -1173,7 +1179,7 @@ def build_activity_management_references() -> ActivityManagementReferences:
         timezone_reader=agent_activity_policy.activity_timezone,
     )
 
-def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
+def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetailRead]:
     return AutonomyWorkflows(
         get_user=identity_profile.get_user,
         get_character=character_profile.get_character,
@@ -1263,8 +1269,8 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         resolve_key=resolve_first_greeting_key,
         new_tracker=RunLlmTracker,
         _run_first_greeting_writer=_run_first_greeting_writer,
-        post_input=schemas.PostCreate,
-        build_response=schemas.AgentFirstGreetingRead,
+        post_input=social_schemas.PostCreate,
+        build_response=schema_api_schemas_first_greeting.AgentFirstGreetingRead,
         create_post=social_timeline_runtime.timeline_service.create_post,
         build_post_created_activity_result=social_activity_results_service.build_post_created_activity_result,
         attach_image=_attach_first_greeting_image,
@@ -1273,7 +1279,7 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         social_service_error=social_errors.CommunityServiceError,
     )
 
-def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.AgentDetailRead]:
+def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[character_schemas.AgentDetailRead]:
     return TendencyAnalysisWorkflows(
         get_owned_character=_get_owned_character,
         ensure_mutable=demo_lock.ensure_demo_user_mutable,
@@ -1302,7 +1308,7 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         upsert_credential=identity_credential_records.upsert_credential,
         get_credential=identity_credentials.get_character_credential,
         sync_enabled=_resident_openclaw_sync_enabled,
-        slot_read=schemas.AgentSlotRead.model_validate,
+        slot_read=routine_schemas_runs.AgentSlotRead.model_validate,
         bind_profile=_bind_slot_auth_profile,
         release_profile=_release_slot_auth_profile,
         reload_secrets=_reload_openclaw_secrets_sync,
@@ -1316,7 +1322,7 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         credential_required_error=CredentialRequiredError,
     )
 
-def build_tendency_analysis_runner() -> TendencyAnalysisRunner[schemas.AgentDetailRead]:
+def build_tendency_analysis_runner() -> TendencyAnalysisRunner[character_schemas.AgentDetailRead]:
     return partial(tendency_analysis.analyze_tendency, workflows=build_tendency_analysis_workflows())
 
 def configure_character_activity_http(app: Any) -> None:

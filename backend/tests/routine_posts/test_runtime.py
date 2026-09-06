@@ -1,7 +1,9 @@
 from __future__ import annotations
 from app.domains.routines.service import activity_settings as routines_settings
 from app.domains.routines.service import plans as routine_plans
-
+import app.domains.routine_posts.schemas as schema_routine_posts_schemas
+import app.domains.routines.schemas as routine_schemas
+import app.domains.social.schemas.community as social_schemas
 import app.domains.social.exceptions as social_errors
 import app.runtime.social.timeline as social_timeline_runtime
 from app.domains.routines.service import autonomy_management
@@ -21,7 +23,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+
 from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.models import Base
@@ -221,18 +223,18 @@ class FakeRoutineProvider:
             )
         used_ids = routine_context.considered_source_event_ids[:1]
         effects = [
-            schemas.RoutineSourceEventEffect(
+            schema_routine_posts_schemas.RoutineSourceEventEffect(
                 source_event_id=event_id,
                 effect="acknowledge",
                 intensity=8,
-                state_change=schemas.RoutineStateChange(
+                state_change=schema_routine_posts_schemas.RoutineStateChange(
                     mood="curious",
                     mood_intensity_delta=8,
                 ),
             )
             for event_id in used_ids
         ]
-        plan = schemas.RoutineBeatPlan(
+        plan = schema_routine_posts_schemas.RoutineBeatPlan(
             episode_id=routine_context.episode.id,
             beat_id=beat.id,
             sequence_no=beat.sequence_no,
@@ -259,7 +261,7 @@ class FakeRoutineProvider:
         )
         return RoutineGeneration(
             plan=plan,
-            draft=schemas.RoutinePostDraft(
+            draft=schema_routine_posts_schemas.RoutinePostDraft(
                 title=f"Morning activity scene {beat.sequence_no}",
                 body=(
                     "The academy morning activity begins."
@@ -1341,7 +1343,7 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
             character_id=fixture.character.id,
             world_id=fixture.world.id,
             user=fixture.user,
-            data=schemas.WorldCharacterRuntimeModeUpdate(
+            data=routine_schemas.WorldCharacterRuntimeModeUpdate(
                 activity_runtime_mode="routine_resident_v1"
             ),
             now=now,
@@ -1568,7 +1570,7 @@ def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:
             social_timeline_runtime.timeline_service.create_post(
                 db,
                 fixture.user,
-                schemas.PostCreate(
+                social_schemas.PostCreate(
                     title="Invalid scope",
                     body="Only one half of the scope was supplied.",
                     author_character_id=fixture.character.id,

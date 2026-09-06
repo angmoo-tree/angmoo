@@ -1,3 +1,4 @@
+import app.domains.social.schemas.community as social_schemas
 import app.domains.routines.constants as routines_constants
 import app.domains.routines.service.feed_history_notes as routines_feed_history_notes_service
 import app.domains.social.exceptions as social_errors
@@ -47,7 +48,7 @@ from fastapi import status
 
 import pytest
 
-from app import schemas
+
 
 from app.domains.characters import router as agent_routes
 
@@ -122,7 +123,9 @@ def test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency():
     assert "Like when quiet agreement is enough." in prompt
 
 def test_activity_setting_read_excludes_internal_planner_tendency_profile():
+    import app.domains.routines.schemas as schemas
     assert "planner_tendency_profile" not in schemas.AgentActivitySettingRead.model_fields
+    import app.domains.routines.schemas as schemas
     assert "tendency_analysis_ready" in schemas.AgentActivitySettingRead.model_fields
 
 def _tendency_setting_with_profile(profile: dict[str, object]) -> SimpleNamespace:
@@ -816,9 +819,9 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1", summary="summary", reason="reason"
                 )
             ],
@@ -876,9 +879,9 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
     result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1", summary="summary", reason="reply fits better"
                 )
             ],
@@ -915,7 +918,7 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
     result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[],
             post_seed="이걸로 글을 쓰자",
             post_seed_intent="own_thought",
@@ -968,9 +971,9 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
     result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1",
                     summary="like-worthy summary",
                     reason="quiet agreement fits",
@@ -1008,22 +1011,22 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
     result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         None,
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(
+        social_schemas.AgentFeedHistorySanitizeCreate(
             consumed_sources=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="lunch strategy",
                     source_title="source lunch",
                     seed_semantic_summary="냐하하! copied lunch strategy voice",
                 )
             ],
             recent_feed_interests=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="feed lunch",
                     interest_reason_summary="냐하하! cared about lunch timing",
                 )
             ],
             recent_own_root_topics=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="own lunch",
                     own_root_semantic_summary="냐하하! already posted lunch plan",
                 )
@@ -1083,9 +1086,9 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
     result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(
+        social_schemas.AgentFeedHistorySanitizeCreate(
             consumed_sources=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     post_id="post-locked",
                     topic_signature="wrong topic",
                     novelty_basis="wrong novelty",
@@ -1143,7 +1146,7 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
     result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(),
+        social_schemas.AgentFeedHistorySanitizeCreate(),
     )
 
     payload = json.loads(result.result)
@@ -1184,9 +1187,9 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
             SimpleNamespace(),
             "session-secret-value",
-            schemas.AgentFeedHistorySanitizeCreate(
+            social_schemas.AgentFeedHistorySanitizeCreate(
                 consumed_sources=[
-                    schemas.AgentFeedHistorySanitizeItem(
+                    social_schemas.AgentFeedHistorySanitizeItem(
                         post_id="post-secret",
                         seed_semantic_summary="secret raw summary text",
                     )
@@ -1222,7 +1225,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
             social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
                 "session-secret-value",
-                schemas.AgentFeedHistorySanitizeCreate(),
+                social_schemas.AgentFeedHistorySanitizeCreate(),
             )
 
     joined = "\n".join(record.getMessage() for record in caplog.records)
@@ -1327,9 +1330,9 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1",
                     summary="same broad topic",
                     reason="like can still fit",
@@ -1420,7 +1423,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
-        schemas.PostCreate(
+        social_schemas.PostCreate(
             title="title",
             body="body",
             author_character_id="char-1",
@@ -1488,7 +1491,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: consumed.append(kwargs),
     )
 
-    post_data = schemas.PostCreate(
+    post_data = social_schemas.PostCreate(
         title="title",
         body="body",
         author_character_id="char-1",

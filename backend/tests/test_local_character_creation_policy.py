@@ -6,7 +6,7 @@ from pathlib import Path
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.characters.schemas as schemas
 from model_fixture_support import models
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
@@ -174,18 +174,45 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
 
 def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> None:
     # The former management module's activity admission is now owned by
-    # Routines. Inspect both actual source files for the same logical surface.
+    # Routines. Community CRUD was split across the actual owners below;
+    # these are the complete destinations in the reviewed symbol-move map.
+    # Inspect all of those bodies for the same no-saved-count-quota contract.
     source_groups = {
         "backend/app/runtime/characters/management.py": (
             "backend/app/runtime/characters/management.py",
             "backend/app/domains/routines/service/autonomy_management.py",
+        ),
+        "backend/app/cruds/community.py": (
+            "backend/app/core/search_text.py",
+            "backend/app/domains/characters/exceptions.py",
+            "backend/app/domains/characters/service/profile.py",
+            "backend/app/domains/characters/service/search.py",
+            "backend/app/domains/characters/service/state.py",
+            "backend/app/domains/identity/service/profile.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/activity.py",
+            "backend/app/domains/social/repository/image_jobs.py",
+            "backend/app/domains/social/repository/inbox.py",
+            "backend/app/domains/social/repository/media.py",
+            "backend/app/domains/social/repository/posts.py",
+            "backend/app/domains/social/repository/profiles.py",
+            "backend/app/domains/social/repository/reactions.py",
+            "backend/app/domains/social/service/image_jobs.py",
+            "backend/app/domains/social/service/notifications.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/source_posts.py",
+            "backend/app/domains/social/utils/cursors.py",
+            "backend/app/domains/social/utils/text.py",
+            "backend/app/runtime/bootstrap/demo_seed.py",
+            "backend/app/runtime/social/discovery.py",
+            "backend/app/runtime/social/inbox.py",
+            "backend/app/runtime/social/profile_activity.py",
         ),
         **{
             relative: (relative,)
             for relative in (
                 "backend/app/runtime/characters/creator.py",
                 "backend/app/api/v1/routes/agents.py",
-                "backend/app/cruds/community.py",
             )
         },
     }

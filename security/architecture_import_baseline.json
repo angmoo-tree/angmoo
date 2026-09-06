@@ -1,7 +1,7 @@
 {
-  "edge_count": 4069,
-  "external_import_count": 3115,
-  "module_count": 1095,
+  "edge_count": 4072,
+  "external_import_count": 3114,
+  "module_count": 1091,
   "modules": [
     {
       "external_imports": [],
@@ -135,9 +135,9 @@
         "app.database",
         "app.domains.identity.dependencies",
         "app.domains.identity.models",
+        "app.domains.routines.schemas.runs",
         "app.domains.routines.service.slot_status",
-        "app.runtime.persistence.model_registration",
-        "app.schemas"
+        "app.runtime.persistence.model_registration"
       ],
       "module": "app.api.v1.routes.agent_runs",
       "path": "backend/app/api/v1/routes/agent_runs.py",
@@ -152,6 +152,7 @@
       "imports": [
         "app.database",
         "app.domains.characters.router",
+        "app.domains.characters.schemas",
         "app.domains.identity.dependencies",
         "app.domains.identity.models",
         "app.domains.local_bot.router.keys",
@@ -161,8 +162,7 @@
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.extensions.resident_adapter",
-        "app.runtime.persistence.model_registration",
-        "app.schemas"
+        "app.runtime.persistence.model_registration"
       ],
       "module": "app.api.v1.routes.agents",
       "path": "backend/app/api/v1/routes/agents.py",
@@ -213,9 +213,9 @@
         "app.domains.identity.dependencies",
         "app.domains.identity.models",
         "app.domains.social.exceptions",
+        "app.domains.social.schemas.feed",
         "app.runtime.persistence.model_registration",
-        "app.runtime.social.world_feed_search",
-        "app.schemas"
+        "app.runtime.social.world_feed_search"
       ],
       "module": "app.api.v1.routes.world_character_setup",
       "path": "backend/app/api/v1/routes/world_character_setup.py",
@@ -12802,6 +12802,7 @@
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.schemas",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
         "app.domains.characters.service.image_generation",
@@ -12827,8 +12828,7 @@
         "app.runtime.extensions.resident_adapter",
         "app.runtime.persistence.model_registration",
         "app.runtime.resident.execution",
-        "app.runtime.routines.activity_policy",
-        "app.schemas"
+        "app.runtime.routines.activity_policy"
       ],
       "module": "app.runtime.characters.creator",
       "path": "backend/app/runtime/characters/creator.py",
@@ -12849,6 +12849,7 @@
         "uuid"
       ],
       "imports": [
+        "app.api.schemas.first_greeting",
         "app.config",
         "app.core.active_hours",
         "app.core.image_generation",
@@ -12865,6 +12866,7 @@
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.repository.image_settings",
+        "app.domains.characters.schemas",
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.image_settings",
@@ -12880,11 +12882,13 @@
         "app.domains.identity.contracts",
         "app.domains.identity.models",
         "app.domains.identity.repository.credentials",
+        "app.domains.identity.schemas",
         "app.domains.identity.service.character_credentials",
         "app.domains.identity.service.demo_access",
         "app.domains.identity.service.profile",
         "app.domains.local_bot.constants",
         "app.domains.local_bot.models",
+        "app.domains.local_bot.schemas",
         "app.domains.local_bot.service.key_management",
         "app.domains.memory.models.daypart",
         "app.domains.operations.service.maintenance",
@@ -12904,7 +12908,9 @@
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas",
         "app.domains.routines.schemas.first_greeting",
+        "app.domains.routines.schemas.runs",
         "app.domains.routines.schemas.tendency",
         "app.domains.routines.service.activity_logs",
         "app.domains.routines.service.activity_management",
@@ -12925,6 +12931,7 @@
         "app.domains.social.models.posts",
         "app.domains.social.repository.media",
         "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community",
         "app.domains.social.service.activity_results",
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.posts",
@@ -12951,8 +12958,7 @@
         "app.runtime.social.image_generation",
         "app.runtime.social.timeline",
         "app.runtime.world_characters.cleanup",
-        "app.runtime.world_characters.queries",
-        "app.schemas"
+        "app.runtime.world_characters.queries"
       ],
       "module": "app.runtime.characters.management",
       "path": "backend/app/runtime/characters/management.py",
@@ -14865,6 +14871,7 @@
         "app.credentials",
         "app.domains.character_lore.service.documents",
         "app.domains.character_lore.service.presentation",
+        "app.domains.characters.schemas",
         "app.domains.characters.service.profile",
         "app.domains.identity.models",
         "app.domains.memory.models.daypart",
@@ -14909,6 +14916,7 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.repository.inbox",
         "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community",
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.resident_affordances",
         "app.domains.world_characters.contracts.runtime_modes",
@@ -14926,8 +14934,7 @@
         "app.runtime.social.image_generation",
         "app.runtime.social.langgraph_actions",
         "app.runtime.social.observations",
-        "app.runtime.social.subjective_composition",
-        "app.schemas"
+        "app.runtime.social.subjective_composition"
       ],
       "module": "app.runtime.resident.langgraph",
       "path": "backend/app/runtime/resident/langgraph.py",
@@ -16390,23 +16397,24 @@
     {
       "external_imports": [],
       "imports": [
+        "app.api.schemas.first_greeting",
         "app.domains.character_lore.schemas",
+        "app.domains.characters.schemas",
         "app.domains.chat.schemas",
         "app.domains.identity.schemas",
         "app.domains.local_bot.schemas",
         "app.domains.operations.schemas",
         "app.domains.relationships.schemas",
         "app.domains.routine_posts.schemas",
+        "app.domains.routines.schemas",
+        "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.runs",
+        "app.domains.social.schemas.activity",
         "app.domains.social.schemas.community",
         "app.domains.social.schemas.feed",
         "app.domains.tree.schemas",
-        "app.schemas.agents",
-        "app.schemas.characters",
-        "app.schemas.social_memory",
-        "app.schemas.world_activity_runtime",
-        "app.schemas.world_character_setup",
-        "app.schemas.worlds"
+        "app.domains.world_characters.schemas.setup",
+        "app.domains.worlds.schemas"
       ],
       "module": "app.schemas",
       "path": "backend/app/schemas/__init__.py",
@@ -16424,13 +16432,12 @@
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.local_bot.schemas",
+        "app.domains.media.schemas",
         "app.domains.routines.schemas",
         "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
-        "app.providers.registry",
-        "app.schemas.characters",
-        "app.schemas.media_security"
+        "app.providers.registry"
       ],
       "module": "app.schemas.agents",
       "path": "backend/app/schemas/agents.py",
@@ -16476,44 +16483,6 @@
       ],
       "module": "app.schemas.messages",
       "path": "backend/app/schemas/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.relationships.schemas"
-      ],
-      "module": "app.schemas.social_memory",
-      "path": "backend/app/schemas/social_memory.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.routines.schemas"
-      ],
-      "module": "app.schemas.world_activity_runtime",
-      "path": "backend/app/schemas/world_activity_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sys"
-      ],
-      "imports": [
-        "app.domains.world_characters.schemas.setup"
-      ],
-      "module": "app.schemas.world_character_setup",
-      "path": "backend/app/schemas/world_character_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.worlds.schemas"
-      ],
-      "module": "app.schemas.worlds",
-      "path": "backend/app/schemas/worlds.py",
       "wildcard_imports": []
     },
     {

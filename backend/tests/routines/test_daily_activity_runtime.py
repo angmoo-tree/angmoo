@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
-from app import schemas
+import app.domains.routines.schemas as schemas
 from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps

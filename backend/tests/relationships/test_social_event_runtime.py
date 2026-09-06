@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.social.schemas.feed as schemas
 from model_fixture_support import models
 from app.runtime.social.observations import observe_source
 from app.models import Base

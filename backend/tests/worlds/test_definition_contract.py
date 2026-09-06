@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.worlds.schemas as schemas
 from model_fixture_support import models
 from app.models import Base
 from app.domains.worlds.service import definition as world_definitions
