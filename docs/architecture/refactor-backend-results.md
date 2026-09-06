@@ -2847,3 +2847,16 @@ Backend ARCHITECTURE는 기여자가 업무와 역할, 실제 호출자, Session
 다섯 파일은 byte-identical 이동이다. LocalBot OpenAPI 검사는 폴더 깊이에 따라 `Path(__file__).resolve().parents[2]`만 `parents[3]`으로 변경해 같은 저장소의 `frontend/public/openapi.json`을 읽는다. 이 정확한 물리 경로 보정을 복원하면 여섯 전체 모듈 AST가 원본과 같으며, 최상위 함수·class55개와 기존 assertion107개·decorator·fixture·provider/Session 호출은 모두 유지된다.
 
 이동 전후 실제 수집은 **65 → 65**, 일대일이며 신규·누락·중복0이다. 새 위치의 전체 영향 **65 passed / 5.52초**, 원래 체크포인트/후속 증거의 해당 assertion·suppression 검사0, 승인 public604 보존과 현재 전체 public2683 수집도 통과했다. 기존 split의 직접 소비자29개·행위 node381개는 정확한 새 경로로 연결했다. CI의 현재 literal 소비는 없고 backend 전체 suite가 새 파일을 수집한다. P8-L-B의 현행 검증 명령은 실제 Chat/Common 테스트 경로와 backend 실행 디렉터리를 사용한다. 제품 코드·feature inventory·원본 baseline/checkpoint/additions·동결 자료는 변경하지 않았으며 최종 통합/stock/Hosted Gate는 부모가 진행한다.
+
+
+## AR-B8 통합 준비 — 전체 백엔드와 실제 Host Tauri 기동/종료
+
+2026-09-06 13:50 KST에 확인한 깨끗한 원본 후보 `d88d70a92ada04864b3cbbd8b4940215b130ebc8`의 전체 backend는 **2663 PASS / 기존 환경 조건 SKIP22 / warnings28 / 1118.01초**다. 앞선 준비 후보의 전체 실패5개는 실제 이전 경로·현재 ER0·실제50개 AgentRuns 소유 목록을 수정한 후 이 전체 실행에서 재발하지 않았다. 원래 assertion을 제거하거나 전체 수집을 줄여 통과시키지 않았다.
+
+같은 d88 후보의 공식 `scripts/dev/desktop-dev.ps1 -NoWatch`를 새 Docker project `angmoo-ar-b8-validation`에서 실행했다. 26개 preflight, 정확한 후보 commit과 contributor SQLite/Ladybug 진단, scheduler/projector health, backend/frontend container 및 HTTP 준비를 통과하고 Tauri debug 앱을 실제로 열었다. 홈 shell과 새 환경의 owner 연결 안내를 확인했다. 이 실행은 앱 기동 확인이며 로그인 후 기능 조작 또는 실제 AI 품질 검증으로 기록하지 않는다.
+
+검증용 창을 Alt+F4로 닫은 뒤 창과 Angmoo/sidecar 프로세스가 모두 없어졌고, 공식 wrapper가 exit0 및 `stopped cleanly`로 종료했다. 종료 전후 설치형 제품 데이터 fingerprint는 같았고, Docker container2개는 healthy, 새 검증용 named volume은 보존됐다. 종료 로그의 WebView class unregister 오류1412는 함께 남기며 정상 wrapper 종료와 실제 프로세스 부재를 별도로 확인했다. 설치형 사용자 앱을 교체하거나 데이터 migration을 수행한 결과가 아니다.
+
+후속 통합 `32ef4065`에서 G07 원본 e724의 여섯 테스트 이동을 합쳐 **65 PASS / 11.98초**를 확인했다. 현재 읽기 지도는 37항목의 backend 경로6339개와 실제 직접 import edge7972개를 확인했다. 원래 entrypoint/test node/보존 계약/실행 경로 및 Device Home VERIFIED 원문, frontend 상태, 이전 조사 문서 본문은 그대로다. 경계1064/3964/legacy0, L4, ER0, 현재 Memory batch와 deferred inventory도 통과했다.
+
+이 기록은 준비 후보의 실행 증거다. 순차 PR의 원본 도입 원장과 stock, AR-B8-A/G5/B8-B 최종 후보의 CI·Docker/Host Tauri·installer 및 post-merge 결과는 해당 정확한 후보에서 별도로 닫는다. §8.3·AR-X·P8-L-S 및 Release/Production 완료를 뜻하지 않는다.
