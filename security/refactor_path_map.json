@@ -6117,9 +6117,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -6341,9 +6340,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -6383,9 +6381,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -6425,9 +6422,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -6467,9 +6463,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7059,9 +7053,39 @@
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/access.py",
+            "backend/app/domains/characters/service/image_generation.py",
+            "backend/app/domains/characters/service/media.py",
+            "backend/app/domains/characters/service/state.py",
+            "backend/app/domains/chat/service/generation.py",
+            "backend/app/domains/chat/service/profiles.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/social/service/agent_tool_actions.py",
+            "backend/app/domains/social/service/complete_tick.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/resident_affordances.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/lifecycle.py",
+            "backend/app/domains/world_characters/service/membership.py",
+            "backend/app/domains/world_characters/service/owner_identity.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py",
+            "backend/app/runtime/character_lore.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/graph_projection/diagnostic_references.py",
+            "backend/app/runtime/resident/context_references.py",
+            "backend/app/runtime/resident/identity_references.py",
+            "backend/app/runtime/resident/langgraph_queries.py",
+            "backend/app/runtime/resident/writing.py",
+            "backend/app/runtime/social/image_job_worker.py",
+            "backend/app/runtime/social/manual_feed_references.py",
+            "backend/app/runtime/social/source_references.py",
+            "backend/app/runtime/social/world_feed_queries.py",
+            "backend/app/runtime/tree.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7100,9 +7124,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7141,9 +7163,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7193,9 +7213,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7234,9 +7252,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -7275,9 +7291,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -7317,9 +7332,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -52540,9 +52554,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -52610,7 +52623,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -52640,7 +52653,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -52764,9 +52777,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -52806,9 +52818,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -52848,9 +52859,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -52890,9 +52900,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -52935,7 +52943,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -52947,7 +52955,7 @@
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -53455,7 +53463,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -53485,7 +53493,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -53515,7 +53523,7 @@
           "test_nodes": [
             "tests/social/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/social/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -53524,9 +53532,39 @@
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/access.py",
+            "backend/app/domains/characters/service/image_generation.py",
+            "backend/app/domains/characters/service/media.py",
+            "backend/app/domains/characters/service/state.py",
+            "backend/app/domains/chat/service/generation.py",
+            "backend/app/domains/chat/service/profiles.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/social/service/agent_tool_actions.py",
+            "backend/app/domains/social/service/complete_tick.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/resident_affordances.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/lifecycle.py",
+            "backend/app/domains/world_characters/service/membership.py",
+            "backend/app/domains/world_characters/service/owner_identity.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py",
+            "backend/app/runtime/character_lore.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/graph_projection/diagnostic_references.py",
+            "backend/app/runtime/resident/context_references.py",
+            "backend/app/runtime/resident/identity_references.py",
+            "backend/app/runtime/resident/langgraph_queries.py",
+            "backend/app/runtime/resident/writing.py",
+            "backend/app/runtime/social/image_job_worker.py",
+            "backend/app/runtime/social/manual_feed_references.py",
+            "backend/app/runtime/social/source_references.py",
+            "backend/app/runtime/social/world_feed_queries.py",
+            "backend/app/runtime/tree.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -53565,9 +53603,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -53606,9 +53642,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -53658,9 +53692,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -53699,9 +53731,7 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -53740,9 +53770,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -53782,9 +53811,8 @@
             "backend/app/runtime/social/world_feed_queries.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
             "backend/app/runtime/resident/langgraph.py",
-            "backend/app/services/tree.py"
+            "backend/app/domains/characters/service/profile.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -103259,7 +103287,8 @@
           "new": "backend/app/cruds/agents.py::get_character_credential",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/character_lore.py"
+            "backend/app/cruds/agents.py",
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -104767,7 +104796,8 @@
           "new": "backend/app/cruds/agents.py::get_character_credential",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/character_lore.py"
+            "backend/app/cruds/agents.py",
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -106277,7 +106307,8 @@
           "new": "backend/app/cruds/agents.py::get_character_credential",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/character_lore.py"
+            "backend/app/cruds/agents.py",
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -113285,14 +113316,10 @@
           "old": "backend/app/services/character_lore.py::APP_TIMEZONE",
           "new": "backend/app/domains/character_lore/constants.py::APP_TIMEZONE",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/agent_writing.py",
-            "backend/app/services/community.py",
-            "backend/app/services/langgraph_resident.py",
             "backend/app/services/local_bot.py",
             "backend/app/services/local_bot_quota.py",
-            "backend/app/services/post_image_generation.py",
             "backend/app/runtime/characters/management.py",
             "backend/app/domains/worlds/service/scheduling.py",
             "backend/app/domains/routines/service/tick_schedule.py",
@@ -113409,9 +113436,10 @@
           "new": "backend/app/domains/character_lore/contracts.py::LoreRetrievalResult",
           "direct_consumers": [
             "backend/app/services/agent_writing.py",
-            "backend/app/services/langgraph_resident.py",
             "backend/app/domains/character_lore/service/documents.py",
-            "backend/app/domains/character_lore/service/presentation.py"
+            "backend/app/domains/character_lore/service/presentation.py",
+            "backend/tests/routines/test_resident_graph.py",
+            "backend/tests/routines/test_tendency.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -113520,7 +113548,7 @@
           "old": "backend/app/services/character_lore.py::has_ready_lore_chunks",
           "new": "backend/app/domains/character_lore/service/documents.py::has_ready_lore_chunks",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -113542,7 +113570,8 @@
           "old": "backend/app/services/character_lore.py::retrieve_lore_for_query_tracked",
           "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_query_tracked",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/runtime/resident/langgraph.py",
+            "backend/tests/character_lore/test_documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -113598,7 +113627,9 @@
           "new": "backend/app/domains/character_lore/service/presentation.py::format_lore_prompt_context",
           "direct_consumers": [
             "backend/app/services/agent_writing.py",
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/runtime/resident/langgraph.py",
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/character_lore/test_documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -113610,7 +113641,8 @@
           "new": "backend/app/domains/character_lore/service/documents.py::mark_lore_chunks_used",
           "direct_consumers": [
             "backend/app/services/agent_writing.py",
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/runtime/resident/langgraph.py",
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -114186,17 +114218,12 @@
           "old": "backend/app/services/lore_parser_quota.py::_aware_utc",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/app/services/agent_activity_policy.py",
             "backend/app/services/agent_runs.py",
             "backend/app/services/community_abuse_quota.py",
             "backend/app/services/local_bot_quota.py",
-            "backend/app/services/world_feed_runtime.py",
-            "backend/app/services/world_feed_search.py",
             "backend/app/runtime/characters/management.py",
             "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
             "backend/app/runtime/relationships/sqlalchemy_social_event.py",
-            "backend/app/runtime/social/sqlalchemy_inbox.py",
             "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
             "backend/app/domains/world_packages/service/staging.py",
             "backend/app/domains/world_packages/storage/staging.py",

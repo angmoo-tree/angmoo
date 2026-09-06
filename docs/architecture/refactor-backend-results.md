@@ -2393,3 +2393,9 @@ B7 실제 업무 source `274f90e7` 이후 원본 signed `f52dbdbc`→`f7f303d9`�
 Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연결했다. `f52dbdbc`는 파일13개·신규5 nodes, `f7f303d9`는 파일11개·신규0 nodes, `c4a0a6a2`는 파일5개·신규0 nodes, `9cd5eb14`는 파일7개·신규4 nodes다. 원래 수집기의 도입 판정과 변경하지 않은 `addition_errors`로 각 Git blob·최초 도입·단언·suppression·ancestor를 검증한 뒤 **162개 불변 prefix → 166개**로 append했다. `d8f5b446`과 후보 `7bc89bf0`의 기존 원장도 동일하다. 현재 후보에서 기준 자료를 재수집하거나 원본 단언을 변경하지 않았다.
 
 현재 소스 목록 **1056 modules / 3925 internal edges / 3018 external imports**, 구조 경계 **legacy103**, deferred22, L4 parity99, OSS·secret allowlist metadata25·launcher6명령/2서비스·desktop installer 계약은 통과했다. 공식 stock/API·ORM/node와 전체 backend는 이 metadata를 고정한 후보에서 이어서 수행한다. Hosted CI·설치·post-merge 및 G5/G06/B8-B 최종 판정은 아직 별도 단계다.
+
+Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 **2,437 nodes**가 일치했고 API·ORM·원본 source·단언·suppression 손실이 없었다. 실패 항목은 삭제된 옛 파일과 테스트를 가리키는 현재 지도였다. 실제 정의·import·호출 위치를 대조해 split symbol 34개 행의 사라진 소비 경로를 현재 경로로 연결하고, 기존 node map에 따라 Tree 검사 참조 7개와 K03의 Lore HTTP 경로 1개를 수정했다. 기존 유효한 탐색 경로와 원본 source/symbol/node 이전 증거는 보존했고, 호출되지 않는 보존 함수에 새 소비자를 만들어 넣지 않았다.
+
+고정한 `ac8829f1`에서 backend 전체 첫 실행은 **2,413 PASS / 22 SKIP / 2 FAIL / 기존 warnings27 / 1,197.78초**다. 실패는 sidecar health/shutdown subprocess의 원래 30초 제한 초과와 B7에서 빠진 `app.core.context_clipping`의 현재 core 목록 한 항목이었다. 후자는 선행 보정 `ef0fac3f`와 동일한 `keep / AR-B7-DAYPART` 항목만 추가했다. sidecar 제품 코드·원래 30초 제한·15초 watchdog·검사 단언을 변경하지 않은 재검증에서 sidecar/L0/Daypart **11 PASS / 15.59초**를 확인했다. 시간 초과의 구체 원인을 확정하거나 최초 전체 실행을 전부 통과한 것으로 바꾸어 기록하지 않는다.
+
+현재 지도 보정 후 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`는 **PR #258 1,867 / PR #263 1,907 / protected 2,437 = current 2,437 / items37 PASS**다. 제품·테스트·검사기·동결 기준 자료 및 이미 연결한 원장166개는 이 보정에서 변경하지 않았다. 로컬 검증과 재검증 결과를 갖춘 Tree/Lore 순차 후보이며, Hosted CI·설치·post-merge와 후속 G5/G06/B8-B 완료 판정은 별도로 수행한다.

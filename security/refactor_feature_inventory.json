@@ -708,7 +708,7 @@
         "backend/alembic/versions/20260604_0037_character_lore_pgvector.py",
         "backend/alembic/versions/20260726_0066_lore_parser_leases.py",
         "backend/alembic/versions/20260807_0070_world_foundation.py",
-        "backend/app/api/v1/routes/character_lore.py",
+        "backend/app/domains/character_lore/router.py",
         "backend/app/core/response_schemas.py",
         "backend/app/domains/characters/__init__.py",
         "backend/app/domains/characters/contracts.py",
