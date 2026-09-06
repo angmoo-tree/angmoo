@@ -7752,7 +7752,6 @@
         "backend/app/api/v1/main.py",
         "backend/app/api/v1/public.py",
         "backend/app/main.py",
-        "backend/app/public_main.py",
         "backend/app/runtime/desktop_sidecar.py"
       ],
       "target_paths": [
@@ -7802,7 +7801,8 @@
         "backend/tests/runtime/test_app_factory_ownership.py",
         "backend/tests/runtime/test_asgi_preservation.py",
         "backend/tests/runtime/test_canonical_bootstrap.py",
-        "backend/tests/relationships/test_activity_proposals.py"
+        "backend/tests/relationships/test_activity_proposals.py",
+        "backend/tests/runtime/test_public_factory_retirement.py"
       ],
       "test_nodes": [
         "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
@@ -8004,7 +8004,7 @@
         "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
-      "disposition": "AR-B8-G06-A1 actual factories unified; A2 product launchers/ASGI/tests/CI/current inventories use main and the moved public export is checked against frozen API contracts. Only temporary public_main and dedicated comparison tests remain. G5, latest B4/B5/B7 callbacks, no-file candidate and fresh bundle/installer checks still pending.",
+      "disposition": "Single actual main factory with full/public profiles; temporary public_main facade removed after exact consumers and frozen facade/test proof. Final merged runtime/stock/CI/new bundle installation verification remains pending.",
       "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
       "backend_status": "MAPPED"
     },
@@ -10667,7 +10667,6 @@
         "Dockerfile.backend",
         "backend/app/core/redaction.py",
         "backend/app/main.py",
-        "backend/app/public_main.py",
         "backend/app/runtime/contributor_backend.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/logging_config.py",

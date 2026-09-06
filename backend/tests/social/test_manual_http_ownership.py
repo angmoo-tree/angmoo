@@ -14,7 +14,7 @@ from app.runtime.social.composition import configure_social_runtime
 
 def test_manual_http_factories_share_request_session_without_constructor_io():
     from app.main import create_app as hosted
-    from app.public_main import create_app as local
+    from app.main import create_public_app as local
 
     engine = create_engine("sqlite://")
     statements = []

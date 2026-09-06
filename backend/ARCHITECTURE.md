@@ -108,15 +108,17 @@ backend/
 
 `runtime`, `integrations`, `credentials`는 Angmoo 실행에 필요한 영역입니다. 참조 저장소와 폴더 이름을 맞추기 위해 실행 기능을 없애지 않습니다. `templates`와 `requirements`는 조건부이며, 이번 구조 전환에서 현재 `pyproject.toml`·`uv.lock`을 다른 의존성 관리 방식으로 교체하지 않습니다.
 
-현재 `public_main.py`는 G06 전환 중의 호환 export만 소유합니다. Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 profile의 계약은 `main.py`의 단일 앱 생성 구현에 통합됐으며, 실제 sidecar·contributor·일반 테스트·CI 계약 검사와 현재 runtime inventory는 main을 참조합니다. 검증 후 호환 파일을 제거하고 그 파일이 없는 후보에서 다시 실행을 확인합니다. 이 목표를 현재 구현 완료로 읽지 않으며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
+Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 profile의 계약은 `main.py`의 단일 앱 생성 구현에 있습니다. scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인이 담당합니다.
 
-### G06 앱 생성의 현재 구현과 호환 경로
+### G06 앱 생성과 실행 경로
 
 앱과 lifespan의 실제 구현은 `app/main.py`의 `create_app`과 `create_lifespan` 한곳에 있습니다. `create_app(profile="full")`은 기존 기본 `/health` 응답과 구성 요소 기본값을 유지하고, `create_public_app`은 같은 함수에 `profile="public"`을 지정한 adapter입니다. 후자는 Local의 readiness 응답과 명시적 `RuntimeConfig` 연결을 보존합니다. `create_public_lifespan`도 같은 lifecycle 함수에 기존 public의 미구성 component 기본값을 전달합니다. 두 경로가 서로 다른 DB를 가져야 하는 경우 각 명시적 runtime 구성은 계속 별도로 만듭니다.
 
-`public_main.py`에는 별도 factory·오류 class·초기화 본문이 없고, 같은 구현과 public profile을 가리키는 임시 export만 있습니다. 모듈의 앱 객체는 미디어 디렉터리를 만들지 않으며, 명시적인 factory 호출의 `prepare_media_directories=True` 기본값은 유지합니다. 설정 복원, Memory 종료, World Package 복구와 같은 실행 연결은 이 단일 factory가 기존 runtime 소유 구현을 호출합니다.
+개발 ASGI는 `app.main:public_app`, 공식 sidecar/contributor는 명시적 RuntimeConfig를 주는 `create_public_app`을 사용합니다. `app.main.app`은 full profile, `app.main.public_app`은 public profile입니다. 전환 중 사용한 `public_main.py`는 제거했습니다. 이전 public factory를 소비하던 코드는 `main.create_public_app`에 연결합니다. 모듈 전체를 `main`으로 치환하고 기본 `create_app()`을 호출하면 full profile이 되므로 지원 profile에 맞는 export를 사용합니다.
 
-이 단계는 G06의 첫 실제 통합입니다. 개발 ASGI는 `app.main:public_app`, 공식 sidecar/contributor는 명시적 RuntimeConfig를 주는 `create_public_app`을 사용합니다. 임시 호환 파일과 삭제 전 비교 검사는 유지하며, 새 bundle/installer 검증과 호환 파일 제거는 아직 남아 있습니다. B4/B5/B7의 후속 서비스 callback 및 G5의 단일 Base/database 합류도 별도 통합 검증 대상입니다. `public_main.py`가 없는 최종 후보의 검증 전에는 G06 완료로 보지 않습니다.
+모듈의 앱 객체는 미디어 디렉터리를 만들지 않으며, 명시적인 factory 호출의 `prepare_media_directories=True` 기본값은 유지합니다. 설정 복원, Memory 종료, World Package 복구와 같은 실행 연결은 이 단일 factory가 기존 runtime 소유 구현을 호출합니다. G5의 `app.database`와 명시적 모델 등록 조립을 사용하며 import만으로 DB engine을 생성하지 않습니다.
+
+임시 alias 비교 검사는 보호된 원래 Git source와 실제 factory/default/profile을 검증한 뒤 파일 부재 검사로 승계했습니다. 실제 HTTP 응답, lifespan 순서·실패 cleanup 및 cold subprocess 안의 lazy DB·미디어·DBAPI 차단 검사는 계속 남습니다. 제거 소스의 집중 검증과 최종 병합 후보의 전체/Hosted CI·새 bundle·installer 검증은 구분하며, 후자까지 확인해야 G06을 완료합니다.
 
 ## 2. 도메인 안에서 코드 찾기
 
@@ -367,7 +369,7 @@ Angmoo는 Docker의 브라우저 실행과 Windows 설치 앱에서 같은 백�
 
 | 영역 | 담당하는 일 |
 | --- | --- |
-| `main.py` | 단일 앱 생성과 지원 profile의 router·오류·startup/shutdown 연결. Local 구현은 통합됐으며 `public_main.py`는 참조 전환·검증 후 제거할 임시 export |
+| `main.py` | 단일 앱 생성과 지원 profile의 router·오류·startup/shutdown 연결. Local 구현을 포함한 full/public profile을 소유하며 임시 `public_main.py` 제거 |
 | `runtime` | 설정·DB·서비스 구성, scheduler·worker·lease·종료·복구 |
 | `domains/runtime` | 현재 runtime 상태·진단 등 업무 계약; worker를 실행하는 폴더와 구분 |
 | `integrations`, `providers` | 실제 통신, SDK별 요청·응답·오류·usage 변환, fake 제공 |

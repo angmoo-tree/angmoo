@@ -26996,7 +26996,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27038,7 +27038,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27066,7 +27066,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27080,7 +27080,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27164,7 +27164,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27206,7 +27206,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27234,7 +27234,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -27248,7 +27248,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -33152,7 +33152,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -33194,7 +33194,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -33222,7 +33222,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -33236,7 +33236,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -42978,8 +42978,7 @@
       "direct_consumers": [
         "backend/app/runtime/characters/management.py",
         "backend/app/domains/characters/router.py",
-        "backend/app/main.py",
-        "backend/app/public_main.py"
+        "backend/app/main.py"
       ],
       "preserved": "Same owner admission/error messages/key/provider model decision/quota read timing/seed file-delete-write-commit sequence. Actual owner services and five routes; runtime binds keys and same-Session Social query; shared prompt policy moved unchanged to core."
     },
@@ -49677,7 +49676,7 @@
           "old": "backend/app/domains/runtime/application/single_backend_components.py::component_observations",
           "new": "backend/app/domains/runtime/service/components.py::component_observations",
           "direct_consumers": [
-            "backend/app/public_main.py",
+            "backend/app/main.py",
             "backend/app/runtime/single_backend_components.py"
           ],
           "test_nodes": [
@@ -50863,7 +50862,7 @@
       ],
       "direct_consumers": [
         "backend/app/domains/social/ports/search_index.py",
-        "backend/app/public_main.py",
+        "backend/app/main.py",
         "backend/app/runtime/contributor_backend.py",
         "backend/app/runtime/resident/scheduler.py",
         "backend/app/runtime/search/social_projection.py",
@@ -88409,6 +88408,38 @@
       "same_session_evidence": "Original15 methods +retained25 whole AST and extracted query equal after exact callback/type/self restoration. New SQLite verifies attached ordered records, Character/run window scope, malformed payload/boolean ID filtering, pending newest invalid payload without fallback, autoflush and caller rollback.",
       "binding_followup": "Parent maps current LG read callers to runtime/resident/langgraph.py and activity policy build to runtime.resident.activity_policy; no duplicated policy source.",
       "remaining": "Community25 history-note diagnostics/complete-tick/state functions, G07, aliases and full B5/capture/Hosted pending."
+    },
+    "AR-B8-G06-B": {
+      "reason": "Retire only the verified pure public_main facade; preserve the actual main factory, public profile and all active consumer behavior.",
+      "source_to_destination": {
+        "backend/app/public_main.py": "backend/app/main.py"
+      },
+      "exact_exports": {
+        "app": "public_app",
+        "create_app": "create_public_app",
+        "create_lifespan": "create_public_lifespan",
+        "lifespan": "public_lifespan"
+      },
+      "direct_consumers": [
+        "backend/tests/local_bot/test_http_workflows.py",
+        "backend/tests/relationships/test_diagnostics_http_ownership.py",
+        "backend/tests/social/test_http_ownership.py",
+        "backend/tests/social/test_manual_http_ownership.py",
+        "backend/tests/character_lore/test_lore_role_contracts.py",
+        "backend/tests/tree/test_role_contracts.py",
+        "backend/tests/runtime/test_app_factory_ownership.py"
+      ],
+      "source_proof": "Original source/test snapshots stay immutable. Old file protection is required from sparse historical records; exact signed G06 90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7 -> G5 924a8361867bd0228943082227221d78507f9027 ancestry, DCO, G06 test introduction, byte-identical pure facade and actual factory/default/profile are independently checked from their Git objects. Existing-file revisions are not fabricated as additions.",
+      "assertion_retirement": "Only the exact original five facade identity assertions become one actual old-file absence assertion plus explicit public/default/component checks. The shared actual factory identity, full/public API, lifecycle ordering and failure cleanup assertions remain. The single embedded alias assertion receives the same absence proof.",
+      "subprocess_proof": "Original single literal source must be the actual sys.executable -c input; compare its entire AST after exact imports/exports/alias retirement, then compare the full outer subprocess and whole dedicated test AST. No unrelated statement/assertion/order/input/timeout or import shadowing is accepted.",
+      "not_active_consumers": [
+        "Historical frozen contracts and source/symbol map origins",
+        "Negative import fixtures and sys.modules absence guards",
+        "Original app.public_main logger identity",
+        "test_config_paths local name for an actual app.main import",
+        "Chat parametrized historical node IDs"
+      ],
+      "remaining": "Parent sequential source introduction capture, final merged full/stock/Hosted CI and fresh bundle/installer validation; deletion source alone does not close G06/B8."
     }
   },
   "asgi_exports": {
@@ -88432,5 +88463,6 @@
   "retired_model_facades": {
     "app.models.auth": "app.domains.identity.models",
     "app.models.credentials": "app.domains.identity.models"
-  }
+  },
+  "retired_public_main": true
 }

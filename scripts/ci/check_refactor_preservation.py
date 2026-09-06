@@ -11,11 +11,18 @@ from collections import Counter
 from functools import lru_cache
 import hashlib
 import importlib
+import importlib.util
 import json
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import sys
+
+_retirement_spec = importlib.util.spec_from_file_location(
+    "public_factory_retirement", Path(__file__).with_name("public_factory_retirement.py")
+)
+public_factory_retirement = importlib.util.module_from_spec(_retirement_spec)
+_retirement_spec.loader.exec_module(public_factory_retirement)
 
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
@@ -124,7 +131,7 @@ def _asgi_factory(source: str, export: str) -> str:
 
 
 def validated_asgi_moves(moves: dict[str, str], files: dict[str, str], snapshots: list[dict],
-                         root: Path = ROOT) -> dict[str, str]:
+                         root: Path = ROOT, public_retirement: dict | None = None) -> dict[str, str]:
     """Admit only protected app exports moved to their actual mapped Python owner."""
     if not isinstance(moves, dict):
         raise ValueError("ASGI moves must be a module:export mapping")
@@ -144,6 +151,11 @@ def validated_asgi_moves(moves: dict[str, str], files: dict[str, str], snapshots
         destination = (root / new_path).resolve()
         if not destination.is_relative_to(root.resolve()) or not destination.is_file():
             raise ValueError("ASGI target source is missing or unsafe")
+        if public_retirement is not None and old == "app.public_main:app":
+            if target != "app.main:public_app":
+                raise ValueError("retired public ASGI export must use the verified public profile")
+            original = public_retirement["frozen_main"]
+            old_export = "public_app"
         if _asgi_factory(original, old_export) != _asgi_factory(destination.read_text(encoding="utf-8-sig"), new_export):
             raise ValueError("ASGI move must retain the same actual factory through explicit aliases")
         accepted[old] = target
@@ -604,9 +616,10 @@ def retired_model_assertion(fragment: str, retirements: dict[str, str], literals
 def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict[str, str], root: Path = ROOT,
                      symbols: dict[str, str] | None = None,
                      asgi_moves: dict[str, str] | None = None,
-                     model_retirements: dict[str, str] | None = None) -> list[str]:
+                     model_retirements: dict[str, str] | None = None,
+                     public_retirement: dict | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
-    root_cache, frozen_root_cache = {}, {}
+    root_cache, frozen_root_cache, frozen_text_cache = {}, {}, {}
     literals = path_literals(files)
     symbols = symbols or {}
     for snapshot in snapshots:
@@ -652,8 +665,15 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
             if blob and (old_path, blob) not in frozen_root_cache:
                 text = git_bytes("cat-file", "blob", blob, root=root).decode("utf-8-sig")
                 frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
+                frozen_text_cache[(old_path, blob)] = text
             old_roots = frozen_root_cache.get((old_path, blob), {}).get(old_function, {})
             new_roots = root_cache.get(new_path, {}).get(new_function, {})
+            if public_retirement is not None and "backend/" + old_path == public_factory_retirement.TEST:
+                if new_path != old_path or new_function != old_function or not blob:
+                    raise ValueError("public factory retirement requires its protected exact test location")
+                expected = public_factory_retirement.required_fragments(
+                    expected, frozen_text_cache[(old_path, blob)], old_function, public_retirement
+                )
             required = Counter(normalized_assertion(retired_model_assertion(value, model_retirements or {}, literals), literals, asgi_moves, roots=old_roots) for value in expected)
             # An unchanged synthetic legacy-path fixture and a migrated real
             # path assertion are equivalent under the same exact move map.
@@ -925,7 +945,11 @@ def main() -> int:
         targets = mapped_targets(approved, moves["test_nodes"], nodes=True,
                                  node_snapshots=[baseline["test_nodes"], *(snapshot["test_nodes"] for snapshot in snapshots)])
         file_targets = mapped_targets(sources, moves["files"])
-        asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots])
+        public_retirement = public_factory_retirement.validate(
+            moves.get("retired_public_main", False), file_targets, [baseline, *snapshots], ROOT, git_bytes
+        )
+        asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
+                                        public_retirement=public_retirement)
         errors.extend(check_sources(sources, moves["files"]))
         errors.extend(check_split_evidence(moves, [baseline, *snapshots]))
         errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets))
@@ -937,7 +961,7 @@ def main() -> int:
             moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots])
         errors.extend(check_assertions(snapshots, targets, file_targets,
                                       symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
-                                      model_retirements=model_retirements))
+                                      model_retirements=model_retirements, public_retirement=public_retirement))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
