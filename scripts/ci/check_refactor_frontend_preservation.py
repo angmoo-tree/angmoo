@@ -75,7 +75,8 @@ def classification(path: str) -> tuple[str, str]:
 
 def committed_files(root: Path = ROOT) -> dict[str, bytes]:
     archive = subprocess.check_output(
-        ["git", "archive", "--format=tar", BASE, "frontend", "browser-tests"], cwd=root,
+        ["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf",
+         "archive", "--format=tar", BASE, "frontend", "browser-tests"], cwd=root,
     )
     with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
         return {member.name: tar.extractfile(member).read()

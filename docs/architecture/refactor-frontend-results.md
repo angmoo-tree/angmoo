@@ -51,6 +51,13 @@ real-provider product verification, Release and Production remain separate.
 - Next production build PASS. Introduction commit
   `74ce61a2269bf48b9d084af587597199574345e3` is recorded in the append-only
   ledger: **5 new source files / 31 test nodes**.
+- PR #291 first Linux architecture check failed because Windows `git archive`
+  honored `core.autocrlf=true`. Read the same pinned Git commit with explicit
+  `core.autocrlf=false` and `core.eol=lf`; correct the initial unmerged checkpoint's
+  308 text fingerprints from that commit, with all 324 paths and binary assets
+  unchanged. This does not recapture current product code after migration.
+  Both host configurations are now tested against `git show` bytes:
+  **33 preparation tests passed**. Tauri static build also PASS locally.
 
 ## How to run the added guard
 

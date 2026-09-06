@@ -4,62 +4,62 @@
   "purpose": "Immutable PR290 frontend stock; paths move in refactor_path_map, not in this checkpoint.",
   "files": {
     "browser-tests/fixtures/visual-corpus.json": {
-      "sha256": "213753bc455d948339edac7fe898b2370b99ab4b7d96c223384e999d15adce0b",
+      "sha256": "f5bc877a1b0158dfeb8f32bf2221988cbcd0bac53e3c9c55c3ff9d4170379cba",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/memory-batch-fixture.ts": {
-      "sha256": "683016c33eaaf738a144a043815f7d9d17c276a9f0c3c0ce9c4b04dad13413eb",
+      "sha256": "617a0d9cee4bec8939cb890737828c9bceacb2450c28a38cb188ecdfa82d2395",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/package.json": {
-      "sha256": "534eeacec262f58d60953eba98329dc25444236b65cfb60d65696e1441226e55",
+      "sha256": "dc1d3f16a5a4c6503f0926cca7c7bee2cf74464e8860bdbb2dd8cc4975e42d13",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/playwright.config.ts": {
-      "sha256": "b8ef2658a09d240bb9d7d71b8826c5dcea51bd354409622f68076e8492d4c990",
+      "sha256": "ac9f39bc83bd156db67a8323f669b7029216d722e2d9f2c83594c2fb57d83a6a",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/playwright.static.config.ts": {
-      "sha256": "f9df95e774d2e9039c5e74c58bfe21dabf71b8e189bc80f6be40b6ba10979e7a",
+      "sha256": "b1dcc5b46884c5fcdc2d1e7bf30d8337e83b2c4d5f3648474758d6d0b17612d4",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/playwright.ui-e-local-settings.config.ts": {
-      "sha256": "35a3623444cc0ae3388a7f6b6e4d271033dce4118d81747a04119a88b3c9c678",
+      "sha256": "4683d5b3d17f2f64e613ffb83ba746d4a29fe914426431a3fcdb3ebadf44014d",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/playwright.visual.config.ts": {
-      "sha256": "ede4d3ea9dc9c28e5e825a61ebc867966b404bf7b461477bd80473aa2a53c556",
+      "sha256": "b7afab914962312b68d300f0008f7c0672897236c9546aaa3e0b6b67e3f0d3cb",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/pnpm-lock.yaml": {
-      "sha256": "3d797137e764ea2f648ffb9d659fabdcb0ae0c54db46b0cb421170f9b25fc220",
+      "sha256": "63eec1e3d5bac29965e850bf751269c7a8b317929b570205a1e223544f80a470",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/product-shell.spec.ts": {
-      "sha256": "1e047a5cc4bddc04c0a9fb8a91b553bc8840513169291c9a1420aa87c3e01d99",
+      "sha256": "a14714bcde5d4e91a275523623b4b903f26909d5bfc4e6c29239bad74b9f3626",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/product-surfaces.visual.spec.ts": {
-      "sha256": "aaecba76fbcc3da800570f0b4fddbe124ae7f9b35e07d94b92eadc8bfb80a0c2",
+      "sha256": "9fdc3b91a525a176b1641224ac8557ee613baf5932b00c8635334b4e81bab697",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/relationship-graph/product-shell.spec.ts": {
-      "sha256": "ccd1105369c64d73b62b739a94c7f878378ee93943e60d4a2e8da028f661a41d",
+      "sha256": "d5fd280716ec04006c17989f9629b009aedfa3ffdbf2278ce9febe00de7382e3",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/semantic-foundation.visual.spec.ts": {
-      "sha256": "311582e910e6a105f6e24d5d1acc2bd5f09d8527c1082c3b87d6b7f179209693",
+      "sha256": "a7c3d278abe3e94153879eeae6da59b04c253e29a647abd704d922665e1c0eb3",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
@@ -119,77 +119,77 @@
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/static-product-shell.spec.ts": {
-      "sha256": "c6a56e93c2c6a26a6e823101dd91ab1c50f84db887b8ce5cbf3f1f6a22b47b6f",
+      "sha256": "715f1e9e00c2dc844ea0bb67b228d6431adda159f000a6adec6f9d3bdf043226",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/ui-e-local-settings/local-settings.spec.ts": {
-      "sha256": "4f43e9efe575cace022a3ae74f2ad020c89f695383071539e91484f49bfc40cd",
+      "sha256": "229a0d5196152ee8939809a4ac35456de6edf37a13f907b5c1b5a93c52808773",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "browser-tests/visual-fixture-server.mjs": {
-      "sha256": "a726e218731cbc662f6a5c5011326b93eff29f3adcaa0db53d47071e5ce2cac7",
+      "sha256": "73fb7b2c4ecd690dd900941e6afc8e9fab87a71ae4d5405f79700b67c3fce5b1",
       "kind": "test-or-fixture",
       "owner_stage": "AR-F5-A"
     },
     "frontend/.env.example": {
-      "sha256": "f287f96eabd8dd999e9a07c67795b5ac748ca3c1a253678474ad10445f3413dc",
+      "sha256": "86b2c3fdb1f6fec0abbfece363ad9cfd78ae8f4f71aec36b3d4eb5dbb8cd30f5",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/AGENTS.md": {
-      "sha256": "e60b406ba4a82ef167212a5b829d416f07475c47fee1ec7528ef196edd9b12de",
+      "sha256": "1a523fbc0c9a368147acde9d6325a3df81ae9e81b6e919f5c4fa7bef73934e80",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/ARCHITECTURE.md": {
-      "sha256": "50baf2f4e173bb638fa54079d2274062c51b3f89d7871dbe413ca713c86634f3",
+      "sha256": "61a0c38170dd7ae46b2f2dfad36017b461709fdb98cf5208ddb4ae9493710b6c",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/CLAUDE.md": {
-      "sha256": "d631d88045f74623d568adfb4783b72e3d1b732330d749bc6c72e6648d4581d3",
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/DESIGN.md": {
-      "sha256": "cad9b0d342aef3dcb2d6e900829016400a9f02876160415f7412cbaf88f039bb",
+      "sha256": "71bb761c3cf1416137487ef7a6caa14c07ae1c600f5a578140a8f200e90eae61",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/README.md": {
-      "sha256": "9a0a850a337ebca6b9a097cec442664fdd53a04b19c1659895a6e519a9c7917f",
+      "sha256": "6d9b5d5b17e44ae6ed05ec3f312ebd24a8e55b1a89b1a9a706714fb21ac372fe",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/eslint.config.mjs": {
-      "sha256": "f513ea759cbd402f02fb20a1595e16f1149140107715f88653380fe85a279a22",
+      "sha256": "04d757767daa803e250a626b28b489ecfac3272871f77a19b345c7dfb2fdc7a9",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/next.config.ts": {
-      "sha256": "db811251ce9582c75da8067d51e7f4455b51ae118e86bf852454acaf4884f3e7",
+      "sha256": "562259eedae768971a0c9990fec750670cc14fee17a95ddf88927eef0619fd98",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/package.json": {
-      "sha256": "4db0c85bfb1e35e637267e3ff222dc2bde820eaeb6c4c11d773c8fcc2ad279b7",
+      "sha256": "bde3a8bebc560387b3d3c474ae988e934df46c0d4c84fb051525c23ac136693d",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/pnpm-lock.yaml": {
-      "sha256": "7713a6aae6a699d178a267e045a2667275c6dea6261b6823a3c5ae0077bb5e70",
+      "sha256": "540d8c913b05d9b4a86b4b1827d16c6e02262c2b7614f8bc88933dfd929c84f7",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/pnpm-workspace.yaml": {
-      "sha256": "09c841fee09a7381f94b1dbd8a2d94ea69e3885bb156a538bf80079cdde28add",
+      "sha256": "952370e9620cf0723ce379541f3a3b8cc67e9b4834c64700a2a50d9a9b442776",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/postcss.config.mjs": {
-      "sha256": "7b299d3d3b16699ddda397c0b2373b3af4f25f8fc9ccc9b3d9e64ef083bc1c21",
+      "sha256": "dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
@@ -199,7 +199,7 @@
       "owner_stage": "AR-F5-A"
     },
     "frontend/public/openapi.json": {
-      "sha256": "e6731ac53124003eb8aff5fcb720416944f017ed21869c5a5b258a4ffb4844c4",
+      "sha256": "61c17d05693d99705fe17f51081492ad541b763db78ad976b3ebc71e1fe50e41",
       "kind": "public-asset",
       "owner_stage": "AR-F5-A"
     },
@@ -219,107 +219,107 @@
       "owner_stage": "AR-F5-A"
     },
     "frontend/public/sw.js": {
-      "sha256": "1d36533b4bd90e895836a529063a02540cf6110d9868ee1ce3e5d9c80a0414fc",
+      "sha256": "3bb1de2d74a6da2e9714e60614c4930398813c12b40cd52e783dd0852fd169c4",
       "kind": "public-asset",
       "owner_stage": "AR-F5-A"
     },
     "frontend/scripts/build-static.mjs": {
-      "sha256": "191d8393ef110320012424b0765ce8cd9d69281977c946b43c02f1c6707a1d3f",
+      "sha256": "3cb14d5e59fbae90f9f894281967c67bc5a1082348c52613f3b770cfec3b0ae7",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/scripts/serve-production.mjs": {
-      "sha256": "fb3dc089286fd1e8b8fab7f0d54f5672783b6003f5bea79b30172b372a1d6f33",
+      "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/scripts/serve-static.mjs": {
-      "sha256": "77b5ab1f656b0951a4efc549775edc621dd8b31a3db05a45c160dfaee51b77a8",
+      "sha256": "fa272ff38442accb46d320bae2100698687b61a7b52c67fdd1ecbe556c87e1fb",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/scripts/test-world-package-proxy.mjs": {
-      "sha256": "a19b25ddf1e09a77a23af856cc70aabf5a6d6cc095e4ccb6af0d22967581aadd",
+      "sha256": "e1c076c520291954fc1b32ec18d8a0bb6cd0d3ef428604347d1b00400ac56ad4",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/src/app/agent_guide.md/route.ts": {
-      "sha256": "2e7bb991827873af6887b056f3db40affe150afad531ad7b0cc03dc0fc313690",
+      "sha256": "d66f47a761351a5bc0dc802b1fb97a3b835c8c43b7222301ba83afa869332568",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/agents/[characterId]/page.tsx": {
-      "sha256": "5fed99f33a8429c3a1e475f7586bf33b8d31cbc96536a59fd67e4f7e970a7292",
+      "sha256": "bf6d42682dfb63306fa602fe8fc5c779970caa8dce306a0e2b1b78822a7ed706",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/agents/new/page.tsx": {
-      "sha256": "cf035bfe8d049bdd9a7977e7ddf6c3c1245884e4a16b06799dd0269c401ddcef",
+      "sha256": "a8dfb61d1f2ad3e49980df07bcf739f9de3a00dd9a4f1c839b29528c2b96d3af",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/agents/page.tsx": {
-      "sha256": "09efe246b2550c4572251ae7b3048b1aee79aa8d81e831abb9f83bcac245d520",
+      "sha256": "cadd394a631f8e2c7edfda6ed3c9be196f1a184e4c16ce54a7e44f4a58806580",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/angmoo-api/page.tsx": {
-      "sha256": "eaad959ba47e45a7ca167ba1eeff7acc753f30bbc20bbd61fda1c64b6f3a2143",
+      "sha256": "ee201f727a617dcce713e7cc9edb4b8da9cf03d4c2746da8a8d0a2313cb89115",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/api/backend/[...path]/route.ts": {
-      "sha256": "206be43aa554a4f284f961cfa844275c6b14928cba2f438971e430878458b4a5",
+      "sha256": "9d9d092bc67f2f7c374dd0ca7bf8d23eafcc180e125836fd3b26a8e0280eee19",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": {
-      "sha256": "c22829e90244ada699bdd63d7dc102d7094ef51bfde11e83c9a60c7e22db45cb",
+      "sha256": "cb306cd45817876668dc7f6ff063b31d4a91ad7e9c71bc0eded847f2c1a6df27",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/api/community/posts/[postId]/comments/route.ts": {
-      "sha256": "3bf03838fe35c64581c25243e316d553d2a21fbdd494b7e261623a5430595c0a",
+      "sha256": "e18fb3140d060bd582198c5e9203884e4c9cfc1c35fb471e60d3e0a1c7033940",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/api/community/posts/[postId]/route.ts": {
-      "sha256": "0471fde0beae62c8b8142770540e11d8c802034905ea501ccad50e8e8bbc767b",
+      "sha256": "4276bdb772aafb9b9508d0013bc52467307b1140784e3d1b47e50671ce92e19f",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/api/community/posts/route.ts": {
-      "sha256": "5a7ed981cd6c766f1770273f4d85f7379961eaebdd65e1326abd4df09a20feae",
+      "sha256": "d28dec941f0e2fd78e165f8603802c0f10011815c3f2152c90cea2fb0a29181a",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/characters/[characterId]/activity/page.tsx": {
-      "sha256": "2b5d5b6badc1865cf2282907227f33d1c424827be5dddaf890599c2f92bb4154",
+      "sha256": "6f4e38a872caf91eef242ca4d95e0261c2c2d09a63f8e82be2477af939383ef2",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx": {
-      "sha256": "ce8f681a38c39e3c2821b0b3499a39c27062b6bb6e072392e627fff8366db478",
+      "sha256": "4359d0739f7d69fad799c845f98400a02b7ea9864dcee856b107b9667fb52543",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx": {
-      "sha256": "177845944d0c088b8fdc2ba0fb729d206b9943752e4942aa9772e369ade6d389",
+      "sha256": "89a95c18d474a7277044eec84be0a27aa983c6a323fa28a1cfc6b3e6782f4df0",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/device-home-route-client.tsx": {
-      "sha256": "77524070adefeb6d8a30e63de1897c741929a0ea285934152c6d6047bc0dc0bd",
+      "sha256": "917a127e92d97df5b57974db14b809d8cc16db9d91387e615fa82e8ab163d862",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/feed-page.tsx": {
-      "sha256": "5fd74c44c3eafa6a7cdaeacc1fc46a81fb1f3c5c7875cf53c1f38812b6701a42",
+      "sha256": "abab7d80cd84a8bfa47970ead483f7ec846d41f9a1df29d143114eb238f2cd88",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/globals.css": {
-      "sha256": "4aca052570953657b2893c8e1fd74d1755dae4c0cf9dcec13c36b50bfe2c48ff",
+      "sha256": "d7c98d3551dde61100ad5feb7413474f5038b315636d84c24d7947362c62a0af",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
@@ -329,1297 +329,1297 @@
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/layout.tsx": {
-      "sha256": "b05dabb42433a4b7a4b8593aa579add82a92c160f8a793fb3e33548050ae71b9",
+      "sha256": "4e268282e27986f5afc1f4531528ef4be4c41cc44fa43e7d5bd4c9c25cf6914c",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/licenses/page.tsx": {
-      "sha256": "8aaa6acac3e90b2f1ae065d10dfa0234b593254f2bdea4e359323d432eefc7ee",
+      "sha256": "f4ceea6cd48125ea09654a69b72c47a71e76e895ef0fc3be26abf27a39656b66",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/login/page.tsx": {
-      "sha256": "cc0660d2420dbf92e9195df4688d1c465dcfd894783c6fbdfc7e28f207d17392",
+      "sha256": "74d5aa6245730a8a4ef97aec9064a6066161a65528c9c4b113ad91749ad4596f",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/manifest.ts": {
-      "sha256": "104d8c256b6d79430fbf5da3d25bc38f6e01a023cdf7ae068b7f0a5e7c07786f",
+      "sha256": "a727184a30c841443607b9043901c1d4d70a8c99a08eb11c963413dc6df0043b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/memory-explorer/page.tsx": {
-      "sha256": "3e03bdad48b0ab3708224fc3e456807a872469369815912cbde4cf70b7404971",
+      "sha256": "1a6551565bd461a23d6e99f20bbd4bd81b8a79d8e2a726dd50c7ace8e92c24a2",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/memory/page.tsx": {
-      "sha256": "42a293ba5f7f6f7670c359d6699c68e6ea2327ea2c40e5a0b020815fef2747b9",
+      "sha256": "1ee4f962fd675e91501fcc098344df604913f0153a1abfc6d71cbb2b2bbe6eba",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/messages/[threadId]/page.tsx": {
-      "sha256": "f0e9f176bd156223d7af918df0b77c0e30c6adc27bd4847da18a00c0d89710f9",
+      "sha256": "003a91411ad8f95e9c3291aef2b1cfe18be00bc67d5c626aa2247009b5005a7f",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/messages/page.tsx": {
-      "sha256": "b19763ce85fcf4af73a90f237b554a09e5833c7cf11189476eccc83e44578a9a",
+      "sha256": "eb0124bc64eed91af2380eb7880bb12e55a7fe8dc9cb3df24908fe85435db198",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/notifications/page.tsx": {
-      "sha256": "ed7098c08914ab2dcc998e6f9c38c39259a5a715cf36bd53059f66beab5993b3",
+      "sha256": "66c39440f766bea922558e36f8ec368a23c8a00394f18705b5dc78ef1609ee01",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/opengraph-image.tsx": {
-      "sha256": "7963dc7262a9b03cb106cbb3b38e68fdedefda4bf5f0d9dd610503564ab709f9",
+      "sha256": "8fb0fd2dc9f87c94f78dd25077c0d77ef39783d621d2837feb4c6e1966f01546",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/page.tsx": {
-      "sha256": "6b7e6e1873cf361a193dee1f054326a1d3154e2253d7c9465b75b8a4bc03722f",
+      "sha256": "856286bd705578aa4644d11afa2d7a3f5d0411419712abe83c2f7ae6a21f500b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/posts/[postId]/page.tsx": {
-      "sha256": "43e622761493f4d75dfd62c5ec3cd0e7ccdec041247dc41d25b3040de5de325a",
+      "sha256": "10f622ecbdf7e40e3ff0070ed2c1d1315ef6b0b4340878dce34e1df39f458aca",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/posts/page.tsx": {
-      "sha256": "2384929983c20230b8278b34839e2457c43d2e09b183175603b80cd5ed69b623",
+      "sha256": "537d9ed3ce73c62673f7140290362d0ef0d87ccd64f2fbee2f25aebdf8b87f7c",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/profile/setup/page.tsx": {
-      "sha256": "ee73f524c21b422bd4fca2f5d31690a9dffe5ad2e051e821cfe1fb4a2f3c02b2",
+      "sha256": "4977882c454f784056fcdbe00135487add01de129102c330eb3d13cff86184cc",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx": {
-      "sha256": "33ca452dd98c29b796a07c22b3e4b079abf0c9aa58867c42cac03fc5745118b2",
+      "sha256": "b6c0c938bb346cd95f92eae288632d681b705c513d0048b8ed6e404235d0ed5b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/profiles/characters/[characterId]/page.tsx": {
-      "sha256": "86f81adf7aa4e8f5d024f4e5cf4c5d5de51e94aad18c0f40db0bf99ca125e51c",
+      "sha256": "b8f84735ea84f4288bd14b2419c221f0617eddc2f854cf36a57442f1d9ce8a59",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/profiles/users/[userId]/follows/page.tsx": {
-      "sha256": "b3c126787d02d764dba301c0fcb1f2a72f54ff2dc4f44b06c2133a6dd8f3f1bf",
+      "sha256": "b4cd9a8556d589b313455dbe08af559d626392240301d07e71e25ce07a263383",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/profiles/users/[userId]/page.tsx": {
-      "sha256": "6c5c770ca59d4dff25ec9dbd6073a61feed0fe90171e7452a796347912102ee9",
+      "sha256": "cf71941fa71bed14c8b44bd2ae3cea5e96d48b0c0955a82f596ea19a17c47dee",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/robots.ts": {
-      "sha256": "1122e9a751e736d4f76236fab6fe3b11dbecf101dfba15268d6cb0dd7f692653",
+      "sha256": "159952cebcf33527491623c497a4353f95c16e215c0e6e2ef50feba96d9e578d",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/search/page.tsx": {
-      "sha256": "d6fb888e9fa4bd62af877a34694f6769c6c80c6c86d0d8c5fe034e7ec0ba2f7f",
+      "sha256": "0e4a3a0fa603d501a0e7f030302152d9d2acdfcacd4f1c736fe0e7207d9b11aa",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/settings/page.tsx": {
-      "sha256": "ea345c9cefa576db9b4fe46aaf6cb230bc0af85c2b73b929d9119493ba04bda1",
+      "sha256": "c605dce179d42f7a9486b92ad730b367c237870e97ae917a30aade3a4fb21f67",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/sitemap.ts": {
-      "sha256": "be9444007abeebd5f41688a972f7e5d03fd65e1b92322bba4a0fd1924531827f",
+      "sha256": "00b8afa1246b5f7deebbeb73e696f36ca51436e79624ba1df1964a14d33e9d8b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/import/page.tsx": {
-      "sha256": "46d18c2bced579c65ef88b45ed184b03c4d5178afba962763abde66f3d971853",
+      "sha256": "9c9fcc1710561c0f366fcd8fbebf02b90e7a234f397cbe2c5d5f46ee3539aedc",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/import/studio-import-route-client.tsx": {
-      "sha256": "909f5456a4f8acdbed526b12a2d7965c233804091436665041bd4a2bb93f51a0",
+      "sha256": "e451339baa40cacdd86367c2c99424732c65088050bfaefc207950e1b744ea86",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/page.tsx": {
-      "sha256": "d275187604037ecede289a5a6416e33b730b909e6c53f8eb2dfda75d237a7f78",
+      "sha256": "0713ce25abdc0c25ce5fcd928414168fa62d7f7b742799f81bed2e511c6b4883",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/studio-route-client.tsx": {
-      "sha256": "b9285a5ef0beb24fac9c8627ba99f09d36ac32df00d7b1b85201ac6b863727e2",
+      "sha256": "98793332218cb891be171103030155a2952994a4462966e8c5147e4ab899c1bc",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/worlds/[worldId]/page.tsx": {
-      "sha256": "1ae48ad9f8838cf44e9e63dc70e3b1da500f460761098fba0d10fb80ed6eb946",
+      "sha256": "8cda5c5104907a605c637a087f5a1dfec762107c98a2af4d7feb024de998cb34",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/studio/worlds/new/page.tsx": {
-      "sha256": "7842d47e9218ee83c06db39c41d49c90cd90def2dab8ed8fcc20b8737820158e",
+      "sha256": "9517a014961000abf856e4d91e8c84e40d3faf017213d0bdc3e3c025205272ba",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/tree/[postId]/page.tsx": {
-      "sha256": "1d82ab6b068777ac991f14763f5b0f20e3612ffb4a2eb43d8bf70bd73040aef7",
+      "sha256": "92c86b7860fc2061b436a06ea4cfba22ddd68da4172a35370347354a3a2f8284",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/tree/page.tsx": {
-      "sha256": "8af0454d2e257bd48c2e0bbf2cf1f4f66b13130beb649d7c1a2d5d57ae0f6825",
+      "sha256": "083eefd9c4a57b46489a19c9129ba6b10ec1821fbdb28d0e9d484ca52fa0272c",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/ui-foundation/page.tsx": {
-      "sha256": "322a40dc517a62eae712bb6245d162a602f22228a41161e159277f3408eda4c0",
+      "sha256": "c8055c910553d7fb51a8a07fa3aa86e5f2c61c06740d589fbbf22dc460ff887f",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/world-app-route-client.tsx": {
-      "sha256": "e2bc04f3372acfb7b24e4a2f2c9ad1cdc78c49632b78f36d5f413c3861e57815",
+      "sha256": "e23f7cfab419e32daf8ddb1ba8f318b928427b14edb355877510deaaafb60b81",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/[section]/page.tsx": {
-      "sha256": "377a33bf1a0c59364a50f9a5353ffc0cebb0b673533a4a970f07ba1b8e1d2c10",
+      "sha256": "df56765945cbb2e23402c4dcc4354040d396833fbcd98ad60b3572a7e9343076",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx": {
-      "sha256": "504543cc4b09578e4c54e6c351d6574f705f7c37c729123bcf30762cfd61ccb4",
+      "sha256": "318640163354e22a80e95a888ae713fbccca079f58128adf7e5c84075d55a6b7",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/chat/[threadId]/page.tsx": {
-      "sha256": "bf5dc681b7d904346f17697d3eabdc6c9f5321fae590f2d0ee0a9c1c951f455d",
+      "sha256": "b24d4c78b75b2de59188231c4ce607e45094cf6c3124783cad45c542d286a87b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/creator/page.tsx": {
-      "sha256": "c255f8c3313e0718193672ede579100bf84dceaff6ba3665bd880c73a2acc136",
+      "sha256": "e16c0b277f09702fe5fda19d287170a8b79c894411ee9a7ba6494353ba655c00",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/page.tsx": {
-      "sha256": "c39aec3ff739479504a69e3b821772ce4f5337cfede2a558a98e771fc10de5b8",
+      "sha256": "101260aa30871e8aa907cd3819d13b21e70d05556e070d6d000cb61076cded2b",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/[worldId]/posts/[postId]/page.tsx": {
-      "sha256": "2d7679ed51cf1e7df5c849fd1d26eac32281f7e8e8b1d3475921565409718e03",
+      "sha256": "b1f12369b10b72feae198a32d9f1d7d6cd38108847f05698ecc68a7b49971250",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/app/worlds/new/page.tsx": {
-      "sha256": "35666e86ead6fef76275f8b8cbb3e964da3487ddd8e74c07ecd52d90e10f43ec",
+      "sha256": "2b1b546ecb4354e163e418ede604318e1398297009b1bc67bdae51854764ff9e",
       "kind": "next-entry-or-screen",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/components/active-agent-card.tsx": {
-      "sha256": "b2e2d62e37875022cb5aaaaf0305139591740e555a5cbcf4e742aabd3ef68612",
+      "sha256": "917d55e2222f8237cb3ee86c9e5472510eb54227103a81e186d90d8a6ce42124",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/activity-hours-control.tsx": {
-      "sha256": "60c45bf9c41bd309a23572de0ccd525f6c7c91a443d146dfc25feae15abe4719",
+      "sha256": "7426559602765cd2ffe1d2bf6e10bc9ecfc9d1f9007b48c3e56c85b8f9f57e69",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/agent-activity-list.tsx": {
-      "sha256": "9746884ada76c17940f7be3c5a259d0d7a0f8536dd8eb455e0788eb8f09c6425",
+      "sha256": "0ff8fb7b0152ef0514f63ef3246dbd811dbc463bcceb30cb82337e4d35692422",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/agent-create-client.tsx": {
-      "sha256": "31d609dba22ee5bdc12ace0ce0458a34e55567fe109c67c93040c512b625823f",
+      "sha256": "8e46fdbf64aa2dd7e899d03ac6fac0277ba71bc616a474cacfd4f0df30c4f58f",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/agent-detail-client.tsx": {
-      "sha256": "e821bc4fb3613039b35aaae324639b9ae34893c7afe50d68b97efa5655dc24b3",
+      "sha256": "be3c6a0f8a3838f2c3e085cef5e1a62d822cea1cd253ebb6a6230a1d639d534d",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/agents-dashboard-client.tsx": {
-      "sha256": "f0d9f4ba1249f6c571ac2382035a3bb8e679c95434d32aa4272cebaa1b10e29a",
+      "sha256": "52636740ddc31f1aba37f66058cab296f48fe814c331b81b6fe42167a7831958",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/app-shell.tsx": {
-      "sha256": "f55cb5efed98917f71016110dae2ee7def5af88ac6d6c8c131ce5cf34908a3ac",
+      "sha256": "3b7bc14f7e93c986fc6d3cd0216125b8cea1809971e510c8327b5cfee2a377bc",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/components/auth-provider.tsx": {
-      "sha256": "74a00054c072674d35258500d3af75d9c9a193eefdd035df13a8939f6d703096",
+      "sha256": "8f8ed5835d763d0bb1e38ed19c853effb09609e710fe67d8a87053f4187e490c",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/character-activity-client.tsx": {
-      "sha256": "2be32cb4cc667a086d1a5920ed9e49053e71b1466a14cbfda635d63026ecf6db",
+      "sha256": "f681d01d66a682b4c5a50420bad71617dc9f6a336d3241c8b046d5cebee0fe0c",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/character-profile-client.tsx": {
-      "sha256": "c49b6aa435fe89068d9af93fb9365fd59d1f211551d7f8365cc640e6cae88936",
+      "sha256": "d3b7b6e98ecf13be749b45653a281fcfa0aa3b59216723292b0a3c8c0367ee03",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/components/expandable-post-text.tsx": {
-      "sha256": "90e04090cc410964a06075a6c3b17d619e90a89da744ed3246f292c3dc0851d2",
+      "sha256": "bbed42c1fbf48f08141474c9b898c473db1d0b6c712167dd29bd958799d3b9d4",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/generated-media-preview-card.tsx": {
-      "sha256": "9b25b74e628f95153f7aa05803f902cd5359692fa9b7c80bde70dd84a3d17da0",
+      "sha256": "39f5709df44f6b620e34609982b5794e216504dfe9869caed2aba203537fe97c",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/local-owner-client.module.css": {
-      "sha256": "8fb6780dc7297582f2f9cb1c5bb5b2007437f6f6c30715c85fccd70d62b29632",
+      "sha256": "443bf906ea5c13575e047898d8bdc01e6c12b12c83db1a9c2cfd7b7911396254",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/local-owner-client.tsx": {
-      "sha256": "0617724d2ab2ab19bf8d62244293d77d60199f45591d249b196355048e01be2c",
+      "sha256": "5b70ccf08721bf44c0b85880c34a681d896c9c035e695eea3c97e1990f99cb0f",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/login-client.tsx": {
-      "sha256": "62162fe7b5169cf1f53cb9977f4a47641867fd75fd4405a3524728c6707dd6ab",
+      "sha256": "af0037e28308c316539fa0592edbcb299c289e10035260afe2723cfb3f72abaa",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/mentioned-text.tsx": {
-      "sha256": "e9b0b6c624c11a8c9aacd9d42b1441f768460d81ed817bd0e5ec23430c5411f5",
+      "sha256": "cb68407299e8db2e094264a0666bdb5d263f9c931b6b461949ea08676f862594",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/message-thread-client.tsx": {
-      "sha256": "8aeab05bfe6a8f1706f4134b8fb906ace8a5d66f1e91e39c01d24f02df4f2a65",
+      "sha256": "3ac741976fefaed438f5236ec00258dc38d502d6294c4998a5aef72127daf727",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/components/messages-client.tsx": {
-      "sha256": "1a100d8b2a96c886b8dbe4b919e769f17ebff4eb108c72f9db3e4a1d67b623ad",
+      "sha256": "67e0a6cf82ec87694325dd92e20f0d55d21d08c2e5fce8180229c87d6bbb89cb",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/components/nest-search-form.tsx": {
-      "sha256": "1b58e7095d0faa313f567d94eb313a3a5dd5a60b5f61c1f8f70b25a2def0b591",
+      "sha256": "58fd1c5d81b8007ded2d7725e52db987cfa4d53a0dec6d00336feda8898fe1c9",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/notifications-client.tsx": {
-      "sha256": "61bc8043a458bd80b59c14142401de2d7395edf9f21e3f83bda619c2d775409f",
+      "sha256": "9f546a9571ada4a05f8f2421892deb25751937b4d566e441746cd9c45cfb16b2",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/post-detail-client.tsx": {
-      "sha256": "2cdd5b8523b71933579566191064d174098353d62e1ed534fdb9d055fc1d8917",
+      "sha256": "0cf68577fc0b6c5347feff1eee1e12abba679889fb22df15516b9ae3a60a4c92",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/post-media-grid.tsx": {
-      "sha256": "5ca446d05c6455e31d337ebb0dfc11a53b71c407cc7c4488c7680f34f15aaae5",
+      "sha256": "6c7d5fc4e43ff1535dd438484d6e6dd8248d77057e9c60690098b7ce18be653b",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/profile-avatar.tsx": {
-      "sha256": "babc6b336e4cb4a5bf4c896bb03637597a6f1d4df0a66e51b1e0320c1fb5b1c7",
+      "sha256": "72e004d6e4dc2bc9110b514f03c4bd7291e254150bd8c79d7475fa87b3447342",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/profile-connections-client.tsx": {
-      "sha256": "342e5c45e39fd6608aac3463a52884c4aab40503ab9a664ccd019bc004cd1a67",
+      "sha256": "3851d73ec86c080ca60c5f793740317bd609155f7223bf71713cf49e5c2d2826",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/profile-list-row.tsx": {
-      "sha256": "1d40b7b50045d69417f562b7e192f94cabf6ba6a625429c936217b622654519b",
+      "sha256": "311911f741022e7333f271b4cc727c6caaf4c51a6294fcdc860916f375f693a3",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/profile-media-uploader.tsx": {
-      "sha256": "c8bfba9624773afb76a2a050910b7a4ca3444f038633178119f0858d6d8631b3",
+      "sha256": "b92d33dfdd6afcf27ca2d1dbc1ed804418d2f25aa9aed16f75c0155c80b9ce4e",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/profile-setup-client.tsx": {
-      "sha256": "d700749b967237ed09607cc6f8b1b7a404f83e3be91594b188a75a8c486f8841",
+      "sha256": "dbd18228c9b78abc8b5834084395ba24d1d7981543f6e1897d55f76fc4233630",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/right-rail-insights.tsx": {
-      "sha256": "8a4b4213c65ee455ce73524dfcb0b7f6199fdcfb3b0b4bce7e1781cb91494864",
+      "sha256": "78bfccd6e479a265c04ae79c2a88fb0cd1a139867b773ae4b2faecc7258b9b47",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/search-results-client.tsx": {
-      "sha256": "343ea408e059f07158cb62ed6f31148a5b799408214a857a8ff40b3f0fdc2615",
+      "sha256": "9a59e443ac14133a6bbdf1fb1474ebf7bcaf65a92eb5e6fd9302debdd18cb99c",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/settings-client.module.css": {
-      "sha256": "a52fdd07f3e778057398e899b516bed43f5f13dbf8d5994a949e3aff33e85f65",
+      "sha256": "b40b333429fb9bc52402180938a92c21113b744fb4d0af2b9c0ef744da948214",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/settings-client.tsx": {
-      "sha256": "5c97cb4a6fdcbe57e1e0553c3dd98cdec4d94451dbf25d5f52d86bf776871d9d",
+      "sha256": "dea5048105a261e4a71bee970571ae27e657192fe8fd4aaba5f4d7aa25e117d4",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/tree-community-client.tsx": {
-      "sha256": "e1acdf01a2c8cb90f933ae071370fe662ba93f4d73a1606b19d6010214346e4b",
+      "sha256": "bf2b7a4b2eab1a94a2b187d847dbb6e84ebc0ef4275f0eb6916f61f01a121f94",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/components/tree-post-detail-client.tsx": {
-      "sha256": "b4305247e4eb47bab965a4b86aea3e5b55acdb660fe91cbbb0a2f6297c4362fc",
+      "sha256": "7b9cd8bb016fccaf5f6443ba3381eaa5cd60c5b859e359bda51cd39232cfe24f",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/components/turnstile-widget.tsx": {
-      "sha256": "15b452ebe92c602d398a1f625a1a5e5d6c18f2d0009b3fb5e72c5f1428d1c247",
+      "sha256": "3f5c0db2b0c569c3636ed838bd472efcb09be1db2355bf720102b2ba530fbee7",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/ui/app-icon.module.css": {
-      "sha256": "cc3897e965320c8c45deeae4994aea61423fff57577f349e96e1b4e4b2f31c60",
+      "sha256": "a21face3e6b824ad7543fa10f8d2cc8026cffb0080fbeeff7000b5625cc1dabe",
       "kind": "canonical-common",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/components/ui/app-icon.tsx": {
-      "sha256": "ea52b4a133b2e7de6e41ac00a0d6dce864ba0ab5213da1a6c7331d93350f3cb0",
+      "sha256": "837e4fbed2f37f19c983aeeb577a63af688265c6f31a057a913837599afa596e",
       "kind": "canonical-common",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/components/ui/button.tsx": {
-      "sha256": "1086c4da08321e4fed5498f47cb9382985fabb371d030febe93a05efadab7e23",
+      "sha256": "8952f381f1b3df1f034fe63a48eaa952da9cb9379d0cd62c2289db5c2c72bb25",
       "kind": "canonical-common",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/components/ui/semantic-foundation.module.css": {
-      "sha256": "9498baf39089f7711e0cc9f563fd83074a6b62bb07340ce524fa34ebb146319b",
+      "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23",
       "kind": "canonical-common",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/components/user-profile-client.tsx": {
-      "sha256": "98b86c0bcd3b52293ad2446cf03afdafc4e16b809b1112663d1a696b42d6c9f1",
+      "sha256": "e41ae561d70f0e3b6ad7a4d142e4b15d0fb09309202643c68316a0b2980bc3dd",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-A"
     },
     "frontend/src/components/world-character-autonomy-setup-client.tsx": {
-      "sha256": "7afdf28099ef5865a7bbad9e82241f6d513ae9fce37252c43c82860ec3daeb7d",
+      "sha256": "2d47a8285d4ed1bf5729347cca00de1f55b611cc95d4a72ef4f7884b17efb5db",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/components/world-creator-client.tsx": {
-      "sha256": "8236e06d8fbf5b29de4f4ba4103bd922d02fcb28004bf8553c0320cfe6d4d9ca",
+      "sha256": "9634b7b167a4050d13b33509cbb1f79063d52656210e2bf191eb1d4d113bb847",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/composition/screens/device-home-screen.tsx": {
-      "sha256": "20dda1a79ab1b8f9a9999a9d4873ed618b9a17947a20d80d9355c5ad1991c7a8",
+      "sha256": "1f33c4f845d36fef11419255c7eafcf212e1b1ad29dfbe1810b0115b6cfc6846",
       "kind": "screen-composition",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/composition/screens/device-home-shell.module.css": {
-      "sha256": "8c8cf225676dec2dc24383a37779c4558ee571a22839d8b658334f159776b773",
+      "sha256": "6204289d1c4be2851d278ffd451656eb96834f186a16810c73adfe4da88f6844",
       "kind": "screen-composition",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/composition/screens/device-home-shell.tsx": {
-      "sha256": "ed21c11261a32aacff7be9f4de3ab5ced1f2bc7dfc405206b569070633a2d0c1",
+      "sha256": "fbb00c50378bf16c34041d4a43cd9df59d893ad5fe2192d9dcad012e7ece1f0a",
       "kind": "screen-composition",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/composition/static-product-router.tsx": {
-      "sha256": "8ce54e6af86cfc3cc6254b9ff269e00f334c668eb16249c9201069b49a079f5c",
+      "sha256": "2930da844ffa4be3f0fcf1d7f9faee48fa2bc75cc1dfef318dd3d38b6e96385a",
       "kind": "screen-composition",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/characters/api/character-dashboard-client.ts": {
-      "sha256": "7ab14ff88e5f8ca1972ac8cb8f46e75c62d752e3454f9f3ccf0e700c525baa26",
+      "sha256": "5408d99ce2fcf4b00e58d435e3f4a10e41728c96a6e0b4e4cb30205e070bfeac",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/api/world-character-profile-client.ts": {
-      "sha256": "2f25334074fca4bc80b22f414fccf4f7ea3267550397106264e50a5453fd5e6d",
+      "sha256": "bfc0f14a5900ac24d9e5f827ec64e15451268c96873b83ae97a511239a9264ef",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/model/character-dashboard-contract.ts": {
-      "sha256": "760ac069109e956815bdb26f22060b813b10b92557fe82a27e346670e1b9b380",
+      "sha256": "7b1f7a968688cf8e886ef7d0af57f6121ece1090475c892ce9b04111a4897739",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/model/character-dashboard-session.ts": {
-      "sha256": "e1dc593117e9a03a15f9eab718a47cfe6b13913e050c2f9edb2024af3e3502fd",
+      "sha256": "3aa4ecafdeb73d9c1d6c38a77c059e2b7445155bc77dd63651c719236ece5fa8",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/model/character-recent-activity-presentation.ts": {
-      "sha256": "95452d9fdd73a9c2af54830ac8b07e9bf28d859eb86613271bc43ca99654b4b2",
+      "sha256": "2dde010a2adacbfeb0da8df300a72454e93c1c1bddbf7f91a9a39fbada703c74",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/model/world-character-profile-contract.ts": {
-      "sha256": "2c787da9d1033125ae17557b7d0930e64a4a5f52103b7b5a3f99ea98b1396658",
+      "sha256": "bb7fd4ebfcca76bd4a3759d8b786a125fd3f228efc618faeea6a62cf475ead1d",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/public.ts": {
-      "sha256": "a8fac652e234711c35aa309bcbf7f1371c6c4e7299b557f838b9129854f30f75",
+      "sha256": "725f9d200f67d0edb1ffaea6ac95d2348e20a0abdb23ca8d4c386e3bb2f20d09",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/ui/agents-dashboard-client.tsx": {
-      "sha256": "6327205eb324e547c3acd22ec0ad76ce480b9a8c2cee7f38371874ee8fdc07f3",
+      "sha256": "7558cdb0e06229e87ce28e82bc9f484e874d37bfe7eb5e5f285b3fba29acfaea",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/ui/characters-dashboard.module.css": {
-      "sha256": "34b5901e76da446042007372e7812232142a59d0d276b522c58de5b2fd59f5e4",
+      "sha256": "49860129ac6da37b76893990cbb56a45a73c2e376cb8cc69a7e2539803543803",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/ui/world-character-profile.module.css": {
-      "sha256": "9bdd481bac78fd62e9726bad64c96daf4d6fac60c52698b005d6d4da90d578f2",
+      "sha256": "0b9d371280b06f11776dfec96b37aca97caa0d3026006aa1438104f00d8b1f6c",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/characters/ui/world-character-profile.tsx": {
-      "sha256": "1f64adba89f9786da9f02de680c6ae834ec88f0b0c5329e10c6df52b98413628",
+      "sha256": "0cfcc5ba610a6a943a53fba70786bf25904f79bfa1e759214b08eb171fbd3ff5",
       "kind": "feature",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/features/chat/api/chat-client.ts": {
-      "sha256": "08407e3668c1cec55fa4d2ebb240e2542330ea05e8184d498baac76463701604",
+      "sha256": "38ebdcdd2f3dd4ff470a6b7d673eeae7a32c1db7bf333f2279d4c74b63930d3e",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/api/world-chat-client.ts": {
-      "sha256": "981abfb86492f8022ba3ceff96e152e833ce892e1351dd23f19f9340637c8399",
+      "sha256": "ccb2a47506bffaec54109dca1eec854521e90f3f016d6c212649fb3389b8e54a",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/model/chat-contract.ts": {
-      "sha256": "6d1cd23975b2083d170b9cd4f47dc0f22ac50b6588dee6b0faf7bb4c376f91eb",
+      "sha256": "91abcfa91a564e5bc2be30c1cd8d347b8ebc420ecfcee81b5af310f1bbfee568",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/model/world-chat-contract.ts": {
-      "sha256": "1cccd9e74502d5725e4f563ecced7c257a5d368421488cb2c84fc10f9ec68d33",
+      "sha256": "0221bd0574d20c0fdf524701c932b26bada6c619d1ab0938039d6c31f3ee73dd",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/public.ts": {
-      "sha256": "43586357c6f3a515187d69dfc9710bf5410478cb0a0bf545946111939ea7aa99",
+      "sha256": "91492673831f3bcc3fadae23b5c1930a78aa532823dc5a2a9e887d6e076ba1ed",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/ui/message-thread-client.tsx": {
-      "sha256": "1e912f6305f8d8c5addcc45cc02e56004a8d19c79c37b0e88f8d970ef6926794",
+      "sha256": "cd04a0748177327f21ebc81110e5ae59c3b98af9a4b5657517e2496ef4372e9b",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/ui/messages-client.tsx": {
-      "sha256": "c65afd5d5d373c6fe9884e428621f31c0d3011e64c258bdae27acc42e3fa547a",
+      "sha256": "925287b548e4af4b4e2096e42464abc91d7c2da018d17d670268cb9fe6b42fcb",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/ui/world-chat.module.css": {
-      "sha256": "d5a6a888e7feedf3837167419b9298f2d8d10b78dee268b53d9cfd151a8f523e",
+      "sha256": "c8ac25fd84ee72ffc52258385c2cafc3230f5ab573bcfd2eb051004aebc8abaf",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/chat/ui/world-chat.tsx": {
-      "sha256": "72bcd2320f432e388ee481c66a04c8e785617824b4b9d273a879b4c19705def6",
+      "sha256": "efeb8ee1f78d121468b5db6c7fbace200ac7f1117e710f5bcc5f09e3f5d71346",
       "kind": "feature",
       "owner_stage": "AR-F4-A"
     },
     "frontend/src/features/creator-studio/api/studio-world-character-client.ts": {
-      "sha256": "73cb7c97a00f80d0476e3097821566d647127066156d2fb25d482af3d7a62f9c",
+      "sha256": "bc80cfa1d3511e99485dcb356c827eba9fd4c686bc309b1f27ac0aeaa8e6bd11",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/model/creator-studio-contract.ts": {
-      "sha256": "5ec72fe19eded284bb3d6ade032aa3f8c7eef3eaa56bdbc232fcf5a153292b62",
+      "sha256": "bc9fe9b0273ed22c8351c585b5cf960630bf017742a23728af2f045a65794a98",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/model/studio-world-character-contract.ts": {
-      "sha256": "b76958af1c58c5b3406f8f70641f9e6b535df59731e07994c4c2a47bcbde58cb",
+      "sha256": "98a647b0234537ad3d214e0da3e54af7e5d8895b71bb36310f5ec668a5d72404",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/public.ts": {
-      "sha256": "59be945331a9f15e00198667692091c1ef14fbc00a76447375fe72cb8fb60014",
+      "sha256": "027cf11cea47b74f0c845db069883266c6d3728fa882c1bc1f49fcca403e8860",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css": {
-      "sha256": "29267b04c9c3673fe6075e447d6ddb0d26570ce24ec74ce73f295cbe63ac6248",
+      "sha256": "356779fa9fc8baecf41a2792b4110902a2c99ba907d29514411d077349540ac3",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": {
-      "sha256": "b8f8c595772ed8fb46e9d07133001e2bc94e64f11f4c494acf880caebba7bd2d",
+      "sha256": "20447ae909cadd21fe86ccfa3b4430baa128596c133d57f811383f90ee6a6267",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-frame.module.css": {
-      "sha256": "43ca1cde2e4d7ce3c2791fd43b956ae9fa1f051be97ac39d772fad8460c085d1",
+      "sha256": "f5ce29bcf6b228cc7cd793a2534bed3e1430a610783eda0edd7d9d560e334163",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx": {
-      "sha256": "818026ff6ca3c5487dfafd2b1823d2369d6f77d05558a1753b3b01dab40c156a",
+      "sha256": "8ec943c9bdbbd7e9fdd6eb22eb535352d85046ecc1a00f0347e0ec9508806230",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-shell.module.css": {
-      "sha256": "780002e69abc55b8e4c46624c9da058bb5d1cc74bea46dff7f6b6f5c0050bf82",
+      "sha256": "d4bc336e4ac1a9738ac404ab571d62a0dec77b07c64d330b4fed52ccd3bb8c4f",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/creator-studio-shell.tsx": {
-      "sha256": "cea5e58f810227552b35d99fe75539b3e7d6bd4be6c330185b00666c03f9f2df",
+      "sha256": "6e8f19375a779f269228c6b94dbadfd548de6a175fcca9e3fea003e3ed622aeb",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx": {
-      "sha256": "ea9839ac7d972d5768433ca1ded04121430a52418c887bb8248743b3df06a141",
+      "sha256": "64766de1349bf4a221198207b0d670024d76ca711682557a60d3c65ec351d323",
       "kind": "feature",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/features/device-home/api/device-home-client.ts": {
-      "sha256": "0c7b9a6bebdf95bda8044bc44ff1c7bd59a58677f3e7677119423c6398b2449b",
+      "sha256": "7b0dc9fc1ac375a840f8afc63dd652038e61a6d34c8e2b009d64dfd04584369f",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-home/components/device-home.module.css": {
-      "sha256": "4f0fbd5439652102a6d4e7a870fdccf6cf1dc39850994cc5ecde65985029aef2",
+      "sha256": "162ce1eeafb2b1aa050482375e6e4cc803525e284644c8bf7e7d505c00cefe83",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-home/components/device-home.tsx": {
-      "sha256": "97cb504e7d655e22193d1ee4f07390aa72c2c11eeb5378dee2e53c88d34a48a7",
+      "sha256": "231832d14345c2ead9bbb5b4d6dc273255c29d9eb3cc1b63868bd9903c9bc14d",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-home/public.ts": {
-      "sha256": "4bcbf05c9f59bc3ced50a40fedeca0787f6e7bebc6aa1ad832acd76a61a4b271",
+      "sha256": "49852b6e878fc90175898aa39887bd8bad7c93e1d5195f9caec7734893b25bb7",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-home/types/index.ts": {
-      "sha256": "3460fe9810e7a9ddc931c8ce5d970dce9af799b745151b7cd87984180242de05",
+      "sha256": "ab31e42d2d20669238da772250cb43609f1e8ad24e4791b10a3b922077eb3e43",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-home/utils/device-home-presentation.ts": {
-      "sha256": "8edf605457091cee9dcf3ff533625286670131dd3cdbfdf306696b2bccc6dc85",
+      "sha256": "76fbbe37553da435dded4e77a168e9100e8373ef9954ae0e560fbfdea9101ca5",
       "kind": "feature",
       "owner_stage": "AR-F1"
     },
     "frontend/src/features/device-shell/model/device-navigation.ts": {
-      "sha256": "d07d3976b0a565a960fc61cb8f3d26e14e3395b9cc70d8e07c86afe12f49e63b",
+      "sha256": "d52e64a650d1d0f2fd41f3a0cd39b3af58d0b6a7bd3c8089d1d153dad52a3c60",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/public.ts": {
-      "sha256": "4bfa457be2d6c3e5d2d399963d534003a5736462ec64a3c42895894507ccb965",
+      "sha256": "7d34586d7b0fbaa4cec0a774ad142c93176a465ce62fa8f7b130d476df5f0c56",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/ui/device-shell.module.css": {
-      "sha256": "9bb79c8c3f7d5a76d34515fc5e07b66e812875aae841eb1e91c5ff1e0c30fb2c",
+      "sha256": "3dfc80b0cd8cee84b3d6a7ef35867779722405c3844278a5abf042f518516df5",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/ui/device-shell.tsx": {
-      "sha256": "635e6667e24f803e04b3560087c9e28f944ca67d6fab478b0024aed3af8a9471",
+      "sha256": "bb87a2e7795012caea77982ed758c06af579b4b16713114ac70b1af4611b83d0",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/ui/local-device-navigation.tsx": {
-      "sha256": "4e814602ccce3d4272e83f4c962f1c5e7bc25b38d369df71a39f581a3e52c493",
+      "sha256": "0b5b2827d9bee8d3067b5b00e05a69b450d8e6a4af445bedcf1b8e4fb763eec6",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/ui/local-product-link.module.css": {
-      "sha256": "11502e355fb337d2f7411b322f2d063f17cea60090a318793e3eccaa1095f8a0",
+      "sha256": "85c193808a474ad0b529788b4f8ae79c2ee2b102ea824c4fa63232db6c0d1304",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/device-shell/ui/local-product-link.tsx": {
-      "sha256": "1fe745025ab8c647fa4c806d864946acca98568229197956d44020eacb8b7ad4",
+      "sha256": "808eca1dfea8801b699631acd24b674086fdb81b6e61a160f7c551ba503c4365",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/memory/api/memory-client.ts": {
-      "sha256": "8d82ff9c13f52badb7a9db12284e4fc38884d57e78254e0f30033a50edc93291",
+      "sha256": "9980fd8b3e039c9283075c54c4c3674ad01b3586c4b07d8e18dfdd9e82a2f555",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/model/memory-batch-contract.ts": {
-      "sha256": "d0ff6bb63948a3deeeb97a8feca04a8cb6ac91d27a955eb6f219d750e82a10ee",
+      "sha256": "f78af1e643a60df292dfe0db224022debaa9538a0bbaf0a82c0a17141383c053",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/model/memory-contract.ts": {
-      "sha256": "8a7f75f87e5e38f88487743bfaa284b4bbd103f2a88f40157456e0442545daf6",
+      "sha256": "b09d751bea6b2b0981cd3cdf1563e0d691de7be0b52ffe1e8109a050181a6610",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/public.ts": {
-      "sha256": "7478aba2116ff671f25865b6db0d1a1474c52d5a92e16dd995582a79d3b84f21",
+      "sha256": "52320d92f340a5c48db1c78f2d9c064ad57109de5f5c452d179f77aadb392de9",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/ui/memory-batch-controls.tsx": {
-      "sha256": "dbb96b18798c644f6332289d4e81456672bc02fe63f866cfdc8d974b62a80160",
+      "sha256": "c47a72828493208ab84db958fe2f7af8bd9616b9f308f570367f32e268d52dd7",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/ui/memory-scope-summary.tsx": {
-      "sha256": "5eb029941868d4374a73bc3809a905a3f0a01195cacc440b98c2ca145ab142a7",
+      "sha256": "e3dc4099faa7f191abbdd5a782a8865b466216d8d0b01040c21bdd2bc9f496a1",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/ui/memory-workspace.module.css": {
-      "sha256": "c2fbf62e52dca4a8d47713dd3c8b1fece6dcd1e5cfb7aa256ae12a889ccaaa85",
+      "sha256": "096df97f7b3b29147cadf262ea8d31b7eeaa0de655371187ec3e32e45ac0a0ae",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/ui/memory-workspace.tsx": {
-      "sha256": "30d9c2c7aecfddc3a4d2101513d7248e0bee430e41a46f17e392266adbbb3113",
+      "sha256": "c9c4c4a95b349bcb68233815d9b54c7d2cb9271eecff6c3ac99f0db99e7aff13",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": {
-      "sha256": "0741728d673a81c145e97555c2b17977617e6d921e2a0d14505f44821614e2b9",
+      "sha256": "d911b868f7d5c16b97faee9b1fdd7d84d682a06690d3a2ca9f376b5de7a2725b",
       "kind": "feature",
       "owner_stage": "AR-F4-B"
     },
     "frontend/src/features/pwa-shell/model/pwa-contract.ts": {
-      "sha256": "478c880f02366ebbb59cb68f6bf75474b063c9788ac497b3aa6bd182662c12b5",
+      "sha256": "10f220983ecba75afb519b716f04354f5e49c9b0de010622e1a4a2d008f63df4",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/pwa-shell/public.ts": {
-      "sha256": "af8c25266a18dc9e5f0e41d4de0f2e708836d895bb1bda4fe8032d9795d0face",
+      "sha256": "3fc2d10879d894662826e30fb04eb34518634679ec067d67790afe66c78e7e03",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": {
-      "sha256": "259f1dc516aa4621bf77ff357ed3a3eba48c847d02bac3f2106ac6a66c55a87e",
+      "sha256": "09ead09541126306fe903a2d3af67637611db988cefc13240f793550a66080e0",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/relationships/api/relationship-graph.ts": {
-      "sha256": "69c3cc6fae9430aa8e09c058b4947341d2bd2937ed1c957b179d1f66c510bb7e",
+      "sha256": "0e31cbb24f9b7fb677ce79b8b1e99f15335d40a09e561c65ba575fe973c5bd61",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/relationships/model/relationship-graph.ts": {
-      "sha256": "2f27c93ad0c2730260ffc6f20418886b4b898d39ac9f1a6b0a33ee2816f83377",
+      "sha256": "859a1a23a8233c6e5fa80e806673ec9df305204ad365369a7da2c55d453d5cc8",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/relationships/public.ts": {
-      "sha256": "3c8078bd467eab5596e3784eaeeb0b4a7648bf943b9251e6e32537955916bf7e",
+      "sha256": "43cc1ef83b1a09738d5ff5958e04573c4fc87721f5a27e19e1844d5d444cc1a9",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/relationships/ui/relationship-graph-client.tsx": {
-      "sha256": "142b43be71de2760283c552a3c0245abd5432c57ea26c8eab27fd3d874b734ae",
+      "sha256": "3904f11140882dae52e4b3bc63c2a84278a798f601b170b254f57877b42e5cb7",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/relationships/ui/relationship-graph-frame.module.css": {
-      "sha256": "a1b22289f651380b80e82ca3011c0b8b559a75f08dcee042b21c7b8261566331",
+      "sha256": "c8e72ecefd541a49c70a362ad517e97e84b063ce60f39063215345636863b838",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": {
-      "sha256": "a33ec35de9eb33f792646ad8b9ed764bf82ee5a9b157934ddfbe3572f712b5c5",
+      "sha256": "0da8ce483b0d4615e150fc4e5b48dbc52abdadb47033a04ef391d1913e29e534",
       "kind": "feature",
       "owner_stage": "AR-F3-F"
     },
     "frontend/src/features/runtime-status/api/runtime-status-client.ts": {
-      "sha256": "bf1108742d404c6bc6944b9bfae3219c4169ea2b7f8738876b0bb42a87e6c0d1",
+      "sha256": "025b32b395bd1b54cdde21fa8f4075e0295efebfdef431bbe7f55f4898882bbe",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/runtime-status/model/runtime-status-contract.ts": {
-      "sha256": "802aa90e4277810dac6384393cab25245a5c98665f421dab2568743c430469ba",
+      "sha256": "1dc1e56820e2f8aa555e667b14f6872900f87b2a5198d84fa6b07bd0256f8c2c",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/runtime-status/public.ts": {
-      "sha256": "cddf021ee9c144fa1e1361feaefde7b9f878a5a0f5dc87f2473fc431ff113b8b",
+      "sha256": "571d1850a30dabaeb6c515f8d8e4038d558a9c0183be513f6b0df97e24905fa5",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/runtime-status/ui/runtime-status-summary.tsx": {
-      "sha256": "99387659e2f8a8a5da6129d34cbef050635321d8f3b98868002249bb1b2c43e6",
+      "sha256": "a82b2ff778ec01c1176a20191004c23df4fa0a2ed626468771d8c2e3172efd75",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/social/api/social-agent-client.ts": {
-      "sha256": "fc8b57cb68ad16160212e79a57be492a0a5f5cea70bdd2eacf57d0a8caccbda4",
+      "sha256": "cec589b8f6ff205e3fcbe9bba7c63318ea886a4250654dba74f82ac3db3a6cd6",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/api/social-feed-client.ts": {
-      "sha256": "108273d3d904947001b0b88ccbbca8470486102971416562c38941ca1364f116",
+      "sha256": "e7138dd44b6b1bb9e335d0a8f3e38c83d8aa40e701f8c52247fd281ad8407189",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/api/social-write-client.ts": {
-      "sha256": "e3a7e9d1b983b7ca6f8162d1ccdba72e45dbff6a1d1c5cba40c8c985f0ab3de8",
+      "sha256": "c17d14d0678f8a345a0b2ac75d4bfa9a517e49a9d58aeb6e47f84ead2aa37f8e",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/api/world-character-social-profile-client.ts": {
-      "sha256": "939825c22adf880610b2f30bdb37f70c94cf2ee16f5dd8e82d6abc6fff3a4867",
+      "sha256": "e54e12ce3eafb23c00e4fa4fb094d755ae2f041e64e2b8a017bf739d5a9ce228",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/causality-presentation.ts": {
-      "sha256": "3e79e15776d3cf33130227e26beeb165fcd66706f522751dabaa21479824a76c",
+      "sha256": "8e39f8638fdeb960b56cad8fc76a3c2ed1c2c67eb3d1c9217614096a22193b99",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/post-card-navigation.ts": {
-      "sha256": "5d96874a1a8780f4a86335ac109d70ce696f07b5ffcde1cd380e82d41394162f",
+      "sha256": "326fd7efcca17ea9ac5db55909dc242a5441ac3be8bd32bc56fb9210ba5837f2",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/social-agent-contract.ts": {
-      "sha256": "712e5ae50b935958ecd4935d3fb380f85983ad3c441c6b858937fdfea4a627c4",
+      "sha256": "fbaaafafd8061bf66b08c45548394ad12cbcf7eaf12612c6cecc24e225f4b5f7",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/social-feed-contract.ts": {
-      "sha256": "4a4be54f49ed911b1fa321662c4bc4217d270ca8736f71c7514f81cb33dd17c8",
+      "sha256": "14fd0abb1deccbe7dac5a811c13a01201f0391e58904d7210f1e600d3e97d93b",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/social-presentation-contract.ts": {
-      "sha256": "0f882c1bd5f6af8bd9432cc88decbe2ceac9632dbb5518f86740990d0e309049",
+      "sha256": "bae6144684e40838fc7b7733882bf3685901476a4d74fcebb2827fe67fdd96f7",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/social-write-contract.ts": {
-      "sha256": "97fbaa7d12647ba034c55ae54ee41ddf128303dd47ee7b713dcc8b5e09f29121",
+      "sha256": "a905dcf4ab18b80c914c73a68aab652cc3b0fd9967064bad67b8045489248bbc",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/model/world-character-social-profile-contract.ts": {
-      "sha256": "88170dfd83dca49572b035f7540494b7cc0fe4d530653343ec5ce1c0fdf29a0f",
+      "sha256": "1f85d2996a7c2b77a52de7bce6bfc4ff374e1870693f946c3c6d80bce5c770c5",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/public.ts": {
-      "sha256": "25a1470ad9f843d48656128c7c57c502d18fec5ec5c24c69263ee3a9f38b9f67",
+      "sha256": "d2d63998e85b1c9398c1e488df302fbbe43910e3f561c996a560c54a406e8ff8",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/active-agent-summary.tsx": {
-      "sha256": "11d1c99dffed8b5ab2959a0b7c73d66e6cbe7104222466e02620c90949d6e12e",
+      "sha256": "834a14cde2d473ba38d26cc817245dc4c8d9d7263420319d40bdac60ea9e0f27",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/expandable-post-text.tsx": {
-      "sha256": "90c53f0d7144982af0c635233d96d927948ddc4ca3004136521745266623c16f",
+      "sha256": "7add3d46005c10fb7b6b92421032abc89ca75759229a9e49b0635632e1711a37",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/mentioned-text.tsx": {
-      "sha256": "4d46c990678fc4c2b3e746312318e3b4a21405173ec1389646fb0b97d55e8201",
+      "sha256": "f02064771cbfb9f2ac4942b15724c1b818fd6989904f72ecb21fc7ee4779c1d4",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/post-list-client.tsx": {
-      "sha256": "b1dc67e762b5b3668b699373dc8c36b59fdcd2701dc2e63881425e5cda1a22e2",
+      "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/post-media-grid.tsx": {
-      "sha256": "f036620f746ddc74e45ea32cba93dcc474a939435fb851c535b3c07ea1675bdb",
+      "sha256": "c3d0419500ab77ebd048848aeea74f28337da3d74b4ab6a29ba72bb95e504e25",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/social-post-row.tsx": {
-      "sha256": "6db7b69bb77f126ef95e8a81bbab5660369db9de3f1ae0136383e2b486110050",
+      "sha256": "0e0de56ac3b05c2c08eba83e92f98faad560653a16226ad6a5d1d73bd277fe25",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/social-presentation.module.css": {
-      "sha256": "42ce8e5acbabd51b46f60a5b17b7d8013a2913875d8e21bdcfd69ed9d7c22d11",
+      "sha256": "d24b5e775f25a7bb7cb6ec019995af77bc9aa7328fcd7ccdb13a30d229195897",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/world-character-social-profile-activity.module.css": {
-      "sha256": "c9c7d07a57f080371b2ec4cfc876bb69cd32ce1ccf74eb596c6a580ea89c752c",
+      "sha256": "11b70a05ad889c4050c47d3d86b39603485ea597b7aa0133996387ec6db3d3c1",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/world-character-social-profile-activity.tsx": {
-      "sha256": "48af7aa45638dd265741550b86d58b50c56b57cf457454e289a0729b46e81b2f",
+      "sha256": "7fc36f9cb5694e639a26c5449ff6bc23623fbd8c7f81fd2771e44f458a4131f8",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/world-social-feed.module.css": {
-      "sha256": "470ba75c1b4815d9a558d469e016824da029e29308b6b9e57c40fd8c25fccc48",
+      "sha256": "0c8292b73dfda56d8e85047b7f4c059e0e6ac36096802666f3e34c2449f04643",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/social/ui/world-social-feed.tsx": {
-      "sha256": "6c747844841f666e8d57c8f19cfe2c0044d584c436b3eb6fc5b0c26733800afb",
+      "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c",
       "kind": "feature",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/features/ui-foundation/public.ts": {
-      "sha256": "bcc5c096b38abb7c8817fa9b4a9bf0251c7cf3533f21a7584bfd58500ffb1a5e",
+      "sha256": "8468b51c2279f1038d06ca98874aa8afa605655c91236b035662588443a2f601",
       "kind": "feature",
       "owner_stage": "AR-F5-A"
     },
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css": {
-      "sha256": "3242a33d8430289227637ea9703a82ca439c18772bc73cef3ac9ae4ff6851e4b",
+      "sha256": "247bba207a353c6be701143138067b9cad7f8e35405056e8ef0c1c69ad6a7aa1",
       "kind": "feature",
       "owner_stage": "AR-F5-A"
     },
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": {
-      "sha256": "2d356b7020a59bfd415e918a3b231938b90f870211baed708f1d7ad3e3a419ba",
+      "sha256": "2e811cb214b85a366f62b26c4ae449883f6dcd104f4db0211a3bd07afc2faf1f",
       "kind": "feature",
       "owner_stage": "AR-F5-A"
     },
     "frontend/src/features/world-app/api/world-app-client.ts": {
-      "sha256": "93ded30e677aa0c44d8d8b2a2ba68e16ac5ff237f9919de9db9391277e72654a",
+      "sha256": "b136769b1a204671504ab0de38cd1fc377c99be90bbeddd0e4eda4cb43ffa410",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/model/world-app-contract.ts": {
-      "sha256": "81ff031f734fd8e39fd57fd27287c47ff4786fd9add1f6c8113b64ff9816e46e",
+      "sha256": "d0087058504bac4798ffc40c997fb3dc988f319d7c356a05998bc217d76e3748",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/public.ts": {
-      "sha256": "7817ffa7f651fccc8033a2fce6b0ff54d7c9b87e2bec0f0d86a084f97b9f10dd",
+      "sha256": "26db322c49242d8ef756233bc543efcc00cfebaf02bba5c92963a1d9d86e39aa",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/ui/world-app-shell.module.css": {
-      "sha256": "9ade0071fa73396f0592ac49a00964ccd0d36176c747edc8200eb0b90dcc8c65",
+      "sha256": "cf740f173983e66384b18bdeb430ec344293a102c14d999ef81a47065cc1dc18",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/ui/world-app-shell.tsx": {
-      "sha256": "7b41f60099a028a2be200461d9befbeb72f27258423b75814742a00cb96ced4c",
+      "sha256": "84bacc227b15601bc1a025e6ceb04215027ebca9136dab2cf052d4c201d18ac1",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/ui/world-app.module.css": {
-      "sha256": "6c7feec0351a8b2ef94965fb473362e58362952705225df95d65e2f828e379ca",
+      "sha256": "4a9ea1a4abaaa3be985881225af2238a2e69f50e4a46aaf89acdae929637b2ad",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-app/ui/world-app.tsx": {
-      "sha256": "229b436818ef8b7df425e4ac77d2a22e3cc24e7c5db7721e4598aba9f9d86587",
+      "sha256": "aeabe7ec9d3c3659b03dfc1d4b1547ee228bb14134462a3cda54765c2158f72e",
       "kind": "feature",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/features/world-packages/api/world-package-client.ts": {
-      "sha256": "1898884a042ac857e329a5718eafacd1f279cae694dcc680f9ca3e7e4e83a4bb",
+      "sha256": "4421093187f851d2ba1e9e63a92ddb352f9c42e61adaaaae19f8f59f72a1ab67",
       "kind": "feature",
       "owner_stage": "AR-F3-D"
     },
     "frontend/src/features/world-packages/native-delivery.ts": {
-      "sha256": "9ee9b29ee5b8e8460fd77d7c6f6da98129febdd7bb30db99cd2c0c6770ab0f6d",
+      "sha256": "22afbb26998b0486114841f5ebdbbcd77f1c69239296ab785908bf9bfc8ab6ed",
       "kind": "feature",
       "owner_stage": "AR-F3-D"
     },
     "frontend/src/features/world-packages/public.ts": {
-      "sha256": "8b29425048589f9c230c8d41432ceb258e429c7f9c135d97ad42c3cc5e05576b",
+      "sha256": "4d41d50935df84e7b2e17e483960e6db1e8044e3112a252c49c537e53633a145",
       "kind": "feature",
       "owner_stage": "AR-F3-D"
     },
     "frontend/src/features/world-packages/world-package-export-panel.tsx": {
-      "sha256": "27c0e98051f5d7ff69622a44ddadf4d3bb39156151927bf390abd4be4c1ced8e",
+      "sha256": "fe69c59d7dc9b2857c3f426e3859a43c411fa7ec05f0e56044839b58007a7e80",
       "kind": "feature",
       "owner_stage": "AR-F3-D"
     },
     "frontend/src/features/world-packages/world-package-import-client.tsx": {
-      "sha256": "8315b3f7fd490fcc4dc44732ff1d5cbdaf2264eb46a6f968a0edf9c1c3b60bbd",
+      "sha256": "e083fbe3355cc63a915bb27f418bac2468a3c1398d8c65b720029d3117cb4db5",
       "kind": "feature",
       "owner_stage": "AR-F3-D"
     },
     "frontend/src/hooks/use-runtime-media-url.ts": {
-      "sha256": "3ade329074449dbaad82b322ec13327cac2c71dd648f2c470d51d740a10ecef4",
+      "sha256": "18748b3edaa5fe6d331fcd24df1378915d55eeca9360bdc2777c642b40f5f42e",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/src/lib/activity.ts": {
-      "sha256": "8449a77273e5c0b870dbf0369e9f43a96644f6355828f52f734fdd5fe86d1ac5",
+      "sha256": "f8868ea8ad2d0c255a8f70d72251b153a0ed8bf3e6538dd495444ab5a7857b90",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/lib/agents.ts": {
-      "sha256": "b87a4b56084d9acdc262d6abbc0378644a3e1ea3ff47f79db642cc46606eba18",
+      "sha256": "9d3bb9d6130a91b56dff767db1f0393f8c088c333d03253d8f25a080d8fceb2f",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-B"
     },
     "frontend/src/lib/angmoo-api-docs.ts": {
-      "sha256": "484e9797bd2e59d5f4062517eac13f1cb41c4d87934a5118184b8f6a87e2216b",
+      "sha256": "3142e16d9ee62a0521b266dfa4daa6c210656c2d90a2ff5d8e18afaaba959eb2",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/lib/backend.ts": {
-      "sha256": "9b18028904843f628e3b6f3c8b1cc9f32c5c048f9e3964fde867f250bf7ef1a7",
+      "sha256": "95f5b33111fb91cb08c4ae48c8954d971ae795e22ea8fac33f0f3633728c8b3a",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/community.ts": {
-      "sha256": "e24f840597f42c4b6b84c869c235724b6989ee75c6884a25ab2348495af51bc4",
+      "sha256": "ae697e51545686aef9999886a86d4897c32d13d1badb385ac23428eb770de8cb",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/features.ts": {
-      "sha256": "497fa000fe5c1d1f24bcda3aeb7481a6832225f1174aaad313a3555736df2700",
+      "sha256": "e2907681381232318021c938d80b0d594d4ea22d57b8c71912d512812f08ce15",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-C"
     },
     "frontend/src/lib/generated-media.ts": {
-      "sha256": "50102e2fc43087ab5b5af27365ac1ed0db27cc6aa3f1af02008e0a51112063b9",
+      "sha256": "e1c8c8904f605175eb1393a625a41b680dbf04e61924bef9313536a33e143905",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/incremental-list.ts": {
-      "sha256": "e35e5766918e0ab1f098bfa96b57526f2ee3d21a55eaa823c8cc9171dbd4547c",
+      "sha256": "06599c3dac42641e47bdff70469edb27f3c28e2e2c6c89bc8a7a7eab46697959",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/media/safe-media-url.ts": {
-      "sha256": "e82e9fcd7cf5c93d5e19530c61dc14a460a9a0422491e83909f40779460a5d0f",
+      "sha256": "f91de646d5211412c79c22eb8b339791d5f325bcb04cd38b99af2ba0b69e98df",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/navigation/product-routes.ts": {
-      "sha256": "57c054afadd70d3815842b3f2eb0a58a570442712bd8334fdeb749b7e1de5075",
+      "sha256": "8e5582a7ea72ab796dc9943f4cbf7e3623f5d2a3bd9e2d2d632c124b93e871f4",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/policy-links.ts": {
-      "sha256": "bedcd7d1b9125599c298e3468f33340c9c1cb7b063e26451ede9ae27f105d10e",
+      "sha256": "90fb8f85eb0a352398761289c9de6f3afd74ba329baa693c329009ee8c2e8bdb",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/lib/post-card-navigation.ts": {
-      "sha256": "81ff50a13649610954c2429582afa672a0bf4b90d0bb5472530aae644441c994",
+      "sha256": "672ed88b08c6e8afb444fe9add6913f2150ee93eea15c3208088e9a62565f70f",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/profile.ts": {
-      "sha256": "bc209755921c6b353a8da523e814ff03144ee0d0973cb0c900c42ccb5f25128f",
+      "sha256": "e145aa852ac46732b007e785ec2ae4d12ce32a2685438bdbef71725c5e0b88c9",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/runtime/runtime-config.ts": {
-      "sha256": "9712ce59cbedef3c25308078591601bca3bdc0dd2f766d58c559ef1054713247",
+      "sha256": "96bb72f5db0009f86e0a760410d3ff441284f3e2c5ad2b891ad5afd3104d12aa",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/safe-media-url.ts": {
-      "sha256": "02cfe6bf1fd06ac6b720bd9c2b4a680d6d6406834ea75d0b0c34657bbd86cb2e",
+      "sha256": "17496eccbea7803dc3b1eb9014e449a2bd82564ea7e9c5c8dce4f8776b27c6a6",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/safe-navigation.ts": {
-      "sha256": "929ccdd374732169d1846784e21c77c3b90767d6c9ef9caca203d9e92f09030b",
+      "sha256": "26e1235c662bb0a4abbe646a1996d3f751df730e68ee7f39dff0800ae071b6d7",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/seo.ts": {
-      "sha256": "d0ea62ad111e6c9ca6fe76d2b0aa734ca7bb8d12a43516ec745cb148ca087b05",
+      "sha256": "3edb91ef30bdcbc352c7a82e19a7daeac51475af24e2534af87f2e58c8d6da2f",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/lib/tree.ts": {
-      "sha256": "f7982df1a2486ad7bf781f1ec7fd2fb1e849285b68083d48aa5882b4fc70f687",
+      "sha256": "261a2dc2935e89708114c819c08916fe0620b55062bec71be01c2972a2df80f6",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-G"
     },
     "frontend/src/lib/use-mobile-pull-to-refresh.ts": {
-      "sha256": "1e20d7727e3bd5afdafcc44749018fa123ff14efa0e6fd54416317846d943007",
+      "sha256": "9494297c3bd9463cb916f8ced15f23ae8ceb116e9556fca8def9b5257470256b",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/use-private-media-url.ts": {
-      "sha256": "99a4aee089d281af85f3dfb00290c18455c516939d2bae24e3f8e149df339e61",
+      "sha256": "355d65db998dcfb2ee34534644b404b1c606990dc9c08cde4ff7f83b2d8c1e36",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/lib/world-activity-runtime.ts": {
-      "sha256": "d318a7152765539da78d72298c164949543a304a39f1076fbe6fa5ec0052b8c9",
+      "sha256": "38e0306b1ee6148c8410304c69878d90781f5b0b39d89b6d0895e2979f349050",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/world-character-setup.ts": {
-      "sha256": "27b4d6bd9338ebf19d73a66a6103cbbed7fc3e211f60ef0c7f4c15f772393044",
+      "sha256": "e2ed8e30e638fc0ec3ffed613a2fce5819e2790983ea295295e84f2ba3f8d8f9",
       "kind": "social-or-shared-presentation",
       "owner_stage": "AR-F3-E"
     },
     "frontend/src/lib/worlds.ts": {
-      "sha256": "3f199e1144d24f0a4edeb4db21b3e2c497df287d2e8d91d2e97a8e30a40e5a3d",
+      "sha256": "5435ecfee21b37ab7f27e04893fbbe00a2912d6d283c3f51d9e82eda01431f07",
       "kind": "existing-owner-to-separate",
       "owner_stage": "AR-F3-C"
     },
     "frontend/src/shared/api/backend-server.ts": {
-      "sha256": "79e41c97bc03d0c5d334c79fa08d3ae42558f73263d481683428c9f9da4d9b4f",
+      "sha256": "4f267458fa8495ce8f606f4d9c8ad3f9636806bc6e22fd7f58a48732f1cecec3",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/api/public.ts": {
-      "sha256": "644e25dad988a00044030d81a2044f926b1d1862386feaea31b948db81bc967a",
+      "sha256": "4f038a7e1ac46d78eab8ed620fd6c7f846d949598b011e46f631bb0c689544ee",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/auth/auth-provider.tsx": {
-      "sha256": "e8bdf8c48c1df2eca09ed15dad3c30cd571edbd72aab98a782ec6b70d131fa6b",
+      "sha256": "48ad0572160a79184fa7e9de495e42615c90820e6ba83372edb026707908967c",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/auth/auth-session.ts": {
-      "sha256": "54fa273049894b062ac132bd72697380c9ffe4b5eb72d16ed00fc5245c4d5851",
+      "sha256": "0021aabaa85ac99e8fcc95c9f5886175cef96805fe21269e5899403949f04b22",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/auth/public.ts": {
-      "sha256": "9c071c7392c0caf21a34a918647f83e05a196d0cb6fa072338774fcedb439807",
+      "sha256": "77cac77c1b816adbca36db2e4e360cf5ca11507eb8e4536a1b010b97c49c4919",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/desktop/desktop-window-bridge.tsx": {
-      "sha256": "b4060d1c8fb3cefbf52e2212cae0b337800e57d21a3dc9f8d05003f3b557f8d4",
+      "sha256": "9fc4d28f7911b78efc046f4a07d9fb27ad4b2745987078b9c696492aed012def",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/desktop/desktop-window-controls.module.css": {
-      "sha256": "db1ba9b976ef78837ea09924f99e64d12b09e78c4180a496a24c2e0a5f37a28f",
+      "sha256": "fe9a9041bca8b1a3c051c14524b556daf85e6f539483f29147fe053ebe3f06e9",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/desktop/product-window.ts": {
-      "sha256": "f8e9e70c4a314f78eac128c375af5bb532763828ea8b0ead74cc86a665569b85",
+      "sha256": "80202c0ea523be1b19ab7daa14dbab7bd89a7b06dfcfbf96718a59a76119ddf9",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/desktop/public.ts": {
-      "sha256": "9504d84c1cf1d0bad10e8bcff4be1ea5b371b91986d673222b64b83bfc17c214",
+      "sha256": "24df377f6c858f6cc11b5f27993527fec6594738bbee12806609a9a8e01cec44",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/interaction/public.ts": {
-      "sha256": "f4a584236ebc0d6a498f387952054dbfdab5152f9d81a0f392cfa8e6a5984e27",
+      "sha256": "4a84ff24e2bd570d0623c5189f2224abd4366da5ea577eb254ebdcb7d9143661",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/interaction/scroll-viewport.ts": {
-      "sha256": "a123375561986437efbc6d8d8e99e1ce983ad140fe352ee0b63256904d5ab590",
+      "sha256": "e10a8b5eb78d6196a72cc8664e4aadfa58ada16c462bc4a03fa9f4e592cbab9f",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts": {
-      "sha256": "c58eb34691566780233be34e1ef03663d2cd014c4c487860115b250b08653f3b",
+      "sha256": "756ad51b664285892de9d6cca1f589a0d55850a6cf7d8775dfc4d87ad92950ba",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/media/public.ts": {
-      "sha256": "7768b74e0cc39a2599a468e744223e9b40b3e7374d3220b858f925df9affef3a",
+      "sha256": "82ad023b4bed4d3c214eeb5e200138147f9a78d75f7af77737d3edee091ecb3e",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/media/safe-media-url.ts": {
-      "sha256": "d63042e0c9bc94ac3bf0317ab3c8f9483251a9e632f3b453a9aeb2c236ad3c16",
+      "sha256": "34b1b972856c727cf02138ccc364bd7fb2336c26072789bc3bc73c43454d42ff",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/media/use-runtime-media-url.ts": {
-      "sha256": "fb3df9012e47d6ad3511968e4a00293cf846ce03727246efc325ef30122dd29a",
+      "sha256": "cde1226c5e52abeff27152e4647ed14b0f229eacbde68a29044a8b4bf3ec9ab9",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/navigation/product-routes.ts": {
-      "sha256": "31143ac56d1b4a4646363fe9c3cd578924f2e1e53909f641cb0b055a2a2a05d5",
+      "sha256": "3ab193cc3f361907060840982e3717b55a52d920cdd3f7d5f5e2ed57d8b8778e",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/navigation/public.ts": {
-      "sha256": "bca5062a98c782cb35bae7e0c5cbaf7c9054f0a64ddc9d894d72871fa879c634",
+      "sha256": "0bf61a5f502cb7ca446609dd32435668f5f151264625b9e6694f50171c97591f",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/navigation/runtime-navigation.ts": {
-      "sha256": "99f18cab70bb979c3dd7f5d1bd6e9b3e67f4ad495c0d0c3bfd3470df44245aff",
+      "sha256": "26b1c6e74e38c26e3ae0105910459ecf31a4f45f66df12c15b3dae74b1e770d6",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/navigation/static-navigation-bridge.tsx": {
-      "sha256": "33b4de88c4a6d50872608cb294ddb294b046a86a7e5b3e5c22e1d6bbd0abf73c",
+      "sha256": "483af4c88c52aa9832988cfd7bdcaebb995cd8c5efb1d148f437077a6c50ab7e",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/runtime/desktop-runtime-gate.tsx": {
-      "sha256": "ad880294ff5c5be015fb81472c37fbad08d2459a46058ad25761a899338282c6",
+      "sha256": "fd963cf8dfd69008c17d39d56fa60bbd807672d3c5c2325d539fef2ba35d3bff",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx": {
-      "sha256": "0f83f48f959b0f930b080ac7c618ee1e96bde77aae3c7e1277768ece1cfa63a2",
+      "sha256": "000335d89f394f569d79ed48ae4b276917119b49b99ecb236ab4d6499d235730",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/runtime/public.ts": {
-      "sha256": "fe83f8555d4cdca0a9f7603e2866e26426b2b3d2495c85b6cdf8b5047950cfb2",
+      "sha256": "ec10cc73c61e6324569d62afb5c3b6d7781bb592ae310d87adad788944132292",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/runtime/runtime-config.ts": {
-      "sha256": "6e04a69a998b30ac48bf04f82386de8311b14565e1598afe8fbd4d2444b666ef",
+      "sha256": "a5844e153007202af0bbbbca7db6704c9433afab455dd185b249e5a0a0836f08",
       "kind": "transport-or-platform",
       "owner_stage": "AR-F2-B"
     },
     "frontend/src/shared/ui/app-icon.tsx": {
-      "sha256": "06e8a53c45e0633090b7fa95c3422735a556d3acb4e9b64a9371bd6cb0f57bf6",
+      "sha256": "14c2ed16e25e73a344e3a89feac92f58e3c3c4b000c89fc99b1bad63ccb6943e",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/avatar.tsx": {
-      "sha256": "4703f2531272f892212d4e3c2be150456a217c9543ed6c672f413cce0651956b",
+      "sha256": "bd91bf38213e1e06243e1f05d7610da09f9b650b55cd72ece1f7283e83608ee4",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/button.tsx": {
-      "sha256": "10d3adcdaefd50ce49ed52a8ee39b2adb59f44a88fe04e30911dcde01ea6b386",
+      "sha256": "4b916bb3aa7ae9f0f2f7c56054b8212b23e827b90b79e73f4fd3896b85565030",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/class-names.ts": {
-      "sha256": "da3cc2d715c411293e31402c61e77a6c175a3a8b2e43a169f33a81d3ea5a4744",
+      "sha256": "0cc016f067e13386868b449fd412a1e05f87043e13372d867fb96a5f42e47640",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/device-frame.module.css": {
-      "sha256": "0c96d909b20e828bd5e91113391ba4ffd170c159ac58dd91fa3ed5663cd54165",
+      "sha256": "439e989d88b6f375eb2adea4bef4931bb1dd5ff83fdf3fa22c576a12de55ad8a",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/device-frame.tsx": {
-      "sha256": "9b02ecac27cf13fcc0145e958d5e23de86d251c38bb914ef24f497f6f696fac5",
+      "sha256": "aa6e41b1dbc724c9a0e28a11da034122c95d81dca7acf67f65a63b5f12c7d02b",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/dialog.tsx": {
-      "sha256": "64c5040adbd0ba6431139bbece188dbb41b739cf9e951da084420fdf81d7fd7b",
+      "sha256": "0968d0638e2d98db9340d8199e5e53ef9632737c255e846ef115039b8fbd9994",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/feedback.tsx": {
-      "sha256": "e4d2f3466e14d381ea08b53d1747ab3d4c09a30e7d999ced35e95b6a38f31f17",
+      "sha256": "7ace9c20fd7bc4177a37ce5ec2dcb43e1a9580747f62f1f47d6bdd250dd88664",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/form-controls.tsx": {
-      "sha256": "82aa412ff2862a56dba9d5c9b66ef6debc57c6b5bb6790983fb496d4c792bfd2",
+      "sha256": "623dd198c906c428d84dc80e56ef16d8e5fb7fdfabba86a832cd6493e08d2f88",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/navigation.tsx": {
-      "sha256": "2b82a4319e5c30c54cdc749efe55adb9b41a43098a4b3a97f5706e4749da2585",
+      "sha256": "3027104d26d3678b2f76feb1446fb9628f4e8d8844ad86afdddb52388b866a8e",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/profile-avatar.tsx": {
-      "sha256": "b8e8a3724f696515041e04700fcd5b20afccd3126c34fec414b8e733259a3c5a",
+      "sha256": "b672a8290f161befc065fcb4ea5bd47ce2b6d13c0a6ac74348c3acec9e59f655",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/profile-presentation.ts": {
-      "sha256": "865d329303e6c50dfd059f27c186c638376c356f840e698fb79f2ed1283de1d7",
+      "sha256": "d79daf9f2befed6af5a8c9882c85192221ff3081ae49744b669d9d517bc62593",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/public.ts": {
-      "sha256": "f1e2b29d99ae012116d7b76b0d0d9e506950fc02eefb893bb3cb8dadbf4664a5",
+      "sha256": "fc162b6a3427eb2d1eb5d94d7ccabde45487386ffbd0ef0dbdb147b9f141e368",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/semantic-tokens.css": {
-      "sha256": "ad295e29e9a22f6baa3e02cce3caad5296e430d47c1ca22ac96c716278dc587c",
+      "sha256": "10a74dfaaf8646971795da5591ef24b15eceb1a9d5073091477edad2524376ed",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/status-badge.tsx": {
-      "sha256": "2d5ccd05b687ec62faa22d65267923cf82712ef09806baf6fce193f71c16d4dd",
+      "sha256": "7274d1c9af0dfaa54d3a5fca94423a519a354680f5724974efec3134be6aa07e",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/status.tsx": {
-      "sha256": "cdd2641d103ea6e3ff50253864b1d1b96343c7e32ef54d74b268ade1f741068a",
+      "sha256": "e8fe4b77b27c403cba360b0622b3b3a736dad9cfe44b2efeacc44e3bf3577ff8",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/shared/ui/surfaces.tsx": {
-      "sha256": "92d1bcaf407bfee04488bcc541a602aef3130cab4d0ba99f48be34acc15b8eba",
+      "sha256": "524a7348fe749f10507a31097d1e058fcf08c2e856e0394d30a2fee29b9772a6",
       "kind": "common-ui",
       "owner_stage": "AR-F2-A"
     },
     "frontend/src/utils/class-names.ts": {
-      "sha256": "aa6cbe1c69085f62dc2a265c69dc12c104ba83c886ee146e9da15b6f61796f48",
+      "sha256": "1ace811987495757099ccbcb0cff314b271b54ea2fadce50db999a165d47f1c9",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/static-shell/app/layout.tsx": {
-      "sha256": "2b406e1d3623fb23db1beecdbac4bddc10a40d5147d55d1213970094cbdb1a99",
+      "sha256": "1e61347642ca6859e5646cc51aa2420a1dc66a57a1a2d5b302d20f99b1f792f7",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/static-shell/app/page.tsx": {
-      "sha256": "26846183b4dfc32f41d5af6434c862ea678d6556bb61156a7122e05815114464",
+      "sha256": "272c3090633d4b8c8b45952894223a9698c0234e45795b19d599310367eefe5d",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/static-shell/app/static-globals.css": {
-      "sha256": "451cdf41036e9db4bba783f30db14d3b570a8192ef55eaf58267dfbd71eda69a",
+      "sha256": "04e13afe1dd5366405380fec9032884ce30f5680bf07d58ca8274ca0adea3e04",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/static-shell/next.config.ts": {
-      "sha256": "ea929bae009e8cb968d7418eab78615da807ea11730c5a684d7a134c0a789e27",
+      "sha256": "79b10babaf28c11526f72d5f38f3a17e392771ee4f2e62cc19e3e2f98769109b",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/static-shell/tsconfig.json": {
-      "sha256": "cb1b2e6ea1d461b0c249488a293f77d7de6eefd6d7539e27fbf3e0169f2eefc3",
+      "sha256": "809a023d11b67f210f08297a8217faee946e082f121a01bb1fee9be5f2d54a2c",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     },
     "frontend/tsconfig.json": {
-      "sha256": "dbacf04aa5f38c1ce4b0f030fbb84e5adff19306fb785b2e4aafef9c58705658",
+      "sha256": "5c51df4c59f4510d8c7dadf07a5c32132228826a3b331da5e286207b4df7ef9c",
       "kind": "build-config-or-support",
       "owner_stage": "AR-F5-A"
     }

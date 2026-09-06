@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import subprocess
 
 import pytest
 import yaml
@@ -13,12 +14,23 @@ from frontend_completed_boundaries import check_completed_frontend
 from check_refactor_frontend_preservation import mapped, verify
 from refactor_boundaries import validate_scope
 from check_windows_host_tauri_dev_contract import check_workflow_triggers
+import check_refactor_frontend_preservation as frontend_stock
 
 
 def write(root, path, text):
     target = root / path
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding="utf-8")
+
+
+@pytest.mark.parametrize("autocrlf", ["true", "false"])
+def test_committed_frontend_bytes_ignore_host_line_endings(monkeypatch, autocrlf):
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
+    monkeypatch.setenv("GIT_CONFIG_KEY_0", "core.autocrlf")
+    monkeypatch.setenv("GIT_CONFIG_VALUE_0", autocrlf)
+    source = "browser-tests/playwright.config.ts"
+    canonical = subprocess.check_output(["git", "show", f"{frontend_stock.BASE}:{source}"], cwd=ROOT)
+    assert frontend_stock.committed_files(ROOT)[source] == canonical
 
 
 @pytest.mark.parametrize("statement", [
