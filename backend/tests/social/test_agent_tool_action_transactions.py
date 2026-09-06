@@ -5,7 +5,7 @@ from model_fixture_support import models
 from app.core.unit_of_work import deferred_commits
 from app.domains.social.schemas.community import PostCreate
 from app.runtime.social.agent_tools import agent_tool_actions
-from test_social_event_runtime import _engine, _seed
+from relationships.test_social_event_runtime import _engine, _seed
 
 
 def test_tool_post_topic_and_success_log_share_caller_rollback():

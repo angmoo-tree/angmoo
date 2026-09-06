@@ -13,7 +13,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 > **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio·퇴장·runtime mode·readiness의 실제 업무 흐름은 `service/`, HTTP는 `router/profile.py`·`entry.py`·`setup.py`가 소유합니다. 여러 업무 join과 삭제·runtime busy 검사 및 시작 조립은 `runtime/world_characters/`에 있습니다. 미전환 외부 소비자는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
 
 
-> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 원본 글·반응·프로필 업무 흐름은 아래 B5-B2~B6 적용 범위로 이어지며 agent 도구와 Relationship/projection 전환은 아직 남아 있습니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
+> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 원본 글·반응·프로필·agent 도구와 Relationship/projection의 실제 역할 이전은 아래 B5 결과에 이어집니다. 현재 Social/Relationships의 옛 계층·public 및 Community 집합은 제거했고, 부모 통합에서 실제 Resident·Chat·DB 조립을 합류해 전체 경계를 검증합니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
 
 > **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 원본 글·반응은 `service/timeline.py`, 프로필·팔로우는 `service/profiles.py`가 현재 실제 업무 구현을 소유합니다. Feed 목록·following은 `service/feed.py`, Inbox 목록·읽음 판단은 `service/inbox.py`에 있습니다. 기본 검색·Today 순위는 `service/discovery.py`가 담당합니다. 기본 HTTP 31개는 `social/router.py`, 요청 의존성은 `dependencies.py`가 소유합니다. 앱 생성은 `runtime/social/composition.py`에서 네 서비스를 연결하고, 공통 API 조립은 원래 Character 상태 경로 순서를 보존합니다. World Feed 검색·agent 도구는 이어지는 B5에서 이전합니다.
 
@@ -425,6 +425,8 @@ AR-G4에서 88개 revision과 `env.py`·`script.py.mako`의 물리 경로를 옮
 ## 10. 변경 위치와 테스트
 
 테스트도 업무별로 모읍니다. 여러 업무가 사용하는 fixture는 공통 위치, 해당 업무만의 fixture는 그 업무 테스트 가까이에 둡니다. 단순한 파일 이동 테스트보다 사용자가 관찰하는 결과와 실제 변경 경계를 검증하는 테스트가 필요합니다.
+
+Social의 게시물·World Feed·수동 작성·공개 활동 회귀는 `tests/social/`, 관계 이벤트·graph 조회·projection 회귀는 `tests/relationships/`에 있습니다. 이 두 폴더는 Python package로 구분해 같은 테스트 파일명이 다른 업무에 있어도 충돌하지 않게 합니다. 업무 간에 공유하는 기존 fixture는 명시적인 업무 경로로 import하며, `tests/conftest.py`의 공통 네트워크 검사 범위는 유지합니다.
 
 | 수정하려는 문제 | 주요 변경 위치 | 확인할 결과 |
 | --- | --- | --- |
@@ -1196,3 +1198,6 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 `tests/memory`에는 Memory 스키마·범위·쓰기 lifecycle·회상·정리·조회·소유자 관리와 배치 정책·실행·안전성·마이그레이션 검사를 모읍니다. 공통 준비 코드를 공유하는 테스트는 `memory.test_*`의 기존 fixture를 가져옵니다. `__init__.py`는 이 테스트 이름 공간만 정하며, fixture나 제품 구현을 추가하지 않습니다. 여러 업무가 사용하는 ORM fixture와 원본 평가 자료는 `tests`의 공통 위치를 사용합니다.
 
 Memory 업무 검사 명령은 `python -m pytest -q tests/memory`입니다. 별도 루트 inventory 검사는 역사적 승인·동결 자료와 현재 자료의 연결을 계속 확인합니다. 과거 노드를 새 이름으로 재승인하거나 JSONL·동결 predecessor를 복제하지 않고, 기존 노드에서 현재 테스트로의 정확한 이동표를 사용합니다.
+
+
+Relationships의 `public.py` 집합은 제거했습니다. Graph 읽기와 회상은 `service/graph_read.py`·`graph_recall.py`, 계획 검증·실행은 `service/graph_planning.py`, IO 없는 값은 `contracts/`, HTTP 응답은 `schemas.py`, 오류는 `exceptions.py`에서 가져옵니다. 실제 query와 transport 조립은 runtime에 있으며 원래 같은 gateway/Session 객체를 전달합니다. 한 이름을 찾기 위해 다시 모든 도메인 기능을 모으는 집합을 만들지 않습니다.

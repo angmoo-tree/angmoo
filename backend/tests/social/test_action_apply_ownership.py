@@ -8,7 +8,7 @@ from model_fixture_support import models
 from app.domains.social.exceptions import LangGraphSocialApplyError
 from app.domains.social.service import action_notifications, action_sources
 from app.runtime.social.action_scope import RuntimeActionScopeReferences
-from test_social_event_runtime import _engine, _seed, _post
+from relationships.test_social_event_runtime import _engine, _seed, _post
 
 
 def test_no_action_keeps_original_scope_checks_and_caller_rollback():

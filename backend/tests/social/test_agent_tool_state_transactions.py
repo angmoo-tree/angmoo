@@ -6,7 +6,7 @@ from app.core.unit_of_work import deferred_commits
 from app.domains.characters.schemas import AgentCharacterStateWrite, CharacterStateWrite
 from app.domains.characters.service import state as character_state
 from app.runtime.social.agent_tool_state import agent_tool_state
-from test_social_event_runtime import _engine, _seed
+from relationships.test_social_event_runtime import _engine, _seed
 
 
 def test_tool_state_duplicate_note_preserves_state_and_log_order_with_caller_rollback():

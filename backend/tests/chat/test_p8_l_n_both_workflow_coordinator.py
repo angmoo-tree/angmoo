@@ -35,18 +35,11 @@ from app.domains.memory.contracts.recall import CanonicalRecallStatus
 from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
 from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.memory.policies.retrieval_planner import parse_canonical_retrieval_plan_payload
-from app.domains.relationships.public import (
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
-    GraphPlannerOutputError,
-    GraphPlannerProviderResult,
-    GraphRecallEvidence,
-    GraphRecallOperation,
-    GraphRecallResult,
-    GraphRecallSource,
-    GraphRecallStatus,
-    GraphRetrievalPlanExecutor,
-    parse_graph_retrieval_plan_payload,
-)
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_planner import GraphPlannerOutputError, GraphPlannerProviderResult
+from app.domains.relationships.contracts.graph_recall import GraphRecallEvidence, GraphRecallOperation, GraphRecallResult, GraphRecallSource, GraphRecallStatus
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
+from app.domains.relationships.policies.graph_plan_schema import parse_graph_retrieval_plan_payload
 
 
 NOW = datetime(2026, 9, 2, 8, tzinfo=UTC)

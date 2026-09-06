@@ -9,7 +9,7 @@ from app.domains.social.repository.topic_history import recent_own_root_posts
 from app.domains.social.service import topic_metadata
 from app.runtime.social.feed_history import RuntimeFeedHistoryReferences
 from app.runtime.social.topic_metadata import RuntimeTopicHistoryReferences
-from test_social_event_runtime import _engine, _seed, _post
+from relationships.test_social_event_runtime import _engine, _seed, _post
 
 
 def test_topic_history_preserves_attached_rows_column_precedence_and_rollback():

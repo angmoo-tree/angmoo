@@ -9,13 +9,8 @@ from app.domains.chat.policies import (
     resolve_world_chat_model_execution_policy,
 )
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.relationships.public import (
-    GraphPlannerOutputError,
-    GraphPlannerProviderResult,
-    GraphPlannerRequest,
-    graph_retrieval_plan_response_schema,
-    parse_graph_retrieval_plan_payload,
-)
+from app.domains.relationships.contracts.graph_planner import GraphPlannerOutputError, GraphPlannerProviderResult, GraphPlannerRequest
+from app.domains.relationships.policies.graph_plan_schema import graph_retrieval_plan_response_schema, parse_graph_retrieval_plan_payload
 from app.integrations import direct_llm
 
 

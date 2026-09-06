@@ -7,7 +7,7 @@ from sqlalchemy.orm import object_session
 from app.domains.social.exceptions import ServiceImageQuotaError
 from app.domains.social.repository.media import count_service_image_quota_used
 from app.domains.social.service import image_quota
-from test_l4_social_write_uow import _session_factory
+from social.test_l4_social_write_uow import _session_factory
 
 
 def test_image_quota_keeps_day_window_commit_and_release_accounting(monkeypatch, tmp_path):

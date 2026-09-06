@@ -1,7 +1,7 @@
 {
-  "edge_count": 4127,
+  "edge_count": 4113,
   "external_import_count": 3128,
-  "module_count": 1100,
+  "module_count": 1099,
   "modules": [
     {
       "external_imports": [],
@@ -1949,7 +1949,7 @@
         "app.domains.chat.schemas",
         "app.domains.chat.service",
         "app.domains.memory.contracts.retrieval_plan",
-        "app.domains.relationships.public"
+        "app.domains.relationships.contracts.graph_plan"
       ],
       "module": "app.domains.chat.public",
       "path": "backend/app/domains/chat/public.py",
@@ -5016,32 +5016,6 @@
       "imports": [],
       "module": "app.domains.relationships.policies.proposals",
       "path": "backend/app/domains/relationships/policies/proposals.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.relationships.contracts.graph_execution",
-        "app.domains.relationships.contracts.graph_plan",
-        "app.domains.relationships.contracts.graph_planner",
-        "app.domains.relationships.contracts.graph_read",
-        "app.domains.relationships.contracts.graph_recall",
-        "app.domains.relationships.contracts.graph_recall_gateway",
-        "app.domains.relationships.contracts.outbox",
-        "app.domains.relationships.contracts.projection",
-        "app.domains.relationships.contracts.projection_commands",
-        "app.domains.relationships.contracts.query",
-        "app.domains.relationships.contracts.replay",
-        "app.domains.relationships.exceptions",
-        "app.domains.relationships.policies.graph_plan_schema",
-        "app.domains.relationships.schemas",
-        "app.domains.relationships.service.graph_planning",
-        "app.domains.relationships.service.graph_read",
-        "app.domains.relationships.service.graph_recall",
-        "app.domains.relationships.utils.projection_digest"
-      ],
-      "module": "app.domains.relationships.public",
-      "path": "backend/app/domains/relationships/public.py",
       "wildcard_imports": []
     },
     {
@@ -12348,7 +12322,8 @@
       "imports": [
         "app.domains.chat.policies",
         "app.domains.identity.public",
-        "app.domains.relationships.public",
+        "app.domains.relationships.contracts.graph_planner",
+        "app.domains.relationships.policies.graph_plan_schema",
         "app.integrations.direct_llm"
       ],
       "module": "app.integrations.llm.graph_retrieval_planner",
@@ -13064,7 +13039,8 @@
         "app.domains.identity.contracts",
         "app.domains.memory.service.recall",
         "app.domains.memory.service.retrieval_plan",
-        "app.domains.relationships.public",
+        "app.domains.relationships.service.graph_planning",
+        "app.domains.relationships.service.graph_recall",
         "app.domains.world_characters.models",
         "app.integrations.llm",
         "app.runtime.chat.evidence_reads",
@@ -13455,12 +13431,14 @@
         "app.domains.identity.models",
         "app.domains.relationships.contracts.graph_query",
         "app.domains.relationships.contracts.graph_read",
+        "app.domains.relationships.contracts.graph_recall",
         "app.domains.relationships.contracts.projection",
         "app.domains.relationships.exceptions",
         "app.domains.relationships.models.social",
-        "app.domains.relationships.public",
         "app.domains.relationships.repository.projection_state",
         "app.domains.relationships.schemas",
+        "app.domains.relationships.service.graph_read",
+        "app.domains.relationships.service.graph_recall",
         "app.domains.social.models.feed",
         "app.domains.social.models.posts",
         "app.domains.world_characters.models",

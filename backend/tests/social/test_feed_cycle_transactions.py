@@ -8,7 +8,7 @@ from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.service import feed_cycle
 from app.runtime.social.feed_cycle import RuntimeWorldFeedWorkflows
 from app.runtime.social import world_feed_actions
-from test_feed_reaction_intent import FakeFeedProvider, _engine, _seed
+from social.test_feed_reaction_intent import FakeFeedProvider, _engine, _seed
 
 
 def test_failed_public_effect_rolls_back_execution_but_keeps_durable_observation():

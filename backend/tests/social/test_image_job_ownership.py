@@ -11,7 +11,7 @@ from app.domains.social.models.posts import Post, PostImageGenerationJob
 from app.domains.social.repository.media import create_post_image_generation_job
 from app.domains.social.service.image_jobs import mark_stale_post_image_generation_jobs_failed
 from app.runtime.social import image_job_worker as worker
-from test_l4_social_write_uow import _session_factory
+from social.test_l4_social_write_uow import _session_factory
 
 
 @pytest.mark.parametrize("removed,expected", [(None, "skipped"), ("character", "character_missing"), ("post", "post_missing")])

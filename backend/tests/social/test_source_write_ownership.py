@@ -4,7 +4,7 @@ from sqlalchemy.orm import object_session
 from model_fixture_support import models
 from app.runtime.social import source_references
 from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
-from test_l4_social_write_uow import _owner_post, _session_factory
+from social.test_l4_social_write_uow import _owner_post, _session_factory
 
 
 def test_source_collaborators_read_after_begin_and_share_one_commit(monkeypatch, tmp_path):

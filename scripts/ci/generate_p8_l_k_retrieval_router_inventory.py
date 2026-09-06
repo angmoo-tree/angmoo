@@ -43,9 +43,7 @@ from app.domains.chat.contracts.retrieval_router import (  # noqa: E402
     ROUTER_VALIDATION_CODES,
 )
 from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
-from app.domains.relationships.public import (  # noqa: E402
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
-)
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 from app.runtime.migrations.sqlite_versions.registry import (  # noqa: E402
     load_sqlite_manifest,
 )

@@ -9,7 +9,7 @@ from model_fixture_support import models
 from app.domains.social.exceptions import AgentRunAuthorizationError
 from app.domains.social.service import agent_tool_authorization as service
 from app.runtime.social.agent_tool_authorization import RuntimeAgentToolReferences
-from test_social_event_runtime import _engine, _seed
+from relationships.test_social_event_runtime import _engine, _seed
 
 
 def test_tool_authorization_keeps_attached_run_pending_status_and_caller_rollback():

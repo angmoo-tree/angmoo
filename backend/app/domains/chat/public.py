@@ -116,11 +116,7 @@ from app.domains.chat.contracts import (
 from app.domains.memory.contracts.retrieval_plan import CANONICAL_PLAN_VERSION
 from app.domains.memory.contracts.retrieval_plan import CanonicalPlanStep
 from app.domains.memory.contracts.retrieval_plan import CanonicalRetrievalPlan
-from app.domains.relationships.public import (
-    GRAPH_PLAN_VERSION,
-    GraphPlanStep,
-    GraphRetrievalPlan,
-)
+from app.domains.relationships.contracts.graph_plan import GRAPH_PLAN_VERSION, GraphPlanStep, GraphRetrievalPlan
 from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,

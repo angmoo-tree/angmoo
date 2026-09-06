@@ -9,7 +9,7 @@ from app.runtime.social.world_feed_search import (
     load_ready_search_profile,
     search_world_feed_candidates,
 )
-from test_feed_reaction_intent import _engine, _seed
+from social.test_feed_reaction_intent import _engine, _seed
 
 
 def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypatch):

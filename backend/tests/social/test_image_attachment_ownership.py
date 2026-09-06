@@ -7,7 +7,7 @@ from app.domains.social.contracts.image_generation import PreparedPostImage
 from app.domains.social.models.posts import PostImageQuotaReservation, PostMedia
 from app.domains.social.repository.media import create_post_image_quota_reservation
 from app.domains.social.service import image_attachment
-from test_l4_social_write_uow import _session_factory
+from social.test_l4_social_write_uow import _session_factory
 
 
 @pytest.mark.parametrize("storage_fails", [False, True])

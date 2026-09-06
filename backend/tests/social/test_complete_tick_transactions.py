@@ -11,7 +11,7 @@ from app.domains.social.exceptions import AgentRunAuthorizationError
 from app.domains.social.repository.inbox import list_unread_reply_notifications
 from app.domains.social.schemas.community import AgentCompleteTickCreate
 from app.runtime.social.complete_tick import agent_tool_tick
-from test_social_event_runtime import _engine, _seed
+from relationships.test_social_event_runtime import _engine, _seed
 
 
 def test_complete_tick_prevalidates_all_actions_and_shares_caller_rollback():

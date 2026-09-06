@@ -10,7 +10,7 @@ from app.runtime.social.agent_tool_reads import (
     RuntimeAgentToolReadWorkflows,
     agent_tool_reads,
 )
-from test_social_event_runtime import _engine, _seed
+from relationships.test_social_event_runtime import _engine, _seed
 
 
 def test_inbox_delivery_keeps_run_scope_order_payload_rules_and_caller_rollback():

@@ -23,10 +23,8 @@ from app.domains.chat.service import (
 from app.domains.identity.contracts import CredentialMaterial
 from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
-from app.domains.relationships.public import (
-    GraphRecallService,
-    GraphRetrievalPlanExecutor,
-)
+from app.domains.relationships.service.graph_recall import GraphRecallService
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
 from app.domains.world_characters.models import WorldCharacter
 from app.integrations.llm import (
     DirectLlmCanonicalRetrievalPlannerProvider,

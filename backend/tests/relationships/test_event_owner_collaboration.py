@@ -9,7 +9,7 @@ from app.domains.relationships.contracts.events import EvidenceInput
 from app.domains.relationships.exceptions import SocialEventRuntimeError
 from app.domains.relationships.service.events import record_successful_social_event
 from app.runtime.relationships import event_references
-from test_social_event_runtime import _engine, _post, _seed
+from relationships.test_social_event_runtime import _engine, _post, _seed
 
 
 def test_replay_checks_current_membership_before_skipping_source_reads(monkeypatch):
