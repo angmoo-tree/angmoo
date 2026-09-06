@@ -1450,3 +1450,9 @@ C7-H 원본 archive2297nodes는 준비됐고, source3파일/testfile1/4노드의
 실제 route 객체를 대조해 정확한 12개 module 필드만 `app.domains.characters.router`로 변경했다. URL·method·endpoint·access와 다른 필드는 모두 동일하며, public inventory196개도 기존 생성기로 갱신했다. 제품 코드·테스트 source·원래 assertion/suppression·동결자료·92개 원장 기록은 바꾸지 않았다. 원래 실패 M3/M4와 활동 HTTP·관리·성향·credential transaction6파일은 **78 passed / 3 warnings / 15.29초**다.
 
 이 보정은 metadata만 변경하므로 이미 실행한 전체 검사의 실패 이력은 그대로 보존하고, 최종 전체 gate는 PR exact head의 Core backend CI에서 확인한다. local 전체 PASS로 바꾸어 기록하지 않는다. 원래 stock와 inventory를 보정 head에서 다시 확인한 뒤 PR을 생성하며, PR checks·merge·post Actions·Installer gate는 각각 별도 상태다.
+
+### PR #282 — Gitleaks의 원본 Git fingerprint 오탐과 한정 보정
+
+PR #282의 `e20c9d9`에서 Core backend, frontend, architecture-boundary, dependency-license, DCO, embedded migration 검사는 통과했다. `oss-boundary`는 Gitleaks directory 검사에서10개를 감지해 실패했다. 원문 검사기를 재현한 결과 전부 `security/refactor_backend_additions.json`의 실제 파일 Git blob SHA-1이었다. 원래 signed `526a939c`, `f34de9bd`, `2a89dc80`, `0299586c`의 해당 파일 object와10개를 각각 대조해 실제 런타임 비밀이 아님을 확인했다.
+
+기존 방식과 같은 `generic-api-key` 규칙 AND 정확한 additions 경로 AND 전체 key/hash 행 일치만 적용했다. 다른 key/hash·접두/접미 문자열은40개 음성 검증에서 모두 거절되며 원래10개/공백·쉼표 변형20개만 일치한다. 동결·원장·제품·테스트 source·기존 custom scanner25 tuple은 바꾸지 않았다. 동일 Gitleaks8.30.1의 tracked tree 및 HEAD 조상459commits 재검사 모두0 findings이며 기존 scanner/allowlist 회귀는 **23 passed / 2.01초**다. 최종 push head에서 모든 PR checks를 다시 확인한다.
