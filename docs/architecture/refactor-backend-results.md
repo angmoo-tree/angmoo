@@ -2736,3 +2736,11 @@ Characters·Identity·Routines·WorldCharacter·Worlds의 옛 public5는 실제 
 ## B8 통합 준비 — 전체 소유 범위의 파일 배치 검사
 
 `refactor_boundaries`에 완료 범위의 파일 배치 검사 지원을 추가했다. 새로 생긴 미등록 업무, import edge가 없는 옛 계층/전역 집합/compatibility 파일, 삭제 후 남은 정책 항목을 거부한다. 필요한 역사 migration·외부 확장 경로는 정확한 module·분류·이유·계약으로 등록하며 기존 import/DB/pure-role/cycle 검사를 우회하지 않는다. 부분 전환용 기존 규칙은 그대로 유지하고 최종 순수 호환 제거 후 `complete` 범위를 적용한다. 신규 음성 사례와 기존 구조 회귀 **68 passed / 0.52초**다. 이 지원 추가 자체가 AR-B8 전체 검증 완료를 뜻하지 않는다.
+
+## AR-B8 — Chat·RoutinePost 실제 소비자 연결
+
+Memory selection의 자격 증명 호출을 기존 `message_composition.settings_service`에 직접 연결했다. RoutinePost legacy export 집합의 마지막 실제 소비자는 Social PostCreate, Routines 활동 정책, Relationships 이벤트 조립, Resident context를 실제 소유 경로에서 가져오며, 원래 import-time model registration을 같은 위치에서 실행한다. 이전 interaction 실제 소유 이동표는 그대로 두고 residual export 파일만 제거했다. 기존 Chat test support는 bound service를 우선하는 기존 순서와 실제 error/security 객체를 유지한다. 원래 identity·delegation·antiwrapper tests와 보존 검사기는 수정하지 않았다. 신규 cold import 회귀는 같은 ORM102개와 미생성 engine/session/app 상태를 확인한다.
+
+RoutinePost가 이미 만들어진 입력에서 읽는 필드는 기존 PlanningContext의 5개와 session_key다. 이 구조를 RoutineResidentContext로 명시해, 옛 bridge가 가렸던 Resident → RoutinePost → Resident 참조 순환을 제거했다. runtime dataclass와 실제 attached 객체·Session은 바뀌지 않고 생성·복사·새 전달 서비스가 없다.
+
+검증: **124 passed / 19 existing skipped / 2 warnings / 43.98s**. 원래 workflow 11개는 정확한 receiver 2개와 annotation 1개를 대응시키면 전체 AST가 같으며, 원래 등록 호출 AST도 같다. 기존 Chat test support 속성38개는 실제 객체 또는 bound method의 self/function이 같고 Memory는 동일 설정서비스 인스턴스를 호출한다. 경계는 **1090 modules / 4072 edges / 5 exact legacy edges / cycle0**이다. 원래 보존 검사7종 읽기 진단은 오류0(protected2313/current2564)이며 signed869 최초2경로와 signed49c0f1f4 최초2test의 원본증거만 임시로 읽었다. 원장·동결 자료·원래 checker는 수정하지 않았고 parent 순차capture 및 stock/Hosted 검증은 아직 별도다. 현재 L4 1090/14/99와 Memory batch inventory도 연결했다.

@@ -1233,3 +1233,7 @@ Character의 모델·이미지 키 모드·실행 모드 타입은 `characters/c
 ### 외부 LLM과 작성 파라미터 테스트
 
 `tests/integrations/test_direct_llm.py`는 외부 LLM 요청 설정, JSON 응답 진단, 재시도, 사용량 기록과 호출 제한을 검증합니다. 작성 작업이 선택하는 파라미터는 `tests/routines/test_writing_parameters.py`에 둡니다. LangGraph 실행 검사는 기존 `tests/routines/test_resident_graph.py`를 사용합니다. 파일 이름에 이전 실행기의 이름을 남기는 대신 실제 검사 대상의 소유 위치에서 테스트를 찾을 수 있습니다.
+
+### RoutinePost 실행 조립과 Memory 모델 선택
+
+RoutinePost 실행 조립은 사용하는 업무 DTO·활동 정책·이벤트 실행을 실제 소유 모듈에서 가져옵니다. 이미 생성된 Resident context는 조립에서 읽는 여섯 필드를 명시한 `RoutineResidentContext` 계약으로 받습니다. 별도의 `compatibility/routine_posts/legacy.py` 집합은 사용하지 않으며, 기존 ORM 등록은 실행 조립을 가져오는 같은 시점에 수행합니다. Memory의 모델 선택은 앱과 같은 Chat 설정 서비스에서 선택한 자격 증명을 해석합니다. 두 경로 모두 기존 Session과 실제 서비스 객체를 유지합니다.

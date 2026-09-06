@@ -30392,7 +30392,7 @@
           "direct_consumers": [
             "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py",
-            "backend/app/compatibility/routine_posts/legacy.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
             "backend/app/runtime/resident/langgraph.py"
           ],
           "test_nodes": [
@@ -123706,7 +123706,7 @@
           ]
         },
         {
-          "path": "backend/app/compatibility/routine_posts/legacy.py",
+          "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
           "bindings": [],
           "imports": []
         },
@@ -123840,7 +123840,7 @@
         "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py"
       },
       "actual_consumers": [
-        "backend/app/compatibility/routine_posts/legacy.py",
+        "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
         "backend/app/runtime/characters/creator.py",
         "backend/app/runtime/characters/management.py",
         "backend/app/runtime/resident/activity_policy.py",
@@ -126553,7 +126553,6 @@
         "backend/app/runtime/characters/creator.py",
         "backend/app/runtime/characters/management.py",
         "backend/app/runtime/resident/langgraph.py",
-        "backend/app/compatibility/routine_posts/legacy.py",
         "backend/tests/p7_graph_support.py",
         "backend/tests/test_feed_reaction_intent.py",
         "backend/tests/test_l3_owner_manual_social_inbox.py",
@@ -126572,7 +126571,8 @@
         "backend/tests/world_characters/test_setup_contracts.py",
         "backend/tests/world_characters/test_setup_service.py",
         "backend/tests/world_packages/test_import_commit.py",
-        "backend/tests/test_google_model_selection.py"
+        "backend/tests/test_google_model_selection.py",
+        "backend/app/runtime/routine_posts/sqlalchemy_runtime.py"
       ],
       "actual_owners": {
         "backend/app/services/activity_state_contracts.py": "backend/app/domains/routines/policies/activity_state.py",
@@ -133027,6 +133027,34 @@
         "Exact node collection 2509 before and after; nineteen existing path substitutions only; new/missing/duplicate nodes zero.",
         "Original seven read-only diagnostics zero errors, protected2311/current2509; signed869 two-path original introduction supplement only; stock final capture remains parent-owned.",
         "L4 inventory1094/14/99 and Memory batch current inventory pass without regeneration."
+      ]
+    },
+    "AR-B8-CHAT-ROUTINE-CONSUMERS": {
+      "status": "SOURCE VALIDATED; parent sequential capture/stock/Hosted pending",
+      "base_commit": "e565834291dc901ab1826979644d81cc643f9dfd",
+      "actual_paths": [
+        "backend/app/runtime/memory_selection_provider.py",
+        "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+        "backend/tests/chat_service_support.py",
+        "backend/app/domains/routine_posts/contracts/context.py"
+      ],
+      "retired_path": "backend/app/compatibility/routine_posts/legacy.py",
+      "ownership": "Memory selection calls the existing composed Chat settings instance. RoutinePost composition directly imports actual Social PostCreate, Routines activity policy and Relationships events. It receives the same caller context through RoutineResidentContext; no new forwarding service is defined.",
+      "registration": "The original import-time register_models() is invoked at the former legacy import position, before subsequent composition imports. It registers the same metadata without opening the default engine; original aliases did not own a workflow.",
+      "legacy_source_map": "The preexisting legacy.py -> runtime/routine_posts/interactions.py map remains because it records the actual earlier interaction factory move. This final source removes only residual exports after their four caller bindings are direct.",
+      "test_support": "Existing HistoricalChatTestView keeps the same service/profile/policy/error receiver order; its final fallback now reads actual Message module DirectLlmError, Thread module IntegrityError and Identity credential security module, with the same underlying objects and no fake product namespace.",
+      "new_tests": [
+        "tests/routine_posts/test_registration.py::test_routine_post_import_registers_the_same_models_without_opening_database"
+      ],
+      "remaining": "Chat pure aggregate/module identity and forwarding class retirement is coordinated separately; original identity/delegation/antiwrapper assertions and preservation checker remain unchanged.",
+      "context_contract": "The old aggregate hid a Resident->RoutinePost->Resident package cycle. RoutinePost only reads the six fields already held by the caller; RoutineResidentContext extends existing ResidentPlanningContext with session_key. No context is copied or created; runtime dataclass/attached objects stay unchanged. This replaces the single runtime-class annotation import, not runtime behavior.",
+      "validation": [
+        "124 passed,19 existing skipped,2 warnings in43.98s: all six HistoricalChatTestView consumers, RoutinePost runtime/cold registration and Memory batch API/safety.",
+        "11 workflow complete AST unchanged after exact receiver2 and annotation1 normalization; same original registration call AST; old legacy0actualdefs.",
+        "38 existing HistoricalChatTestView attributes preserve actual object or boundmethod self/function identity; Memory credential call uses the same service instance/function.",
+        "Architecture1090modules/4072edges/5exactlegacyedges,cycle0; no boundary rule or exception change.",
+        "Original seven read-only diagnostics all0,protected2313/current2564. Original signed869 two-path and signed49c0f1f4 two-test first-introduction evidence only; no ledger/frozen write.",
+        "L4 current1090/14/99 and Memory batch inventories current; product API/ORM and ASGI profiles unchanged."
       ]
     }
   },

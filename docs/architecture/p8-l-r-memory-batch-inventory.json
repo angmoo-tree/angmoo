@@ -304,7 +304,7 @@
     },
     {
       "path": "backend/app/integrations/llm/memory_selection.py",
-      "sha256": "1de42b7c01d84860bbe19ca8676ba5113cf0a308ddea1c8d3a9f080d01b1c8eb"
+      "sha256": "f263367f9594f1ab8bce8d11dc9fb3d23054efbbb79e63463bbfa7729603cf78"
     },
     {
       "path": "backend/app/main.py",
@@ -316,7 +316,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "49ab60876c13b49d476571c247c2cb6b3e96e1851bb0b80a1b2233253c66b0c5"
+      "sha256": "3714859f9668d993a0a678203accfa487b15b71a4f10c6f1b8b03ea95c0fc17c"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -392,7 +392,7 @@
     },
     {
       "path": "backend/app/runtime/memory_selection_provider.py",
-      "sha256": "547c1efa2c6fdc52b171e4af0e6120d80db8c167b6f57b66493ba59811024caf"
+      "sha256": "b9be0e1ec1276f021d15deb17ec45fa6c31bfa4d2e45f2f48b5a3eed208c69eb"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",

@@ -5,11 +5,19 @@ models or a second persistence owner. Any permits those records and test views
 without importing another domain's models into this contract.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Iterable, Protocol
 from app.domains.routines.contracts.lifecycle import DueTick
+from app.domains.routines.contracts.planning_context import ResidentPlanningContext
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
+
+
+class RoutineResidentContext(ResidentPlanningContext, Protocol):
+    """The existing attached execution fields read by RoutinePost composition."""
+
+    session_key: str
 
 
 class RoutineInteractionSource(Protocol):
