@@ -38,4 +38,3 @@ export type WorldCharacterSocialProfileRead = {
   items: WorldCharacterSocialProfilePost[];
   next_cursor: string | null;
 };
-
