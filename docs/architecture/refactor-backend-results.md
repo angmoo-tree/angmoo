@@ -17,7 +17,7 @@
 
 최종 구현에는 `main.py` 단일 앱 factory와 지원 full/public profile, 실제 도메인 소유 모델 **102개**, 각 profile의 API **196개**를 보존했다. 임시 `public_main.py`와 사용하지 않는 Chat route facade 3개는 제거했다. 현재 legacy import edge / legacy exception group은 0이며, 정당한 역사·외부 계약과 runtime 조립의 **명시 bridge 38개 = 역사 13개 + 지원 조립 25개**, retained module 20개는 별도 유지한다. 이 수치를 bridge 0으로 표현하지 않는다.
 
-전체 backend 결과는 **exact `30dcbd81`의 2676 PASS / 기존 22 SKIP / 28 warnings, 1087.30초**다. 이후 Chat facade 3개 제거와 원래 실제 HTTP/DI 객체·AST 승계는 **60 focused PASS / 1 warning, 33.68초** 및 독립 읽기 검토로 확인했다. 후속 11개 음성 회귀 도입을 포함한 최종 보존 계보는 2709개다. 따라서 앞의 전체 결과를 `16a67c41`, `a444410b`, `bd892534`에서 수행한 전체 backend 결과로 바꾸어 표기하지 않는다. 마지막 exact PR의 전체 backend 결과는 해당 PR의 Actions 근거를 별도로 연결한다.
+전체 backend 결과는 **exact `30dcbd81`의 2676 PASS / 기존 22 SKIP / 28 warnings, 1087.30초**다. 이후 Chat facade 3개 제거와 원래 실제 HTTP/DI 객체·AST 승계는 **60 focused PASS / 1 warning, 33.68초** 및 독립 읽기 검토로 확인했다. 후속 11개 오류 사례 회귀 검사 도입을 포함한 최종 보존 계보는 2709개다. 따라서 앞의 전체 결과를 `16a67c41`, `a444410b`, `bd892534`에서 수행한 전체 backend 결과로 바꾸어 표기하지 않는다. 마지막 exact PR의 전체 backend 결과는 해당 PR의 Actions 근거를 별도로 연결한다.
 
 실제 Host 검증은 **exact `68113382`**에서 공식 `scripts/dev/desktop-dev.ps1 -NoWatch`로 수행했다. 별도 Docker 프로젝트의 SQLite/Ladybug health 및 scheduler/projector ready, 네이티브 Device Home의 미설정 owner 안내 렌더링을 확인했다. Alt+F4 이후 새 창 목록이 비고 Angmoo·sidecar 프로세스가 사라졌으며 wrapper exit 0과 installed-data fingerprint / cleanup 검사가 통과했다. 기록된 비치명적 WebView unregister 1412 메시지는 별도로 보존한다. 이 실행은 인증된 제품 기능 전체나 실제 AI 작업의 검증 근거가 아니다.
 
@@ -3879,3 +3879,10 @@ Signed source `68113382a2435faefdd7b65fd701d5ba081ec86b`의 변경 없는 `commi
 The first PR head `ed40f1fb` passed collection of all 2,507 nodes, the L4 current inventory and embedded migration, but Core backend stopped before the whole pytest suite at the Memory batch current inventory check (run `34027168148`, job `101470090058`). The original log is retained; this run is not recorded as a backend-suite pass.
 
 The unchanged generator updates exactly 17 source hashes already changed by G5 Base/database/model imports. Each old hash matches the pre-G5 source `576d3119`, and every new hash matches the existing signed `ed40f1fb` Git blob after the generator's existing newline normalization. All file paths, other current-inventory fields and the frozen Today predecessor remain identical. Product code, tests, assertions, suppressions, checkers, CI, the 185-record ledger and frozen checkpoints are unchanged. The original Memory, L4, deferred, architecture and public-route current checks are rerun on this metadata correction; the new exact PR head must complete Core's whole backend suite and every remaining remote gate.
+
+
+### 2026-09-06 G5 post-merge: unchanged SQLite contention recheck
+
+The first Core backend run on merge `64e21d38` recorded **1 failed / 2484 passed / 22 skipped / 28 warnings / 440.29s** (run `34028979419`, job `101474940587`). The failure was `test_sqlite_concurrent_world_activation_serializes_capacity_at_one`: `BEGIN IMMEDIATE` returned SQLite BUSY and the unchanged 0.25-second bounded writer policy exposed its typed retryable error. The log's configured four-attempt label does not prove that all four attempts ran. PR `5bb8db94` and main `64e21d38` have exactly the same Git tree `1540e62071accb986e202cafab608e095446aa10`.
+
+A planned single local run of the original concurrent-capacity test and busy-exhaustion test passed **2 tests / 11.49s** without changing code, assertions, timeouts or retry policy. This does not establish the runner-level cause or erase the first full-run failure. The subsequent same-source remote backend recheck and the final post-merge decision are recorded in Issue264 and the exact Actions attempt; other successful jobs are preserved.
