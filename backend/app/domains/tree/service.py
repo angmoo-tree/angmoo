@@ -1,42 +1,29 @@
-import app.domains.characters.service.profile as characters_profile_service
+"""Tree visibility, write admission, and public response assembly."""
+
 from uuid import uuid4
-
 from sqlalchemy.orm import Session
-
-from app import models, schemas
-
-from app.cruds import tree as tree_crud
-
-
-CATEGORIES = {"notice", "bug", "suggestion", "question", "free"}
-WRITABLE_CATEGORIES = {"bug", "suggestion", "question", "free"}
-DELETED_CHARACTER_NAME = "삭제한 앵무"
-
-
-class TreeServiceError(Exception):
-    pass
-
-
-class TreePostNotFoundError(TreeServiceError):
-    pass
-
-
-class TreeCategoryError(TreeServiceError):
-    pass
-
-
-class TreeNoticeWriteForbiddenError(TreeServiceError):
-    pass
-
-
-class TreeRelatedCharacterError(TreeServiceError):
-    pass
+from app.domains.tree import models, schemas
+from app.domains.tree import repository as tree_crud
+from app.domains.tree.contracts import TreeAuthor, TreeCharacter, TreeReferences
+from app.domains.tree.constants import (
+    CATEGORIES,
+    WRITABLE_CATEGORIES,
+    DELETED_CHARACTER_NAME,
+)
+from app.domains.tree.exceptions import (
+    TreeCategoryError,
+    TreeNoticeWriteForbiddenError,
+    TreePostNotFoundError,
+    TreeRelatedCharacterError,
+    TreeServiceError,
+)
 
 
 def list_posts(
     db: Session,
     *,
     category: str,
+    references: TreeReferences,
     limit: int = 20,
     cursor: str | None = None,
     query: str | None = None,
@@ -48,6 +35,7 @@ def list_posts(
         limit=_safe_limit(limit),
         cursor=cursor,
         query=query,
+        author_name_matches=references.author_name_matches,
     )
     return schemas.TreeFeedPage(
         items=[_post_summary(db, post) for post in posts],
@@ -63,12 +51,16 @@ def get_post(db: Session, post_id: str) -> schemas.TreePostDetail:
 
 
 def create_post(
-    db: Session, user: models.User, data: schemas.TreePostCreate
+    db: Session,
+    user: TreeAuthor,
+    data: schemas.TreePostCreate,
+    *,
+    references: TreeReferences,
 ) -> schemas.TreePostDetail:
     if data.category not in WRITABLE_CATEGORIES:
         raise TreeNoticeWriteForbiddenError("공지 작성은 운영자 전용입니다.")
     related_character_id = _validate_related_character(
-        db, user=user, character_id=data.related_character_id
+        db, user=user, character_id=data.related_character_id, references=references
     )
     post = tree_crud.create_tree_post(
         db,
@@ -83,7 +75,7 @@ def create_post(
 
 
 def create_comment(
-    db: Session, user: models.User, post_id: str, data: schemas.TreeCommentCreate
+    db: Session, user: TreeAuthor, post_id: str, data: schemas.TreeCommentCreate
 ) -> schemas.TreePostDetail:
     post = tree_crud.get_tree_post(db, post_id)
     if post is None:
@@ -103,17 +95,25 @@ def _safe_limit(limit: int) -> int:
 
 
 def _validate_related_character(
-    db: Session, *, user: models.User, character_id: str | None
+    db: Session,
+    *,
+    user: TreeAuthor,
+    character_id: str | None,
+    references: TreeReferences,
 ) -> str | None:
     if character_id is None:
         return None
-    character = characters_profile_service.get_character(db, character_id)
-    if character is None or character.deleted_at is not None or character.owner_id != user.id:
+    character = references.get_character(db, character_id)
+    if (
+        character is None
+        or character.deleted_at is not None
+        or character.owner_id != user.id
+    ):
         raise TreeRelatedCharacterError(character_id)
     return character.id
 
 
-def _author_read(user: models.User) -> schemas.TreeAuthorRead:
+def _author_read(user: TreeAuthor) -> schemas.TreeAuthorRead:
     return schemas.TreeAuthorRead(
         id=user.id,
         display_name=user.display_name,
@@ -123,7 +123,7 @@ def _author_read(user: models.User) -> schemas.TreeAuthorRead:
 
 
 def _related_character_read(
-    character: models.Character | None,
+    character: TreeCharacter | None,
 ) -> schemas.TreeRelatedCharacterRead | None:
     if character is None:
         return None
@@ -170,7 +170,9 @@ def _post_detail(db: Session, post: models.TreePost) -> schemas.TreePostDetail:
     summary = _post_summary(db, post)
     comments = [
         _comment_read(comment)
-        for comment in sorted(post.comments, key=lambda item: (item.created_at, item.id))
+        for comment in sorted(
+            post.comments, key=lambda item: (item.created_at, item.id)
+        )
         if comment.hidden_at is None
     ]
     return schemas.TreePostDetail(**summary.model_dump(), comments=comments)

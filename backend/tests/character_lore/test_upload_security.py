@@ -8,7 +8,7 @@ import pytest
 from docx import Document
 from pypdf import PdfWriter
 
-from app.services import character_lore
+from app.domains.character_lore import parser as character_lore
 
 
 class _ChunkedUpload:
@@ -158,7 +158,7 @@ def test_parser_timeout_terminates_the_child() -> None:
 
 def test_next_proxy_uses_bounded_readers_for_all_request_bodies() -> None:
     source = (
-        Path(__file__).parents[2]
+        Path(__file__).parents[3]
         / "frontend"
         / "src"
         / "app"

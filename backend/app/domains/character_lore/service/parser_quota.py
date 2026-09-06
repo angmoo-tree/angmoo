@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 import hashlib
 import hmac
@@ -11,25 +10,22 @@ from sqlalchemy import func, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.character_lore import models
 from app.config import settings
+from app.domains.character_lore.constants import (
+    GLOBAL_ACTIVE_LIMIT,
+    SUBJECT_ACTIVE_LIMIT,
+    LEASE_SECONDS,
+    RETRY_AFTER_SECONDS,
+)
+from app.domains.character_lore.exceptions import (
+    LoreParserCapacityError,
+    LoreParserLeaseUnavailableError,
+)
 
 
-GLOBAL_ACTIVE_LIMIT = 2
-SUBJECT_ACTIVE_LIMIT = 1
-LEASE_SECONDS = 30
-RETRY_AFTER_SECONDS = 2
 _SQLITE_LOCK = Lock()
 _POSTGRES_LOCK_ID = 7_026_006_600_001
-
-
-@dataclass(frozen=True)
-class LoreParserCapacityError(Exception):
-    retry_after_seconds: int = RETRY_AFTER_SECONDS
-
-
-class LoreParserLeaseUnavailableError(Exception):
-    pass
 
 
 @contextmanager

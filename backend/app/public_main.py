@@ -320,6 +320,10 @@ def create_app(
     from app.runtime.characters.management import configure_character_activity_http
     configure_character_activity_http(runtime_app)
 
+    from app.runtime.tree import build_tree_references
+    runtime_app.state.tree_references = build_tree_references
+    from app.runtime.character_lore import build_lore_workflows
+    runtime_app.state.lore_workflows = build_lore_workflows
     from app.runtime.memory_http import build_memory_workflows
     runtime_app.state.memory_workflows = build_memory_workflows
     from app.runtime.characters.management import build_character_media_workflows

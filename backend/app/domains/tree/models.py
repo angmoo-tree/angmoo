@@ -21,7 +21,9 @@ class TreePost(Base):
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     author_user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
-    related_character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    related_character_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("characters.id")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

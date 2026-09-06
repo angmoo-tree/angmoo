@@ -24,7 +24,8 @@ from app.credentials import (
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
-from app.services import character_lore as lore_service
+from app.domains.character_lore.service import documents as lore_service
+from app.runtime.character_lore import build_lore_workflows
 from chat_service_support import messages as message_service
 
 
@@ -647,7 +648,8 @@ def test_two_user_object_authorization_matrix_denies_cross_owner_access(
             )
         with pytest.raises(lore_service.CharacterLoreNotFoundError):
             lore_service.delete_lore_source(
-                db, intruder, character.id, f"lore-{character.id}"
+                db, intruder, character.id, f"lore-{character.id}",
+                workflows=build_lore_workflows(),
             )
         with pytest.raises(message_service.MessageNotFoundError):
             message_service.get_thread(db, intruder, f"thread-{character.id}")

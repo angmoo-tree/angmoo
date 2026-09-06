@@ -17,6 +17,7 @@ from app.runtime.social import feed_history as history_runtime
 from app.domains.routines.service import feed_history as history_policy
 from app.domains.social.service import topic_metadata as topic_policy
 from app.domains.social.repository import posts as post_repository
+from app.domains.character_lore import contracts as character_lore
 import asyncio
 import json
 import inspect
@@ -31,7 +32,7 @@ from app.domains.characters import router as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
 from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
-from app.services import character_lore, direct_llm
+from app.services import direct_llm
 from app.domains.routines.service import writing_prompts as agent_writing
 from app.runtime.resident import writing as writing_runtime
 from app.runtime.resident import execution as agent_runs

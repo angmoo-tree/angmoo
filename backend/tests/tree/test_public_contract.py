@@ -4,9 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.api.v1.routes import tree as tree_routes
+from app.domains.tree import router as tree_routes
 from app.core.db import Base
-from app.services import tree as tree_service
+from app.domains.tree import service as tree_service
+from app.runtime.tree import build_tree_references
 
 
 def _user(user_id: str) -> models.User:
@@ -57,7 +58,9 @@ def test_tree_reads_are_public_and_writes_require_authentication() -> None:
     assert "get_current_user" not in route_access[("GET", "/tree/posts")]
     assert "get_current_user" not in route_access[("GET", "/tree/posts/{post_id}")]
     assert "get_current_user" in route_access[("POST", "/tree/posts")]
-    assert "get_current_user" in route_access[("POST", "/tree/posts/{post_id}/comments")]
+    assert (
+        "get_current_user" in route_access[("POST", "/tree/posts/{post_id}/comments")]
+    )
 
 
 def test_tree_list_and_detail_are_readable_without_user_context() -> None:
@@ -75,7 +78,9 @@ def test_tree_list_and_detail_are_readable_without_user_context() -> None:
         db.add_all([owner, post])
         db.commit()
 
-        page = tree_service.list_posts(db, category="free")
+        page = tree_service.list_posts(
+            db, category="free", references=build_tree_references()
+        )
         detail = tree_service.get_post(db, post.id)
 
         assert [item.id for item in page.items] == ["tree-public"]
@@ -102,6 +107,7 @@ def test_tree_notice_and_cross_owner_character_are_rejected() -> None:
                     title="notice",
                     body="body",
                 ),
+                references=build_tree_references(),
             )
         except tree_service.TreeNoticeWriteForbiddenError:
             pass
@@ -118,6 +124,7 @@ def test_tree_notice_and_cross_owner_character_are_rejected() -> None:
                     body="body",
                     related_character_id=character.id,
                 ),
+                references=build_tree_references(),
             )
         except tree_service.TreeRelatedCharacterError:
             pass
