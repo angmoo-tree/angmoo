@@ -11,13 +11,10 @@ from app.domains.identity.models import LlmCredential
 from app.domains.runtime.infrastructure import RuntimeSchedulerLease
 from app.domains.characters.models import Character, CharacterState
 from app.domains.character_lore.models import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
-from app.models.agent_settings import AgentImageGenerationSetting
+from app.domains.characters.models import AgentImageGenerationSetting
 from app.domains.routines.models import AgentActivitySetting
-from app.models.agent_local_keys import AgentLocalKey
-from app.models.local_bot_quotas import (
-    LocalBotActionQuotaBucket,
-    LocalBotReadQuotaBucket,
-)
+from app.domains.local_bot.models import AgentLocalKey
+from app.domains.local_bot.models import LocalBotActionQuotaBucket, LocalBotReadQuotaBucket
 from app.domains.routines.models import AgentSlot
 from app.domains.social.models.posts import (
     Comment,
@@ -59,7 +56,7 @@ from app.domains.characters.models import ProfileImageCandidate, ProfileImageQuo
 from app.models.agent_runs import AgentRelationshipPoint
 from app.domains.routines.models import AgentRun, AgentActivityLog, AgentFeedCue, AgentPublicActionExecution
 from app.domains.characters.models import AgentCreationDraft
-from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
+from app.domains.operations.models import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
 from app.domains.tree.models import TreeComment, TreePost
 from app.models.worlds import (
     CharacterActiveWorld,

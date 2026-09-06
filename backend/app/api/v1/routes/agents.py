@@ -1,4 +1,7 @@
 import app.domains.social.exceptions as social_errors
+from app.domains.local_bot.router.keys import get_local_connection, issue_local_key, revoke_local_key
+from app.domains.local_bot.router.keys import router as local_key_router
+from app.domains.characters.router import delete_image_seed, delete_image_settings_key, get_image_settings, update_image_settings, upload_image_seed
 from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
 from app.domains.characters.router import (
     get_agent_draft_media,
@@ -38,14 +41,14 @@ from app.core.db import get_db
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.domains.routines import exceptions as agent_run_service
-from app.services import maintenance as maintenance_service
+from app.domains.operations.service import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
 from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError
 
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 _character_routes = {route.name: route for route in character_router.routes}
-
+_local_key_routes = {route.name: route for route in local_key_router.routes}
 
 
 def _raise_demo_account_locked(exc: Exception) -> None:
@@ -133,54 +136,13 @@ def delete_agent(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get(
-    "/{character_id}/local-connection",
-    response_model=schemas.AgentLocalConnectionRead,
-)
-def get_local_connection(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentLocalConnectionRead:
-    try:
-        return agent_service.get_local_connection(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_local_key_routes["get_local_connection"])
 
 
-@router.post(
-    "/{character_id}/local-key",
-    response_model=schemas.AgentLocalKeyCreateRead,
-    status_code=status.HTTP_201_CREATED,
-)
-def issue_local_key(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentLocalKeyCreateRead:
-    try:
-        return agent_service.issue_local_key(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_local_key_routes["issue_local_key"])
 
 
-@router.delete("/{character_id}/local-key", status_code=status.HTTP_204_NO_CONTENT)
-def revoke_local_key(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> Response:
-    try:
-        agent_service.revoke_local_key(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+router.routes.append(_local_key_routes["revoke_local_key"])
 
 
 router.routes.append(_character_routes["get_feed_cue"])
@@ -201,114 +163,19 @@ router.routes.append(_character_routes["update_promotion_usage"])
 router.routes.append(_character_routes["upload_profile_media"])
 
 
-@router.get(
-    "/{character_id}/image-settings",
-    response_model=schemas.AgentImageGenerationSettingRead,
-)
-def get_image_settings(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return agent_service.get_image_settings(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["get_image_settings"])
 
 
-@router.put(
-    "/{character_id}/image-settings",
-    response_model=schemas.AgentImageGenerationSettingRead,
-)
-def update_image_settings(
-    character_id: str,
-    data: schemas.AgentImageGenerationSettingUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return agent_service.update_image_settings(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.ImageSettingsInvalidError,
-        agent_service.UnsafeImagePromptError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["update_image_settings"])
 
 
-@router.delete(
-    "/{character_id}/image-settings/key",
-    response_model=schemas.AgentImageGenerationSettingRead,
-)
-def delete_image_settings_key(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return agent_service.update_image_settings(
-            db,
-            user,
-            character_id,
-            schemas.AgentImageGenerationSettingUpdate(clear_pollinations_api_key=True),
-        )
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.ImageSettingsInvalidError,
-        agent_service.UnsafeImagePromptError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["delete_image_settings_key"])
 
 
-@router.post(
-    "/{character_id}/image-settings/seed",
-    response_model=schemas.AgentImageGenerationSettingRead,
-)
-def upload_image_seed(
-    character_id: str,
-    data: schemas.AgentImageSeedUpload,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return agent_service.upload_image_seed(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["upload_image_seed"])
 
 
-@router.delete(
-    "/{character_id}/image-settings/seed",
-    response_model=schemas.AgentImageGenerationSettingRead,
-)
-def delete_image_seed(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return agent_service.delete_image_seed(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_character_routes["delete_image_seed"])
 
 
 router.routes.append(_character_routes["generate_profile_media"])

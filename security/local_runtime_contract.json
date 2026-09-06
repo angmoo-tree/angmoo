@@ -38,12 +38,6 @@
     },
     {
       "disposition": "keep",
-      "module": "app.core.context_clipping",
-      "owner_stage": "AR-B7-DAYPART",
-      "removal_condition": null
-    },
-    {
-      "disposition": "keep",
       "module": "app.core.context_text",
       "owner_stage": "AR-B4",
       "removal_condition": null
@@ -71,6 +65,12 @@
       "module": "app.core.image_generation",
       "owner_stage": "L6",
       "removal_condition": "Move media generation policy behind the media domain public API."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.image_prompt_safety",
+      "owner_stage": "AR-B8-A",
+      "removal_condition": null
     },
     {
       "disposition": "keep",
@@ -136,6 +136,12 @@
       "disposition": "keep",
       "module": "app.core.unit_of_work",
       "owner_stage": "L0",
+      "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.context_clipping",
+      "owner_stage": "AR-B7-DAYPART",
       "removal_condition": null
     }
   ],

@@ -87,7 +87,7 @@ from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
-from app.services import operation_settings
+from app.domains.operations.service import settings as operation_settings
 from app.integrations import image_provider
 from app.integrations import pollinations_image
 from app.core import prompt_safety
@@ -106,7 +106,7 @@ from app.integrations.azure_translation import (
     _TRANSLATION_USAGE_LOCK,
 )
 from app.integrations import replicate_image
-from app.services import service_image_key
+from app.credentials import service_images as service_image_key
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,

@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.characters.models import Character
 from app.domains.identity.models import LlmCredential
-from app.models.agent_settings import AgentImageGenerationSetting
+from app.domains.characters.models import AgentImageGenerationSetting
 from app.domains.social.schemas import community as schemas
 from app.config import settings
 from app.credentials import (
@@ -32,11 +32,14 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.cruds import agents as agent_crud
+from app.domains.characters.repository import image_settings as image_setting_repository
+from app.domains.routines.service import activity_logs
 from app.integrations import image_provider
 from app.domains.social.service import media_storage as profile_media
 from app.integrations.media import files as media_files
-from app.services import image_prompt_safety, operation_settings, service_image_key
+from app.core import image_prompt_safety
+from app.domains.operations.service import settings as operation_settings
+from app.credentials import service_images as service_image_key
 from app.services.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,
@@ -253,7 +256,7 @@ def _log_local_api_image_rejected(
     post_id: str,
     local_key_prefix: str,
 ) -> None:
-    agent_crud.log_activity(
+    activity_logs.log_activity(
         db,
         user_id=user_id,
         character_id=character_id,
@@ -270,7 +273,7 @@ class RuntimeImageGenerationWorkflows:
         return DirectLlmError
 
     def get_image_generation_setting(self, db: Session, character_id: str):
-        return agent_crud.get_image_generation_setting(db, character_id)
+        return image_setting_repository.get_image_generation_setting(db, character_id)
 
     def service_image_available(self, model: str) -> bool:
         return service_image_key.is_service_image_available_for_model(model)
@@ -309,11 +312,9 @@ class RuntimeImageGenerationWorkflows:
 
     def store_image_visual_identity(self, db: Session, setting: AgentImageGenerationSetting, *, identity_prompt: str, source_hash: str) -> str:
         # Preserve the attached setting and the caller's explicit commit/refresh.
-        setting.visual_identity_prompt = identity_prompt.strip()
-        setting.visual_identity_source_hash = source_hash
-        db.commit()
-        db.refresh(setting)
-        return setting.visual_identity_prompt
+        return image_setting_repository.store_image_visual_identity(
+            db, setting, identity_prompt=identity_prompt, source_hash=source_hash
+        )
 
     async def generate_visual_identity_payload(self,
         *,

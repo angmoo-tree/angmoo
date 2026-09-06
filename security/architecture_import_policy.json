@@ -5,10 +5,6 @@
     {
       "edges": [
         {
-          "importer": "app.api.v1.deps",
-          "imported": "app.services.local_bot"
-        },
-        {
           "importer": "app.api.v1.routes.agent_runs",
           "imported": "app.models"
         },
@@ -38,19 +34,7 @@
         },
         {
           "importer": "app.api.v1.routes.agents",
-          "imported": "app.services.maintenance"
-        },
-        {
-          "importer": "app.api.v1.routes.agents",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.services.local_bot"
         },
         {
           "importer": "app.api.v1.routes.world_character_setup",
@@ -78,23 +62,7 @@
         },
         {
           "importer": "app.models",
-          "imported": "app.models.admin_ops"
-        },
-        {
-          "importer": "app.models",
-          "imported": "app.models.agent_local_keys"
-        },
-        {
-          "importer": "app.models",
           "imported": "app.models.agent_runs"
-        },
-        {
-          "importer": "app.models",
-          "imported": "app.models.agent_settings"
-        },
-        {
-          "importer": "app.models",
-          "imported": "app.models.local_bot_quotas"
         },
         {
           "importer": "app.models",
@@ -142,15 +110,7 @@
         },
         {
           "importer": "app.runtime.characters.creator",
-          "imported": "app.services.operation_settings"
-        },
-        {
-          "importer": "app.runtime.characters.creator",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.runtime.characters.creator",
-          "imported": "app.services.service_image_key"
         },
         {
           "importer": "app.runtime.characters.management",
@@ -174,23 +134,7 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.services.image_prompt_safety"
-        },
-        {
-          "importer": "app.runtime.characters.management",
-          "imported": "app.services.maintenance"
-        },
-        {
-          "importer": "app.runtime.characters.management",
-          "imported": "app.services.operation_settings"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.runtime.characters.management",
-          "imported": "app.services.service_image_key"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -218,27 +162,7 @@
         },
         {
           "importer": "app.runtime.social.image_generation",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.social.image_generation",
-          "imported": "app.models.agent_settings"
-        },
-        {
-          "importer": "app.runtime.social.image_generation",
           "imported": "app.services.direct_llm"
-        },
-        {
-          "importer": "app.runtime.social.image_generation",
-          "imported": "app.services.image_prompt_safety"
-        },
-        {
-          "importer": "app.runtime.social.image_generation",
-          "imported": "app.services.operation_settings"
-        },
-        {
-          "importer": "app.runtime.social.image_generation",
-          "imported": "app.services.service_image_key"
         },
         {
           "importer": "app.runtime.social.image_job_worker",
@@ -259,10 +183,6 @@
         {
           "importer": "app.schemas",
           "imported": "app.schemas.characters"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.maintenance"
         },
         {
           "importer": "app.schemas",
@@ -298,46 +218,6 @@
         },
         {
           "importer": "app.services.community_abuse_quota",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.runtime.characters.management"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.runtime.social.image_generation"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.services.local_bot_quota"
-        },
-        {
-          "importer": "app.services.local_bot_quota",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.maintenance",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.maintenance",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.operation_settings",
           "imported": "app.models"
         },
         {
@@ -459,10 +339,6 @@
         {
           "importer": "app.runtime.resident.execution",
           "imported": "app.services.direct_llm"
-        },
-        {
-          "importer": "app.runtime.resident.execution",
-          "imported": "app.services.maintenance"
         },
         {
           "importer": "app.runtime.resident.execution",
@@ -1177,7 +1053,40 @@
       "app.domains.tree.repository",
       "app.domains.tree.router",
       "app.domains.tree.schemas",
-      "app.domains.tree.service"
+      "app.domains.tree.service",
+      "app.domains.characters.repository.image_settings",
+      "app.domains.characters.service.image_settings",
+      "app.domains.characters.service.image_settings_owner",
+      "app.domains.identity.repository.credentials",
+      "app.domains.identity.service.character_credentials",
+      "app.domains.local_bot.constants",
+      "app.domains.local_bot.contracts.actions",
+      "app.domains.local_bot.contracts.authentication",
+      "app.domains.local_bot.contracts.key_management",
+      "app.domains.local_bot.contracts.rate_limits",
+      "app.domains.local_bot.dependencies",
+      "app.domains.local_bot.exceptions",
+      "app.domains.local_bot.models",
+      "app.domains.local_bot.policies.rate_limit_clock",
+      "app.domains.local_bot.repository.keys",
+      "app.domains.local_bot.repository.quota",
+      "app.domains.local_bot.router.bot",
+      "app.domains.local_bot.router.keys",
+      "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.actions",
+      "app.domains.local_bot.service.authentication",
+      "app.domains.local_bot.service.key_management",
+      "app.domains.local_bot.service.key_records",
+      "app.domains.local_bot.service.presentation",
+      "app.domains.local_bot.service.quota",
+      "app.domains.local_bot.service.rate_limits",
+      "app.domains.operations.constants",
+      "app.domains.operations.contracts",
+      "app.domains.operations.models",
+      "app.domains.operations.repository",
+      "app.domains.operations.schemas",
+      "app.domains.operations.service.maintenance",
+      "app.domains.operations.service.settings"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1605,7 +1514,27 @@
       "app.domains.character_lore.service.presentation",
       "app.domains.tree.contracts",
       "app.domains.tree.schemas",
-      "app.domains.tree.service"
+      "app.domains.tree.service",
+      "app.domains.characters.service.image_settings",
+      "app.domains.characters.service.image_settings_owner",
+      "app.domains.identity.service.character_credentials",
+      "app.domains.local_bot.contracts.actions",
+      "app.domains.local_bot.contracts.authentication",
+      "app.domains.local_bot.contracts.key_management",
+      "app.domains.local_bot.contracts.rate_limits",
+      "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.actions",
+      "app.domains.local_bot.service.authentication",
+      "app.domains.local_bot.service.key_management",
+      "app.domains.local_bot.service.key_records",
+      "app.domains.local_bot.service.presentation",
+      "app.domains.local_bot.service.quota",
+      "app.domains.local_bot.service.rate_limits",
+      "app.domains.operations.contracts",
+      "app.domains.operations.schemas",
+      "app.domains.operations.service.maintenance",
+      "app.domains.operations.service.settings",
+      "app.domains.social.exceptions"
     ],
     "bridges": [
       {
@@ -2118,14 +2047,6 @@
         "owner_stage": "AR-B8-A",
         "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
         "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       },
       {
@@ -2833,46 +2754,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.social.service.activity_results",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.social.service.feed",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.social.service.inbox",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.social.service.posts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.social.service.profiles",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.social.repository.posts",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8",
@@ -2969,30 +2850,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.routines.service.tick_schedule",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
-        "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot_quota",
-        "target": "app.domains.routines.service.tick_schedule",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
-        "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.maintenance",
-        "target": "app.domains.operations.exceptions",
-        "owner_stage": "AR-B8-A",
-        "review_date": "2026-09-06",
-        "reason": "One original error class moved to actual Operations owner for existing HTTP catches. The remaining old service imports the same object; no alternate implementation exists.",
-        "removal_condition": "Root joins the already-authored Operations 5fb092b source, which owns maintenance service and removes app.services.maintenance before B8-A."
-      },
-      {
         "importer": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
         "target": "app.domains.social.models.subjective_context",
         "owner_stage": "AR-B8-A",
@@ -3030,6 +2887,86 @@
         "owner_stage": "AR-B8-A / AR-G5",
         "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
         "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.operations.models",
+        "owner_stage": "AR-B8-A/G5",
+        "removal_condition": "Remove global model/schema aggregates after all actual domain owners and registration callers are migrated.",
+        "reason": "Existing global import preserves the same moved operation ORM/schema object during the final source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.operations.schemas",
+        "owner_stage": "AR-B8-A/G5",
+        "removal_condition": "Remove global model/schema aggregates after all actual domain owners and registration callers are migrated.",
+        "reason": "Existing global import preserves the same moved operation ORM/schema object during the final source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.local_bot.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.local_bot.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.identity.repository.credentials",
+        "owner_stage": "AR-B4/AR-B8-A",
+        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
+        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.identity.service.character_credentials",
+        "owner_stage": "AR-B4/AR-B8-A",
+        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
+        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.identity.repository.credentials",
+        "owner_stage": "AR-B4/AR-B8-A",
+        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
+        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.local_bot.repository.keys",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
+        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.local_bot.service.key_records",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
+        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.local_bot.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
         "review_date": "2026-09-06"
       }
     ]
