@@ -1369,3 +1369,5 @@ Canonical interaction의 후보 실제 메서드/관계 band/상호 차단은 �
 신규 회귀 최초는 기존13 PASS/새1 FAIL로, SQLite rollback 재조회에서 datetime timezone 표시가 naive로 복원되기 때문에 새 테스트의 dataclass 전체 비교가 달랐다. 새 테스트에서 UTC 시간 표현을 정규화한 뒤 같은 전체 후보 값으로 비교하며 제품 시간/SQL/기존 assertion은 변경하지 않았다. 최종 호환/G07/full B5/capture/Hosted는 계속한다.
 
 C28 최종 확대는 **131 PASS /기존 PostgreSQL skip1 /63.62초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **855 module /3108 edge /legacy181**, L4 parity99·ER0가 통과했다. 첫 지도 검사가 legacy의 단일 factory 이전을 다중 분할로 기재한1항목을 거절했으므로, 실제 단일 구현 이전과 남은 임시 import aggregate로 구분해 같은 검사0오류를 확인했다. DTO·업무·SQL·assertion은 변경하지 않았다.
+
+C28 독립 리뷰 후속: `RuntimeRoutineInteractionReferences.get_post`가 원래 `db.get` 대신 공개/댓글 eager-load 조회에 연결된 차이를 발견했다. 신규 SQLite 회귀가 숨김 attached 객체 조회에서 **1 FAIL**로 결정적으로 재현했다. 이미 존재하는 실제 `social.repository.event_evidence.get_post`의 동일 `db.get`로 연결하여 identity-map hit의 SQL/flush0, miss의 숨김 객체/단일 SELECT/no eager-load, caller rollback·없는 ID를 확인했다. 직접 Social·RoutinePost 회귀는 **36 PASS /기존 PostgreSQL skip1 /19.50초**다. 앞선 AST 보존은 callback 호출 복원까지의 증거였으며 이 후속 검증이 실제 callback SQL 의미도 보완한다. 기존 판단/SQL/회귀 assertion은 변경하지 않았다.

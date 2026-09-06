@@ -73135,7 +73135,8 @@
         }
       ],
       "new_tests": [
-        "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+        "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback",
+        "tests/relationships/test_routine_interaction_reads.py::test_interaction_source_lookup_keeps_unfiltered_identity_map_and_lazy_sql"
       ],
       "statement_extractions": [
         {
@@ -73164,6 +73165,14 @@
           "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
         ],
         "meaning": "The only actual legacy factory moves verbatim to runtime and is consumed by default_interaction_source. Remaining legacy imports are a temporary B4 binding aggregate pending final caller removal."
+      },
+      "lookup_review": {
+        "actual_owner": "backend/app/domains/social/repository/event_evidence.py::get_post",
+        "consumer": "backend/app/runtime/routine_posts/interactions.py::RuntimeRoutineInteractionReferences.get_post",
+        "test_nodes": [
+          "tests/relationships/test_routine_interaction_reads.py::test_interaction_source_lookup_keeps_unfiltered_identity_map_and_lazy_sql"
+        ],
+        "evidence": "Independent review caught a wrong visible/eager-loaded Post query binding. Deterministic new SQLite regression failed at hidden attached Post identity before correction; original nullable db.get owner is now bound. Identity hit performs zero SQL/flush, miss returns hidden row with one SELECT and no comments eager load; caller rollback and missing row preserved. Original candidate predicates and existing assertions unchanged."
       }
     }
   }

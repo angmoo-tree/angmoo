@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.runtime.routine_posts.interactions import CanonicalRoutineInteractionSource
+from app.runtime.routine_posts.interactions import RuntimeRoutineInteractionReferences
 from test_social_event_runtime import _engine, _seed, _post, _record_post_event
 
 
@@ -103,4 +104,49 @@ def test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rol
         assert reverse.trust == 45
         assert db.get(models.WorldCharacterBlock, "interaction-read-block") is None
         assert commits == []
+    engine.dispose()
+
+
+def test_interaction_source_lookup_keeps_unfiltered_identity_map_and_lazy_sql():
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        post = _post(
+            db,
+            post_id="interaction-raw-lookup",
+            author=fixture.actor,
+            author_world_character=fixture.actor_world_character,
+            body="Stored evidence",
+        )
+        db.commit()
+        post_id = post.id
+        post.deleted_at = datetime(2026, 8, 11, tzinfo=UTC)
+        post.report_hidden_at = datetime(2026, 8, 11, tzinfo=UTC)
+        statements = []
+        flushes = []
+        event.listen(engine, "before_cursor_execute", lambda *args: statements.append(args[2]))
+        event.listen(db, "before_flush", lambda *_: flushes.append("flush"))
+        references = RuntimeRoutineInteractionReferences()
+
+        # Evidence validation owns visibility checks after the original db.get.
+        assert references.get_post(db, post_id) is post
+        assert statements == []
+        assert flushes == []
+
+        db.flush()
+        db.expunge(post)
+        statements.clear()
+        flushes.clear()
+        loaded = references.get_post(db, post_id)
+        assert loaded is not None
+        assert loaded.deleted_at is not None
+        assert loaded.report_hidden_at is not None
+        assert "comments" not in loaded.__dict__
+        assert len(statements) == 1
+        assert statements[0].lstrip().upper().startswith("SELECT")
+        assert flushes == []
+
+        db.rollback()
+        assert references.get_post(db, post_id).deleted_at is None
+        assert references.get_post(db, "absent-interaction-post") is None
     engine.dispose()

@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from app.domains.social.models.posts import Post
 from app.domains.social.contracts.inbox import ManualInboxInteractionCandidate
-from app.domains.social.repository import posts, interaction_context
+from app.domains.social.repository import event_evidence, interaction_context
 from app.domains.relationships.service.routine_interactions import (
     CanonicalRoutineInteractionService,
 )
@@ -16,7 +16,7 @@ from app.runtime.social.manual_inbox import (
 
 class RuntimeRoutineInteractionReferences(RuntimeManualInboxReferences):
     def get_post(self, db: Session, post_id: str) -> Post | None:
-        return posts.get_post(db, post_id)
+        return event_evidence.get_post(db, post_id)
 
     def pair_blocked(
         self, db: Session, *, world_id: str, first_id: str, second_id: str

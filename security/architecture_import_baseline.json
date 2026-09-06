@@ -11078,8 +11078,8 @@
         "app.domains.relationships.service.routine_interactions",
         "app.domains.social.contracts.inbox",
         "app.domains.social.models.posts",
+        "app.domains.social.repository.event_evidence",
         "app.domains.social.repository.interaction_context",
-        "app.domains.social.repository.posts",
         "app.runtime.social.manual_inbox"
       ],
       "module": "app.runtime.routine_posts.interactions",
