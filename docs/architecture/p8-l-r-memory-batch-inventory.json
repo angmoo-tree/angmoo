@@ -392,7 +392,7 @@
     },
     {
       "path": "backend/app/runtime/memory_selection_provider.py",
-      "sha256": "547c1efa2c6fdc52b171e4af0e6120d80db8c167b6f57b66493ba59811024caf"
+      "sha256": "a2ca5ab0a7e651fae6242254ebe7f3f592f3e6efca9bd9e900ebc91b6c63f43a"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",

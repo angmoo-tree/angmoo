@@ -7,7 +7,8 @@ the owning service method. Product code does not use this compatibility view.
 
 from app.domains.chat import exceptions, policies
 from app.domains.chat.service import profiles
-from app.runtime.chat import sqlalchemy_service as legacy
+from app.domains.chat.service import messages as message_module, threads as thread_module
+from app.domains.identity.service import message_credentials
 from app.runtime.chat.message_composition import (
     message_service,
     settings_service,
@@ -24,7 +25,9 @@ class HistoricalChatTestView:
             profiles,
             policies,
             exceptions,
-            legacy,
+            message_module,
+            thread_module,
+            message_credentials,
         ):
             if hasattr(owner, name):
                 return owner

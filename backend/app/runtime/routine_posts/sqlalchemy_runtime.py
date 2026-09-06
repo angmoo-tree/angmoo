@@ -22,7 +22,11 @@ from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy.orm import Session
 
-from app.compatibility.routine_posts import legacy
+from app.runtime.persistence.model_registration import register_models
+register_models()
+from app.domains.social.schemas.community import PostCreate
+from app.runtime.routines import activity_policy as agent_activity_policy
+from app.runtime.relationships import sqlalchemy_social_event as social_event_runtime
 
 from app.core import unit_of_work
 
@@ -39,6 +43,7 @@ from app.domains.routine_posts.service.generation import DirectRoutinePostProvid
 from app.domains.routine_posts.exceptions import RoutineContextUnavailable
 
 from app.domains.routine_posts.contracts.context import RoutineInteractionSource
+from app.domains.routine_posts.contracts.context import RoutineResidentContext
 
 from app.domains.routine_posts.service.context import assemble_routine_post_context
 
@@ -94,13 +99,6 @@ from app.domains.routines.service import joint_activity as joint_activity_runtim
 from app.domains.routines.repository import public_action_executions as public_action_queries
 
 from app.domains.routines.service import public_action_executions as public_action_executions
-
-agent_activity_policy = legacy.agent_activity_policy
-
-social_event_runtime = legacy.social_event_runtime
-
-
-LangGraphResidentContext = legacy.LangGraphResidentContext
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +229,7 @@ def _finish_failed_beat(
         )
 
 async def run_routine_post_runtime(
-    resident_context: LangGraphResidentContext,
+    resident_context: RoutineResidentContext,
     *,
     interaction_source: RoutineInteractionSource | None = None,
     provider: RoutinePostProvider | None = None,
@@ -583,7 +581,7 @@ async def run_routine_post_runtime(
             post_read = agent_tool_actions.create_agent_tool_post(
                 db,
                 resident_context.session_key,
-                legacy.PostCreate(
+                PostCreate(
                     title=generation.draft.title,
                     body=generation.draft.body,
                     author_character_id=resident_context.character.id,
