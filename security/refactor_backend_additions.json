@@ -4938,6 +4938,1906 @@
       "test_suppressions": {
         "tests/routines/test_activity_presentation.py": {}
       }
+    },
+    {
+      "commit": "e5b75cf93b0ca42c1f4cf9cd66ba4b221dc29b20",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own profile and follow workflows",
+      "tracked_files": {
+        "backend/app/domains/social/service/profiles.py": "590e5d74546cc6e2b186a6b6057274091904324f",
+        "backend/app/domains/social/utils/limits.py": "6a8b764eec33aa86c8dce86c59e02de20f41bda8",
+        "backend/tests/social/test_profile_workflows.py": "67d96690646546ee0a5e88e74ada2e638573a28a"
+      },
+      "test_nodes": [
+        "tests/social/test_profile_workflows.py::test_follow_workflow_deduplicates_notification_and_retains_caller_transaction",
+        "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
+      ],
+      "test_assertions": {
+        "tests/social/test_profile_workflows.py": {
+          "profile_session": [],
+          "test_follow_workflow_deduplicates_notification_and_retains_caller_transaction": [
+            "assert db.scalar(select(func.count(models.ProfileFollow.id))) == 0",
+            "assert db.scalar(select(func.count(models.Notification.id))) == 0",
+            "assert first == second",
+            "assert first.follower.id == owner.id and first.target.id == target.id",
+            "assert profiles.get_follow_status(db, owner, data).following",
+            "assert db.scalar(select(func.count(models.ProfileFollow.id))) == 1",
+            "assert db.scalar(select(func.count(models.Notification.id))) == 1",
+            "assert notice.recipient_character_id == target.id",
+            "assert notice.actor_user_id == owner.id",
+            "assert notice.notification_type == 'follow'",
+            "assert commits == []",
+            "assert not profiles.get_follow_status(db, owner, data).following",
+            "assert commits == []"
+          ],
+          "test_profile_workflow_preserves_fail_closed_order_and_deleted_display": [
+            "pytest.raises(CharacterOwnershipError)",
+            "pytest.raises(FollowSelfError)",
+            "pytest.raises(ProfileNotFoundError)",
+            "assert db.scalar(select(func.count(models.ProfileFollow.id))) == 0",
+            "assert db.scalar(select(func.count(models.Notification.id))) == 0",
+            "assert result.profile.id == target.id",
+            "assert result.profile.display_name == DELETED_CHARACTER_NAME",
+            "assert result.profile.handle is None",
+            "assert result.profile.avatar_url is None and result.profile.banner_url is None",
+            "pytest.raises(ProfileNotFoundError)",
+            "assert db.scalar(select(func.count(models.ProfileFollow.id))) == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_profile_workflows.py": {}
+      }
+    },
+    {
+      "commit": "3e3b80b418f47e061e0b2babc0b33fa113725927",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own feed and inbox workflows",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/inbox_reads.py": "5a4a5b84752aa9c85d1f8e686d7334ac26bbec56",
+        "backend/app/domains/social/service/feed.py": "6e5dfdcc42b28d4adcaec64f0f96589a7a8350b3",
+        "backend/app/domains/social/service/inbox.py": "f84b543fd1d9dd30bf490950fbbbe64e277a9c6f",
+        "backend/app/runtime/social/inbox.py": "154194f1774d5c058bb5b81d19ccb02043a48af2",
+        "backend/tests/social/test_inbox_workflows.py": "68ac881577f416fbe16b5df373338813fa1876ab"
+      },
+      "test_nodes": [
+        "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope",
+        "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+        "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope"
+      ],
+      "test_assertions": {
+        "tests/social/test_inbox_workflows.py": {
+          "inbox_session": [],
+          "test_user_inbox_keeps_single_owner_subquery_and_cursor_scope": [
+            "assert page == [rows[1]] and cursor == '2'",
+            "assert len(statements) == 1",
+            "assert 'SELECT characters.id' in statements[0]",
+            "assert second == [rows[0]] and next_cursor is None",
+            "assert len(statements) == 1",
+            "assert malformed == [rows[1], rows[0]] and malformed_cursor is None",
+            "assert user_inbox_reads.get_notification_for_user(db, user=owner, notification_id=3) is None",
+            "assert user_inbox_reads.get_notification_for_user(db, user=owner, notification_id=4) is None",
+            "assert user_inbox_reads.get_notification_for_user(db, user=owner, notification_id=5) is None",
+            "assert [item.id for item in result.items] == [2] and result.next_cursor == '2'"
+          ],
+          "test_read_workflow_keeps_missing_guard_and_original_explicit_commit": [
+            "pytest.raises(NotificationNotFoundError)",
+            "assert rows[3].read_at is None and commits == []",
+            "assert result.id == rows[1].id and result.read_at is not None",
+            "assert commits == ['commit']",
+            "assert db.get(models.Notification, rows[1].id) is rows[1]",
+            "assert rows[1].read_at is not None",
+            "assert owner.display_name == 'Pending owner change'"
+          ],
+          "test_character_inbox_keeps_explicit_user_or_character_scope": [
+            "assert [item.id for item in result.items] == [2, 1]",
+            "pytest.raises(NotificationNotFoundError)",
+            "assert rows[3].read_at is None",
+            "assert result.id == 1 and result.read_at is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_inbox_workflows.py": {}
+      }
+    },
+    {
+      "commit": "89085acca68bb8e892aceb3731d0d4fc06690bc7",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own discovery policies and aggregate reads",
+      "tracked_files": {
+        "backend/app/domains/characters/service/search.py": "450f94873e2cf751363741a0a7a2320205ca944d",
+        "backend/app/domains/social/contracts/discovery.py": "136eb70c7b8a8edc3ba86fdc41c3e050ad7463c5",
+        "backend/app/domains/social/service/discovery.py": "d849c9d2140f5950398e79b6b5a60bbc53a33385",
+        "backend/app/runtime/social/discovery.py": "64d47b7e67482efce4d7abbda6edb2fa201b9c60",
+        "backend/tests/social/test_discovery_workflows.py": "ec204f54512ab970a16e612dc7a457b3a75ebae7"
+      },
+      "test_nodes": [
+        "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query",
+        "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+        "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
+      ],
+      "test_assertions": {
+        "tests/social/test_discovery_workflows.py": {
+          "discovery_session": [],
+          "test_discovery_keeps_literal_like_escape_join_scope_and_empty_query": [
+            "assert empty.query == '' and empty.posts == [] and (empty.characters == [])",
+            "assert statements == []",
+            "assert found == [posts[0]] and cursor is None",
+            "assert len(statements) == 1 and 'LEFT OUTER JOIN characters' in statements[0]",
+            "assert characters == [literal] and next_offset is None",
+            "assert handles == [literal]",
+            "assert result.query == '100%'",
+            "assert [item.id for item in result.posts] == [posts[0].id]",
+            "assert [item.id for item in result.characters] == [literal.id]"
+          ],
+          "test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order": [
+            "assert feed._today_start_utc() == cutoff",
+            "assert [(item.character_id, item.score) for item in ranked] == [(literal.id, 6), (broad.id, 6)]",
+            "assert (ranked[0].post_count, ranked[0].reply_count, ranked[0].like_count) == (1, 1, 1)",
+            "assert (ranked[1].post_count, ranked[1].reply_count, ranked[1].like_count) == (0, 2, 2)",
+            "assert len(statements) == 1 and 'JOIN agent_activity_logs' in statements[0]",
+            "assert commits == []",
+            "assert [item.character_id for item in discovery_service.list_today_activity(db, limit=0)] == [literal.id]"
+          ],
+          "test_today_root_query_keeps_original_cutoff_visibility_and_order": [
+            "assert selected == rows[:2]",
+            "assert len(statements) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_discovery_workflows.py": {}
+      }
+    },
+    {
+      "commit": "6c5e6b51a9de07b13a94f6084e5f8d7080f43d9b",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own safe public activity projections",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/activity.py": "96a20da8fa27b2036568b7b65a33e03f9aefcf62",
+        "backend/app/domains/social/repository/activity.py": "23faffffb2e8d8498a366e215ca2d053ab83110e",
+        "backend/app/domains/social/schemas/activity.py": "f867c3935be470e841b4cca80e98bbb13adb26eb",
+        "backend/app/domains/social/service/profile_activity.py": "b819e2c32796932f6fa47625ea912d6d755c3c83",
+        "backend/app/runtime/social/profile_activity.py": "8a94bc93821fc2d5e6e1d5e0300192bca92e814e",
+        "backend/tests/social/test_profile_activity_workflows.py": "ee96af0b9c4314ca8a4287f1091976a56a874c58"
+      },
+      "test_nodes": [
+        "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+        "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
+      ],
+      "test_assertions": {
+        "tests/social/test_profile_activity_workflows.py": {
+          "activity_session": [],
+          "test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe": [
+            "assert [item.id for item in result.recent_comments] == [item.id for item in reversed(comments[-20:])]",
+            "assert [item.action_type for item in result.recent_agent_activity] == ['activity_updated', 'state_saved', 'liked']",
+            "assert [item.id for item in result.recent_agent_activity] == [logs[5].id, logs[2].id, logs[0].id]",
+            "assert len(statements) == 3",
+            "assert 'FROM comments' in statements[0]",
+            "assert 'FROM character_states' in statements[1]",
+            "assert 'FROM agent_activity_logs' in statements[2]",
+            "assert 'SYNTHETIC-PRIVATE-STATE' not in str(payload)",
+            "assert 'owner_id' not in payload['character'] and 'personality' not in payload['character']",
+            "assert 'memory_note' not in payload['state']",
+            "assert all(('reason' not in item and 'result' not in item for item in payload['recent_agent_activity']))",
+            "assert commits == []"
+          ],
+          "test_profile_activity_rejects_missing_or_deleted_before_activity_queries": [
+            "assert not any(('FROM comments' in statement or 'FROM character_states' in statement or 'FROM agent_activity_logs' in statement for statement in statements))",
+            "pytest.raises(CharacterNotFoundError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_profile_activity_workflows.py": {}
+      }
+    },
+    {
+      "commit": "13eb9a8402f175fe495570058bd9637e9fe76133",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own basic HTTP handlers and dependency wiring",
+      "tracked_files": {
+        "backend/app/domains/social/dependencies.py": "dca2b9378951dbfeba47171931e83c414a91157d",
+        "backend/app/domains/social/router.py": "a6b1db9bda5c8019988b3c5432cf1dfa6daddf74",
+        "backend/app/runtime/social/composition.py": "688da8e193a5874a6421354874b8e6be67990428",
+        "backend/tests/social/test_http_ownership.py": "b2e87b9af7c3cc34275b8e042b69160795c740e2"
+      },
+      "test_nodes": [
+        "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+        "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping",
+        "tests/social/test_http_ownership.py::test_social_dependencies_fail_closed_before_runtime_configuration"
+      ],
+      "test_assertions": {
+        "tests/social/test_http_ownership.py": {
+          "test_both_factories_bind_social_services_and_preserve_character_state_order": [
+            "assert dependencies.get_current_user is identity_dependencies.get_current_user",
+            "assert dependencies.get_optional_current_user is identity_dependencies.get_optional_current_user",
+            "assert dependencies.get_timeline_service(request) is timeline.timeline_service",
+            "assert dependencies.get_inbox_service(request) is inbox.inbox_service",
+            "assert dependencies.get_discovery_service(request) is discovery.discovery_service",
+            "assert dependencies.get_profile_activity_service(request) is profile_activity.profile_activity_service",
+            "assert len(social_routes) == 31",
+            "assert names.count('save_character_state') == 1",
+            "assert names.count('get_character_activity') == 1",
+            "assert names.index('save_character_state') + 1 == names.index('get_character_activity')"
+          ],
+          "test_social_dependencies_fail_closed_before_runtime_configuration": [
+            "pytest.raises(RuntimeError, match='is not configured')"
+          ],
+          "test_inbox_http_preserves_request_values_validation_and_error_mapping": [
+            "assert response.status_code == 404",
+            "assert response.json() == {'detail': 'Notification not found'}",
+            "assert calls == [(db, owner, 7)]",
+            "assert invalid.status_code == 422",
+            "assert calls == [(db, owner, 7)]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_http_ownership.py": {}
+      }
+    },
+    {
+      "commit": "e0d29a0586adbfd2fd1ef359b7ec569b8a46d902",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own models and candidate lifecycle",
+      "tracked_files": {
+        "backend/app/domains/relationships/constants.py": "8beaaa02f9937c553ccb35275cec97ebced613ad",
+        "backend/app/domains/relationships/models/__init__.py": "f22f98826d7e840f645e8c1c851de00687b31515",
+        "backend/app/domains/relationships/models/points.py": "6094e5eb674160ff7467f23443949ea887ef4417",
+        "backend/app/domains/relationships/repository/__init__.py": "bc8a64f1a5f9102ce139c1176875157588b93b2d",
+        "backend/app/domains/relationships/repository/points.py": "21cf56fd8fcc0998c34d1d4983c7324c8be52c5c",
+        "backend/app/domains/relationships/service/__init__.py": "cded729ad8b12056e55abf8394108b79a3508bc9",
+        "backend/app/domains/relationships/service/points.py": "266862497380bd403839541326e5c7df2745d230",
+        "backend/app/domains/relationships/utils/__init__.py": "022f43872e39e27a79d8f7a4ae7102be9706bc33",
+        "backend/app/domains/relationships/utils/points.py": "58faa6036ac31dc8be3d790616f3cbe50522d918",
+        "backend/tests/relationships/test_point_write_boundaries.py": "d5bfdea887ffdcc8cfb2df1a22543864b1ebc835"
+      },
+      "test_nodes": [
+        "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+        "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_point_write_boundaries.py": {
+          "_request": [],
+          "test_point_admission_and_existing_duplicate_do_not_write_or_reset_state": [
+            "assert sql == []",
+            "assert reason is None",
+            "assert duplicate is point and object_session(duplicate) is db",
+            "assert reason == 'duplicate'",
+            "assert (point.topic_brief, point.status, point.selected_run_id) == ('original', 'selected', 'selected-run')",
+            "assert len(sql) == 1 and sql[0].lstrip().upper().startswith('SELECT')",
+            "assert commits == []",
+            "assert points.create_relationship_point(db, **_request(**changes)) == (None, reason)"
+          ],
+          "test_point_unique_collision_rolls_back_then_reads_the_committed_winner": [
+            "assert reason == 'duplicate'",
+            "assert point.id == winner_id[0] and point.topic_brief == 'winner'",
+            "assert object_session(point) is db and db.is_active",
+            "assert calls[0] == 'winner' and 'rollback' in calls[1:]",
+            "assert db.scalar(select(func.count(AgentRelationshipPoint.id))) == 1",
+            "assert observer.get(AgentRelationshipPoint, winner_id[0]).topic_brief == 'winner'",
+            "assert session is db",
+            "assert reason is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_point_write_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "415029fa18e5f220bfc5f63c8d1cf67756b897de",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): separate graph contracts policies and execution",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/__init__.py": "c42aa8dfb5c51acea38b7fdc918e9985910a1356",
+        "backend/app/domains/relationships/contracts/graph_execution.py": "1e33262a64534dd23e063215c07f74acd38eef70",
+        "backend/app/domains/relationships/contracts/graph_read.py": "5cfbc0fce3d7168214acf26e52096c8bee89d0b2",
+        "backend/app/domains/relationships/contracts/graph_recall_gateway.py": "d9c12f582eb723f9e75eb7768961a72984be686a",
+        "backend/app/domains/relationships/policies/__init__.py": "4bc5c623deff5e675f5ccdcd28bed2f48f1cc596",
+        "backend/app/domains/relationships/policies/graph_recall.py": "58bd53fffe4766742ef3b226325a5b3ddaa49192"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "2761e35e00791fc6884b0f888ab98910abb05ccf",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own event deltas state caps and outbox decisions",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/events.py": "d390ed415a479ada9ae03469482c73ea51cb69ef",
+        "backend/app/domains/relationships/policies/events.py": "09303588e25034c6156530936b8f0be279f08da3",
+        "backend/app/domains/relationships/repository/events.py": "7009d0f6d6e476c7a1bda64dc4e51ef4250444a5",
+        "backend/app/domains/relationships/repository/state.py": "6b53a473803894c9172f9398ffbde4eb135e97af",
+        "backend/app/domains/relationships/service/events.py": "489ecd02b58c641d80d2ca5bc8ceecfca2f08f44",
+        "backend/app/domains/relationships/service/projection_events.py": "3cbd5400f0d716dad6d2f4fad5d1682b15380d60",
+        "backend/app/domains/relationships/service/state.py": "507e56fb1332d309b3b1b52a5a0a96e6dbc599a7"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "42f03669fa0a60525b15ac6a1a0fef38326cf2c2",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): keep execution evidence writes with Routines",
+      "tracked_files": {
+        "backend/tests/relationships/test_execution_evidence_transaction.py": "dbc3b4608d120152ed91364ee9019818b3d3a37c"
+      },
+      "test_nodes": [
+        "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[False]",
+        "tests/relationships/test_execution_evidence_transaction.py::test_execution_link_stays_in_the_event_transaction[True]"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_execution_evidence_transaction.py": {
+          "test_execution_link_stays_in_the_event_transaction": [
+            "assert execution.social_event_id is None",
+            "assert db.scalars(select(models.SocialEvent)).all() == []",
+            "assert db.scalars(select(models.SocialEventEvidence)).all() == []",
+            "assert db.scalars(select(models.GraphProjectionOutbox)).all() == []",
+            "assert session is db",
+            "assert value is (None if missing_execution else execution)",
+            "assert value is execution",
+            "assert object_session(value) is db",
+            "assert len(statements) == before",
+            "pytest.raises(events.SocialEventRuntimeError, match='execution_evidence_invalid')",
+            "assert calls == ['get']",
+            "assert execution.social_event_id == result.event.id",
+            "assert calls == ['get', 'set']",
+            "assert observer.get(models.AgentPublicActionExecution, execution_id).social_event_id is None",
+            "assert observer.scalars(select(models.SocialEvent)).all() == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_execution_evidence_transaction.py": {}
+      }
+    },
+    {
+      "commit": "d602aaedb1570ec49bd9f4bbaf8d1b35f635beb9",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own successful event workflow and evidence boundaries",
+      "tracked_files": {
+        "backend/app/domains/relationships/service/evidence.py": "addece130a2a159ef4feb9fd3d7975d17e1e7b5d",
+        "backend/app/domains/routines/repository/event_evidence.py": "e9f6f522a361f2a47101ffea96b521182566fbf3",
+        "backend/app/domains/social/repository/blocks.py": "c19e7b157e2009732544b1269533182f4ee1d564",
+        "backend/app/domains/social/repository/event_evidence.py": "ae221fb83cb59590247ba52640fbe1b104caae92",
+        "backend/app/domains/world_characters/service/event_scope.py": "9da91c8ceabe29d5bb40975121f01414b0b5407c",
+        "backend/app/runtime/relationships/event_references.py": "89559b4269a85c3dd0bfb95651f82a2f30ec26bf",
+        "backend/tests/relationships/test_event_owner_collaboration.py": "036f9e9e139e41076e3186603780f80c0df64481"
+      },
+      "test_nodes": [
+        "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries",
+        "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_event_owner_collaboration.py": {
+          "test_replay_checks_current_membership_before_skipping_source_reads": [
+            "assert calls == [(fixture.actor_world_character.id, True), (fixture.target_world_character.id, False)]",
+            "pytest.raises(SocialEventRuntimeError)",
+            "assert error.value.reason_code == 'world_membership_inactive'",
+            "assert calls == [(fixture.actor_world_character.id, True)]",
+            "assert replay.reused is True",
+            "assert replay.event is first.event",
+            "assert replay.relationship_state is first.relationship_state",
+            "assert calls == [(fixture.actor_world_character.id, True), (fixture.target_world_character.id, False)]",
+            "assert len(db.scalars(select(models.SocialEvent)).all()) == 1",
+            "assert len(db.scalars(select(models.RelationshipStateChange)).all()) == 1",
+            "assert session is db"
+          ],
+          "test_actor_validation_locks_before_target_or_evidence_queries": [
+            "pytest.raises(SocialEventRuntimeError)",
+            "assert error.value.reason_code == 'world_character_inactive'",
+            "assert len(statements) == 1",
+            "assert statements[0]._for_update_arg is not None",
+            "assert db.scalars(select(models.SocialEvent)).all() == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_event_owner_collaboration.py": {}
+      }
+    },
+    {
+      "commit": "4232cd231a86a9be7c62294afbcd7f8a0e3ff7f8",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): extract proposal contracts and owned queries",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/proposals.py": "2b26b5728f36e2d776102ac55d560ebd30ff0023",
+        "backend/app/domains/relationships/policies/proposals.py": "2a9be789fb54acc818a02474c6dfd957fba940fd",
+        "backend/app/domains/relationships/repository/proposals.py": "b1720ce64e48a32604af2684c53b36a3141e9b70"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "e61e135b018954536a93319afb87759e2229c4af",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own proposal workflows and reservation composition",
+      "tracked_files": {
+        "backend/app/domains/relationships/service/proposals.py": "73fc2a19a7a59c421ad92e76b3647b68f0d3a2f9",
+        "backend/app/runtime/activity_proposals/__init__.py": "6a74ef338c40860d113cd78f1aad1a543cddb977",
+        "backend/app/runtime/activity_proposals/references.py": "b5e8eb014efbec7c8e7f13f12192f3fdfef22fa3",
+        "backend/tests/relationships/test_proposal_transaction.py": "e848b98b1cc915901bd96c606f819af406e96a68"
+      },
+      "test_nodes": [
+        "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[False]",
+        "tests/relationships/test_proposal_transaction.py::test_acceptance_reservation_uses_same_session_and_caller_rollback[True]"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_proposal_transaction.py": {
+          "test_acceptance_reservation_uses_same_session_and_caller_rollback": [
+            "assert len(calls) == 1",
+            "assert fixture.proposal.status == 'proposed'",
+            "assert fixture.proposal.source_response_event_id is None",
+            "assert db.scalars(select(models.JointActivity)).all() == []",
+            "assert db.scalars(select(models.JointActivityParticipant)).all() == []",
+            "assert db.scalar(select(models.SocialEvent).where(models.SocialEvent.idempotency_key == 'owner-accepted')) is None",
+            "assert session is db",
+            "assert kwargs['references']._db is db",
+            "assert kwargs['proposal'] is fixture.proposal",
+            "assert object_session(kwargs['proposal']) is db",
+            "assert kwargs['proposal'].status == 'accepted'",
+            "assert object_session(result.joint_activity) is db",
+            "pytest.raises(RuntimeError, match='after reservation')",
+            "assert result.joint_activity is calls[0]",
+            "assert result.proposal is fixture.proposal",
+            "assert observer.get(models.ActivityProposal, fixture.proposal.id).status == 'proposed'",
+            "assert observer.scalars(select(models.JointActivity)).all() == []",
+            "assert observer.get(models.SocialEvent, source.id) is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_proposal_transaction.py": {}
+      }
+    },
+    {
+      "commit": "4e6d575d59164916d4bf75cd359c8d35faa65228",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own outbox state transitions and readiness queries",
+      "tracked_files": {
+        "backend/app/domains/relationships/repository/projection_state.py": "9e19a946049b467d3a9cf678a4af6e6e8692bd71",
+        "backend/tests/relationships/test_projection_state_transaction.py": "060929a878264316be4839eac9b11a34a1e887aa"
+      },
+      "test_nodes": [
+        "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_projection_state_transaction.py": {
+          "test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction": [
+            "assert projection_state.claim_batch(db, worker_id='owner', now=now, batch_size=1) == [fixture.outbox.id]",
+            "assert fixture.outbox.lease_owner == 'owner'",
+            "assert fixture.outbox.attempt_count == original_attempts + 1",
+            "assert projection_state.finalize_failure(db, outbox_id=fixture.outbox.id, worker_id='stale-owner', now=now, error_class='temporary', terminal=False) == 'lease_lost'",
+            "assert fixture.outbox.status == 'processing'",
+            "assert fixture.outbox.lease_owner == 'owner'",
+            "assert projection_state.finalize_failure(db, outbox_id=fixture.outbox.id, worker_id='owner', now=now, error_class='temporary', terminal=False) == 'pending'",
+            "assert fixture.outbox.next_attempt_at == now + timedelta(seconds=5)",
+            "assert fixture.outbox.lease_owner is None",
+            "assert fixture.outbox.completed_at is None",
+            "assert fixture.outbox.status == 'pending'",
+            "assert fixture.outbox.attempt_count == original_attempts",
+            "assert fixture.outbox.next_attempt_at is None",
+            "assert fixture.outbox.last_error_class is None",
+            "assert original.status == 'pending'",
+            "assert original.attempt_count == original_attempts"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_projection_state_transaction.py": {}
+      }
+    },
+    {
+      "commit": "4b86caa2988b1e58beba86cfa4230e9f2e858cc5",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own canonical SQLite lease policy and CAS",
+      "tracked_files": {
+        "backend/app/domains/relationships/repository/sqlite_projection_state.py": "732d6390bdf0119a4bff8891cf280b62c35c7e3c",
+        "backend/app/domains/relationships/service/sqlite_projection_state.py": "aa4f54fc91e125664318f7a7df3cecf9d944eebc"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "650090b34d825472846609a6ffb4443b8d095984",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own canonical projection command admission",
+      "tracked_files": {
+        "backend/app/domains/relationships/policies/projection_commands.py": "b774170774585ac13f4c3cff7dbbe3e39e672f92",
+        "backend/app/domains/relationships/repository/projection_commands.py": "3bbeba512cb9bbb2489f0e8eb54f87b2fff72f02",
+        "backend/app/domains/relationships/service/projection_commands.py": "1506746fbf60b6d05b11817a60aef09eb0fbc450",
+        "backend/app/domains/world_characters/service/projection_scope.py": "9076b0747791884e7c6260d1587befe55a3a91dc",
+        "backend/app/runtime/graph_projection/command_references.py": "e8778f952d79e1fb250a9e70b566f597025ea60e",
+        "backend/tests/relationships/test_projection_owner_collaboration.py": "62fe4050662b2cb062f73d3e53da5fbe3b2317d2"
+      },
+      "test_nodes": [
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_projection_owner_collaboration.py": {
+          "test_projection_reads_same_session_sources_and_historical_inactive_membership": [
+            "assert isinstance(command, RelationshipStateProjectionCommand)",
+            "assert calls == [fixture.actor_world_character, fixture.target_world_character, fixture.actor_world_character, fixture.target_world_character]",
+            "assert isinstance(hidden, SourceExclusionProjectionCommand)",
+            "assert hidden.reason == 'source_hidden'",
+            "assert calls == []",
+            "assert fixture.event.retrieval_status == 'eligible'",
+            "assert fixture.actor_world_character.status == 'active'",
+            "assert membership.status == 'active'",
+            "assert fixture.reply_post.report_hidden_at is None",
+            "assert session is db"
+          ],
+          "test_projection_scope_rejects_misrouted_membership_before_target_read": [
+            "pytest.raises(ProjectionCommandError)",
+            "assert error.value.error_class == 'world_mismatch'",
+            "assert error.value.terminal is True",
+            "assert error.value.cancelled is False",
+            "assert calls == [fixture.actor_world_character.membership_id]",
+            "assert fixture.outbox.status == 'pending'",
+            "assert session is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_projection_owner_collaboration.py": {}
+      }
+    },
+    {
+      "commit": "8d340fe4ec3a9918bccfa8464ea19f59ebc8a4ea",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own replay state and canonical source queries",
+      "tracked_files": {
+        "backend/app/domains/relationships/repository/replay.py": "098322003a33d6dd36b1332dee63a037bcea6688",
+        "backend/app/domains/relationships/service/replay.py": "95186a6bd7c7c8da0d3ea6c8fde34a6f2e2e338f",
+        "backend/app/domains/worlds/service/projection_sources.py": "288ac1bccfd73e8254cef98788bcde9b6e7c0ba9"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "f90f7be6dd8e1d5f979a51fd8ab4dd4f8c092460",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own diagnostics contracts and canonical reads",
+      "tracked_files": {
+        "backend/app/domains/relationships/repository/diagnostics.py": "963cac7aaee29169eca85e3031869943a45932a4",
+        "backend/app/domains/routines/repository/joint_diagnostics.py": "971d61f87f1bca663c85515df456d9614b7ed97b"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "9c81880c99b5349cb83ae228f2c632de40e4f846",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own diagnostics workflows and HTTP",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/diagnostics.py": "0e2cfc7a3864c16a998a4105bee7128ecbe3767d",
+        "backend/app/domains/relationships/dependencies.py": "406b4e0089a0e0aae3615d22c2200e0d3c2df933",
+        "backend/app/domains/relationships/router.py": "caf836cbd57d6104a88326a053d0bc749b979840",
+        "backend/app/domains/relationships/service/diagnostics.py": "d9cdcccf77b6a2681f4fc423daaf2e3ad5a860be",
+        "backend/app/runtime/graph_projection/composition.py": "f4e1205733eab3fd4a5c8f8178ba32c632829e3d",
+        "backend/app/runtime/graph_projection/diagnostic_references.py": "57f2c5b0ee9e8d1725565faea4bb562412925df5",
+        "backend/tests/relationships/test_diagnostics_http_ownership.py": "fc8454d3f46ee0af68af0d4abfca9513d553f98f"
+      },
+      "test_nodes": [
+        "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+        "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_diagnostics_http_ownership.py": {
+          "test_both_factories_bind_relationship_readers_and_register_each_route_once": [
+            "assert dependencies.get_current_user is identity_dependencies.get_current_user",
+            "assert isinstance(readers, diagnostic_references.SqlAlchemyDiagnosticReferences)",
+            "assert readers.db is session",
+            "assert readers.config is getattr(app.state, 'runtime_settings', settings)",
+            "assert dependencies.get_read_references(request, session).config is request_config",
+            "assert len(owned) == 2",
+            "assert [route.name for route in owned] == ['get_world_character_social_memory', 'get_world_character_relationship_graph']"
+          ],
+          "test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation": [
+            "assert response.status_code == 200",
+            "assert response.json()['world_character_id'] == fixture.actor_world_character.id",
+            "assert response.json()['relationship_graph_status'] == 'disabled'",
+            "assert calls == [(db, fixture.actor.id)]",
+            "assert graph.status_code == 200",
+            "assert graph.json()['meta']['source'] == 'canonical_fallback'",
+            "assert invalid.status_code == 422",
+            "assert denied.status_code == 403",
+            "assert denied.json() == {'detail': 'character_not_owned'}",
+            "assert absent.status_code == 404",
+            "assert absent.json() == {'detail': 'world_character_not_found'}",
+            "assert fixture.event.retrieval_status == 'eligible'",
+            "assert fixture.outbox.status == 'pending'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_diagnostics_http_ownership.py": {}
+      }
+    },
+    {
+      "commit": "363cf1f3ff2d0ee3610e7673d8a4d0c36eaabbee",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own observation state and receipt writes",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/observations.py": "8801e62fc2808c5935a938658883a38813b3005a",
+        "backend/app/domains/relationships/repository/observations.py": "97029df9b67cea67e0460c1c84960e4a5e287f7a",
+        "backend/app/domains/relationships/service/observations.py": "70a80ec3288fb0313f0d7edb947eab15f2727930",
+        "backend/app/runtime/relationships/observation_references.py": "03d8b9e4b575ba67fb6422c6d90ed73d0ad82305",
+        "backend/tests/relationships/test_observation_ownership.py": "920a3de7d120d3882fcc87b32712dafe9e85c9dd"
+      },
+      "test_nodes": [
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]",
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+        "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_observation_ownership.py": {
+          "_counts": [],
+          "test_observation_uses_same_session_sources_and_caller_rollback": [
+            "assert calls == [('scope', fixture.target_world_character, True), ('post', fixture.reply_post), ('scope', fixture.actor_world_character, False), ('block', fixture.target_world_character.id, fixture.actor_world_character.id)]",
+            "assert _counts(db) == (before[0], before[1] + 1, before[2] + 1, before[3] + 1)",
+            "assert observed.familiarity == 1",
+            "assert (observed.affinity, observed.trust, observed.tension) == (0, 0, 0)",
+            "assert fixture.relationship.actor_world_character_id == fixture.actor_world_character.id",
+            "assert _counts(db) == before",
+            "assert db.get(models.RelationshipStateChange, receipt_id) is None",
+            "assert db.get(models.RelationshipState, state_id) is None",
+            "assert db.get(models.SocialEvent, fixture.event.id) is fixture.event",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db"
+          ],
+          "test_observation_revalidates_active_scope_and_block_before_relation_write": [
+            "pytest.raises(SocialObservationError)",
+            "assert error.value.reason_code == reason",
+            "assert post_reads == ([fixture.reply_post.id] if reads_post else [])",
+            "assert _counts(db) == before",
+            "assert session is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_observation_ownership.py": {}
+      }
+    },
+    {
+      "commit": "c7fabdc465578133cbbd3fb68cdc859e9f2a0b46",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own source replay and audit event records",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/source_posts.py": "255462e82f7d6dee27027c97fd9f92c0f7662ccb",
+        "backend/app/domains/relationships/service/source_posts.py": "032a6816c607dd415669552161e20159ef2225f8",
+        "backend/app/domains/social/repository/manual_writes.py": "8b56dc840c171d6346e66012ca36fe85230d0f23",
+        "backend/app/domains/social/service/manual_writes.py": "746268eb6f3d53b5808e405fd605d6bcfc11b0ad",
+        "backend/app/domains/social/utils/source_writes.py": "a31a3608a84e3ddc4d9c54a2a50fa398da0b0c92"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "601ae80e372e6a08bade8bb012d66030316f614b",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own canonical source write workflows",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/source_writes.py": "116def054da21ec8d886f2f9a076a1a75ff42724",
+        "backend/app/domains/social/service/source_writes.py": "3206c9085cad9b64c04fb2d64a2c240da3b86bd1",
+        "backend/app/domains/world_characters/repository/source_writes.py": "606347ee105c3a87a03e3b80d6e5f6b66d8f1af8",
+        "backend/app/runtime/social/source_references.py": "436a18a8b1694cd06eb892e8cb2a9323664b0434",
+        "backend/tests/social/test_source_write_ownership.py": "79d705b3aa6ca707a9f57f5543bc7ee855ae7811"
+      },
+      "test_nodes": [
+        "tests/social/test_source_write_ownership.py::test_source_collaborators_read_after_begin_and_share_one_commit"
+      ],
+      "test_assertions": {
+        "tests/social/test_source_write_ownership.py": {
+          "test_source_collaborators_read_after_begin_and_share_one_commit": [
+            "assert not db.in_transaction()",
+            "assert not db.in_transaction()",
+            "assert calls == []",
+            "assert commits == ['commit']",
+            "assert calls == [('actor', 'social-uow-owner-actor'), ('source', result.post.id), ('actor', 'social-uow-owner-actor')]",
+            "assert not result.replayed",
+            "assert result.post.can_owner_reply is False",
+            "assert replay.replayed and replay.post.id == result.post.id",
+            "assert calls == [('actor', 'social-uow-owner-actor'), ('actor', 'social-uow-owner-actor')]",
+            "assert commits == ['commit', 'commit']",
+            "assert db.scalar(select(func.count(models.OwnerManualSocialWrite.id))) == 1",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert session is db",
+            "assert session.connection().connection.driver_connection.in_transaction",
+            "assert object_session(row) is db",
+            "assert session is db",
+            "assert object_session(kwargs['post']) is db",
+            "assert kwargs['root_post'] is kwargs['post']",
+            "assert commits == []",
+            "assert stored.retrieval_status == 'audit_only'",
+            "assert session.scalar(select(func.count(models.SocialEventEvidence.id))) == 1",
+            "assert session.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert session.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_source_write_ownership.py": {}
+      }
+    },
+    {
+      "commit": "110fbf8fffab4f120ef6f73146f581e61f6774e0",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own manual feed and thread read policy",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/manual_feed.py": "fa45b8ef5a58e9f6aefa8ddccf877bfaeeca1865",
+        "backend/app/domains/social/repository/manual_feed.py": "0bc29a7a0ec568cbc7239c014d4253a149bedc4f",
+        "backend/app/domains/social/service/manual_feed.py": "db2278b5a3999199383935727c2d48938cb428f4",
+        "backend/app/runtime/social/manual_feed_references.py": "e140760647eea8ba4eaae2d5f4a05fa6171a2f71",
+        "backend/tests/social/test_manual_feed_ownership.py": "3251130db582df1fef261683b3f467a4342257db"
+      },
+      "test_nodes": [
+        "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing"
+      ],
+      "test_assertions": {
+        "tests/social/test_manual_feed_ownership.py": {
+          "test_manual_feed_reads_owner_facts_in_order_without_committing": [
+            "assert not db.in_transaction()",
+            "assert calls == ['get_owner_identity', 'get_world_character', 'get_character', 'get_membership', 'get_world_character', 'get_character', 'active_author_id']",
+            "assert [post.id for post in feed.items] == ['social-uow-target-post']",
+            "assert feed.items[0].author_profile_capability == 'available'",
+            "assert feed.items[0].can_owner_reply is True",
+            "assert [post.id for post in changed.items] == ['social-uow-target-post']",
+            "assert changed.items[0].author_profile_capability == 'unavailable'",
+            "assert commits == []",
+            "assert db.get(Character, author.id).moderation_status == 'active'",
+            "assert references.db is db",
+            "assert object_session(result) is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_manual_feed_ownership.py": {}
+      }
+    },
+    {
+      "commit": "c77daa947a09cd36bd5aebe107ec7b5c32d52c48",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own image prompt and quota policies",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/image_generation.py": "121255e8eff2eaae95716ebe2d39ccedac4b67a4",
+        "backend/app/domains/social/schemas/image_generation.py": "46364264d32d99a7c718cd84e2a6a2fa351c315d",
+        "backend/app/domains/social/service/image_attempts.py": "d5017a093dcd0b543fd64a7b3142fc0ea62b237c",
+        "backend/app/domains/social/service/image_prompts.py": "40d8bd27dfe4fd579d32cc9985e7f6edcb77f838",
+        "backend/app/domains/social/service/image_quota.py": "395ba6bce3bf6d851e6a11a8289b4f9cfc1783c6",
+        "backend/tests/social/test_image_quota_ownership.py": "1e1d4d15cca181d5cf1be4a1629659c4addbb6c5"
+      },
+      "test_nodes": [
+        "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting"
+      ],
+      "test_assertions": {
+        "tests/social/test_image_quota_ownership.py": {
+          "test_image_quota_keeps_day_window_commit_and_release_accounting": [
+            "assert image_quota._service_quota_date(at) == date(2026, 9, 6)",
+            "assert image_quota._daily_image_window(at) == (at, datetime(2026, 9, 6, 15, 0, tzinfo=UTC))",
+            "assert image_quota._daily_image_window(at.replace(tzinfo=None)) == image_quota._daily_image_window(at)",
+            "assert object_session(first) is db",
+            "assert first.status == 'reserved' and first.quota_date == date(2026, 9, 6)",
+            "assert commits == ['commit']",
+            "pytest.raises(ServiceImageQuotaError, match='free_quota_exceeded')",
+            "assert commits == ['commit']",
+            "assert commits == ['commit', 'commit']",
+            "assert count_service_image_quota_used(db, user_id='social-uow-owner', quota_date=first.quota_date) == 0",
+            "assert count_service_image_quota_used(db, user_id='social-uow-owner', quota_date=first.quota_date) == 1",
+            "assert commits == ['commit'] * 4"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_image_quota_ownership.py": {}
+      }
+    },
+    {
+      "commit": "61c07628b61986a079cb55d37c013eaf72a6d339",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own image queue state and processing policy",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/image_jobs.py": "b425bf9c34365259bad164b30e5692379303da16",
+        "backend/app/domains/social/repository/image_jobs.py": "dc70955b5465c6ec33644b2ebb443a8bd801c1cd",
+        "backend/app/domains/social/service/image_jobs.py": "3b01245c6561d59be15ac408c386ed2e0af2319e",
+        "backend/tests/social/test_image_job_ownership.py": "0114f296f763e50dc847bc8b9544c4f182ef67b4"
+      },
+      "test_nodes": [
+        "tests/social/test_image_job_ownership.py::test_image_worker_claims_then_validates_in_same_session[None-skipped]",
+        "tests/social/test_image_job_ownership.py::test_image_worker_claims_then_validates_in_same_session[character-character_missing]",
+        "tests/social/test_image_job_ownership.py::test_image_worker_claims_then_validates_in_same_session[post-post_missing]",
+        "tests/social/test_image_job_ownership.py::test_stale_image_failure_keeps_strict_cutoff_and_conditional_commit"
+      ],
+      "test_assertions": {
+        "tests/social/test_image_job_ownership.py": {
+          "test_image_worker_claims_then_validates_in_same_session": [
+            "assert asyncio.run(worker.process_one_post_image_job()) is True",
+            "assert commits == ['commit', 'commit']",
+            "assert calls == (['character', 'prepare', 'attach'] if removed is None else ['character'])",
+            "assert session is db",
+            "assert commits == ['commit']",
+            "assert session.get(PostImageGenerationJob, job_id).status == 'processing'",
+            "assert kwargs['db'] is db",
+            "assert object_session(kwargs['character']) is db",
+            "assert kwargs['job_id'] == job_id",
+            "assert kwargs['run_started_at'] == job.started_at",
+            "assert kwargs['db'] is db",
+            "assert kwargs['post_id'] == job.post_id",
+            "assert completed.attempt_count == 1",
+            "assert completed.finished_at is not None",
+            "assert completed.status == expected and completed.skip_reason == 'disabled'",
+            "assert completed.status == 'failed' and completed.failure_class == expected"
+          ],
+          "test_stale_image_failure_keeps_strict_cutoff_and_conditional_commit": [
+            "assert mark_stale_post_image_generation_jobs_failed(db, stale_before=cutoff) == 0",
+            "assert commits == []",
+            "assert mark_stale_post_image_generation_jobs_failed(db, stale_before=cutoff + timedelta(microseconds=1)) == 1",
+            "assert job.status == 'failed' and job.failure_class == 'stale_processing'",
+            "assert commits == ['commit']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_image_job_ownership.py": {}
+      }
+    },
+    {
+      "commit": "658e8e50f6c6745e340277f08ae31394a150fd2e",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own image attachment and reference decisions",
+      "tracked_files": {
+        "backend/app/domains/social/service/image_attachment.py": "6b62560a80ecfcf762ab1c05d557a272f3141fa6",
+        "backend/app/domains/social/service/image_reference_policy.py": "491063144f74279b96b7edfffca36da7342f65bb",
+        "backend/tests/social/test_image_attachment_ownership.py": "2295f9ef45b6a7d832e1cb5ec162c05dd537babb"
+      },
+      "test_nodes": [
+        "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+        "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]"
+      ],
+      "test_assertions": {
+        "tests/social/test_image_attachment_ownership.py": {
+          "test_attachment_keeps_media_commit_then_quota_finalization": [
+            "assert saves == [{'post_id': 'social-uow-target-post', 'content_type': 'image/png', 'content': b'fixture-image', 'target_size': (1024, 768), 'max_bytes': 900000, 'quality_steps': (78, 70, 62)}]",
+            "assert stored.post_id == 'social-uow-target-post' and stored.finalized_at is not None",
+            "assert commits == []",
+            "assert result['status'] == 'failed' and result['failure_class'] == 'OSError'",
+            "assert stored.status == 'failed'",
+            "assert db.scalar(select(func.count(PostMedia.id))) == 0",
+            "assert commits == ['commit']",
+            "assert result['status'] == 'attached' and result['media_url'] == '/media/posts/example.webp'",
+            "assert stored.status == 'attached'",
+            "assert db.scalar(select(func.count(PostMedia.id))) == 1",
+            "assert commits == ['commit', 'commit']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_image_attachment_ownership.py": {}
+      }
+    },
+    {
+      "commit": "b29141e30060e95641f7b8c2067f598ee33ae9d4",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own image request and generation workflows",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/image_workflows.py": "f2a54103781f1b937ec93ef348fa3b5bb8358c7d",
+        "backend/app/domains/social/service/image_generation.py": "1cd32f0e2e2826be85efe10a88fd85dfedd19964",
+        "backend/tests/social/test_image_request_ownership.py": "1de0bc5381f398e7a123ec0c84bdbe3504c9b2d4"
+      },
+      "test_nodes": [
+        "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai"
+      ],
+      "test_assertions": {
+        "tests/social/test_image_request_ownership.py": {
+          "test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai": [
+            "assert isinstance(first, BotImageRequestRead) and first.status == 'queued'",
+            "assert second.status == 'skipped' and second.skip_reason == 'limit_exceeded'",
+            "assert reads == [character.id, character.id]",
+            "assert commits == ['commit', 'commit']",
+            "assert [(job.status, job.skip_reason) for job in jobs] == [('queued', None), ('skipped', 'limit_exceeded')]",
+            "assert first.job_id == jobs[0].id and second.job_id == jobs[1].id",
+            "assert session is db",
+            "assert result is setting and object_session(result) is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_image_request_ownership.py": {}
+      }
+    },
+    {
+      "commit": "ab972d9f079d1604c27f5901977b6ac5e5897935",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own visual identity cache and validation",
+      "tracked_files": {
+        "backend/app/domains/social/service/image_identity.py": "eee25c5f688061866593c37deac5c77de8b554de",
+        "backend/tests/social/test_image_identity_ownership.py": "062c5809e41af0cbd62843915120101416416570"
+      },
+      "test_nodes": [
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]"
+      ],
+      "test_assertions": {
+        "tests/social/test_image_identity_ownership.py": {
+          "test_visual_identity_cache_and_rejection_preserve_same_session_write": [
+            "assert asyncio.run(post_image_generation._ensure_visual_identity(**args)) == 'small blue bird'",
+            "assert setting.visual_identity_prompt == 'small blue bird'",
+            "assert setting.visual_identity_source_hash == 'first-hash'",
+            "assert object_session(setting) is db",
+            "assert commits == ['commit'] and calls == ['first-hash']",
+            "assert asyncio.run(post_image_generation._ensure_visual_identity(**args)) == 'small blue bird'",
+            "assert commits == ['commit'] and calls == ['first-hash']",
+            "assert asyncio.run(post_image_generation._ensure_visual_identity(**{**args, 'reference': reference})) is None",
+            "assert setting.visual_identity_prompt == 'small blue bird'",
+            "assert setting.visual_identity_source_hash == 'first-hash'",
+            "assert commits == ['commit'] and calls == ['first-hash', 'second-hash']",
+            "assert not db.is_modified(setting)",
+            "assert kwargs['character'] is character",
+            "assert kwargs['credential'] is credential and kwargs['tracker'] is tracker",
+            "assert kwargs['reference'] is reference",
+            "assert object_session(setting) is db",
+            "assert persisted.visual_identity_prompt == 'small blue bird'",
+            "assert persisted.visual_identity_source_hash == 'first-hash'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_image_identity_ownership.py": {}
+      }
+    },
+    {
+      "commit": "9c47a5da028fc0e2f6e33f39f6b2f637186ac7e8",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own authenticated profile cursor",
+      "tracked_files": {
+        "backend/app/domains/social/service/profile_cursor.py": "6c8c1a7530d5d9cf21c806cb80e35838c70b98e8"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "db9c72483aff93f5f6febac0180217e9e3cc1629",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own World profile policy and queries",
+      "tracked_files": {
+        "backend/app/domains/social/repository/world_profile.py": "09284db5e25f6ec33383ca18241a391a2cd37a83",
+        "backend/app/runtime/social/profile_references.py": "2577d814f39307d42f75f2233b178b40278e24cc",
+        "backend/tests/social/test_world_profile_ownership.py": "cd9835138f6d9bb5ff93cf484911fd6269e047df"
+      },
+      "test_nodes": [
+        "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit"
+      ],
+      "test_assertions": {
+        "tests/social/test_world_profile_ownership.py": {
+          "test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit": [
+            "assert service.repository.db is db and service.references.db is db",
+            "pytest.raises(WorldCharacterSocialProfileValidationError)",
+            "assert statements == []",
+            "assert db.is_modified(target)",
+            "assert [post.id for post in page.items] == ['a-root-new', 'a-root-old']",
+            "assert all((post.author_avatar_url == '/media/pending-profile.webp' for post in page.items))",
+            "assert all((post.author_profile_capability == 'available' for post in page.items))",
+            "assert commits == []",
+            "assert db.get(WorldCharacter, 'wc-a-target').local_profile == before",
+            "assert all((post.author_avatar_url == before['avatar_url'] for post in page.items))",
+            "assert commits == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_world_profile_ownership.py": {}
+      }
+    },
+    {
+      "commit": "8b75ac2ee9d50ebbd026d1fb7a392f4fc84eebe0",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own manual HTTP and request composition",
+      "tracked_files": {
+        "backend/tests/social/test_manual_http_ownership.py": "6d31eb66e031c862b6c40689e48c3c724632beb6"
+      },
+      "test_nodes": [
+        "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+        "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io"
+      ],
+      "test_assertions": {
+        "tests/social/test_manual_http_ownership.py": {
+          "test_manual_http_factories_share_request_session_without_constructor_io": [
+            "assert profile.repository.db is db",
+            "assert profile.references.db is db",
+            "assert refs.db is db",
+            "assert executor._session is db",
+            "assert statements == []",
+            "assert names == ['read_world_character_social_activity', 'read_manual_social_feed', 'read_manual_social_post_thread', 'write_owner_post', 'write_owner_reply']"
+          ],
+          "test_manual_http_origin_rejection_precedes_all_business_io": [
+            "assert len(opened) == 5",
+            "assert response.status_code == 403",
+            "assert statements == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_manual_http_ownership.py": {}
+      }
+    },
+    {
+      "commit": "e7b0236681e057c4f96f54315865e131751429c4",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own declared action persistence",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/subjective_persistence.py": "7858c4ed4f0c24f8aa20b6a8bec78eee1e1e1db8",
+        "backend/app/domains/social/repository/subjective_context.py": "9f699b5b27432b06a80cdb7160c3e258a2709415",
+        "backend/app/domains/social/service/subjective_context.py": "119adb834de96f5797e4c0b2bdb9e6976c721d8d",
+        "backend/app/runtime/social/subjective_references.py": "bad38ab056ae5399d3083ebf67febcb22d2be27b",
+        "backend/tests/social/test_subjective_persistence_ownership.py": "415e25567355369c57dded794c0d6500b905757b"
+      },
+      "test_nodes": [
+        "tests/social/test_subjective_persistence_ownership.py::test_subjective_service_preserves_attached_flush_and_caller_rollback",
+        "tests/social/test_subjective_persistence_ownership.py::test_subjective_service_rejects_failed_or_mismatched_action_before_sql"
+      ],
+      "test_assertions": {
+        "tests/social/test_subjective_persistence_ownership.py": {
+          "_context": [],
+          "test_subjective_service_preserves_attached_flush_and_caller_rollback": [
+            "assert references.db is db",
+            "assert object_session(row) is db",
+            "assert db.get(SocialActionSubjectiveContext, row.id) is row",
+            "assert row.public_action_execution_id == execution.id",
+            "assert row.social_event_id == social_event.id",
+            "assert row.provenance_kind == 'declared_at_action_decision'",
+            "assert row.captured_at == NOW",
+            "assert commits == []",
+            "assert db.get(SocialActionSubjectiveContext, row_id) is None",
+            "assert commits == []"
+          ],
+          "test_subjective_service_rejects_failed_or_mismatched_action_before_sql": [
+            "assert record_declared_subjective_context(db, execution=failed, event=social_event, source_post_id='subject-root', context=None, captured_at=NOW, references=refs) is None",
+            "pytest.raises(SubjectiveContextPersistenceError, match='subjective_context_execution_not_succeeded')",
+            "pytest.raises(SubjectiveContextPersistenceError, match='subjective_context_execution_event_mismatch')",
+            "assert statements == []",
+            "assert len(db.new) == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_subjective_persistence_ownership.py": {}
+      }
+    },
+    {
+      "commit": "fb9180bd042662e7ff2fd016629de0af5704b38a",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own Today activity value policies",
+      "tracked_files": {
+        "backend/app/domains/social/service/today_activity_values.py": "16489c704d1f6ad71bc3c0e0fdc46f755f61fbbd"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "e83f32019addeb240f580febca5bf7a3bf69aa08",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own Today activity snapshot reads",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/today_references.py": "42dd0f8efa4f48ec5db55d053a88f1aa137fa7e6",
+        "backend/app/domains/social/repository/today_activity.py": "b7ffdbfa5a05268d5d66a8a047cea50c20de245d",
+        "backend/app/domains/social/service/today_activity.py": "f61c87a8578148aa5a1c133ebc9ec763bbbe3720",
+        "backend/app/runtime/social/today_activity_queries.py": "e9d04860b4b18fb7519c93ac3e3324be2bb7daa0",
+        "backend/tests/social/test_today_activity_ownership.py": "212cc41cfddbaa6792fe257bc7d703a44604f24f"
+      },
+      "test_nodes": [
+        "tests/social/test_today_activity_ownership.py::test_today_reader_refreshes_canonical_visibility_without_own_commit"
+      ],
+      "test_assertions": {
+        "tests/social/test_today_activity_ownership.py": {
+          "test_today_reader_refreshes_canonical_visibility_without_own_commit": [
+            "assert cached.report_hidden_at is None",
+            "assert cached.report_hidden_at is None",
+            "assert reader.repository._db is db",
+            "assert reader.references._db is db",
+            "assert statements == []",
+            "pytest.raises(TodaySocialActivityReadError, match='today_social_day_range_invalid')",
+            "assert statements == []",
+            "assert cached.report_hidden_at is not None",
+            "assert all((row.source_post_id != 'subject-root' for row in result.records))",
+            "assert all((row.root_post_id != 'subject-root' for row in result.records))",
+            "assert commits == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_today_activity_ownership.py": {}
+      }
+    },
+    {
+      "commit": "365a5c65c27a2701e25ef0ad820e81c6cb94c32b",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own successful action and notification policies",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/action_response.py": "43a892d0bb215a1f3fa4f0330b47dea463e414cb",
+        "backend/app/domains/relationships/service/action_response.py": "2efb00a26dcd768ed3cbed50a775069500c98ce1",
+        "backend/app/domains/social/contracts/action_scope.py": "f8d239a9f68dbe51409943070a75bed26cd137ab",
+        "backend/app/domains/social/service/action_event_types.py": "0f9de0c8b776249dc430c0b5f48a4b08358f191d",
+        "backend/app/domains/social/service/action_notifications.py": "9865e7f76f60b019c573a1b1838d0849e1e1f5d9",
+        "backend/app/domains/social/service/action_sources.py": "c17bae4dc998ac55e64a0607a35899be13fdf516",
+        "backend/app/domains/world_characters/service/action_scope.py": "5f5a9dbabf539e815ee2942c33ab1821559c3a6e",
+        "backend/app/runtime/social/action_scope.py": "7a0017048132fdb52827a0360e0c2ffe9edbdfde",
+        "backend/tests/social/test_action_apply_ownership.py": "7e380b5669eccc64306b429db5c15fc535f1519a"
+      },
+      "test_nodes": [
+        "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+        "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_action_apply_ownership.py": {
+          "test_no_action_keeps_original_scope_checks_and_caller_rollback": [
+            "assert references.db is db",
+            "assert calls == []",
+            "pytest.raises(LangGraphSocialApplyError, match='notification_no_action_outcome_invalid')",
+            "assert calls == []",
+            "assert result is db.get(models.Notification, notification.id)",
+            "assert result.handling_outcome == 'LLM_DECIDED_NO_ACTION'",
+            "assert result.actor_world_character_id == fixture.target_world_character.id",
+            "assert 'commit' not in calls",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert db.get(models.Notification, notification.id).handled_at is None"
+          ],
+          "test_action_sources_preserve_pending_reaction_scope_without_committing": [
+            "assert source == (like, 'like', 'post_like', str(like.id), None)",
+            "assert (like.world_id, like.actor_world_character_id, like.target_world_character_id) == (fixture.world.id, fixture.actor_world_character.id, fixture.target_world_character.id)",
+            "assert changes == []",
+            "assert changes == ['flush']",
+            "assert db.get(models.PostLike, like.id).world_id is None",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0",
+            "assert 'commit' not in changes"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_action_apply_ownership.py": {}
+      }
+    },
+    {
+      "commit": "21c00bef6daa001f95757ee7cb2d18a0c2aa59e4",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own resident action affordances and presentation",
+      "tracked_files": {
+        "backend/app/domains/social/repository/resident_affordances.py": "0072ef915861d31feb394223c00ede318af9cdbe",
+        "backend/app/domains/social/service/agent_presentation.py": "fd5f385235490bbd93008f82c0be60a683eb91fa",
+        "backend/app/domains/social/service/resident_affordances.py": "dabe88e7fce5fc9d33d914a302c214152aafd614",
+        "backend/tests/social/test_resident_affordance_ownership.py": "c43adc684531084657aa330da5f54d9bc7f4badd"
+      },
+      "test_nodes": [
+        "tests/social/test_resident_affordance_ownership.py::test_resident_affordance_sees_pending_like_in_same_session_and_preserves_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_resident_affordance_ownership.py": {
+          "test_resident_affordance_sees_pending_like_in_same_session_and_preserves_rollback": [
+            "assert calls == []",
+            "assert disabled['available_actions'] == []",
+            "assert disabled['blocked_actions'] == dict.fromkeys(('like', 'reply', 'repost', 'follow'), 'policy_disabled')",
+            "assert resident_feed_action_affordance(db, post=post, character_id=fixture.actor.id, allowed_actions={'like'})['available_actions'] == ['like']",
+            "assert offered['available_actions'] == []",
+            "assert offered['blocked_actions']['like'] == 'already_liked'",
+            "assert like.id is not None",
+            "assert 'commit' not in calls",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert resident_feed_action_affordance(db, post=post, character_id=fixture.actor.id, allowed_actions={'like'})['available_actions'] == ['like']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_resident_affordance_ownership.py": {}
+      }
+    },
+    {
+      "commit": "b6ba56306a4d421812c66319dd5c4679e0dd5aa3",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(routines): own feed history sanitization values",
+      "tracked_files": {
+        "backend/app/core/bounded_text.py": "cee909b8b660cfc1dfeb28a94f391f710891519c",
+        "backend/app/domains/routines/schemas/feed_history.py": "02a5de2247c385128a9b63da1d30716c4f89c570",
+        "backend/app/domains/routines/service/feed_history_values.py": "ba25a76bc70a0aadf0a1b1b4c39fd7eb5539173b"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "49c0f1f4cc9d57346de72f76387df3ae3d809579",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own World feed search and canonical validation",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/world_feed.py": "292f571b8d83704459862deebf201a8358b37c22",
+        "backend/app/domains/social/policies/world_feed.py": "7ba7331236a0eac57588609eb76735fe12153526",
+        "backend/app/domains/social/repository/world_feed.py": "482de9078b07ef3b2ac037471bae13f7b4456b4f",
+        "backend/app/runtime/social/world_feed_queries.py": "120b8bb09af140abdbd5500cddff525d23eea25b",
+        "backend/app/runtime/social/world_feed_search.py": "a2e9a0382589141b323e5d5e87b043682085242d"
+      },
+      "test_nodes": [
+        "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions",
+        "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/test_world_feed_search.py": {
+          "_engine": [],
+          "_user": [],
+          "_character": [],
+          "_world": [],
+          "_action_profile": [],
+          "_add_world_character": [],
+          "_add_ready_profile": [],
+          "_post": [],
+          "_search_index": [],
+          "_seed_actor": [],
+          "test_search_text_normalization_is_deterministic": [
+            "assert normalize_search_text('  ＡLCHEMY\\u200b\\nClub  ', max_chars=40) == 'alchemy club'",
+            "assert build_post_search_document(title='Alchemy', body='  New\\tPotion ', topic_signature='LAB') == 'alchemy\\nnew potion\\nlab'"
+          ],
+          "test_search_facts_keep_attached_identity_and_caller_rollback": [
+            "assert statements == []",
+            "assert profile.world is world",
+            "assert profile.character is actor",
+            "assert profile.world_character is actor_wc",
+            "assert inspect(profile.membership).session is db",
+            "assert inspect(profile.profile).session is db",
+            "assert len(statements) == query_count",
+            "assert claim.duplicate_cycle is False",
+            "assert db.get(models.WorldCharacterFeedCursor, actor_wc.id) is not None",
+            "assert db.get(models.WorldCharacterFeedCursor, actor_id) is None"
+          ],
+          "test_hidden_candidate_stops_foreign_reads_and_actions": [
+            "assert len(result.candidates) == 1",
+            "assert result is None",
+            "assert foreign_reads == []",
+            "assert db.get(models.Post, post.id).report_hidden_at is None"
+          ],
+          "test_profile_requires_eight_searchable_keywords": [
+            "assert profile is not None",
+            "pytest.raises(WorldFeedReadinessError)",
+            "assert exc.value.reason_code == reason_code"
+          ],
+          "test_profile_accepts_two_character_keyword_with_world_bounded_search": [
+            "assert profile is not None",
+            "assert status.profile_keywords_ready is True",
+            "assert status.next_keywords == [ready.keywords[0], 'library']",
+            "assert ready.keywords[0] == '일상'"
+          ],
+          "test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows": [
+            "assert [candidate.post_id for candidate in result.candidates] == [relevant_old.id]",
+            "assert result.candidates[0].age_bucket == 'older'",
+            "assert result.candidates[0].world_local_datetime.endswith('+09:00')",
+            "assert result.candidates[0].allowed_actions == ['like', 'comment', 'repost', 'follow']"
+          ],
+          "test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once": [
+            "assert first.keywords == ('alchemy', 'library')",
+            "assert len(claimed.observations) == 1",
+            "assert second_claim.observations == ()",
+            "assert second_claim.claim_conflict_count == 1",
+            "assert status.profile_keyword_count == 8",
+            "assert status.profile_keywords_ready is True",
+            "assert status.next_keyword_offset == 2",
+            "assert status.next_keywords == ['runes', 'potions']",
+            "assert len(status.recent_observations) == 1",
+            "assert status.recent_observations[0].post_title == 'Alchemy club'",
+            "assert status.recent_observations[0].author_name == author.name",
+            "assert status.recent_observations[0].post_created_at.replace(tzinfo=UTC) == now",
+            "assert duplicate.duplicate_cycle is True",
+            "assert next_cycle.cursor_offset == 2",
+            "assert next_cycle.keywords == ('runes', 'potions')"
+          ],
+          "test_blocked_author_is_not_a_candidate": [
+            "assert result.candidates == ()"
+          ],
+          "test_character_privacy_cleanup_removes_p5_runtime_state": [
+            "assert len(claimed.observations) == 1",
+            "assert db.scalar(select(func.count(models.WorldCharacterFeedCursor.world_character_id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldCharacterFeedObservation.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldCharacterBlock.id))) == 0",
+            "assert stored_execution is not None",
+            "assert stored_execution.feed_observation_id is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_world_feed_search.py": {}
+      }
+    },
+    {
+      "commit": "4179b73c754cc884c74fc49b81da156c8c021a97",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own world feed cycle decisions and transactions",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/feed_execution.py": "5501d101e9f2d711ef025c8323fc78789555bf12",
+        "backend/app/domains/social/service/feed_cycle_publishing.py": "ee8b087fab8539857b8e8b71fefd6ed3a1ba797f",
+        "backend/app/domains/social/service/feed_cycle_values.py": "995c36ff881d4ba4c61576ef61524ae82cefe6c7",
+        "backend/app/domains/social/service/feed_reaction_validation.py": "0cfe0976e50e2aaed3727665ccfbaefb37d21d39",
+        "backend/app/runtime/social/feed_cycle.py": "10d018e9ed91a5b09e3282eb6cab4c3eadc70d8e",
+        "backend/tests/social/test_feed_cycle_transactions.py": "80147d183a1009883160912493c52ca08727ce85"
+      },
+      "test_nodes": [
+        "tests/social/test_feed_cycle_transactions.py::test_failed_public_effect_rolls_back_execution_but_keeps_durable_observation"
+      ],
+      "test_assertions": {
+        "tests/social/test_feed_cycle_transactions.py": {
+          "test_failed_public_effect_rolls_back_execution_but_keeps_durable_observation": [
+            "assert calls == []",
+            "assert active is db.get(models.CharacterActiveWorld, context.character.id)",
+            "assert 'commit' not in calls",
+            "assert result['feed_outcome'] == 'public_action_failed'",
+            "assert result['failure_class'] == 'RuntimeError'",
+            "assert result['publish_result'] == {'public_action_count': 0}",
+            "assert provider.plan_calls == 1",
+            "assert provider.writer_calls == 0",
+            "assert len(failed_effects) == 1",
+            "assert db.get(models.SocialEvent, failed_effects[0]) is None",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert db.scalar(select(func.count(models.AgentPublicActionExecution.id))) == 0",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert db.scalar(select(func.count(models.Post.id))) == 1",
+            "assert observation is not None",
+            "assert observation.post_id == target.id",
+            "assert observation.status == 'retryable_failed'",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1",
+            "assert db.get(models.WorldCharacterFeedObservation, observation.id) is not None",
+            "assert session is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_feed_cycle_transactions.py": {}
+      }
+    },
+    {
+      "commit": "62227bdadfe8b20c0bd235f69605ecc021deb617",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): separate feed prompts from provider transport",
+      "tracked_files": {
+        "backend/app/domains/social/service/feed_reaction_prompts.py": "a985f00af20e4613583d289874af9d66c04f9f73",
+        "backend/tests/social/test_feed_reaction_provider_contract.py": "6c7683332984bcbe2b0e06cdec314574075a461d"
+      },
+      "test_nodes": [
+        "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+      ],
+      "test_assertions": {
+        "tests/social/test_feed_reaction_provider_contract.py": {
+          "test_direct_reaction_provider_keeps_context_schema_and_call_limits": [
+            "assert result.selected_action is None",
+            "assert draft.source_post_id == target.id",
+            "assert len(calls) == 2",
+            "assert credential_contexts == [context, context]",
+            "assert all((call['tracker'] is tracker for call in calls))",
+            "assert [call['max_output_tokens'] for call in calls] == [900, 1000]",
+            "assert [call['thinking_level'] for call in calls] == ['medium', 'medium']",
+            "assert calls[0]['context'].node == 'FeedReactionPlanner'",
+            "assert calls[0]['context'].lane == 'world_keyword_feed'",
+            "assert calls[1]['context'].node == 'ReplyWriter'",
+            "assert calls[1]['context'].lane == 'world_keyword_feed_comment'",
+            "assert calls[0]['response_schema'] is provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
+            "assert calls[1]['response_schema'] is provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
+            "assert calls[0]['should_retry_json_error'](None) is False",
+            "assert 'should_retry_json_error' not in calls[1]",
+            "assert prompt['candidates'] == [item.model_dump(mode='json') for item in candidates]",
+            "assert prompt['rules']['max_public_action'] == 1",
+            "assert prompt['rules']['no_public_ignore'] is True",
+            "assert prompt['rules']['comment_intent']['proposal_eligible_candidate_indices'] == [0]",
+            "assert writer_prompt['requirements']['source_post_id'] == target.id",
+            "assert writer_prompt['requirements']['proposal_schedule'] is None",
+            "assert writer_prompt['validated_decision'] == decision.model_dump(mode='json')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_feed_reaction_provider_contract.py": {}
+      }
+    },
+    {
+      "commit": "175210bb48050bdc5a5fcdafcd971152e33e562a",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): separate consumed history and post topic ownership",
+      "tracked_files": {
+        "backend/app/core/json_objects.py": "6a0b3dfdf5f94db0c68e10cb51ef4b1c7f2404d2",
+        "backend/app/domains/routines/contracts/feed_history.py": "e03fc3fb3657dcbffbb157e734b940186efefa25",
+        "backend/app/domains/routines/repository/feed_history.py": "fdfaf2bc67a7cb6ed3cdc3cf4d2c041537bc41a2",
+        "backend/app/domains/routines/service/feed_history.py": "b487dd2e5090184b243eb4151fdbe7da97b89a44",
+        "backend/app/domains/social/contracts/topic_history.py": "cc9e50176e8bd108bdd1026b18c415d0598628d8",
+        "backend/app/domains/social/repository/topic_history.py": "766a168f848e82cbc15909e80bd91b11cf179839",
+        "backend/app/domains/social/service/topic_metadata.py": "46d18d2d26a60a110adc2df97c0dbf312f005911",
+        "backend/app/runtime/social/feed_history.py": "e0dee909a3bbe578a82290b060afc70b7ac76c82",
+        "backend/app/runtime/social/topic_metadata.py": "cee18e1a29449e0f39d6dda5f0811c3ea4746afb",
+        "backend/tests/social/test_topic_history_contracts.py": "68743e4eae9b271f183d4cfc835df12c8fd198c2"
+      },
+      "test_nodes": [
+        "tests/social/test_topic_history_contracts.py::test_topic_history_preserves_attached_rows_column_precedence_and_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_topic_history_contracts.py": {
+          "test_topic_history_preserves_attached_rows_column_precedence_and_rollback": [
+            "assert calls == []",
+            "assert rows == [post]",
+            "assert rows[0] is post",
+            "assert history.get_post(db, post.id) is post",
+            "assert references.latest_creation_log(db, character_id=fixture.actor.id, post_id=post.id) is log",
+            "assert topic_metadata.post_topic_signature_for_prompt(db, post, references=references) == 'persisted log topic'",
+            "assert topic_metadata.post_topic_signature_for_prompt(db, post, references=references) == 'pending column topic'",
+            "assert calls == []",
+            "assert post.topic_signature is None",
+            "assert topic_metadata.post_topic_signature_for_prompt(db, post, references=references) == 'persisted log topic'",
+            "assert 'commit' not in calls"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_topic_history_contracts.py": {}
+      }
+    },
+    {
+      "commit": "81eb60798980dd177e81482d053c70366b2b65e1",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own resident tool authorization and scope checks",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/agent_tools.py": "b8568e6bdcea56b540319291f57753e444960afe",
+        "backend/app/domains/social/service/agent_tool_authorization.py": "2befe322a1f459de2182e1a37661c625aa2a96b8",
+        "backend/app/runtime/social/agent_tool_authorization.py": "9dc3c830c979f787a9a956d2f8b3c3fc1b0be752",
+        "backend/tests/social/test_agent_tool_authorization_contracts.py": "2fd0836ed6a633c4e49dd9627b105889e089bd9a"
+      },
+      "test_nodes": [
+        "tests/social/test_agent_tool_authorization_contracts.py::test_tool_authorization_keeps_attached_run_pending_status_and_caller_rollback",
+        "tests/social/test_agent_tool_authorization_contracts.py::test_tool_authorization_preserves_short_circuit_and_exact_denial_translation"
+      ],
+      "test_assertions": {
+        "tests/social/test_agent_tool_authorization_contracts.py": {
+          "test_tool_authorization_keeps_attached_run_pending_status_and_caller_rollback": [
+            "assert calls == []",
+            "assert actual is run",
+            "assert calls == ['sql']",
+            "assert service._agent_tool_user(db, run, references=references, action='post', session_key=run.tool_auth_key) is db.get(models.User, run.user_id)",
+            "pytest.raises(AgentRunAuthorizationError)",
+            "assert 'reason=no_active_run' in str(exc.value)",
+            "assert 'run_status=completed' in str(exc.value)",
+            "assert run.tool_auth_key not in str(exc.value)",
+            "assert 'commit' not in calls",
+            "assert run.status == 'running'",
+            "assert service._get_agent_tool_run(db, references=references, session_key=run.tool_auth_key, action='post') is run"
+          ],
+          "test_tool_authorization_preserves_short_circuit_and_exact_denial_translation": [
+            "assert service._get_agent_tool_run(db, references=references, session_key=key, action='like') is run",
+            "assert calls == ['auth']",
+            "pytest.raises(AgentRunAuthorizationError)",
+            "assert 'reason=daypart_session_key_not_authorized' in str(exc.value)",
+            "assert hashlib.sha256(key.encode()).hexdigest()[:12] in str(exc.value)",
+            "assert key not in str(exc.value)",
+            "assert calls == ['auth', 'auth']",
+            "pytest.raises(AgentRunAuthorizationError, match='reason=outside active hours')",
+            "pytest.raises(RuntimeError)",
+            "assert exc.value is references.failure",
+            "assert session is db",
+            "assert session is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_agent_tool_authorization_contracts.py": {}
+      }
+    },
+    {
+      "commit": "fd7e4c3175c8d8fcc39c89c0d0e0a4bf2d4eb296",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own resident tool writes and success bookkeeping",
+      "tracked_files": {
+        "backend/app/domains/social/service/agent_tool_actions.py": "06cb13590c2cb4582ca039f9aa26b4619f66d4ed",
+        "backend/app/runtime/social/agent_tools.py": "8b2b77a3288f663b7fccebd45497e7082ef503a5",
+        "backend/tests/social/test_agent_tool_action_transactions.py": "4723dd128b2dbe440c88b870c320315683f6750f"
+      },
+      "test_nodes": [
+        "tests/social/test_agent_tool_action_transactions.py::test_tool_post_topic_and_success_log_share_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_agent_tool_action_transactions.py": {
+          "test_tool_post_topic_and_success_log_share_caller_rollback": [
+            "assert db.get(models.Post, result.id) is None",
+            "assert db.scalar(select(models.AgentActivityLog.id).where(models.AgentActivityLog.target_post_id == result.id)) is None",
+            "assert db.get(models.AgentRun, run.id) is run",
+            "assert commits == []",
+            "assert post is not None",
+            "assert post.author_character_id == fixture.actor.id",
+            "assert post.world_id == fixture.world.id",
+            "assert post.topic_signature == 'A new shared reading note'",
+            "assert len(logs) == 1",
+            "assert logs[0].action_type == 'post_created'",
+            "assert logs[0].reason == 'agent_tool_post'",
+            "assert logs[0].character_id == run.character_id",
+            "assert commits == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_agent_tool_action_transactions.py": {}
+      }
+    },
+    {
+      "commit": "77385483e1689a7ba69ab888559c245862dad453",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own tool feed inbox and observation reads",
+      "tracked_files": {
+        "backend/app/domains/social/service/agent_tool_reads.py": "a2e50679f6cd0235d9d96c03387094d252802304",
+        "backend/app/runtime/social/agent_tool_reads.py": "43fa71555aa53531e2c222342aaeab7dc30a9546",
+        "backend/tests/social/test_agent_tool_inbox_delivery.py": "ca9d973ef05799b4885c27e12760ea20b2a29edd"
+      },
+      "test_nodes": [
+        "tests/social/test_agent_tool_inbox_delivery.py::test_inbox_delivery_keeps_run_scope_order_payload_rules_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_agent_tool_inbox_delivery.py": {
+          "test_inbox_delivery_keeps_run_scope_order_payload_rules_and_caller_rollback": [
+            "assert calls == []",
+            "assert rows == [malformed, valid]",
+            "assert all((row is not foreign and row is not older for row in rows))",
+            "assert agent_tool_reads._latest_inbox_delivery_notification_ids(db, run=run, session_key=run.session_key) == [12, 13]",
+            "assert agent_tool_reads._latest_inbox_delivery_notification_ids(db, run=run, session_key=run.session_key) == []",
+            "assert pending.id is not None",
+            "assert 'commit' not in calls",
+            "assert agent_tool_reads._latest_inbox_delivery_notification_ids(db, run=run, session_key=run.session_key) == [12, 13]",
+            "assert 'commit' not in calls"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_agent_tool_inbox_delivery.py": {}
+      }
+    },
+    {
+      "commit": "85679b3f2d842b2022920587ffc0d7654625ff63",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(routines): own feed note validation and recording",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/feed_history_notes.py": "6973a2dcfa0087761273787514e212e0abc3838e",
+        "backend/app/domains/routines/service/feed_history_notes.py": "8a6430d227a549cfc1f71c1afe27ceae40f87f2b",
+        "backend/app/runtime/social/feed_history_notes.py": "424d4c2c89c630714a10ea28627ee4d1c9f802bb"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "9d432e64d7b3dde9cfaf198717d2435db2791156",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own tool state admission and recording",
+      "tracked_files": {
+        "backend/app/domains/characters/service/state_notes.py": "a35e2f5d46459a6a6f54b2dbafe9ec7db3951bc3",
+        "backend/app/domains/social/service/agent_tool_state.py": "c0171cc71afe00fdd4d8496cb5dd9131097afd6c",
+        "backend/app/runtime/social/agent_tool_state.py": "734d46759b98bcd4fd92d7bbec4a73af3cfc25b9",
+        "backend/tests/social/test_agent_tool_state_transactions.py": "fabc348e0624b4ca796f7c95c33ae7d798f1b65d"
+      },
+      "test_nodes": [
+        "tests/social/test_agent_tool_state_transactions.py::test_tool_state_duplicate_note_preserves_state_and_log_order_with_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_agent_tool_state_transactions.py": {
+          "test_tool_state_duplicate_note_preserves_state_and_log_order_with_caller_rollback": [
+            "assert list(db.scalars(select(models.AgentActivityLog))) == []",
+            "assert character_state.get_character_state(db, fixture.actor.id) is original",
+            "assert original.memory_note == 'A Shared Memory'",
+            "assert original.summary == 'Original state'",
+            "assert original.memory_note == 'A Shared Memory'",
+            "assert list(db.scalars(select(models.AgentActivityLog))) == []",
+            "assert commits == []",
+            "assert character_state.get_character_state(db, fixture.actor.id) is original",
+            "assert result.mood == 'calm'",
+            "assert result.summary == 'Original state'",
+            "assert result.memory_note == 'A Shared Memory'",
+            "assert original.updated_at == original_updated",
+            "assert insert_actions == ['observation_note_saved', 'state_save_suppressed']",
+            "assert len(logs) == 2",
+            "assert {row.reason for row in logs} == {'agent_tool_state_observation_note', 'agent_tool_state_duplicate_memory_note'}",
+            "assert next((row.result for row in logs if row.action_type == 'observation_note_saved')) == 'observed a new reply'",
+            "assert commits == []",
+            "assert updated.memory_note == 'A different memory'",
+            "assert character_state.get_character_state(db, fixture.actor.id) is original",
+            "assert original.summary == 'A later state'",
+            "assert saved_log.action_type == 'state_saved'",
+            "assert saved_log.reason == 'agent_tool_state'",
+            "assert commits == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_agent_tool_state_transactions.py": {}
+      }
+    },
+    {
+      "commit": "ebfee28bcbaae497a202fe3e7450aeecc46f7e47",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own tick candidates and completion workflow",
+      "tracked_files": {
+        "backend/app/domains/social/policies/complete_tick.py": "019ffa5e8d7e97e849bc70f53030311ee15473a4",
+        "backend/app/domains/social/service/complete_tick.py": "22868076e7cf502e1f48b52f58de29e31034847b",
+        "backend/app/runtime/social/complete_tick.py": "538c3bfd80b71c79674fa36790c4a3ea3c1ec656",
+        "backend/tests/social/test_complete_tick_transactions.py": "8138e7e64e26d2ae63520c04f7a83af32ac86543"
+      },
+      "test_nodes": [
+        "tests/social/test_complete_tick_transactions.py::test_complete_tick_prevalidates_all_actions_and_shares_caller_rollback",
+        "tests/social/test_complete_tick_transactions.py::test_tick_evidence_queries_keep_scope_order_pending_rows_and_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_complete_tick_transactions.py": {
+          "test_complete_tick_prevalidates_all_actions_and_shares_caller_rollback": [
+            "assert list(db.scalars(select(models.PostLike))) == []",
+            "assert list(db.scalars(select(models.AgentActivityLog))) == []",
+            "assert db.get(models.CharacterState, fixture.actor.id) is None",
+            "assert commits == []",
+            "pytest.raises(AgentRunAuthorizationError, match='like is duplicated')",
+            "assert list(db.scalars(select(models.PostLike))) == []",
+            "assert db.get(models.CharacterState, fixture.actor.id) is None",
+            "assert db.scalar(select(models.AgentActivityLog.action_type)) == 'complete_tick_rejected'",
+            "assert commits == []",
+            "assert result.executed_actions == [f'like:{post.id}']",
+            "assert result.state.memory_note == 'A fresh observation'",
+            "assert db.scalar(select(models.PostLike.character_id)) == fixture.actor.id",
+            "assert set(actions) == {'liked', 'state_saved', 'tick_completed'}",
+            "assert commits == []"
+          ],
+          "test_tick_evidence_queries_keep_scope_order_pending_rows_and_rollback": [
+            "assert find_thread_viewed_log_id(db, **args) is None",
+            "assert find_thread_viewed_log_id(db, **args) == evidence.id",
+            "assert db.get(models.AgentActivityLog, evidence.id) is evidence",
+            "assert found == list(reversed(notifications))[:30]",
+            "assert list_unread_reply_notifications(db, character_id=fixture.actor.id) == list(reversed(notifications[:-1]))[:30]",
+            "assert list_unread_reply_notifications(db, character_id=fixture.target.id) == []",
+            "assert find_thread_viewed_log_id(db, **args) is None",
+            "assert list_unread_reply_notifications(db, character_id=fixture.actor.id) == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_complete_tick_transactions.py": {}
+      }
+    },
+    {
+      "commit": "bb8bee2053ee2d366c97ac0af0c9275581c760fe",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(social): own manual inbox claims and eligibility",
+      "tracked_files": {
+        "backend/app/domains/social/repository/manual_inbox.py": "7e229ae1269520fb0d781d3ced3cfb540f2ce764",
+        "backend/app/domains/social/utils/manual_inbox.py": "30a6f632d9a88bf0c6d2dac315ad440f4c699496",
+        "backend/app/runtime/social/manual_inbox.py": "dfb9937df1981cecc0a2d3efbd839a6f1916a7ac",
+        "backend/tests/social/test_manual_inbox_lifecycle.py": "43daf6ec8a5d55e9fdb0ba309c18df7695859714"
+      },
+      "test_nodes": [
+        "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits"
+      ],
+      "test_assertions": {
+        "tests/social/test_manual_inbox_lifecycle.py": {
+          "test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits": [
+            "assert [item.source_event_id for item in found] == [source_id(row.id)]",
+            "assert found[0].episode_relevance == 100",
+            "assert commits == []",
+            "assert manual_inbox_service.claim(db, **claim_args) is row",
+            "assert row.status == 'claimed'",
+            "assert commits == ['commit']",
+            "pytest.raises(ManualInboxRuntimeError, match='already_claimed')",
+            "assert commits == ['commit']",
+            "pytest.raises(ManualInboxRuntimeError, match='claim_mismatch')",
+            "assert row.status == 'consumed'",
+            "assert row.version == version + 1",
+            "assert commits == ['commit']",
+            "assert row.status == 'claimed'",
+            "assert row.claim_run_id == 'first-run'",
+            "assert row.version == version",
+            "assert row.status == 'released'",
+            "assert row.claim_run_id is None",
+            "assert commits == ['commit', 'commit']",
+            "assert manual_inbox_service.candidates(db, **candidate_args) == []",
+            "assert row.status == 'rejected'",
+            "assert row.rejected_reason_code == 'source_context_invalid'",
+            "assert commits == ['commit', 'commit', 'commit']",
+            "assert row.status == 'rejected'",
+            "assert db.get(models.WorldCharacterBlock, 'manual-lifecycle-block') is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_manual_inbox_lifecycle.py": {}
+      }
+    },
+    {
+      "commit": "8a4da93cadaafb15f4f5d55a12c263fd4f3276fc",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(relationships): own canonical routine interaction reads",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/routine_interactions.py": "dd5f4879f0c9bc282b84f37419701c6feb4b9a13",
+        "backend/app/domains/relationships/repository/routine_interactions.py": "20c6182d3f4ca4518604d5674d36ee9c89416b43",
+        "backend/app/domains/social/repository/interaction_context.py": "c65450bcc1f179fbd142a22415536a468a5b4f93",
+        "backend/tests/relationships/test_routine_interaction_reads.py": "4711b3f32e36472d2dc70ae82a497d1df5c2a530"
+      },
+      "test_nodes": [
+        "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_routine_interaction_reads.py": {
+          "test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback": [
+            "assert all((type(item) is RoutineInteractionInput for item in found))",
+            "assert [item.source_event_id for item in found] == [item.id for item in events]",
+            "assert [item.relationship_band for item in found] == ['trusted', 'trusted']",
+            "assert [item.episode_relevance for item in found] == [60, 60]",
+            "assert source.references.get_post(db, replies[0].id) is replies[0]",
+            "assert [item.source_event_id for item in source.candidates(db, **{**args, 'after': current})] == [events[1].id]",
+            "assert [item.relationship_band for item in source.candidates(db, **args)] == ['familiar', 'familiar']",
+            "assert source.candidates(db, **args) == []",
+            "assert commits == []",
+            "assert [replace(item, occurred_at=item.occurred_at.replace(tzinfo=UTC)) for item in source.candidates(db, **args)] == found",
+            "assert reverse.trust == 45",
+            "assert db.get(models.WorldCharacterBlock, 'interaction-read-block') is None",
+            "assert commits == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_routine_interaction_reads.py": {}
+      }
+    },
+    {
+      "commit": "696ada3290ea61fc0174250f8808cc6fc6fe6d40",
+      "feature_id": "AR-B5",
+      "reason": "Original signed regression source: fix(relationships): preserve unfiltered interaction source lookup",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/relationships/test_routine_interaction_reads.py::test_interaction_source_lookup_keeps_unfiltered_identity_map_and_lazy_sql"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_routine_interaction_reads.py": {
+          "test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback": [
+            "assert all((type(item) is RoutineInteractionInput for item in found))",
+            "assert [item.source_event_id for item in found] == [item.id for item in events]",
+            "assert [item.relationship_band for item in found] == ['trusted', 'trusted']",
+            "assert [item.episode_relevance for item in found] == [60, 60]",
+            "assert source.references.get_post(db, replies[0].id) is replies[0]",
+            "assert [item.source_event_id for item in source.candidates(db, **{**args, 'after': current})] == [events[1].id]",
+            "assert [item.relationship_band for item in source.candidates(db, **args)] == ['familiar', 'familiar']",
+            "assert source.candidates(db, **args) == []",
+            "assert commits == []",
+            "assert [replace(item, occurred_at=item.occurred_at.replace(tzinfo=UTC)) for item in source.candidates(db, **args)] == found",
+            "assert reverse.trust == 45",
+            "assert db.get(models.WorldCharacterBlock, 'interaction-read-block') is None",
+            "assert commits == []"
+          ],
+          "test_interaction_source_lookup_keeps_unfiltered_identity_map_and_lazy_sql": [
+            "assert references.get_post(db, post_id) is post",
+            "assert statements == []",
+            "assert flushes == []",
+            "assert loaded is not None",
+            "assert loaded.deleted_at is not None",
+            "assert loaded.report_hidden_at is not None",
+            "assert 'comments' not in loaded.__dict__",
+            "assert len(statements) == 1",
+            "assert statements[0].lstrip().upper().startswith('SELECT')",
+            "assert flushes == []",
+            "assert references.get_post(db, post_id).deleted_at is None",
+            "assert references.get_post(db, 'absent-interaction-post') is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_routine_interaction_reads.py": {}
+      }
+    },
+    {
+      "commit": "cac90dcbf14a52a3655cab9099b4d0db90b17c02",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(runtime): own opt-in demo data initialization",
+      "tracked_files": {
+        "backend/app/runtime/bootstrap/__init__.py": "fcc0bb14742b5359dc07fd0295be7bab11a95a53",
+        "backend/app/runtime/bootstrap/demo_seed.py": "0a6113d73332556152071b1831c8bb71751950fc",
+        "backend/tests/runtime/test_demo_seed.py": "4739e139db72549713e2d94cba28deeaae26521d"
+      },
+      "test_nodes": [
+        "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
+        "tests/runtime/test_demo_seed.py::test_demo_seed_repairs_existing_user_then_credential_then_setting"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_demo_seed.py": {
+          "_engine": [],
+          "test_demo_seed_keeps_initial_defaults_and_noop_replay": [
+            "assert user.email == 'demo@angmoo.local'",
+            "assert user.password_hash is None",
+            "assert user.profile_setup_completed",
+            "assert character.owner_id == user.id",
+            "assert character.status == 'inactive'",
+            "assert state.mood == 'curious'",
+            "assert credential.owner_id == user.id",
+            "assert credential.character_id == character.id",
+            "assert credential.provider == 'google'",
+            "assert credential.encrypted_api_key is None",
+            "assert setting.auto_enabled is False",
+            "assert setting.activity_interval_minutes == 60",
+            "assert setting.comment_cooldown_minutes == 180",
+            "assert setting.post_cooldown_hours == 24",
+            "assert db.scalars(select(models.Post.id).order_by(models.Post.id)).all() == ['post-001', 'post-002']",
+            "assert commits == ['commit']",
+            "assert db.get(models.User, user.id) is user",
+            "assert db.get(models.Character, character.id) is character",
+            "assert db.get(models.AgentActivitySetting, character.id) is setting",
+            "assert commits == ['commit']"
+          ],
+          "test_demo_seed_repairs_existing_user_then_credential_then_setting": [
+            "assert writes == [['User'], ['LlmCredential'], ['AgentActivitySetting']]",
+            "assert user.email == 'demo@angmoo.local'",
+            "assert user.display_name_normalized == 'demo user'",
+            "assert user.profile_setup_completed",
+            "assert demo_seed.security.verify_password('synthetic-demo-phrase', user.password_hash)",
+            "assert db.get(models.Character, 'char-mango').name == '망고'",
+            "assert len(db.scalars(select(models.Post)).all()) == 2",
+            "assert writes == [['User'], ['LlmCredential'], ['AgentActivitySetting']]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_demo_seed.py": {}
+      }
+    },
+    {
+      "commit": "04abe9deb3d92a37c27161c20ca264a61e6b6bc5",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: refactor(test): organize Social and Relationships regressions",
+      "tracked_files": {
+        "backend/tests/relationships/__init__.py": "9e47c5dba76e78697376500491bb1f1b121d0f5e",
+        "backend/tests/social/__init__.py": "7b8d51c61b4696a71bb5f77866b99b007de7b9d1"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "66676863b19a029a1c486f5788aa920298042e90",
+      "feature_id": "AR-B5",
+      "reason": "Original signed source integration: test: retain frozen parity and validate every current source node",
+      "tracked_files": {
+        "backend/tests/test_l4_parity_current_source.py": "b0c382cab85a55b12302db7599592ff819d1e3f6"
+      },
+      "test_nodes": [
+        "tests/test_l4_parity_current_source.py::test_live_parity_rejects_stale_or_changed_evidence[count]",
+        "tests/test_l4_parity_current_source.py::test_live_parity_rejects_stale_or_changed_evidence[counter]",
+        "tests/test_l4_parity_current_source.py::test_live_parity_rejects_stale_or_changed_evidence[missing_node]"
+      ],
+      "test_assertions": {
+        "tests/test_l4_parity_current_source.py": {
+          "frozen_checkpoint_behavior": [],
+          "assert_live_parity_matches_source": [
+            "assert behavior['parity_test_files'] == expected_files",
+            "assert behavior['parity_test_nodes'] == expected_nodes",
+            "assert behavior['parity_test_node_count'] == len(expected_nodes)",
+            "assert {moved_node(node) for node in frozen['parity_test_nodes']} <= set(expected_nodes)",
+            "assert behavior['counter_contracts'] == expected_counters",
+            "assert policy['behavior_counters'] == expected_counters",
+            "assert all((item['test'] in expected_nodes for item in expected_counters))",
+            "assert node not in seen",
+            "assert path not in seen"
+          ],
+          "test_live_parity_rejects_stale_or_changed_evidence": [
+            "pytest.raises(AssertionError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l4_parity_current_source.py": {}
+      }
     }
   ]
 }
