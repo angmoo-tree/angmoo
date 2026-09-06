@@ -15059,81 +15059,99 @@
     },
     "stages": {
       "AR-F2-0": {
-        "status": "MERGED / POST-MERGE RUNNING",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "pr": 291,
         "head": "1daca62035f4d2eb7f938d30f073cd280b540dea",
         "merge": "72b6573898ad4a720125aba2905327f49aa7fbd2",
         "pr_checks": "23/23 SUCCESS; installer 5/5 SUCCESS"
       },
       "AR-F2-A": {
-        "status": "MOVED / VALIDATION IN PROGRESS",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F2-A",
-        "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges"
+        "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges",
+        "pr": 292
       },
       "AR-F2-B": {
-        "status": "IMPLEMENTED - ISOLATED VALIDATION; merge follows AR-F2-A post-merge",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F2-B",
-        "scope": "server proxy, browser session transport, runtime navigation and native commands"
+        "scope": "server proxy, browser session transport, runtime navigation and native commands",
+        "pr": 293
       },
       "AR-F2-C": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F2-C",
-        "scope": "Next/static common screens, providers, World/Studio/Device shells"
+        "scope": "Next/static common screens, providers, World/Studio/Device shells",
+        "pr": 294
       },
       "AR-F3-A": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F3-A",
-        "scope": "Identity and settings ownership"
+        "scope": "Identity and settings ownership",
+        "pr": 295
       },
       "AR-F3-B": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F3-B",
-        "scope": "Character feature ownership and mixed-screen assembly"
+        "scope": "Character feature ownership and mixed-screen assembly",
+        "pr": 296
       },
       "AR-F3-C": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
         "source_map": "security/refactor_path_map.json#details.AR-F3-C",
-        "scope": "World definition and Creator Studio ownership"
+        "scope": "World definition and Creator Studio ownership",
+        "pr": 297
       },
       "AR-F3-D": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "MERGED - post-merge pending",
         "source_map": "security/refactor_path_map.json#details.AR-F3-D",
-        "scope": "World definition and Creator Studio ownership"
+        "scope": "World package import/export, preview and desktop transfer",
+        "pr": 298
       },
       "AR-F3-E": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F3-E",
-        "scope": "Social feature ownership"
+        "scope": "Social feature ownership",
+        "pr": 299
       },
       "AR-F3-F": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F3-F",
-        "scope": "Relationship graph ownership"
+        "scope": "Relationship graph ownership",
+        "pr": 300
       },
       "AR-F3-G": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F3-G",
-        "scope": "Relationship graph ownership"
+        "scope": "Tree, support and server/static route ownership",
+        "pr": 301
       },
       "AR-F4-A": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F4-A",
-        "scope": "Relationship graph ownership"
+        "scope": "Chat transport/UI and upper Memory panel composition",
+        "pr": 302
       },
       "AR-F4-B": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F4-B",
-        "scope": "Memory scope and owner/batch controls"
+        "scope": "Memory scope and owner/batch controls",
+        "pr": 303
       },
       "AR-F4-C": {
-        "status": "IMPLEMENTED - local integration validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F4-C",
-        "scope": "Shared screen and native lifecycle boundaries"
+        "scope": "Shared screen and native lifecycle boundaries",
+        "pr": 304
       },
       "AR-F5-A": {
-        "status": "IMPLEMENTED - isolated validation",
+        "status": "IMPLEMENTED - sequential integration pending",
         "source_map": "security/refactor_path_map.json#details.AR-F5-A",
-        "scope": "Retire old forwarding paths and classify actual common/feature/testing owners"
+        "scope": "Retire old forwarding paths and classify actual common/feature/testing owners",
+        "pr": 305
+      },
+      "AR-F5-B": {
+        "status": "IMPLEMENTED - final validation and integration pending",
+        "scope": "Whole-tree frontend checks, contributor documentation and final runtime gates"
       }
     }
   }

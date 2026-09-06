@@ -1,9 +1,9 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0~AR-F3-B #291~#296 COMPLETE; AR-F3-C #297 MERGED
-with post-merge running; AR-F3-D #298~AR-F3-F #300 pre-merge 23/23 PASS;
-AR-F3-G #301 and AR-F4-A/B/C #302~#304 in CI; AR-F5-A local implementation;
-AR-F5-B and AR-X NOT STARTED**.
+Current: **AR-F2-0~AR-F3-C #291~#297 COMPLETE; AR-F3-D #298 MERGED,
+post-merge running; #299~#302 pre-merge PASS; #303~#305 in CI;
+AR-F5-B complete-mode implementation and final validation in progress**.
+AR-X is not started.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -454,3 +454,24 @@ committed history were deleted.
   checked at its real utility owner; original route operations remain unchanged.
   Memory's historical assertion is materialized from real Git source so its
   original assertion AST remains protected. Local focused 9 PASS.
+
+## AR-F5-B whole-tree mode — implementation and final validation
+
+- Enabled complete ownership checks for all frontend source and static entry
+  files. New features and common files are automatically covered. Composition-only
+  cycles and unclassified source roots now fail as well; 58 focused guard tests PASS.
+- Architecture and contributor entry documents describe actual role files and
+  current whole-tree behavior. Historical product-shell records remain explicitly
+  separated from current contribution rules.
+- Final typecheck/lint, proxy and Identity/Characters/Social request parity PASS.
+  Full backend, both builds, browser/static/lifecycle, Linux visual, clean checkout,
+  Host and installer gates remain pending at this writing. Completion of the
+  checker is not completion of these runtime gates.
+
+## Integration receipt — 2026-09-07 07:11 KST
+
+- AR-F3-C #297 merge 817071ddd549daec36f565af539280c045abf6cb:
+  all seven post-merge workflows PASS, including Installer five jobs.
+- AR-F3-D #298: exact head de1abed71db6ea00b31b455ad9673b12619bf5f0,
+  all 23 pre-merge checks PASS; merged at 07:11:08 KST as
+  618905f73b11b19f30493aca87965a981ef9d405. Post-merge remains in progress.

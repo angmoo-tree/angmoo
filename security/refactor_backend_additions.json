@@ -9805,6 +9805,92 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_import_splits.py": {}
       }
+    },
+    {
+      "commit": "a29e9a389eec3ae72b626bff3643bf2a5620af2b",
+      "feature_id": "AR-F5-B",
+      "reason": "Complete frontend ownership checks automatically cover new features, composition cycles and unclassified sources",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_complete_mode_does_not_ignore_a_new_unclassified_source_root",
+        "tests/test_refactor_frontend_foundation.py::test_complete_mode_rejects_a_cycle_only_between_new_composition_files",
+        "tests/test_refactor_frontend_foundation.py::test_complete_public_checker_accepts_new_valid_owners_without_scope_registration"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_committed_frontend_bytes_ignore_host_line_endings": [
+            "assert frontend_stock.committed_files(ROOT)[source] == canonical"
+          ],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "retirement_example": [],
+          "test_retired_facade_preserves_each_export_at_its_actual_owner": [
+            "assert verify_retirements(tmp_path, frozen, moves, details) == []"
+          ],
+          "test_facade_retirement_cannot_hide_removed_or_unrelated_code": [
+            "assert any((expected in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_retired_facade_rejects_remaining_web_or_static_consumer": [
+            "assert any(('active_import' in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ],
+          "test_browser_relative_source_move_preserves_assertions_and_rejects_weakened_expectation": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []",
+            "assert any(('frontend_oracle_changed' in error for error in verify(tmp_path, {path: original}, {old: new})))"
+          ],
+          "test_complete_mode_rejects_a_cycle_only_between_new_composition_files": [
+            "assert any(('refactor_module_cycle' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_mode_does_not_ignore_a_new_unclassified_source_root": [
+            "assert any(('frontend_unclassified_source' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_public_checker_accepts_new_valid_owners_without_scope_registration": [
+            "assert check_frontend(tmp_path, policy) == []",
+            "assert any(('refactor_common_imports_application' in e for e in check_frontend(tmp_path, policy)))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
     }
   ]
 }
