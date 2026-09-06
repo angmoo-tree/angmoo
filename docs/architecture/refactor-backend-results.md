@@ -1,5 +1,35 @@
 # 백엔드 구조 전환 실행 결과
 
+## 최종 구현과 제출 준비 시점의 검증 스냅샷
+
+이 절은 **2026-09-06 20:02 KST B8-B 제출 준비 시점에 확인한 구현과 검증 근거**를 기록한다. 지속적으로 갱신되는 현재 상태표가 아니다. 이 기록 이후 확정된 최종 PR-head, 필수 Actions·설치 결과, merge commit 및 post-merge 결과의 공식 확인 경로는 [추적 Issue #264](https://github.com/angmoo-tree/angmoo/issues/264)와 그 Issue에 연결된 각 PR의 **Checks / Actions 실행 링크**다. 검증 결과는 해당 source SHA와 실행 범위에 한정하며, 아래 역사 기록의 당시 대기 상태를 최신 상태로 해석하지 않는다.
+
+§8.2의 실제 백엔드 소유 전환과 최종 호환 정리를 구현했고, 순차 제출 후보에는 G5의 실제 이력과 B8의 최종 소유 지도를 함께 보존했다. 원본 #258·#263 계약과 frozen migration 자료, 승인 public 검사 및 최초 도입 계보를 유지한다. 이 구현·로컬 검증 스냅샷만으로 마지막 B8-B PR·설치·병합 후 Gate가 완료됐다고 판정하지 않는다.
+
+| 단계 / 확인 대상 | 이 스냅샷에 포함한 확정 결과 | 이후 최종 확인 경로 |
+| --- | --- | --- |
+| AR-G0~G4·B2~B7·Tree/Lore | #265~#286의 순차 PR 및 각 실제 merge 후 검사·설치 PASS | 단계별 PR과 아래 날짜가 붙은 상세 이력, [Issue #264](https://github.com/angmoo-tree/angmoo/issues/264) |
+| AR-B8-A Residual [#287](https://github.com/angmoo-tree/angmoo/pull/287) | merge `8047b816`; **post 7/7 및 Installer 5/5 PASS**. Post backend 2429 PASS / 기존 22 SKIP, 230.18초 | [PR Checks](https://github.com/angmoo-tree/angmoo/pull/287/checks), [post Installer 34022637602](https://github.com/angmoo-tree/angmoo/actions/runs/34022637602) |
+| AR-B8-A Runtime/G06-A [#288](https://github.com/angmoo-tree/angmoo/pull/288) | merge `474c63f2`; **post 7/7 및 Installer 5/5 PASS**. Post backend 2456 PASS / 기존 22 SKIP, 239.12초 | [PR Checks](https://github.com/angmoo-tree/angmoo/pull/288/checks), [post Installer 34025600697](https://github.com/angmoo-tree/angmoo/actions/runs/34025600697) |
+| AR-G5 [#289](https://github.com/angmoo-tree/angmoo/pull/289) | exact `5bb8db94e68ed41df85f869b4e07b90162d5c21f`의 **PR backend 2485 PASS / 기존 22 SKIP, 265.97초**. 첫 head `ed40f1fb`의 전체 검사 전 Memory 목록 실패와 기존 17개 hash 정정 이력은 아래에 보존 | [PR Checks](https://github.com/angmoo-tree/angmoo/pull/289/checks). PR23개·[Installer34027618446](https://github.com/angmoo-tree/angmoo/actions/runs/34027618446)5개 및 Host 모두 SUCCESS; merge `64e21d3829159be26e58bfac88e8909fa9ea338a`, 2026-09-06 20:00:22 KST; 후속 [Core34028979419](https://github.com/angmoo-tree/angmoo/actions/runs/34028979419)·[Installer34028979421](https://github.com/angmoo-tree/angmoo/actions/runs/34028979421) 등 7개는 이 시점에 시작됐으며, 최종 결과는 각 실행과 Issue264에서 확인 |
+| AR-B8-B 구현·보존 후보 | exact `16a67c41`와 `a444410b`의 원래 보존 검사 **2709 보호 = 2709 현재 / 기능 항목 37 PASS**. 최초 도입 원장 **204개**, G5의 임시 ORM 소비자 9개 **모두 제거** | G5 후속 이력까지 연결한 문서 병합 후보 `bd8925343c4138f2acb883edd31feb573f8c4010`. 아래 동일성·검증 범위 설명을 함께 확인 |
+| AR-B8-B 최종 제출·종료 Gate | 이 스냅샷 이후의 exact PR 전체·설치·merge·post 결과는 아래 공식 경로에서 확인 | [Issue #264](https://github.com/angmoo-tree/angmoo/issues/264)에 기록된 최종 B8-B PR과 그 PR의 Checks / Actions에서 exact head·merge·설치·post 결과를 확인 |
+
+최종 구현에는 `main.py` 단일 앱 factory와 지원 full/public profile, 실제 도메인 소유 모델 **102개**, 각 profile의 API **196개**를 보존했다. 임시 `public_main.py`와 사용하지 않는 Chat route facade 3개는 제거했다. 현재 legacy import edge / legacy exception group은 0이며, 정당한 역사·외부 계약과 runtime 조립의 **명시 bridge 38개 = 역사 13개 + 지원 조립 25개**, retained module 20개는 별도 유지한다. 이 수치를 bridge 0으로 표현하지 않는다.
+
+전체 backend 결과는 **exact `30dcbd81`의 2676 PASS / 기존 22 SKIP / 28 warnings, 1087.30초**다. 이후 Chat facade 3개 제거와 원래 실제 HTTP/DI 객체·AST 승계는 **60 focused PASS / 1 warning, 33.68초** 및 독립 읽기 검토로 확인했다. 후속 11개 음성 회귀 도입을 포함한 최종 보존 계보는 2709개다. 따라서 앞의 전체 결과를 `16a67c41`, `a444410b`, `bd892534`에서 수행한 전체 backend 결과로 바꾸어 표기하지 않는다. 마지막 exact PR의 전체 backend 결과는 해당 PR의 Actions 근거를 별도로 연결한다.
+
+실제 Host 검증은 **exact `68113382`**에서 공식 `scripts/dev/desktop-dev.ps1 -NoWatch`로 수행했다. 별도 Docker 프로젝트의 SQLite/Ladybug health 및 scheduler/projector ready, 네이티브 Device Home의 미설정 owner 안내 렌더링을 확인했다. Alt+F4 이후 새 창 목록이 비고 Angmoo·sidecar 프로세스가 사라졌으며 wrapper exit 0과 installed-data fingerprint / cleanup 검사가 통과했다. 기록된 비치명적 WebView unregister 1412 메시지는 별도로 보존한다. 이 실행은 인증된 제품 기능 전체나 실제 AI 작업의 검증 근거가 아니다.
+
+검증 source 연결은 다음과 같다. `68113382` 이후 `589b2e97`은 원장·문서, `589b2e97` 이후 `16a67c41`은 현재 소유 경로·결과 문서만 정리했다. `a444410b`는 G5 이력과 G02 실제 Runtime 모델 경로·역사 문서를 합쳤고, `bd892534`는 후속 G5 실패/보정 문서 7줄만 추가했다. 이 구간의 제품·테스트·보존 검사기·CI·설치·보안 정책은 동일하다. 실제 G5 main `64e21d38`을 연결한 `9c555798`은 `bd892534`와 Git tree가 완전히 같다. 특히 `16a67c41` → `a444410b` → `bd892534`에서는 B8 Memory 현재 inventory와 이미 고정한 204개 원장도 그대로 보존했다. `a444410b`의 별도 수집 2709개 및 원래 stock 2709/2709·37 items는 각각 exit 0이었다. `bd892534`에서 이 두 검사를 새로 실행한 것으로 쓰지 않는다.
+
+보안은 exact `589b2e97`의 원래 네 가지 current/history 검사 PASS와 `16a67c41`의 실제 current·차분 검사 PASS를 구분해 기록한다. 최초 검사의 실패·보정 이력과 source별 검증 범위는 아래 상세 이력에 그대로 남긴다. 이후 최종 PR 보안 결과도 해당 exact Actions 실행으로 확인한다.
+
+이 문서의 실행 범위는 **§8.2 백엔드 구조 전환**이다. §8.3 프론트엔드 이전, AR-X, P8-L-S, 실제 AI를 이용한 제품 인과·품질 검증과 Release/Production은 별도 범위이며, 제품 검증의 PARTIAL 판정을 이 구조 전환 기록만으로 승격하지 않는다.
+
+<details>
+<summary>2026-09-06 17:17 KST 범위·현재 상태표 원문 — 해당 시점의 역사 기록</summary>
+
 ## 범위와 현재 상태
 
 2026-09-05에 §8.2 AR-G0부터 AR-B8-B까지 실행을 시작했다. 사용자 검증·PR·merge는 이번 실행에서 위임받은 권한으로 수행하며, 각 검증은 실제 수행한 범위와 commit을 기록한다. Release/Production, §8.3 프론트엔드 이전, AR-X와 P8-L-S 실제 AI 품질·인과 검증은 별도 범위다.
@@ -22,6 +52,8 @@
 | AR-B8-B | IN PROGRESS · 최종 호환/검사·실행 검증 | clean30dcbd81 stock2698·전체2676 PASS/22 SKIP; 마지막 Chat 호환·보안 경로·최종 실제 실행·PR/merge/post 검증은 진행 중 |
 
 현재 상태는 2026-09-06 17:17 KST의 실제 원격/로컬 근거를 구분한 기록이다. 아래 각 단계의 이전 `NOT STARTED`, `PENDING`, 최초 실패 기록은 해당 시점의 이력이며 현재 상태를 덮어쓰지 않는다. AR-B8-B 종료와 §8.3·AR-X·P8-L-S·Release/Production 완료를 앞당기지 않는다.
+
+</details>
 
 <details>
 <summary>이전 작업 중간 상태표 — 역사적 기록</summary>
