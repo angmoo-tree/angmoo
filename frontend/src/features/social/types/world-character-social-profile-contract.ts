@@ -1,7 +1,4 @@
-import type {
-  MentionedCharacterRef,
-  PostMediaRead,
-} from "./social-feed-contract";
+import type { MentionedCharacterRef, PostMediaRead } from "@/features/social/types/social-feed-contract";
 
 export type WorldCharacterSocialProfileTab = "posts" | "replies" | "likes";
 
@@ -41,9 +38,3 @@ export type WorldCharacterSocialProfileRead = {
   items: WorldCharacterSocialProfilePost[];
   next_cursor: string | null;
 };
-
-export function parseWorldCharacterSocialProfileTab(
-  value: string | null | undefined,
-): WorldCharacterSocialProfileTab {
-  return value === "replies" || value === "likes" ? value : "posts";
-}

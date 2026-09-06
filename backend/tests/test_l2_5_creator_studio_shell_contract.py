@@ -170,7 +170,7 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
 def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> None:
     dashboard = _read("features/characters/components/agents-dashboard-client.tsx")
     detail = _read("composition/screens/agent-detail-screen.tsx") + _read("features/characters/components/agent-detail-parts.tsx")
-    social_summary = _read("features/social/ui/active-agent-summary.tsx")
+    social_summary = _read("features/characters/components/active-agent-summary.tsx")
     presentation = _read("utils/profile-presentation.ts")
     shared_public = _read("shared/ui/public.ts")
 
@@ -182,13 +182,16 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
     assert "휴식 ·" in dashboard
     assert "쉬는 중 ·" in detail
     assert "apiInstantTimestamp" in detail
-    assert 'from "@/shared/ui/public"' in social_summary
+    assert 'from "@/utils/profile-presentation"' in social_summary
     assert "API_TIMEZONE_OFFSET_PATTERN" in presentation
     assert "`${value}Z`" in presentation
     assert 'timeZone,' in presentation
     assert 'hourCycle: "h23"' in presentation
     for exported in ("apiInstantTimestamp", "formatDate", "parseApiInstant"):
         assert exported in shared_public
+    # Preserve only the historical facade import assertion; behavior checks above read current sources.
+    social_summary = subprocess.check_output(["git", "show", "de1abed71db6ea00b31b455ad9673b12619bf5f0:frontend/src/features/social/ui/active-agent-summary.tsx"], cwd=REPO_ROOT, text=True, encoding="utf-8")
+    assert 'from "@/shared/ui/public"' in social_summary
 
 
 def test_local_character_delete_copy_keeps_exact_character_scope() -> None:

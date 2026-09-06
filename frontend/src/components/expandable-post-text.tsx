@@ -1,1 +1,1 @@
-export { ExpandablePostText } from "@/features/social/public";
+export { ExpandablePostText } from "@/components/content/expandable-post-text";

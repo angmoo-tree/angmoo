@@ -159,11 +159,7 @@
       "RelationshipGraphFrame",
       "data-product-shell=\"relationship-graph\""
     ],
-    "frontend/src/features/social/public.ts": [
-      "SocialPostPresentation",
-      "SocialPostRow"
-    ],
-    "frontend/src/features/social/ui/social-post-row.tsx": [
+    "frontend/src/features/social/components/social-post-row.tsx": [
       "authorHref",
       "shouldOpenPostFromCardClick",
       "shouldOpenPostFromCardKeyDown",
@@ -255,18 +251,22 @@
     "frontend/src/composition/providers/auth-provider.tsx",
     "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
     "frontend/src/composition/screens/device-home-screen.tsx",
+    "frontend/src/composition/screens/post-list-screen.tsx",
     "frontend/src/composition/screens/world-app.tsx",
     "frontend/src/composition/screens/world-character-profile-screen.tsx",
     "frontend/src/composition/shells/creator-studio-frame.tsx",
     "frontend/src/composition/shells/local-device-navigation.tsx",
     "frontend/src/composition/shells/world-app-navigation.ts",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
+    "frontend/src/features/characters/api/feed-actor.ts",
     "frontend/src/features/characters/api/world-character-profile-client.ts",
+    "frontend/src/features/characters/components/active-agent-summary.tsx",
     "frontend/src/features/characters/components/agents-dashboard-client.tsx",
     "frontend/src/features/characters/components/characters-dashboard.module.css",
     "frontend/src/features/characters/components/world-character-profile.module.css",
     "frontend/src/features/characters/public.ts",
     "frontend/src/features/characters/stores/character-dashboard-session.ts",
+    "frontend/src/features/characters/types/feed-actor.ts",
     "frontend/src/features/characters/types/world-character-profile.ts",
     "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
     "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
@@ -300,21 +300,16 @@
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/runtime-status/types/runtime-status.ts",
-    "frontend/src/features/social/api/social-agent-client.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-feed-server.ts",
     "frontend/src/features/social/api/social-write-client.ts",
-    "frontend/src/features/social/model/social-agent-contract.ts",
-    "frontend/src/features/social/model/social-feed-contract.ts",
-    "frontend/src/features/social/model/social-presentation-contract.ts",
-    "frontend/src/features/social/model/social-write-contract.ts",
-    "frontend/src/features/social/public.ts",
-    "frontend/src/features/social/ui/active-agent-summary.tsx",
-    "frontend/src/features/social/ui/post-list-client.tsx",
-    "frontend/src/features/social/ui/social-post-row.tsx",
-    "frontend/src/features/social/ui/social-presentation.module.css",
-    "frontend/src/features/social/ui/world-social-feed.module.css",
-    "frontend/src/features/social/ui/world-social-feed.tsx",
+    "frontend/src/features/social/components/social-post-row.tsx",
+    "frontend/src/features/social/components/social-presentation.module.css",
+    "frontend/src/features/social/components/world-social-feed.module.css",
+    "frontend/src/features/social/components/world-social-feed.tsx",
+    "frontend/src/features/social/types/social-feed-contract.ts",
+    "frontend/src/features/social/types/social-presentation-contract.ts",
+    "frontend/src/features/social/types/social-write-contract.ts",
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
@@ -345,6 +340,7 @@
       "device-home",
       "identity",
       "runtime-status",
+      "social",
       "world-packages",
       "worlds"
     ],
@@ -385,6 +381,7 @@
       "lib/desktop/product-window",
       "lib/http/api-request",
       "lib/http/community-request",
+      "lib/http/social-request",
       "lib/media/authenticated-media",
       "lib/media/safe-media-url",
       "lib/navigation/device-navigation",
@@ -427,54 +424,6 @@
       {
         "importer": "features/memory/ui/memory-workspace",
         "target": "features/device-home/public",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/api/social-feed-server",
-        "target": "lib/server/backend",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/public",
-        "target": "components/content/expandable-post-text",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/public",
-        "target": "components/content/mentioned-text",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/public",
-        "target": "components/media/post-media-grid",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/ui/post-list-client",
-        "target": "components/content/mentioned-text",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/ui/post-list-client",
-        "target": "components/media/post-media-grid",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/ui/social-post-row",
-        "target": "components/content/expandable-post-text",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/social/ui/social-post-row",
-        "target": "components/media/post-media-grid",
         "owner_stage": "AR-F5-A",
         "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },

@@ -1,4 +1,2 @@
-export {
-  shouldOpenPostFromCardClick,
-  shouldOpenPostFromCardKeyDown,
-} from "@/features/social/public";
+export { shouldOpenPostFromCardClick } from "@/utils/post-card-navigation";
+export { shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";

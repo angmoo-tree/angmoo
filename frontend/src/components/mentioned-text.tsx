@@ -1,1 +1,1 @@
-export { MentionedText } from "@/features/social/public";
+export { MentionedText } from "@/components/content/mentioned-text";

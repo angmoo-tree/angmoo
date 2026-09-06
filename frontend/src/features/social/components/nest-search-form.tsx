@@ -1,10 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import {
-  useRuntimeRouter as useRouter,
-  useRuntimeSearchParams as useSearchParams,
-} from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter, useRuntimeSearchParams as useSearchParams } from "@/hooks/use-runtime-navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 

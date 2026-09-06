@@ -1,70 +1,14 @@
-import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
-import { runtimeFetch } from "@/shared/runtime/public";
-import { formatDate } from "@/shared/ui/public";
+import {requestSocialApi} from '@/lib/http/social-request';
+export {requestSocialApi} from '@/lib/http/social-request';
+import { formatDate } from "@/utils/profile-presentation";
 
-import type {
-  FeedContentFilter,
-  FeedPage,
-  PostThreadRead,
-  PostReportRead,
-  PostReportReason,
-} from "../model/social-feed-contract";
+import type { FeedContentFilter, FeedPage, PostThreadRead, PostReportRead, PostReportReason } from "@/features/social/types/social-feed-contract";
 
 type FeedListOptions = {
   limit?: number;
   cursor?: string | null;
   content?: FeedContentFilter;
 };
-
-type RequestOptions = Omit<RequestInit, "body" | "credentials"> & {
-  body?: unknown;
-  anonymous?: boolean;
-  clearAuthOnUnauthorized?: boolean;
-};
-
-export async function requestSocialApi<T>(
-  path: string,
-  options: RequestOptions = {},
-) {
-  const {
-    anonymous = false,
-    body,
-    clearAuthOnUnauthorized = false,
-    headers,
-    ...rest
-  } = options;
-  const response = await runtimeFetch(`/api/backend${path}`, {
-    ...rest,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache: "no-store",
-    credentials: anonymous ? "omit" : "same-origin",
-    headers: { "Content-Type": "application/json", ...(headers ?? {}) },
-  });
-  const text = await response.text();
-  let payload: unknown = null;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch (error) {
-    // A successful endpoint must not silently turn a malformed response into a
-    // typed null. Error responses still fall through to the stable HTTP reason.
-    if (response.ok) throw error;
-  }
-  if (!response.ok) {
-    if (response.status === 401 && !anonymous && clearAuthOnUnauthorized) {
-      clearStoredUser();
-      notifyAuthChanged();
-    }
-    const detail =
-      typeof payload === "object" &&
-      payload !== null &&
-      "detail" in payload &&
-      typeof payload.detail === "string"
-        ? payload.detail
-        : `http_${response.status}`;
-    throw new Error(detail);
-  }
-  return payload as T;
-}
 
 function feedPath(path: string, options: FeedListOptions): string {
   const params = new URLSearchParams({ limit: String(options.limit ?? 20) });

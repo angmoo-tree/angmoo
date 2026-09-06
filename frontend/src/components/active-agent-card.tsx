@@ -3,18 +3,12 @@
 import { Radio } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  ActiveAgentSummary,
-  selectActiveAgent,
-} from "@/features/social/public";
-import { useAuth } from "@/shared/auth/public";
-import {
-  AGENTS_CHANGED_EVENT,
-  clearAuth,
-  isAuthError,
-  listAgents,
-  type AgentDetailRead,
-} from "@/lib/agents";
+import { ActiveAgentSummary, selectActiveAgent } from "@/features/characters/components/active-agent-summary";
+import { useAuth } from "@/hooks/use-auth";
+import { AGENTS_CHANGED_EVENT } from "@/features/characters/stores/agent-session";
+import { clearAuth, isAuthError } from "@/lib/auth/browser-session";
+import { listAgents } from "@/features/characters/api/agents";
+import { type AgentDetailRead } from "@/features/characters/types/agents";
 
 export function ActiveAgentCard() {
   const { status } = useAuth();
@@ -118,4 +112,4 @@ export {
   getRuntimeNotice,
   isActiveAgentResting,
   selectActiveAgent,
-} from "@/features/social/public";
+} from "@/features/characters/components/active-agent-summary";

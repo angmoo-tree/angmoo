@@ -1,12 +1,6 @@
-import {
-  RuntimeFetchError,
-  runtimeFetch,
-} from "@/shared/runtime/public";
+import { RuntimeFetchError, runtimeFetch } from "@/lib/runtime/runtime-config";
 
-import type {
-  ManualSocialFeedRead,
-  ManualSocialWriteRead,
-} from "../model/social-write-contract";
+import type { ManualSocialFeedRead, ManualSocialWriteRead } from "@/features/social/types/social-write-contract";
 
 type ManualSocialReadOptions = {
   ownerWorldCharacterId?: string;

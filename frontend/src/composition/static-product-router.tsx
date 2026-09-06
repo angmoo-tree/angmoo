@@ -8,13 +8,9 @@ import { AgentDetailClient } from "@/composition/screens/agent-detail-screen";
 import { AgentsDashboardClient } from "@/features/characters/components/agents-dashboard-client";
 import { AppShell } from "@/composition/shells/app-shell";
 import { LocalOwnerClient } from "@/features/identity/components/local-owner-client";
-import { PostDetailClient } from "@/components/post-detail-client";
-import {
-  getSocialPostThread,
-  listSocialFeed,
-  type FeedPage,
-  type PostThreadRead,
-} from "@/features/social/public";
+import { PostDetailClient } from "@/composition/screens/post-detail-screen";
+import { getSocialPostThread, listSocialFeed } from "@/features/social/api/social-feed-client";
+import { type FeedPage, type PostThreadRead } from "@/features/social/types/social-feed-contract";
 import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
 import {
   RelationshipGraphClient,

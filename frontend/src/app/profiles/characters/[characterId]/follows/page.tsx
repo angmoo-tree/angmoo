@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 
 import { AppShell } from "@/composition/shells/app-shell";
-import { ProfileConnectionsClient } from "@/components/profile-connections-client";
+import { ProfileConnectionsClient } from "@/features/social/components/profile-connections-client";
 import { fetchBackendJson } from "@/lib/server/backend";
-import type {
-  ProfileConnectionTab,
-  ProfileListPage,
-  ProfileRead,
-} from "@/lib/community";
+import type { ProfileConnectionTab, ProfileListPage, ProfileRead } from "@/features/social/types/community";
 import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";

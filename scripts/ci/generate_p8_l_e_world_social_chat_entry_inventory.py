@@ -161,11 +161,11 @@ def _frontend_contract() -> dict[str, Any]:
         ("getWorldChatEntry", "createOrGetWorldChatThread", "WorldChatEntryRead"),
     )
     _require_text(
-        "frontend/src/features/social/ui/world-social-feed.tsx",
+        "frontend/src/features/social/components/world-social-feed.tsx",
         ("author_profile_capability", "worldCharacterProfileRoute"),
     )
     _require_text(
-        "frontend/src/features/social/ui/social-post-row.tsx",
+        "frontend/src/features/social/components/social-post-row.tsx",
         (
             "authorHref",
             'data-post-card-ignore',
@@ -188,12 +188,12 @@ def _frontend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/features/social/public.ts",
-        (
-            "getWorldCharacterSocialProfile",
-            "WorldCharacterSocialProfileActivity",
-            "WorldCharacterSocialProfileTab",
-        ),
+        "frontend/src/features/social/api/world-character-social-profile-client.ts",
+        ("getWorldCharacterSocialProfile", "WorldCharacterSocialProfileTab"),
+    )
+    _require_text(
+        "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
+        ("WorldCharacterSocialProfileActivity",),
     )
     _require_text(
         "frontend/src/components/ui/device-frame.module.css",

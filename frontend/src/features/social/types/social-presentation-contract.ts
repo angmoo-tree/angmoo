@@ -1,7 +1,4 @@
-import type {
-  MentionedCharacterRef,
-  PostMediaRead,
-} from "./social-feed-contract";
+import type { MentionedCharacterRef, PostMediaRead } from "@/features/social/types/social-feed-contract";
 
 export type SocialPostActionKind = "reply" | "repost" | "like" | "share";
 

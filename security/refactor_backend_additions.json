@@ -9689,6 +9689,24 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "dfd5553b6dd39a7bae32c7bf0ca71f56a7a53627",
+      "feature_id": "K06",
+      "reason": "AR-F3-E Social API DTO transport and presentation extraction with unchanged endpoint bodies and cross-feature screen orchestration",
+      "tracked_files": {
+        "frontend/scripts/test-social-requests.mjs": "cb2961d0e4b631ace7ee37036dd3dc1b796367c7",
+        "frontend/src/features/characters/components/feed-activity-parts.tsx": "6b96f0a00e21ca132da240e2039af4b97d91831d",
+        "frontend/src/features/social/api/community.ts": "2ac22a4794c1b9b14683d6b17a75c9fef00d69da",
+        "frontend/src/features/social/components/post-detail-parts.tsx": "6b9b296d266d224faa6321b1590ffab70e48e0ad",
+        "frontend/src/features/social/components/post-feed-parts.tsx": "c6e2525dcf081eb4b6f1ec0490040bd7510aff5e",
+        "frontend/src/features/social/types/community.ts": "67a36caec10c06b0aa6c29d0c311d790090f398f",
+        "frontend/src/features/social/utils/world-character-social-profile.ts": "d7af4840ad5cb2d7fd461d0318b4626cea459f2a",
+        "frontend/src/lib/http/social-request.ts": "86e4e246cdee82912c11c5b3b0ca536046e3a465"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

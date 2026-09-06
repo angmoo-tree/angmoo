@@ -39,7 +39,8 @@ type CharacterMessageSettingRead,
 import { useAuth } from "@/hooks/use-auth";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { clearAuth,isAuthError } from "@/lib/auth/browser-session";
-import { getCharacterProfile,getCharacterProfileFeed,type FeedPage,type PostSummary,type ProfileFeedTab,type ProfileRead } from "@/lib/community";
+import { getCharacterProfile, getCharacterProfileFeed } from "@/features/social/api/community";
+import { type FeedPage, type PostSummary, type ProfileFeedTab, type ProfileRead } from "@/features/social/types/community";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 import { shouldOpenPostFromCardClick,shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
 import { apiInstantTimestamp,formatDate,formatHandle } from "@/utils/profile-presentation";

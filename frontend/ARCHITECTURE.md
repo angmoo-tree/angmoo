@@ -65,6 +65,21 @@ World Package의 preview·prepare·download·acknowledge·discard·import 요청
 preview digest 승인, 취소·실패·정리와 저장 완료 확인 순서를 유지한다. World 편집과의
 연결은 공통 screen이 담당하며 사용하지 않는 Package facade는 두 실제 컴포넌트로 대체했다.
 
+Social의 게시물·댓글·신고·검색·알림·프로필 활동 API는 `features/social/api`,
+응답 형식은 `types`, 표시 변환은 `utils`, 화면 요소는 `components`가 소유한다.
+전역 피드와 게시물 상세는 현재 사용자와 소유 Character를 함께 조회하므로
+`composition/screens/post-list-screen.tsx`와 `post-detail-screen.tsx`에서 연결한다.
+게시물 메뉴·신고/삭제 대화상자·댓글 트리·피드 필터는 Social의 `post-feed-parts`와
+`post-detail-parts`에 있고, 캐릭터 활동 요약·휴식 안내·활동 주제 입력은 Characters의
+`active-agent-summary`와 `feed-activity-parts`에 있다. 조립 화면은 기존 취소·페이지네이션·
+선택·권한 확인과 mutation 결과 처리를 유지한다. 각 기능은 상대 기능을 직접 import하지 않는다.
+
+피드의 캐릭터 조회·활동 주제 요청은 `features/characters/api/feed-actor.ts`가 소유한다.
+공용 `lib/http/social-request.ts`는 이 요청과 Social 요청이 기존에 공유한 전송 계약이며,
+401 처리·성공 응답의 잘못된 JSON·오류 메시지 변환을 유지한다. endpoint와 업무 판단은
+각 기능에 남는다. `lib/community.ts`는 미전환 소비자의 임시 export만 제공한다.
+이미 이전된 화면은 제거된 Social public 대신 실제 API·component·type을 사용한다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

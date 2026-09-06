@@ -15,7 +15,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { WorldCharacterProfile } from "@/composition/screens/world-character-profile-screen";
 import { WorldChat } from "@/features/chat/public";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
-import { WorldSocialFeed } from "@/features/social/public";
+import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
 import { PRODUCT_ROUTES, relationshipGraphRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
 import { StatusBadge } from "@/components/ui/status-badge";

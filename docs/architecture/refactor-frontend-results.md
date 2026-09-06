@@ -1,9 +1,9 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0 and AR-F2-A COMPLETE; AR-F2-B #293 MERGED with installer
-post-merge validation running; AR-F2-C #294 passed 23 pre-merge checks, awaiting
-predecessor gate; AR-F3-A #295 draft CI and full local preservation PASS;
-AR-F3-B implemented locally, validation running; AR-F3-C through AR-F5-B NOT STARTED**.
+Current: **AR-F2-0~AR-F2-C #291~#294 COMPLETE; AR-F3-A #295 MERGED,
+post-merge validation running; AR-F3-B #296, AR-F3-C #297 and AR-F3-D #298
+local full preservation PASS and CI running; AR-F3-E Social local implementation
+and validation in progress; AR-F3-F~AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -329,3 +329,31 @@ committed history were deleted.
   (7.3s), 60 Package/closeout contracts PASS. Architecture/design and 324-source
   preservation PASS; static browser, source capture, full preservation and CI
   remain required. No frozen fixture, expectation, snapshot, lock or asset changes.
+
+## AR-F3-E Social — implementation and local verification
+
+- Move Social API/types/components/utils to their actual feature owners. Move
+  Character activity request/summary/form ownership to Characters. Feed and
+  detail screens join the features; their original pure presentation helpers
+  remain feature components with unchanged bodies and DOM.
+- Preserve 27 Social endpoints and 4 Character endpoints against committed
+  `de1abed71db6ea00b31b455ad9673b12619bf5f0`; ten transport/auth/error cases PASS.
+  The parity test runs in CI. Manual Social writes and server-only initial feed
+  retain their implementations and import boundaries.
+- Retire the unused Social facade only after mapping all 66 frozen exports,
+  including the server-only initial feed moved earlier in F2-C. Preserve frozen
+  browser assertions, fixtures, visual oracles, assets and lockfiles.
+- Initial local web 21, Settings 2, static 68, both builds and source contract
+  recheck 32 PASS. Repeat the relevant validation after final presentation
+  extraction; source introduction capture, full preservation, CI/merge/post-merge
+  remain required. This is not AR-F3-E completion.
+
+## Integration receipts — 2026-09-07 05:30 KST
+
+- F2-C #294 post-merge: seven workflows SUCCESS including all five Windows
+  Installer jobs. Merge `6ca211869dfb7e32c7a6689544e18137e0ecdfe5`, COMPLETE.
+- F3-A #295: final head `c66d8bb18c771e06b720fddd5b665642f4e1142a`, 23/23 PASS;
+  merge `a40ea7715a4b97a696788d09e5ee00bb9fd5b135` at 05:24:07 KST.
+  Post-merge remains in progress. F3-C and F3-D full preservation each passed
+  2753 protected/current nodes and 37 contracts after correcting retired facade
+  references in the current feature inventory.

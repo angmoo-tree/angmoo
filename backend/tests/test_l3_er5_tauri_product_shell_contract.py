@@ -229,9 +229,9 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
     product_link = _read(
         "frontend/src/components/navigation/local-product-link.tsx"
     )
-    feed = _read("frontend/src/features/social/ui/post-list-client.tsx")
+    feed = _read("frontend/src/composition/screens/post-list-screen.tsx")
     social_post_row = _read(
-        "frontend/src/features/social/ui/social-post-row.tsx"
+        "frontend/src/features/social/components/social-post-row.tsx"
     )
     agent = _read("frontend/src/composition/screens/agent-detail-screen.tsx") + _read("frontend/src/features/characters/components/agent-detail-parts.tsx")
     pull_to_refresh = _read(

@@ -1,9 +1,5 @@
-import type {
-  AgentActivityMaintenanceRead,
-  AgentDetailRead,
-  AgentFeedCueRead,
-} from "../model/social-agent-contract";
-import { requestSocialApi } from "./social-feed-client";
+import type { AgentActivityMaintenanceRead, AgentDetailRead, AgentFeedCueRead } from "@/features/characters/types/feed-actor";
+import { requestSocialApi } from "@/lib/http/social-request";
 
 export function getAgentActivityMaintenance() {
   return requestSocialApi<AgentActivityMaintenanceRead>(

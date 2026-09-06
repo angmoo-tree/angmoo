@@ -3,7 +3,9 @@
 import { Mail, MessageCircle, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createOrGetWorldChatThread, getWorldChatEntry, type WorldChatEntryRead, WorldChatApiError } from "@/features/chat/public";
-import { parseWorldCharacterSocialProfileTab, WorldCharacterSocialProfileActivity, type WorldCharacterSocialProfileTab } from "@/features/social/public";
+import { parseWorldCharacterSocialProfileTab } from "@/features/social/utils/world-character-social-profile";
+import { WorldCharacterSocialProfileActivity } from "@/features/social/components/world-character-social-profile-activity";
+import { type WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
 import { useRuntimeBack, useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
 import { worldCharacterDirectoryRoute, worldCharacterProfileRoute, worldChatThreadRoute } from "@/lib/navigation/product-routes";
 import { getWorldCharacterProfile } from "@/features/characters/api/world-character-profile-client";
