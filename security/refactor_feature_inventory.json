@@ -8,7 +8,7 @@
       "id": "K01",
       "title": "Local owner·인증·BYOK·프로필·삭제",
       "owner": "identity / credentials",
-      "stage": "AR-B2 / AR-F2",
+      "stage": "AR-B2 / AR-F3-A",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260514_0008_character_profile_identity.py",
@@ -630,7 +630,7 @@
       "id": "K02",
       "title": "Device Home·Phone·World 목록",
       "owner": "device_home / device-home / composition",
-      "stage": "AR-B1 / AR-F1",
+      "stage": "AR-B1 / AR-F2-C",
       "status": "VERIFIED",
       "current_paths": [
         "backend/app/domains/device_home/__init__.py",
@@ -781,7 +781,7 @@
       "id": "K03",
       "title": "Character·World Creator·readiness",
       "owner": "characters / worlds / creator-studio",
-      "stage": "AR-B2 / AR-F2",
+      "stage": "AR-B2 / AR-F3-B / AR-F3-C",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260522_0028_agent_creation_drafts.py",
@@ -1252,7 +1252,7 @@
       "id": "K04",
       "title": "WorldCharacter 구성·시간대 routine·승인",
       "owner": "world_characters / routines",
-      "stage": "AR-B2 / AR-F2",
+      "stage": "AR-B2 / AR-F3-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/world_character_setup.py",
@@ -1611,7 +1611,7 @@
       "id": "K05",
       "title": "일일 활동·episode·beat·cursor",
       "owner": "routines / routine_posts / runtime",
-      "stage": "AR-B4",
+      "stage": "AR-B4 / AR-F3-B / AR-F3-E",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260511_0003_agent_slots.py",
@@ -2337,7 +2337,7 @@
       "id": "K06",
       "title": "SNS·Inbox·관찰·자율 후속",
       "owner": "social",
-      "stage": "AR-B5 / AR-F3",
+      "stage": "AR-B5 / AR-F3-E",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260510_0001_initial_community_schema.py",
@@ -2886,7 +2886,7 @@
       "id": "K07",
       "title": "Feed 검색·FTS·범위",
       "owner": "social / search runtime",
-      "stage": "AR-B5",
+      "stage": "AR-B5 / AR-F3-E",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/search_text.py",
@@ -3080,7 +3080,7 @@
       "id": "K08",
       "title": "SocialEvent·관계·outbox",
       "owner": "social / relationships",
-      "stage": "AR-B5",
+      "stage": "AR-B5 / AR-F3-E / AR-F3-F",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/relationships/__init__.py",
@@ -3521,7 +3521,7 @@
       "id": "K09",
       "title": "SQLite canonical·Ladybug projection",
       "owner": "graph projection / persistence",
-      "stage": "AR-B5",
+      "stage": "AR-B5 / AR-F3-F",
       "status": "MOVED",
       "current_paths": [
         "backend/app/domains/relationships/__init__.py",
@@ -4141,7 +4141,7 @@
       "id": "K10",
       "title": "World Package v1",
       "owner": "world_packages",
-      "stage": "AR-B3 / AR-F2",
+      "stage": "AR-B3 / AR-F3-D",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/world_packages/__init__.py",
@@ -4434,7 +4434,7 @@
       "id": "K11",
       "title": "이미지·media·provider",
       "owner": "integrations / providers / credentials",
-      "stage": "AR-B3 / AR-B8-A / AR-F4",
+      "stage": "AR-B3 / AR-B8-A / AR-F2-B / AR-F3-D",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/image_generation.py",
@@ -4862,7 +4862,7 @@
       "id": "K12",
       "title": "설치·sidecar·runtime 생명주기",
       "owner": "runtime / desktop",
-      "stage": "AR-B8 / AR-F4",
+      "stage": "AR-B8 / AR-F2-C / AR-F4-C",
       "status": "MAPPED",
       "current_paths": [
         ".github/workflows/windows-host-tauri-dev.yml",
@@ -5501,7 +5501,7 @@
       "id": "K13",
       "title": "제품 UI·설정·진단·PWA·Local Bot",
       "owner": "composition / settings / support",
-      "stage": "AR-B8 / AR-F4",
+      "stage": "AR-B8 / AR-F2-C / AR-F3-G",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
@@ -5823,7 +5823,7 @@
       "id": "K14",
       "title": "P8 A-E World Chat",
       "owner": "chat / identity",
-      "stage": "AR-B6 / AR-F3",
+      "stage": "AR-B6 / AR-F4-A",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/chat/repository/response_lifecycle.py",
@@ -6175,7 +6175,7 @@
       "id": "K15",
       "title": "P8 F-G Memory 쓰기·관리",
       "owner": "memory",
-      "stage": "AR-B7 / AR-F3",
+      "stage": "AR-B7 / AR-F4-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/memory/router.py",
@@ -6470,7 +6470,7 @@
       "id": "K16",
       "title": "P8 H-I 근거 회상",
       "owner": "memory recall / graph",
-      "stage": "AR-B7",
+      "stage": "AR-B7 / AR-F4-B",
       "status": "MOVED",
       "current_paths": [
         "backend/app/domains/memory/__init__.py",
@@ -6802,7 +6802,7 @@
       "id": "K17",
       "title": "P8 J-N 응답 실행·planner",
       "owner": "chat / retrieval workflow",
-      "stage": "AR-B6",
+      "stage": "AR-B6 / AR-F4-A",
       "status": "MOVED",
       "current_paths": [
         "backend/app/domains/chat/repository/response_lifecycle.py",
@@ -7112,7 +7112,7 @@
       "id": "K18",
       "title": "P8 O-P HotBrief·근거·stream",
       "owner": "memory consolidation / chat",
-      "stage": "AR-B6 / AR-B7",
+      "stage": "AR-B6 / AR-B7 / AR-F4-A / AR-F4-C",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/chat/__init__.py",
@@ -7506,7 +7506,7 @@
       "id": "K19",
       "title": "P8 Q-R Memory inspector·owner UI",
       "owner": "memory UI / owner API",
-      "stage": "AR-B7 / AR-F3",
+      "stage": "AR-B7 / AR-F4-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/memory/router.py",
@@ -7823,7 +7823,7 @@
       "id": "K20",
       "title": "Today SNS #251",
       "owner": "social / chat context",
-      "stage": "AR-B5 / AR-B6",
+      "stage": "AR-B5 / AR-B6 / AR-F3-E / AR-F4-A",
       "status": "MOVED",
       "current_paths": [
         "backend/app/domains/chat/__init__.py",
@@ -8164,7 +8164,7 @@
       "id": "K21",
       "title": "#258 A-B SQLite v9·source delivery",
       "owner": "memory / source delivery",
-      "stage": "AR-B7",
+      "stage": "AR-B7 / AR-F4-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260904_0089_memory_batch.py",
@@ -8408,7 +8408,7 @@
       "id": "K22",
       "title": "#258 C-D AI 배치·예약",
       "owner": "memory batch / scheduler",
-      "stage": "AR-B7 / AR-F3",
+      "stage": "AR-B7 / AR-F4-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic/versions/20260904_0089_memory_batch.py",
@@ -8611,7 +8611,7 @@
       "id": "K23",
       "title": "#258 E 종료 저장",
       "owner": "desktop shutdown / memory",
-      "stage": "AR-B7 / AR-B8-A / AR-F4",
+      "stage": "AR-B7 / AR-B8-A / AR-F4-C",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/runtime/memory/__init__.py",
@@ -13709,7 +13709,7 @@
       "id": "K24",
       "title": "Tree 게시판·공통 실행·호환·레거시 지원 소스",
       "owner": "Tree community / shared UI / bootstrap / compatibility",
-      "stage": "AR-B8-A / AR-B8-B / AR-F4",
+      "stage": "AR-B8-A / AR-B8-B / AR-F3-G / AR-F5-A",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/__init__.py",
@@ -14590,5 +14590,166 @@
     "test_paths": "Current existing associated test files; original/intermediate test_nodes are retained and resolved by refactor_path_map.json.",
     "historical_fields": "baseline_commit/tree, coverage, entrypoints, test_nodes and historical_transition_evidence retain original/intermediate evidence; none is regenerated from current source.",
     "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f"
+  },
+  "frontend_transition": {
+    "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
+    "status": "AR-F2-0 IN PROGRESS",
+    "documentation": "docs/architecture/refactor-frontend-results.md",
+    "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
+    "items": {
+      "K01": {
+        "stages": [
+          "AR-F3-A"
+        ],
+        "status": "MAPPED"
+      },
+      "K02": {
+        "stages": [
+          "AR-F2-C"
+        ],
+        "status": "MAPPED"
+      },
+      "K03": {
+        "stages": [
+          "AR-F3-B",
+          "AR-F3-C"
+        ],
+        "status": "MAPPED"
+      },
+      "K04": {
+        "stages": [
+          "AR-F3-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K05": {
+        "stages": [
+          "AR-F3-B",
+          "AR-F3-E"
+        ],
+        "status": "MAPPED"
+      },
+      "K06": {
+        "stages": [
+          "AR-F3-E"
+        ],
+        "status": "MAPPED"
+      },
+      "K07": {
+        "stages": [
+          "AR-F3-E"
+        ],
+        "status": "MAPPED"
+      },
+      "K08": {
+        "stages": [
+          "AR-F3-E",
+          "AR-F3-F"
+        ],
+        "status": "MAPPED"
+      },
+      "K09": {
+        "stages": [
+          "AR-F3-F"
+        ],
+        "status": "MAPPED"
+      },
+      "K10": {
+        "stages": [
+          "AR-F3-D"
+        ],
+        "status": "MAPPED"
+      },
+      "K11": {
+        "stages": [
+          "AR-F2-B",
+          "AR-F3-D"
+        ],
+        "status": "MAPPED"
+      },
+      "K12": {
+        "stages": [
+          "AR-F2-C",
+          "AR-F4-C"
+        ],
+        "status": "MAPPED"
+      },
+      "K13": {
+        "stages": [
+          "AR-F2-C",
+          "AR-F3-G"
+        ],
+        "status": "MAPPED"
+      },
+      "K14": {
+        "stages": [
+          "AR-F4-A"
+        ],
+        "status": "MAPPED"
+      },
+      "K15": {
+        "stages": [
+          "AR-F4-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K16": {
+        "stages": [
+          "AR-F4-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K17": {
+        "stages": [
+          "AR-F4-A"
+        ],
+        "status": "MAPPED"
+      },
+      "K18": {
+        "stages": [
+          "AR-F4-A",
+          "AR-F4-C"
+        ],
+        "status": "MAPPED"
+      },
+      "K19": {
+        "stages": [
+          "AR-F4-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K20": {
+        "stages": [
+          "AR-F3-E",
+          "AR-F4-A"
+        ],
+        "status": "MAPPED"
+      },
+      "K21": {
+        "stages": [
+          "AR-F4-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K22": {
+        "stages": [
+          "AR-F4-B"
+        ],
+        "status": "MAPPED"
+      },
+      "K23": {
+        "stages": [
+          "AR-F4-C"
+        ],
+        "status": "MAPPED"
+      },
+      "K24": {
+        "stages": [
+          "AR-F3-G",
+          "AR-F5-A"
+        ],
+        "status": "MAPPED"
+      }
+    }
   }
 }

@@ -5,6 +5,12 @@ on:
     branches:
       - main
     paths:
+      - "frontend/**"
+      - "browser-tests/**"
+      - "security/frontend*"
+      - "scripts/ci/check_frontend_architecture_boundaries.py"
+      - "scripts/ci/frontend_completed_boundaries.py"
+      - "scripts/ci/refactor_boundaries.py"
       - "desktop/**"
       - "scripts/dev/desktop-preflight.ps1"
       - "scripts/dev/desktop-dev.ps1"
@@ -25,6 +31,12 @@ on:
       - "docs/public/windows-host-tauri-dev.md"
   pull_request:
     paths:
+      - "frontend/**"
+      - "browser-tests/**"
+      - "security/frontend*"
+      - "scripts/ci/check_frontend_architecture_boundaries.py"
+      - "scripts/ci/frontend_completed_boundaries.py"
+      - "scripts/ci/refactor_boundaries.py"
       - "desktop/**"
       - "scripts/dev/desktop-preflight.ps1"
       - "scripts/dev/desktop-dev.ps1"

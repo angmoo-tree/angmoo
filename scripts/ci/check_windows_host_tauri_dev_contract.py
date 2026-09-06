@@ -17,7 +17,7 @@ def _read(root: Path, relative: str) -> str:
 
 
 def check_workflow_triggers(workflow: str) -> list[str]:
-    """Keep both automatic Windows checks reachable for every backend path."""
+    """Keep automatic native checks reachable for backend and frontend inputs."""
     try:
         document = yaml.safe_load(workflow)
     except yaml.YAMLError as exc:
@@ -41,6 +41,14 @@ def check_workflow_triggers(workflow: str) -> list[str]:
             continue
         if "backend/**" not in paths:
             errors.append(f"Hosted Windows {name} paths must include backend/**")
+        for required in (
+            "frontend/**", "browser-tests/**", "security/frontend*",
+            "scripts/ci/check_frontend_architecture_boundaries.py",
+            "scripts/ci/frontend_completed_boundaries.py",
+            "scripts/ci/refactor_boundaries.py",
+        ):
+            if required not in paths:
+                errors.append(f"Hosted Windows {name} paths must include {required}")
         # GitHub does not permit paths and paths-ignore in the same event.
         if "paths-ignore" in event:
             errors.append(f"Hosted Windows {name} must not use paths-ignore")
@@ -56,6 +64,8 @@ def check_workflow_triggers(workflow: str) -> list[str]:
                 or any(char in top_level for char in "*?[]{}()+!@\\")
             ):
                 errors.append(f"Hosted Windows {name} paths must not exclude backend: {path}")
+            if top_level in {"frontend", "browser-tests", "security", "scripts"}:
+                errors.append(f"Hosted Windows {name} paths must not exclude frontend inputs: {path}")
     return errors
 
 
