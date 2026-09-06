@@ -45,6 +45,12 @@ real-provider product verification, Release and Production remain separate.
   existing node_modules use 11.19.0; canonical CI remains pinned to 11.22.0.
 - CI policy, secret-allowlist metadata, backend import inventory, deferred
   inventory, L4 current inventory and Memory batch current inventory PASS.
+- Actual Next browser regression: **21 passed in 54.6s**, including World Chat,
+  Memory owner controls, Social/profile/letter, legacy Messages and Relationship
+  Graph. These use synthetic API fixtures; no real provider calls were made.
+- Next production build PASS. Introduction commit
+  `74ce61a2269bf48b9d084af587597199574345e3` is recorded in the append-only
+  ledger: **5 new source files / 31 test nodes**.
 
 ## How to run the added guard
 
@@ -62,7 +68,6 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
 
 ## Pending before AR-F2-0 closeout
 
-- Record committed source/test introduction in the original append-only ledger.
 - Exact-head CI, PR, merge and post-merge verification.
 - Continue AR-F2-A only after this preparation unit is integrated.
 
