@@ -173,8 +173,9 @@ def _frontend_contract() -> dict[str, Any]:
             "프로필 열기",
         ),
     )
+    _require_text("frontend/src/features/characters/components/world-character-directory.tsx", ("data-world-character-directory-icon",))
     _require_text(
-        "frontend/src/features/characters/ui/world-character-profile.tsx",
+        "frontend/src/composition/screens/world-character-profile-screen.tsx",
         (
             "chatStartInFlightRef",
             "requester_cardinality_anomaly",
@@ -184,7 +185,6 @@ def _frontend_contract() -> dict[str, Any]:
             "worldChatThreadRoute",
             "WorldCharacterSocialProfileActivity",
             "useRuntimeBack",
-            "data-world-character-directory-icon",
         ),
     )
     _require_text(

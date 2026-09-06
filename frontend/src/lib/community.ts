@@ -1,8 +1,10 @@
-import { runtimeFetch } from "@/shared/runtime/public";
+import { apiRequest } from "@/lib/http/community-request";
+export { getCharacterActivity,saveCharacterState } from "@/features/characters/api/activity";
+export type { CharacterActivityRead } from "@/features/characters/types/activity";
 export {
-  apiInstantTimestamp,
-  formatDate,
-  parseApiInstant,
+apiInstantTimestamp,
+formatDate,
+parseApiInstant
 } from "@/shared/ui/public";
 
 export type FeedContentFilter = "all" | "posts" | "reposts";
@@ -259,93 +261,15 @@ export type FollowStatusRead = {
   following: boolean;
 };
 
-export type CharacterRead = {
-  id: string;
-  owner_id: string;
-  name: string;
-  handle: string;
-  avatar_url: string | null;
-  banner_url: string | null;
-  one_liner: string;
-  personality: string;
-  speech_style: string;
-  worldview: string;
-  topic_preferences: string;
-  safety_rules: string;
-  status: string;
-  execution_mode: "llm" | "local";
-  persona_summary: string;
-};
+export type { CharacterRead } from "@/features/characters/types/character";
 
-export type CharacterStateRead = {
-  character_id: string;
-  mood: string;
-  summary: string;
-  memory_note: string;
-  updated_at: string;
-};
+export type { CharacterStateRead } from "@/features/characters/types/character";
 
-export type CharacterActivityRead = {
-  character: {
-    id: string;
-    name: string;
-    handle: string;
-    avatar_url: string | null;
-    banner_url: string | null;
-    one_liner: string;
-    persona_summary: string;
-  };
-  state: {
-    mood: string;
-    summary: string;
-    updated_at: string;
-  } | null;
-  recent_comments: CommentRead[];
-  recent_agent_activity: {
-    id: number;
-    action_type: string;
-    target_post_id: string | null;
-    target_profile_type?: "user" | "character" | null;
-    target_profile_id?: string | null;
-    target_profile_name?: string | null;
-    target_profile_handle?: string | null;
-    target_profile_avatar_url?: string | null;
-    summary: string;
-    created_at: string;
-  }[];
-};
 
-type RequestOptions = Omit<RequestInit, "body"> & {
-  body?: unknown;
-  anonymous?: boolean;
-};
 
-async function apiRequest<T>(path: string, options: RequestOptions = {}) {
-  const { body, headers, anonymous = false, ...rest } = options;
-  const response = await runtimeFetch(`/api/backend${path}`, {
-    ...rest,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache: "no-store",
-    credentials: anonymous ? "omit" : "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      ...(headers ?? {}),
-    },
-  });
 
-  const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
 
-  if (!response.ok) {
-    const message =
-      typeof payload?.detail === "string"
-        ? payload.detail
-        : `Request failed with ${response.status}`;
-    throw new Error(message);
-  }
 
-  return payload as T;
-}
 
 export function listPosts() {
   return apiRequest<FeedPage>("/feed").then((page) => page.items);
@@ -607,23 +531,5 @@ export function listNotifications(options: { limit?: number; cursor?: string | n
 export function markNotificationRead(notificationId: number) {
   return apiRequest<NotificationRead>(`/notifications/${notificationId}/read`, {
     method: "PATCH",
-  });
-}
-
-export function getCharacterActivity(characterId: string) {
-  return apiRequest<CharacterActivityRead>(`/characters/${characterId}/activity`);
-}
-
-export function saveCharacterState(
-  characterId: string,
-  data: {
-    mood: string;
-    summary: string;
-    memory_note: string;
-  },
-) {
-  return apiRequest<CharacterStateRead>(`/characters/${characterId}/state`, {
-    method: "POST",
-    body: data,
   });
 }

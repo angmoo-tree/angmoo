@@ -1,8 +1,8 @@
-import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
-import { runtimeFetch } from "@/shared/runtime/public";
+import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
-import type { CharacterDashboardItem } from "../model/character-dashboard-contract";
-import { notifyCharactersChanged } from "../model/character-dashboard-session";
+import type { CharacterDashboardItem } from "@/features/characters/types/character";
+import { notifyCharactersChanged } from "@/features/characters/stores/character-dashboard-session";
 
 type CharacterRequestOptions = Omit<RequestInit, "body" | "credentials"> & {
   body?: unknown;

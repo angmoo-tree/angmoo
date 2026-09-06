@@ -61,8 +61,12 @@ def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities()
     assert 'from "@/features/social/public"' in world_app
     assert "WorldCharacterDirectory" in world_app
     assert "WorldCharacterProfile" in world_app
-    assert 'from "@/features/characters/public"' in world_app
+    assert 'from "@/features/characters/components/world-character-directory"' in world_app
+    assert 'from "@/composition/screens/world-character-profile-screen"' in world_app
     assert "/api/backend/worlds/mine/${encodeURIComponent(worldId)}" in client
+    # Historical facade topology only; all current component and capability checks remain above.
+    world_app = subprocess.check_output(["git", "show", "0ba64ea8e10a2828bf0e8d99433a5903d1f104fe:frontend/src/composition/screens/world-app.tsx"], cwd=REPO_ROOT, text=True, encoding="utf-8")
+    assert 'from "@/features/characters/public"' in world_app
 
 
 def test_legacy_posts_route_remains_the_global_feed() -> None:

@@ -39,7 +39,7 @@
       "classification": "ADAPTED",
       "hosted_blob_oid": "1300ab04f863ec94c08f873ce5cd129b89feb96b",
       "hosted_source": "frontend/src/components/character-profile-client.tsx",
-      "local_target": "frontend/src/components/character-profile-client.tsx",
+      "local_target": "frontend/src/composition/screens/character-profile-screen.tsx",
       "scope": "profile banner, avatar, metadata, tabs, and stream anatomy"
     },
     {
@@ -53,28 +53,28 @@
       "classification": "DIRECT",
       "hosted_blob_oid": "158ad82895a9746f55696916745c68cadbf93516",
       "hosted_source": "frontend/src/components/expandable-post-text.tsx",
-      "local_target": "frontend/src/features/social/ui/expandable-post-text.tsx",
+      "local_target": "frontend/src/components/content/expandable-post-text.tsx",
       "scope": "line clamp and explicit expansion"
     },
     {
       "classification": "DIRECT",
       "hosted_blob_oid": "788c4c1e30dc6732d9df811e640ce1ab4ca22131",
       "hosted_source": "frontend/src/components/mentioned-text.tsx",
-      "local_target": "frontend/src/features/social/ui/mentioned-text.tsx",
+      "local_target": "frontend/src/components/content/mentioned-text.tsx",
       "scope": "mention presentation"
     },
     {
       "classification": "ADAPTED",
       "hosted_blob_oid": "0cd5c683bab6e8a822e2a5ba5922583fad1b6927",
       "hosted_source": "frontend/src/components/post-media-grid.tsx",
-      "local_target": "frontend/src/features/social/ui/post-media-grid.tsx",
+      "local_target": "frontend/src/components/media/post-media-grid.tsx",
       "scope": "runtime-safe payload-backed 0, 1, 2, 3, and 4-plus image layout without remote fallback"
     },
     {
       "classification": "DIRECT",
       "hosted_blob_oid": "eb5bc224d1b9d9da56eeb9e0951dd2386a1a06f2",
       "hosted_source": "frontend/src/lib/post-card-navigation.ts",
-      "local_target": "frontend/src/features/social/model/post-card-navigation.ts",
+      "local_target": "frontend/src/utils/post-card-navigation.ts",
       "scope": "accessible row navigation behavior"
     },
     {
@@ -95,14 +95,14 @@
       "classification": "ADAPTED",
       "hosted_blob_oid": "ebeaf887706f73fe3b126feac46d87e55fe12faf",
       "hosted_source": "frontend/src/components/agents-dashboard-client.tsx",
-      "local_target": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
+      "local_target": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
       "scope": "row hierarchy adapted to multi-autonomy, World capacity, scheduler state, and fail-closed recent-result presentation"
     },
     {
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+      "local_target": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
       "scope": "feature-owned action summary and authoritative target link that never exposes raw activity result payloads"
     },
     {
@@ -257,7 +257,7 @@
     "frontend/src/composition/shells/app-shell.tsx",
     "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
-    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+    "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
     "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
     "frontend/src/components/layout/device-shell.module.css",
@@ -276,9 +276,9 @@
     "frontend/src/features/social/model/social-feed-contract.ts",
     "frontend/src/features/social/model/social-presentation-contract.ts",
     "frontend/src/features/social/public.ts",
-    "frontend/src/features/social/ui/expandable-post-text.tsx",
+    "frontend/src/components/content/expandable-post-text.tsx",
     "frontend/src/features/social/ui/post-list-client.tsx",
-    "frontend/src/features/social/ui/post-media-grid.tsx",
+    "frontend/src/components/media/post-media-grid.tsx",
     "frontend/src/features/social/ui/social-post-row.tsx",
     "frontend/src/features/social/ui/social-presentation.module.css",
     "frontend/src/features/social/ui/world-social-feed.module.css",
@@ -320,7 +320,7 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 33,
+    "baseline_files": 34,
     "baseline_occurrences": 1408,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
@@ -436,12 +436,12 @@
       "data-world-chat-evidence-dialog",
       "이 답변의 근거"
     ],
-    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+    "frontend/src/features/characters/utils/character-recent-activity-presentation.ts": [
       "presentCharacterRecentActivity",
       "result payload intentionally stays outside",
       "target_post_id"
     ],
-    "frontend/src/features/characters/ui/agents-dashboard-client.tsx": [
+    "frontend/src/features/characters/components/agents-dashboard-client.tsx": [
       "data-character-recent-activity",
       "LocalProductLink",
       "RecentActivityMetric"

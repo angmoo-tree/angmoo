@@ -9572,6 +9572,97 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "342e7ae4877b0ee23caea513174a5694e2d78f55",
+      "feature_id": "K03",
+      "reason": "AR-F3-B Character ownership, preserved API/session behavior, mixed-screen assembly and exact relative browser-import guard",
+      "tracked_files": {
+        "frontend/scripts/test-character-session.mjs": "28990e38c374bb5d1aeabc5b9222e42eb65370cb",
+        "frontend/src/components/content/expandable-post-text.module.css": "134327078e48bbe65e111b94768f401c976859ed",
+        "frontend/src/components/media/post-media-grid.module.css": "9007b42131a44a23f450db1383e2cf36921ab80e",
+        "frontend/src/features/characters/api/activity.ts": "512ac92047c886240fd0d413bcbb0b465138515f",
+        "frontend/src/features/characters/api/agents.ts": "0f87bce323c021daaafcbd2346fd78e4eb361758",
+        "frontend/src/features/characters/components/agent-detail-parts.tsx": "3e31c0ba0a1651257518a0fc70b70b6a9cb6dfd6",
+        "frontend/src/features/characters/components/world-character-directory.tsx": "a48f6b0fabe24477ebf433735e887d6bbf88b328",
+        "frontend/src/features/characters/components/world-character-profile-card.tsx": "d1e32db3b57a0bdcf8e048042e65ecdd8131d965",
+        "frontend/src/features/characters/config/model-options.ts": "7f707791926da9ee93ceaf6125dab9acda12f75f",
+        "frontend/src/features/characters/stores/agent-session.ts": "a7eda7e87ce6a797df81ba00f118df20f37849d8",
+        "frontend/src/features/characters/types/activity.ts": "878522a0aed43f1356f86aab8f5ff01d10de29b4",
+        "frontend/src/features/characters/types/agents.ts": "6bd803eafe714959dea4ab2bf173e0919c0199d8",
+        "frontend/src/features/characters/types/character.ts": "4fd6b1a62afc257856d9767f0642bff08d411e0b",
+        "frontend/src/features/characters/utils/agent-counts.ts": "83f6f14e75c2828124635bd0b76883367a923533",
+        "frontend/src/lib/http/community-request.ts": "058f3966c971dacbbb158fe5b98e25ba2e730e15",
+        "frontend/src/lib/media/authenticated-media.ts": "b4ecc8f86e5da489f5cf31368f5704b599471659"
+      },
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_browser_relative_source_move_preserves_assertions_and_rejects_weakened_expectation"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_committed_frontend_bytes_ignore_host_line_endings": [
+            "assert frontend_stock.committed_files(ROOT)[source] == canonical"
+          ],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "retirement_example": [],
+          "test_retired_facade_preserves_each_export_at_its_actual_owner": [
+            "assert verify_retirements(tmp_path, frozen, moves, details) == []"
+          ],
+          "test_facade_retirement_cannot_hide_removed_or_unrelated_code": [
+            "assert any((expected in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_retired_facade_rejects_remaining_web_or_static_consumer": [
+            "assert any(('active_import' in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ],
+          "test_browser_relative_source_move_preserves_assertions_and_rejects_weakened_expectation": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []",
+            "assert any(('frontend_oracle_changed' in error for error in verify(tmp_path, {path: original}, {old: new})))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
     }
   ]
 }

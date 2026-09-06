@@ -55,14 +55,14 @@
       "follow: false",
       "index: false"
     ],
-    "frontend/src/features/characters/model/character-dashboard-contract.ts": [
+    "frontend/src/features/characters/utils/character-dashboard-presentation.ts": [
       "\"external\"",
       "\"failed\"",
       "\"resting\"",
       "\"scheduled\"",
       "presentCharacterAutonomy"
     ],
-    "frontend/src/features/characters/model/character-recent-activity-presentation.ts": [
+    "frontend/src/features/characters/utils/character-recent-activity-presentation.ts": [
       "CharacterRecentActivityPresentation",
       "presentCharacterRecentActivity",
       "target_post_id"
@@ -232,8 +232,11 @@
     "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx",
+    "frontend/src/components/content/expandable-post-text.tsx",
+    "frontend/src/components/content/mentioned-text.tsx",
     "frontend/src/components/layout/device-shell.module.css",
     "frontend/src/components/layout/device-shell.tsx",
+    "frontend/src/components/media/post-media-grid.tsx",
     "frontend/src/components/navigation/local-product-link.module.css",
     "frontend/src/components/navigation/local-product-link.tsx",
     "frontend/src/components/ui/app-icon.tsx",
@@ -253,20 +256,20 @@
     "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
     "frontend/src/composition/screens/device-home-screen.tsx",
     "frontend/src/composition/screens/world-app.tsx",
+    "frontend/src/composition/screens/world-character-profile-screen.tsx",
     "frontend/src/composition/shells/creator-studio-frame.tsx",
     "frontend/src/composition/shells/local-device-navigation.tsx",
     "frontend/src/composition/shells/world-app-navigation.ts",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/api/world-character-profile-client.ts",
-    "frontend/src/features/characters/model/character-dashboard-contract.ts",
-    "frontend/src/features/characters/model/character-dashboard-session.ts",
-    "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
-    "frontend/src/features/characters/model/world-character-profile-contract.ts",
+    "frontend/src/features/characters/components/agents-dashboard-client.tsx",
+    "frontend/src/features/characters/components/characters-dashboard.module.css",
+    "frontend/src/features/characters/components/world-character-profile.module.css",
     "frontend/src/features/characters/public.ts",
-    "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
-    "frontend/src/features/characters/ui/characters-dashboard.module.css",
-    "frontend/src/features/characters/ui/world-character-profile.module.css",
-    "frontend/src/features/characters/ui/world-character-profile.tsx",
+    "frontend/src/features/characters/stores/character-dashboard-session.ts",
+    "frontend/src/features/characters/types/world-character-profile.ts",
+    "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
+    "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
     "frontend/src/features/chat/api/chat-client.ts",
     "frontend/src/features/chat/api/world-chat-client.ts",
     "frontend/src/features/chat/model/chat-contract.ts",
@@ -302,17 +305,13 @@
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-feed-server.ts",
     "frontend/src/features/social/api/social-write-client.ts",
-    "frontend/src/features/social/model/post-card-navigation.ts",
     "frontend/src/features/social/model/social-agent-contract.ts",
     "frontend/src/features/social/model/social-feed-contract.ts",
     "frontend/src/features/social/model/social-presentation-contract.ts",
     "frontend/src/features/social/model/social-write-contract.ts",
     "frontend/src/features/social/public.ts",
     "frontend/src/features/social/ui/active-agent-summary.tsx",
-    "frontend/src/features/social/ui/expandable-post-text.tsx",
-    "frontend/src/features/social/ui/mentioned-text.tsx",
     "frontend/src/features/social/ui/post-list-client.tsx",
-    "frontend/src/features/social/ui/post-media-grid.tsx",
     "frontend/src/features/social/ui/social-post-row.tsx",
     "frontend/src/features/social/ui/social-presentation.module.css",
     "frontend/src/features/social/ui/world-social-feed.module.css",
@@ -336,20 +335,25 @@
     "frontend/src/shared/ui/public.ts",
     "frontend/src/styles/semantic-tokens.css",
     "frontend/src/utils/class-names.ts",
+    "frontend/src/utils/post-card-navigation.ts",
     "frontend/src/utils/profile-presentation.ts",
     "frontend/src/utils/scroll-viewport.ts"
   ],
   "schema_version": 1,
   "refactor": {
     "features": [
+      "characters",
       "device-home",
       "identity",
       "runtime-status",
       "worlds"
     ],
     "common": [
+      "components/content/expandable-post-text",
+      "components/content/mentioned-text",
       "components/layout/device-shell",
       "components/layout/device-shell.module.css",
+      "components/media/post-media-grid",
       "components/navigation/local-product-link",
       "components/navigation/local-product-link.module.css",
       "components/ui/app-icon",
@@ -367,16 +371,21 @@
       "components/ui/status",
       "components/ui/status-badge",
       "components/ui/surfaces",
+      "config/features",
       "config/policy-links",
       "config/pwa",
       "hooks/use-auth",
+      "hooks/use-incremental-list",
       "hooks/use-mobile-pull-to-refresh",
+      "hooks/use-private-media-url",
       "hooks/use-runtime-media-url",
       "hooks/use-runtime-navigation",
       "lib/auth/auth-context",
       "lib/auth/browser-session",
       "lib/desktop/product-window",
       "lib/http/api-request",
+      "lib/http/community-request",
+      "lib/media/authenticated-media",
       "lib/media/safe-media-url",
       "lib/navigation/device-navigation",
       "lib/navigation/product-routes",
@@ -385,6 +394,7 @@
       "styles/globals.css",
       "styles/semantic-tokens.css",
       "utils/class-names",
+      "utils/post-card-navigation",
       "utils/profile-presentation",
       "utils/safe-navigation",
       "utils/scroll-viewport"
@@ -416,6 +426,12 @@
       },
       {
         "importer": "features/memory/ui/memory-workspace",
+        "target": "features/characters/public",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/memory/ui/memory-workspace",
         "target": "features/device-home/public",
         "owner_stage": "AR-F5-A",
         "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
@@ -423,6 +439,48 @@
       {
         "importer": "features/social/api/social-feed-server",
         "target": "lib/server/backend",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/public",
+        "target": "components/content/expandable-post-text",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/public",
+        "target": "components/content/mentioned-text",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/public",
+        "target": "components/media/post-media-grid",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/ui/post-list-client",
+        "target": "components/content/mentioned-text",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/ui/post-list-client",
+        "target": "components/media/post-media-grid",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/ui/social-post-row",
+        "target": "components/content/expandable-post-text",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "features/social/ui/social-post-row",
+        "target": "components/media/post-media-grid",
         "owner_stage": "AR-F5-A",
         "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },

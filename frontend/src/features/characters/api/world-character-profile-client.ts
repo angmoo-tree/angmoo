@@ -1,10 +1,7 @@
-import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
-import { runtimeFetch } from "@/shared/runtime/public";
+import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
-import type {
-  WorldCharacterProfileListRead,
-  WorldCharacterPublicProfile,
-} from "../model/world-character-profile-contract";
+import type { WorldCharacterProfileListRead, WorldCharacterPublicProfile } from "@/features/characters/types/world-character-profile";
 
 export class WorldCharacterProfileApiError extends Error {
   constructor(

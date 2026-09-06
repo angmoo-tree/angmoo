@@ -48,6 +48,8 @@ def test_legacy_unbounded_character_state_proxy_is_absent() -> None:
         REPO_ROOT / "frontend" / "src" / "lib" / "community.ts"
     ).read_text(encoding="utf-8")
 
+    community_client += (REPO_ROOT / "frontend/src/lib/http/community-request.ts").read_text(encoding="utf-8")
+
     assert not legacy_route.exists()
     assert "runtimeFetch(`/api/backend${path}`" in community_client
     assert "/api/community" not in community_client

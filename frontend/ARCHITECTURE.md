@@ -25,6 +25,24 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 온보딩 연결은 `profile-setup-screen.tsx`에서 수행한다. 기존 `lib/agents.ts`의 인증 관련
 export는 미전환 소비자를 위한 전달 코드이며, 새로운 Identity 구현을 복제하지 않는다.
 
+Character 생성·설정·활동의 요청은 `features/characters/api`, 응답 DTO는 `types`,
+모델 선택 옵션은 `config`, 온보딩과 자율활동의 브라우저 상태는 `stores`에 있다.
+`utils`는 상태를 저장하지 않는 표시·변환 함수를 담고 `components`는 생성 폼,
+목록, 프로필 카드와 설정·상태 표시를 소유한다. 작은 컴포넌트의 props와 표시 함수의
+지역 타입은 사용 위치에 함께 둘 수 있다.
+
+Character 상세 화면의 Social 프로필·피드 조회와 Chat 쪽지 설정은
+`composition/screens/agent-detail-screen.tsx`가 연결한다. 캐릭터 전용 폼과 상태 표시는
+`features/characters/components/agent-detail-parts.tsx`에 있다. World 캐릭터 프로필도
+`world-character-profile-screen.tsx`가 Chat 시작과 Social 탭을 조립하고, Character가
+directory와 profile card를 소유한다. 카드의 슬롯은 DOM을 추가하지 않으며 기존
+요청 취소·재시도·중복 실행 방지·World 범위 검사를 화면에서 유지한다.
+
+공통 텍스트·미디어 컴포넌트는 `components/content`와 `components/media`에서 필요한
+표시 입력만 받는다. Social의 API DTO를 공통 코드로 옮겨 의존성을 숨기지 않는다.
+`lib/http/community-request.ts`는 기존 community 전송 계약을 그대로 보존하며,
+일반 agents 전송과 오류 처리 차이가 있어 무조건 하나로 합치지 않는다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

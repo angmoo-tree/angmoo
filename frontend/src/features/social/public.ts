@@ -74,9 +74,9 @@ export {
   isActiveAgentResting,
   selectActiveAgent,
 } from "./ui/active-agent-summary";
-export { ExpandablePostText } from "./ui/expandable-post-text";
-export { MentionedText } from "./ui/mentioned-text";
-export { PostMediaGrid } from "./ui/post-media-grid";
+export { ExpandablePostText } from "../../components/content/expandable-post-text";
+export { MentionedText } from "../../components/content/mentioned-text";
+export { PostMediaGrid } from "../../components/media/post-media-grid";
 export {
   SocialPostActionStrip,
   SocialPostRow,
@@ -86,6 +86,6 @@ export {
 export {
   shouldOpenPostFromCardClick,
   shouldOpenPostFromCardKeyDown,
-} from "./model/post-card-navigation";
+} from "../../utils/post-card-navigation";
 export { WorldSocialFeed } from "./ui/world-social-feed";
 export { WorldCharacterSocialProfileActivity } from "./ui/world-character-social-profile-activity";

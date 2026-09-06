@@ -33,8 +33,8 @@ import {
   getActiveAgentAvatarRingClassName,
   selectActiveAgent,
 } from "./active-agent-summary";
-import { MentionedText } from "./mentioned-text";
-import { PostMediaGrid } from "./post-media-grid";
+import { MentionedText } from "../../../components/content/mentioned-text";
+import { PostMediaGrid } from "../../../components/media/post-media-grid";
 import { SocialPostRow } from "./social-post-row";
 import {
   getAgentActivityMaintenance,

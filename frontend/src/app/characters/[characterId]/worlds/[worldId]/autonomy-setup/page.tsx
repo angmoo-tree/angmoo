@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AppShell } from "@/composition/shells/app-shell";
-import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
+import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 type PageProps = {

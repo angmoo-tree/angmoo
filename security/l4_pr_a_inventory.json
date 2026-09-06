@@ -2466,7 +2466,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 26,
+      "candidate_consumer_edge_count": 22,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -2493,17 +2493,11 @@
         "frontend/src/features/social/ui/post-list-client.tsx": [],
         "frontend/src/features/social/ui/world-social-feed.tsx": [],
         "frontend/src/lib/community.ts": [
-          "frontend/src/app/characters/[characterId]/activity/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
           "frontend/src/app/profiles/characters/[characterId]/page.tsx",
           "frontend/src/app/profiles/users/[userId]/follows/page.tsx",
           "frontend/src/app/profiles/users/[userId]/page.tsx",
           "frontend/src/app/search/page.tsx",
-          "frontend/src/components/agent-activity-list.tsx",
-          "frontend/src/components/agent-create-client.tsx",
-          "frontend/src/components/agent-detail-client.tsx",
-          "frontend/src/components/character-activity-client.tsx",
-          "frontend/src/components/character-profile-client.tsx",
           "frontend/src/components/notifications-client.tsx",
           "frontend/src/components/profile-connections-client.tsx",
           "frontend/src/components/profile-list-row.tsx",
@@ -2511,6 +2505,8 @@
           "frontend/src/components/search-results-client.tsx",
           "frontend/src/components/tree-community-client.tsx",
           "frontend/src/components/tree-post-detail-client.tsx",
+          "frontend/src/composition/screens/agent-detail-screen.tsx",
+          "frontend/src/composition/screens/character-profile-screen.tsx",
           "frontend/src/lib/agents.ts"
         ]
       },
@@ -2655,13 +2651,13 @@
             "PostListClient"
           ],
           "imports": [
+            "../../../components/content/mentioned-text",
+            "../../../components/media/post-media-grid",
             "../api/social-agent-client",
             "../api/social-feed-client",
             "../model/social-agent-contract",
             "../model/social-feed-contract",
             "./active-agent-summary",
-            "./mentioned-text",
-            "./post-media-grid",
             "./social-post-row",
             "@/shared/auth/public",
             "@/shared/interaction/public",
@@ -2673,7 +2669,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "1a451b2f93f380fe417edb3dc581ea17f19efc0d499b90d5b204a2cf1bce17b3"
+          "sha256": "6a993bf7974ca71d39efeb0d869e41632cde081db5fac6f4fd645b2947f60459"
         },
         {
           "exports": [
@@ -2697,10 +2693,7 @@
         },
         {
           "exports": [
-            "CharacterActivityRead",
-            "CharacterRead",
             "CharacterSearchResult",
-            "CharacterStateRead",
             "CommentRead",
             "FeedContentFilter",
             "FeedPage",
@@ -2731,7 +2724,6 @@
             "createReply",
             "deletePost",
             "followProfile",
-            "getCharacterActivity",
             "getCharacterProfile",
             "getCharacterProfileConnections",
             "getCharacterProfileFeed",
@@ -2752,16 +2744,18 @@
             "markNotificationRead",
             "reportPost",
             "repostPost",
-            "saveCharacterState",
             "searchNest",
             "unfollowProfile"
           ],
           "imports": [
-            "@/shared/runtime/public",
+            "@/features/characters/api/activity",
+            "@/features/characters/types/activity",
+            "@/features/characters/types/character",
+            "@/lib/http/community-request",
             "@/shared/ui/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "ae697e51545686aef9999886a86d4897c32d13d1badb385ac23428eb770de8cb"
+          "sha256": "fcad4cf7709527375353c5e57c9a2f9c9ee749649deb54f18590722b56758e69"
         }
       ],
       "planned_feature_allowlist": [

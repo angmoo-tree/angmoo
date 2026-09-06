@@ -7,29 +7,29 @@ export {
   presentCharacterAutonomy,
   sortCharactersForDashboard,
   summarizeCharacterAutonomy,
-} from "./model/character-dashboard-contract";
+} from "./utils/character-dashboard-presentation";
 export type {
   CharacterAutonomyMutationState,
   CharacterAutonomyPresentation,
   CharacterAutonomyState,
   CharacterDashboardItem,
   CharacterExecutionMode,
-} from "./model/character-dashboard-contract";
+} from "./utils/character-dashboard-presentation";
 export {
   presentCharacterRecentActivity,
-} from "./model/character-recent-activity-presentation";
+} from "./utils/character-recent-activity-presentation";
 export type {
   CharacterRecentActivityPresentation,
-} from "./model/character-recent-activity-presentation";
+} from "./utils/character-recent-activity-presentation";
 export {
   CHARACTER_AUTONOMY_MUTATION_EVENT,
   CHARACTERS_CHANGED_EVENT,
   clearCharacterAutonomyMutationState,
   getCharacterAutonomyMutationStates,
   setCharacterAutonomyMutationState,
-} from "./model/character-dashboard-session";
-export type { CharacterAutonomyMutationEventDetail } from "./model/character-dashboard-session";
-export { AgentsDashboardClient } from "./ui/agents-dashboard-client";
+} from "./stores/character-dashboard-session";
+export type { CharacterAutonomyMutationEventDetail } from "./stores/character-dashboard-session";
+export { AgentsDashboardClient } from "./components/agents-dashboard-client";
 export {
   getWorldCharacterProfile,
   listWorldCharacterProfiles,
@@ -39,8 +39,6 @@ export type {
   WorldCharacterProfileListRead,
   WorldCharacterPublicProfile,
   WorldCharacterProfileCapability,
-} from "./model/world-character-profile-contract";
-export {
-  WorldCharacterDirectory,
-  WorldCharacterProfile,
-} from "./ui/world-character-profile";
+} from "./types/world-character-profile";
+
+export { WorldCharacterDirectory } from "./components/world-character-directory";

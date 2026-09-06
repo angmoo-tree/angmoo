@@ -121,7 +121,7 @@ def rewrite_paths(text: str, moves: dict[str, str]) -> str:
         new = mapped(old, moves)
         replacements[old] = new
         if old.startswith("frontend/src/") and new.startswith("frontend/src/"):
-            for prefix in ("@/", "src/"):
+            for prefix in ("@/", "src/", "../frontend/src/"):
                 a, b = prefix + old[13:], prefix + new[13:]
                 replacements[a] = b
                 if a.endswith((".ts", ".tsx")):

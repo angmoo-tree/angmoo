@@ -66,6 +66,8 @@ def test_browser_auth_provider_bootstraps_from_auth_me() -> None:
 def test_community_and_tree_clients_do_not_create_user_bearer_headers() -> None:
     for relative_path in ("lib/community.ts", "lib/tree.ts"):
         source = _read(relative_path)
+        if relative_path == "lib/community.ts":
+            source += _read("lib/http/community-request.ts")
         assert "getStoredToken" not in source
         assert "Authorization: `Bearer" not in source
         assert '"same-origin"' in source

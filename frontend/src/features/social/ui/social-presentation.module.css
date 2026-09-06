@@ -160,34 +160,6 @@
   -webkit-line-clamp: 4;
 }
 
-.expandButton {
-  display: inline-flex;
-  min-width: 44px;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  margin-top: var(--spacing-micro);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--color-brand-accent);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: 800;
-  padding-inline: var(--spacing-compact);
-  transition: background-color var(--motion-fast) ease;
-}
-
-.expandButton:hover {
-  background: var(--color-brand-soft);
-}
-
-.expandButton:focus-visible {
-  outline: 2px solid var(--focus-ring-color);
-  outline-offset: 2px;
-}
-
 .menu {
   position: absolute;
   top: var(--spacing-phone);
@@ -265,64 +237,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.mediaGrid {
-  display: grid;
-  overflow: hidden;
-  margin-top: var(--spacing-phone);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-reference-card);
-  background: var(--color-surface-subtle);
-  gap: 1px;
-}
-
-.mediaGridOne {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.mediaGridMultiple {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  aspect-ratio: 4 / 3;
-}
-
-.mediaFrame {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--color-surface-muted);
-}
-
-.mediaGridOne .mediaFrame {
-  aspect-ratio: 4 / 3;
-}
-
-.mediaGridTwo .mediaFrame {
-  grid-row: 1 / -1;
-}
-
-.mediaGridThree .mediaFrame:first-child {
-  grid-row: 1 / -1;
-}
-
-.mediaImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mediaMore {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--color-action-dark) 68%, transparent);
-  color: var(--color-surface);
-  font-size: var(--text-card-title);
-  font-weight: 800;
-}
-
 @media (min-width: 768px) {
   .postRow {
     padding-inline: var(--spacing-major);
@@ -335,7 +249,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .openableRow,
-  .expandButton,
   .action,
   .actionLink {
     transition-duration: 1ms;

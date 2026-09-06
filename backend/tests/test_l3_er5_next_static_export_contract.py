@@ -104,7 +104,7 @@ def test_static_media_uses_authenticated_fetch_and_blob_urls() -> None:
     assert "URL.revokeObjectURL" in media_hook
     for relative in (
         "frontend/src/components/ui/profile-avatar.tsx",
-        "frontend/src/features/social/ui/post-media-grid.tsx",
+        "frontend/src/components/media/post-media-grid.tsx",
         "frontend/src/components/world-creator-client.tsx",
         "frontend/src/features/device-home/components/device-home.tsx",
     ):

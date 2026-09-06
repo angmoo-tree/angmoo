@@ -1,7 +1,7 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 
-import type { CharacterDashboardItem } from "../frontend/src/features/characters/model/character-dashboard-contract";
-import { presentCharacterRecentActivity } from "../frontend/src/features/characters/model/character-recent-activity-presentation";
+import type { CharacterDashboardItem } from "../frontend/src/features/characters/utils/character-dashboard-presentation";
+import { presentCharacterRecentActivity } from "../frontend/src/features/characters/utils/character-recent-activity-presentation";
 import type {
   MessageThreadRead,
   WorldChatThreadRead,
