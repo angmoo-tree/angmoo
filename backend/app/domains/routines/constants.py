@@ -430,3 +430,15 @@ WRITING_KOREAN_WEEKDAYS = (
 )
 
 WRITING_TOOLS_ALLOWED = ["angmoo_list_feed"]
+
+GEMINI_FREE_CREATE_POST_MAX = 1
+
+COMPLETE_TICK_ACTION_TYPES = (
+    "create_post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)

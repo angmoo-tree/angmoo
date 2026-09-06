@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.routines.service import activity_logs as agent_crud
+
 import app.domains.characters.service.profile as characters_profile_service
 import app.domains.social.repository.inbox as social_inbox_repository
 import app.domains.social.repository.posts as social_posts_repository
@@ -177,7 +179,7 @@ from app.domains.relationships import constants as relationship_point_constants
 from app.domains.relationships.repository import points as relationship_point_queries
 from app.domains.relationships.service import points as relationship_points
 from app.domains.relationships.utils import points as relationship_point_values
-from app.cruds import agents as agent_crud
+
 
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
@@ -199,7 +201,7 @@ from app.domains.character_lore.service import documents as character_lore_servi
 
 from app.runtime.social import langgraph_actions as langgraph_social_apply
 from app.runtime.social import image_generation as post_image_generation
-from app.services import prompt_safety
+from app.core import prompt_safety as prompt_safety
 from app.integrations.direct_llm import DirectLlmCallContext
 from app.integrations.direct_llm import DirectLlmDeferred
 from app.integrations.direct_llm import DirectLlmError

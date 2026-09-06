@@ -1,4 +1,8 @@
 from __future__ import annotations
+from app.domains.identity.repository import credentials as identity_credentials
+from app.domains.identity.service import character_credentials as identity_credential_records
+from app.domains.routines.service import activity_logs as agent_crud
+
 import app.domains.social.exceptions as social_errors
 import app.domains.social.service.activity_results as social_activity_results_service
 import app.domains.social.service.posts as social_posts_service
@@ -206,7 +210,7 @@ from app.credentials import CredentialResolutionError
 
 from app.credentials import CredentialResolver
 
-from app.cruds import agents as agent_crud
+
 
 
 
@@ -1178,7 +1182,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         ensure_llm_mode=_ensure_llm_mode,
         ensure_auto_ticks_available=maintenance_service.ensure_auto_ticks_available,
         evaluate_readiness=_activity_profile_readiness,
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         select_world_character=selected_autonomous_world_character,
         lock_world_capacity=lock_world_autonomy_capacity,
         count_world_autonomy=count_enabled_autonomous_world_characters,
@@ -1214,7 +1218,7 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
             autonomy_management._ensure_activity_profile_ready,
             workflows=build_autonomy_workflows(),
         ),
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         run_assigned_slot=agent_run_service.run_assigned_resident_slot_once,
         claim_temporary_slot=agent_run_service.claim_temporary_resident_slot,
         sync_enabled=_resident_openclaw_sync_enabled,
@@ -1255,7 +1259,7 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         ensure_run_now_available=maintenance_service.ensure_run_now_available,
         build_activity_policy=agent_activity_policy.build_activity_policy,
         has_authored_post=social_post_queries.character_has_authored_post,
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         resolve_key=resolve_first_greeting_key,
         new_tracker=RunLlmTracker,
         _run_first_greeting_writer=_run_first_greeting_writer,
@@ -1279,7 +1283,7 @@ def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.Age
             locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
             execution_mode_error=AgentExecutionModeError,
         ),
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         bind_profile=_bind_slot_auth_profile,
         release_profile=_release_slot_auth_profile,
         build_detail=_build_agent_detail,
@@ -1295,8 +1299,8 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         get_world_character_id=credential_world_characters.get_accessible_world_character_id,
         get_assigned_slot=slot_queries.get_assigned_slot,
         running_slot_status=routine_constants.SLOT_STATUS_RUNNING,
-        upsert_credential=agent_crud.upsert_credential,
-        get_credential=agent_crud.get_character_credential,
+        upsert_credential=identity_credential_records.upsert_credential,
+        get_credential=identity_credentials.get_character_credential,
         sync_enabled=_resident_openclaw_sync_enabled,
         slot_read=schemas.AgentSlotRead.model_validate,
         bind_profile=_bind_slot_auth_profile,

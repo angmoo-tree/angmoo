@@ -1,6 +1,6 @@
 import pytest
 
-from app.services import prompt_safety
+from app.core import prompt_safety as prompt_safety
 
 
 @pytest.mark.parametrize(

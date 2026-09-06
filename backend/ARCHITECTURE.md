@@ -1207,3 +1207,9 @@ Relationships의 `public.py` 집합은 제거했습니다. Graph 읽기와 회�
 `runtime/extensions/hosted_configuration.py`는 선택적 Hosted 설정·prompt 제공자의 등록, 중복 등록 거절과 lifespan 정리를 소유합니다. `runtime/extensions/resident_adapter.py`는 선택적 Resident adapter의 등록과 fail-closed 호출을 소유합니다. 앱과 현재 runtime 소비자는 이 구현을 직접 사용하며 registry state는 각각 한 곳에만 있습니다.
 
 기존 별도 배포 Hosted 확장이 사용하는 `services/hosted_configuration.py`와 `services/runtime_boundary.py`는 같은 함수·타입·객체를 내보내는 최소 호환 경로입니다. 호환 파일에 구현이나 별도 registry state를 두지 않습니다. 외부 확장의 실제 import를 함께 이전하기 전까지 이 두 계약을 유지하며, 새 기능의 시작점은 실제 runtime 소유 모듈입니다.
+
+### 서비스 호환 경로의 종료
+
+실제 구현을 소유한 모듈로 소비자를 연결한 뒤 `services/activity_state_contracts`, `daily_activity_plans`, `direct_llm`, `routine_post_runtime`, `world_character_contracts`, `agent_runs`와 `cruds/agents`의 남은 전달 경로를 제거했습니다. 활동·슬롯은 Routines, credential 조회·저장은 Identity, 이미지 정제·파일 처리는 해당 업무 및 integrations의 실제 모듈을 사용합니다. 테스트도 같은 구현을 직접 참조하며 기존 단언에 쓰인 지역 이름은 실제 모듈 import의 별칭으로 유지합니다.
+
+`services/messages`, `prompt_safety`, `world_character_provider`, `profile_media`는 과거 경로의 객체 동일성을 직접 검사하는 원본 테스트 때문에 아직 남아 있습니다. 이 검사는 다른 실제 owner를 가리키는지 확인해야 하므로 자기 자신과 비교하는 단언으로 바꾸지 않습니다. 새로운 제품 코드는 이 경로를 사용하지 않으며, 별도의 좁은 호환 종료 증명과 원본 기능 검증을 거쳐 제거합니다. Hosted 설정과 runtime adapter 등록의 실제 상태 저장소는 별도 전환 범위입니다.

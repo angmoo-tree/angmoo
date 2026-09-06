@@ -1,3 +1,5 @@
+from app.domains.routines.service import plans as routine_plans
+
 import app.domains.social.repository.reactions as social_reactions_repository
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
 from app.domains.routines.service import first_greeting as first_greeting_service
@@ -34,9 +36,9 @@ from app.domains.local_bot.service import quota as local_bot_quota
 from app.domains.identity.service import login_throttle
 from app.domains.character_lore.service import parser_quota as lore_parser_quota
 from chat_service_support import messages as message_service
-from app.services import daily_activity_plans
+
 from app.domains.worlds import service as world_service
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.integrations.direct_llm import DirectLlmResponse
 
 
@@ -394,7 +396,7 @@ def test_daily_activity_plan_is_singleton_across_twenty_postgres_sessions() -> N
             user = db.get(models.User, user_id)
             assert user is not None
             barrier.wait()
-            result = daily_activity_plans.prepare_activity_plan(
+            result = routine_plans.prepare_activity_plan(
                 db,
                 references=SqlAlchemyPlanReferences(db),
                 character_id=character_id,

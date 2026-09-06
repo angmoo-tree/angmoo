@@ -1,3 +1,6 @@
+from app.domains.routines.repository import slots as routines_slots
+from app.domains.routines.service import activity_settings as routines_settings
+
 import app.domains.social.service.posts as social_posts_actual
 import app.runtime.social.timeline as social_timeline_actual
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
@@ -27,7 +30,7 @@ from app.core import active_hours
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
 from app.domains.routines import constants as agent_run_crud
-from app.cruds import agents as agent_crud
+
 from app.domains.worlds import public as world_service
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
@@ -243,7 +246,7 @@ def test_ensure_setting_uses_default_daily_limits() -> None:
     models.AgentActivitySetting.__table__.create(engine)
 
     with Session(engine) as db:
-        setting = agent_crud.ensure_setting(db, "char-1")
+        setting = routines_settings.ensure_setting(db, "char-1")
 
         assert setting.max_posts_per_day == 10
         assert setting.max_comments_per_day == 30
@@ -815,7 +818,7 @@ def test_world_timezone_change_reschedules_enabled_idle_slots(
         )
         db.commit()
 
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert changed == 1
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == expected
@@ -1534,6 +1537,7 @@ def test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomica
             )
             == 50
         )
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, fiftieth.id) is not None
         db.refresh(fiftieth_world_character)
         assert fiftieth_world_character.autonomous_enabled is True
@@ -1556,8 +1560,9 @@ def test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomica
             autonomy_management.activate_agent(db, user, fifty_first.id, workflows=agent_service.build_autonomy_workflows())
 
         assert caught.value.reason_code == "world_autonomy_capacity_full"
-        rejected_setting = agent_crud.get_setting(db, fifty_first.id)
+        rejected_setting = routines_settings.get_setting(db, fifty_first.id)
         assert rejected_setting is not None and rejected_setting.auto_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, fifty_first.id) is None
         db.refresh(fifty_first_world_character)
         assert fifty_first_world_character.autonomous_enabled is False
@@ -1726,11 +1731,17 @@ def test_physical_slot_capacity_does_not_disable_existing_agents(
         ):
             autonomy_management.activate_agent(db, user, target.id, workflows=agent_service.build_autonomy_workflows())
 
+        from app.domains.routines.service import activity_settings as agent_crud
         assert agent_crud.get_setting(db, first.id).auto_enabled is True
+        from app.domains.routines.service import activity_settings as agent_crud
         assert agent_crud.get_setting(db, second.id).auto_enabled is True
+        from app.domains.routines.service import activity_settings as agent_crud
         assert agent_crud.get_setting(db, target.id).auto_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, first.id) is not None
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, second.id) is not None
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, target.id) is None
 
 
@@ -1964,7 +1975,7 @@ def test_activation_uses_canonical_initial_schedule(
 
         autonomy_management.activate_agent(db, user, character.id, workflows=agent_service.build_autonomy_workflows())
 
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == expected
         assert observed["character_id"] == character.id
@@ -2007,7 +2018,7 @@ def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
             references=agent_service.build_activity_management_references(),
         )
 
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == expected
         assert slot.heartbeat_interval_seconds == 90 * 60
@@ -2030,7 +2041,7 @@ def test_running_slot_keeps_current_schedule_until_run_completion(
             slot_id="angmoo-1",
         )
         db.commit()
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None
         slot.status = "running"
         slot.next_tick_at = existing
@@ -2053,7 +2064,7 @@ def test_running_slot_keeps_current_schedule_until_run_completion(
             references=agent_service.build_activity_management_references(),
         )
 
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == existing
 
@@ -2107,7 +2118,7 @@ def test_run_now_uses_temporary_slot_without_enabling_autonomy(
 
         result = asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
-        setting = agent_crud.get_setting(db, character.id)
+        setting = routines_settings.get_setting(db, character.id)
         assert result.status == "completed"
         assert called == {
             "assigned": False,
@@ -2115,6 +2126,7 @@ def test_run_now_uses_temporary_slot_without_enabling_autonomy(
             "community": False,
         }
         assert setting is not None and setting.auto_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, character.id) is None
         assert all(
             slot.assigned_character_id is None
@@ -2207,12 +2219,13 @@ def test_run_now_keeps_direct_created_world_manual_contract_when_import_registry
 
         result = asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
-        setting = agent_crud.get_setting(db, character.id)
+        setting = routines_settings.get_setting(db, character.id)
         db.refresh(world_character)
         assert result.status == "completed"
         assert called == {"temporary": True}
         assert setting is not None and setting.auto_enabled is False
         assert world_character.autonomous_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, character.id) is None
 
 
@@ -2264,9 +2277,10 @@ def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
         with pytest.raises(agent_service.RunNowSlotUnavailableError):
             asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
-        setting = agent_crud.get_setting(db, character.id)
+        setting = routines_settings.get_setting(db, character.id)
         assert called == {"claim": True, "assigned": False, "community": False}
         assert setting is not None and setting.auto_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, character.id) is None
 
 
@@ -2298,8 +2312,9 @@ def test_run_now_releases_temporary_slot_after_runner_failure(
         with pytest.raises(RuntimeError, match="temporary runner failed"):
             asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
-        setting = agent_crud.get_setting(db, character.id)
+        setting = routines_settings.get_setting(db, character.id)
         assert setting is not None and setting.auto_enabled is False
+        from app.domains.routines.repository import slots as agent_crud
         assert agent_crud.get_assigned_slot(db, character.id) is None
 
 
@@ -2344,7 +2359,7 @@ def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> 
 
         db.refresh(run)
         db.refresh(slot)
-        setting = agent_crud.get_setting(db, character.id)
+        setting = routines_settings.get_setting(db, character.id)
         assert recovered_count == 1
         assert run.status == "failed"
         assert run.gateway_result is not None
@@ -2607,7 +2622,7 @@ def test_run_now_rejects_target_running_slot(monkeypatch: pytest.MonkeyPatch) ->
             auto_enabled=True,
             slot_id="angmoo-1",
         )
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None
         slot.status = "running"
         slot.lease_expires_at = datetime.now(UTC) + timedelta(minutes=5)
@@ -2693,7 +2708,7 @@ def test_run_now_rejects_target_soon_scheduled_slot(
             auto_enabled=True,
             slot_id="angmoo-1",
         )
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None
         slot.next_tick_at = datetime.now(UTC) + timedelta(minutes=5)
         db.commit()
@@ -2923,7 +2938,7 @@ def test_run_now_allows_target_due_slot(monkeypatch: pytest.MonkeyPatch) -> None
             auto_enabled=True,
             slot_id="angmoo-1",
         )
-        slot = agent_crud.get_assigned_slot(db, character.id)
+        slot = routines_slots.get_assigned_slot(db, character.id)
         assert slot is not None
         slot.next_tick_at = datetime.now(UTC) - timedelta(seconds=1)
         db.commit()

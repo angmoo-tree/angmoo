@@ -10,7 +10,7 @@ import pytest
 
 from google.genai import errors as google_errors
 
-from app.services import agent_runs
+
 
 from app.domains.routines.service import writing_results as agent_writing
 

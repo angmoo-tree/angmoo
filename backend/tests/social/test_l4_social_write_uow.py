@@ -25,7 +25,7 @@ from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
 from app.core.sqlite_concurrency import SqliteRetryPolicy
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 
 
 def _session_factory(tmp_path) -> sessionmaker[Session]:
