@@ -15,13 +15,11 @@ from app import exceptions, pagination
 from app.core import request_limits, sqlite_concurrency
 from app.domains.device_home import repository as home
 from app.domains.device_home.exceptions import InvalidWorldSurfaceCursorError
-from app.domains.social.public import (
-    SocialWriteRetryableError,
-    WorldCharacterSocialProfileQuery,
-    WorldCharacterSocialProfileValidationError,
-)
+from app.domains.social.contracts.writes import SocialWriteRetryableError
+from app.domains.social.contracts.profile_activity import WorldCharacterSocialProfileQuery
+from app.domains.social.contracts.profile_activity import WorldCharacterSocialProfileValidationError
 from app.runtime import persistence
-from app.runtime.social import sqlalchemy_profile_repository as social
+from app.domains.social.service import profile_cursor as social
 
 
 # Compatibility vectors from de83dae's cursor functions, using only the public
@@ -90,7 +88,7 @@ def test_request_body_limit_catches_the_shared_error_for_streamed_chunks(excess)
 
 
 def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(monkeypatch):
-    from app.api.v1.routes import manual_social
+    from app.domains.social import router as manual_social
     from app.domains.characters import router as character_http
     from app.domains.routines import exceptions as routine_errors
     from types import SimpleNamespace

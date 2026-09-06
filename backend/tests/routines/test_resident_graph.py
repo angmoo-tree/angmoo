@@ -1,3 +1,5 @@
+from app.runtime.social.agent_tools import agent_tool_actions
+from app.runtime.social.agent_tool_state import agent_tool_state
 import asyncio
 import inspect
 from datetime import UTC, date, datetime, timedelta
@@ -2138,7 +2140,7 @@ def test_state_recorder_json_failure_saves_fallback_state(monkeypatch) -> None:
 
     monkeypatch.setattr(langgraph_resident, "_call_json", fail_call_json)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fake_save_state,
     )
@@ -2254,7 +2256,7 @@ def test_state_recorder_length_failure_saves_sanitized_payload(monkeypatch) -> N
 
     monkeypatch.setattr(langgraph_resident, "_call_json", fail_call_json)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fake_save_state,
     )
@@ -2348,7 +2350,7 @@ def test_state_recorder_length_failure_does_not_retry_and_uses_low_thinking(
     monkeypatch.setattr(langgraph_resident, "_decrypt_api_key", lambda _credential: "key")
     monkeypatch.setattr(direct_llm, "generate_text", fake_generate_text)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fake_save_state,
     )
@@ -2416,7 +2418,7 @@ def test_state_recorder_length_sanitize_requires_revalidatable_payload(monkeypat
 
     monkeypatch.setattr(langgraph_resident, "_call_json", fail_call_json)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fake_save_state,
     )
@@ -2471,7 +2473,7 @@ def test_state_recorder_direct_llm_error_records_provider_hint(monkeypatch) -> N
 
     monkeypatch.setattr(langgraph_resident, "_call_json", fail_call_json)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fake_save_state,
     )
@@ -2535,7 +2537,7 @@ def test_state_recorder_fallback_save_failure_is_suppressed(monkeypatch) -> None
 
     monkeypatch.setattr(langgraph_resident, "_call_json", fail_call_json)
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_state,
         "save_agent_tool_character_state",
         fail_save_state,
     )
@@ -2574,7 +2576,7 @@ def test_writing_plan_skip_reports_persona_writer_missing_post_text(monkeypatch)
         raise AssertionError("empty post text must not create a post")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fail_create,
     )
@@ -2658,7 +2660,7 @@ def test_writing_plan_with_repaired_text_creates_post(monkeypatch) -> None:
         return SimpleNamespace(id="post-created", title=kwargs["topic_signature"])
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -2720,7 +2722,7 @@ def test_owner_feed_cue_writing_consumes_matching_pending_cue(monkeypatch) -> No
         return SimpleNamespace(id="post-created", title="Title")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -2789,7 +2791,7 @@ def test_writing_plan_success_records_lore_metadata_and_usage(monkeypatch) -> No
         return SimpleNamespace(id="post-created", title="Title")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -2929,7 +2931,7 @@ def test_writing_plan_success_ignores_legacy_topic_arc_progress(monkeypatch) -> 
         return SimpleNamespace(id="post-created", title=kwargs["topic_signature"])
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -3085,7 +3087,7 @@ def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> Non
         lambda *_args, **_kwargs: False,
     )
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "reply_agent_tool_post",
         fake_reply,
     )
@@ -3197,7 +3199,7 @@ def test_reply_action_skips_when_target_already_answered(monkeypatch) -> None:
         lambda *_args, **_kwargs: True,
     )
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "reply_agent_tool_post",
         fail_reply,
     )

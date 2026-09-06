@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal, Protocol
 
-from app.domains.relationships.graph_read.repository import (
+from app.domains.relationships.contracts.graph_query import (
     GraphEvidenceHit,
     GraphNeighborhoodHit,
     GraphPathHit,

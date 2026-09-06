@@ -146,7 +146,7 @@
   "parity_test_files": [
     "backend/tests/test_embedded_data_migration.py",
     "backend/tests/test_feed_reaction_intent.py",
-    "backend/tests/test_graph_projection_replay.py",
+    "backend/tests/relationships/test_projection_replay.py",
     "backend/tests/test_graph_projection_worker.py",
     "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
     "backend/tests/world_packages/test_import_commit.py",

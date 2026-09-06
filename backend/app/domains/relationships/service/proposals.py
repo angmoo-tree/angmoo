@@ -1,0 +1,375 @@
+"""Publish and answer proposals in the same transaction as their successful evidence."""
+from __future__ import annotations
+from datetime import date, datetime, timedelta
+from hashlib import sha256
+from sqlalchemy.orm import Session
+from app.core.ids import uuid7_string
+from app.domains.relationships import models
+from app.domains.relationships.constants import OPEN_PROPOSAL_LIMIT_PER_CHARACTER, ACTIVE_COMMITMENT_LIMIT, COUNTER_LIMIT, PAIR_COOLDOWN, SEARCH_DAYS, PROPOSAL_TTL
+from app.domains.relationships.contracts.proposals import ProposalEligibility, ResolvedSchedule, ProposalResponseResult, ProposalPreview, ProposalPost, ProposalCharacter, ProposalReferences
+from app.domains.relationships.exceptions import ActivityProposalRuntimeError
+from app.domains.relationships.policies.events import _aware_utc
+from app.domains.relationships.policies.proposals import _text_daypart_consistent
+from app.domains.relationships.repository import proposals as proposal_repository
+from app.domains.relationships.repository.proposals import _open_pair_count, _open_character_count
+from app.domains.routines.service import joint_activity as joint_activity_runtime
+
+
+def _cooldown_active(
+    db: Session, *, actor_id: str, target_id: str, now: datetime
+) -> bool:
+    cutoff = _aware_utc(now) - PAIR_COOLDOWN
+    return (
+        proposal_repository.recent_failed_pair(db, actor_id=actor_id, target_id=target_id, cutoff=cutoff)
+        is not None
+    )
+
+
+def proposal_eligibility(
+    db: Session,
+    *,
+    references: ProposalReferences,
+    actor_world_character_id: str,
+    target_post_id: str,
+    now: datetime,
+) -> ProposalEligibility:
+    post = references.get_post(target_post_id)
+    if (
+        post is None
+        or post.world_id is None
+        or post.author_world_character_id is None
+        or post.deleted_at is not None
+        or post.report_hidden_at is not None
+        or post.visibility != "public"
+    ):
+        return ProposalEligibility(False, "proposal_target_invalid", None)
+    target_id = post.author_world_character_id
+    try:
+        references.validate_pair(
+            world_id=post.world_id,
+            first_world_character_id=actor_world_character_id,
+            second_world_character_id=target_id,
+        )
+    except joint_activity_runtime.JointActivityRuntimeError as exc:
+        return ProposalEligibility(False, exc.reason_code, target_id)
+    if _open_pair_count(db, actor_id=actor_world_character_id, target_id=target_id):
+        return ProposalEligibility(False, "proposal_pair_limit", target_id)
+    if any(
+        _open_character_count(db, world_character_id=world_character_id)
+        >= OPEN_PROPOSAL_LIMIT_PER_CHARACTER
+        for world_character_id in (actor_world_character_id, target_id)
+    ):
+        return ProposalEligibility(False, "proposal_character_limit", target_id)
+    if any(
+        references.active_commitment_count( world_character_id=world_character_id
+        )
+        >= ACTIVE_COMMITMENT_LIMIT
+        for world_character_id in (actor_world_character_id, target_id)
+    ):
+        return ProposalEligibility(False, "proposal_commitment_limit", target_id)
+    if _cooldown_active(
+        db,
+        actor_id=actor_world_character_id,
+        target_id=target_id,
+        now=now,
+    ):
+        return ProposalEligibility(False, "proposal_pair_cooldown", target_id)
+    return ProposalEligibility(True, None, target_id)
+
+
+def validate_preview(
+    db: Session,
+    *,
+    references: ProposalReferences,
+    preview: ProposalPreview,
+    world_id: str,
+    proposer_world_character_id: str,
+    target_post_id: str,
+    now: datetime,
+) -> tuple[ProposalCharacter, ProposalCharacter]:
+    if preview.source_post_id != target_post_id:
+        raise ActivityProposalRuntimeError("proposal_source_mismatch")
+    post = references.get_post(target_post_id)
+    if (
+        post is None
+        or post.world_id != world_id
+        or post.author_world_character_id != preview.target_world_character_id
+    ):
+        raise ActivityProposalRuntimeError("proposal_target_mismatch")
+    eligibility = proposal_eligibility(
+        db, references=references,
+        actor_world_character_id=proposer_world_character_id,
+        target_post_id=target_post_id,
+        now=now,
+    )
+    if not eligibility.eligible:
+        raise ActivityProposalRuntimeError(
+            eligibility.reason_code or "proposal_ineligible"
+        )
+    proposer, target = references.validate_pair(
+        world_id=world_id,
+        first_world_character_id=proposer_world_character_id,
+        second_world_character_id=preview.target_world_character_id,
+    )
+    references.validate_place(
+        world_id=world_id,
+        place_key=preview.place_key,
+        target_daypart=preview.target_daypart,
+        participant_role_keys=(proposer.role_key, target.role_key),
+    )
+    if preview.date_policy == "exact" and preview.target_date is None:
+        raise ActivityProposalRuntimeError("proposal_exact_date_required")
+    world = references.get_world(world_id)
+    if world is None:
+        raise ActivityProposalRuntimeError("world_not_found")
+    local_today = references.local_activity_date(now, world.timezone)
+    if preview.target_date is not None and not (
+        local_today <= preview.target_date < local_today + timedelta(days=SEARCH_DAYS)
+    ):
+        raise ActivityProposalRuntimeError("proposal_date_out_of_range")
+    if not _text_daypart_consistent(preview.text, preview.target_daypart):
+        raise ActivityProposalRuntimeError("proposal_text_daypart_mismatch")
+    return proposer, target
+
+
+def create_published_proposal(
+    db: Session,
+    *,
+    references: ProposalReferences,
+    preview: ProposalPreview,
+    proposal_comment: ProposalPost,
+    proposal_event: models.SocialEvent,
+    proposer_world_character_id: str,
+    now: datetime,
+) -> models.ActivityProposal:
+    if proposal_event.event_type != "joint_proposed":
+        raise ActivityProposalRuntimeError("proposal_event_invalid")
+    validate_preview(
+        db, references=references,
+        preview=preview,
+        world_id=proposal_event.world_id,
+        proposer_world_character_id=proposer_world_character_id,
+        target_post_id=preview.source_post_id,
+        now=now,
+    )
+    if (
+        proposal_comment.id
+        != proposal_repository.source_post_for_event(db, proposal_event=proposal_event)
+        or proposal_comment.reply_to_post_id != preview.source_post_id
+    ):
+        raise ActivityProposalRuntimeError("proposal_evidence_invalid")
+    existing = proposal_repository.find_by_source_event(db, proposal_event=proposal_event)
+    if existing is not None:
+        return existing
+    proposal_id = uuid7_string()
+    proposal = models.ActivityProposal(
+        id=proposal_id,
+        world_id=proposal_event.world_id,
+        root_proposal_id=proposal_id,
+        parent_proposal_id=None,
+        proposal_version=1,
+        proposer_world_character_id=proposer_world_character_id,
+        target_world_character_id=preview.target_world_character_id,
+        activity_seed=preview.activity_seed,
+        place_key=preview.place_key,
+        target_daypart=preview.target_daypart,
+        date_policy=preview.date_policy,
+        target_date=preview.target_date,
+        proposed_local_snapshot={
+            "timezone": references.get_world(proposal_event.world_id).timezone,
+            "target_daypart": preview.target_daypart,
+            "target_date": (
+                preview.target_date.isoformat()
+                if preview.target_date is not None
+                else None
+            ),
+        },
+        status="proposed",
+        source_proposal_event_id=proposal_event.id,
+        idempotency_key=sha256(
+            f"proposal|{proposal_event.id}".encode("utf-8")
+        ).hexdigest(),
+        expires_at=_aware_utc(now) + PROPOSAL_TTL,
+        version=1,
+    )
+    db.add(proposal)
+    db.flush()
+    return proposal
+
+
+def resolve_acceptance_schedule(
+    db: Session,
+    *,
+    references: ProposalReferences,
+    proposal_id: str,
+    now: datetime,
+) -> ResolvedSchedule:
+    proposal = proposal_repository.get_proposal(db, proposal_id)
+    if proposal is None or proposal.status != "proposed":
+        raise ActivityProposalRuntimeError("proposal_not_open")
+    world = references.get_world(proposal.world_id)
+    if world is None:
+        raise ActivityProposalRuntimeError("world_not_found")
+    references.validate_pair(
+        world_id=proposal.world_id,
+        first_world_character_id=proposal.proposer_world_character_id,
+        second_world_character_id=proposal.target_world_character_id,
+    )
+    local_today = references.local_activity_date(now, world.timezone)
+    if proposal.date_policy == "exact":
+        if proposal.target_date is None:
+            raise ActivityProposalRuntimeError("proposal_exact_date_required")
+        candidates = (proposal.target_date,)
+    else:
+        candidates = tuple(local_today + timedelta(days=offset) for offset in range(SEARCH_DAYS))
+    for candidate_date in candidates:
+        if not (local_today <= candidate_date < local_today + timedelta(days=SEARCH_DAYS)):
+            continue
+        start_at, end_at = references.daypart_windows(
+            candidate_date, world.timezone
+        )[proposal.target_daypart]
+        if _aware_utc(start_at) <= _aware_utc(now):
+            continue
+        if all(
+            references.slot_available(
+                world_id=proposal.world_id,
+                world_character_id=world_character_id,
+                local_date=candidate_date,
+                daypart=proposal.target_daypart,
+                now=now,
+            )
+            for world_character_id in (
+                proposal.proposer_world_character_id,
+                proposal.target_world_character_id,
+            )
+        ):
+            return ResolvedSchedule(
+                candidate_date,
+                proposal.target_daypart,
+                start_at,
+                end_at,
+                world.timezone,
+            )
+    raise ActivityProposalRuntimeError("joint_activity_no_shared_schedule")
+
+
+def apply_response(
+    db: Session,
+    *,
+    references: ProposalReferences,
+    proposal_id: str,
+    response_event: models.SocialEvent,
+    decision: str,
+    now: datetime,
+    resolved_schedule: ResolvedSchedule | None = None,
+    counter_activity_seed: str | None = None,
+    counter_place_key: str | None = None,
+    counter_target_daypart: str | None = None,
+    counter_date_policy: str | None = None,
+    counter_target_date: date | None = None,
+) -> ProposalResponseResult:
+    proposal = proposal_repository.find_for_update(db, proposal_id=proposal_id)
+    if proposal is None or proposal.status != "proposed":
+        raise ActivityProposalRuntimeError("proposal_not_open")
+    if response_event.world_id != proposal.world_id:
+        raise ActivityProposalRuntimeError("proposal_response_world_mismatch")
+    if (
+        response_event.actor_world_character_id
+        != proposal.target_world_character_id
+        or response_event.target_world_character_id
+        != proposal.proposer_world_character_id
+    ):
+        raise ActivityProposalRuntimeError("proposal_response_actor_mismatch")
+    if proposal.source_response_event_id is not None:
+        if proposal.source_response_event_id != response_event.id:
+            raise ActivityProposalRuntimeError("proposal_already_answered")
+        joint = references.find_joint_for_proposal(proposal.id)
+        return ProposalResponseResult(proposal, None, joint)
+
+    current = _aware_utc(now)
+    proposal.source_response_event_id = response_event.id
+    proposal.version += 1
+    if decision == "accept":
+        if response_event.event_type != "joint_accepted":
+            raise ActivityProposalRuntimeError("proposal_response_event_invalid")
+        schedule = resolved_schedule or resolve_acceptance_schedule(
+        db, references=references, proposal_id=proposal.id, now=current
+        )
+        proposal.status = "accepted"
+        proposal.accepted_at = current
+        scheduled = references.create_scheduled_joint(
+            proposal=proposal,
+            acceptance_event_id=response_event.id,
+            scheduled_local_date=schedule.local_date,
+            scheduled_start_at=schedule.scheduled_start_at,
+            scheduled_end_at=schedule.scheduled_end_at,
+            timezone_name=schedule.timezone_name,
+            now=current,
+        )
+        db.flush()
+        return ProposalResponseResult(proposal, None, scheduled.joint_activity)
+    if decision == "reject":
+        if response_event.event_type != "joint_declined":
+            raise ActivityProposalRuntimeError("proposal_response_event_invalid")
+        proposal.status = "rejected"
+        proposal.rejected_at = current
+        db.flush()
+        return ProposalResponseResult(proposal, None, None)
+    if decision != "counter":
+        raise ActivityProposalRuntimeError("proposal_decision_invalid")
+    if response_event.event_type != "joint_proposed":
+        raise ActivityProposalRuntimeError("proposal_response_event_invalid")
+    if proposal.proposal_version > COUNTER_LIMIT:
+        raise ActivityProposalRuntimeError("proposal_counter_limit")
+    if not counter_activity_seed or counter_target_daypart not in joint_activity_runtime.DAYPARTS:
+        raise ActivityProposalRuntimeError("proposal_counter_invalid")
+    if counter_date_policy not in {"exact", "earliest_available"}:
+        raise ActivityProposalRuntimeError("proposal_counter_invalid")
+    if counter_date_policy == "exact" and counter_target_date is None:
+        raise ActivityProposalRuntimeError("proposal_exact_date_required")
+    proposer, target = references.validate_pair(
+        world_id=proposal.world_id,
+        first_world_character_id=proposal.target_world_character_id,
+        second_world_character_id=proposal.proposer_world_character_id,
+    )
+    references.validate_place(
+        world_id=proposal.world_id,
+        place_key=counter_place_key,
+        target_daypart=str(counter_target_daypart),
+        participant_role_keys=(proposer.role_key, target.role_key),
+    )
+    proposal.status = "countered"
+    proposal.countered_at = current
+    child = models.ActivityProposal(
+        id=uuid7_string(),
+        world_id=proposal.world_id,
+        root_proposal_id=proposal.root_proposal_id,
+        parent_proposal_id=proposal.id,
+        proposal_version=proposal.proposal_version + 1,
+        proposer_world_character_id=proposal.target_world_character_id,
+        target_world_character_id=proposal.proposer_world_character_id,
+        activity_seed=counter_activity_seed,
+        place_key=counter_place_key,
+        target_daypart=str(counter_target_daypart),
+        date_policy=str(counter_date_policy),
+        target_date=counter_target_date,
+        proposed_local_snapshot={
+            "timezone": references.get_world(proposal.world_id).timezone,
+            "target_daypart": counter_target_daypart,
+            "target_date": (
+                counter_target_date.isoformat()
+                if counter_target_date is not None
+                else None
+            ),
+        },
+        status="proposed",
+        source_proposal_event_id=response_event.id,
+        idempotency_key=sha256(
+            f"proposal-counter|{proposal.id}|{response_event.id}".encode("utf-8")
+        ).hexdigest(),
+        expires_at=current + PROPOSAL_TTL,
+        version=1,
+    )
+    db.add(child)
+    db.flush()
+    return ProposalResponseResult(proposal, child, None)

@@ -9,7 +9,7 @@ from app.core.db import Base
 from app.domains.routines.service.joint_activity import execution
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 from routines.test_daily_activity_runtime import _utc
-from test_activity_proposal_runtime import _post, _ready_joint_fixture, _record_post_event
+from relationships.test_activity_proposals import _post, _ready_joint_fixture, _record_post_event
 
 
 @pytest.mark.parametrize("outcome", ["commit", "rollback"])

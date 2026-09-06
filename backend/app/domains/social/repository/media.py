@@ -191,96 +191,11 @@ def count_active_post_image_jobs_for_character_between(
         or 0
     )
 
-def claim_next_post_image_generation_job(
-    db: Session,
-) -> models.PostImageGenerationJob | None:
-    statement = (
-        select(models.PostImageGenerationJob)
-        .where(models.PostImageGenerationJob.status == "queued")
-        .order_by(models.PostImageGenerationJob.created_at.asc())
-        .limit(1)
-    )
-    if db.bind is not None and db.bind.dialect.name == "postgresql":
-        statement = statement.with_for_update(skip_locked=True)
-    job = db.scalar(statement)
-    if job is None:
-        return None
-    now = datetime.now(timezone.utc)
-    job.status = "processing"
-    job.started_at = now
-    job.updated_at = now
-    job.attempt_count = (job.attempt_count or 0) + 1
-    reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-    if reservation is not None and reservation.status == "queued":
-        update_post_image_quota_reservation(db, reservation, status="processing", job_id=job.id)
-    db.commit()
-    db.refresh(job)
-    return job
 
-def mark_stale_post_image_generation_jobs_failed(
-    db: Session,
-    *,
-    stale_before: datetime,
-) -> int:
-    rows = list(
-        db.scalars(
-            select(models.PostImageGenerationJob)
-            .where(models.PostImageGenerationJob.status == "processing")
-            .where(models.PostImageGenerationJob.started_at < stale_before)
-        )
-    )
-    now = datetime.now(timezone.utc)
-    for job in rows:
-        job.status = "failed"
-        job.failure_class = "stale_processing"
-        job.finished_at = now
-        job.updated_at = now
-        reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-        if reservation is not None:
-            update_post_image_quota_reservation(db, reservation, status="failed", job_id=job.id)
-    if rows:
-        db.commit()
-    return len(rows)
 
-def finish_post_image_generation_job(
-    db: Session,
-    job: models.PostImageGenerationJob,
-    *,
-    status: str,
-    prompt_hash: str | None = None,
-    reference_source: str | None = None,
-    skip_reason: str | None = None,
-    failure_class: str | None = None,
-    media_url: str | None = None,
-    byte_size: int | None = None,
-) -> models.PostImageGenerationJob:
-    job.status = status
-    job.prompt_hash = prompt_hash or job.prompt_hash
-    job.reference_source = reference_source or job.reference_source
-    job.skip_reason = skip_reason
-    job.failure_class = failure_class
-    job.media_url = media_url
-    job.byte_size = byte_size
-    job.finished_at = datetime.now(timezone.utc)
-    reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-    if reservation is not None:
-        reservation_status = (
-            "attached"
-            if status == "attached"
-            else "released"
-            if status == "skipped"
-            else "failed"
-        )
-        update_post_image_quota_reservation(
-            db,
-            reservation,
-            status=reservation_status,
-            post_id=job.post_id,
-            job_id=job.id,
-        )
-    db.commit()
-    db.refresh(job)
-    return job
+
+
+
 
 def count_post_media_for_character_between(
     db: Session,

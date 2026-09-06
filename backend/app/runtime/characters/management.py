@@ -173,14 +173,18 @@ from app.credentials import (
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
-from app.services import community as community_service
+from app.domains.social import exceptions as social_errors
+from app.runtime.social.timeline import timeline_service
+from app.domains.social.service import activity_results as social_activity_results
+from app.domains.social.service import posts as social_posts
 from app.runtime.resident import execution as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 from app.core import prompt_safety
 from app.domains.characters.service import media_storage as profile_media
 from app.integrations.media import files as media_files
@@ -1397,7 +1401,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         credential_required_error=CredentialRequiredError,
         credential_sync_error=CredentialSyncError,
         slot_busy_error=ActiveSlotBusyError,
-        social_character_not_found_error=community_service.CharacterNotFoundError,
+        social_character_not_found_error=social_errors.CharacterNotFoundError,
     )
 
 
@@ -1484,12 +1488,12 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         _run_first_greeting_writer=_run_first_greeting_writer,
         post_input=schemas.PostCreate,
         build_response=schemas.AgentFirstGreetingRead,
-        create_post=community_service.create_post,
-        build_post_created_activity_result=community_service.build_post_created_activity_result,
+        create_post=timeline_service.create_post,
+        build_post_created_activity_result=social_activity_results.build_post_created_activity_result,
         attach_image=_attach_first_greeting_image,
-        get_post=community_service.get_post,
+        get_post=social_posts.get_post,
         deferred_error=DirectLlmDeferred,
-        social_service_error=community_service.CommunityServiceError,
+        social_service_error=social_errors.CommunityServiceError,
     )
 
 

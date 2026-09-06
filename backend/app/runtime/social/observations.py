@@ -13,12 +13,9 @@ from sqlalchemy.orm import Session
 from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialObservationUnitOfWork,
 )
-from app.domains.social.public import (
-    ObservationLane,
-    SocialObservationCommand,
-    SocialObservationResult,
-    observe_social_source,
-)
+from app.domains.social.contracts.observations import ObservationLane
+from app.domains.social.contracts.observations import SocialObservationCommand
+from app.domains.social.contracts.observations import SocialObservationResult
 
 
 def observe_source(
@@ -31,8 +28,7 @@ def observe_source(
     lane: ObservationLane,
     observed_at: datetime,
 ) -> SocialObservationResult:
-    return observe_social_source(
-        SqlAlchemySocialObservationUnitOfWork(db),
+    return SqlAlchemySocialObservationUnitOfWork(db).observe(
         SocialObservationCommand(
             world_id=world_id,
             observer_world_character_id=observer_world_character_id,

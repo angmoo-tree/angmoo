@@ -12,11 +12,11 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.config import Settings, settings
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
+from app.domains.relationships.repository import projection_state as graph_projection_crud
 from app.domains.relationships import public as relationships
-from app.domains.relationships.graph_read import schemas
-from app.domains.relationships.graph_read.errors import GraphReadBackendError
-from app.domains.relationships.graph_read.repository import (
+from app.domains.relationships import (schemas)
+from app.domains.relationships.exceptions import (GraphReadBackendError)
+from app.domains.relationships.contracts.graph_query import (
     EvidencePostFacts,
     GraphEvidenceCandidate,
     GraphEvidenceHit,
@@ -28,11 +28,9 @@ from app.domains.relationships.graph_read.repository import (
     RelationshipGraphQueryPort,
     RelationshipRevalidationFacts,
 )
-from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
+from app.domains.relationships.contracts.graph_read import (GraphProjectionCounts)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
-from app.domains.relationships.ports.projection import (
-    RelationshipProjectionBackendError,
-)
+from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.graph_projection.metrics import graph_metrics
 from app.runtime.graph_projection.process_client import (

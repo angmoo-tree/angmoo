@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.social import feed_history as resident_feed_history
+
 import asyncio
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -508,7 +510,7 @@ def build_lore_search_query(
     now: datetime | None = None,
 ) -> str:
     current_time = now or datetime.now(UTC)
-    recent_topics = community_service.format_recent_own_root_topic_history_for_prompt(
+    recent_topics = resident_feed_history.format_recent_own_root_topic_history_for_prompt(
         db, character_id=character.id
     )
     recent_lore = _format_recent_lore_usage(db, character_id=character.id)

@@ -403,7 +403,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_failure(monkeypatch):
 
 def test_self_update_query_excludes_feed_scan_context(monkeypatch):
     monkeypatch.setattr(
-        character_lore.community_service,
+        character_lore.resident_feed_history,
         "format_recent_own_root_topic_history_for_prompt",
         lambda *args, **kwargs: "최근 자기 root topic",
     )

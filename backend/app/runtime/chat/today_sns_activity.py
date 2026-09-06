@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
 from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
 from app.domains.chat.ports.today_sns_activity import TodaySnsSnapshotChangedError
-from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 
 
 class SqlAlchemyTodaySnsSnapshotValidator:

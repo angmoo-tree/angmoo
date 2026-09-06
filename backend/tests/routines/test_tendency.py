@@ -1,3 +1,22 @@
+from app.domains.routines.repository import runs as routine_run_queries
+from app.domains.social import exceptions as social_exceptions
+from app.domains.routines import constants as social_constants
+from app.runtime.social.agent_tool_reads import agent_tool_reads
+from app.domains.social.service import activity_results as social_activity_results
+from app.runtime.social.agent_tools import agent_tool_actions
+from app.runtime.social import feed_history as social_feed_history
+from app.runtime.social import feed_history_notes as social_feed_history_notes
+from app.runtime.social import topic_metadata as social_topic_metadata
+from app.domains.routines.service import feed_history_notes as note_service
+from app.runtime.social import feed_history_notes as note_runtime
+from app.domains.social.service import agent_tool_reads as tool_read_service
+from app.domains.social.service import agent_tool_actions as tool_action_service
+from app.runtime.social import agent_tools as tool_action_runtime
+from app.runtime.social import feed_history as history_runtime
+
+from app.domains.routines.service import feed_history as history_policy
+from app.domains.social.service import topic_metadata as topic_policy
+from app.domains.social.repository import posts as post_repository
 import asyncio
 import json
 import inspect
@@ -605,7 +624,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         )
 
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "list_recent_feed_interest_logs",
         lambda *args, **kwargs: [
             log("post-1", 1),
@@ -632,12 +651,12 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         "post-6": post("post-6"),
     }
     monkeypatch.setattr(
-        community_service.community_crud,
+        post_repository,
         "get_post",
         lambda _db, post_id: posts.get(post_id),
     )
 
-    result = community_service.format_recent_feed_interest_history_for_prompt(
+    result = social_feed_history.format_recent_feed_interest_history_for_prompt(
         None, character_id="char-1"
     )
 
@@ -659,7 +678,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
 
 def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "큰 주제: 반복되는 응원 루프",
@@ -667,7 +686,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
         },
     )
     monkeypatch.setattr(
-        community_service,
+        tool_read_service,
         "_post_author_identity",
         lambda *args, **kwargs: {
             "name": "source author",
@@ -683,7 +702,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
         body="x" * 350,
     )
 
-    card = community_service._agent_feed_post_summary(None, post)
+    card = agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.post_id == "post-1"
     assert card.author == "source author"
@@ -695,7 +714,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
 
 def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log topic should not win",
@@ -703,7 +722,7 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
         },
     )
     monkeypatch.setattr(
-        community_service,
+        tool_read_service,
         "_post_author_identity",
         lambda *args, **kwargs: {
             "name": "source author",
@@ -721,14 +740,14 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
         novelty_basis="column novelty",
     )
 
-    card = community_service._agent_feed_post_summary(None, post)
+    card = agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.topic_signature == "column topic wins"
 
 
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log fallback topic",
@@ -745,7 +764,7 @@ def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     )
 
     assert (
-        community_service.post_topic_signature_for_prompt(None, post)
+        social_topic_metadata.post_topic_signature_for_prompt(None, post)
         == "log fallback topic"
     )
 
@@ -758,22 +777,22 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
@@ -782,9 +801,9 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -811,29 +830,29 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
 
 def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: SimpleNamespace(id="post-1"),
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "recent_own_root_topic_exists",
         lambda *args, **kwargs: False,
     )
@@ -843,9 +862,9 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -871,7 +890,7 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
 
 def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -883,9 +902,9 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -909,7 +928,7 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
 
 def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -922,12 +941,12 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
         post_type="post",
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
@@ -937,9 +956,9 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -965,7 +984,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -977,9 +996,9 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
         None,
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(
@@ -1007,8 +1026,8 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
     payload = json.loads(result.result)
     stored_payload = json.loads(str(captured["result"]))
-    assert result.action_type == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE
-    assert captured["action_type"] == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE
+    assert result.action_type == social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE
+    assert captured["action_type"] == social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE
     assert "냐하하" not in result.result
     assert payload["consumed_sources"][0]["seed_semantic_summary"] == (
         "copied lunch strategy voice"
@@ -1022,18 +1041,18 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
 
 def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypatch):
-    style_marker = community_service.FEED_HISTORY_STYLE_MARKER_RE.pattern[
+    style_marker = social_constants.FEED_HISTORY_STYLE_MARKER_RE.pattern[
         1:
     ].split("|")[0]
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [
@@ -1050,12 +1069,12 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(
@@ -1087,14 +1106,14 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
     monkeypatch,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [
@@ -1111,12 +1130,12 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(),
@@ -1136,14 +1155,14 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
     caplog,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [],
@@ -1152,13 +1171,13 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
     with caplog.at_level("INFO", logger=community_service.logger.name):
-        community_service.note_agent_tool_feed_history_sanitize(
+        social_feed_history_notes.note_agent_tool_feed_history_sanitize(
             SimpleNamespace(),
             "session-secret-value",
             schemas.AgentFeedHistorySanitizeCreate(
@@ -1190,13 +1209,13 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     caplog,
 ):
     def reject(*args, **kwargs):
-        raise community_service.AgentRunAuthorizationError("no session")
+        raise social_exceptions.AgentRunAuthorizationError("no session")
 
-    monkeypatch.setattr(community_service, "_get_agent_tool_run", reject)
+    monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
     with caplog.at_level("WARNING", logger=community_service.logger.name):
-        with pytest.raises(community_service.AgentRunAuthorizationError):
-            community_service.note_agent_tool_feed_history_sanitize(
+        with pytest.raises(social_exceptions.AgentRunAuthorizationError):
+            social_feed_history_notes.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
                 "session-secret-value",
                 schemas.AgentFeedHistorySanitizeCreate(),
@@ -1212,7 +1231,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
 def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     now = datetime(2026, 6, 6, 12, 0, tzinfo=UTC)
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "list_recent_feed_seed_consumed_logs",
         lambda *args, **kwargs: [
             SimpleNamespace(
@@ -1231,22 +1250,22 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
         ],
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        post_repository,
         "get_post",
         lambda *args, **kwargs: SimpleNamespace(title="source lunch title"),
     )
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "_format_recent_feed_interests_metadata_only",
         lambda *args, **kwargs: "- none",
     )
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "_format_recent_own_roots_metadata_only",
         lambda *args, **kwargs: "- none",
     )
 
-    sections = community_service.format_feed_history_metadata_fallback_for_prompt(
+    sections = social_feed_history.format_feed_history_metadata_fallback_for_prompt(
         None, character_id="char-1"
     )
 
@@ -1263,7 +1282,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     monkeypatch,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1276,22 +1295,22 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
         post_type="post",
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "recent_own_root_topic_exists",
         lambda *args, **kwargs: True,
     )
@@ -1301,9 +1320,9 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1330,7 +1349,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
 
 
 def test_post_created_activity_result_stores_topic_metadata():
-    result = community_service.build_post_created_activity_result(
+    result = social_activity_results.build_post_created_activity_result(
         post_id="post-1",
         title="visible title",
         body="visible body",
@@ -1359,17 +1378,17 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.routine_run_queries,
+        routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_ensure_tick_action_allowed",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.agent_tool_actions.timeline,
         "create_post",
         lambda *args, **kwargs: SimpleNamespace(
             id="post-1",
@@ -1378,27 +1397,27 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_store_post_topic_metadata",
         lambda *args, **kwargs: stored.update(kwargs),
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.activity_logs,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.feed_history,
         "maybe_log_feed_seed_consumed_for_created_post",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.feed_cues,
+        tool_action_runtime.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: None,
     )
 
-    community_service.create_agent_tool_post(
+    agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
         schemas.PostCreate(
@@ -1426,17 +1445,17 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.routine_run_queries,
+        routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_ensure_tick_action_allowed",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.agent_tool_actions.timeline,
         "create_post",
         lambda *args, **kwargs: SimpleNamespace(
             id="post-1",
@@ -1445,27 +1464,27 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_store_post_topic_metadata",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.activity_logs,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.feed_history,
         "maybe_log_feed_seed_consumed_for_created_post",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.feed_cue_queries,
+        tool_action_runtime.feed_cue_queries,
         "get_pending_feed_cue",
         lambda *args, **kwargs: SimpleNamespace(id=77),
     )
     monkeypatch.setattr(
-        community_service.feed_cues,
+        tool_action_runtime.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: consumed.append(kwargs),
     )
@@ -1475,8 +1494,8 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         body="body",
         author_character_id="char-1",
     )
-    community_service.create_agent_tool_post(FakeDb(), "session-1", post_data)
-    community_service.create_agent_tool_post(
+    agent_tool_actions.create_agent_tool_post(FakeDb(), "session-1", post_data)
+    agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
         post_data,
@@ -1510,12 +1529,12 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
             return post
 
     monkeypatch.setattr(
-        community_service,
+        history_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log topic should not be needed",
@@ -1523,7 +1542,7 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
         },
     )
 
-    assert community_service.recent_own_root_topic_exists(
+    assert social_feed_history.recent_own_root_topic_exists(
         FakeDb(),
         character_id="char-1",
         topic_signature="이미 쓴 큰 주제",

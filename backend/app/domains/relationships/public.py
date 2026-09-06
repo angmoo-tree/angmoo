@@ -1,30 +1,34 @@
 """Stable public API for the relationships domain."""
 
-from app.domains.relationships.domain import (
+from app.domains.relationships.contracts.graph_plan import (
     GRAPH_PLAN_VERSION,
     MAX_GRAPH_PLAN_STEPS,
     GraphPlanContractError,
     GraphPlanStep,
     GraphRetrievalPlan,
+)
+from app.domains.relationships.policies.graph_plan_schema import (
     graph_retrieval_plan_response_schema,
     parse_graph_retrieval_plan_payload,
 )
-from app.domains.relationships.application import (
+from app.domains.relationships.contracts.graph_execution import (
     GraphPlanExecutionContext,
     GraphPlanExecutionResult,
     GraphPlanStepExecution,
     GraphPlanValidationResult,
+)
+from app.domains.relationships.service.graph_planning import (
     GraphRetrievalPlanExecutor,
     GraphRetrievalPlanValidator,
 )
 
-from app.domains.relationships.graph_read.errors import (
+from app.domains.relationships.exceptions import (
     RelationshipGraphForbiddenError,
     RelationshipGraphNotFoundError,
     RelationshipGraphReadError,
     RelationshipGraphRequestError,
 )
-from app.domains.relationships.graph_read.schemas import (
+from app.domains.relationships.schemas import (
     GraphStatus,
     RelationshipGraphEdgeRead,
     RelationshipGraphEvidenceRead,
@@ -32,38 +36,42 @@ from app.domains.relationships.graph_read.schemas import (
     RelationshipGraphQueryMetaRead,
     RelationshipGraphRead,
 )
-from app.domains.relationships.graph_read.use_case import (
+from app.domains.relationships.contracts.graph_read import (
     GraphProjectionCounts,
     GraphProvider,
     GraphView,
     RelationshipGraphReadGateway,
-    get_owner_relationship_graph,
 )
-from app.domains.relationships.graph_recall import (
+from app.domains.relationships.service.graph_read import (get_owner_relationship_graph)
+from app.domains.relationships.contracts.graph_recall import (
     GRAPH_RECALL_CONTRACT_VERSION,
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
     MAX_GRAPH_RECALL_EDGES,
     MAX_GRAPH_RECALL_EVIDENCE,
     MAX_GRAPH_RECALL_HOPS,
     MAX_GRAPH_RECALL_RESULTS,
     GraphRecallDirection,
     GraphRecallEvidence,
-    GraphRecallGateway,
     GraphRecallOperation,
     GraphRecallPath,
-    GraphRecallPrimitiveSpec,
     GraphRecallQuery,
     GraphRecallRanking,
     GraphRecallRelationship,
     GraphRecallResult,
     GraphRecallScope,
     GraphRecallScopeAccess,
-    GraphRecallService,
     GraphRecallSource,
     GraphRecallStatus,
+)
+from app.domains.relationships.contracts.graph_recall_gateway import (
+    GRAPH_RECALL_PRIMITIVE_REGISTRY,
+    GraphRecallGateway,
+    GraphRecallPrimitiveSpec,
+)
+from app.domains.relationships.service.graph_recall import (
+    GraphRecallService,
     GraphRecallValidator,
 )
-from app.domains.relationships.ports import (
+from app.domains.relationships.contracts.graph_planner import (
     MAX_GRAPH_PLANNER_MESSAGE_CHARACTERS,
     GraphPlannerEntity,
     GraphPlannerOutputError,
@@ -71,22 +79,24 @@ from app.domains.relationships.ports import (
     GraphPlannerProviderResult,
     GraphPlannerRelationship,
     GraphPlannerRequest,
+)
+from app.domains.relationships.contracts.outbox import (
     OutboxFinalizeStatus,
     OutboxPort,
     ProjectionWorkItem,
-    ProjectionReplaySource,
-    RelationshipProjectionPort,
-    RelationshipQueryPort,
 )
-from app.domains.relationships.projection import (
+from app.domains.relationships.contracts.replay import (ProjectionReplaySource)
+from app.domains.relationships.contracts.projection import (RelationshipProjectionPort)
+from app.domains.relationships.contracts.query import (RelationshipQueryPort)
+from app.domains.relationships.contracts.projection_commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
     ProjectionCommandError,
     RelationshipStateProjectionCommand,
     SocialEventProjectionCommand,
     SourceExclusionProjectionCommand,
-    projection_digest,
 )
+from app.domains.relationships.utils.projection_digest import (projection_digest)
 
 
 __all__ = [

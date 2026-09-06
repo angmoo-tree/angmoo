@@ -1,3 +1,4 @@
+from app.runtime.social import agent_tool_state as social_state
 from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta
 import logging
@@ -16,7 +17,7 @@ from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot_quota
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
 
 
 POST_COOLDOWN = timedelta(minutes=30)
@@ -121,7 +122,7 @@ def save_state(
     )
     try:
         with unit_of_work.deferred_commits():
-            state = community_service.save_character_state(
+            state = social_state.save_character_state(
                 db,
                 context.character.id,
                 schemas.CharacterStateWrite(

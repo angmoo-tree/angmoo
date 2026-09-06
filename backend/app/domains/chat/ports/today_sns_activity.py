@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.social.public import TodaySocialActivityRead
+from app.domains.social.contracts.today_activity import TodaySocialActivityRead
 from app.domains.chat.domain.today_sns_activity import TodaySnsActivitySnapshot
 
 

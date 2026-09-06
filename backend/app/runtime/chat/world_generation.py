@@ -62,7 +62,7 @@ from app.domains.memory.public import (
     MemoryScope,
     MemorySourceTypeV1,
 )
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+from app.domains.relationships.models.social import (
     RelationshipState,
 )
 from app.domains.relationships.public import (
@@ -85,9 +85,7 @@ from app.runtime.memory.sqlalchemy_source_reader import (
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 
 

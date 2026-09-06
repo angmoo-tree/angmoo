@@ -17,7 +17,8 @@ from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.social.schemas.manual import ManualSocialPostRead
-from app.api.v1.routes.manual_social import router as manual_social_router
+from app.runtime.social.composition import configure_social_runtime
+from app.domains.social.router import manual_router as manual_social_router
 from app.domains.world_characters.router.profile import router as owner_identity_router
 from app.runtime.social.sqlalchemy_read_repository import list_owner_world_feed
 from app.services import world_character_contracts
@@ -55,6 +56,7 @@ def _fixture():
     Base.metadata.create_all(engine)
     principal: dict[str, models.User | None] = {"user": None}
     app = FastAPI()
+    configure_social_runtime(app)
     app.include_router(owner_identity_router, prefix="/api/v1")
     app.include_router(manual_social_router, prefix="/api/v1")
 

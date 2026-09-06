@@ -254,20 +254,19 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
 
         return invoke
 
-    community = writing.community_service
-    monkeypatch.setattr(community, "_session_fingerprint", lambda _: "redacted")
-    monkeypatch.setattr(community, "_get_agent_tool_run", step("run", run))
+    monkeypatch.setattr(writing.social_agent_tool_authorization, "_session_fingerprint", lambda _: "redacted")
+    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_get_agent_tool_run", step("run", run))
     monkeypatch.setattr(
-        community, "_agent_tool_character_id", lambda *args, **kwargs: "character"
+        writing.social_agent_tool_authorization, "_agent_tool_character_id", lambda *args, **kwargs: "character"
     )
-    monkeypatch.setattr(community, "_agent_tool_user", step("user"))
-    monkeypatch.setattr(community, "_ensure_tick_action_allowed", step("gate"))
+    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_agent_tool_user", step("user"))
+    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_ensure_tick_action_allowed", step("gate"))
     monkeypatch.setattr(
         writing.community_crud,
         "get_post",
         step("target", SimpleNamespace(author_character_id="other")),
     )
-    monkeypatch.setattr(community, "_ensure_agent_can_reply_to_thread", step("thread"))
+    monkeypatch.setattr(writing.social_resident_affordances, "_ensure_agent_can_reply_to_thread", step("thread"))
     monkeypatch.setattr(
         writing,
         "_compose_writing_from_brief",
@@ -280,8 +279,8 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
             ),
         ),
     )
-    monkeypatch.setattr(community, "create_agent_tool_post", step("social", post))
-    monkeypatch.setattr(community, "reply_agent_tool_post", step("social", post))
+    monkeypatch.setattr(writing.agent_tool_actions, "create_agent_tool_post", step("social", post))
+    monkeypatch.setattr(writing.agent_tool_actions, "reply_agent_tool_post", step("social", post))
     monkeypatch.setattr(
         writing.character_lore_service, "mark_lore_chunks_used", step("lore")
     )
