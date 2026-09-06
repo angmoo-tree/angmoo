@@ -9732,6 +9732,20 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "33f213b4217cd8511908586d9fd5f66f3a3104b0",
+      "feature_id": "K14",
+      "reason": "AR-F4-A Chat models and legacy-route extraction with required same-screen Memory renderers and original stream/state behavior",
+      "tracked_files": {
+        "frontend/src/composition/screens/world-chat-screen.tsx": "c0a3e32305b2e57ccfd94987ccf41157acc66c4d",
+        "frontend/src/features/chat/config/models.ts": "54c031acc3d5fc3f7e63736b2f5b58659231d431",
+        "frontend/src/features/chat/types/view-slots.ts": "d4ffa8a196b2bc218c7c75f245d1d26083e0ad73",
+        "frontend/src/features/chat/utils/legacy-world-route.ts": "74d0a22da1fbd416f6520c25d99af22a45684978"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
