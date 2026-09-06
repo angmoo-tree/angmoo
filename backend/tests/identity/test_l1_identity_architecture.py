@@ -1,4 +1,6 @@
 from __future__ import annotations
+from compatibility_retirement_support import historical_imports
+
 
 import json
 from pathlib import Path
@@ -35,33 +37,22 @@ def _legacy_edges() -> set[tuple[str, str]]:
 
 def test_identity_domain_is_the_canonical_aggregate_source() -> None:
     imports = _module_imports()
-
-    assert "app.domains.identity.models" in imports["app.runtime.persistence.model_registration"]
-    assert "app.models.auth" not in imports["app.runtime.persistence.model_registration"]
-    assert "app.models.credentials" not in imports["app.runtime.persistence.model_registration"]
-    assert "app.domains.identity.schemas" in imports["app.schemas"]
-    assert "app.schemas.auth" not in imports["app.schemas"]
-    assert imports["app.credentials"] >= {
-        "app.domains.identity.service.credential_resolution",
-        "app.domains.identity.contracts",
-    }
+    assert 'app.domains.identity.models' in imports['app.runtime.persistence.model_registration']
+    assert 'app.models.auth' not in imports['app.runtime.persistence.model_registration']
+    assert 'app.models.credentials' not in imports['app.runtime.persistence.model_registration']
+    assert 'app.schemas' not in imports and 'app.domains.identity.schemas' in historical_imports('app.schemas')
+    assert 'app.schemas.auth' not in imports and 'app.schemas.auth' not in historical_imports('app.schemas')
+    assert imports['app.credentials'] >= {'app.domains.identity.service.credential_resolution', 'app.domains.identity.contracts'}
 
 
 def test_identity_compatibility_facades_only_point_inward() -> None:
     imports = _module_imports()
-
-    assert "app.models.auth" not in imports
-    assert "app.models.credentials" not in imports
-    assert imports["app.schemas.auth"] == {"app.domains.identity.schemas"}
-    assert imports["app.credentials.contracts"] == {
-        "app.domains.identity.contracts"
-    }
-    assert imports["app.credentials.resolver"] == {
-        "app.domains.identity.service.credential_resolution"
-    }
-    assert "app.credentials.contracts" not in imports[
-        "app.domains.identity.service.credential_resolution"
-    ]
+    assert 'app.models.auth' not in imports
+    assert 'app.models.credentials' not in imports
+    assert 'app.schemas.auth' not in imports and historical_imports('app.schemas.auth') == {'app.domains.identity.schemas'}
+    assert imports['app.credentials.contracts'] == {'app.domains.identity.contracts'}
+    assert imports['app.credentials.resolver'] == {'app.domains.identity.service.credential_resolution'}
+    assert 'app.credentials.contracts' not in imports['app.domains.identity.service.credential_resolution']
 
 
 def test_removed_identity_legacy_edges_are_not_allowlisted() -> None:

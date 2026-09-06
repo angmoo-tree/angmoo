@@ -2741,3 +2741,11 @@ Memory selection의 자격 증명 호출을 기존 `message_composition.settings
 RoutinePost가 이미 만들어진 입력에서 읽는 필드는 기존 PlanningContext의 5개와 session_key다. 이 구조를 RoutineResidentContext로 명시해, 옛 bridge가 가렸던 Resident → RoutinePost → Resident 참조 순환을 제거했다. runtime dataclass와 실제 attached 객체·Session은 바뀌지 않고 생성·복사·새 전달 서비스가 없다.
 
 검증: **124 passed / 19 existing skipped / 2 warnings / 43.98s**. 원래 workflow 11개는 정확한 receiver 2개와 annotation 1개를 대응시키면 전체 AST가 같으며, 원래 등록 호출 AST도 같다. 기존 Chat test support 속성38개는 실제 객체 또는 bound method의 self/function이 같고 Memory는 동일 설정서비스 인스턴스를 호출한다. 경계는 **1090 modules / 4072 edges / 5 exact legacy edges / cycle0**이다. 원래 보존 검사7종 읽기 진단은 오류0(protected2313/current2564)이며 signed869 최초2경로와 signed49c0f1f4 최초2test의 원본증거만 임시로 읽었다. 원장·동결 자료·원래 checker는 수정하지 않았고 parent 순차capture 및 stock/Hosted 검증은 아직 별도다. 현재 L4 1090/14/99와 Memory batch inventory도 연결했다.
+
+## AR-B8 — 순수 스키마·서비스·public 집합의 최종 종료
+
+제품 소비자를 실제 역할로 연결한 뒤 남은 import-only 16파일을 제거했다. 이미 제거된 Daily Plan 파일의 원래 구조 검사까지 17개 signed Git 입력으로 보호한다. 모든 802 binding(원래 future binding 3 포함), public5의 165 binding과 실제 정의를 재귀적으로 대조하며 과거 Python을 실행하거나 가짜 module을 만들지 않는다. 원래 Literal5와 실제 class/function, Chat bound method의 receiver/function은 유지한다.
+
+원래 호환·구조 검사22개는 전체 함수 AST를 signed 원문과 비교하고 정확한 import/identity 경로만 승계한다. 업무 assert·with raises·fixture·provider monkeypatch·동일 Session 동작은 유지한다. 기존 split의 임시 alias 소비582개를 실제 현재 소비자로 정리하고 stale bridge75개를 제거했으며 신규 경계 예외0이다. baseline/checkpoint/additions와 동결자료는 변경하지 않았다.
+
+검증은 영향 **194 PASS / 4 warnings / 43.34초**, 마지막 class/decorator/default 실행 guard 보강 뒤 엄격 음성·원문함수검사 **53 PASS / 20.13초**다. 실제 옛 경로 소비0, 경계 **1074 modules / 3986 edges / 기존 legacy5 PASS**. 원본 전체 source/split/assertion/suppression 진단은0이며 PR258/263 API/schema/ORM도PASS다. 최초 신규 검사 가정 및 current inventory와 원래 __all__ 문장 형태를 정정한 이력은 [호환 종료 기록](ar-b8-compatibility-retirement.md)에 남긴다. 새 회귀 node53개 최초 도입과 source capture, stock/전체/Hosted/설치 및 post-merge 검증은 부모 선형 통합의 별도 Gate다.

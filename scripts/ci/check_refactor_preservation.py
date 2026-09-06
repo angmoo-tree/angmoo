@@ -24,6 +24,12 @@ _retirement_spec = importlib.util.spec_from_file_location(
 public_factory_retirement = importlib.util.module_from_spec(_retirement_spec)
 _retirement_spec.loader.exec_module(public_factory_retirement)
 
+_compatibility_spec = importlib.util.spec_from_file_location(
+    "compatibility_facade_retirement", Path(__file__).with_name("compatibility_facade_retirement.py")
+)
+compatibility_facade_retirement = importlib.util.module_from_spec(_compatibility_spec)
+_compatibility_spec.loader.exec_module(compatibility_facade_retirement)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
 INVENTORY = ROOT / "security/refactor_feature_inventory.json"
@@ -617,7 +623,8 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                      symbols: dict[str, str] | None = None,
                      asgi_moves: dict[str, str] | None = None,
                      model_retirements: dict[str, str] | None = None,
-                     public_retirement: dict | None = None) -> list[str]:
+                     public_retirement: dict | None = None,
+                     compatibility_retirement: dict | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
     root_cache, frozen_root_cache, frozen_text_cache = {}, {}, {}
     literals = path_literals(files)
@@ -673,6 +680,13 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                     raise ValueError("public factory retirement requires its protected exact test location")
                 expected = public_factory_retirement.required_fragments(
                     expected, frozen_text_cache[(old_path, blob)], old_function, public_retirement
+                )
+            if compatibility_retirement is not None and ("backend/" + new_path, new_function) in compatibility_retirement["tests"]:
+                if old_function != new_function or not blob:
+                    raise ValueError("compatibility retirement requires its protected original test function")
+                expected = compatibility_facade_retirement.required_fragments(
+                    expected, frozen_text_cache[(old_path, blob)], old_function,
+                    "backend/" + new_path, compatibility_retirement
                 )
             required = Counter(normalized_assertion(retired_model_assertion(value, model_retirements or {}, literals), literals, asgi_moves, roots=old_roots) for value in expected)
             # An unchanged synthetic legacy-path fixture and a migrated real
@@ -948,6 +962,10 @@ def main() -> int:
         public_retirement = public_factory_retirement.validate(
             moves.get("retired_public_main", False), file_targets, [baseline, *snapshots], ROOT, git_bytes
         )
+        compatibility_retirement = compatibility_facade_retirement.validate(
+            moves.get("retired_compatibility_facades", False), file_targets,
+            [baseline, *snapshots], ROOT, git_bytes
+        )
         asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
                                         public_retirement=public_retirement)
         errors.extend(check_sources(sources, moves["files"]))
@@ -961,7 +979,8 @@ def main() -> int:
             moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots])
         errors.extend(check_assertions(snapshots, targets, file_targets,
                                       symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
-                                      model_retirements=model_retirements, public_retirement=public_retirement))
+                                      model_retirements=model_retirements, public_retirement=public_retirement,
+                                      compatibility_retirement=compatibility_retirement))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))

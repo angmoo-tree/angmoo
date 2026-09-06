@@ -1,4 +1,6 @@
 """Creator HTTP retains error semantics while consuming neutral contracts."""
+from compatibility_retirement_support import export_matches
+
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
@@ -12,7 +14,6 @@ from app.domains.characters.service import drafts
 from app.domains.media import contracts as media_contracts
 from app.domains.runtime import exceptions as runtime_contracts
 from app.runtime.characters import management
-from app.services import profile_media
 import app.runtime.extensions.resident_adapter as runtime_boundary
 from app.domains.routines import exceptions as agent_runs
 
@@ -55,13 +56,13 @@ def test_error_exports_are_same_objects_and_keep_runtime_diagnostics():
     assert agent_runs.AgentRunServiceError is runtime_contracts.AgentRunServiceError
     assert agent_runs.AgentSlotUnavailableError is runtime_contracts.AgentSlotUnavailableError
     assert issubclass(agent_runs.AgentSlotUnavailableError, agent_runs.AgentRunServiceError)
-    assert profile_media.InvalidProfileMediaError is media_contracts.InvalidProfileMediaError
+    assert export_matches('app.services.profile_media', 'InvalidProfileMediaError', media_contracts.InvalidProfileMediaError)
     assert runtime_boundary.OpenClawGatewayError is runtime_contracts.ResidentRuntimeError
     assert runtime_boundary.OpenClawGatewayAuthError is runtime_contracts.ResidentRuntimeAuthError
-    diagnostics = {"engine": "fixture", "status": "unavailable"}
-    error = runtime_contracts.ResidentRuntimeError("not ready", diagnostics=diagnostics)
-    assert str(error) == "not ready"
+    diagnostics = {'engine': 'fixture', 'status': 'unavailable'}
+    error = runtime_contracts.ResidentRuntimeError('not ready', diagnostics=diagnostics)
+    assert str(error) == 'not ready'
     assert error.diagnostics is diagnostics
     expected = [route.name for route in mixed.router.routes]
-    assert expected.index("create_agent_draft") < expected.index("get_agent")
-    assert expected.index("complete_agent_draft") < expected.index("get_agent")
+    assert expected.index('create_agent_draft') < expected.index('get_agent')
+    assert expected.index('complete_agent_draft') < expected.index('get_agent')

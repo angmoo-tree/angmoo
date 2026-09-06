@@ -20,7 +20,8 @@ from app.domains.chat.public import (
     RouteAwareCallTracker,
     parse_retrieval_intent_payload,
 )
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
 from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 from app.domains.relationships.contracts.graph_plan import GraphPlanContractError
 from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionContext

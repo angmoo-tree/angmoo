@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 
 from model_fixture_support import models
 from app.models import Base
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
 from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
 from app.domains.memory.repository.transaction import SqlAlchemyMemoryMaintenanceUnitOfWork
 from app.runtime.memory.composition import (

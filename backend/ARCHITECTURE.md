@@ -583,7 +583,7 @@ WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `s
 WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.
 
 
-WorldCharacter의 활동 준비 상태는 `service/readiness.py`가 판단합니다. Character 상세 API에 들어가는 `AgentActivityProfileReadinessRead`는 `characters/schemas.py`에서 한 번만 정의하며 WC 준비 상태 서비스와 이전 `app.schemas.agents`가 같은 class를 사용합니다. Character 응답 조립이 WC 서비스를 역으로 import하지 않도록 사용하지 않는 Runtime alias와 WC 응답 파일은 제거했습니다. 준비 상태를 판단할 때 World 접근·profile hash·최신 ready repertoire·daypart별 후보 수의 기존 우선순위는 유지합니다.
+WorldCharacter의 활동 준비 상태는 `service/readiness.py`가 판단합니다. Character 상세 API에 들어가는 `AgentActivityProfileReadinessRead`는 `characters/schemas.py`에서 한 번만 정의하며 WC 준비 상태 서비스도 그 class를 직접 사용합니다. 이전 `app.schemas.agents` 집합은 소비자 전환과 객체 계약 검증 뒤 제거했습니다. Character 응답 조립이 WC 서비스를 역으로 import하지 않도록 사용하지 않는 Runtime alias와 WC 응답 파일은 제거했습니다. 준비 상태를 판단할 때 World 접근·profile hash·최신 ready repertoire·daypart별 후보 수의 기존 우선순위는 유지합니다.
 
 입장·퇴장 HTTP 4개와 설정 HTTP 6개는 WC router가 소유합니다. 피드 상태 HTTP는 현재 feed 소유 경로에 남고, 두 앱의 route 조립은 기존 feed→setup 순서를 유지합니다. World 접근 오류의 HTTP 변환은 공통 `app/api/world_errors.py`가 소유하므로 한 도메인의 router가 다른 router를 호출하지 않습니다. Scheduler/AgentRun/Slot과 setup의 퇴장 busy 조회는 runtime guard를 공통 HTTP 연결에서 주입합니다.
 
@@ -680,7 +680,7 @@ Today 인기 root Post의 SQL은 Social repository에 있고 공개 응답·반�
 
 댓글 조회는 Social repository, 활동 로그 조회/기존 visible filter는 `runtime/social/profile_activity.py`의 같은 Session 협력이다. 원래 댓글 20개 조회 → 공개 Character/state 구성 → 활동 로그 80개 조회와 visible/dedupe 20개 적용 순서를 유지한다. 이미 로드한 state의 ORM identity-map 사용이나 필요한 lazy read도 보존한다.
 
-기존 schema aggregate는 같은 class를 내보내는 임시 호환 경로이며 구현이 중복되지 않는다. ActivityLog와 visible filter의 실제 owner 이동은 AR-B4-C가 이 정확한 runtime 소비자까지 연결한다.
+응답 소비자는 실제 Social schema를 직접 사용하며 기존 schema aggregate는 제거했다. ActivityLog와 visible filter는 Routines의 실제 소유 함수를 runtime에서 같은 Session으로 연결한다.
 
 
 ### RoutinePost의 입력 형식과 이벤트 문맥
@@ -1212,7 +1212,7 @@ Relationships의 `public.py` 집합은 제거했습니다. Graph 읽기와 회�
 
 실제 구현을 소유한 모듈로 소비자를 연결한 뒤 `services/activity_state_contracts`, `daily_activity_plans`, `direct_llm`, `routine_post_runtime`, `world_character_contracts`, `agent_runs`와 `cruds/agents`의 남은 전달 경로를 제거했습니다. 활동·슬롯은 Routines, credential 조회·저장은 Identity, 이미지 정제·파일 처리는 해당 업무 및 integrations의 실제 모듈을 사용합니다. 테스트도 같은 구현을 직접 참조하며 기존 단언에 쓰인 지역 이름은 실제 모듈 import의 별칭으로 유지합니다.
 
-`services/messages`, `prompt_safety`, `world_character_provider`, `profile_media`는 과거 경로의 객체 동일성을 직접 검사하는 원본 테스트 때문에 아직 남아 있습니다. 이 검사는 다른 실제 owner를 가리키는지 확인해야 하므로 자기 자신과 비교하는 단언으로 바꾸지 않습니다. 새로운 제품 코드는 이 경로를 사용하지 않으며, 별도의 좁은 호환 종료 증명과 원본 기능 검증을 거쳐 제거합니다. Hosted 설정과 runtime adapter 등록의 실제 상태 저장소는 별도 전환 범위입니다.
+`services/messages`, `prompt_safety`, `world_character_provider`, `profile_media`와 Chat의 `runtime/chat/sqlalchemy_service` 집합은 제거했습니다. Chat은 `runtime.chat.message_composition`이 연결한 실제 서비스 인스턴스, prompt 안전성은 `core`, WorldCharacter provider는 해당 도메인의 `client`, 이미지 처리는 실제 Media 소유 모듈을 사용합니다. 과거 객체 동일성 검사는 옛 signed Git source의 import 관계와 현재 실제 class·함수·bound method의 소유 객체를 대조하도록 승계했습니다. 자기 자신과 비교하는 단언이나 가짜 호환 모듈은 만들지 않습니다.
 
 ### 요청·응답 스키마의 소유자
 
@@ -1226,9 +1226,9 @@ from app.domains.social.schemas.community import PostCreate
 
 현재 앱 코드와 일반 기능 테스트는 `app.schemas` 집합을 사용하지 않는다. 각 스키마의 기존 class·검증기·필드·직렬화 순서는 유지하며, 다른 이름의 동일한 DTO를 다시 정의하지 않는다. 같은 클래스가 필요한 여러 호출자는 그 실제 정의를 함께 사용한다.
 
-`app/schemas`에 남은 `__init__`, `agents`, `characters`, `auth`, `messages`, `media_security`는 과거 import 경로의 객체 동일성 및 구조를 직접 확인하는 테스트 때문에 유지되는 호환 파일이다. 이 테스트에서 옛 import를 새 import로 바꾼 뒤 같은 객체를 자기 자신과 비교하는 방식으로 호환성 종료를 처리하지 않는다. 앱 소비자가 없는 Worlds·SocialMemory·WorldActivityRuntime·WorldCharacterSetup 호환 파일 네 개는 제거했다.
+`app/schemas`의 마지막 여섯 집합 파일도 제거했다. Character·Identity·Routines·WorldCharacter·Worlds의 import-only `public.py` 다섯 개 역시 실제 소비자를 연결한 뒤 제거했다. 기능을 추가할 때 별도의 public 집합을 경유할 필요는 없으며, 해당 업무가 소유한 schemas·contracts·service를 선택한다. 다른 업무의 ORM·repository를 직접 가져올 수 있다는 뜻은 아니다. 같은 Session을 사용하는 업무 협력과 runtime 조립의 경계는 앞의 의존 규칙을 따른다.
 
-Character의 모델·이미지 키 모드·실행 모드 타입은 `characters/constants.py`, 활동 글쓰기 반복 수준은 `routines/constants.py`가 소유한다. 원래 Literal 별칭 다섯 개의 대입 본문과 값 순서를 이곳에 보존하고, 스키마와 임시 `agents.py` export는 그 같은 객체를 import한다. 값이 같은 `Literal`을 여러 번 정의한 뒤 typing 내부 캐시의 객체 동일성에 의존하지 않는다. 남은 호환 검사와 검증 근거는 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md)에 정리한다.
+Character의 모델·이미지 키 모드·실행 모드 타입은 `characters/constants.py`, 활동 글쓰기 반복 수준은 `routines/constants.py`가 소유한다. 원래 Literal 별칭 다섯 개의 대입 본문과 값 순서를 이곳에 보존하고, 실제 스키마가 그 객체를 import한다. 값이 같은 `Literal`을 여러 번 정의한 뒤 typing 내부 캐시의 객체 동일성에 의존하지 않는다. 이전 이력은 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md), 최종 호환 종료와 원래 계약의 검증 방식은 [호환 집합 종료 기록](../docs/architecture/ar-b8-compatibility-retirement.md)에 정리한다.
 
 ### 외부 LLM과 작성 파라미터 테스트
 

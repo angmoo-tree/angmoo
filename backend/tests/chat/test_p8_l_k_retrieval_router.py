@@ -32,11 +32,9 @@ from app.domains.chat.contracts import (
     RetrievalRouterProviderResult,
     RetrievalRouterRequest,
 )
-from app.domains.identity.public import (
-    CredentialMaterial,
-    CredentialPurpose,
-    LOCAL_INSTALLATION_KEY,
-)
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
+from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.integrations import direct_llm
 from app.integrations.llm.retrieval_router import DirectLlmRetrievalRouterProvider
 from app.providers.gemini import build_generate_content_config

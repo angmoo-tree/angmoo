@@ -8,7 +8,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.runtime import memory_http as memory_routes
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
 from app.domains.memory.policies.batch import (
     MEMORY_CONSENT_VERSION,
     MAX_SELECTION_INPUT_TOKEN_BOUND,
