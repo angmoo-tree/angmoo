@@ -162,3 +162,23 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_backend_additions\.json$''']
 regexes = ['''^\s*"backend/app/domains/characters/service/access\.py": "b060e60b24d5ca01a9f212bb7769de189c1b5dbd",?\s*$''']
+
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact B4 followup introduced-file Git blobs; verified against original signed commits 526a939c, f34de9bd, 2a89dc80 and 0299586c; not runtime credentials; reviewed 2026-09-06"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = [
+  '''^\s*"backend/app/domains/routines/service/session_keys\.py":\ "3d93a6d6143037f868cc666a6ce2662dab756574",?\s*$''',
+  '''^\s*"backend/tests/routines/test_session_keys\.py":\ "e42f23392f87fe5f3bb43b9d136198d20fe2610d",?\s*$''',
+  '''^\s*"backend/app/runtime/resident/credential_profiles\.py":\ "935bcd33166cf69113b946ad6022137248d2e17d",?\s*$''',
+  '''^\s*"backend/tests/routines/test_slot_auth_profiles\.py":\ "b51d2f3f34bb8f7c7b687ce3f29e659a20f55cb1",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/credential_cooldown\.py":\ "cdf501b56989c772c971a336c2b3468ed1f4ab60",?\s*$''',
+  '''^\s*"backend/tests/identity/test_credential_cooldown\.py":\ "c7aba1c085825c2ca0669c32e9b8c3d35dac9ea3",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/credential_management\.py":\ "92662fd09ceacf4d52c44e80b3faf2b2787bb791",?\s*$''',
+  '''^\s*"backend/app/domains/world_characters/repository/credential_scope\.py":\ "0777801d8ab9cb307bd2442dc802e44da80a55d3",?\s*$''',
+  '''^\s*"backend/app/domains/worlds/repository/credential_scope\.py":\ "d946317189427c821eab62ba757b49f8c4f8154d",?\s*$''',
+  '''^\s*"backend/tests/identity/test_character_credential_transaction\.py":\ "6e78bc39545122921f33e389f73a3ab0614ed470",?\s*$''',
+]

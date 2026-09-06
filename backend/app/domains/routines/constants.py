@@ -1,3 +1,4 @@
+import re
 """Versioned deterministic daily planning constants."""
 import re
 from datetime import timedelta
@@ -195,3 +196,247 @@ RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
 
 
 TOOLS_ALLOW_FEED_PERCEPTION = ["angmoo_list_feed"]
+
+
+TOOL_CHOICE_COMPLETE_TICK = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_complete_tick"],
+}
+
+
+TOOL_CHOICE_THREAD_OR_COMPLETE = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_get_post_thread", "angmoo_complete_tick"],
+}
+
+
+TOOL_CHOICE_SAVE_STATE = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_save_character_state"],
+}
+
+
+TOOLS_ALLOW_COMPLETE_TICK = ["angmoo_complete_tick"]
+
+
+TOOLS_ALLOW_THREAD_OR_COMPLETE = ["angmoo_get_post_thread", "angmoo_complete_tick"]
+
+
+TOOLS_ALLOW_SAVE_STATE = ["angmoo_save_character_state"]
+
+
+TOOLS_ALLOW_V6_INBOX_LANE = [
+    "angmoo_get_notifications",
+    "angmoo_get_post_thread",
+    "angmoo_note_inbox_review",
+]
+
+
+TOOLS_ALLOW_V6_FEED_SCAN_LANE = [
+    "angmoo_list_feed",
+    "angmoo_note_feed_interests",
+]
+
+
+TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE = [
+    "angmoo_note_feed_history_sanitize",
+]
+
+
+TOOLS_ALLOW_V6_STATE_LANE = ["angmoo_save_character_state"]
+
+
+TOOLS_ALLOW_COMMUNITY_ONCE = [
+    "angmoo_list_feed",
+    "angmoo_get_post_thread",
+    "angmoo_create_post",
+    "angmoo_reply_to_post",
+    "angmoo_like_post",
+    "angmoo_unlike_post",
+    "angmoo_repost_post",
+    "angmoo_unrepost_post",
+    "angmoo_follow_profile",
+    "angmoo_unfollow_profile",
+    "angmoo_get_profile",
+    "angmoo_get_notifications",
+    "angmoo_mark_notification_read",
+    "angmoo_note_feed_history_sanitize",
+    "angmoo_note_feed_interests",
+    "angmoo_note_inbox_review",
+    "angmoo_observe_community",
+    "angmoo_save_character_state",
+]
+
+
+PUBLIC_ACTION_TOOLS_BY_POLICY = {
+    "post": "angmoo_create_post",
+    "reply": "angmoo_reply_to_post",
+    "like": "angmoo_like_post",
+    "repost": "angmoo_repost_post",
+    "follow": "angmoo_follow_profile",
+    "unfollow": "angmoo_unfollow_profile",
+    "observe": "angmoo_observe_community",
+}
+
+
+PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY = {
+    **PUBLIC_ACTION_TOOLS_BY_POLICY,
+    "post": "angmoo_create_post_from_brief",
+    "reply": "angmoo_reply_to_post_from_brief",
+}
+
+
+GEMINI_FREE_ALLOWED_ACTIONS = (
+    "post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)
+
+
+GEMINI_FREE_INBOX_CANDIDATE_MAX = 1
+
+
+GEMINI_FREE_FEED_CANDIDATE_MAX = 1
+
+
+GEMINI_FREE_WRITING_SEED_MAX = 1
+
+
+GEMINI_FREE_INBOX_ACTION_MAX = 3
+
+
+GEMINI_FREE_FEED_ACTION_MAX = 4
+
+
+TENDENCY_ACTION_KEYS = (
+    "post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)
+
+TENDENCY_INDEPENDENT_TOPIC_COUNT = 30
+
+TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS = 5200
+
+FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH = 1200
+
+TENDENCY_ACTION_DEFAULTS = {
+    "post": {
+        "min": 0,
+        "max": 1,
+        "label": "게시글 작성",
+        "note": "주제가 잘 맞을 때 짧은 게시글을 작성합니다.",
+    },
+    "reply": {
+        "min": 0,
+        "max": 2,
+        "label": "리플 작성",
+        "note": "대화가 열려 있을 때 리플을 작성합니다.",
+    },
+    "like": {
+        "min": 1,
+        "max": 6,
+        "label": "좋아요 누르기",
+        "note": "대부분의 앵무가 부담 없이 자주 쓰는 공감 반응입니다.",
+    },
+    "repost": {
+        "min": 0,
+        "max": 1,
+        "label": "리포스트하기",
+        "note": "성향과 주제가 강하게 맞을 때만 공유합니다.",
+    },
+    "follow": {
+        "min": 0,
+        "max": 1,
+        "label": "팔로우하기",
+        "note": "관심사가 맞는 앵무를 발견하면 연결합니다.",
+    },
+    "unfollow": {
+        "min": 0,
+        "max": 0,
+        "label": "언팔로우하기",
+        "note": "보통은 사용하지 않습니다.",
+    },
+    "observe": {
+        "min": 1,
+        "max": 1,
+        "label": "둘러보기",
+        "note": "대부분의 활동에서 먼저 흐름을 살핍니다.",
+    },
+}
+
+INDEPENDENT_POST_PROBABILITY_RANGES = {
+    "very_low": (0.03, 0.07),
+    "low": (0.08, 0.14),
+    "medium": (0.15, 0.22),
+    "high": (0.23, 0.34),
+    "very_high": (0.35, 0.45),
+}
+
+TENDENCY_CONTENT_CHARACTER_PHRASES = (
+    "최애 캐릭터",
+    "좋아하는 캐릭터",
+    "게임 캐릭터",
+    "만화 캐릭터",
+    "애니 캐릭터",
+    "작품 캐릭터",
+)
+
+TENDENCY_PERSONA_CHARACTER_PATTERN = re.compile(
+    r"캐릭터(?=(?:\s+(?:성향|특성|프로필|자체|본인))|"
+    r"은|는|이|가|의|을|를|에게|에겐|께|로|로서|처럼|답게|다운|"
+    r"입니다|입니다\.|이고|이며|라서|라면|만의|마다)"
+)
+
+
+SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
+    "global_autonomy_capacity_full: 로컬 runtime 전체 자율활동 정원이 가득 찼습니다. "
+    "다른 앵무의 자율활동을 끄거나 runtime 설정을 확인해주세요."
+)
+
+WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
+    "world_autonomy_capacity_full: 이 World에서 동시에 자율활동할 수 있는 "
+    "앵무 50개의 상한에 도달했습니다."
+)
+
+SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
+
+
+RUN_NOW_COOLDOWN = timedelta(minutes=30)
+
+
+RUN_NOW_SCHEDULER_GUARD_WINDOW = timedelta(minutes=10)
+
+
+RUN_NOW_SCHEDULER_HEADROOM = 2
+
+FIRST_GREETING_COOLDOWN = timedelta(minutes=30)
+
+FIRST_GREETING_SESSION_MARKER = ":first-greeting:"
+
+FIRST_GREETING_WRITER_OUTPUT_TOKENS = 5000
+
+TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
+
+# Time labels and no-tool gateway admission for the brief writer.
+
+WRITING_TIMEZONE = ZoneInfo("Asia/Seoul")
+WRITING_KOREAN_WEEKDAYS = (
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+)
+
+WRITING_TOOLS_ALLOWED = ["angmoo_list_feed"]

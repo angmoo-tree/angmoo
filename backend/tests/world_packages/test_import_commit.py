@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.runtime.resident import tendency_analysis
 
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -67,7 +70,7 @@ from app.runtime.relationships import (
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.runtime.characters import management as agent_service
-from app.services import langgraph_resident
+from app.runtime.resident import langgraph as langgraph_resident
 from app.services import (
     world_character_contracts,
     world_character_provider,
@@ -808,7 +811,7 @@ def test_commit_is_atomic_registers_one_home_world_and_replays_without_writes(
             agent_service.AgentExecutionModeError,
             match="자율활동을 먼저 켠 뒤",
         ):
-            asyncio.run(agent_service.run_agent_now(db, owner, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, owner, character.id, workflows=agent_service.build_manual_activity_workflows()))
         _runtime_rows_are_zero(db)
         home = SqlAlchemyWorldSurfaceRepository(db).list_worlds(
             owner_user_id=OWNER_ID,
@@ -997,9 +1000,9 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             agent_service.AgentExecutionModeError,
             match="자율활동을 먼저 켠 뒤",
         ):
-            asyncio.run(agent_service.run_agent_now(db, owner, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, owner, character.id, workflows=agent_service.build_manual_activity_workflows()))
         with pytest.raises(agent_service.AgentExecutionModeError):
-            agent_service.give_feed_cue(
+            feed_cues.give_feed_cue(
                 db,
                 owner,
                 character.id,
@@ -1007,18 +1010,20 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
                     topic="가져온 World의 다음 활동",
                     manual_run=True,
                 ),
+                workflows=agent_service.build_feed_cue_workflows(),
             )
         with pytest.raises(agent_service.AgentExecutionModeError):
             asyncio.run(
-                agent_service.run_first_greeting(
+                first_greeting_service.run_first_greeting(
                     db,
                     owner,
                     character.id,
                     schemas.AgentFirstGreetingCreate(topic="가져온 World 첫인사"),
+                    workflows=agent_service.build_first_greeting_workflows(),
                 )
             )
         with pytest.raises(agent_service.AgentExecutionModeError):
-            asyncio.run(agent_service.analyze_tendency(db, owner, character.id))
+            asyncio.run(tendency_analysis.analyze_tendency(db, owner, character.id, workflows=agent_service.build_tendency_analysis_workflows()))
         assert runner_calls == 0
         assert _count(db, models.AgentActivitySetting) == 0
 
@@ -1091,7 +1096,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             "AGENT_ACTIVITY_ENGINE",
             "langgraph",
         )
-        activated = agent_service.activate_agent(db, owner, character.id)
+        activated = autonomy_management.activate_agent(db, owner, character.id, workflows=agent_service.build_autonomy_workflows())
         db.refresh(world_character)
         assert activated.settings.auto_enabled is True
         assert world_character.autonomous_enabled is True
@@ -1116,7 +1121,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             "run_assigned_resident_slot_once",
             guarded_runner,
         )
-        run_result = asyncio.run(agent_service.run_agent_now(db, owner, character.id))
+        run_result = asyncio.run(manual_activity.run_agent_now(db, owner, character.id, workflows=agent_service.build_manual_activity_workflows()))
         assert run_result.status == "completed"
         assert runner_calls == 1
 

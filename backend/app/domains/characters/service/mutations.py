@@ -66,3 +66,8 @@ def update_owned_persona(db: Session, user: CharacterOwner, character_id: str, d
     ensure_persona_prompt_safety(data)
     profile.update_character_persona(db, character, data)
     return character
+
+
+def set_activity_status(character: models.Character, *, status: str) -> None:
+    """Only the original attached status assignment; caller owns its transaction."""
+    character.status = status

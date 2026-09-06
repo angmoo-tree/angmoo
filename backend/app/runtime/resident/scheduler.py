@@ -10,6 +10,7 @@ from typing import Awaitable, Callable, Any
 from uuid import uuid4
 
 from app.domains.routines import schemas
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 
 from app.config import Settings, settings
@@ -22,7 +23,7 @@ from app.domains.runtime.public import (
     SqlAlchemySchedulerLeaseRepository,
     scheduler_fence,
 )
-from app.services import agent_runs
+from app.runtime.resident import execution as agent_runs
 
 
 logger = logging.getLogger(__name__)
@@ -120,7 +121,7 @@ async def _tick_once(
 ) -> schemas.ResidentSlotTickRead:
     resolved_session_factory = session_factory or SessionLocal
     with resolved_session_factory() as db:
-        transition = agent_runs.reconcile_all_elapsed_routines(
+        transition = reconcile_all_elapsed_routines(
             db, references=SqlAlchemyLifecycleReferences(db)
         )
         if transition.completed or transition.skipped:

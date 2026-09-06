@@ -71,3 +71,10 @@ def update_setting(
     else:
         db.flush()
     return setting
+
+
+def disable_auto_if_present(db: Session, character_id: str) -> None:
+    """Original optional attached setting mutation; the caller owns the commit."""
+    setting = db.get(models.AgentActivitySetting, character_id)
+    if setting is not None:
+        setting.auto_enabled = False

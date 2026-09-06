@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2310,
-      "internal_edge_count": 2483,
+      "external_import_count": 2559,
+      "internal_edge_count": 2959,
       "legacy_import_exception_count": 0,
-      "module_count": 738,
+      "module_count": 833,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -306,7 +306,9 @@
             "path": "backend/app/domains/social/contracts/search_state.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.contracts.action_subjective_context"
+            ],
             "module": "app.domains.social.contracts.subjective_context",
             "path": "backend/app/domains/social/contracts/subjective_context.py"
           },
@@ -469,6 +471,14 @@
             ],
             "module": "app.domains.social.repository.reactions",
             "path": "backend/app/domains/social/repository/reactions.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts"
+            ],
+            "module": "app.domains.social.repository.resident_context",
+            "path": "backend/app/domains/social/repository/resident_context.py"
           },
           {
             "imports": [],
@@ -1349,7 +1359,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "4ad74fe1ada420bdffc8f335456c4c6e91eecddbeedadf5f2d951a638a39ea3f"
+        "sha256": "cd4b4310919316d193416e6dce17ff13cf533fd602fd29f6d82ea80e004e2693"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

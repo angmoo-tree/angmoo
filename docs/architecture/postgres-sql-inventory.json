@@ -484,6 +484,37 @@
     },
     {
       "markers": {
+        "advisory_lock": [
+          10
+        ],
+        "driver_or_url": [
+          7
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/repository/autonomy.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "38032af51a6dd715ca234647a003088ecb073242b48777368e465302624ea28b",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          17
+        ],
+        "driver_or_url": [
+          1,
+          8
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/repository/first_greeting.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "f8514324f57dcbd780b1c37291febaf799abe2613faf294eab91df5a188c8efc",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "row_lock": [
           44,
           99,
@@ -916,23 +947,6 @@
     {
       "markers": {
         "advisory_lock": [
-          519,
-          2977
-        ],
-        "driver_or_url": [
-          516,
-          2968
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/characters/management.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "6dc38dd892daea055bc8f921d830d43baead90d8fbccc38e6a1d60cb4a064240",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "advisory_lock": [
           306,
           561,
           664
@@ -1313,10 +1327,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 85,
+  "entry_count": 86,
   "marker_counts": {
-    "advisory_lock": 10,
-    "driver_or_url": 49,
+    "advisory_lock": 11,
+    "driver_or_url": 50,
     "jsonb": 11,
     "pgvector": 5,
     "row_lock": 38,

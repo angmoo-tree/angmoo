@@ -1,3 +1,4 @@
+from app.exceptions import AgentServiceError
 from datetime import datetime
 from app.domains.characters import schemas
 
@@ -10,8 +11,6 @@ class InvalidCharacterHandleError(Exception):
     pass
 
 
-class AgentServiceError(Exception):
-    pass
 
 class AgentNotFoundError(AgentServiceError):
     pass
@@ -92,4 +91,8 @@ class CredentialSyncError(AgentServiceError):
 
 
 class CharacterStateNotFoundError(AgentServiceError):
+    pass
+
+
+class ActiveSlotBusyError(AgentServiceError):
     pass

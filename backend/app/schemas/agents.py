@@ -1,3 +1,5 @@
+from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
+from app.api.schemas.first_greeting import AgentFirstGreetingRead
 from app.domains.characters.schemas import (
     AgentImageGenerationSettingRead,
     AgentDetailRead,
@@ -11,6 +13,7 @@ from app.domains.routines.schemas import (
 
 from app.domains.identity.schemas import (
     CredentialRead,
+    CredentialUpsert,
 )
 
 from datetime import datetime
@@ -76,20 +79,8 @@ WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
 AgentExecutionMode = Literal["llm", "local"]
 
 
-class AgentFirstGreetingCreate(BaseModel):
-    topic: str = Field(min_length=2, max_length=500)
 
 
-class AgentFirstGreetingRead(UtcInstantResponseModel):
-    run_id: str
-    status: str
-    summary: str | None = None
-    character_id: str
-    post_id: str | None = None
-    post: PostDetail | None = None
-    image_attempt: dict | None = None
-    first_greeting_available_at: datetime | None = None
-    gateway_result: dict
 
 
 
@@ -171,12 +162,6 @@ class AgentImageGenerationSettingUpdate(BaseModel):
 
 
 
-class CredentialUpsert(BaseModel):
-    provider: str = Field(default="google", max_length=40)
-    model: AgentGoogleModel = "gemini-3.1-flash-lite"
-    api_key: str | None = Field(default=None, min_length=1, max_length=4000)
-    auth_profile_id: str | None = Field(default=None, max_length=120)
-    label: str | None = Field(default=None, max_length=80)
-    world_id: str | None = Field(default=None, min_length=1, max_length=64)
+
 
 from app.domains.routines.schemas import AgentActivitySettingUpdate, AgentFeedCueCreate, AgentFeedCueRead

@@ -6,7 +6,7 @@ from types import CodeType
 
 import pytest
 
-from app.services import agent_runs
+from app.runtime.resident import execution as agent_runs
 
 
 def _required_globals(code):

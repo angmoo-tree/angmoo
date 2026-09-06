@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.routines.service import autonomy_management
 
 import asyncio
 import os
@@ -24,13 +25,8 @@ from app.runtime.social.sqlalchemy_unit_of_work import (
 )
 from app.domains.social.public import OwnerReplyCommand, create_owner_reply
 from app.providers.gemini import build_generate_content_config
-from app.services import (
-    activity_state_contracts,
-    daily_activity_plans,
-    langgraph_resident,
-    routine_post_runtime,
-    world_character_contracts,
-)
+from app.services import activity_state_contracts, daily_activity_plans, routine_post_runtime, world_character_contracts
+from app.runtime.resident import langgraph as langgraph_resident
 from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.routines.contracts.activity_policy import ActivityPolicy
@@ -565,10 +561,11 @@ def test_world_profile_readiness_replaces_legacy_tendency_gate() -> None:
         assert readiness.reason_code is None
         assert readiness.world_id == fixture.world.id
         assert readiness.world_character_id == fixture.world_character.id
-        agent_service._ensure_activity_profile_ready(
+        autonomy_management._ensure_activity_profile_ready(
             db,
             character=fixture.character,
             setting=setting,
+            workflows=agent_service.build_autonomy_workflows(),
         )
 
 
@@ -592,10 +589,11 @@ def test_world_profile_readiness_rejects_incomplete_repertoire() -> None:
         assert readiness.source == "world_community_profile"
         assert readiness.reason_code == "world_activity_repertoire_not_ready"
         with pytest.raises(agent_service.ActivityProfileRequiredError):
-            agent_service._ensure_activity_profile_ready(
+            autonomy_management._ensure_activity_profile_ready(
                 db,
                 character=fixture.character,
                 setting=setting,
+                workflows=agent_service.build_autonomy_workflows(),
             )
 
 
@@ -617,10 +615,11 @@ def test_legacy_runtime_still_requires_legacy_tendency_analysis() -> None:
         assert readiness.source == "legacy_tendency"
         assert readiness.reason_code == "legacy_tendency_not_ready"
         with pytest.raises(agent_service.TendencyAnalysisRequiredError):
-            agent_service._ensure_activity_profile_ready(
+            autonomy_management._ensure_activity_profile_ready(
                 db,
                 character=fixture.character,
                 setting=setting,
+                workflows=agent_service.build_autonomy_workflows(),
             )
 
 

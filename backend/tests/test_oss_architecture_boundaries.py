@@ -11,11 +11,13 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
     APP_ROOT / "runtime" / "characters" / "creator.py",
     APP_ROOT / "services" / "agent_runs.py",
+    APP_ROOT / "runtime" / "resident" / "execution.py",
     APP_ROOT / "services" / "agent_writing.py",
+    APP_ROOT / "runtime" / "resident" / "writing.py",
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
-    APP_ROOT / "services" / "langgraph_resident.py",
+    APP_ROOT / "runtime" / "resident" / "langgraph.py",
     APP_ROOT / "runtime" / "resident" / "context.py",
     APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
@@ -33,7 +35,7 @@ def _imports(path: Path) -> set[str]:
 
 
 def test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports():
-    imports = _imports(APP_ROOT / "services" / "langgraph_resident.py")
+    imports = _imports(APP_ROOT / "runtime" / "resident" / "langgraph.py")
 
     assert not {name for name in imports if "openclaw" in name.lower()}
     assert not {name for name in imports if name == "google" or name.startswith("google.")}
@@ -118,10 +120,10 @@ def test_secret_decryption_is_confined_to_credential_resolver():
 def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
         "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
-        "services/agent_runs.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
+        "runtime/resident/tendency_analysis.py": {"analyze_tendency"},
         "runtime/characters/management.py": {
-            "run_first_greeting",
-            "analyze_tendency",
             "_bind_slot_auth_profile",
         },
         "services/character_lore.py": {
@@ -129,7 +131,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_google_api_key_for_character",
         },
         "services/feed_reaction_planner.py": {"_api_key"},
-        "services/langgraph_resident.py": {"_decrypt_api_key"},
+        "runtime/resident/langgraph.py": {"_decrypt_api_key"},
         "runtime/chat/sqlalchemy_service.py": {"_resolve_message_credential"},
         "services/post_image_generation.py": {
             "_ensure_visual_identity",

@@ -3926,6 +3926,1018 @@
       "test_suppressions": {
         "tests/routines/test_decision_lanes.py": {}
       }
+    },
+    {
+      "commit": "526a939c9125c0523a5f9f004bab73bcbb0354ad",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own candidate tool and resident session policies",
+      "tracked_files": {
+        "backend/app/domains/routines/service/action_candidates.py": "d99047358a9315b5e6ed2e6687db4734a819b4d3",
+        "backend/app/domains/routines/service/session_keys.py": "3d93a6d6143037f868cc666a6ce2662dab756574",
+        "backend/app/domains/routines/service/tool_policy.py": "92312e18d2f7b3c2c462c1cd4c40aa719b28bc3d",
+        "backend/app/runtime/resident/request_options.py": "4c0786f33fbcb3f484899e03cc76a4fdff88e2f5",
+        "backend/tests/routines/test_session_keys.py": "e42f23392f87fe5f3bb43b9d136198d20fe2610d"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "aa3416a830cc9e93d4a4403c2a232c9e3ce6e684",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own resident reaction and thread queries",
+      "tracked_files": {
+        "backend/app/domains/social/repository/resident_context.py": "7ba0e53be1fac8676728e29851e8991883f44f9c",
+        "backend/tests/social/test_resident_context_queries.py": "09c5f17fe393e88909b1243d43071bf6c28268f2"
+      },
+      "test_nodes": [
+        "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+        "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit"
+      ],
+      "test_assertions": {
+        "tests/social/test_resident_context_queries.py": {
+          "_engine": [],
+          "_post": [],
+          "test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback": [
+            "assert not queries._has_character_like(db, post_id='root', character_id=character_id)",
+            "assert queries._has_character_like(db, post_id='root', character_id=character_id)",
+            "assert queries._has_character_repost(db, post_id='root', character_id=character_id)",
+            "assert queries.find_follow_id(db, follower_character_id=character_id, target_character_id=character_id) == follow.id",
+            "assert not queries._has_character_like(db, post_id='root', character_id='different-character')",
+            "assert queries.find_follow_id(db, follower_character_id='different-character', target_character_id=character_id) is None",
+            "assert not queries._has_character_like(db, post_id='root', character_id=character_id)",
+            "assert not queries._has_character_repost(db, post_id='root', character_id=character_id)",
+            "assert queries.find_follow_id(db, follower_character_id=character_id, target_character_id=character_id) is None",
+            "assert not queries._has_character_like(observer, post_id='root', character_id=character_id)",
+            "assert not queries._has_character_repost(observer, post_id='root', character_id=character_id)",
+            "assert queries.find_follow_id(observer, follower_character_id=character_id, target_character_id=character_id) is None"
+          ],
+          "test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit": [
+            "assert queries._thread_reply_post_ids_for_action_gate(db, root.id) == ['visible', 'nested']",
+            "assert queries._has_character_replied_to_thread(db, root_post_id=root.id, character_id=character_id)",
+            "assert not queries._has_character_replied_to_thread(db, root_post_id=root.id, character_id='other')",
+            "assert queries._is_direct_reply_to_character_post_for_action_gate(db, post_id=visible.id, character_id=character_id)",
+            "assert not queries._is_direct_reply_to_character_post_for_action_gate(db, post_id=hidden.id, character_id=character_id)",
+            "assert not queries._is_direct_reply_to_character_post_for_action_gate(db, post_id=root.id, character_id=character_id)",
+            "assert queries._thread_reply_post_ids_for_action_gate(db, root.id) == []",
+            "assert queries._thread_reply_post_ids_for_action_gate(observer, root.id) == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_resident_context_queries.py": {}
+      }
+    },
+    {
+      "commit": "77e961057c8be90fb08bcc81e46ed55b93a6bc4f",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident action admission and menu policy",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/action_context.py": "b5132879d98c8277672cdf7aa131dcdeb0f1b7e3",
+        "backend/app/domains/routines/service/action_admission.py": "ee2efb0b06ef121f82d124d0b37082db8bee99a1",
+        "backend/app/domains/routines/service/action_menu.py": "c4b6333e99a5f05fc12c36cd07ec680b09a08fd0",
+        "backend/app/runtime/resident/context_references.py": "b953403fa9c3796d890554d0e850d35723b3b1d0",
+        "backend/tests/routines/test_action_admission.py": "ff1c91e6e7d74d52ac6bc8afb313fa05caa62bdc",
+        "backend/tests/routines/test_action_menu.py": "b84781d3fd5a3738f70e6810d1972b781da7df1b"
+      },
+      "test_nodes": [
+        "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+        "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide"
+      ],
+      "test_assertions": {
+        "tests/routines/test_action_admission.py": {
+          "_setup": [],
+          "test_action_admission_uses_same_session_pending_reactions_and_caller_rollback": [
+            "assert refs.get_post(root.id) is root",
+            "assert '- tool: angmoo_like_post' not in allowed",
+            "assert '- tool: angmoo_follow_profile' not in allowed",
+            "assert '- tool: angmoo_reply_to_post_from_brief' in allowed",
+            "assert '- tool: angmoo_repost_post' in allowed",
+            "assert '- like: already liked' in unavailable",
+            "assert '- follow: already following author' in unavailable",
+            "assert '- tool: angmoo_like_post' in restored",
+            "assert '- tool: angmoo_follow_profile' in restored",
+            "assert '- tool: angmoo_like_post' in outside",
+            "assert '- tool: angmoo_follow_profile' in outside"
+          ],
+          "test_action_menu_keeps_hidden_parent_context_out_without_committing_hide": [
+            "assert 'Feed candidate 1' in visible",
+            "assert 'private-context-marker' in visible",
+            "assert 'Feed candidate 1' not in hidden",
+            "assert 'private-context-marker' not in hidden",
+            "assert 'Feed candidate 1' in restored",
+            "assert 'Feed candidate 1' in outside"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_action_admission.py": {}
+      }
+    },
+    {
+      "commit": "acb9077bd1d12ff049b76601b74a46ca04304602",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate resident context history queries by owner",
+      "tracked_files": {
+        "backend/app/domains/routines/repository/resident_context.py": "c0ded931c9822a3b05409b27ef44096e18b17900",
+        "backend/tests/routines/test_resident_review_history.py": "75636c0ed491ec39fa5a102b43a7de8af3aa3b78",
+        "backend/tests/social/test_resident_context_history.py": "997b744f68e4b1afae2e8d863f77084206271646"
+      },
+      "test_nodes": [
+        "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+        "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+        "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle"
+      ],
+      "test_assertions": {
+        "tests/routines/test_resident_review_history.py": {
+          "test_relationship_review_time_observes_pending_log_without_committing": [
+            "assert queries.latest_relationship_review_at(db, character_id=actor) is None",
+            "assert queries.latest_relationship_review_at(db, character_id=actor) == now",
+            "assert queries.latest_relationship_review_at(db, character_id='absent-character') is None",
+            "assert queries.latest_relationship_review_at(db, character_id=actor) is None",
+            "assert queries.latest_relationship_review_at(observer, character_id=actor) is None"
+          ]
+        },
+        "tests/social/test_resident_context_history.py": {
+          "test_resident_notification_queries_keep_limits_and_pending_read_state": [
+            "assert [row.id for row in queries.list_unread_reply_notifications(db, character_id=actor, limit=30)] == expected[:30]",
+            "assert [row.id for row in queries.list_unread_reply_notifications(db, character_id=actor, limit=20)] == expected[:20]",
+            "assert rows[-1].id not in [row.id for row in queries.list_unread_reply_notifications(db, character_id=actor, limit=30)]",
+            "assert queries.find_review_notification(db, notification_id=rows[-1].id, character_id=actor) is rows[-1]",
+            "assert queries.find_review_notification(db, notification_id=other_type.id, character_id=actor) is None",
+            "assert queries.find_review_notification(db, notification_id=other_owner.id, character_id=actor) is None",
+            "assert queries.list_unread_reply_notifications(db, character_id=actor, limit=1)[0] is rows[-1]",
+            "assert queries.list_unread_reply_notifications(observer, character_id=actor, limit=1)[0].id == rows[-1].id"
+          ],
+          "test_resident_post_history_keeps_filters_order_limits_and_root_cycle": [
+            "assert [row.id for row in queries.list_recent_own_posts(db, character_id=actor)] == [row.id for row in rows[:8]]",
+            "assert [row.id for row in queries.list_recent_followed_posts(db, target_id=actor, since=now - timedelta(days=3))] == [row.id for row in rows[:5]]",
+            "assert [row.id for row in queries.list_recent_reply_posts(db, since=now - timedelta(days=3))] == [row.id for row in reversed(rows[2:])]",
+            "assert queries.list_recent_own_posts(db, character_id='absent-character') == []",
+            "assert queries._thread_root_post_id_for_prompt(db, rows[0].id) == root.id",
+            "assert queries._thread_root_post_id_for_prompt(db, rows[0].id) is None",
+            "assert queries._thread_root_post_id_for_prompt(db, rows[0].id) == root.id",
+            "assert queries._thread_root_post_id_for_prompt(observer, rows[0].id) == root.id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_resident_review_history.py": {},
+        "tests/social/test_resident_context_history.py": {}
+      }
+    },
+    {
+      "commit": "1181111641164316a9f8c6eefcd169fed2c31b2b",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own feed inbox and relationship context decisions",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/context_reads.py": "de7468d43b06eb68e6705f4fdeb31e1613cb60d2",
+        "backend/app/domains/routines/service/feed_context.py": "28ffe4725da63b792de99da62718e7273bc6d035",
+        "backend/app/domains/routines/service/social_context.py": "03a5ae658c186613c9583d09ce7729bc62f908b5",
+        "backend/app/runtime/resident/feed_context_references.py": "e6746a49052da55079b72e5661918a7a2eaff641",
+        "backend/tests/routines/test_context_reads.py": "7466a71e210ec358470571d2c5796b0db2febc66"
+      },
+      "test_nodes": [
+        "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+        "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+        "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission"
+      ],
+      "test_assertions": {
+        "tests/routines/test_context_reads.py": {
+          "test_feed_interest_context_uses_original_rows_and_pending_visibility": [
+            "assert root.id in visible",
+            "assert other.name in visible",
+            "assert 'shared-topic' in visible",
+            "assert refs.get_post(root.id) is root",
+            "assert hidden == '- none'",
+            "assert feed_context._format_v6_feed_interests(refs, feed_interest_payload=payload) == visible",
+            "assert root.id in outside"
+          ],
+          "test_review_candidate_preserves_recipient_and_invalid_payload_admission": [
+            "assert len(result) == 1",
+            "assert result[0]['root_post_id'] == root.id",
+            "assert result[0]['source_post_id'] == reply.id",
+            "assert result[0]['actor_name'] == f'{other.name} (@{other.handle})'",
+            "assert result[0]['candidate_reason'] == 'direct-reply'",
+            "assert feed_context._v6_inbox_candidates_from_review(refs, character_id=other.id, payload={'candidate_notification_id': notice.id}) == []",
+            "assert feed_context._v6_inbox_candidates_from_review(refs, character_id=fixture.character.id, payload={'candidate_notification_id': True}) == []",
+            "assert feed_context._v6_inbox_candidates_from_review(refs, character_id=fixture.character.id, payload={'candidate_notification_id': notice_id}) == []",
+            "assert feed_context._v6_inbox_candidates_from_review(SqlAlchemyResidentContextReferences(observer, social=SimpleNamespace()), character_id=fixture.character.id, payload={'candidate_notification_id': notice.id}) == []"
+          ],
+          "test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow": [
+            "assert '- status: available' in candidate",
+            "assert f'- target: character:{other.id}' in candidate",
+            "assert 'own_replies=1; target_replies=1' in candidate",
+            "assert refs.is_post_instance(target_reply)",
+            "assert not refs.is_post_instance(SimpleNamespace(id=target_reply.id))",
+            "assert '- status: none' in unavailable",
+            "assert social_context._format_strong_social_connection_candidate(refs, **kwargs) == candidate",
+            "assert '- status: available' in outside"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_context_reads.py": {}
+      }
+    },
+    {
+      "commit": "f751611ce0198c3b90e78966493f931d5c9d12bd",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own slot status and retry scheduling",
+      "tracked_files": {
+        "backend/app/domains/routines/service/retry_schedule.py": "2a3529612e6ce5932fd11251d4f55b31ed851ff0",
+        "backend/app/domains/routines/service/slot_status.py": "a52701138380a478ef4d65d82d51767e1f73f728",
+        "backend/tests/routines/test_execution_readiness.py": "45400f7e93985ee0e28773bcb2d28ed5a3634915",
+        "backend/tests/routines/test_retry_schedule_transaction.py": "fc45e7715c1c09ef09df13f9e126cae1eb35cbc3",
+        "backend/tests/routines/test_slot_status_route.py": "fbbeb510f046a6aca24cca5f13c208719654887e"
+      },
+      "test_nodes": [
+        "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+        "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+        "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response"
+      ],
+      "test_assertions": {
+        "tests/routines/test_retry_schedule_transaction.py": {
+          "test_retry_schedule_preserves_early_returns_and_caller_pending_setting": [
+            "assert retry_schedule._scheduled_retry_next_tick_at(None, setting=None, character_id='actor', retry_at=now, manual_next_tick_at=manual, timezone_reader=unexpected_timezone) is manual",
+            "assert retry_schedule._scheduled_retry_next_tick_at(None, setting=None, character_id='', retry_at=now, manual_next_tick_at=None, timezone_reader=unexpected_timezone) is now",
+            "assert seen == [(db, actor, 19)]",
+            "assert result.tzinfo is not None",
+            "assert fixture.character.name == original_name",
+            "assert observer.get(Character, actor).name == original_name"
+          ],
+          "test_retry_missing_setting_keeps_original_ensure_commit_before_timezone": [
+            "assert activity_settings.get_setting(db, actor) is None",
+            "assert observations == ['original-ensure-commit']",
+            "assert fixture.character.name == 'original-ensure-commit'",
+            "assert session is db",
+            "assert activity_settings.get_setting(observer, character_id) is not None"
+          ]
+        },
+        "tests/routines/test_slot_status_route.py": {
+          "test_slot_route_keeps_owner_filter_and_original_public_response": [
+            "assert len(output) == 1",
+            "assert output[0].agent_id == own.agent_id",
+            "assert output[0].assigned_character_id == fixture.character.id",
+            "assert 'assigned_user_id' not in payload",
+            "assert 'assigned_credential_id' not in payload",
+            "assert 'locked_by_run_id' not in payload",
+            "assert routes.list_resident_slots(db=db, user=fixture.user) == []",
+            "assert len(routes.list_resident_slots(db=db, user=fixture.user)) == 1",
+            "assert len(routes.list_resident_slots(db=observer, user=fixture.user)) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_retry_schedule_transaction.py": {},
+        "tests/routines/test_slot_status_route.py": {}
+      }
+    },
+    {
+      "commit": "f34de9bd0ec21106e31544b41f888826626a3fd7",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own run authorization and auth profile workflow",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/run_identity.py": "e2d3799e406e150eb023e2ff671b26417f82d71e",
+        "backend/app/domains/routines/service/run_identity.py": "3590de486d58e910cea4ffb5c65df055ecaf8126",
+        "backend/app/runtime/resident/credential_profiles.py": "935bcd33166cf69113b946ad6022137248d2e17d",
+        "backend/app/runtime/resident/identity_references.py": "2dd212792031f51f61b8febe198dda27a0cf5531",
+        "backend/tests/routines/test_run_identity.py": "49aaa9b2b16bd1823bc957884fee358caef7b11f",
+        "backend/tests/routines/test_slot_auth_profiles.py": "b51d2f3f34bb8f7c7b687ce3f29e659a20f55cb1"
+      },
+      "test_nodes": [
+        "tests/routines/test_run_identity.py::test_run_identity_preserves_error_precedence_and_stops_before_credential_read",
+        "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret[bind-expected1]",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret[inspect-expected0]",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret[preflight-expected3]",
+        "tests/routines/test_slot_auth_profiles.py::test_slot_auth_failure_stops_at_original_stage_and_redacts_secret[reload-expected2]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_run_identity.py": {
+          "test_run_identity_reads_attached_pending_values_without_committing": [
+            "assert reads == []",
+            "assert character is fixture.character",
+            "assert found is credential",
+            "assert reads == [(db, credential.id)]",
+            "assert fixture.character.name == 'Mira'",
+            "assert credential.label == 'Routine test key'",
+            "assert observer.get(Character, fixture.character.id).name == 'Mira'",
+            "assert observer.get(LlmCredential, credential.id).label == 'Routine test key'"
+          ],
+          "test_run_identity_preserves_error_precedence_and_stops_before_credential_read": [
+            "pytest.raises(CharacterNotFoundError)",
+            "assert missing.value.args == ('missing',)",
+            "assert calls == []",
+            "pytest.raises(CharacterNotFoundError)",
+            "assert calls == []",
+            "pytest.raises(exceptions.CharacterOwnershipError)",
+            "assert calls == []",
+            "pytest.raises(exceptions.CredentialNotFoundError)",
+            "assert calls[-1] == (db, 'missing')",
+            "assert credential.enabled is True",
+            "assert credential.character_id == fixture.character.id",
+            "pytest.raises(exceptions.CredentialOwnershipError)",
+            "assert 'cannot use credential' in str(owner.value)",
+            "pytest.raises(exceptions.CredentialOwnershipError)",
+            "assert 'is not assigned' in str(assignment.value)",
+            "pytest.raises(exceptions.CredentialDisabledError)",
+            "assert validate(references, **values)[1] is credential"
+          ]
+        },
+        "tests/routines/test_slot_auth_profiles.py": {
+          "RecordedProfiles::__init__": [],
+          "RecordedProfiles::inspect_credential_slot": [],
+          "RecordedProfiles::bind_credential_to_slot": [
+            "assert kwargs['api_key'] == 'synthetic-secret'"
+          ],
+          "RecordedProfiles::release_credential_from_slot": [],
+          "RecordedClient::__init__": [],
+          "RecordedClient::reload_secrets": [],
+          "_resolver": [
+            "assert kwargs == dict(purpose=profiles.CredentialPurpose.PRIVATE_OPENCLAW, owner_id='owner', character_id='character')"
+          ],
+          "test_slot_auth_avoids_reveal_for_match_and_preserves_bind_reload_release_order": [
+            "assert asyncio.run(profiles._ensure_slot_auth_profile(**kwargs)) is True",
+            "assert events == ['inspect']",
+            "assert asyncio.run(profiles._ensure_slot_auth_profile(**kwargs)) is True",
+            "assert events == ['inspect', 'resolve', 'reveal', 'bind', 'reload', 'inspect']",
+            "assert events == ['release', 'reload']"
+          ],
+          "test_slot_auth_failure_stops_at_original_stage_and_redacts_secret": [
+            "pytest.raises(profiles.CredentialSyncError)",
+            "assert events == expected",
+            "assert 'synthetic-secret' not in str(caught.value)",
+            "assert str(caught.value) == 'OpenClaw auth profile preflight failed'",
+            "assert '[REDACTED]' in str(caught.value)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_run_identity.py": {},
+        "tests/routines/test_slot_auth_profiles.py": {}
+      }
+    },
+    {
+      "commit": "1b9055093a16f9bf98255ea849fe2968bb0cfa6a",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own execution targets and nullable state reads",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/post_selection.py": "5affaa933045bb378bd4971c93f59b01740bae1a",
+        "backend/app/domains/routines/service/post_selection.py": "49d5f4a103bdc8f2a2aa89a95109eeef42813cf6",
+        "backend/app/runtime/resident/post_selection.py": "dab90a75ad814fa907abcc82f0f6cfca14c85944",
+        "backend/tests/routines/test_execution_owner_reads.py": "62de38ade0b4c0b223f2b912c1a88a29d9d0b590",
+        "backend/tests/routines/test_post_selection.py": "6cab4d17c547f6e8f54a9a9e45a94df80dbc4391"
+      },
+      "test_nodes": [
+        "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+        "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback"
+      ],
+      "test_assertions": {
+        "tests/routines/test_execution_owner_reads.py": {
+          "test_target_queries_keep_visibility_nonself_priority_and_pending_rollback": [
+            "assert queries.get_latest_visible_nonself_root_id(db, actor) == 'foreign-z'",
+            "assert queries.get_latest_visible_root_id(db) == 'self-newest'",
+            "assert _select_tick_post_id(references, preferred_post_id=None, character_id=actor) == 'foreign-z'",
+            "assert _select_tick_post_id(None, preferred_post_id='unqueried-preferred', character_id=actor) == 'unqueried-preferred'",
+            "assert _select_tick_post_id(references, preferred_post_id=None, character_id=actor) == 'self-newest'",
+            "assert _select_tick_post_id(references, preferred_post_id=None, character_id=actor) is None",
+            "assert queries.get_latest_visible_nonself_root_id(db, actor) == 'foreign-z'",
+            "assert queries.get_latest_visible_nonself_root_id(observer, actor) == 'foreign-z'"
+          ],
+          "test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit": [
+            "assert get_character_state(db, 'missing') is None",
+            "assert get_agent_slot(db, 'missing') is None",
+            "assert get_setting(db, 'missing') is None",
+            "assert get_character_state(db, actor) is state",
+            "assert get_agent_slot(db, slot.agent_id) is slot",
+            "assert state in db.dirty",
+            "assert slot in db.dirty",
+            "assert state.summary == 'original'",
+            "assert slot.status == 'idle'",
+            "assert get_character_state(observer, actor).summary == 'original'",
+            "assert get_agent_slot(observer, slot.agent_id).status == 'idle'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_execution_owner_reads.py": {}
+      }
+    },
+    {
+      "commit": "2a89dc803f8b519165bab92c9a29c081855fa56a",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own request admission and credential cooldown writes",
+      "tracked_files": {
+        "backend/app/domains/identity/service/credential_cooldown.py": "cdf501b56989c772c971a336c2b3468ed1f4ab60",
+        "backend/app/domains/routines/service/execution_admission.py": "4f482c4d212bb1a625386e95ea9063f598877dc4",
+        "backend/tests/identity/test_credential_cooldown.py": "c7aba1c085825c2ca0669c32e9b8c3d35dac9ea3",
+        "backend/tests/routines/test_execution_admission.py": "7c646746f59917bec9fa15165c73f40877937232"
+      },
+      "test_nodes": [
+        "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+        "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility"
+      ],
+      "test_assertions": {
+        "tests/identity/test_credential_cooldown.py": {
+          "test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback": [
+            "assert set_cooldown_until(credential, cooldown_until=value) is None",
+            "assert credential.cooldown_until is value",
+            "assert credential in db.dirty",
+            "assert len(sql) == count",
+            "assert credential.cooldown_until.replace(tzinfo=UTC) == previous",
+            "assert get_credential(observer, credential.id).cooldown_until.replace(tzinfo=UTC) == previous"
+          ]
+        },
+        "tests/routines/test_execution_admission.py": {
+          "test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility": [
+            "assert calls == []",
+            "pytest.raises(CharacterNotFoundError)",
+            "assert calls == []",
+            "pytest.raises(CharacterSuspendedError)",
+            "assert calls == []",
+            "assert admission._read_available_run_character(references, fixture.character.id) is fixture.character",
+            "assert admission._resolve_run_owner(fixture.character, None) == fixture.user.id",
+            "pytest.raises(CharacterOwnershipError)",
+            "assert calls == []",
+            "assert admission._resolve_run_credential(references, credential_id=credential.id, **kwargs) is credential",
+            "assert calls == [('explicit', db, credential.id)]",
+            "pytest.raises(CredentialNotFoundError)",
+            "assert str(missing.value) == f'No enabled credential is assigned to character {fixture.character.id}'",
+            "assert calls[-1] == ('default', db, fixture.user.id, fixture.character.id)",
+            "assert admission._resolve_run_credential(references, credential_id=None, **kwargs) is credential",
+            "assert get_default_credential(observer, fixture.user.id, character_id=fixture.character.id).id == credential.id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_credential_cooldown.py": {},
+        "tests/routines/test_execution_admission.py": {}
+      }
+    },
+    {
+      "commit": "b643b6b95775280bf66d3d87249b8dbb3da79405",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own slot requests and resident execution",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/slot_requests.py": "f862dd9fe92683deef0d43a3e05201fc9800d6b9",
+        "backend/app/domains/routines/service/slot_requests.py": "468c17261639a362911424a4e86da7c8b22211d4",
+        "backend/app/runtime/resident/execution.py": "d5847c1d77d8ebe629e75af44cb0ed68418162d6",
+        "backend/tests/routines/test_slot_request_workflows.py": "b4d97a6df130f85820e4fba225ca5455309c5d6c"
+      },
+      "test_nodes": [
+        "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[False]",
+        "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_slot_request_workflows.py": {
+          "test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction": [
+            "assert events == []",
+            "assert events == ['gate', 'credential', 'timezone', 'slot']",
+            "assert result.agent_id == 'request-slot'",
+            "assert result.assigned_character_id == actor",
+            "assert result.next_tick_at is not None",
+            "assert (get_agent_slot(db, 'request-slot') is not None) is commit",
+            "pytest.raises(RuntimeError, match='maintenance gate closed')",
+            "assert events == ['rejected']",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db",
+            "assert character_id == actor",
+            "assert activity_settings.get_setting(db, actor) is not None",
+            "assert references.db is db",
+            "assert (get_agent_slot(observer, 'request-slot') is not None) is commit",
+            "assert (activity_settings.get_setting(observer, actor) is not None) is commit",
+            "assert observer.get(Character, actor).name == ('pending-request-owner' if commit else 'Mira')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_slot_request_workflows.py": {}
+      }
+    },
+    {
+      "commit": "3c0fc4abee38f249acc0092fbb69590fa27a7970",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own activity settings and tendency policy",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity_management.py": "0b36128b257312b7f6a05d0c4205e47c41d51823",
+        "backend/app/domains/routines/schemas/tendency.py": "2e7efdd9b26c2f2722d5b39557613e6739212da2",
+        "backend/app/domains/routines/service/activity_management.py": "107d963060d1753543e701bd6f8fdc5f2d1d7c6c",
+        "backend/app/domains/routines/service/tendency.py": "cdabe3ff886449ff9e8da78ad546f72d46c37de0",
+        "backend/app/domains/routines/service/tendency_settings.py": "c6440ab328cd1a1a937563f8606ada2bbf8b5ead",
+        "backend/tests/routines/test_activity_management.py": "8c2412ccd74333fd0091fd1287255c4584fa6920"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_management.py::test_activity_setting_owner_preserves_pending_schedule_transaction_and_error_identity"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_management.py": {
+          "test_activity_setting_owner_preserves_pending_schedule_transaction_and_error_identity": [
+            "assert observed == ['owner', 'mutable', 'timezone']",
+            "assert response.activity_interval_minutes == 120",
+            "assert db.get(models.AgentSlot, slot.agent_id) is slot",
+            "assert slot.next_tick_at != previous_tick",
+            "assert character_errors.AgentServiceError is common_errors.AgentServiceError",
+            "assert session is db and user is fixture.user and (key == character_id)",
+            "assert result is fixture.character",
+            "assert user is fixture.user",
+            "assert session is db",
+            "assert activity_settings.get_setting(session, character_id) is setting",
+            "assert setting.activity_interval_minutes == 120",
+            "assert slot.heartbeat_interval_seconds == 7200",
+            "assert activity_settings.get_setting(observer, character_id).activity_interval_minutes == 120",
+            "assert observer.get(Character, character_id).name == 'pending-settings-owner'",
+            "assert observer.get(models.AgentSlot, slot.agent_id).heartbeat_interval_seconds == 7200",
+            "assert activity_settings.get_setting(observer, character_id).activity_interval_minutes == 60",
+            "assert observer.get(Character, character_id).name == 'Mira'",
+            "assert error.reason_code == 'autonomy_capacity_full'",
+            "assert error.active_count == error.max_active == 3"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_management.py": {}
+      }
+    },
+    {
+      "commit": "698513a5ebdc2b723b6ae530e266fb2ee1dc3582",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident planning schemas and action vocabulary",
+      "tracked_files": {
+        "backend/app/contracts/action_subjective_context.py": "4cee5d973d96f79636f53333161005b6ff940f96",
+        "backend/app/domains/routines/contracts/topic_arcs.py": "53b083f750934c52d09dffb831702a42c6c06924",
+        "backend/app/domains/routines/policies/topic_arc_roles.py": "9942cbab610236dbf7a92e51a9e16909547489a6",
+        "backend/app/domains/routines/schemas/resident_planning.py": "805796d32ceaa07e22ef7c360f12ce8dfa988e4f"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "09d1b835f381def701c473548cdb4478b09996b5",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident planning and writer output rules",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/planning_context.py": "e4a50ad76f089dafb2ec6c0e845540769d2961aa",
+        "backend/app/domains/routines/policies/action_matching.py": "feb504b0f2b680d6796a808d089834f2db4e0560",
+        "backend/app/domains/routines/policies/handoff_coverage.py": "c7d7ef790b757d5a4e21e3a39ad28c00e065a047",
+        "backend/app/domains/routines/policies/topic_dates.py": "4e8e7c174c3046b1392287f20bbc065db6ff8b6a",
+        "backend/app/domains/routines/policies/writer_outputs.py": "7e7aa6a36dddf0665d5681b767e4da4a540c139e",
+        "backend/app/domains/routines/policies/writing_contract.py": "31f4dc69e6842c26446bd4245741e0950ccec201"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "93ee82a39558f6cf0026bca08e84853399b8a20a",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own topic arc recovery and continuity decisions",
+      "tracked_files": {
+        "backend/app/domains/routines/policies/resident_clock.py": "2bff76d3dc14f3048579bff9724f438f372b1b45",
+        "backend/app/domains/routines/service/topic_arcs.py": "103c1a45b6442a6654b83e84807a2c3e18358892",
+        "backend/tests/routines/test_topic_arc_workflows.py": "620906ba00c13e9e691288c45091628331b945f3"
+      },
+      "test_nodes": [
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_continuity_keeps_read_order_and_same_session",
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads[-1-past_target_date-False]",
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads[0-due_today-True]",
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads[1-future_target_date-False]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_topic_arc_workflows.py": {
+          "_context": [],
+          "_payload": [
+            "assert payload is not None"
+          ],
+          "test_topic_arc_continuity_keeps_read_order_and_same_session": [
+            "assert result['continue'] is True",
+            "assert result['reason'] == 'continuity_near'",
+            "assert calls == ['post', 'event']",
+            "assert db.in_transaction()",
+            "assert commits == []",
+            "assert actual is ctx",
+            "assert actual.db is db",
+            "assert post_id == 'previous-post'",
+            "assert actual.db.scalar(select(literal(1))) == 1",
+            "assert actual is ctx",
+            "assert actual.db is db",
+            "assert arc_id == payload['arc_id']",
+            "assert actual.db.scalar(select(literal(2))) == 2"
+          ],
+          "test_topic_arc_date_admission_skips_unneeded_reads": [
+            "assert result['continue'] is continues",
+            "assert result['reason'] == expected",
+            "assert not db.in_transaction()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_topic_arc_workflows.py": {}
+      }
+    },
+    {
+      "commit": "3e8c08f3733baf44d796d55da8180e0ac6b3fb7a",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own independent topic selection and history queries",
+      "tracked_files": {
+        "backend/app/domains/routines/repository/independent_topics.py": "f4142cdaf59f4fe1c82d607aacecb1639cc72585",
+        "backend/app/domains/routines/service/independent_topics.py": "3accdf2972c4e58797b698233d471a4f4f7462f9"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "f1be3c193937736bc671ac8b21120664e018b662",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident action planning and budgets",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/action_planning.py": "8ff25113d2ca1effe3f8217ffb4c04e8c9ab1dec",
+        "backend/app/domains/routines/service/action_budgets.py": "7db282870e4092b48b4c94df2a33f39baa3606a6",
+        "backend/app/domains/routines/service/action_plans.py": "0aeac9f795e17514fadd11cc7cbbcbfc09fdab5d",
+        "backend/app/domains/routines/service/writing_plans.py": "cd880e07233df63726a50023b5e21109f8de2e5c",
+        "backend/tests/routines/test_action_planning_workflows.py": "3355702ac6b0faefac83ae7daa1033ed927c5599"
+      },
+      "test_nodes": [
+        "tests/routines/test_action_planning_workflows.py::test_action_budget_binding_keeps_session_timestamp_and_read_order[5]",
+        "tests/routines/test_action_planning_workflows.py::test_action_budget_binding_keeps_session_timestamp_and_read_order[None]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_action_planning_workflows.py": {
+          "test_action_budget_binding_keeps_session_timestamp_and_read_order": [
+            "assert calls == (['setting', 'post'] if reply_limit is None else ['setting', 'reply', 'post'])",
+            "assert budget['reply']['remaining_before_plan'] == (None if reply_limit is None else 3)",
+            "assert budget['post']['remaining_before_plan'] == 1",
+            "assert commits == []",
+            "assert db.in_transaction()",
+            "assert actual_db is db",
+            "assert character_id == 'budget-character'",
+            "assert actual_db is db",
+            "assert character_id == 'budget-character'",
+            "assert now is ctx.run_started_at"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_action_planning_workflows.py": {}
+      }
+    },
+    {
+      "commit": "385abe717abb4c29cc4d8b9bd0f5d9a8c7f22ea4",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own writer results and state output recovery",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/writer_results.py": "5cf94521202ae510778a83e36741287f6d9eb936",
+        "backend/app/domains/routines/policies/writer_tasks.py": "48ec3a7104c6d65aba67b3823a667b0062224837",
+        "backend/app/domains/routines/service/post_writer_results.py": "a36274c2a5bc44809338a87917893637c62fca8d",
+        "backend/app/domains/routines/service/state_outputs.py": "6bf2f591bcc2d5b48e1022fb0d3974540da1413a"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "fced276acb13da776117e73a51f072dbccc27c91",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident prompts and writer task assembly",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/resident_prompts.py": "3168a263fb7a566afcc7f252aa6058a7807b7415",
+        "backend/app/domains/routines/service/planner_results.py": "1ed6d6486367dc501dd0cea3b9496b0b30ec6692",
+        "backend/app/domains/routines/service/resident_prompts.py": "cd76a2fb97eaf1519b83dbd67dd7a0953bf714ff",
+        "backend/app/domains/routines/service/writing_tasks.py": "0c790210622901df50170aaf82f48011ebee054e"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "b17078caf3a7780c18237c712ed2843d654caf75",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident relationship and conversation context",
+      "tracked_files": {
+        "backend/app/domains/routines/service/conversation_context.py": "b96587ffc09028dc572cbf8eee6d8ec8706429c0",
+        "backend/app/domains/routines/service/relationship_context.py": "1bd298a2d1a73cb0baf262fde3e3c4dfeb843cd6",
+        "backend/app/domains/routines/service/writing_context.py": "c32912dc8ad8898178413db1ae05cab7bb17460b"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "c3c14c037ecb22b0764450c31437f88cb045120c",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident graph runtime and source tests",
+      "tracked_files": {
+        "backend/app/domains/routines/policies/execution_results.py": "14de3055e50b84c63e25c9d929255131b931b2d6",
+        "backend/app/runtime/resident/langgraph_queries.py": "b113e82beec4c1bde2f7b597cf109ac04d8df84d",
+        "backend/tests/routines/test_resident_graph.py": "58dc7b6416c490e902d5bdc941613065e4d2d5b2"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "50d50ed2fea07ccb1a8526e152e3833e05231752",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own autonomy activation and capacity policy",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/autonomy_management.py": "9bf5534c78e69feabed0f82f3f68a4643d876ba3",
+        "backend/app/domains/routines/repository/autonomy.py": "0544107ddbe51129b54d4b55e187ab2f2d9529b5",
+        "backend/app/domains/routines/service/autonomy_management.py": "a9bc8dc378524f821c8382afc74383a9350cca79",
+        "backend/app/runtime/resident/autonomy_reads.py": "e97bd644ec3b019d2a5b87cacf7d6a0ac2940624"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "05691bb72b7f2e23b7b5012ba4f053fccf80adcf",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own manual activity and feed cue admission",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/manual_activity.py": "d1a62e6c3c7b627fce3a887527b3e007ce820595",
+        "backend/app/domains/routines/service/manual_activity.py": "8f8f62cb7b667bd84123cfefabcc3c5dd31d84dd"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "b0a8a8d5c782eabbcbf6beafb94ae9520a909acc",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate first greeting policy and provider IO",
+      "tracked_files": {
+        "backend/app/api/schemas/__init__.py": "7d7173a33eb4590ae1dad0d0b4ede6020e0ec8e7",
+        "backend/app/api/schemas/first_greeting.py": "90a58dd6c54d9a756ad99a9d53173098719389e8",
+        "backend/app/domains/routines/contracts/first_greeting.py": "0043b61676904d565c6a69de19cb9c4a9dc3e7b7",
+        "backend/app/domains/routines/repository/first_greeting.py": "2098955e810ac7923c4f408fb4efd5fcac0789d9",
+        "backend/app/domains/routines/schemas/first_greeting.py": "7b8c1b9fd8fbc0bca40bd2a99cdf4a054d9b1a09",
+        "backend/app/domains/routines/service/first_greeting.py": "7f3714b542fe6cd03fcb7c14041da6ec84c1b25c",
+        "backend/app/runtime/resident/first_greeting.py": "fdfd4de03ddcc83ae0b5bcf5b2161a21c60d054c"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "2abe37962f3af3968435d53a38d5bb2abc678e3e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own tendency analysis preparation and storage",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/tendency_analysis.py": "f6cf745a2e4ec9ccd0ee35e5a9d6b20b60c0d05e",
+        "backend/app/domains/routines/service/tendency_analysis.py": "f27bbd3b8972e8648487c579a76e16549e427300",
+        "backend/app/runtime/resident/tendency_analysis.py": "f8398b4241cec1f19ac8ed46bc0d62f91b1aa483",
+        "backend/tests/routines/test_tendency_result_transaction.py": "652428e539192c7fa4e6579090c6af06fae11d01"
+      },
+      "test_nodes": [
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[direct]",
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_tendency_result_transaction.py": {
+          "test_tendency_result_is_evaluated_after_setting_commit_before_activity_log": [
+            "assert observed == [('after', None, [])]",
+            "assert ordering.index('commit') < ordering.index('user-read') < ordering.index('result')",
+            "assert ordering.index('commit') < ordering.index('character-read') < ordering.index('result')",
+            "assert db.get(AgentActivitySetting, character.id) is setting",
+            "assert setting.tendency_updated_at is not None",
+            "assert durable_setting is not None",
+            "assert durable_setting.tendency_action_ranges == {'post': {'min': 1, 'max': 2}}",
+            "assert durable_setting.planner_tendency_profile == {'feed_seed_interest_criteria': 'fixture'}",
+            "assert log is not None",
+            "assert (log.user_id, log.character_id, log.action_type, log.target_post_id, log.reason, log.result) == (user.id, character.id, 'tendency_analyzed', None, reason, result_text)",
+            "assert durable_setting is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_tendency_result_transaction.py": {}
+      }
+    },
+    {
+      "commit": "0299586cc9436f5ad02147e229b0c90dc2e231e6",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(identity): own character credential management and scope",
+      "tracked_files": {
+        "backend/app/domains/identity/service/credential_management.py": "92662fd09ceacf4d52c44e80b3faf2b2787bb791",
+        "backend/app/domains/world_characters/repository/__init__.py": "da377944dd7efbf5c1a75e4b329366298938d35f",
+        "backend/app/domains/world_characters/repository/credential_scope.py": "0777801d8ab9cb307bd2442dc802e44da80a55d3",
+        "backend/app/domains/worlds/repository/__init__.py": "e60e31495849b935557a8c435f7f7b20f6048840",
+        "backend/app/domains/worlds/repository/credential_scope.py": "d946317189427c821eab62ba757b49f8c4f8154d",
+        "backend/tests/identity/test_character_credential_transaction.py": "6e78bc39545122921f33e389f73a3ab0614ed470"
+      },
+      "test_nodes": [
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+      ],
+      "test_assertions": {
+        "tests/identity/test_character_credential_transaction.py": {
+          "test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot": [
+            "assert observed == [('character', True, True)]",
+            "assert db.get(Character, 'character') is character",
+            "assert db.get(LlmCredential, 'credential') is credential",
+            "assert session is db",
+            "assert character_id == 'character'",
+            "assert enabled is False",
+            "assert setting.auto_enabled is False",
+            "assert slot.assigned_character_id is None",
+            "assert credential.enabled is True",
+            "pytest.raises(RuntimeError, match='synthetic world write failure')",
+            "assert durable_character.status == 'active'",
+            "assert durable_credential.enabled is True",
+            "assert durable_credential.encrypted_api_key == 'synthetic-envelope'",
+            "assert durable_credential.key_fingerprint == 'synthetic-fingerprint'",
+            "assert durable_slot.assigned_character_id == 'character'",
+            "assert durable_setting.auto_enabled is True",
+            "assert durable_character.status == 'inactive'",
+            "assert durable_credential.enabled is False",
+            "assert durable_credential.encrypted_api_key is None",
+            "assert durable_credential.key_fingerprint is None",
+            "assert durable_credential.cooldown_until is None",
+            "assert durable_slot.assigned_character_id is None",
+            "assert durable_setting.auto_enabled is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_character_credential_transaction.py": {}
+      }
+    },
+    {
+      "commit": "3c398f3cf9c71cc1e6328cbfb4122cbf7c5df74e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor: give writer policy and provider execution actual owners",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/writing.py": "6a293624aeaea23cd416a154e5e5c243be38339d",
+        "backend/app/domains/routines/service/writing_prompts.py": "60c0e31573775e687c259469f4536fc9079ab8e8",
+        "backend/app/domains/routines/service/writing_results.py": "6ab83049b411f5ff56ba12d5ef56468da1748674",
+        "backend/app/runtime/resident/writing.py": "e1dcccffb700b8f543e473e2ff62ed0f30c94428",
+        "backend/tests/routines/test_writing_composition.py": "5a3cc2573a557a05e6923fa18934b53a3ed11cba"
+      },
+      "test_nodes": [
+        "tests/routines/test_writing_composition.py::test_composition_records_provider_usage_before_response_validation[not JSON]",
+        "tests/routines/test_writing_composition.py::test_composition_records_provider_usage_before_response_validation[{\"reply\":{\"body\":\"hello\"}}]",
+        "tests/routines/test_writing_composition.py::test_existing_daypart_writer_keeps_event_identity_and_single_commit",
+        "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+        "tests/routines/test_writing_composition.py::test_gateway_writer_rejects_active_event_loop_before_provider_call",
+        "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+        "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]",
+        "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+      ],
+      "test_assertions": {
+        "tests/routines/test_writing_composition.py": {
+          "_gateway_inputs": [],
+          "test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract": [
+            "assert result == {'status': 'completed', 'text': '{\"body\":\"hello\"}'}",
+            "assert [name for name, _ in calls] == ['client', 'run']",
+            "assert request['session_key'] == f'daypart-memory:scratch:writing-composition-create_post:run-1:{brief_hash}'",
+            "assert request['idempotency_key'] == f'run-1-writing-composition-create_post-{brief_hash}'",
+            "assert request['tool_auth_key'] == 'tool-auth-test'",
+            "assert request['tool_choice'] == 'none'",
+            "assert request['tools_allow'] == ['angmoo_list_feed']",
+            "assert request['auth_profile_id'] == 'profile-1'",
+            "assert request['extra_system_prompt'] == 'original prompt'",
+            "assert request['stream_params'] == {}"
+          ],
+          "test_gateway_writer_rejects_active_event_loop_before_provider_call": [
+            "assert provider_calls == []",
+            "pytest.raises(WritingCompositionError, match='active event loop')"
+          ],
+          "test_writing_lane_preserves_other_run_state_and_commits_same_session_once": [
+            "assert calls == [('get', models.AgentRun, 'run-1'), ('commit',)]",
+            "assert run.gateway_result['session_context'] == {'memory_session_key': 'memory-1'}",
+            "assert run.gateway_result['writing_composition_lanes'][0] == {'status': 'completed', 'kind': 'reply'}",
+            "assert lane['kind'] == 'create_post'",
+            "assert lane['runId'] == 'gateway-run'",
+            "assert lane['llmUsage']['providerCallCount'] == 1",
+            "assert lane['llmUsage']['failedProviderCallCount'] == 0",
+            "assert lane['llmUsage']['totalTokens'] == 42"
+          ],
+          "test_composition_records_provider_usage_before_response_validation": [
+            "assert events == ['character', 'credential', 'setting', 'state', 'prompt', 'provider', 'record']",
+            "assert session is db",
+            "assert session is db and actual_run is run",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db",
+            "assert session is db",
+            "pytest.raises(WritingCompositionInvalidError, match='composition did not return JSON')",
+            "assert payload == {'body': 'hello'}",
+            "assert usage == {'providerCallCount': 1}",
+            "assert lore is None"
+          ],
+          "test_writer_admits_before_composition_and_records_memory_after_social_write": [
+            "assert result['status'] == 'ok'",
+            "assert result['kind'] == kind",
+            "assert result['post'] is post",
+            "assert result['action_memory']['source_post'] == ('target-post' if kind == 'reply' else None)",
+            "assert session is db",
+            "assert action_memory['post_id'] == 'created-post'",
+            "assert events == ['run', 'user', 'gate', 'compose', 'social', 'lore', 'memory']",
+            "assert events == ['run', 'user', 'gate', 'target', 'thread', 'compose', 'social', 'memory']",
+            "assert session is db"
+          ],
+          "test_existing_daypart_writer_keeps_event_identity_and_single_commit": [
+            "assert event.character_id == 'character-1'",
+            "assert event.run_id == 'run-1'",
+            "assert event.source_post_id == 'target-1'",
+            "assert event.event_type == 'action_reply'",
+            "assert event.memory_session_key == 'memory-1'",
+            "assert event.daypart_start_date.isoformat() == '2026-09-04'",
+            "assert event.activity_daypart == 'evening'",
+            "assert event.payload is payload",
+            "assert event.summary == 'Saved result'",
+            "assert committed == 'commit'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_writing_composition.py": {}
+      }
+    },
+    {
+      "commit": "6faae3c322cf39e2119125273dec2091e13ff1e8",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): connect activity resource HTTP to actual owners",
+      "tracked_files": {
+        "backend/app/domains/characters/constants.py": "05cae53a5c652f41accc67adcccb1b9424b4142f",
+        "backend/app/domains/operations/__init__.py": "97ee1c1e56a166d7fe2717763089a7652c0a854c",
+        "backend/app/domains/operations/exceptions.py": "3b92e3a9a10d09041d42dd8c67b9c542f649f2ee",
+        "backend/tests/routines/test_activity_http.py": "f950209e3cf01186cf2ba991e0a5f467e224a333"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_http.py": {
+          "test_activity_resource_http_preserves_route_owner_and_request_session": [
+            "assert set(actual) == expected",
+            "assert all((route.endpoint.__module__ == 'app.domains.characters.router' for route in actual.values()))",
+            "assert current is db and principal is user",
+            "assert character_id == 'character'",
+            "assert current is db and principal is user",
+            "assert character_id == 'character'",
+            "assert response.status_code == 200",
+            "assert response.json()['character_id'] == 'character'",
+            "assert calls == ['owned']",
+            "assert response.status_code == 502",
+            "assert response.json() == {'detail': '성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요.'}",
+            "assert calls == ['analysis']",
+            "assert observer.get(AgentActivitySetting, 'character') is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_http.py": {}
+      }
+    },
+    {
+      "commit": "c2ceac3614c21061b9b0239dab99e059f755ddba",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own activity presentation and imported runtime admission",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity_presentation.py": "da2f6c3c08bd93c9c65fad4faff04a90ad0e6d31",
+        "backend/app/domains/routines/service/activity_presentation.py": "5eccc06148b4fa6f8f99cc0b7f676fe5b28fe2a3",
+        "backend/app/domains/routines/service/runtime_guards.py": "901f0c4a803e38c4a87cbb45f5d94eaea4b9942b",
+        "backend/tests/routines/test_activity_presentation.py": "6634d20cd752b816abf6d6a3adac4a7d6c05fde7"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+        "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_presentation.py": {
+          "test_activity_target_uses_same_attached_profile_and_preserves_rollback": [
+            "assert result['target_profile_name'] == 'pending'",
+            "assert result['target_profile_type'] == profile_type",
+            "assert getattr(row, field) == 'original'",
+            "assert current is db",
+            "assert result is row",
+            "assert getattr(observer.get(type(row), row.id), field) == 'original'"
+          ],
+          "test_activity_summary_resolves_lazy_counts_in_original_field_order": [
+            "assert calls == ['timezone', 'comment', 'post', 'like']",
+            "assert summary.next_activity_at is None",
+            "assert summary.allowed_actions == ['post', 'like']",
+            "assert summary.max_comments_per_day == 9",
+            "assert summary.max_posts_per_day == 11",
+            "assert current is db and character_id == 'character'",
+            "assert current is db and character_id == 'character'"
+          ],
+          "test_execution_readiness_rejects_missing_setting": [
+            "assert slot_status._has_tendency_analysis(None) is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_presentation.py": {}
+      }
     }
   ]
 }

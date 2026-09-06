@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.runtime.resident import tendency_analysis
 from app.runtime.resident import slots as resident_slots
 
 import asyncio
@@ -19,7 +22,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.routines import constants as agent_run_crud
 from app.domains.world_characters.router.profile import router
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from app.runtime.characters import management as agent_service
 
 
@@ -497,7 +500,7 @@ def test_owner_controlled_execution_preflight_blocks_run_now_and_provider(
             agent_service.AgentExecutionModeError,
             match="owner_controlled_manual_write_not_available",
         ):
-            asyncio.run(agent_service.run_agent_now(db, owner, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, owner, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         credential = models.LlmCredential(
             id="credential-owner-preflight",
