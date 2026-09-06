@@ -29,8 +29,6 @@ Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.
 
-## 목차
-
 AR-F2-C의 공통 화면은 `composition/screens`, 제품 탐색과 shell은
 `composition/shells`, 인증·데스크톱·PWA lifecycle 조립은 `composition/providers`에
 위치한다. Next route와 정적 라우터 모두 이 구현을 사용한다. 제품 중립적인
@@ -39,6 +37,8 @@ Device frame과 링크 표현은 각각 `components/layout`, `components/navigat
 제품 초기화 순서를 재구현하지 않는다. World shell이 조회하는 DTO/API는
 `features/worlds`가 소유한다. 기존 `world-app/public.ts`의 모든 호출자는 실제
 구현으로 전환했고, 다른 미전환 feature의 공개 entry는 후속 단계에서 정리한다.
+
+## 목차
 
 - [프로젝트 구조](#프로젝트-구조)
 - [기능 안에서 코드 나누기](#기능-안에서-코드-나누기)

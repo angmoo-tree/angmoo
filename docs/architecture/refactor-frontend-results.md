@@ -119,9 +119,9 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
   checks SUCCESS, including all five Windows Installer jobs and Host Tauri.
 - Local full backend: 2720 passed, 22 skipped, 28 warnings, 757.97 seconds.
 - Merge `5c967a87cb4b72a51146d15f525a1eec3627a5a3`, 2026-09-07 03:08:15 KST.
-  Post-merge workflows are checked separately before AR-F2-B integration.
-
-## Temporary-file cleanup
+  All seven post-merge workflows are SUCCESS. Windows Installer run 34050757126
+  passed all five build/clean-install/supported-upgrade/failure-recovery/aggregate
+  jobs. AR-F2-A is complete; next-stage integration remains sequential.
 
 ## AR-F2-C product composition preparation
 
@@ -142,8 +142,17 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
 - Preparation validation: TypeScript/ESLint, Node proxy, 324-file source/browser
   preservation and partial architecture checks pass. CI/merge and full runtime
   verification remain pending; this section is not an AR-F2-C completion claim.
+- Next and static production builds PASS; web 21 PASS (47.5s), Settings 2 PASS
+  (8.6s), static direct-open/product behavior 68 PASS (36.0s). Full backend 2730
+  PASS, 22 existing SKIP, 28 warnings (982.82s). The later structure-assertion
+  adjustment preserves pinned historical import topology and independently
+  requires actual current screen/navigation/frame imports. It does not freeze
+  current product behavior tests or replace their fixtures.
+- Source introduction `322130952465bbe350e0a6b63dbb21d0c57eed2f` adds four source
+  files and ten retirement regression nodes; its append-only record is retained.
+  Full preservation gate and CI must pass before marking this stage complete.
 
-## Temporary-file cleanup (continued)
+## Temporary-file cleanup
 
 User authorized cleanup of obsolete backend-refactor temporary files. Check
 actual worktree/process consumers and document/evidence links first. Preserve
@@ -214,3 +223,7 @@ committed history were deleted.
   the full preservation guard passes: 2742 protected/current nodes, 37 contracts.
   The AR-F2-A merge is an ancestor of this branch; no introduction commit or
   frozen checkpoint was rewritten while preparing the sequential integration.
+- PR #293 first backend CI found the current Next/static compatibility inventory
+  still contained 13 pre-move route hashes. Regenerate with the existing embedded
+  inventory tool: only those current hashes change, with 44 routes and all
+  capability classifications retained. This is not a frozen-oracle refresh.
