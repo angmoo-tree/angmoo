@@ -6,12 +6,10 @@ import sqlite3
 
 import pytest
 
-from app.domains.runtime.ports.search_index import (
-    RebuildableSearchIndexPort,
-    SearchIndexDocument,
-    SearchIndexQuery,
-)
-from app.domains.runtime.ports.vector_recall import VectorRecallPort
+from app.domains.runtime.contracts.search import RebuildableSearchIndexPort
+from app.domains.runtime.contracts.search import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexQuery
+from app.domains.runtime.contracts.vector_recall import VectorRecallPort
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search.sqlite_fts5 import (
     SqliteFts5SchemaError,
@@ -265,7 +263,7 @@ def test_duplicate_rebuild_and_unversioned_projection_fail_closed(
 def test_vector_recall_is_a_domain_port_only_and_has_no_runtime_adapter() -> None:
     assert isinstance(VectorRecallPort, type)
     app_root = Path(__file__).parents[1] / "app"
-    port_path = app_root / "domains" / "runtime" / "ports" / "vector_recall.py"
+    port_path = app_root / "domains" / "runtime" / "contracts" / "vector_recall.py"
     tree = ast.parse(port_path.read_text(encoding="utf-8"), filename=str(port_path))
     imports = [
         node.module

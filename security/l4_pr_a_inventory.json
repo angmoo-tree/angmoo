@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3065,
-      "internal_edge_count": 4053,
+      "external_import_count": 3119,
+      "internal_edge_count": 4090,
       "legacy_import_exception_count": 0,
-      "module_count": 1093,
+      "module_count": 1105,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2836,7 +2836,7 @@
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
-        "sha256": "4219f15fa246ba989a6a951d2a45e9be9d597930679df3a108c3ca9cafc7ab08"
+        "sha256": "4cd38085083a1072408e27d880d15e8b2b143e0a9c8763eab411853d304b2fd0"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2852,7 +2852,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "d6fc9721d5bd6beeb521667fdcd2adc1d11a367c56d07da981d828ebbfd1330f"
+        "sha256": "8a305968879404adf11034a9f2053bfcdd95d6b8ba66597dd248fcbb6d83d832"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2888,7 +2888,7 @@
       },
       {
         "path": "backend/tests/social/test_world_feed_search.py",
-        "sha256": "6a3e9f78f5dd68ad4d61de505a56da9989f5f01225fb58ee0810da63981d90f3"
+        "sha256": "953a2d07824108154409f3247cb7ef162a0ebd9ee98d7eab458db8a82a3ddeb6"
       }
     ],
     "parity_test_node_count": 99,

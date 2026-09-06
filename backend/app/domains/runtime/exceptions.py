@@ -33,3 +33,19 @@ class ResidentRuntimeRegistrationError(ResidentRuntimeError):
 # Historical API names identify the exact same runtime-neutral classes.
 OpenClawGatewayError = ResidentRuntimeError
 OpenClawGatewayAuthError = ResidentRuntimeAuthError
+
+
+class SchedulerLeaseError(RuntimeError):
+    reason_code = "scheduler_lease_error"
+
+
+class SchedulerLeaseHeldError(SchedulerLeaseError):
+    reason_code = "scheduler_lease_held"
+
+
+class SchedulerLeaseLostError(SchedulerLeaseError):
+    reason_code = "scheduler_lease_lost"
+
+
+class SchedulerFenceRejectedError(SchedulerLeaseLostError):
+    reason_code = "scheduler_fence_rejected"

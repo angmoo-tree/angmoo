@@ -7,7 +7,7 @@ import hashlib
 from pathlib import Path
 
 from app.core.db import create_database_engine, create_session_factory
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.integrations.ladybug_projection import (
     LADYBUG_PROJECTION_SCHEMA_VERSION,
     LadybugProjectionError,

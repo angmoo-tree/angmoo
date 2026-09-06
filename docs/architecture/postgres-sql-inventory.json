@@ -887,22 +887,32 @@
     {
       "markers": {
         "advisory_lock": [
-          334
+          25
         ],
         "driver_or_url": [
-          332
+          1,
+          23
         ],
         "row_lock": [
-          138,
-          146,
-          265,
-          297
+          34
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "path": "backend/app/domains/runtime/repository/scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0705f88e673cee4c3d3c726e39e72b209866d76898a4832e24e18c8ef7235e5e",
+      "source_sha256": "c9efa2143284dd73e2ec9fcc0273d6df5f37bbc074029211d9c41677bf62fee3",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          22
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/runtime/service/sqlite_lease.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "a529e3220db7144aa2f845f2b2152de76bf5d8d5ce0bb01425af75c2c0b4741e",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1195,6 +1205,18 @@
     },
     {
       "markers": {
+        "row_lock": [
+          15
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/persistence/scheduler_lease.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "c29ae077be030addf153be4c1574b5d5b9d4dd2e709aa8dde2a3228f5b3b6ca3",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "pgvector": [
           80
         ]
@@ -1203,18 +1225,6 @@
       "path": "backend/app/runtime/persistence/sqlite_codecs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "d1ad4a897ce41fc80e988fcdf1db8314d378fa21ef431541a700c9575e634c52",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
-          36
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "2ab63358f059bad3e0aa95fdbbb7866a4516b0457ad717be1a07bc5522fea9ce",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1374,13 +1384,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 91,
+  "entry_count": 92,
   "marker_counts": {
     "advisory_lock": 11,
     "driver_or_url": 52,
     "jsonb": 11,
     "pgvector": 5,
-    "row_lock": 40,
+    "row_lock": 41,
     "skip_locked": 10
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

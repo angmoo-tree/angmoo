@@ -313,6 +313,8 @@ def create_app(
 
     from app.runtime.chat.message_composition import configure_chat_services
     configure_chat_services(runtime_app)
+    from app.runtime.diagnostics.http import configure_runtime_diagnostics
+    configure_runtime_diagnostics(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
     from app.runtime.characters.management import build_character_credential_workflows
@@ -403,10 +405,8 @@ def runtime_health(request: Request) -> dict[str, object]:
         with composition.session_factory() as db:
             db.execute(text("SELECT 1")).scalar_one()
 
-        from app.domains.runtime.public import (
-            RuntimeComponentState,
-            component_observations,
-        )
+        from app.domains.runtime.contracts.status import RuntimeComponentState
+        from app.domains.runtime.service.components import component_observations
         from app.runtime.component_workers import (
             borrow_runtime_graph_client,
         )

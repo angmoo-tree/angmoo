@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.integrations.ladybug_projection import (
     LADYBUG_PROJECTION_SCHEMA_VERSION,
     LadybugRelationshipProjection,

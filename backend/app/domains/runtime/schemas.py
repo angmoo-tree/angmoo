@@ -5,14 +5,12 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
-from app.domains.runtime.domain.installation_state import (
-    RUNTIME_STATUS_SCHEMA_VERSION,
-    ApplicationRuntimeStatus,
-    InstallationState,
-    ProviderFailureClass,
-    RuntimeComponentState,
-)
+from app.domains.runtime.constants import RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import RUNTIME_STATUS_SCHEMA_VERSION
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState
+from app.domains.runtime.contracts.status import ProviderFailureClass
+from app.domains.runtime.contracts.status import RuntimeComponentState
 
 
 class RuntimeStatusSchema(BaseModel):

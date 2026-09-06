@@ -1086,7 +1086,37 @@
       "app.domains.operations.repository",
       "app.domains.operations.schemas",
       "app.domains.operations.service.maintenance",
-      "app.domains.operations.service.settings"
+      "app.domains.operations.service.settings",
+      "app.domains.identity.repository.runtime_access",
+      "app.domains.identity.service.runtime_access",
+      "app.domains.runtime.constants",
+      "app.domains.runtime.contracts.components",
+      "app.domains.runtime.contracts.data_paths",
+      "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.http",
+      "app.domains.runtime.contracts.lease",
+      "app.domains.runtime.contracts.lease_store",
+      "app.domains.runtime.contracts.release",
+      "app.domains.runtime.contracts.search",
+      "app.domains.runtime.contracts.status",
+      "app.domains.runtime.contracts.status_queries",
+      "app.domains.runtime.contracts.status_reader",
+      "app.domains.runtime.contracts.transaction",
+      "app.domains.runtime.contracts.vector_recall",
+      "app.domains.runtime.dependencies",
+      "app.domains.runtime.exceptions",
+      "app.domains.runtime.models",
+      "app.domains.runtime.policies.lease",
+      "app.domains.runtime.repository.scheduler_lease",
+      "app.domains.runtime.repository.sqlite_lease",
+      "app.domains.runtime.repository.status",
+      "app.domains.runtime.router",
+      "app.domains.runtime.schemas",
+      "app.domains.runtime.service.components",
+      "app.domains.runtime.service.lease_coordinator",
+      "app.domains.runtime.service.scheduler_lease",
+      "app.domains.runtime.service.sqlite_lease",
+      "app.domains.runtime.service.status"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1534,7 +1564,27 @@
       "app.domains.operations.schemas",
       "app.domains.operations.service.maintenance",
       "app.domains.operations.service.settings",
-      "app.domains.social.exceptions"
+      "app.domains.social.exceptions",
+      "app.domains.identity.service.runtime_access",
+      "app.domains.runtime.contracts.components",
+      "app.domains.runtime.contracts.data_paths",
+      "app.domains.runtime.contracts.execution_errors",
+      "app.domains.runtime.contracts.http",
+      "app.domains.runtime.contracts.lease",
+      "app.domains.runtime.contracts.lease_store",
+      "app.domains.runtime.contracts.release",
+      "app.domains.runtime.contracts.search",
+      "app.domains.runtime.contracts.status",
+      "app.domains.runtime.contracts.status_queries",
+      "app.domains.runtime.contracts.status_reader",
+      "app.domains.runtime.contracts.transaction",
+      "app.domains.runtime.contracts.vector_recall",
+      "app.domains.runtime.schemas",
+      "app.domains.runtime.service.components",
+      "app.domains.runtime.service.lease_coordinator",
+      "app.domains.runtime.service.scheduler_lease",
+      "app.domains.runtime.service.sqlite_lease",
+      "app.domains.runtime.service.status"
     ],
     "bridges": [
       {
@@ -2124,14 +2174,6 @@
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.creator",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.runtime_boundary",
-        "target": "app.domains.runtime.contracts",
         "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
         "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
@@ -2967,6 +3009,22 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
         "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.runtime_boundary",
+        "target": "app.domains.runtime.exceptions",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.runtime.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove the Runtime model aggregate exports when their actual callers and G5 model registration consume the defining role before AR-B8-B.",
+        "reason": "Existing Runtime aggregate exposes the same moved scheduler ORM class during the bounded source transition.",
         "review_date": "2026-09-06"
       }
     ]

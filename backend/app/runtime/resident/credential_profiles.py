@@ -7,7 +7,7 @@ from app.credentials import CredentialPurpose, CredentialResolutionError, Creden
 from app.domains.characters.models import Character
 from app.domains.identity.models import LlmCredential
 from app.domains.routines.exceptions import CredentialRequiredError, CredentialSyncError
-from app.domains.runtime.contracts import ResidentRuntimeError as OpenClawGatewayError
+from app.domains.runtime.exceptions import ResidentRuntimeError as OpenClawGatewayError
 
 
 class SecretReloadClient(Protocol):

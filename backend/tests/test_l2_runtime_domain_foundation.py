@@ -5,7 +5,45 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from pydantic import ValidationError
 
-from app.domains.runtime import public as runtime
+from types import SimpleNamespace as _RuntimeTestNamespace
+from app.domains.runtime.contracts.status import ActivityRuntimeStatus as _runtime_ActivityRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus as _runtime_ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState as _runtime_InstallationState
+from app.domains.runtime.schemas import LocalRuntimeStatusRead as _runtime_LocalRuntimeStatusRead
+from app.domains.runtime.contracts.status import MigrationRuntimeStatus as _runtime_MigrationRuntimeStatus
+from app.domains.runtime.contracts.status import OwnerRuntimeStatus as _runtime_OwnerRuntimeStatus
+from app.domains.runtime.contracts.status import ProjectorRuntimeStatus as _runtime_ProjectorRuntimeStatus
+from app.domains.runtime.contracts.status import ProviderFailureClass as _runtime_ProviderFailureClass
+from app.domains.runtime.contracts.status import ProviderUsageRuntimeStatus as _runtime_ProviderUsageRuntimeStatus
+from app.domains.runtime.service.status import ReadApplicationRuntimeStatus as _runtime_ReadApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import RuntimeCapabilityStatus as _runtime_RuntimeCapabilityStatus
+from app.domains.runtime.contracts.status import RuntimeComponentState as _runtime_RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus as _runtime_RuntimeComponentStatus
+from app.domains.runtime.contracts.status import RuntimeDependencyStatus as _runtime_RuntimeDependencyStatus
+from app.domains.runtime.constants import RuntimeDiagnosticCode as _runtime_RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import SchedulerRuntimeStatus as _runtime_SchedulerRuntimeStatus
+from app.domains.runtime.schemas import runtime_status_read as _runtime_runtime_status_read
+
+# Preserve the original test namespace with the same actual role objects.
+runtime = _RuntimeTestNamespace(
+    ActivityRuntimeStatus=_runtime_ActivityRuntimeStatus,
+    ApplicationRuntimeStatus=_runtime_ApplicationRuntimeStatus,
+    InstallationState=_runtime_InstallationState,
+    LocalRuntimeStatusRead=_runtime_LocalRuntimeStatusRead,
+    MigrationRuntimeStatus=_runtime_MigrationRuntimeStatus,
+    OwnerRuntimeStatus=_runtime_OwnerRuntimeStatus,
+    ProjectorRuntimeStatus=_runtime_ProjectorRuntimeStatus,
+    ProviderFailureClass=_runtime_ProviderFailureClass,
+    ProviderUsageRuntimeStatus=_runtime_ProviderUsageRuntimeStatus,
+    ReadApplicationRuntimeStatus=_runtime_ReadApplicationRuntimeStatus,
+    RuntimeCapabilityStatus=_runtime_RuntimeCapabilityStatus,
+    RuntimeComponentState=_runtime_RuntimeComponentState,
+    RuntimeComponentStatus=_runtime_RuntimeComponentStatus,
+    RuntimeDependencyStatus=_runtime_RuntimeDependencyStatus,
+    RuntimeDiagnosticCode=_runtime_RuntimeDiagnosticCode,
+    SchedulerRuntimeStatus=_runtime_SchedulerRuntimeStatus,
+    runtime_status_read=_runtime_runtime_status_read,
+)
 
 
 class FakeApplicationRuntimeProbe:

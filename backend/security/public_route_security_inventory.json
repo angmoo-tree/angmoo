@@ -354,7 +354,7 @@
     },
     "GET /api/v1/runtime/status": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.runtime_status",
+      "module": "app.domains.runtime.router",
       "endpoint": "get_runtime_status"
     },
     "GET /api/v1/search": {

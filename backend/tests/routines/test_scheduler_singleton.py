@@ -12,17 +12,15 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.domains.runtime.public import (
-    SchedulerFenceRejectedError,
-    SchedulerLeaseCoordinator,
-    SchedulerLeaseHeldError,
-    SchedulerLeaseLostError,
-    SchedulerTickPermit,
-    SchedulerTickResult,
-    SqlAlchemySchedulerLeaseRepository,
-    decide_tick_window,
-    scheduler_fence,
-)
+from app.domains.runtime.exceptions import SchedulerFenceRejectedError
+from app.domains.runtime.service.lease_coordinator import SchedulerLeaseCoordinator
+from app.domains.runtime.exceptions import SchedulerLeaseHeldError
+from app.domains.runtime.exceptions import SchedulerLeaseLostError
+from app.domains.runtime.contracts.lease import SchedulerTickPermit
+from app.domains.runtime.contracts.lease import SchedulerTickResult
+from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
+from app.domains.runtime.policies.lease import decide_tick_window
+from app.runtime.persistence.scheduler_fence import scheduler_fence
 from app.runtime.resident import scheduler as resident_tick_scheduler
 
 

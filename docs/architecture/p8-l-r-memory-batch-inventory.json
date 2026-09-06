@@ -308,7 +308,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "fcfea744b7521126f8b9b4674d52df9a7672b6eb2e74661be28a36e1fe0e96ea"
+      "sha256": "01840f8dbaceefbfdd7c037b7f1b89a192a1cc7c5a9a38567103bd301f1abbeb"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -376,7 +376,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
-      "sha256": "8fe5cc0923eb59d20c876882c8ac7316425d5993f63015b282d95a7c6081a281"
+      "sha256": "86f0b12a1a9fbcb3c5f33983158e3bae55a71ce76a3c625c124bbfa6b1727aac"
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
@@ -404,7 +404,7 @@
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
-      "sha256": "8da1ec46358cc86f07709458a33ed98234e643e6b0e903d5fcd7e71ed160bf08"
+      "sha256": "2eeb2d6850f68232168ac34147e5736d31101eaa817b7693ebb4869d0c3b5cc7"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",

@@ -1132,3 +1132,11 @@ LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 
 공통 HTTP Authorization 문법은 `app/api/authorization.py`에서 해석합니다. Identity와 LocalBot의 권한 정책은 각자의 서비스에 남아 있습니다. 다른 업무의 실제 오류 클래스를 처리할 때는 검사 정책에 정확한 `exceptions` 모듈을 공개 entry로 등록할 수 있습니다. 이것은 하위 모듈·router·models·repository 접근을 허용하지 않으며, 오류 모듈의 DB·프레임워크 의존도 계속 금지합니다.
 
 Bot 쓰기에서 할당량 잠금, 지연 commit 구간, 성공 기록과 실패 rollback의 순서는 업무 계약입니다. 이미지 생성 요청은 원래 게시 성공 후 위치를 유지합니다. 상태 저장은 일일 사용량을 늘리지 않고 마지막 성공 시각으로 재호출 간격을 제한합니다. 반환 DTO는 소유자 id·토큰·private persona를 포함하지 않습니다.
+
+### Runtime 진단과 실행 잠금의 소유권
+
+`domains/runtime/router.py`는 소유자용 `/runtime/status` HTTP와 응답 형식을 담당합니다. InstallationIdentity의 같은 Session 조회와 claimed-owner 판단은 `identity/repository/runtime_access.py` 및 `identity/service/runtime_access.py`에 있습니다. 상태의 privacy-safe 분류와 component overlay는 Runtime `service/status.py`, `service/components.py`에서 읽을 수 있습니다. 다른 업무의 실제 상태 조회와 reader 생성은 `runtime/diagnostics`가 연결하며, 두 앱 생성 profile은 이 reader factory를 한 번 등록합니다.
+
+`RuntimeSchedulerLease` ORM은 Runtime의 `models.py`에 있습니다. 잠금 획득·heartbeat·tick·해제·오래된 실행자 거부 규칙은 `service/scheduler_lease.py`와 `service/sqlite_lease.py`, 실제 SQL과 compare-and-set 조건은 같은 이름의 `repository` 파일이 담당합니다. `runtime/persistence/scheduler_lease.py`는 SQLAlchemy Session factory와 Identity 조회를 연결하고, `sqlite_scheduler_lease.py`는 SQLite engine·읽기 connection·BEGIN IMMEDIATE 재시도·시계를 연결합니다. `scheduler_fence.py`는 실행 context와 단일 before-commit hook의 수명을 담당합니다.
+
+도메인 밖에서 필요한 Runtime 값과 callback 계약은 `contracts/status.py`, `lease.py`, `lease_store.py`, `search.py`, `transaction.py` 등 실제 정의 파일에서 import합니다. 기존 `public.py`와 `api/application/domain/infrastructure/ports` 집합 export는 제거했습니다. 옛 assertion을 보존하는 두 테스트의 local namespace는 동일한 실제 타입과 함수만 묶으며 제품 코드가 사용하지 않습니다. 공통 Base·DB·모델 등록의 G5 통합과 G06 진입점 최종 정리는 이 역할 배치와 구분하여 검증합니다.

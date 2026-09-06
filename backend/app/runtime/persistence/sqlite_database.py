@@ -14,10 +14,8 @@ from typing import Any
 from sqlalchemy import Engine, URL, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.domains.runtime.ports.runtime_data_path import (
-    RuntimeDataPathPort,
-    RuntimeDataPaths,
-)
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
+from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
 from app.runtime.persistence.sqlite_codecs import (
     decode_json_document,
     encode_json_document,
