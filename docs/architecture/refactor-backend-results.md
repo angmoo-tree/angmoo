@@ -2026,3 +2026,12 @@ B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock
 수정 source `9a7f76d`와 최초 도입 원장 metadata `0108a3a`를 signed로 고정한 뒤 전체 backend가 **2,362 PASS /기존 skip22 /warning27 /733.18초**로 통과했다. 동일 source의 원래 stock 검사도 **보호2,384 /현재2,384 /37항목 PASS**다. 원래 tendency 단언의 중복 import만 정리한 별도4개 회귀도 통과했으며, 전체 실행 중 source/test/metadata를 편집하지 않았다. 최초20개 실패 이력은 위 기록에 유지한다.
 
 같은 커밋의 Gitleaks 추적 source와 HEAD 전체 조상 history는 모두0 leaks, DCO·secret metadata25·Local OSS/CI policy·frontend design은 PASS다. 원래 custom scanner의 현재 Git tree는2,081파일/치명0이다. 공유 개발 저장소의 `--history`는 `--all`을 읽기 때문에 미합류 B8 `3500f3f`의 신규 `tests/integrations/test_direct_llm.py`에서3개 synthetic fixture 오탐을 발견했다. 그 경로와 blob `a464aad`는 B5 HEAD 조상에 없고 해당 B8 source가 자기 경로의 기존 exact allowlist를 이미 이전했다. B5에 미래 예외를 추가하지 않고, 후보 전체 조상만 있는 별도 bare 저장소에서 원래 history 검사를 그대로 실행해 PR 범위 결과를 분리한다. PR required CI와 병합 후 실행·installer Gate는 아직 완료로 표시하지 않는다.
+
+
+### PR #283 첫 원격 Gate와 실행 경로 검사 보완
+
+Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 현재 Memory batch inventory hash 5개에서, Local autonomy는 옛 `tests/test_activity_proposal_runtime.py` 실행 인자에서 실패했다. 제품 소스/원래 테스트 단언을 추가 수정하지 않고 검토된 실제 `tests/relationships/test_activity_proposals.py`를 실행하도록 연결하고 현재 inventory만 원래 generator로 갱신했다. immutable Today predecessor와 모든 schema/budget 계약은 유지했다.
+
+전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
+
+Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.

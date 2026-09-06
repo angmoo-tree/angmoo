@@ -164,7 +164,7 @@ jobs:
             tests/social/test_feed_reaction_intent.py \
             tests/social/test_world_feed_search.py \
             tests/relationships/test_social_event_runtime.py \
-            tests/test_activity_proposal_runtime.py
+            tests/relationships/test_activity_proposals.py
 
   local-full-graph:
     runs-on: ubuntu-latest
