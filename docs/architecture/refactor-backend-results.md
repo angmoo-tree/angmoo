@@ -2839,3 +2839,11 @@ ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_g
 Backend ARCHITECTURE는 기여자가 업무와 역할, 실제 호출자, Session/원본/AI/앱 생성/설치 경계를 찾도록 다시 정리했다. 현재 도메인 지도·공개 기여 지도·구조 개요도 같은 설명으로 연결하고, 이전 T2.5 도메인 지도는 별도 역사 문서에 원문을 보관했다. 공통 Gemini adapter, 업무별 client, 다중 업무 HTTP 응답 조립의 실제 위치를 명시했다. 한국어 기여 가이드의 SQLite 개발 container에 과거 PostgreSQL Alembic 전체를 실행하는 명령은 제거해 영문/공식 embedded 실행 경로와 맞췄다.
 
 현재 Memory batch hash와 ER0 목록도 실제 source로 갱신했다. ER0의92→91은 제거한 runtime.chat.sqlalchemy_service의 옛 URL 문자열 행이 사라진 결과이며, 실제 모델/SQL 또는 역사 migration을 삭제한 결과가 아니다. Public docs/OSS/current inventory/CI policy 검사를 통과했다. 전체 백엔드·순차 PR별 원본 도입 원장/stock·최종 실행/설치 및 post-merge 종료는 아직 진행 중이며, 이 준비 결과를 AR-B8-B 전체 완료로 표시하지 않는다.
+
+## AR-B8-G07 — 남은 LocalBot·Media·공통 정책 테스트 소유
+
+기준 `7ada864c5a3a77ddd601d0faed81577615b5af0f`의 실제 업무 테스트 여섯 파일을 기존 소유 폴더로 이전했다. LocalBot의 응답·rate limit·원자적 quota는 `tests/local_bot/{test_response_contract,test_rate_limit,test_atomic_quota}.py`, 이미지 파일 저장·정제는 `tests/media/test_profile_media.py`, 공통 prompt 안전성과 텍스트 정제는 `tests/common/{test_prompt_safety,test_context_text}.py`에서 찾는다. 빈 옛 파일이나 새 검증 함수를 만들지 않았다.
+
+다섯 파일은 byte-identical 이동이다. LocalBot OpenAPI 검사는 폴더 깊이에 따라 `Path(__file__).resolve().parents[2]`만 `parents[3]`으로 변경해 같은 저장소의 `frontend/public/openapi.json`을 읽는다. 이 정확한 물리 경로 보정을 복원하면 여섯 전체 모듈 AST가 원본과 같으며, 최상위 함수·class55개와 기존 assertion107개·decorator·fixture·provider/Session 호출은 모두 유지된다.
+
+이동 전후 실제 수집은 **65 → 65**, 일대일이며 신규·누락·중복0이다. 새 위치의 전체 영향 **65 passed / 5.52초**, 원래 체크포인트/후속 증거의 해당 assertion·suppression 검사0, 승인 public604 보존과 현재 전체 public2683 수집도 통과했다. 기존 split의 직접 소비자29개·행위 node381개는 정확한 새 경로로 연결했다. CI의 현재 literal 소비는 없고 backend 전체 suite가 새 파일을 수집한다. P8-L-B의 현행 검증 명령은 실제 Chat/Common 테스트 경로와 backend 실행 디렉터리를 사용한다. 제품 코드·feature inventory·원본 baseline/checkpoint/additions·동결 자료는 변경하지 않았으며 최종 통합/stock/Hosted Gate는 부모가 진행한다.
