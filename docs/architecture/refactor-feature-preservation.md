@@ -1,3 +1,108 @@
+# Angmoo 기능 보존과 현재 코드 읽기 지도
+
+기능을 수정할 때는 [Backend ARCHITECTURE](../../backend/ARCHITECTURE.md)의 역할 설명과 [기능 inventory](../../security/refactor_feature_inventory.json)의 현재 경로를 함께 확인한다. 이 문서는 기능별 실제 구현과 그 기능을 보존하는 증거의 관계를 설명한다. 원래 파일이 여러 업무로 나뉜 경우 대표 파일 하나가 원래 기능 전체를 대신하지 않는다.
+
+## 현재 적용 범위와 검증 상태
+
+이 읽기 지도의 코드 기준은 AR-B8 통합 준비 source `7ada864c5a3a77ddd601d0faed81577615b5af0f`다. 백엔드 업무·공통 기반의 실제 소유 위치, 삭제된 집계 파일의 후속 구현, 현재 소비자와 테스트 경로를 반영했다. `MOVED`는 이 코드 이전을 뜻하며 **최종 통합 CI·설치·업그레이드·실패 복원 검증을 새로 통과했다는 뜻은 아니다.** 해당 결과와 정확한 PR·merge commit은 [백엔드 전환 결과](refactor-backend-results.md)에서 확인한다.
+
+Device Home의 기존 `VERIFIED` 파일럿 증거는 유지한다. 프론트엔드의 AR-F2 이후 전환과 AR-X는 별도 단계다. 백엔드가 이전돼도 해당 기능의 `frontend_status`가 `MAPPED`이면 전체 `status`도 `MAPPED`로 남긴다. P8-L-S의 실제 AI 품질·인과·사용자 closeout 또한 이 문서의 코드 이전 판정과 구분한다.
+
+현재 G07에서 별도 source로 준비하는 테스트 6개는 이 기준에 아직 합류하지 않았다. LocalBot 응답·rate limit·atomic quota는 `tests/local_bot`, profile media는 `tests/media`, prompt safety와 context text는 `tests/common`으로 옮기는 후속이다. 현재 inventory는 이 파일들이 실제 존재하는 기준 경로를 유지하며, 부모 통합에서 그 source의 정확한 이동을 연결한다.
+
+## 현재 경로와 역사적 증거를 읽는 방법
+
+| 자료·필드 | 의미 |
+| --- | --- |
+| inventory의 `current_paths` | 현재 존재하는 구현·지원 파일. 삭제된 빈 marker는 다른 빈 파일로 대체하지 않는다. |
+| `target_paths` | 확정된 백엔드의 실제 역할 위치. 프론트엔드의 미전환 목표 경로는 §8.3에서 구현할 대상으로 유지한다. |
+| `consumers` | 현재 `backend/app` AST에서 해당 항목의 구현 파일을 직접 import하는 제품 모듈. 기존 프론트엔드·기타 비-app 소비자는 유지한다. 모두 HTTP 호출자라는 의미는 아니다. |
+| `test_paths` | 현재 존재하는 연관 회귀 파일. 이 목록만으로 모든 분기·설치 환경이 검증됐다고 판단하지 않는다. |
+| 기록된 `entrypoints`·`test_nodes` | 최초 조사 또는 중간 이전 시점의 symbol/node 연결. 현재 위치는 [경로 대응표](../../security/refactor_path_map.json)의 파일·symbol·node 기록으로 확인한다. |
+| `historical_transition_evidence` | 이전 slice의 설명·검증·당시 잔여 작업. 현재 미구현 목록이나 현재 검증 결과로 해석하지 않는다. |
+| `baseline_commit/tree`·`coverage` | #258 당시 고정 조사 범위와 숫자. 현재 source 수로 덮어쓰지 않는다. |
+| [원본 기준선](../../security/refactor_source_baseline.json)·[후속 체크포인트](../../security/refactor_backend_checkpoint.json)·[추가 이력](../../security/refactor_backend_additions.json) | 원본 source·API·ORM·단언·node와 이후 실제 최초 도입 증거. 현재 목록 정리로 다시 생성하지 않는다. |
+
+소비자 목록은 현재 source의 import 관계를 확인해서 작성한다. 삭제된 `services/agents.py`를 `runtime/characters/management.py` 한 곳으로 바꾸는 것처럼 과거 경로의 대표 대응만 반복 적용하지 않는다. 현재 Character·Routines·Identity 서비스와 runtime 조립 중 어느 파일이 실제 해당 기능을 import하는지 구분한다. 더 세밀한 함수 호출과 같은 Session 협력은 source 및 `split_symbols`의 소비자 증거를 따라간다.
+
+## 기능별 현재 구현
+
+아래 경로는 `backend/app/` 기준이다. 같은 기능에 여러 업무가 참여해도 권한·상태 전이·자기 DB의 실제 소유를 유지한다.
+
+| 기능 ID | 현재 시작 위치와 협력 | 보존하는 경계 |
+| --- | --- | --- |
+| K01 | `domains/identity`·`credentials`·`runtime/account_deletion.py` | 세션·CSRF·credential·동일 Session 삭제/rollback·비공개 미디어 보상 |
+| K02 | `domains/device_home` | Local World 목록·진입/실행가능 표면과 runtime 상태 구분 |
+| K03 | `domains/characters`·`domains/worlds`·`domains/character_lore` | Creator·초안·정의/readiness·문서·모델 소유 |
+| K04 | `domains/world_characters`·`domains/routines/service/plans.py` | 참여·setup 승인·owner control·시간대 후보·flush/commit 순서 |
+| K05 | `domains/routines`·`domains/routine_posts`·`runtime/resident`·`runtime/routines` | 계획·episode·beat·cursor·슬롯·claim·실행·로그·provider 예산 |
+| K06~K07 | `domains/social/service`·`repository`·`runtime/social`·`runtime/search` | 게시·Inbox·관찰·Feed/FTS·현재 World/공개 범위 |
+| K08~K09 | `domains/relationships`·`runtime/relationships`·`runtime/graph_projection` | 사건·관계·outbox 원자 적용과 재구성 가능한 graph |
+| K10 | `domains/world_packages`·`runtime/world_packages` | export/preview/import·archive·lineage·same-Session 원자 적용·파일 보상 |
+| K11 | `domains/media`·Character/Social 미디어 서비스·`integrations`·`providers` | 공유 변환과 업무별 candidate/공개/할당 정책·credential·호출 수 |
+| K12~K13 | `domains/runtime`·`runtime`·`domains/local_bot`·`domains/operations` | sidecar·진단·lease·종료/복구·Bot 권한·설정 의미 |
+| K14·K17 | `domains/chat/router`·`service`·`repository`·`runtime/chat` | World chat identity·thread/message·durable generation·취소·동시성 |
+| K15~K16 | `domains/memory/service`·`repository`·`runtime/memory` | 후보/항목·동의·원본 재검증·정정/삭제·canonical/graph recall |
+| K18 | Chat 응답/근거 서비스·Memory consolidation 서비스 | immutable evidence·CRG NDJSON·모델 snapshot·legacy v1 |
+| K19 | `domains/memory/router.py`·소유 서비스 | inspector·owner control·pin/정정/삭제·충돌 응답 |
+| K20 | Social Today 활동·Chat Today 근거 서비스 | 실제 성공 source·coverage·숨긴 원본 제외·추가 AI 없음 |
+| K21~K23 | Memory batch 준비/선택/예약 서비스·`runtime/memory`·embedded migrations | ON epoch·source 전달·lease/config/model fence·원자 저장·bounded shutdown |
+| K24 | Tree·Operations·공유 core/contracts·`runtime/extensions` | 실제 잔여 업무와 지원 확장 계약. 임시 전달층은 제거하고 필요한 역사적 alias만 유지 |
+
+Chat의 전달 전용 `ChatService`, `ChatRuntimePort`, `GenerationLifecycleService`와 집계 `world_generation`은 현재 구현 위치가 아니다. 실제 Thread·Message·Generation·Evidence 서비스와 `runtime/chat/message_composition.py`를 사용한다. 원래 전달 테스트는 실제 owner의 같은 입력·결과·실패 계약 및 좁은 원문 증명으로 승계한다.
+
+## 공통 기반의 현재 위치
+
+| ID | 현재 실제 소유 | 확인할 계약 |
+| --- | --- | --- |
+| G01 | `app/config.py`·`runtime/configuration.py` | 기본값·설정 우선순위·개발 `.env` 경로·설치 독립성 |
+| G02 | `app/models.py`·`runtime/persistence/model_registration.py`·각 도메인 models | 단일 Base/metadata와 실제 class identity·모델 등록 |
+| G03 | `app/exceptions.py`·소유 도메인 exceptions | HTTP status/code/body·실패/재시도 의미 |
+| G04 | `app/pagination.py`·Device Home/Social cursor 소유 파일 | 공유 bytes codec과 독립적인 payload·암호화·scope·정렬 |
+| G05 | `app/database.py`·runtime 구성/SQLite 자원 관리 | lazy engine/session·PRAGMA·같은 Session·종료 |
+| G06 | `app/main.py`·공식 contributor/sidecar launcher | 단일 factory의 full/public profile·시작/종료·health·기존 기본값 |
+| G07 | 소유 도메인·runtime/integrations/common의 tests | 기존 assertion/node·fixture·수집·CI의 정확한 이동 |
+| G08 | 실제 `main.py`·`api/v1/public.py`의 JSON/API 조립 | 서버 HTML template 소비가 없어 `templates/`를 만들지 않은 결정 |
+| G09 | `pyproject.toml`·`uv.lock`·`.python-version` | 실제 dependency 원본 유지. 수동 `requirements/` 이중 관리 없음 |
+| G10 | `.env.example`·설정/명시적 runtime 구성 | 비밀 제외·설치 환경 분리·우선순위 |
+| G11 | root `.gitignore`·Docker/installer 배포 설정 | Git 제외와 배포 제외 구분·필수 source/lock/resource 포함 |
+| G12 | `logging.ini`·`runtime/logging_config.py` | 기존 handler와 sidecar stdout/stderr·handshake |
+| G13 | `backend/alembic`·실제 Base/등록·embedded migrations | 역사적 revision 본문/그래프와 지원 SQLite upgrade·실패 복원 |
+
+`main.py`의 기본 `create_app`/`app`은 full profile이고 `create_public_app`/`public_app`은 public profile이다. `public_main.py`를 삭제했다고 두 profile을 하나의 기본 호출로 바꾸지 않는다. G06 최종 설치·CI 판정은 삭제된 파일이 없는 최종 후보에서 별도로 확인한다.
+
+## 삭제된 집계와 실제 소유자를 대응한 근거
+
+| 옛 source 범위 | 현재 위치 선정 |
+| --- | --- |
+| `models/agent_runs.py` | 실행·로그·slot·cue는 Routines `models/resident.py`, 관계 point는 Relationships `models/points.py`, Daypart 기억은 Memory `models/daypart.py`로 나뉜다. |
+| `models/agent_settings.py` | Character 이미지 설정은 Characters models, 활동 설정은 Routines resident models다. |
+| `models/worlds.py` | World 정의/회원/장소/역할은 Worlds models, World 참여/활성 World는 WorldCharacter models다. |
+| `models/__init__.py` | 실제 Base는 `app/models.py`, 전체 등록은 runtime `model_registration.py`다. 한 파일로 대체하지 않는다. |
+| 나머지 옛 ORM 파일 | 인증/credential은 Identity, Character/초안/프로필 후보는 Characters, Bot/key/quota는 LocalBot, message는 Chat, 계획은 Routines, setup은 WC, 운영 설정은 Operations models다. |
+| `services/world_foundation.py` | World seed 규칙은 Worlds, 참여 seed 규칙은 WC, 동일 Session의 혼합 연결은 `runtime/worlds/foundation.py`다. |
+| `services/local_bot_quota.py` | LocalBot quota 서비스·조회 repository·오류로 나뉘며 원래 atomic write 의미를 유지한다. |
+| `services/maintenance.py`·`operation_settings.py` | Operations service/repository와 해당 constants/contracts/exceptions가 실제 소유자다. |
+| `services/image_prompt_safety.py`·`service_image_key.py` | 실제 공유 정책은 `core/image_prompt_safety.py`, 공통 비밀 해석은 `credentials/service_images.py`다. |
+| 옛 Chat public·api marker와 compatibility namespace | 실제 업무를 전달하는 집계 또는 빈 marker다. 이미 기록한 실제 역할을 사용하며 부재 경로마다 proxy를 새로 지정하지 않는다. |
+
+활동시간의 5개 순수 함수·4개 상수는 `domains/routines/policies/active_hours.py`에 있다. 게시물 검색 문서 구성은 `domains/social/service/search_documents.py`가 소유하고, 공통 검색 문자열 정규화는 `core/search_text.py`에 남는다. `core/image_generation.py`의 공유 모델 값과 `core/public_media.py`의 마운팅은 실제 공통 역할이므로 유지한다.
+
+역사 migration의 옛 schema/model helper와 별도 배포 Hosted 확장 alias는 제거한 임시 집계와 구분한다. 정확한 잔존 경로·소비자·같은 객체 계약은 [호환 계약](backend-compatibility.md)에 기록하며, 현재 source import 검사에서도 제외하지 않는다.
+
+## 검증과 증거 갱신
+
+현재 경로를 정리할 때는 파일 존재만 확인하지 않는다. 실제 defining symbol과 source split을 대조하고 소비자 AST를 재수집한다. 테스트는 파일 이동 뒤 원래 node·assertion·fixture를 계속 보호하는지 확인한다. 기존 source/test/API/ORM 기준선, 승인 node, frozen migration, 최초 도입 이력은 이 읽기 지도 수정으로 변경하지 않는다.
+
+최종 제품 검증은 Docker Browser Run, Docker contributor, Host Tauri dev, Windows installer의 각 실행 계약에 맞춘다. 현재 코드 위치가 정확하다는 사실은 그 실행 경로에서 최종 후보를 검증했다는 증거와 별개다.
+
+## 역사적 조사·중간 이전 기록
+
+아래는 이 문서의 `7ada864c` 기준 이전 내용을 그대로 보관한 기록이다. 내부의 “진행 중”, “후속”, “목표”와 수치는 각 slice 당시 상태이며 현재 구현·최종 검증 상태를 선언하지 않는다. 현재 위치는 위 설명과 inventory의 현재 필드를 사용한다.
+
+<details>
+<summary>AR-0 파일럿부터 B8 LocalBot A5까지의 원문 기록</summary>
+
 # Angmoo 구조 전환 기능 보존 지도
 
 기존 기능의 API·저장 데이터·화면·실행 방식을 보존하면서 수정 위치를 찾기 쉬운 구조로 옮긴다. 이 문서는 보존 범위와 검증을 읽는 지도이며, 목표 역할은 [frontend ARCHITECTURE](../../frontend/ARCHITECTURE.md)와 [backend ARCHITECTURE](../../backend/ARCHITECTURE.md)가 설명한다.
@@ -131,3 +236,5 @@ AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계�
 
 
 AR-B8 LocalBot A5는 실제 18행동/읽기와 18HTTP를 own service/router로 닫는다. 이전 LocalBot 72정의 split의 실제 목적지·소비자와 Identity deps 원본의 Authorization 2/Bot 인증 1 분할을 갱신했다. 기존 원본 snapshot/assertion은 불변이며 typed 협력은 같은 Session·nullable 조회·오류객체·deferred commit·quota/rollback·aftercommit image 요청을 보존한다. G07 route inventory는 module 필드 26개만 현재 owner로 전환했다. B5/G5/G06 최종 합류와 원본 source introduction은 root 순차 통합 범위다.
+
+</details>
