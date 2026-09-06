@@ -74,43 +74,5 @@ from app.domains.routines.repository.slots import get_assigned_slot
 
 register_models()
 
-def set_character_status(db: Session, character: _model_Character, status: str) -> None:
-    character.status = status
-    db.commit()
 
-def disable_other_active_settings(
-    db: Session,
-    *,
-    user_id: str,
-    keep_character_id: str,
-    commit: bool = True,
-) -> list[_model_AgentActivitySetting]:
-    settings = list_other_active_settings(
-        db, user_id=user_id, keep_character_id=keep_character_id
-    )
-    now = datetime.now(UTC)
-    for setting in settings:
-        setting.auto_enabled = False
-        setting.updated_at = now
-    if settings and commit:
-        db.commit()
-    elif settings:
-        db.flush()
-    return settings
 
-def list_other_active_settings(
-    db: Session, *, user_id: str, keep_character_id: str
-) -> list[_model_AgentActivitySetting]:
-    settings = list(
-        db.scalars(
-            select(_model_AgentActivitySetting)
-            .join(_model_Character)
-            .where(
-                _model_Character.owner_id == user_id,
-                _model_Character.deleted_at.is_(None),
-                _model_Character.id != keep_character_id,
-                _model_AgentActivitySetting.auto_enabled.is_(True),
-            )
-        )
-    )
-    return settings

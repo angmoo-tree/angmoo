@@ -12391,7 +12391,7 @@
           "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
           "new": "backend/app/domains/routines/exceptions.py::AgentSlotUnavailableError",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -12471,53 +12471,6 @@
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
-          "new": "backend/app/services/agent_runs.py::_format_v6_action_menu",
-          "direct_consumers": [
-            "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
-          "new": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ],
-          "remaining_owner": "AR-B8-A",
-          "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers.",
-          "source_member": "Retained original uncalled definition; historical source declaration stays unchanged, no new runtime consumer is claimed."
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ],
-          "remaining_owner": "AR-B8-A",
-          "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers.",
-          "source_member": "Retained original uncalled definition; historical source declaration stays unchanged, no new runtime consumer is claimed."
         },
         {
           "old": "backend/app/services/profile_media.py::CONTENT_TYPES",
@@ -13716,16 +13669,6 @@
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
             "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
             "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
-          "new": "backend/app/domains/routines/exceptions.py::AgentSlotUnavailableError",
-          "direct_consumers": [
-            "backend/app/runtime/resident/execution.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
         {
@@ -16337,6 +16280,54 @@
             "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[True]",
             "tests/routines/test_activity_limits.py::test_activation_uses_canonical_initial_schedule"
           ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
+          "new": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/action_menu.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Original dormant function retained at actual role owner; declaring module recorded, no active product caller or runtime activation is claimed. Full AST matches after exact existing ResidentActionReferences/type restoration. Original independent-section prepared_create_post_brief NameError is reproduced in an isolated original/current fixture and remains unchanged. Existing stage behavior suites stay registered; seven-definition source preservation is separately verified.",
+          "active_product_callers": []
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
+          "new": "backend/app/domains/routines/service/action_menu.py::_v6_possible_post_actions",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/action_menu.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Original dormant function retained at actual role owner; declaring module recorded, no active product caller or runtime activation is claimed. Full AST matches after exact existing ResidentActionReferences/type restoration. Original independent-section prepared_create_post_brief NameError is reproduced in an isolated original/current fixture and remains unchanged. Existing stage behavior suites stay registered; seven-definition source preservation is separately verified.",
+          "active_product_callers": []
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_message",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/state_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Original dormant function retained at actual role owner; declaring module recorded, no active product caller or runtime activation is claimed. Full AST matches after exact existing ResidentActionReferences/type restoration. Original independent-section prepared_create_post_brief NameError is reproduced in an isolated original/current fixture and remains unchanged. Existing stage behavior suites stay registered; seven-definition source preservation is separately verified.",
+          "active_product_callers": []
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_prompt",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/state_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Original dormant function retained at actual role owner; declaring module recorded, no active product caller or runtime activation is claimed. Full AST matches after exact existing ResidentActionReferences/type restoration. Original independent-section prepared_create_post_brief NameError is reproduced in an isolated original/current fixture and remains unchanged. Existing stage behavior suites stay registered; seven-definition source preservation is separately verified.",
+          "active_product_callers": []
         }
       ]
     },
@@ -22079,10 +22070,10 @@
       "scope": "Actual timeline mutation/report/deletion workflow, Social notification admission, bounded post-result text; WC owns actual author/active-world/member validation, runtime only binds pre-existing same-Session collaborators.",
       "split_files": {
         "backend/app/services/community_abuse_quota.py": [
+          "backend/app/domains/social/exceptions.py",
           "backend/app/domains/social/service/abuse_quota.py",
-          "backend/app/domains/identity/service/mutation_quota.py",
           "backend/app/domains/identity/repository/mutation_quota.py",
-          "backend/app/domains/social/exceptions.py"
+          "backend/app/domains/identity/service/mutation_quota.py"
         ]
       },
       "split_symbols": [
@@ -26963,11 +26954,11 @@
           "backend/app/domains/local_bot/repository/keys.py",
           "backend/app/domains/local_bot/service/key_records.py",
           "backend/app/domains/routines/service/activity_logs.py",
-          "backend/app/cruds/agents.py",
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/runtime/resident/autonomy_reads.py"
+          "backend/app/runtime/resident/autonomy_reads.py",
+          "backend/app/domains/characters/service/mutations.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/schemas/agents.py",
@@ -27445,54 +27436,6 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
-        },
-        {
-          "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
@@ -28152,6 +28095,45 @@
             "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
           ],
           "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
         }
       ],
       "ownership": "Routines models/resident owns AgentActivitySetting, AgentRun, AgentSlot, AgentPublicActionExecution, AgentFeedCue and AgentActivityLog. Original plans models/schema move whole into models/plans and schemas/plans with identical-object package exports. Activity/slot/log response DTO and settings/feed-cue input are schemas/resident. service/activity_settings owns get/ensure/update; service/activity_logs owns actual hidden/state-dedupe/read/write flow. Original defaults/limits/hidden and 90-second window are constants.",
@@ -30785,7 +30767,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -30795,7 +30777,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -31365,7 +31347,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
-          "new": "backend/app/services/agent_runs.py::_format_v6_action_menu",
+          "new": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -32055,7 +32037,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
-          "new": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
+          "new": "backend/app/domains/routines/service/action_menu.py::_v6_possible_post_actions",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -39544,10 +39526,10 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
+          "backend/app/domains/characters/service/mutations.py",
+          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/runtime/resident/autonomy_reads.py",
           "backend/app/domains/routines/constants.py",
-          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/activity_logs.py"
         ],
         "backend/app/schemas/agents.py": [
@@ -39801,7 +39783,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -39813,7 +39795,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -39825,7 +39807,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -45493,10 +45475,10 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
+          "backend/app/domains/characters/service/mutations.py",
+          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/runtime/resident/autonomy_reads.py",
           "backend/app/domains/routines/constants.py",
-          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/characters/repository/image_settings.py",
           "backend/app/domains/characters/service/image_settings.py",
           "backend/app/domains/routines/service/activity_logs.py"
@@ -45665,7 +45647,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -45675,7 +45657,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -45685,7 +45667,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -46654,7 +46636,7 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
+          "backend/app/domains/characters/service/mutations.py",
           "backend/app/runtime/resident/autonomy_reads.py"
         ],
         "backend/app/api/v1/routes/agents.py": [
@@ -49541,7 +49523,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -49551,7 +49533,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -49561,7 +49543,7 @@
         },
         {
           "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
           "direct_consumers": [
             "backend/app/cruds/agents.py"
           ],
@@ -96287,8 +96269,8 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
-          "backend/app/runtime/resident/autonomy_reads.py"
+          "backend/app/runtime/resident/autonomy_reads.py",
+          "backend/app/domains/characters/service/mutations.py"
         ]
       },
       "split_symbols": [
@@ -96731,54 +96713,6 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot"
           ],
           "test_only_bridge": "Old cruds.agents.get_assigned_slot is the same repository function for exact existing assertion bindings in tests/routines/test_activity_limits.py. No production get_assigned_slot caller uses it; retire remaining test alias with reviewed final test-owner transition by B8-A."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
@@ -97763,6 +97697,45 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot"
           ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
         }
       ],
       "ownership": "Run creation/completion/post association, public execution creation/completion, FeedCue creation/consumption are actual owner services. Six Run reads, signature lookup and pending FeedCue SQL are repositories. The same original Run error/active constant have one canonical definition.",
@@ -97805,8 +97778,8 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
-          "backend/app/runtime/resident/autonomy_reads.py"
+          "backend/app/runtime/resident/autonomy_reads.py",
+          "backend/app/domains/characters/service/mutations.py"
         ]
       },
       "split_symbols": [
@@ -98249,54 +98222,6 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot"
           ],
           "test_only_bridge": "Old cruds.agents.get_assigned_slot is the same repository function for exact existing assertion bindings in tests/routines/test_activity_limits.py. No production get_assigned_slot caller uses it; retire remaining test alias with reviewed final test-owner transition by B8-A."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
@@ -99281,6 +99206,45 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot"
           ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
         }
       ],
       "ownership": "13 actual slot pool/recovery/release/lease and read functions plus12 original constants have one canonical Routines definition. Pool, state clear, expired recovery, assignment release and lease updates are separate service roles; list/active/assigned queries are repository/slots.",
@@ -99325,8 +99289,8 @@
           "backend/app/domains/routines/repository/feed_cues.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/repository/slots.py",
-          "backend/app/cruds/agents.py",
-          "backend/app/runtime/resident/autonomy_reads.py"
+          "backend/app/runtime/resident/autonomy_reads.py",
+          "backend/app/domains/characters/service/mutations.py"
         ]
       },
       "split_symbols": [
@@ -99769,54 +99733,6 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot"
           ],
           "test_only_bridge": "Old cruds.agents.get_assigned_slot is the same repository function for exact existing assertion bindings in tests/routines/test_activity_limits.py. No production get_assigned_slot caller uses it; retire remaining test alias with reviewed final test-owner transition by B8-A."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::set_character_status",
-          "new": "backend/app/cruds/agents.py::set_character_status",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::list_other_active_settings",
-          "new": "backend/app/cruds/agents.py::list_other_active_settings",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
@@ -100930,6 +100846,45 @@
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
             "tests/world_characters/test_owner_identity.py::test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous"
           ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/domains/characters/service/mutations.py::set_character_status",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/tests/routines/test_retained_setting_transactions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+            "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+          ],
+          "source_member": "Original full definition retained at actual owner. Character status still commits the entire caller transaction. Setting query extracted unchanged to the existing mixed-read runtime, then the same selected attached list immediately enters the service before original now/loop/commit-or-flush. Exact full-function AST is restored by inserting original query statement and signature. Current product caller0; synthetic transaction tests exercise actual owners."
         }
       ],
       "ownership": "Assignment/temporary claim and assigned/due claim real decisions now live in Routines services. Runtime constructs exact same-Session Character lock/read and WC correlated predicate collaboration; five original query occurrences mapped with no foreign ORM in owner services.",
@@ -105863,8 +105818,8 @@
       "split_files": {
         "backend/app/services/community_abuse_quota.py": [
           "backend/app/domains/social/service/abuse_quota.py",
-          "backend/app/domains/identity/service/mutation_quota.py",
           "backend/app/domains/identity/repository/mutation_quota.py",
+          "backend/app/domains/identity/service/mutation_quota.py",
           "backend/app/domains/social/exceptions.py"
         ]
       },
@@ -105961,6 +105916,42 @@
         "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
         "tests/social/test_abuse_quota_transactions.py::test_unknown_quota_action_rejects_before_touching_session"
       ]
+    },
+    "AR-B8-resident-retained-utilities": {
+      "status": "IMPLEMENTED — original7 full AST restoration PASS; final26PASS; boundary798/2812/exactlegacy204/cycle0; read-only original6 checks0/protected2139/current2300; stock gate awaits root sequential introductions",
+      "definitions": {
+        "backend/app/services/agent_runs.py::_format_v6_action_menu": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu",
+        "backend/app/services/agent_runs.py::_v6_possible_post_actions": "backend/app/domains/routines/service/action_menu.py::_v6_possible_post_actions",
+        "backend/app/services/agent_runs.py::_build_tool_recovery_message": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_message",
+        "backend/app/services/agent_runs.py::_build_tool_recovery_prompt": "backend/app/domains/routines/service/state_prompts.py::_build_tool_recovery_prompt",
+        "backend/app/cruds/agents.py::set_character_status": "backend/app/domains/characters/service/mutations.py::set_character_status",
+        "backend/app/cruds/agents.py::disable_other_active_settings": "backend/app/domains/routines/service/activity_settings.py::disable_other_active_settings",
+        "backend/app/cruds/agents.py::list_other_active_settings": "backend/app/runtime/resident/autonomy_reads.py::list_other_active_settings"
+      },
+      "actual_paths": [
+        "backend/app/domains/routines/service/action_menu.py",
+        "backend/app/domains/routines/service/state_prompts.py",
+        "backend/app/domains/routines/service/activity_settings.py",
+        "backend/app/runtime/resident/autonomy_reads.py",
+        "backend/app/domains/characters/service/mutations.py",
+        "backend/tests/routines/test_retained_setting_transactions.py"
+      ],
+      "new_regression": [
+        "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+        "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]",
+        "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction"
+      ],
+      "ownership": "Original dormant menu2 retained alongside existing actual menu policies using the existing ResidentActionReferences; recovery2 uses existing state prompts and value contracts. No new production module/port/wrapper or active caller is created. Character committing status stays distinct from assignment-only status. Mixed Character/setting query belongs to existing runtime autonomy_reads; Routines service owns timestamp/mutations/conditional transaction on same selected list.",
+      "latent_original_defect": "Original dormant _format_v6_action_menu reads undefined prepared_create_post_brief; both original and owner with empty synthetic candidates raise the same NameError. Parent directed preservation during structural migration; no added input/default, caller, or silent behavioral fix.",
+      "preservation": "All7 complete definitions equal original AST after exact type/existing read binding and original query-slice restoration. Owner query preserves full join/filter/order semantics; no lock/query/commit/flush added. Retained functions removed from old files; no source bytes lost.",
+      "remaining": "Root joins existing B7 Memory7 and B5/Identity/image/LocalBot sources before retiring remaining old modules. Root owns source introduction capture, stock gate, CI and merge.",
+      "validation": {
+        "focused": "26 passed /29.49seconds; includes three new actual SQLite transaction nodes",
+        "source_preservation": "All7 original ASTs restored exactly; no copied/added runtime behavior or active caller. Undefined old menu name preserved by explicit parent direction.",
+        "inventories": "L4 798/14/97; ER0 86/87/24/44/7; Memory current",
+        "original_guard": "sources/split/assertions/suppressions/API-ORM/nodes0; read-only signed path supplement only, original frozen/checkpoint/additions unchanged",
+        "final_formatting": "Only trailing blank lines removed from old Memory remainder after validation; AST equality checked."
+      }
     }
   },
   "asgi_exports": {

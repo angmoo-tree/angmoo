@@ -2493,3 +2493,15 @@ Moved the reply/report limits and unchanged CommunityQuotaExceeded contract to s
 The complete original consume body is AST-identical after expanding the exact owner calls and Social error translation. Original policies, hash, UTC and bucket insert bodies are identical. Focused results: **14 passed / 18 existing PostgreSQL-only skips / 10.98 seconds**, including two new checks for caller rollback, rollback of an expired short window when the longer window rejects, exact retry interval, attached row identity, and invalid-action rejection before Session access. Original source/split/assertion/suppression/ASGI/API-ORM/node diagnostics: **all seven error 0**, protected 2201/current 2416.
 
 The first architecture check rejected the new Identity service as an undeclared entry; declaring this exact actual business service resolved both cross-owner errors. Current inventory is 958 modules/3510 edges, L4 958/parity99, ER0 87/87/24/44/7. Remaining architecture errors belong to the separately prepared B4/B5 old activity/Community consumers; no new bridge was added. Stock introduction metadata, full backend, PostgreSQL concurrency execution, sequential PR/CI/installer/merge gates are not claimed by this focused source preparation.
+
+## AR-B8 — 보존된 Resident 보조 기능7의 실제 소유
+
+메뉴2/복구2를 기존 Routines policy/prompt 모듈로, commit을 포함한 Character 상태1을 Character mutations로, 활성설정 disable1과 혼합조회1을 Routines service와 기존 runtime 조회로 옮겼다. 새 production 파일·추상 port·빈 전달 함수·활성 호출을 추가하지 않았다. 원래 전체7함수 AST는 정확한 기존 협력/type/query 추출 복원 후 모두 동일하다. 초기11회귀가 통과했다. 신규SQLite3은 owner/deleted/keep/enabled join 필터, 같은 attached 결과, 조건부 commit/flush/empty no-write, 별도 Session 가시성과 rollback, Character 상태의 원래 전체 caller commit을 검증한다.
+
+과거 비활성 text 메뉴는 원래 prepared_create_post_brief가 정의되지 않아 independent 구간에서 NameError를 낸다. 원본과 이전본의 격리된 synthetic 입력에서 같은 오류를 재현했다. 이번 이전에서 임의 기본값/인자를 추가하거나 새 실행 경로를 만들지 않고 원문과 잠재 결함 근거를 보존한다는 parent 결정을 따랐다. 현재 table 메뉴와 동작은 그대로이다.
+
+최종 관련26검사(29.49초), 원문7 AST복원, 경계798 modules /2812 edges /exact legacy204 /cycle0이 통과했다. 원래6검사의 읽기 전용 진단은 모두 오류0(보호2139/current2300), L4 798/14/97, ER0 86/87/24/44/7, Memory current이다. 검사 중 소스는 고정했고 종료 후 old Memory 잔여 파일의 EOF 빈줄만 AST 동일하게 정리했다. frozen/checkpoint/additions·기존 단언·검사기는 변경하지 않았으며 root의 선형 첫 도입 연결과 stock 검증/CI/merge는 별도이다.
+
+### G5 preparation: retained transactions and utilities
+
+Original quota source331094f and retained utilities b013974 are integrated after the final B4 owner connection. Quota file-backed transaction tests passed2;18 existing PostgreSQL-only tests remain conditional skips. Seven retained utility definitions use their original actual owners, including the Character operation that commits the caller transaction. Test model imports now use the existing canonical fixture support. No dormant caller was activated. The source captures and original whole-AST proofs remain associated with their original signed commits; final sequential ledger and backend closeout are still pending.

@@ -1149,3 +1149,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 댓글·신고 제한의 업무와 저장 소유
 
 `social/service/abuse_quota.py`는 댓글·신고별 횟수/시간 제한과 공개 오류를 소유합니다. `identity/service/mutation_quota.py`는 원래 HMAC 사용자 식별값과 시간 창·카운터를 관리하며, `identity/repository/mutation_quota.py`는 같은 Session의 quota 행 생성과 잠금 조회를 수행합니다. Identity의 실제 `CommunityMutationQuotaBucket` 모델을 Social에 복제하거나 노출하지 않습니다. 한 창이라도 제한을 넘으면 원래처럼 caller transaction을 rollback한 뒤 Social 오류와 최대 대기 시간을 반환하며, 허용 시 새 commit을 추가하지 않습니다.
+
+
+### 보존된 활동 보조 기능
+
+기존 text 메뉴와 tool 복구 문구는 각각 `routines/service/action_menu.py`와 `state_prompts.py`에 보존합니다. 현재 실행기는 기존 table 메뉴를 사용하며 이 이전으로 과거 메뉴를 활성화하지 않습니다. 같은 Character 상태 대입도 `characters/service/mutations.py::set_character_status`는 원래 commit까지 수행하고 `set_activity_status`는 호출자의 transaction에 참여하는 대입만 하므로 서로 합치지 않습니다. 다른 캐릭터의 활성 설정 조회는 기존 `runtime/resident/autonomy_reads.py`의 정확한 join을 사용한 뒤 그 같은 Session과 결과 list를 `activity_settings.disable_other_active_settings`에 즉시 전달합니다. 서비스는 원래 UTC timestamp·대입·조건부 commit/flush를 소유합니다.
