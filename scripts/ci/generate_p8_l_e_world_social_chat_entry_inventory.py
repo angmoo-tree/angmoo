@@ -196,7 +196,7 @@ def _frontend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/shared/ui/device-frame.module.css",
+        "frontend/src/components/ui/device-frame.module.css",
         ("scrollbar-gutter: auto", "scrollbar-width: none", "::-webkit-scrollbar"),
     )
     _require_text(

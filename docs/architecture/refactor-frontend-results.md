@@ -102,10 +102,16 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
   TypeScript and ESLint PASS. Next production and static builds PASS; web
   **21 passed in 48.7s**, static **68 passed in 33.8s**. All 15 implementation/CSS
   bodies match pinned PR290 after excluding import declarations and normalizing
-  checkout line endings. Fixed-environment visual and PR/native checks are pending.
+  checkout line endings. PR #292 at `51b2c1a1` passed frontend CI: web 21,
+  Settings 2, static 68 and fixed-Linux visual 36. Native checks remain pending.
 - The first full preservation run detected 15 stale K01/K24 current paths;
   update only the current/target path arrays and retain historical classifications.
-  The focused inventory validation passes; the full guard rerun is in progress.
+  The full guard rerun passes: 2742 protected/current nodes and 37 contracts.
+- The first full backend CI found three additional stale source-path consumers
+  (Creator Studio presentation, media security and P8-L-E generated inventory).
+  Correct their physical paths without changing assertions or baseline evidence;
+  all 18 tests in those three files pass locally. The latest commit must pass
+  the full CI suite again before merge; earlier frontend success is historical.
 
 ## Temporary-file cleanup
 
