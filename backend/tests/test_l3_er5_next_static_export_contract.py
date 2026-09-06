@@ -63,7 +63,7 @@ def test_static_profile_reuses_product_source_and_has_no_server_hooks() -> None:
 
 def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() -> None:
     runtime = _read("frontend/src/lib/runtime/runtime-config.ts")
-    auth_provider = _read("frontend/src/shared/auth/auth-provider.tsx")
+    auth_provider = _read("frontend/src/composition/providers/auth-provider.tsx")
     assert 'new Set(["127.0.0.1", "localhost", "[::1]"])' in runtime
     assert 'parsed.protocol !== "http:"' in runtime
     assert 'input.startsWith("/api/backend")' in runtime
@@ -82,7 +82,7 @@ def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() 
 
 
 def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> None:
-    gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
+    gate = _read("frontend/src/composition/providers/desktop-runtime-gate.tsx")
     desktop = _read("frontend/src/lib/desktop/product-window.ts")
     router = _read("frontend/src/composition/static-product-router.tsx")
     assert "DesktopRuntimeGate" in router
@@ -219,7 +219,7 @@ def test_next_post_detail_keeps_server_prefetch_initial_prop_handoff() -> None:
 
 def test_static_profile_disables_pwa_and_leaves_outputs_untracked() -> None:
     lifecycle = _read(
-        "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx"
+        "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx"
     )
     build = _read("frontend/scripts/build-static.mjs")
     ignore = _read(".gitignore")

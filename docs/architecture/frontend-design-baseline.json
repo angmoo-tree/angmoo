@@ -4,15 +4,15 @@
       "classifications": [
         "ADAPTED"
       ],
-      "path": "frontend/src/components/app-shell.tsx",
-      "sha256": "3b7bc14f7e93c986fc6d3cd0216125b8cea1809971e510c8327b5cfee2a377bc"
+      "path": "frontend/src/components/character-profile-client.tsx",
+      "sha256": "d3b7b6e98ecf13be749b45653a281fcfa0aa3b59216723292b0a3c8c0367ee03"
     },
     {
       "classifications": [
-        "ADAPTED"
+        "LOCAL"
       ],
-      "path": "frontend/src/components/character-profile-client.tsx",
-      "sha256": "d3b7b6e98ecf13be749b45653a281fcfa0aa3b59216723292b0a3c8c0367ee03"
+      "path": "frontend/src/components/layout/device-shell.tsx",
+      "sha256": "b279540c61cca9976d9ebceb9f6f13c6dab156a5a117edf40e88469569ea89f6"
     },
     {
       "classifications": [
@@ -32,6 +32,27 @@
       "classifications": [
         "LOCAL"
       ],
+      "path": "frontend/src/composition/screens/world-app.tsx",
+      "sha256": "0b22c540423487cbf4fea3479d88fc103b69f660d07ec1aac6a67e2dbbcce1e8"
+    },
+    {
+      "classifications": [
+        "ADAPTED"
+      ],
+      "path": "frontend/src/composition/shells/app-shell.tsx",
+      "sha256": "53424ea1776b295f9c8cf9e7ad607f685f4b5298c93515be6f38f61d0e3e2401"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/composition/shells/creator-studio-frame.tsx",
+      "sha256": "ae380ab21f6e4943b1286e4083a66ce2ac5df2c8766d5dd0955aa63e40d00a5e"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
       "path": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
       "sha256": "2dde010a2adacbfeb0da8df300a72454e93c1c1bddbf7f91a9a39fbada703c74"
     },
@@ -46,22 +67,8 @@
       "classifications": [
         "LOCAL"
       ],
-      "path": "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
-      "sha256": "8ec943c9bdbbd7e9fdd6eb22eb535352d85046ecc1a00f0347e0ec9508806230"
-    },
-    {
-      "classifications": [
-        "LOCAL"
-      ],
       "path": "frontend/src/features/device-home/components/device-home.tsx",
       "sha256": "231832d14345c2ead9bbb5b4d6dc273255c29d9eb3cc1b63868bd9903c9bc14d"
-    },
-    {
-      "classifications": [
-        "LOCAL"
-      ],
-      "path": "frontend/src/features/device-shell/ui/device-shell.tsx",
-      "sha256": "bb87a2e7795012caea77982ed758c06af579b4b16713114ac70b1af4611b83d0"
     },
     {
       "classifications": [
@@ -139,13 +146,6 @@
       ],
       "path": "frontend/src/features/social/ui/world-social-feed.tsx",
       "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
-    },
-    {
-      "classifications": [
-        "LOCAL"
-      ],
-      "path": "frontend/src/features/world-app/ui/world-app.tsx",
-      "sha256": "aeabe7ec9d3c3659b03dfc1d4b1547ee228bb14134462a3cda54765c2158f72e"
     },
     {
       "classifications": [
@@ -266,17 +266,17 @@
       "frontend/src/app/memory/page.tsx",
       "frontend/src/app/memory-explorer/page.tsx",
       "frontend/src/app/ui-foundation/page.tsx",
-      "frontend/src/components/app-shell.tsx",
+      "frontend/src/composition/shells/app-shell.tsx",
       "frontend/src/components/post-detail-client.tsx",
       "frontend/src/composition/static-product-router.tsx",
       "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
-      "frontend/src/features/device-shell/model/device-navigation.ts",
+      "frontend/src/lib/navigation/device-navigation.ts",
       "frontend/src/features/device-shell/public.ts",
-      "frontend/src/features/device-shell/ui/device-shell.module.css",
-      "frontend/src/features/device-shell/ui/device-shell.tsx",
-      "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
-      "frontend/src/features/device-shell/ui/local-product-link.module.css",
-      "frontend/src/features/device-shell/ui/local-product-link.tsx",
+      "frontend/src/components/layout/device-shell.module.css",
+      "frontend/src/components/layout/device-shell.tsx",
+      "frontend/src/composition/shells/local-device-navigation.tsx",
+      "frontend/src/components/navigation/local-product-link.module.css",
+      "frontend/src/components/navigation/local-product-link.tsx",
       "frontend/src/features/memory/public.ts",
       "frontend/src/features/memory/ui/memory-scope-summary.tsx",
       "frontend/src/features/memory/ui/memory-workspace.module.css",
@@ -1125,7 +1125,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "6e289e06bf6557f37a4525b172f9227c169601cb5e6e6861e124b836149165a3",
+    "next_static_inventory_sha256": "4d0d00e2661d74192b205643d054ef6130f87591ce0514679ac9f3a5f6cb7dd3",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1148,11 +1148,6 @@
     ],
     "consumer_adoption": "limited_direct_world_package_adoption_plus_compatibility_bridges",
     "files": [
-      {
-        "path": "frontend/src/app/globals.css",
-        "present": true,
-        "sha256": "9777f4198d92371598b3f0d5734d87d149570d0d5d7ff51364e28d3efdf03670"
-      },
       {
         "path": "frontend/src/app/ui-foundation/page.tsx",
         "present": true,
@@ -1216,7 +1211,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "2930da844ffa4be3f0fcf1d7f9faee48fa2bc75cc1dfef318dd3d38b6e96385a"
+        "sha256": "c599107d8e25e7e06896bb07cb8013175fd42dc66db62f9196944e8235e939e7"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",
@@ -1244,6 +1239,11 @@
         "sha256": "39431caafb3236eb9a7141a2e24344852bbef8924bb2d076129b7b9ae5e91dab"
       },
       {
+        "path": "frontend/src/styles/globals.css",
+        "present": true,
+        "sha256": "6a4596c114f5b4da7f4114aafef0fb3f547e1ef3ce2d9f2e4b8b821c2dc70b24"
+      },
+      {
         "path": "frontend/src/styles/semantic-tokens.css",
         "present": true,
         "sha256": "10a74dfaaf8646971795da5591ef24b15eceb1a9d5073091477edad2524376ed"
@@ -1258,7 +1258,7 @@
     "fixture_route": "/ui-foundation",
     "global_legacy_alias_remap": {
       "import_marker": "@import \"../shared/ui/semantic-tokens.css\";",
-      "import_path": "frontend/src/app/globals.css",
+      "import_path": "frontend/src/styles/globals.css",
       "required_smoke": [
         "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
         "pnpm --dir browser-tests test",

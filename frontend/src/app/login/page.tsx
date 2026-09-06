@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";

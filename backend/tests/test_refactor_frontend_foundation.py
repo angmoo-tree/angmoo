@@ -11,7 +11,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/ci"))
 from frontend_completed_boundaries import check_completed_frontend
-from check_refactor_frontend_preservation import mapped, verify
+from check_refactor_frontend_preservation import mapped, verify, verify_retirements
 from refactor_boundaries import validate_scope
 from check_windows_host_tauri_dev_contract import check_workflow_triggers
 import check_refactor_frontend_preservation as frontend_stock
@@ -119,6 +119,61 @@ def test_path_moves_preserve_entire_browser_assertion(tmp_path):
     original = b'import "@/features/chat/ui/chat"; expect(1).toBe(1);'
     write(tmp_path, path, 'import "@/features/chat/components/chat"; expect(1).toBe(1);')
     assert verify(tmp_path, {path: original}, {old: new}) == []
+
+
+def retirement_example(root):
+    old = "frontend/src/features/old/public.ts"
+    view = "frontend/src/composition/screens/view.tsx"
+    contract = "frontend/src/features/current/types/read.ts"
+    frozen = {old: b'export { View, type Read } from "./implementation";\n'}
+    write(root, view, "export function View() { return null; }")
+    write(root, contract, "export type Read = { id: string };")
+    record = {"reason": "Each caller now uses the actual owner", "verification": ["typecheck", "browser parity"],
+              "export_destinations": {"View": view, "Read": contract}}
+    return old, view, contract, frozen, {old: view}, {"stage": {"frontend_retirements": {old: record}}}
+
+
+def test_retired_facade_preserves_each_export_at_its_actual_owner(tmp_path):
+    _, _, _, frozen, moves, details = retirement_example(tmp_path)
+    assert verify_retirements(tmp_path, frozen, moves, details) == []
+
+
+@pytest.mark.parametrize("case,expected", [
+    ("omit_type", "export_coverage"),
+    ("import_only", "missing_export"),
+    ("still_present", "source_still_exists"),
+    ("unrelated", "unrelated_target"),
+    ("implementation", "not_static_facade"),
+    ("outside", "missing_export"),
+])
+def test_facade_retirement_cannot_hide_removed_or_unrelated_code(tmp_path, case, expected):
+    old, view, contract, frozen, moves, details = retirement_example(tmp_path)
+    record = details["stage"]["frontend_retirements"][old]
+    if case == "omit_type":
+        del record["export_destinations"]["Read"]
+    elif case == "import_only":
+        write(tmp_path, contract, 'import type { Read } from "elsewhere";')
+    elif case == "still_present":
+        write(tmp_path, old, frozen[old].decode())
+    elif case == "unrelated":
+        moves[old] = "frontend/src/unrelated.ts"
+        write(tmp_path, moves[old], "export const placeholder = 1;")
+    elif case == "implementation":
+        frozen[old] += b"export function importantBehavior() { return 1; }"
+    elif case == "outside":
+        record["export_destinations"]["Read"] = "../outside.ts"
+    assert any(expected in error for error in verify_retirements(tmp_path, frozen, moves, details))
+
+
+@pytest.mark.parametrize("source,spec", [
+    ("frontend/src/app/page.tsx", "@/features/old/public"),
+    ("frontend/src/app/page.tsx", "../features/old/public.ts"),
+    ("frontend/static-shell/app/page.tsx", "../../src/features/old/public"),
+])
+def test_retired_facade_rejects_remaining_web_or_static_consumer(tmp_path, source, spec):
+    _, _, _, frozen, moves, details = retirement_example(tmp_path)
+    write(tmp_path, source, f'import type {{ Read }} from "{spec}";')
+    assert any("active_import" in error for error in verify_retirements(tmp_path, frozen, moves, details))
 
 
 @pytest.mark.parametrize("target", ["../outside.ts", "/absolute.ts", "frontend/../outside.ts"])

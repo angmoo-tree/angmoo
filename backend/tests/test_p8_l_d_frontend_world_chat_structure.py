@@ -49,11 +49,11 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     page = _read(
         "frontend/src/app/worlds/[worldId]/chat/[threadId]/page.tsx"
     )
-    route_client = _read("frontend/src/app/world-app-route-client.tsx")
+    route_client = _read("frontend/src/composition/screens/world-app-screen.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
     product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
     capability = _read(
-        "frontend/src/features/device-shell/model/device-navigation.ts"
+        "frontend/src/lib/navigation/device-navigation.ts"
     )
     safe_navigation = _read("frontend/src/lib/safe-navigation.ts")
     rust = _read("desktop/src-tauri/src/product_windows.rs")
@@ -78,9 +78,9 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
 
 
 def test_world_chat_ui_preserves_p8_l_d_scope_under_p8_l_p_successor() -> None:
-    world_app = _read("frontend/src/features/world-app/ui/world-app.tsx")
+    world_app = _read("frontend/src/composition/screens/world-app.tsx")
     world_contract = _read(
-        "frontend/src/features/world-app/model/world-app-contract.ts"
+        "frontend/src/composition/shells/world-app-navigation.ts"
     )
     ui = _read("frontend/src/features/chat/ui/world-chat.tsx")
     css = _read("frontend/src/features/chat/ui/world-chat.module.css")

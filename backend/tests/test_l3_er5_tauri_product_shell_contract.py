@@ -70,7 +70,7 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
     for forbidden in ("execute_sql", "execute_cypher", "raw_shell"):
         assert forbidden not in runtime
 
-    runtime_gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
+    runtime_gate = _read("frontend/src/composition/providers/desktop-runtime-gate.tsx")
     assert 'width: "min(24rem, calc(100vw - 4rem))"' in runtime_gate
     assert 'wordBreak: "keep-all"' in runtime_gate
     assert "sidecar_terminated" not in runtime
@@ -153,10 +153,10 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
 
 def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -> None:
     layout = _read("frontend/static-shell/app/layout.tsx")
-    globals_css = _read("frontend/src/app/globals.css")
+    globals_css = _read("frontend/src/styles/globals.css")
     frame = _read("frontend/src/components/ui/device-frame.tsx")
     frame_css = _read("frontend/src/components/ui/device-frame.module.css")
-    bridge = _read("frontend/src/shared/desktop/desktop-window-bridge.tsx")
+    bridge = _read("frontend/src/composition/providers/desktop-window-bridge.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
 
     assert 'data-angmoo-runtime-profile="tauri-static"' in layout
@@ -183,7 +183,7 @@ def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -
 
 def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     windows = _read("desktop/src-tauri/src/product_windows.rs")
-    bridge = _read("frontend/src/shared/desktop/desktop-window-bridge.tsx")
+    bridge = _read("frontend/src/composition/providers/desktop-window-bridge.tsx")
     desktop_runtime = _read("frontend/src/lib/desktop/product-window.ts")
 
     for marker in (
@@ -201,7 +201,7 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     assert 'invoke("open_product_window"' in desktop_runtime
     assert "desktopWindowKindForRoute" in bridge
     assert "targetKind === currentKind" in bridge
-    world_app = _read("frontend/src/features/world-app/ui/world-app.tsx")
+    world_app = _read("frontend/src/composition/screens/world-app.tsx")
     product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
     assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
     assert "내 조종 앵무 관계망 열기" in world_app
@@ -224,10 +224,10 @@ def test_phone_product_window_allowlist_matches_local_route_capabilities() -> No
 
 def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> None:
     capability = _read(
-        "frontend/src/features/device-shell/model/device-navigation.ts"
+        "frontend/src/lib/navigation/device-navigation.ts"
     )
     product_link = _read(
-        "frontend/src/features/device-shell/ui/local-product-link.tsx"
+        "frontend/src/components/navigation/local-product-link.tsx"
     )
     feed = _read("frontend/src/features/social/ui/post-list-client.tsx")
     social_post_row = _read(

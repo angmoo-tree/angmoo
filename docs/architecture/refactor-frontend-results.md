@@ -123,6 +123,28 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
 
 ## Temporary-file cleanup
 
+## AR-F2-C product composition preparation
+
+- Move the common World/Studio screens out of Next's `app` directory. Next and
+  the static product router use the same composition; CSS bodies, state effects,
+  native window commands and PWA lifecycle behavior are retained.
+- Place product shells/navigation and bootstrap providers above features. The
+  Device frame and capability-aware link presentation remain reusable common UI.
+- Extract the single auth context/useAuth hook, Runtime status types and Worlds'
+  shell DTO ownership. Worlds no longer obtains its API DTO from Device Home.
+- Retire only the unused World App named-export facade. Record all 13 original
+  exports and their live destinations; check destination declarations, absence of
+  consumers and rejection of implementation-file retirement. Ten new regression
+  cases cover missing type exports, fake destinations and remaining consumers.
+- Preserve the historical L4 public-entry count against its pinned checkpoint;
+  compare today's public-entry list with source instead of retaining a dead file
+  to satisfy an old topology count. Frozen assertions and behavior remain intact.
+- Preparation validation: TypeScript/ESLint, Node proxy, 324-file source/browser
+  preservation and partial architecture checks pass. CI/merge and full runtime
+  verification remain pending; this section is not an AR-F2-C completion claim.
+
+## Temporary-file cleanup (continued)
+
 User authorized cleanup of obsolete backend-refactor temporary files. Check
 actual worktree/process consumers and document/evidence links first. Preserve
 supported migration/extension code, user data, backups and referenced evidence.

@@ -6,7 +6,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { AgentCreateClient } from "@/components/agent-create-client";
 import { AgentDetailClient } from "@/components/agent-detail-client";
 import { AgentsDashboardClient } from "@/features/characters/public";
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { LocalOwnerClient } from "@/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
 import {
@@ -24,27 +24,18 @@ import { SettingsClient } from "@/components/settings-client";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";
 import { DeviceHomeScreen } from "@/composition/screens/device-home-screen";
-import { StudioImportRouteClient } from "@/app/studio/import/studio-import-route-client";
-import { StudioRouteClient } from "@/app/studio/studio-route-client";
-import { WorldAppRouteClient } from "@/app/world-app-route-client";
-import { CreatorStudioFrame } from "@/features/creator-studio/public";
+import { StudioImportRouteClient } from "@/composition/screens/studio-import-screen";
+import { StudioRouteClient } from "@/composition/screens/studio-screen";
+import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
+import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
 import { MemoryWorkspace } from "@/features/memory/public";
 import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
-import {
-  canonicalProductRoute,
-  currentDesktopRoute,
-  desktopWindowKindForRoute,
-  getDesktopWindowState,
-  subscribeDesktopRoute,
-} from "@/shared/desktop/public";
-import { useRuntimeRouter } from "@/shared/navigation/public";
-import {
-  worldAppSectionFromSegment,
-  type WorldAppSectionId,
-} from "@/features/world-app/public";
+import { canonicalProductRoute, currentDesktopRoute, desktopWindowKindForRoute, getDesktopWindowState, subscribeDesktopRoute } from "@/lib/desktop/product-window";
+import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
+import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { safeLoginReturnTo } from "@/lib/safe-navigation";
-import { DesktopRuntimeGate } from "@/shared/runtime/desktop-runtime-gate";
-import { getRuntimeConfig } from "@/shared/runtime/public";
+import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
+import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
 
 type BrowserLocation = {
   pathname: string;

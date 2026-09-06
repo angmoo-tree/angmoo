@@ -687,7 +687,40 @@
     "frontend/src/shared/ui/surfaces.tsx": "frontend/src/components/ui/surfaces.tsx",
     "frontend/src/shared/api/backend-server.ts": "frontend/src/lib/server/backend.ts",
     "frontend/src/shared/desktop/product-window.ts": "frontend/src/lib/desktop/product-window.ts",
-    "frontend/src/shared/navigation/runtime-navigation.ts": "frontend/src/hooks/use-runtime-navigation.ts"
+    "frontend/src/shared/navigation/runtime-navigation.ts": "frontend/src/hooks/use-runtime-navigation.ts",
+    "frontend/src/app/globals.css": "frontend/src/styles/globals.css",
+    "frontend/src/app/world-app-route-client.tsx": "frontend/src/composition/screens/world-app-screen.tsx",
+    "frontend/src/app/studio/studio-route-client.tsx": "frontend/src/composition/screens/studio-screen.tsx",
+    "frontend/src/app/studio/import/studio-import-route-client.tsx": "frontend/src/composition/screens/studio-import-screen.tsx",
+    "frontend/src/components/app-shell.tsx": "frontend/src/composition/shells/app-shell.tsx",
+    "frontend/src/shared/auth/auth-provider.tsx": "frontend/src/composition/providers/auth-provider.tsx",
+    "frontend/src/shared/runtime/desktop-runtime-gate.tsx": "frontend/src/composition/providers/desktop-runtime-gate.tsx",
+    "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx": "frontend/src/composition/providers/desktop-shutdown-overlay.tsx",
+    "frontend/src/shared/desktop/desktop-window-bridge.tsx": "frontend/src/composition/providers/desktop-window-bridge.tsx",
+    "frontend/src/shared/desktop/desktop-window-controls.module.css": "frontend/src/composition/providers/desktop-window-controls.module.css",
+    "frontend/src/shared/navigation/static-navigation-bridge.tsx": "frontend/src/composition/providers/static-navigation-bridge.tsx",
+    "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
+    "frontend/src/features/pwa-shell/model/pwa-contract.ts": "frontend/src/config/pwa.ts",
+    "frontend/src/features/device-shell/ui/device-shell.tsx": "frontend/src/components/layout/device-shell.tsx",
+    "frontend/src/features/device-shell/ui/device-shell.module.css": "frontend/src/components/layout/device-shell.module.css",
+    "frontend/src/features/device-shell/ui/local-product-link.tsx": "frontend/src/components/navigation/local-product-link.tsx",
+    "frontend/src/features/device-shell/ui/local-product-link.module.css": "frontend/src/components/navigation/local-product-link.module.css",
+    "frontend/src/features/device-shell/ui/local-device-navigation.tsx": "frontend/src/composition/shells/local-device-navigation.tsx",
+    "frontend/src/features/device-shell/model/device-navigation.ts": "frontend/src/lib/navigation/device-navigation.ts",
+    "frontend/src/features/world-app/api/world-app-client.ts": "frontend/src/features/worlds/api/world-app-client.ts",
+    "frontend/src/features/world-app/model/world-app-contract.ts": "frontend/src/composition/shells/world-app-navigation.ts",
+    "frontend/src/features/world-app/ui/world-app.tsx": "frontend/src/composition/screens/world-app.tsx",
+    "frontend/src/features/world-app/ui/world-app.module.css": "frontend/src/composition/screens/world-app.module.css",
+    "frontend/src/features/world-app/ui/world-app-shell.tsx": "frontend/src/composition/shells/world-app-shell.tsx",
+    "frontend/src/features/world-app/ui/world-app-shell.module.css": "frontend/src/composition/shells/world-app-shell.module.css",
+    "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx": "frontend/src/composition/shells/creator-studio-frame.tsx",
+    "frontend/src/features/creator-studio/ui/creator-studio-frame.module.css": "frontend/src/composition/shells/creator-studio-frame.module.css",
+    "frontend/src/features/creator-studio/ui/creator-studio-shell.tsx": "frontend/src/composition/shells/creator-studio-shell.tsx",
+    "frontend/src/features/creator-studio/ui/creator-studio-shell.module.css": "frontend/src/composition/shells/creator-studio-shell.module.css",
+    "frontend/src/features/creator-studio/model/creator-studio-contract.ts": "frontend/src/composition/shells/creator-studio-navigation.ts",
+    "frontend/src/features/runtime-status/ui/runtime-status-summary.tsx": "frontend/src/features/runtime-status/components/runtime-status-summary.tsx",
+    "frontend/src/features/runtime-status/model/runtime-status-contract.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
+    "frontend/src/features/world-app/public.ts": "frontend/src/composition/screens/world-app.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135368,6 +135401,102 @@
         "Windows Host and installer CI"
       ],
       "status": "IMPLEMENTED - validation in progress"
+    },
+    "AR-F2-C": {
+      "scope": "Shared Next/static screens, product shells/providers and canonical platform primitives",
+      "files": {
+        "frontend/src/app/globals.css": "frontend/src/styles/globals.css",
+        "frontend/src/app/world-app-route-client.tsx": "frontend/src/composition/screens/world-app-screen.tsx",
+        "frontend/src/app/studio/studio-route-client.tsx": "frontend/src/composition/screens/studio-screen.tsx",
+        "frontend/src/app/studio/import/studio-import-route-client.tsx": "frontend/src/composition/screens/studio-import-screen.tsx",
+        "frontend/src/components/app-shell.tsx": "frontend/src/composition/shells/app-shell.tsx",
+        "frontend/src/shared/auth/auth-provider.tsx": "frontend/src/composition/providers/auth-provider.tsx",
+        "frontend/src/shared/runtime/desktop-runtime-gate.tsx": "frontend/src/composition/providers/desktop-runtime-gate.tsx",
+        "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx": "frontend/src/composition/providers/desktop-shutdown-overlay.tsx",
+        "frontend/src/shared/desktop/desktop-window-bridge.tsx": "frontend/src/composition/providers/desktop-window-bridge.tsx",
+        "frontend/src/shared/desktop/desktop-window-controls.module.css": "frontend/src/composition/providers/desktop-window-controls.module.css",
+        "frontend/src/shared/navigation/static-navigation-bridge.tsx": "frontend/src/composition/providers/static-navigation-bridge.tsx",
+        "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
+        "frontend/src/features/pwa-shell/model/pwa-contract.ts": "frontend/src/config/pwa.ts",
+        "frontend/src/features/device-shell/ui/device-shell.tsx": "frontend/src/components/layout/device-shell.tsx",
+        "frontend/src/features/device-shell/ui/device-shell.module.css": "frontend/src/components/layout/device-shell.module.css",
+        "frontend/src/features/device-shell/ui/local-product-link.tsx": "frontend/src/components/navigation/local-product-link.tsx",
+        "frontend/src/features/device-shell/ui/local-product-link.module.css": "frontend/src/components/navigation/local-product-link.module.css",
+        "frontend/src/features/device-shell/ui/local-device-navigation.tsx": "frontend/src/composition/shells/local-device-navigation.tsx",
+        "frontend/src/features/device-shell/model/device-navigation.ts": "frontend/src/lib/navigation/device-navigation.ts",
+        "frontend/src/features/world-app/api/world-app-client.ts": "frontend/src/features/worlds/api/world-app-client.ts",
+        "frontend/src/features/world-app/model/world-app-contract.ts": "frontend/src/composition/shells/world-app-navigation.ts",
+        "frontend/src/features/world-app/ui/world-app.tsx": "frontend/src/composition/screens/world-app.tsx",
+        "frontend/src/features/world-app/ui/world-app.module.css": "frontend/src/composition/screens/world-app.module.css",
+        "frontend/src/features/world-app/ui/world-app-shell.tsx": "frontend/src/composition/shells/world-app-shell.tsx",
+        "frontend/src/features/world-app/ui/world-app-shell.module.css": "frontend/src/composition/shells/world-app-shell.module.css",
+        "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx": "frontend/src/composition/shells/creator-studio-frame.tsx",
+        "frontend/src/features/creator-studio/ui/creator-studio-frame.module.css": "frontend/src/composition/shells/creator-studio-frame.module.css",
+        "frontend/src/features/creator-studio/ui/creator-studio-shell.tsx": "frontend/src/composition/shells/creator-studio-shell.tsx",
+        "frontend/src/features/creator-studio/ui/creator-studio-shell.module.css": "frontend/src/composition/shells/creator-studio-shell.module.css",
+        "frontend/src/features/creator-studio/model/creator-studio-contract.ts": "frontend/src/composition/shells/creator-studio-navigation.ts",
+        "frontend/src/features/runtime-status/ui/runtime-status-summary.tsx": "frontend/src/features/runtime-status/components/runtime-status-summary.tsx",
+        "frontend/src/features/runtime-status/model/runtime-status-contract.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts"
+      },
+      "frontend_extractions": {
+        "frontend/src/shared/auth/auth-provider.tsx": {
+          "provider": "frontend/src/composition/providers/auth-provider.tsx",
+          "context": "frontend/src/lib/auth/auth-context.ts",
+          "consumer_hook": "frontend/src/hooks/use-auth.ts",
+          "preserved": "One Context instance, existing bootstrap/refresh and subscription cleanup; only ownership/imports change."
+        },
+        "frontend/src/features/runtime-status/model/runtime-status-contract.ts": {
+          "presentation": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
+          "types": "frontend/src/features/runtime-status/types/runtime-status.ts",
+          "preserved": "Every state, label, description and tone; API mapping unchanged."
+        },
+        "frontend/src/features/world-app/api/world-app-client.ts": {
+          "api": "frontend/src/features/worlds/api/world-app-client.ts",
+          "types": "frontend/src/features/worlds/types/world-app.ts",
+          "preserved": "Same full DTO fields, request/response validation and World identity. Worlds owns its context DTO instead of importing Device Home."
+        }
+      },
+      "frontend_retirements": {
+        "frontend/src/features/world-app/public.ts": {
+          "reason": "No source/browser consumer remains after replacing the combined facade with actual screen, navigation and Worlds context entries. The frontend does not publish this module as an external package contract.",
+          "export_destinations": {
+            "WORLD_APP_SECTIONS": "frontend/src/composition/shells/world-app-navigation.ts",
+            "worldAppSectionFromSegment": "frontend/src/composition/shells/world-app-navigation.ts",
+            "worldAppSectionRoute": "frontend/src/composition/shells/world-app-navigation.ts",
+            "WorldAppSection": "frontend/src/composition/shells/world-app-navigation.ts",
+            "WorldAppSectionId": "frontend/src/composition/shells/world-app-navigation.ts",
+            "getOwnerControlledActor": "frontend/src/features/worlds/api/world-app-client.ts",
+            "getLocalWorldApp": "frontend/src/features/worlds/api/world-app-client.ts",
+            "WorldAppApiError": "frontend/src/features/worlds/api/world-app-client.ts",
+            "LocalWorldAppRead": "frontend/src/features/worlds/types/world-app.ts",
+            "OwnerControlledActorRead": "frontend/src/features/worlds/types/world-app.ts",
+            "WorldApp": "frontend/src/composition/screens/world-app.tsx",
+            "WorldAppAuthStatus": "frontend/src/composition/screens/world-app.tsx",
+            "WorldAppShell": "frontend/src/composition/shells/world-app-shell.tsx"
+          },
+          "verification": [
+            "TypeScript actual callers",
+            "no old facade import",
+            "World route and static scenarios",
+            "source/stock preservation"
+          ]
+        }
+      },
+      "source_contract_consumers": [
+        "backend/tests/test_l2_5_creator_studio_shell_contract.py",
+        "backend/tests/test_l2_5_pwa_shell_contract.py",
+        "backend/tests/test_l2_5_world_app_shell_contract.py",
+        "backend/tests/test_l3_er5_next_static_export_contract.py",
+        "backend/tests/test_l3_er5_tauri_product_shell_contract.py",
+        "backend/tests/test_l4_5_ui_c_landmark_contract.py",
+        "backend/tests/test_p8_l_c_frontend_chat_structure.py",
+        "backend/tests/test_p8_l_d_frontend_world_chat_structure.py",
+        "backend/tests/test_p8_l_q_frontend_memory.py",
+        "backend/tests/world_packages/test_ui_contract.py",
+        "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
+        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py"
+      ],
+      "status": "IMPLEMENTED - isolated validation pending prior stage integration"
     }
   },
   "asgi_exports": {

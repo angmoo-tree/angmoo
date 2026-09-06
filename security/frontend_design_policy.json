@@ -88,7 +88,7 @@
       "classification": "ADAPTED",
       "hosted_blob_oid": "77559dc0bb72f49e470e03b05989ed16552fd92c",
       "hosted_source": "frontend/src/components/app-shell.tsx",
-      "local_target": "frontend/src/components/app-shell.tsx",
+      "local_target": "frontend/src/composition/shells/app-shell.tsx",
       "scope": "visual chrome only; Local route and product-window matrix stays authoritative"
     },
     {
@@ -116,7 +116,7 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/device-shell/ui/device-shell.tsx",
+      "local_target": "frontend/src/components/layout/device-shell.tsx",
       "scope": "feature-owned Phone shell, one scroll owner, safe-area navigation, Browser centering, and Tauri frame suppression"
     },
     {
@@ -130,14 +130,14 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/world-app/ui/world-app.tsx",
+      "local_target": "frontend/src/composition/screens/world-app.tsx",
       "scope": "World-scoped Phone application shell"
     },
     {
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
+      "local_target": "frontend/src/composition/shells/creator-studio-frame.tsx",
       "scope": "wide Creator Studio workspace"
     },
     {
@@ -254,17 +254,17 @@
     "frontend/src/app/memory/page.tsx",
     "frontend/src/app/memory-explorer/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
-    "frontend/src/components/app-shell.tsx",
+    "frontend/src/composition/shells/app-shell.tsx",
     "frontend/src/components/post-detail-client.tsx",
     "frontend/src/composition/static-product-router.tsx",
     "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
-    "frontend/src/features/device-shell/model/device-navigation.ts",
+    "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
-    "frontend/src/features/device-shell/ui/device-shell.module.css",
-    "frontend/src/features/device-shell/ui/device-shell.tsx",
-    "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
-    "frontend/src/features/device-shell/ui/local-product-link.module.css",
-    "frontend/src/features/device-shell/ui/local-product-link.tsx",
+    "frontend/src/components/layout/device-shell.module.css",
+    "frontend/src/components/layout/device-shell.tsx",
+    "frontend/src/composition/shells/local-device-navigation.tsx",
+    "frontend/src/components/navigation/local-product-link.module.css",
+    "frontend/src/components/navigation/local-product-link.tsx",
     "frontend/src/features/memory/public.ts",
     "frontend/src/features/memory/ui/memory-scope-summary.tsx",
     "frontend/src/features/memory/ui/memory-workspace.module.css",
@@ -334,7 +334,7 @@
   },
   "device_shell": {
     "bottom_navigation": {
-      "capability_source": "frontend/src/features/device-shell/model/device-navigation.ts",
+      "capability_source": "frontend/src/lib/navigation/device-navigation.ts",
       "destinations": [
         "/",
         "/posts",
@@ -351,10 +351,10 @@
         "/tree"
       ]
     },
-    "compatibility_facade": "frontend/src/components/app-shell.tsx",
+    "compatibility_facade": "frontend/src/composition/shells/app-shell.tsx",
     "feature_public_export": "frontend/src/features/device-shell/public.ts",
     "owner_stage": "L4.5 UI-C",
-    "product_shell": "frontend/src/features/device-shell/ui/device-shell.tsx",
+    "product_shell": "frontend/src/components/layout/device-shell.tsx",
     "shared_neutral_primitive": "frontend/src/components/ui/device-frame.tsx",
     "single_scroll_owner_marker": "data-device-scroll-owner=\"true\"",
     "tauri_titlebar_exclusion": {
@@ -399,18 +399,19 @@
       "frontend/DESIGN.md",
       "END:angmoo-frontend-design-contract"
     ],
-    "frontend/src/app/globals.css": [
-      "@import \"../styles/semantic-tokens.css\";"
+    "frontend/src/styles/globals.css": [
+      "@import \"./semantic-tokens.css\";"
     ],
     "frontend/src/app/ui-foundation/page.tsx": [
       "follow: false",
       "index: false",
       "SemanticFoundationFixture"
     ],
-    "frontend/src/components/app-shell.tsx": [
-      "Compatibility facade for legacy route wrappers",
-      "from \"@/features/device-shell/public\"",
-      "surface=\"local-phone\""
+    "frontend/src/composition/shells/app-shell.tsx": [
+      "Shared Phone screen composition",
+      "surface=\"local-phone\"",
+      "@/components/layout/device-shell",
+      "@/composition/shells/local-device-navigation"
     ],
     "frontend/src/composition/static-product-router.tsx": [
       "pathname === \"/memory\"",
@@ -445,7 +446,7 @@
       "LocalProductLink",
       "RecentActivityMetric"
     ],
-    "frontend/src/features/device-shell/model/device-navigation.ts": [
+    "frontend/src/lib/navigation/device-navigation.ts": [
       "LOCAL_DEVICE_NAVIGATION",
       "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
       "exposure: \"hidden\"",
@@ -457,16 +458,16 @@
       "LocalDeviceNavigation",
       "LocalProductLink"
     ],
-    "frontend/src/features/device-shell/ui/device-shell.tsx": [
+    "frontend/src/components/layout/device-shell.tsx": [
       "DeviceFrame",
       "data-device-shell=\"phone\"",
       "navigation?: ReactNode"
     ],
-    "frontend/src/features/device-shell/ui/local-product-link.module.css": [
+    "frontend/src/components/navigation/local-product-link.module.css": [
       "--color-state-disabled",
       "cursor: not-allowed"
     ],
-    "frontend/src/features/device-shell/ui/local-product-link.tsx": [
+    "frontend/src/components/navigation/local-product-link.tsx": [
       "aria-disabled=\"true\"",
       "data-product-route-unavailable=\"true\"",
       "isStaticFrontendProfile",
@@ -849,7 +850,7 @@
     },
     "global_legacy_alias_remap": {
       "import_marker": "@import \"../shared/ui/semantic-tokens.css\";",
-      "import_path": "frontend/src/app/globals.css",
+      "import_path": "frontend/src/styles/globals.css",
       "required_smoke": [
         "pnpm --dir browser-tests exec playwright test --config=playwright.static.config.ts",
         "pnpm --dir browser-tests test",

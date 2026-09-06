@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { ProfileConnectionsClient } from "@/components/profile-connections-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type {

@@ -2574,12 +2574,12 @@
             "FeedPage"
           ],
           "imports": [
-            "@/components/app-shell",
+            "@/composition/shells/app-shell",
             "@/features/social/api/social-feed-server",
             "@/features/social/public"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "173b505a866ce4f2b261785ef91ee53d5ff0d1a42c6fef6d92c8ff6ea533b52f"
+          "sha256": "00687eaefd4b789164abd376a8b2a83cd4de61a22337ca4dea6d150edb574e00"
         },
         {
           "exports": [
@@ -2781,7 +2781,6 @@
           "frontend/src/features/runtime-status/public.ts",
           "frontend/src/features/social/public.ts",
           "frontend/src/features/ui-foundation/public.ts",
-          "frontend/src/features/world-app/public.ts",
           "frontend/src/features/world-packages/public.ts"
         ],
         "shared": [

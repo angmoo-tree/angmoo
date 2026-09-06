@@ -156,6 +156,70 @@ def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str]) -> list[
     return errors
 
 
+def verify_retirements(root: Path, frozen: dict[str, bytes], moves: dict[str, str], details: dict) -> list[str]:
+    """Retire a named-export facade only when every original export survives.
+
+    This deliberately accepts only a narrow, static facade grammar. Arbitrary
+    implementation files cannot be excused by pointing their old path at a
+    surviving file. TypeScript and runtime tests still verify actual consumers.
+    """
+    errors = []
+    statement = re.compile(r'''export\s+(?:type\s+)?\{([^}]+)\}\s*from\s*(['"])([^'"\n]+)\2\s*;''', re.S)
+    imported = re.compile(r'''(?:from\s+|import\s*\(|require\s*\(|import\s+)\s*['"]([^'"\n]+)['"]''')
+    for stage, detail in details.items():
+        for old, record in detail.get("frontend_retirements", {}).items():
+            if old not in frozen or not old.startswith("frontend/src/"):
+                errors.append(f"[frontend_retirement_unfrozen_source] {stage}: {old}")
+                continue
+            source = frozen[old].decode("utf-8")
+            exports = set()
+            valid = True
+            for match in statement.finditer(source):
+                for binding in match[1].split(","):
+                    if not binding.strip():
+                        continue
+                    symbol = re.fullmatch(r"\s*(?:type\s+)?([A-Za-z_$][\w$]*)(?:\s+as\s+([A-Za-z_$][\w$]*))?\s*", binding)
+                    if symbol is None:
+                        valid = False
+                    else:
+                        exports.add(symbol[2] or symbol[1])
+            if not valid or not exports or statement.sub("", source).strip():
+                errors.append(f"[frontend_retirement_not_static_facade] {old}")
+                continue
+            destinations = record.get("export_destinations", {})
+            if set(destinations) != exports or not record.get("reason") or not record.get("verification"):
+                errors.append(f"[frontend_retirement_export_coverage] {old}")
+            if (root / old).exists():
+                errors.append(f"[frontend_retirement_source_still_exists] {old}")
+            if mapped(old, moves) not in destinations.values():
+                errors.append(f"[frontend_retirement_unrelated_target] {old}")
+            for name, destination in destinations.items():
+                target = (root / destination).resolve()
+                if not target.is_relative_to((root / "frontend/src").resolve()) or not target.is_file():
+                    errors.append(f"[frontend_retirement_missing_export] {old}: {name} -> {destination}")
+                    continue
+                declaration = rf"\bexport\s+(?:async\s+)?(?:function|class|const|let|type|interface|enum)\s+{re.escape(name)}\b"
+                if re.search(declaration, target.read_text(encoding="utf-8")) is None:
+                    errors.append(f"[frontend_retirement_missing_export] {old}: {name} -> {destination}")
+            retired_module = (root / old).with_suffix("").resolve()
+            for folder in (root / "frontend/src", root / "frontend/static-shell/app"):
+                for path in folder.rglob("*"):
+                    if not path.is_file() or path.suffix not in {".ts", ".tsx", ".js", ".jsx"}:
+                        continue
+                    for spec in imported.findall(path.read_text(encoding="utf-8")):
+                        if spec.startswith("@/"):
+                            target = root / "frontend/src" / spec[2:]
+                        elif spec.startswith("."):
+                            target = path.parent / spec
+                        else:
+                            continue
+                        if target.suffix in {".ts", ".tsx", ".js", ".jsx"}:
+                            target = target.with_suffix("")
+                        if target.resolve() == retired_module:
+                            errors.append(f"[frontend_retirement_active_import] {path.relative_to(root)} -> {old}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture", action="store_true")
@@ -171,8 +235,10 @@ def main() -> int:
         return 0
     if json.loads(path.read_text(encoding="utf-8")) != expected:
         raise ValueError("frontend checkpoint differs from pinned PR290 Git source")
-    moves = json.loads((ROOT / PATH_MAP).read_text(encoding="utf-8"))["files"]
+    path_map = json.loads((ROOT / PATH_MAP).read_text(encoding="utf-8"))
+    moves = path_map["files"]
     errors = verify(ROOT, frozen, moves)
+    errors.extend(verify_retirements(ROOT, frozen, moves, path_map.get("details", {})))
     for error in errors:
         print(error)
     if errors:

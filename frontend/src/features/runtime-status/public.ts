@@ -1,9 +1,9 @@
 export {
   presentRuntimeState,
-} from "./model/runtime-status-contract";
+} from "./utils/runtime-status-presentation";
 export type {
   ProductRuntimePresentation,
   ProductRuntimeState,
-} from "./model/runtime-status-contract";
-export { RuntimeStatusSummary } from "./ui/runtime-status-summary";
+} from "./types/runtime-status";
+export { RuntimeStatusSummary } from "./components/runtime-status-summary";
 export { getProductRuntimeState } from "./api/runtime-status-client";

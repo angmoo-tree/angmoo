@@ -1,5 +1,5 @@
-import type { ProductRuntimeState } from "../model/runtime-status-contract";
-import { runtimeFetch } from "@/shared/runtime/public";
+import type { ProductRuntimeState } from "@/features/runtime-status/types/runtime-status";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 
 type RuntimeStatusEnvelope = {

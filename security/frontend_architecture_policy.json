@@ -12,8 +12,8 @@
     "runtime-status",
     "social",
     "ui-foundation",
-    "world-app",
-    "world-packages"
+    "world-packages",
+    "worlds"
   ],
   "legacy_import_exceptions": [],
   "legacy_import_prefixes": [
@@ -122,7 +122,7 @@
       "WorldSurfaceItem",
       "getLocalWorldSurface"
     ],
-    "frontend/src/features/device-shell/model/device-navigation.ts": [
+    "frontend/src/lib/navigation/device-navigation.ts": [
       "LOCAL_DEVICE_NAVIGATION",
       "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
       "isStaticLocalProductRouteSupported",
@@ -134,22 +134,22 @@
       "LocalDeviceNavigation",
       "LocalProductLink"
     ],
-    "frontend/src/features/device-shell/ui/device-shell.tsx": [
+    "frontend/src/components/layout/device-shell.tsx": [
       "DeviceFrame",
       "data-device-shell=\"phone\"",
       "navigation?: ReactNode"
     ],
-    "frontend/src/features/device-shell/ui/local-product-link.module.css": [
+    "frontend/src/components/navigation/local-product-link.module.css": [
       "--color-state-disabled",
       "cursor: not-allowed"
     ],
-    "frontend/src/features/device-shell/ui/local-product-link.tsx": [
+    "frontend/src/components/navigation/local-product-link.tsx": [
       "aria-disabled=\"true\"",
       "data-product-route-unavailable=\"true\"",
       "isStaticFrontendProfile",
       "isStaticLocalProductRouteSupported"
     ],
-    "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx": [
+    "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx": [
       "registration.unregister()",
       "registration.update()",
       "updateViaCache: \"none\""
@@ -178,14 +178,14 @@
       "onSelect={setActiveNavigation}",
       "src=\"/icon.svg\""
     ],
-    "frontend/src/features/world-app/model/world-app-contract.ts": [
+    "frontend/src/composition/shells/world-app-navigation.ts": [
       "availability: \"available\"",
       "id: \"characters\"",
       "id: \"relationships\"",
       "segment: \"feed\"",
       "worldAppSectionRoute"
     ],
-    "frontend/src/features/world-app/ui/world-app.tsx": [
+    "frontend/src/composition/screens/world-app.tsx": [
       "const NO_SPECIFIC_ROLE_KEY = \"no_specific_role\";",
       "return !roleKey || roleKey === NO_SPECIFIC_ROLE_KEY ? \"역할 없음\" : roleKey;",
       "worldRoleLabel(ownerActor.profile.role_key)"
@@ -231,6 +231,10 @@
     "frontend/src/app/messages/page.tsx",
     "frontend/src/app/ui-foundation/page.tsx",
     "frontend/src/app/worlds/[worldId]/characters/[worldCharacterId]/page.tsx",
+    "frontend/src/components/layout/device-shell.module.css",
+    "frontend/src/components/layout/device-shell.tsx",
+    "frontend/src/components/navigation/local-product-link.module.css",
+    "frontend/src/components/navigation/local-product-link.tsx",
     "frontend/src/components/ui/app-icon.tsx",
     "frontend/src/components/ui/avatar.tsx",
     "frontend/src/components/ui/button.tsx",
@@ -244,7 +248,13 @@
     "frontend/src/components/ui/status-badge.tsx",
     "frontend/src/components/ui/status.tsx",
     "frontend/src/components/ui/surfaces.tsx",
+    "frontend/src/composition/providers/auth-provider.tsx",
+    "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
     "frontend/src/composition/screens/device-home-screen.tsx",
+    "frontend/src/composition/screens/world-app.tsx",
+    "frontend/src/composition/shells/creator-studio-frame.tsx",
+    "frontend/src/composition/shells/local-device-navigation.tsx",
+    "frontend/src/composition/shells/world-app-navigation.ts",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/api/world-character-profile-client.ts",
     "frontend/src/features/characters/model/character-dashboard-contract.ts",
@@ -267,16 +277,9 @@
     "frontend/src/features/chat/ui/world-chat.tsx",
     "frontend/src/features/creator-studio/public.ts",
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
-    "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/device-home/utils/device-home-presentation.ts",
-    "frontend/src/features/device-shell/model/device-navigation.ts",
     "frontend/src/features/device-shell/public.ts",
-    "frontend/src/features/device-shell/ui/device-shell.module.css",
-    "frontend/src/features/device-shell/ui/device-shell.tsx",
-    "frontend/src/features/device-shell/ui/local-device-navigation.tsx",
-    "frontend/src/features/device-shell/ui/local-product-link.module.css",
-    "frontend/src/features/device-shell/ui/local-product-link.tsx",
     "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/model/memory-contract.ts",
     "frontend/src/features/memory/public.ts",
@@ -285,7 +288,6 @@
     "frontend/src/features/memory/ui/memory-workspace.tsx",
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
     "frontend/src/features/pwa-shell/public.ts",
-    "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx",
     "frontend/src/features/relationships/api/relationship-graph.ts",
     "frontend/src/features/relationships/model/relationship-graph.ts",
     "frontend/src/features/relationships/public.ts",
@@ -293,6 +295,7 @@
     "frontend/src/features/relationships/ui/relationship-graph-frame.module.css",
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
     "frontend/src/features/runtime-status/public.ts",
+    "frontend/src/features/runtime-status/types/runtime-status.ts",
     "frontend/src/features/social/api/social-agent-client.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-feed-server.ts",
@@ -315,16 +318,16 @@
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
-    "frontend/src/features/world-app/api/world-app-client.ts",
-    "frontend/src/features/world-app/model/world-app-contract.ts",
-    "frontend/src/features/world-app/public.ts",
-    "frontend/src/features/world-app/ui/world-app.tsx",
     "frontend/src/features/world-packages/public.ts",
+    "frontend/src/features/worlds/api/world-app-client.ts",
+    "frontend/src/features/worlds/types/world-app.ts",
+    "frontend/src/hooks/use-auth.ts",
     "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+    "frontend/src/lib/auth/auth-context.ts",
     "frontend/src/lib/auth/browser-session.ts",
+    "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/lib/server/backend.ts",
     "frontend/src/shared/api/public.ts",
-    "frontend/src/shared/auth/auth-provider.tsx",
     "frontend/src/shared/auth/auth-session.ts",
     "frontend/src/shared/auth/public.ts",
     "frontend/src/shared/interaction/public.ts",
@@ -338,9 +341,15 @@
   "schema_version": 1,
   "refactor": {
     "features": [
-      "device-home"
+      "device-home",
+      "runtime-status",
+      "worlds"
     ],
     "common": [
+      "components/layout/device-shell",
+      "components/layout/device-shell.module.css",
+      "components/navigation/local-product-link",
+      "components/navigation/local-product-link.module.css",
       "components/ui/app-icon",
       "components/ui/app-icon.module.css",
       "components/ui/avatar",
@@ -356,15 +365,20 @@
       "components/ui/status",
       "components/ui/status-badge",
       "components/ui/surfaces",
+      "config/pwa",
+      "hooks/use-auth",
       "hooks/use-mobile-pull-to-refresh",
       "hooks/use-runtime-media-url",
       "hooks/use-runtime-navigation",
+      "lib/auth/auth-context",
       "lib/auth/browser-session",
       "lib/desktop/product-window",
       "lib/media/safe-media-url",
+      "lib/navigation/device-navigation",
       "lib/navigation/product-routes",
       "lib/runtime/runtime-config",
       "lib/server/backend",
+      "styles/globals.css",
       "styles/semantic-tokens.css",
       "utils/class-names",
       "utils/profile-presentation",
@@ -374,182 +388,188 @@
       {
         "importer": "features/creator-studio/ui/creator-studio-dashboard",
         "target": "features/device-home/public",
-        "owner_stage": "AR-F3-C",
-        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+      },
+      {
+        "importer": "features/device-shell/public",
+        "target": "components/layout/device-shell",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+      },
+      {
+        "importer": "features/device-shell/public",
+        "target": "components/navigation/local-product-link",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+      },
+      {
+        "importer": "features/device-shell/public",
+        "target": "lib/navigation/device-navigation",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "features/memory/ui/memory-workspace",
         "target": "features/device-home/public",
-        "owner_stage": "AR-F4-B",
-        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "features/social/api/social-feed-server",
         "target": "lib/server/backend",
-        "owner_stage": "AR-F3-E",
-        "removal_condition": "Server-only initial feed consumer separated in F2-B. Activate the complete Social feature scope in F3-E; client/public modules never import this server entry."
-      },
-      {
-        "importer": "features/world-app/api/world-app-client",
-        "target": "features/device-home/public",
-        "owner_stage": "AR-F2-C",
-        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
-      },
-      {
-        "importer": "features/world-app/ui/world-app",
-        "target": "features/device-home/public",
-        "owner_stage": "AR-F2-C",
-        "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/api/public",
         "target": "lib/server/backend",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/auth/auth-session",
         "target": "lib/auth/browser-session",
         "owner_stage": "AR-F3-A",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
-        "importer": "shared/desktop/desktop-window-bridge",
-        "target": "lib/desktop/product-window",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "importer": "shared/auth/public",
+        "target": "hooks/use-auth",
+        "owner_stage": "AR-F3-A",
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/desktop/public",
         "target": "lib/desktop/product-window",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/interaction/public",
         "target": "hooks/use-mobile-pull-to-refresh",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/interaction/public",
         "target": "utils/scroll-viewport",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/media/safe-media-url",
         "target": "lib/media/safe-media-url",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/media/use-runtime-media-url",
         "target": "hooks/use-runtime-media-url",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/navigation/product-routes",
         "target": "lib/navigation/product-routes",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/navigation/public",
         "target": "hooks/use-runtime-navigation",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/runtime/runtime-config",
         "target": "lib/runtime/runtime-config",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/app-icon",
         "target": "components/ui/app-icon",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/button",
         "target": "components/ui/button",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/class-names",
         "target": "utils/class-names",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/avatar",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/device-frame",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/dialog",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/feedback",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/form-controls",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/navigation",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/profile-avatar",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status-badge",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/surfaces",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "utils/profile-presentation",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
       }
     ]
   }

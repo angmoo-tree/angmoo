@@ -59,7 +59,7 @@ def test_service_worker_is_lifecycle_only_and_caches_no_application_data() -> No
 def test_root_layout_registers_optional_worker_without_blocking_render() -> None:
     layout = _read("frontend/src/app/layout.tsx")
     lifecycle = _read(
-        "frontend/src/features/pwa-shell/ui/pwa-service-worker-lifecycle.tsx"
+        "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx"
     )
 
     assert "<PwaServiceWorkerLifecycle />" in layout

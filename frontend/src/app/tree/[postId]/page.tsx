@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { TreePostDetailClient } from "@/components/tree-post-detail-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { TreePostDetail } from "@/lib/tree";

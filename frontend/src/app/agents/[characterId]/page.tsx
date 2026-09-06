@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AgentDetailClient } from "@/components/agent-detail-client";
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 type PageProps = {

@@ -50,14 +50,14 @@ def test_browser_auth_storage_contains_no_session_or_pending_token() -> None:
 
 
 def test_browser_auth_provider_bootstraps_from_auth_me() -> None:
-    provider = _read("shared/auth/auth-provider.tsx")
+    provider = _read("composition/providers/auth-provider.tsx")
     session = _read("shared/auth/auth-session.ts")
     layout = _read("app/layout.tsx")
 
-    assert 'type AuthStatus = "checking" | "authenticated" | "unauthenticated"' in provider
+    assert 'type AuthStatus = "checking" | "authenticated" | "unauthenticated"' in _read("lib/auth/auth-context.ts")
     assert "getCurrentUser" in provider
     assert 'authRequest<UserRead>("/auth/me", options)' in session
-    assert "useAuth" in provider
+    assert "useAuth" in _read("hooks/use-auth.ts")
     assert "<AuthProvider>" in layout
 
 

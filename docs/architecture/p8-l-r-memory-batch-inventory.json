@@ -451,6 +451,14 @@
       "sha256": "13783bb4a0513e02f1b088d598e1e830e1e185bf24a125bae15cf58473e31775"
     },
     {
+      "path": "frontend/src/composition/providers/desktop-runtime-gate.tsx",
+      "sha256": "cf54a848e2fa7039ce23829b904e0653fdb730a23174cc3e895438158c774056"
+    },
+    {
+      "path": "frontend/src/composition/providers/desktop-shutdown-overlay.tsx",
+      "sha256": "f7ac13e87c758282937d08429321ad8c08c1435bd080245f42c1b9eea1d958aa"
+    },
+    {
       "path": "frontend/src/features/memory/api/memory-client.ts",
       "sha256": "9980fd8b3e039c9283075c54c4c3674ad01b3586c4b07d8e18dfdd9e82a2f555"
     },
@@ -491,14 +499,6 @@
       "sha256": "80202c0ea523be1b19ab7daa14dbab7bd89a7b06dfcfbf96718a59a76119ddf9"
     },
     {
-      "path": "frontend/src/shared/runtime/desktop-runtime-gate.tsx",
-      "sha256": "fd963cf8dfd69008c17d39d56fa60bbd807672d3c5c2325d539fef2ba35d3bff"
-    },
-    {
-      "path": "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx",
-      "sha256": "000335d89f394f569d79ed48ae4b276917119b49b99ecb236ab4d6499d235730"
-    },
-    {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
       "sha256": "be2eeb89cb8426b1ecf34cd19691e983b3ba869252c7bd763e1fc0d52db80acf"
     },
@@ -508,7 +508,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "1d91a47c75b439002c2d5f1452fc29f7031718f72b824d1ddbdfd94e34464271"
+      "sha256": "8e03491c2c31dd363a6cb3d095d5cac582f502a4ae2e5dd1de256632e1843454"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

@@ -18,7 +18,7 @@ def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
     import_page = _read("app/studio/import/page.tsx")
 
     for source in (dashboard_page, new_page, edit_page, import_page):
-        assert 'from "@/features/creator-studio/public"' in source
+        assert 'from "@/composition/shells/creator-studio-frame"' in source
     assert 'activeSection="worlds"' in dashboard_page
     assert 'activeSection="new-world"' in new_page
     assert "WorldCreatorClient" in new_page
@@ -61,11 +61,11 @@ def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
 
 
 def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> None:
-    shell_css = _read("features/creator-studio/ui/creator-studio-shell.module.css")
+    shell_css = _read("composition/shells/creator-studio-shell.module.css")
     dashboard_css = _read(
         "features/creator-studio/ui/creator-studio-dashboard.module.css"
     )
-    frame = _read("features/creator-studio/ui/creator-studio-frame.tsx")
+    frame = _read("composition/shells/creator-studio-frame.tsx")
 
     assert "grid-template-columns: minmax(210px, 260px) minmax(0, 1fr)" in shell_css
     assert "@media (max-width: 799px)" in shell_css

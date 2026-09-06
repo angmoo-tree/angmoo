@@ -91,7 +91,7 @@ REQUIRED_FILES = (
     "frontend/src/features/chat/ui/world-chat.tsx",
     "frontend/src/features/device-home/model/device-home-contract.ts",
     "frontend/src/features/device-home/ui/device-home.tsx",
-    "frontend/src/features/device-shell/model/device-navigation.ts",
+    "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/model/memory-contract.ts",
     "frontend/src/features/memory/public.ts",

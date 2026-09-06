@@ -10,9 +10,9 @@ def _read(relative_path: str) -> str:
 
 def test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes() -> None:
     device_shell = _read(
-        "frontend/src/features/device-shell/ui/device-shell.tsx"
+        "frontend/src/components/layout/device-shell.tsx"
     )
-    app_shell = _read("frontend/src/components/app-shell.tsx")
+    app_shell = _read("frontend/src/composition/shells/app-shell.tsx")
 
     assert "<main" in device_shell
     assert 'data-main-landmark-owner="device-shell"' in device_shell
@@ -45,7 +45,7 @@ def test_wide_product_shells_own_their_main_landmark() -> None:
         "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
     )
     creator_shell = _read(
-        "frontend/src/features/creator-studio/ui/creator-studio-shell.tsx"
+        "frontend/src/composition/shells/creator-studio-shell.tsx"
     )
     creator_client = _read("frontend/src/components/world-creator-client.tsx")
 

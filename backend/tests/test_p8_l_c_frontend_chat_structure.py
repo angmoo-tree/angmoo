@@ -110,7 +110,7 @@ def test_chat_v1_behavior_and_next_only_exposure_markers_are_preserved() -> None
     ):
         assert marker in listing
     navigation = _read(
-        "frontend/src/features/device-shell/model/device-navigation.ts"
+        "frontend/src/lib/navigation/device-navigation.ts"
     )
     assert '"/messages"' in navigation
     assert 'id: `next-only-${routeFamily.slice(1)}`' in navigation

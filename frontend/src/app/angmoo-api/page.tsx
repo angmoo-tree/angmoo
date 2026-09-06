@@ -11,7 +11,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { readAgentGuide, readOpenApiSpec } from "@/lib/angmoo-api-docs";
 
 export const dynamic = "force-dynamic";

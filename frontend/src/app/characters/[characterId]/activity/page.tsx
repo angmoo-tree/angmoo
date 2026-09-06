@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { CharacterActivityClient } from "@/components/character-activity-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { CharacterActivityRead } from "@/lib/community";

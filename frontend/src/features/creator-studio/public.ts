@@ -1,10 +1,10 @@
-export { CREATOR_STUDIO_SECTIONS } from "./model/creator-studio-contract";
+export { CREATOR_STUDIO_SECTIONS } from "../../composition/shells/creator-studio-navigation";
 export type {
   CreatorStudioSection,
   CreatorStudioSectionId,
-} from "./model/creator-studio-contract";
-export { CreatorStudioShell } from "./ui/creator-studio-shell";
-export { CreatorStudioFrame } from "./ui/creator-studio-frame";
+} from "../../composition/shells/creator-studio-navigation";
+export { CreatorStudioShell } from "../../composition/shells/creator-studio-shell";
+export { CreatorStudioFrame } from "../../composition/shells/creator-studio-frame";
 export { CreatorStudioDashboard } from "./ui/creator-studio-dashboard";
 export type { CreatorStudioAuthStatus } from "./ui/creator-studio-dashboard";
 export { StudioWorldCharacterList } from "./ui/studio-world-character-list";

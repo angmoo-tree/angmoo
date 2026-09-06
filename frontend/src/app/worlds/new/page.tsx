@@ -1,10 +1,6 @@
 import { redirect } from "next/navigation";
 
-import {
-  PRODUCT_ROUTES,
-  productRouteWithSearchParams,
-  type ProductRouteSearchParams,
-} from "@/shared/navigation/public";
+import { PRODUCT_ROUTES, productRouteWithSearchParams, type ProductRouteSearchParams } from "@/lib/navigation/product-routes";
 
 type PageProps = {
   searchParams: Promise<ProductRouteSearchParams>;
