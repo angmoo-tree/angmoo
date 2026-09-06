@@ -54,3 +54,8 @@ def save_character_state_for_user(
 
     state = upsert_character_state(db, character, data)
     return schemas.CharacterStateRead.model_validate(state)
+
+
+def get_character_state(db: Session, character_id: str) -> models.CharacterState | None:
+    """Read the caller's attached state at the original lookup position."""
+    return db.get(models.CharacterState, character_id)

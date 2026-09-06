@@ -926,6 +926,7 @@
       "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
+      "app.domains.characters.service.state_notes",
       "app.domains.characters.service.world_lifecycle",
       "app.domains.identity.browser_session",
       "app.domains.identity.client",
@@ -1158,6 +1159,7 @@
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
+      "app.domains.social.service.agent_tool_state",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
@@ -1273,6 +1275,7 @@
       "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
+      "app.domains.characters.service.state_notes",
       "app.domains.characters.service.world_lifecycle",
       "app.domains.identity.contracts",
       "app.domains.identity.schemas",
@@ -1413,6 +1416,7 @@
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
+      "app.domains.social.service.agent_tool_state",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
@@ -3219,6 +3223,14 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Remaining Community facade exposes actual Routines note helpers while final tool route/legacy removal proceeds; no note body remains in Community.",
         "removal_condition": "Connect final tool route callers to runtime.resident.feed_history_notes and remove exact old diagnostic imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.characters.service.state_notes",
+        "owner_stage": "AR-B5",
+        "reason": "Community compatibility imports actual state implementations while final complete-tick/tool route consumers move; no state implementation remains in Community.",
+        "removal_condition": "Finish actual complete tick callers and remove Community facade imports.",
         "review_date": "2026-09-06"
       }
     ]

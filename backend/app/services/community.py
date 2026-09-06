@@ -1,3 +1,7 @@
+from app.runtime.social.agent_tool_state import agent_tool_state
+save_agent_tool_character_state = agent_tool_state.save_agent_tool_character_state
+from app.runtime.social.agent_tool_state import save_character_state, save_character_state_for_user
+from app.domains.characters.service.state_notes import _normalize_state_memory_note, _is_duplicate_memory_note, _state_observation_note
 from app.runtime.social.feed_history_notes import note_agent_tool_feed_interests, note_agent_tool_feed_history_sanitize
 from app.domains.routines.service.feed_history_notes import _diagnostic_hash, _json_byte_length, _feed_history_sanitize_payload_bytes, _elapsed_ms
 from app.runtime.social.agent_tool_reads import agent_tool_reads
@@ -1484,105 +1488,3 @@ def _has_effective_complete_tick_action(executed_actions: list[str]) -> bool:
         not action.startswith(NOOP_COMPLETE_TICK_ACTION_PREFIXES)
         for action in executed_actions
     )
-
-
-def save_character_state(
-    db: Session, character_id: str, data: schemas.CharacterStateWrite
-) -> schemas.CharacterStateRead:
-    try:
-        return character_state.save_character_state(db, character_id, data)
-    except CharacterStateNotFoundError as exc:
-        raise CharacterNotFoundError(str(exc)) from exc
-
-
-def save_character_state_for_user(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    data: schemas.CharacterStateWrite,
-) -> schemas.CharacterStateRead:
-    try:
-        return character_state.save_character_state_for_user(db, user, character_id, data)
-    except CharacterStateNotFoundError as exc:
-        raise CharacterNotFoundError(str(exc)) from exc
-
-
-def _normalize_state_memory_note(value: str) -> str:
-    return " ".join(value.split()).casefold()
-
-
-def _is_duplicate_memory_note(
-    state: models.CharacterState | None, data: schemas.CharacterStateWrite
-) -> bool:
-    if state is None:
-        return False
-    incoming_note = _normalize_state_memory_note(data.memory_note)
-    saved_note = _normalize_state_memory_note(state.memory_note)
-    return bool(incoming_note and incoming_note == saved_note)
-
-
-def _state_observation_note(data: schemas.CharacterStateWrite) -> str:
-    note = getattr(data, "observation_note", None)
-    return note.strip() if isinstance(note, str) else ""
-
-
-def save_agent_tool_character_state(
-    db: Session, session_key: str, character_id: str, data: schemas.CharacterStateWrite
-) -> schemas.CharacterStateRead:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="state",
-        requested_character_id=character_id,
-    )
-    if run.character_id != character_id:
-        _raise_agent_tool_authorization_error(
-            action="state",
-            reason="character_mismatch",
-            session_key=session_key,
-            run=run,
-            requested_character_id=character_id,
-        )
-    existing_state = db.get(models.CharacterState, character_id)
-    observation_note = _state_observation_note(data)
-    if observation_note:
-        agent_crud.log_activity(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            action_type="observation_note_saved",
-            target_post_id=run.post_id,
-            reason="agent_tool_state_observation_note",
-            result=observation_note[:1000],
-        )
-    if _is_duplicate_memory_note(existing_state, data):
-        agent_crud.log_activity(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            action_type="state_save_suppressed",
-            target_post_id=run.post_id,
-            reason="agent_tool_state_duplicate_memory_note",
-            result="Suppressed duplicate memory_note state save.",
-        )
-        logger.info(
-            "duplicate_state_save_suppressed character_id=%s run_id=%s session_key=%s",
-            character_id,
-            run.id,
-            session_key,
-        )
-        return schemas.CharacterStateRead.model_validate(existing_state)
-    state = save_character_state(db, character_id, data)
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="state_saved",
-        target_post_id=run.post_id,
-        reason="agent_tool_state",
-        result=(
-            f"Saved state mood={state.mood}; "
-            f"summary={state.summary[:300]}; memory_note={state.memory_note[:700]}"
-        ),
-    )
-    return state

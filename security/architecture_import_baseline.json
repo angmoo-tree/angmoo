@@ -1,7 +1,7 @@
 {
-  "edge_count": 3037,
-  "external_import_count": 2490,
-  "module_count": 843,
+  "edge_count": 3057,
+  "external_import_count": 2493,
+  "module_count": 846,
   "modules": [
     {
       "external_imports": [],
@@ -1228,6 +1228,16 @@
       ],
       "module": "app.domains.characters.service.state",
       "path": "backend/app/domains/characters/service/state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.schemas"
+      ],
+      "module": "app.domains.characters.service.state_notes",
+      "path": "backend/app/domains/characters/service/state_notes.py",
       "wildcard_imports": []
     },
     {
@@ -5435,6 +5445,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.characters.schemas",
         "app.domains.social.contracts.topic_history"
       ],
       "module": "app.domains.social.contracts.agent_tools",
@@ -6383,6 +6394,21 @@
       ],
       "module": "app.domains.social.service.agent_tool_reads",
       "path": "backend/app/domains/social/service/agent_tool_reads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "logging",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.state_notes",
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.service.agent_tool_authorization"
+      ],
+      "module": "app.domains.social.service.agent_tool_state",
+      "path": "backend/app/domains/social/service/agent_tool_state.py",
       "wildcard_imports": []
     },
     {
@@ -11219,6 +11245,25 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.state",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions",
+        "app.domains.social.service.agent_tool_state",
+        "app.runtime.social.agent_tool_authorization"
+      ],
+      "module": "app.runtime.social.agent_tool_state",
+      "path": "backend/app/runtime/social/agent_tool_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.cruds.agents",
         "app.domains.routines.models",
         "app.domains.routines.service.activity_logs",
@@ -12348,6 +12393,7 @@
         "app.cruds.community",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.state",
+        "app.domains.characters.service.state_notes",
         "app.domains.routines.constants",
         "app.domains.routines.service.feed_history",
         "app.domains.routines.service.feed_history_notes",
@@ -12372,6 +12418,7 @@
         "app.models",
         "app.runtime.social.agent_tool_authorization",
         "app.runtime.social.agent_tool_reads",
+        "app.runtime.social.agent_tool_state",
         "app.runtime.social.agent_tools",
         "app.runtime.social.discovery",
         "app.runtime.social.feed_history",
@@ -12487,6 +12534,7 @@
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.agent_tool_reads",
+        "app.runtime.social.agent_tool_state",
         "app.runtime.social.agent_tools",
         "app.runtime.social.feed_cycle",
         "app.runtime.social.image_generation",
@@ -12520,6 +12568,7 @@
         "app.domains.identity.service.demo_access",
         "app.models",
         "app.runtime.characters.management",
+        "app.runtime.social.agent_tool_state",
         "app.runtime.social.image_generation",
         "app.schemas",
         "app.services.agent_activity_policy",

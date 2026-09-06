@@ -762,3 +762,6 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 활동 계획용 feed 관심/이력 정제 note의 실제 정책과 로그는 `routines/service/feed_history_notes.py`가 소유한다. 입력/메모 응답 DTO는 `routines/schemas/feed_history.py`에 두며 Social 응답·기존 HTTP도 같은 class를 사용한다. 숨겨진 Post 판단과 도구 권한은 `runtime/social/feed_history_notes.py`의 지연 협력으로 연결하고, 서버 skeleton metadata를 클라이언트 요약이 덮어쓰지 못하게 하는 기존 판단과 로그 privacy를 유지한다.
+
+
+도구 상태 저장은 `social/service/agent_tool_state.py`에서 Run 권한·캐릭터 일치, 관찰 로그, 중복 메모 저장 억제와 성공 기록을 원래 순서대로 수행한다. 메모의 공백/대소문자 정규화와 실제 상태 조회/쓰기는 Characters가 소유한다. 같은 메모이면 mood/summary도 덮어쓰지 않는 기존 의미를 유지하고, 모든 실제 상태/활동 로그는 호출자의 Session과 deferred commit에 참여한다. LocalBot가 사용하는 Character 오류의 Social 분류는 runtime의 실제 오류 변환 함수에 유지한다.

@@ -1333,3 +1333,12 @@ C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 
 최초 기존69개 중59 PASS/10 FAIL은 note 테스트의 옛 mock receiver였다. 해당10함수 내부의35개 receiver를 실제 함수/바인딩으로 연결했고 원래 assertion은 그대로 유지했다. 최종 직접 회귀는 **71 PASS / 6.41초 / 기존 warning2개**다. 새 테스트나 실행 제한을 추가하지 않았으며 existing note 회귀의 immutable metadata·기록 상태·raw payload 비노출·오류 분류를 유지했다. Community19/G07/full B5/capture/Hosted는 후속이다.
 
 C24 최종 확대 검증은 **394 PASS / 기존 PostgreSQL skip1 / 70.11초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 모두 통과했다. 경계 **843 module / 3037 edge / legacy182**, L4 parity99·ER0도 통과했다. 처음 runtime/resident 배치에서 생긴 실제 runtime package 순환은 Social-facing 실행 조립을 runtime/social로 옮겨 해결했고 검사 예외는 추가하지 않았다. 옛 schema 소비자 지도62개는 이미 삭제된 app/schemas/community.py 대신 실제 app/schemas/__init__.py로 정확히 연결해 동일 검사0오류를 확인했다. DTO3는 실제 정의/공통 aggregate/Social 소비자에서 동일 class 객체다.
+
+
+## AR-B5-C25 — 캐릭터 상태·도구 저장 의미 보존
+
+Community 실제6함수는 Characters의 메모 값 정책3, runtime의 Character 오류 변환2/Social 도구 실행1로 옮겼고 nullable state lookup은 Characters 실제 소유에 추출했다. 원래6/잔여13 전체 AST와 LG/LocalBot caller 전체 함수는 정확한 callback/self/type 복원 후 동일하다. auth→캐릭터 일치→nullable 조회→관찰→중복 억제 또는 저장→성공 로그 순서를 유지했다.
+
+첫 실제 확대는 **219 PASS / 9.52초**였다. 기존 LG6개·LocalBot1개 mock receiver만 실제 소유로 연결했으며 assertion은 변경하지 않았다. 새 SQLite 회귀는 공백/casefold 동일 메모에 대해 mood/summary까지 기존값을 유지함, 로그 원래 순서, 실제 새로운 상태와 로그의 caller rollback을 검사한다. 최초 테스트가 rollback된 로그 객체를 보유해 SQLite ID 재사용 warning이 발생했으므로 검증 완료된 임시 로그 참조를 해제해 fixture 수명을 정리했다. Community13/G07/full B5 및 capture/Hosted는 계속한다.
+
+C25 최종 확대 검증은 **422 PASS / 기존 PostgreSQL skip1 / 81.68초 / 기존 warning3개**다. 새 상태 회귀의 로그 객체 수명 정리 후 추가 SQLAlchemy warning은 없다. PR #258/#263 API/schema/ORM·보호 변경2파일 assertion·전체 split evidence0, 경계 **846 module /3057 edge /legacy182**, L4 parity99·ER0가 통과했다. Character 오류의 실제 변환2함수는 runtime에 두어 Social→Character exceptions deep import 없이 원래 예외 종류/메시지를 보존했다. 실제 업무·호출 순서나 검사 예외를 완화하지 않았다.

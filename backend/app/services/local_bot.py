@@ -1,3 +1,4 @@
+from app.runtime.social import agent_tool_state as social_state
 from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta
 import logging
@@ -121,7 +122,7 @@ def save_state(
     )
     try:
         with unit_of_work.deferred_commits():
-            state = community_service.save_character_state(
+            state = social_state.save_character_state(
                 db,
                 context.character.id,
                 schemas.CharacterStateWrite(

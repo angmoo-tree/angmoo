@@ -5,6 +5,7 @@ activity denial exception is translated; unrelated failures keep propagating.
 """
 
 from datetime import datetime
+from app.domains.characters import schemas as character_schemas
 from typing import Protocol
 from app.domains.social.contracts.topic_history import (
     CreationTopicLog,
@@ -92,6 +93,42 @@ class AgentToolReadWorkflows(AgentToolReferences, Protocol):
     def inbox_delivery_logs(
         self, db: Session, *, run: ToolRun
     ) -> list[CreationTopicLog]: ...
+    def log_activity(
+        self,
+        db: Session,
+        *,
+        user_id: str,
+        character_id: str,
+        action_type: str,
+        target_post_id: str | None,
+        reason: str,
+        result: str,
+    ) -> object: ...
+
+
+class ToolCharacterState(Protocol):
+    @property
+    def character_id(self) -> str: ...
+    @property
+    def mood(self) -> str: ...
+    @property
+    def summary(self) -> str: ...
+    @property
+    def memory_note(self) -> str: ...
+    @property
+    def updated_at(self) -> datetime: ...
+
+
+class AgentToolStateWorkflows(AgentToolReferences, Protocol):
+    def save_character_state(
+        self,
+        db: Session,
+        character_id: str,
+        data: character_schemas.CharacterStateWrite,
+    ) -> character_schemas.CharacterStateRead: ...
+    def get_character_state(
+        self, db: Session, character_id: str
+    ) -> ToolCharacterState | None: ...
     def log_activity(
         self,
         db: Session,

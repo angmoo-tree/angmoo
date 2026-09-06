@@ -1763,7 +1763,11 @@
         "backend/app/runtime/social/agent_tool_reads.py",
         "backend/app/domains/routines/service/feed_history_notes.py",
         "backend/app/domains/routines/contracts/feed_history_notes.py",
-        "backend/app/runtime/social/feed_history_notes.py"
+        "backend/app/runtime/social/feed_history_notes.py",
+        "backend/app/domains/social/service/agent_tool_state.py",
+        "backend/app/domains/characters/service/state_notes.py",
+        "backend/app/domains/characters/service/state.py",
+        "backend/app/runtime/social/agent_tool_state.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

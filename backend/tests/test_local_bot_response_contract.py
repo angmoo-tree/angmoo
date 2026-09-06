@@ -145,7 +145,7 @@ def test_bot_state_read_and_save_contract(monkeypatch):
         calls.append(("log_activity", kwargs))
 
     monkeypatch.setattr(local_bot, "_ensure_activity_rate_limit", fake_limit)
-    monkeypatch.setattr(local_bot.community_service, "save_character_state", fake_save_state)
+    monkeypatch.setattr(local_bot.social_state, "save_character_state", fake_save_state)
     monkeypatch.setattr(local_bot.agent_crud, "log_activity", fake_log_activity)
 
     saved = local_bot.save_state(
