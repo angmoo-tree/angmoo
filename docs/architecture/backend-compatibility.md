@@ -18,6 +18,7 @@
 | `domains/worlds/infrastructure/definition_repository.py` | SQLite v2→v3 | `worlds/service/definition.py`의 정의 읽기·hash·readiness 함수 연결 |
 | `domains/worlds/infrastructure/sqlalchemy_models.py` | SQLite v2→v3 | `worlds/models.py`와 같은 ORM class identity |
 | `domains/worlds/infrastructure/sqlalchemy_reserved_roles.py` | SQLite v2→v3 | 실제 예약 역할 처리의 지원 함수 연결 |
+| `domains/world_characters/infrastructure/__init__.py` | SQLite v2→v3가 역사 WC 하위 모듈을 import할 때의 package 초기화 | 실제 `world_characters/models.py`의 `CharacterActiveWorld`·`WorldCharacter` class 2개를 같은 객체로 re-export. 빈 package marker가 아님 |
 | `domains/world_characters/infrastructure/sqlalchemy_models.py` | SQLite v2→v3 | `world_characters/models.py`와 같은 참여 모델 |
 | `domains/world_characters/infrastructure/sqlalchemy_setup_models.py` | SQLite v2→v3 | 같은 설정·적용 모델과 schema 계약 |
 | `domains/chat/infrastructure/world_scope_migration.py` | SQLite v3→v4·Alembic 0084·model binding migration·`runtime/persistence/sqlite_schema.py`의 과거 버전 metadata | 검증한 역사적 World Chat 변환 본문 |
@@ -28,7 +29,7 @@
 | `domains/social/infrastructure/sqlalchemy_subjective_context_models.py` | Alembic 0088 | 실제 Social 모델의 create/drop schema 함수 2개 |
 | `core/db.py` | 역사적 Chat 변환·Alembic 0089 | `app/models.py`의 단일 Base만 같은 객체로 연결 |
 
-같은 namespace의 `__init__.py`가 필요한 경우에도 업무 구현을 추가하지 않습니다. 이 목록의 정확한 경로를 유지한다는 결정이 형제 파일이나 새로운 하위 계층을 만드는 허용은 아닙니다. 특히 `world_scope_migration.py`의 역사적 변환 본문을 현재 데이터 모델로 자동 재생성하지 않습니다.
+같은 namespace의 `__init__.py`가 필요한 경우에도 업무 구현을 추가하지 않습니다. WC infrastructure package는 위 두 같은 class를 제공하는 역사적 초기화 계약을 유지하며, 다른 빈 marker와 구분합니다. 이 목록의 정확한 경로를 유지한다는 결정이 형제 파일이나 새로운 하위 계층을 만드는 허용은 아닙니다. 특히 `world_scope_migration.py`의 역사적 변환 본문을 현재 데이터 모델로 자동 재생성하지 않습니다.
 
 대표적인 실제 import는 SQLite v2→v3의 `World`, `WorldCharacter`, `WorldActivityRepertoire`, `WorldCommunityProfile`, 예약 역할 상수와 `ensure_no_specific_role`, `world_contract_hash`, `refresh_world_contract`입니다. Memory의 옛 두 파일은 `MEMORY_SCHEMA_V1_TABLES`·`create_memory_schema_v1`·`drop_memory_schema_v1` 및 `MEMORY_BATCH_TABLES`·`create_memory_batch_schema`를 실제 `memory/models/items.py`와 `batch.py`에서 가져옵니다. Social 0088의 두 함수는 `create_subjective_context_schema`, `drop_subjective_context_schema`입니다. Chat 0086은 실제 `chat/models.py`의 `create_response_request_schema`, `drop_response_request_schema`를 호출합니다. 각 파일의 명시적 import·`__all__` 또는 동일 module alias가 가리키는 실제 소유자에서 전체 export를 확인할 수 있습니다.
 

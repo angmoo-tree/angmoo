@@ -9254,6 +9254,57 @@
       "test_suppressions": {
         "tests/test_chat_forwarder_retirement.py": {}
       }
+    },
+    {
+      "commit": "68113382a2435faefdd7b65fd701d5ba081ec86b",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed Chat route facade retirement: eleven negative cases preserve real Request DI, concrete owner types and unchanged endpoint/dependency bodies while rejecting retired files, packages and consumers.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[dependency_missing_guard]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[dependency_wrong_state]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[http_endpoint_stub]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[http_wrong_dependency]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_missing_configuration]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_other_app]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_wrong_getter]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_active_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_owner_type_shadow]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_package]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_wrong_disposition]"
+      ],
+      "test_assertions": {
+        "tests/test_chat_forwarder_retirement.py": {
+          "signed_reader": [],
+          "candidate": [],
+          "rewrite": [
+            "assert old in source"
+          ],
+          "test_exact_original_layers_and_actual_owner_tests_are_verified": [
+            "assert set(result) == {function for _, function in proof.TESTS.values()}",
+            "assert required == proof.fragments(current)",
+            "assert len(required) >= len(proof.fragments(original))"
+          ],
+          "test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_requires_original_signed_source_provenance": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_original_node_expectations_cannot_be_substituted": [
+            "pytest.raises(ValueError, match='reviewed original')",
+            "pytest.raises(ValueError, match='exact existing test node')",
+            "assert proof.required_fragments(original, old, 'backend/tests/other.py', function, path, function, result) == original"
+          ],
+          "test_retirement_flag_cannot_be_a_truthy_configuration": [
+            "assert proof.validate(False, moves, [], root, signed_reader) is None",
+            "pytest.raises(ValueError, match='exact reviewed boolean')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_chat_forwarder_retirement.py": {}
+      }
     }
   ]
 }
