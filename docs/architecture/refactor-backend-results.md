@@ -2389,3 +2389,7 @@ B7 실제 업무 source `274f90e7` 이후 원본 signed `f52dbdbc`→`f7f303d9`�
 현재 L4·ER0·Memory batch 자료는 실제 소스와 맞췄다. 원래 first-introduction과 B7의 원장 prefix는 변경하지 않았다. 순차 후보의 원장4개 원본 연결, 전체 backend, stock/API/ORM/node, Hosted·installer·post-merge는 별도로 진행한다. 최종 AR-B8-B·G01~G13 및 후속 frontend/제품 단계가 끝났다는 의미는 아니다.
 
 원래 signed9개 source의 파일35개·노드13개는 변경 없는 원장 검증을 통과해 **153개 불변 prefix → 162개**로 append했다. 각 Git blob·첫 도입 SHA·원래 assertion/suppression을 검증했으며 source `274f90e7`의 제품 코드는 이 metadata append에서 변경하지 않았다. 공식 stock/API/ORM/node 및 backend 전체 검사는 이 후보에서 이어간다.
+
+Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연결했다. `f52dbdbc`는 파일13개·신규5 nodes, `f7f303d9`는 파일11개·신규0 nodes, `c4a0a6a2`는 파일5개·신규0 nodes, `9cd5eb14`는 파일7개·신규4 nodes다. 원래 수집기의 도입 판정과 변경하지 않은 `addition_errors`로 각 Git blob·최초 도입·단언·suppression·ancestor를 검증한 뒤 **162개 불변 prefix → 166개**로 append했다. `d8f5b446`과 후보 `7bc89bf0`의 기존 원장도 동일하다. 현재 후보에서 기준 자료를 재수집하거나 원본 단언을 변경하지 않았다.
+
+현재 소스 목록 **1056 modules / 3925 internal edges / 3018 external imports**, 구조 경계 **legacy103**, deferred22, L4 parity99, OSS·secret allowlist metadata25·launcher6명령/2서비스·desktop installer 계약은 통과했다. 공식 stock/API·ORM/node와 전체 backend는 이 metadata를 고정한 후보에서 이어서 수행한다. Hosted CI·설치·post-merge 및 G5/G06/B8-B 최종 판정은 아직 별도 단계다.
