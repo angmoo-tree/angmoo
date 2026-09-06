@@ -13918,7 +13918,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
-          "new": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentSlotUnavailableError",
           "direct_consumers": [
             "backend/app/runtime/resident/execution.py"
           ],
@@ -108636,13 +108636,13 @@
       "split_files": {
         "backend/app/domains/runtime/contracts.py": [
           "backend/app/domains/routines/exceptions.py",
-          "backend/app/domains/runtime/contracts.py"
+          "backend/app/domains/runtime/exceptions.py"
         ]
       },
       "split_symbols": [
         {
           "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
@@ -108654,7 +108654,7 @@
         },
         {
           "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeAuthError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeAuthError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeAuthError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
@@ -108666,7 +108666,7 @@
         },
         {
           "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeUnavailableError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeUnavailableError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeUnavailableError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
@@ -108678,7 +108678,7 @@
         },
         {
           "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeRegistrationError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeRegistrationError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeRegistrationError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
@@ -108714,7 +108714,7 @@
         },
         {
           "old": "backend/app/domains/runtime/contracts.py::OpenClawGatewayError",
-          "new": "backend/app/domains/runtime/contracts.py::OpenClawGatewayError",
+          "new": "backend/app/domains/runtime/exceptions.py::OpenClawGatewayError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
@@ -108726,7 +108726,7 @@
         },
         {
           "old": "backend/app/domains/runtime/contracts.py::OpenClawGatewayAuthError",
-          "new": "backend/app/domains/runtime/contracts.py::OpenClawGatewayAuthError",
+          "new": "backend/app/domains/runtime/exceptions.py::OpenClawGatewayAuthError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py",
             "backend/app/runtime/resident/read_only_lanes.py"
