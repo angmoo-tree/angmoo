@@ -3,9 +3,10 @@ from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.domains.tree import router as tree_routes
-from app.core.db import Base
+from app.models import Base
 from app.domains.tree import service as tree_service
 from app.runtime.tree import build_tree_references
 

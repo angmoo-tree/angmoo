@@ -4,7 +4,7 @@ from dataclasses import replace
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app import models
+from tests.model_fixture_support import models
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.runtime.routine_posts.interactions import CanonicalRoutineInteractionSource
 from app.runtime.routine_posts.interactions import RuntimeRoutineInteractionReferences

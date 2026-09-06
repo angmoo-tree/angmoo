@@ -1,7 +1,7 @@
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 
-from app import models
+from tests.model_fixture_support import models
 from app.core.unit_of_work import deferred_commits
 from app.domains.characters.schemas import AgentCharacterStateWrite, CharacterStateWrite
 from app.domains.characters.service import state as character_state

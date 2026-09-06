@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.runtime.chat.message_composition import configure_chat_services
-from app import models
+from tests.model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
 from app.domains.memory.router import router as memory_router
 from app.domains.chat.router.world_chat_response import router as response_router
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )

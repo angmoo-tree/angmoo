@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.identity.dependencies import get_current_user
 from app.domains.runtime import router as runtime_routes
-from app.core.db import get_db
+from app.database import get_db
 from types import SimpleNamespace as _RuntimeTestNamespace
 from app.domains.runtime.contracts.status import ActivityRuntimeStatus as _runtime_ActivityRuntimeStatus
 from app.domains.runtime.contracts.status import ApplicationRuntimeStatus as _runtime_ApplicationRuntimeStatus

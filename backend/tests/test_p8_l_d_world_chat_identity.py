@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.chat import schemas
 from chat_service_support import messages as world_chat
 

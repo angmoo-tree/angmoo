@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.credentials import (
     CredentialMaterial,
     CredentialPurpose,
@@ -10,8 +11,8 @@ from app.credentials import (
 from app.credentials import contracts as legacy_contracts
 from app.credentials import resolver as legacy_resolver
 from app.domains.identity import public as identity
-from app.models import auth as legacy_auth_models
-from app.models import credentials as legacy_credential_models
+from app.domains.identity import models as legacy_auth_models
+from app.domains.identity import models as legacy_credential_models
 from app.schemas import auth as legacy_auth_schemas
 
 

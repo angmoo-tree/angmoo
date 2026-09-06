@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
-from app import models
+from model_fixture_support import models
 from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
@@ -443,7 +443,7 @@ def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_ses
         MemoryBatchProfile,
         MEMORY_BATCH_TABLES,
     )
-    from app.core.db import Base
+    from app.models import Base
     from sqlalchemy import event
     from app.runtime.memory.recall_projection import EmbeddedMemoryRecallProjection
 

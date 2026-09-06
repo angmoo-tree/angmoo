@@ -24,7 +24,7 @@ root = Path(sys.argv[1])
 app = contributor_backend.create_contributor_runtime_app(data_root=root / 'contributor')
 try:
     from app import main
-    from app.core.db import Base
+    from app.models import Base
     assert app.state.runtime_config.database_path.is_file()
     assert len(Base.metadata.tables) > 50
     assert app.openapi()['paths']['/health']['get']['operationId'] == 'runtime_health_health_get'

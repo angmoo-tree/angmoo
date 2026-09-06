@@ -282,16 +282,16 @@ Local owner 서비스는 기존 `SqlAlchemyIdentityRepository`에 있던 업무 
 
 | 위치 | 책임 |
 | --- | --- |
-| `app/models.py` | 하나의 ORM Base·metadata, 실제 공유하는 모델 기반·mixin |
+| `app/models.py` | 하나의 ORM Base와 그 metadata. 현재 업무 모델이나 engine 생성은 포함하지 않습니다. |
 | `app/domains/<업무>/models.py` | 해당 업무의 ORM 모델 |
 | `app/domains/<업무>/schemas.py` | HTTP 등 경계의 Pydantic 요청·응답 |
 | `app/database.py` | engine·session factory·공통 연결 기반 |
 | `app/runtime/persistence` | 실제 설치 DB 경로·수명·필요한 모델 등록 조립 |
 
-목표 관계를 최소한으로 표현하면 다음과 같습니다. **등록이나 engine 생성까지 포함한 구현 예제는 아닙니다.**
+현재 공통 기반과 도메인 모델의 관계는 다음과 같습니다.
 
 ```python
-# app/models.py: 공통 기반의 목표 형태
+# app/models.py: 실제 공통 기반
 from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
@@ -301,7 +301,11 @@ class Base(DeclarativeBase):
 # from app.models import Base
 ```
 
-공통 `models.py`에 업무 table을 모두 다시 모으거나 engine를 생성하지 않습니다. 도메인 ORM을 읽어 metadata를 채우는 등록 함수는 `runtime/persistence`가 소유하고, 앱 시작과 `alembic/env.py`가 필요 시 호출합니다. 공통 Base가 등록 함수를 역으로 import하면 순환 의존이 생기므로 방향을 유지합니다. 별도 필수 `model_registry.py`는 두지 않습니다.
+공통 `models.py`는 업무 table을 모으거나 engine를 생성하지 않습니다. [model_registration.py](app/runtime/persistence/model_registration.py)의 `register_models()`가 실제 도메인 모델 모듈 23개를 명시적으로 import하고 같은 `Base.metadata`를 반환합니다. 등록된 102개 모델의 클래스 객체는 반복 등록해도 바뀌지 않습니다. 앱 조립, Alembic 환경, 설치 SQLite 어댑터와 기존 등록 소비자가 필요한 시점에 이 함수를 호출합니다. 공통 Base는 등록 함수나 도메인을 역으로 import하지 않습니다.
+
+[database.py](app/database.py)는 engine 생성, session factory, 지연 생성되는 기본 engine·session factory, 요청 session 정리를 소유합니다. 모듈을 import하는 것만으로 기본 engine을 생성하지 않습니다. 설치 실행의 `SqliteCanonicalDatabase`는 명시적인 자기 engine과 session factory를 사용하며, 모델 등록은 기존 open 검사를 통과한 뒤 engine 생성 전에 수행합니다. 여러 업무 모델이 필요한 테스트는 제품에 모델 집합을 다시 만들지 않고 [model_fixture_support.py](tests/model_fixture_support.py)의 실제 클래스와 등록 지원을 사용합니다.
+
+`core/db.py`에는 불변 Alembic 0089와 SQLite World scope migration이 가져오는 같은 `Base` 객체만 남아 있습니다. 새 모델은 `app.models.Base`, DB 연결과 요청 dependency는 `app.database`를 사용합니다. 역사 migration 본문과 기존 DB schema는 이 경로 변경으로 수정하지 않습니다.
 
 ### Transaction은 하나의 업무 변경을 묶습니다
 

@@ -72,7 +72,10 @@ from uuid import uuid4
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.characters import models as character_models
 from app.domains.characters.service import profile as character_profile
 from app.core import security
@@ -143,20 +146,20 @@ class _DraftCredential:
 
 
 async def create_draft(
-    db: Session, user: models.User, data: schemas.AgentCreationDraftCreate
+    db: Session, user: _model_User, data: schemas.AgentCreationDraftCreate
 ) -> schemas.AgentCreationDraftRead:
     return await draft_lifecycle.create_draft(db, user, data, workflows=build_creator_workflows())
 
 
 def get_draft(
-    db: Session, user: models.User, draft_id: str
+    db: Session, user: _model_User, draft_id: str
 ) -> schemas.AgentCreationDraftRead:
     return draft_lifecycle.get_draft(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def get_draft_media_content(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     media_type: str,
 ):
@@ -165,7 +168,7 @@ def get_draft_media_content(
 
 def get_draft_candidate_content(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     candidate_id: str,
 ):
@@ -174,7 +177,7 @@ def get_draft_candidate_content(
 
 def get_profile_candidate_content(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     candidate_id: str,
 ):
@@ -183,7 +186,7 @@ def get_profile_candidate_content(
 
 def update_draft(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     data: schemas.AgentCreationDraftUpdate,
 ) -> schemas.AgentCreationDraftRead:
@@ -191,14 +194,14 @@ def update_draft(
 
 
 async def enhance_persona(
-    db: Session, user: models.User, draft_id: str
+    db: Session, user: _model_User, draft_id: str
 ) -> schemas.AgentCreationDraftRead:
     return await draft_lifecycle.enhance_persona(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def upload_draft_media(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     data: schemas.AgentCreationDraftMediaUpload,
 ) -> schemas.AgentCreationDraftRead:
@@ -207,7 +210,7 @@ def upload_draft_media(
 
 async def generate_media(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     data: schemas.AgentCreationDraftGenerateMediaCreate,
 ) -> schemas.AgentCreationDraftMediaGenerationRead:
@@ -216,7 +219,7 @@ async def generate_media(
 
 async def generate_profile_media(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentProfileMediaGenerateCreate,
 ) -> schemas.AgentProfileMediaGenerationRead:
@@ -224,20 +227,20 @@ async def generate_profile_media(
 
 
 def get_draft_profile_image_usage(
-    db: Session, user: models.User, draft_id: str
+    db: Session, user: _model_User, draft_id: str
 ) -> schemas.AgentProfileImageUsageRead:
     return media_service.get_draft_profile_image_usage(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def get_agent_profile_image_usage(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentProfileImageUsageRead:
     return media_service.get_agent_profile_image_usage(db, user, character_id)
 
 
 def apply_draft_media_candidate(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     candidate_id: str,
 ) -> schemas.AgentCreationDraftRead:
@@ -246,7 +249,7 @@ def apply_draft_media_candidate(
 
 def apply_profile_media_candidate(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     candidate_id: str,
 ) -> schemas.AgentDetailRead:
@@ -255,7 +258,7 @@ def apply_profile_media_candidate(
 
 def discard_draft_media_candidate(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     candidate_id: str,
 ) -> None:
@@ -264,7 +267,7 @@ def discard_draft_media_candidate(
 
 def discard_profile_media_candidate(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     candidate_id: str,
 ) -> None:
@@ -273,7 +276,7 @@ def discard_profile_media_candidate(
 
 def complete_draft(
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     data: schemas.AgentCreationDraftComplete | None = None,
 ) -> schemas.AgentDetailRead:
@@ -281,7 +284,7 @@ def complete_draft(
 
 
 def _get_owned_draft(
-    db: Session, user: models.User, draft_id: str
+    db: Session, user: _model_User, draft_id: str
 ) -> character_models.AgentCreationDraft:
     return draft_lifecycle._get_owned_draft(db, user, draft_id, workflows=build_creator_workflows())
 
@@ -299,7 +302,7 @@ def _delete_profile_image_candidates_for_draft(
 async def _run_draft_llm(
     *,
     db: Session,
-    user: models.User,
+    user: _model_User,
     draft_id: str,
     provider: str,
     model: str,
@@ -448,7 +451,7 @@ def _decrypt_draft_api_key(draft: character_models.AgentCreationDraft) -> str:
 async def _generate_profile_image_candidate(
     db: Session,
     *,
-    user: models.User,
+    user: _model_User,
     scope: str,
     media_type: str,
     prompt: str,

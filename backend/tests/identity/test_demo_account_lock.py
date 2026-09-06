@@ -5,7 +5,8 @@ import httpx
 import pytest
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import agents as agent_routes
 from app.domains.characters import router as character_routes

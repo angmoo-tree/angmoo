@@ -170,7 +170,7 @@ def guarded(name, *args, **kwargs):
 builtins.__import__ = guarded
 handlers = tuple(logging.getLogger().handlers)
 from app import main, public_main
-from app.core import db
+from app import database as db
 assert db._default_engine is None and db._default_session_factory is None
 assert not root.exists()
 assert tuple(logging.getLogger().handlers) == handlers

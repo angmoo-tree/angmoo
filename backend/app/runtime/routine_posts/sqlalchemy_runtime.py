@@ -53,7 +53,11 @@ from app.integrations.direct_llm import (
 )
 
 
-models = legacy.models
+from app.domains.routines.models.plans import ActivityBeat as _model_ActivityBeat
+from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
+from app.domains.routines.models.plans import JointActivity as _model_JointActivity
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
 agent_run_crud = legacy.agent_run_crud
 agent_activity_policy = legacy.agent_activity_policy
 from app.domains.routines.service import joint_activity as joint_activity_runtime
@@ -67,11 +71,11 @@ CLAIM_LEASE = timedelta(minutes=10)
 
 def routine_world_character_for_character(
     db: Session, *, character_id: str
-) -> models.WorldCharacter | None:
-    active_world = db.get(models.CharacterActiveWorld, character_id)
+) -> _model_WorldCharacter | None:
+    active_world = db.get(_model_CharacterActiveWorld, character_id)
     if active_world is None:
         return None
-    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    world_character = db.get(_model_WorldCharacter, active_world.world_character_id)
     if (
         world_character is None
         or world_character.character_id != character_id
@@ -163,7 +167,7 @@ def _runtime_error_code(exc: activity_errors.ActivityRuntimeError) -> str:
 def _finish_failed_beat(
     db: Session,
     *,
-    beat: models.ActivityBeat,
+    beat: _model_ActivityBeat,
     claim_run_id: str,
     reason_code: str,
     retryable: bool,
@@ -273,7 +277,7 @@ async def run_routine_post_runtime(
     except RoutineContextUnavailable as exc:
         return _safe_result(outcome=exc.reason_code, tracker=tracker)
     joint_activity = (
-        db.get(models.JointActivity, context.item.joint_activity_id)
+        db.get(_model_JointActivity, context.item.joint_activity_id)
         if context.item.joint_activity_id is not None
         else None
     )
@@ -311,7 +315,7 @@ async def run_routine_post_runtime(
     except activity_errors.ActivityRuntimeError as exc:
         return _safe_result(outcome=_runtime_error_code(exc), tracker=tracker)
     beat = claim.row
-    if not isinstance(beat, models.ActivityBeat):
+    if not isinstance(beat, _model_ActivityBeat):
         raise TypeError("activity beat claim returned an invalid row")
     claimed_manual_source_ids: list[str] = []
     try:
@@ -449,7 +453,7 @@ async def run_routine_post_runtime(
             )
         except joint_activity_runtime.JointActivityRuntimeError as exc:
             db.rollback()
-            refreshed_joint = db.get(models.JointActivity, joint_activity.id)
+            refreshed_joint = db.get(_model_JointActivity, joint_activity.id)
             if (
                 exc.reason_code == "joint_activity_already_opened"
                 and refreshed_joint is not None
@@ -561,7 +565,7 @@ async def run_routine_post_runtime(
                 world_id=context.world.id,
                 author_world_character_id=world_character.id,
             )
-            post = db.get(models.Post, post_read.id)
+            post = db.get(_model_Post, post_read.id)
             if post is None:
                 raise activity_errors.ActivityRuntimeValidationError(
                     "publish_evidence_missing"

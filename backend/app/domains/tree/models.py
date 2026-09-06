@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base
+from app.models import Base
 
 
 class TreePost(Base):

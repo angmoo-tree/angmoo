@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event, inspect, select
 from sqlalchemy.orm import Session
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.identity.models import User
 from app.domains.routines.schemas import WorldCharacterRuntimeModeUpdate
 from app.domains.routines.service import plans

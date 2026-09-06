@@ -19,7 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.social.contracts.subjective_context import (
     ACTION_SUBJECTIVE_CONTEXT_VERSION,
     ActionEmotionLabel,

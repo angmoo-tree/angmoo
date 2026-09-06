@@ -5,7 +5,7 @@ from typing import cast
 from fastapi import Request
 
 from app.api.identity_dependencies import browser_session, get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.chat.service.evidence import EvidenceService
 from app.domains.chat.service.generation import GenerationService
 from app.domains.chat.service.messages import MessageService

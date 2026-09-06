@@ -4,8 +4,8 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models as registry
-from app.core.db import Base
+from model_fixture_support import models as registry
+from app.models import Base
 from app.domains.chat import models
 from app.domains.chat.repository import threads
 

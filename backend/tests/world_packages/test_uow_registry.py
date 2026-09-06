@@ -11,8 +11,8 @@ from alembic.operations import Operations
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.world_packages.exceptions import WorldPackageContractError
 from app.runtime.world_packages.seed import (
     SqlAlchemyWorldPackageDestinationSeed,

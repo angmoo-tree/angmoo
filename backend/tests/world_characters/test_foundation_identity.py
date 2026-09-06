@@ -1,6 +1,6 @@
 """Compatibility identities used by frozen migration and provider substitution."""
-from app import models as registered_models
-from app.core.db import Base
+from model_fixture_support import models as registered_models
+from app.models import Base
 from app.domains.world_characters import client, models
 from app.domains.world_characters.contracts import provider
 from app.domains.world_characters.infrastructure import sqlalchemy_models as old_identity

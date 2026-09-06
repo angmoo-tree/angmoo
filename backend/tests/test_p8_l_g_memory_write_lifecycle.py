@@ -10,8 +10,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from tests.model_fixture_support import models
+from app.models import Base
 from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,

@@ -8,7 +8,8 @@ imported by the domain itself.
 
 from __future__ import annotations
 
-from app import models
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.schemas.community import PostCreate
 from app.runtime.routines import activity_policy as agent_activity_policy

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.identity import browser_session
 from app.config import settings
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.identity.schemas import (
     LocalBootstrapChallengeRead,
     LocalBootstrapRead,

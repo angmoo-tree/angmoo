@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
-from app.core.db import Base
+from app.models import Base
 
 
 class RuntimeSchedulerLease(Base):

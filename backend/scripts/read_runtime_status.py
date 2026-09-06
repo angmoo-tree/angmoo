@@ -15,7 +15,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.core.redaction import sanitize_support_bundle_metadata
 from app.domains.runtime.service.status import ReadApplicationRuntimeStatus
 from app.domains.runtime.schemas import runtime_status_read

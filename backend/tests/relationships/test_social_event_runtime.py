@@ -11,9 +11,10 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.social.observations import observe_source
-from app.core.db import Base
+from app.models import Base
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )

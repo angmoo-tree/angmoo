@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import event, func, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.social.exceptions import LangGraphSocialApplyError
 from app.domains.social.service import action_notifications, action_sources
 from app.runtime.social.action_scope import RuntimeActionScopeReferences

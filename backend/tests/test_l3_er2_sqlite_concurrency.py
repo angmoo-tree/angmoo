@@ -13,7 +13,7 @@ import pytest
 from sqlalchemy import Connection, func, insert, select, update
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.public import LOCAL_INSTALLATION_KEY
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError
 from app.domains.runtime.exceptions import SchedulerLeaseLostError

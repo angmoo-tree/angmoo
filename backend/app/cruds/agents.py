@@ -9,7 +9,11 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.characters.models import Character as _model_Character
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.core.image_generation import (
     DEFAULT_USER_IMAGE_MODEL,
     DEFAULT_MAX_IMAGES_PER_DAY,
@@ -57,7 +61,7 @@ from app.core import unit_of_work
 
 
 
-def set_character_status(db: Session, character: models.Character, status: str) -> None:
+def set_character_status(db: Session, character: _model_Character, status: str) -> None:
     character.status = status
     db.commit()
 
@@ -68,7 +72,7 @@ def disable_other_active_settings(
     user_id: str,
     keep_character_id: str,
     commit: bool = True,
-) -> list[models.AgentActivitySetting]:
+) -> list[_model_AgentActivitySetting]:
     settings = list_other_active_settings(
         db, user_id=user_id, keep_character_id=keep_character_id
     )
@@ -85,16 +89,16 @@ def disable_other_active_settings(
 
 def list_other_active_settings(
     db: Session, *, user_id: str, keep_character_id: str
-) -> list[models.AgentActivitySetting]:
+) -> list[_model_AgentActivitySetting]:
     settings = list(
         db.scalars(
-            select(models.AgentActivitySetting)
-            .join(models.Character)
+            select(_model_AgentActivitySetting)
+            .join(_model_Character)
             .where(
-                models.Character.owner_id == user_id,
-                models.Character.deleted_at.is_(None),
-                models.Character.id != keep_character_id,
-                models.AgentActivitySetting.auto_enabled.is_(True),
+                _model_Character.owner_id == user_id,
+                _model_Character.deleted_at.is_(None),
+                _model_Character.id != keep_character_id,
+                _model_AgentActivitySetting.auto_enabled.is_(True),
             )
         )
     )

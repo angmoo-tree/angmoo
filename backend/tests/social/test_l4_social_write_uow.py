@@ -8,8 +8,8 @@ import pytest
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
-from app.core.db import Base
+from tests.model_fixture_support import models
+from app.models import Base
 from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
 apply_validated_autonomous_result = SqlAlchemySocialWriteUnitOfWork.apply_validated_autonomous_result
 create_owner_post = SqlAlchemySocialWriteUnitOfWork.create_owner_post

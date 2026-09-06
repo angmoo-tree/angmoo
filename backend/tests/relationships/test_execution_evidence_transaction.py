@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session, object_session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.routines.service import public_action_executions
 from app.runtime.relationships import sqlalchemy_social_event as events
 from relationships.test_social_event_runtime import _post, _seed

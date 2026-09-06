@@ -12,7 +12,7 @@ import argparse
 import socket
 import threading
 
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.runtime.graph_projection.replay import (
     GraphProjectionReplayService,
     create_replay_run,

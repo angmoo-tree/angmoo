@@ -20,7 +20,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_ROOT = REPOSITORY_ROOT / "backend"
 sys.path.insert(0, str(BACKEND_ROOT))
 
-from app import models as _models  # noqa: E402,F401 - register metadata
+from app.runtime.persistence.model_registration import register_models
+register_models()  # noqa: E402,F401 - register metadata
 from app.runtime.persistence.runtime_data_path import (  # noqa: E402
     StaticRuntimeDataPath,
 )

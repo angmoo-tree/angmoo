@@ -2,7 +2,7 @@
 
 from sqlalchemy import delete, or_, select
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.memory.models.items import MemoryCandidate
 from app.domains.memory.models.items import MemoryHotBrief
 from app.domains.memory.models.items import MemoryHotBriefItem

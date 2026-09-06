@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session, object_session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.relationships.service import proposals
 from app.runtime.activity_proposals import references as proposal_references
 from relationships.test_activity_proposals import _published_proposal_fixture, _post, _record_post_event, _utc

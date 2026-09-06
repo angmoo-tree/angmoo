@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app import models
+from tests.model_fixture_support import models
 from app.domains.social.repository.topic_history import recent_own_root_posts
 from app.domains.social.service import topic_metadata
 from app.runtime.social.feed_history import RuntimeFeedHistoryReferences

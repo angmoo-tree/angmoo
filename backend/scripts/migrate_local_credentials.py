@@ -6,10 +6,15 @@ import sys
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.characters.models import AgentCreationDraft as _model_AgentCreationDraft
+from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+from app.domains.characters.models import Character as _model_Character
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.core import security
 from app.config import settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.domains.identity.exceptions import CredentialMigrationError
 from app.domains.identity.service.credential_migration import migrate_local_credential_envelope
 
@@ -40,7 +45,7 @@ def migrate_local_credential_envelopes(db: Session) -> CredentialMigrationResult
     external = 0
     try:
         for credential in db.scalars(
-            select(models.LlmCredential).order_by(models.LlmCredential.id)
+            select(_model_LlmCredential).order_by(_model_LlmCredential.id)
         ):
             if not credential.encrypted_api_key:
                 continue
@@ -62,7 +67,7 @@ def migrate_local_credential_envelopes(db: Session) -> CredentialMigrationResult
             external += outcome.external
 
         for draft in db.scalars(
-            select(models.AgentCreationDraft).order_by(models.AgentCreationDraft.id)
+            select(_model_AgentCreationDraft).order_by(_model_AgentCreationDraft.id)
         ):
             if not draft.encrypted_api_key:
                 continue
@@ -84,11 +89,11 @@ def migrate_local_credential_envelopes(db: Session) -> CredentialMigrationResult
             external += outcome.external
 
         image_rows = db.execute(
-            select(models.AgentImageGenerationSetting, models.Character.owner_id)
+            select(_model_AgentImageGenerationSetting, _model_Character.owner_id)
             .join(
-                models.Character,
-                models.Character.id
-                == models.AgentImageGenerationSetting.character_id,
+                _model_Character,
+                _model_Character.id
+                == _model_AgentImageGenerationSetting.character_id,
             )
         ).all()
         for setting, owner_id in image_rows:

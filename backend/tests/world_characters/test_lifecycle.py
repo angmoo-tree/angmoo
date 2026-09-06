@@ -8,11 +8,12 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
 from app.domains.world_characters.router.entry import router as worlds_router
 from app.domains.worlds.router import router as world_creator_router
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.domains.world_characters.router.profile import router as studio_router
 
 

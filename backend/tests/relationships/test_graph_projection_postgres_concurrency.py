@@ -9,7 +9,7 @@ import pytest
 from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.relationships.service import projection_state as graph_projection_crud
 
 

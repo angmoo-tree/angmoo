@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import create_engine
 
-from app import models as _models  # noqa: F401
+from model_fixture_support import models as _models  # noqa: F401
 from app.domains.social.models.subjective_context import (
     drop_subjective_context_schema,
 )

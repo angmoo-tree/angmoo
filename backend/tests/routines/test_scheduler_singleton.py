@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.domains.runtime.exceptions import SchedulerFenceRejectedError
 from app.domains.runtime.service.lease_coordinator import SchedulerLeaseCoordinator
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError

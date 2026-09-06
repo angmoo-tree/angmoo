@@ -2679,6 +2679,43 @@ Tree/Lore metadata를 합치며 기존 `app.core.context_clipping`의 AR-B4 행�
 보정한 signed `d82db1cc`에서 원래 공식 stock **보호2478=현재2478 /37항목 PASS**, 실제 Gitleaks tree/history 탐지0을 확인했다. Residual의 `core_modules` 중복 정정을 합친 `7cd71f43`은 해당 목록6줄 제거만 다르며 제품·테스트·원장184개는 동일하다. 이 후보의 원래 L0 **6 PASS /0.18초**, 후보 조상만 연결한 격리 Git 저장소의 custom history **10170 blobs/치명0**을 확인했다. 첫 navigation/Gitleaks 실패와 보정 후 결과를 구분하며, 전체 backend2456 PASS는 같은 제품·테스트의 ec72 원본 실행에 근거한다. 순차 PR·원격 Core 전체·Windows/installer·병합 후 검증 및 G5/최종 public_main 제거는 후속 단계다.
 
 
+
+## AR-B8-G5 순차 통합 — 단일 Base·DB 연결·명시적 모델 등록
+
+Tree/Lore·Operations·Image·LocalBot·Runtime의 실제 모델 소유와 G06-A가 갖춰진 `576d3119`에 원래 G5 source `924a8361867bd0228943082227221d78507f9027`을 합류한다. 두 소스 사이의 미합류 비-merge commit은 이 G5 source 한 개다. 원래 source의 최초 도입 계보를 유지하며, 현재 B4/B5/B7 및 잔여 업무 함수·40개 앱 연결을 옛 준비 파일로 덮어쓰지 않는다.
+
+`app.models`에는 단일 ORM `Base`를, `app.database`에는 기존 engine/session·연결 함수 6개를 둔다. `runtime.persistence.model_registration.register_models()`가 실제 소유 모듈 23개를 명시적으로 등록한다. 102개 모델의 전체 class AST와 원래 DB 함수 AST가 동일하며, 등록만으로 engine·앱을 생성하지 않는다. 현재 업무 정의 504개의 본문도 정확한 import/모델 참조와 같은 시점의 명시적 등록을 정규화하면 동일하다. `public_main`의 임시 15개 export와 기존 profile 계약은 이 단계에서 유지한다.
+
+제품의 옛 `app.models` aggregate 접근은 각 실제 도메인 ORM을 직접 참조하도록 연결했다. 테스트의 기존 모델 fixture namespace는 `tests.model_fixture_support`에서 같은 102개 class를 제공한다. immutable Alembic 0089와 Chat World-scope migration은 원본 bytes를 그대로 유지하며, 역사적 `app.core.db.Base`는 실제 `app.models.Base`와 동일한 객체의 한정 호환이다. 기존 모델 alias 단언의 승계는 원래 source·실제 class·단일 Base·현재 consumer와 파일 제거를 검증하는 원래 G5 proof로 제한한다.
+
+아직 남은 네 옛 helper 파일의 간접 ORM 접근은 **정확한 임시 consumer 9개**로 기록했다. `cruds.agents`, `services.agent_runs`, `services.community_abuse_quota`, `services.world_foundation`의 원래 61개 참조와 같은 실제 ORM class를 독립 AST 검토로 확인했다. 이는 새 예외가 없다는 주장이 아니다. 각 행에 원래 함수·기존 aggregate 의존·`AR-B8-B` 제거 조건을 명시했으며, wildcard나 경계 검사 코드를 넓히지 않았다. 준비된 실제 helper 이전·호환 제거 후 이 9개 관계도 전부 제거해야 B8-B를 완료할 수 있다.
+
+고정 전 집중 검증은 모델 등록·기존 alias retirement·두 profile factory·cold contributor/sidecar·Alembic **44 PASS / 69.09초**다. 설정 경로·계정 삭제·credential transaction·SQLite 연결/동시성·embedded migration·Memory·World Package 및 기존 Chat/Memory migration 영향 묶음은 **195 PASS / 1 warning / 230.24초**다. 전체 **2,507 tests**가 수집됐고, 실제 full/public **각 196 operations**, ORM **102 tables** 및 ASGI의 frozen 계약 차이는 모두 0이다. 현재 구조는 **1,097 modules / 4,109 edges / exact legacy 50 PASS**다.
+
+위 결과는 source 준비와 집중 검증이다. 선행 184개 원장 prefix 및 현재 navigation 합류, 원래 G5 source의 append-only 최초 도입 연결, 공식 전체 보존 검사와 같은 최종 후보의 전체 backend suite는 이어서 검증한다. Hosted CI·installer·병합 및 B8-B 최종 호환 제거를 이 집중 결과만으로 완료 처리하지 않는다.
+
+선행 Runtime 현재 경로 보정 `d82db1cc`도 합류했다. 충돌 합류로 두 번 등록됐던 `app.core.context_clipping`은 실제 Daypart source 소유의 `AR-B7-DAYPART / keep` 한 항목을 유지했다. 제품·테스트·검사기는 바꾸지 않았으며, 실제 DB import 이동에 따른 현재 SQL/실행 inventory를 다시 수집해 **ER0 92/87/24/44/7**, deferred **24 files**를 확인했다. 이 현재 목록 갱신은 frozen migration 본문이나 predecessor 계약의 재생성이 아니다.
+
+G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도입 귀속 오류를 잡았으며 원장은 저장하지 않았다. 이 파일은 원래 signed merge `8a4bb308`의 양 부모 모두에 없었던 설명 docstring 한 줄이다. 함수·class·import·docstring 이외 실행문·현재 module consumer가 각각 0이고, G5의 실제 source `924a836`이 처음 추가한 파일도 아니다. 선행 `576d3119` 역시 이 파일 없이 같은 Chat 검사들을 수집·실행했다. 따라서 G5와 무관한 namespace 표시 파일의 합류만 제외하고, 원문 blob·두 부모·AST·현재 참조0 증거는 `g5-unrelated-test-namespace-proof.json`에 남긴다. 기존 Chat test 함수·fixture·단언은 삭제하거나 바꾸지 않는다. 원래 snapshot과 checker는 유지하고, 원장에는 실제 G5 도입 파일 4개와 기존 새 test 29개만 귀속한다. 설명 파일을 현재 커밋의 새 기능이나 잘못된 최초 source로 재등록하지 않는다.
+
+namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
+
+원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
+
+
+G5의 고정 후보 `e46f6e4c` 전체 backend는 **2,485 PASS / 22 SKIP / 28 warnings / 1,188.91초**다. 같은 후보의 첫 공식 보존 검사는 **PR #258 1,867 / PR #263 1,907 / protected 2,507 = current 2,507**을 확인했고 원본 source·API·ORM·단언·suppression·node 오류는 없었다. 실패는 K01/K03/K04/K05/K14/G02의 현재 기능 지도에 남은 삭제된 모델 경로20개였다.
+
+원래 `576d3119`의 각 alias가 제공하던 실제 class와 현재 `register_models()`의23개 소유 모듈을 대조해 이20개 경로만 실제 소유 위치로 연결했다. 옛 agent_runs 모델 묶음의 Memory/Relationships 두 소유와 worlds 모델 묶음의 Worlds/WorldCharacter 두 소유를 모두 유지했다. G02는 단일 Base·DB 함수·명시적 등록·각 도메인 ORM을 구분하고 `MOVED`로 기록한다. frozen 자료·원장185·제품·테스트·검사기 변경0이며, metadata 보정 뒤 원래 공식 stock을 다시 실행한다. 위 전체 통과를 Hosted CI·installer·병합 또는 B8-B 완료로 승격하지 않는다.
+
+현재 지도 보정 후보 `3d9313cd`의 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`가 **items37 PASS / protected 2,507 = current 2,507**로 통과했다. PR #258/#263의 원본 소스·API·ORM·단언·suppression·노드 및185개 도입 기록을 모두 유지한다. 이 보정은 metadata와 결과 문서만 변경했으므로 같은 제품·테스트의 전체 **2,485 PASS / 22 SKIP** 결과와 함께 G5 로컬 통합 검증으로 기록한다. Hosted·설치·post-merge 및 후속 B8-B의 정확9개 임시 소비자 제거는 별도 Gate다.
+
 ### AR-B8-A Runtime/G06 PR #288: current inventory correction
 
 The first exact-head PR run at `849e6bc0` failed the deferred runtime inventory check after the preceding CI policy, OSS, allowlist, launcher, installer, Host and architecture checks passed. The original Runtime/G06 source ledger now contains the supported extension type marker; the current inventory had 23 entries and omitted that one existing ledger file. The correction adds only `security/refactor_backend_additions.json` to the generated current inventory (24 entries), preserving all 23 previous rows. Product code, tests, assertion/suppression contracts, the original source ledger184 and frozen checkpoints are unchanged. The initial failure remains recorded separately from the corrected-head CI rerun.
+
+
+### AR-G5 PR #289: current Memory inventory correction
+
+The first PR head `ed40f1fb` passed collection of all 2,507 nodes, the L4 current inventory and embedded migration, but Core backend stopped before the whole pytest suite at the Memory batch current inventory check (run `34027168148`, job `101470090058`). The original log is retained; this run is not recorded as a backend-suite pass.
+
+The unchanged generator updates exactly 17 source hashes already changed by G5 Base/database/model imports. Each old hash matches the pre-G5 source `576d3119`, and every new hash matches the existing signed `ed40f1fb` Git blob after the generator's existing newline normalization. All file paths, other current-inventory fields and the frozen Today predecessor remain identical. Product code, tests, assertions, suppressions, checkers, CI, the 185-record ledger and frozen checkpoints are unchanged. The original Memory, L4, deferred, architecture and public-route current checks are rerun on this metadata correction; the new exact PR head must complete Core's whole backend suite and every remaining remote gate.

@@ -16,7 +16,18 @@ import app.domains.relationships.service.graph_recall as relationships_service_g
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.characters.models import Character as _model_Character
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.relationships.models.social import RelationshipState as _model_RelationshipState
+from app.domains.relationships.models.social import SocialEvent as _model_SocialEvent
+from app.domains.relationships.models.social import SocialEventEvidence as _model_SocialEventEvidence
+from app.domains.identity.models import User as _model_User
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.social.models.feed import WorldCharacterBlock as _model_WorldCharacterBlock
+from app.domains.social.models.feed import WorldCharacterFeedObservation as _model_WorldCharacterFeedObservation
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.config import Settings, settings
 from app.domains.relationships.repository import projection_state as graph_projection_crud
 
@@ -97,7 +108,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         character_id: str,
         world_id: str,
     ) -> OwnerWorldCharacterAccess:
-        character = self._db.get(models.Character, character_id)
+        character = self._db.get(_model_Character, character_id)
         if character is None:
             return OwnerWorldCharacterAccess(
                 character_exists=False,
@@ -109,13 +120,13 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 membership_world_id=None,
             )
         world_character = self._db.scalar(
-            select(models.WorldCharacter).where(
-                models.WorldCharacter.world_id == world_id,
-                models.WorldCharacter.character_id == character_id,
+            select(_model_WorldCharacter).where(
+                _model_WorldCharacter.world_id == world_id,
+                _model_WorldCharacter.character_id == character_id,
             )
         )
         membership = (
-            self._db.get(models.WorldMembership, world_character.membership_id)
+            self._db.get(_model_WorldMembership, world_character.membership_id)
             if world_character is not None
             else None
         )
@@ -143,16 +154,16 @@ class SqlAlchemyRelationshipGraphReadGateway:
         scope: relationships_contracts_graph_recall.GraphRecallScope,
     ) -> relationships_contracts_graph_recall.GraphRecallScopeAccess:
         world_character = self._db.get(
-            models.WorldCharacter,
+            _model_WorldCharacter,
             scope.subject_world_character_id,
         )
         character = (
-            self._db.get(models.Character, world_character.character_id)
+            self._db.get(_model_Character, world_character.character_id)
             if world_character is not None
             else None
         )
         membership = (
-            self._db.get(models.WorldMembership, world_character.membership_id)
+            self._db.get(_model_WorldMembership, world_character.membership_id)
             if world_character is not None
             else None
         )
@@ -185,7 +196,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         )
 
     def target_world_id(self, *, world_character_id: str) -> str | None:
-        target = self._db.get(models.WorldCharacter, world_character_id)
+        target = self._db.get(_model_WorldCharacter, world_character_id)
         return target.world_id if target is not None else None
     def projection_counts(self, *, world_id: str) -> GraphProjectionCounts:
         counts = graph_projection_crud.world_counts(self._db, world_id=world_id)
@@ -259,15 +270,15 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 )
             )
             for row in self._db.scalars(
-                select(models.WorldCharacterBlock).where(
-                    models.WorldCharacterBlock.world_id == world_id
+                select(_model_WorldCharacterBlock).where(
+                    _model_WorldCharacterBlock.world_id == world_id
                 )
             )
         }
 
     @staticmethod
     def _relationship_hit(
-        row: models.RelationshipState,
+        row: _model_RelationshipState,
     ) -> GraphRelationshipHit:
         return GraphRelationshipHit(
             world_id=row.world_id,
@@ -293,14 +304,14 @@ class SqlAlchemyRelationshipGraphReadGateway:
         target_id: str | None,
         limit: int,
     ) -> list[GraphRelationshipHit]:
-        statement = select(models.RelationshipState).where(
-            models.RelationshipState.world_id == world_id
+        statement = select(_model_RelationshipState).where(
+            _model_RelationshipState.world_id == world_id
         )
         if target_id is None:
             statement = statement.where(
                 or_(
-                    models.RelationshipState.actor_world_character_id == center_id,
-                    models.RelationshipState.target_world_character_id == center_id,
+                    _model_RelationshipState.actor_world_character_id == center_id,
+                    _model_RelationshipState.target_world_character_id == center_id,
                 )
             )
         else:
@@ -308,21 +319,21 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 or_(
                     (
                         (
-                            models.RelationshipState.actor_world_character_id
+                            _model_RelationshipState.actor_world_character_id
                             == center_id
                         )
                         & (
-                            models.RelationshipState.target_world_character_id
+                            _model_RelationshipState.target_world_character_id
                             == target_id
                         )
                     ),
                     (
                         (
-                            models.RelationshipState.actor_world_character_id
+                            _model_RelationshipState.actor_world_character_id
                             == target_id
                         )
                         & (
-                            models.RelationshipState.target_world_character_id
+                            _model_RelationshipState.target_world_character_id
                             == center_id
                         )
                     ),
@@ -331,8 +342,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
         rows = list(
             self._db.scalars(
                 statement.order_by(
-                    models.RelationshipState.updated_at.desc(),
-                    models.RelationshipState.id.asc(),
+                    _model_RelationshipState.updated_at.desc(),
+                    _model_RelationshipState.id.asc(),
                 ).limit(limit)
             )
         )
@@ -350,11 +361,11 @@ class SqlAlchemyRelationshipGraphReadGateway:
         rows = {
             row.id: row
             for row in self._db.scalars(
-                select(models.RelationshipState).where(
-                    models.RelationshipState.id.in_(
+                select(_model_RelationshipState).where(
+                    _model_RelationshipState.id.in_(
                         [hit.relationship_state_id for hit in hits]
                     ),
-                    models.RelationshipState.world_id == world_id,
+                    _model_RelationshipState.world_id == world_id,
                 )
             )
         }
@@ -369,9 +380,9 @@ class SqlAlchemyRelationshipGraphReadGateway:
         world_characters = {
             row.id: row
             for row in self._db.scalars(
-                select(models.WorldCharacter).where(
-                    models.WorldCharacter.id.in_(world_character_ids),
-                    models.WorldCharacter.world_id == world_id,
+                select(_model_WorldCharacter).where(
+                    _model_WorldCharacter.id.in_(world_character_ids),
+                    _model_WorldCharacter.world_id == world_id,
                 )
             )
         }
@@ -381,10 +392,10 @@ class SqlAlchemyRelationshipGraphReadGateway:
         active_memberships = {
             row.id
             for row in self._db.scalars(
-                select(models.WorldMembership).where(
-                    models.WorldMembership.id.in_(membership_ids),
-                    models.WorldMembership.world_id == world_id,
-                    models.WorldMembership.status == "active",
+                select(_model_WorldMembership).where(
+                    _model_WorldMembership.id.in_(membership_ids),
+                    _model_WorldMembership.world_id == world_id,
+                    _model_WorldMembership.status == "active",
                 )
             )
         }
@@ -453,12 +464,12 @@ class SqlAlchemyRelationshipGraphReadGateway:
         events = {
             row.id: row
             for row in self._db.scalars(
-                select(models.SocialEvent).where(
-                    models.SocialEvent.id.in_(event_ids),
-                    models.SocialEvent.world_id == world_id,
-                    models.SocialEvent.result == "succeeded",
-                    models.SocialEvent.retrieval_status == "eligible",
-                    models.SocialEvent.invalidated_at.is_(None),
+                select(_model_SocialEvent).where(
+                    _model_SocialEvent.id.in_(event_ids),
+                    _model_SocialEvent.world_id == world_id,
+                    _model_SocialEvent.result == "succeeded",
+                    _model_SocialEvent.retrieval_status == "eligible",
+                    _model_SocialEvent.invalidated_at.is_(None),
                 )
             )
         }
@@ -476,8 +487,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
             return observed
         evidence_rows = list(
             self._db.scalars(
-                select(models.SocialEventEvidence).where(
-                    models.SocialEventEvidence.social_event_id.in_(remaining)
+                select(_model_SocialEventEvidence).where(
+                    _model_SocialEventEvidence.social_event_id.in_(remaining)
                 )
             )
         )
@@ -505,13 +516,13 @@ class SqlAlchemyRelationshipGraphReadGateway:
             return observed
         observed_post_ids = set(
             self._db.scalars(
-                select(models.WorldCharacterFeedObservation.post_id).where(
-                    models.WorldCharacterFeedObservation.world_id == world_id,
-                    models.WorldCharacterFeedObservation.observer_world_character_id
+                select(_model_WorldCharacterFeedObservation.post_id).where(
+                    _model_WorldCharacterFeedObservation.world_id == world_id,
+                    _model_WorldCharacterFeedObservation.observer_world_character_id
                     == subject_world_character_id,
-                    models.WorldCharacterFeedObservation.post_id.in_(post_events),
-                    models.WorldCharacterFeedObservation.status == "observed",
-                    models.WorldCharacterFeedObservation.observed_at.is_not(None),
+                    _model_WorldCharacterFeedObservation.post_id.in_(post_events),
+                    _model_WorldCharacterFeedObservation.status == "observed",
+                    _model_WorldCharacterFeedObservation.observed_at.is_not(None),
                 )
             )
         )
@@ -531,19 +542,19 @@ class SqlAlchemyRelationshipGraphReadGateway:
         events = {
             row.id: row
             for row in self._db.scalars(
-                select(models.SocialEvent).where(
-                    models.SocialEvent.id.in_(event_ids)
+                select(_model_SocialEvent).where(
+                    _model_SocialEvent.id.in_(event_ids)
                 )
             )
         }
         evidence_rows = list(
             self._db.scalars(
-                select(models.SocialEventEvidence).where(
-                    models.SocialEventEvidence.social_event_id.in_(events)
+                select(_model_SocialEventEvidence).where(
+                    _model_SocialEventEvidence.social_event_id.in_(events)
                 )
             )
         )
-        evidence_by_event: dict[str, list[models.SocialEventEvidence]] = {}
+        evidence_by_event: dict[str, list[_model_SocialEventEvidence]] = {}
         for evidence in evidence_rows:
             evidence_by_event.setdefault(
                 evidence.social_event_id, []
@@ -579,7 +590,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     )
                 )
                 for post_id in post_ids:
-                    post = self._db.get(models.Post, post_id)
+                    post = self._db.get(_model_Post, post_id)
                     posts.append(
                         EvidencePostFacts(
                             post_id=post_id,
@@ -636,16 +647,16 @@ class SqlAlchemyRelationshipGraphReadGateway:
         world_characters = {
             row.id: row
             for row in self._db.scalars(
-                select(models.WorldCharacter).where(
-                    models.WorldCharacter.id.in_(world_character_ids)
+                select(_model_WorldCharacter).where(
+                    _model_WorldCharacter.id.in_(world_character_ids)
                 )
             )
         }
         characters = {
             row.id: row
             for row in self._db.scalars(
-                select(models.Character).where(
-                    models.Character.id.in_(
+                select(_model_Character).where(
+                    _model_Character.id.in_(
                         [row.character_id for row in world_characters.values()]
                     )
                 )
@@ -654,8 +665,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
         memberships = {
             row.id: row
             for row in self._db.scalars(
-                select(models.WorldMembership).where(
-                    models.WorldMembership.id.in_(
+                select(_model_WorldMembership).where(
+                    _model_WorldMembership.id.in_(
                         [
                             row.membership_id
                             for row in world_characters.values()
@@ -707,7 +718,7 @@ def get_owner_relationship_graph(
     *,
     character_id: str,
     world_id: str,
-    user: models.User,
+    user: _model_User,
     view: relationships_contracts_graph_read.GraphView = "neighborhood",
     target_world_character_id: str | None = None,
     depth: int = 1,

@@ -6,7 +6,41 @@ from app.domains.operations import repository as operation_repository
 from sqlalchemy import delete, false, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app import models
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.characters.models import AgentCreationDraft as _model_AgentCreationDraft
+from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+from app.domains.local_bot.models import AgentLocalKey as _model_AgentLocalKey
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.identity.models import AuthSession as _model_AuthSession
+from app.domains.characters.models import Character as _model_Character
+from app.domains.character_lore.models import CharacterLoreChunk as _model_CharacterLoreChunk
+from app.domains.character_lore.models import CharacterLoreSource as _model_CharacterLoreSource
+from app.domains.chat.models import CharacterMessageSetting as _model_CharacterMessageSetting
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.chat.models import MessageMessage as _model_MessageMessage
+from app.domains.chat.models import MessageThread as _model_MessageThread
+from app.domains.social.models.posts import Notification as _model_Notification
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.social.models.posts import PostImageGenerationJob as _model_PostImageGenerationJob
+from app.domains.social.models.posts import PostImageQuotaReservation as _model_PostImageQuotaReservation
+from app.domains.social.models.posts import PostLike as _model_PostLike
+from app.domains.social.models.posts import PostReport as _model_PostReport
+from app.domains.social.models.posts import PostRepost as _model_PostRepost
+from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+from app.domains.characters.models import ProfileImageCandidate as _model_ProfileImageCandidate
+from app.domains.characters.models import ProfileImageQuotaReservation as _model_ProfileImageQuotaReservation
+from app.domains.social.models.subjective_context import SocialActionSubjectiveContext as _model_SocialActionSubjectiveContext
+from app.domains.identity.models import User as _model_User
+from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+from app.runtime.persistence.model_registration import register_models
+register_models()
 
 from app.config import settings
 from app.core.redaction import redact_secret_text
@@ -33,13 +67,13 @@ from app.domains.identity.exceptions import (
 
 
 def delete_current_user_account(
-    db: Session, user: models.User
+    db: Session, user: _model_User
 ) -> None:
     characters = list(
         db.scalars(
-            select(models.Character)
-            .where(models.Character.owner_id == user.id)
-            .order_by(models.Character.id.asc())
+            select(_model_Character)
+            .where(_model_Character.owner_id == user.id)
+            .order_by(_model_Character.id.asc())
         )
     )
     character_ids = [character.id for character in characters]
@@ -74,8 +108,8 @@ def _quarantine_account_private_media(
 ) -> profile_media.PrivateMediaQuarantine:
     draft_ids = list(
         db.scalars(
-            select(models.AgentCreationDraft.id).where(
-                models.AgentCreationDraft.user_id == user_id
+            select(_model_AgentCreationDraft.id).where(
+                _model_AgentCreationDraft.user_id == user_id
             )
         )
     )
@@ -90,10 +124,10 @@ def _ensure_account_deletion_not_busy(
     db: Session, user_id: str, character_ids: list[str]
 ) -> None:
     active_run_id = db.scalar(
-        select(models.AgentRun.id)
+        select(_model_AgentRun.id)
         .where(
             _owned_agent_run_condition(user_id, character_ids),
-            models.AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
+            _model_AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -101,10 +135,10 @@ def _ensure_account_deletion_not_busy(
         raise AccountDeletionBusyError("Agent run is running")
 
     running_slot_id = db.scalar(
-        select(models.AgentSlot.agent_id)
+        select(_model_AgentSlot.agent_id)
         .where(
             _owned_agent_slot_condition(user_id, character_ids),
-            models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
+            _model_AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -120,9 +154,9 @@ def _release_openclaw_profiles_for_account(
     released = False
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(_owned_agent_slot_condition(user_id, character_ids))
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     for slot in slots:
@@ -134,7 +168,7 @@ def _release_openclaw_profiles_for_account(
             or slot.assigned_credential_id is None
         ):
             continue
-        credential = db.get(models.LlmCredential, slot.assigned_credential_id)
+        credential = db.get(_model_LlmCredential, slot.assigned_credential_id)
         if credential is None:
             continue
         try:
@@ -172,9 +206,9 @@ def _clear_resident_slots_for_account(
 ) -> None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(_owned_agent_slot_condition(user_id, character_ids))
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     for slot in slots:
@@ -194,8 +228,8 @@ def _clear_resident_slots_for_account(
 
 def _scrub_account_data(
     db: Session,
-    user: models.User,
-    characters: list[models.Character],
+    user: _model_User,
+    characters: list[_model_Character],
     character_ids: list[str],
 ) -> None:
     now = auth_service._utcnow()
@@ -207,8 +241,8 @@ def _scrub_account_data(
 
     scrub_memory_data(db, owner_id=user.id)
     db.execute(
-        delete(models.SocialActionSubjectiveContext).where(
-            models.SocialActionSubjectiveContext.owner_id == user.id
+        delete(_model_SocialActionSubjectiveContext).where(
+            _model_SocialActionSubjectiveContext.owner_id == user.id
         )
     )
     world_character_setup.delete_setup_data_for_characters(
@@ -216,254 +250,254 @@ def _scrub_account_data(
     )
 
     db.execute(
-        delete(models.ProfileImageCandidate).where(
+        delete(_model_ProfileImageCandidate).where(
             or_(
-                models.ProfileImageCandidate.user_id == user.id,
+                _model_ProfileImageCandidate.user_id == user.id,
                 character_condition(
-                    models.ProfileImageCandidate.character_id, character_ids
+                    _model_ProfileImageCandidate.character_id, character_ids
                 ),
             )
         )
     )
     db.execute(
-        delete(models.ProfileImageQuotaReservation).where(
-            models.ProfileImageQuotaReservation.user_id == user.id
+        delete(_model_ProfileImageQuotaReservation).where(
+            _model_ProfileImageQuotaReservation.user_id == user.id
         )
     )
     db.execute(
-        delete(models.AgentCreationDraft).where(
-            models.AgentCreationDraft.user_id == user.id
+        delete(_model_AgentCreationDraft).where(
+            _model_AgentCreationDraft.user_id == user.id
         )
     )
 
-    message_thread_ids = select(models.MessageThread.id).where(
+    message_thread_ids = select(_model_MessageThread.id).where(
         or_(
-            models.MessageThread.requester_id == user.id,
-            character_condition(models.MessageThread.character_id, character_ids),
+            _model_MessageThread.requester_id == user.id,
+            character_condition(_model_MessageThread.character_id, character_ids),
         )
     )
     db.execute(
-        delete(models.MessageMessage).where(
-            models.MessageMessage.thread_id.in_(message_thread_ids)
+        delete(_model_MessageMessage).where(
+            _model_MessageMessage.thread_id.in_(message_thread_ids)
         )
     )
     db.execute(
-        delete(models.MessageThread).where(
+        delete(_model_MessageThread).where(
             or_(
-                models.MessageThread.requester_id == user.id,
-                character_condition(models.MessageThread.character_id, character_ids),
+                _model_MessageThread.requester_id == user.id,
+                character_condition(_model_MessageThread.character_id, character_ids),
             )
         )
     )
     db.execute(
-        delete(models.UserMessagePreference).where(
-            models.UserMessagePreference.user_id == user.id
+        delete(_model_UserMessagePreference).where(
+            _model_UserMessagePreference.user_id == user.id
         )
     )
     db.execute(
-        delete(models.CharacterMessageSetting).where(
+        delete(_model_CharacterMessageSetting).where(
             character_condition(
-                models.CharacterMessageSetting.character_id, character_ids
+                _model_CharacterMessageSetting.character_id, character_ids
             )
         )
     )
 
-    lore_source_ids = select(models.CharacterLoreSource.id).where(
+    lore_source_ids = select(_model_CharacterLoreSource.id).where(
         or_(
-            models.CharacterLoreSource.owner_id == user.id,
-            character_condition(models.CharacterLoreSource.character_id, character_ids),
+            _model_CharacterLoreSource.owner_id == user.id,
+            character_condition(_model_CharacterLoreSource.character_id, character_ids),
         )
     )
     db.execute(
-        delete(models.CharacterLoreChunk).where(
+        delete(_model_CharacterLoreChunk).where(
             or_(
-                models.CharacterLoreChunk.owner_id == user.id,
+                _model_CharacterLoreChunk.owner_id == user.id,
                 character_condition(
-                    models.CharacterLoreChunk.character_id, character_ids
+                    _model_CharacterLoreChunk.character_id, character_ids
                 ),
-                models.CharacterLoreChunk.source_id.in_(lore_source_ids),
+                _model_CharacterLoreChunk.source_id.in_(lore_source_ids),
             )
         )
     )
     db.execute(
-        delete(models.CharacterLoreSource).where(
+        delete(_model_CharacterLoreSource).where(
             or_(
-                models.CharacterLoreSource.owner_id == user.id,
+                _model_CharacterLoreSource.owner_id == user.id,
                 character_condition(
-                    models.CharacterLoreSource.character_id, character_ids
+                    _model_CharacterLoreSource.character_id, character_ids
                 ),
             )
         )
     )
 
     db.execute(
-        delete(models.PostImageGenerationJob).where(
+        delete(_model_PostImageGenerationJob).where(
             or_(
-                models.PostImageGenerationJob.user_id == user.id,
+                _model_PostImageGenerationJob.user_id == user.id,
                 character_condition(
-                    models.PostImageGenerationJob.character_id, character_ids
+                    _model_PostImageGenerationJob.character_id, character_ids
                 ),
             )
         )
     )
     db.execute(
-        delete(models.PostImageQuotaReservation).where(
+        delete(_model_PostImageQuotaReservation).where(
             or_(
-                models.PostImageQuotaReservation.user_id == user.id,
+                _model_PostImageQuotaReservation.user_id == user.id,
                 character_condition(
-                    models.PostImageQuotaReservation.character_id, character_ids
+                    _model_PostImageQuotaReservation.character_id, character_ids
                 ),
             )
         )
     )
     db.execute(
-        delete(models.AgentPublicActionExecution).where(
+        delete(_model_AgentPublicActionExecution).where(
             character_condition(
-                models.AgentPublicActionExecution.character_id, character_ids
+                _model_AgentPublicActionExecution.character_id, character_ids
             )
         )
     )
     db.execute(
-        delete(models.AgentDaypartMemoryEvent).where(
+        delete(_model_AgentDaypartMemoryEvent).where(
             character_condition(
-                models.AgentDaypartMemoryEvent.character_id, character_ids
+                _model_AgentDaypartMemoryEvent.character_id, character_ids
             )
         )
     )
     db.execute(
-        delete(models.AgentRelationshipPoint).where(
+        delete(_model_AgentRelationshipPoint).where(
             or_(
                 character_condition(
-                    models.AgentRelationshipPoint.recipient_character_id,
+                    _model_AgentRelationshipPoint.recipient_character_id,
                     character_ids,
                 ),
                 character_condition(
-                    models.AgentRelationshipPoint.source_character_id,
+                    _model_AgentRelationshipPoint.source_character_id,
                     character_ids,
                 ),
             )
         )
     )
 
-    db.execute(delete(models.AuthSession).where(models.AuthSession.user_id == user.id))
+    db.execute(delete(_model_AuthSession).where(_model_AuthSession.user_id == user.id))
     db.execute(
-        delete(models.AgentFeedCue).where(
+        delete(_model_AgentFeedCue).where(
             or_(
-                models.AgentFeedCue.user_id == user.id,
-                character_condition(models.AgentFeedCue.character_id, character_ids),
+                _model_AgentFeedCue.user_id == user.id,
+                character_condition(_model_AgentFeedCue.character_id, character_ids),
             )
         )
     )
     db.execute(
-        delete(models.AgentActivityLog).where(
+        delete(_model_AgentActivityLog).where(
             or_(
-                models.AgentActivityLog.user_id == user.id,
+                _model_AgentActivityLog.user_id == user.id,
                 character_condition(
-                    models.AgentActivityLog.character_id, character_ids
+                    _model_AgentActivityLog.character_id, character_ids
                 ),
             )
         )
     )
     db.execute(
-        delete(models.AgentRun).where(
+        delete(_model_AgentRun).where(
             _owned_agent_run_condition(user.id, character_ids)
         )
     )
     db.execute(
-        delete(models.PostReport).where(models.PostReport.reporter_user_id == user.id)
+        delete(_model_PostReport).where(_model_PostReport.reporter_user_id == user.id)
     )
     db.execute(
-        delete(models.PostLike).where(
+        delete(_model_PostLike).where(
             or_(
-                models.PostLike.user_id == user.id,
-                character_condition(models.PostLike.character_id, character_ids),
+                _model_PostLike.user_id == user.id,
+                character_condition(_model_PostLike.character_id, character_ids),
             )
         )
     )
     db.execute(
-        delete(models.PostRepost).where(
+        delete(_model_PostRepost).where(
             or_(
-                models.PostRepost.user_id == user.id,
-                character_condition(models.PostRepost.character_id, character_ids),
+                _model_PostRepost.user_id == user.id,
+                character_condition(_model_PostRepost.character_id, character_ids),
             )
         )
     )
     db.execute(
-        delete(models.ProfileFollow).where(
+        delete(_model_ProfileFollow).where(
             or_(
-                models.ProfileFollow.follower_user_id == user.id,
-                models.ProfileFollow.target_user_id == user.id,
+                _model_ProfileFollow.follower_user_id == user.id,
+                _model_ProfileFollow.target_user_id == user.id,
                 character_condition(
-                    models.ProfileFollow.follower_character_id, character_ids
+                    _model_ProfileFollow.follower_character_id, character_ids
                 ),
                 character_condition(
-                    models.ProfileFollow.target_character_id, character_ids
-                ),
-            )
-        )
-    )
-    db.execute(
-        delete(models.Notification).where(
-            or_(
-                models.Notification.recipient_user_id == user.id,
-                models.Notification.actor_user_id == user.id,
-                character_condition(
-                    models.Notification.recipient_character_id, character_ids
-                ),
-                character_condition(
-                    models.Notification.actor_character_id, character_ids
+                    _model_ProfileFollow.target_character_id, character_ids
                 ),
             )
         )
     )
     db.execute(
-        update(models.Post)
-        .where(models.Post.author_user_id == user.id)
+        delete(_model_Notification).where(
+            or_(
+                _model_Notification.recipient_user_id == user.id,
+                _model_Notification.actor_user_id == user.id,
+                character_condition(
+                    _model_Notification.recipient_character_id, character_ids
+                ),
+                character_condition(
+                    _model_Notification.actor_character_id, character_ids
+                ),
+            )
+        )
+    )
+    db.execute(
+        update(_model_Post)
+        .where(_model_Post.author_user_id == user.id)
         .values(author_name=DELETED_USER_DISPLAY_NAME)
     )
     if character_ids:
         db.execute(
-            update(models.Post)
-            .where(models.Post.author_character_id.in_(character_ids))
+            update(_model_Post)
+            .where(_model_Post.author_character_id.in_(character_ids))
             .values(author_name=DELETED_CHARACTER_NAME)
         )
         db.execute(
-            delete(models.CharacterState).where(
-                models.CharacterState.character_id.in_(character_ids)
+            delete(_model_CharacterState).where(
+                _model_CharacterState.character_id.in_(character_ids)
             )
         )
         db.execute(
-            delete(models.AgentImageGenerationSetting).where(
-                models.AgentImageGenerationSetting.character_id.in_(character_ids)
+            delete(_model_AgentImageGenerationSetting).where(
+                _model_AgentImageGenerationSetting.character_id.in_(character_ids)
             )
         )
 
     db.execute(
-        delete(models.AgentActivitySetting).where(
-            character_condition(models.AgentActivitySetting.character_id, character_ids)
+        delete(_model_AgentActivitySetting).where(
+            character_condition(_model_AgentActivitySetting.character_id, character_ids)
         )
     )
 
     db.execute(
-        delete(models.LlmCredential).where(
+        delete(_model_LlmCredential).where(
             or_(
-                models.LlmCredential.owner_id == user.id,
-                character_condition(models.LlmCredential.character_id, character_ids),
+                _model_LlmCredential.owner_id == user.id,
+                character_condition(_model_LlmCredential.character_id, character_ids),
             )
         )
     )
     db.execute(
-        delete(models.AgentLocalKey).where(
+        delete(_model_AgentLocalKey).where(
             or_(
-                models.AgentLocalKey.owner_id == user.id,
-                character_condition(models.AgentLocalKey.character_id, character_ids),
+                _model_AgentLocalKey.owner_id == user.id,
+                character_condition(_model_AgentLocalKey.character_id, character_ids),
             )
         )
     )
     operation_repository.scrub_user_attribution(db, user.id)
     db.execute(
-        update(models.Character)
-        .where(models.Character.moderation_updated_by_user_id == user.id)
+        update(_model_Character)
+        .where(_model_Character.moderation_updated_by_user_id == user.id)
         .values(moderation_updated_by_user_id=None)
     )
 
@@ -500,15 +534,15 @@ def _scrub_account_data(
 
 def _owned_agent_run_condition(user_id: str, character_ids: list[str]):
     return or_(
-        models.AgentRun.user_id == user_id,
-        _character_id_condition(models.AgentRun.character_id, character_ids),
+        _model_AgentRun.user_id == user_id,
+        _character_id_condition(_model_AgentRun.character_id, character_ids),
     )
 
 
 def _owned_agent_slot_condition(user_id: str, character_ids: list[str]):
     return or_(
-        models.AgentSlot.assigned_user_id == user_id,
-        _character_id_condition(models.AgentSlot.assigned_character_id, character_ids),
+        _model_AgentSlot.assigned_user_id == user_id,
+        _character_id_condition(_model_AgentSlot.assigned_character_id, character_ids),
     )
 
 
@@ -527,9 +561,9 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
     candidate = base
     index = 2
     while db.scalar(
-        select(models.Character.id).where(
-            models.Character.handle == candidate,
-            models.Character.id != character_id,
+        select(_model_Character.id).where(
+            _model_Character.handle == candidate,
+            _model_Character.id != character_id,
         )
     ):
         suffix_text = f"_{index}"

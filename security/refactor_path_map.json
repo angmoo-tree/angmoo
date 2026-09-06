@@ -402,6 +402,30 @@
     "backend/app/domains/memory/public.py": "backend/app/domains/memory/contracts/provenance.py",
     "backend/app/domains/memory/domain/__init__.py": "backend/app/domains/memory/contracts/__init__.py",
     "backend/app/domains/memory/api/__init__.py": "backend/app/domains/memory/schemas/__init__.py",
+    "backend/app/models/tree.py": "backend/app/domains/tree/models.py",
+    "backend/app/schemas/tree.py": "backend/app/domains/tree/schemas.py",
+    "backend/app/cruds/tree.py": "backend/app/domains/tree/repository.py",
+    "backend/app/services/tree.py": "backend/app/domains/tree/service.py",
+    "backend/app/api/v1/routes/tree.py": "backend/app/domains/tree/router.py",
+    "backend/tests/test_m4_tree_public_contract.py": "backend/tests/tree/test_public_contract.py",
+    "backend/app/models/character_lore.py": "backend/app/domains/character_lore/models.py",
+    "backend/app/schemas/character_lore.py": "backend/app/domains/character_lore/schemas.py",
+    "backend/app/services/lore_parser_quota.py": "backend/app/domains/character_lore/service/parser_quota.py",
+    "backend/tests/test_character_lore.py": "backend/tests/character_lore/test_documents.py",
+    "backend/tests/test_lore_parser_quota.py": "backend/tests/character_lore/test_parser_quota.py",
+    "backend/tests/test_lore_upload_security.py": "backend/tests/character_lore/test_upload_security.py",
+    "backend/app/services/character_lore.py": "backend/app/runtime/character_lore.py",
+    "backend/app/api/v1/routes/character_lore.py": "backend/app/domains/character_lore/router.py",
+    "backend/app/models/admin_ops.py": "backend/app/domains/operations/models.py",
+    "backend/app/services/operation_settings.py": "backend/app/domains/operations/service/settings.py",
+    "backend/app/services/maintenance.py": "backend/app/domains/operations/service/maintenance.py",
+    "backend/app/schemas/maintenance.py": "backend/app/domains/operations/schemas.py",
+    "backend/app/models/agent_settings.py": "backend/app/domains/characters/models.py",
+    "backend/app/models/agent_local_keys.py": "backend/app/domains/local_bot/models.py",
+    "backend/app/models/local_bot_quotas.py": "backend/app/domains/local_bot/models.py",
+    "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py",
+    "backend/app/services/image_prompt_safety.py": "backend/app/core/image_prompt_safety.py",
+    "backend/app/services/service_image_key.py": "backend/app/credentials/service_images.py",
     "backend/app/domains/chat/api/schemas.py": "backend/app/domains/chat/schemas.py",
     "backend/app/domains/chat/domain/errors.py": "backend/app/domains/chat/exceptions.py",
     "backend/app/domains/chat/domain/policies.py": "backend/app/domains/chat/policies.py",
@@ -448,6 +472,31 @@
     "backend/app/api/v1/routes/messages.py": "backend/app/domains/chat/router/messages.py",
     "backend/app/api/v1/routes/world_chat.py": "backend/app/domains/chat/router/world_chat.py",
     "backend/app/api/v1/routes/world_chat_response.py": "backend/app/domains/chat/router/world_chat_response.py",
+    "backend/app/domains/runtime/contracts.py": "backend/app/domains/runtime/exceptions.py",
+    "backend/app/domains/runtime/api/runtime_schemas.py": "backend/app/domains/runtime/schemas.py",
+    "backend/app/domains/runtime/domain/diagnostic_codes.py": "backend/app/domains/runtime/constants.py",
+    "backend/app/domains/runtime/domain/installation_state.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/ports/application_runtime_probe.py": "backend/app/domains/runtime/contracts/status_reader.py",
+    "backend/app/domains/runtime/ports/runtime_data_path.py": "backend/app/domains/runtime/contracts/data_paths.py",
+    "backend/app/domains/runtime/ports/scheduler_lease_repository.py": "backend/app/domains/runtime/contracts/lease_store.py",
+    "backend/app/domains/runtime/ports/search_index.py": "backend/app/domains/runtime/contracts/search.py",
+    "backend/app/domains/runtime/ports/unit_of_work.py": "backend/app/domains/runtime/contracts/transaction.py",
+    "backend/app/domains/runtime/ports/vector_recall.py": "backend/app/domains/runtime/contracts/vector_recall.py",
+    "backend/app/domains/runtime/ports/release_candidate.py": "backend/app/domains/runtime/contracts/release.py",
+    "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
+    "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py",
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": "backend/app/domains/runtime/service/scheduler_lease.py",
+    "backend/app/api/v1/routes/runtime_status.py": "backend/app/domains/runtime/router.py",
+    "backend/app/domains/runtime/application/read_runtime_status.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/application/manage_scheduler_lease.py": "backend/app/domains/runtime/service/lease_coordinator.py",
+    "backend/app/domains/runtime/public.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/ports/__init__.py": "backend/app/domains/runtime/contracts/lease_store.py",
+    "backend/app/domains/runtime/infrastructure/__init__.py": "backend/app/domains/runtime/models.py",
+    "backend/app/domains/runtime/application/__init__.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/domain/__init__.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/api/__init__.py": "backend/app/domains/runtime/schemas.py",
+    "backend/app/public_main.py": "backend/app/main.py",
     "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py": "backend/app/domains/relationships/models/social.py",
     "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py": "backend/app/domains/relationships/models/projection.py",
     "backend/app/domains/relationships/graph_read/errors.py": "backend/app/domains/relationships/exceptions.py",
@@ -491,6 +540,18 @@
     "backend/app/services/langgraph_social_apply.py": "backend/app/runtime/social/langgraph_actions.py",
     "backend/app/services/world_feed_social_apply.py": "backend/app/runtime/social/world_feed_actions.py",
     "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": "backend/app/domains/relationships/repository/diagnostics.py",
+    "backend/app/services/local_bot.py": "backend/app/domains/local_bot/service/actions.py",
+    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py",
+    "backend/app/models/__init__.py": "backend/app/runtime/persistence/model_registration.py",
+    "backend/app/models/agent_runs.py": "backend/app/domains/memory/models/daypart.py",
+    "backend/app/models/auth.py": "backend/app/domains/identity/models.py",
+    "backend/app/models/characters.py": "backend/app/domains/characters/models.py",
+    "backend/app/models/credentials.py": "backend/app/domains/identity/models.py",
+    "backend/app/models/messages.py": "backend/app/domains/chat/models.py",
+    "backend/app/models/world_activity_runtime.py": "backend/app/domains/routines/models/plans.py",
+    "backend/app/models/world_character_setup.py": "backend/app/domains/world_characters/models.py",
+    "backend/app/models/worlds.py": "backend/app/domains/world_characters/models.py",
+    "backend/app/core/db.py": "backend/app/database.py",
     "backend/app/services/world_feed_search.py": "backend/app/domains/social/service/world_feed.py",
     "backend/app/domains/social/application/keyword_feed.py": "backend/app/domains/social/service/keyword_feed.py",
     "backend/app/domains/social/application/search_runtime.py": "backend/app/runtime/search/binding.py",
@@ -534,58 +595,7 @@
     "backend/app/services/langgraph_resident.py": "backend/app/runtime/resident/langgraph.py",
     "backend/tests/test_tendency_note_action_selection.py": "backend/tests/routines/test_tendency.py",
     "backend/app/runtime/resident/activity_policy.py": "backend/app/runtime/routines/activity_policy.py",
-    "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py",
-    "backend/app/models/tree.py": "backend/app/domains/tree/models.py",
-    "backend/app/schemas/tree.py": "backend/app/domains/tree/schemas.py",
-    "backend/app/cruds/tree.py": "backend/app/domains/tree/repository.py",
-    "backend/app/services/tree.py": "backend/app/domains/tree/service.py",
-    "backend/app/api/v1/routes/tree.py": "backend/app/domains/tree/router.py",
-    "backend/tests/test_m4_tree_public_contract.py": "backend/tests/tree/test_public_contract.py",
-    "backend/app/models/character_lore.py": "backend/app/domains/character_lore/models.py",
-    "backend/app/schemas/character_lore.py": "backend/app/domains/character_lore/schemas.py",
-    "backend/app/services/lore_parser_quota.py": "backend/app/domains/character_lore/service/parser_quota.py",
-    "backend/tests/test_character_lore.py": "backend/tests/character_lore/test_documents.py",
-    "backend/tests/test_lore_parser_quota.py": "backend/tests/character_lore/test_parser_quota.py",
-    "backend/tests/test_lore_upload_security.py": "backend/tests/character_lore/test_upload_security.py",
-    "backend/app/services/character_lore.py": "backend/app/runtime/character_lore.py",
-    "backend/app/api/v1/routes/character_lore.py": "backend/app/domains/character_lore/router.py",
-    "backend/app/models/admin_ops.py": "backend/app/domains/operations/models.py",
-    "backend/app/services/operation_settings.py": "backend/app/domains/operations/service/settings.py",
-    "backend/app/services/maintenance.py": "backend/app/domains/operations/service/maintenance.py",
-    "backend/app/schemas/maintenance.py": "backend/app/domains/operations/schemas.py",
-    "backend/app/models/agent_settings.py": "backend/app/domains/characters/models.py",
-    "backend/app/models/agent_local_keys.py": "backend/app/domains/local_bot/models.py",
-    "backend/app/models/local_bot_quotas.py": "backend/app/domains/local_bot/models.py",
-    "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py",
-    "backend/app/services/image_prompt_safety.py": "backend/app/core/image_prompt_safety.py",
-    "backend/app/services/service_image_key.py": "backend/app/credentials/service_images.py",
-    "backend/app/services/local_bot.py": "backend/app/domains/local_bot/service/actions.py",
-    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py",
-    "backend/app/domains/runtime/contracts.py": "backend/app/domains/runtime/exceptions.py",
-    "backend/app/domains/runtime/api/runtime_schemas.py": "backend/app/domains/runtime/schemas.py",
-    "backend/app/domains/runtime/domain/diagnostic_codes.py": "backend/app/domains/runtime/constants.py",
-    "backend/app/domains/runtime/domain/installation_state.py": "backend/app/domains/runtime/contracts/status.py",
-    "backend/app/domains/runtime/ports/application_runtime_probe.py": "backend/app/domains/runtime/contracts/status_reader.py",
-    "backend/app/domains/runtime/ports/runtime_data_path.py": "backend/app/domains/runtime/contracts/data_paths.py",
-    "backend/app/domains/runtime/ports/scheduler_lease_repository.py": "backend/app/domains/runtime/contracts/lease_store.py",
-    "backend/app/domains/runtime/ports/search_index.py": "backend/app/domains/runtime/contracts/search.py",
-    "backend/app/domains/runtime/ports/unit_of_work.py": "backend/app/domains/runtime/contracts/transaction.py",
-    "backend/app/domains/runtime/ports/vector_recall.py": "backend/app/domains/runtime/contracts/vector_recall.py",
-    "backend/app/domains/runtime/ports/release_candidate.py": "backend/app/domains/runtime/contracts/release.py",
-    "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
-    "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py",
-    "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": "backend/app/domains/runtime/service/status.py",
-    "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": "backend/app/domains/runtime/service/scheduler_lease.py",
-    "backend/app/api/v1/routes/runtime_status.py": "backend/app/domains/runtime/router.py",
-    "backend/app/domains/runtime/application/read_runtime_status.py": "backend/app/domains/runtime/service/status.py",
-    "backend/app/domains/runtime/application/manage_scheduler_lease.py": "backend/app/domains/runtime/service/lease_coordinator.py",
-    "backend/app/domains/runtime/public.py": "backend/app/domains/runtime/contracts/status.py",
-    "backend/app/domains/runtime/ports/__init__.py": "backend/app/domains/runtime/contracts/lease_store.py",
-    "backend/app/domains/runtime/infrastructure/__init__.py": "backend/app/domains/runtime/models.py",
-    "backend/app/domains/runtime/application/__init__.py": "backend/app/domains/runtime/service/status.py",
-    "backend/app/domains/runtime/domain/__init__.py": "backend/app/domains/runtime/contracts/status.py",
-    "backend/app/domains/runtime/api/__init__.py": "backend/app/domains/runtime/schemas.py",
-    "backend/app/public_main.py": "backend/app/main.py"
+    "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -28746,9 +28756,9 @@
       "status": "IMPLEMENTED — 158 focused passed, existing PG skip1; read-only source/split/assertion/suppression/API/ORM/node diagnostics 0 errors; root linear source introductions and stock integration gate pending",
       "split_files": {
         "backend/app/models/agent_runs.py": [
-          "backend/app/domains/routines/models/resident.py",
-          "backend/app/models/agent_runs.py",
-          "backend/app/domains/relationships/models/points.py"
+          "backend/app/domains/memory/models/daypart.py",
+          "backend/app/domains/relationships/models/points.py",
+          "backend/app/domains/routines/models/resident.py"
         ],
         "backend/app/models/agent_settings.py": [
           "backend/app/domains/routines/models/resident.py",
@@ -28781,7 +28791,7 @@
           "old": "backend/app/models/agent_runs.py::AgentRun",
           "new": "backend/app/domains/routines/models/resident.py::AgentRun",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28796,7 +28806,7 @@
           "old": "backend/app/models/agent_runs.py::AgentActivityLog",
           "new": "backend/app/domains/routines/models/resident.py::AgentActivityLog",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28811,7 +28821,7 @@
           "old": "backend/app/models/agent_runs.py::AgentFeedCue",
           "new": "backend/app/domains/routines/models/resident.py::AgentFeedCue",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28824,9 +28834,9 @@
         },
         {
           "old": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
-          "new": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "new": "backend/app/domains/memory/models/daypart.py::AgentDaypartMemoryEvent",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28835,30 +28845,13 @@
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
-          "new": "backend/app/domains/relationships/models/points.py::AgentRelationshipPoint",
-          "direct_consumers": [
-            "backend/app/models/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          ]
         },
         {
           "old": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
           "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28873,7 +28866,7 @@
           "old": "backend/app/models/agent_settings.py::AgentActivitySetting",
           "new": "backend/app/domains/routines/models/resident.py::AgentActivitySetting",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -28883,6 +28876,22 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
+        },
+        {
+          "old": "backend/app/models/agent_settings.py::AgentImageGenerationSetting",
+          "new": "backend/app/domains/characters/models.py::AgentImageGenerationSetting",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/cruds/agents.py::HIDDEN_ACTIVITY_ACTION_TYPES",
@@ -28990,6 +28999,86 @@
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_image_generation_setting",
+          "new": "backend/app/domains/characters/repository/image_settings.py::get_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::ensure_image_generation_setting",
+          "new": "backend/app/domains/characters/repository/image_settings.py::ensure_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::_image_secret_scope",
+          "new": "backend/app/domains/characters/service/image_settings.py::_image_secret_scope",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::update_image_generation_setting",
+          "new": "backend/app/domains/characters/service/image_settings.py::update_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::clear_image_visual_identity",
+          "new": "backend/app/domains/characters/repository/image_settings.py::clear_image_visual_identity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
         },
         {
           "old": "backend/app/cruds/agents.py::get_character_credential",
@@ -29331,6 +29420,18 @@
           ]
         },
         {
+          "old": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "new": "backend/app/domains/characters/schemas.py::PollinationsImageModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
           "old": "backend/app/schemas/agents.py::ImageKeyMode",
           "new": "backend/app/schemas/agents.py::ImageKeyMode",
           "direct_consumers": [
@@ -29601,6 +29702,46 @@
           ]
         },
         {
+          "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
           "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
           "new": "backend/app/domains/routines/schemas/resident.py::AgentActionRangeRead",
           "direct_consumers": [
@@ -29723,6 +29864,16 @@
           ]
         },
         {
+          "old": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageSeedUpload",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
           "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
           "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingRead",
           "direct_consumers": [
@@ -29730,6 +29881,18 @@
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
           ]
         },
         {
@@ -29782,10 +29945,10 @@
           ]
         },
         {
-          "old": "backend/app/models/agent_settings.py::AgentImageGenerationSetting",
-          "new": "backend/app/domains/characters/models.py::AgentImageGenerationSetting",
+          "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
+          "new": "backend/app/domains/relationships/models/points.py::AgentRelationshipPoint",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -29796,160 +29959,6 @@
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::get_image_generation_setting",
-          "new": "backend/app/domains/characters/repository/image_settings.py::get_image_generation_setting",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::ensure_image_generation_setting",
-          "new": "backend/app/domains/characters/repository/image_settings.py::ensure_image_generation_setting",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::_image_secret_scope",
-          "new": "backend/app/domains/characters/service/image_settings.py::_image_secret_scope",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::update_image_generation_setting",
-          "new": "backend/app/domains/characters/service/image_settings.py::update_image_generation_setting",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/cruds/agents.py::clear_image_visual_identity",
-          "new": "backend/app/domains/characters/repository/image_settings.py::clear_image_visual_identity",
-          "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
-            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
-        },
-        {
-          "old": "backend/app/schemas/agents.py::PollinationsImageModel",
-          "new": "backend/app/domains/characters/schemas.py::PollinationsImageModel",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
-            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
-            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
-          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
-          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::BotCharacterRead",
-          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::BotMeRead",
-          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::AgentImageSeedUpload",
-          "new": "backend/app/domains/characters/schemas.py::AgentImageSeedUpload",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
-        },
-        {
-          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
-          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingUpdate",
-          "direct_consumers": [
-            "backend/app/schemas/__init__.py"
-          ],
-          "test_nodes": [
-            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
-            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
-            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
-          ]
         }
       ],
       "ownership": "Routines models/resident owns AgentActivitySetting, AgentRun, AgentSlot, AgentPublicActionExecution, AgentFeedCue and AgentActivityLog. Original plans models/schema move whole into models/plans and schemas/plans with identical-object package exports. Activity/slot/log response DTO and settings/feed-cue input are schemas/resident. service/activity_settings owns get/ensure/update; service/activity_logs owns actual hidden/state-dedupe/read/write flow. Original defaults/limits/hidden and 90-second window are constants.",
@@ -31665,9 +31674,9 @@
       "status": "LOCAL VERIFIED: 265 tests PASS; 16 whole definitions + 7 explicit body/SQL transformations equal; readonly preserved 2201/current2246 with two signed B4 introduction blobs; stock gate pending root linear source capture",
       "split_files": {
         "backend/app/models/agent_runs.py": [
-          "backend/app/domains/routines/models/resident.py",
           "backend/app/domains/memory/models/daypart.py",
-          "backend/app/models/agent_runs.py"
+          "backend/app/domains/relationships/models/points.py",
+          "backend/app/domains/routines/models/resident.py"
         ],
         "backend/app/services/agent_runs.py": [
           "backend/app/domains/routines/constants.py",
@@ -31767,7 +31776,7 @@
           "old": "backend/app/models/agent_runs.py::AgentActivityLog",
           "new": "backend/app/domains/routines/models/resident.py::AgentActivityLog",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -31782,7 +31791,7 @@
           "old": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
           "new": "backend/app/domains/memory/models/daypart.py::AgentDaypartMemoryEvent",
           "direct_consumers": [
-            "backend/app/models/__init__.py",
+            "backend/app/runtime/persistence/model_registration.py",
             "backend/app/domains/memory/service/daypart.py"
           ],
           "test_nodes": [
@@ -31793,7 +31802,7 @@
           "old": "backend/app/models/agent_runs.py::AgentFeedCue",
           "new": "backend/app/domains/routines/models/resident.py::AgentFeedCue",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -31808,7 +31817,7 @@
           "old": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
           "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -31821,9 +31830,9 @@
         },
         {
           "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
-          "new": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
+          "new": "backend/app/domains/relationships/models/points.py::AgentRelationshipPoint",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -31832,14 +31841,13 @@
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
-          ],
-          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+          ]
         },
         {
           "old": "backend/app/models/agent_runs.py::AgentRun",
           "new": "backend/app/domains/routines/models/resident.py::AgentRun",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
@@ -31848,6 +31856,446 @@
             "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::AgentRunServiceError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentRunServiceError",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentSlotUnavailableError",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::COMPLETE_TICK_ACTION_TYPES",
+          "new": "backend/app/services/agent_runs.py::COMPLETE_TICK_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_CREATE_POST_MAX",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_CREATE_POST_MAX",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
+          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
+          "new": "backend/app/domains/memory/service/daypart_observations.py::build_daypart_memory_note",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
+          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
+          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_clip_text",
+          "new": "backend/app/services/agent_runs.py::_clip_text",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_daypart_memory_event_exists",
+          "new": "backend/app/domains/memory/repository/daypart.py::event_exists",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_feed_interest",
+          "new": "backend/app/domains/memory/service/daypart_observations.py::filter_daypart_duplicate_feed_interest",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_inbox_candidates",
+          "new": "backend/app/domains/memory/service/daypart_observations.py::filter_daypart_duplicate_inbox_candidates",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
+          "new": "backend/app/services/agent_runs.py::_format_v6_action_menu",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_character_like",
+          "new": "backend/app/services/agent_runs.py::_has_character_like",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
+          "new": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_character_repost",
+          "new": "backend/app/services/agent_runs.py::_has_character_repost",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
+          "new": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
+          "new": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_profile_following_status",
+          "new": "backend/app/services/agent_runs.py::_profile_following_status",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_profile_target_parts",
+          "new": "backend/app/services/agent_runs.py::_profile_target_parts",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_purge_expired_daypart_memory_events",
+          "new": "backend/app/domains/memory/service/daypart.py::purge_expired_events",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_record_daypart_memory_event",
+          "new": "backend/app/domains/memory/service/daypart.py::record_memory_event",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
+          "new": "backend/app/domains/memory/service/daypart_observations.py::record_provided_daypart_observations",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
+          "new": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::logger",
+          "new": "backend/app/services/agent_runs.py::logger",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_record_daypart_action_memory",
+          "new": "backend/app/domains/memory/service/daypart.py::record_action_memory",
+          "direct_consumers": [
+            "backend/app/services/agent_writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_clip",
+          "new": "backend/app/core/context_clipping.py::clip_context_text",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_compact_daypart_summary_event",
+          "new": "backend/app/domains/memory/policies/daypart.py::compact_daypart_summary_event",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_daypart_end_summary_payload",
+          "new": "backend/app/domains/memory/policies/daypart.py::daypart_end_summary_payload",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_daypart_end_summary_text",
+          "new": "backend/app/domains/memory/policies/daypart.py::daypart_end_summary_text",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_daypart_history",
+          "new": "backend/app/domains/memory/service/daypart.py::history",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_daypart_history_for_prompt",
+          "new": "backend/app/domains/memory/policies/daypart.py::history_for_prompt",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_daypart_start_utc",
+          "new": "backend/app/domains/memory/policies/daypart.py::daypart_start_utc",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_finalize_closed_dayparts",
+          "new": "backend/app/domains/memory/service/daypart.py::finalize_closed_dayparts",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_latest_daypart_summary",
+          "new": "backend/app/domains/memory/service/daypart.py::latest_summary",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_latest_topic_arc_event",
+          "new": "backend/app/domains/memory/repository/daypart.py::recent_topic_events",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_record_daypart_event",
+          "new": "backend/app/domains/memory/service/daypart.py::record_event",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_seen_daypart_feed_post_ids",
+          "new": "backend/app/domains/memory/service/daypart.py::seen_feed_post_ids",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_seen_daypart_notification_ids",
+          "new": "backend/app/domains/memory/service/daypart.py::seen_notification_ids",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_resident.py::_yesterday_handoff_context",
+          "new": "backend/app/domains/memory/repository/daypart.py::handoff_events",
+          "direct_consumers": [
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
         {
@@ -31900,16 +32348,6 @@
             "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
             "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::COMPLETE_TICK_ACTION_TYPES",
-          "new": "backend/app/services/agent_runs.py::COMPLETE_TICK_ACTION_TYPES",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -32074,66 +32512,6 @@
             "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
             "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_CREATE_POST_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_CREATE_POST_MAX",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -32732,16 +33110,6 @@
           ]
         },
         {
-          "old": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
-          "new": "backend/app/domains/memory/service/daypart_observations.py::build_daypart_memory_note",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
           "old": "backend/app/services/agent_runs.py::_build_extra_system_prompt",
           "new": "backend/app/domains/routines/service/execution_prompts.py::_build_extra_system_prompt",
           "direct_consumers": [
@@ -32910,26 +33278,6 @@
             "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
             "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -33133,16 +33481,6 @@
           ]
         },
         {
-          "old": "backend/app/services/agent_runs.py::_clip_text",
-          "new": "backend/app/services/agent_runs.py::_clip_text",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
           "old": "backend/app/services/agent_runs.py::_collect_v6_inbox_candidates",
           "new": "backend/app/domains/routines/service/feed_context.py::_collect_v6_inbox_candidates",
           "direct_consumers": [
@@ -33239,16 +33577,6 @@
             "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_daypart_memory_event_exists",
-          "new": "backend/app/domains/memory/repository/daypart.py::event_exists",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
         {
@@ -33380,26 +33708,6 @@
             "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_feed_interest",
-          "new": "backend/app/domains/memory/service/daypart_observations.py::filter_daypart_duplicate_feed_interest",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_inbox_candidates",
-          "new": "backend/app/domains/memory/service/daypart_observations.py::filter_daypart_duplicate_inbox_candidates",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
         {
@@ -33950,16 +34258,6 @@
           ]
         },
         {
-          "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
-          "new": "backend/app/services/agent_runs.py::_format_v6_action_menu",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
           "old": "backend/app/services/agent_runs.py::_format_v6_action_menu_table",
           "new": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu_table",
           "direct_consumers": [
@@ -34070,36 +34368,6 @@
             "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
             "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_has_character_like",
-          "new": "backend/app/services/agent_runs.py::_has_character_like",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
-          "new": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_has_character_repost",
-          "new": "backend/app/services/agent_runs.py::_has_character_repost",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -34237,16 +34505,6 @@
             "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
             "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
-          "new": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -34556,46 +34814,6 @@
           ]
         },
         {
-          "old": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
-          "new": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_profile_following_status",
-          "new": "backend/app/services/agent_runs.py::_profile_following_status",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_profile_target_parts",
-          "new": "backend/app/services/agent_runs.py::_profile_target_parts",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_purge_expired_daypart_memory_events",
-          "new": "backend/app/domains/memory/service/daypart.py::purge_expired_events",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
           "old": "backend/app/services/agent_runs.py::_read_only_lane_deferred_retry_at",
           "new": "backend/app/runtime/resident/read_only_lanes.py::_read_only_lane_deferred_retry_at",
           "direct_consumers": [
@@ -34621,26 +34839,6 @@
             "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
             "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep",
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_record_daypart_memory_event",
-          "new": "backend/app/domains/memory/service/daypart.py::record_memory_event",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
-          "new": "backend/app/domains/memory/service/daypart_observations.py::record_provided_daypart_observations",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
         {
@@ -35138,16 +35336,6 @@
           ]
         },
         {
-          "old": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
-          "new": "backend/app/services/agent_runs.py::_v6_possible_post_actions",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
           "old": "backend/app/services/agent_runs.py::_v6_unavailable_post_actions",
           "new": "backend/app/domains/routines/service/action_admission.py::_v6_unavailable_post_actions",
           "direct_consumers": [
@@ -35257,16 +35445,6 @@
             "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
             "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::logger",
-          "new": "backend/app/services/agent_runs.py::logger",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         },
@@ -35728,16 +35906,6 @@
           "test_nodes": [
             "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
             "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_writing.py::_record_daypart_action_memory",
-          "new": "backend/app/domains/memory/service/daypart.py::record_action_memory",
-          "direct_consumers": [
-            "backend/app/services/agent_writing.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -36960,16 +37128,6 @@
           ]
         },
         {
-          "old": "backend/app/services/langgraph_resident.py::_clip",
-          "new": "backend/app/core/context_clipping.py::clip_context_text",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
           "old": "backend/app/services/langgraph_resident.py::_coerce_action_step_count",
           "new": "backend/app/domains/routines/policies/writing_contract.py::_coerce_action_step_count",
           "direct_consumers": [
@@ -37025,16 +37183,6 @@
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_run_resident_langgraph_failed_result_includes_independent_roll",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_compact_daypart_summary_event",
-          "new": "backend/app/domains/memory/policies/daypart.py::compact_daypart_summary_event",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -37189,56 +37337,6 @@
           ],
           "test_nodes": [
             "tests/routines/test_action_planning_workflows.py::test_action_budget_binding_keeps_session_timestamp_and_read_order",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_daypart_end_summary_payload",
-          "new": "backend/app/domains/memory/policies/daypart.py::daypart_end_summary_payload",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_daypart_end_summary_text",
-          "new": "backend/app/domains/memory/policies/daypart.py::daypart_end_summary_text",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_daypart_history",
-          "new": "backend/app/domains/memory/service/daypart.py::history",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_daypart_history_for_prompt",
-          "new": "backend/app/domains/memory/policies/daypart.py::history_for_prompt",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_daypart_start_utc",
-          "new": "backend/app/domains/memory/policies/daypart.py::daypart_start_utc",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -37460,16 +37558,6 @@
             "tests/routines/test_resident_graph.py::test_action_plan_drops_reply_removed_from_affordance",
             "tests/routines/test_resident_graph.py::test_action_plan_uses_feed_available_action_targets",
             "tests/routines/test_resident_graph.py::test_action_plan_resolves_feed_index_actions_and_deduplicates",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_finalize_closed_dayparts",
-          "new": "backend/app/domains/memory/service/daypart.py::finalize_closed_dayparts",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -37724,26 +37812,6 @@
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_run_resident_langgraph_failed_result_includes_independent_roll",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_latest_daypart_summary",
-          "new": "backend/app/domains/memory/service/daypart.py::latest_summary",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_latest_topic_arc_event",
-          "new": "backend/app/domains/memory/repository/daypart.py::recent_topic_events",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -38359,16 +38427,6 @@
           ]
         },
         {
-          "old": "backend/app/services/langgraph_resident.py::_record_daypart_event",
-          "new": "backend/app/domains/memory/service/daypart.py::record_event",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
           "old": "backend/app/services/langgraph_resident.py::_record_feed_seed_selected",
           "new": "backend/app/runtime/resident/langgraph.py::_record_feed_seed_selected",
           "direct_consumers": [
@@ -38635,26 +38693,6 @@
             "tests/routines/test_resident_graph.py::test_state_recorder_json_failure_saves_fallback_state",
             "tests/routines/test_resident_graph.py::test_state_recorder_length_failure_saves_sanitized_payload",
             "tests/routines/test_resident_graph.py::test_state_recorder_length_failure_does_not_retry_and_uses_low_thinking",
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_seen_daypart_feed_post_ids",
-          "new": "backend/app/domains/memory/service/daypart.py::seen_feed_post_ids",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/langgraph_resident.py::_seen_daypart_notification_ids",
-          "new": "backend/app/domains/memory/service/daypart.py::seen_notification_ids",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
           ]
         },
@@ -39169,16 +39207,6 @@
           ]
         },
         {
-          "old": "backend/app/services/langgraph_resident.py::_yesterday_handoff_context",
-          "new": "backend/app/domains/memory/repository/daypart.py::handoff_events",
-          "direct_consumers": [
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
           "old": "backend/app/services/langgraph_resident.py::_yesterday_kst_window",
           "new": "backend/app/domains/routines/policies/resident_clock.py::_yesterday_kst_window",
           "direct_consumers": [
@@ -39210,26 +39238,6 @@
             "tests/routines/test_resident_graph.py::test_run_resident_langgraph_failed_result_includes_independent_roll",
             "tests/routines/test_resident_graph.py::test_run_resident_langgraph_recursion_result_includes_independent_roll",
             "tests/routines/test_resident_graph.py::test_finalize_closed_daypart_records_summary_without_relationship_creation"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::AgentRunServiceError",
-          "new": "backend/app/domains/runtime/exceptions.py::AgentRunServiceError",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
-        },
-        {
-          "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
-          "new": "backend/app/domains/runtime/exceptions.py::AgentSlotUnavailableError",
-          "direct_consumers": [
-            "backend/app/services/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
           ]
         }
       ],
@@ -42882,9 +42890,9 @@
       "scope": "8 actual ORM classes, candidate admission/lifecycle, exact point SQL and deterministic helpers; original source/event/schema unchanged.",
       "split_files": {
         "backend/app/models/agent_runs.py": [
-          "backend/app/domains/routines/models/resident.py",
-          "backend/app/models/agent_runs.py",
-          "backend/app/domains/relationships/models/points.py"
+          "backend/app/domains/memory/models/daypart.py",
+          "backend/app/domains/relationships/models/points.py",
+          "backend/app/domains/routines/models/resident.py"
         ],
         "backend/app/cruds/agent_runs.py": [
           "backend/app/domains/routines/constants.py",
@@ -42914,7 +42922,7 @@
           "old": "backend/app/models/agent_runs.py::AgentRun",
           "new": "backend/app/domains/routines/models/resident.py::AgentRun",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -42924,7 +42932,7 @@
           "old": "backend/app/models/agent_runs.py::AgentActivityLog",
           "new": "backend/app/domains/routines/models/resident.py::AgentActivityLog",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -42934,7 +42942,7 @@
           "old": "backend/app/models/agent_runs.py::AgentFeedCue",
           "new": "backend/app/domains/routines/models/resident.py::AgentFeedCue",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -42942,9 +42950,9 @@
         },
         {
           "old": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
-          "new": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "new": "backend/app/domains/memory/models/daypart.py::AgentDaypartMemoryEvent",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
@@ -42954,7 +42962,7 @@
           "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
           "new": "backend/app/domains/relationships/models/points.py::AgentRelationshipPoint",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
@@ -42965,10 +42973,306 @@
           "old": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
           "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
           "direct_consumers": [
-            "backend/app/models/__init__.py"
+            "backend/app/runtime/persistence/model_registration.py"
           ],
           "test_nodes": [
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_PENDING",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_SELECTED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_credential",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "new": "backend/app/cruds/agent_runs.py::get_default_credential",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_pair_key",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
+          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
+          "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "new": "backend/app/domains/relationships/service/points.py::create_relationship_point",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
+          "new": "backend/app/domains/relationships/repository/points.py::count_relationship_points_for_pair_since",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "new": "backend/app/domains/relationships/service/points.py::expire_relationship_points",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "new": "backend/app/domains/relationships/service/points.py::list_pending_relationship_points",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_selected",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
+          "new": "backend/app/domains/relationships/service/points.py::release_relationship_point_selection",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_consumed",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
+          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_failed",
+          "direct_consumers": [
+            "backend/app/cruds/agent_runs.py",
+            "backend/app/runtime/resident/langgraph.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
+          "new": "backend/app/domains/relationships/repository/points.py::find_by_signature",
+          "source_member": "Original source_signature SELECT before creation and after IntegrityError rollback; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
+          "new": "backend/app/domains/relationships/repository/points.py::list_expired",
+          "source_member": "Original active statuses and expires_at <= now SELECT; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
+          "new": "backend/app/domains/relationships/repository/points.py::list_pending",
+          "source_member": "Original recipient/status/expiry/order/limit SELECT after expiry workflow; same Session and same query count/order.",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/points.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
+            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
           ]
         },
         {
@@ -43242,90 +43546,6 @@
           ]
         },
         {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_KINDS",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_KINDS",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_PENDING",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_PENDING",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_SELECTED",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_SELECTED",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_CONSUMED",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_CONSUMED",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_EXPIRED",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_EXPIRED",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_FAILED",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_FAILED",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
-          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_POINT_ACTIVE_STATUSES",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
           "old": "backend/app/cruds/agent_runs.py::AgentRunConflictError",
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
@@ -43341,26 +43561,6 @@
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::get_credential",
-          "new": "backend/app/cruds/agent_runs.py::get_credential",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::get_default_credential",
-          "new": "backend/app/cruds/agent_runs.py::get_default_credential",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py"
-          ],
-          "test_nodes": [
-            "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
-          ]
         },
         {
           "old": "backend/app/cruds/agent_runs.py::create_agent_run",
@@ -43466,162 +43666,6 @@
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
           ],
           "preservation": "Original body/SQL/commit/refresh/deferred finish_write and error chaining are unchanged. FeedCue identity-only annotations retain the same attached objects."
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::relationship_point_pair_key",
-          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_pair_key",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::relationship_point_source_signature",
-          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_source_signature",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::relationship_point_chain_id",
-          "new": "backend/app/domains/relationships/utils/points.py::relationship_point_chain_id",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::_relationship_point_payload",
-          "new": "backend/app/domains/relationships/utils/points.py::_relationship_point_payload",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
-          "new": "backend/app/domains/relationships/service/points.py::create_relationship_point",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::count_relationship_points_for_pair_since",
-          "new": "backend/app/domains/relationships/repository/points.py::count_relationship_points_for_pair_since",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
-          "new": "backend/app/domains/relationships/service/points.py::expire_relationship_points",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
-          "new": "backend/app/domains/relationships/service/points.py::list_pending_relationship_points",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_selected",
-          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_selected",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::release_relationship_point_selection",
-          "new": "backend/app/domains/relationships/service/points.py::release_relationship_point_selection",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_consumed",
-          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_consumed",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_replied",
-          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_replied",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::mark_relationship_point_failed",
-          "new": "backend/app/domains/relationships/service/points.py::mark_relationship_point_failed",
-          "direct_consumers": [
-            "backend/app/cruds/agent_runs.py",
-            "backend/app/runtime/resident/langgraph.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
         },
         {
           "old": "backend/app/cruds/agent_runs.py::get_active_run_for_session",
@@ -44109,42 +44153,6 @@
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
             "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routines/test_resident_graph.py::test_relationship_point_crud_lifecycle"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::create_relationship_point",
-          "new": "backend/app/domains/relationships/repository/points.py::find_by_signature",
-          "source_member": "Original source_signature SELECT before creation and after IntegrityError rollback; same Session and same query count/order.",
-          "direct_consumers": [
-            "backend/app/domains/relationships/service/points.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::expire_relationship_points",
-          "new": "backend/app/domains/relationships/repository/points.py::list_expired",
-          "source_member": "Original active statuses and expires_at <= now SELECT; same Session and same query count/order.",
-          "direct_consumers": [
-            "backend/app/domains/relationships/service/points.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
-          ]
-        },
-        {
-          "old": "backend/app/cruds/agent_runs.py::list_pending_relationship_points",
-          "new": "backend/app/domains/relationships/repository/points.py::list_pending",
-          "source_member": "Original recipient/status/expiry/order/limit SELECT after expiry workflow; same Session and same query count/order.",
-          "direct_consumers": [
-            "backend/app/domains/relationships/service/points.py"
-          ],
-          "test_nodes": [
-            "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
-            "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
           ]
         }
       ],
@@ -118327,7 +118335,7 @@
           "old": "backend/app/models/local_bot_quotas.py::LocalBotActionQuotaBucket",
           "new": "backend/app/domains/local_bot/models.py::LocalBotActionQuotaBucket",
           "direct_consumers": [
-            "backend/app/models/__init__.py",
+            "backend/app/runtime/persistence/model_registration.py",
             "backend/app/domains/local_bot/repository/quota.py",
             "backend/tests/test_postgres_security_concurrency.py",
             "backend/app/domains/local_bot/service/quota.py",
@@ -118342,7 +118350,7 @@
           "old": "backend/app/models/local_bot_quotas.py::LocalBotReadQuotaBucket",
           "new": "backend/app/domains/local_bot/models.py::LocalBotReadQuotaBucket",
           "direct_consumers": [
-            "backend/app/models/__init__.py",
+            "backend/app/runtime/persistence/model_registration.py",
             "backend/app/domains/local_bot/repository/quota.py",
             "backend/tests/test_postgres_security_concurrency.py",
             "backend/tests/test_local_bot_atomic_quota.py"
@@ -129183,6 +129191,235 @@
         "canonical_local_alias": "test_config_paths names an import of app.main as public_main only to retain its original object-identity assertion; this does not import the former module."
       },
       "pending": "G5 Base/database; B8-B removal and final runtime/bundle/installer/CI verification after all preceding scopes."
+    },
+    "AR-B8-G5-DATABASE-FOUNDATION": {
+      "status": "MOVED source preparation; original 924 ancestry; sole Base/database/explicit registration; 102 original model ASTs and 504 existing role definitions unchanged; cold/retirement/factory/Alembic 44 PASS; sequential source ledger and full stock/Hosted/installed gates pending.",
+      "split_files": {
+        "backend/app/core/db.py": [
+          "backend/app/models.py",
+          "backend/app/database.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/core/db.py::Base",
+          "new": "backend/app/models.py::Base",
+          "direct_consumers": [
+            "backend/alembic/env.py",
+            "backend/app/core/db.py",
+            "backend/app/domains/character_lore/models.py",
+            "backend/app/domains/characters/models.py",
+            "backend/app/domains/chat/infrastructure/model_binding_migration.py",
+            "backend/app/domains/chat/models.py",
+            "backend/app/domains/identity/models.py",
+            "backend/app/domains/local_bot/models.py",
+            "backend/app/domains/memory/models/batch.py",
+            "backend/app/domains/memory/models/daypart.py",
+            "backend/app/domains/memory/models/items.py",
+            "backend/app/domains/operations/models.py",
+            "backend/app/domains/relationships/models/points.py",
+            "backend/app/domains/relationships/models/projection.py",
+            "backend/app/domains/relationships/models/social.py",
+            "backend/app/domains/routines/models/plans.py",
+            "backend/app/domains/routines/models/resident.py",
+            "backend/app/domains/runtime/models.py",
+            "backend/app/domains/social/models/feed.py",
+            "backend/app/domains/social/models/manual_writes.py",
+            "backend/app/domains/social/models/posts.py",
+            "backend/app/domains/social/models/subjective_context.py",
+            "backend/app/domains/tree/models.py",
+            "backend/app/domains/world_characters/models.py",
+            "backend/app/domains/world_packages/models.py",
+            "backend/app/domains/worlds/models.py",
+            "backend/app/runtime/memory/batch_runtime.py",
+            "backend/app/runtime/memory/scope_queries.py",
+            "backend/app/runtime/memory/source_catalogs.py",
+            "backend/app/runtime/memory/source_delivery.py",
+            "backend/app/runtime/memory_privacy.py",
+            "backend/app/runtime/persistence/model_registration.py",
+            "backend/app/runtime/persistence/sqlite_schema.py",
+            "backend/tests/character_lore/test_lore_role_contracts.py",
+            "backend/tests/characters/test_character_foundation.py",
+            "backend/tests/characters/test_creator_policies.py",
+            "backend/tests/chat/test_thread_repository.py",
+            "backend/tests/device_home/test_world_surface.py",
+            "backend/tests/identity/test_account_deletion_composition.py",
+            "backend/tests/identity/test_l1_byok_ownership_privacy.py",
+            "backend/tests/identity/test_l1_local_owner_session.py",
+            "backend/tests/memory/test_scope_composition.py",
+            "backend/tests/p7_graph_support.py",
+            "backend/tests/relationships/test_execution_evidence_transaction.py",
+            "backend/tests/relationships/test_projection_state_transaction.py",
+            "backend/tests/relationships/test_proposal_transaction.py",
+            "backend/tests/relationships/test_social_event_runtime.py",
+            "backend/tests/routine_posts/test_runtime.py",
+            "backend/tests/routines/test_activity_persistence.py",
+            "backend/tests/routines/test_daily_activity_runtime.py",
+            "backend/tests/routines/test_decision_lanes.py",
+            "backend/tests/routines/test_execution_composition.py",
+            "backend/tests/routines/test_guarded_claim_recovery.py",
+            "backend/tests/routines/test_joint_composition.py",
+            "backend/tests/routines/test_lifecycle_composition.py",
+            "backend/tests/routines/test_plan_composition.py",
+            "backend/tests/runtime/test_demo_seed.py",
+            "backend/tests/social/test_feed_reaction_intent.py",
+            "backend/tests/social/test_foundation_contracts.py",
+            "backend/tests/social/test_l3_owner_manual_social_inbox.py",
+            "backend/tests/social/test_l4_social_search_projection.py",
+            "backend/tests/social/test_l4_social_write_uow.py",
+            "backend/tests/social/test_p8_l_e_world_profile_social_activity.py",
+            "backend/tests/social/test_resident_context_queries.py",
+            "backend/tests/social/test_world_feed_search.py",
+            "backend/tests/test_embedded_data_migration.py",
+            "backend/tests/test_m3_authorization_deletion.py",
+            "backend/tests/test_p8_l_d_world_chat_api.py",
+            "backend/tests/test_p8_l_e_world_profile_chat_entry.py",
+            "backend/tests/test_p8_l_f_memory_domain.py",
+            "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
+            "backend/tests/test_p8_l_h_canonical_recall.py",
+            "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+            "backend/tests/test_p8_l_k_retrieval_router.py",
+            "backend/tests/test_p8_l_o_memory_consolidation.py",
+            "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+            "backend/tests/test_p8_l_q_memory_read_inspector.py",
+            "backend/tests/test_p8_l_r_memory_batch_safety.py",
+            "backend/tests/test_p8_l_r_today_sns_activity.py",
+            "backend/tests/test_world_foundation.py",
+            "backend/tests/tree/test_public_contract.py",
+            "backend/tests/tree/test_role_contracts.py",
+            "backend/tests/world_characters/test_foundation_identity.py",
+            "backend/tests/world_characters/test_lifecycle.py",
+            "backend/tests/world_characters/test_owner_character_uow.py",
+            "backend/tests/world_characters/test_owner_identity.py",
+            "backend/tests/world_characters/test_readiness_contract.py",
+            "backend/tests/world_characters/test_runtime_mode_repair.py",
+            "backend/tests/world_characters/test_runtime_mode_write.py",
+            "backend/tests/world_characters/test_setup_service.py",
+            "backend/tests/world_packages/test_closeout.py",
+            "backend/tests/world_packages/test_export.py",
+            "backend/tests/world_packages/test_import_commit.py",
+            "backend/tests/world_packages/test_preview.py",
+            "backend/tests/world_packages/test_uow_registry.py",
+            "backend/tests/worlds/test_creator_routes.py",
+            "backend/tests/worlds/test_definition_contract.py",
+            "backend/tests/worlds/test_transition_contracts.py",
+            "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
+            "scripts/ci/check_refactor_preservation.py",
+            "scripts/ci/generate_p8_l_f_memory_inventory.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback",
+            "tests/persistence/test_model_registration.py::test_base_import_does_not_load_domain_models_database_or_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::SessionLocal",
+          "new": "backend/app/database.py::SessionLocal",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::_default_engine",
+          "new": "backend/app/database.py::_default_engine",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::_default_session_factory",
+          "new": "backend/app/database.py::_default_session_factory",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::create_database_engine",
+          "new": "backend/app/database.py::create_database_engine",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::create_session_factory",
+          "new": "backend/app/database.py::create_session_factory",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::get_db",
+          "new": "backend/app/database.py::get_db",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::get_default_engine",
+          "new": "backend/app/database.py::get_default_engine",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/core/db.py::get_default_session_factory",
+          "new": "backend/app/database.py::get_default_session_factory",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/tests/persistence/test_model_registration.py"
+          ],
+          "test_nodes": [
+            "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+            "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+            "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback"
+          ]
+        }
+      ],
+      "model_registration": "Actual table classes belong to domains; runtime/persistence/model_registration.register_models imports each owner without creating engine/app. Historical Alembic core.db.Base remains an identical-object alias. Test-only aggregate belongs to tests/model_fixture_support.py."
     }
   },
   "test_symbols": {
@@ -129247,5 +129484,9 @@
   },
   "asgi_exports": {
     "app.public_main:app": "app.main:public_app"
+  },
+  "retired_model_facades": {
+    "app.models.auth": "app.domains.identity.models",
+    "app.models.credentials": "app.domains.identity.models"
   }
 }

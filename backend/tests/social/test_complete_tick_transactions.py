@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 
-from app import models
+from tests.model_fixture_support import models
 from app.core.unit_of_work import deferred_commits
 from app.domains.routines.repository.feed_history import find_thread_viewed_log_id
 from app.domains.social.exceptions import AgentRunAuthorizationError

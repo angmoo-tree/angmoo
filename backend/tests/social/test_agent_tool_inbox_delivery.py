@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app import models
+from tests.model_fixture_support import models
 from app.domains.social.service.agent_tool_authorization import _session_fingerprint
 from app.runtime.social.agent_tool_reads import (
     RuntimeAgentToolReadWorkflows,

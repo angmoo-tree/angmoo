@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.relationships.contracts.events import EvidenceInput
 from app.domains.relationships.exceptions import SocialEventRuntimeError
 from app.domains.relationships.service.events import record_successful_social_event

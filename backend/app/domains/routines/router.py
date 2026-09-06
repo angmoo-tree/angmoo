@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.database import get_db
 from app.api.identity_dependencies import get_current_user
 from app.domains.routines import exceptions, schemas
 from app.domains.routines.contracts.plans import PlanOwner, PlanReferences

@@ -8,7 +8,7 @@ import sqlite3
 import pytest
 from sqlalchemy import URL, create_engine
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from model_fixture_support import models as _models  # noqa: F401 - register canonical metadata
 from app.domains.memory.models.items import (
     MEMORY_SCHEMA_V1_TABLES,
     drop_memory_schema_v1,

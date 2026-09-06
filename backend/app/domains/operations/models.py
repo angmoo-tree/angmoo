@@ -4,7 +4,7 @@ from typing import Any, Optional
 from sqlalchemy import Boolean, DateTime, ForeignKey, JSON, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base
+from app.models import Base
 
 
 class SiteOperationBanner(Base):

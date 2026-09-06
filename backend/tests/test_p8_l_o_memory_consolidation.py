@@ -8,8 +8,8 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
 from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
 from app.domains.memory.repository.transaction import SqlAlchemyMemoryMaintenanceUnitOfWork

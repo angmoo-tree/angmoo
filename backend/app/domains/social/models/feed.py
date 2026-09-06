@@ -17,7 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.models import Base
 from sqlalchemy import JSON
 from sqlalchemy.dialects.postgresql import JSONB
 

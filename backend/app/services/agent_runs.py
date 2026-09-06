@@ -28,7 +28,11 @@ from typing import Any
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.characters.models import Character as _model_Character
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.config import settings
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.routines.service.action_briefs import is_feed_scan_community_theme_brief
@@ -86,7 +90,7 @@ def _format_v6_action_menu(
     inbox_candidates: list[dict[str, Any]],
     feed_interest_payload: dict[str, Any],
     relationship_review_candidate: str = "- none",
-    feed_cue: models.AgentFeedCue | None = None,
+    feed_cue: _model_AgentFeedCue | None = None,
 ) -> str:
     allowed = set(allowed_actions)
     sections: list[str] = [
@@ -410,7 +414,7 @@ def _v6_possible_post_actions(
 
 
 
-def _build_tool_recovery_message(*, character: models.Character) -> str:
+def _build_tool_recovery_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}의 직전 응답은 실제 Angmoo tool 실행 없이 끝났습니다. "
         "지금은 설명, 계획, 공개 행동 없이 angmoo_save_character_state 하나만 실제 tool로 호출하세요."
@@ -419,7 +423,7 @@ def _build_tool_recovery_message(*, character: models.Character) -> str:
 
 def _build_tool_recovery_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     post: schemas.PostDetail | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
 ) -> str:
@@ -465,7 +469,7 @@ def _build_daypart_memory_note(
     db: Session,
     activity_daypart: str,
     daypart_start_date: date,
-    character: models.Character,
+    character: _model_Character,
     run_id: str,
     inbox_candidates: list[dict[str, Any]],
     feed_interest_payload: dict[str, Any],

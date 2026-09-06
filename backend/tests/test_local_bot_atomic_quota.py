@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app import schemas
 from tests.local_bot.support import bound_bot_actions
 from app.domains.local_bot.service import actions

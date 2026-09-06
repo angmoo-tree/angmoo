@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.core.search_text import build_post_search_document, normalize_search_text
 from app.domains.runtime.contracts.search import SearchIndexHit
 from app.domains.social.contracts.search_state import SocialSearchState

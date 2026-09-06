@@ -6,9 +6,9 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models as registered_models
+from tests.model_fixture_support import models as registered_models
 from app.core import unit_of_work
-from app.core.db import Base
+from app.models import Base
 from app.domains.routines import models
 from app.domains.routines.service import perception_diagnostics
 from app.runtime.resident import decision_lanes

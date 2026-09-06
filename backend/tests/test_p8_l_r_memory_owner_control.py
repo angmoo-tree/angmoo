@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.memory.exceptions import MemoryNotFoundError
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,

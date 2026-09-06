@@ -10,7 +10,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.identity.router import auth as auth_routes
 from app.domains.identity import browser_session

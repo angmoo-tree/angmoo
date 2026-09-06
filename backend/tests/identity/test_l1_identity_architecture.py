@@ -36,9 +36,9 @@ def _legacy_edges() -> set[tuple[str, str]]:
 def test_identity_domain_is_the_canonical_aggregate_source() -> None:
     imports = _module_imports()
 
-    assert "app.domains.identity.models" in imports["app.models"]
-    assert "app.models.auth" not in imports["app.models"]
-    assert "app.models.credentials" not in imports["app.models"]
+    assert "app.domains.identity.models" in imports["app.runtime.persistence.model_registration"]
+    assert "app.models.auth" not in imports["app.runtime.persistence.model_registration"]
+    assert "app.models.credentials" not in imports["app.runtime.persistence.model_registration"]
     assert "app.domains.identity.schemas" in imports["app.schemas"]
     assert "app.schemas.auth" not in imports["app.schemas"]
     assert imports["app.credentials"] >= {
@@ -50,12 +50,8 @@ def test_identity_domain_is_the_canonical_aggregate_source() -> None:
 def test_identity_compatibility_facades_only_point_inward() -> None:
     imports = _module_imports()
 
-    assert imports["app.models.auth"] == {
-        "app.domains.identity.models"
-    }
-    assert imports["app.models.credentials"] == {
-        "app.domains.identity.models"
-    }
+    assert "app.models.auth" not in imports
+    assert "app.models.credentials" not in imports
     assert imports["app.schemas.auth"] == {"app.domains.identity.schemas"}
     assert imports["app.credentials.contracts"] == {
         "app.domains.identity.contracts"

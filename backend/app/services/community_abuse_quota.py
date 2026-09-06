@@ -9,7 +9,9 @@ from sqlalchemy import select, tuple_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.identity.models import CommunityMutationQuotaBucket as _model_CommunityMutationQuotaBucket
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.config import settings
 
 
@@ -48,16 +50,16 @@ def consume(
         )
     rows = list(
         db.scalars(
-            select(models.CommunityMutationQuotaBucket)
+            select(_model_CommunityMutationQuotaBucket)
             .where(
                 tuple_(
-                    models.CommunityMutationQuotaBucket.scope,
-                    models.CommunityMutationQuotaBucket.subject_hash,
+                    _model_CommunityMutationQuotaBucket.scope,
+                    _model_CommunityMutationQuotaBucket.subject_hash,
                 ).in_(
                     [(scope, subject_hash) for scope, _window, _limit in policies]
                 )
             )
-            .order_by(models.CommunityMutationQuotaBucket.scope.asc())
+            .order_by(_model_CommunityMutationQuotaBucket.scope.asc())
             .with_for_update()
         )
     )
@@ -95,12 +97,12 @@ def _ensure_bucket(
     now: datetime,
 ) -> None:
     identity = {"scope": scope, "subject_hash": subject_hash}
-    if db.get(models.CommunityMutationQuotaBucket, identity) is not None:
+    if db.get(_model_CommunityMutationQuotaBucket, identity) is not None:
         return
     try:
         with db.begin_nested():
             db.add(
-                models.CommunityMutationQuotaBucket(
+                _model_CommunityMutationQuotaBucket(
                     scope=scope,
                     subject_hash=subject_hash,
                     window_started_at=now,

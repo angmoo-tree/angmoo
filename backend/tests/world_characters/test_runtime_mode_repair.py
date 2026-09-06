@@ -8,8 +8,9 @@ from pathlib import Path
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base, create_database_engine, create_session_factory
+from model_fixture_support import models
+from app.models import Base
+from app.database import create_database_engine, create_session_factory
 from app.domains.world_characters.schemas.setup import WorldCharacterEntryCreate
 from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,

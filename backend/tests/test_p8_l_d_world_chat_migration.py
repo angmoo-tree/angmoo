@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import URL, create_engine, inspect
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from model_fixture_support import models as _models  # noqa: F401 - register canonical metadata
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )

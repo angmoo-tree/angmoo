@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import event, inspect, select
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.memory.repository.delivery import capture_delivery, sync_epoch
 
 
