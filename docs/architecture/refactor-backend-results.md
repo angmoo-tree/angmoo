@@ -1985,3 +1985,10 @@ Social11개·Relationships7개 파일을 업무 폴더로 옮겼다. 전체18개
 ## AR-B5 C33 순차 통합 — G07 및 현재 parity 검사 후속
 
 Social11·Relationships7개 파일의 원래92개 노드와 fixture import/CI 경로를 현재 B4 main에 합쳤다. 최초 집중은 **201 PASS /기존 skip1 /1 FAIL /107.99초**다. 실패는 원래97개를 단언한 L4 parity 수량이 현재99개로 늘어난 점이다. 기존 단언이나 source 기준을 덮어쓰지 않고, 후속에서 #263 원래97 근거와 현재 전체 source parity 목록·수량·counter를 각각 검증한다. 이 시점은 전체 통과가 아니며 original source 수집 및 전체 Gate도 진행 중이다.
+
+
+### L4 parity 고정 수량과 현재 source의 분리 검증
+
+기존 `behavior["parity_test_node_count"] == 97` 단언은 #263 immutable inventory의 원래 behavior에 그대로 적용한다. 현재 behavior는 policy가 가리키는 모든 파일의 SHA256·무필터 top-level test AST 목록·전체 수량과 직접 비교하고, 원래97개가 명시적 이동 후 모두 포함되는지 확인한다. Counter의 이름/값/노드도 원래 frozen 계약을 실제 경로로 연결한 결과와 전체 비교한다. 최신99를 새 고정 숫자로 쓰거나 검사에서 테스트를 제외하지 않는다.
+
+기존 검사와 stale 수량·누락 node·counter 변조 음성3개를 포함한 검증은 **10 PASS /15.93초**다. 이 후속의 신규3개 노드는 `tests/test_l4_parity_current_source.py`에 실제 최초 source 커밋으로 기록하며, 원장 append와 stock 검증을 이어서 수행한다. 앞선201 PASS/1 FAIL 이력은 그대로 유지한다.

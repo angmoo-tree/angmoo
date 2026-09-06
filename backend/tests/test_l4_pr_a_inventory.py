@@ -8,6 +8,11 @@ from pathlib import Path
 
 import pytest
 
+from test_l4_parity_current_source import (
+    assert_live_parity_matches_source,
+    frozen_checkpoint_behavior,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = REPO_ROOT / "scripts/ci/generate_l4_pr_a_inventory.py"
 SPEC = importlib.util.spec_from_file_location(
@@ -123,12 +128,13 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     payload = generator.build_inventory()
     # File/edge totals intentionally change during an architecture migration.
     # Preserve the original checkpoint assertions and validate the current
-    # report separately against actual source; runtime/parity remain live.
+    # report separately against actual source; runtime contracts remain live.
     backend = frozen_checkpoint_backend_architecture()
     frontend = payload["architecture"]["frontend"]
-    behavior = payload["behavior"]
+    behavior = frozen_checkpoint_behavior()
 
     assert_live_backend_matches_source(payload["architecture"]["backend"])
+    assert_live_parity_matches_source(payload["behavior"])
 
     assert backend["module_count"] == 680
     assert backend["internal_edge_count"] == 1837
