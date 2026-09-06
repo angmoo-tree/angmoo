@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../shared/ui/semantic-tokens.css";
+@import "../styles/semantic-tokens.css";
 
 * {
   box-sizing: border-box;

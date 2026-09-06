@@ -154,8 +154,8 @@ def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None
 def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -> None:
     layout = _read("frontend/static-shell/app/layout.tsx")
     globals_css = _read("frontend/src/app/globals.css")
-    frame = _read("frontend/src/shared/ui/device-frame.tsx")
-    frame_css = _read("frontend/src/shared/ui/device-frame.module.css")
+    frame = _read("frontend/src/components/ui/device-frame.tsx")
+    frame_css = _read("frontend/src/components/ui/device-frame.module.css")
     bridge = _read("frontend/src/shared/desktop/desktop-window-bridge.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
 
@@ -235,10 +235,10 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
     )
     agent = _read("frontend/src/components/agent-detail-client.tsx")
     pull_to_refresh = _read(
-        "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts"
+        "frontend/src/hooks/use-mobile-pull-to-refresh.ts"
     )
     scroll_viewport = _read(
-        "frontend/src/shared/interaction/scroll-viewport.ts"
+        "frontend/src/utils/scroll-viewport.ts"
     )
     static_router = _read("frontend/src/composition/static-product-router.tsx")
 

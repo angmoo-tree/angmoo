@@ -2,7 +2,7 @@
 
 import { useState, type HTMLAttributes } from "react";
 
-import { classNames } from "./class-names";
+import { classNames } from "@/utils/class-names";
 import styles from "@/components/ui/semantic-foundation.module.css";
 
 export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children"> & {

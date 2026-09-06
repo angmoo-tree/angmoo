@@ -161,7 +161,7 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
     dashboard = _read("features/characters/ui/agents-dashboard-client.tsx")
     detail = _read("components/agent-detail-client.tsx")
     social_summary = _read("features/social/ui/active-agent-summary.tsx")
-    presentation = _read("shared/ui/profile-presentation.ts")
+    presentation = _read("utils/profile-presentation.ts")
     shared_public = _read("shared/ui/public.ts")
 
     assert "candidate.character.id === nextItem.character.id" in dashboard

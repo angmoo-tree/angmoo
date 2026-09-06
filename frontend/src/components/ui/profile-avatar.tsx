@@ -1,8 +1,9 @@
 "use client";
 
-import { safeSameOriginMediaUrl, useRuntimeMediaUrl } from "@/shared/media/public";
+import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
+import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 import { Avatar } from "./avatar";
-import { getProfileColor, getProfileInitial } from "./profile-presentation";
+import { getProfileColor, getProfileInitial } from "../../utils/profile-presentation";
 
 export function ProfileAvatar({
   name,

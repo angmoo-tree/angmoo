@@ -1,35 +1,35 @@
 export { AppIcon } from "./app-icon";
-export { Avatar } from "./avatar";
-export type { AvatarProps } from "./avatar";
+export { Avatar } from "../../components/ui/avatar";
+export type { AvatarProps } from "../../components/ui/avatar";
 export { Button, IconButton } from "./button";
 export type { ButtonProps, ButtonVariant, IconButtonProps } from "./button";
-export { Dialog } from "./dialog";
-export type { DialogProps } from "./dialog";
-export { DeviceFrame } from "./device-frame";
-export { DegradedPanel, EmptyState, InlineError, Toast } from "./feedback";
+export { Dialog } from "../../components/ui/dialog";
+export type { DialogProps } from "../../components/ui/dialog";
+export { DeviceFrame } from "../../components/ui/device-frame";
+export { DegradedPanel, EmptyState, InlineError, Toast } from "../../components/ui/feedback";
 export type {
   DegradedPanelProps,
   EmptyStateProps,
   InlineErrorProps,
   ToastProps,
   ToastTone,
-} from "./feedback";
-export { Field, Input, Select, Textarea } from "./form-controls";
+} from "../../components/ui/feedback";
+export { Field, Input, Select, Textarea } from "../../components/ui/form-controls";
 export type {
   FieldProps,
   InputProps,
   SelectProps,
   TextareaProps,
-} from "./form-controls";
-export { BottomNavigation, PageHeader, Tabs } from "./navigation";
+} from "../../components/ui/form-controls";
+export { BottomNavigation, PageHeader, Tabs } from "../../components/ui/navigation";
 export type {
   BottomNavigationItem,
   BottomNavigationProps,
   PageHeaderProps,
   TabItem,
   TabsProps,
-} from "./navigation";
-export { ProfileAvatar } from "./profile-avatar";
+} from "../../components/ui/navigation";
+export { ProfileAvatar } from "../../components/ui/profile-avatar";
 export {
   apiInstantTimestamp,
   formatDate,
@@ -39,14 +39,14 @@ export {
   isOfficialOperatorName,
   OFFICIAL_OPERATOR_DISPLAY_NAME,
   parseApiInstant,
-} from "./profile-presentation";
-export { StatusBadge } from "./status-badge";
-export type { StatusBadgeTone } from "./status-badge";
-export { Badge, StatusChip } from "./status";
+} from "../../utils/profile-presentation";
+export { StatusBadge } from "../../components/ui/status-badge";
+export type { StatusBadgeTone } from "../../components/ui/status-badge";
+export { Badge, StatusChip } from "../../components/ui/status";
 export type {
   BadgeProps,
   StatusChipProps,
   StatusChipTone,
-} from "./status";
-export { Card, ListRow } from "./surfaces";
-export type { CardProps, ListRowProps } from "./surfaces";
+} from "../../components/ui/status";
+export { Card, ListRow } from "../../components/ui/surfaces";
+export type { CardProps, ListRowProps } from "../../components/ui/surfaces";

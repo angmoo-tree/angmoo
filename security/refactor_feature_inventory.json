@@ -78,8 +78,8 @@
         "frontend/src/features/social/ui/world-character-social-profile-activity.tsx",
         "frontend/src/lib/profile.ts",
         "frontend/src/shared/auth/auth-provider.tsx",
-        "frontend/src/shared/ui/profile-avatar.tsx",
-        "frontend/src/shared/ui/profile-presentation.ts",
+        "frontend/src/components/ui/profile-avatar.tsx",
+        "frontend/src/utils/profile-presentation.ts",
         "backend/app/domains/social/service/profile_cursor.py",
         "backend/app/domains/social/repository/world_profile.py",
         "backend/app/runtime/social/profile_references.py",
@@ -13792,20 +13792,20 @@
         "frontend/src/shared/auth/auth-session.ts",
         "frontend/src/shared/auth/public.ts",
         "frontend/src/shared/interaction/public.ts",
-        "frontend/src/shared/interaction/scroll-viewport.ts",
-        "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
-        "frontend/src/shared/ui/avatar.tsx",
-        "frontend/src/shared/ui/device-frame.module.css",
-        "frontend/src/shared/ui/device-frame.tsx",
-        "frontend/src/shared/ui/dialog.tsx",
-        "frontend/src/shared/ui/feedback.tsx",
-        "frontend/src/shared/ui/form-controls.tsx",
-        "frontend/src/shared/ui/navigation.tsx",
+        "frontend/src/utils/scroll-viewport.ts",
+        "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+        "frontend/src/components/ui/avatar.tsx",
+        "frontend/src/components/ui/device-frame.module.css",
+        "frontend/src/components/ui/device-frame.tsx",
+        "frontend/src/components/ui/dialog.tsx",
+        "frontend/src/components/ui/feedback.tsx",
+        "frontend/src/components/ui/form-controls.tsx",
+        "frontend/src/components/ui/navigation.tsx",
         "frontend/src/shared/ui/public.ts",
-        "frontend/src/shared/ui/semantic-tokens.css",
-        "frontend/src/shared/ui/status-badge.tsx",
-        "frontend/src/shared/ui/status.tsx",
-        "frontend/src/shared/ui/surfaces.tsx",
+        "frontend/src/styles/semantic-tokens.css",
+        "frontend/src/components/ui/status-badge.tsx",
+        "frontend/src/components/ui/status.tsx",
+        "frontend/src/components/ui/surfaces.tsx",
         "frontend/src/utils/class-names.ts",
         "backend/app/domains/relationships/service/routine_interactions.py",
         "backend/app/domains/relationships/repository/routine_interactions.py",
@@ -14593,7 +14593,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-0 IN PROGRESS",
+    "status": "AR-F2-0 MERGED / POST-MERGE RUNNING; AR-F2-A VALIDATION IN PROGRESS",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14749,6 +14749,20 @@
           "AR-F5-A"
         ],
         "status": "MAPPED"
+      }
+    },
+    "stages": {
+      "AR-F2-0": {
+        "status": "MERGED / POST-MERGE RUNNING",
+        "pr": 291,
+        "head": "1daca62035f4d2eb7f938d30f073cd280b540dea",
+        "merge": "72b6573898ad4a720125aba2905327f49aa7fbd2",
+        "pr_checks": "23/23 SUCCESS; installer 5/5 SUCCESS"
+      },
+      "AR-F2-A": {
+        "status": "MOVED / VALIDATION IN PROGRESS",
+        "source_map": "security/refactor_path_map.json#details.AR-F2-A",
+        "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges"
       }
     }
   }

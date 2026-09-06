@@ -1,5 +1,11 @@
 # L4.5 frontend design reference and provenance
 
+The 2026-09-07 common-UI move retains the existing Local primitive implementation
+and all original adoption classifications. Its current paths are in
+`security/frontend_design_policy.json`: `components/ui`, `styles`, `hooks` and
+`utils`. No new hosted code, assets, fonts or visual decisions were imported.
+Historical provenance below keeps its original reference commits.
+
 This document is the public, clean-clone companion to
 [`frontend/DESIGN.md`](../../frontend/DESIGN.md). It records the evidence used
 by **L4.5 UI-A — Design contract, reference, and provenance closeout** and the

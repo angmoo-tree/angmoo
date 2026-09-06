@@ -6,6 +6,13 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 
 ## 목차
 
+2026-09-07 공용 UI 이전에서는 기존 primitive를 `src/components/ui`, 전역 semantic token을
+`src/styles/semantic-tokens.css`, scroll hook을 `src/hooks`, 순수 scroll·프로필 표시 도구를
+`src/utils`로 모았다. 새 공용 코드는 이 실제 구현을 사용한다. 아직 이전하지 않은 기능의
+`shared/ui/public.ts`·`shared/interaction/public.ts`는 구현을 복제하지 않는 임시 export이며,
+해당 기능의 이전과 함께 소비를 종료한다. 단계별 검증 상태는
+[프론트엔드 전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
+
 - [프로젝트 구조](#프로젝트-구조)
 - [기능 안에서 코드 나누기](#기능-안에서-코드-나누기)
 - [화면 조립과 의존 방향](#화면-조립과-의존-방향)

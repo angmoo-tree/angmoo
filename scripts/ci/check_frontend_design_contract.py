@@ -50,13 +50,13 @@ UI_F_VISUAL_SPECS = [
 ]
 UI_B_COMPATIBILITY_BRIDGES = [
     {
-        "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
+        "adapter": "frontend/src/components/ui/profile-avatar.tsx",
         "composes": "Avatar",
         "existing_public_export": "ProfileAvatar",
         "impact": "transitional_existing_product_consumers",
     },
     {
-        "adapter": "frontend/src/shared/ui/status-badge.tsx",
+        "adapter": "frontend/src/components/ui/status-badge.tsx",
         "composes": "StatusChip",
         "existing_public_export": "StatusBadge",
         "impact": "transitional_existing_product_consumers",
