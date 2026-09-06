@@ -149,11 +149,11 @@ from app.runtime.resident.request_options import _tool_choice_any
 from app.runtime.resident.slots import build_slot_request_workflows
 
 from app.domains.operations.service import maintenance as maintenance_service
-from app.services.agent_runs import _build_daypart_memory_note
-from app.services.agent_runs import _filter_daypart_duplicate_feed_interest
-from app.services.agent_runs import _filter_daypart_duplicate_inbox_candidates
-from app.services.agent_runs import _purge_expired_daypart_memory_events
-from app.services.agent_runs import _record_provided_daypart_observations
+from app.runtime.memory.daypart_observations import _build_daypart_memory_note
+from app.domains.memory.service.daypart_observations import filter_daypart_duplicate_feed_interest as _filter_daypart_duplicate_feed_interest
+from app.domains.memory.service.daypart_observations import filter_daypart_duplicate_inbox_candidates as _filter_daypart_duplicate_inbox_candidates
+from app.domains.memory.service.daypart import purge_expired_events as _purge_expired_daypart_memory_events
+from app.runtime.memory.daypart_observations import _record_provided_daypart_observations
 from app.integrations.direct_llm import DirectLlmDeferred
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.resident.langgraph import run_resident_langgraph
@@ -1150,6 +1150,7 @@ async def _run_resident_individual_tool_flow(
     daypart_memory_note = None
     if use_daypart_main_session and daypart_start_date and activity_daypart:
         daypart_memory_note = _build_daypart_memory_note(
+            profile_references=SqlAlchemyResidentActionReferences,
             db=db,
             activity_daypart=activity_daypart,
             daypart_start_date=daypart_start_date,
@@ -1168,6 +1169,7 @@ async def _run_resident_individual_tool_flow(
         ):
             _record_provided_daypart_observations(
                 db,
+                profile_references=SqlAlchemyResidentActionReferences,
                 character_id=character.id,
                 memory_session_key=main_run_session_key,
                 daypart_start_date=daypart_start_date,

@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app.cruds.agent_runs import get_credential
+from app.domains.identity.repository.credentials import get_credential
 from app.domains.identity.service.credential_cooldown import set_cooldown_until
 from routine_posts.test_runtime import _seed
 from social.test_resident_context_queries import _engine

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from app.runtime.persistence.model_registration import register_models
 register_models()
-from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.schemas.community import PostCreate
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.services import activity_state_contracts
@@ -29,7 +28,6 @@ __all__ = [
     "PostCreate",
     "activity_state_contracts",
     "agent_activity_policy",
-    "agent_run_crud",
     "neutralize_context_text",
     "social_event_runtime",
 ]

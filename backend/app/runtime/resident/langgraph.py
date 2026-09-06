@@ -170,7 +170,10 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.relationships import constants as relationship_point_constants
+from app.domains.relationships.repository import points as relationship_point_queries
+from app.domains.relationships.service import points as relationship_points
+from app.domains.relationships.utils import points as relationship_point_values
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.domains.world_characters.contracts.runtime_modes import (
@@ -737,7 +740,7 @@ def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
         "summaries_skipped": 0,
     }
     try:
-        result["expired_relationship_points"] = agent_run_crud.expire_relationship_points(
+        result["expired_relationship_points"] = relationship_points.expire_relationship_points(
             ctx.db, now=ctx.run_started_at
         )
     except Exception as exc:
@@ -831,7 +834,7 @@ def _relationship_point_to_state(
     source_post = _relationship_source_post_available(ctx, point.source_post_id)
     if source_post is None:
         try:
-            agent_run_crud.mark_relationship_point_failed(
+            relationship_points.mark_relationship_point_failed(
                 ctx.db, point, failure_class="source_post_unavailable"
             )
         except Exception:
@@ -844,7 +847,7 @@ def _relationship_point_to_state(
         or source_character.moderation_status == "suspended"
     ):
         try:
-            agent_run_crud.mark_relationship_point_failed(
+            relationship_points.mark_relationship_point_failed(
                 ctx.db, point, failure_class="source_character_unavailable"
             )
         except Exception:
@@ -877,7 +880,7 @@ def _pending_relationship_points_for_state(
         return []
     now = ctx.run_started_at.astimezone(UTC)
     try:
-        points = agent_run_crud.list_pending_relationship_points(
+        points = relationship_points.list_pending_relationship_points(
             ctx.db,
             recipient_character_id=ctx.character.id,
             now=now,
@@ -2471,9 +2474,9 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 )
                 if (
                     db_point is not None
-                    and db_point.status == agent_run_crud.RELATIONSHIP_POINT_PENDING
+                    and db_point.status == relationship_point_constants.RELATIONSHIP_POINT_PENDING
                 ):
-                    agent_run_crud.mark_relationship_point_selected(
+                    relationship_points.mark_relationship_point_selected(
                         ctx.db,
                         db_point,
                         run_id=ctx.run_id,
@@ -3735,11 +3738,11 @@ def _relationship_point_cap_allows(
         return False, "self_relationship_point"
     if chain_depth > 3:
         return False, "chain_depth_exceeded"
-    pair_key = agent_run_crud.relationship_point_pair_key(
+    pair_key = relationship_point_values.relationship_point_pair_key(
         source_character_id, recipient_character_id
     )
     try:
-        count = agent_run_crud.count_relationship_points_for_pair_since(
+        count = relationship_point_queries.count_relationship_points_for_pair_since(
             ctx.db,
             pair_key=pair_key,
             since=_relationship_pair_cap_window_start(ctx),
@@ -3784,7 +3787,7 @@ def _create_relationship_point_from_post(
     if not allowed:
         return {"created": False, "reason": reason}
     try:
-        point, create_reason = agent_run_crud.create_relationship_point(
+        point, create_reason = relationship_points.create_relationship_point(
             ctx.db,
             kind=kind,
             recipient_character_id=recipient_character_id,
@@ -3828,11 +3831,11 @@ def _record_relationship_points_after_publish(
         if point_id:
             point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if point is not None and point.status in {
-                agent_run_crud.RELATIONSHIP_POINT_PENDING,
-                agent_run_crud.RELATIONSHIP_POINT_SELECTED,
+                relationship_point_constants.RELATIONSHIP_POINT_PENDING,
+                relationship_point_constants.RELATIONSHIP_POINT_SELECTED,
             }:
                 try:
-                    agent_run_crud.mark_relationship_point_consumed(
+                    relationship_points.mark_relationship_point_consumed(
                         ctx.db,
                         point,
                         run_id=ctx.run_id,
@@ -3861,10 +3864,10 @@ def _record_relationship_points_after_publish(
             point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if (
                 point is not None
-                and point.status == agent_run_crud.RELATIONSHIP_POINT_SELECTED
+                and point.status == relationship_point_constants.RELATIONSHIP_POINT_SELECTED
                 and point.selected_run_id == ctx.run_id
             ):
-                agent_run_crud.release_relationship_point_selection(
+                relationship_points.release_relationship_point_selection(
                     ctx.db,
                     point,
                     failure_class="publish_not_succeeded",

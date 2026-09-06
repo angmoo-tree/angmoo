@@ -324,7 +324,7 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
 
 
 def test_existing_daypart_writer_keeps_event_identity_and_single_commit():
-    from app.services.agent_writing import _record_daypart_action_memory
+    from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
 
     events = []
 

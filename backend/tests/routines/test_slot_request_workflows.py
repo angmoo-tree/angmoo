@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.cruds.agent_runs import get_credential, get_default_credential
+from app.domains.identity.repository.credentials import get_credential, get_default_credential
 from app.domains.characters.models import Character
 from app.domains.routines.service import activity_settings, slot_requests
 from app.domains.routines.repository.slots import get_agent_slot

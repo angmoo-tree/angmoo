@@ -2581,3 +2581,18 @@ C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertio
 Activity composition verification: original non-import ASTs of both moved modules and12 updated consumers are identical. Same-Session scope/policy/activity tests passed **71 / 2 warnings /31.11s**. All seven read-only original preservation diagnostics passed0errors, protected2311/current2497. This source intentionally retains the base's unresolved legacy consumers and two Social context type backedges, already owned by Social C29; it does not introduce an exception or claim complete architecture closeout.
 
 - 위 공유 활동 조립의 C30 포함 통합 결과: 관련 **133 passed / 3 warnings / 55.79초**, Social complete_tick의 추가 호출자까지 실제 새 위치로 연결했다. 현재 경계 검사의 순환 참조 오류는 없고, 남은 21건은 이후 호환 CRUD/서비스 제거 대상의 정확한 옛 소비자다.
+
+## AR-B8 — Daypart 실행 연결과 Writer·Run CRUD 호환 종료
+
+Memory 조립 3개를 `runtime/memory/daypart_observations.py`로 실제 이전했다. Resident caller가 기존 프로필 조회 factory를 전달하며, Post가 있는 분기에서만 같은 Session으로 이를 생성한다. inbox 관찰의 개별 commit 이후 feed 작성자를 읽는 기존 순서는 그대로다. 실행의 filter/purge, Writer 행동 기억은 actual Memory 서비스를 직접 사용한다. LangGraph의 관계 포인트 정책·query·값·상수와 Identity credential 조회도 각 actual 소유에 연결하여 정의가 없는 `services/agent_writing.py`·`cruds/agent_runs.py`를 삭제했다. 미사용 RoutinePost CRUD module export 두 개도 실제 호출 없음 확인 후 제거했다.
+
+원문 조립3과 dormant4, 실행·Graph·Writer71 정의를 AST로 대조했다. 변경을 복원할 때 허용한 부분은 정확한 owner import와 두 caller의 profile factory 주입뿐이다. factory가 필요한 시점·없을 때의 조회 생략·같은 attached 객체를 보존한다. 신규 검사는 실제 SQLite Post의 Character/User 작성자2, inbox commit 후 같은 Session 작성자 조회1, cold 실행 import·단일 102 mapper 등록·default engine 미생성1을 포함한다.
+
+현재 원래 AgentRun의 dormant4·상수와 schemas/agents는 이 범위에서 변경하지 않는다. signed b013974b9c1b49c86f64479754303272741a1b49의 실제 소유 이전과 나머지 B5/B8/G07 정리는 부모 순차 통합 범위다. 원본 baseline/checkpoint/additions 및 역사적 migration은 유지하며 source introduction append·stock gate·전체 backend·CI·설치 결과를 이 개별 source 검증과 구분한다.
+
+최종 관련 검증은 **205 passed / 56.80초**이며 소스를 고정한 상태에서 진행했다. 원래7 보존 검사 읽기 진단은 **모두 오류0, 보호2311/current2496**이다. API·ORM·기존 단언·suppression·노드와 전체 split 책임 증거가 보존됐다. 현재 inventory는1094모듈/4137내부edge/3118외부import, L4parity99이며 Memory batch/Today current와 owner-control frozen successor 조건을 확인했다. 기존 미완료 ORM 경계22개 중 이 두 facade 소유6개가 해소되어16개가 남고, 기존 `runtime.memory.subjective_source → runtime.social → runtime.resident` 경로의 cycle은 부모 B5/B8 실제 소유 종료에 남긴다. 새 Memory 조립은 runtime을 import하지 않고 예외도 추가하지 않았다. 이 읽기 진단을 stock gate나 전체 단계 완료로 기록하지 않는다.
+
+### B8 Memory 조립 통합
+
+- Daypart 원래 세 조립 함수는 `runtime/memory/daypart_observations.py`로 이전했다. 기존 Resident 실행이 같은 Session의 profile references 생성 함수를 전달하며, Post 조회 후에만 실행한다. Writer/LangGraph/credential 소비자는 각 실제 업무 기능을 직접 사용한다.
+- C30과 공유 활동 조립이 반영된 후보의 관련 검증: **212 passed / 기존 PostgreSQL 1 skipped / 1 warning / 94.37초**. 옛 AgentRun의 이미 이전한 네 dormant 함수는 다시 가져오지 않았다. 최종 stock/전체/설치 Gate는 계속 남아 있다.

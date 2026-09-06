@@ -95,8 +95,6 @@ from app.domains.routines.repository import public_action_executions as public_a
 
 from app.domains.routines.service import public_action_executions as public_action_executions
 
-agent_run_crud = legacy.agent_run_crud
-
 agent_activity_policy = legacy.agent_activity_policy
 
 social_event_runtime = legacy.social_event_runtime
