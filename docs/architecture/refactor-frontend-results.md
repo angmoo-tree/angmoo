@@ -287,6 +287,12 @@ committed history were deleted.
   Full history secret scan: 737 commits, 41.11 MB, no leaks after the verified
   exact blob exception. No credential or provider call was used by parity tests.
 
+- PR #296 CI caught a duplicated working-directory key while inserting the
+  Character Node step, and a stale current design digest after the final source
+  cleanup. Correct the YAML so both parity steps have exactly one frontend cwd;
+  refresh only the current design inventory and run the actual CI policy checker.
+  These were preparation defects; no failing candidate was merged.
+
 ## AR-F3-C World Creator and Studio — local validation
 
 - Move World API and DTOs to Worlds, retaining request paths, validation errors,
