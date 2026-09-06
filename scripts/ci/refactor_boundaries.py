@@ -16,14 +16,35 @@ MODULE_NAME = re.compile(r"app(?:\.[a-z_][a-z0-9_]*)+")
 BACKEND_BRIDGE_FIELDS = {
     "importer", "target", "owner_stage", "removal_condition", "reason", "review_date",
 }
+RETAINED_MODULE_FIELDS = {"module", "kind", "reason", "contract"}
+RETAINED_MODULE_KINDS = {"historical_migration", "external_contract", "package_marker"}
 
 
 def validate_scope(policy: dict, *, frontend: bool) -> list[str]:
     fields = ("features", "common", "bridges") if frontend else (
         "domains", "globals", "modules", "entries", "bridges",
     )
-    if not isinstance(policy, dict) or set(policy) - set(fields):
+    optional = set() if frontend else {"complete", "retained_modules"}
+    if not isinstance(policy, dict) or set(policy) - set(fields) - optional:
         return ["[refactor_invalid_scope] unknown scope fields"]
+    if not frontend:
+        if "complete" in policy and not isinstance(policy["complete"], bool):
+            return ["[refactor_invalid_scope] complete must be a boolean"]
+        retained = policy.get("retained_modules", [])
+        if not isinstance(retained, list):
+            return ["[refactor_invalid_scope] retained_modules must be an array"]
+        names = []
+        for item in retained:
+            if (not isinstance(item, dict) or set(item) != RETAINED_MODULE_FIELDS
+                    or not all(isinstance(item[field], str) and item[field].strip() for field in RETAINED_MODULE_FIELDS)
+                    or not MODULE_NAME.fullmatch(item["module"])
+                    or item["kind"] not in RETAINED_MODULE_KINDS):
+                return ["[refactor_invalid_scope] retained modules require an exact name and documented contract"]
+            names.append(item["module"])
+        if names != sorted(set(names)):
+            return ["[refactor_invalid_scope] retained modules must be sorted and unique"]
+        if policy.get("complete") and policy.get("modules"):
+            return ["[refactor_invalid_scope] complete backend cannot retain partial module scopes"]
     for field in fields:
         values = policy.get(field, [])
         if not isinstance(values, list):
@@ -108,6 +129,8 @@ def check_backend_edges(modules: dict, policy: dict) -> list[str]:
     moved = set(policy.get("domains", []))
     pure_globals = set(policy.get("globals", [])) & {"app.models", "app.exceptions", "app.pagination"}
     errors = []
+    if policy.get("complete"):
+        errors.extend(check_completed_backend_layout(modules, policy))
     observed = {(source, target) for source, info in modules.items() for target in info["imports"]}
     bridges = {(bridge["importer"], bridge["target"]) for bridge in policy.get("bridges", [])}
     bridge_sources = {source for source, _ in bridges}
@@ -157,6 +180,33 @@ def check_backend_edges(modules: dict, policy: dict) -> list[str]:
             for target in info["external_imports"]:
                 if target.split(".")[0] in {"fastapi", "starlette", "sqlalchemy", "sqlite3", "alembic", "httpx", "requests", "aiohttp", "boto3", "openai", "anthropic", "google", "redis", "neo4j", "kuzu"}:
                     errors.append(f"[refactor_pure_imports_framework] {source} -> {target}")
+    return errors
+
+
+def check_completed_backend_layout(modules: dict, policy: dict) -> list[str]:
+    """Keep completed ownership closed when new files or domains are added.
+
+    Exact historical/extension entries document necessary old paths; they do
+    not bypass the existing import, storage, pure-role or cycle checks.
+    """
+    errors = []
+    declared = set(policy.get("domains", []))
+    observed = {owner for module in modules if (owner := domain_role(module)[0])}
+    for name in sorted(observed - declared):
+        errors.append(f"[refactor_unowned_domain] app.domains.{name}")
+    for name in sorted(declared - observed):
+        errors.append(f"[refactor_stale_domain] app.domains.{name}")
+    retained = {item["module"] for item in policy.get("retained_modules", [])}
+    for name in sorted(retained - modules.keys()):
+        errors.append(f"[refactor_stale_retained_module] {name}")
+    globals_ = set(policy.get("globals", []))
+    for name in sorted(modules):
+        owner, role = domain_role(name)
+        old_role = owner is not None and role in OLD_ROLES
+        old_aggregate = any(name == prefix or name.startswith(prefix + ".") for prefix in OLD_BACKEND_PREFIXES)
+        old_compatibility = name == "app.compatibility" or name.startswith("app.compatibility.")
+        if (old_role or old_aggregate or old_compatibility) and name not in globals_ and name not in retained:
+            errors.append(f"[refactor_unregistered_old_module] {name}")
     return errors
 
 

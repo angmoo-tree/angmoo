@@ -2733,3 +2733,6 @@ Secret scanner의 현재 exact tuple 하나는 옮긴 원본 fixture 경로를 �
 ## B8 통합 준비 — 남은 공개 집합의 실제 제품 소비자 전환
 
 Characters·Identity·Routines·WorldCharacter·Worlds의 옛 public5는 실제 함수·class 정의 없이 explicit import와 export 선언만 담는다. 165개 binding을 원문 Git source와 대조해, Identity11/WC2 제품 소비자13개를 실제 역할 모듈로 연결했다. 89개 전체 함수·class AST는 동일하다. 관련 검색 planner·Memory consolidation·Resident 실행 검사는 **66 passed / 11.61초**, 경계 검사는1091modules/4079edges/기존예외5 PASS다. 실제 파일과 역사 identity 검사의 제거는 원래 binding과 현재 소유 객체를 검증하는 별도 종료 절차에서 처리한다.
+## B8 통합 준비 — 전체 소유 범위의 파일 배치 검사
+
+`refactor_boundaries`에 완료 범위의 파일 배치 검사 지원을 추가했다. 새로 생긴 미등록 업무, import edge가 없는 옛 계층/전역 집합/compatibility 파일, 삭제 후 남은 정책 항목을 거부한다. 필요한 역사 migration·외부 확장 경로는 정확한 module·분류·이유·계약으로 등록하며 기존 import/DB/pure-role/cycle 검사를 우회하지 않는다. 부분 전환용 기존 규칙은 그대로 유지하고 최종 순수 호환 제거 후 `complete` 범위를 적용한다. 신규 음성 사례와 기존 구조 회귀 **68 passed / 0.52초**다. 이 지원 추가 자체가 AR-B8 전체 검증 완료를 뜻하지 않는다.
