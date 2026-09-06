@@ -8972,7 +8972,7 @@
       "id": "G02",
       "title": "공통 모델·단일 Base",
       "owner": "persistence / domain ORM",
-      "stage": "EACH_DOMAIN_PR / AR-G5",
+      "stage": "AR-G5",
       "status": "MOVED",
       "current_paths": [
         "backend/app/core/db.py",
@@ -9028,7 +9028,8 @@
         "backend/app/domains/runtime/repository/sqlite_lease.py",
         "backend/app/domains/relationships/models/projection.py",
         "backend/app/domains/relationships/constants.py",
-        "backend/app/domains/relationships/models/social.py"
+        "backend/app/domains/relationships/models/social.py",
+        "backend/app/domains/runtime/models.py"
       ],
       "target_paths": [
         "backend/app/models.py",

@@ -3255,6 +3255,10 @@ Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare �
 
 Gitleaks current tree의1건은 최초 signed `57528d22072f7541e7f1f1b982071afd5c1d537c`에서 도입한 Identity message_credentials source의 Git blob40이었다. 원장 key/value와 실제 Git object를 대조한 뒤 metadata 경로·generic-api-key 규칙·정확한 전체 key/hash 행1개에만 적용한다. 같은 행 comma 유무2개는 통과하고 hash/key/prefix/suffix/path 변형5개는 실제 Gitleaks에서 계속 검출됐다. 검토 설정으로 후보의 원래 tree와 HEAD 전체 history는0 findings이며 제품·원장·기존 assertion을 수정하지 않는다. 처음 실패한 stock/Gitleaks 결과는 이력으로 남기고 보정 head의 stock/집중을 확인한다.
 
+보정 source `5a2e8462`의 원래 stock 전체는 **보호2415=현재2415 / 기능목록37 PASS**, 관련 원래 guard·보안204개는 PASS다. B5 병합 `ce3bc32f`를 합친 `ef71ceaef486481966f60a42a569d8728ce77bb7`은 같은 Git tree이며 제품/테스트를 다시 바꾸지 않았다. 정확한 후보의 실제 설정으로 Gitleaks tree와 HEAD 전체 history 모두0 findings, 변경 없는 custom scanner는 현재2,111 files/치명0 및 고립된 전체809 ancestor의9,070 blobs/치명0을 확인했다. 기존 asset audit 항목은 삭제하거나 보안 통과로 재분류하지 않는다. DCO·Local OSS boundary·CI policy도 PASS다.
+
+B5 #283의 병합 후 Windows Installer가 완료되면 이 B6 후보를 순차 PR로 제출한다. PR exact-head Core 전체·보안·Windows·installer 및 이후 병합 후 Gate는 이 로컬 결과와 별도로 확인하며 B7/B8 전체 종료로 승격하지 않는다.
+
 ## AR-B7 Daypart — 활동 관찰·행동 기억의 실제 소유 이전
 
 Memory A9 기반과 B4 signed `6beec5d`를 병합한 뒤 AgentDaypartMemoryEvent의 실제 class를 `memory/models/daypart.py`로 옮겼다. 기존 단일 Base/table/FK/column/default/relationship은 같다. Daypart 저장·조회·요약, feed/inbox 중복 admission과 실제 제공 기록은 Memory의 service/repository/policies가 소유한다. Resident prompt와 Memory가 함께 쓰는 중립화 clipping은 원문 함수 하나를 `core/context_clipping.py`로 옮겼다.
@@ -3614,6 +3618,15 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 
 현재 지도 보정 후 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`는 **PR #258 1,867 / PR #263 1,907 / protected 2,437 = current 2,437 / items37 PASS**다. 제품·테스트·검사기·동결 기준 자료 및 이미 연결한 원장166개는 이 보정에서 변경하지 않았다. 로컬 검증과 재검증 결과를 갖춘 Tree/Lore 순차 후보이며, Hosted CI·설치·post-merge와 후속 G5/G06/B8-B 완료 판정은 별도로 수행한다.
 
+### AR-B7 공식 전체·원래 보존 검증과 현재 core 목록 보정
+
+고정 source `274f90e7`/metadata `d8f5b446`의 공식 stock은 **보호2428 = 현재2428 / 37항목 PASS**다. original #258/#263 및162개 append-only 기록의 API/ORM/assertion/suppression/node를 변경하지 않고 검사했다. 실제 d8 tree/history Gitleaks는0 findings이며 custom 현재 **2145 files /치명0**, 별도 bare 저장소의 전체 **843 ancestors /9523 blobs /치명0**이다. 기존 asset audit22개는 별도 유지하며 DCO·CI 정책·OSS 경계도 통과했다.
+
+같은 고정 tree의 전체 backend는 **2405 passed / 기존22 skipped / 1 failed / 27 warnings / 1526.32초**다. 유일 실패는 `tests/test_l0_local_runtime_contract.py::test_repository_runtime_contract_passes`의 `core module inventory is stale`였다. Daypart 원문에서 도입한 실제 공통 helper `app.core.context_clipping`은 Git 원문 그대로 존재하지만 현재 `security/local_runtime_contract.json` 목록에서 빠져 있었다. 전체 프로세스가 끝난 뒤 해당 모듈의 keep/AR-B7-DAYPART 기록 한 항목6줄만 추가했다. 원본 checker·제품·테스트·단언과162개 원장은 바꾸지 않았다.
+
+원래 실패가 포함된 L0 runtime contract와 실제 Daypart 회귀는 **10 passed /8.83초**다. 목록 보정 전 전체 실패와 보정 후 집중 결과를 합쳐 전체 PASS라고 쓰지 않으며, 정확한 최종 PR head의 Core backend 전체를 최종 전체 Gate로 확인한다. B6 #284 merge `4c1d06a277388d9ec317f5966f836b3008304fd8` 이후의 순차 합류와 stock/PR/installer는 별도 확인한다.
+
+B6 main을 이어받은 `65abcea991c4b96639c6b2b78d21989a218fc7e3`의 최종 원래 stock도 **보호2428=현재2428 /37항목 PASS**다. 이 head의 실제 Gitleaks tree/history는 모두0이며 DCO도 통과했다. 전체 검사를 수행한 d8f5b446와의 차이는 위 current core 목록 및 결과 문서뿐이고 제품/테스트/162개 원장 변경은 없다. 이후 검증 문서만 기록해 PR을 제출하며 정확 PR head의 Core 전체·보안·Windows·설치 검증을 최종 Gate로 확인한다. B6의 병합 후7개 workflow와 installer가 완료되기 전에는 B7 PR을 선행 제출하지 않는다.
 
 ### AR-B8-A Residual 현재 지도 정합성
 
@@ -3623,6 +3636,17 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 
 현재 feature 경로는 기존 exact file map을 따라 LocalBot·Character Image·Identity credential·Operations로 연결했다. K13은 Activity와 Image 모델의 실제 두 소유자를 함께 유지하며 Maintenance 값은 Operations로 분류한다. **원래 production current inventory/split 검사 오류0**, 기존166 prefix 동일/현재176, 제품·테스트·검사·CI·frozen 변경0을 확인했다. 이 metadata를 고정한 뒤 공식 전체 stock 및 전체 pytest를 이어가며, 이 국소 통과를 전체 backend/Hosted/installer/병합 완료로 기록하지 않는다.
 
+
+### AR-B8-A Residual 순차 후보 검증 결과
+
+고정 `cc5a8d67b1fb8a2c4f26ab86e95f2d97f59892d7`에서 공식 `check_refactor_preservation.py --contracts --nodes`는 **PR #258 1867 / PR #263 1907 / 보호2451 = 현재2451 / items37 PASS**다. 원본 source·split·단언·suppression·API·ORM·176개 도입 원장 오류0을 확인했다. 같은 고정 tree의 backend 전체 실행은 **2428 PASS /22 SKIP /1 FAIL /기존 warnings28 /1102.57초**다. 유일한 실패는 L0 current runtime contract의 `core_modules contains duplicates`였다.
+
+Tree/Lore metadata를 합치며 기존 `app.core.context_clipping`의 AR-B4 행과 추가된 AR-B7-DAYPART 행을 같은 module key로 합치지 못한 것이 원인이다. 실제 최초 정의는 signed `d83ef86c`의 Memory Daypart source이므로 `155ebf4f`에서 AR-B7-DAYPART 원래 한 항목만 남겼다. 제품·테스트·timeout·단언·skip 조건을 바꾸지 않은 원래 L0 전체 묶음은 **6 PASS /0.30초**다. 최초 전체 실행을 실패0으로 다시 쓰거나 전체를 재실행한 것으로 기록하지 않는다.
+
+부모의 원본 Git 객체 독립 검증을 거친 exact12 hash 보정 `ce9b31d1`만 cherry-pick해 `d7f551a0`으로 고정했다. 원장에 기록된 실제 Git blob 해시가 generic-api-key로 탐지된 경우이며, 원장 파일 경로·JSON source key·정확한 hash·전체 행과 해당 rule을 함께 제한한다. 파일이나 regex 규칙 전체를 제외하지 않았다. 실제 Gitleaks8.30.1의 일치 사례 탐지0/값 변경 탐지1/다른 파일 탐지1 근거가 있고, 이 후보의 추적 tree **28.93MB /7.84초** 및 HEAD 이력 **592 commits /36.50MB /7.93초**를 `--redact`로 검사한 결과는 모두 탐지0/exit0이다.
+
+보정 후 제품·테스트·checker·CI와 전체 stock 입력(source 및 baseline/checkpoint/additions/path map/feature inventory)은 검증한 cc5a8d67과 동일하다. 기존166 prefix와 최종176 원장도 그대로다. XML에서도 유일한 실패가 해당 metadata 중복임을 확인했다. 이 단계의 로컬 보존/전체 실행 및 실패 항목 재검증 근거를 갖춘 순차 후보이며 Hosted CI·installer·post-merge·병합 및 후속 Runtime/G5/G06/B8-B 완료는 별도 Gate로 이어간다.
+
 ### AR-B8-A Runtime·G06 순차 통합 전체 검증
 
 고정 `ec72adaa1fb7e1fd6ea43864f749c9871b503e73`의 전체 backend는 **2456 PASS / 기존22 SKIP /28 warnings /912.53초**다. 실제 Runtime 진단·lease·같은 Session의 Identity 접근과 `main.py` 단일 factory 및 임시 public export를 합친 후보이며, 기존 40개 초기화 연결과 factory/lifespan/health 본문, full/public 각각196개 HTTP operation 및102 ORM 계약을 유지한다. G5와 `public_main.py` 삭제 전 검증으로 기록하며 최종 제거 완료를 뜻하지 않는다.
@@ -3630,6 +3654,8 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 선행 Residual의 검토된 현재 지도를 합친 `d9f9fac6`에서 제품·테스트·검사기·원장184개는 달라지지 않았다. 첫 공식 stock의 보호2478=현재2478과 원본 계약·단언·suppression 보존은 일치했으나, Runtime 오류의 현재 경로7개와 해당 split 목적지 집합1개가 아직 이전 `contracts.py`를 가리켰다. 실제 동일 오류 정의를 소유한 Runtime/Routines의 `exceptions.py`로 현재 목적지만 연결하고 원본 source·symbol·행위 검증을 유지했다.
 
 같은 후보의 CI·OSS·launcher·desktop installer·Host Tauri 계약과 DCO·구조 경계 검사가 통과했고 custom 현재 보안 검사는2226files/치명0이다. Gitleaks가 원장의 Git blob14개를 generic key로 분류한 첫 실패를 보존한다. 각각 원래 signed commit의 정확한 경로와 실제 Git blob 일치를 확인한 뒤 Residual12개와 Runtime2개를 exact 경로·행·값 조합으로만 구분했다. 실제 Gitleaks8.30.1에서 검토 값은 통과하고 값 변경 및 다른 파일은 각각 검출되는 것을 확인했다. 원장 내용과 비밀 탐지 규칙은 그대로이며 이 보정 후 전체 stock·보안·순차 PR/Hosted/설치/병합 Gate를 이어간다.
+
+보정한 signed `d82db1cc`에서 원래 공식 stock **보호2478=현재2478 /37항목 PASS**, 실제 Gitleaks tree/history 탐지0을 확인했다. Residual의 `core_modules` 중복 정정을 합친 `7cd71f43`은 해당 목록6줄 제거만 다르며 제품·테스트·원장184개는 동일하다. 이 후보의 원래 L0 **6 PASS /0.18초**, 후보 조상만 연결한 격리 Git 저장소의 custom history **10170 blobs/치명0**을 확인했다. 첫 navigation/Gitleaks 실패와 보정 후 결과를 구분하며, 전체 backend2456 PASS는 같은 제품·테스트의 ec72 원본 실행에 근거한다. 순차 PR·원격 Core 전체·Windows/installer·병합 후 검증 및 G5/최종 public_main 제거는 후속 단계다.
 
 
 
@@ -3727,6 +3753,16 @@ G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도�
 namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
 
 원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
+
+G5의 고정 후보 `e46f6e4c` 전체 backend는 **2,485 PASS / 22 SKIP / 28 warnings / 1,188.91초**다. 같은 후보의 첫 공식 보존 검사는 **PR #258 1,867 / PR #263 1,907 / protected 2,507 = current 2,507**을 확인했고 원본 source·API·ORM·단언·suppression·node 오류는 없었다. 실패는 K01/K03/K04/K05/K14/G02의 현재 기능 지도에 남은 삭제된 모델 경로20개였다.
+
+원래 `576d3119`의 각 alias가 제공하던 실제 class와 현재 `register_models()`의23개 소유 모듈을 대조해 이20개 경로만 실제 소유 위치로 연결했다. 옛 agent_runs 모델 묶음의 Memory/Relationships 두 소유와 worlds 모델 묶음의 Worlds/WorldCharacter 두 소유를 모두 유지했다. G02는 단일 Base·DB 함수·명시적 등록·각 도메인 ORM을 구분하고 `MOVED`로 기록한다. frozen 자료·원장185·제품·테스트·검사기 변경0이며, metadata 보정 뒤 원래 공식 stock을 다시 실행한다. 위 전체 통과를 Hosted CI·installer·병합 또는 B8-B 완료로 승격하지 않는다.
+
+현재 지도 보정 후보 `3d9313cd`의 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`가 **items37 PASS / protected 2,507 = current 2,507**로 통과했다. PR #258/#263의 원본 소스·API·ORM·단언·suppression·노드 및185개 도입 기록을 모두 유지한다. 이 보정은 metadata와 결과 문서만 변경했으므로 같은 제품·테스트의 전체 **2,485 PASS / 22 SKIP** 결과와 함께 G5 로컬 통합 검증으로 기록한다. Hosted·설치·post-merge 및 후속 B8-B의 정확9개 임시 소비자 제거는 별도 Gate다.
+
+### AR-B8-A Runtime/G06 PR #288: current inventory correction
+
+The first exact-head PR run at `849e6bc0` failed the deferred runtime inventory check after the preceding CI policy, OSS, allowlist, launcher, installer, Host and architecture checks passed. The original Runtime/G06 source ledger now contains the supported extension type marker; the current inventory had 23 entries and omitted that one existing ledger file. The correction adds only `security/refactor_backend_additions.json` to the generated current inventory (24 entries), preserving all 23 previous rows. Product code, tests, assertion/suppression contracts, the original source ledger184 and frozen checkpoints are unchanged. The initial failure remains recorded separately from the corrected-head CI rerun.
 
 ### AR-B8-B Windows Host Tauri 자동 실행 조건 보완
 
