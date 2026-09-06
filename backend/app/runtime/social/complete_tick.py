@@ -10,7 +10,7 @@ from app.runtime.social.agent_tools import (
     agent_tool_actions,
 )
 from app.runtime.social.agent_tool_state import agent_tool_state
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 
 
 class RuntimeAgentToolTickWorkflows(RuntimeAgentToolActionWorkflows):

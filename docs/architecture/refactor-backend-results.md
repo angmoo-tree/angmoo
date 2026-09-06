@@ -2573,3 +2573,11 @@ C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertio
 - 옛 `app.services.community`를 삭제하고 원래 함수 호출을 Social·Routines의 실제 담당 코드로 연결했다. Local Bot과 Resident context의 실행 조립은 동일한 Session과 호출 시점의 함수 조회를 유지한다.
 - 관련 회귀 검증: **382 passed / 기존 PostgreSQL 1 skipped / 3 warnings / 75.78초**.
 - 원본 보호 읽기 진단: 보호 2,311 / 현재 2,503 nodes, source·split symbol·assertion·suppression·ASGI·API/ORM·missing node **각 0 오류**. 선형 source introduction을 적용한 stock gate·전체 CI·설치 검증을 대신하지 않는다.
+
+### Shared activity composition
+
+`runtime/routines/activity_policy.py` and `activity_scope.py` own the existing shared activity policy assembly and same-Session World/Package reads. Resident execution, Character setup and Social authorization use this shared assembly. Original function/class bodies, lookup timing, exceptions and transactions are unchanged; no reverse dependency from this assembly to Resident or Social is introduced.
+
+Activity composition verification: original non-import ASTs of both moved modules and12 updated consumers are identical. Same-Session scope/policy/activity tests passed **71 / 2 warnings /31.11s**. All seven read-only original preservation diagnostics passed0errors, protected2311/current2497. This source intentionally retains the base's unresolved legacy consumers and two Social context type backedges, already owned by Social C29; it does not introduce an exception or claim complete architecture closeout.
+
+- 위 공유 활동 조립의 C30 포함 통합 결과: 관련 **133 passed / 3 warnings / 55.79초**, Social complete_tick의 추가 호출자까지 실제 새 위치로 연결했다. 현재 경계 검사의 순환 참조 오류는 없고, 남은 21건은 이후 호환 CRUD/서비스 제거 대상의 정확한 옛 소비자다.

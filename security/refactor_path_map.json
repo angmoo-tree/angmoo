@@ -576,7 +576,9 @@
     "backend/app/domains/social/ports/__init__.py": "backend/app/domains/social/contracts/__init__.py",
     "backend/app/domains/social/ports/observation_unit_of_work.py": "backend/app/domains/social/contracts/observation_execution.py",
     "backend/app/domains/social/api/__init__.py": "backend/app/domains/social/__init__.py",
-    "backend/app/services/community.py": "backend/app/domains/social/service/agent_tool_actions.py"
+    "backend/app/services/community.py": "backend/app/domains/social/service/agent_tool_actions.py",
+    "backend/app/runtime/resident/activity_policy.py": "backend/app/runtime/routines/activity_policy.py",
+    "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -29037,7 +29039,7 @@
       "status": "IMPLEMENTED — 268 focused passed, existing PG skip1; 38 original definitions AST unchanged and21 actual Context types identical; boundary694/2318/222; readonly source/split/assertion/suppression/API/ORM/node diagnostics errors0; root linear introductions and stock integration gate pending",
       "split_files": {
         "backend/app/services/agent_activity_policy.py": [
-          "backend/app/runtime/resident/activity_policy.py",
+          "backend/app/runtime/routines/activity_policy.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/activity_policy.py",
@@ -29051,7 +29053,7 @@
       "split_symbols": [
         {
           "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
-          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/routines/activity_policy.py::APP_TIMEZONE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29068,7 +29070,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::TickSchedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29085,7 +29087,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
-          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/routines/activity_policy.py::tick_interval_seconds",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29102,7 +29104,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::next_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29119,7 +29121,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::initial_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29136,7 +29138,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::retry_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29153,7 +29155,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -29170,7 +29172,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
-          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/routines/activity_policy.py::_is_within_active_hours",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -29187,7 +29189,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
-          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/routines/activity_policy.py::_aware_utc",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -29206,7 +29208,7 @@
           "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
           "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29218,7 +29220,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29230,7 +29232,7 @@
           "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29242,7 +29244,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29254,7 +29256,7 @@
           "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29266,7 +29268,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
           "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29278,7 +29280,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29290,7 +29292,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29305,7 +29307,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29320,7 +29322,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29332,7 +29334,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29344,7 +29346,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29359,7 +29361,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29374,7 +29376,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29386,7 +29388,7 @@
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
           "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29400,7 +29402,7 @@
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
           "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29414,7 +29416,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
           "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29428,7 +29430,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
           "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29442,7 +29444,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29456,7 +29458,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29470,7 +29472,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29484,7 +29486,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_block_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29498,7 +29500,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -29512,7 +29514,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -101949,7 +101951,7 @@
       "status": "IMPLEMENTED — 467 focused passed, existing PG skip1; original10 actual function ASTs preserved after exact collaborator substitution; boundary697/2332/221; readonly source/split/assertion/suppression/API/ORM/node diagnostics errors0; root linear introductions and stock integration gate pending",
       "split_files": {
         "backend/app/services/agent_activity_policy.py": [
-          "backend/app/runtime/resident/activity_policy.py",
+          "backend/app/runtime/routines/activity_policy.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/activity_policy.py",
@@ -101963,7 +101965,7 @@
       "split_symbols": [
         {
           "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
-          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/routines/activity_policy.py::APP_TIMEZONE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -101980,7 +101982,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::TickSchedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -101997,7 +101999,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
-          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/routines/activity_policy.py::tick_interval_seconds",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102014,7 +102016,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::next_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102031,7 +102033,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::initial_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102048,7 +102050,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::retry_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102065,7 +102067,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -102082,7 +102084,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
-          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/routines/activity_policy.py::_is_within_active_hours",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102099,7 +102101,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
-          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/routines/activity_policy.py::_aware_utc",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -102118,7 +102120,7 @@
           "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
           "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102130,7 +102132,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102142,7 +102144,7 @@
           "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102154,7 +102156,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102166,7 +102168,7 @@
           "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102178,7 +102180,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
           "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102190,7 +102192,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102202,7 +102204,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102217,7 +102219,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102232,7 +102234,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102244,7 +102246,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102256,7 +102258,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102271,7 +102273,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102286,7 +102288,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102298,7 +102300,7 @@
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
           "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102312,7 +102314,7 @@
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
           "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102326,7 +102328,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
           "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102340,7 +102342,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
           "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102354,7 +102356,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102368,7 +102370,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102382,7 +102384,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102396,7 +102398,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_block_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102410,7 +102412,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102424,7 +102426,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102436,7 +102438,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
-          "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
+          "new": "backend/app/runtime/routines/activity_policy.py::build_activity_policy",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
@@ -102455,7 +102457,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
-          "new": "backend/app/runtime/resident/activity_policy.py::assert_action_allowed",
+          "new": "backend/app/runtime/routines/activity_policy.py::assert_action_allowed",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
@@ -102474,7 +102476,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
-          "new": "backend/app/runtime/resident/activity_policy.py::count_action_today",
+          "new": "backend/app/runtime/routines/activity_policy.py::count_action_today",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
@@ -102500,7 +102502,7 @@
       "status": "IMPLEMENTED — 544 focused passed, existing PG skip1; four decision/two query ASTs preserved; boundary700/2340/211; read-only split/APIORM/node errors0 and representative file-map correction source/assertion/suppression errors0; root linear introductions and stock integration gate pending",
       "split_files": {
         "backend/app/services/agent_activity_policy.py": [
-          "backend/app/runtime/resident/activity_policy.py",
+          "backend/app/runtime/routines/activity_policy.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/activity_policy.py",
@@ -102509,13 +102511,13 @@
           "backend/app/domains/routines/service/activity_policy.py",
           "backend/app/domains/routines/repository/activity_counts.py",
           "backend/app/domains/routines/utils/activity_actions.py",
-          "backend/app/runtime/resident/activity_scope.py"
+          "backend/app/runtime/routines/activity_scope.py"
         ]
       },
       "split_symbols": [
         {
           "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
-          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/routines/activity_policy.py::APP_TIMEZONE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102532,7 +102534,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::TickSchedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102549,7 +102551,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
-          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/routines/activity_policy.py::tick_interval_seconds",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102566,7 +102568,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::next_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102583,7 +102585,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::initial_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102600,7 +102602,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::retry_tick_schedule",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102617,7 +102619,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
-          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/routines/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -102634,7 +102636,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
-          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/routines/activity_policy.py::_is_within_active_hours",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
             "backend/app/runtime/resident/langgraph.py",
@@ -102651,7 +102653,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
-          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/routines/activity_policy.py::_aware_utc",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
             "backend/app/runtime/characters/management.py",
@@ -102670,7 +102672,7 @@
           "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
           "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102682,7 +102684,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102694,7 +102696,7 @@
           "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102706,7 +102708,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102718,7 +102720,7 @@
           "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102730,7 +102732,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
           "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102742,7 +102744,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102754,7 +102756,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102769,7 +102771,7 @@
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
           "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102784,7 +102786,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102796,7 +102798,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102808,7 +102810,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102823,7 +102825,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
           "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102838,7 +102840,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102850,7 +102852,7 @@
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
           "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102864,7 +102866,7 @@
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
           "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102878,7 +102880,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
           "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102892,7 +102894,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
           "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102906,7 +102908,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102920,7 +102922,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102934,7 +102936,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102948,7 +102950,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_block_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102962,7 +102964,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102976,7 +102978,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py"
+            "backend/app/runtime/routines/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -102988,7 +102990,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
-          "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
+          "new": "backend/app/runtime/routines/activity_policy.py::build_activity_policy",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/runtime/resident/langgraph.py",
@@ -103007,7 +103009,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
-          "new": "backend/app/runtime/resident/activity_policy.py::assert_action_allowed",
+          "new": "backend/app/runtime/routines/activity_policy.py::assert_action_allowed",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
@@ -103026,7 +103028,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
-          "new": "backend/app/runtime/resident/activity_policy.py::count_action_today",
+          "new": "backend/app/runtime/routines/activity_policy.py::count_action_today",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
             "backend/app/services/agent_runs.py",
@@ -103045,7 +103047,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
-          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "new": "backend/app/runtime/routines/activity_scope.py::SqlAlchemyActivityScopeReads",
           "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
           "destination_members": [
             "_table_exists",
@@ -103057,7 +103059,7 @@
             "get_world"
           ],
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/runtime/routines/activity_policy.py",
             "backend/app/domains/routines/service/activity_scope.py"
           ],
           "test_nodes": [
@@ -103068,7 +103070,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
-          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "new": "backend/app/runtime/routines/activity_scope.py::SqlAlchemyActivityScopeReads",
           "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
           "destination_members": [
             "_table_exists",
@@ -103076,7 +103078,7 @@
             "get_import_id"
           ],
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/runtime/routines/activity_policy.py",
             "backend/app/domains/routines/service/activity_scope.py"
           ],
           "test_nodes": [
@@ -103087,7 +103089,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
-          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "new": "backend/app/runtime/routines/activity_scope.py::SqlAlchemyActivityScopeReads",
           "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
           "destination_members": [
             "_table_exists",
@@ -103098,7 +103100,7 @@
             "get_import_id"
           ],
           "direct_consumers": [
-            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/runtime/routines/activity_policy.py",
             "backend/app/domains/routines/service/activity_scope.py"
           ],
           "test_nodes": [
@@ -103109,7 +103111,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
-          "new": "backend/app/runtime/resident/activity_policy.py::activity_timezone_name",
+          "new": "backend/app/runtime/routines/activity_policy.py::activity_timezone_name",
           "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
@@ -103124,7 +103126,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
-          "new": "backend/app/runtime/resident/activity_policy.py::activity_timezone",
+          "new": "backend/app/runtime/routines/activity_policy.py::activity_timezone",
           "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
@@ -103139,7 +103141,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
-          "new": "backend/app/runtime/resident/activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/runtime/routines/activity_policy.py::is_imported_world_runtime_locked_for_character",
           "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
@@ -103154,7 +103156,7 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
-          "new": "backend/app/runtime/resident/activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/runtime/routines/activity_policy.py::is_imported_world_runtime_locked",
           "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
@@ -121982,6 +121984,33 @@
         "backend/app/services/local_bot.py": "backend/app/runtime/local_bot/composition.py"
       },
       "remaining": "Original CRUD export facade, remaining caller-owned legacy bindings and G07. Parent final B4/LocalBot integration removes exact transitional old-consumer bridges; no blanket domain exceptions or new implementation were added."
+    },
+    "AR-B8-ACTIVITY-COMPOSITION": {
+      "status": "SOURCE PREPARATION",
+      "reason": "Activity policy and same-Session World/Package reads are shared by Social, Character and Resident execution. Their actual composition belongs to runtime/routines; no business body, query timing, permission, transaction or provider changes.",
+      "moved_files": {
+        "backend/app/runtime/resident/activity_policy.py": "backend/app/runtime/routines/activity_policy.py",
+        "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py"
+      },
+      "actual_consumers": [
+        "backend/app/compatibility/routine_posts/legacy.py",
+        "backend/app/runtime/characters/creator.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/app/runtime/resident/activity_policy.py",
+        "backend/app/runtime/resident/execution.py",
+        "backend/app/runtime/resident/langgraph.py",
+        "backend/app/runtime/social/agent_tool_authorization.py",
+        "backend/app/runtime/social/agent_tool_reads.py",
+        "backend/app/services/agent_runs.py",
+        "backend/app/services/community.py",
+        "backend/tests/routines/test_activity_limits.py",
+        "backend/tests/routines/test_activity_scope_transaction.py"
+      ],
+      "behavior_tests": [
+        "tests/routines/test_activity_scope_transaction.py",
+        "tests/routines/test_activity_policy_transaction.py",
+        "tests/routines/test_activity_limits.py"
+      ]
     }
   },
   "asgi_exports": {

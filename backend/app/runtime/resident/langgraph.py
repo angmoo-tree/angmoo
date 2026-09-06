@@ -188,7 +188,7 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.character_lore.service import documents as character_lore_service
 
 from app.runtime.social import langgraph_actions as langgraph_social_apply

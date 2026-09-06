@@ -1172,3 +1172,7 @@ Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`�
 
 
 Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실행 흐름은 피드·Inbox·도구 행동·tick·상태·활동 이력의 실제 owner를 이름으로 선택한다. 실행에 타 업무 협력이 필요하면 구성된 runtime instance를 사용한다. 예외와 값만 필요한 소비자는 해당 실제 정의를 읽으며, 모든 Social 기능을 모아 다시 내보내는 범용 facade를 만들지 않는다.
+
+### Shared activity composition
+
+`runtime/routines/activity_policy.py` and `activity_scope.py` own the existing shared activity policy assembly and same-Session World/Package reads. Resident execution, Character setup and Social authorization use this shared assembly. Original function/class bodies, lookup timing, exceptions and transactions are unchanged; no reverse dependency from this assembly to Resident or Social is introduced.

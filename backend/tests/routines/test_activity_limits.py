@@ -29,7 +29,7 @@ from app.config import settings
 from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service

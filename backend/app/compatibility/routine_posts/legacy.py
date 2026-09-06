@@ -12,7 +12,7 @@ from app.runtime.persistence.model_registration import register_models
 register_models()
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.social.schemas.community import PostCreate
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.services import activity_state_contracts
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,

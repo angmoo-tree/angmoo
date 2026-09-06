@@ -325,8 +325,8 @@
         "app.domains.social.schemas.community",
         "app.runtime.persistence.model_registration",
         "app.runtime.relationships.sqlalchemy_social_event",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
+        "app.runtime.routines.activity_policy",
         "app.services.activity_state_contracts"
       ],
       "module": "app.compatibility.routine_posts.legacy",
@@ -12940,8 +12940,8 @@
         "app.policies.name_policy",
         "app.runtime.characters.management",
         "app.runtime.persistence.model_registration",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.execution",
+        "app.runtime.routines.activity_policy",
         "app.schemas",
         "app.services.runtime_boundary"
       ],
@@ -13059,11 +13059,11 @@
         "app.runtime.local_bot.keys",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.autonomy_reads",
         "app.runtime.resident.execution",
         "app.runtime.resident.first_greeting",
         "app.runtime.resident.tendency_analysis",
+        "app.runtime.routines.activity_policy",
         "app.runtime.social.image_generation",
         "app.runtime.social.timeline",
         "app.runtime.world_characters.cleanup",
@@ -14645,46 +14645,6 @@
     },
     {
       "external_imports": [
-        "datetime",
-        "sqlalchemy.orm",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.domains.routines.constants",
-        "app.domains.routines.contracts.activity_policy",
-        "app.domains.routines.contracts.activity_scope",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.models",
-        "app.domains.routines.repository.activity_counts",
-        "app.domains.routines.service.activity_policy",
-        "app.domains.routines.service.activity_scope",
-        "app.domains.routines.service.activity_sessions",
-        "app.domains.routines.service.tick_schedule",
-        "app.domains.routines.utils.activity_actions",
-        "app.runtime.resident.activity_scope"
-      ],
-      "module": "app.runtime.resident.activity_policy",
-      "path": "backend/app/runtime/resident/activity_policy.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy",
-        "sqlalchemy.engine.reflection",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.world_characters.models",
-        "app.domains.world_packages.models",
-        "app.domains.worlds.models"
-      ],
-      "module": "app.runtime.resident.activity_scope",
-      "path": "backend/app/runtime/resident/activity_scope.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -14837,7 +14797,6 @@
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.integrations.direct_llm",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
         "app.runtime.resident.context_references",
         "app.runtime.resident.credential_profiles",
@@ -14850,6 +14809,7 @@
         "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.request_options",
         "app.runtime.resident.slots",
+        "app.runtime.routines.activity_policy",
         "app.runtime.search.binding",
         "app.runtime.social.feed_history",
         "app.services.agent_runs",
@@ -15011,10 +14971,10 @@
         "app.integrations.direct_llm",
         "app.runtime.character_lore",
         "app.runtime.persistence.model_registration",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
         "app.runtime.resident.langgraph_queries",
         "app.runtime.routine_posts.sqlalchemy_runtime",
+        "app.runtime.routines.activity_policy",
         "app.runtime.social.agent_tool_reads",
         "app.runtime.social.agent_tool_state",
         "app.runtime.social.agent_tools",
@@ -15333,6 +15293,30 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.activity_scope",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.activity_counts",
+        "app.domains.routines.service.activity_policy",
+        "app.domains.routines.service.activity_scope",
+        "app.domains.routines.service.activity_sessions",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.utils.activity_actions",
+        "app.runtime.routines.activity_scope"
+      ],
+      "module": "app.runtime.routines.activity_policy",
+      "path": "backend/app/runtime/routines/activity_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -15343,6 +15327,22 @@
       ],
       "module": "app.runtime.routines.activity_references",
       "path": "backend/app/runtime/routines/activity_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.engine.reflection",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models",
+        "app.domains.world_packages.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.routines.activity_scope",
+      "path": "backend/app/runtime/routines/activity_scope.py",
       "wildcard_imports": []
     },
     {
@@ -15560,7 +15560,7 @@
         "app.domains.routines.models",
         "app.domains.routines.repository.runs",
         "app.domains.social.service.agent_tool_authorization",
-        "app.runtime.resident.activity_policy"
+        "app.runtime.routines.activity_policy"
       ],
       "module": "app.runtime.social.agent_tool_authorization",
       "path": "backend/app/runtime/social/agent_tool_authorization.py",
@@ -15576,7 +15576,7 @@
         "app.domains.routines.repository.feed_history",
         "app.domains.routines.service.activity_logs",
         "app.domains.social.service.agent_tool_reads",
-        "app.runtime.resident.activity_policy",
+        "app.runtime.routines.activity_policy",
         "app.runtime.social.agent_tool_authorization",
         "app.runtime.social.topic_metadata"
       ],
@@ -15630,7 +15630,7 @@
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.repository.feed_history",
         "app.domains.social.service.complete_tick",
-        "app.runtime.resident.activity_policy",
+        "app.runtime.routines.activity_policy",
         "app.runtime.social.agent_tool_state",
         "app.runtime.social.agent_tools"
       ],
@@ -16616,8 +16616,8 @@
         "app.domains.social.repository.resident_context",
         "app.domains.social.service.resident_affordances",
         "app.runtime.persistence.model_registration",
-        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context_references",
+        "app.runtime.routines.activity_policy",
         "app.runtime.social.feed_history",
         "app.schemas"
       ],
