@@ -65,10 +65,6 @@
           "imported": "app.cruds.agents"
         },
         {
-          "importer": "app.runtime.character_lore",
-          "imported": "app.services.community"
-        },
-        {
           "importer": "app.runtime.characters.creator",
           "imported": "app.cruds.agent_runs"
         },
@@ -401,10 +397,62 @@
         {
           "importer": "app.runtime.social.feed_cycle",
           "imported": "app.cruds.agent_runs"
+        }
+      ]
+    },
+    {
+      "id": "ar-b5-history-brief-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C20 keeps only the existing feed-theme predicate in runtime while the separately prepared Routines brief source is integrated. No policy is duplicated.",
+      "removal_condition": "Parent integrates routines.service.action_briefs.is_feed_scan_community_theme_brief and replaces this one exact runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.feed_history",
+          "imported": "app.services.agent_briefs"
+        }
+      ]
+    },
+    {
+      "id": "ar-b5-agent-tool-owner-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C21 preserves current Routines actual query/admission calls solely in runtime until prepared B4 source integration.",
+      "removal_condition": "Parent binds four same-Session routines.repository.runs queries and runtime.resident.activity_policy, removing exact old imports.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.agent_tool_authorization",
+          "imported": "app.cruds.agent_runs"
         },
         {
-          "importer": "app.runtime.social.feed_cycle",
-          "imported": "app.services.community"
+          "importer": "app.runtime.social.agent_tool_authorization",
+          "imported": "app.services.agent_activity_policy"
+        }
+      ]
+    },
+    {
+      "id": "ar-b5-agent-tool-cue-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C22 keeps exact current pending-cue query and consume writes in runtime until prepared B4 canonical integration; actual Social tool policy no longer depends on legacy code.",
+      "removal_condition": "Bind routines.repository.feed_cues pending query and routines.service.feed_cues consumption and remove exact old runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.agent_tools",
+          "imported": "app.cruds.agents"
+        }
+      ]
+    },
+    {
+      "id": "ar-b5-agent-tool-read-admission-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C23 preserves original Routines build_activity_policy in runtime until prepared B4 owner source integration; no Social domain legacy or foreign-ORM import.",
+      "removal_condition": "Parent binds runtime.resident.activity_policy.build_activity_policy and removes exact old runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.agent_tool_reads",
+          "imported": "app.services.agent_activity_policy"
         }
       ]
     }
@@ -1001,7 +1049,17 @@
       "app.domains.social.service.resident_affordances",
       "app.domains.social.service.world_feed",
       "app.domains.world_characters.service.foundation",
-      "app.domains.worlds.service.foundation"
+      "app.domains.worlds.service.foundation",
+      "app.domains.routines.contracts.feed_history",
+      "app.domains.routines.repository.feed_history",
+      "app.domains.routines.service.feed_history",
+      "app.domains.social.contracts.agent_tools",
+      "app.domains.social.contracts.topic_history",
+      "app.domains.social.repository.topic_history",
+      "app.domains.social.service.agent_tool_actions",
+      "app.domains.social.service.agent_tool_authorization",
+      "app.domains.social.service.agent_tool_reads",
+      "app.domains.social.service.topic_metadata"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1373,7 +1431,15 @@
       "app.domains.social.service.resident_affordances",
       "app.domains.social.service.world_feed",
       "app.domains.world_characters.service.foundation",
-      "app.domains.worlds.service.foundation"
+      "app.domains.worlds.service.foundation",
+      "app.domains.routines.contracts.feed_history",
+      "app.domains.routines.service.feed_history",
+      "app.domains.social.contracts.agent_tools",
+      "app.domains.social.contracts.topic_history",
+      "app.domains.social.service.agent_tool_actions",
+      "app.domains.social.service.agent_tool_authorization",
+      "app.domains.social.service.agent_tool_reads",
+      "app.domains.social.service.topic_metadata"
     ],
     "bridges": [
       {
@@ -3222,6 +3288,38 @@
         "owner_stage": "AR-B5",
         "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
         "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.feed_history",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Remaining Community consumes the actual Routines consumed-source decision; its nullable SQL is owned by the same domain repository.",
+        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.topic_metadata",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Remaining Community actions consume actual owner history queries/topic policy while their own workflow is migrated; no original history implementation remains in this old surface.",
+        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.agent_tool_authorization",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
+        "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.social.service.agent_tool_authorization",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
+        "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
         "review_date": "2026-09-06"
       }
     ]

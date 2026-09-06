@@ -1817,7 +1817,20 @@
         "backend/app/domains/social/service/feed_reaction_validation.py",
         "backend/app/domains/social/contracts/feed_execution.py",
         "backend/app/runtime/social/feed_reaction_provider.py",
-        "backend/app/domains/social/service/feed_reaction_prompts.py"
+        "backend/app/domains/social/service/feed_reaction_prompts.py",
+        "backend/app/domains/routines/repository/feed_history.py",
+        "backend/app/domains/social/repository/topic_history.py",
+        "backend/app/domains/social/service/topic_metadata.py",
+        "backend/app/domains/routines/service/feed_history.py",
+        "backend/app/runtime/social/topic_metadata.py",
+        "backend/app/runtime/social/feed_history.py",
+        "backend/app/domains/social/service/agent_tool_authorization.py",
+        "backend/app/domains/social/contracts/agent_tools.py",
+        "backend/app/runtime/social/agent_tool_authorization.py",
+        "backend/app/domains/social/service/agent_tool_actions.py",
+        "backend/app/runtime/social/agent_tools.py",
+        "backend/app/domains/social/service/agent_tool_reads.py",
+        "backend/app/runtime/social/agent_tool_reads.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

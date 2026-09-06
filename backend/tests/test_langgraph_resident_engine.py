@@ -3467,7 +3467,7 @@ def test_writing_plan_skip_reports_persona_writer_missing_post_text(monkeypatch)
         raise AssertionError("empty post text must not create a post")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fail_create,
     )
@@ -3551,7 +3551,7 @@ def test_writing_plan_with_repaired_text_creates_post(monkeypatch) -> None:
         return SimpleNamespace(id="post-created", title=kwargs["topic_signature"])
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -3613,7 +3613,7 @@ def test_owner_feed_cue_writing_consumes_matching_pending_cue(monkeypatch) -> No
         return SimpleNamespace(id="post-created", title="Title")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -3682,7 +3682,7 @@ def test_writing_plan_success_records_lore_metadata_and_usage(monkeypatch) -> No
         return SimpleNamespace(id="post-created", title="Title")
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -3822,7 +3822,7 @@ def test_writing_plan_success_ignores_legacy_topic_arc_progress(monkeypatch) -> 
         return SimpleNamespace(id="post-created", title=kwargs["topic_signature"])
 
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "create_agent_tool_post",
         fake_create_post,
     )
@@ -3978,7 +3978,7 @@ def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> Non
         lambda *_args, **_kwargs: False,
     )
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "reply_agent_tool_post",
         fake_reply,
     )
@@ -4090,7 +4090,7 @@ def test_reply_action_skips_when_target_already_answered(monkeypatch) -> None:
         lambda *_args, **_kwargs: True,
     )
     monkeypatch.setattr(
-        langgraph_resident.community_service,
+        langgraph_resident.agent_tool_actions,
         "reply_agent_tool_post",
         fail_reply,
     )

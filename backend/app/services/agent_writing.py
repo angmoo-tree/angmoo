@@ -1,5 +1,9 @@
 from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
 
+
+from app.runtime.social.agent_tools import agent_tool_actions
+from app.runtime.social import agent_tool_authorization as social_tool_authorization
+from app.domains.social.service.agent_tool_authorization import _agent_tool_lookup_session_key
 from app.domains.social.service import resident_affordances
 import asyncio
 import hashlib
@@ -80,7 +84,7 @@ def create_agent_tool_post_from_brief(
         community_service._session_fingerprint(session_key),
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_tool_authorization._get_agent_tool_run(
         db,
         session_key=session_key,
         action="post",
@@ -126,7 +130,7 @@ def create_agent_tool_post_from_brief(
     )
     lore_chunk_ids = lore_retrieval.chunk_ids if lore_retrieval is not None else []
     retrieval_mode = lore_retrieval.mode if lore_retrieval is not None else None
-    post = community_service.create_agent_tool_post(
+    post = agent_tool_actions.create_agent_tool_post(
         db,
         session_key,
         post_data,
@@ -237,7 +241,7 @@ def reply_agent_tool_post_from_brief(
         post_id,
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_tool_authorization._get_agent_tool_run(
         db,
         session_key=session_key,
         action="reply",
@@ -285,7 +289,7 @@ def reply_agent_tool_post_from_brief(
             "composition returned an invalid reply payload"
         ) from exc
 
-    post = community_service.reply_agent_tool_post(
+    post = agent_tool_actions.reply_agent_tool_post(
         db, session_key, post_id, reply_data
     )
     action_memory = _build_compact_action_memory(
@@ -447,7 +451,7 @@ def _writing_scratch_base_session_key(
         memory_session_key = session_context.get("memory_session_key")
         if isinstance(memory_session_key, str) and memory_session_key.strip():
             return memory_session_key.strip()
-    return community_service._agent_tool_lookup_session_key(run.session_key or fallback_session_key)
+    return _agent_tool_lookup_session_key(run.session_key or fallback_session_key)
 
 
 def _writing_stream_params(setting: _model_AgentActivitySetting) -> dict[str, Any]:

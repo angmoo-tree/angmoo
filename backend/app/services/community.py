@@ -1,3 +1,46 @@
+from app.runtime.social.agent_tool_reads import agent_tool_reads
+list_agent_tool_feed = agent_tool_reads.list_agent_tool_feed
+_list_resident_feed_scan_page = agent_tool_reads._list_resident_feed_scan_page
+list_agent_tool_following_feed = agent_tool_reads.list_agent_tool_following_feed
+_agent_feed_post_summary = agent_tool_reads._agent_feed_post_summary
+get_agent_tool_post_thread = agent_tool_reads.get_agent_tool_post_thread
+get_agent_tool_profile = agent_tool_reads.get_agent_tool_profile
+_log_inbox_notifications_provided = agent_tool_reads._log_inbox_notifications_provided
+_latest_inbox_delivery_notification_ids = agent_tool_reads._latest_inbox_delivery_notification_ids
+_mark_provided_inbox_notifications_read = agent_tool_reads._mark_provided_inbox_notifications_read
+list_agent_tool_notifications = agent_tool_reads.list_agent_tool_notifications
+mark_agent_tool_notification_read = agent_tool_reads.mark_agent_tool_notification_read
+_single_post_id_hint = agent_tool_reads._single_post_id_hint
+_resolve_inbox_review_target_post_id = agent_tool_reads._resolve_inbox_review_target_post_id
+note_agent_tool_inbox_review = agent_tool_reads.note_agent_tool_inbox_review
+observe_agent_tool_community = agent_tool_reads.observe_agent_tool_community
+from app.runtime.social.agent_tools import agent_tool_actions
+create_agent_tool_comment = agent_tool_actions.create_agent_tool_comment
+create_agent_tool_post = agent_tool_actions.create_agent_tool_post
+like_agent_tool_post = agent_tool_actions.like_agent_tool_post
+reply_agent_tool_post = agent_tool_actions.reply_agent_tool_post
+quote_agent_tool_post = agent_tool_actions.quote_agent_tool_post
+unlike_agent_tool_post = agent_tool_actions.unlike_agent_tool_post
+repost_agent_tool_post = agent_tool_actions.repost_agent_tool_post
+unrepost_agent_tool_post = agent_tool_actions.unrepost_agent_tool_post
+follow_agent_tool_profile = agent_tool_actions.follow_agent_tool_profile
+unfollow_agent_tool_profile = agent_tool_actions.unfollow_agent_tool_profile
+from app.domains.social.service.agent_tool_authorization import (
+    _session_fingerprint, _agent_tool_lookup_session_key,
+    _is_daypart_memory_session_key, _agent_tool_scratch_lane,
+    _raise_agent_tool_authorization_error, _agent_tool_character_id,
+)
+from app.runtime.social.agent_tool_authorization import (
+    _get_agent_tool_run, _agent_tool_user, _ensure_tick_action_allowed,
+)
+from app.runtime.social.feed_history import recent_own_root_topic_exists
+from app.core.json_objects import _json_object
+from app.domains.routines.constants import FEED_SEED_CONSUMED_ACTION_TYPE, FEED_HISTORY_SANITIZED_ACTION_TYPE, FEED_SEED_CONSUMED_LOOKBACK_DAYS, FEED_SEED_CONSUMED_LIMIT, RECENT_FEED_INTEREST_LOG_SCAN_LIMIT, RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS, RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT
+from app.domains.routines.service.feed_history import feed_seed_source_already_consumed
+from app.domains.routines.service.feed_history_values import activity_result_text_for_prompt
+from app.domains.social.service.topic_metadata import _topic_metadata_from_result, _topic_metadata_from_post_columns, _store_post_topic_metadata, _recent_feed_interest_post_is_eligible
+from app.runtime.social.topic_metadata import _latest_post_created_topic_metadata, _topic_metadata_for_post, post_topic_signature_for_prompt
+from app.runtime.social.feed_history import format_feed_seed_consumed_sources_for_prompt, format_recent_feed_interest_history_for_prompt, format_recent_own_root_topic_history_for_prompt, build_feed_history_sanitize_skeleton, format_feed_history_metadata_fallback_for_prompt, maybe_log_feed_seed_consumed_for_created_post
 from app.domains.routines.service.feed_history_values import (
     _safe_feed_history_post_id,
     _feed_history_sanitize_skeleton_item,
@@ -183,13 +226,6 @@ COMPLETE_TICK_DECISION_TYPES = {
     "relationship_review",
 }
 NOOP_COMPLETE_TICK_ACTION_PREFIXES = ("like_skipped_",)
-FEED_SEED_CONSUMED_ACTION_TYPE = "feed_seed_consumed"
-FEED_HISTORY_SANITIZED_ACTION_TYPE = "feed_history_sanitized"
-FEED_SEED_CONSUMED_LOOKBACK_DAYS = 7
-FEED_SEED_CONSUMED_LIMIT = 20
-RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
-RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
-RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
 from app.domains.social.constants import FEED_SCAN_BODY_PREVIEW_CHARS
 
 
@@ -257,847 +293,98 @@ def _reject_complete_tick(
 
 
 
-def _json_object(value: str | None) -> dict[str, object]:
-    if not value:
-        return {}
-    try:
-        parsed = json.loads(value)
-    except (json.JSONDecodeError, TypeError):
-        return {}
-    return parsed if isinstance(parsed, dict) else {}
-
-
-
-
-
-
-
-
-
-
-def _topic_metadata_from_result(value: str | None) -> dict[str, str]:
-    payload = _json_object(value)
-    topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-    novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 500)
-    return {
-        "topic_signature": topic_signature,
-        "novelty_basis": novelty_basis,
-    }
-
-
-def _topic_metadata_from_post_columns(post: _model_Post | None) -> dict[str, str]:
-    if post is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    return {
-        "topic_signature": _safe_topic_text(
-            getattr(post, "topic_signature", None), 300
-        ),
-        "novelty_basis": _safe_topic_text(getattr(post, "novelty_basis", None), 500),
-    }
-
-
-def _store_post_topic_metadata(
-    db: Session,
-    *,
-    post_id: str,
-    topic_signature: str | None,
-    novelty_basis: str | None,
-) -> None:
-    topic = _safe_topic_text(topic_signature, 300)
-    novelty = _safe_topic_text(novelty_basis, 500)
-    if not topic and not novelty:
-        return
-    post = db.get(_model_Post, post_id)
-    if post is None:
-        return
-    post.topic_signature = topic or None
-    post.novelty_basis = novelty or None
-    post.search_document = build_post_search_document(
-        title=post.title,
-        body=post.body,
-        topic_signature=post.topic_signature,
-    )
-    db.add(post)
-    unit_of_work.finish_write(db, post)
-
-
-def activity_result_text_for_prompt(
-    result: str | None, reason: str | None = None
-) -> str:
-    payload = _json_object(result)
-    if payload:
-        message = _safe_topic_text(payload.get("message"), 500)
-        if message:
-            return message
-    return result or reason or "-"
-
-
-
-
-def _feed_seed_consumed_cutoff(*, lookback_days: int) -> datetime:
-    return datetime.now(UTC) - timedelta(days=max(1, lookback_days))
-
-
-def list_recent_feed_seed_consumed_logs(
-    db: Session,
-    *,
-    character_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-    limit: int = FEED_SEED_CONSUMED_LIMIT,
-) -> list[_model_AgentActivityLog]:
-    return list(
-        db.scalars(
-            select(_model_AgentActivityLog)
-            .where(
-                _model_AgentActivityLog.character_id == character_id,
-                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                _model_AgentActivityLog.target_post_id.is_not(None),
-                _model_AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .order_by(
-                _model_AgentActivityLog.created_at.desc(),
-                _model_AgentActivityLog.id.desc(),
-            )
-            .limit(max(1, limit))
-        )
-    )
-
-
-def feed_seed_source_already_consumed(
-    db: Session,
-    *,
-    character_id: str,
-    source_post_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-) -> bool:
-    return (
-        db.scalar(
-            select(_model_AgentActivityLog.id)
-            .where(
-                _model_AgentActivityLog.character_id == character_id,
-                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                _model_AgentActivityLog.target_post_id == source_post_id,
-                _model_AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def format_feed_seed_consumed_sources_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    for log in logs:
-        source_post_id = log.target_post_id or "-"
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        created_post_id = str(result_payload.get("created_post_id") or "-")
-        post_seed = _clip_text(
-            neutralize_context_text(str(result_payload.get("post_seed") or "")), 120
-        )
-        topic_signature = _safe_topic_text(result_payload.get("topic_signature"), 300)
-        novelty_basis = _safe_topic_text(result_payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {source_post_id}",
-                    f"  consumed_at: {log.created_at.isoformat()}",
-                    f"  created_post_id: {created_post_id}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    f"  source_title: {_clip_text(neutralize_context_text(source_title), 120) or '-'}",
-                    f"  prior_post_seed: {post_seed or '-'}",
-                ]
-            )
-        )
-    return "\n".join(lines)
-
-
-def list_recent_feed_interest_logs(
-    db: Session,
-    *,
-    character_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-    limit: int = RECENT_FEED_INTEREST_LOG_SCAN_LIMIT,
-) -> list[_model_AgentActivityLog]:
-    return list(
-        db.scalars(
-            select(_model_AgentActivityLog)
-            .where(
-                _model_AgentActivityLog.character_id == character_id,
-                _model_AgentActivityLog.action_type == "feed_interests_noted",
-                _model_AgentActivityLog.result.is_not(None),
-                _model_AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .order_by(
-                _model_AgentActivityLog.created_at.desc(),
-                _model_AgentActivityLog.id.desc(),
-            )
-            .limit(max(1, limit))
-        )
-    )
-
-
-def _recent_feed_interest_post_is_eligible(
-    db: Session, *, character_id: str, post: _model_Post
-) -> bool:
-    if post.author_character_id == character_id:
-        return False
-    if post.reply_to_post_id is not None:
-        return False
-    if post.post_type != "post":
-        return False
-    return _is_post_public_context_visible(db, post)
-
-
-def _latest_post_created_topic_metadata(
-    db: Session, *, character_id: str | None, post_id: str
-) -> dict[str, str]:
-    if db is not None:
-        column_metadata = _topic_metadata_from_post_columns(db.get(_model_Post, post_id))
-        if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
-            return column_metadata
-    if db is None or character_id is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    log = db.scalar(
-        select(_model_AgentActivityLog)
-        .where(
-            _model_AgentActivityLog.character_id == character_id,
-            _model_AgentActivityLog.action_type == "post_created",
-            _model_AgentActivityLog.target_post_id == post_id,
-            _model_AgentActivityLog.result.is_not(None),
-        )
-        .order_by(
-            _model_AgentActivityLog.created_at.desc(),
-            _model_AgentActivityLog.id.desc(),
-        )
-        .limit(1)
-    )
-    if log is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    return _topic_metadata_from_result(log.result)
-
-
-def _topic_metadata_for_post(
-    db: Session, *, post: _model_Post, character_id: str | None = None
-) -> dict[str, str]:
-    column_metadata = _topic_metadata_from_post_columns(post)
-    if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
-        return column_metadata
-    return _latest_post_created_topic_metadata(
-        db,
-        character_id=character_id if character_id is not None else post.author_character_id,
-        post_id=post.id,
-    )
-
-
-def post_topic_signature_for_prompt(db: Session, post: _model_Post) -> str:
-    metadata = _topic_metadata_for_post(db, post=post)
-    return metadata["topic_signature"] or _fallback_topic_signature(
-        title=post.title, body=post.body
-    )
-
-
-def format_recent_feed_interest_history_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        if not isinstance(payload, dict):
-            continue
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = str(first_interest.get("post_id") or "").strip()
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        if not topic_signature:
-            topic_signature = _fallback_topic_signature(
-                title=str(payload.get("post_seed") or ""),
-                body=" / ".join(
-                    [
-                        str(first_interest.get("summary") or ""),
-                        str(first_interest.get("reason") or ""),
-                    ]
-                ),
-            )
-        novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  interested_at: {log.created_at.isoformat()}",
-                    f"  author: {neutralize_context_text(post.author_name or '-')}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                    "  body_preview: " + (_body_preview(post.body) or "-"),
-                    "  prior_feed_scan:",
-                    "    summary: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(first_interest.get("summary") or "")
-                            ),
-                            160,
-                        )
-                        or "-"
-                    ),
-                    "    reason: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(first_interest.get("reason") or "")
-                            ),
-                            180,
-                        )
-                        or "-"
-                    ),
-                    "    review_reason: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(payload.get("review_reason") or "")
-                            ),
-                            180,
-                        )
-                        or "-"
-                    ),
-                    "    post_seed: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(str(payload.get("post_seed") or "")),
-                            180,
-                        )
-                        or "-"
-                    ),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def format_recent_own_root_topic_history_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(_model_Post)
-            .where(
-                _model_Post.author_character_id == character_id,
-                _model_Post.reply_to_post_id.is_(None),
-                _model_Post.post_type != "repost",
-                _model_Post.repost_of_post_id.is_(None),
-                _model_Post.deleted_at.is_(None),
-                _model_Post.report_hidden_at.is_(None),
-                _model_Post.created_at >= cutoff,
-            )
-            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    if not posts:
-        return "- none"
-    lines: list[str] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        novelty_basis = metadata["novelty_basis"]
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  created_at: {post.created_at.isoformat()}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                    f"  body_preview: {_body_preview(post.body) or '-'}",
-                ]
-            )
-        )
-        if len(lines) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-
-
-def _build_consumed_sources_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    items: list[dict[str, str]] = []
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)[
-        :FEED_HISTORY_SANITIZED_CONSUMED_LIMIT
-    ]
-    for log in logs:
-        source_post_id = _safe_feed_history_post_id(log.target_post_id)
-        if not source_post_id:
-            continue
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=source_post_id,
-                topic_signature=result_payload.get("topic_signature"),
-                novelty_basis=result_payload.get("novelty_basis"),
-                source_title=source_title,
-                summary_source=result_payload.get("post_seed"),
-                timestamp_label="consumed_at",
-                timestamp_value=log.created_at,
-            )
-        )
-    return items
-
-
-def _build_recent_feed_interests_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    items: list[dict[str, str]] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = _safe_feed_history_post_id(first_interest.get("post_id"))
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        if not topic_signature:
-            topic_signature = _fallback_topic_signature(
-                title=str(payload.get("post_seed") or ""),
-                body=" / ".join(
-                    [
-                        str(first_interest.get("summary") or ""),
-                        str(first_interest.get("reason") or ""),
-                    ]
-                ),
-            )
-        summary_source = " / ".join(
-            item
-            for item in [
-                str(first_interest.get("summary") or "").strip(),
-                str(first_interest.get("reason") or "").strip(),
-                str(payload.get("review_reason") or "").strip(),
-                str(payload.get("post_seed") or "").strip(),
-            ]
-            if item
-        )
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=post_id,
-                topic_signature=topic_signature,
-                novelty_basis=payload.get("novelty_basis"),
-                source_title=post.title,
-                summary_source=summary_source,
-                timestamp_label="interested_at",
-                timestamp_value=log.created_at,
-            )
-        )
-        if len(items) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return items
-
-
-def _build_recent_own_root_topics_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(_model_Post)
-            .where(
-                _model_Post.author_character_id == character_id,
-                _model_Post.reply_to_post_id.is_(None),
-                _model_Post.post_type != "repost",
-                _model_Post.repost_of_post_id.is_(None),
-                _model_Post.deleted_at.is_(None),
-                _model_Post.report_hidden_at.is_(None),
-                _model_Post.created_at >= cutoff,
-            )
-            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    items: list[dict[str, str]] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=post.id,
-                topic_signature=topic_signature,
-                novelty_basis=metadata["novelty_basis"],
-                source_title=post.title,
-                summary_source=_body_preview(post.body),
-                timestamp_label="created_at",
-                timestamp_value=post.created_at,
-            )
-        )
-        if len(items) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return items
-
-
-def build_feed_history_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> dict[str, list[dict[str, str]]]:
-    return {
-        "consumed_sources": _build_consumed_sources_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-        "recent_feed_interests": _build_recent_feed_interests_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-        "recent_own_root_topics": _build_recent_own_root_topics_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def format_feed_history_metadata_fallback_for_prompt(
-    db: Session, *, character_id: str
-) -> dict[str, str]:
-    return {
-        "consumed_seed_sources": _format_consumed_sources_metadata_only(
-            db, character_id=character_id
-        ),
-        "recent_feed_interest_history": _format_recent_feed_interests_metadata_only(
-            db, character_id=character_id
-        ),
-        "recent_own_root_topic_history": _format_recent_own_roots_metadata_only(
-            db, character_id=character_id
-        ),
-    }
-
-
-def _format_consumed_sources_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)[
-        :FEED_HISTORY_SANITIZED_CONSUMED_LIMIT
-    ]
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    for log in logs:
-        source_post_id = log.target_post_id or "-"
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {source_post_id}",
-                    f"  consumed_at: {log.created_at.isoformat()}",
-                    f"  created_post_id: {result_payload.get('created_post_id') or '-'}",
-                    "  topic_signature: "
-                    + (_safe_topic_text(result_payload.get("topic_signature"), 300) or "-"),
-                    "  novelty_basis: "
-                    + (_safe_topic_text(result_payload.get("novelty_basis"), 300) or "-"),
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(source_title), 120) or "-"),
-                ]
-            )
-        )
-    return "\n".join(lines)
-
-
-def _format_recent_feed_interests_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = str(first_interest.get("post_id") or "").strip()
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  interested_at: {log.created_at.isoformat()}",
-                    f"  author: {neutralize_context_text(post.author_name or '-')}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def _format_recent_own_roots_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(_model_Post)
-            .where(
-                _model_Post.author_character_id == character_id,
-                _model_Post.reply_to_post_id.is_(None),
-                _model_Post.post_type != "repost",
-                _model_Post.repost_of_post_id.is_(None),
-                _model_Post.deleted_at.is_(None),
-                _model_Post.report_hidden_at.is_(None),
-                _model_Post.created_at >= cutoff,
-            )
-            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    lines: list[str] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  created_at: {post.created_at.isoformat()}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {metadata['novelty_basis'] or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def recent_own_root_topic_exists(
-    db: Session, *, character_id: str, topic_signature: str | None
-) -> bool:
-    topic = _safe_topic_text(topic_signature, 300)
-    if not topic or db is None:
-        return False
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(_model_Post)
-            .where(
-                _model_Post.author_character_id == character_id,
-                _model_Post.reply_to_post_id.is_(None),
-                _model_Post.post_type != "repost",
-                _model_Post.repost_of_post_id.is_(None),
-                _model_Post.deleted_at.is_(None),
-                _model_Post.report_hidden_at.is_(None),
-                _model_Post.created_at >= cutoff,
-            )
-            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        existing_topic = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        if _safe_topic_text(existing_topic, 300) == topic:
-            return True
-    return False
-
-
-def _feed_seed_consumed_log_exists(
-    db: Session, *, character_id: str, source_post_id: str
-) -> bool:
-    return (
-        db.scalar(
-            select(_model_AgentActivityLog.id)
-            .where(
-                _model_AgentActivityLog.character_id == character_id,
-                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                _model_AgentActivityLog.target_post_id == source_post_id,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def _extract_feed_seed_source_from_run(
-    run: _model_AgentRun,
-) -> tuple[str, str, str, str] | None:
-    gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
-    action_gate = gateway_result.get("action_gate")
-    if not isinstance(action_gate, dict):
-        return None
-    prepared_brief = action_gate.get("prepared_create_post_brief")
-    if not is_feed_scan_community_theme_brief(prepared_brief):
-        return None
-    feed_interests = action_gate.get("feed_interests")
-    if not isinstance(feed_interests, dict):
-        return None
-    interests = feed_interests.get("interests")
-    if not isinstance(interests, list) or not interests:
-        return None
-    first_interest = interests[0]
-    if not isinstance(first_interest, dict):
-        return None
-    source_post_id = str(first_interest.get("post_id") or "").strip()
-    if not source_post_id:
-        return None
-    post_seed = str(feed_interests.get("post_seed") or "").strip()
-    topic_signature = str(feed_interests.get("topic_signature") or "").strip()
-    novelty_basis = str(feed_interests.get("novelty_basis") or "").strip()
-    return source_post_id, post_seed, topic_signature, novelty_basis
-
-
-def maybe_log_feed_seed_consumed_for_created_post(
-    db: Session, *, run: _model_AgentRun, created_post_id: str
-) -> _model_AgentActivityLog | None:
-    seed_source = _extract_feed_seed_source_from_run(run)
-    if seed_source is None:
-        return None
-    source_post_id, post_seed, topic_signature, novelty_basis = seed_source
-    if source_post_id == created_post_id:
-        return None
-    if _feed_seed_consumed_log_exists(
-        db, character_id=run.character_id, source_post_id=source_post_id
-    ):
-        return None
-    if community_crud.get_post(db, source_post_id) is None:
-        return None
-    payload = {
-        "created_post_id": created_post_id,
-        "run_id": run.id,
-        "post_seed": _clip_text(neutralize_context_text(post_seed), 240),
-        "topic_signature": _safe_topic_text(topic_signature, 300),
-        "novelty_basis": _safe_topic_text(novelty_basis, 500),
-        "consumed_at": datetime.now(UTC).isoformat(),
-    }
-    try:
-        return agent_crud.log_activity(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            action_type=FEED_SEED_CONSUMED_ACTION_TYPE,
-            target_post_id=source_post_id,
-            reason="feed_scan_post_seed_created_post",
-            result=json.dumps(payload, ensure_ascii=False)[:4000],
-        )
-    except Exception:
-        db.rollback()
-        logger.exception(
-            "feed_seed_consumed_log_failed character_id=%s run_id=%s source_post_id=%s created_post_id=%s",
-            run.character_id,
-            run.id,
-            source_post_id,
-            created_post_id,
-        )
-        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def _complete_tick_representative_target(
@@ -1122,53 +409,16 @@ def _complete_tick_representative_target(
 
 
 
-def _session_fingerprint(session_key: str) -> str:
-    return hashlib.sha256(session_key.encode("utf-8")).hexdigest()[:12]
 
 
-def _agent_tool_lookup_session_key(session_key: str) -> str:
-    for marker in (":scratch:", ":run-main:"):
-        if marker in session_key:
-            return session_key.split(marker, 1)[0]
-    return session_key
 
 
-def _is_daypart_memory_session_key(session_key: str) -> bool:
-    return ":resident-daypart:" in session_key
 
 
-def _agent_tool_scratch_lane(session_key: str) -> str | None:
-    marker = ":scratch:"
-    if marker not in session_key:
-        return None
-    suffix = session_key.split(marker, 1)[1]
-    lane = suffix.split(":", 1)[0].strip()
-    return lane or None
 
 
 
 
-def _raise_agent_tool_authorization_error(
-    *,
-    action: str,
-    reason: str,
-    session_key: str,
-    run,
-    requested_post_id: str | None = None,
-    requested_character_id: str | None = None,
-) -> None:
-    detail = (
-        f"Agent run is not authorized for this {action} "
-        f"(reason={reason}, session={_session_fingerprint(session_key)}, "
-        f"requested_post={requested_post_id or '-'}, "
-        f"requested_character={requested_character_id or '-'}, "
-        f"run_id={getattr(run, 'id', '-') if run else '-'}, "
-        f"run_status={getattr(run, 'status', '-') if run else '-'}, "
-        f"run_post={getattr(run, 'post_id', '-') if run else '-'}, "
-        f"run_character={getattr(run, 'character_id', '-') if run else '-'})"
-    )
-    logger.warning("agent tool authorization denied: %s", detail)
-    raise AgentRunAuthorizationError(detail)
 
 
 
@@ -1241,678 +491,86 @@ def _raise_agent_tool_authorization_error(
 
 
 
-def create_agent_tool_comment(
-    db: Session, session_key: str, post_id: str, data: schemas.CommentCreate
-) -> schemas.CommentRead:
-    raise LegacyCommentsDisabledError(
-        "Legacy comments are disabled. Use /posts/{post_id}/replies."
-    )
-
-
-def create_agent_tool_post(
-    db: Session,
-    session_key: str,
-    data: schemas.PostCreate,
-    *,
-    topic_signature: str | None = None,
-    novelty_basis: str | None = None,
-    lore_chunk_ids: list[str] | None = None,
-    retrieval_mode: str | None = None,
-    lore_query_mode: str | None = None,
-    consume_pending_feed_cue: bool = False,
-    feed_cue_id: int | None = None,
-    world_id: str | None = None,
-    author_world_character_id: str | None = None,
-) -> schemas.PostDetail:
-    lookup_session_key = _agent_tool_lookup_session_key(session_key)
-    run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
-    if run is None:
-        latest_run = agent_run_crud.get_latest_run_for_session(db, lookup_session_key)
-        _raise_agent_tool_authorization_error(
-            action="post",
-            reason="no_active_run",
-            session_key=session_key,
-            run=latest_run,
-            requested_character_id=data.author_character_id,
-        )
-    author_character_id = data.author_character_id or run.character_id
-    if run.character_id != author_character_id:
-        _raise_agent_tool_authorization_error(
-            action="post",
-            reason="character_mismatch",
-            session_key=session_key,
-            run=run,
-            requested_character_id=author_character_id,
-        )
-    user = db.get(_model_User, run.user_id)
-    if user is None:
-        _raise_agent_tool_authorization_error(
-            action="post",
-            reason="user_missing",
-            session_key=session_key,
-            run=run,
-            requested_character_id=author_character_id,
-        )
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="post")
-    post = create_post(
-        db,
-        user,
-        schemas.PostCreate(
-            title=data.title,
-            body=data.body,
-            author_character_id=author_character_id,
-        ),
-        log_manual_activity=False,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-    )
-    result = build_post_created_activity_result(
-        post_id=post.id,
-        title=post.title,
-        body=post.body,
-        topic_signature=topic_signature,
-        novelty_basis=novelty_basis,
-        lore_chunk_ids=lore_chunk_ids,
-        retrieval_mode=retrieval_mode,
-        lore_query_mode=lore_query_mode,
-        message=f"Created post {post.id}.",
-    )
-    topic_metadata = _topic_metadata_from_result(result)
-    _store_post_topic_metadata(
-        db,
-        post_id=post.id,
-        topic_signature=topic_metadata["topic_signature"],
-        novelty_basis=topic_metadata["novelty_basis"],
-    )
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="post_created",
-        target_post_id=post.id,
-        reason="agent_tool_post",
-        result=result,
-    )
-    maybe_log_feed_seed_consumed_for_created_post(
-        db, run=run, created_post_id=post.id
-    )
-    if consume_pending_feed_cue:
-        cue = agent_crud.get_pending_feed_cue(db, run.character_id)
-        if feed_cue_id is None or (cue is not None and cue.id == feed_cue_id):
-            agent_crud.mark_pending_feed_cue_used(
-                db, character_id=run.character_id, run_id=run.id, post_id=post.id
-            )
-    return post
-
-
-def like_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="like",
-        requested_post_id=post_id,
-        requested_character_id=data.character_id,
-    )
-    character_id = _agent_tool_character_id(
-        run,
-        data.character_id,
-        action="like",
-        session_key=session_key,
-        post_id=post_id,
-    )
-    user = _agent_tool_user(db, run, action="like", session_key=session_key)
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="like")
-    if _character_already_liked_post(db, character_id=character_id, post_id=post_id):
-        raise AgentRunAuthorizationError("like is already recorded for this post")
-    return like_post(
-        db,
-        user,
-        post_id,
-        schemas.PostLikeCreate(character_id=character_id),
-        activity_reason="agent_tool_like",
-    )
-
-
-def list_agent_tool_feed(
-    db: Session, session_key: str, *, limit: int = 20, cursor: str | None = None
-) -> schemas.AgentFeedPage:
-    run = _get_agent_tool_run(db, session_key=session_key, action="list_feed")
-    scratch_lane = _agent_tool_scratch_lane(session_key)
-    effective_limit = (
-        max(1, min(limit, 30))
-        if scratch_lane == "feed-scan"
-        else max(1, min(limit, 100))
-    )
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="feed_viewed",
-        target_post_id=run.post_id,
-        reason="agent_tool_list_feed",
-        result=f"Read feed limit={effective_limit}.",
-    )
-    if scratch_lane == "feed-scan":
-        return _list_resident_feed_scan_page(
-            db, run=run, limit=effective_limit, cursor=cursor
-        )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db, limit=effective_limit, cursor=cursor
-    )
-    return schemas.AgentFeedPage(
-        items=[
-            _agent_feed_post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _list_resident_feed_scan_page(
-    db: Session,
-    *,
-    run: _model_AgentRun,
-    limit: int,
-    cursor: str | None = None,
-) -> schemas.AgentFeedPage:
-    allowed_actions = set(
-        agent_activity_policy.build_activity_policy(
-            db, character_id=run.character_id
-        ).allowed_actions
-    )
-    items: list[_model_Post] = []
-    page_cursor = cursor
-    last_scanned_id: str | None = cursor
-    scanned = 0
-    while len(items) < limit and scanned < 500:
-        posts, next_cursor = community_crud.list_resident_scan_posts(
-            db, limit=100, cursor=page_cursor
-        )
-        if not posts:
-            break
-        scanned += len(posts)
-        for post in posts:
-            last_scanned_id = post.id
-            if _post_has_resident_feed_action(
-                db,
-                post=post,
-                character_id=run.character_id,
-                allowed_actions=allowed_actions,
-            ):
-                items.append(post)
-                if len(items) >= limit:
-                    break
-        if next_cursor is None or len(items) >= limit:
-            break
-        page_cursor = next_cursor
-    return schemas.AgentFeedPage(
-        items=[_agent_feed_post_summary(db, post) for post in items],
-        next_cursor=last_scanned_id if len(items) >= limit else None,
-    )
-
-
-
-
-
-
-
-
-
-
-def list_agent_tool_following_feed(
-    db: Session, session_key: str, *, limit: int = 20, cursor: str | None = None
-) -> schemas.FeedPage:
-    run = _get_agent_tool_run(db, session_key=session_key, action="list_following_feed")
-    followed_user_ids, followed_character_ids = (
-        community_crud.get_followed_profiles_for_character(db, run.character_id)
-    )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db,
-        limit=_safe_limit(limit),
-        cursor=cursor,
-        followed_user_ids=followed_user_ids,
-        followed_character_ids=followed_character_ids,
-    )
-    return _neutralize_feed_page_for_agent(
-        schemas.FeedPage(
-            items=[
-                _post_summary(db, post)
-                for post in posts
-                if _is_post_public_context_visible(db, post)
-            ],
-            next_cursor=next_cursor,
-        )
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-def _agent_feed_post_summary(
-    db: Session, post: _model_Post
-) -> schemas.AgentFeedPostSummary:
-    author = _post_author_identity(db, post)
-    return schemas.AgentFeedPostSummary(
-        post_id=post.id,
-        author=neutralize_context_text(author["name"] or "-"),
-        created_at=post.created_at,
-        topic_signature=post_topic_signature_for_prompt(db, post),
-        title=_safe_topic_text(post.title, 120),
-        body_preview=_body_preview(post.body),
-    )
-
-
-def get_agent_tool_post_thread(
-    db: Session, session_key: str, post_id: str
-) -> schemas.PostThreadRead:
-    run = _get_agent_tool_run(
-        db, session_key=session_key, action="get_thread", requested_post_id=post_id
-    )
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        raise PostNotFoundError(post_id)
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="thread_viewed",
-        target_post_id=_thread_root_post_id(db, post_id),
-        reason="agent_tool_get_thread",
-        result=f"Read thread {post_id}.",
-    )
-    return _neutralize_post_thread_for_agent(get_post_thread(db, post_id))
-
-
-def reply_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.TimelineReplyCreate
-) -> schemas.PostDetail:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="reply",
-        requested_post_id=post_id,
-        requested_character_id=data.author_character_id,
-    )
-    character_id = _agent_tool_character_id(
-        run,
-        data.author_character_id,
-        action="reply",
-        session_key=session_key,
-        post_id=post_id,
-    )
-    user = _agent_tool_user(db, run, action="reply", session_key=session_key)
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="reply")
-    target_post = community_crud.get_post(db, post_id)
-    if target_post is None or not _is_post_public_context_visible(db, target_post):
-        raise PostNotFoundError(post_id)
-    if target_post.author_character_id == character_id:
-        raise AgentRunAuthorizationError(
-            "reply target is self-authored. Reply to another character's post in the viewed thread instead."
-        )
-    _ensure_agent_can_reply_to_thread(db, post_id=post_id, character_id=character_id)
-    return create_reply(
-        db,
-        user,
-        post_id,
-        schemas.TimelineReplyCreate(body=data.body, author_character_id=character_id),
-        activity_reason="agent_tool_reply",
-        enforce_user_quota=False,
-    )
-
-
-def quote_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.TimelineQuoteCreate
-) -> schemas.PostDetail:
-    raise AgentRunAuthorizationError("Quote is disabled for agent activity")
-
-
-
-
-
-
-
-
-
-
-def unlike_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="unlike",
-        requested_post_id=post_id,
-        requested_character_id=data.character_id,
-    )
-    character_id = _agent_tool_character_id(
-        run,
-        data.character_id,
-        action="unlike",
-        session_key=session_key,
-        post_id=post_id,
-    )
-    user = _agent_tool_user(db, run, action="unlike", session_key=session_key)
-    return unlike_post(
-        db, user, post_id, schemas.PostLikeCreate(character_id=character_id)
-    )
-
-
-def repost_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="repost",
-        requested_post_id=post_id,
-        requested_character_id=data.character_id,
-    )
-    character_id = _agent_tool_character_id(
-        run,
-        data.character_id,
-        action="repost",
-        session_key=session_key,
-        post_id=post_id,
-    )
-    user = _agent_tool_user(db, run, action="repost", session_key=session_key)
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="repost")
-    if _character_already_reposted_post(
-        db, character_id=character_id, post_id=post_id
-    ):
-        raise AgentRunAuthorizationError("repost is already recorded for this post")
-    return repost_post(
-        db,
-        user,
-        post_id,
-        schemas.PostLikeCreate(character_id=character_id),
-        activity_reason="agent_tool_repost",
-    )
-
-
-def unrepost_agent_tool_post(
-    db: Session, session_key: str, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="unrepost",
-        requested_post_id=post_id,
-        requested_character_id=data.character_id,
-    )
-    character_id = _agent_tool_character_id(
-        run,
-        data.character_id,
-        action="unrepost",
-        session_key=session_key,
-        post_id=post_id,
-    )
-    user = _agent_tool_user(db, run, action="unrepost", session_key=session_key)
-    return unrepost_post(
-        db, user, post_id, schemas.PostLikeCreate(character_id=character_id)
-    )
-
-
-def follow_agent_tool_profile(
-    db: Session, session_key: str, data: schemas.FollowCreate
-) -> schemas.FollowRead:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="follow",
-        requested_character_id=data.follower_character_id,
-    )
-    follower_character_id = _agent_tool_character_id(
-        run,
-        data.follower_character_id,
-        action="follow",
-        session_key=session_key,
-    )
-    user = _agent_tool_user(db, run, action="follow", session_key=session_key)
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="follow")
-    follower_character = community_crud.get_character(db, follower_character_id)
-    target_user, target_character = _resolve_target_profile(
-        db, data.target_type, data.target_id
-    )
-    already_following = community_crud.profile_follow_exists(
-        db,
-        follower_user=None,
-        follower_character=follower_character,
-        target_user=target_user,
-        target_character=target_character,
-    )
-    if already_following:
-        raise AgentRunAuthorizationError("follow is already recorded for this profile")
-    follow = follow_profile(
-        db,
-        user,
-        schemas.FollowCreate(
-            target_type=data.target_type,
-            target_id=data.target_id,
-            follower_character_id=follower_character_id,
-        ),
-    )
-    if not already_following:
-        agent_crud.log_activity(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            action_type="followed",
-            target_post_id=None,
-            reason="agent_tool_follow",
-            result=f"Followed {data.target_type}:{data.target_id}.",
-        )
-    return follow
-
-
-def unfollow_agent_tool_profile(
-    db: Session, session_key: str, data: schemas.FollowCreate
-) -> None:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="unfollow",
-        requested_character_id=data.follower_character_id,
-    )
-    follower_character_id = _agent_tool_character_id(
-        run,
-        data.follower_character_id,
-        action="unfollow",
-        session_key=session_key,
-    )
-    user = _agent_tool_user(db, run, action="unfollow", session_key=session_key)
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="unfollow")
-    unfollow_profile(
-        db,
-        user,
-        schemas.FollowCreate(
-            target_type=data.target_type,
-            target_id=data.target_id,
-            follower_character_id=follower_character_id,
-        ),
-    )
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="unfollowed",
-        target_post_id=None,
-        reason="agent_tool_unfollow",
-        result=f"Unfollowed {data.target_type}:{data.target_id}.",
-    )
-
-
-def get_agent_tool_profile(
-    db: Session, session_key: str, profile_type: str, profile_id: str
-) -> schemas.ProfileRead:
-    _get_agent_tool_run(db, session_key=session_key, action="get_profile")
-    if profile_type == "user":
-        return get_user_profile(db, profile_id)
-    if profile_type == "character":
-        return get_character_profile(db, profile_id)
-    raise ProfileNotFoundError(profile_id)
-
-
-def _log_inbox_notifications_provided(
-    db: Session,
-    *,
-    run: _model_AgentRun,
-    session_key: str,
-    notifications: list[_model_Notification],
-) -> None:
-    payload = {
-        "session_fingerprint": _session_fingerprint(session_key),
-        "notification_ids": [notification.id for notification in notifications[:10]],
-    }
-    first = notifications[0] if notifications else None
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="inbox_notifications_provided",
-        target_post_id=(first.source_post_id or first.post_id) if first else run.post_id,
-        reason="agent_tool_get_notifications",
-        result=json.dumps(payload, ensure_ascii=False)[:4000],
-    )
-
-
-def _latest_inbox_delivery_notification_ids(
-    db: Session, *, run: _model_AgentRun, session_key: str
-) -> list[int]:
-    fingerprint = _session_fingerprint(session_key)
-    logs = list(
-        db.scalars(
-            select(_model_AgentActivityLog)
-            .where(
-                _model_AgentActivityLog.user_id == run.user_id,
-                _model_AgentActivityLog.character_id == run.character_id,
-                _model_AgentActivityLog.action_type == "inbox_notifications_provided",
-                _model_AgentActivityLog.created_at >= run.created_at,
-            )
-            .order_by(
-                _model_AgentActivityLog.created_at.desc(),
-                _model_AgentActivityLog.id.desc(),
-            )
-            .limit(5)
-        )
-    )
-    for log in logs:
-        try:
-            payload = json.loads(log.result)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(payload, dict):
-            continue
-        if payload.get("session_fingerprint") != fingerprint:
-            continue
-        ids = payload.get("notification_ids")
-        if not isinstance(ids, list):
-            return []
-        normalized: list[int] = []
-        for item in ids[:10]:
-            if isinstance(item, bool):
-                continue
-            try:
-                normalized.append(int(item))
-            except (TypeError, ValueError):
-                continue
-        return normalized
-    return []
-
-
-def _mark_provided_inbox_notifications_read(
-    db: Session, *, run: _model_AgentRun, session_key: str
-) -> None:
-    for notification_id in _latest_inbox_delivery_notification_ids(
-        db, run=run, session_key=session_key
-    ):
-        notification = community_crud.get_notification_for_agent(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            notification_id=notification_id,
-        )
-        if (
-            notification is not None
-            and notification.notification_type == "reply"
-            and notification.read_at is None
-        ):
-            community_crud.mark_notification_read(db, notification)
-
-
-def list_agent_tool_notifications(
-    db: Session, session_key: str, *, limit: int = 50
-) -> list[schemas.NotificationRead]:
-    run = _get_agent_tool_run(db, session_key=session_key, action="get_notifications")
-    if _agent_tool_scratch_lane(session_key) == "inbox":
-        policy = agent_activity_policy.build_activity_policy(
-            db, character_id=run.character_id
-        )
-        notifications = list_resident_actionable_inbox_notifications(
-            db,
-            character_id=run.character_id,
-            allowed_actions=policy.allowed_actions,
-            limit=max(1, min(limit, 10)),
-        )
-        _log_inbox_notifications_provided(
-            db, run=run, session_key=session_key, notifications=notifications
-        )
-        return [
-            _compact_agent_notification_read(_notification_read(db, item))
-            for item in notifications
-        ]
-    else:
-        notifications = [
-            item
-            for item in community_crud.list_notifications_for_agent(
-                db,
-                user_id=run.user_id,
-                character_id=run.character_id,
-                limit=max(1, min(limit, 100)),
-            )
-            if _notification_source_is_public_context_visible(db, item)
-        ]
-    return [_notification_read(db, item) for item in notifications]
-
-
-def mark_agent_tool_notification_read(
-    db: Session, session_key: str, notification_id: int
-) -> schemas.NotificationRead:
-    run = _get_agent_tool_run(db, session_key=session_key, action="read_notification")
-    notification = community_crud.get_notification_for_agent(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        notification_id=notification_id,
-    )
-    if notification is None or not _notification_source_is_public_context_visible(
-        db, notification
-    ):
-        raise NotificationNotFoundError(notification_id)
-    return _notification_read(db, community_crud.mark_notification_read(db, notification))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def note_agent_tool_feed_interests(
@@ -2090,128 +748,12 @@ def note_agent_tool_feed_history_sanitize(
         raise
 
 
-def _single_post_id_hint(value: str | None) -> str | None:
-    if value is None:
-        return None
-    post_id = value.strip()
-    if not post_id:
-        return None
-    if "," in post_id or any(ch.isspace() for ch in post_id):
-        return None
-    return post_id
 
 
-def _resolve_inbox_review_target_post_id(
-    db: Session, *, run: _model_AgentRun, data: schemas.AgentInboxReviewCreate
-) -> tuple[str | None, str, list[str]]:
-    warnings: list[str] = []
-    raw_candidate_post_id = data.candidate_post_id or ""
-    candidate_post_id = _single_post_id_hint(data.candidate_post_id)
-    resolved_post_id: str | None = None
-
-    if raw_candidate_post_id and candidate_post_id is None:
-        warnings.append("candidate_post_id_invalid_format")
-
-    if data.candidate_notification_id is not None:
-        notification = community_crud.get_notification_for_agent(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            notification_id=data.candidate_notification_id,
-        )
-        if notification is None:
-            warnings.append("candidate_notification_id_not_found")
-        elif notification.notification_type != "reply":
-            warnings.append("candidate_notification_id_not_reply")
-        else:
-            source_post_id = notification.source_post_id or notification.post_id
-            source = community_crud.get_post(db, source_post_id) if source_post_id else None
-            if source is not None and _is_post_public_context_visible(db, source):
-                resolved_post_id = source_post_id
-            else:
-                warnings.append("candidate_notification_source_post_not_found")
-
-    if candidate_post_id is not None:
-        candidate = community_crud.get_post(db, candidate_post_id)
-        if candidate is None or not _is_post_public_context_visible(db, candidate):
-            warnings.append("candidate_post_id_not_found")
-        elif resolved_post_id is None:
-            resolved_post_id = candidate_post_id
-        elif candidate_post_id != resolved_post_id:
-            warnings.append("candidate_post_id_mismatch_used_notification_source")
-
-    stored_candidate_post_id = resolved_post_id or ""
-    return resolved_post_id or run.post_id, stored_candidate_post_id, warnings
 
 
-def note_agent_tool_inbox_review(
-    db: Session, session_key: str, data: schemas.AgentInboxReviewCreate
-) -> schemas.AgentToolNoteRead:
-    run = _get_agent_tool_run(db, session_key=session_key, action="note_inbox_review")
-    target_post_id, stored_candidate_post_id, warnings = _resolve_inbox_review_target_post_id(
-        db, run=run, data=data
-    )
-    payload = {
-        "notification_ids": data.notification_ids[:10],
-        "reviewed_thread_ids": data.reviewed_thread_ids[:5],
-        "response_plan": data.response_plan or "",
-        "no_public_response_reason": data.no_public_response_reason or "",
-        "candidate_notification_id": data.candidate_notification_id,
-        "candidate_post_id": stored_candidate_post_id,
-        "candidate_summary": data.candidate_summary or "",
-        "candidate_reason": data.candidate_reason or "",
-        "reply_context": data.reply_context or "",
-    }
-    if warnings:
-        payload["warnings"] = warnings
-    result = json.dumps(payload, ensure_ascii=False)
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="inbox_reviewed",
-        target_post_id=target_post_id,
-        reason="agent_tool_note_inbox_review",
-        result=result[:4000],
-    )
-    if _agent_tool_scratch_lane(session_key) == "inbox":
-        _mark_provided_inbox_notifications_read(
-            db, run=run, session_key=session_key
-        )
-    return schemas.AgentToolNoteRead(
-        status="ok", action_type="inbox_reviewed", result=result
-    )
 
 
-def observe_agent_tool_community(
-    db: Session, session_key: str, data: schemas.AgentObserveCreate
-) -> schemas.AgentToolNoteRead:
-    run = _get_agent_tool_run(
-        db,
-        session_key=session_key,
-        action="observe",
-        requested_post_id=data.target_post_id,
-    )
-    _ensure_tick_action_allowed(db, session_key=session_key, run=run, action="observe")
-    if data.target_post_id:
-        target_post = community_crud.get_post(db, data.target_post_id)
-        if target_post is None or not _is_post_public_context_visible(db, target_post):
-            raise PostNotFoundError(data.target_post_id)
-    result = data.summary
-    if data.memory_hint:
-        result = f"{result}\n메모 힌트: {data.memory_hint}"
-    agent_crud.log_activity(
-        db,
-        user_id=run.user_id,
-        character_id=run.character_id,
-        action_type="observed",
-        target_post_id=data.target_post_id or run.post_id,
-        reason="agent_tool_observe",
-        result=result[:2000],
-    )
-    return schemas.AgentToolNoteRead(
-        status="ok", action_type="observed", result=result
-    )
 
 
 def _complete_tick_target_post(
@@ -3238,95 +1780,3 @@ def save_agent_tool_character_state(
         ),
     )
     return state
-
-
-
-
-def _get_agent_tool_run(
-    db: Session,
-    *,
-    session_key: str,
-    action: str,
-    requested_post_id: str | None = None,
-    requested_character_id: str | None = None,
-) -> _model_AgentRun:
-    run = agent_run_crud.get_active_run_for_tool_auth_key(db, session_key)
-    if run is not None:
-        return run
-    if _is_daypart_memory_session_key(session_key):
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="daypart_session_key_not_authorized",
-            session_key=session_key,
-            run=None,
-            requested_post_id=requested_post_id,
-            requested_character_id=requested_character_id,
-        )
-    lookup_session_key = _agent_tool_lookup_session_key(session_key)
-    run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
-    if run is None:
-        latest_run = (
-            agent_run_crud.get_latest_run_for_tool_auth_key(db, session_key)
-            or agent_run_crud.get_latest_run_for_session(db, lookup_session_key)
-        )
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="no_active_run",
-            session_key=session_key,
-            run=latest_run,
-            requested_post_id=requested_post_id,
-            requested_character_id=requested_character_id,
-        )
-    return run
-
-
-def _agent_tool_character_id(
-    run: _model_AgentRun,
-    requested_character_id: str | None,
-    *,
-    action: str,
-    session_key: str,
-    post_id: str | None = None,
-) -> str:
-    character_id = requested_character_id or run.character_id
-    if character_id != run.character_id:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="character_mismatch",
-            session_key=session_key,
-            run=run,
-            requested_post_id=post_id,
-            requested_character_id=character_id,
-        )
-    return character_id
-
-
-def _agent_tool_user(
-    db: Session, run: _model_AgentRun, *, action: str, session_key: str
-) -> _model_User:
-    user = db.get(_model_User, run.user_id)
-    if user is None:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="user_missing",
-            session_key=session_key,
-            run=run,
-            requested_character_id=run.character_id,
-        )
-    return user
-
-
-def _ensure_tick_action_allowed(
-    db: Session, *, session_key: str, run: _model_AgentRun, action: str
-) -> None:
-    try:
-        agent_activity_policy.assert_action_allowed(db, run=run, action=action)
-    except agent_activity_policy.ActivityPolicyDeniedError as exc:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason=str(exc),
-            session_key=session_key,
-            run=run,
-            requested_post_id=run.post_id,
-            requested_character_id=run.character_id,
-        )

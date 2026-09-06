@@ -913,3 +913,15 @@ World Feed의 실행 판단은 `social/service/feed_cycle.py`가 소유한다. �
 
 
 World Feed의 bounded prompt와 서버 후보/의도/공개 근거 지침은 `social/service/feed_reaction_prompts.py`의 실제 정책이다. `runtime/social/feed_reaction_provider.py`는 기존 credential resolver·Gemini 응답 schema·DirectLlm transport·trace context를 연결한다. prompt를 이동하면서 문자열·후보 목록·중립화/길이 제한·응답 계약을 바꾸지 않으며, 실제 네트워크나 자격 증명 해석을 service의 import/구성 단계에서 실행하지 않는다.
+
+
+활동 계획에 사용할 소비 이력/최근 관심/자기 주제 이력은 `routines/service/feed_history.py`와 `routines/repository/feed_history.py`가 소유한다. Post/root 이력 SQL·숨김/공개 문맥·현재 컬럼 우선 주제 메타데이터는 `social/repository/topic_history.py`, `social/service/topic_metadata.py`가 담당한다. 실행 조립은 원래 Session의 붙어 있는 객체를 그대로 읽어 제공한다. Routines가 Social ORM이나 저장소를 직접 가져오거나, Post 컬럼이 이미 채워졌는데 활동 로그를 미리 조회하지 않는다. 중립 JSON-object fallback은 `core/json_objects.py`의 동일 함수 하나를 공유한다.
+
+
+Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `social/service/agent_tool_authorization.py`가 소유한다. Routines의 Run 조회·활동 허용 검사와 Identity 사용자 조회는 `runtime/social/agent_tool_authorization.py`가 원래 Session으로 연결한다. Run auth key 성공을 먼저 반환하고 daypart 세션 거절 뒤에만 기존 fallback을 수행한다. 협력은 객체 복사·선조회·commit을 추가하지 않으며, 지정된 활동 거절 외의 예외는 그대로 전달한다.
+
+
+실제 Social 도구 게시/답글/반응/팔로우는 `social/service/agent_tool_actions.py`의 `AgentToolActionService`가 소유한다. 원래 권한/자기 글/중복/공개 검증 후 같은 Social timeline을 호출하고, 주제 메타데이터·성공 활동 로그·선택적 feed cue 소비를 원래 순서로 처리한다. `runtime/social/agent_tools.py`는 기존 Session의 타 업무 협력만 연결하며, provider를 호출하거나 새 commit 경계를 만들지 않는다. 기존 호출자는 구성된 `agent_tool_actions`의 원래 이름/인자를 사용한다.
+
+
+도구의 피드/Inbox/관찰 읽기는 `social/service/agent_tool_reads.py`가 공개·행동 가능 조건, 원래 커서/스캔 상한과 중립 응답을 소유한다. 이미 전달한 알림의 session fingerprint·읽음 처리 판단도 Social에서 수행한다. Routines 활동로그 SQL은 `routines/repository/feed_history.py`가 소유하며 runtime은 같은 Session의 원래 attached 행을 제공한다. malformed 기록을 건너뛰는 경우와 일치한 잘못된 payload에서 종료하는 경우를 바꾸지 않고, 조회를 앞당기거나 별도 commit을 만들지 않는다.

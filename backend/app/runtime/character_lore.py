@@ -26,7 +26,7 @@ from app.integrations.direct_llm import (
 )
 from app.providers.contracts import EmbeddingRequest
 from app.providers.registry import get_embedding_adapter
-from app.services import community as community_service
+from app.runtime.social import feed_history as resident_feed_history
 
 
 def _google_embedding_credential_for_character(
@@ -123,5 +123,5 @@ def build_lore_workflows() -> LoreWorkflows:
         embed_text=_embed_text,
         embed_text_tracked=_embed_text_tracked,
         embedding_context=DirectLlmCallContext,
-        recent_topics=community_service.format_recent_own_root_topic_history_for_prompt,
+        recent_topics=resident_feed_history.format_recent_own_root_topic_history_for_prompt,
     )

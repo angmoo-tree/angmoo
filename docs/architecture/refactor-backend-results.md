@@ -1917,3 +1917,45 @@ Original read-only diagnostics before the final four guard cases: protected 2201
 Integrated original source `924a8361867bd0228943082227221d78507f9027` into the newer World/Search/Social/Bot/Chat/Memory/Runtime preparation. The seven additional consumer imports use actual canonical models or the test-only fixture; newer World/Social workflow implementations were retained during merge. Focused cold-registration, retirement guard, World initialization/rollback, Search and app-factory/runtime provider checks: **54 passed / 1 warning**. Full test collection: **2409 nodes**. Original source, split, assertion, suppression, ASGI, API/ORM and node diagnostics all report **0 errors** (protected2201/current2409).
 
 Current import inventory contains **940 modules / 3402 internal edges**. Architecture remains pending: 31 exact legacy-to-actual ORM imports belong to the still-separate B4/B5 activity/Community/Writer/LangGraph sources and the remaining abuse-quota owner. No new bridge was added to admit them. This integration is source preparation with preserved behavior; immutable introduction metadata, complete stock/full verification, sequential PR/merge and installer closeout are not yet claimed.
+
+
+## AR-B5-C20 — 소비 이력·게시물 주제·활동 로그 실제 소유
+
+Community 실제28함수를 Routines 이력 서비스/조회, Social Post/주제/공개 판단, 공통 JSON 값으로 나눴다. 남은59함수와 이동28함수 전체 AST는 정확한 SQL/callback 복원 후 동일하다. Routines service는 foreign ORM/query import 없이 readonly Social 협력을 사용하고, 컬럼 우선/로그 fallback·cutoff/order/limit·로그 저장/rollback 의미를 보존했다.
+
+최초 기존69개 집중 회귀는64 PASS/5 FAIL로, 모두 옛 Community helper를 monkeypatch하던 대상이 실제 새 소유 함수에 연결되지 않은 문제였다. 정확11개의 receiver를 이동했고 기존 assertion은 유지했다. 확대285 중284 PASS/1 FAIL 역시 Character lore의 옛 history mock 대상이어서 실제 runtime history로 연결했다. 최종 새 SQLite 포함 집중은 **90 PASS / 6.49초 / 기존 warning 2개**다. 새 회귀는 구성 IO0·attached Post/log·owner roots·추가 SQL 없는 컬럼 우선·caller rollback 후 로그 복원을 확인한다. Community59·G07·full B5/capture/Hosted는 계속한다.
+
+C20 최종 확대 검증은 **454 PASS / 54.81초 / 기존 warning 5개**다. 처음 경계 검사에서 Social이 Routines 상수를 직접 참조하고 repository를 업무 진입점으로 노출한 문제를 발견했다. 원래 cutoff·상한·이미 소비했는지 판단은 Routines service가 소유하고, Social repository는 전달받은 값으로 원래 SQL만 수행하도록 정리했다. 검사 예외를 추가하지 않았으며 최종 경계 **833 module / 2951 edge / legacy178**, L4 parity99·ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence가 통과했다. 기존28개 이전 함수와59개 잔여 함수의 전체 AST는 정확한 SQL/callback 복원 후 동일하다.
+
+
+## AR-B5-C21 — Social 도구 권한·Run 범위 판단 소유
+
+원래 권한9함수는 Social service/contracts로 옮기고 기존 Routines 조회·활동 허용 검사/Identity nullable 조회는 runtime이 같은 Session으로 연결한다. 이동9개와 잔여50개 함수의 전체 AST는 정확한 readonly 타입/조회 협력 복원 후 동일하다. 원래 Social 오류 class·진단 문자열·시크릿 대신 fingerprint·auth key 우선/daypart 차단/fallback 순서를 유지한다.
+
+첫 집중 검증은78 PASS/1 FAIL로, nullable User 조회 한 곳이 잘못된 Protocol을 db.get에 전달한 실제 연결 오류를 새 SQLite 회귀가 잡았다. 해당 위치를 원래 User 조회 협력으로 바로잡았으며 최종 직접 회귀는 **79 PASS / 6.36초 / 기존 warning2개**다. 새2개 회귀는 attached Run/User, pending 상태 조회/autoflush, commit 없음/caller rollback과 daypart 즉시 거절·지정 오류만 변환을 검사한다. 기존 assertion을 변경하지 않았다. Community50/G07/full B5 및 capture/Hosted는 후속이다.
+
+C21 최종 확대 Social·Relationships·Daypart·Tendency·LangGraph·Feed 검증은 **369 PASS / 47.75초 / 기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence가 통과했고, 경계 **836 module / 2962 edge / legacy180**, L4 parity99·ER0 84/87/24/44/7도 통과했다. Agent writing의 기존 권한 조회 소비자만 실제 owner/runtime으로 연결했으며 그 별도 writing 업무 구현은 이 단계에서 이전하지 않았다.
+
+
+## AR-B5-C22 — Social 도구 게시·답글·반응·팔로우 실제 소유
+
+Community 실제10개 행동은 AgentToolActionService로 옮겼다. 같은 Social timeline과 주제 메타데이터를 직접 호출하고, Routines의 실제 권한·로그·cue는 runtime 협력으로 연결한다. 10개 전체 함수와40개 잔여 함수 AST는 self/정확 협력 호출 복원 후 동일하다. Agent writing/LangGraph/RoutinePost/WorldFeed 실행의 실제 소비자도 구성된 서비스로 연결했다.
+
+첫 수집은 RoutinePost의 future import보다 새 import가 앞에 놓여1오류였으며 올바른 import 위치로 수정했다. 이후 기존88개 중86 PASS/2 FAIL은 옛 Community monkeypatch 대상이어서 실제 함수/연결 대상으로10개 receiver만 변경했다. 기존 assertion은 유지했고 **88 PASS / 8.12초**, 새 SQLite/권한/반응/Search 집중은 **20 PASS / 6.84초**다. 새 회귀는 실제 World 게시/주제/성공 로그를 원래 deferred_commits 아래에서 실행하고 caller rollback으로 함께 취소함을 검증한다. Community40 및 G07/full B5/capture/Hosted는 계속한다.
+
+C22 확대 첫 실행은386 PASS/7 FAIL/기존 PostgreSQL 전용 skip1이었다. LangGraph7개 mock receiver와 RoutinePost의 실제 실패 주입2개 참조를 새 실행 instance로 연결했고 원래 assertion·skip은 유지했다. 최종 확대는 **393 PASS / 1 기존 skip / 59.32초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경3파일 assertion·전체 split evidence와 경계 **838 module / 2987 edge / legacy180**, L4 parity99·ER0가 통과했다. split 지도는 기존 형식대로 실제 top-level class와 destination_member를 함께 명시해10개 원래 함수의 정확한 메서드 소유를 기록했으며 검사 코드는 변경하지 않았다.
+
+
+## AR-B5-C23 — Social 도구 피드·Inbox·관찰 읽기 소유
+
+실제15개 읽기/Inbox/관찰 함수는 AgentToolReadService로 옮기고 Routines 활동로그 SQL1개는 해당 repository로 분리했다. 원래15개/잔여25개 전체 함수와 SQL이 정확한 self/타입/협력 복원 후 동일하다. 공개/캐릭터·Run 범위, scan500/페이지100/Inbox10 제한, neutral 응답, 전달기록 fingerprint/ID 처리 및 로그·읽음 쓰기 순서를 유지했다.
+
+최초 기존81개 중79 PASS/2 FAIL은 Post author mock의 옛 대상이었다. 실제 service의2개 receiver만 연결했고 기존 assertion은 그대로다. 새 SQLite 및 관련 소유 회귀 포함 **83 PASS / 6.71초 / 기존 warning2개**다. 새 테스트는 attached 로그·created/id 정렬·다른 Character/이전 Run 제외, malformed/boolean ID 처리, 일치한 잘못된 최신 payload에서 fallback 금지, pending autoflush와 caller rollback을 확인한다. Community25/G07/full B5/capture/Hosted는 계속한다.
+
+C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 검증은 **394 PASS / 기존 PostgreSQL skip1 / 59.10초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했고, 경계 **840 module / 3017 edge / legacy181**, L4 parity99·ER0도 통과했다. 실제15개 메서드와 Routines 조회1의 소유 경로/직접 소비자/동작 검증을 현재 지도에 기록했으며 기존 저장 모델·SQL 정렬·상한·오류 계약을 변경하지 않았다.
+
+## G5 preparation integration — Community tools and history — 2026-09-06 09:24 KST
+
+Integrated signed B5 C20–C23 source through 77385483 into the existing canonical DB/World/Chat/Memory/runtime preparation. The actual Lore runtime receives the new feed history owner; its removed legacy service was not restored. Existing Memory Daypart imports and newer owner workflows remain connected. Five newly introduced consumer imports use the canonical ORM owners.
+
+Focused existing and new history/tool authorization/action/inbox, Lore, RoutinePost, Tendency and LangGraph checks: **311 passed / 1 existing PostgreSQL-only skip / 2 warnings / 21.58 seconds**. Read-only original source, split symbols, assertions, suppressions, ASGI exports, API/ORM and test-node diagnostics: **0 errors in all seven**, protected 2201/current 2414. Inventory 956 modules/3510 edges; L4 956/parity99 and ER0 87/87/24/44/7 pass. The architecture check continues to reject the remaining B4/B5 legacy-to-canonical ORM consumers; no bridge was added. Linear introduction metadata, full/stock verification, sequential PRs and installation/merge closeout remain separate pending gates.

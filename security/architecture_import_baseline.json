@@ -1,7 +1,7 @@
 {
-  "edge_count": 3402,
-  "external_import_count": 2688,
-  "module_count": 940,
+  "edge_count": 3510,
+  "external_import_count": 2730,
+  "module_count": 956,
   "modules": [
     {
       "external_imports": [],
@@ -475,6 +475,16 @@
       "imports": [],
       "module": "app.core.image_prompt_safety",
       "path": "backend/app/core/image_prompt_safety.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json"
+      ],
+      "imports": [],
+      "module": "app.core.json_objects",
+      "path": "backend/app/core/json_objects.py",
       "wildcard_imports": []
     },
     {
@@ -5751,6 +5761,18 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.feed_history",
+      "path": "backend/app/domains/routines/contracts/feed_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "datetime",
         "typing"
@@ -5933,6 +5955,21 @@
       ],
       "module": "app.domains.routines.repository.event_evidence",
       "path": "backend/app/domains/routines/repository/event_evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.feed_history",
+      "path": "backend/app/domains/routines/repository/feed_history.py",
       "wildcard_imports": []
     },
     {
@@ -6147,6 +6184,29 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "logging",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.bounded_text",
+        "app.core.context_text",
+        "app.core.json_objects",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.feed_history",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.feed_history",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.feed_history_values"
+      ],
+      "module": "app.domains.routines.service.feed_history",
+      "path": "backend/app/domains/routines/service/feed_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "json",
         "re",
@@ -6155,6 +6215,7 @@
       "imports": [
         "app.core.bounded_text",
         "app.core.context_text",
+        "app.core.json_objects",
         "app.domains.routines.constants",
         "app.domains.routines.schemas.feed_history"
       ],
@@ -6899,6 +6960,19 @@
         "typing"
       ],
       "imports": [
+        "app.domains.social.contracts.topic_history"
+      ],
+      "module": "app.domains.social.contracts.agent_tools",
+      "path": "backend/app/domains/social/contracts/agent_tools.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
         "app.domains.social.models.posts"
       ],
       "module": "app.domains.social.contracts.discovery",
@@ -7132,6 +7206,17 @@
       ],
       "module": "app.domains.social.contracts.today_references",
       "path": "backend/app/domains/social/contracts/today_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.topic_history",
+      "path": "backend/app/domains/social/contracts/topic_history.py",
       "wildcard_imports": []
     },
     {
@@ -7530,6 +7615,20 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.topic_history",
+      "path": "backend/app/domains/social/repository/topic_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy",
         "sqlalchemy.orm",
         "typing"
@@ -7740,6 +7839,75 @@
       ],
       "module": "app.domains.social.service.agent_presentation",
       "path": "backend/app/domains/social/service/agent_presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.repository.resident_affordances",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.agent_tool_authorization",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.resident_affordances",
+        "app.domains.social.service.timeline",
+        "app.domains.social.service.topic_metadata",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.agent_tool_actions",
+      "path": "backend/app/domains/social/service/agent_tool_actions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "logging",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions"
+      ],
+      "module": "app.domains.social.service.agent_tool_authorization",
+      "path": "backend/app/domains/social/service/agent_tool_authorization.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.inbox",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.agent_presentation",
+        "app.domains.social.service.agent_tool_authorization",
+        "app.domains.social.service.notifications",
+        "app.domains.social.service.posts",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.resident_affordances",
+        "app.domains.social.service.topic_metadata",
+        "app.domains.social.service.visibility",
+        "app.domains.social.utils.limits"
+      ],
+      "module": "app.domains.social.service.agent_tool_reads",
+      "path": "backend/app/domains/social/service/agent_tool_reads.py",
       "wildcard_imports": []
     },
     {
@@ -8338,6 +8506,26 @@
       ],
       "module": "app.domains.social.service.today_activity_values",
       "path": "backend/app/domains/social/service/today_activity_values.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.bounded_text",
+        "app.core.json_objects",
+        "app.core.search_text",
+        "app.core.unit_of_work",
+        "app.domains.social.contracts.topic_history",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.topic_history",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.topic_metadata",
+      "path": "backend/app/domains/social/service/topic_metadata.py",
       "wildcard_imports": []
     },
     {
@@ -10774,7 +10962,7 @@
         "app.integrations.direct_llm",
         "app.providers.contracts",
         "app.providers.registry",
-        "app.services.community"
+        "app.runtime.social.feed_history"
       ],
       "module": "app.runtime.character_lore",
       "path": "backend/app/runtime/character_lore.py",
@@ -12603,6 +12791,7 @@
         "app.runtime.routine_posts.context_references",
         "app.runtime.routines.activity_references",
         "app.runtime.routines.joint_references",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.observations",
         "app.runtime.social.sqlalchemy_inbox",
         "app.runtime.social.subjective_composition"
@@ -12840,6 +13029,56 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.agent_runs",
+        "app.domains.identity.models",
+        "app.domains.routines.models",
+        "app.domains.social.service.agent_tool_authorization",
+        "app.services.agent_activity_policy"
+      ],
+      "module": "app.runtime.social.agent_tool_authorization",
+      "path": "backend/app/runtime/social/agent_tool_authorization.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.feed_history",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.social.service.agent_tool_reads",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.topic_metadata",
+        "app.services.agent_activity_policy"
+      ],
+      "module": "app.runtime.social.agent_tool_reads",
+      "path": "backend/app/runtime/social/agent_tool_reads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.agents",
+        "app.domains.routines.models",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.social.service.agent_tool_actions",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.feed_history",
+        "app.runtime.social.timeline"
+      ],
+      "module": "app.runtime.social.agent_tools",
+      "path": "backend/app/runtime/social/agent_tools.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi"
       ],
       "imports": [
@@ -12889,15 +13128,37 @@
         "app.integrations.direct_llm",
         "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.feed_reaction_provider",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
         "app.runtime.social.world_feed_actions",
-        "app.runtime.social.world_feed_queries",
-        "app.services.community"
+        "app.runtime.social.world_feed_queries"
       ],
       "module": "app.runtime.social.feed_cycle",
       "path": "backend/app/runtime/social/feed_cycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.service.feed_history",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.topic_history",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.topic_metadata",
+        "app.domains.social.service.visibility",
+        "app.runtime.social.topic_metadata",
+        "app.services.agent_briefs"
+      ],
+      "module": "app.runtime.social.feed_history",
+      "path": "backend/app/runtime/social/feed_history.py",
       "wildcard_imports": []
     },
     {
@@ -13254,6 +13515,21 @@
       ],
       "module": "app.runtime.social.today_activity_queries",
       "path": "backend/app/runtime/social/today_activity_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.repository.feed_history",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.topic_metadata"
+      ],
+      "module": "app.runtime.social.topic_metadata",
+      "path": "backend/app/runtime/social/topic_metadata.py",
       "wildcard_imports": []
     },
     {
@@ -13812,6 +14088,7 @@
         "app.runtime.persistence.model_registration",
         "app.runtime.routine_posts",
         "app.runtime.search.binding",
+        "app.runtime.social.feed_history",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.agent_briefs",
@@ -13850,9 +14127,12 @@
         "app.domains.identity.models",
         "app.domains.memory.service.daypart",
         "app.domains.routines.models.resident",
+        "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.resident_affordances",
         "app.runtime.character_lore",
         "app.runtime.persistence.model_registration",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.agent_tools",
         "app.schemas",
         "app.services.agent_briefs",
         "app.services.community",
@@ -13877,6 +14157,7 @@
       ],
       "imports": [
         "app.core.context_text",
+        "app.core.json_objects",
         "app.core.search_text",
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
@@ -13888,6 +14169,7 @@
         "app.domains.identity.models",
         "app.domains.routines.constants",
         "app.domains.routines.models.resident",
+        "app.domains.routines.service.feed_history",
         "app.domains.routines.service.feed_history_values",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
@@ -13895,6 +14177,7 @@
         "app.domains.social.repository.resident_affordances",
         "app.domains.social.service.activity_results",
         "app.domains.social.service.agent_presentation",
+        "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.feed",
         "app.domains.social.service.inbox",
         "app.domains.social.service.notifications",
@@ -13903,13 +14186,19 @@
         "app.domains.social.service.profiles",
         "app.domains.social.service.resident_affordances",
         "app.domains.social.service.timeline",
+        "app.domains.social.service.topic_metadata",
         "app.domains.social.service.visibility",
         "app.domains.social.utils.limits",
         "app.runtime.persistence.model_registration",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.agent_tool_reads",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.discovery",
+        "app.runtime.social.feed_history",
         "app.runtime.social.inbox",
         "app.runtime.social.profile_activity",
         "app.runtime.social.timeline",
+        "app.runtime.social.topic_metadata",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.agent_briefs",
@@ -14019,6 +14308,8 @@
         "app.runtime.persistence.model_registration",
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
+        "app.runtime.social.agent_tool_reads",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.feed_cycle",
         "app.runtime.social.image_generation",
         "app.runtime.social.langgraph_actions",

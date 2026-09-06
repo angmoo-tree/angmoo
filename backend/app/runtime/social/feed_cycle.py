@@ -13,7 +13,7 @@ from app.runtime.social import world_feed_actions as world_feed_social_apply
 from app.runtime.social.observations import observe_source
 from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.cruds import agent_runs as agent_run_crud
-from app.services import community as community_service
+from app.runtime.social.agent_tools import agent_tool_actions
 from app.runtime.social.feed_reaction_provider import DirectFeedReactionProvider
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
@@ -29,7 +29,7 @@ class RuntimeWorldFeedWorkflows:
     llm_json_error = DirectLlmJsonError
     proposals = activity_proposal_runtime
     executions = agent_run_crud
-    publishing = community_service
+    publishing = agent_tool_actions
     social_apply = world_feed_social_apply
     new_tracker = staticmethod(RunLlmTracker)
     default_provider = staticmethod(DirectFeedReactionProvider)

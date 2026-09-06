@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime.social.agent_tools import agent_tool_actions
 
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
@@ -550,7 +551,7 @@ async def run_routine_post_runtime(
                 world_id=context.world.id,
                 actor_world_character_id=world_character.id,
             )
-            post_read = community_service.create_agent_tool_post(
+            post_read = agent_tool_actions.create_agent_tool_post(
                 db,
                 resident_context.session_key,
                 legacy.PostCreate(

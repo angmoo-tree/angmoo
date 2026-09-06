@@ -3,6 +3,8 @@ from app.domains.memory.service.daypart import (
     event_exists as _daypart_memory_event_exists,
     record_memory_event as _record_daypart_memory_event,
 )
+
+from app.runtime.social import feed_history as resident_feed_history
 from app.domains.routines.service import feed_history_values
 from app.domains.social.service import resident_affordances
 from app.domains.memory.service.daypart_observations import (
@@ -6024,7 +6026,7 @@ async def _run_resident_individual_tool_flow(
         )
     inbox_threads = _format_v6_inbox_compact_candidate(inbox_candidates)
     feed_history_sanitize_skeleton = (
-        community_service.build_feed_history_sanitize_skeleton(
+        resident_feed_history.build_feed_history_sanitize_skeleton(
             db, character_id=character.id
         )
     )
@@ -6144,7 +6146,7 @@ async def _run_resident_individual_tool_flow(
         if sanitize_retry_exhausted:
             result["feed_history_sanitize_fallback_reason"] = "retry_exhausted"
         feed_history_sections = (
-            community_service.format_feed_history_metadata_fallback_for_prompt(
+            resident_feed_history.format_feed_history_metadata_fallback_for_prompt(
                 db, character_id=character.id
             )
         )

@@ -17,6 +17,9 @@ from app.domains.memory.policies.daypart import (
 )
 
 
+from app.runtime.social.agent_tool_reads import agent_tool_reads
+from app.runtime.social.agent_tools import agent_tool_actions
+
 from app.domains.social.service import resident_affordances
 
 import asyncio
@@ -6296,7 +6299,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def feed_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:feed-scan:langgraph"
-        feed_page = community_service.list_agent_tool_feed(ctx.db, session_key, limit=30)
+        feed_page = agent_tool_reads.list_agent_tool_feed(ctx.db, session_key, limit=30)
         seen_post_ids = _seen_daypart_feed_post_ids(ctx)
         items: list[dict[str, Any]] = []
         seed_candidates: list[dict[str, Any]] = []
@@ -6510,7 +6513,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def inbox_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:inbox:langgraph"
-        notifications = community_service.list_agent_tool_notifications(
+        notifications = agent_tool_reads.list_agent_tool_notifications(
             ctx.db, session_key, limit=10
         )
         inbox_lane_only = bool(state.get("inbox_lane_only"))
@@ -8078,7 +8081,7 @@ def _execute_planned_action(
             if action_type == "reply":
                 if not body:
                     raise ValueError("reply body missing")
-                result = community_service.reply_agent_tool_post(
+                result = agent_tool_actions.reply_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -8088,7 +8091,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id, "reply_to_post_id": post_id}
             elif action_type == "like":
-                result = community_service.like_agent_tool_post(
+                result = agent_tool_actions.like_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -8096,7 +8099,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "repost":
-                result = community_service.repost_agent_tool_post(
+                result = agent_tool_actions.repost_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -8104,7 +8107,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "follow":
-                result = community_service.follow_agent_tool_profile(
+                result = agent_tool_actions.follow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -8118,7 +8121,7 @@ def _execute_planned_action(
                     "target_id": result.target.id,
                 }
             elif action_type == "unfollow":
-                community_service.unfollow_agent_tool_profile(
+                agent_tool_actions.unfollow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -8336,7 +8339,7 @@ def _execute_writing_plan(
             character_id=ctx.character.id,
         )
         with unit_of_work.deferred_commits():
-            result = community_service.create_agent_tool_post(
+            result = agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
                 schemas.PostCreate(
