@@ -407,6 +407,18 @@
     {
       "markers": {
         "row_lock": [
+          55
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/identity/repository/mutation_quota.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "03eef8c3a4129545b31fd5ce5e9dbc9ee9464c3ed4cc6f033d3351cb65f79fe4",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           629
         ]
       },
@@ -1278,18 +1290,6 @@
       "path": "backend/app/runtime/social/sqlalchemy_inbox.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "cb57af59ded6edaaebc2b980403ad18984b960177d338f867982116ffc3da0cf",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          63
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/community_abuse_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "97b566f0318d34579fc2ccf858a92d52ffebaa80dd5a45fab2967ba7b13585b6",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

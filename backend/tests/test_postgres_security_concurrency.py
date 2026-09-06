@@ -27,7 +27,7 @@ from app.domains.routines import constants as agent_run_crud
 from app.cruds import community as community_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
-from app.services import community_abuse_quota
+from app.domains.social.service import abuse_quota as community_abuse_quota
 from app.domains.identity.service import external_verification as external_auth_verification
 from app.domains.local_bot.service import quota as local_bot_quota
 from app.domains.identity.service import login_throttle

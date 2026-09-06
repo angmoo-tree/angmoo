@@ -1145,3 +1145,7 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 활동 요약과 로그 표현
 
 `routines/service/activity_presentation.py`는 활동 요약과 팔로우 로그의 대상 표현을 담당합니다. 프로필은 Character/Identity의 기존 nullable 조회를 같은 Session으로 연결합니다. 상세 화면의 여러 기능 조립은 runtime에 남으며 활동 설정과 로그는 실제 Routines 소유 서비스에서 읽습니다. 시간대와 오늘 행동 수를 먼저 계산하지 않고 기존 응답 필드 평가 위치에서 읽습니다. 가져온 World의 명시적 활성화 제한은 `service/runtime_guards.py`의 실제 판단이며 런타임이 현재 World의 잠금 조회와 원래 오류 클래스를 전달합니다. 일반 캐릭터의 수동 실행과 가져온 World의 활성화 조건을 합치지 않습니다.
+
+### 댓글·신고 제한의 업무와 저장 소유
+
+`social/service/abuse_quota.py`는 댓글·신고별 횟수/시간 제한과 공개 오류를 소유합니다. `identity/service/mutation_quota.py`는 원래 HMAC 사용자 식별값과 시간 창·카운터를 관리하며, `identity/repository/mutation_quota.py`는 같은 Session의 quota 행 생성과 잠금 조회를 수행합니다. Identity의 실제 `CommunityMutationQuotaBucket` 모델을 Social에 복제하거나 노출하지 않습니다. 한 창이라도 제한을 넘으면 원래처럼 caller transaction을 rollback한 뒤 Social 오류와 최대 대기 시간을 반환하며, 허용 시 새 commit을 추가하지 않습니다.

@@ -187,10 +187,6 @@
         {
           "importer": "app.services.community",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.services.community_abuse_quota"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -230,19 +226,6 @@
         {
           "importer": "app.runtime.account_deletion",
           "imported": "app.services.runtime_boundary"
-        }
-      ]
-    },
-    {
-      "id": "ar-b5-timeline-existing-collaboration",
-      "owner_stage": "L6",
-      "reason": "Only the existing Community log_activity and quota calls are connected from runtime while actual Social write policy moves into its service. The same Session and commit behavior are preserved; no new operation is introduced.",
-      "removal_condition": "B4-C replaces the existing AgentActivityLog writer; G5/B8 resolves the frozen Identity quota model/public alias and replaces the quota owner. Then remove these two exact runtime edges.",
-      "review_date": "2026-09-05",
-      "edges": [
-        {
-          "importer": "app.runtime.social.timeline",
-          "imported": "app.services.community_abuse_quota"
         }
       ]
     },
@@ -1051,7 +1034,10 @@
       "app.domains.routines.service.writing_plans",
       "app.domains.routines.service.writing_prompts",
       "app.domains.routines.service.writing_results",
-      "app.domains.routines.service.writing_tasks"
+      "app.domains.routines.service.writing_tasks",
+      "app.domains.social.service.abuse_quota",
+      "app.domains.identity.service.mutation_quota",
+      "app.domains.identity.repository.mutation_quota"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1514,7 +1500,8 @@
       "app.domains.routines.service.writing_plans",
       "app.domains.routines.service.writing_prompts",
       "app.domains.routines.service.writing_results",
-      "app.domains.routines.service.writing_tasks"
+      "app.domains.routines.service.writing_tasks",
+      "app.domains.identity.service.mutation_quota"
     ],
     "bridges": [
       {
@@ -2328,14 +2315,6 @@
       {
         "importer": "app.services.community",
         "target": "app.domains.social.service.timeline",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community_abuse_quota",
-        "target": "app.domains.social.exceptions",
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
         "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3122,
+      "external_import_count": 3125,
       "internal_edge_count": 4154,
       "legacy_import_exception_count": 0,
-      "module_count": 1095,
+      "module_count": 1097,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1132,6 +1132,14 @@
             "imports": [],
             "module": "app.domains.social.service",
             "path": "backend/app/domains/social/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.identity.service.mutation_quota",
+              "app.domains.social.exceptions"
+            ],
+            "module": "app.domains.social.service.abuse_quota",
+            "path": "backend/app/domains/social/service/abuse_quota.py"
           },
           {
             "imports": [
@@ -2293,9 +2301,9 @@
           {
             "imports": [
               "app.domains.routines.service.activity_logs",
+              "app.domains.social.service.abuse_quota",
               "app.domains.social.service.timeline",
-              "app.runtime.relationships.sqlalchemy_social_event",
-              "app.services.community_abuse_quota"
+              "app.runtime.relationships.sqlalchemy_social_event"
             ],
             "module": "app.runtime.social.timeline",
             "path": "backend/app/runtime/social/timeline.py"
