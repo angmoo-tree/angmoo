@@ -1,3 +1,5 @@
+from app.domains.routines.service import feed_history_notes as note_service
+from app.runtime.social import feed_history_notes as note_runtime
 from app.domains.social.service import agent_tool_reads as tool_read_service
 from app.domains.social.service import agent_tool_actions as tool_action_service
 from app.runtime.social import agent_tools as tool_action_runtime
@@ -1364,22 +1366,22 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     captured: dict[str, object] = {}
 
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
@@ -1388,7 +1390,7 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_interests(
         None,
@@ -1417,29 +1419,29 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
 
 def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: SimpleNamespace(id="post-1"),
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "recent_own_root_topic_exists",
         lambda *args, **kwargs: False,
     )
@@ -1449,7 +1451,7 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_interests(
         None,
@@ -1477,7 +1479,7 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
 
 def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1489,7 +1491,7 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_interests(
         None,
@@ -1515,7 +1517,7 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
 
 def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1528,12 +1530,12 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
         post_type="post",
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
@@ -1543,7 +1545,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_interests(
         None,
@@ -1571,7 +1573,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1583,7 +1585,7 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_history_sanitize(
         None,
@@ -1632,14 +1634,14 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
         1:
     ].split("|")[0]
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [
@@ -1656,7 +1658,7 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
@@ -1693,14 +1695,14 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
     monkeypatch,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [
@@ -1717,7 +1719,7 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
@@ -1742,14 +1744,14 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
     caplog,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "build_feed_history_sanitize_skeleton",
         lambda *args, **kwargs: {
             "consumed_sources": [],
@@ -1758,7 +1760,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         },
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        note_service.agent_crud,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
@@ -1798,7 +1800,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     def reject(*args, **kwargs):
         raise community_service.AgentRunAuthorizationError("no session")
 
-    monkeypatch.setattr(community_service, "_get_agent_tool_run", reject)
+    monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
     with caplog.at_level("WARNING", logger=community_service.logger.name):
         with pytest.raises(community_service.AgentRunAuthorizationError):
@@ -1869,7 +1871,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     monkeypatch,
 ):
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_get_agent_tool_run",
         lambda *args, **kwargs: SimpleNamespace(
             id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1882,22 +1884,22 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
         post_type="post",
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        note_runtime.post_repository,
         "get_post",
         lambda *args, **kwargs: post,
     )
     monkeypatch.setattr(
-        community_service,
+        note_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "feed_seed_source_already_consumed",
         lambda *args, **kwargs: False,
     )
     monkeypatch.setattr(
-        community_service,
+        note_service,
         "recent_own_root_topic_exists",
         lambda *args, **kwargs: True,
     )
@@ -1907,7 +1909,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
         captured.update(kwargs)
         return SimpleNamespace(id=1)
 
-    monkeypatch.setattr(community_service.agent_crud, "log_activity", log_activity)
+    monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
     result = community_service.note_agent_tool_feed_interests(
         None,

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2480,
-      "internal_edge_count": 3017,
+      "external_import_count": 2490,
+      "internal_edge_count": 3037,
       "legacy_import_exception_count": 0,
-      "module_count": 840,
+      "module_count": 843,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2033,6 +2033,22 @@
             ],
             "module": "app.runtime.social.feed_history",
             "path": "backend/app/runtime/social/feed_history.py"
+          },
+          {
+            "imports": [
+              "app.domains.routines.models",
+              "app.domains.routines.schemas.feed_history",
+              "app.domains.routines.service.feed_history_notes",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.service.visibility",
+              "app.runtime.social.agent_tool_authorization",
+              "app.runtime.social.feed_history",
+              "app.services.agent_briefs"
+            ],
+            "module": "app.runtime.social.feed_history_notes",
+            "path": "backend/app/runtime/social/feed_history_notes.py"
           },
           {
             "imports": [

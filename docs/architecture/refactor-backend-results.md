@@ -1324,3 +1324,12 @@ C22 확대 첫 실행은386 PASS/7 FAIL/기존 PostgreSQL 전용 skip1이었다.
 최초 기존81개 중79 PASS/2 FAIL은 Post author mock의 옛 대상이었다. 실제 service의2개 receiver만 연결했고 기존 assertion은 그대로다. 새 SQLite 및 관련 소유 회귀 포함 **83 PASS / 6.71초 / 기존 warning2개**다. 새 테스트는 attached 로그·created/id 정렬·다른 Character/이전 Run 제외, malformed/boolean ID 처리, 일치한 잘못된 최신 payload에서 fallback 금지, pending autoflush와 caller rollback을 확인한다. Community25/G07/full B5/capture/Hosted는 계속한다.
 
 C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 검증은 **394 PASS / 기존 PostgreSQL skip1 / 59.10초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했고, 경계 **840 module / 3017 edge / legacy181**, L4 parity99·ER0도 통과했다. 실제15개 메서드와 Routines 조회1의 소유 경로/직접 소비자/동작 검증을 현재 지도에 기록했으며 기존 저장 모델·SQL 정렬·상한·오류 계약을 변경하지 않았다.
+
+
+## AR-B5-C24 — 활동 계획용 feed note·정제·진단 소유
+
+기존 note2/diagnostics4 실제 함수는 Routines로 옮기고 planning 입력/응답 DTO3도 원문 그대로 같은 schema 객체로 연결했다. 원래6함수/잔여19함수/DTO3의 전체 AST가 정확한 협력 복원 후 동일하다. Routines가 Social 내부 ORM/저장소/서비스를 직접 참조하지 않으며, 원래 canonical visibility·권한과 같은 Session의 history 데이터를 runtime이 제공한다.
+
+최초 기존69개 중59 PASS/10 FAIL은 note 테스트의 옛 mock receiver였다. 해당10함수 내부의35개 receiver를 실제 함수/바인딩으로 연결했고 원래 assertion은 그대로 유지했다. 최종 직접 회귀는 **71 PASS / 6.41초 / 기존 warning2개**다. 새 테스트나 실행 제한을 추가하지 않았으며 existing note 회귀의 immutable metadata·기록 상태·raw payload 비노출·오류 분류를 유지했다. Community19/G07/full B5/capture/Hosted는 후속이다.
+
+C24 최종 확대 검증은 **394 PASS / 기존 PostgreSQL skip1 / 70.11초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 모두 통과했다. 경계 **843 module / 3037 edge / legacy182**, L4 parity99·ER0도 통과했다. 처음 runtime/resident 배치에서 생긴 실제 runtime package 순환은 Social-facing 실행 조립을 runtime/social로 옮겨 해결했고 검사 예외는 추가하지 않았다. 옛 schema 소비자 지도62개는 이미 삭제된 app/schemas/community.py 대신 실제 app/schemas/__init__.py로 정확히 연결해 동일 검사0오류를 확인했다. DTO3는 실제 정의/공통 aggregate/Social 소비자에서 동일 class 객체다.

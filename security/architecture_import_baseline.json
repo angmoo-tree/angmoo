@@ -1,7 +1,7 @@
 {
-  "edge_count": 3017,
-  "external_import_count": 2480,
-  "module_count": 840,
+  "edge_count": 3037,
+  "external_import_count": 2490,
+  "module_count": 843,
   "modules": [
     {
       "external_imports": [],
@@ -4324,6 +4324,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.feed_history"
+      ],
+      "module": "app.domains.routines.contracts.feed_history_notes",
+      "path": "backend/app/domains/routines/contracts/feed_history_notes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -4755,6 +4767,28 @@
       ],
       "module": "app.domains.routines.service.feed_history",
       "path": "backend/app/domains/routines/service/feed_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "hashlib",
+        "json",
+        "logging",
+        "sqlalchemy.orm",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.core.bounded_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.feed_history_notes",
+        "app.domains.routines.schemas.feed_history",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.feed_history",
+        "app.domains.routines.service.feed_history_values"
+      ],
+      "module": "app.domains.routines.service.feed_history_notes",
+      "path": "backend/app/domains/routines/service/feed_history_notes.py",
       "wildcard_imports": []
     },
     {
@@ -11283,6 +11317,27 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.schemas.feed_history",
+        "app.domains.routines.service.feed_history_notes",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.service.visibility",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.feed_history",
+        "app.services.agent_briefs"
+      ],
+      "module": "app.runtime.social.feed_history_notes",
+      "path": "backend/app/runtime/social/feed_history_notes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "pydantic"
       ],
@@ -12295,6 +12350,7 @@
         "app.domains.characters.service.state",
         "app.domains.routines.constants",
         "app.domains.routines.service.feed_history",
+        "app.domains.routines.service.feed_history_notes",
         "app.domains.routines.service.feed_history_values",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
@@ -12319,6 +12375,7 @@
         "app.runtime.social.agent_tools",
         "app.runtime.social.discovery",
         "app.runtime.social.feed_history",
+        "app.runtime.social.feed_history_notes",
         "app.runtime.social.inbox",
         "app.runtime.social.profile_activity",
         "app.runtime.social.timeline",
