@@ -403,7 +403,10 @@
     "backend/app/domains/social/ports/search_index.py": "backend/app/domains/social/contracts/search_index.py",
     "backend/app/services/world_feed_runtime.py": "backend/app/domains/social/service/feed_cycle.py",
     "backend/app/services/feed_reaction_planner.py": "backend/app/runtime/social/feed_reaction_provider.py",
-    "backend/app/runtime/social/sqlalchemy_inbox.py": "backend/app/domains/social/service/manual_inbox.py"
+    "backend/app/runtime/social/sqlalchemy_inbox.py": "backend/app/domains/social/service/manual_inbox.py",
+    "backend/app/compatibility/routine_posts/canonical_interactions.py": "backend/app/domains/relationships/service/routine_interactions.py",
+    "backend/app/services/social_routine_interactions.py": "backend/app/runtime/routine_posts/interactions.py",
+    "backend/app/compatibility/routine_posts/legacy.py": "backend/app/runtime/routine_posts/interactions.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -73079,6 +73082,89 @@
       ],
       "same_session_evidence": "Original11 functions/error whole AST and query5 equal after exact self/query/foreign-read restoration. Existing manual next-beat proof retains all assertions. New SQLite verifies commit on claim/release/rejection, active other-claim refusal, flush-only consume with caller rollback to durable claim and pending mutual block participation.",
       "remaining": "Canonical RoutineInteraction actual3, final consumers/compatibility/G07. Full B5/capture/Hosted pending."
+    },
+    "AR-B5-C28": {
+      "status": "IMPLEMENTED source; capture pending",
+      "scope": "Relationships owns actual successful-event eligibility, directional band selection and event/evidence/state SQL. Social owns actual Post/block queries and manual inbox policy. Runtime connects typed same-Session reads and constructs the unchanged RoutineInteractionInput through existing RoutinePost contract; old compatibility implementation and module alias removed.",
+      "split_files": {
+        "backend/app/compatibility/routine_posts/canonical_interactions.py": [
+          "backend/app/domains/relationships/service/routine_interactions.py",
+          "backend/app/domains/social/repository/interaction_context.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/compatibility/routine_posts/canonical_interactions.py::_relationship_band",
+          "new": "backend/app/domains/relationships/service/routine_interactions.py::_relationship_band",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/routine_interactions.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/compatibility/routine_posts/canonical_interactions.py::_blocked",
+          "new": "backend/app/domains/social/repository/interaction_context.py::_blocked",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/interactions.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/compatibility/routine_posts/canonical_interactions.py::CanonicalRoutineInteractionSource",
+          "new": "backend/app/domains/relationships/service/routine_interactions.py::CanonicalRoutineInteractionService",
+          "destination_member": "CanonicalRoutineInteractionService.candidates",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/interactions.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+      ],
+      "statement_extractions": [
+        {
+          "old": "backend/app/compatibility/routine_posts/canonical_interactions.py::CanonicalRoutineInteractionSource.candidates",
+          "new": "backend/app/domains/relationships/repository/routine_interactions.py::reply_event_rows",
+          "meaning": "Original lazy result, inner join multiplicity, canonical result/status/world/consumer/time predicates and occurred_at/id ASC preserved."
+        },
+        {
+          "old": "backend/app/compatibility/routine_posts/canonical_interactions.py::CanonicalRoutineInteractionSource.candidates",
+          "new": "backend/app/domains/relationships/repository/routine_interactions.py::directional_relationship",
+          "meaning": "Original consumer-to-actor directional nullable lookup at the same point after visibility/membership/block checks."
+        }
+      ],
+      "same_session_evidence": "Original candidates whole AST, band/block, queries2 and original constructor factory equal after exact callback/query restoration. New SQLite verifies original DTO class identity, cutoff/order, directional trust boundary, attached Post identity, pending state/block effects, no extra commit and caller rollback.",
+      "remaining": "Final compatibility consumer/alias removal and G07; parent maps remaining legacy-resident imports to actual runtime/resident/{execution,langgraph,writing}. Full B5/capture/Hosted pending.",
+      "single_implementation_move": {
+        "old": "backend/app/compatibility/routine_posts/legacy.py::canonical_interaction_source",
+        "new": "backend/app/runtime/routine_posts/interactions.py::canonical_interaction_source",
+        "direct_consumers": [
+          "backend/app/runtime/routine_posts/context_references.py"
+        ],
+        "test_nodes": [
+          "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+          "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+          "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+          "tests/relationships/test_routine_interaction_reads.py::test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback"
+        ],
+        "meaning": "The only actual legacy factory moves verbatim to runtime and is consumed by default_interaction_source. Remaining legacy imports are a temporary B4 binding aggregate pending final caller removal."
+      }
     }
   }
 }

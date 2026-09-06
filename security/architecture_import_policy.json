@@ -650,10 +650,6 @@
     {
       "edges": [
         {
-          "importer": "app.compatibility.routine_posts.canonical_interactions",
-          "imported": "app.models"
-        },
-        {
           "importer": "app.compatibility.routine_posts.legacy",
           "imported": "app.cruds.agent_runs"
         },
@@ -972,6 +968,7 @@
       "app.domains.relationships.contracts.proposals",
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.contracts.routine_interactions",
       "app.domains.relationships.contracts.source_posts",
       "app.domains.relationships.dependencies",
       "app.domains.relationships.exceptions",
@@ -994,6 +991,7 @@
       "app.domains.relationships.repository.projection_state",
       "app.domains.relationships.repository.proposals",
       "app.domains.relationships.repository.replay",
+      "app.domains.relationships.repository.routine_interactions",
       "app.domains.relationships.repository.sqlite_projection_state",
       "app.domains.relationships.repository.state",
       "app.domains.relationships.router",
@@ -1013,6 +1011,7 @@
       "app.domains.relationships.service.projection_state",
       "app.domains.relationships.service.proposals",
       "app.domains.relationships.service.replay",
+      "app.domains.relationships.service.routine_interactions",
       "app.domains.relationships.service.source_posts",
       "app.domains.relationships.service.sqlite_projection_state",
       "app.domains.relationships.service.state",
@@ -1132,6 +1131,7 @@
       "app.domains.social.repository.event_evidence",
       "app.domains.social.repository.image_jobs",
       "app.domains.social.repository.inbox",
+      "app.domains.social.repository.interaction_context",
       "app.domains.social.repository.manual_feed",
       "app.domains.social.repository.manual_inbox",
       "app.domains.social.repository.manual_writes",
@@ -1314,6 +1314,7 @@
       "app.domains.relationships.contracts.proposals",
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.contracts.routine_interactions",
       "app.domains.relationships.contracts.source_posts",
       "app.domains.relationships.schemas",
       "app.domains.relationships.service.action_response",
@@ -1329,6 +1330,7 @@
       "app.domains.relationships.service.projection_state",
       "app.domains.relationships.service.proposals",
       "app.domains.relationships.service.replay",
+      "app.domains.relationships.service.routine_interactions",
       "app.domains.relationships.service.source_posts",
       "app.domains.relationships.service.sqlite_projection_state",
       "app.domains.relationships.service.state",

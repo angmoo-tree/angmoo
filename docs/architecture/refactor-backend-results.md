@@ -1360,3 +1360,12 @@ C26 최종 확대는 **424 PASS / 기존 PostgreSQL skip1 /72.57초 /기존 warn
 새 회귀는 활성 다른 claim 거절, claim/release의 실제 commit과 consume의 flush-only/caller rollback을 확인한다. pending 상호 차단을 같은 Session으로 읽어 무효 후보 거절과 함께 원래 commit하는 의미도 검증한다. 원래 assertion이나 DB 제약은 변경하지 않았다. Canonical RoutineInteraction3·G07/full B5/capture/Hosted는 후속이다.
 
 C27 최종 Social·Relationships·RoutinePost 검증은 **130 PASS / 기존 PostgreSQL skip1 /63.73초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **852 module /3099 edge /legacy182**, L4 parity99·ER0가 통과했다. 기존 L4 구조 검사의 단일 실제 소유 파일 경로를 Social service로 연결했으며 검사 조건은 유지했다. 사라진 runtime→전역 ORM 정확1개 임시 예외도 제거했다.
+
+
+## AR-B5-C28 — 성공 Social 이벤트의 RoutinePost 후보 실제 소유
+
+Canonical interaction의 후보 실제 메서드/관계 band/상호 차단은 각각 Relationships service와 Social repository로 옮겼고 event/evidence/방향별 관계 SQL2도 Relationships가 소유한다. 기존 compatibility 본체와 services의 module alias를 제거했다. 원래 후보 전체 AST·band/block·SQL2·constructor factory가 정확한 callback/query 복원 후 동일하다. 기존 Social/RoutinePost 집중은 **34 PASS /기존 PostgreSQL skip1 /18.09초**다.
+
+신규 회귀 최초는 기존13 PASS/새1 FAIL로, SQLite rollback 재조회에서 datetime timezone 표시가 naive로 복원되기 때문에 새 테스트의 dataclass 전체 비교가 달랐다. 새 테스트에서 UTC 시간 표현을 정규화한 뒤 같은 전체 후보 값으로 비교하며 제품 시간/SQL/기존 assertion은 변경하지 않았다. 최종 호환/G07/full B5/capture/Hosted는 계속한다.
+
+C28 최종 확대는 **131 PASS /기존 PostgreSQL skip1 /63.62초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **855 module /3108 edge /legacy181**, L4 parity99·ER0가 통과했다. 첫 지도 검사가 legacy의 단일 factory 이전을 다중 분할로 기재한1항목을 거절했으므로, 실제 단일 구현 이전과 남은 임시 import aggregate로 구분해 같은 검사0오류를 확인했다. DTO·업무·SQL·assertion은 변경하지 않았다.

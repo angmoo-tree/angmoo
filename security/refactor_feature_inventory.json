@@ -1633,7 +1633,6 @@
         "backend/app/runtime/social/timeline.py",
         "backend/app/services/community.py",
         "backend/app/services/community_abuse_quota.py",
-        "backend/app/services/social_routine_interactions.py",
         "backend/tests/social/test_foundation_contracts.py",
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts",
@@ -1773,7 +1772,12 @@
         "backend/app/domains/social/service/manual_inbox.py",
         "backend/app/domains/social/repository/manual_inbox.py",
         "backend/app/domains/social/utils/manual_inbox.py",
-        "backend/app/runtime/social/manual_inbox.py"
+        "backend/app/runtime/social/manual_inbox.py",
+        "backend/app/domains/relationships/service/routine_interactions.py",
+        "backend/app/domains/relationships/repository/routine_interactions.py",
+        "backend/app/domains/social/repository/interaction_context.py",
+        "backend/app/domains/relationships/contracts/routine_interactions.py",
+        "backend/app/runtime/routine_posts/interactions.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -10725,7 +10729,6 @@
         "backend/app/api/v1/routes/tree.py",
         "backend/app/compatibility/__init__.py",
         "backend/app/compatibility/routine_posts/__init__.py",
-        "backend/app/compatibility/routine_posts/canonical_interactions.py",
         "backend/app/compatibility/routine_posts/legacy.py",
         "backend/app/contracts/__init__.py",
         "backend/app/contracts/core_experience.py",
@@ -10813,7 +10816,12 @@
         "frontend/src/shared/ui/status-badge.tsx",
         "frontend/src/shared/ui/status.tsx",
         "frontend/src/shared/ui/surfaces.tsx",
-        "frontend/src/utils/class-names.ts"
+        "frontend/src/utils/class-names.ts",
+        "backend/app/domains/relationships/service/routine_interactions.py",
+        "backend/app/domains/relationships/repository/routine_interactions.py",
+        "backend/app/domains/social/repository/interaction_context.py",
+        "backend/app/domains/relationships/contracts/routine_interactions.py",
+        "backend/app/runtime/routine_posts/interactions.py"
       ],
       "target_paths": [
         "backend/app/runtime",

@@ -771,3 +771,6 @@ Social tick 완료의 실제 업무는 `social/service/complete_tick.py`가 소�
 
 
 수동 답글 Inbox 후보의 상태 전이는 `social/service/manual_inbox.py`, 실제 후보·차단 조회는 Social repository가 소유한다. runtime은 같은 Session의 WorldCharacter/membership만 원래 조회 위치에 제공한다. 무효 후보 거절·claim·release의 commit과, 후속 게시물과 함께 원자적으로 처리하는 consume의 flush를 구분한다. 만료 전 다른 claim 거절, target beat/run fencing, 원래 상태/version·source-context 검증을 유지한다.
+
+
+RoutinePost가 읽는 성공 답글 후보는 `relationships/service/routine_interactions.py`가 canonical event 상태·대상·공개 조건과 방향별 관계 band를 판단한다. Event/evidence join과 관계 상태 SQL은 Relationships, Post/상호 차단 SQL은 Social 소유다. runtime은 원래 lazy 결과의 행 수·시간/ID 순서와 같은 Session을 보존하고, 기존 `RoutineInteractionInput` class를 그대로 사용해 RoutinePost에 전달한다. 수동 Inbox 후보는 같은 Social service의 실제 후보 검증을 거친 뒤 원래 순서로 이어 붙인다.

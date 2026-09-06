@@ -891,7 +891,8 @@ def test_self_target_and_cross_world_target_are_rejected() -> None:
 
 def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
     from app.runtime.graph_projection import social_memory_read
-    from app.services import community, social_routine_interactions
+    from app.services import community
+    from app.runtime.routine_posts import interactions as social_routine_interactions
 
     engine = _engine()
     occurred_at = datetime(2026, 8, 11, 5, 0, tzinfo=UTC)
@@ -1018,7 +1019,7 @@ def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
 
 def test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals() -> None:
     from app.runtime.graph_projection import social_memory_read
-    from app.services import social_routine_interactions
+    from app.runtime.routine_posts import interactions as social_routine_interactions
 
     engine = _engine()
     occurred_at = datetime(2026, 8, 11, 5, 30, tzinfo=UTC)
