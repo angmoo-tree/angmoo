@@ -2596,3 +2596,8 @@ Memory 조립 3개를 `runtime/memory/daypart_observations.py`로 실제 이전�
 
 - Daypart 원래 세 조립 함수는 `runtime/memory/daypart_observations.py`로 이전했다. 기존 Resident 실행이 같은 Session의 profile references 생성 함수를 전달하며, Post 조회 후에만 실행한다. Writer/LangGraph/credential 소비자는 각 실제 업무 기능을 직접 사용한다.
 - C30과 공유 활동 조립이 반영된 후보의 관련 검증: **212 passed / 기존 PostgreSQL 1 skipped / 1 warning / 94.37초**. 옛 AgentRun의 이미 이전한 네 dormant 함수는 다시 가져오지 않았다. 최종 stock/전체/설치 Gate는 계속 남아 있다.
+
+### G13 불변 Chat migration 원문 복원
+
+- G5 준비 중 바뀐 `world_scope_migration.py`의 Base import 한 줄을 #258 원본으로 복원했다. 원본20595bytes / SHA256 `643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634`와 정확히 같다. 기존 `core/db.py`의 같은 Base export로 실행되며, frozen D inventory는 수정하지 않았다.
+- D inventory 및 실제 migration 회귀 **17 passed / 28.70초**. 역사적 파일은 이후의 일반 ORM import 전환 대상에서 제외한다.

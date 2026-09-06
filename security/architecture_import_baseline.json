@@ -1951,7 +1951,7 @@
         "typing"
       ],
       "imports": [
-        "app.models"
+        "app.core.db"
       ],
       "module": "app.domains.chat.infrastructure.world_scope_migration",
       "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
