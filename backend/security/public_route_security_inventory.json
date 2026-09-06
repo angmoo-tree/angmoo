@@ -59,7 +59,7 @@
     },
     "DELETE /api/v1/messages/threads/{thread_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "delete_thread"
     },
     "DELETE /api/v1/posts/{post_id}": {
@@ -239,7 +239,7 @@
     },
     "GET /api/v1/characters/{character_id}/message-settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "get_character_message_settings"
     },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan": {
@@ -284,17 +284,17 @@
     },
     "GET /api/v1/messages/settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "get_message_settings"
     },
     "GET /api/v1/messages/threads": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "list_threads"
     },
     "GET /api/v1/messages/threads/{thread_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "get_thread"
     },
     "GET /api/v1/notifications": {
@@ -424,32 +424,32 @@
     },
     "GET /api/v1/worlds/{world_id}/chat/threads": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat",
+      "module": "app.domains.chat.router.world_chat",
       "endpoint": "list_world_threads"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat",
+      "module": "app.domains.chat.router.world_chat",
       "endpoint": "get_world_thread"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "get_latest_world_response_request"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "get_world_response_request"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/events": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "stream_world_response_events"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/{request_id}/evidence": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "get_world_response_evidence"
     },
     "GET /api/v1/worlds/{world_id}/creator-context": {
@@ -484,7 +484,7 @@
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{responding_id}/chat-entry": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat",
+      "module": "app.domains.chat.router.world_chat",
       "endpoint": "get_world_chat_entry"
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories": {
@@ -549,7 +549,7 @@
     },
     "PATCH /api/v1/characters/{character_id}/message-settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "update_character_message_settings"
     },
     "PATCH /api/v1/characters/{character_id}/worlds/{world_id}/activity-runtime-mode": {
@@ -559,12 +559,12 @@
     },
     "PATCH /api/v1/messages/settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "update_message_settings"
     },
     "PATCH /api/v1/messages/threads/{thread_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "update_thread"
     },
     "PATCH /api/v1/notifications/{notification_id}/read": {
@@ -584,7 +584,7 @@
     },
     "PATCH /api/v1/worlds/{world_id}/chat/threads/{thread_id}/model": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat",
+      "module": "app.domains.chat.router.world_chat",
       "endpoint": "update_world_thread_model"
     },
     "PATCH /api/v1/worlds/{world_id}/owner-character": {
@@ -749,17 +749,17 @@
     },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "create_thread"
     },
     "POST /api/v1/messages/threads/{thread_id}/messages": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "send_message"
     },
     "POST /api/v1/messages/threads/{thread_id}/messages/{message_id}/retry": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.messages",
+      "module": "app.domains.chat.router.messages",
       "endpoint": "retry_message"
     },
     "POST /api/v1/posts": {
@@ -879,17 +879,17 @@
     },
     "POST /api/v1/worlds/{world_id}/chat/threads": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat",
+      "module": "app.domains.chat.router.world_chat",
       "endpoint": "create_or_get_world_thread"
     },
     "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/messages": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "accept_world_message"
     },
     "POST /api/v1/worlds/{world_id}/chat/threads/{thread_id}/retry": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_chat_response",
+      "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "retry_world_response"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {

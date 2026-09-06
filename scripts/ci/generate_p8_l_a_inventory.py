@@ -307,7 +307,7 @@ def _architecture_inventory() -> dict[str, Any]:
 
 
 def _route_inventory(policy: dict[str, Any]) -> list[str]:
-    source = (ROOT / "backend/app/api/v1/routes/messages.py").read_text(encoding="utf-8")
+    source = (ROOT / "backend/app/domains/chat/router/messages.py").read_text(encoding="utf-8")
     actual = sorted(
         f"{method.upper()} /api/v1{path}" for method, path in ROUTE_PATTERN.findall(source)
     )

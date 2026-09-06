@@ -6868,6 +6868,339 @@
       "test_suppressions": {
         "tests/test_ci_pytest_paths.py": {}
       }
+    },
+    {
+      "commit": "2f36a6afdfbb5a70dfb0b99f6d148df7e6f20c34",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): establish concrete contracts models and thread queries",
+      "tracked_files": {
+        "backend/app/domains/chat/repository/__init__.py": "71dd714fe9a056d90b5d845e04c6b14b7a41d2f7",
+        "backend/app/domains/chat/repository/threads.py": "d18a32053aaa5a09358ebc8e1e1c23a404dc02f4",
+        "backend/tests/chat/test_thread_repository.py": "9871de0aeb18fe053d14d107512cd661689209b4"
+      },
+      "test_nodes": [
+        "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+      ],
+      "test_assertions": {
+        "tests/chat/test_thread_repository.py": {
+          "test_thread_queries_preserve_owner_deleted_scope_order_and_same_session": [
+            "assert [row.id for row in rows] == ['latest', 'recent', 'old']",
+            "assert rows[0] is db.get(models.MessageThread, 'latest')",
+            "assert threads.count_active_threads(db, owner.id) == 3",
+            "assert threads.count_ambiguous_threads(db, owner.id) == 3",
+            "assert [row.id for row in threads.find_legacy_thread_candidates(db, owner.id, character.id)] == ['old', 'recent']",
+            "assert threads.get_owned_thread(db, owner.id, 'foreign') is None",
+            "assert threads.get_owned_thread(db, owner.id, 'deleted') is None",
+            "assert commits == []",
+            "assert db.get(models.MessageThread, 'latest').selected_model == 'gemini-2.5-flash-lite'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_thread_repository.py": {}
+      }
+    },
+    {
+      "commit": "57528d22072f7541e7f1f1b982071afd5c1d537c",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): move thread settings and message workflows into owner services",
+      "tracked_files": {
+        "backend/app/domains/chat/contracts/context.py": "b00af641aef374ebe597c093ac6a16be43183374",
+        "backend/app/domains/chat/service/__init__.py": "36aec198f8b6f495d0ceea480459eb55634c7be4",
+        "backend/app/domains/chat/service/messages.py": "3362ad26a533ddeb336551592d0bdc4e5f0e93f7",
+        "backend/app/domains/chat/service/profiles.py": "1d33e900ef53d81bb09fd6bd00c0b4827040c4d5",
+        "backend/app/domains/chat/service/settings.py": "a68a2ec797fee06eddf28a55fa35e7f4de32aa7d",
+        "backend/app/domains/identity/service/message_credentials.py": "4b17220e4ed27e31fa42f1fbcd5bff71b4eb6ecf",
+        "backend/app/runtime/chat/scope_queries.py": "4ea56648e11d41c71ddb3b80912795b6e24e156b",
+        "backend/tests/chat/test_service_ownership.py": "2ff439d6df0d4898fe5dc485d79a8b0cbfc59766",
+        "backend/tests/chat_service_support.py": "c9a40547ede24989552db8ccc671febc840edd63"
+      },
+      "test_nodes": [
+        "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries",
+        "tests/chat/test_service_ownership.py::test_legacy_send_releases_original_fence_after_unexpected_failure",
+        "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback",
+        "tests/chat/test_service_ownership.py::test_owner_denial_precedes_world_query_with_same_session[None]",
+        "tests/chat/test_service_ownership.py::test_owner_denial_precedes_world_query_with_same_session[installation1]",
+        "tests/chat/test_service_ownership.py::test_owner_denial_precedes_world_query_with_same_session[installation2]",
+        "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain",
+        "tests/chat/test_service_ownership.py::test_world_denial_follows_installation_and_preserves_lock_scope"
+      ],
+      "test_assertions": {
+        "tests/chat/test_service_ownership.py": {
+          "test_owner_denial_precedes_world_query_with_same_session": [
+            "pytest.raises(MessageForbiddenError, match='local owner')",
+            "assert calls == [(db, True)]"
+          ],
+          "test_world_denial_follows_installation_and_preserves_lock_scope": [
+            "pytest.raises(MessageNotFoundError, match='World Chat')",
+            "assert calls == [('installation', db, True), ('world', db, 'owner', 'world', True)]"
+          ],
+          "test_joined_reads_keep_attached_identity_filters_and_single_queries": [
+            "assert scope_queries.responding_world_character(db, 'world', responder_role.id) is None",
+            "assert scope_queries.responding_world_character(db, 'world', responder_role.id)[1] is responder",
+            "assert candidates == [requester_role]",
+            "assert candidates[0] is requester_role",
+            "assert len(statements) == 1",
+            "assert row[0] is responder_role",
+            "assert row[1] is responder",
+            "assert len(statements) == 1",
+            "assert role[0] is requester_role and role[1] is requester",
+            "assert len(statements) == 1",
+            "assert scope_queries.world_chat_role(db, requester_role.id, world_id='world', expected_owner_id=other.id) is None",
+            "assert scope_queries.responding_world_character(db, 'other-world', responder_role.id) is None"
+          ],
+          "test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback": [
+            "assert message_credentials.get_message_credential(db, owner.id) is credential",
+            "assert credential.purpose == 'message'",
+            "assert credential.character_id is None",
+            "assert credential.auth_profile_id == 'google:message:owner'",
+            "assert credential.label == '쪽지용 Google API key'",
+            "assert (scopes[0].owner_id, scopes[0].character_id, scopes[0].provider, scopes[0].purpose) == ('owner', '', 'google', 'message')",
+            "assert commits == []",
+            "assert message_credentials.get_message_credential(db, owner.id) is None",
+            "assert changed is credential",
+            "assert credential.enabled is False",
+            "assert credential.encrypted_api_key is None",
+            "assert credential.key_fingerprint is None",
+            "assert commits == []",
+            "assert credential.enabled is True",
+            "assert credential.model == 'gemini-2.5-flash-lite'"
+          ],
+          "test_routes_call_actual_owner_services_without_runtime_port_chain": [
+            "assert messages.thread_service is message_composition.thread_service",
+            "assert messages.settings_service is message_composition.settings_service",
+            "assert messages.message_service is message_composition.message_service",
+            "assert world_chat.chat_service is message_composition.thread_service",
+            "assert world_chat_response.chat_service is world_generation",
+            "assert type(messages.thread_service) is ThreadService",
+            "assert type(messages.settings_service) is MessageSettingsService",
+            "assert type(messages.message_service) is MessageService"
+          ],
+          "test_legacy_send_releases_original_fence_after_unexpected_failure": [
+            "pytest.raises(RuntimeError, match='unexpected-provider-failure')",
+            "assert events == [('acquire', db, user, 'thread'), ('send', db, user, 'thread', 'trimmed'), ('release', db, 'thread', 'same-fence')]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_service_ownership.py": {}
+      }
+    },
+    {
+      "commit": "408a29e0306aa9b95b08e3ed383032eebf4c6f8c",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own retrieval workflows and durable lifecycle repository",
+      "tracked_files": {
+        "backend/tests/chat/test_response_lifecycle_owner.py": "e155d9e0da3341e73b39bf085b98ea3407496507"
+      },
+      "test_nodes": [
+        "tests/chat/test_response_lifecycle_owner.py::test_direct_finalize_keeps_fence_rejection_and_exactly_one_committed_reply",
+        "tests/chat/test_response_lifecycle_owner.py::test_http_generation_accept_and_replay_use_the_durable_owner"
+      ],
+      "test_assertions": {
+        "tests/chat/test_response_lifecycle_owner.py": {
+          "test_http_generation_accept_and_replay_use_the_durable_owner": [
+            "assert first.outcome == 'accepted'",
+            "assert replay.outcome == 'replayed'",
+            "assert first.user_message.id == replay.user_message.id",
+            "assert first.response_request.request_id == replay.response_request.request_id",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert db.scalar(select(func.count(models.ChatResponseRequest.request_id))) == 1"
+          ],
+          "test_direct_finalize_keeps_fence_rejection_and_exactly_one_committed_reply": [
+            "pytest.raises(GenerationContractError, match='finalize_fence_conflict')",
+            "assert response_session.scalar(select(func.count(models.MessageMessage.id))) == before",
+            "assert committed.state is ResponseRequestState.COMMITTED",
+            "assert committed.committed_assistant_message_id is not None",
+            "assert replay.committed_assistant_message_id == committed.committed_assistant_message_id",
+            "assert response_session.scalar(select(func.count(models.MessageMessage.id))) == before + 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_response_lifecycle_owner.py": {}
+      }
+    },
+    {
+      "commit": "f4a5ddc74eb7651d91a100272a21dc26cb41543c",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own generation admission retry and request status",
+      "tracked_files": {
+        "backend/app/domains/chat/repository/response_requests.py": "5b66b49e3a892a086f8600696777ebaf0bd437ad"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "4694b5dc6eaa81e3c01ddb41ea01e5732cbe636c",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own live evidence policy and reader composition",
+      "tracked_files": {
+        "backend/app/domains/chat/contracts/evidence_reads.py": "3e3d66c15ace897b4a068138fc3fa39fc7055717",
+        "backend/app/domains/chat/service/evidence.py": "b6850982e46fd093171003583b7748b60fc8d6c4",
+        "backend/app/runtime/chat/evidence_reads.py": "91311ffe5cf8725fe599686303156ae5748526ae",
+        "backend/tests/chat/test_evidence_ownership.py": "be5e680c03c00fe43d22af412f9b14c52ec2c815"
+      },
+      "test_nodes": [
+        "tests/chat/test_evidence_ownership.py::test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt[changed0-available]",
+        "tests/chat/test_evidence_ownership.py::test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt[changed1-unavailable]",
+        "tests/chat/test_evidence_ownership.py::test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt[changed2-deleted]",
+        "tests/chat/test_evidence_ownership.py::test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt[changed3-unavailable]",
+        "tests/chat/test_evidence_ownership.py::test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt[changed4-unavailable]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_evidence_ownership.py": {
+          "test_inspector_rechecks_live_scope_revision_and_visibility_before_excerpt": [
+            "assert source_calls == [{'scope': scope, 'source_type': MemorySourceTypeV1.POST, 'source_id': 'post'}]",
+            "assert result.availability == availability",
+            "assert result.excerpt == 'x' * 500",
+            "assert result.canonical_href == '/worlds/world/posts/post'",
+            "assert result.related_character == 'Current character'",
+            "assert name_calls == [(session, 'other', 'world')]",
+            "assert result.excerpt is None",
+            "assert result.canonical_href is None",
+            "assert result.related_character is None",
+            "assert name_calls == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_evidence_ownership.py": {}
+      }
+    },
+    {
+      "commit": "d32ce88155acb64d4bca911b27935d58ddde54e5",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own streaming policy and ordered provider composition",
+      "tracked_files": {
+        "backend/app/domains/chat/contracts/execution.py": "6694a074a675627e748cbac5e2f74d4b62b946b3",
+        "backend/app/runtime/chat/generation_workflows.py": "5c089d9c5a81d7db57b31e6f3bc423e150c05b39",
+        "backend/tests/chat/test_generation_composition.py": "13ee98e3b40a4de7c3f0ed0cbff9a61952628bc0"
+      },
+      "test_nodes": [
+        "tests/chat/test_generation_composition.py::test_runtime_builder_keeps_provider_order_material_and_session",
+        "tests/chat/test_generation_composition.py::test_unavailable_memory_fails_durably_before_any_provider_builder"
+      ],
+      "test_assertions": {
+        "tests/chat/test_generation_composition.py": {
+          "test_runtime_builder_keeps_provider_order_material_and_session": [
+            "assert observed == ['canonical', 'graph_gateway', 'graph', 'labels', 'router', 'response', 'memory', 'today']",
+            "assert execution.character_labels is labels",
+            "assert execution.workflow._lifecycle is lifecycle",
+            "assert execution.workflow._unit_of_work._session is db",
+            "assert execution.workflow._memory_producer.session is db",
+            "assert execution.workflow._today_snapshot_validator.session is db",
+            "assert session is db",
+            "assert config is runtime_config",
+            "assert graph_provider == 'ladybug'",
+            "assert session is db",
+            "assert world_id == 'world'",
+            "assert session is db",
+            "assert session is db",
+            "assert current_labels is labels",
+            "assert value is material"
+          ],
+          "test_unavailable_memory_fails_durably_before_any_provider_builder": [
+            "assert [event.event_type for event in events] == [GenerationEventType.ACCEPTED, GenerationEventType.FAILED]",
+            "assert stored.state is ResponseRequestState.FAILED",
+            "assert stored.node_state['failure_class'] == 'local_runtime_unavailable'",
+            "assert stored.retryable is True",
+            "assert stored.committed_assistant_message_id is None",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert provider_calls == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_generation_composition.py": {}
+      }
+    },
+    {
+      "commit": "4d1f0f4836e913251f7fa92c091e93d8b1ce3409",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own canonical retrieval and snapshot policies",
+      "tracked_files": {
+        "backend/app/domains/chat/contracts/retrieval_reads.py": "29d8104b0e67e796ab67169db7cd43ad202f4fbb",
+        "backend/app/runtime/chat/retrieval_queries.py": "c91fc5d66ab84ee1c98b857a0c60500214ef1c02",
+        "backend/tests/chat/test_retrieval_policy_ownership.py": "f061b2b7b8446bc878f2195db7f50791c4ce730c"
+      },
+      "test_nodes": [
+        "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification",
+        "tests/chat/test_retrieval_policy_ownership.py::test_preflight_owner_denial_precedes_other_queries[None]",
+        "tests/chat/test_retrieval_policy_ownership.py::test_preflight_owner_denial_precedes_other_queries[installation1]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_retrieval_policy_ownership.py": {
+          "test_preflight_owner_denial_precedes_other_queries": [
+            "pytest.raises(RetrievalContractError, match='retrieval_preflight_local_owner_forbidden')",
+            "assert calls == [(session, command)]"
+          ],
+          "test_entity_policy_rechecks_unicode_identity_and_blocks_clarification": [
+            "assert observed == [(session, 'world', 'alice'), (session, {'world_id': 'world', 'first_world_character_id': 'responding', 'second_world_character_id': 'eligible'})]",
+            "assert len(result) == 1",
+            "assert result[0].ref == 'ref'",
+            "assert len(result[0].candidates) == 1",
+            "assert candidate.world_character_id == 'eligible'",
+            "assert candidate.blocked is True",
+            "assert candidate.observable is False",
+            "assert candidate.safe_for_clarification is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_retrieval_policy_ownership.py": {}
+      }
+    },
+    {
+      "commit": "74f6c06f9e5501ab3556fed1f3cbd4d5d5546217",
+      "feature_id": "AR-B6",
+      "reason": "Original signed source integration: refactor(chat): own HTTP handlers and inject actual services",
+      "tracked_files": {
+        "backend/app/domains/chat/dependencies.py": "2f8280ff03c39529242909ab179cee6c000477c7",
+        "backend/app/domains/chat/router/__init__.py": "1df7eab97edf29370b3bfefb132d7044a784f03f",
+        "backend/tests/chat/test_http_ownership.py": "288eb12dc44d48b05b8ff00f6b21665c6e2130b6"
+      },
+      "test_nodes": [
+        "tests/chat/test_http_ownership.py::test_both_factories_register_the_same_actual_chat_services[app.main]",
+        "tests/chat/test_http_ownership.py::test_both_factories_register_the_same_actual_chat_services[app.public_main]",
+        "tests/chat/test_http_ownership.py::test_missing_service_configuration_does_not_construct_an_implicit_fallback",
+        "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user",
+        "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+      ],
+      "test_assertions": {
+        "tests/chat/test_http_ownership.py": {
+          "test_both_factories_register_the_same_actual_chat_services": [
+            "assert dependencies.get_current_user is get_current_user",
+            "assert dependencies.get_db is get_db",
+            "assert world_chat.get_current_user is get_current_user",
+            "assert world_chat_response.get_current_user is get_current_user",
+            "assert messages.list_threads in endpoints",
+            "assert world_chat.get_world_chat_entry in endpoints",
+            "assert world_chat_response.stream_world_response_events in endpoints",
+            "assert getter(request) is getattr(message_composition, name)"
+          ],
+          "test_request_injected_service_receives_the_original_session_and_user": [
+            "assert response.status_code == 200",
+            "assert response.json() == {'items': [], 'max_threads': 5}",
+            "assert calls == [(session, user)]"
+          ],
+          "test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context": [
+            "assert response.status_code == 200",
+            "assert response.headers['content-type'] == 'application/x-ndjson'",
+            "assert response.headers['cache-control'] == 'no-store'",
+            "assert response.headers['x-content-type-options'] == 'nosniff'",
+            "assert response.content == (json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':')) + '\\n').encode('utf-8')",
+            "assert calls == [('read', (session, user, 'world', 'thread', 'request')), ('stream', (session, user, 'world', 'thread', 'request'), {'memory_recall_service': memory, 'runtime_settings': config})]"
+          ],
+          "test_missing_service_configuration_does_not_construct_an_implicit_fallback": [
+            "pytest.raises(RuntimeError, match='Chat generation_service is not configured')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_http_ownership.py": {}
+      }
     }
   ]
 }

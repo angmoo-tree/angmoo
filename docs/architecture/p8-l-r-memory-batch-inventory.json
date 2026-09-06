@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "08829df27d8477daea2e0f920392d7cd42031d10d07acf627f4745ccc24782ea"
+      "sha256": "c0a589558ce20c7150b9fe32e92a32108cab8eb2e53eafe795f32bfe93570faf"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -264,7 +264,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-      "sha256": "0a1201bf667f40380f97a0949eea73d87e8fbad213a34c51f10c3694a8150bae"
+      "sha256": "7b0d0c9d1f3bd50a0185f2137bf2850816044ac47e5bbc756e76a6f5529bb64f"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
@@ -388,7 +388,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "77713507e5d9d11bec2789d958e289d6810a6455f982bd98c8a4506330d3bbaa"
+      "sha256": "1080745e7251d905bac542e6797fd5ae8fc273b7ce7b0163535225b693b53d20"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",

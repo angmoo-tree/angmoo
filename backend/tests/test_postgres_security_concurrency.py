@@ -21,7 +21,7 @@ from sqlalchemy.pool import NullPool
 
 from app import models, schemas
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
-from app.domains.chat.api import schemas as chat_schemas
+from app.domains.chat import schemas as chat_schemas
 from app.config import settings
 from app.domains.routines import constants as agent_run_crud
 from app.runtime.characters import management as agent_service
@@ -31,7 +31,7 @@ from app.domains.identity.service import external_verification as external_auth_
 from app.services import local_bot_quota
 from app.domains.identity.service import login_throttle
 from app.services import lore_parser_quota
-from app.services import messages as message_service
+from chat_service_support import messages as message_service
 from app.services import daily_activity_plans
 from app.domains.worlds import service as world_service
 from app.services import world_character_contracts

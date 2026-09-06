@@ -21,27 +21,27 @@ I_INVENTORY_SHA256 = (
     "1de9f8218ddc8ecfb5af8a3a9873b0a84d71d6bf62f498a079d0f983f49569df"
 )
 
-from app.domains.chat.domain.call_tracker import (  # noqa: E402
+from app.domains.chat.contracts.call_tracker import (  # noqa: E402
     LlmNode,
     NORMAL_NODE_BUDGETS,
 )
-from app.domains.chat.domain.generation_lifecycle import (  # noqa: E402
+from app.domains.chat.contracts.generation_lifecycle import (  # noqa: E402
     CHAT_GENERATION_STREAM_VERSION,
     ResponseRequestState,
     ResponseTerminalReason,
 )
-from app.domains.chat.domain.resolved_envelope import (  # noqa: E402
+from app.domains.chat.contracts.resolved_envelope import (  # noqa: E402
     RESOLVED_RETRIEVAL_VERSION,
 )
-from app.domains.chat.domain.retrieval_intent import (  # noqa: E402
+from app.domains.chat.contracts.retrieval_intent import (  # noqa: E402
     RETRIEVAL_INTENT_VERSION,
     RetrievalRoute,
 )
-from app.domains.chat.domain.workflow_recipe import (  # noqa: E402
+from app.domains.chat.contracts.workflow_recipe import (  # noqa: E402
     RETRIEVAL_WORKFLOW_VERSION,
     WorkflowRecipe,
 )
-from app.domains.chat.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.chat.models import (  # noqa: E402
     ChatResponseRequest,
 )
 from app.domains.memory.domain.canonical_retrieval_plan import (  # noqa: E402
@@ -63,16 +63,16 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/chat/domain/retrieval_intent.py",
-    "backend/app/domains/chat/domain/resolved_envelope.py",
-    "backend/app/domains/chat/domain/workflow_recipe.py",
-    "backend/app/domains/chat/domain/call_tracker.py",
-    "backend/app/domains/chat/domain/generation_lifecycle.py",
-    "backend/app/domains/chat/domain/response_request.py",
-    "backend/app/domains/chat/application/answer_request.py",
-    "backend/app/domains/chat/application/generation_lifecycle.py",
-    "backend/app/domains/chat/ports/response_lifecycle.py",
-    "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+    "backend/app/domains/chat/contracts/retrieval_intent.py",
+    "backend/app/domains/chat/contracts/resolved_envelope.py",
+    "backend/app/domains/chat/contracts/workflow_recipe.py",
+    "backend/app/domains/chat/contracts/call_tracker.py",
+    "backend/app/domains/chat/contracts/generation_lifecycle.py",
+    "backend/app/domains/chat/contracts/response_request.py",
+    "backend/app/domains/chat/service/answer_request.py",
+    "backend/app/compatibility/chat_generation_lifecycle.py",
+    "backend/app/domains/chat/contracts/response_lifecycle.py",
+    "backend/app/domains/chat/repository/response_lifecycle.py",
     "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
     "backend/app/domains/relationships/contracts/graph_plan.py",
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
@@ -118,7 +118,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/chat/application/answer_request.py",
+        "backend/app/domains/chat/service/answer_request.py",
         (
             "AnswerRequestContractValidator",
             "BoundedFakeAnswerRequestExecutor",
@@ -128,7 +128,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+        "backend/app/domains/chat/repository/response_lifecycle.py",
         (
             "lease_generation=ChatResponseRequest.lease_generation + 1",
             "last_emitted_sequence",
@@ -138,7 +138,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/domain/call_tracker.py",
+        "backend/app/domains/chat/contracts/call_tracker.py",
         (
             "llm_duplicate_crg_call",
             "llm_request_wide_repair_exceeded",

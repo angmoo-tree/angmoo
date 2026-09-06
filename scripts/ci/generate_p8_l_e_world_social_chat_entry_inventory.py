@@ -60,7 +60,7 @@ def _backend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/api/v1/routes/world_chat.py",
+        "backend/app/domains/chat/router/world_chat.py",
         (
             'prefix="/worlds/{world_id}/world-characters"',
             '"/{responding_id}/chat-entry"',
@@ -70,7 +70,7 @@ def _backend_contract() -> dict[str, Any]:
     for relative in ("backend/app/api/v1/main.py", "backend/app/api/v1/public.py"):
         _require_text(relative, ("world_chat.entry_router", "world_chat.router"))
     _require_text(
-        "backend/app/runtime/chat/sqlalchemy_service.py",
+        "backend/app/domains/chat/service/threads.py",
         (
             "requester_cardinality=\"zero\"",
             "requester_cardinality=\"one\"",
