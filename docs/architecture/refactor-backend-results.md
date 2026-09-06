@@ -15,7 +15,7 @@
 | AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP LOCAL VERIFIED · FINAL INTEGRATION GATES PENDING | 실제 AgentRun·LangGraph·작성·C7-H 활동 HTTP/상세 응답 소유까지 합류; 전체 backend/stock/PR 검증 준비 |
+| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP SOURCE COMPLETE · PR FULL CI PENDING | C7-H까지 실제 소유 합류; local full의 route inventory 1실패를 metadata만 수정하고 focused78 PASS; stock2311 PASS, 최종 PR 전체 CI 대기 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -1442,3 +1442,11 @@ C7-H 원본 archive2297nodes는 준비됐고, source3파일/testfile1/4노드의
 
 
 최종 C7-H 원래 최초 도입 4파일/4노드의 순차 append 및 원래 provenance 검증이 완료됐다. ledger는 **91 → 92 records**, main의 기존64와 직전91은 불변 prefix다. 이 metadata commit 이후 파일을 고정하여 전체 backend와 source/API/ORM/단언/suppression/수집노드 stock 검증을 실행한다.
+
+### B4 후속 최종 전체 검사와 HTTP 보안 목록 보정
+
+고정 `71493c5`의 전체 backend 검사는 **1 failed / 2288 passed / 22 skipped / 27 warnings / 726.47초**다. 유일한 실패는 `test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation`에서 C7의 실제 HTTP 소유 이동 뒤 보안 목록의 module이 이전 `app.api.v1.routes.agents`로 남은 불일치였다. 같은 커밋의 stock `--contracts --nodes`는 **PASS: items37, 보호2311 / 현재2311**이며 원래 #258의1867 / #263의1907 및 모든 원래 최초 도입을 보존했다.
+
+실제 route 객체를 대조해 정확한 12개 module 필드만 `app.domains.characters.router`로 변경했다. URL·method·endpoint·access와 다른 필드는 모두 동일하며, public inventory196개도 기존 생성기로 갱신했다. 제품 코드·테스트 source·원래 assertion/suppression·동결자료·92개 원장 기록은 바꾸지 않았다. 원래 실패 M3/M4와 활동 HTTP·관리·성향·credential transaction6파일은 **78 passed / 3 warnings / 15.29초**다.
+
+이 보정은 metadata만 변경하므로 이미 실행한 전체 검사의 실패 이력은 그대로 보존하고, 최종 전체 gate는 PR exact head의 Core backend CI에서 확인한다. local 전체 PASS로 바꾸어 기록하지 않는다. 원래 stock와 inventory를 보정 head에서 다시 확인한 뒤 PR을 생성하며, PR checks·merge·post Actions·Installer gate는 각각 별도 상태다.
