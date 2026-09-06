@@ -441,8 +441,8 @@
     "backend/app/domains/chat/domain/workflow_recipe.py": "backend/app/domains/chat/contracts/workflow_recipe.py",
     "backend/app/domains/chat/domain/__init__.py": "backend/app/domains/chat/contracts/__init__.py",
     "backend/app/domains/chat/infrastructure/sqlalchemy_models.py": "backend/app/domains/chat/models.py",
-    "backend/app/domains/chat/application/messages.py": "backend/app/compatibility/chat_service.py",
-    "backend/app/domains/chat/ports/runtime.py": "backend/app/compatibility/chat_runtime_contract.py",
+    "backend/app/domains/chat/application/messages.py": "backend/app/domains/chat/service/threads.py",
+    "backend/app/domains/chat/ports/runtime.py": "backend/app/domains/chat/dependencies.py",
     "backend/app/runtime/chat/composition.py": "backend/app/runtime/chat/message_composition.py",
     "backend/app/runtime/chat/sqlalchemy_adapter.py": "backend/app/domains/chat/service/threads.py",
     "backend/app/domains/chat/application/answer_request.py": "backend/app/domains/chat/service/answer_request.py",
@@ -450,7 +450,7 @@
     "backend/app/domains/chat/application/canonical_retrieval.py": "backend/app/domains/chat/service/canonical_retrieval.py",
     "backend/app/domains/chat/application/character_response.py": "backend/app/domains/chat/service/character_response.py",
     "backend/app/domains/chat/application/evidence_assembly.py": "backend/app/domains/chat/service/evidence_assembly.py",
-    "backend/app/domains/chat/application/generation_lifecycle.py": "backend/app/compatibility/chat_generation_lifecycle.py",
+    "backend/app/domains/chat/application/generation_lifecycle.py": "backend/app/domains/chat/repository/response_lifecycle.py",
     "backend/app/domains/chat/application/graph_retrieval.py": "backend/app/domains/chat/service/graph_retrieval.py",
     "backend/app/domains/chat/application/response_workflow.py": "backend/app/domains/chat/service/response_workflow.py",
     "backend/app/domains/chat/application/retrieval_routing.py": "backend/app/domains/chat/service/retrieval_routing.py",
@@ -53229,7 +53229,8 @@
         "temporary_implementation": "backend/app/compatibility/chat_service.py",
         "temporary_contract": "backend/app/compatibility/chat_runtime_contract.py",
         "replacement_node": "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain",
-        "removal_stage": "AR-B8: explicitly retire the old structure-only check with its frozen assertion correspondence; no new product caller may use the historical forwarding class."
+        "removal_stage": "AR-B8: explicitly retire the old structure-only check with its frozen assertion correspondence; no new product caller may use the historical forwarding class.",
+        "current_completion": "AR-B8 Chat forwarding retirement: original layer Git AST and the three exact test nodes are verified by scripts/ci/chat_forwarder_retirement.py; actual service/repository tests retain argument/result/failure/SQLite replay checks."
       },
       "remaining_owners": {
         "backend/app/runtime/chat/world_generation.py": "AR-B6-B durable accept/retry/stream/fence; currently calls actual service aliases with the same Session.",
@@ -53291,7 +53292,8 @@
             "_request",
             "_workflow"
           ]
-        }
+        },
+        "current_completion": "AR-B8 Chat forwarding retirement: original layer Git AST and the three exact test nodes are verified by scripts/ci/chat_forwarder_retirement.py; actual service/repository tests retain argument/result/failure/SQLite replay checks."
       },
       "remaining_owners": {
         "backend/app/runtime/chat/world_generation.py": "AR-B6-B2 actual generation admission, request reads and streaming orchestration; cross-owner reads/provider wiring remain typed runtime collaboration.",
@@ -53315,8 +53317,7 @@
           "backend/app/domains/chat/service/evidence.py",
           "backend/app/domains/chat/repository/response_requests.py",
           "backend/app/runtime/chat/evidence_reads.py",
-          "backend/app/domains/chat/service/profiles.py",
-          "backend/app/runtime/chat/world_generation.py"
+          "backend/app/domains/chat/service/profiles.py"
         ]
       },
       "split_symbols": [
@@ -53659,14 +53660,15 @@
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::__all__",
-          "new": "backend/app/runtime/chat/world_generation.py::__all__",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
-          ]
+          ],
+          "retirement_evidence": "Original seven advertised exports remain in actual GenerationService methods, deadline constant and generation_workflows.SqlAlchemyResponseWorkflowUnitOfWork. Closed signed-source Chat retirement proof checks all three original owner definitions unchanged; no synthetic __all__ or forwarding object remains."
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
@@ -56974,8 +56976,7 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanValidator",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanValidator",
           "direct_consumers": [
-            "backend/app/domains/chat/service/graph_retrieval.py",
-            "backend/app/runtime/chat/world_generation.py"
+            "backend/app/domains/chat/service/graph_retrieval.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
@@ -56995,8 +56996,7 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanExecutor",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanExecutor",
           "direct_consumers": [
-            "backend/app/domains/chat/service/graph_retrieval.py",
-            "backend/app/runtime/chat/world_generation.py"
+            "backend/app/domains/chat/service/graph_retrieval.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
@@ -57125,7 +57125,6 @@
           "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallValidator",
           "direct_consumers": [
             "backend/app/domains/relationships/service/graph_planning.py",
-            "backend/app/runtime/chat/world_generation.py",
             "backend/app/runtime/graph_projection/relationship_graph_read.py"
           ],
           "test_nodes": [
@@ -57144,7 +57143,6 @@
           "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallService",
           "direct_consumers": [
             "backend/app/domains/relationships/service/graph_planning.py",
-            "backend/app/runtime/chat/world_generation.py",
             "backend/app/runtime/graph_projection/relationship_graph_read.py"
           ],
           "test_nodes": [
@@ -72570,7 +72568,6 @@
           "new": "backend/app/runtime/social/today_activity.py::today_social_activity_reader",
           "direct_consumers": [
             "backend/app/runtime/chat/today_sns_activity.py",
-            "backend/app/runtime/chat/world_generation.py",
             "backend/app/runtime/memory/subjective_source.py"
           ],
           "test_nodes": [
@@ -72788,7 +72785,6 @@
           "new": "backend/app/runtime/social/today_activity.py::today_social_activity_reader",
           "direct_consumers": [
             "backend/app/runtime/chat/today_sns_activity.py",
-            "backend/app/runtime/chat/world_generation.py",
             "backend/app/runtime/memory/subjective_source.py"
           ],
           "test_nodes": [
@@ -133056,6 +133052,40 @@
         "Original seven read-only diagnostics all0,protected2313/current2564. Original signed869 two-path and signed49c0f1f4 two-test first-introduction evidence only; no ledger/frozen write.",
         "L4 current1090/14/99 and Memory batch inventories current; product API/ORM and ASGI profiles unchanged."
       ]
+    },
+    "AR-B8-CHAT-FORWARDERS": {
+      "status": "SOURCE VALIDATED; parent source capture/stock/Hosted pending",
+      "anchor_commit": "fd312e6a55d264f4ef704ee866f6819322119858",
+      "removed_files": [
+        "backend/app/compatibility/chat_service.py",
+        "backend/app/compatibility/chat_runtime_contract.py",
+        "backend/app/compatibility/chat_generation_lifecycle.py",
+        "backend/app/runtime/chat/world_generation.py"
+      ],
+      "actual_paths": [
+        "backend/app/domains/chat/service/threads.py",
+        "backend/app/domains/chat/dependencies.py",
+        "backend/app/domains/chat/repository/response_lifecycle.py",
+        "backend/app/domains/chat/service/generation.py",
+        "backend/app/domains/chat/service/messages.py",
+        "backend/app/domains/chat/service/evidence.py",
+        "backend/app/runtime/chat/message_composition.py"
+      ],
+      "retirement_proof": "scripts/ci/chat_forwarder_retirement.py requires the signed ancestor, four exact Git blobs, forward-only22+9 bodies/protocol22, unchanged actual22 owner/9 durable command methods and actual composition/route bindings. It admits no generic class retirement.",
+      "existing_test_successors": {
+        "tests/chat/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port": "Same node calls actual ThreadService/MessageService; lower SQL/IO spies verify arguments, trimmed content, return, original exception identity and success/failure lease release. No retired wrapper is copied.",
+        "tests/chat/test_response_lifecycle_owner.py::test_http_generation_accept_and_replay_use_the_durable_owner": "Same SQLite/replay assertions and calls; old constructor tripwire replaced solely by absent original file and actual GenerationService type.",
+        "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain": "Same other route assertions; old aggregate identity replaced by actual generation/evidence instance identity and concrete GenerationService type."
+      },
+      "old_exports": "Chat public no longer exports ChatService or GenerationLifecycleService. SQL Chat/message/schema historical identities are the independent pure-facade retirement scope.",
+      "runtime_contract": "No schema, ORM, provider, transaction, service/repository body or composition construction changes. Streaming test helpers call the existing actual repository directly, preserving accept/finalize aliases.",
+      "frozen_materials": "P8-L-B/P/Q/Today inventories remain frozen successor evidence; their historical source paths are not current runtime dependencies. Baseline/checkpoint/additions/approved nodes are untouched.",
+      "validation": [
+        "Actual affected50 tests PASS; earlier combined actual50+strict32=82 PASS.",
+        "Final strict34 positive/negative/provenance nodes PASS; inventory focused total52PASS/1 preexisting L4 parity97vs99 failure already fixed by parent signed66676863, not changed here.",
+        "Original seven read-only diagnostics all0; protected2313/current2598; signed869 original two paths and signed49c0f1f4 original two test introductions only, no frozen/ledger write.",
+        "Architecture1086modules/4055edges/5exactlegacyedges cycle0; actual generation advertised7exports verified across original3owner definitions unchanged."
+      ]
     }
   },
   "asgi_exports": {
@@ -133157,5 +133187,6 @@
     "app.models.auth": "app.domains.identity.models",
     "app.models.credentials": "app.domains.identity.models"
   },
-  "retired_public_main": true
+  "retired_public_main": true,
+  "retired_chat_forwarders": true
 }

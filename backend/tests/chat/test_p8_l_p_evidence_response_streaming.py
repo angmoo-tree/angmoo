@@ -27,7 +27,6 @@ from app.domains.chat.service.character_response import (
     CharacterResponseGenerationService,
 )
 from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
-from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
 from app.domains.chat.service.graph_retrieval import (
     GraphPlanningMetrics,
     GraphPlanningResult,
@@ -101,11 +100,7 @@ from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
-from app.runtime.chat.world_generation import (
-    accept_world_message,
-    get_world_response_request,
-    retry_world_response,
-)
+from app.runtime.chat.message_composition import generation_service
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
 from chat_service_support import messages as world_chat
 
@@ -556,9 +551,7 @@ def _request(session: Session, route: RetrievalRoute):
     )
     assert user_message is not None
     suffix = route.value.lower()
-    return GenerationLifecycleService(
-        SqlAlchemyResponseLifecycleRepository(session)
-    ).accept(
+    return SqlAlchemyResponseLifecycleRepository(session).accept(
         CreateResponseRequest(
             request_id=f"request-{suffix}",
             thread_id="p-thread",
@@ -590,7 +583,7 @@ def _workflow(
     router=None,
     today_snapshot_validator=None,
 ):
-    lifecycle = GenerationLifecycleService(SqlAlchemyResponseLifecycleRepository(session))
+    lifecycle = SqlAlchemyResponseLifecycleRepository(session)
     return ResponseGenerationWorkflowService(
         lifecycle=lifecycle,
         router=router or _Router(route),
@@ -898,7 +891,7 @@ def test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable(
 
     owner = response_session.get(models.User, "p-owner")
     assert owner is not None
-    retried = retry_world_response(
+    retried = generation_service.retry_world_response(
         response_session,
         owner,
         "p-world",
@@ -1102,14 +1095,14 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
         content="철수랑 왜 싸웠지?",
         idempotency_key="message-idempotency-p8-l-p",
     )
-    accepted = accept_world_message(
+    accepted = generation_service.accept_world_message(
         response_session,
         owner,
         "p-world",
         "p-thread",
         payload,
     )
-    replayed = accept_world_message(
+    replayed = generation_service.accept_world_message(
         response_session,
         owner,
         "p-world",
@@ -1159,7 +1152,7 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
         owner,
         MessageSettingsUpdate(default_model="gemini-2.5-flash"),
     )
-    retried = retry_world_response(
+    retried = generation_service.retry_world_response(
         response_session,
         owner,
         "p-world",
@@ -1199,7 +1192,7 @@ def test_status_read_recovers_an_expired_non_terminal_request(
     row.deadline_at = datetime.now(UTC) - timedelta(seconds=1)
     response_session.commit()
 
-    read = get_world_response_request(
+    read = generation_service.get_world_response_request(
         response_session,
         owner,
         "p-world",

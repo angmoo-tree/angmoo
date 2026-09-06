@@ -2016,46 +2016,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.compatibility.chat_generation_lifecycle",
-        "target": "app.domains.chat.contracts.generation_lifecycle",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.compatibility.chat_generation_lifecycle",
-        "target": "app.domains.chat.contracts.response_request",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.compatibility.chat_generation_lifecycle",
-        "target": "app.domains.chat.contracts.retrieval_intent",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.compatibility.chat_generation_lifecycle",
-        "target": "app.domains.chat.contracts.retrieval_router",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.compatibility.chat_generation_lifecycle",
-        "target": "app.domains.chat.contracts.workflow_recipe",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.chat.infrastructure.sqlalchemy_models",
         "target": "app.domains.chat.models",
         "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",

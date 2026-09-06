@@ -11,7 +11,7 @@ from model_fixture_support import models as _models  # noqa: F401 - register can
 from app.domains.chat.schemas import WorldChatThreadModelUpdate
 from app.domains.chat.contracts.model_binding import MessageModelBindingMode
 from app.providers.gemini import build_generate_content_config
-from app.runtime.chat import world_generation
+from app.runtime.chat.message_composition import generation_service as world_generation
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding import (
     capture_v6_to_v7_delta,
@@ -103,7 +103,7 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
     observed: dict[str, object] = {}
 
     monkeypatch.setattr(
-        world_generation.generation_service.thread_service,
+        world_generation.thread_service,
         "_require_world_chat_owner_scope",
         lambda *_args, **_kwargs: None,
     )
@@ -120,12 +120,12 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
         return thread
 
     monkeypatch.setattr(
-        world_generation.generation_service.thread_service,
+        world_generation.thread_service,
         "_get_owned_world_thread",
         get_owned_thread,
     )
     monkeypatch.setattr(
-        world_generation.generation_service.thread_service,
+        world_generation.thread_service,
         "_world_thread_read",
         lambda *_args, **_kwargs: None,
     )

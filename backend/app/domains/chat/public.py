@@ -1,7 +1,5 @@
 """Supported backend boundary for Chat consumers."""
 
-from app.compatibility.chat_service import ChatService
-from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
 from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
@@ -140,7 +138,6 @@ __all__ = [
     "CanonicalRetrievalScope",
     "CharacterMessageSettingRead",
     "CharacterMessageSettingUpdate",
-    "ChatService",
     "ClarificationCandidate",
     "ClarificationResolution",
     "CoordinatedRetrievalReference",
@@ -151,7 +148,6 @@ __all__ = [
     "GenerationEvent",
     "GenerationEventType",
     "GenerationFence",
-    "GenerationLifecycleService",
     "GraphPlanningMetrics",
     "GraphPlanningResult",
     "GraphRetrievalCommand",

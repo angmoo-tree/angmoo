@@ -2762,6 +2762,8 @@ OSS 검사의 기존 함수9개 전체 AST를 유지하며 원래 AgentRun sourc
 
 후속 B5의 실제 CI pytest 경로 검사 source `280d4c034620046216fbde9a07aec3de2e606ebe`를 통합 후보에도 적용했다. 원래 Activity Proposal 경로 수정 외에, G07에서 `tests/worlds/test_foundation.py`로 옮긴 파일의 Local Smoke 명령도 연결했다. 실제 workflow 검사8개와 경로 음성 사례·기존 CI 정책·World foundation 회귀 **16 passed / 5.70초**다. 원래 frozen node·기능 단언은 바꾸지 않았으며 이 검사로 파일 이동 뒤 실행 대상이 사라진 CI 명령을 조기에 거부한다.
 
+후속 Chat forwarding source `f88ad7c60d165560fd51bc0e90411d741feeb3e6`를 이 고정 후보에 합류했다. 실제 Thread·Message·Generation·Evidence 서비스와 durable repository는 유지하고, 제품 소비자가 없는 전달 클래스3개와 `runtime/chat/world_generation.py` 집합을 제거했다. strict 원문/부재/자가비교·실제 호출·streaming·Today SNS·현재/역사 L4를 합친 **97 passed / 44.22초**다. 현재 경계1087modules/4060edges/기존정확예외5 및 Memory batch inventory가 일치한다. 이는 선행 단계들을 합친 로컬 후보의 증거이며 후속 원장·PR·설치 Gate는 별도다.
+
 Relationships·Graph recall/planner/Both·경계·동결 I/K/M inventory 집중은 **123 PASS /기존 PostgreSQL skip1 /48.36초 /기존 warning1개**다. PR #258/#263 API/schema/ORM, 보호 변경8파일 assertion 및 전체 split evidence는0오류, 경계847 module/3027 edge/legacy154와 현재 L4/ER0 generator도 통과했다. frozen JSON과 역사적 정책 설명 문자열은 다시 쓰지 않았다.
 
 B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Community service/CRUD/public 집합 제거와 G07 18파일은 source로 준비됐다. 부모 통합은 이미 별도로 전환된 Resident·Chat·LocalBot·Character image·공통 DB/모델 등록 소비자를 합류하고 전체 gate 및 Hosted/설치를 검증한다. 복합 Chat/Today/image 테스트의 최종 소유 위치와 앞선 G07 고정 수치 검사는 부모의 정확 통합 검증 대상으로 남는다.
@@ -2797,3 +2799,14 @@ Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 �
 전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
 
 Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.
+
+
+### AR-B8 Chat forwarding3와 generation 집계 제거
+
+ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_generation.py는 실제 제품 정책을 갖지 않는 전달 계층이었다. 기존 HTTP/Memory 조립의 Thread/Message/Settings/Generation/Evidence 서비스와 durable repository를 직접 사용하도록 테스트의 소비자까지 연결했고 네 파일을 제거했다. Chat public의 전달 클래스 export 두 개도 제거했다. API·ORM·provider·same Session·commit/flush·실제 service/repository 본문은 변경하지 않았다.
+
+기존 구조 node 세 개는 단순 삭제하거나 자기 비교로 바꾸지 않는다. signed fd312 원문 네 blob, 22+9개 전달 본문과 Protocol 22개, 실제 owner 22개·저장 명령 9개의 동일 AST, composition/route binding을 검증한 경우에만 정확한 기존 node 승계를 인정한다. 메시지 테스트는 실제 ThreadService와 MessageService에서 원래 인자/반환값을 검증하고 실패 시 동일 예외와 lease 해제도 확인한다. durable 테스트의 SQLite/replay 단언은 그대로이며 constructor tripwire만 실제 옛 파일 부재와 concrete owner 확인으로 대체한다.
+
+기존 영향 50개 검사는 통과했다. 제거 증명은 원문/계보 변조, 재생성한 class·package, 다른 실제 경로 지정, import/attribute 덮어쓰기, 자기 비교와 실제 transaction 단언 제거를 거부하는 별도 회귀로 검증한다. P8-L-B/P/Q/Today 고정 successor 인벤토리와 원본 baseline/checkpoint/additions는 변경하지 않는다. SQL Chat·message/schema/public의 순수 facade identity는 별도 단계이며 이 결과로 전체 B8 종료를 주장하지 않는다.
+
+최종 집중 검증: 실제 영향 50개 PASS, 제거 증명 34개 PASS. 고정 predecessor 및 현재 구조 인벤토리 묶음은 52 PASS와 선행 L4 parity97/99 차이 1건이며, 이 차이는 상위 통합의 signed66676863에서 이미 원본97+현재전수비교로 해결되었다. 이 source에서는 해당 단언을 수정하지 않았다. 원래 일곱 읽기 전용 보존 진단은 모두 오류0(protected2313/current2598), 경계1086 modules/4055 edges/5 exact legacy edges/cycle0이다. 원본 signed869 두 경로와 signed49의 두 노드를 읽기 전용 진단 근거로만 사용했고 source capture·원장·Hosted/통합 종료는 부모 단계에 남긴다.

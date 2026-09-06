@@ -1,7 +1,7 @@
 {
-  "edge_count": 4077,
-  "external_import_count": 3115,
-  "module_count": 1091,
+  "edge_count": 4060,
+  "external_import_count": 3109,
+  "module_count": 1087,
   "modules": [
     {
       "external_imports": [],
@@ -235,8 +235,7 @@
       "external_imports": [],
       "imports": [
         "app.domains.chat.router.world_chat_response",
-        "app.runtime.chat.message_composition",
-        "app.runtime.chat.world_generation"
+        "app.runtime.chat.message_composition"
       ],
       "module": "app.api.v1.routes.world_chat_response",
       "path": "backend/app/api/v1/routes/world_chat_response.py",
@@ -267,45 +266,6 @@
       "imports": [],
       "module": "app.compatibility",
       "path": "backend/app/compatibility/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime"
-      ],
-      "imports": [
-        "app.domains.chat.contracts.generation_lifecycle",
-        "app.domains.chat.contracts.response_lifecycle",
-        "app.domains.chat.contracts.response_request",
-        "app.domains.chat.contracts.retrieval_intent",
-        "app.domains.chat.contracts.retrieval_router",
-        "app.domains.chat.contracts.workflow_recipe"
-      ],
-      "module": "app.compatibility.chat_generation_lifecycle",
-      "path": "backend/app/compatibility/chat_generation_lifecycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.compatibility.chat_runtime_contract",
-      "path": "backend/app/compatibility/chat_runtime_contract.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.compatibility.chat_runtime_contract"
-      ],
-      "module": "app.compatibility.chat_service",
-      "path": "backend/app/compatibility/chat_service.py",
       "wildcard_imports": []
     },
     {
@@ -1899,8 +1859,6 @@
     {
       "external_imports": [],
       "imports": [
-        "app.compatibility.chat_generation_lifecycle",
-        "app.compatibility.chat_service",
         "app.domains.chat.contracts",
         "app.domains.chat.exceptions",
         "app.domains.chat.schemas",
@@ -13151,21 +13109,6 @@
       ],
       "module": "app.runtime.chat.today_sns_activity",
       "path": "backend/app/runtime/chat/today_sns_activity.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.repository.response_requests",
-        "app.domains.chat.service.evidence",
-        "app.domains.chat.service.generation",
-        "app.domains.chat.service.profiles",
-        "app.runtime.chat.evidence_reads",
-        "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.message_composition"
-      ],
-      "module": "app.runtime.chat.world_generation",
-      "path": "backend/app/runtime/chat/world_generation.py",
       "wildcard_imports": []
     },
     {

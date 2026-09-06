@@ -24,6 +24,12 @@ _retirement_spec = importlib.util.spec_from_file_location(
 public_factory_retirement = importlib.util.module_from_spec(_retirement_spec)
 _retirement_spec.loader.exec_module(public_factory_retirement)
 
+_chat_retirement_spec = importlib.util.spec_from_file_location(
+    "chat_forwarder_retirement", Path(__file__).with_name("chat_forwarder_retirement.py")
+)
+chat_forwarder_retirement = importlib.util.module_from_spec(_chat_retirement_spec)
+_chat_retirement_spec.loader.exec_module(chat_forwarder_retirement)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
 INVENTORY = ROOT / "security/refactor_feature_inventory.json"
@@ -617,7 +623,8 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                      symbols: dict[str, str] | None = None,
                      asgi_moves: dict[str, str] | None = None,
                      model_retirements: dict[str, str] | None = None,
-                     public_retirement: dict | None = None) -> list[str]:
+                     public_retirement: dict | None = None,
+                     chat_retirement: dict | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
     root_cache, frozen_root_cache, frozen_text_cache = {}, {}, {}
     literals = path_literals(files)
@@ -668,6 +675,12 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                 frozen_text_cache[(old_path, blob)] = text
             old_roots = frozen_root_cache.get((old_path, blob), {}).get(old_function, {})
             new_roots = root_cache.get(new_path, {}).get(new_function, {})
+            if chat_retirement is not None:
+                expected = chat_forwarder_retirement.required_fragments(
+                    expected, frozen_text_cache.get((old_path, blob), ""),
+                    "backend/" + old_path, old_function, "backend/" + new_path,
+                    new_function, chat_retirement
+                )
             if public_retirement is not None and "backend/" + old_path == public_factory_retirement.TEST:
                 if new_path != old_path or new_function != old_function or not blob:
                     raise ValueError("public factory retirement requires its protected exact test location")
@@ -948,6 +961,9 @@ def main() -> int:
         public_retirement = public_factory_retirement.validate(
             moves.get("retired_public_main", False), file_targets, [baseline, *snapshots], ROOT, git_bytes
         )
+        chat_retirement = chat_forwarder_retirement.validate(
+            moves.get("retired_chat_forwarders", False), file_targets, [baseline, *snapshots], ROOT, git_bytes
+        )
         asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
                                         public_retirement=public_retirement)
         errors.extend(check_sources(sources, moves["files"]))
@@ -961,7 +977,8 @@ def main() -> int:
             moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots])
         errors.extend(check_assertions(snapshots, targets, file_targets,
                                       symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
-                                      model_retirements=model_retirements, public_retirement=public_retirement))
+                                      model_retirements=model_retirements, public_retirement=public_retirement,
+                                      chat_retirement=chat_retirement))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))

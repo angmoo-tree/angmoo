@@ -754,7 +754,7 @@ Chat 요청은 이제 역할이 있는 실제 서비스로 들어갑니다. `ser
 
 World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로, 저장 직전 scope 재검증, 충돌 시 한 번의 재시도는 그대로입니다. 기존 쪽지는 user message commit 뒤 provider를 부르고, 재시도에서는 기존 실패 assistant 행 하나를 수정합니다. 새로운 공통 transaction 규칙으로 이 차이를 합치지 않습니다.
 
-과거 `ChatService → ChatRuntimePort → SqlAlchemyChatRuntime` 전달 체인은 HTTP 호출 경로에서 제거했습니다. 과거 구조 자체를 검증하는 승인 테스트 하나 때문에 이전 forwarder와 Protocol만 `app/compatibility/chat_service.py`·`chat_runtime_contract.py`에 임시 보존합니다. 이들은 신규 기능의 진입점이 아니며 B8에서 원래 node/assertion과 실제 서비스 회귀의 대응을 확인하고 퇴역합니다. `runtime/chat/sqlalchemy_service.py`에는 Memory 선택과 이전 테스트가 쓰는 동일 인스턴스 메서드 alias만 남습니다. 실제 generation/retrieval은 아래 서비스와 runtime 협력이 소유합니다.
+ThreadService는 대화방 정책과 조회를, MessageService는 메시지 입력과 응답 lease를, MessageSettingsService는 모델·자격 설정을 소유합니다. HTTP와 Memory 조립은 `runtime/chat/message_composition.py`가 만든 실제 서비스 인스턴스를 사용합니다. 전달만 하던 ChatService·ChatRuntimePort는 제거했습니다. 구조 검사는 실제 서비스를 실행하여 인자·반환값·오류·lease 해제와 route의 동일 인스턴스 연결을 검증합니다.
 
 ### Chat 검색·응답 생성과 저장 책임
 
@@ -762,7 +762,7 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 
 `repository/response_lifecycle.py`는 응답 요청의 lease·상태 전이·sequence·최종 답변의 원자적 저장을 담당합니다. `accept`와 `finalize`는 원래 `create_request`와 `finalize_response`의 동일 함수 이름이며 추가 저장 정책이 아닙니다. 실행 경로는 이 저장소를 직접 사용하므로 단순 전달만 하던 `GenerationLifecycleService` 인스턴스를 생성하지 않습니다. 오래된 fence의 거부, 완료 응답 재실행 시 중복 방지, 부분 delta 비저장, 성공 이후 Memory 후보 생성 순서는 유지합니다.
 
-이전 생성 클래스는 기존 공개 계약과 승인 테스트를 보존하기 위해 `compatibility/chat_generation_lifecycle.py` 한 곳에 남습니다. 새 기능의 진입점으로 사용하지 않으며 B8에서 원래 테스트와 실제 저장소 회귀의 대응을 확인한 뒤 제거합니다. 실제 생성 입장 판단은 GenerationService, 여러 업무를 읽는 조립은 아래 runtime 협력이 소유합니다. `runtime/chat/world_generation.py`는 기존 검사 alias이며 전체 B6 통합 검증과 호환 종료는 별도입니다.
+생성 입장 판단은 GenerationService, 여러 업무를 읽는 조립은 runtime 협력이 소유합니다. 전달 전용 GenerationLifecycleService는 제거했으며 저장소 회귀는 실제 SqlAlchemyResponseLifecycleRepository를 호출합니다. 예전 생성 모듈의 이름을 거치는 대신 `message_composition.generation_service`와 `evidence_service`를 사용합니다.
 
 ### World Chat 요청의 실제 서비스
 
@@ -782,7 +782,7 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 
 `contracts/execution.py`는 실제 실행 조립 결과와 입력을 명시합니다. `runtime/chat/generation_workflows.py`는 기존 canonical provider/executor, graph gateway/provider/executor, World 이름 목록, router·응답·UoW·성공 Memory 후보·Today validator를 그 순서로 연결합니다. 조립은 새로운 provider 호출이나 권한 판단을 추가하지 않습니다. 서비스는 이어서 기존 20개/8,000자 recent-context 규칙과 optional Today snapshot 실패 처리를 적용하고 실제 response workflow를 실행합니다. recent-context SQL은 repository, 선택·본문 한도와 요청 구성은 서비스에 있습니다.
 
-`runtime/chat/world_generation.py`는 이제 기존 테스트·계약을 위한 동일 인스턴스 이름만 남았습니다. 새 HTTP 동작은 실제 generation/evidence 서비스에 연결됩니다. A2 구조 확인 테스트가 보는 module attribute는 B8의 명시적 퇴역 대상이며 제품 동작의 호출 체인에 포함되지 않습니다. Canonical preflight/entity resolution·Today snapshot 검증과 Request 기반 HTTP 의존성은 아래 역할로 연결됩니다.
+`runtime/chat/world_generation.py` 집계 모듈은 제거했습니다. 응답 HTTP는 실제 GenerationService·EvidenceService 인스턴스에 연결됩니다. Canonical preflight/entity resolution·Today snapshot 검증과 Request 기반 HTTP 의존성은 아래 역할로 연결됩니다.
 
 
 ### 검색 사전 검사와 Today snapshot 판단
