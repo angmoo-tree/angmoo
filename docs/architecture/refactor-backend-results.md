@@ -2486,3 +2486,7 @@ Tree/Lore 후보 `7bc89bf0` 이후 원본 residual 및 LocalBot source `1565688f
 LocalBot의 Social 협력은 현재 B5의 실제 Feed/Profile/Inbox/Post/Timeline/State 소유자를 연결한다. `runtime/local_bot/composition.py`는 검증된 원본 `55d1c2f9`의 동일 바이트이며 16개 실제 함수 binding을 호출 시점에 제공한다. 여기서 SQL·권한 판단·provider 호출을 새로 구현하지 않는다. Image runtime의 setting 조회와 visual identity 저장도 같은 Character repository, 활동 기록은 같은 Routines service를 호출하도록 연결했다. 옛 Bot HTTP·서비스와 옛 Post Image 구현은 이미 준비된 실제 소유 파일을 사용하며 재생성하지 않았다.
 
 Python source/test의 문법과 전체 수집 **2451 nodes / 87.89초**, 경계 **1093 modules / 4053 edges / legacy72 PASS**, L4·ER0·현재 Memory batch·deferred inventory를 확인했다. 합쳐진 현재 reference만 맞추고 사라진 legacy9개/bridge11개를 제거했으며 새 예외를 추가하지 않았다. 현재 이 source의 focused·전체 backend·stock/API/ORM/node·원본 도입 원장·Hosted·설치·병합은 **검증 진행 전 또는 진행 중**이다. 수집과 구조 검사만으로 기능/AR-B8 완료로 기록하지 않는다.
+
+Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연결했다. `f52dbdbc`는 파일13개·신규5 nodes, `f7f303d9`는 파일11개·신규0 nodes, `c4a0a6a2`는 파일5개·신규0 nodes, `9cd5eb14`는 파일7개·신규4 nodes다. 원래 수집기의 도입 판정과 변경하지 않은 `addition_errors`로 각 Git blob·최초 도입·단언·suppression·ancestor를 검증한 뒤 **162개 불변 prefix → 166개**로 append했다. `d8f5b446`과 후보 `7bc89bf0`의 기존 원장도 동일하다. 현재 후보에서 기준 자료를 재수집하거나 원본 단언을 변경하지 않았다.
+
+현재 소스 목록 **1056 modules / 3925 internal edges / 3018 external imports**, 구조 경계 **legacy103**, deferred22, L4 parity99, OSS·secret allowlist metadata25·launcher6명령/2서비스·desktop installer 계약은 통과했다. 공식 stock/API·ORM/node와 전체 backend는 이 metadata를 고정한 후보에서 이어서 수행한다. Hosted CI·설치·post-merge 및 G5/G06/B8-B 최종 판정은 아직 별도 단계다.

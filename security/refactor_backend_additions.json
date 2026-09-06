@@ -7578,6 +7578,162 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "f52dbdbc727bf08935cd7cbdca245aa81d6cd6ab",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(tree): own board models queries services and HTTP",
+      "tracked_files": {
+        "backend/app/domains/tree/__init__.py": "b708d5da0a77764d02ac0fb7a941de52b42ac894",
+        "backend/app/domains/tree/constants.py": "469b867a006e1ceb2f65d1faaeda80a289f539d8",
+        "backend/app/domains/tree/contracts.py": "8cf39bc4f0357d4f714ab7c5c1f6d120513d063d",
+        "backend/app/domains/tree/dependencies.py": "daebb322b2116e5f625cf18a3f46fd2711472c92",
+        "backend/app/domains/tree/exceptions.py": "7d9ba19628939197ba042d9f6b0f1a5eafc4b014",
+        "backend/app/runtime/tree.py": "24fd387a5cadd90d20e171432953fa9534c703ac",
+        "backend/tests/tree/test_role_contracts.py": "a703603cae2354685333c640cacf71692826f2e6",
+        "backend/app/domains/tree/models.py": "ad417cb3003f8ba8d9d663eec2d7513f62d79300",
+        "backend/app/domains/tree/repository.py": "4184b27a3c11292e76d5726deb3dd6d6ba92f559",
+        "backend/app/domains/tree/router.py": "ea0eaa9b7f1503647f8157dc08c7c541db62658a",
+        "backend/app/domains/tree/schemas.py": "ccc5945aed6cb36e76b8d8ad7e2e65caece13e97",
+        "backend/app/domains/tree/service.py": "f26773d431b8a2838e8c5b4b076bc4c1d88ba71e",
+        "backend/tests/tree/test_public_contract.py": "d27dfaa85620d69a11d83fcae98a12a5430ccee1"
+      },
+      "test_nodes": [
+        "tests/tree/test_role_contracts.py::test_both_factories_wire_tree_http_with_original_dependencies[full]",
+        "tests/tree/test_role_contracts.py::test_both_factories_wire_tree_http_with_original_dependencies[public]",
+        "tests/tree/test_role_contracts.py::test_repository_commit_failure_does_not_refresh_or_swallow",
+        "tests/tree/test_role_contracts.py::test_search_keeps_author_comment_scope_and_tied_cursor_order",
+        "tests/tree/test_role_contracts.py::test_writes_keep_same_session_commit_refresh_and_deleted_profile"
+      ],
+      "test_assertions": {
+        "tests/tree/test_role_contracts.py": {
+          "db": [],
+          "owner": [],
+          "test_search_keeps_author_comment_scope_and_tied_cursor_order": [
+            "assert [item.id for item in page.items] == ['tree-a', 'tree-b']",
+            "assert page.next_cursor == 'tree-b'",
+            "assert 'EXISTS' in statements[0] and 'users.display_name' in statements[0]",
+            "assert [item.id for item in next_page.items] == ['tree-c']",
+            "assert next_page.next_cursor is None",
+            "assert [item.id for item in comment_page.items] == ['tree-c']"
+          ],
+          "test_writes_keep_same_session_commit_refresh_and_deleted_profile": [
+            "assert seen == [(db, character.id)]",
+            "assert writes == ['commit', ('refresh', models.TreePost)]",
+            "assert (result.title, result.body) == ('Title', 'Body')",
+            "assert writes == ['commit', ('refresh', models.TreeComment)]",
+            "assert detail.comments[0].content == 'Comment'",
+            "assert (deleted.name, deleted.handle, deleted.avatar_url) == ('삭제한 앵무', None, None)",
+            "assert Base.metadata.tables['tree_posts'] is models.TreePost.__table__",
+            "assert Base.metadata.tables['tree_comments'] is models.TreeComment.__table__"
+          ],
+          "test_repository_commit_failure_does_not_refresh_or_swallow": [
+            "pytest.raises(RuntimeError)",
+            "assert caught.value is failure",
+            "assert calls == ['commit']",
+            "assert db.get(models.TreePost, 'failed') is None"
+          ],
+          "test_both_factories_wire_tree_http_with_original_dependencies": [
+            "assert application.state.tree_references().get_character is build_tree_references().get_character",
+            "assert created.status_code == 201",
+            "assert public_read.status_code == 200",
+            "assert [item['id'] for item in public_read.json()['items']] == [created.json()['id']]",
+            "assert application.openapi()['paths']['/api/v1/tree/posts']['get']['operationId'] == 'list_tree_posts_api_v1_tree_posts_get'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/tree/test_role_contracts.py": {}
+      }
+    },
+    {
+      "commit": "f7f303d9464d594f7651f8b508e71e3266595d1b",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own models contracts and parser admission",
+      "tracked_files": {
+        "backend/app/domains/character_lore/__init__.py": "bfcec04fbe3db6afa89d5b48bf8638d4a47fd6d7",
+        "backend/app/domains/character_lore/constants.py": "35c9ab3bb0e56fb8676afdc6d641b431468ffad6",
+        "backend/app/domains/character_lore/contracts.py": "c80ec1446ebf13bce23b2034b74c31f5391e0a1b",
+        "backend/app/domains/character_lore/exceptions.py": "1b7057004aa5be64404532d2b8f8096e84a27b09",
+        "backend/app/domains/character_lore/service/__init__.py": "e4976653e08c19f9be94c1b4cce4c431eaa3e064",
+        "backend/app/domains/character_lore/models.py": "b0a9e56934ca448b0f85d17f75f8798108c74b65",
+        "backend/app/domains/character_lore/schemas.py": "a46f22ca9eb81a76f7a2f1f89f7f9a0969dcce49",
+        "backend/app/domains/character_lore/service/parser_quota.py": "a385a85dd634cd4946f449641b69511e138a719a",
+        "backend/tests/character_lore/test_documents.py": "8919e7654c0ca6b97250b5d438a9e1f8e736bdca",
+        "backend/tests/character_lore/test_parser_quota.py": "d19e4c00c956e6c74c7f851cf7694cb7fbf996e1",
+        "backend/tests/character_lore/test_upload_security.py": "96ffc528f1aca3e6d55b00f1296b606bf3dec699"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "c4a0a6a2dc5b952a98522a748fb5c57ea9835026",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own bounded parser and document text policies",
+      "tracked_files": {
+        "backend/app/domains/character_lore/parser.py": "2ab7a9f3d17133a16fb7a6e62bcf10c0f4dd4121",
+        "backend/app/domains/character_lore/policies/__init__.py": "1773b9540767de1b7044aeb2f9e23d9f8a6afc1f",
+        "backend/app/domains/character_lore/policies/chunking.py": "bcd2cb397fa7c52bedd9bc0c9cad834441581ae6",
+        "backend/app/domains/character_lore/service/presentation.py": "c2218bf4a9f687b33716b5f035f07fbf423926be",
+        "backend/app/domains/character_lore/utils.py": "10f6da01beb89635b24d9d7ee84d6d7874804ac1"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "9cd5eb14a0145e0f904b44e0125bfd7697bef8df",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own document and retrieval services with explicit composition",
+      "tracked_files": {
+        "backend/app/domains/character_lore/dependencies.py": "6fa7cf593c950624fa3fe0dfb79a18265eac719a",
+        "backend/app/domains/character_lore/policies/ranking.py": "9b5c9a1d0b630ff8b1492194c5619cfe00b8569f",
+        "backend/app/domains/character_lore/repository.py": "70d41984c5a18e09a4b74085347ca20fe7336d37",
+        "backend/app/domains/character_lore/service/documents.py": "76d31a9f7d1be6c1bfe5fe4336c023a21d9bc33a",
+        "backend/tests/character_lore/test_lore_role_contracts.py": "18906b79536b86f5518efb750954a90ee8fd16da",
+        "backend/app/domains/character_lore/router.py": "758f01656b6747e0d627e83d23229270a0403408",
+        "backend/app/runtime/character_lore.py": "1b76523630987fcc08c0a0f4b6b898c0cc3edad0"
+      },
+      "test_nodes": [
+        "tests/character_lore/test_lore_role_contracts.py::test_both_factories_wire_lore_same_session_and_original_authentication[full]",
+        "tests/character_lore/test_lore_role_contracts.py::test_both_factories_wire_lore_same_session_and_original_authentication[public]",
+        "tests/character_lore/test_lore_role_contracts.py::test_failed_embedding_is_saved_and_empty_scope_skips_provider",
+        "tests/character_lore/test_lore_role_contracts.py::test_upload_duplicate_and_rebuild_keep_session_commit_and_embedding_reuse"
+      ],
+      "test_assertions": {
+        "tests/character_lore/test_lore_role_contracts.py": {
+          "context": [],
+          "test_upload_duplicate_and_rebuild_keep_session_commit_and_embedding_reuse": [
+            "assert uploaded.status == 'ready'",
+            "assert writes == ['commit', ('refresh', models.CharacterLoreSource)]",
+            "assert len(embedded) == 1",
+            "assert duplicate.id == uploaded.id",
+            "assert writes == [] and len(embedded) == 1",
+            "assert rebuilt.status == 'ready' and rebuilt.chunk_count == 1",
+            "assert len(embedded) == 1",
+            "assert writes == ['commit', ('refresh', models.CharacterLoreSource)]",
+            "assert looked_up == [(db, character.id)] * 3",
+            "assert session is db and character_id == character.id"
+          ],
+          "test_failed_embedding_is_saved_and_empty_scope_skips_provider": [
+            "assert source is not None and source.status == 'embedding_failed'",
+            "assert source.chunks[0].error_message == 'embedding failed'",
+            "assert len(calls) == 1",
+            "assert empty_scope.mode == 'fallback_no_lore'",
+            "assert len(calls) == 1"
+          ],
+          "test_both_factories_wire_lore_same_session_and_original_authentication": [
+            "assert response.status_code == 200",
+            "assert response.json()['source_count'] == 0",
+            "assert observed == [(db, character.id)]",
+            "assert get_current_user is canonical_auth"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/character_lore/test_lore_role_contracts.py": {}
+      }
     }
   ]
 }
