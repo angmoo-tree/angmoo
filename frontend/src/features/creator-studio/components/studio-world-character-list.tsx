@@ -12,33 +12,15 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  enterStudioWorldCharacter,
-  getStudioCharacterCandidates,
-  getStudioWorldCharacters,
-  leaveStudioWorldCharacter,
-  stopStudioCharacter,
-  StudioWorldCharacterApiError,
-} from "../api/studio-world-character-client";
-import type {
-  StudioCharacterCandidateRead,
-  StudioWorldCharacterRead,
-  StudioWorldRole,
-} from "../model/studio-world-character-contract";
-import {
-  studioWorldRoute,
-  useRuntimeRouter,
-  useRuntimeSearchParams,
-} from "@/shared/navigation/public";
-import {
-  Button,
-  Dialog,
-  Field,
-  IconButton,
-  InlineError,
-  Select,
-  StatusChip,
-} from "@/shared/ui/public";
+import { enterStudioWorldCharacter, getStudioCharacterCandidates, getStudioWorldCharacters, leaveStudioWorldCharacter, stopStudioCharacter, StudioWorldCharacterApiError } from "@/features/creator-studio/api/studio-world-character-client";
+import type { StudioCharacterCandidateRead, StudioWorldCharacterRead, StudioWorldRole } from "@/features/creator-studio/types/studio-world-character";
+import { studioWorldRoute } from "@/lib/navigation/product-routes";
+import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
+import { Button, IconButton } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Field, Select } from "@/components/ui/form-controls";
+import { InlineError } from "@/components/ui/feedback";
+import { StatusChip } from "@/components/ui/status";
 
 
 const NO_SPECIFIC_ROLE_KEY = "no_specific_role";

@@ -1,10 +1,5 @@
-import type {
-  StudioCharacterCandidateListRead,
-  StudioWorldCharacterListRead,
-  WorldCharacterEntryRead,
-  WorldCharacterLeaveRead,
-} from "../model/studio-world-character-contract";
-import { runtimeFetch } from "@/shared/runtime/public";
+import type { StudioCharacterCandidateListRead, StudioWorldCharacterListRead, WorldCharacterEntryRead, WorldCharacterLeaveRead } from "@/features/creator-studio/types/studio-world-character";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 
 export class StudioWorldCharacterApiError extends Error {

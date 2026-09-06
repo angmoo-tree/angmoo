@@ -9663,6 +9663,19 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_foundation.py": {}
       }
+    },
+    {
+      "commit": "39d2d2b330931ba22b0a1e98a77da67607a54c30",
+      "feature_id": "K03",
+      "reason": "AR-F3-C World definition types, Creator Studio display inputs and stable upper tool slots",
+      "tracked_files": {
+        "frontend/src/composition/screens/world-creator-screen.tsx": "6cfde595c83e7ec341124a727bedfb280107fa81",
+        "frontend/src/features/creator-studio/types/studio-world-list.ts": "457b502452539efbe6516fb6af647ebc474f433b",
+        "frontend/src/features/worlds/types/worlds.ts": "a06950676c339b062b60b7a60a58d51511b5e1a1"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

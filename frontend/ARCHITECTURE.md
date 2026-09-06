@@ -43,6 +43,20 @@ directory와 profile card를 소유한다. 카드의 슬롯은 DOM을 추가하�
 `lib/http/community-request.ts`는 기존 community 전송 계약을 그대로 보존하며,
 일반 agents 전송과 오류 처리 차이가 있어 무조건 하나로 합치지 않는다.
 
+World 정의·membership·readiness와 owner-controlled identity의 API는
+`features/worlds/api/worlds.ts`, 해당 DTO는 `features/worlds/types/worlds.ts`,
+생성·편집 폼은 `features/worlds/components/world-creator-client.tsx`가 소유한다.
+Creator Studio의 참여 캐릭터 목록·연결·제거는 `features/creator-studio`의
+components/api/types가 담당한다. World 편집 폼이 Studio나 Package를 직접 import하지 않고,
+`composition/screens/world-creator-screen.tsx`가 같은 World ID와 편집 중인 roles로
+참여 목록 및 내보내기 슬롯을 연결한다. 저장 이전 roles와 저장된 World 문맥을 혼동하지 않는다.
+
+Studio dashboard에는 `studio-screen.tsx`가 기존 World surface 조회 함수를 전달한다.
+목록 표시·그룹 분류와 요청 취소·오류 상태는 dashboard에 있고, API 구현은 복제하지 않는다.
+Studio의 입력 타입은 화면이 실제 표시하는 값만 설명하며 Device Home의 내부 DTO를
+공용 타입으로 승격하지 않는다. 새 Studio 소비자는 제거된 `creator-studio/public.ts` 대신
+실제 component/API 또는 상위 screen을 사용한다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

@@ -22,7 +22,7 @@ import {
 } from "@/features/relationships/public";
 import { SettingsClient } from "@/composition/screens/settings-screen";
 import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
-import { WorldCreatorClient } from "@/components/world-creator-client";
+import { WorldCreatorClient } from "@/composition/screens/world-creator-screen";
 import { DeviceHomeScreen } from "@/composition/screens/device-home-screen";
 import { StudioImportRouteClient } from "@/composition/screens/studio-import-screen";
 import { StudioRouteClient } from "@/composition/screens/studio-screen";

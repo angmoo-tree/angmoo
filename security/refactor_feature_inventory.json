@@ -878,7 +878,7 @@
         "frontend/src/features/characters/components/agent-create-client.tsx",
         "frontend/src/composition/screens/agent-detail-screen.tsx",
         "frontend/src/components/agents-dashboard-client.tsx",
-        "frontend/src/components/world-creator-client.tsx",
+        "frontend/src/features/worlds/components/world-creator-client.tsx",
         "frontend/src/features/characters/api/character-dashboard-client.ts",
         "frontend/src/features/characters/api/world-character-profile-client.ts",
         "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
@@ -892,15 +892,15 @@
         "frontend/src/composition/screens/world-character-profile-screen.tsx",
         "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
         "frontend/src/composition/shells/creator-studio-navigation.ts",
-        "frontend/src/features/creator-studio/model/studio-world-character-contract.ts",
-        "frontend/src/features/creator-studio/public.ts",
-        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css",
-        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx",
+        "frontend/src/features/creator-studio/types/studio-world-character.ts",
+        "frontend/src/composition/screens/world-creator-screen.tsx",
+        "frontend/src/features/creator-studio/components/creator-studio-dashboard.module.css",
+        "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
         "frontend/src/composition/shells/creator-studio-frame.module.css",
         "frontend/src/composition/shells/creator-studio-frame.tsx",
         "frontend/src/composition/shells/creator-studio-shell.module.css",
         "frontend/src/composition/shells/creator-studio-shell.tsx",
-        "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx",
+        "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
         "backend/app/domains/chat/contracts/evidence_reads.py",
         "backend/app/domains/chat/contracts/execution.py",
         "backend/app/domains/chat/repository/response_requests.py",
@@ -931,7 +931,13 @@
         "frontend/src/features/characters/utils/agent-counts.ts",
         "frontend/src/features/characters/utils/generated-media.ts",
         "frontend/src/lib/http/community-request.ts",
-        "frontend/src/lib/media/authenticated-media.ts"
+        "frontend/src/lib/media/authenticated-media.ts",
+        "frontend/src/features/worlds/api/world-app-client.ts",
+        "frontend/src/features/worlds/api/worlds.ts",
+        "frontend/src/features/worlds/types/world-app.ts",
+        "frontend/src/features/worlds/types/worlds.ts",
+        "frontend/src/composition/screens/world-creator-screen.tsx",
+        "frontend/src/features/creator-studio/types/studio-world-list.ts"
       ],
       "target_paths": [
         "backend/app/domains/characters/router.py",
@@ -975,7 +981,14 @@
         "frontend/src/features/characters/utils/generated-media.ts",
         "frontend/src/composition/screens/agent-detail-screen.tsx",
         "frontend/src/lib/http/community-request.ts",
-        "frontend/src/lib/media/authenticated-media.ts"
+        "frontend/src/lib/media/authenticated-media.ts",
+        "frontend/src/features/worlds/api/world-app-client.ts",
+        "frontend/src/features/worlds/api/worlds.ts",
+        "frontend/src/features/worlds/components/world-creator-client.tsx",
+        "frontend/src/features/worlds/types/world-app.ts",
+        "frontend/src/features/worlds/types/worlds.ts",
+        "frontend/src/composition/screens/world-creator-screen.tsx",
+        "frontend/src/features/creator-studio/types/studio-world-list.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260522_0028_agent_creation_drafts.py::upgrade",
@@ -1403,8 +1416,8 @@
         "frontend/src/features/characters/components/world-character-profile.module.css",
         "frontend/src/composition/screens/world-character-profile-screen.tsx",
         "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
-        "frontend/src/features/creator-studio/model/studio-world-character-contract.ts",
-        "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx",
+        "frontend/src/features/creator-studio/types/studio-world-character.ts",
+        "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
         "frontend/src/features/social/api/world-character-social-profile-client.ts",
         "frontend/src/features/social/model/world-character-social-profile-contract.ts",
         "frontend/src/features/social/ui/world-character-social-profile-activity.module.css",
@@ -13857,7 +13870,7 @@
         "frontend/src/lib/tree.ts",
         "frontend/src/lib/use-mobile-pull-to-refresh.ts",
         "frontend/src/features/characters/api/world-activity-runtime.ts",
-        "frontend/src/lib/worlds.ts",
+        "frontend/src/features/worlds/api/worlds.ts",
         "frontend/src/lib/server/backend.ts",
         "frontend/src/shared/api/public.ts",
         "frontend/src/features/identity/api/session.ts",
@@ -14676,7 +14689,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-B ISOLATED PREPARATION",
+    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-C ISOLATED PREPARATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14866,6 +14879,11 @@
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F3-B",
         "scope": "Character feature ownership and mixed-screen assembly"
+      },
+      "AR-F3-C": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F3-C",
+        "scope": "World definition and Creator Studio ownership"
       }
     }
   }

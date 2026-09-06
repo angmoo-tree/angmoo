@@ -4,15 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-import {
-  getLocalWorldSurface,
-  type WorldSurfaceItem,
-} from "@/features/device-home/public";
-import {
-  PRODUCT_ROUTES,
-  studioWorldRoute,
-  worldAppRoute,
-} from "@/shared/navigation/public";
+import type { StudioWorldItem as WorldSurfaceItem, StudioWorldLoader } from "@/features/creator-studio/types/studio-world-list";
+import { PRODUCT_ROUTES, studioWorldRoute, worldAppRoute } from "@/lib/navigation/product-routes";
 
 import styles from "./creator-studio-dashboard.module.css";
 
@@ -31,8 +24,10 @@ const GROUPS: readonly { id: StudioGroupId; label: string; description: string }
 
 export function CreatorStudioDashboard({
   authStatus,
+  getLocalWorldSurface,
 }: {
   authStatus: CreatorStudioAuthStatus;
+  getLocalWorldSurface: StudioWorldLoader;
 }) {
   const [worlds, setWorlds] = useState<WorldSurfaceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +46,7 @@ export function CreatorStudioDashboard({
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [authStatus]);
+  }, [authStatus, getLocalWorldSurface]);
 
   const grouped = useMemo(() => {
     const next = new Map<StudioGroupId, WorldSurfaceItem[]>(

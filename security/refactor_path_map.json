@@ -759,7 +759,14 @@
     "frontend/src/features/social/model/post-card-navigation.ts": "frontend/src/utils/post-card-navigation.ts",
     "frontend/src/features/social/ui/mentioned-text.tsx": "frontend/src/components/content/mentioned-text.tsx",
     "frontend/src/features/social/ui/expandable-post-text.tsx": "frontend/src/components/content/expandable-post-text.tsx",
-    "frontend/src/features/social/ui/post-media-grid.tsx": "frontend/src/components/media/post-media-grid.tsx"
+    "frontend/src/features/social/ui/post-media-grid.tsx": "frontend/src/components/media/post-media-grid.tsx",
+    "frontend/src/components/world-creator-client.tsx": "frontend/src/features/worlds/components/world-creator-client.tsx",
+    "frontend/src/lib/worlds.ts": "frontend/src/features/worlds/api/worlds.ts",
+    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
+    "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css": "frontend/src/features/creator-studio/components/creator-studio-dashboard.module.css",
+    "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx": "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
+    "frontend/src/features/creator-studio/model/studio-world-character-contract.ts": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+    "frontend/src/features/creator-studio/public.ts": "frontend/src/composition/shells/creator-studio-navigation.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135617,6 +135624,74 @@
         "frontend/src/lib/community.ts": "character activity endpoint and DTO; unchanged transport in lib/http/community-request.ts",
         "frontend/src/components/agent-detail-client.tsx": "composition/screens/agent-detail-screen.tsx and features/characters/components/agent-detail-parts.tsx",
         "frontend/src/features/characters/ui/world-character-profile.tsx": "composition screen and feature directory/profile card, same DOM and state transitions"
+      }
+    },
+    "AR-F3-C": {
+      "scope": "World definition API/types/editor and Creator Studio components/types; upper participation/package slots and World list injection",
+      "files": {
+        "frontend/src/components/world-creator-client.tsx": "frontend/src/features/worlds/components/world-creator-client.tsx",
+        "frontend/src/lib/worlds.ts": "frontend/src/features/worlds/api/worlds.ts",
+        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
+        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css": "frontend/src/features/creator-studio/components/creator-studio-dashboard.module.css",
+        "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx": "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
+        "frontend/src/features/creator-studio/model/studio-world-character-contract.ts": "frontend/src/features/creator-studio/types/studio-world-character.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_l2_5_creator_studio_shell_contract.py",
+        "backend/tests/test_l3_er5_next_static_export_contract.py",
+        "backend/tests/test_l4_5_ui_c_landmark_contract.py",
+        "backend/tests/world_packages/test_ui_contract.py",
+        "backend/tests/worlds/test_creator_routes.py"
+      ],
+      "frontend_retirements": {
+        "frontend/src/features/creator-studio/public.ts": {
+          "reason": "All active callers use actual screen, shell, component or API owners; no published external frontend module contract.",
+          "export_destinations": {
+            "CREATOR_STUDIO_SECTIONS": "frontend/src/composition/shells/creator-studio-navigation.ts",
+            "CreatorStudioSection": "frontend/src/composition/shells/creator-studio-navigation.ts",
+            "CreatorStudioSectionId": "frontend/src/composition/shells/creator-studio-navigation.ts",
+            "CreatorStudioShell": "frontend/src/composition/shells/creator-studio-shell.tsx",
+            "CreatorStudioFrame": "frontend/src/composition/shells/creator-studio-frame.tsx",
+            "CreatorStudioDashboard": "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
+            "CreatorStudioAuthStatus": "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
+            "StudioWorldCharacterList": "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
+            "enterStudioWorldCharacter": "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
+            "getStudioCharacterCandidates": "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
+            "getStudioWorldCharacters": "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
+            "leaveStudioWorldCharacter": "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
+            "stopStudioCharacter": "frontend/src/features/creator-studio/api/studio-world-character-client.ts",
+            "StudioCharacterCandidateListRead": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "StudioCharacterCandidateRead": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "StudioWorldRole": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "StudioWorldCharacterListRead": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "StudioWorldCharacterRead": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "WorldCharacterEntryRead": "frontend/src/features/creator-studio/types/studio-world-character.ts",
+            "WorldCharacterLeaveRead": "frontend/src/features/creator-studio/types/studio-world-character.ts"
+          },
+          "verification": [
+            "No active facade imports",
+            "Actual export declarations and same source symbols",
+            "Next and static Studio scenarios"
+          ]
+        }
+      },
+      "frontend_extractions": {
+        "frontend/src/lib/worlds.ts": {
+          "api": "frontend/src/features/worlds/api/worlds.ts",
+          "types": "frontend/src/features/worlds/types/worlds.ts"
+        },
+        "frontend/src/components/world-creator-client.tsx": {
+          "editor": "frontend/src/features/worlds/components/world-creator-client.tsx",
+          "tools": "frontend/src/composition/screens/world-creator-screen.tsx",
+          "preserved": "Same World id and current definition.roles, lifecycle and conditional mounting; no extra DOM from slots."
+        },
+        "frontend/src/features/creator-studio/ui/creator-studio-dashboard.tsx": {
+          "component": "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
+          "loader": "frontend/src/composition/screens/studio-screen.tsx",
+          "types": "frontend/src/features/creator-studio/types/studio-world-list.ts",
+          "preserved": "Same API function and creator_studio surface; same AbortSignal, result and error lifecycle."
+        }
       }
     }
   },

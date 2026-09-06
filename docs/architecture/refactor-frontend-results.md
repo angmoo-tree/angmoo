@@ -292,3 +292,26 @@ committed history were deleted.
   cleanup. Correct the YAML so both parity steps have exactly one frontend cwd;
   refresh only the current design inventory and run the actual CI policy checker.
   These were preparation defects; no failing candidate was merged.
+
+## AR-F3-C World Creator and Studio — local validation
+
+- Move World API and DTOs to Worlds, retaining request paths, validation errors,
+  row versions, definition/readiness state, owner-controlled identity and media.
+- World editor receives a stable tool-rendering slot from the shared screen;
+  Studio participation receives the same edited role definitions, Package export
+  the same saved World ID. Next and static route consumers share this screen.
+- Studio dashboard accepts the existing surface loader from upper composition;
+  its own display shape, grouping, abort and error lifecycle remain unchanged.
+  No duplicated endpoint or Device Home-to-Studio type dependency is introduced.
+- Retire unused Creator Studio facade and map all 20 exports to actual owners.
+  Frozen browser assertions, fixtures, snapshots, locks/assets and 324-file stock
+  pass preservation; raw colors stay at 1408 occurrences in 34 files.
+- Web 21 PASS (1.1m), Settings 2 PASS (7.3s). Frontend-related backend suite had
+  485 PASS and two old single-file assertions; their unchanged assertions now
+  inspect editor plus real composition, and focused 12 PASS. New boundary PASS.
+- Builds, static browser, committed source capture, full preservation and final
+  CI/sequential merge are still required. F3-D through F5-B remain uncompleted.
+
+- AR-F3-C Next/static builds and static browser 68 PASS (42.8s). Three source
+  files were introduced at `39d2d2b330931ba22b0a1e98a77da67607a54c30`, with zero
+  backend nodes added. Full 2753-node/37-contract preservation is running.

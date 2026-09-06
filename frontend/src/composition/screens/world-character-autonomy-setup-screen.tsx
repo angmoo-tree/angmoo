@@ -36,7 +36,8 @@ import {
   type WorldCharacterSetupPreflightRead,
   type WorldCharacterSetupRead,
 } from "@/features/characters/api/world-character-setup";
-import { getWorld, type WorldRead } from "@/lib/worlds";
+import { getWorld } from "@/features/worlds/api/worlds";
+import type { WorldRead } from "@/features/worlds/types/worlds";
 
 const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
 

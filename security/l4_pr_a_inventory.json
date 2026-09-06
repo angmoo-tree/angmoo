@@ -2766,7 +2766,6 @@
         "features": [
           "frontend/src/features/characters/public.ts",
           "frontend/src/features/chat/public.ts",
-          "frontend/src/features/creator-studio/public.ts",
           "frontend/src/features/device-home/public.ts",
           "frontend/src/features/device-shell/public.ts",
           "frontend/src/features/memory/public.ts",
