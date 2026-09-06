@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2498,
-      "internal_edge_count": 3089,
+      "external_import_count": 2504,
+      "internal_edge_count": 3099,
       "legacy_import_exception_count": 0,
-      "module_count": 849,
+      "module_count": 852,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -967,6 +967,14 @@
           },
           {
             "imports": [
+              "app.domains.social.models.feed",
+              "app.domains.social.models.manual_writes"
+            ],
+            "module": "app.domains.social.repository.manual_inbox",
+            "path": "backend/app/domains/social/repository/manual_inbox.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.manual_writes"
             ],
             "module": "app.domains.social.repository.manual_writes",
@@ -1492,6 +1500,18 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.inbox",
+              "app.domains.social.models.manual_writes",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.manual_inbox",
+              "app.domains.social.repository.posts",
+              "app.domains.social.utils.manual_inbox"
+            ],
+            "module": "app.domains.social.service.manual_inbox",
+            "path": "backend/app/domains/social/service/manual_inbox.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.writes",
               "app.domains.social.models.manual_writes",
               "app.domains.social.models.posts",
@@ -1755,6 +1775,11 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.utils.manual_inbox",
+            "path": "backend/app/domains/social/utils/manual_inbox.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.utils.source_writes",
             "path": "backend/app/domains/social/utils/source_writes.py"
           },
@@ -1957,8 +1982,8 @@
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
               "app.runtime.social.agent_tools",
+              "app.runtime.social.manual_inbox",
               "app.runtime.social.observations",
-              "app.runtime.social.sqlalchemy_inbox",
               "app.runtime.social.subjective_composition"
             ],
             "module": "app.runtime.routine_posts.sqlalchemy_runtime",
@@ -2228,6 +2253,17 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.inbox",
+              "app.domains.social.service.manual_inbox",
+              "app.domains.social.utils.manual_inbox",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models"
+            ],
+            "module": "app.runtime.social.manual_inbox",
+            "path": "backend/app/runtime/social/manual_inbox.py"
+          },
+          {
+            "imports": [
               "app.domains.social.public",
               "app.runtime.social.sqlalchemy_unit_of_work"
             ],
@@ -2280,15 +2316,6 @@
             ],
             "module": "app.runtime.social.source_references",
             "path": "backend/app/runtime/social/source_references.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts.inbox",
-              "app.domains.social.models.manual_writes",
-              "app.models"
-            ],
-            "module": "app.runtime.social.sqlalchemy_inbox",
-            "path": "backend/app/runtime/social/sqlalchemy_inbox.py"
           },
           {
             "imports": [

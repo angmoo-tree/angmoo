@@ -768,3 +768,6 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 Social tick 완료의 실제 업무는 `social/service/complete_tick.py`가 소유한다. 실행 전에 전체 action을 원래 순서대로 검증하고, 서버 후보 ID·공개/중복 판단·후속 알림/상태/성공 기록을 연결한다. 후보 ID와 완료 값은 `social/policies/complete_tick.py`, 읽지 않은 답글 알림 SQL은 Social repository, Run 시작 이후 thread 조회 증거 SQL은 Routines repository가 소유한다. 권한/활동 허용 정책과 실제 행동 서비스는 같은 Session으로 조립하고, 기존 반복 조회나 쓰기/로그의 commit 시점을 바꾸지 않는다.
+
+
+수동 답글 Inbox 후보의 상태 전이는 `social/service/manual_inbox.py`, 실제 후보·차단 조회는 Social repository가 소유한다. runtime은 같은 Session의 WorldCharacter/membership만 원래 조회 위치에 제공한다. 무효 후보 거절·claim·release의 commit과, 후속 게시물과 함께 원자적으로 처리하는 consume의 flush를 구분한다. 만료 전 다른 claim 거절, target beat/run fencing, 원래 상태/version·source-context 검증을 유지한다.

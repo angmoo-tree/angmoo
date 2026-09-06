@@ -402,7 +402,8 @@
     "backend/app/domains/social/application/search_runtime.py": "backend/app/runtime/search/binding.py",
     "backend/app/domains/social/ports/search_index.py": "backend/app/domains/social/contracts/search_index.py",
     "backend/app/services/world_feed_runtime.py": "backend/app/domains/social/service/feed_cycle.py",
-    "backend/app/services/feed_reaction_planner.py": "backend/app/runtime/social/feed_reaction_provider.py"
+    "backend/app/services/feed_reaction_planner.py": "backend/app/runtime/social/feed_reaction_provider.py",
+    "backend/app/runtime/social/sqlalchemy_inbox.py": "backend/app/domains/social/service/manual_inbox.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -72857,6 +72858,227 @@
       "retained_evidence_from": "AR-B2-B6 entire original Community; all original tracked definitions now point to actual owners.",
       "binding_followup": "Parent runtime.resident.activity_policy.build_activity_policy replaces exact old runtime callback; Routines activity_sessions and contracts already canonical. No policy duplication or AI call added.",
       "remaining": "Community compatibility imports/unused imports cleanup, RoutineInteraction actual3, G07, full B5/capture/Hosted."
+    },
+    "AR-B5-C27": {
+      "status": "IMPLEMENTED source; capture pending",
+      "scope": "Social owns manual reply eligibility, claim/release/consume/reject state transitions and source IDs. Own inbox queries/mutual block SQL live in repository; runtime only retrieves same-Session WorldCharacter/membership and composes actual service. Removed old runtime implementation.",
+      "split_files": {
+        "backend/app/runtime/social/sqlalchemy_inbox.py": [
+          "backend/app/domains/social/contracts/inbox.py",
+          "backend/app/domains/social/repository/manual_inbox.py",
+          "backend/app/domains/social/service/manual_inbox.py",
+          "backend/app/domains/social/utils/manual_inbox.py",
+          "backend/app/runtime/social/manual_inbox.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::SOURCE_PREFIX",
+          "new": "backend/app/domains/social/utils/manual_inbox.py::SOURCE_PREFIX",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::ManualInboxRuntimeError",
+          "new": "backend/app/domains/social/contracts/inbox.py::ManualInboxRuntimeError",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::source_id",
+          "new": "backend/app/domains/social/utils/manual_inbox.py::source_id",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::candidate_id",
+          "new": "backend/app/domains/social/utils/manual_inbox.py::candidate_id",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::is_manual_inbox_source",
+          "new": "backend/app/domains/social/utils/manual_inbox.py::is_manual_inbox_source",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::_aware_utc",
+          "new": "backend/app/domains/social/utils/manual_inbox.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::_blocked",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::_blocked",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::_valid_candidate",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService._valid_candidate"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::candidates",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService.candidates"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::claim",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService.claim"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::claimed_observation_post_id",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService.claimed_observation_post_id"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::release_claims",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService.release_claims"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::consume_claims",
+          "new": "backend/app/domains/social/service/manual_inbox.py::ManualInboxService",
+          "direct_consumers": [
+            "backend/app/runtime/social/manual_inbox.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ],
+          "destination_member": "ManualInboxService.consume_claims"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::__all__",
+          "new": "backend/app/runtime/social/manual_inbox.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_owner_manual_reply_is_observed_once_on_next_allowed_beat",
+            "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits",
+            "tests/test_l4_pr_f_closeout_contract.py::test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_manual_inbox_lifecycle.py::test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits"
+      ],
+      "statement_extractions": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::candidates",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::list_candidates",
+          "meaning": "Original exact same-Session SQL including result laziness, filters/order, FOR UPDATE and nullable/read shape."
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::claim",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::get_for_update",
+          "meaning": "Original exact same-Session SQL including result laziness, filters/order, FOR UPDATE and nullable/read shape."
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::claimed_observation_post_id",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::get_candidate",
+          "meaning": "Original exact same-Session SQL including result laziness, filters/order, FOR UPDATE and nullable/read shape."
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::consume_claims",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::list_for_update",
+          "meaning": "Original exact same-Session SQL including result laziness, filters/order, FOR UPDATE and nullable/read shape."
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_inbox.py::release_claims",
+          "new": "backend/app/domains/social/repository/manual_inbox.py::claimed_for_run",
+          "meaning": "Original exact same-Session SQL including result laziness, filters/order, FOR UPDATE and nullable/read shape."
+        }
+      ],
+      "same_session_evidence": "Original11 functions/error whole AST and query5 equal after exact self/query/foreign-read restoration. Existing manual next-beat proof retains all assertions. New SQLite verifies commit on claim/release/rejection, active other-claim refusal, flush-only consume with caller rollback to durable claim and pending mutual block participation.",
+      "remaining": "Canonical RoutineInteraction actual3, final consumers/compatibility/G07. Full B5/capture/Hosted pending."
     }
   }
 }

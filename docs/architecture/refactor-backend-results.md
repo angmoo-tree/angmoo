@@ -1351,3 +1351,12 @@ Community 마지막13개 실제 함수와4개 상수를 Social tick service/poli
 최초 직접73개 중72 PASS/새1 FAIL은 신규 테스트가 기존 좋아요 로그명을 post_liked로 잘못 예상한 문제였다. 실제 원래 값 liked를 새 테스트에 반영했으며 제품/기존 assertion은 변경하지 않았다. 새 SQLite2개는 전체 사전 검증 전 partial action 금지, 반응/상태/성공 로그의 caller rollback, 원래 cutoff/scope/order/limit·pending autoflush를 검증한다. G07/full B5/capture/Hosted는 계속한다.
 
 C26 최종 확대는 **424 PASS / 기존 PostgreSQL skip1 /72.57초 /기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence0, 경계 **849 module /3089 edge /legacy183**, L4 parity99·ER0가 통과했다. 기존 함수/class와 상수는 실제 owner에 모두 정의되어 있으며 Community는 임시 같은객체 수출만 남았다. 신규 SQLite2개는 실제 좋아요/상태/로그 전체 rollback과 중복 payload의 사전 차단, 읽지 않은 답글30개 정렬 및 Run 이후 thread 증거 원래 필터를 확인했다.
+
+
+## AR-B5-C27 — 수동 답글 Inbox 상태·claim 실제 소유
+
+원래 runtime Inbox 실제11함수/오류는 Social service·repository·값/계약으로 옮겼고 기존 runtime 파일을 제거했다. 소유 SQL5 및11함수/오류 전체 AST가 정확한 self/query/foreign-read 복원 후 동일하다. 기존 수동 답글/후속 beat/L4 집중은 **35 PASS / 기존 PostgreSQL skip1 /20.81초**, 새 SQLite 및 실제 후속 beat 회귀는 **2 PASS /5.81초**다.
+
+새 회귀는 활성 다른 claim 거절, claim/release의 실제 commit과 consume의 flush-only/caller rollback을 확인한다. pending 상호 차단을 같은 Session으로 읽어 무효 후보 거절과 함께 원래 commit하는 의미도 검증한다. 원래 assertion이나 DB 제약은 변경하지 않았다. Canonical RoutineInteraction3·G07/full B5/capture/Hosted는 후속이다.
+
+C27 최종 Social·Relationships·RoutinePost 검증은 **130 PASS / 기존 PostgreSQL skip1 /63.73초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **852 module /3099 edge /legacy182**, L4 parity99·ER0가 통과했다. 기존 L4 구조 검사의 단일 실제 소유 파일 경로를 Social service로 연결했으며 검사 조건은 유지했다. 사라진 runtime→전역 ORM 정확1개 임시 예외도 제거했다.

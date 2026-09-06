@@ -27,16 +27,16 @@ from app.domains.routines.service.execution import claims as activity_claims
 from app.domains.routines.service.execution import lifecycle as activity_lifecycle
 from app.domains.routines import exceptions as activity_errors
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import (
     ManualInboxRuntimeError,
     claimed_observation_post_id,
     is_manual_inbox_source,
 )
-from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import claim as claim_manual_inbox
+from app.runtime.social.manual_inbox import (
     consume_claims as consume_manual_inbox_claims,
 )
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import (
     release_claims as release_manual_inbox_claims,
 )
 from app.runtime.social.observations import observe_source

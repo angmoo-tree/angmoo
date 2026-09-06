@@ -1,7 +1,7 @@
 {
-  "edge_count": 3089,
-  "external_import_count": 2498,
-  "module_count": 849,
+  "edge_count": 3099,
+  "external_import_count": 2504,
+  "module_count": 852,
   "modules": [
     {
       "external_imports": [],
@@ -390,7 +390,7 @@
       "imports": [
         "app.domains.routine_posts.contracts.interaction",
         "app.models",
-        "app.runtime.social.sqlalchemy_inbox"
+        "app.runtime.social.manual_inbox"
       ],
       "module": "app.compatibility.routine_posts.canonical_interactions",
       "path": "backend/app/compatibility/routine_posts/canonical_interactions.py",
@@ -5532,7 +5532,9 @@
       "external_imports": [
         "__future__",
         "dataclasses",
-        "datetime"
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [],
       "module": "app.domains.social.contracts.inbox",
@@ -5994,6 +5996,21 @@
       ],
       "module": "app.domains.social.repository.manual_feed",
       "path": "backend/app/domains/social/repository/manual_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.feed",
+        "app.domains.social.models.manual_writes"
+      ],
+      "module": "app.domains.social.repository.manual_inbox",
+      "path": "backend/app/domains/social/repository/manual_inbox.py",
       "wildcard_imports": []
     },
     {
@@ -6774,6 +6791,23 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.inbox",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.manual_inbox",
+        "app.domains.social.repository.posts",
+        "app.domains.social.utils.manual_inbox"
+      ],
+      "module": "app.domains.social.service.manual_inbox",
+      "path": "backend/app/domains/social/service/manual_inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -7157,6 +7191,15 @@
       "imports": [],
       "module": "app.domains.social.utils.limits",
       "path": "backend/app/domains/social/utils/limits.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [],
+      "module": "app.domains.social.utils.manual_inbox",
+      "path": "backend/app/domains/social/utils/manual_inbox.py",
       "wildcard_imports": []
     },
     {
@@ -11021,8 +11064,8 @@
         "app.runtime.routines.activity_references",
         "app.runtime.routines.joint_references",
         "app.runtime.social.agent_tools",
+        "app.runtime.social.manual_inbox",
         "app.runtime.social.observations",
-        "app.runtime.social.sqlalchemy_inbox",
         "app.runtime.social.subjective_composition"
       ],
       "module": "app.runtime.routine_posts.sqlalchemy_runtime",
@@ -11589,6 +11632,21 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.inbox",
+        "app.domains.social.service.manual_inbox",
+        "app.domains.social.utils.manual_inbox",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.social.manual_inbox",
+      "path": "backend/app/runtime/social/manual_inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy.orm"
@@ -11666,22 +11724,6 @@
       ],
       "module": "app.runtime.social.source_references",
       "path": "backend/app/runtime/social/source_references.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.social.contracts.inbox",
-        "app.domains.social.models.manual_writes",
-        "app.models"
-      ],
-      "module": "app.runtime.social.sqlalchemy_inbox",
-      "path": "backend/app/runtime/social/sqlalchemy_inbox.py",
       "wildcard_imports": []
     },
     {

@@ -1625,7 +1625,6 @@
         "backend/app/domains/world_characters/service/social_scope.py",
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
-        "backend/app/runtime/social/sqlalchemy_inbox.py",
         "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/today_activity.py",
@@ -1770,7 +1769,11 @@
         "backend/app/runtime/social/agent_tool_state.py",
         "backend/app/domains/social/service/complete_tick.py",
         "backend/app/domains/social/policies/complete_tick.py",
-        "backend/app/runtime/social/complete_tick.py"
+        "backend/app/runtime/social/complete_tick.py",
+        "backend/app/domains/social/service/manual_inbox.py",
+        "backend/app/domains/social/repository/manual_inbox.py",
+        "backend/app/domains/social/utils/manual_inbox.py",
+        "backend/app/runtime/social/manual_inbox.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -2131,7 +2134,6 @@
         "backend/app/domains/routines/repository/joint_diagnostics.py",
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
-        "backend/app/runtime/social/sqlalchemy_inbox.py",
         "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/today_activity.py",
@@ -2213,7 +2215,11 @@
         "backend/app/domains/social/policies/world_feed.py",
         "backend/app/domains/social/repository/world_feed.py",
         "backend/app/runtime/social/world_feed_queries.py",
-        "backend/app/runtime/social/world_feed_search.py"
+        "backend/app/runtime/social/world_feed_search.py",
+        "backend/app/domains/social/service/manual_inbox.py",
+        "backend/app/domains/social/repository/manual_inbox.py",
+        "backend/app/domains/social/utils/manual_inbox.py",
+        "backend/app/runtime/social/manual_inbox.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -3605,7 +3611,6 @@
         "backend/app/runtime/single_backend_components.py",
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
-        "backend/app/runtime/social/sqlalchemy_inbox.py",
         "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/today_activity.py",
@@ -3676,7 +3681,12 @@
         "backend/app/domains/social/service/today_activity.py",
         "backend/app/domains/social/repository/today_activity.py",
         "backend/app/runtime/social/today_activity_queries.py",
-        "backend/app/domains/social/contracts/today_references.py"
+        "backend/app/domains/social/contracts/today_references.py",
+        "backend/app/domains/social/service/manual_inbox.py",
+        "backend/app/domains/social/repository/manual_inbox.py",
+        "backend/app/domains/social/utils/manual_inbox.py",
+        "backend/app/domains/social/contracts/inbox.py",
+        "backend/app/runtime/social/manual_inbox.py"
       ],
       "target_paths": [
         "backend/app/runtime",

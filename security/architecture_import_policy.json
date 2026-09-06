@@ -683,19 +683,6 @@
     {
       "edges": [
         {
-          "importer": "app.runtime.social.sqlalchemy_inbox",
-          "imported": "app.models"
-        }
-      ],
-      "id": "l4-social-persistence-model-bridge",
-      "owner_stage": "L6",
-      "reason": "L4 PR F removes the manual-social compatibility namespace and makes app.domains.social the canonical contract owner. Runtime-owned SQLAlchemy adapters still map the frozen pre-domain Post ORM and community persistence service until the L6 service closeout moves those shared persistence definitions.",
-      "removal_condition": "Move the Post ORM and remaining community persistence operations behind canonical social repository ports, then remove these exact runtime edges.",
-      "review_date": "2026-11-19"
-    },
-    {
-      "edges": [
-        {
           "importer": "app.runtime.search.social_projection",
           "imported": "app.models"
         }
@@ -1146,6 +1133,7 @@
       "app.domains.social.repository.image_jobs",
       "app.domains.social.repository.inbox",
       "app.domains.social.repository.manual_feed",
+      "app.domains.social.repository.manual_inbox",
       "app.domains.social.repository.manual_writes",
       "app.domains.social.repository.media",
       "app.domains.social.repository.posts",
@@ -1194,6 +1182,7 @@
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.keyword_feed",
       "app.domains.social.service.manual_feed",
+      "app.domains.social.service.manual_inbox",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
@@ -1216,6 +1205,7 @@
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
       "app.domains.social.utils.limits",
+      "app.domains.social.utils.manual_inbox",
       "app.domains.social.utils.source_writes",
       "app.domains.social.utils.text",
       "app.domains.world_characters.client",
@@ -1452,6 +1442,7 @@
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.keyword_feed",
       "app.domains.social.service.manual_feed",
+      "app.domains.social.service.manual_inbox",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
