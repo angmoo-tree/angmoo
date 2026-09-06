@@ -1180,3 +1180,12 @@ Character HTTP9를 실제 Routines service와 typed tendency runner에 직접 �
 검토된 root source `1565688ffa8095b37ec8fb843f5547c6c87705ae`의 정확한 예외 entry 지원만 선행 반영했다. 해당 원본 negative3은 byte 동일한 임시파일에서 기존 partialscope63/HTTP2와 함께68통과한 뒤 임시파일을 제거하여 원래 최초 도입 계보를 보존했다. 새 blanket exception이나 계약 alias는 추가하지 않았다. 실제 Operations 오류 한 클래스만 부분 이전하고 기존 service는 같은 객체를 import한다. root Operations 서비스 source 합류 시 이 정확 bridge가 제거된다.
 
 C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 경계795 modules /2805 edges /exact legacy204 /cycle0, L4 795/14/97, ER0 86/87/24/44/7, Memory current이다. Social 오류 직접 import로 발견된 Character→Social→WC→Character 순환은 기존 workflow에 원래 오류 class 두 객체를 전달하여 해소했으며 순환 예외를 추가하지 않았다. 정확한 Operations/Routines 오류 entry만 등록한다. 원래 여섯 검사의 읽기 전용 진단은 모두 오류0(보호2139/current2293)이며 frozen/checkpoint/additions는 그대로이다. stock gate는 root의 선형 도입 원장 연결 뒤 확인한다.
+
+
+## AR-B4-C7-H — 활동 표현·가져온 World 실행 제한·최종 실제 소유
+
+활동 로그3·summary 생성식·가져온 World guard를 실제 Routines 서비스로 이전했다. Character/Identity의 nullable 조회는 같은 Session으로 연결하고, 기존 설정/로그 조회도 actual 소유 서비스를 사용한다. 상세 응답 자체는 여러 업무를 조립하는 runtime 책임으로 남는다. 원래 전체 detail 본문은 추출 표현식을 정확히 복원하면 AST가 동일하다. 실행 준비 여부의 원래 None→False도 유지하며 이미 동일한 성향 판단을 재사용한다. 기존 profile readiness 단순 전달 함수는 실제 서비스와 명시적 runtime 협력 연결로 제거했다. 초기 관련118검사/기존PG1skip이 통과했고 원문 AST7이 동일하다. 신규4는 실제 attached 프로필/별도 Session의 미커밋 가시성·rollback, 시간대/댓글/글/좋아요 조회 순서와 원래 필드 평가 시점, 없는 설정의 준비 거절을 검증한다.
+
+현재 호출되지 않는 AgentRun 메뉴/복구4와 old CRUD3은 원문 그대로 보존하며 B8에서 실제 소유에 배치한다. 현재 호출0만으로 기능 삭제를 판단하지 않는다. Memory Daypart7 및 다른 담당자가 이미 작성한 Identity/Character image/LocalBot/Relationships 구현은 root의 선형 합류에서 원래 callback/alias를 actual 소유로 연결한다. 소유가 없는 구현을 일반 runtime 이름으로 옮겨 종료하지 않는다.
+
+C7-H 최종 관련 검증은 **689 passed / 기존 PostgreSQL 조건1 skipped / 기존 경고22 / 265.67초**이다. 최종 검사 동안 제품/테스트 source는 고정했다. 현재 경계798 modules /2817 edges /exact legacy204 /cycle0, L4 798/14/97, ER0 86/87/24/44/7, Memory current이며 원래6검사 읽기 진단은 오류0(보호2139/current2297)이다. 동료 읽기 검토에서도 lazy 평가 순서·같은 Session의 nullable 프로필·World guard4연결에 차단 문제는 발견되지 않았다. 보존할 AgentRun11/CRUD3의 본문도 이전 signed source와 AST가 동일하다. frozen/checkpoint/additions 및 기존 단언은 그대로이며 stock gate는 root의 순차 도입 연결 뒤 검증한다.

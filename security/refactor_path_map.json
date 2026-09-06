@@ -7266,11 +7266,13 @@
           "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/routines/schemas/tendency.py",
           "backend/app/domains/routines/service/activity_management.py",
+          "backend/app/domains/routines/service/activity_presentation.py",
           "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/autonomy_management.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/service/first_greeting.py",
           "backend/app/domains/routines/service/manual_activity.py",
+          "backend/app/domains/routines/service/runtime_guards.py",
           "backend/app/domains/routines/service/tendency.py",
           "backend/app/domains/routines/service/tendency_analysis.py",
           "backend/app/domains/routines/service/tendency_settings.py",
@@ -9126,15 +9128,21 @@
         },
         {
           "old": "backend/app/services/agents.py::_ensure_imported_world_runtime_enabled",
-          "new": "backend/app/runtime/characters/management.py::_ensure_imported_world_runtime_enabled",
+          "new": "backend/app/domains/routines/service/runtime_guards.py::_ensure_imported_world_runtime_enabled",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/activity_presentation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/tests/routines/test_execution_readiness.py"
           ],
           "test_nodes": [
-            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
-          ]
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting",
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ],
+          "source_member": "Original full definition; exact same-Session callbacks restore original profile db.get and imported lock query/error objects. Missing-setting False remains before reused identical tendency policy. Original AST matches after exact callback expansion; no commit/flush/order changes."
         },
         {
           "old": "backend/app/services/agents.py::run_agent_now",
@@ -9337,13 +9345,21 @@
         },
         {
           "old": "backend/app/services/agents.py::_visible_activity_actions",
-          "new": "backend/app/runtime/characters/management.py::_visible_activity_actions",
+          "new": "backend/app/domains/routines/service/activity_presentation.py::_visible_activity_actions",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/activity_presentation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/tests/routines/test_execution_readiness.py"
           ],
           "test_nodes": [
-            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe"
-          ]
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting",
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ],
+          "source_member": "Original full definition; exact same-Session callbacks restore original profile db.get and imported lock query/error objects. Missing-setting False remains before reused identical tendency policy. Original AST matches after exact callback expansion; no commit/flush/order changes."
         },
         {
           "old": "backend/app/services/agents.py::_build_agent_detail",
@@ -9422,23 +9438,39 @@
         },
         {
           "old": "backend/app/services/agents.py::_activity_log_read",
-          "new": "backend/app/runtime/characters/management.py::_activity_log_read",
+          "new": "backend/app/domains/routines/service/activity_presentation.py::_activity_log_read",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/activity_presentation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/tests/routines/test_execution_readiness.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting",
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ],
+          "source_member": "Original full definition; exact same-Session callbacks restore original profile db.get and imported lock query/error objects. Missing-setting False remains before reused identical tendency policy. Original AST matches after exact callback expansion; no commit/flush/order changes."
         },
         {
           "old": "backend/app/services/agents.py::_activity_log_target_profile",
-          "new": "backend/app/runtime/characters/management.py::_activity_log_target_profile",
+          "new": "backend/app/domains/routines/service/activity_presentation.py::_activity_log_target_profile",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/activity_presentation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/tests/routines/test_execution_readiness.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting",
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ],
+          "source_member": "Original full definition; exact same-Session callbacks restore original profile db.get and imported lock query/error objects. Missing-setting False remains before reused identical tendency policy. Original AST matches after exact callback expansion; no commit/flush/order changes."
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::logger",
@@ -10659,6 +10691,20 @@
           "test_nodes": [
             "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
             "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_build_agent_detail",
+          "new": "backend/app/domains/routines/service/activity_presentation.py::build_activity_summary",
+          "source_member": "Exact activity_summary=schemas.AgentActivitySummaryRead(...) expression extracted from _build_agent_detail. Original attached character/setting/slot and precomputed policy/timestamps pass unchanged; timezone and comment/post/like count reads stay lazy at original keyword evaluation positions. Restoring this exact expression yields the full original detail AST.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting"
           ]
         }
       ],
@@ -14500,13 +14546,21 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_tendency_analysis",
-          "new": "backend/app/services/agent_runs.py::_has_tendency_analysis",
+          "new": "backend/app/domains/routines/service/slot_status.py::_has_tendency_analysis",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/activity_presentation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/tests/routines/test_execution_readiness.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+            "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+            "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+            "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting",
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ],
+          "source_member": "Original full definition; exact same-Session callbacks restore original profile db.get and imported lock query/error objects. Missing-setting False remains before reused identical tendency policy. Original AST matches after exact callback expansion; no commit/flush/order changes."
         },
         {
           "old": "backend/app/services/profile_media.py::CONTENT_TYPES",
@@ -33987,6 +34041,32 @@
       "prerequisite_source": "1565688ffa8095b37ec8fb843f5547c6c87705ae scripts/ci/refactor_boundaries.py exact reviewed exceptions-entry support. Original test_refactor_error_entries.py3 were temporarily executed as exact bytes and removed before commit to preserve the root first-introduction provenance. Current original partial-scope63 guards are unchanged.",
       "remaining": "C7-H closes activity presentation, imported-World runtime guard and execution readiness ownership. Four dormant original execution helpers stay unchanged for B8 actual-owner preservation; zero current callers does not authorize deletion. Root joins already-authored Operations service and removes its exact legacy bridge.",
       "cycle_resolution": "Exact Operations/Routines exceptions entries are registered. Two original Social error class objects are supplied by existing Autonomy/FirstGreeting workflows; this preserves catch identity and removes Character→Social→WC→Character dependency without a cycle exception."
+    },
+    "AR-B4-C7-H-activity-presentation": {
+      "status": "IMPLEMENTED — final689PASS/existing PostgreSQL1skip/22warnings; boundary798/2817/exactlegacy204/cycle0; read-only original6 checks0/protected2139/current2297; stock gate awaits root sequential introduction append",
+      "actual_paths": [
+        "backend/app/domains/routines/service/activity_presentation.py",
+        "backend/app/domains/routines/service/runtime_guards.py",
+        "backend/app/domains/routines/service/slot_status.py",
+        "backend/app/domains/routines/contracts/activity_presentation.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/tests/routines/test_activity_presentation.py"
+      ],
+      "ownership": "Routines owns summary/target presentation and imported-World admission. Runtime retains real composite Character detail, and binds existing Character/Identity nullable get with the same Session. Its activity settings/log reads now use actual Routines services. One profile-readiness forwarder is replaced by the existing actual service bound to original runtime collaborators.",
+      "preservation": "Exact original AST7: three log/presentation definitions, imported guard, missing-setting readiness expanded with identical policy, summary constructor expression and restored full detail body. Profile query nullable behavior and error object identity remain. Query/count evaluation stays at original positions; no precomputed IDs or copied objects.",
+      "new_regression": [
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+        "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+        "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting"
+      ],
+      "remaining": "Root joins Memory Daypart7 and B5/Identity/Character-image/LocalBot owners, then retires their exact old aliases. Four dormant AgentRun menu/recovery definitions and three dormant old CRUD definitions are preserved unchanged for B8 actual-owner placement, never deleted from zero current callers. Composite detail/deletion/provider wiring remains real runtime composition.",
+      "validation": {
+        "related_suite": "689 passed / existing PostgreSQL1 skipped / 22 warnings / 265.67seconds; current tree held fixed throughout final pytest and diagnostic",
+        "ast": "Original7 exact full-definition/expression checks; retained AgentRun11 and CRUD3 bodies unchanged",
+        "current_inventory": "L4 798/14/97; ER0 86/87/24/44/7; Memory current",
+        "peer_review": "g0_preservation read-only confirmed lazy field evaluation, same-Session nullable profile lookup and exact four imported guard bindings; no blocking finding"
+      }
     }
   },
   "test_symbols": {

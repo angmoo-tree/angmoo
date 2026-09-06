@@ -762,3 +762,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 활동 HTTP의 연결
 
 `/agents/{id}` 아래의 설정·모이·활성화·수동 실행·첫인사·성향 분석은 Character 리소스 HTTP로 배치합니다. 실제 판단과 저장은 Routines 서비스가 수행하고, 긴 provider 실행은 typed runner로 연결합니다. 앱 생성에서 workflow factory를 등록하며 HTTP dependency는 원래 request Session과 인증 이후에 이를 전달합니다. HTTP 오류 처리를 공유할 때는 검토한 정확한 exceptions 모듈만 공개 entry에 등록할 수 있습니다. 다른 파일·하위 모듈·repository·HTTP 접근을 함께 허용하지 않으며 예외 모듈의 framework/DB 접근도 계속 금지합니다.
+
+
+### 활동 요약과 로그 표현
+
+`routines/service/activity_presentation.py`는 활동 요약과 팔로우 로그의 대상 표현을 담당합니다. 프로필은 Character/Identity의 기존 nullable 조회를 같은 Session으로 연결합니다. 상세 화면의 여러 기능 조립은 runtime에 남으며 활동 설정과 로그는 실제 Routines 소유 서비스에서 읽습니다. 시간대와 오늘 행동 수를 먼저 계산하지 않고 기존 응답 필드 평가 위치에서 읽습니다. 가져온 World의 명시적 활성화 제한은 `service/runtime_guards.py`의 실제 판단이며 런타임이 현재 World의 잠금 조회와 원래 오류 클래스를 전달합니다. 일반 캐릭터의 수동 실행과 가져온 World의 활성화 조건을 합치지 않습니다.

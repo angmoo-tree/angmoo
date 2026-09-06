@@ -687,22 +687,7 @@ def _v6_possible_post_actions(
 
 
 
-def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:
-    if not setting:
-        return False
-    profile = (
-        setting.planner_tendency_profile
-        if isinstance(setting.planner_tendency_profile, dict)
-        else {}
-    )
-    criteria = profile.get("feed_seed_interest_criteria")
-    return bool(
-        setting.tendency_updated_at
-        and setting.tendency_summary.strip()
-        and setting.tendency_action_ranges
-        and isinstance(criteria, str)
-        and criteria.strip()
-    )
+
 
 
 
