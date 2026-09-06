@@ -2,9 +2,9 @@
   "architecture": {
     "backend": {
       "external_import_count": 2872,
-      "internal_edge_count": 3657,
+      "internal_edge_count": 3659,
       "legacy_import_exception_count": 0,
-      "module_count": 985,
+      "module_count": 986,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -811,6 +811,13 @@
             "imports": [],
             "module": "app.domains.social.exceptions",
             "path": "backend/app/domains/social/exceptions.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.subjective_context"
+            ],
+            "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+            "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py"
           },
           {
             "imports": [],

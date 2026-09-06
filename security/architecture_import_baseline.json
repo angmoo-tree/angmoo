@@ -1,7 +1,7 @@
 {
-  "edge_count": 3657,
+  "edge_count": 3659,
   "external_import_count": 2872,
-  "module_count": 985,
+  "module_count": 986,
   "modules": [
     {
       "external_imports": [],
@@ -7436,6 +7436,15 @@
     },
     {
       "external_imports": [],
+      "imports": [
+        "app.domains.social.models.subjective_context"
+      ],
+      "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [],
       "module": "app.domains.social.models",
       "path": "backend/app/domains/social/models/__init__.py",
@@ -11425,6 +11434,7 @@
         "app.domains.routines.service.tendency_settings",
         "app.domains.routines.service.tick_schedule",
         "app.domains.social.exceptions",
+        "app.domains.social.repository.media",
         "app.domains.social.repository.posts",
         "app.domains.social.service.activity_results",
         "app.domains.social.service.image_attachment",

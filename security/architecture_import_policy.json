@@ -2675,6 +2675,14 @@
         "review_date": "2026-09-06",
         "reason": "One original error class moved to actual Operations owner for existing HTTP catches. The remaining old service imports the same object; no alternate implementation exists.",
         "removal_condition": "Root joins the already-authored Operations 5fb092b source, which owns maintenance service and removes app.services.maintenance before B8-A."
+      },
+      {
+        "importer": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "target": "app.domains.social.models.subjective_context",
+        "owner_stage": "AR-B8-A",
+        "reason": "Immutable Alembic 0088 imports the exact two schema-builder functions from this historical path; no ORM classes or duplicate implementations are exported.",
+        "removal_condition": "Keep while immutable supported Alembic revision 0088 imports this path; product consumers use the actual model owner directly.",
+        "review_date": "2026-09-06"
       }
     ]
   }

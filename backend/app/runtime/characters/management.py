@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.social.repository import media as social_media_repository
 from app.domains.routines.contracts.activity_presentation import ActivityPresentationReads
 from app.domains.routines.service import activity_presentation, activity_logs, runtime_guards
 from app.domains.characters.service import profile as character_profile

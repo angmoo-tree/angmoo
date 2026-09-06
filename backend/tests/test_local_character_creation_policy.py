@@ -184,7 +184,7 @@ def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> Non
             for relative in (
                 "backend/app/runtime/characters/creator.py",
                 "backend/app/api/v1/routes/agents.py",
-                "backend/app/cruds/community.py",
+                "backend/app/domains/characters/service/profile.py",
             )
         },
     }

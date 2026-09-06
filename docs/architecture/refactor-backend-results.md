@@ -2010,3 +2010,13 @@ B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Commu
 Relationships 공개 집합의 실제 정의70개·원래 실제 소비자 전환을 현재 B4 실행과 합쳤다. C34 제품61개 AST 동일 근거와 정확 public→graph_read 경로 대응을 유지하고, 기존 Graph Recall·Planner·Both·response streaming 및 경계/L4 검사는 **156 PASS /기존 skip1 /65.47초**다. 현재 경계 **985 modules /3,657 edges /legacy126 /cycle0**, ER0 및 L4 현재 inventory도 통과했다. 전역 facade를 다시 만들거나 호출 순서·provider·Session을 바꾸지 않았다.
 
 B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock 전체 보존과 전체 backend, PR required CI·설치 Gate를 이어서 실행한다. 이후 B6/B7/B8 및 G5/G06 완료를 이 결과로 앞당겨 선언하지 않는다.
+
+## AR-B5 최초 전체 검증과 통합 연결 보정 — 2026-09-06
+
+첫 전체 backend 검사는 **20 FAIL /2,342 PASS /기존 skip22 /752.72초**였다. 실패는 `runtime/characters/management.py`의 실제 Social media 조회 import 누락, 불변 Alembic 0088이 사용하는 schema helper 경로 삭제, 현재 core/source/HTTP inventory 경로 미갱신으로 분류했다. 원래 migration 본문과 ORM 구현은 바꾸지 않고 역사 경로에 실제 schema helper 두 개만 같은 함수 객체로 복구했다. 클래스 export나 새 infrastructure marker는 추가하지 않았다. 나머지는 기존 조회를 실제 모듈에 연결하고 현재 core 두 항목, HTTP module 필드 38개와 실제 검사 입력 경로를 갱신했다. 관련 마이그레이션·생성/활성화·패키지 가져오기·보안·tendency 확대 회귀는 **158 PASS /기존 warning5 /30.56초**다.
+
+첫 stock 보존 검사는 API/ORM/원장/2,384개 노드의 원본 보존을 확인했으나, 이동 후 split 증거의 현재 소비자/노드 경로와 tendency 단언의 지역 이름 네 개를 거절했다. 원래 단언은 같은 실제 owner의 지역 import에 연결해 복원했다. 현재 경로 참조 543개를 검토된 file/node 지도에 따라 연결하고, AR-B5-C1에서 원래 위치에 보존했던 Run 정의 42개는 실제 후속 B4-C4b2의 기존 분할 증거를 승계했다. 역사 pilot의 상대 경로 설명과 원본 source 키·원본 정의·단언은 유지했다. 수정 후 원래 **`check_refactor_preservation.py --contracts --nodes` 전체 PASS**, PR258 1,867 /PR263 1,907 /현재 보호·수집 **2,384 /2,384**, K01–K23/G01–G13 **37항목 PASS**다. 현재 경계는 **986 modules /3,659 edges /legacy126 /cycle0**, L4·ER0·deferred·public HTTP inventory도 통과했다.
+
+원장은 main의 **92개 기록을 불변 prefix**로 유지하고 최초 signed source **52개 기록**을 추가해 **144개**로 준비했다. 각 source는 고립된 원본 Git archive에서 수집하며 현재 구현으로 기준선을 재생성하지 않았다. 추가 파일 증거 211개와 신규 노드 73개를 최초 정의 커밋까지 대조했고, RoutineInteraction 조회 회귀 한 개는 후속 C31이 아닌 실제 최초 `696ada3` 기록에 배치했다. World Feed 검색 회귀 두 개도 최초 `49c0f1f` 기록과 기존 경로에서 C33 이동 지도로 이어진다. PR258/263 동결 source/checkpoint/승인 목록은 바꾸지 않았다.
+
+보안 사전 검증은 Gitleaks 8.30.1로 history 519 commits와 추적 source+원장 draft를 각각 검사했다. C33 지도의 공개 테스트 파일 SHA256 한 줄이 generic-api-key로 감지되어 원래 signed `f977215` 테스트 blob의 SHA256과 동일함을 검증했다. exact path/rule/전체 line 한 개에만 예외를 추가했고 변경 hash/key/path/prefix/suffix 음성 6개를 거절했다. 후속 history 및 source draft 검사에서 **0 leaks**이며 기존 secret allowlist 25개는 그대로다. 최종 source 기준 전체 backend·PR required CI·병합 후 실행 Gate는 다음 결과로 기록한다.

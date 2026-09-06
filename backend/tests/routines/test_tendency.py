@@ -765,7 +765,7 @@ def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     )
 
     assert (
-        social_topic_metadata.post_topic_signature_for_prompt(None, post)
+        community_service.post_topic_signature_for_prompt(None, post)
         == "log fallback topic"
     )
 
@@ -1028,8 +1028,8 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
     payload = json.loads(result.result)
     stored_payload = json.loads(str(captured["result"]))
-    assert result.action_type == social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE
-    assert captured["action_type"] == social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE
+    assert result.action_type == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE
+    assert captured["action_type"] == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE
     assert "냐하하" not in result.result
     assert payload["consumed_sources"][0]["seed_semantic_summary"] == (
         "copied lunch strategy voice"
@@ -1212,12 +1212,12 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
 ):
     import app.domains.social.exceptions as community_service
     def reject(*args, **kwargs):
-        raise social_exceptions.AgentRunAuthorizationError("no session")
+        raise community_service.AgentRunAuthorizationError("no session")
 
     monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
     with caplog.at_level("WARNING", logger=note_service.logger.name):
-        with pytest.raises(social_exceptions.AgentRunAuthorizationError):
+        with pytest.raises(community_service.AgentRunAuthorizationError):
             social_feed_history_notes.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
                 "session-secret-value",
@@ -1546,7 +1546,7 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
         },
     )
 
-    assert social_feed_history.recent_own_root_topic_exists(
+    assert community_service.recent_own_root_topic_exists(
         FakeDb(),
         character_id="char-1",
         topic_signature="이미 쓴 큰 주제",
