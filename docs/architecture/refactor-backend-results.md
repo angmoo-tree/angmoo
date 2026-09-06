@@ -2759,3 +2759,41 @@ Social11·Relationships7개 파일의 원래92개 노드와 fixture import/CI �
 고정 `16e0960ab780fe030a5f92cbbce13d66c3ac0120`의 전체 백엔드는 **2564 passed / 22 existing skipped / 5 failed / 28 warnings / 826.44초**다. 다섯 실패는 삭제된 Daily Plan facade의 과거 identity 검사1, 현재 ER0 목록의 scheduler lease import 이동에 따른 줄·hash 갱신 누락2, 삭제된 `services/agent_runs.py`를 읽는 OSS 정적 경계 검사2다. 이 결과를 전체 PASS로 표시하지 않는다.
 
 OSS 검사의 기존 함수9개 전체 AST를 유지하며 원래 AgentRun source의 검토된 분할 지도에 있는 실제 소유 파일50개 모두를 검사 대상으로 연결했다. 옛 파일 한곳을 비워 남기거나 대표 파일 한개만 검사하지 않는다. ER0는 현재 scheduler lease의 줄번호·hash만 갱신됐고 PostgreSQL 흔적 파일92·역사적 migration87·Neo4j 정적 query24·Next route44·parity workload7은 같다. 이 수정의 OSS·ER0 회귀 **16 passed / 13.92초**다. Daily Plan 원래 identity의 승계 검증, 선형 원장·후속 PR 및 최종 설치·전체 Gate는 계속 진행 중이다.
+
+후속 B5의 실제 CI pytest 경로 검사 source `280d4c034620046216fbde9a07aec3de2e606ebe`를 통합 후보에도 적용했다. 원래 Activity Proposal 경로 수정 외에, G07에서 `tests/worlds/test_foundation.py`로 옮긴 파일의 Local Smoke 명령도 연결했다. 실제 workflow 검사8개와 경로 음성 사례·기존 CI 정책·World foundation 회귀 **16 passed / 5.70초**다. 원래 frozen node·기능 단언은 바꾸지 않았으며 이 검사로 파일 이동 뒤 실행 대상이 사라진 CI 명령을 조기에 거부한다.
+
+Relationships·Graph recall/planner/Both·경계·동결 I/K/M inventory 집중은 **123 PASS /기존 PostgreSQL skip1 /48.36초 /기존 warning1개**다. PR #258/#263 API/schema/ORM, 보호 변경8파일 assertion 및 전체 split evidence는0오류, 경계847 module/3027 edge/legacy154와 현재 L4/ER0 generator도 통과했다. frozen JSON과 역사적 정책 설명 문자열은 다시 쓰지 않았다.
+
+B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Community service/CRUD/public 집합 제거와 G07 18파일은 source로 준비됐다. 부모 통합은 이미 별도로 전환된 Resident·Chat·LocalBot·Character image·공통 DB/모델 등록 소비자를 합류하고 전체 gate 및 Hosted/설치를 검증한다. 복합 Chat/Today/image 테스트의 최종 소유 위치와 앞선 G07 고정 수치 검사는 부모의 정확 통합 검증 대상으로 남는다.
+
+
+## AR-B5 C34 순차 통합 검증
+
+Relationships 공개 집합의 실제 정의70개·원래 실제 소비자 전환을 현재 B4 실행과 합쳤다. C34 제품61개 AST 동일 근거와 정확 public→graph_read 경로 대응을 유지하고, 기존 Graph Recall·Planner·Both·response streaming 및 경계/L4 검사는 **156 PASS /기존 skip1 /65.47초**다. 현재 경계 **985 modules /3,657 edges /legacy126 /cycle0**, ER0 및 L4 현재 inventory도 통과했다. 전역 facade를 다시 만들거나 호출 순서·provider·Session을 바꾸지 않았다.
+
+B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock 전체 보존과 전체 backend, PR required CI·설치 Gate를 이어서 실행한다. 이후 B6/B7/B8 및 G5/G06 완료를 이 결과로 앞당겨 선언하지 않는다.
+
+## AR-B5 최초 전체 검증과 통합 연결 보정 — 2026-09-06
+
+첫 전체 backend 검사는 **20 FAIL /2,342 PASS /기존 skip22 /752.72초**였다. 실패는 `runtime/characters/management.py`의 실제 Social media 조회 import 누락, 불변 Alembic 0088이 사용하는 schema helper 경로 삭제, 현재 core/source/HTTP inventory 경로 미갱신으로 분류했다. 원래 migration 본문과 ORM 구현은 바꾸지 않고 역사 경로에 실제 schema helper 두 개만 같은 함수 객체로 복구했다. 클래스 export나 새 infrastructure marker는 추가하지 않았다. 나머지는 기존 조회를 실제 모듈에 연결하고 현재 core 두 항목, HTTP module 필드 38개와 실제 검사 입력 경로를 갱신했다. 관련 마이그레이션·생성/활성화·패키지 가져오기·보안·tendency 확대 회귀는 **158 PASS /기존 warning5 /30.56초**다.
+
+첫 stock 보존 검사는 API/ORM/원장/2,384개 노드의 원본 보존을 확인했으나, 이동 후 split 증거의 현재 소비자/노드 경로와 tendency 단언의 지역 이름 네 개를 거절했다. 원래 단언은 같은 실제 owner의 지역 import에 연결해 복원했다. 현재 경로 참조 543개를 검토된 file/node 지도에 따라 연결하고, AR-B5-C1에서 원래 위치에 보존했던 Run 정의 42개는 실제 후속 B4-C4b2의 기존 분할 증거를 승계했다. 역사 pilot의 상대 경로 설명과 원본 source 키·원본 정의·단언은 유지했다. 수정 후 원래 **`check_refactor_preservation.py --contracts --nodes` 전체 PASS**, PR258 1,867 /PR263 1,907 /현재 보호·수집 **2,384 /2,384**, K01–K23/G01–G13 **37항목 PASS**다. 현재 경계는 **986 modules /3,659 edges /legacy126 /cycle0**, L4·ER0·deferred·public HTTP inventory도 통과했다.
+
+원장은 main의 **92개 기록을 불변 prefix**로 유지하고 최초 signed source **52개 기록**을 추가해 **144개**로 준비했다. 각 source는 고립된 원본 Git archive에서 수집하며 현재 구현으로 기준선을 재생성하지 않았다. 추가 파일 증거 211개와 신규 노드 73개를 최초 정의 커밋까지 대조했고, RoutineInteraction 조회 회귀 한 개는 후속 C31이 아닌 실제 최초 `696ada3` 기록에 배치했다. World Feed 검색 회귀 두 개도 최초 `49c0f1f` 기록과 기존 경로에서 C33 이동 지도로 이어진다. PR258/263 동결 source/checkpoint/승인 목록은 바꾸지 않았다.
+
+보안 사전 검증은 Gitleaks 8.30.1로 history 519 commits와 추적 source+원장 draft를 각각 검사했다. C33 지도의 공개 테스트 파일 SHA256 한 줄이 generic-api-key로 감지되어 원래 signed `f977215` 테스트 blob의 SHA256과 동일함을 검증했다. exact path/rule/전체 line 한 개에만 예외를 추가했고 변경 hash/key/path/prefix/suffix 음성 6개를 거절했다. 후속 history 및 source draft 검사에서 **0 leaks**이며 기존 secret allowlist 25개는 그대로다. 최종 source 기준 전체 backend·PR required CI·병합 후 실행 Gate는 다음 결과로 기록한다.
+
+### 최종 B5 후보 전체 검증
+
+수정 source `9a7f76d`와 최초 도입 원장 metadata `0108a3a`를 signed로 고정한 뒤 전체 backend가 **2,362 PASS /기존 skip22 /warning27 /733.18초**로 통과했다. 동일 source의 원래 stock 검사도 **보호2,384 /현재2,384 /37항목 PASS**다. 원래 tendency 단언의 중복 import만 정리한 별도4개 회귀도 통과했으며, 전체 실행 중 source/test/metadata를 편집하지 않았다. 최초20개 실패 이력은 위 기록에 유지한다.
+
+같은 커밋의 Gitleaks 추적 source와 HEAD 전체 조상 history는 모두0 leaks, DCO·secret metadata25·Local OSS/CI policy·frontend design은 PASS다. 원래 custom scanner의 현재 Git tree는2,081파일/치명0이다. 공유 개발 저장소의 `--history`는 `--all`을 읽기 때문에 미합류 B8 `3500f3f`의 신규 `tests/integrations/test_direct_llm.py`에서3개 synthetic fixture 오탐을 발견했다. 그 경로와 blob `a464aad`는 B5 HEAD 조상에 없고 해당 B8 source가 자기 경로의 기존 exact allowlist를 이미 이전했다. B5에 미래 예외를 추가하지 않고, 후보 전체 조상만 있는 별도 bare 저장소에서 원래 history 검사를 그대로 실행해 PR 범위 결과를 분리한다. PR required CI와 병합 후 실행·installer Gate는 아직 완료로 표시하지 않는다.
+
+
+### PR #283 첫 원격 Gate와 실행 경로 검사 보완
+
+Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 현재 Memory batch inventory hash 5개에서, Local autonomy는 옛 `tests/test_activity_proposal_runtime.py` 실행 인자에서 실패했다. 제품 소스/원래 테스트 단언을 추가 수정하지 않고 검토된 실제 `tests/relationships/test_activity_proposals.py`를 실행하도록 연결하고 현재 inventory만 원래 generator로 갱신했다. immutable Today predecessor와 모든 schema/budget 계약은 유지했다.
+
+전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
+
+Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.
