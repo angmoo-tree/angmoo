@@ -83,7 +83,7 @@ def test_runtime_adapter_restricts_injection_to_loopback_and_maps_proxy_paths() 
 
 def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> None:
     gate = _read("frontend/src/shared/runtime/desktop-runtime-gate.tsx")
-    desktop = _read("frontend/src/shared/desktop/product-window.ts")
+    desktop = _read("frontend/src/lib/desktop/product-window.ts")
     router = _read("frontend/src/composition/static-product-router.tsx")
     assert "DesktopRuntimeGate" in router
     assert 'phase: "starting" | "ready" | "crashed" | "stopped"' in desktop

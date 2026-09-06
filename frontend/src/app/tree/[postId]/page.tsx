@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
 import { TreePostDetailClient } from "@/components/tree-post-detail-client";
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/lib/server/backend";
 import type { TreePostDetail } from "@/lib/tree";
 import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
 

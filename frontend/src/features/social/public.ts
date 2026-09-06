@@ -1,6 +1,5 @@
 export {
   deleteSocialPost,
-  getInitialSocialFeed,
   getSocialPostThread,
   listCharacterFollowingSocialFeed,
   listFollowingSocialFeed,

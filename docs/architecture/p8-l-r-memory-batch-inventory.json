@@ -487,7 +487,7 @@
       "sha256": "d911b868f7d5c16b97faee9b1fdd7d84d682a06690d3a2ca9f376b5de7a2725b"
     },
     {
-      "path": "frontend/src/shared/desktop/product-window.ts",
+      "path": "frontend/src/lib/desktop/product-window.ts",
       "sha256": "80202c0ea523be1b19ab7daa14dbab7bd89a7b06dfcfbf96718a59a76119ddf9"
     },
     {
@@ -508,7 +508,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "69292086997b6cb42da6c48cd12c5a8e04d7dbd21ffaf6d889305da8d53c3bbb"
+      "sha256": "1d91a47c75b439002c2d5f1452fc29f7031718f72b824d1ddbdfd94e34464271"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

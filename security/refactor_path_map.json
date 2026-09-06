@@ -684,7 +684,10 @@
     "frontend/src/shared/ui/semantic-tokens.css": "frontend/src/styles/semantic-tokens.css",
     "frontend/src/shared/ui/status-badge.tsx": "frontend/src/components/ui/status-badge.tsx",
     "frontend/src/shared/ui/status.tsx": "frontend/src/components/ui/status.tsx",
-    "frontend/src/shared/ui/surfaces.tsx": "frontend/src/components/ui/surfaces.tsx"
+    "frontend/src/shared/ui/surfaces.tsx": "frontend/src/components/ui/surfaces.tsx",
+    "frontend/src/shared/api/backend-server.ts": "frontend/src/lib/server/backend.ts",
+    "frontend/src/shared/desktop/product-window.ts": "frontend/src/lib/desktop/product-window.ts",
+    "frontend/src/shared/navigation/runtime-navigation.ts": "frontend/src/hooks/use-runtime-navigation.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135318,6 +135321,51 @@
         "existing product-shell and static product-shell scenarios",
         "existing fixed-environment visual corpus",
         "existing Tauri product-shell/media source contracts"
+      ],
+      "status": "IMPLEMENTED - validation in progress"
+    },
+    "AR-F2-B": {
+      "scope": "Canonical server proxy, desktop commands and runtime navigation; browser session transport separated from identity endpoint ownership",
+      "files": {
+        "frontend/src/shared/api/backend-server.ts": "frontend/src/lib/server/backend.ts",
+        "frontend/src/shared/desktop/product-window.ts": "frontend/src/lib/desktop/product-window.ts",
+        "frontend/src/shared/navigation/runtime-navigation.ts": "frontend/src/hooks/use-runtime-navigation.ts"
+      },
+      "frontend_extractions": {
+        "frontend/src/shared/auth/auth-session.ts": {
+          "common": "frontend/src/lib/auth/browser-session.ts",
+          "common_roles": [
+            "shared session DTOs",
+            "token-free user cache",
+            "auth change notification",
+            "credential-mode JSON request and existing 401/error handling"
+          ],
+          "remaining_roles": [
+            "getCurrentUser",
+            "issueLocalSession",
+            "updateUserFeedPreferences"
+          ],
+          "remaining_owner_stage": "AR-F3-A",
+          "consumers": [
+            "frontend/src/shared/auth/auth-provider.tsx",
+            "frontend/src/shared/auth/public.ts"
+          ]
+        },
+        "frontend/src/features/social/api/social-feed-client.ts": {
+          "server": "frontend/src/features/social/api/social-feed-server.ts",
+          "symbols": [
+            "getInitialSocialFeed"
+          ],
+          "consumer": "frontend/src/app/feed-page.tsx",
+          "client_exports": "Existing browser request functions remain in social-feed-client. Social public no longer re-exports server initialization."
+        }
+      },
+      "verification": [
+        "Node World Package proxy",
+        "browser session/media source contracts",
+        "web/static/Settings/visual corpus",
+        "server reachability audit",
+        "Windows Host and installer CI"
       ],
       "status": "IMPLEMENTED - validation in progress"
     }

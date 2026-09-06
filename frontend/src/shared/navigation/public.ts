@@ -16,5 +16,5 @@ export {
   useRuntimePathname,
   useRuntimeRouter,
   useRuntimeSearchParams,
-} from "./runtime-navigation";
+} from "../../hooks/use-runtime-navigation";
 export { StaticNavigationBridge } from "./static-navigation-bridge";

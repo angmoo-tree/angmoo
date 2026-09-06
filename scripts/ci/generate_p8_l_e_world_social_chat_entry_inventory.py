@@ -200,7 +200,7 @@ def _frontend_contract() -> dict[str, Any]:
         ("scrollbar-gutter: auto", "scrollbar-width: none", "::-webkit-scrollbar"),
     )
     _require_text(
-        "frontend/src/shared/desktop/product-window.ts",
+        "frontend/src/lib/desktop/product-window.ts",
         (
             "DESKTOP_ROUTE_HISTORY_INDEX",
             "synchronizeDesktopRouteFromBrowserHistory",

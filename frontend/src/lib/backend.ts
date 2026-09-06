@@ -1,1 +1,1 @@
-export { fetchBackendJson, proxyBackend } from "@/shared/api/public";
+export { fetchBackendJson, proxyBackend } from "@/lib/server/backend";

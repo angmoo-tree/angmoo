@@ -1,4 +1,4 @@
-import { proxyBackend } from "@/lib/backend";
+import { proxyBackend } from "@/lib/server/backend";
 
 type RouteContext = {
   params: Promise<{

@@ -16,11 +16,11 @@ export {
   openDesktopProductWindow,
   retryDesktopRuntime,
   subscribeDesktopRoute,
-} from "./product-window";
+} from "../../lib/desktop/product-window";
 export type {
   AngmooDesktopWindowKind,
   AngmooDesktopWindowState,
   AngmooDesktopRuntimeStatus,
   DesktopShutdownStatus,
   DesktopProductNavigationResult,
-} from "./product-window";
+} from "../../lib/desktop/product-window";

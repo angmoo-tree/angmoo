@@ -12,8 +12,8 @@ import {
   isTauriDesktopRuntime,
   navigateBackCurrentDesktopRoute,
   navigateDesktopProductRoute,
-} from "@/shared/desktop/public";
-import { isStaticFrontendProfile } from "@/shared/runtime/public";
+} from "@/lib/desktop/product-window";
+import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
 function staticNavigate(href: string, replace: boolean) {
   if (isTauriDesktopRuntime()) {

@@ -14,7 +14,7 @@ import {
   navigateCurrentDesktopRoute,
   openDesktopProductWindow,
   startDesktopWindowResize,
-} from "./product-window";
+} from "../../lib/desktop/product-window";
 import styles from "./desktop-window-controls.module.css";
 
 const WINDOW_DRAG_INTERACTIVE_SELECTOR = [

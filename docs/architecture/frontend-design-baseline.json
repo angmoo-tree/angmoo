@@ -297,7 +297,7 @@
       "frontend/src/features/social/ui/world-social-feed.tsx",
       "frontend/src/features/ui-foundation/public.ts",
       "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
-      "frontend/src/shared/desktop/product-window.ts",
+      "frontend/src/lib/desktop/product-window.ts",
       "frontend/src/utils/scroll-viewport.ts",
       "frontend/src/components/ui/profile-avatar.tsx",
       "frontend/src/shared/ui/public.ts",

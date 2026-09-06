@@ -1,7 +1,7 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0 MERGED, post-merge checks running; AR-F2-A implementation and
-validation in progress; AR-F2-B through AR-F5-B NOT STARTED**.
+Current: **AR-F2-0 COMPLETE; AR-F2-A PR #292 awaiting final Windows checks;
+AR-F2-B isolated preparation and validation; AR-F2-C through AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -131,3 +131,30 @@ The subsequent read-only audit assessed 72 remaining backend worktrees and remov
 conditions remain. Exact paths, commits and results are recorded in workspace
 `.task-output/angmoo-refactor-8-3/backend-worktree-audit.json`; no branches or
 committed history were deleted.
+
+## AR-F2-B runtime and server/client transport
+
+- Prepare in an isolated worktree while PR #292's fixed HEAD finishes Windows
+  checks. Integrate in sequence only after AR-F2-A merge and post-merge gates.
+- Move server proxy to `lib/server/backend.ts`, native window commands to
+  `lib/desktop/product-window.ts`, runtime navigation hooks to
+  `hooks/use-runtime-navigation.ts`. Next routes use the actual server entry.
+- Extract shared session DTO/cache/notification/authenticated JSON transport to
+  `lib/auth/browser-session.ts`. Keep Identity endpoints in the old auth-session
+  module until F3-A; preserve existing error, 401, cookie and storage semantics.
+- Split Social's `getInitialSocialFeed` server request from the browser client.
+  The web feed page imports the server entry directly; the Social public export
+  no longer introduces a server dependency into client consumers.
+- Keep runtimeFetch's dynamic loopback address, launch token, CSRF, streams and
+  the existing authenticated-media hook unchanged. Native event names, route
+  normalization, history, window commands and shutdown meaning are unchanged.
+- Local: 114 related regression tests, TypeScript/ESLint, architecture and design
+  PASS; stock 324 PASS; all-client/static transitive server-dependency audit PASS.
+  Existing real-Next World Package proxy PASS; web 21 PASS (56.4s). Settings,
+  production/static builds and static corpus are being verified.
+- Initial worktree-only Next start failed because Turbopack rejects an external
+  node_modules junction. Preserve that junction outside the worktree and install
+  the same frozen dependencies locally (350 cached packages, no version/lock
+  change). The proxy and web tests then pass; no product configuration workaround.
+- Regenerate only current L4/design/Memory batch inventories after reviewed path
+  moves. Preserve frozen Today/P8-L-Q predecessors, source and visual oracles.

@@ -4,14 +4,24 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 
 이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)에 기반한 **구조 전환의 목표 기준**이다. 2026-09-05 AR-0 기준선과 AR-1 검사 지원을 병합했고, `device-home`을 AR-F1 첫 제품 파일럿으로 옮겨 해당 범위의 새 경계 검사를 활성화했다. Home의 기능 코드는 `features/device-home`, 인증·runtime·Phone shell 조립은 `composition/screens/device-home-screen.tsx`, 공용 구현은 `components/hooks/lib/utils`가 소유한다. 다른 화면에는 `ui`, `model`, `public.ts`, `shared`가 남아 있으므로 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [전환 중인 코드 읽기](#전환-중인-코드-읽기)를 함께 확인한다.
 
-## 목차
-
 2026-09-07 공용 UI 이전에서는 기존 primitive를 `src/components/ui`, 전역 semantic token을
 `src/styles/semantic-tokens.css`, scroll hook을 `src/hooks`, 순수 scroll·프로필 표시 도구를
 `src/utils`로 모았다. 새 공용 코드는 이 실제 구현을 사용한다. 아직 이전하지 않은 기능의
 `shared/ui/public.ts`·`shared/interaction/public.ts`는 구현을 복제하지 않는 임시 export이며,
 해당 기능의 이전과 함께 소비를 종료한다. 단계별 검증 상태는
 [프론트엔드 전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
+
+서버 프록시는 `lib/server/backend.ts`, 네이티브 명령은 `lib/desktop/product-window.ts`,
+실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
+캐시·인증된 JSON 전송은 `lib/auth/browser-session.ts`에 있고, 사용자 조회·로컬 세션 발급·
+프로필 설정 endpoint는 Identity 업무 코드로 이전할 대상이다. 전환 중의
+`shared/auth/auth-session.ts`에는 그 endpoint와 공용 세션 export만 남는다.
+
+Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
+직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
+않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.
+
+## 목차
 
 - [프로젝트 구조](#프로젝트-구조)
 - [기능 안에서 코드 나누기](#기능-안에서-코드-나누기)

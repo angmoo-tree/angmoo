@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
 import { TreeCommunityClient } from "@/components/tree-community-client";
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/lib/server/backend";
 import type { TreeCategory, TreeFeedPage } from "@/lib/tree";
 
 export const dynamic = "force-dynamic";

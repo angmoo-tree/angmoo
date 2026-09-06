@@ -28,7 +28,7 @@ def test_next_proxy_forwards_idempotency_key_for_safe_mutation_replay() -> None:
 
 
 def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> None:
-    proxy = _read("shared/api/backend-server.ts")
+    proxy = _read("lib/server/backend.ts")
 
     assert "getSetCookie" in proxy
     assert "forwardedResponseHeaders" in proxy
@@ -39,7 +39,7 @@ def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> Non
 
 
 def test_browser_auth_storage_contains_no_session_or_pending_token() -> None:
-    auth_session = _read("shared/auth/auth-session.ts")
+    auth_session = _read("shared/auth/auth-session.ts") + _read("lib/auth/browser-session.ts")
 
     assert "angmoo.authToken" not in auth_session
     assert "pending_token" not in auth_session
