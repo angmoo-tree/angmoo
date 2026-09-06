@@ -2601,3 +2601,27 @@ Memory 조립 3개를 `runtime/memory/daypart_observations.py`로 실제 이전�
 
 - G5 준비 중 바뀐 `world_scope_migration.py`의 Base import 한 줄을 #258 원본으로 복원했다. 원본20595bytes / SHA256 `643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634`와 정확히 같다. 기존 `core/db.py`의 같은 Base export로 실행되며, frozen D inventory는 수정하지 않았다.
 - D inventory 및 실제 migration 회귀 **17 passed / 28.70초**. 역사적 파일은 이후의 일반 ORM import 전환 대상에서 제외한다.
+
+
+## AR-B5-C31 — 데모 데이터 초기화 실제 runtime 소유
+
+CRUD의 마지막 실제 seed 함수는 runtime/bootstrap으로 옮겼다. 실제 Identity·Character·Routines·Social 모델을 직접 명시하며 원래 전체 AST는 모델 import 복원 후 동일하다. 기존 factory 기본 콜백/실행 설정·데모 본문/기본값·기존 user 보완·credential/setting 추가·flush/commit 순서를 유지한다. 새 SQLite2개는 최초1회 commit 및 반복 no-op, 기존 user→credential→setting의3개 commit 순서와 password 검증을 확인한다.
+
+초기22 PASS 뒤 factory/runtime/logging는45 PASS/1 FAIL이었다. 실패는 선행 Relationships router 이동의 옛 mock 대상으로, 실제 router·runtime gateway 및 같은 request/db DI를 연결하고 원래 단언을 유지했다. 최종 **46 PASS /44.97초 /기존 warning1개**, 같은 DB object 명시 후 해당1개도 PASS다. CRUD별칭/Relationships public/G07/full B5/capture/Hosted는 후속이다.
+
+C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0을 확인했다. 남아 있는 public_main도 같은 실제 seed 콜백으로 연결했으며 parent G06 최종 통합에서는 main의 동일 콜백을 보존한다. 실제 initializer 새 경로 외에 데모 활성 설정이나 factory 본문은 변경하지 않았다.
+
+
+## AR-B5-C32 — Community CRUD 집합 제거
+
+실제 함수/class0인 CRUD 집합을 삭제하고11개 소비자의68참조를 실제 소유 서비스·조회에 연결했다. 제품660개 전체 정의는 import 해석 후 동일하며, Post의 원래 공개 필터/댓글 eager-load 조회를 다른 내부 조회로 바꾸지 않았다. 기존 assertion 표현은 실제 owner import로 유지하고 LG/Resident mock2개도 실제 Post repository를 향한다.
+
+집중 회귀는 **342 PASS /기존 PostgreSQL skip18 /29.97초 /기존 warning3개**다. 신규 테스트 노드는 없고 부모의 이미 전환한 Resident/Tree/Lore 실제 소비자에 연결할 정확한 지도와 임시 bridge 종료 조건을 남겼다. Relationships 집합/G07/full B5/capture/Hosted는 후속이다.
+
+C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion·전체 split evidence0, 경계848 module/3037 edge/legacy154 및 L4 parity99·ER0 PASS다. 실제 도입 원본과 역사 pilot 기록은 유지했으며 새 테스트 노드를 추가하지 않았다.
+
+### C31–C32 실제 Bootstrap·CRUD 소비자 통합
+
+- Demo 초기 데이터 생성은 `runtime/bootstrap/demo_seed.py`의 원래 구현을 단일 main에서 호출한다. 정의가 모두 이전된 Community CRUD 파일을 삭제하고 현재 코드와 테스트를 실제 담당 조회/쓰기 함수에 연결했다.
+- 통합 첫 검사 **229 passed / 2 failed**는 Writer 테스트의 삭제된 Community module 대역 두 경로였다. 원래 조건/저장순서 assertion을 유지하고 실제 eight 함수의 대역 위치를 연결한 뒤 해당 파일 **8 passed / 6.28초**.
+- 원본 보호 읽기 진단: 보호2311/current2509, source·split·assertion·suppression·ASGI·API/ORM·missing nodes 모두0. 최종 stock/전체/CI/설치 검증은 이어서 수행한다.

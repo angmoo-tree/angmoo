@@ -1,4 +1,5 @@
 """Daypart composition shares the caller Session and preserves write ordering."""
+import app.domains.social.repository.posts as social_posts_actual
 
 from datetime import date
 import os
@@ -74,7 +75,7 @@ def test_provided_observations_commit_inbox_before_same_session_author_read(engi
                 assert [row.event_type for row in observer.scalars(select(AgentDaypartMemoryEvent))] == ["observation_inbox"]
             return original(current, post_id)
 
-        monkeypatch.setattr(daypart_observations.community_crud, "get_post", get_post)
+        monkeypatch.setattr(social_posts_actual, "get_post", get_post)
         daypart_observations._record_provided_daypart_observations(
             db, character_id="character", memory_session_key="session-a",
             profile_references=SqlAlchemyResidentActionReferences,

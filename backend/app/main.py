@@ -50,7 +50,7 @@ from app.core.public_media import mount_public_media
 
 from app.core.request_limits import RequestBodyLimitMiddleware
 
-from app.cruds.community import seed_demo_data
+from app.runtime.bootstrap.demo_seed import seed_demo_data
 
 from app.runtime.configuration import RuntimeComposition
 

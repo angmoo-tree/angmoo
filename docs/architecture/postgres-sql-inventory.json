@@ -339,7 +339,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "6c215f06acdc076ea30fc0c0b2bd63b885e98408e1a158c774934126d6d4455e",
+      "source_sha256": "643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

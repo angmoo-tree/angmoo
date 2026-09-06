@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.characters.service.profile as characters_profile_service
+import app.domains.social.repository.inbox as social_inbox_repository
+import app.domains.social.repository.posts as social_posts_repository
 import app.domains.social.service.resident_affordances as social_resident_affordances_service
 import app.runtime.social.agent_tool_reads as social_agent_tool_reads_runtime
 import app.runtime.social.agent_tools as social_agent_tools_runtime
@@ -175,7 +178,7 @@ from app.domains.relationships.repository import points as relationship_point_qu
 from app.domains.relationships.service import points as relationship_points
 from app.domains.relationships.utils import points as relationship_point_values
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
@@ -278,7 +281,7 @@ _writing_context_workflows = WritingContextWorkflows(
 _conversation_workflows = ConversationWorkflows(
     clip=_clip,
     get_post=lambda db, post_id: _conversation_context_post(db, post_id),
-    thread_replies=lambda db, post_id, **kwargs: community_crud.list_post_thread_replies(db, post_id, **kwargs),
+    thread_replies=lambda db, post_id, **kwargs: social_posts_repository.list_post_thread_replies(db, post_id, **kwargs),
 )
 _tendency_action_note = partial(relationship_context_service._tendency_action_note, workflows=_relationship_context_workflows)
 _relationship_daypart_memory = partial(relationship_context_service._relationship_daypart_memory, workflows=_relationship_context_workflows)
@@ -331,7 +334,7 @@ _action_planning_workflows = ActionPlanningWorkflows(
 _action_budget_workflows = ActionBudgetWorkflows(
     ensure_setting=lambda db, character_id: activity_settings.ensure_setting(db, character_id),
     count_today=lambda db, **kwargs: agent_activity_policy.count_action_today(db, **kwargs),
-    get_post=lambda db, post_id: community_crud.get_post(db, post_id),
+    get_post=lambda db, post_id: social_posts_repository.get_post(db, post_id),
     reply_task_id=lambda **kwargs: _reply_task_id(**kwargs),
 )
 _filter_action_plan = partial(action_plans_service._filter_action_plan, workflows=_action_planning_workflows)
@@ -840,7 +843,7 @@ def _relationship_point_to_state(
         except Exception:
             ctx.db.rollback()
         return None
-    source_character = community_crud.get_character(ctx.db, point.source_character_id)
+    source_character = characters_profile_service.get_character(ctx.db, point.source_character_id)
     if (
         source_character is None
         or source_character.deleted_at is not None
@@ -1694,10 +1697,10 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
         for item in feed_page.items:
             if item.post_id in seen_post_ids:
                 continue
-            post = community_crud.get_post(ctx.db, item.post_id)
+            post = social_posts_repository.get_post(ctx.db, item.post_id)
             author_character_id = getattr(post, "author_character_id", None)
             author_character = (
-                community_crud.get_character(ctx.db, author_character_id)
+                characters_profile_service.get_character(ctx.db, author_character_id)
                 if author_character_id
                 else None
             )
@@ -1932,7 +1935,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             }:
                 continue
             source_post_id = notification.source_post_id or notification.post_id
-            raw_notification = community_crud.get_notification_for_agent(
+            raw_notification = social_inbox_repository.get_notification_for_agent(
                 ctx.db,
                 user_id=ctx.user_id,
                 character_id=ctx.character.id,
@@ -1941,7 +1944,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             observation_receipt = None
             if inbox_lane_only:
                 source_post = (
-                    community_crud.get_post(ctx.db, source_post_id)
+                    social_posts_repository.get_post(ctx.db, source_post_id)
                     if source_post_id
                     else None
                 )
@@ -3245,7 +3248,7 @@ def _execute_planned_action(
             "failure_class": "missing_post_id",
         }
     if action_type == "follow" and target_id is None and post_id is not None:
-        post = community_crud.get_post(ctx.db, post_id)
+        post = social_posts_repository.get_post(ctx.db, post_id)
         if post is not None and post.author_character_id:
             target_type = "character"
             target_id = post.author_character_id
@@ -3770,7 +3773,7 @@ def _create_relationship_point_from_post(
 ) -> dict[str, Any]:
     if not recipient_character_id:
         return {"created": False, "reason": "recipient_not_character"}
-    recipient = community_crud.get_character(ctx.db, recipient_character_id)
+    recipient = characters_profile_service.get_character(ctx.db, recipient_character_id)
     if recipient is None or recipient.deleted_at is not None:
         return {"created": False, "reason": "recipient_unavailable"}
     if recipient.moderation_status == "suspended":
@@ -3892,7 +3895,7 @@ def _record_relationship_points_after_publish(
         result = action.get("result") if isinstance(action.get("result"), dict) else {}
         reply_post_id = str(result.get("post_id") or "").strip()
         parent_post_id = str(result.get("reply_to_post_id") or "").strip()
-        parent = community_crud.get_post(ctx.db, parent_post_id) if parent_post_id else None
+        parent = social_posts_repository.get_post(ctx.db, parent_post_id) if parent_post_id else None
         if parent is None or not parent.author_character_id:
             skipped.append(
                 {

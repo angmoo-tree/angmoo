@@ -11,7 +11,7 @@ from app import schemas as registered_schemas
 from model_fixture_support import models as registered_models
 from app.models import Base
 from app.core.unit_of_work import deferred_commits
-from app.cruds import community as legacy_repository
+
 from app.domains.characters import contracts, models, public, schemas
 from app.domains.characters.service import profile, seed, state
 from app.domains.media import schemas as media_schemas
@@ -60,7 +60,9 @@ def test_model_and_schema_compatibility_exports_have_one_identity():
     for name in ("AgentCreate", "AgentDeleteCreate", "AgentProfileUpdate", "AgentPersonaUpdate"):
         assert getattr(schemas, name) is getattr(legacy_agent_schemas, name)
     assert public.seed_autonomous_character is seed.seed_autonomous_character
+    import app.domains.characters.service.profile as legacy_repository
     assert legacy_repository.create_character is profile.create_character
+    import app.domains.characters.service.state as legacy_repository
     assert legacy_repository.upsert_character_state is state.upsert_character_state
     assert legacy_media_schemas.validate_profile_media_reference is media_schemas.validate_profile_media_reference
 

@@ -1,3 +1,4 @@
+import app.domains.social.repository.posts as social_posts_actual
 import app.runtime.social.agent_tools as social_agent_tools_actual
 import asyncio
 import inspect
@@ -6401,7 +6402,7 @@ def test_unfollow_conflict_suppression_only_removes_target_related_actions(
         "post-seed": SimpleNamespace(author_character_id="char-target"),
     }
     monkeypatch.setattr(
-        langgraph_resident.community_crud,
+        social_posts_actual,
         "get_post",
         lambda _db, post_id: posts.get(post_id),
     )

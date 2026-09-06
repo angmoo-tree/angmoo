@@ -242,6 +242,10 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from app.domains.relationships import router as world_activity_runtime
+    from app.domains.relationships.dependencies import get_read_references
+    from app.runtime.graph_projection import diagnostic_references
+
     config = _embedded_config(tmp_path)
     runtime_settings = settings_from_runtime_config(
         config,
@@ -252,6 +256,9 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
             runtime_settings=runtime_settings,
             relationships_read_references_factory=diagnostic_references.SqlAlchemyDiagnosticReferences,
         ))
+    )
+    request.app.state.relationships_read_references_factory = (
+        diagnostic_references.SqlAlchemyDiagnosticReferences
     )
     observed: dict[str, object] = {}
 

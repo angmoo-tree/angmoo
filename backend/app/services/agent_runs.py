@@ -68,7 +68,7 @@ from app.runtime.persistence.model_registration import register_models
 
 from app.config import settings
 
-from app.cruds import community as community_crud
+
 
 from app.runtime.routines import activity_policy as agent_activity_policy
 

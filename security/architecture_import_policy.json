@@ -33,14 +33,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.cruds.community",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.main",
-          "imported": "app.cruds.community"
-        },
-        {
           "importer": "app.main",
           "imported": "app.services.hosted_configuration"
         },
@@ -70,10 +62,6 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.runtime.social.image_generation"
         },
         {
@@ -87,10 +75,6 @@
         {
           "importer": "app.runtime.resident.langgraph",
           "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -135,10 +119,6 @@
         {
           "importer": "app.schemas.agents",
           "imported": "app.schemas.media_security"
-        },
-        {
-          "importer": "app.services.agent_runs",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.services.agent_runs",
@@ -189,19 +169,6 @@
       "owner_stage": "L4",
       "removal_condition": "Root sequential AR-B5/B7/B8/LG integration binds actual Social/Memory/Identity/Operations/Runtime and resident.langgraph/context owners, then removes these exact imports before AR-B8-B.",
       "review_date": "2026-09-06"
-    },
-    {
-      "id": "ar-b4-writer-app-cruds-community",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social query integration.",
-      "removal_condition": "Connect the original nullable Post lookup to its signed Social owner without changing missing/self/thread error order.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.cruds.community"
-        }
-      ]
     },
     {
       "id": "ar-b4-writer-runtime_boundary",
@@ -1438,30 +1405,6 @@
     ],
     "bridges": [
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.state",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.characters.public",
         "target": "app.domains.characters.contracts",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
@@ -1990,54 +1933,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.inbox",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.media",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.posts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.profiles",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.cursors",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.text",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.social.schemas.community",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
@@ -2070,14 +1965,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.profile_media",
         "target": "app.domains.characters.service.media_storage",
         "owner_stage": "AR-B8-A",
@@ -2099,30 +1986,6 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
         "reason": "The historical unused World image entry keeps its original exception class through this same-object compatibility export.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.identity.service.profile",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.reactions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.source_posts",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
         "review_date": "2026-09-05"
       },
       {
@@ -2257,14 +2120,6 @@
         "importer": "app.cruds.agents",
         "target": "app.domains.routines.service.activity_settings",
         "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5",
         "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
         "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
         "review_date": "2026-09-06"
@@ -2518,30 +2373,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.search",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The old CRUD name is the same original Character-owned text search; its remaining caller migration is tracked explicitly.",
-        "removal_condition": "Migrate exact legacy CRUD search callers and remove the alias.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.profile_activity",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.schemas.characters",
         "target": "app.domains.social.schemas.activity",
         "owner_stage": "AR-B5 / AR-B8-A",
@@ -2715,14 +2546,6 @@
         "owner_stage": "AR-B5",
         "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
         "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.image_jobs",
-        "owner_stage": "AR-B5",
-        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
-        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
         "review_date": "2026-09-06"
       },
       {

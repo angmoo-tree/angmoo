@@ -1,7 +1,7 @@
 {
-  "edge_count": 4152,
-  "external_import_count": 3133,
-  "module_count": 1100,
+  "edge_count": 4128,
+  "external_import_count": 3128,
+  "module_count": 1101,
   "modules": [
     {
       "external_imports": [],
@@ -710,53 +710,6 @@
       ],
       "module": "app.cruds.agents",
       "path": "backend/app/cruds/agents.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "hashlib",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.config",
-        "app.core.active_hours",
-        "app.core.search_text",
-        "app.core.security",
-        "app.core.unit_of_work",
-        "app.domains.characters.exceptions",
-        "app.domains.characters.models",
-        "app.domains.characters.service.profile",
-        "app.domains.characters.service.search",
-        "app.domains.characters.service.state",
-        "app.domains.identity.models",
-        "app.domains.identity.service.profile",
-        "app.domains.routines.constants",
-        "app.domains.routines.models.resident",
-        "app.domains.social.constants",
-        "app.domains.social.models.posts",
-        "app.domains.social.repository.inbox",
-        "app.domains.social.repository.media",
-        "app.domains.social.repository.posts",
-        "app.domains.social.repository.profiles",
-        "app.domains.social.repository.reactions",
-        "app.domains.social.service.image_jobs",
-        "app.domains.social.service.notifications",
-        "app.domains.social.service.profile_activity",
-        "app.domains.social.service.source_posts",
-        "app.domains.social.utils.cursors",
-        "app.domains.social.utils.text",
-        "app.runtime.persistence.model_registration",
-        "app.runtime.social.discovery",
-        "app.runtime.social.inbox",
-        "app.runtime.social.profile_activity",
-        "app.schemas"
-      ],
-      "module": "app.cruds.community",
-      "path": "backend/app/cruds/community.py",
       "wildcard_imports": []
     },
     {
@@ -12588,12 +12541,12 @@
         "app.config",
         "app.core.public_media",
         "app.core.request_limits",
-        "app.cruds.community",
         "app.database",
         "app.domains.runtime.contracts.status",
         "app.domains.runtime.service.components",
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
+        "app.runtime.bootstrap.demo_seed",
         "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
@@ -12831,6 +12784,31 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.bootstrap",
+      "path": "backend/app/runtime/bootstrap/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.active_hours",
+        "app.core.security",
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.runtime.bootstrap.demo_seed",
+      "path": "backend/app/runtime/bootstrap/demo_seed.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "asyncio",
@@ -12949,7 +12927,6 @@
         "app.credentials",
         "app.credentials.service_images",
         "app.cruds.agents",
-        "app.cruds.community",
         "app.domains.character_lore.models",
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
@@ -14921,9 +14898,9 @@
         "app.core.unit_of_work",
         "app.credentials",
         "app.cruds.agents",
-        "app.cruds.community",
         "app.domains.character_lore.service.documents",
         "app.domains.character_lore.service.presentation",
+        "app.domains.characters.service.profile",
         "app.domains.identity.models",
         "app.domains.memory.models.daypart",
         "app.domains.relationships.constants",
@@ -14964,6 +14941,8 @@
         "app.domains.routines.service.writing_plans",
         "app.domains.routines.service.writing_tasks",
         "app.domains.social.contracts.subjective_context",
+        "app.domains.social.repository.inbox",
+        "app.domains.social.repository.posts",
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.resident_affordances",
         "app.domains.world_characters.contracts.runtime_modes",
@@ -15161,7 +15140,6 @@
       "imports": [
         "app.config",
         "app.core.context_text",
-        "app.cruds.community",
         "app.domains.character_lore.service.documents",
         "app.domains.character_lore.service.presentation",
         "app.domains.characters.service.profile",
@@ -15178,6 +15156,7 @@
         "app.domains.routines.service.writing_prompts",
         "app.domains.routines.service.writing_results",
         "app.domains.social.exceptions",
+        "app.domains.social.repository.posts",
         "app.domains.social.schemas.community",
         "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.posts",
@@ -16598,7 +16577,6 @@
       "imports": [
         "app.config",
         "app.core.context_text",
-        "app.cruds.community",
         "app.domains.characters.models",
         "app.domains.identity.models",
         "app.domains.memory.contracts.daypart",

@@ -1,7 +1,8 @@
+import app.domains.social.service.profile_activity as social_profile_activity_service
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
-from app.cruds import community as community_crud
+
 
 
 FORBIDDEN_PUBLIC_ACTIVITY_FIELDS = {
@@ -22,7 +23,7 @@ FORBIDDEN_PUBLIC_ACTIVITY_FIELDS = {
 
 def test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary() -> None:
     canary = "M01-PRIVATE-CANARY"
-    event = community_crud._public_activity_event(
+    event = social_profile_activity_service._public_activity_event(
         SimpleNamespace(
             id=1,
             action_type="state_saved",
@@ -42,7 +43,7 @@ def test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary(
 
 
 def test_public_activity_event_normalizes_unknown_actions_without_raw_fallback() -> None:
-    event = community_crud._public_activity_event(
+    event = social_profile_activity_service._public_activity_event(
         SimpleNamespace(
             id=2,
             action_type="private_future_action",
