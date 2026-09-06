@@ -9707,6 +9707,17 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "9af3359334885452d889ba56dd31fba78263fd66",
+      "feature_id": "K08",
+      "reason": "AR-F3-F Relationship graph response types and unchanged presentation state utility split",
+      "tracked_files": {
+        "frontend/src/features/relationships/utils/relationship-graph.ts": "50faf5e0b22b611c171ca045b41262d657352744"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
