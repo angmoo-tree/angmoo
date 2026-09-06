@@ -200,3 +200,25 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_backend_additions\.json$''']
 regexes = ['''^\s*"backend/app/domains/identity/service/message_credentials\.py":\ "4b17220e4ed27e31fa42f1fbcd5bff71b4eb6ecf",?\s*$''']
+
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact residual original source Git blobs; verified against signed commits and Git objects, not runtime credentials; reviewed 2026-09-06"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = [
+  '''^\s*"backend/app/domains/identity/repository/credentials\.py":\ "0b9ce9d658cb67b8cf888cbfc579aeb816381277",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/character_credentials\.py":\ "047c77960301580d3e339d3aef122f627710b974",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/contracts/key_management\.py":\ "bf711e2cab8cc08017a66a50a5f723db44fcda2f",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/repository/keys\.py":\ "ff3e335265f3dcfe3e97797a5954f18339860f20",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/router/keys\.py":\ "c9ae6ebd1860e3633cbeaa7f1387fdb9d06ce7d7",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/service/key_management\.py":\ "b121334d21ca75ac7012681e71098036a3fca1df",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/service/key_records\.py":\ "10f6488e7cbcfb0e738cfc31088969e80b637aeb",?\s*$''',
+  '''^\s*"backend/tests/local_bot/test_key_management\.py":\ "5cf033a643499618ac81b37a3c1c03ccc325e102",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/contracts/authentication\.py":\ "38f05b3a368c47db93ac18da948bc80d3576d912",?\s*$''',
+  '''^\s*"backend/app/domains/local_bot/service/authentication\.py":\ "5c3384472db2667d9e868e0837ac10cb5e44aeea",?\s*$''',
+  '''^\s*"backend/app/runtime/local_bot/authentication\.py":\ "8af351caaec6f4e6bc1b04dbe1c67ae126542283",?\s*$''',
+  '''^\s*"backend/tests/local_bot/test_authentication\.py":\ "a39cbbdf8f8d1a45883d9dd2e3d4840fd634dca2",?\s*$''',
+]
