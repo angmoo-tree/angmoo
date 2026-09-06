@@ -191,3 +191,12 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_path_map\.json$''']
 regexes = ['''^\s*"tests/test_relationship_graph_api\.py":\ "dd2d8cad0e58de251fa405caa9eb85432e7669c58dc55fa7eefe141a057af97c",?\s*$''']
+
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact Chat credential-service Git blob from signed 57528d220; verified Git object in append-only evidence, not a credential; reviewed 2026-09-06"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = ['''^\s*"backend/app/domains/identity/service/message_credentials\.py":\ "4b17220e4ed27e31fa42f1fbcd5bff71b4eb6ecf",?\s*$''']

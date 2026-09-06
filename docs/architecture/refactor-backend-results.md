@@ -2182,3 +2182,10 @@ Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare �
 이 후보에는 B7 Memory·Runtime·G5·G06 제거 ancestry를 합치지 않았다. 해당 후속 owner로의 실제 연결과 기록된 Chat 역사 테스트 alias 종료는 계획한 다음 PR에서 수행한다.
 
 최종 Social block query 연결은 두 runtime collaborator가 실제 같은 함수 객체를 사용함을 확인했고, 실제 경로의 preflight·HTTP 보안 회귀 **11 PASS / 7.58초**다. 앞선 명령의 존재하지 않는 테스트 파일명은 pytest 수집 전에 종료됐으며 제품 실패로 집계하지 않는다. 원래153개 source 기록 뒤의 API/ORM/assertion/node 및 backend 전체 검증을 이어간다.
+
+
+### AR-B6 최종 로컬 전체 및 보존 연결 보정
+
+고정 `618ca6222fadad6457732616bda00336cc65c601`의 전체 backend는 **2393 passed / 기존22 skipped / 27 warnings / 729.45초**다. 첫 stock은 API/ORM·단언·suppression 및 보호2415=현재2415를 유지했지만 현재 split 소비자 경로3곳에서 종료했다. Character source 조회는 실제 `chat/service/profiles.py`, Graph Validator는 실제 `chat/service/graph_retrieval.py`, Executor는 그 서비스와 `runtime/chat/generation_workflows.py`의 현재 import/call로 목록을 맞췄다. 원본 symbol/파일 및 테스트 이동 지도, 원래 단언과 source 내용은 바꾸지 않았다.
+
+Gitleaks current tree의1건은 최초 signed `57528d22072f7541e7f1f1b982071afd5c1d537c`에서 도입한 Identity message_credentials source의 Git blob40이었다. 원장 key/value와 실제 Git object를 대조한 뒤 metadata 경로·generic-api-key 규칙·정확한 전체 key/hash 행1개에만 적용한다. 같은 행 comma 유무2개는 통과하고 hash/key/prefix/suffix/path 변형5개는 실제 Gitleaks에서 계속 검출됐다. 검토 설정으로 후보의 원래 tree와 HEAD 전체 history는0 findings이며 제품·원장·기존 assertion을 수정하지 않는다. 처음 실패한 stock/Gitleaks 결과는 이력으로 남기고 보정 head의 stock/집중을 확인한다.

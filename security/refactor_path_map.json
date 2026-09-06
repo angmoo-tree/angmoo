@@ -23132,22 +23132,7 @@
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_owned_agent_refs",
           "new": "backend/app/domains/characters/service/profile.py::list_message_source_characters",
           "direct_consumers": [
-            "backend/app/cruds/community.py",
-            "backend/app/domains/characters/service/access.py",
-            "backend/app/domains/characters/service/drafts.py",
-            "backend/app/domains/characters/service/image_generation.py",
-            "backend/app/domains/characters/service/management.py",
-            "backend/app/domains/characters/service/media.py",
-            "backend/app/domains/characters/service/mutations.py",
-            "backend/app/domains/characters/service/state.py",
-            "backend/app/domains/chat/service/profiles.py",
-            "backend/app/domains/chat/service/settings.py",
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/service/lifecycle.py",
-            "backend/app/domains/world_characters/service/owner_identity.py",
-            "backend/app/domains/world_characters/service/runtime_modes.py",
-            "backend/app/runtime/characters/creator.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/chat/service/profiles.py"
           ],
           "test_nodes": [
             "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
@@ -34003,8 +33988,7 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanValidator",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanValidator",
           "direct_consumers": [
-            "backend/app/domains/chat/application/graph_retrieval.py",
-            "backend/app/runtime/chat/world_generation.py"
+            "backend/app/domains/chat/service/graph_retrieval.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
@@ -34024,8 +34008,8 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanExecutor",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanExecutor",
           "direct_consumers": [
-            "backend/app/domains/chat/application/graph_retrieval.py",
-            "backend/app/runtime/chat/world_generation.py"
+            "backend/app/domains/chat/service/graph_retrieval.py",
+            "backend/app/runtime/chat/generation_workflows.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
