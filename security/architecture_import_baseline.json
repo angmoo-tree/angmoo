@@ -1,7 +1,7 @@
 {
-  "edge_count": 4079,
-  "external_import_count": 3116,
-  "module_count": 1091,
+  "edge_count": 4076,
+  "external_import_count": 3115,
+  "module_count": 1090,
   "modules": [
     {
       "external_imports": [],
@@ -313,23 +313,6 @@
       "imports": [],
       "module": "app.compatibility.routine_posts",
       "path": "backend/app/compatibility/routine_posts/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.core.context_text",
-        "app.domains.routines.policies.activity_state",
-        "app.domains.social.schemas.community",
-        "app.runtime.persistence.model_registration",
-        "app.runtime.relationships.sqlalchemy_social_event",
-        "app.runtime.resident.context",
-        "app.runtime.routines.activity_policy"
-      ],
-      "module": "app.compatibility.routine_posts.legacy",
-      "path": "backend/app/compatibility/routine_posts/legacy.py",
       "wildcard_imports": []
     },
     {
@@ -5578,7 +5561,8 @@
       ],
       "imports": [
         "app.domains.routine_posts.contracts.interaction",
-        "app.domains.routines.contracts.lifecycle"
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.contracts.planning_context"
       ],
       "module": "app.domains.routine_posts.contracts.context",
       "path": "backend/app/domains/routine_posts/contracts/context.py",
@@ -13985,7 +13969,7 @@
         "app.domains.memory.exceptions",
         "app.integrations.llm.memory_selection",
         "app.providers.registry",
-        "app.runtime.chat.sqlalchemy_service"
+        "app.runtime.chat.message_composition"
       ],
       "module": "app.runtime.memory_selection_provider",
       "path": "backend/app/runtime/memory_selection_provider.py",
@@ -15209,7 +15193,6 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.compatibility.routine_posts.legacy",
         "app.core.unit_of_work",
         "app.domains.routine_posts.constants",
         "app.domains.routine_posts.contracts.context",
@@ -15229,9 +15212,13 @@
         "app.domains.social.contracts.observations",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.models.posts",
+        "app.domains.social.schemas.community",
         "app.domains.world_characters.models",
         "app.integrations.direct_llm",
+        "app.runtime.persistence.model_registration",
+        "app.runtime.relationships.sqlalchemy_social_event",
         "app.runtime.routine_posts.context_references",
+        "app.runtime.routines.activity_policy",
         "app.runtime.routines.activity_references",
         "app.runtime.routines.joint_references",
         "app.runtime.social.agent_tools",

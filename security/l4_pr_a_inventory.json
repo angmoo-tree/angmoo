@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3116,
-      "internal_edge_count": 4079,
+      "external_import_count": 3115,
+      "internal_edge_count": 4076,
       "legacy_import_exception_count": 0,
-      "module_count": 1091,
+      "module_count": 1090,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1950,7 +1950,6 @@
           },
           {
             "imports": [
-              "app.compatibility.routine_posts.legacy",
               "app.core.unit_of_work",
               "app.domains.routine_posts.constants",
               "app.domains.routine_posts.contracts.context",
@@ -1970,9 +1969,13 @@
               "app.domains.social.contracts.observations",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.models.posts",
+              "app.domains.social.schemas.community",
               "app.domains.world_characters.models",
               "app.integrations.direct_llm",
+              "app.runtime.persistence.model_registration",
+              "app.runtime.relationships.sqlalchemy_social_event",
               "app.runtime.routine_posts.context_references",
+              "app.runtime.routines.activity_policy",
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
               "app.runtime.social.agent_tools",
