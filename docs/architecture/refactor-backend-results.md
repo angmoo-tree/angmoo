@@ -2020,3 +2020,9 @@ B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock
 원장은 main의 **92개 기록을 불변 prefix**로 유지하고 최초 signed source **52개 기록**을 추가해 **144개**로 준비했다. 각 source는 고립된 원본 Git archive에서 수집하며 현재 구현으로 기준선을 재생성하지 않았다. 추가 파일 증거 211개와 신규 노드 73개를 최초 정의 커밋까지 대조했고, RoutineInteraction 조회 회귀 한 개는 후속 C31이 아닌 실제 최초 `696ada3` 기록에 배치했다. World Feed 검색 회귀 두 개도 최초 `49c0f1f` 기록과 기존 경로에서 C33 이동 지도로 이어진다. PR258/263 동결 source/checkpoint/승인 목록은 바꾸지 않았다.
 
 보안 사전 검증은 Gitleaks 8.30.1로 history 519 commits와 추적 source+원장 draft를 각각 검사했다. C33 지도의 공개 테스트 파일 SHA256 한 줄이 generic-api-key로 감지되어 원래 signed `f977215` 테스트 blob의 SHA256과 동일함을 검증했다. exact path/rule/전체 line 한 개에만 예외를 추가했고 변경 hash/key/path/prefix/suffix 음성 6개를 거절했다. 후속 history 및 source draft 검사에서 **0 leaks**이며 기존 secret allowlist 25개는 그대로다. 최종 source 기준 전체 backend·PR required CI·병합 후 실행 Gate는 다음 결과로 기록한다.
+
+### 최종 B5 후보 전체 검증
+
+수정 source `9a7f76d`와 최초 도입 원장 metadata `0108a3a`를 signed로 고정한 뒤 전체 backend가 **2,362 PASS /기존 skip22 /warning27 /733.18초**로 통과했다. 동일 source의 원래 stock 검사도 **보호2,384 /현재2,384 /37항목 PASS**다. 원래 tendency 단언의 중복 import만 정리한 별도4개 회귀도 통과했으며, 전체 실행 중 source/test/metadata를 편집하지 않았다. 최초20개 실패 이력은 위 기록에 유지한다.
+
+같은 커밋의 Gitleaks 추적 source와 HEAD 전체 조상 history는 모두0 leaks, DCO·secret metadata25·Local OSS/CI policy·frontend design은 PASS다. 원래 custom scanner의 현재 Git tree는2,081파일/치명0이다. 공유 개발 저장소의 `--history`는 `--all`을 읽기 때문에 미합류 B8 `3500f3f`의 신규 `tests/integrations/test_direct_llm.py`에서3개 synthetic fixture 오탐을 발견했다. 그 경로와 blob `a464aad`는 B5 HEAD 조상에 없고 해당 B8 source가 자기 경로의 기존 exact allowlist를 이미 이전했다. B5에 미래 예외를 추가하지 않고, 후보 전체 조상만 있는 별도 bare 저장소에서 원래 history 검사를 그대로 실행해 PR 범위 결과를 분리한다. PR required CI와 병합 후 실행·installer Gate는 아직 완료로 표시하지 않는다.
