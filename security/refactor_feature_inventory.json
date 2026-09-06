@@ -1767,7 +1767,10 @@
         "backend/app/domains/social/service/agent_tool_state.py",
         "backend/app/domains/characters/service/state_notes.py",
         "backend/app/domains/characters/service/state.py",
-        "backend/app/runtime/social/agent_tool_state.py"
+        "backend/app/runtime/social/agent_tool_state.py",
+        "backend/app/domains/social/service/complete_tick.py",
+        "backend/app/domains/social/policies/complete_tick.py",
+        "backend/app/runtime/social/complete_tick.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

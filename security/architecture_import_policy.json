@@ -855,6 +855,19 @@
           "imported": "app.services.agent_briefs"
         }
       ]
+    },
+    {
+      "id": "ar-b5-complete-tick-policy-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C26 exact runtime callback to original Routines policy builder until prepared B4 owner source integration; Social retains no foreign SQL or policy implementation.",
+      "removal_condition": "Bind runtime.resident.activity_policy.build_activity_policy and remove the exact old import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.complete_tick",
+          "imported": "app.services.agent_activity_policy"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1124,6 +1137,7 @@
       "app.domains.social.models.manual_writes",
       "app.domains.social.models.posts",
       "app.domains.social.models.subjective_context",
+      "app.domains.social.policies.complete_tick",
       "app.domains.social.policies.world_feed",
       "app.domains.social.repository",
       "app.domains.social.repository.activity",
@@ -1160,6 +1174,7 @@
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
       "app.domains.social.service.agent_tool_state",
+      "app.domains.social.service.complete_tick",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
@@ -1417,6 +1432,7 @@
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
       "app.domains.social.service.agent_tool_state",
+      "app.domains.social.service.complete_tick",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
@@ -3231,6 +3247,14 @@
         "owner_stage": "AR-B5",
         "reason": "Community compatibility imports actual state implementations while final complete-tick/tool route consumers move; no state implementation remains in Community.",
         "removal_condition": "Finish actual complete tick callers and remove Community facade imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.policies.complete_tick",
+        "owner_stage": "AR-B5",
+        "reason": "Final Community facade retains original pure candidate/completion names as direct aliases while consumers move; no implementation remains.",
+        "removal_condition": "Remove final Community compatibility imports after all exact callers use actual service/policy.",
         "review_date": "2026-09-06"
       }
     ]

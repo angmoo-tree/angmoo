@@ -5,6 +5,7 @@ activity denial exception is translated; unrelated failures keep propagating.
 """
 
 from datetime import datetime
+from app.domains.routines.contracts.activity_policy import ActivityPolicy
 from app.domains.characters import schemas as character_schemas
 from typing import Protocol
 from app.domains.social.contracts.topic_history import (
@@ -15,6 +16,8 @@ from sqlalchemy.orm import Session
 
 
 class ToolRun(Protocol):
+    @property
+    def session_key(self) -> str: ...
     @property
     def created_at(self) -> datetime: ...
     @property
@@ -140,3 +143,12 @@ class AgentToolStateWorkflows(AgentToolReferences, Protocol):
         reason: str,
         result: str,
     ) -> object: ...
+
+
+class AgentToolTickWorkflows(AgentToolActionWorkflows, Protocol):
+    def build_activity_policy(
+        self, db: Session, *, character_id: str, ignore_active_hours: bool
+    ) -> ActivityPolicy: ...
+    def find_thread_viewed_log_id(
+        self, db: Session, *, character_id: str, root_post_id: str, created_at: datetime
+    ) -> int | None: ...

@@ -765,3 +765,6 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 도구 상태 저장은 `social/service/agent_tool_state.py`에서 Run 권한·캐릭터 일치, 관찰 로그, 중복 메모 저장 억제와 성공 기록을 원래 순서대로 수행한다. 메모의 공백/대소문자 정규화와 실제 상태 조회/쓰기는 Characters가 소유한다. 같은 메모이면 mood/summary도 덮어쓰지 않는 기존 의미를 유지하고, 모든 실제 상태/활동 로그는 호출자의 Session과 deferred commit에 참여한다. LocalBot가 사용하는 Character 오류의 Social 분류는 runtime의 실제 오류 변환 함수에 유지한다.
+
+
+Social tick 완료의 실제 업무는 `social/service/complete_tick.py`가 소유한다. 실행 전에 전체 action을 원래 순서대로 검증하고, 서버 후보 ID·공개/중복 판단·후속 알림/상태/성공 기록을 연결한다. 후보 ID와 완료 값은 `social/policies/complete_tick.py`, 읽지 않은 답글 알림 SQL은 Social repository, Run 시작 이후 thread 조회 증거 SQL은 Routines repository가 소유한다. 권한/활동 허용 정책과 실제 행동 서비스는 같은 Session으로 조립하고, 기존 반복 조회나 쓰기/로그의 commit 시점을 바꾸지 않는다.

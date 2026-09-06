@@ -147,3 +147,22 @@ def list_inbox_delivery_logs(
             .limit(5)
         )
     )
+
+
+def find_thread_viewed_log_id(
+    db: Session,
+    *,
+    character_id: str,
+    root_post_id: str,
+    created_at: datetime,
+) -> int | None:
+    return db.scalar(
+        select(models.AgentActivityLog.id)
+        .where(
+            models.AgentActivityLog.character_id == character_id,
+            models.AgentActivityLog.action_type == "thread_viewed",
+            models.AgentActivityLog.target_post_id == root_post_id,
+            models.AgentActivityLog.created_at >= created_at,
+        )
+        .limit(1)
+    )

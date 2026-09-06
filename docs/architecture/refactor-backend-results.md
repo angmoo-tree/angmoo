@@ -1342,3 +1342,12 @@ Community 실제6함수는 Characters의 메모 값 정책3, runtime의 Characte
 첫 실제 확대는 **219 PASS / 9.52초**였다. 기존 LG6개·LocalBot1개 mock receiver만 실제 소유로 연결했으며 assertion은 변경하지 않았다. 새 SQLite 회귀는 공백/casefold 동일 메모에 대해 mood/summary까지 기존값을 유지함, 로그 원래 순서, 실제 새로운 상태와 로그의 caller rollback을 검사한다. 최초 테스트가 rollback된 로그 객체를 보유해 SQLite ID 재사용 warning이 발생했으므로 검증 완료된 임시 로그 참조를 해제해 fixture 수명을 정리했다. Community13/G07/full B5 및 capture/Hosted는 계속한다.
 
 C25 최종 확대 검증은 **422 PASS / 기존 PostgreSQL skip1 / 81.68초 / 기존 warning3개**다. 새 상태 회귀의 로그 객체 수명 정리 후 추가 SQLAlchemy warning은 없다. PR #258/#263 API/schema/ORM·보호 변경2파일 assertion·전체 split evidence0, 경계 **846 module /3057 edge /legacy182**, L4 parity99·ER0가 통과했다. Character 오류의 실제 변환2함수는 runtime에 두어 Social→Character exceptions deep import 없이 원래 예외 종류/메시지를 보존했다. 실제 업무·호출 순서나 검사 예외를 완화하지 않았다.
+
+
+## AR-B5-C26 — Social tick 후보·사전 검증·완료 실제 소유
+
+Community 마지막13개 실제 함수와4개 상수를 Social tick service/policy로 옮겼다. Social Inbox SQL1개와 Routines thread-view 증거 SQL1개는 각 owner repository에 추출했다. 원래13/상수4 전체 AST와SQL2가 정확한 self/callback/type 복원 후 동일하다. Community에는 실제 함수/class가0개이며 남은 compatibility 연결과 실제 소비자 종료는 후속이다.
+
+최초 직접73개 중72 PASS/새1 FAIL은 신규 테스트가 기존 좋아요 로그명을 post_liked로 잘못 예상한 문제였다. 실제 원래 값 liked를 새 테스트에 반영했으며 제품/기존 assertion은 변경하지 않았다. 새 SQLite2개는 전체 사전 검증 전 partial action 금지, 반응/상태/성공 로그의 caller rollback, 원래 cutoff/scope/order/limit·pending autoflush를 검증한다. G07/full B5/capture/Hosted는 계속한다.
+
+C26 최종 확대는 **424 PASS / 기존 PostgreSQL skip1 /72.57초 /기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence0, 경계 **849 module /3089 edge /legacy183**, L4 parity99·ER0가 통과했다. 기존 함수/class와 상수는 실제 owner에 모두 정의되어 있으며 Community는 임시 같은객체 수출만 남았다. 신규 SQLite2개는 실제 좋아요/상태/로그 전체 rollback과 중복 payload의 사전 차단, 읽지 않은 답글30개 정렬 및 Run 이후 thread 증거 원래 필터를 확인했다.
