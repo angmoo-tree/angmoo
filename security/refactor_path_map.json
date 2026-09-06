@@ -5547,7 +5547,7 @@
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/repository/inbox.py",
           "backend/app/domains/characters/service/state.py",
-          "backend/app/cruds/community.py",
+          "backend/app/runtime/bootstrap/demo_seed.py",
           "backend/app/domains/social/constants.py",
           "backend/app/core/search_text.py",
           "backend/app/runtime/social/discovery.py",
@@ -6502,19 +6502,16 @@
         },
         {
           "old": "backend/app/cruds/community.py::seed_demo_data",
-          "new": "backend/app/cruds/community.py::seed_demo_data",
+          "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
           "direct_consumers": [
             "backend/app/main.py",
-            "backend/app/public_main.py",
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/services/tree.py"
+            "backend/app/cruds/community.py",
+            "backend/app/public_main.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
+            "tests/runtime/test_demo_seed.py::test_demo_seed_repairs_existing_user_then_credential_then_setting"
           ]
         },
         {
@@ -36341,7 +36338,7 @@
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/repository/inbox.py",
           "backend/app/domains/characters/service/state.py",
-          "backend/app/cruds/community.py",
+          "backend/app/runtime/bootstrap/demo_seed.py",
           "backend/app/domains/social/constants.py",
           "backend/app/core/search_text.py",
           "backend/app/runtime/social/discovery.py",
@@ -37287,19 +37284,16 @@
         },
         {
           "old": "backend/app/cruds/community.py::seed_demo_data",
-          "new": "backend/app/cruds/community.py::seed_demo_data",
+          "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
           "direct_consumers": [
             "backend/app/main.py",
-            "backend/app/public_main.py",
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/agent_writing.py",
-            "backend/app/services/character_lore.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/services/tree.py"
+            "backend/app/cruds/community.py",
+            "backend/app/public_main.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
+            "tests/runtime/test_demo_seed.py::test_demo_seed_repairs_existing_user_then_credential_then_setting"
           ]
         },
         {
@@ -82359,6 +82353,36 @@
         "backend/app/services/local_bot.py": "backend/app/runtime/local_bot/composition.py"
       },
       "remaining": "Original CRUD export facade, remaining caller-owned legacy bindings and G07. Parent final B4/LocalBot integration removes exact transitional old-consumer bridges; no blanket domain exceptions or new implementation were added."
+    },
+    "AR-B5-C31": {
+      "status": "IMPLEMENTED source; capture pending",
+      "scope": "Move the last actual Community CRUD demo initializer to runtime/bootstrap with canonical owner ORM imports. Preserve original opt-in factory callback, initial data/defaults, nullable repair rules, exact add/flush/commit sequence and no-op repeated execution.",
+      "source_symbols": [
+        {
+          "old": "backend/app/cruds/community.py::seed_demo_data",
+          "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
+          "direct_consumers": [
+            "backend/app/main.py",
+            "backend/app/cruds/community.py",
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
+            "tests/runtime/test_demo_seed.py::test_demo_seed_repairs_existing_user_then_credential_then_setting"
+          ]
+        }
+      ],
+      "new_files": [
+        "backend/app/runtime/bootstrap/demo_seed.py",
+        "backend/app/runtime/bootstrap/__init__.py",
+        "backend/tests/runtime/test_demo_seed.py"
+      ],
+      "new_tests": [
+        "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
+        "tests/runtime/test_demo_seed.py::test_demo_seed_repairs_existing_user_then_credential_then_setting"
+      ],
+      "evidence": "Whole initializer AST unchanged after model import restoration. Initial+common22 PASS. Factory/runtime/logging first45PASS/1FAIL exposed older graph route mock; actual router+runtime gateway+same-request same-db dependency now connected with original assertions unchanged. Final46 PASS and targeted1 PASS. New SQLite checks fresh defaults/one commit/idempotent no-op and existing-user→credential→setting three commit repair sequence.",
+      "remaining": "Final Community CRUD alias consumer removal, Relationships public exports and G07. Parent main factory keeps the same actual callback and activation settings."
     }
   }
 }

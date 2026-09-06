@@ -18,7 +18,7 @@ from app.core.db import SessionLocal, get_db
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
 from app.runtime.startup_security import validate_startup_security
-from app.cruds.community import seed_demo_data
+from app.runtime.bootstrap.demo_seed import seed_demo_data
 from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
 from app.services.hosted_configuration import (
     HostedConfigurationRegistrationError,

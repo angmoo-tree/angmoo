@@ -1770,7 +1770,8 @@
         "backend/app/domains/relationships/repository/routine_interactions.py",
         "backend/app/domains/social/repository/interaction_context.py",
         "backend/app/domains/relationships/contracts/routine_interactions.py",
-        "backend/app/runtime/routine_posts/interactions.py"
+        "backend/app/runtime/routine_posts/interactions.py",
+        "backend/app/runtime/bootstrap/demo_seed.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

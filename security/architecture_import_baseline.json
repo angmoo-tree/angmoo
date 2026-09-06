@@ -1,7 +1,7 @@
 {
-  "edge_count": 3050,
-  "external_import_count": 2499,
-  "module_count": 847,
+  "edge_count": 3059,
+  "external_import_count": 2500,
+  "module_count": 849,
   "modules": [
     {
       "external_imports": [],
@@ -786,6 +786,7 @@
         "app.domains.social.utils.cursors",
         "app.domains.social.utils.text",
         "app.models",
+        "app.runtime.bootstrap.demo_seed",
         "app.runtime.social.discovery",
         "app.runtime.social.inbox",
         "app.runtime.social.profile_activity",
@@ -9096,8 +9097,8 @@
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
-        "app.cruds.community",
         "app.runtime.account_deletion",
+        "app.runtime.bootstrap.demo_seed",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.graph_projection.composition",
@@ -9443,10 +9444,10 @@
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
-        "app.cruds.community",
         "app.domains.runtime.public",
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
+        "app.runtime.bootstrap.demo_seed",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.component_workers",
@@ -9547,6 +9548,31 @@
       ],
       "module": "app.runtime.activity_proposals.references",
       "path": "backend/app/runtime/activity_proposals/references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.bootstrap",
+      "path": "backend/app/runtime/bootstrap/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.active_hours",
+        "app.core.security",
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.runtime.bootstrap.demo_seed",
+      "path": "backend/app/runtime/bootstrap/demo_seed.py",
       "wildcard_imports": []
     },
     {

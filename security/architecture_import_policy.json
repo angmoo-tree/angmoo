@@ -118,10 +118,6 @@
         },
         {
           "importer": "app.main",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.main",
           "imported": "app.services.hosted_configuration"
         },
         {
@@ -163,10 +159,6 @@
         {
           "importer": "app.models",
           "imported": "app.models.worlds"
-        },
-        {
-          "importer": "app.public_main",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.public_main",

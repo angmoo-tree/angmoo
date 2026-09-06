@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2499,
-      "internal_edge_count": 3050,
+      "external_import_count": 2500,
+      "internal_edge_count": 3059,
       "legacy_import_exception_count": 0,
-      "module_count": 847,
+      "module_count": 849,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2461,6 +2461,7 @@
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
               "app.models",
+              "app.runtime.bootstrap.demo_seed",
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.profile_activity",
@@ -2911,7 +2912,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "6649fc28bc24e18f4cca1e5bb13f7c5438d1f437d15d816b3e8e4717fc442ac9"
+        "sha256": "689e53d7c18397d490b597f72f8f872ce1fa35f69d5a766d387ec2d8fdb30246"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",

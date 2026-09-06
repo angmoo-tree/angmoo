@@ -1389,3 +1389,12 @@ C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·
 최초 집중은350 PASS/9 FAIL/기존 PGskip1로 LocalBot의 옛 mock receiver가 원인이었다. LocalBot10·Routines2 receiver를 실제 owner로 옮긴 후 같은 집중은 **359 PASS /기존 PostgreSQL skip1 /22.54초 /기존 warning3개**다. 기존 Community25임시bridge/17legacyedge를 제거하고, 현재 branch의 미합류 AgentRun/Writer/LocalBot 실제consumer13개만 정확한 종료 조건과 함께 기록했다. parent의 이미 구현된 runtime/resident 및 LocalBot 합류에서 이 임시 oldconsumer들을 제거한다. CRUD별칭/G07/full B5/capture/Hosted는 후속이다.
 
 C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertion·전체 split evidence0, 경계847 module/3050 edge/legacy164, L4 parity99·ER0 PASS다. 실제 첫인사 receiver2개가 쓰이는 기존 회귀1개도 PASS다. 지도 생성 첫 시도에서 역사 pilot 형식을 일반 split으로 재작성한7항목은 원래 HEAD의 정확 AR-B1/AR-F1을 복구해 동일 검사0오류로 종료했다. 부모 strict 지도 검사가 C29의 한 번도 추적되지 않은 infrastructure/__init__.py 가상 항목을 발견했고 전체 Git 도입 이력0을 확인하여 그 항목만 제거했다. 원본 snapshot이나 테스트 단언은 변경하지 않았다.
+
+
+## AR-B5-C31 — 데모 데이터 초기화 실제 runtime 소유
+
+CRUD의 마지막 실제 seed 함수는 runtime/bootstrap으로 옮겼다. 실제 Identity·Character·Routines·Social 모델을 직접 명시하며 원래 전체 AST는 모델 import 복원 후 동일하다. 기존 factory 기본 콜백/실행 설정·데모 본문/기본값·기존 user 보완·credential/setting 추가·flush/commit 순서를 유지한다. 새 SQLite2개는 최초1회 commit 및 반복 no-op, 기존 user→credential→setting의3개 commit 순서와 password 검증을 확인한다.
+
+초기22 PASS 뒤 factory/runtime/logging는45 PASS/1 FAIL이었다. 실패는 선행 Relationships router 이동의 옛 mock 대상으로, 실제 router·runtime gateway 및 같은 request/db DI를 연결하고 원래 단언을 유지했다. 최종 **46 PASS /44.97초 /기존 warning1개**, 같은 DB object 명시 후 해당1개도 PASS다. CRUD별칭/Relationships public/G07/full B5/capture/Hosted는 후속이다.
+
+C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0을 확인했다. 남아 있는 public_main도 같은 실제 seed 콜백으로 연결했으며 parent G06 최종 통합에서는 main의 동일 콜백을 보존한다. 실제 initializer 새 경로 외에 데모 활성 설정이나 factory 본문은 변경하지 않았다.
