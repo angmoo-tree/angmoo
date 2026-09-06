@@ -2797,32 +2797,32 @@
       {
         "counter": "degraded_search_provider_calls",
         "expected": 0,
-        "test": "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls"
+        "test": "backend/tests/social/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls"
       },
       {
         "counter": "provider_calls",
         "expected": 0,
-        "test": "backend/tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls"
+        "test": "backend/tests/social/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls"
       },
       {
         "counter": "provider_calls_per_reused_minute_cycle",
         "expected": 1,
-        "test": "backend/tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call"
+        "test": "backend/tests/social/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call"
       },
       {
         "counter": "manual_post_reply_provider_calls",
         "expected": 0,
-        "test": "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free"
+        "test": "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free"
       },
       {
         "counter": "successful_social_event_outbox_rows",
         "expected": 1,
-        "test": "backend/tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
+        "test": "backend/tests/relationships/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
       },
       {
         "counter": "failed_transaction_committed_rows",
         "expected": 0,
-        "test": "backend/tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+        "test": "backend/tests/relationships/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
       },
       {
         "counter": "concurrent_world_package_commits",
@@ -2850,7 +2850,7 @@
         "sha256": "369d9fedd12b3b8280b9fd00e0b73a6826c8eb308318fc9e0bf11a9ca52dc4b0"
       },
       {
-        "path": "backend/tests/test_feed_reaction_intent.py",
+        "path": "backend/tests/social/test_feed_reaction_intent.py",
         "sha256": "4219f15fa246ba989a6a951d2a45e9be9d597930679df3a108c3ca9cafc7ab08"
       },
       {
@@ -2858,7 +2858,7 @@
         "sha256": "ac461ee04eab201b93159af90e7c24fe6d5549037e0342331c2b58011efb1b2a"
       },
       {
-        "path": "backend/tests/test_graph_projection_worker.py",
+        "path": "backend/tests/relationships/test_graph_projection_worker.py",
         "sha256": "1b569fec873e22b9d41fadc1bf6a509e31c3c0c9bd7ead1f491b472f5e3ab7da"
       },
       {
@@ -2874,23 +2874,23 @@
         "sha256": "0c727169947658b98cc202fb009038161601ff593e8bad0d53489ee8d1082ccf"
       },
       {
-        "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "1dc2ceffec762140b717a330a5af24b9802a476ff7c6035ec70df157547a5259"
+        "path": "backend/tests/social/test_l3_owner_manual_social_inbox.py",
+        "sha256": "8d8df791f608c5f4cc1ff0ccb14e2ba566733117b930aefdbf15ac55cb2fa9aa"
       },
       {
-        "path": "backend/tests/test_l4_social_search_projection.py",
-        "sha256": "02f8d39e9922cb720b81fe994176991464c1bf78ece3cd05b14b4cf30a07c07d"
+        "path": "backend/tests/social/test_l4_social_search_projection.py",
+        "sha256": "96d15a1a334a55e83335e0075500d4e087be9a5fd7e943a6046e229ed49f739b"
       },
       {
-        "path": "backend/tests/test_relationship_graph_api.py",
+        "path": "backend/tests/relationships/test_relationship_graph_api.py",
         "sha256": "dd2d8cad0e58de251fa405caa9eb85432e7669c58dc55fa7eefe141a057af97c"
       },
       {
-        "path": "backend/tests/test_relationship_graph_repository.py",
+        "path": "backend/tests/relationships/test_relationship_graph_repository.py",
         "sha256": "74b67ae8c011a26a3d69f07d234f123222f5d7e99d657139915a92745087de38"
       },
       {
-        "path": "backend/tests/test_social_event_runtime.py",
+        "path": "backend/tests/relationships/test_social_event_runtime.py",
         "sha256": "689e53d7c18397d490b597f72f8f872ce1fa35f69d5a766d387ec2d8fdb30246"
       },
       {
@@ -2902,18 +2902,69 @@
         "sha256": "659ba64ba063fb5ef8dfba5a03c950f8f870964dd8aa5a78a52083682b9957b2"
       },
       {
-        "path": "backend/tests/test_world_feed_search.py",
+        "path": "backend/tests/social/test_world_feed_search.py",
         "sha256": "6a3e9f78f5dd68ad4d61de505a56da9989f5f01225fb58ee0810da63981d90f3"
       }
     ],
     "parity_test_node_count": 99,
     "parity_test_nodes": [
+      "backend/tests/relationships/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_shutdown_drains_inflight_and_returns_unstarted_claims_to_pending",
+      "backend/tests/relationships/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row",
       "backend/tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
       "backend/tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
       "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
       "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
       "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
       "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+      "backend/tests/relationships/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+      "backend/tests/relationships/test_relationship_graph_repository.py::test_direct_relationship_keeps_direction_and_uses_bound_parameters",
+      "backend/tests/relationships/test_relationship_graph_repository.py::test_provider_temporal_values_are_normalized_to_native_datetimes",
+      "backend/tests/relationships/test_relationship_graph_repository.py::test_query_result_caps_are_enforced_in_repository",
+      "backend/tests/relationships/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+      "backend/tests/relationships/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+      "backend/tests/relationships/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+      "backend/tests/relationships/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+      "backend/tests/relationships/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+      "backend/tests/relationships/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+      "backend/tests/relationships/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+      "backend/tests/relationships/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+      "backend/tests/relationships/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+      "backend/tests/relationships/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+      "backend/tests/relationships/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+      "backend/tests/relationships/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+      "backend/tests/social/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
+      "backend/tests/social/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
+      "backend/tests/social/test_feed_reaction_intent.py::test_reaction_contract_rejects_public_ignore_and_invalid_action_shape",
+      "backend/tests/social/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
+      "backend/tests/social/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+      "backend/tests/social/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls",
+      "backend/tests/social/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_manual_social_count_projection_is_exact_world_visible_and_batched",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_manual_social_read_counts_are_required_and_non_negative",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_manual_social_migration_refuses_history_losing_downgrade",
+      "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped",
+      "backend/tests/social/test_l4_social_search_projection.py::test_embedded_projection_rebuilds_and_tracks_committed_post_changes",
+      "backend/tests/social/test_l4_social_search_projection.py::test_production_p5_has_no_canonical_contains_fallback",
+      "backend/tests/social/test_l4_social_search_projection.py::test_rebuild_failure_is_explicitly_unavailable_and_keeps_backend_alive",
+      "backend/tests/social/test_world_feed_search.py::test_blocked_author_is_not_a_candidate",
+      "backend/tests/social/test_world_feed_search.py::test_character_privacy_cleanup_removes_p5_runtime_state",
+      "backend/tests/social/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+      "backend/tests/social/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions",
+      "backend/tests/social/test_world_feed_search.py::test_profile_accepts_two_character_keyword_with_world_bounded_search",
+      "backend/tests/social/test_world_feed_search.py::test_profile_requires_eight_searchable_keywords",
+      "backend/tests/social/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+      "backend/tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic",
+      "backend/tests/social/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
       "backend/tests/test_embedded_data_migration.py::test_generation_name_limit_preserves_target_version_and_disambiguator",
@@ -2929,18 +2980,6 @@
       "backend/tests/test_embedded_data_migration.py::test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta",
       "backend/tests/test_embedded_data_migration.py::test_supported_v2_without_roleless_rows_adds_no_reserved_role",
       "backend/tests/test_embedded_data_migration.py::test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved",
-      "backend/tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-      "backend/tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-      "backend/tests/test_feed_reaction_intent.py::test_reaction_contract_rejects_public_ignore_and_invalid_action_shape",
-      "backend/tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-      "backend/tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
-      "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls",
-      "backend/tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
-      "backend/tests/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
-      "backend/tests/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
-      "backend/tests/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",
-      "backend/tests/test_graph_projection_worker.py::test_shutdown_drains_inflight_and_returns_unstarted_claims_to_pending",
-      "backend/tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row",
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_cross_feature_deep_import_is_rejected",
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_exact_legacy_exception_must_be_used",
       "backend/tests/test_l2_5_frontend_architecture_boundaries.py::test_new_feature_cannot_add_unreviewed_legacy_import",
@@ -2950,47 +2989,8 @@
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_outage_backlog_recovers_to_zero_lag",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_typed_query_workload_and_world_isolation",
       "backend/tests/test_l3_er3_graph_query_parity.py::test_ladybug_world_replay_restores_digest_and_sqlite_source",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_count_projection_is_exact_world_visible_and_batched",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_manual_social_read_counts_are_required_and_non_negative",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_social_migration_refuses_history_losing_downgrade",
-      "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped",
-      "backend/tests/test_l4_social_search_projection.py::test_embedded_projection_rebuilds_and_tracks_committed_post_changes",
-      "backend/tests/test_l4_social_search_projection.py::test_production_p5_has_no_canonical_contains_fallback",
-      "backend/tests/test_l4_social_search_projection.py::test_rebuild_failure_is_explicitly_unavailable_and_keeps_backend_alive",
-      "backend/tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
-      "backend/tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
-      "backend/tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
-      "backend/tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider",
-      "backend/tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
-      "backend/tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
-      "backend/tests/test_relationship_graph_repository.py::test_direct_relationship_keeps_direction_and_uses_bound_parameters",
-      "backend/tests/test_relationship_graph_repository.py::test_provider_temporal_values_are_normalized_to_native_datetimes",
-      "backend/tests/test_relationship_graph_repository.py::test_query_result_caps_are_enforced_in_repository",
-      "backend/tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
-      "backend/tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
-      "backend/tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
-      "backend/tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
-      "backend/tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
-      "backend/tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
-      "backend/tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
-      "backend/tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
-      "backend/tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
-      "backend/tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
-      "backend/tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
-      "backend/tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
       "backend/tests/test_t2_architecture_inventory.py::test_architecture_inventory_is_deterministic_and_current",
       "backend/tests/test_t2_architecture_inventory.py::test_architecture_inventory_resolves_imported_modules_and_relative_imports",
-      "backend/tests/test_world_feed_search.py::test_blocked_author_is_not_a_candidate",
-      "backend/tests/test_world_feed_search.py::test_character_privacy_cleanup_removes_p5_runtime_state",
-      "backend/tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
-      "backend/tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions",
-      "backend/tests/test_world_feed_search.py::test_profile_accepts_two_character_keyword_with_world_bounded_search",
-      "backend/tests/test_world_feed_search.py::test_profile_requires_eight_searchable_keywords",
-      "backend/tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
-      "backend/tests/test_world_feed_search.py::test_search_text_normalization_is_deterministic",
-      "backend/tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
       "backend/tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",
       "backend/tests/world_packages/test_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes",
       "backend/tests/world_packages/test_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role",

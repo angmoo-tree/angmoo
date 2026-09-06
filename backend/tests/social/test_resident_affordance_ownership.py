@@ -5,7 +5,7 @@ from app import models
 from app.domains.social.service.resident_affordances import (
     resident_feed_action_affordance,
 )
-from test_social_event_runtime import _engine, _seed, _post
+from relationships.test_social_event_runtime import _engine, _seed, _post
 
 
 def test_resident_affordance_sees_pending_like_in_same_session_and_preserves_rollback():

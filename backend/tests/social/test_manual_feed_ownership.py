@@ -4,7 +4,7 @@ from sqlalchemy.orm import object_session
 from app.domains.characters.models import Character
 from app.domains.social.service.manual_feed import list_owner_world_feed
 from app.runtime.social.manual_feed_references import RuntimeManualFeedReferences
-from test_l4_social_write_uow import _session_factory
+from social.test_l4_social_write_uow import _session_factory
 
 
 def test_manual_feed_reads_owner_facts_in_order_without_committing(monkeypatch, tmp_path):

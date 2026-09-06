@@ -367,6 +367,8 @@ AR-G4에서 88개 revision과 `env.py`·`script.py.mako`의 물리 경로를 옮
 
 테스트도 업무별로 모읍니다. 여러 업무가 사용하는 fixture는 공통 위치, 해당 업무만의 fixture는 그 업무 테스트 가까이에 둡니다. 단순한 파일 이동 테스트보다 사용자가 관찰하는 결과와 실제 변경 경계를 검증하는 테스트가 필요합니다.
 
+Social의 게시물·World Feed·수동 작성·공개 활동 회귀는 `tests/social/`, 관계 이벤트·graph 조회·projection 회귀는 `tests/relationships/`에 있습니다. 이 두 폴더는 Python package로 구분해 같은 테스트 파일명이 다른 업무에 있어도 충돌하지 않게 합니다. 업무 간에 공유하는 기존 fixture는 명시적인 업무 경로로 import하며, `tests/conftest.py`의 공통 네트워크 검사 범위는 유지합니다.
+
 | 수정하려는 문제 | 주요 변경 위치 | 확인할 결과 |
 | --- | --- | --- |
 | 다른 World의 게시물이 조회됨 | `social` service·조회 조건 | 허용 World만 반환, pagination·순서 유지 |
