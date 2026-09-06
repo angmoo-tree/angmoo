@@ -1,7 +1,7 @@
 {
-  "edge_count": 4152,
+  "edge_count": 4154,
   "external_import_count": 3133,
-  "module_count": 1100,
+  "module_count": 1103,
   "modules": [
     {
       "external_imports": [],
@@ -160,9 +160,9 @@
         "app.integrations.direct_llm",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.persistence.model_registration",
-        "app.schemas",
-        "app.services.runtime_boundary"
+        "app.schemas"
       ],
       "module": "app.api.v1.routes.agents",
       "path": "backend/app/api/v1/routes/agents.py",
@@ -12601,6 +12601,7 @@
         "app.runtime.component_workers",
         "app.runtime.configuration",
         "app.runtime.diagnostics.http",
+        "app.runtime.extensions.hosted_configuration",
         "app.runtime.graph_projection.composition",
         "app.runtime.local_bot.authentication",
         "app.runtime.local_bot.composition",
@@ -12618,8 +12619,7 @@
         "app.runtime.tree",
         "app.runtime.world_characters.recovery",
         "app.runtime.world_packages.composition",
-        "app.runtime.world_packages.import_commit",
-        "app.services.hosted_configuration"
+        "app.runtime.world_packages.import_commit"
       ],
       "module": "app.main",
       "path": "backend/app/main.py",
@@ -12779,10 +12779,10 @@
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context",
         "app.integrations.media.files",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
-        "app.runtime.world_characters.cleanup",
-        "app.services.runtime_boundary"
+        "app.runtime.world_characters.cleanup"
       ],
       "module": "app.runtime.account_deletion",
       "path": "backend/app/runtime/account_deletion.py",
@@ -12912,11 +12912,11 @@
         "app.integrations.replicate_image",
         "app.policies.name_policy",
         "app.runtime.characters.management",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.persistence.model_registration",
         "app.runtime.resident.execution",
         "app.runtime.routines.activity_policy",
-        "app.schemas",
-        "app.services.runtime_boundary"
+        "app.schemas"
       ],
       "module": "app.runtime.characters.creator",
       "path": "backend/app/runtime/characters/creator.py",
@@ -13029,6 +13029,7 @@
         "app.integrations.media.files",
         "app.integrations.media.images",
         "app.policies.name_policy",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.local_bot.keys",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
@@ -13041,8 +13042,7 @@
         "app.runtime.social.timeline",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
-        "app.schemas",
-        "app.services.runtime_boundary"
+        "app.schemas"
       ],
       "module": "app.runtime.characters.management",
       "path": "backend/app/runtime/characters/management.py",
@@ -13394,6 +13394,35 @@
       "imports": [],
       "module": "app.runtime.diagnostics.status_queries",
       "path": "backend/app/runtime/diagnostics/status_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.extensions",
+      "path": "backend/app/runtime/extensions/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.extensions.hosted_configuration",
+      "path": "backend/app/runtime/extensions/hosted_configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.exceptions"
+      ],
+      "module": "app.runtime.extensions.resident_adapter",
+      "path": "backend/app/runtime/extensions/resident_adapter.py",
       "wildcard_imports": []
     },
     {
@@ -14793,6 +14822,7 @@
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.integrations.direct_llm",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.memory.daypart_observations",
         "app.runtime.resident.context",
         "app.runtime.resident.context_references",
@@ -14808,8 +14838,7 @@
         "app.runtime.resident.slots",
         "app.runtime.routines.activity_policy",
         "app.runtime.search.binding",
-        "app.runtime.social.feed_history",
-        "app.services.runtime_boundary"
+        "app.runtime.social.feed_history"
       ],
       "module": "app.runtime.resident.execution",
       "path": "backend/app/runtime/resident/execution.py",
@@ -15142,7 +15171,7 @@
         "app.domains.routines.service.tendency_analysis",
         "app.domains.routines.service.tendency_settings",
         "app.integrations.direct_llm",
-        "app.services.runtime_boundary"
+        "app.runtime.extensions.resident_adapter"
       ],
       "module": "app.runtime.resident.tendency_analysis",
       "path": "backend/app/runtime/resident/tendency_analysis.py",
@@ -15183,9 +15212,9 @@
         "app.domains.social.service.posts",
         "app.domains.social.service.resident_affordances",
         "app.runtime.character_lore",
+        "app.runtime.extensions.resident_adapter",
         "app.runtime.social.agent_tool_authorization",
-        "app.runtime.social.agent_tools",
-        "app.services.runtime_boundary"
+        "app.runtime.social.agent_tools"
       ],
       "module": "app.runtime.resident.writing",
       "path": "backend/app/runtime/resident/writing.py",
@@ -16645,11 +16674,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "typing"
+      "external_imports": [],
+      "imports": [
+        "app.runtime.extensions.hosted_configuration"
       ],
-      "imports": [],
       "module": "app.services.hosted_configuration",
       "path": "backend/app/services/hosted_configuration.py",
       "wildcard_imports": []
@@ -16703,12 +16731,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.domains.runtime.exceptions"
+        "app.runtime.extensions.resident_adapter"
       ],
       "module": "app.services.runtime_boundary",
       "path": "backend/app/services/runtime_boundary.py",

@@ -1176,3 +1176,9 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 ### Shared activity composition
 
 `runtime/routines/activity_policy.py` and `activity_scope.py` own the existing shared activity policy assembly and same-Session World/Package reads. Resident execution, Character setup and Social authorization use this shared assembly. Original function/class bodies, lookup timing, exceptions and transactions are unchanged; no reverse dependency from this assembly to Resident or Social is introduced.
+
+### 공유 확장 등록 상태
+
+`runtime/extensions/hosted_configuration.py`는 선택적 Hosted 설정·prompt 제공자의 등록, 중복 등록 거절과 lifespan 정리를 소유합니다. `runtime/extensions/resident_adapter.py`는 선택적 Resident adapter의 등록과 fail-closed 호출을 소유합니다. 앱과 현재 runtime 소비자는 이 구현을 직접 사용하며 registry state는 각각 한 곳에만 있습니다.
+
+기존 별도 배포 Hosted 확장이 사용하는 `services/hosted_configuration.py`와 `services/runtime_boundary.py`는 같은 함수·타입·객체를 내보내는 최소 호환 경로입니다. 호환 파일에 구현이나 별도 registry state를 두지 않습니다. 외부 확장의 실제 import를 함께 이전하기 전까지 이 두 계약을 유지하며, 새 기능의 시작점은 실제 runtime 소유 모듈입니다.

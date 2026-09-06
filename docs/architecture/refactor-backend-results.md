@@ -2601,3 +2601,13 @@ Memory 조립 3개를 `runtime/memory/daypart_observations.py`로 실제 이전�
 
 - G5 준비 중 바뀐 `world_scope_migration.py`의 Base import 한 줄을 #258 원본으로 복원했다. 원본20595bytes / SHA256 `643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634`와 정확히 같다. 기존 `core/db.py`의 같은 Base export로 실행되며, frozen D inventory는 수정하지 않았다.
 - D inventory 및 실제 migration 회귀 **17 passed / 28.70초**. 역사적 파일은 이후의 일반 ORM import 전환 대상에서 제외한다.
+
+### B8 공유 확장 registry 실제 소유 이전
+
+- 설정/prompt와 Resident adapter의 전체 원문 두 모듈을 `runtime/extensions`로 옮겼다. 실제 함수·클래스·전역 state body는 원본과 정확히 같고 현재11개 소비자는 실제 소유자를 참조한다.
+- 별도 Hosted 확장 main·gateway 및 release builder에서 현재 소비가 확인된 기존 import 두 개는 동일 객체 export만 유지한다. Hosted 구현·인증·설정 기능을 삭제하거나 별도 제품을 수정하지 않았다.
+- 기존 runtime/lifespan/security/creator 오류 및 외부 import와 현재 runtime 사이의 단일 등록 상태 회귀: **58 passed / 기존 1 skipped / 2 warnings / 30.61초**. 새 두 테스트는 실제 old-path 등록→new-path 조회/중복 거절→new-path 해제→old-path 기본값/거절 복구를 검증한다.
+- 원본 source capture와 선형 stock/전체/CI/설치 Gate는 부모 통합에 남는다.
+
+- Peer 원문 리뷰에서 두 실제 registry의 함수/class/상태 AST가 원본과 정확히 같음을 확인했다. 초기 신규 테스트의 previous import까지 일반 소비자 변환에 포함된 문제를 찾아 실제 옛 `app.services` 경로로 복원했고, 해당 변환에서도 제외했다. 수정한 실제 두 import 경로의 등록·조회·중복 거절·정리 및 기존 M4 **19 passed / 10.90초**. 앞선 확대 검사의 기존56개와 함께 검증 근거를 구분한다.
+- 최종 원본 보호 읽기 진단은 보호2311/current2509, source·split·assertion·suppression·ASGI·APIORM·missing nodes 모두0이다. 옛 split 기록의 private 상태/helper11개도 실제 새 모듈로 연결했다. 원본source/체크포인트·동결자료는 변경하지 않았다.

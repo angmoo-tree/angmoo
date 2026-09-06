@@ -21,10 +21,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.api.v1.routes.agents",
-          "imported": "app.services.runtime_boundary"
-        },
-        {
           "importer": "app.api.v1.routes.world_character_setup",
           "imported": "app.schemas"
         },
@@ -39,10 +35,6 @@
         {
           "importer": "app.main",
           "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.main",
-          "imported": "app.services.hosted_configuration"
         },
         {
           "importer": "app.runtime.character_lore",
@@ -61,10 +53,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.runtime.characters.creator",
-          "imported": "app.services.runtime_boundary"
-        },
-        {
           "importer": "app.runtime.characters.management",
           "imported": "app.cruds.agents"
         },
@@ -79,10 +67,6 @@
         {
           "importer": "app.runtime.characters.management",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.characters.management",
-          "imported": "app.services.runtime_boundary"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -165,32 +149,6 @@
       "review_date": "2026-11-19"
     },
     {
-      "id": "ar-b2-identity-account-deletion-uow",
-      "owner_stage": "L6",
-      "reason": "Only existing account-deletion edges formerly owned by app.services.auth move with the same Session/UoW workflow. No new foreign-table operation is introduced.",
-      "removal_condition": "Replace each exact legacy persistence call with its owner service during AR-B2 through AR-B8-A, retaining the caller Session and one commit/rollback with media quarantine.",
-      "review_date": "2026-09-05",
-      "edges": [
-        {
-          "importer": "app.runtime.account_deletion",
-          "imported": "app.services.runtime_boundary"
-        }
-      ]
-    },
-    {
-      "id": "AR-B4-C6-execution-pending-owner-bindings",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.execution",
-          "imported": "app.services.runtime_boundary"
-        }
-      ],
-      "reason": "Actual execution moved with original Memory, provider, credential and maintenance callbacks. Each same-Session call keeps its original implementation until independently authored owner source joins; no policy copying or alias layer.",
-      "owner_stage": "L4",
-      "removal_condition": "Root sequential AR-B5/B7/B8/LG integration binds actual Social/Memory/Identity/Operations/Runtime and resident.langgraph/context owners, then removes these exact imports before AR-B8-B.",
-      "review_date": "2026-09-06"
-    },
-    {
       "id": "ar-b4-writer-app-cruds-community",
       "owner_stage": "L6",
       "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social query integration.",
@@ -200,32 +158,6 @@
         {
           "importer": "app.runtime.resident.writing",
           "imported": "app.cruds.community"
-        }
-      ]
-    },
-    {
-      "id": "ar-b4-writer-runtime_boundary",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B8 Runtime transport integration.",
-      "removal_condition": "Connect the actual same gateway client/error objects; preserve one provider call and timeout contract.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.services.runtime_boundary"
-        }
-      ]
-    },
-    {
-      "id": "AR-B4-C7-E-tendency-runtime-constructor",
-      "owner_stage": "L4",
-      "review_date": "2026-09-06",
-      "reason": "Exact original registered gateway constructor/error is used by the moved actual provider IO, with unchanged lazy construction/profile/lease behavior.",
-      "removal_condition": "Root joins the already-authored Runtime source, connects its actual same constructor/error identity, and removes this exact import before AR-B8-A.",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.tendency_analysis",
-          "imported": "app.services.runtime_boundary"
         }
       ]
     }
@@ -2508,14 +2440,6 @@
         "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
         "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
         "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.runtime_boundary",
-        "target": "app.domains.runtime.exceptions",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
       },
       {
         "importer": "app.cruds.community",

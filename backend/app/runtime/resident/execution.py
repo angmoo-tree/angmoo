@@ -157,8 +157,8 @@ from app.runtime.memory.daypart_observations import _record_provided_daypart_obs
 from app.integrations.direct_llm import DirectLlmDeferred
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.resident.langgraph import run_resident_langgraph
-from app.services.runtime_boundary import OpenClawGatewayClient
-from app.services.runtime_boundary import openclaw_auth_profiles
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient
+from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
 from datetime import UTC
 from datetime import date
 from datetime import datetime

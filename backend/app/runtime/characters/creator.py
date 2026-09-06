@@ -111,7 +111,7 @@ from app.integrations.azure_translation import (
 )
 from app.integrations import replicate_image
 from app.credentials import service_images as service_image_key
-from app.services.runtime_boundary import (
+from app.runtime.extensions.resident_adapter import (
     OpenClawGatewayClient,
     OpenClawGatewayError,
     openclaw_auth_profiles,

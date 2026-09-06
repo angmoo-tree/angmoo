@@ -90,11 +90,11 @@ from app.core.redaction import redact_secret_text
 
 from app.integrations.media import files as profile_media
 
-from app.services.runtime_boundary import OpenClawGatewayClient
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient
 
-from app.services.runtime_boundary import OpenClawGatewayError
+from app.runtime.extensions.resident_adapter import OpenClawGatewayError
 
-from app.services.runtime_boundary import openclaw_auth_profiles
+from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
 
 from app.domains.identity.service import auth as auth_service
 

@@ -580,7 +580,9 @@
     "backend/app/runtime/resident/activity_policy.py": "backend/app/runtime/routines/activity_policy.py",
     "backend/app/runtime/resident/activity_scope.py": "backend/app/runtime/routines/activity_scope.py",
     "backend/app/services/agent_writing.py": "backend/app/runtime/resident/writing.py",
-    "backend/app/cruds/agent_runs.py": "backend/app/domains/routines/repository/runs.py"
+    "backend/app/cruds/agent_runs.py": "backend/app/domains/routines/repository/runs.py",
+    "backend/app/services/hosted_configuration.py": "backend/app/runtime/extensions/hosted_configuration.py",
+    "backend/app/services/runtime_boundary.py": "backend/app/runtime/extensions/resident_adapter.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -12134,7 +12136,7 @@
       "split_files": {
         "backend/app/services/runtime_boundary.py": [
           "backend/app/domains/runtime/exceptions.py",
-          "backend/app/services/runtime_boundary.py"
+          "backend/app/runtime/extensions/resident_adapter.py"
         ],
         "backend/app/services/agent_runs.py": [
           "backend/app/services/agent_runs.py",
@@ -12241,7 +12243,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::OpenClawGatewayError",
-          "new": "backend/app/services/runtime_boundary.py::OpenClawGatewayError",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::OpenClawGatewayError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12251,7 +12253,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::OpenClawGatewayAuthError",
-          "new": "backend/app/services/runtime_boundary.py::OpenClawGatewayAuthError",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::OpenClawGatewayAuthError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12261,7 +12263,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::ResidentRuntimeAdapter",
-          "new": "backend/app/services/runtime_boundary.py::ResidentRuntimeAdapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::ResidentRuntimeAdapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12271,7 +12273,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::_resident_runtime_adapter",
-          "new": "backend/app/services/runtime_boundary.py::_resident_runtime_adapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::_resident_runtime_adapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12281,7 +12283,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::register_resident_runtime_adapter",
-          "new": "backend/app/services/runtime_boundary.py::register_resident_runtime_adapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::register_resident_runtime_adapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12291,7 +12293,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::unregister_resident_runtime_adapter",
-          "new": "backend/app/services/runtime_boundary.py::unregister_resident_runtime_adapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::unregister_resident_runtime_adapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12301,7 +12303,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::get_resident_runtime_adapter",
-          "new": "backend/app/services/runtime_boundary.py::get_resident_runtime_adapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::get_resident_runtime_adapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12311,7 +12313,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::_require_resident_runtime_adapter",
-          "new": "backend/app/services/runtime_boundary.py::_require_resident_runtime_adapter",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::_require_resident_runtime_adapter",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12321,7 +12323,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::OpenClawGatewayClient",
-          "new": "backend/app/services/runtime_boundary.py::OpenClawGatewayClient",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::OpenClawGatewayClient",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12331,7 +12333,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::_RegisteredAuthProfiles",
-          "new": "backend/app/services/runtime_boundary.py::_RegisteredAuthProfiles",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::_RegisteredAuthProfiles",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -12341,7 +12343,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::openclaw_auth_profiles",
-          "new": "backend/app/services/runtime_boundary.py::openclaw_auth_profiles",
+          "new": "backend/app/runtime/extensions/resident_adapter.py::openclaw_auth_profiles",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -121997,6 +121999,37 @@
         "source_scope": "G07 test relocation, dormant4/CRUD3 b013 merge, global schemas and other pending B5/B8 owners remain outside this source",
         "peer_review": "g0_preservation read-only: missing Post skips factory, existing Post uses same db at original branch, same canonical get_post query, no new commit/flush/provider call; no blocker found."
       }
+    },
+    "AR-B8-EXTENSION-REGISTRIES": {
+      "status": "IMPLEMENTED SOURCE — real old-import registration/lifetime19 PASS; source/stock integration pending",
+      "ownership": "runtime/extensions owns the original registration implementation and singleton state; services keeps exact same-object exports solely for independently deployed hosted extension version-2 imports.",
+      "actual_paths": [
+        "backend/app/runtime/extensions/hosted_configuration.py",
+        "backend/app/runtime/extensions/resident_adapter.py"
+      ],
+      "direct_consumers": [
+        "backend/app/api/v1/routes/agents.py",
+        "backend/app/main.py",
+        "backend/app/runtime/account_deletion.py",
+        "backend/app/runtime/characters/creator.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/app/runtime/resident/execution.py",
+        "backend/app/runtime/resident/tendency_analysis.py",
+        "backend/app/runtime/resident/writing.py",
+        "backend/tests/characters/test_creator_http_errors.py",
+        "backend/tests/config/test_startup_security.py",
+        "backend/tests/test_m4_public_runtime.py"
+      ],
+      "whole_file_moves": {
+        "backend/app/services/hosted_configuration.py": "backend/app/runtime/extensions/hosted_configuration.py",
+        "backend/app/services/runtime_boundary.py": "backend/app/runtime/extensions/resident_adapter.py"
+      },
+      "external_contracts": [
+        "backend/app/services/hosted_configuration.py",
+        "backend/app/services/runtime_boundary.py"
+      ],
+      "remaining": "Two compatibility files remain until external hosted imports are migrated together. No implementation, state, or app-owned new consumer is duplicated in these files.",
+      "validation": "Original actual complete modules are identical; earlier broader56 existing tests passed (one existing skip). After peer review corrected the intentional previous-module imports excluded from consumer conversion, real old-path/current-runtime registration and existing M4 tests19 PASS in10.90s."
     }
   },
   "asgi_exports": {

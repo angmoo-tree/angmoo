@@ -54,7 +54,7 @@ from app.domains.social.schemas import community as schemas
 from app.domains.character_lore.service import documents as character_lore_service
 
 from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
-from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient, OpenClawGatewayError
 from app.domains.character_lore.service import presentation as lore_presentation
 from app.runtime.character_lore import build_lore_workflows
 
