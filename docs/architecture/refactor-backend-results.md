@@ -2673,3 +2673,5 @@ Tree/Lore·Operations·Image·LocalBot·Runtime의 실제 모델 소유와 G06-A
 G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도입 귀속 오류를 잡았으며 원장은 저장하지 않았다. 이 파일은 원래 signed merge `8a4bb308`의 양 부모 모두에 없었던 설명 docstring 한 줄이다. 함수·class·import·docstring 이외 실행문·현재 module consumer가 각각 0이고, G5의 실제 source `924a836`이 처음 추가한 파일도 아니다. 선행 `576d3119` 역시 이 파일 없이 같은 Chat 검사들을 수집·실행했다. 따라서 G5와 무관한 namespace 표시 파일의 합류만 제외하고, 원문 blob·두 부모·AST·현재 참조0 증거는 `g5-unrelated-test-namespace-proof.json`에 남긴다. 기존 Chat test 함수·fixture·단언은 삭제하거나 바꾸지 않는다. 원래 snapshot과 checker는 유지하고, 원장에는 실제 G5 도입 파일 4개와 기존 새 test 29개만 귀속한다. 설명 파일을 현재 커밋의 새 기능이나 잘못된 최초 source로 재등록하지 않는다.
 
 namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
+
+원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
