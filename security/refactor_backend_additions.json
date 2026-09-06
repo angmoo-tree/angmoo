@@ -8428,6 +8428,832 @@
         "tests/persistence/test_model_registration.py": {},
         "tests/test_refactor_model_facade_retirement.py": {}
       }
+    },
+    {
+      "commit": "447e3c1607c3e6f303d25982feeeefbc0c31069f",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: move global World initialization to actual owners",
+      "tracked_files": {
+        "backend/app/domains/world_characters/service/foundation.py": "c7d0afffdafc6afa447ef93ad7cc017b1437944f",
+        "backend/app/domains/worlds/service/foundation.py": "33c0102f5b3a6804f66bba13820a98e26477ef0d",
+        "backend/app/runtime/worlds/__init__.py": "0bd2e5542865d05c79bbd1f30208805c0ac7eb65",
+        "backend/tests/worlds/test_foundation_transaction.py": "ef67bea946e0055d3e3d7f3ffb238b280af57d39"
+      },
+      "test_nodes": [
+        "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+      ],
+      "test_assertions": {
+        "tests/worlds/test_foundation_transaction.py": {
+          "test_foundation_flushes_within_the_callers_transaction_without_committing": [
+            "assert report.seeded is True",
+            "assert report.membership_count == 1",
+            "assert report.world_character_count == 1",
+            "assert world is not None",
+            "assert db.get(models.World, report.world_id) is world",
+            "assert db.query(models.CharacterActiveWorld).count() == 0",
+            "assert db.query(models.World).count() == 0",
+            "assert db.query(models.WorldMembership).count() == 0",
+            "assert db.query(models.WorldCharacter).count() == 0",
+            "assert db.query(models.User).count() == 1",
+            "assert db.query(models.Character).count() == 1",
+            "assert repeated == report"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/worlds/test_foundation_transaction.py": {}
+      }
+    },
+    {
+      "commit": "331094fe345b5fc7505fd5fd452e9b1d877b3a77",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: place mutation quota policy and locked counters in actual owners",
+      "tracked_files": {
+        "backend/app/domains/identity/repository/mutation_quota.py": "22424b843e863c1184d2e8e8f4c0aaea11897f50",
+        "backend/app/domains/identity/service/mutation_quota.py": "3fc8e7682fbed4800b21d68346d372b66392efc5",
+        "backend/tests/social/test_abuse_quota_transactions.py": "dcdd84d2a1995a8a6ab1d490efec72e3c309e257"
+      },
+      "test_nodes": [
+        "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+        "tests/social/test_abuse_quota_transactions.py::test_unknown_quota_action_rejects_before_touching_session"
+      ],
+      "test_assertions": {
+        "tests/social/test_abuse_quota_transactions.py": {
+          "test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset": [
+            "assert all((row.used_count == 2 for row in rows.values()))",
+            "assert all((row in db for row in rows.values()))",
+            "assert all((row.used_count == 1 for row in rows.values()))",
+            "pytest.raises(CommunityQuotaExceeded)",
+            "assert error.value.retry_after_seconds == 86339",
+            "assert rows['reply_minute'].used_count == 10",
+            "assert rows['reply_day'].used_count == 100",
+            "assert rows['reply_minute'].window_started_at.replace(tzinfo=UTC) == now"
+          ],
+          "test_unknown_quota_action_rejects_before_touching_session": [
+            "pytest.raises(ValueError, match='Unsupported community quota action')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_abuse_quota_transactions.py": {}
+      }
+    },
+    {
+      "commit": "b013974b9c1b49c86f64479754303272741a1b49",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(routines): preserve retained utilities at their actual owners",
+      "tracked_files": {
+        "backend/tests/routines/test_retained_setting_transactions.py": "40e3b51bfe7d9bca5065846c45a24d92a1be76c4"
+      },
+      "test_nodes": [
+        "tests/routines/test_retained_setting_transactions.py::test_retained_character_status_commits_the_original_caller_transaction",
+        "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[False]",
+        "tests/routines/test_retained_setting_transactions.py::test_retained_other_settings_keep_owner_join_and_commit_or_flush[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_retained_setting_transactions.py": {
+          "_engine": [],
+          "test_retained_other_settings_keep_owner_join_and_commit_or_flush": [
+            "assert {item.character_id for item in selected} == {'one', 'two'}",
+            "assert all((item is settings[item.character_id] for item in selected))",
+            "assert result is selected",
+            "assert events == (['commit', 'flush'] if commit else ['flush'])",
+            "assert settings['one'].updated_at == settings['two'].updated_at",
+            "assert settings['one'].auto_enabled is (not commit)",
+            "assert activity_settings.disable_other_active_settings(db, empty, commit=commit) is empty",
+            "assert events == []",
+            "assert observer.get(AgentActivitySetting, 'one').auto_enabled is (not commit)",
+            "assert observer.get(AgentActivitySetting, 'keep').auto_enabled is True",
+            "assert observer.get(AgentActivitySetting, 'foreign').auto_enabled is True",
+            "assert observer.get(AgentActivitySetting, 'deleted').auto_enabled is True"
+          ],
+          "test_retained_character_status_commits_the_original_caller_transaction": [
+            "assert mutations.set_character_status(db, character, 'active') is None",
+            "assert character.status == 'active'",
+            "assert row.status == 'active'",
+            "assert row.name == 'pending same transaction'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_retained_setting_transactions.py": {}
+      }
+    },
+    {
+      "commit": "e4eb2f7ab565899870d04c2366e023cb95cced76",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(memory): bind resident daypart workflows to actual owners",
+      "tracked_files": {
+        "backend/app/runtime/memory/daypart_observations.py": "234903344092c4e33b4fb1181133127e4ef8c895",
+        "backend/tests/memory/test_daypart_runtime_bindings.py": "ebd3be89c3f003ad0bf828bf5e1b2ee134aead5d"
+      },
+      "test_nodes": [
+        "tests/memory/test_daypart_runtime_bindings.py::test_cold_resident_imports_use_actual_owners_and_explicit_registration",
+        "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[character]",
+        "tests/memory/test_daypart_runtime_bindings.py::test_note_author_uses_attached_profile_without_committing[user]",
+        "tests/memory/test_daypart_runtime_bindings.py::test_provided_observations_commit_inbox_before_same_session_author_read"
+      ],
+      "test_assertions": {
+        "tests/memory/test_daypart_runtime_bindings.py": {
+          "engine": [],
+          "test_note_author_uses_attached_profile_without_committing": [
+            "assert f'- seen_person: {expected}' in note",
+            "assert db.is_modified(author)",
+            "assert daypart_observations._daypart_observation_author(db, 'missing', 'unknown', profile_references=unavailable_references) == 'unknown'",
+            "assert daypart_observations._daypart_observation_author(db, None, None, profile_references=unavailable_references) is None",
+            "assert getattr(author, field).startswith('Original')",
+            "assert getattr(observer.get(model, identity), field).startswith('Original')"
+          ],
+          "test_provided_observations_commit_inbox_before_same_session_author_read": [
+            "assert calls == ['character-post']",
+            "assert current is db",
+            "assert [row.event_type for row in rows] == ['observation_inbox', 'observation_feed']",
+            "assert rows[1].payload == {'source_item_id': 'post:character-post', 'seen_person': 'Original character (@daypart)'}",
+            "assert [row.event_type for row in observer.scalars(select(AgentDaypartMemoryEvent))] == ['observation_inbox']"
+          ],
+          "test_cold_resident_imports_use_actual_owners_and_explicit_registration": [
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == ''"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_daypart_runtime_bindings.py": {}
+      }
+    },
+    {
+      "commit": "bc3f2ced3aee5a7c6b97777877137a79569a3196",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(bootstrap): retire public factory compatibility entry",
+      "tracked_files": {
+        "backend/tests/runtime/test_public_factory_retirement.py": "062506651a06d31ce0763aa550a7e7d69265d88e",
+        "scripts/ci/public_factory_retirement.py": "b6a6881ab2a52a03b07f3c1b970d494a88a6a2ff"
+      },
+      "test_nodes": [
+        "tests/runtime/test_public_factory_retirement.py::test_actual_factory_defaults_partial_and_export_cannot_change[component_manager_factory=lambda: None-component_manager_factory=create_single_backend_runtime_components]",
+        "tests/runtime/test_public_factory_retirement.py::test_actual_factory_defaults_partial_and_export_cannot_change[from functools import partial-from custom import partial]",
+        "tests/runtime/test_public_factory_retirement.py::test_actual_factory_defaults_partial_and_export_cannot_change[profile: Literal[\"full\", \"public\"] = \"full\"-profile: Literal[\"full\", \"public\"] = \"public\"]",
+        "tests/runtime/test_public_factory_retirement.py::test_actual_factory_defaults_partial_and_export_cannot_change[profile=\"public\"-profile=\"full\"]",
+        "tests/runtime/test_public_factory_retirement.py::test_actual_factory_defaults_partial_and_export_cannot_change[public_app = create_public_app(-public_app = create_app(]",
+        "tests/runtime/test_public_factory_retirement.py::test_backend_script_is_an_active_consumer",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[    assert calls == [\"construct\", \"start\", \"stop\"]-    assert calls == []]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[    assert main.create_public_app.func is main.create_app-    assert main.create_public_app is main.create_public_app]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[    backend = Path(__file__)-    source = \"pass\"\\n    backend = Path(__file__)]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[[sys.executable, \"-c\", source,-[sys.executable, \"-c\", \"pass\",]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[assert main.app is not main.public_app-assert main.app is main.public_app]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[assert not root.exists()-assert True]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[from pathlib import Path-from custom import Path]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[import subprocess-import subprocess\\nsubprocess = object()]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[main.create_app()\\nassert all-assert all]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[raise ImportError('no bundled PostgreSQL DBAPI')-pass]",
+        "tests/runtime/test_public_factory_retirement.py::test_cold_process_connection_and_original_behavior_are_preserved[timeout=30-timeout=300]",
+        "tests/runtime/test_public_factory_retirement.py::test_exact_bundle_counter_keeps_unrelated_assertions",
+        "tests/runtime/test_public_factory_retirement.py::test_factory_bindings_must_be_unique[\\nclass partial: pass\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_factory_bindings_must_be_unique[\\ndef create_app(): return FastAPI()\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_factory_bindings_must_be_unique[\\nfrom custom import create_public_app\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_factory_bindings_must_be_unique[\\npublic_app = app\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_frozen_facade_actual_profiles_and_cold_source_are_proven",
+        "tests/runtime/test_public_factory_retirement.py::test_historical_strings_are_distinct_from_actual_imports",
+        "tests/runtime/test_public_factory_retirement.py::test_original_facade_implementation_or_rebinding_is_not_retirable[\\n__all__.append('extra')\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_facade_implementation_or_rebinding_is_not_retirable[\\napp = object()\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_facade_implementation_or_rebinding_is_not_retirable[\\ndef __getattr__(name): return None\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_facade_implementation_or_rebinding_is_not_retirable[\\ndef create_app(): return object()\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_facade_implementation_or_rebinding_is_not_retirable[\\nfrom app.other import create_app\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_signed_provenance_is_required[ancestor]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_signed_provenance_is_required[facade]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_signed_provenance_is_required[introduction]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_signed_provenance_is_required[order]",
+        "tests/runtime/test_public_factory_retirement.py::test_original_signed_provenance_is_required[signature]",
+        "tests/runtime/test_public_factory_retirement.py::test_partial_identity_bundle_and_unrelated_identity_are_not_retired",
+        "tests/runtime/test_public_factory_retirement.py::test_remaining_facade_file_or_package_is_rejected[backend/app/public_main.py]",
+        "tests/runtime/test_public_factory_retirement.py::test_remaining_facade_file_or_package_is_rejected[backend/app/public_main/__init__.py]",
+        "tests/runtime/test_public_factory_retirement.py::test_shadowed_test_imports_are_not_rebound[\\ndef main(): pass\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_shadowed_test_imports_are_not_rebound[\\nfrom app.main import *\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_shadowed_test_imports_are_not_rebound[\\nfrom custom import Path\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_shadowed_test_imports_are_not_rebound[\\nmain = object()\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[from . import public_main\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[from .public_main import create_app\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[from app import public_main\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[from app.public_main import create_app\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[from app.public_main.extra import factory\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[import app.public_main\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[import importlib\\nimportlib.import_module('app.' + 'public_main')\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[import importlib\\nimportlib.import_module('app.' + name)\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[import importlib\\nimportlib.import_module('app.public_main')\\n]",
+        "tests/runtime/test_public_factory_retirement.py::test_static_and_unresolved_retired_dynamic_consumers_are_rejected[import importlib\\nmodule = 'app.public_main'\\nimportlib.import_module(module)\\n]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_public_factory_retirement.py": {
+          "original": [],
+          "candidate": [],
+          "proof": [],
+          "test_frozen_facade_actual_profiles_and_cold_source_are_proven": [
+            "assert accepted['exports'] == r.PUBLIC_BINDINGS",
+            "assert accepted['frozen_facade'] == original[r.OLD]",
+            "assert p.validated_asgi_moves({'app.public_main:app': 'app.main:public_app'}, {r.OLD: r.MAIN}, snapshots, root, public_retirement=accepted) == {'app.public_main:app': 'app.main:public_app'}",
+            "pytest.raises(ValueError, match='public profile')"
+          ],
+          "test_remaining_facade_file_or_package_is_rejected": [
+            "pytest.raises(ValueError, match='still exists')"
+          ],
+          "test_original_facade_implementation_or_rebinding_is_not_retirable": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_actual_factory_defaults_partial_and_export_cannot_change": [
+            "assert before in source",
+            "pytest.raises(ValueError)"
+          ],
+          "test_factory_bindings_must_be_unique": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_cold_process_connection_and_original_behavior_are_preserved": [
+            "assert before in current",
+            "pytest.raises(ValueError)"
+          ],
+          "test_shadowed_test_imports_are_not_rebound": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_partial_identity_bundle_and_unrelated_identity_are_not_retired": [
+            "pytest.raises(ValueError, match='five-identity')",
+            "pytest.raises(ValueError)"
+          ],
+          "test_static_and_unresolved_retired_dynamic_consumers_are_rejected": [
+            "pytest.raises(ValueError, match='consumer')"
+          ],
+          "test_historical_strings_are_distinct_from_actual_imports": [
+            "assert proof(candidate)['exports']['app'] == 'public_app'"
+          ],
+          "test_exact_bundle_counter_keeps_unrelated_assertions": [
+            "assert len(fragments) == len(functions[r.BUNDLE_TEST]) - 1",
+            "assert r.ABSENT in fragments",
+            "assert 'assert main.create_public_app.func is main.create_app' in fragments",
+            "assert not any(('public_main' in f for f in fragments if f != r.ABSENT))"
+          ],
+          "test_backend_script_is_an_active_consumer": [
+            "pytest.raises(ValueError, match='consumer')"
+          ],
+          "test_original_signed_provenance_is_required": [
+            "pytest.raises(ValueError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_public_factory_retirement.py": {}
+      }
+    },
+    {
+      "commit": "0c635539e3274cf882317673062f4793799ec7e7",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(tests): group memory behavior tests by owner",
+      "tracked_files": {
+        "backend/tests/memory/__init__.py": "e0e7e6822416ca31af94915dbd171646709f7ea6"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "4fd51c97f0705ef5657e4319552d973e4cd58ca0",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: own shared extension registration in runtime",
+      "tracked_files": {
+        "backend/app/runtime/extensions/__init__.py": "f55a7d8b13f7554a5e7ba2a88188c6f5a3400867",
+        "backend/tests/runtime/test_extension_registry_compatibility.py": "ade1dfc933f7c04fa3431778e8d9f1bd5a815149"
+      },
+      "test_nodes": [
+        "tests/runtime/test_extension_registry_compatibility.py::test_previous_hosted_extension_registration_uses_current_runtime_state",
+        "tests/runtime/test_extension_registry_compatibility.py::test_previous_resident_extension_registration_uses_current_runtime_state"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_extension_registry_compatibility.py": {
+          "test_previous_hosted_extension_registration_uses_current_runtime_state": [
+            "assert previous_hosted.HostedSettingsProvider is hosted.HostedSettingsProvider",
+            "assert previous_hosted.HostedPromptProvider is hosted.HostedPromptProvider",
+            "assert previous_hosted.register_hosted_configuration is hosted.register_hosted_configuration",
+            "assert previous_hosted.get_hosted_setting('example') is None",
+            "assert hosted.get_hosted_prompt('example') is None",
+            "assert hosted.get_hosted_setting('example') == 'registered-value'",
+            "assert previous_hosted.get_hosted_prompt('example') == 'registered-prompt'",
+            "pytest.raises(hosted.HostedConfigurationRegistrationError, match='already registered')"
+          ],
+          "test_previous_resident_extension_registration_uses_current_runtime_state": [
+            "assert previous_resident.ResidentRuntimeAdapter is resident.ResidentRuntimeAdapter",
+            "assert previous_resident.openclaw_auth_profiles is resident.openclaw_auth_profiles",
+            "assert previous_resident.get_resident_runtime_adapter() is None",
+            "pytest.raises(previous_resident.ResidentRuntimeUnavailableError)",
+            "assert resident.get_resident_runtime_adapter() is adapter",
+            "assert resident.OpenClawGatewayClient() is client",
+            "assert previous_resident.OpenClawGatewayClient() is client",
+            "pytest.raises(resident.ResidentRuntimeRegistrationError, match='already registered')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_extension_registry_compatibility.py": {}
+      }
+    },
+    {
+      "commit": "55f497bb05a325e012172d5678307d3f7b190d57",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: fix: bind rejected image activity to its actual service",
+      "tracked_files": {
+        "backend/tests/social/test_rejected_image_activity.py": "e41126953474bc10aeac980edd8045bf434ddb5b"
+      },
+      "test_nodes": [
+        "tests/social/test_rejected_image_activity.py::test_unsafe_local_image_request_persists_rejection_and_skipped_job_without_provider"
+      ],
+      "test_assertions": {
+        "tests/social/test_rejected_image_activity.py": {
+          "test_unsafe_local_image_request_persists_rejection_and_skipped_job_without_provider": [
+            "assert result.status == 'skipped'",
+            "assert result.skip_reason == 'unsafe_prompt'",
+            "assert len(logs) == 1",
+            "assert logs[0].character_id == 'social-uow-autonomous-character'",
+            "assert logs[0].target_post_id == 'social-uow-target-post'",
+            "assert logs[0].reason == 'unsafe_prompt'",
+            "assert logs[0].result == 'skip_reason=unsafe_prompt; token_prefix=test-prefix'",
+            "assert len(jobs) == 1",
+            "assert jobs[0].id == job_id",
+            "assert jobs[0].status == 'skipped'",
+            "assert jobs[0].skip_reason == 'unsafe_prompt'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_rejected_image_activity.py": {}
+      }
+    },
+    {
+      "commit": "03afe4f49d1435ae22fe8636ea0ca9db0a55c32a",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(schemas): connect consumers to owning response contracts",
+      "tracked_files": {
+        "docs/architecture/ar-b8-schema-consumers.md": "c4d3420fe25cb540a9c48730491f62bb295b47d9"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "3500f3f9348707452619dd541e6349d7af0bea1a",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: place remaining LLM tests under their owners",
+      "tracked_files": {
+        "backend/tests/routines/test_writing_parameters.py": "7356fa959f6f3489a4e8275bde3d6a9bf20c2f28"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "aef03b6ba01127ddbe1bc17611406cc8b5ff24ee",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: test: reject unowned and unused legacy files in completed backend scopes",
+      "tracked_files": {
+        "backend/tests/test_completed_backend_boundaries.py": "716471ec10242d23f68afcbe2d36485b9f021952"
+      },
+      "test_nodes": [
+        "tests/test_completed_backend_boundaries.py::test_complete_scope_accepts_flat_ownership_and_new_files_in_the_same_role",
+        "tests/test_completed_backend_boundaries.py::test_exact_historical_path_is_allowed_but_does_not_open_its_siblings",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[complete_type]",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[duplicate]",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[kind]",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[missing_contract]",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[partial_scope]",
+        "tests/test_completed_backend_boundaries.py::test_incomplete_or_broad_final_scope_is_rejected[wildcard]",
+        "tests/test_completed_backend_boundaries.py::test_new_domain_must_have_declared_ownership_even_without_cross_domain_imports",
+        "tests/test_completed_backend_boundaries.py::test_removed_domain_and_retained_contract_cannot_stay_in_policy",
+        "tests/test_completed_backend_boundaries.py::test_retained_contract_does_not_allow_runtime_import_into_a_domain",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.compatibility.new_flow]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.cruds.sample]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.api.routes]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.application.new_flow]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.domain.rules]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.infrastructure.repository]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.ports.repository]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.domains.sample.public]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.models.sample]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.repositories.sample]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.schemas.sample]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.schemas]",
+        "tests/test_completed_backend_boundaries.py::test_unused_new_legacy_file_is_rejected_even_without_an_import_edge[app.services.sample]"
+      ],
+      "test_assertions": {
+        "tests/test_completed_backend_boundaries.py": {
+          "completed_policy": [],
+          "retained": [],
+          "test_complete_scope_accepts_flat_ownership_and_new_files_in_the_same_role": [
+            "assert b.checker.check_inventory(inventory, completed_policy()) == []"
+          ],
+          "test_unused_new_legacy_file_is_rejected_even_without_an_import_edge": [
+            "assert any(('refactor_unregistered_old_module' in error for error in b.checker.check_inventory(inventory, completed_policy())))"
+          ],
+          "test_new_domain_must_have_declared_ownership_even_without_cross_domain_imports": [
+            "assert any(('refactor_unowned_domain' in error for error in b.checker.check_inventory(inventory, completed_policy())))"
+          ],
+          "test_removed_domain_and_retained_contract_cannot_stay_in_policy": [
+            "assert any(('refactor_stale_domain' in error for error in errors))",
+            "assert any(('refactor_stale_retained_module' in error for error in errors))"
+          ],
+          "test_exact_historical_path_is_allowed_but_does_not_open_its_siblings": [
+            "assert b.checker.check_inventory(b._inventory(*base), policy) == []",
+            "assert any(('refactor_unregistered_old_module' in error for error in errors))"
+          ],
+          "test_retained_contract_does_not_allow_runtime_import_into_a_domain": [
+            "assert any(('domain_imports_runtime' in error for error in b.checker.check_inventory(inventory, policy)))"
+          ],
+          "test_incomplete_or_broad_final_scope_is_rejected": [
+            "assert any(('refactor_invalid_scope' in error for error in b.checker.check_inventory(b._inventory(), policy)))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_completed_backend_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "fd312e6a55d264f4ef704ee866f6819322119858",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: connect remaining chat and routine consumers to owners",
+      "tracked_files": {
+        "backend/tests/routine_posts/test_registration.py": "36ef79bea26a9bfe0e186507f2ae7ca1251a16b1"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_registration.py::test_routine_post_import_registers_the_same_models_without_opening_database"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_registration.py": {
+          "test_routine_post_import_registers_the_same_models_without_opening_database": [
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == ''"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_registration.py": {}
+      }
+    },
+    {
+      "commit": "f88ad7c60d165560fd51bc0e90411d741feeb3e6",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(chat): retire forwarding layers through verified actual owners",
+      "tracked_files": {
+        "backend/tests/test_chat_forwarder_retirement.py": "f5e616e434c1a5762944cbb045b3f7aab031c9a6",
+        "scripts/ci/chat_forwarder_retirement.py": "d786ab0066be2dec873757da03da130a241e8aec"
+      },
+      "test_nodes": [
+        "tests/test_chat_forwarder_retirement.py::test_exact_original_layers_and_actual_owner_tests_are_verified",
+        "tests/test_chat_forwarder_retirement.py::test_original_node_expectations_cannot_be_substituted",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_flag_cannot_be_a_truthy_configuration",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_attribute]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_nested_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_reimport]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_setattr]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[backend_script_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[composition_rebind]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[copied_class]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_fake_owner]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_missing_failure_finalization]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_missing_result]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[durable_count_removed]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[exported_uow_stub]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[file_shadow]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[missing_disposition]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[module_side_effect]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[owner_stub]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[path_function]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[path_reimport]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[relative_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[retained_file]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[retained_package]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[root_script_dynamic_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_binding_rebind]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_self_identity]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[star_import]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[unrelated_disposition]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[unsafe_disposition]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[altered_blob]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[not_ancestor]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[unsigned]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[wrong_path_blob]"
+      ],
+      "test_assertions": {
+        "tests/test_chat_forwarder_retirement.py": {
+          "signed_reader": [],
+          "candidate": [],
+          "rewrite": [
+            "assert old in source"
+          ],
+          "test_exact_original_layers_and_actual_owner_tests_are_verified": [
+            "assert set(result) == {function for _, function in proof.TESTS.values()}",
+            "assert required == proof.fragments(current)",
+            "assert len(required) >= len(proof.fragments(original))"
+          ],
+          "test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_requires_original_signed_source_provenance": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_original_node_expectations_cannot_be_substituted": [
+            "pytest.raises(ValueError, match='reviewed original')",
+            "pytest.raises(ValueError, match='exact existing test node')",
+            "assert proof.required_fragments(original, old, 'backend/tests/other.py', function, path, function, result) == original"
+          ],
+          "test_retirement_flag_cannot_be_a_truthy_configuration": [
+            "assert proof.validate(False, moves, [], root, signed_reader) is None",
+            "pytest.raises(ValueError, match='exact reviewed boolean')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_chat_forwarder_retirement.py": {}
+      }
+    },
+    {
+      "commit": "fe4d17345c1ed89df0f2eaa4b5d4eadd6d10caad",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: assign activity and post-search policies to their domains",
+      "tracked_files": {
+        "backend/app/domains/social/service/search_documents.py": "38fd6d2a358a0dd0e84886dba0c26a85bdd59e24"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "b55d68493dda80cb24a04e6d2d56873c056e39ed",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor(backend): retire pure compatibility contracts with original binding proof",
+      "tracked_files": {
+        "backend/tests/compatibility_retirement_support.py": "4918397c7aa822f0b785aa9e3e2349e55b42247a",
+        "backend/tests/runtime/test_compatibility_facade_retirement.py": "e4088c92285033bcef6d71d9afe901c762a23bfd",
+        "docs/architecture/ar-b8-compatibility-retirement.md": "d91e7bb56dfa4954775e21fcddf24c475f64ee22",
+        "scripts/ci/compatibility_facade_retirement.py": "88f21f97042651be23200dcc5243b0d259b4375a"
+      },
+      "test_nodes": [
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from app import schemas\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from app.schemas import LoginCreate\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from app.schemas import unlisted_child\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from app.schemas.unlisted_child import Value\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from builtins import __import__ as load\\nload('app.services.messages')\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[from importlib import import_module as load\\nload('app.schemas.auth')\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[import app.domains.worlds.public\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[import app.schemas.unlisted_child\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[import importlib\\nimportlib.import_module('app.schemas')\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[import importlib\\nvalue = importlib.import_module('app.services.messages')\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_consumer_cannot_keep_using_retired_path[module = 'app.services.' + 'messages'\\n__import__(module)\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[Actual = object()]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[from another import *]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[from another import Actual]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[if True:\\n    Actual = object()]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[match object():\\n    case Actual:\\n        pass]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_actual_owner_export_cannot_be_rebound_after_its_definition[try:\\n    pass\\nexcept Exception as Actual:\\n    pass]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_all_is_not_permission_to_drop_unadvertised_exports",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_all_original_explicit_exports_resolve_to_actual_owners",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_bound_method_requires_original_receiver_and_original_function",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_every_original_function_matches_exact_binding_only_transformation",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[class-global-import]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[class-mutation]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[conditional-import]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[decorator-mutation]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[default-mutation]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[drop]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[except-binding]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[match-binding]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[mutate-code]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[self]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[setattr-code]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[shadow]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[star-import]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[true]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_exact_original_identity_edges_cannot_be_dropped_or_faked[wrong-import]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_historical_module_alias_rejects_implementation_or_rebinding[_implementation = object()\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_historical_module_alias_rejects_implementation_or_rebinding[_implementation.send_message = lambda: None\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_historical_module_alias_rejects_implementation_or_rebinding[def forwarded(*args):\\n    return _implementation.send_message(*args)\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_historical_module_alias_rejects_implementation_or_rebinding[from app.domains.chat.service.messages import *\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_historical_module_alias_rejects_implementation_or_rebinding[print('an import side effect is implementation')\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_real_chat_aggregate_alias_keeps_composed_receiver_and_function",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_real_schema_binding_rejects_equal_looking_different_class",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_relative_import_does_not_hide_retired_application_consumer[backend/app/consumer.py-from . import schemas\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_relative_import_does_not_hide_retired_application_consumer[backend/app/runtime/consumer.py-from ..services import messages\\n]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retired_file_or_package_cannot_be_reintroduced[.py]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retired_file_or_package_cannot_be_reintroduced[/__init__.py]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retired_file_or_package_cannot_be_reintroduced[/nested/consumer.py]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retirement_rejects_changed_business_fixture_and_provider_behavior[backend/tests/identity/test_l1_identity_domain_foundation.py-test_identity_model_table_contracts_are_unchanged-'password_hash',-]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retirement_rejects_changed_business_fixture_and_provider_behavior[backend/tests/media/test_world_banner_codec.py-test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract-match='Invalid image payload'-match='.*']",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retirement_rejects_changed_business_fixture_and_provider_behavior[backend/tests/routines/test_guarded_claim_recovery.py-test_guarded_recovery_uses_consumption_owner_and_preserves_admission-match='owner_controlled_automation_disabled'-match='.*']",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retirement_rejects_changed_business_fixture_and_provider_behavior[backend/tests/world_characters/test_foundation_identity.py-test_provider_compatibility_keeps_monkeypatch_target_and_accounting_types-monkeypatch.setattr(_actual_domains_world_characters_client, 'DirectLlmWorldCharacterSetupProvider', sentinel)-monkeypatch.setattr(_actual_domains_world_characters_client, 'DirectLlmWorldCharacterSetupProvider', original)]",
+        "tests/runtime/test_compatibility_facade_retirement.py::test_retirement_rejects_changed_business_fixture_and_provider_behavior[backend/tests/world_characters/test_readiness_contract.py-test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile-assert writes == []-assert True]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_compatibility_facade_retirement.py": {
+          "evidence": [],
+          "test_all_original_explicit_exports_resolve_to_actual_owners": [
+            "assert set(exports) == set(proof.MODULES)",
+            "assert sum((len(values) for values in exports.values())) == 802",
+            "assert sum((len(exports[name]) for name in public)) == 165",
+            "assert not set(proof.MODULES).intersection(sys.modules)",
+            "assert values",
+            "assert proof.same_object(actual, evidence.actual(module, name))"
+          ],
+          "test_retired_file_or_package_cannot_be_reintroduced": [
+            "pytest.raises(ValueError, match='still exists')"
+          ],
+          "test_historical_module_alias_rejects_implementation_or_rebinding": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_all_is_not_permission_to_drop_unadvertised_exports": [
+            "assert unadvertised",
+            "assert evidence.actual(module, name) is not None"
+          ],
+          "test_retirement_rejects_changed_business_fixture_and_provider_behavior": [
+            "assert old in source",
+            "pytest.raises(ValueError, match='changed behavior')"
+          ],
+          "test_exact_original_identity_edges_cannot_be_dropped_or_faked": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_bound_method_requires_original_receiver_and_original_function": [
+            "assert first.run is not first.run",
+            "assert proof.same_object(first.run, first.run)",
+            "assert not proof.same_object(first.run, second.run)",
+            "assert not proof.same_object(first.run, MethodType(lambda self: 'original', first))",
+            "assert not proof.same_object(first.run, Owner.run)"
+          ],
+          "test_real_chat_aggregate_alias_keeps_composed_receiver_and_function": [
+            "assert proof.export_matches('app.services.messages', 'send_message', message_service.send_message)",
+            "assert proof.export_matches('app.runtime.chat.sqlalchemy_service', 'send_message', message_service.send_message)",
+            "assert not proof.export_matches('app.services.messages', 'send_message', MessageService.send_message)",
+            "assert not proof.export_matches('app.services.messages', 'send_message', lambda: None)",
+            "assert proof.alias_retired('app.services.messages', 'app.runtime.chat.sqlalchemy_service')"
+          ],
+          "test_real_schema_binding_rejects_equal_looking_different_class": [
+            "assert proof.export_matches('app.schemas.auth', 'LoginCreate', LoginCreate)",
+            "assert not proof.export_matches('app.schemas.auth', 'LoginCreate', CopiedLoginCreate)"
+          ],
+          "test_actual_consumer_cannot_keep_using_retired_path": [
+            "pytest.raises(ValueError, match='consumer|dynamic import')"
+          ],
+          "test_relative_import_does_not_hide_retired_application_consumer": [
+            "pytest.raises(ValueError, match='consumer')"
+          ],
+          "test_actual_owner_export_cannot_be_rebound_after_its_definition": [
+            "assert isinstance(proof.terminal_definition(original, 'Actual'), ast.ClassDef)",
+            "pytest.raises(ValueError)"
+          ],
+          "test_every_original_function_matches_exact_binding_only_transformation": []
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_compatibility_facade_retirement.py": {}
+      }
+    },
+    {
+      "commit": "d88d70a92ada04864b3cbbd8b4940215b130ebc8",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: refactor: enforce complete backend roles and document current contribution paths",
+      "tracked_files": {
+        "docs/architecture/backend-compatibility.md": "7b4d5e33905dd73fac61b4fb53890f21c11cf48d",
+        "docs/architecture/backend-domains-t2-5-history.md": "db8121da51df0c050b80b7b3bac7bbc69a8a04cf"
+      },
+      "test_nodes": [
+        "tests/test_completed_backend_boundaries.py::test_repository_keeps_complete_backend_policy_enabled",
+        "tests/test_completed_backend_boundaries.py::test_repository_retained_modules_have_readable_contracts"
+      ],
+      "test_assertions": {
+        "tests/test_completed_backend_boundaries.py": {
+          "completed_policy": [],
+          "retained": [],
+          "test_complete_scope_accepts_flat_ownership_and_new_files_in_the_same_role": [
+            "assert b.checker.check_inventory(inventory, completed_policy()) == []"
+          ],
+          "test_unused_new_legacy_file_is_rejected_even_without_an_import_edge": [
+            "assert any(('refactor_unregistered_old_module' in error for error in b.checker.check_inventory(inventory, completed_policy())))"
+          ],
+          "test_new_domain_must_have_declared_ownership_even_without_cross_domain_imports": [
+            "assert any(('refactor_unowned_domain' in error for error in b.checker.check_inventory(inventory, completed_policy())))"
+          ],
+          "test_removed_domain_and_retained_contract_cannot_stay_in_policy": [
+            "assert any(('refactor_stale_domain' in error for error in errors))",
+            "assert any(('refactor_stale_retained_module' in error for error in errors))"
+          ],
+          "test_exact_historical_path_is_allowed_but_does_not_open_its_siblings": [
+            "assert b.checker.check_inventory(b._inventory(*base), policy) == []",
+            "assert any(('refactor_unregistered_old_module' in error for error in errors))"
+          ],
+          "test_retained_contract_does_not_allow_runtime_import_into_a_domain": [
+            "assert any(('domain_imports_runtime' in error for error in b.checker.check_inventory(inventory, policy)))"
+          ],
+          "test_incomplete_or_broad_final_scope_is_rejected": [
+            "assert any(('refactor_invalid_scope' in error for error in b.checker.check_inventory(b._inventory(), policy)))"
+          ],
+          "test_repository_keeps_complete_backend_policy_enabled": [
+            "assert scope['complete'] is True",
+            "assert scope['modules'] == []",
+            "assert set(scope['globals']) == {'app.config', 'app.models', 'app.database', 'app.exceptions', 'app.pagination'}",
+            "assert policy['legacy_exception_groups'] == []",
+            "assert b.checker.check_inventory(inventory, policy) == []"
+          ],
+          "test_repository_retained_modules_have_readable_contracts": [
+            "assert retained",
+            "assert contract.is_relative_to(ROOT.resolve())",
+            "assert contract.is_file(), item['module']",
+            "assert contract.read_text(encoding='utf-8').strip()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_completed_backend_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "c9969dbd1866872f1338520a08bfe801c9b14766",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: fix(ci): cover all backend changes in Windows Host Tauri checks",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_each_host_event_requires_all_backend_paths[pull_request]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_each_host_event_requires_all_backend_paths[push]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!**/*.py-pull_request]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!**/*.py-push]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!backend/alembic/**-pull_request]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!backend/alembic/**-push]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!backend/app/main.py-pull_request]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_exclusions[!backend/app/main.py-push]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_paths_ignore[pull_request]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_host_events_reject_backend_paths_ignore[push]",
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py::test_nonbackend_exclusions_keep_both_host_events_covered"
+      ],
+      "test_assertions": {
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py": {
+          "_load_checker": [
+            "assert spec is not None and spec.loader is not None"
+          ],
+          "test_windows_host_tauri_dev_contract_is_complete": [
+            "assert checker.check_repo(root=ROOT) == []"
+          ],
+          "_workflow_document": [],
+          "_errors_with_workflow": [],
+          "test_each_host_event_requires_all_backend_paths": [
+            "assert f'Hosted Windows {event} paths must include backend/**' in _errors_with_workflow(checker, monkeypatch, document)"
+          ],
+          "test_host_events_reject_backend_exclusions": [
+            "assert f'Hosted Windows {event} paths must not exclude backend: {exclusion}' in _errors_with_workflow(checker, monkeypatch, document)"
+          ],
+          "test_host_events_reject_backend_paths_ignore": [
+            "assert f'Hosted Windows {event} must not use paths-ignore' in _errors_with_workflow(checker, monkeypatch, document)"
+          ],
+          "test_nonbackend_exclusions_keep_both_host_events_covered": [
+            "assert checker.check_workflow_triggers(yaml.safe_dump(document, sort_keys=False)) == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l3_er7_windows_host_tauri_dev_contract.py": {}
+      }
+    },
+    {
+      "commit": "f8c1735cc3dde689a431bed0ee36bcca76bf8ee8",
+      "feature_id": "AR-B8-B",
+      "reason": "Original signed source integration: test: verify original Social binding in retired Chat composition",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[block_query_binding]",
+        "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[block_query_body]"
+      ],
+      "test_assertions": {
+        "tests/test_chat_forwarder_retirement.py": {
+          "signed_reader": [],
+          "candidate": [],
+          "rewrite": [
+            "assert old in source"
+          ],
+          "test_exact_original_layers_and_actual_owner_tests_are_verified": [
+            "assert set(result) == {function for _, function in proof.TESTS.values()}",
+            "assert required == proof.fragments(current)",
+            "assert len(required) >= len(proof.fragments(original))"
+          ],
+          "test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_requires_original_signed_source_provenance": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_original_node_expectations_cannot_be_substituted": [
+            "pytest.raises(ValueError, match='reviewed original')",
+            "pytest.raises(ValueError, match='exact existing test node')",
+            "assert proof.required_fragments(original, old, 'backend/tests/other.py', function, path, function, result) == original"
+          ],
+          "test_retirement_flag_cannot_be_a_truthy_configuration": [
+            "assert proof.validate(False, moves, [], root, signed_reader) is None",
+            "pytest.raises(ValueError, match='exact reviewed boolean')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_chat_forwarder_retirement.py": {}
+      }
     }
   ]
 }
