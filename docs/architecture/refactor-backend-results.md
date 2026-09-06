@@ -2669,3 +2669,7 @@ Tree/Lore·Operations·Image·LocalBot·Runtime의 실제 모델 소유와 G06-A
 위 결과는 source 준비와 집중 검증이다. 선행 184개 원장 prefix 및 현재 navigation 합류, 원래 G5 source의 append-only 최초 도입 연결, 공식 전체 보존 검사와 같은 최종 후보의 전체 backend suite는 이어서 검증한다. Hosted CI·installer·병합 및 B8-B 최종 호환 제거를 이 집중 결과만으로 완료 처리하지 않는다.
 
 선행 Runtime 현재 경로 보정 `d82db1cc`도 합류했다. 충돌 합류로 두 번 등록됐던 `app.core.context_clipping`은 실제 Daypart source 소유의 `AR-B7-DAYPART / keep` 한 항목을 유지했다. 제품·테스트·검사기는 바꾸지 않았으며, 실제 DB import 이동에 따른 현재 SQL/실행 inventory를 다시 수집해 **ER0 92/87/24/44/7**, deferred **24 files**를 확인했다. 이 현재 목록 갱신은 frozen migration 본문이나 predecessor 계약의 재생성이 아니다.
+
+G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도입 귀속 오류를 잡았으며 원장은 저장하지 않았다. 이 파일은 원래 signed merge `8a4bb308`의 양 부모 모두에 없었던 설명 docstring 한 줄이다. 함수·class·import·docstring 이외 실행문·현재 module consumer가 각각 0이고, G5의 실제 source `924a836`이 처음 추가한 파일도 아니다. 선행 `576d3119` 역시 이 파일 없이 같은 Chat 검사들을 수집·실행했다. 따라서 G5와 무관한 namespace 표시 파일의 합류만 제외하고, 원문 blob·두 부모·AST·현재 참조0 증거는 `g5-unrelated-test-namespace-proof.json`에 남긴다. 기존 Chat test 함수·fixture·단언은 삭제하거나 바꾸지 않는다. 원래 snapshot과 checker는 유지하고, 원장에는 실제 G5 도입 파일 4개와 기존 새 test 29개만 귀속한다. 설명 파일을 현재 커밋의 새 기능이나 잘못된 최초 source로 재등록하지 않는다.
+
+namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
