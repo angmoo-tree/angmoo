@@ -1,4 +1,5 @@
 """Character state admission and existing HTTP surface keep their write policy."""
+import app.runtime.social.agent_tool_state as social_agent_tool_state_runtime
 from types import SimpleNamespace
 
 import pytest
@@ -12,7 +13,7 @@ from app.api.v1.routes import community as community_routes
 from app.core.unit_of_work import deferred_commits
 from app.domains.characters import dependencies, exceptions, models, router, schemas
 from app.domains.characters.service import profile, state
-from app.services import community as legacy
+
 
 
 @pytest.fixture
@@ -30,12 +31,13 @@ def database(tmp_path):
 
 
 def test_state_service_keeps_owner_gate_legacy_error_and_deferred_write(database):
+    import app.domains.social.exceptions as legacy
     db, owner, character = database
     data = schemas.CharacterStateWrite(mood="calm", summary="Rested", memory_note="private memory")
     with pytest.raises(exceptions.CharacterStateNotFoundError):
         state.save_character_state_for_user(db, SimpleNamespace(id="foreign"), character.id, data)
     with pytest.raises(legacy.CharacterNotFoundError) as error:
-        legacy.save_character_state_for_user(db, SimpleNamespace(id="foreign"), character.id, data)
+        social_agent_tool_state_runtime.save_character_state_for_user(db, SimpleNamespace(id="foreign"), character.id, data)
     assert type(error.value) is legacy.CharacterNotFoundError
     assert str(error.value) == character.id
     assert db.get(models.CharacterState, character.id) is None

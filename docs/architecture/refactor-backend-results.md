@@ -1928,6 +1928,32 @@ C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·
 
 첫 수집에서 삭제된 activity policy/brief import를 발견하여 실제 역할 경로로 수정한 뒤 **2,379 nodes 수집**이 통과했다. 첫 집중 검사는 **431 PASS /6 FAIL /기존 skip1 /84.91초**였다. 실패는 FeedCue actual owner 연결, Writer 권한 모듈의 동명 alias 충돌, 첫 인사·작성 테스트의 이전 namespace 세 종류였으며 assertion을 바꾸지 않고 호출 대상/monkeypatch를 실제 소유 객체로 연결했다. 해당 네 파일 재검사는 **123 PASS /11.53초**다.
 
-Social의 activity admission이 Resident runtime을 역참조하는 순환은 root의 독립 signed `a85a63d`와 byte-identical인 `runtime/routines/activity_policy.py`·`activity_scope.py` 두 실제 파일 이동으로 제거했다. G5 ancestry를 합치지 않고 원래 Session·lazy World 조회·정책 함수를 그대로 공유한다. 이 변경의 집중 검사는 **11 PASS /23.75초**다. 실제 사라진 exact 예외 26개만 제거하고, 남은 Daypart의 동일 visibility helper 소비는 B7/B8 종료 대상으로 정확히 기록했다.
+Social의 activity admission이 Resident runtime을 역참조하는 순환은 root의 독립 signed `a85a63d`와 byte-identical인 `runtime/routines/activity_policy.py`·`activity_scope.py` 두 실제 파일 이동으로 제거했다. G5 ancestry를 합치지 않고 원래 Session·lazy World 조회·정책 함수를 그대로 공유한다. 이 변경의 집중 검사는 **11 PASS /23.75초**다. 실제 사라진 exact 예외 26개만 제거하고, 남은 미호출 action-menu/allowed-tool helper의 동일 visibility 소비는 AR-B8-A 종료 대상으로 정확히 기록했다.
 
 현재 단계는 C30 이후 Community/CRUD 소비자 종료, 원래 signed introduction 수집 및 append, stock 보존 전체·전체 backend·Hosted CI·설치 검증 이전의 통합 준비다. main의 원장 92 records와 PR258/263 동결 자료는 수정하지 않았다. 앞선 실패 이력은 최종 통과와 별도로 남긴다.
+
+## AR-B5-C30 — Community 임시 서비스 집합 제거
+
+실제 함수/class0인 Community 집합을 삭제하고18소비자의129참조를 소유 서비스/실행 instance/오류/상수로 연결했다. 제품742개 전체 함수/class AST가 정확한 import 해석 후 동일하다. 기존 test 단언은 실제 owner의 지역 import로 기존 표현을 유지하며 namespace 복제나 범용 facade를 추가하지 않았다.
+
+최초 집중은350 PASS/9 FAIL/기존 PGskip1로 LocalBot의 옛 mock receiver가 원인이었다. LocalBot10·Routines2 receiver를 실제 owner로 옮긴 후 같은 집중은 **359 PASS /기존 PostgreSQL skip1 /22.54초 /기존 warning3개**다. 기존 Community25임시bridge/17legacyedge를 제거하고, 현재 branch의 미합류 AgentRun/Writer/LocalBot 실제consumer13개만 정확한 종료 조건과 함께 기록했다. parent의 이미 구현된 runtime/resident 및 LocalBot 합류에서 이 임시 oldconsumer들을 제거한다. CRUD별칭/G07/full B5/capture/Hosted는 후속이다.
+
+C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertion·전체 split evidence0, 경계847 module/3050 edge/legacy164, L4 parity99·ER0 PASS다. 실제 첫인사 receiver2개가 쓰이는 기존 회귀1개도 PASS다. 지도 생성 첫 시도에서 역사 pilot 형식을 일반 split으로 재작성한7항목은 원래 HEAD의 정확 AR-B1/AR-F1을 복구해 동일 검사0오류로 종료했다. 부모 strict 지도 검사가 C29의 한 번도 추적되지 않은 infrastructure/__init__.py 가상 항목을 발견했고 전체 Git 도입 이력0을 확인하여 그 항목만 제거했다. 원본 snapshot이나 테스트 단언은 변경하지 않았다.
+
+
+## AR-B5-C31 — 데모 데이터 초기화 실제 runtime 소유
+
+CRUD의 마지막 실제 seed 함수는 runtime/bootstrap으로 옮겼다. 실제 Identity·Character·Routines·Social 모델을 직접 명시하며 원래 전체 AST는 모델 import 복원 후 동일하다. 기존 factory 기본 콜백/실행 설정·데모 본문/기본값·기존 user 보완·credential/setting 추가·flush/commit 순서를 유지한다. 새 SQLite2개는 최초1회 commit 및 반복 no-op, 기존 user→credential→setting의3개 commit 순서와 password 검증을 확인한다.
+
+초기22 PASS 뒤 factory/runtime/logging는45 PASS/1 FAIL이었다. 실패는 선행 Relationships router 이동의 옛 mock 대상으로, 실제 router·runtime gateway 및 같은 request/db DI를 연결하고 원래 단언을 유지했다. 최종 **46 PASS /44.97초 /기존 warning1개**, 같은 DB object 명시 후 해당1개도 PASS다. CRUD별칭/Relationships public/G07/full B5/capture/Hosted는 후속이다.
+
+C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0을 확인했다. 남아 있는 public_main도 같은 실제 seed 콜백으로 연결했으며 parent G06 최종 통합에서는 main의 동일 콜백을 보존한다. 실제 initializer 새 경로 외에 데모 활성 설정이나 factory 본문은 변경하지 않았다.
+
+
+## AR-B5 C30–C31 순차 통합 검증
+
+B4가 이미 소유한 실제 Resident 실행·graph·작성 본문을 유지하면서 C30의 Community 집합 제거와 C31의 실제 데모 초기화를 연결했다. 원래 수집은 **2,381 nodes**, Social·Relationships·Resident·RoutinePost·실제 factory/초기화 집중은 **434 PASS /기존 skip1 /148.11초**다. 첫 테스트 명령의 존재하지 않는 파일 인자는 실행 전 오류였으며 제품 실패나 통과로 계산하지 않았다.
+
+실행 context의 세 Social 협력은 `runtime/resident/feed_context_references.py`의 `ResidentSocialContextBindings`가 호출 시 실제 함수를 선택한다. 원래 같은 Session과 지연 호출을 유지하며, 부모의 독립 `55d1c2f9` 구현과 해당 파일이 정확히 같다. 이 연결 뒤 context·daypart·실행 검사는 **12 PASS /28.45초**다. 사라진 정확 legacy edge 10개만 제거했고 현재 경계 **987 modules /3,695 edges /legacy134 /cycle0**, ER0 및 deferred inventory 검사를 통과했다.
+
+원장 main의 92 records와 PR #258/#263 동결 자료는 그대로다. C32의 CRUD 별칭 제거와 G07 테스트 소유권 이전, 원래 최초 도입 증거 append, stock 보존·전체 backend·PR/설치 검증은 이어서 수행한다.

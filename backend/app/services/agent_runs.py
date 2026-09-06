@@ -25,7 +25,6 @@ from app.config import settings
 from app.cruds import community as community_crud
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.routines.service.action_briefs import is_feed_scan_community_theme_brief
-from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
 
 

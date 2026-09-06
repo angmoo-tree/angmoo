@@ -39,7 +39,7 @@ from app.services.direct_llm import (
     RunLlmTracker,
     wait_for_provider_rate_limit,
 )
-from app.services import community as community_service
+
 from app.services import lore_parser_quota
 from app.core.context_text import neutralize_context_text
 

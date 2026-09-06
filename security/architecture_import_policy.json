@@ -34,10 +34,6 @@
         },
         {
           "importer": "app.api.v1.routes.agents",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.api.v1.routes.agents",
           "imported": "app.services.direct_llm"
         },
         {
@@ -51,10 +47,6 @@
         {
           "importer": "app.api.v1.routes.bot",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.api.v1.routes.bot",
@@ -118,10 +110,6 @@
         },
         {
           "importer": "app.main",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.main",
           "imported": "app.services.hosted_configuration"
         },
         {
@@ -163,10 +151,6 @@
         {
           "importer": "app.models",
           "imported": "app.models.worlds"
-        },
-        {
-          "importer": "app.public_main",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.public_main",
@@ -275,10 +259,6 @@
         {
           "importer": "app.runtime.resident.langgraph",
           "imported": "app.services.character_lore"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -381,10 +361,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.services.agent_runs",
-          "imported": "app.services.community"
-        },
-        {
           "importer": "app.services.character_lore",
           "imported": "app.cruds.agents"
         },
@@ -399,10 +375,6 @@
         {
           "importer": "app.services.character_lore",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.services.character_lore",
@@ -411,30 +383,6 @@
         {
           "importer": "app.services.character_lore",
           "imported": "app.services.lore_parser_quota"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.agent_runs"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.services.community_abuse_quota"
         },
         {
           "importer": "app.services.community_abuse_quota",
@@ -459,10 +407,6 @@
         {
           "importer": "app.services.local_bot",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.services.local_bot",
@@ -528,10 +472,6 @@
         {
           "importer": "app.compatibility.routine_posts.legacy",
           "imported": "app.services.activity_state_contracts"
-        },
-        {
-          "importer": "app.compatibility.routine_posts.legacy",
-          "imported": "app.services.community"
         }
       ],
       "id": "l3-routine-post-legacy-persistence-bridge",
@@ -626,10 +566,6 @@
         },
         {
           "importer": "app.runtime.resident.execution",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.runtime.resident.execution",
           "imported": "app.services.direct_llm"
         },
         {
@@ -682,19 +618,6 @@
         {
           "importer": "app.runtime.resident.writing",
           "imported": "app.services.character_lore"
-        }
-      ]
-    },
-    {
-      "id": "ar-b4-writer-app-services-community",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social workflow integration.",
-      "removal_condition": "Connect exact existing admission/read/write collaborators in the same Session and original order.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.services.community"
         }
       ]
     },
@@ -1619,118 +1542,6 @@
     ],
     "bridges": [
       {
-        "importer": "app.api.v1.routes.agent_runs",
-        "target": "app.domains.routines.service.slot_status",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
-        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.api.v1.routes.agents",
-        "target": "app.domains.characters.router",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.api.v1.routes.agents",
-        "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-C7",
-        "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
-        "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.api.v1.routes.community",
-        "target": "app.domains.characters.router",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.api.v1.routes.world_activity_runtime",
-        "target": "app.domains.relationships.router",
-        "owner_stage": "AR-B5",
-        "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
-        "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.api.v1.routes.world_activity_runtime",
-        "target": "app.domains.routines.router",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.constants",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.repository.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.service.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.relationships.utils.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.repository.slots",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact same get_assigned_slot function export preserves existing assertion bindings; production reads use the canonical repository.",
-        "removal_condition": "Close the exact mixed test alias with reviewed test-owner transition by B8-A, preserving every assertion.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.service.activity_logs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.service.activity_settings",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.cruds.community",
         "target": "app.domains.characters.exceptions",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
@@ -1748,130 +1559,10 @@
       },
       {
         "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.search",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The old CRUD name is the same original Character-owned text search; its remaining caller migration is tracked explicitly.",
-        "removal_condition": "Migrate exact legacy CRUD search callers and remove the alias.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
         "target": "app.domains.characters.service.state",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
         "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
         "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.identity.service.profile",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.inbox",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.media",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.posts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.profiles",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.reactions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.image_jobs",
-        "owner_stage": "AR-B5",
-        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
-        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.profile_activity",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.source_posts",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.cursors",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.text",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
         "review_date": "2026-09-05"
       },
       {
@@ -1944,230 +1635,6 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
         "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_execution",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_plan",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_planner",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_read",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_recall",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.graph_recall_gateway",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.outbox",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.projection",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.projection_commands",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.query",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.contracts.replay",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.exceptions",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.policies.graph_plan_schema",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.schemas",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.service.graph_planning",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.service.graph_read",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.service.graph_recall",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.relationships.public",
-        "target": "app.domains.relationships.utils.projection_digest",
-        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
-        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
-        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
-        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
-        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.contracts.clock",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.contracts.lifecycle",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.contracts.plans",
-        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
-        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
-        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.policies.planning",
-        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
-        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
-        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.service.lifecycle",
-        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
-        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
-        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.service.plans",
-        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
-        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
-        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.service.scheduling",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.public",
-        "target": "app.domains.routines.utils.clock",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
         "review_date": "2026-09-05"
       },
       {
@@ -2387,84 +1854,12 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.models",
-        "target": "app.domains.relationships.models.projection",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.relationships.models.social",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.routines.models",
-        "owner_stage": "AR-G5",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.social.models.feed",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.social.models.manual_writes",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.social.models.posts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.social.models.subjective_context",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models",
-        "target": "app.domains.world_packages.models",
-        "owner_stage": "AR-G5",
-        "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
-        "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.models.agent_creation_drafts",
         "target": "app.domains.characters.models",
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
         "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
         "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.models.agent_runs",
-        "target": "app.domains.relationships.models.points",
-        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
-        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
-        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
-        "review_date": "2026-09-06"
       },
       {
         "importer": "app.models.auth",
@@ -2499,14 +1894,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.models.world_activity_runtime",
-        "target": "app.domains.routines.models",
-        "owner_stage": "AR-G5",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.models.worlds",
         "target": "app.domains.world_characters.models",
         "owner_stage": "AR-B2",
@@ -2520,14 +1907,6 @@
         "owner_stage": "AR-G5",
         "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
         "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.runtime.characters.creator",
-        "target": "app.domains.characters.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
-        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
-        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
         "review_date": "2026-09-05"
       },
       {
@@ -2552,14 +1931,6 @@
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
         "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.runtime.characters.creator",
-        "target": "app.domains.characters.service.drafts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
-        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
-        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
         "review_date": "2026-09-05"
       },
       {
@@ -2588,14 +1959,6 @@
       },
       {
         "importer": "app.runtime.characters.management",
-        "target": "app.domains.characters.contracts",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.exceptions",
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
@@ -2616,22 +1979,6 @@
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
         "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.runtime.characters.management",
-        "target": "app.domains.characters.service.creator",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.runtime.characters.management",
-        "target": "app.domains.characters.service.management",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
         "review_date": "2026-09-05"
       },
       {
@@ -2683,91 +2030,11 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas",
-        "target": "app.domains.relationships.schemas",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Exact legacy common schema export retains the original graph response class identities.",
-        "removal_condition": "Move remaining schema aggregate consumers and remove the exact import.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas",
-        "target": "app.domains.routine_posts.schemas",
-        "owner_stage": "AR-G5",
-        "reason": "Exact remaining consumer keeps the identical RoutinePost type/function while context and provider roles transition. Converted role modules do not import legacy code.",
-        "removal_condition": "Move actual context/provider implementation in AR-B4-B2/B3 and remove the exact legacy consumer; global schema collection retires at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas",
-        "target": "app.domains.routines.schemas.runs",
-        "owner_stage": "AR-G5",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas",
-        "target": "app.domains.social.schemas.community",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas",
-        "target": "app.domains.social.schemas.feed",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas.agents",
         "target": "app.domains.characters.schemas",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
         "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
         "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.identity.schemas",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.routines.schemas",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.routines.schemas.first_greeting",
-        "owner_stage": "AR-B4 / AR-B8-A",
-        "reason": "Exact same request class temporarily reexported by the existing mixed schema aggregate while HTTP callers migrate. No additional implementation or backwards import.",
-        "removal_condition": "Complete C7 actual HTTP schema imports and remaining aggregate consumers during AR-B8-A, then remove this exact one-way class reexport.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.routines.schemas.runs",
-        "owner_stage": "AR-G5",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.social.schemas.community",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
         "review_date": "2026-09-05"
       },
       {
@@ -2787,43 +2054,11 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas.characters",
-        "target": "app.domains.social.schemas.activity",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.schemas.characters",
-        "target": "app.domains.social.schemas.community",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas.media_security",
         "target": "app.domains.media.schemas",
         "owner_stage": "AR-B3",
         "removal_condition": "Move existing managed-media schema consumers to media.schemas and remove the old schema helper path after B3 contract tests.",
         "reason": "The exact original pure validator is needed by the Character input schema before the remaining B3 media transition. No file storage, quota or image-job ownership moves here.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.social_memory",
-        "owner_stage": "AR-B5",
-        "removal_condition": "Redirect the remaining aggregate/schema callers to canonical Relationships response types in AR-B5-C6/B8, then remove this exact same-class alias.",
-        "reason": "Existing diagnostics schema export retains exactly the original class objects while current consumers follow the actual owner.",
-        "review_date": "2026-09-06",
-        "target": "app.domains.relationships.schemas"
-      },
-      {
-        "importer": "app.schemas.world_activity_runtime",
-        "target": "app.domains.routines.schemas",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
         "review_date": "2026-09-05"
       },
       {
@@ -2843,6 +2078,398 @@
         "review_date": "2026-09-05"
       },
       {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_character_contracts",
+        "target": "app.domains.world_characters.service.setup_validation",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_character_provider",
+        "target": "app.domains.world_characters.client",
+        "owner_stage": "AR-B2",
+        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
+        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_foundation",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.agents",
+        "target": "app.domains.characters.router",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.management",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
+        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
+        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.service.drafts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.creator",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
+        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
+        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.runtime.characters.management",
+        "target": "app.domains.characters.service.creator",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.runtime_boundary",
+        "target": "app.domains.runtime.contracts",
+        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.media.contracts",
+        "owner_stage": "AR-B8-A",
+        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.community",
+        "target": "app.domains.characters.router",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
+        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
+        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.feed",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.manual_writes",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.social.models.subjective_context",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
+        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.inbox",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.media",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.profiles",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.utils.cursors",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.utils.text",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.social.schemas.feed",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.characters",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.notifications",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.characters.service.media_storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.social.service.media_storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.worlds.storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical unused World image entry keeps its original exception class through this same-object compatibility export.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.world_packages.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
+        "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.identity.service.profile",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
+        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.reactions",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
+        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.source_posts",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
+        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community_abuse_quota",
+        "target": "app.domains.social.exceptions",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
+        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.plans",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.policies.planning",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.lifecycle",
+        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
+        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
+        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.plans",
+        "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
+        "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
+        "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.scheduling",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.utils.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.world_activity_runtime",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.world_activity_runtime",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
         "importer": "app.services.activity_state_contracts",
         "target": "app.domains.routines.policies.activity_state",
         "owner_stage": "AR-B4-B / AR-B4-C",
@@ -2851,11 +2478,435 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.agent_runs",
+        "importer": "app.schemas",
+        "target": "app.domains.routine_posts.schemas",
+        "owner_stage": "AR-G5",
+        "reason": "Exact remaining consumer keeps the identical RoutinePost type/function while context and provider roles transition. Converted role modules do not import legacy code.",
+        "removal_condition": "Move actual context/provider implementation in AR-B4-B2/B3 and remove the exact legacy consumer; global schema collection retires at G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.world_activity_runtime",
+        "target": "app.domains.routines.router",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B4-C",
-        "reason": "Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
-        "removal_condition": "Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_logs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_settings",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas.runs",
+        "owner_stage": "AR-G5",
+        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
+        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.search",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The old CRUD name is the same original Character-owned text search; its remaining caller migration is tracked explicitly.",
+        "removal_condition": "Migrate exact legacy CRUD search callers and remove the alias.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.constants",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
+        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.profile_activity",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
+        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.characters",
+        "target": "app.domains.social.schemas.activity",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
+        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.relationships.models.social",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.relationships.models.projection",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models.agent_runs",
+        "target": "app.domains.relationships.models.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.constants",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.utils.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.repository.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.relationships.service.points",
+        "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
+        "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
+        "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.relationships.schemas",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Exact legacy common schema export retains the original graph response class identities.",
+        "removal_condition": "Move remaining schema aggregate consumers and remove the exact import.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_plan",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.policies.graph_plan_schema",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_execution",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_planning",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.exceptions",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.schemas",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_read",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_read",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_recall",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_recall_gateway",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_recall",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_planner",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.outbox",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.replay",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.projection",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.query",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.projection_commands",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.utils.projection_digest",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.social_memory",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Redirect the remaining aggregate/schema callers to canonical Relationships response types in AR-B5-C6/B8, then remove this exact same-class alias.",
+        "reason": "Existing diagnostics schema export retains exactly the original class objects while current consumers follow the actual owner.",
+        "review_date": "2026-09-06",
+        "target": "app.domains.relationships.schemas"
+      },
+      {
+        "importer": "app.api.v1.routes.world_activity_runtime",
+        "target": "app.domains.relationships.router",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
+        "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.image_jobs",
+        "owner_stage": "AR-B5",
+        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
+        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8 / AR-B4-C",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged. / Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge. / Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.social.service.visibility",
+        "owner_stage": "AR-B8-A",
+        "reason": "The remaining original action-menu and allowed-tool helpers use the same public-context visibility operation after the actual Social implementation moved. These preserved helpers have not been removed merely because their current callers are tests.",
+        "removal_condition": "Move the exact remaining action-menu/tool helpers to their actual Routines/runtime owner and update their existing tests during B8-A without changing visibility, evaluation order or caller Session.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.social.service.activity_results",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.social.service.feed",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.social.service.inbox",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.social.service.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.social.service.profiles",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.agent_runs",
+        "target": "app.domains.routines.service.slot_status",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
+        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.agents",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-C7",
+        "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
+        "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.repository.slots",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact same get_assigned_slot function export preserves existing assertion bindings; production reads use the canonical repository.",
+        "removal_condition": "Close the exact mixed test alias with reviewed test-owner transition by B8-A, preserving every assertion.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas.first_greeting",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "reason": "Exact same request class temporarily reexported by the existing mixed schema aggregate while HTTP callers migrate. No additional implementation or backwards import.",
+        "removal_condition": "Complete C7 actual HTTP schema imports and remaining aggregate consumers during AR-B8-A, then remove this exact one-way class reexport.",
         "review_date": "2026-09-06"
       },
       {
@@ -2899,244 +2950,12 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.social.service.visibility",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "reason": "The preserved Daypart observation helper checks the same public-context visibility function after Social ownership transfer; B4 execution bodies are already removed from this legacy file.",
-        "removal_condition": "Move the remaining actual Daypart observer helpers to Memory and update these exact consumers without changing visibility or caller Session semantics.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_writing",
         "target": "app.domains.routines.models",
         "owner_stage": "AR-B7 signed Daypart source integration",
         "reason": "Original Memory action writer annotates the caller-owned Run with the actual same Routines model.",
         "removal_condition": "Remove the exact old Memory body when signed B7 service joins; no other old writer definitions remain.",
         "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.service.state",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.service.state_notes",
-        "owner_stage": "AR-B5",
-        "reason": "Community compatibility imports actual state implementations while final complete-tick/tool route consumers move; no state implementation remains in Community.",
-        "removal_condition": "Finish actual complete tick callers and remove Community facade imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
-        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.action_briefs",
-        "owner_stage": "AR-B5",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community consumes the actual Routines consumed-source decision; its nullable SQL is owned by the same domain repository.",
-        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history_notes",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community facade exposes actual Routines note helpers while final tool route/legacy removal proceeds; no note body remains in Community.",
-        "removal_condition": "Connect final tool route callers to runtime.resident.feed_history_notes and remove exact old diagnostic imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history_values",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
-        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.exceptions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.policies.complete_tick",
-        "owner_stage": "AR-B5",
-        "reason": "Final Community facade retains original pure candidate/completion names as direct aliases while consumers move; no implementation remains.",
-        "removal_condition": "Remove final Community compatibility imports after all exact callers use actual service/policy.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.repository.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.activity_results",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.agent_presentation",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.agent_tool_authorization",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
-        "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.feed",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
-        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.inbox",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
-        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.posts",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.presentation",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.profiles",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
-        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.timeline",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.topic_metadata",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community actions consume actual owner history queries/topic policy while their own workflow is migrated; no original history implementation remains in this old surface.",
-        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.visibility",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.utils.limits",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
-        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community_abuse_quota",
-        "target": "app.domains.social.exceptions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
       },
       {
         "importer": "app.services.local_bot",
@@ -3161,70 +2980,6 @@
         "review_date": "2026-09-06",
         "reason": "One original error class moved to actual Operations owner for existing HTTP catches. The remaining old service imports the same object; no alternate implementation exists.",
         "removal_condition": "Root joins the already-authored Operations 5fb092b source, which owns maintenance service and removes app.services.maintenance before B8-A."
-      },
-      {
-        "importer": "app.services.profile_media",
-        "target": "app.domains.characters.service.media_storage",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
-        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.profile_media",
-        "target": "app.domains.media.contracts",
-        "owner_stage": "AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.profile_media",
-        "target": "app.domains.social.service.media_storage",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
-        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.profile_media",
-        "target": "app.domains.worlds.storage",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
-        "reason": "The historical unused World image entry keeps its original exception class through this same-object compatibility export.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.runtime_boundary",
-        "target": "app.domains.runtime.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.world_character_contracts",
-        "target": "app.domains.world_characters.service.setup_validation",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.world_character_provider",
-        "target": "app.domains.world_characters.client",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.world_foundation",
-        "target": "app.domains.worlds.service.definition",
-        "owner_stage": "AR-B8-A",
-        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
-        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
-        "review_date": "2026-09-05"
       }
     ]
   }

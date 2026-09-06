@@ -1772,7 +1772,6 @@
         "backend/app/runtime/social/today_activity.py",
         "backend/app/runtime/social/subjective_composition.py",
         "backend/app/runtime/social/timeline.py",
-        "backend/app/services/community.py",
         "backend/app/services/community_abuse_quota.py",
         "backend/tests/social/test_foundation_contracts.py",
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
@@ -1918,7 +1917,8 @@
         "backend/app/domains/relationships/repository/routine_interactions.py",
         "backend/app/domains/social/repository/interaction_context.py",
         "backend/app/domains/relationships/contracts/routine_interactions.py",
-        "backend/app/runtime/routine_posts/interactions.py"
+        "backend/app/runtime/routine_posts/interactions.py",
+        "backend/app/runtime/bootstrap/demo_seed.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

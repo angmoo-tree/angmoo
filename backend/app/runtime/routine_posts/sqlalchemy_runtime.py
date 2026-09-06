@@ -58,7 +58,6 @@ agent_run_crud = legacy.agent_run_crud
 agent_activity_policy = legacy.agent_activity_policy
 from app.domains.routines.service import joint_activity as joint_activity_runtime
 social_event_runtime = legacy.social_event_runtime
-community_service = legacy.community_service
 LangGraphResidentContext = legacy.LangGraphResidentContext
 
 

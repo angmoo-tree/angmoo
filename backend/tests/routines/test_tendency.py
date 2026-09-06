@@ -31,7 +31,7 @@ from app.domains.characters import router as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
 from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
-from app.services import character_lore, community as community_service, direct_llm
+from app.services import character_lore, direct_llm
 from app.domains.routines.service import writing_prompts as agent_writing
 from app.runtime.resident import writing as writing_runtime
 from app.runtime.resident import execution as agent_runs
@@ -746,6 +746,7 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
 
 
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
+    import app.runtime.social.topic_metadata as community_service
     monkeypatch.setattr(
         topic_policy,
         "_latest_post_created_topic_metadata",
@@ -983,6 +984,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
+    import app.domains.routines.constants as community_service
     monkeypatch.setattr(
         note_runtime,
         "_get_agent_tool_run",
@@ -1176,7 +1178,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    with caplog.at_level("INFO", logger=community_service.logger.name):
+    with caplog.at_level("INFO", logger=note_service.logger.name):
         social_feed_history_notes.note_agent_tool_feed_history_sanitize(
             SimpleNamespace(),
             "session-secret-value",
@@ -1208,12 +1210,13 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     monkeypatch,
     caplog,
 ):
+    import app.domains.social.exceptions as community_service
     def reject(*args, **kwargs):
         raise social_exceptions.AgentRunAuthorizationError("no session")
 
     monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
-    with caplog.at_level("WARNING", logger=community_service.logger.name):
+    with caplog.at_level("WARNING", logger=note_service.logger.name):
         with pytest.raises(social_exceptions.AgentRunAuthorizationError):
             social_feed_history_notes.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
@@ -1509,6 +1512,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
 
 
 def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
+    import app.runtime.social.feed_history as community_service
     post = SimpleNamespace(
         id="post-1",
         title="fallback title",

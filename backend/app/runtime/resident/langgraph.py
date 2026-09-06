@@ -184,7 +184,6 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
 )
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.services import character_lore as character_lore_service
-from app.services import community as community_service
 from app.runtime.social import langgraph_actions as langgraph_social_apply
 from app.runtime.social import image_generation as post_image_generation
 from app.domains.social.service import image_attachment

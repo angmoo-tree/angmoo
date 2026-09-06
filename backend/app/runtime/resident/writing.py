@@ -52,7 +52,6 @@ from app.domains.routines.service.writing_results import (
 )
 from app.domains.social.schemas import community as schemas
 from app.services import character_lore as character_lore_service
-from app.services import community as community_service
 from app.services.agent_writing import _record_daypart_action_memory
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 

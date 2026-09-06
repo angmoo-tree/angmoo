@@ -998,3 +998,8 @@ Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`�
 ### Social과 Resident의 공유 활동 조립
 
 활동 허용의 업무 판단은 Routines 서비스가 수행하고, `runtime/routines/activity_policy.py`와 `activity_scope.py`가 caller의 같은 Session으로 World 조회를 연결합니다. Social tool admission과 Resident 실행이 이 실제 조립을 함께 사용하므로 Social이 Resident graph 실행 패키지를 역참조하지 않습니다. 원래 lazy 조회·commit 순서와 활동 정책의 오류는 그대로 유지됩니다.
+
+Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실행 흐름은 피드·Inbox·도구 행동·tick·상태·활동 이력의 실제 owner를 이름으로 선택한다. 실행에 타 업무 협력이 필요하면 구성된 runtime instance를 사용한다. 예외와 값만 필요한 소비자는 해당 실제 정의를 읽으며, 모든 Social 기능을 모아 다시 내보내는 범용 facade를 만들지 않는다.
+
+
+선택적 데모 데이터 준비는 `runtime/bootstrap/demo_seed.py`가 담당한다. 앱 factory는 기존 설정이 허용할 때만 같은 함수를 실행한다. 이 함수는 실제 각 업무의 ORM을 명시적으로 사용하여 초기 데이터를 조립하며, 기존 데이터 보완과 신규 초기화의 commit 순서를 유지한다. 일반 Social 기능이나 공개 업로드에서 이 초기화를 호출하지 않는다.
