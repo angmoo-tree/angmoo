@@ -1169,3 +1169,9 @@ RoutinePost가 읽는 성공 답글 후보는 `relationships/service/routine_int
 
 
 Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`·`application`·`ports`·`infrastructure` 집합은 제거했고, 원자적 수동 쓰기는 runtime UoW의 실제 메서드를 사용한다. 관찰도 같은 실행기에서 Relationships의 실제 관찰 정책을 호출한다. World feed는 readonly context 계약으로 원래 attached context/credential을 받아 실행하므로 Social runtime이 Resident의 구체 context class를 가져오지 않는다.
+
+### Chat 테스트 소유
+
+`tests/chat`에는 Chat의 서비스·HTTP·World별 identity·마이그레이션·응답 lifecycle·회상 라우팅·근거 기반 응답·모델 정책 검사를 함께 둡니다. 기존 테스트를 파일 단위로 옮기며 테스트 이름·동작·조건을 유지합니다. 공유 `model_fixture_support`와 `chat_service_support`는 여러 업무가 사용하므로 `tests` 루트에 남습니다. 평가 JSONL은 `tests/fixtures/p8_l`의 원본 자료를 사용합니다. 이 공통 자료를 Chat 폴더에 복제하지 않습니다.
+
+현재 테스트를 실행할 때는 `python -m pytest -q tests/chat`를 사용합니다. 과거 승인 목록·동결 inventory는 당시 경로를 유지하며, 현재 수집 경로는 보존 이동표가 정확하게 연결합니다. 따라서 폴더 이동을 이유로 승인 노드 목록이나 평가 자료를 다시 생성하지 않습니다.

@@ -13,7 +13,7 @@ from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
 from app.domains.identity.service import message_credentials
 from app.runtime.chat import scope_queries
-from test_p8_l_d_world_chat_identity import (
+from chat.test_p8_l_d_world_chat_identity import (
     _character,
     _create_tables,
     _installation,

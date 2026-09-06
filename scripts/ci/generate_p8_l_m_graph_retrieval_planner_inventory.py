@@ -51,7 +51,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/graph_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl",
-    "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+    "backend/tests/chat/test_p8_l_m_graph_retrieval_planner.py",
     "backend/tests/test_p8_l_m_graph_retrieval_planner_inventory.py",
     "docs/architecture/backend-domains.md",
     "docs/architecture/p8-l-m-graph-retrieval-planner.md",

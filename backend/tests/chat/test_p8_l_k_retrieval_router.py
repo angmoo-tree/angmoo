@@ -44,11 +44,11 @@ from app.runtime.chat.retrieval_policy import SqlAlchemyRetrievalPolicyResolver
 
 
 FIXTURE_PATH = (
-    Path(__file__).resolve().parent
+    Path(__file__).resolve().parents[1]
     / "fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"
 )
 HOTFIX_FIXTURE_PATH = (
-    Path(__file__).resolve().parent
+    Path(__file__).resolve().parents[1]
     / "fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl"
 )
 

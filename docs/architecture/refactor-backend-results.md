@@ -2558,3 +2558,11 @@ C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·
 Signed Social sources through `e56e645f7963609650dccdefbf9cf78474f9931e` are connected to the actual Resident graph, RoutinePost runtime, Character state and canonical models. Original graph state-recorder mocks now patch the actual state service. Manual inbox claims and successful routine interaction reads use their existing owner operations; C28's corrected direct `db.get` query is included.
 
 Current collection is **2503 nodes**. Social, Relationships, RoutinePost, Resident graph, LocalBot response, shared errors and write-UoW validation passed **335 / existing PostgreSQL skip1 / 82.79s**. All seven read-only original preservation diagnostics report0errors (protected2311/current2503). The never-tracked `social/infrastructure/__init__.py` was removed from move metadata after full Git-history verification, matching the reviewed C30 correction; no source or frozen baseline was removed. Sequential source ledger and final backend/architecture/installer closeout remain pending.
+
+## AR-G07 — Chat 테스트 소유 경로
+
+기존 root Chat 동작 테스트15파일/179노드를 `backend/tests/chat`로 whole-file 이동했다. 기존 Chat 테스트4파일의 fixture import는 `chat.test_*`로 연결했다. K/L/M 평가자료4경로와 HIGH reasoning 저장소 기준1경로만 깊이를 보정하여 같은 원본 파일을 읽는다. 공통 fixture/support와 기존 Chat `__init__.py`를 재사용하며 신규 테스트·노드·wrapper 삭제는 없다.
+
+현재/역사 generator7개는 정확한 test source 경로를 따라가며 frozen predecessor payload와 digest는 그대로다. #258/#263 baseline, 추가 원장, public604 승인 목록, P8-L-H 원문·평가자료는 변경하지 않았다. 기존 테스트 이동표와 소비자 증거·G07 위치를 갱신했고 Memory12/DirectLLM 분할·다른 도메인 잔여 정리는 별도 범위다. 첫 Chat 전체 검증은205 PASS/기존경고4/34.50초이다. 원래 보존 및 전체수집·관련 inventory 검증은 아래 최종 결과로 구분한다.
+
+최종 Chat205 PASS/기존경고4, before/after 전체 수집2503개는179개 경로 치환 후 집합이 완전히 같다(신규0/누락0). 공개604 승인 원본은 그대로이며 연결 검사가 PASS다. 원래7 읽기 보존 진단은 모두오류0(보호2311/current2503)이고 소스 도입 원장을 쓰지 않았다. 관련 inventory25개 검사 중24 PASS이며, 실패1은 기준348d8b5에 이미 있던 `world_scope_migration.py`의 frozen20595→실제20594bytes 차이다. 현재 제품 파일과 기준blob이 같은 것을 확인했고 부모가 역사적 원문 복원을 별도 소유한다. 이번 source에서는 해당 migration·검증문·동결JSON을 수정하지 않았다. L4/Today current와 원문759개 단언의 전체모듈 AST 동일성을 확인했다.

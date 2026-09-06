@@ -575,7 +575,22 @@
     "backend/app/domains/social/application/observations.py": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
     "backend/app/domains/social/ports/__init__.py": "backend/app/domains/social/contracts/__init__.py",
     "backend/app/domains/social/ports/observation_unit_of_work.py": "backend/app/domains/social/contracts/observation_execution.py",
-    "backend/app/domains/social/api/__init__.py": "backend/app/domains/social/__init__.py"
+    "backend/app/domains/social/api/__init__.py": "backend/app/domains/social/__init__.py",
+    "backend/tests/test_messages_service.py": "backend/tests/chat/test_messages_service.py",
+    "backend/tests/test_p8_l_b_chat_domain.py": "backend/tests/chat/test_p8_l_b_chat_domain.py",
+    "backend/tests/test_p8_l_d_world_chat_api.py": "backend/tests/chat/test_p8_l_d_world_chat_api.py",
+    "backend/tests/test_p8_l_d_world_chat_identity.py": "backend/tests/chat/test_p8_l_d_world_chat_identity.py",
+    "backend/tests/test_p8_l_d_world_chat_migration.py": "backend/tests/chat/test_p8_l_d_world_chat_migration.py",
+    "backend/tests/test_p8_l_e_world_profile_chat_entry.py": "backend/tests/chat/test_p8_l_e_world_profile_chat_entry.py",
+    "backend/tests/test_p8_l_j_response_generation_lifecycle.py": "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
+    "backend/tests/test_p8_l_j_response_generation_migration.py": "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
+    "backend/tests/test_p8_l_k_retrieval_router.py": "backend/tests/chat/test_p8_l_k_retrieval_router.py",
+    "backend/tests/test_p8_l_l_canonical_retrieval_planner.py": "backend/tests/chat/test_p8_l_l_canonical_retrieval_planner.py",
+    "backend/tests/test_p8_l_m_graph_retrieval_planner.py": "backend/tests/chat/test_p8_l_m_graph_retrieval_planner.py",
+    "backend/tests/test_p8_l_n_both_workflow_coordinator.py": "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
+    "backend/tests/test_p8_l_p_evidence_response_streaming.py": "backend/tests/chat/test_p8_l_p_evidence_response_streaming.py",
+    "backend/tests/test_p8_l_p_model_hotfix.py": "backend/tests/chat/test_p8_l_p_model_hotfix.py",
+    "backend/tests/test_p8_l_p_high_reasoning_hotfix.py": "backend/tests/chat/test_p8_l_p_high_reasoning_hotfix.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1335,7 +1350,186 @@
     "tests/test_tendency_note_action_selection.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match": "tests/routines/test_tendency.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match",
     "tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought": "tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
     "tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_excludes_state_and_activity": "tests/routines/test_tendency.py::test_self_update_composition_prompt_excludes_state_and_activity",
-    "tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_includes_lore_as_private_reference": "tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference"
+    "tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_includes_lore_as_private_reference": "tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference",
+    "tests/test_messages_service.py::test_message_service_user_facing_strings_are_not_mojibake": "tests/chat/test_messages_service.py::test_message_service_user_facing_strings_are_not_mojibake",
+    "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread": "tests/chat/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
+    "tests/test_messages_service.py::test_message_thread_quota_is_locked_before_count_and_insert": "tests/chat/test_messages_service.py::test_message_thread_quota_is_locked_before_count_and_insert",
+    "tests/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite": "tests/chat/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite",
+    "tests/test_messages_service.py::test_message_output_token_limit_stays_unchanged": "tests/chat/test_messages_service.py::test_message_output_token_limit_stays_unchanged",
+    "tests/test_messages_service.py::test_message_system_prompt_uses_one_on_one_chat_guidelines": "tests/chat/test_messages_service.py::test_message_system_prompt_uses_one_on_one_chat_guidelines",
+    "tests/test_messages_service.py::test_message_answer_path_does_not_use_character_lore_rag": "tests/chat/test_messages_service.py::test_message_answer_path_does_not_use_character_lore_rag",
+    "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off": "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off",
+    "tests/test_messages_service.py::test_local_character_owner_cannot_start_message": "tests/chat/test_messages_service.py::test_local_character_owner_cannot_start_message",
+    "tests/test_messages_service.py::test_other_user_cannot_start_message_with_local_character_even_when_enabled": "tests/chat/test_messages_service.py::test_other_user_cannot_start_message_with_local_character_even_when_enabled",
+    "tests/test_messages_service.py::test_local_character_existing_thread_send_is_blocked": "tests/chat/test_messages_service.py::test_local_character_existing_thread_send_is_blocked",
+    "tests/test_messages_service.py::test_local_character_message_setting_cannot_be_enabled": "tests/chat/test_messages_service.py::test_local_character_message_setting_cannot_be_enabled",
+    "tests/test_messages_service.py::test_message_credential_label_uses_message_wording": "tests/chat/test_messages_service.py::test_message_credential_label_uses_message_wording",
+    "tests/test_messages_service.py::test_other_user_cannot_start_message_when_character_setting_is_off": "tests/chat/test_messages_service.py::test_other_user_cannot_start_message_when_character_setting_is_off",
+    "tests/test_messages_service.py::test_message_prompt_uses_recent_successful_messages_only": "tests/chat/test_messages_service.py::test_message_prompt_uses_recent_successful_messages_only",
+    "tests/test_messages_service.py::test_message_prompt_keeps_injection_text_as_untrusted_conversation": "tests/chat/test_messages_service.py::test_message_prompt_keeps_injection_text_as_untrusted_conversation",
+    "tests/test_messages_service.py::test_send_message_stores_fallback_when_output_leaks_internal_prompt": "tests/chat/test_messages_service.py::test_send_message_stores_fallback_when_output_leaks_internal_prompt",
+    "tests/test_messages_service.py::test_send_message_stores_normal_answer_without_prompt_guard_change": "tests/chat/test_messages_service.py::test_send_message_stores_normal_answer_without_prompt_guard_change",
+    "tests/test_messages_service.py::test_retry_model_busy_message_updates_existing_assistant_with_current_model": "tests/chat/test_messages_service.py::test_retry_model_busy_message_updates_existing_assistant_with_current_model",
+    "tests/test_messages_service.py::test_retry_message_stores_fallback_when_output_leaks_internal_secret": "tests/chat/test_messages_service.py::test_retry_message_stores_fallback_when_output_leaks_internal_secret",
+    "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message": "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message",
+    "tests/test_messages_service.py::test_retry_message_in_flight_uses_clear_korean_message": "tests/chat/test_messages_service.py::test_retry_message_in_flight_uses_clear_korean_message",
+    "tests/test_messages_service.py::test_retry_rejects_old_or_non_busy_assistant_message": "tests/chat/test_messages_service.py::test_retry_rejects_old_or_non_busy_assistant_message",
+    "tests/test_p8_l_b_chat_domain.py::test_legacy_message_service_is_the_canonical_runtime_module": "tests/chat/test_p8_l_b_chat_domain.py::test_legacy_message_service_is_the_canonical_runtime_module",
+    "tests/test_p8_l_b_chat_domain.py::test_legacy_model_and_schema_exports_are_canonical_objects": "tests/chat/test_p8_l_b_chat_domain.py::test_legacy_model_and_schema_exports_are_canonical_objects",
+    "tests/test_p8_l_b_chat_domain.py::test_chat_v1_policy_values_remain_frozen": "tests/chat/test_p8_l_b_chat_domain.py::test_chat_v1_policy_values_remain_frozen",
+    "tests/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port": "tests/chat/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port",
+    "tests/test_p8_l_d_world_chat_api.py::test_world_chat_api_exposes_the_three_d_owned_operations": "tests/chat/test_p8_l_d_world_chat_api.py::test_world_chat_api_exposes_the_three_d_owned_operations",
+    "tests/test_p8_l_d_world_chat_api.py::test_world_chat_api_owner_body_spoof_cannot_change_canonical_owner": "tests/chat/test_p8_l_d_world_chat_api.py::test_world_chat_api_owner_body_spoof_cannot_change_canonical_owner",
+    "tests/test_p8_l_d_world_chat_api.py::test_world_chat_api_list_and_get_do_not_cross_owner_or_world": "tests/chat/test_p8_l_d_world_chat_api.py::test_world_chat_api_list_and_get_do_not_cross_owner_or_world",
+    "tests/test_p8_l_d_world_chat_api.py::test_world_chat_api_stale_participant_membership_is_not_readable": "tests/chat/test_p8_l_d_world_chat_api.py::test_world_chat_api_stale_participant_membership_is_not_readable",
+    "tests/test_p8_l_d_world_chat_api.py::test_resolved_world_thread_legacy_endpoints_are_redirect_only": "tests/chat/test_p8_l_d_world_chat_api.py::test_resolved_world_thread_legacy_endpoints_are_redirect_only",
+    "tests/test_p8_l_d_world_chat_api.py::test_claimed_local_installation_legacy_create_requires_world_chat": "tests/chat/test_p8_l_d_world_chat_api.py::test_claimed_local_installation_legacy_create_requires_world_chat",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_model_binding_follows_default_or_stays_thread_override": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_model_binding_follows_default_or_stays_thread_override",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_zero_and_spoof_fail_closed": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_zero_and_spoof_fail_closed",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_cross_world_self_and_block_are_rejected": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_cross_world_self_and_block_are_rejected",
+    "tests/test_p8_l_d_world_chat_identity.py::test_same_character_in_two_worlds_has_distinct_scoped_threads": "tests/chat/test_p8_l_d_world_chat_identity.py::test_same_character_in_two_worlds_has_distinct_scoped_threads",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_cardinality_anomaly_is_not_guessed": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_cardinality_anomaly_is_not_guessed",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_inactive_requester_or_responder_membership_fails_closed": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_inactive_requester_or_responder_membership_fails_closed",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_membership_and_character_are_revalidated": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_requester_membership_and_character_are_revalidated",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_rejects_requester_when_character_owner_disagrees": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_rejects_requester_when_character_owner_disagrees",
+    "tests/test_p8_l_d_world_chat_identity.py::test_non_installation_owner_cannot_create_world_chat": "tests/chat/test_p8_l_d_world_chat_identity.py::test_non_installation_owner_cannot_create_world_chat",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_unique_conflict_recovers_the_existing_active_tuple": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_unique_conflict_recovers_the_existing_active_tuple",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_first_preference_unique_conflict_retries_once": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_first_preference_unique_conflict_retries_once",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_stale_membership_is_not_listed_or_read": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_stale_membership_is_not_listed_or_read",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_precommit_revalidation_failure_rolls_back_all_new_rows": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_precommit_revalidation_failure_rolls_back_all_new_rows",
+    "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_reused_thread_model_change_rolls_back_on_revalidation_error": "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_reused_thread_model_change_rolls_back_on_revalidation_error",
+    "tests/test_p8_l_d_world_chat_identity.py::test_resolved_world_thread_legacy_api_is_redirect_only_and_not_mutable": "tests/chat/test_p8_l_d_world_chat_identity.py::test_resolved_world_thread_legacy_api_is_redirect_only_and_not_mutable",
+    "tests/test_p8_l_d_world_chat_identity.py::test_claimed_local_installation_rejects_new_unscoped_legacy_thread": "tests/chat/test_p8_l_d_world_chat_identity.py::test_claimed_local_installation_rejects_new_unscoped_legacy_thread",
+    "tests/test_p8_l_d_world_chat_identity.py::test_lock_safe_preference_creation_flushes_without_committing": "tests/chat/test_p8_l_d_world_chat_identity.py::test_lock_safe_preference_creation_flushes_without_committing",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_resolves_unique_world_pair_and_preserves_message": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_resolves_unique_world_pair_and_preserves_message",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_quarantines_entire_active_tuple_collision_group": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_quarantines_entire_active_tuple_collision_group",
+    "tests/test_p8_l_d_world_chat_migration.py::test_lossless_v4_to_v3_rollback_removes_binding_only": "tests/chat/test_p8_l_d_world_chat_migration.py::test_lossless_v4_to_v3_rollback_removes_binding_only",
+    "tests/test_p8_l_d_world_chat_migration.py::test_alembic_style_v4_to_v3_rollback_restores_legacy_indexes": "tests/chat/test_p8_l_d_world_chat_migration.py::test_alembic_style_v4_to_v3_rollback_restores_legacy_indexes",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_rebuild_refuses_fk_enabled_connection_before_ddl": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_rebuild_refuses_fk_enabled_connection_before_ddl",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v4_to_v3_rebuild_refuses_fk_enabled_connection_before_ddl": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v4_to_v3_rebuild_refuses_fk_enabled_connection_before_ddl",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_failure_keeps_active_generation_and_removes_staging": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_failure_keeps_active_generation_and_removes_staging",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_verifier_rejects_undeclared_legacy_column_mutation": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v3_to_v4_verifier_rejects_undeclared_legacy_column_mutation",
+    "tests/test_p8_l_d_world_chat_migration.py::test_v4_to_v3_refusal_keeps_v4_schema_and_messages_intact": "tests/chat/test_p8_l_d_world_chat_migration.py::test_v4_to_v3_refusal_keeps_v4_schema_and_messages_intact",
+    "tests/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_membership_owned_by_another_user": "tests/chat/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_membership_owned_by_another_user",
+    "tests/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_who_is_not_the_claimed_installation_owner": "tests/chat/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_who_is_not_the_claimed_installation_owner",
+    "tests/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_when_character_owner_disagrees": "tests/chat/test_p8_l_d_world_chat_migration.py::test_backfill_rejects_requester_when_character_owner_disagrees",
+    "tests/test_p8_l_d_world_chat_migration.py::test_backfill_counts_self_as_requester_before_rejecting_self_pair": "tests/chat/test_p8_l_d_world_chat_migration.py::test_backfill_counts_self_as_requester_before_rejecting_self_pair",
+    "tests/test_p8_l_e_world_profile_chat_entry.py::test_p8_l_e_api_contract_exposes_profile_and_chat_entry_operations": "tests/chat/test_p8_l_e_world_profile_chat_entry.py::test_p8_l_e_api_contract_exposes_profile_and_chat_entry_operations",
+    "tests/test_p8_l_e_world_profile_chat_entry.py::test_profile_and_social_author_use_exact_world_character_identity": "tests/chat/test_p8_l_e_world_profile_chat_entry.py::test_profile_and_social_author_use_exact_world_character_identity",
+    "tests/test_p8_l_e_world_profile_chat_entry.py::test_letter_entry_creates_once_then_reuses_the_active_world_thread": "tests/chat/test_p8_l_e_world_profile_chat_entry.py::test_letter_entry_creates_once_then_reuses_the_active_world_thread",
+    "tests/test_p8_l_e_world_profile_chat_entry.py::test_letter_entry_zero_self_blocked_and_anomaly_fail_closed": "tests/chat/test_p8_l_e_world_profile_chat_entry.py::test_letter_entry_zero_self_blocked_and_anomaly_fail_closed",
+    "tests/test_p8_l_e_world_profile_chat_entry.py::test_inactive_and_cross_world_profile_routes_do_not_leak_identity": "tests/chat/test_p8_l_e_world_profile_chat_entry.py::test_inactive_and_cross_world_profile_routes_do_not_leak_identity",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CURRENT_CONTEXT-2]": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CURRENT_CONTEXT-2]",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CANONICAL-3]": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CANONICAL-3]",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[GRAPH-3]": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[GRAPH-3]",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[BOTH-4]": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[BOTH-4]",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CLARIFICATION-2]": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fake_nodes_enforce_route_budget_without_live_provider[CLARIFICATION-2]",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_request_wide_repair_and_duplicate_crg_are_fail_closed": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_request_wide_repair_and_duplicate_crg_are_fail_closed",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_envelope_hash_cross_catalog_and_raw_query_are_rejected": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_envelope_hash_cross_catalog_and_raw_query_are_rejected",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_renewed_lease_rejects_old_fence_and_sequence_gap": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_renewed_lease_rejects_old_fence_and_sequence_gap",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_cancel_orphan_recovery_and_retry_lineage_are_fail_closed": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_cancel_orphan_recovery_and_retry_lineage_are_fail_closed",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_stream_payload_and_typed_commit_metadata_reject_internal_drift": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_stream_payload_and_typed_commit_metadata_reject_internal_drift",
+    "tests/test_p8_l_j_response_generation_lifecycle.py::test_deadline_prevents_late_transition_and_physical_retry_is_visible": "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_deadline_prevents_late_transition_and_physical_retry_is_visible",
+    "tests/test_p8_l_j_response_generation_migration.py::test_v5_to_v6_adds_only_empty_response_request_table_and_is_reversible": "tests/chat/test_p8_l_j_response_generation_migration.py::test_v5_to_v6_adds_only_empty_response_request_table_and_is_reversible",
+    "tests/test_p8_l_j_response_generation_migration.py::test_v5_generation_upgrades_copy_on_write_and_preserves_source": "tests/chat/test_p8_l_j_response_generation_migration.py::test_v5_generation_upgrades_copy_on_write_and_preserves_source",
+    "tests/test_p8_l_k_retrieval_router.py::test_strict_router_parser_rejects_unknown_identity_and_raw_query_fields": "tests/chat/test_p8_l_k_retrieval_router.py::test_strict_router_parser_rejects_unknown_identity_and_raw_query_fields",
+    "tests/test_p8_l_k_retrieval_router.py::test_router_failure_diagnostic_is_closed_bounded_and_never_copies_text": "tests/chat/test_p8_l_k_retrieval_router.py::test_router_failure_diagnostic_is_closed_bounded_and_never_copies_text",
+    "tests/test_p8_l_k_retrieval_router.py::test_provider_schema_matches_parser_shape_and_serializes_for_gemini_families": "tests/chat/test_p8_l_k_retrieval_router.py::test_provider_schema_matches_parser_shape_and_serializes_for_gemini_families",
+    "tests/test_p8_l_k_retrieval_router.py::test_current_mood_hotfix_fixture_is_minimal_current_context": "tests/chat/test_p8_l_k_retrieval_router.py::test_current_mood_hotfix_fixture_is_minimal_current_context",
+    "tests/test_p8_l_k_retrieval_router.py::test_current_context_routes_once_and_injects_no_retrieval_operations": "tests/chat/test_p8_l_k_retrieval_router.py::test_current_context_routes_once_and_injects_no_retrieval_operations",
+    "tests/test_p8_l_k_retrieval_router.py::test_code_resolves_same_world_identity_direction_time_and_caps": "tests/chat/test_p8_l_k_retrieval_router.py::test_code_resolves_same_world_identity_direction_time_and_caps",
+    "tests/test_p8_l_k_retrieval_router.py::test_ambiguous_or_hidden_identity_becomes_safe_clarification_not_both": "tests/chat/test_p8_l_k_retrieval_router.py::test_ambiguous_or_hidden_identity_becomes_safe_clarification_not_both",
+    "tests/test_p8_l_k_retrieval_router.py::test_router_schema_repair_is_request_wide_and_at_most_once": "tests/chat/test_p8_l_k_retrieval_router.py::test_router_schema_repair_is_request_wide_and_at_most_once",
+    "tests/test_p8_l_k_retrieval_router.py::test_request_deadline_cancels_router_before_late_result_is_accepted": "tests/chat/test_p8_l_k_retrieval_router.py::test_request_deadline_cancels_router_before_late_result_is_accepted",
+    "tests/test_p8_l_k_retrieval_router.py::test_held_out_ko_315_case_router_contract_is_executable": "tests/chat/test_p8_l_k_retrieval_router.py::test_held_out_ko_315_case_router_contract_is_executable",
+    "tests/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_exposes_one_logical_call_without_hidden_json_retry[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_maps_domain_failure_to_safe_repair_code": "tests/chat/test_p8_l_k_retrieval_router.py::test_direct_llm_adapter_maps_domain_failure_to_safe_repair_code",
+    "tests/test_p8_l_k_retrieval_router.py::test_sqlalchemy_policy_injects_only_same_world_visible_unblocked_identity": "tests/chat/test_p8_l_k_retrieval_router.py::test_sqlalchemy_policy_injects_only_same_world_visible_unblocked_identity",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_provider_schema_is_canonical_only_and_strict_parser_normalizes": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_provider_schema_is_canonical_only_and_strict_parser_normalizes",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-operation_unknown]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-operation_unknown]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-raw_query_forbidden]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-raw_query_forbidden]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-cross_axis_ref_forbidden]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-cross_axis_ref_forbidden]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-search_text_required]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-search_text_required]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-reference_invalid]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-reference_invalid]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_validator_clamps_code_cap_and_executor_injects_actual_scope": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_validator_clamps_code_cap_and_executor_injects_actual_scope",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_direct_query": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_direct_query",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_canonical_route_calls_one_specialist_and_preserves_three_call_cap": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_canonical_route_calls_one_specialist_and_preserves_three_call_cap",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_canonical_planner_uses_only_remaining_request_wide_repair": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_canonical_planner_uses_only_remaining_request_wide_repair",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_router_repair_prevents_a_second_request_wide_planner_repair": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_router_repair_prevents_a_second_request_wide_planner_repair",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_memory_off_short_circuits_before_planner_or_recall": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_memory_off_short_circuits_before_planner_or_recall",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_binding_and_unresolved_opaque_reference_fail_closed": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_binding_and_unresolved_opaque_reference_fail_closed",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_or_canonical_ids[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_or_canonical_ids[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_or_canonical_ids[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_or_canonical_ids[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_l_canonical_retrieval_planner.py::test_held_out_korean_corpus_covers_all_nine_operations_and_executes": "tests/chat/test_p8_l_l_canonical_retrieval_planner.py::test_held_out_korean_corpus_covers_all_nine_operations_and_executes",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-operation_unknown]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-operation_unknown]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field0]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field0]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field1]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-forbidden_field1]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-cross_axis_ref_forbidden]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-cross_axis_ref_forbidden]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-direction_required]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-direction_required]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-reference_invalid]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies[<lambda>-reference_invalid]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes": "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_registry_overrides_an_incompatible_router_hint_by_intent": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_registry_overrides_an_incompatible_router_hint_by_intent",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_graph_then_canonical_binds_opaque_event_dependency_and_intersects": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_graph_then_canonical_binds_opaque_event_dependency_and_intersects",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_graph_dependency_zero_short_circuits_canonical_planner": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_graph_dependency_zero_short_circuits_canonical_planner",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_independent_recipe_starts_both_planners_in_parallel_and_deduplicates": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_independent_recipe_starts_both_planners_in_parallel_and_deduplicates",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_canonical_then_graph_uses_character_dependency_and_intersection": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_canonical_then_graph_uses_character_dependency_and_intersection",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_deterministic_ranking_and_resolved_row_cap_are_stable": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_deterministic_ranking_and_resolved_row_cap_are_stable",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_sequential_policy_denial_short_circuits_the_downstream_planner": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_sequential_policy_denial_short_circuits_the_downstream_planner",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_shared_request_repair_token_cannot_be_spent_by_both_parallel_planners": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_shared_request_repair_token_cannot_be_spent_by_both_parallel_planners",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_specialist_both_route_requires_the_code_owned_coordinator": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_specialist_both_route_requires_the_code_owned_coordinator",
+    "tests/test_p8_l_n_both_workflow_coordinator.py::test_intent_hash_and_started_tracker_fail_closed": "tests/chat/test_p8_l_n_both_workflow_coordinator.py::test_intent_hash_and_started_tracker_fail_closed",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CURRENT_CONTEXT-2]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CURRENT_CONTEXT-2]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CANONICAL-3]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CANONICAL-3]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[GRAPH-3]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[GRAPH-3]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[BOTH-4]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[BOTH-4]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CLARIFICATION-2]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_all_routes_emit_only_crg_deltas_and_commit_once[CLARIFICATION-2]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CURRENT_CONTEXT-2]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CURRENT_CONTEXT-2]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CANONICAL-3]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CANONICAL-3]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[GRAPH-3]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[GRAPH-3]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[BOTH-4]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[BOTH-4]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CLARIFICATION-2]": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_today_snapshot_reaches_both_providers_without_extra_calls[CLARIFICATION-2]",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_failure_is_durable_retryable_and_partial_assistant_is_not_committed": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_failure_is_durable_retryable_and_partial_assistant_is_not_committed",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_router_repair_exhaustion_is_safe_durable_and_explicitly_retryable",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_router_security_rejection_stays_nonretryable": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_router_security_rejection_stays_nonretryable",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_after_commit_memory_candidate_is_opt_in_idempotent_and_failure_isolated": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_after_commit_memory_candidate_is_opt_in_idempotent_and_failure_isolated",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_evidence_snapshot_is_deterministic_bounded_and_provider_safe": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_evidence_snapshot_is_deterministic_bounded_and_provider_safe",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+    "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request": "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_high_reasoning_policy_is_model_bounded[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_high_reasoning_policy_is_model_bounded[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_high_reasoning_policy_is_model_bounded[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_high_reasoning_policy_is_model_bounded[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemini-2.5-flash-lite-low]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemini-2.5-flash-lite-low]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemini-2.5-flash-low]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemini-2.5-flash-low]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemma-4-26b-a4b-it-None]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemma-4-26b-a4b-it-None]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemma-4-31b-it-None]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_legacy_model_policy_remains_compatible[gemma-4-31b-it-None]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_execution_policy_rejects_an_unknown_future_model": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_world_chat_execution_policy_rejects_an_unknown_future_model",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_foreground_caps_are_shared_while_background_consolidation_is_unchanged": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_foreground_caps_are_shared_while_background_consolidation_is_unchanged",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_gemini_35_is_message_only_and_reuses_the_reviewed_adapter": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_gemini_35_is_message_only_and_reuses_the_reviewed_adapter",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_high_reasoning_serialization_has_no_numeric_thinking_budget[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_high_reasoning_serialization_has_no_numeric_thinking_budget[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_high_reasoning_serialization_has_no_numeric_thinking_budget[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_high_reasoning_serialization_has_no_numeric_thinking_budget[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_frontend_message_catalog_exposes_35_without_expanding_agent_models": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_frontend_message_catalog_exposes_35_without_expanding_agent_models",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_character_response_generator_propagates_high_cap_and_safe_metrics[gemini-3.1-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_character_response_generator_propagates_high_cap_and_safe_metrics[gemini-3.1-flash-lite]",
+    "tests/test_p8_l_p_high_reasoning_hotfix.py::test_character_response_generator_propagates_high_cap_and_safe_metrics[gemini-3.5-flash-lite]": "tests/chat/test_p8_l_p_high_reasoning_hotfix.py::test_character_response_generator_propagates_high_cap_and_safe_metrics[gemini-3.5-flash-lite]",
+    "tests/test_p8_l_p_model_hotfix.py::test_gemini_thinking_config_is_serialized_by_model_family": "tests/chat/test_p8_l_p_model_hotfix.py::test_gemini_thinking_config_is_serialized_by_model_family",
+    "tests/test_p8_l_p_model_hotfix.py::test_unknown_thinking_family_fails_before_provider_io": "tests/chat/test_p8_l_p_model_hotfix.py::test_unknown_thinking_family_fails_before_provider_io",
+    "tests/test_p8_l_p_model_hotfix.py::test_structured_json_and_family_thinking_config_serialize_together": "tests/chat/test_p8_l_p_model_hotfix.py::test_structured_json_and_family_thinking_config_serialize_together",
+    "tests/test_p8_l_p_model_hotfix.py::test_world_thread_model_update_contract_is_closed": "tests/chat/test_p8_l_p_model_hotfix.py::test_world_thread_model_update_contract_is_closed",
+    "tests/test_p8_l_p_model_hotfix.py::test_generation_acceptance_locks_thread_before_model_snapshot": "tests/chat/test_p8_l_p_model_hotfix.py::test_generation_acceptance_locks_thread_before_model_snapshot",
+    "tests/test_p8_l_p_model_hotfix.py::test_v6_to_v7_backfills_only_resolved_threads_to_default_binding": "tests/chat/test_p8_l_p_model_hotfix.py::test_v6_to_v7_backfills_only_resolved_threads_to_default_binding",
+    "tests/test_p8_l_p_model_hotfix.py::test_v6_to_v7_rejects_unknown_resolved_model_without_guessing": "tests/chat/test_p8_l_p_model_hotfix.py::test_v6_to_v7_rejects_unknown_resolved_model_without_guessing"
   },
   "details": {
     "AR-B1": {
@@ -36905,11 +37099,11 @@
         "backend/tests/test_p8_l_f_memory_domain.py",
         "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
         "backend/tests/test_p8_l_h_canonical_recall.py",
-        "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
-        "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",
-        "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+        "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
+        "backend/tests/chat/test_p8_l_l_canonical_retrieval_planner.py",
+        "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
         "backend/tests/test_p8_l_o_memory_consolidation.py",
-        "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+        "backend/tests/chat/test_p8_l_p_evidence_response_streaming.py",
         "backend/tests/test_p8_l_q_memory_read_inspector.py",
         "backend/app/runtime/configuration.py",
         "backend/app/runtime/memory_privacy.py",
@@ -49866,7 +50060,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -49878,7 +50072,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -49890,7 +50084,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -49902,7 +50096,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "list_world_threads"
         },
@@ -49915,7 +50109,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "get_world_thread"
         },
@@ -49928,7 +50122,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "get_world_chat_entry"
         },
@@ -49941,7 +50135,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "create_or_get_world_thread"
         },
@@ -49954,7 +50148,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "update_world_thread_model"
         },
@@ -49967,7 +50161,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_ensure_no_active_world_response_request"
         },
@@ -49980,7 +50174,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "resolve_world_thread_response_model"
         },
@@ -49993,7 +50187,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_owner_controlled_world_characters"
         },
@@ -50006,7 +50200,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_require_world_chat_owner_scope"
         },
@@ -50019,7 +50213,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_active_responding_world_character"
         },
@@ -50032,7 +50226,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_world_characters_are_blocked"
         },
@@ -50044,7 +50238,7 @@
             "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -50055,7 +50249,7 @@
             "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -50067,7 +50261,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "list_threads"
         },
@@ -50080,7 +50274,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "get_thread"
         },
@@ -50093,7 +50287,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "create_or_get_thread"
         },
@@ -50105,7 +50299,7 @@
             "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -50117,7 +50311,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "update_thread"
         },
@@ -50130,7 +50324,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "delete_thread"
         },
@@ -50141,7 +50335,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "send_message"
         },
@@ -50152,7 +50346,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "retry_message"
         },
@@ -50163,7 +50357,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_acquire_response_lease"
         },
@@ -50174,7 +50368,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_release_response_lease"
         },
@@ -50185,7 +50379,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_send_message_locked"
         },
@@ -50196,7 +50390,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_retry_message_locked"
         },
@@ -50207,7 +50401,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_generate_message_answer"
         },
@@ -50298,7 +50492,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_thread_read"
         },
@@ -50311,7 +50505,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_legacy_thread_read"
         },
@@ -50324,7 +50518,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_world_thread_read"
         },
@@ -50337,7 +50531,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_thread_evidence_summaries"
         },
@@ -50350,7 +50544,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_world_chat_role"
         },
@@ -50363,7 +50557,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_thread_messages"
         },
@@ -50376,7 +50570,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_latest_thread_message"
         },
@@ -50389,7 +50583,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_get_owned_thread"
         },
@@ -50402,7 +50596,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_get_owned_legacy_mutable_thread"
         },
@@ -50415,7 +50609,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_get_owned_world_thread"
         },
@@ -50428,7 +50622,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "new_member": "_claimed_local_installation_exists"
         },
@@ -50440,7 +50634,7 @@
             "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
@@ -50453,7 +50647,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
@@ -50466,7 +50660,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
@@ -50570,7 +50764,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
@@ -50593,7 +50787,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_build_system_prompt"
         },
@@ -50604,7 +50798,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_build_user_prompt"
         },
@@ -50615,7 +50809,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_message_output_prompt_injection_block"
         },
@@ -50626,7 +50820,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "new_member": "_llm_failure_message"
         },
@@ -50640,7 +50834,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
@@ -50653,7 +50847,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
@@ -50778,7 +50972,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
+            "tests/chat/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         }
       ],
@@ -50870,7 +51064,7 @@
             "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+            "tests/chat/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ],
           "reason": "Remove the forwarding class; these methods are actual implementations called directly by the corresponding HTTP route."
         },
@@ -50894,7 +51088,7 @@
             "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+            "tests/chat/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
           ],
           "reason": "Remove the forwarding class; these methods are actual implementations called directly by the corresponding HTTP route."
         },
@@ -50906,7 +51100,7 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
+            "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
             "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain"
           ],
           "reason": "Generation HTTP now calls the established concrete workflow directly; generation-role migration is the next B6 slice.",
@@ -50919,7 +51113,7 @@
         "provider_send_retry_identical": 11
       },
       "structure_test_retirement": {
-        "old_node": "tests/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port",
+        "old_node": "tests/chat/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port",
         "temporary_implementation": "backend/app/compatibility/chat_service.py",
         "temporary_contract": "backend/app/compatibility/chat_runtime_contract.py",
         "replacement_node": "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain",
@@ -51022,8 +51216,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ]
         },
         {
@@ -51074,8 +51268,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "accept_world_message"
         },
@@ -51087,8 +51281,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "retry_world_response"
         },
@@ -51100,8 +51294,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "get_world_response_request"
         },
@@ -51113,8 +51307,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "get_latest_world_response_request"
         },
@@ -51150,8 +51344,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_mutation_thread"
         },
@@ -51162,8 +51356,8 @@
             "backend/app/domains/chat/service/generation.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ]
         },
         {
@@ -51173,8 +51367,8 @@
             "backend/app/domains/chat/service/generation.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ]
         },
         {
@@ -51185,8 +51379,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_recover_if_expired"
         },
@@ -51198,8 +51392,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_request_read"
         },
@@ -51211,8 +51405,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_record_read"
         },
@@ -51307,8 +51501,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_fail_before_workflow"
         },
@@ -51320,8 +51514,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_terminal_event"
         },
@@ -51333,8 +51527,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_fence"
         },
@@ -51346,8 +51540,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
           "new_member": "_event"
         },
@@ -51358,8 +51552,8 @@
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ]
         },
         {
@@ -51640,8 +51834,8 @@
       "legacy_retirement": "Three old route import files are same-object test-only aliases for A2 structure inspection; B8 retires them with the original node and new HTTP behavior regression correspondence. Product composition and standalone behavior tests import canonical routers.",
       "tests": [
         "tests/chat/test_http_ownership.py",
-        "tests/test_p8_l_d_world_chat_api.py",
-        "tests/test_p8_l_e_world_profile_chat_entry.py",
+        "tests/chat/test_p8_l_d_world_chat_api.py",
+        "tests/chat/test_p8_l_e_world_profile_chat_entry.py",
         "tests/test_p8_l_q_memory_read_inspector.py"
       ],
       "remaining": "B5/B7 canonical integration and exact old public/ORM/schema/forwarder exports are B8 retirement. No full backend/CI/installer completion claim.",
@@ -54609,17 +54803,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54629,17 +54823,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54649,17 +54843,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54669,17 +54863,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54689,17 +54883,17 @@
             "backend/app/domains/relationships/public.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54709,17 +54903,17 @@
             "backend/app/domains/relationships/public.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54729,17 +54923,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -54749,17 +54943,17 @@
             "backend/app/domains/relationships/service/graph_planning.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
-            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/chat/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
           ]
         },
         {
@@ -112870,6 +113064,56 @@
       ],
       "evidence": "Original executor/owner implementation unchanged; provider/cycle actual whole AST identical after type restoration. Focused existing138 PASS/1 PG skip; protected assertions retained. Existing migration body unchanged apart from same-object helper import. No new nodes.",
       "remaining": "Community facade consumer removal/G07. Parent integration maps old Resident consumers onto runtime/resident/{execution,langgraph,writing}; its activity-policy runtime reverse dependency must be composed outside Resident, without package-cycle exceptions."
+    },
+    "AR-G07-CHAT-TESTS": {
+      "status": "MOVED SOURCE — Chat205PASS / exact before-after2503 nodes / original seven diagnostic checks0 / approved604 preserved; inherited frozenD source drift remains parent-owned",
+      "base_commit": "348d8b5e73e13531b4b34c027fc9b1622e1ae35a",
+      "ownership": "All fifteen remaining root Chat behavior test modules now live in tests/chat beside Chat owner tests. Whole files keep test/function names, assertions, conditions, fakes, wrapper checks and fixtures. Shared model/chat support stays in tests root; Memory and DirectLLM moves are separate scopes.",
+      "actual_paths": [
+        "backend/tests/chat/test_messages_service.py",
+        "backend/tests/chat/test_p8_l_b_chat_domain.py",
+        "backend/tests/chat/test_p8_l_d_world_chat_api.py",
+        "backend/tests/chat/test_p8_l_d_world_chat_identity.py",
+        "backend/tests/chat/test_p8_l_d_world_chat_migration.py",
+        "backend/tests/chat/test_p8_l_e_world_profile_chat_entry.py",
+        "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
+        "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
+        "backend/tests/chat/test_p8_l_k_retrieval_router.py",
+        "backend/tests/chat/test_p8_l_l_canonical_retrieval_planner.py",
+        "backend/tests/chat/test_p8_l_m_graph_retrieval_planner.py",
+        "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
+        "backend/tests/chat/test_p8_l_p_evidence_response_streaming.py",
+        "backend/tests/chat/test_p8_l_p_model_hotfix.py",
+        "backend/tests/chat/test_p8_l_p_high_reasoning_hotfix.py"
+      ],
+      "test_import_consumers": [
+        "backend/tests/chat/test_generation_composition.py",
+        "backend/tests/chat/test_response_lifecycle_owner.py",
+        "backend/tests/chat/test_retrieval_policy_ownership.py",
+        "backend/tests/chat/test_service_ownership.py"
+      ],
+      "current_inventory_consumers": [
+        "scripts/ci/generate_p8_l_j_response_generation_inventory.py",
+        "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
+        "scripts/ci/generate_p8_l_l_canonical_retrieval_planner_inventory.py",
+        "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py",
+        "scripts/ci/generate_p8_l_n_both_workflow_coordinator_inventory.py",
+        "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
+        "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py"
+      ],
+      "moved_node_count": 179,
+      "new_test_nodes": 0,
+      "path_anchors": "K/L/M held-out JSONL paths still resolve to backend/tests/fixtures using parents[1]; the high-reasoning repository anchor changes parents[2] to parents[3]. Other __file__ references keep their meaning. Existing tests/chat/__init__.py is reused.",
+      "frozen_evidence": "Original baseline/checkpoint/additions, M3 public604 approved node file, P8-L-H and all predecessor inventory bytes/digest constants are untouched. Historical generator source paths follow the relocated test, but their frozen --check branch and payload remain unchanged.",
+      "validation": {
+        "chat": "205 passed / existing4 warnings / 34.50seconds",
+        "whole_file_proof": "15 complete module ASTs identical after only five exact fixture/repository anchor restorations; original759 assertions unchanged. Four fixture consumer modules identical after exact import qualification.",
+        "collection": "Before and after sets exactly equal after179 explicit moves:2503 nodes, added0, removed0. Original public604 approval file unchanged; baseline checkerPASS(current2503).",
+        "original_guards": "sources/split_symbols/assertions/suppressions/asgi_exports/api_orm/missing_nodes each0; protected2311/current2503, read-only original signed869bae path supplement only; stock source ledger gate remains parent-owned.",
+        "inventory": "Related10files:24PASS/1 inherited frozen D drift; L4 current1102modules/14frontend/99parity, Today current. Frozen predecessor bytes/digests preserved.",
+        "inherited_failure": "test_p8_l_d_generated_inventory_is_current: original base348d8b5 world_scope_migration.py already20594bytes/hash6c215f06acdc076ea30fc0c0b2bd63b885e98408e1a158c774934126d6d4455e vs frozen20595/hash643c1af687dd0926464c4fef4b6affd0c89c86b0a5730e5580ba42e83354e634. Current product equals base bytes; parent confirmed separate immutable source restoration. No test assertion/artifact altered to bypass.",
+        "product_diff": "No backend/app, migration, fixture corpus, frozen baseline/checkpoint/additions, original approved lists or gitleaks configuration changes."
+      }
     }
   },
   "asgi_exports": {
