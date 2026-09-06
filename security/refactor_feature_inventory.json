@@ -4867,7 +4867,8 @@
         "backend/tests/test_provider_boundary_security.py",
         "backend/tests/test_provider_response_limits.py",
         "backend/tests/media/test_world_banner_codec.py",
-        "backend/tests/media/test_azure_translation.py"
+        "backend/tests/media/test_azure_translation.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[agent]",
@@ -5529,7 +5530,8 @@
         "backend/tests/test_p8_l_d_installer_upgrade_contract.py",
         "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
         "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
-        "backend/tests/test_windows_installer_supported_upgrade_verifier.py"
+        "backend/tests/test_windows_installer_supported_upgrade_verifier.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
@@ -6228,7 +6230,8 @@
         "backend/tests/chat/test_p8_l_e_world_profile_chat_entry.py",
         "backend/tests/social/test_p8_l_e_world_profile_social_activity.py",
         "backend/tests/test_p8_l_e_world_social_chat_entry_inventory.py",
-        "backend/tests/chat/test_thread_repository.py"
+        "backend/tests/chat/test_thread_repository.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/chat/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite",
@@ -7229,7 +7232,8 @@
         "backend/tests/chat/test_p8_l_m_graph_retrieval_planner.py",
         "backend/tests/test_p8_l_m_graph_retrieval_planner_inventory.py",
         "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
-        "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py"
+        "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/test_p8_l_j_response_generation_inventory.py::test_p8_l_j_generated_inventory_is_current",
@@ -7678,7 +7682,8 @@
         "backend/tests/test_p8_l_p_evidence_response_streaming_inventory.py",
         "backend/tests/test_p8_l_p_frontend_streaming.py",
         "backend/tests/chat/test_p8_l_p_high_reasoning_hotfix.py",
-        "backend/tests/chat/test_p8_l_p_model_hotfix.py"
+        "backend/tests/chat/test_p8_l_p_model_hotfix.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/memory/test_p8_l_o_memory_consolidation.py::test_automatic_threshold_keeps_ordinary_sources_provider_free",
@@ -7979,7 +7984,8 @@
         "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
         "browser-tests/product-shell.spec.ts",
         "browser-tests/relationship-graph/product-shell.spec.ts",
-        "browser-tests/static-product-shell.spec.ts"
+        "browser-tests/static-product-shell.spec.ts",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/test_p8_l_q_frontend_memory.py::test_chat_shows_only_deterministic_evidence_capability_and_safe_dialog",
@@ -8608,7 +8614,8 @@
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
-        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py"
+        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
@@ -8834,7 +8841,8 @@
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
-        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py"
+        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/memory/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version",
@@ -9015,7 +9023,8 @@
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
-        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py"
+        "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
+        "browser-tests/refactor-lifecycle.spec.ts"
       ],
       "test_nodes": [
         "tests/test_l3_er5_tauri_product_shell_contract.py::test_desktop_build_outputs_never_enter_docker_build_context",
@@ -15163,6 +15172,11 @@
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F4-B",
         "scope": "Memory scope and owner/batch controls"
+      },
+      "AR-F4-C": {
+        "status": "IMPLEMENTED - local integration validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F4-C",
+        "scope": "Shared screen and native lifecycle boundaries"
       }
     }
   }

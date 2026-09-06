@@ -415,3 +415,18 @@ committed history were deleted.
 - Type/lint, architecture and 324-source preservation PASS. Browser, builds,
   source-contract regression, immutable capture, full preservation and CI remain
   required before sequential integration. No final AR-F5-B claim.
+
+## AR-F4-C shared screen and native lifecycle integration
+
+- Shared Chat/Memory/Settings composition and provider ownership verified. No
+  remaining F4-owned feature-to-feature bridge; the remaining facade cleanup is F5.
+- Added a separate static regression config in Core CI: Memory scope change while
+  an older Character response is held; child close sends only the window command;
+  a fresh host session clears the closing dialog. Both browser cases PASS.
+- Both builds, architecture/design, frozen 324-source oracles and CI policy PASS.
+  Existing web/static/native cases and final integration remain required.
+- #296 COMPLETE: seven post-merge workflows and five Installer jobs SUCCESS.
+  #297 passed exact-head 23/23 and merged as
+  `817071ddd549daec36f565af539280c045abf6cb` at 2026-09-07 06:33:34 KST.
+  Its post-merge remains pending; following PRs merge only after it passes.
+- Chat local full preservation: 2753 protected/current nodes and 37 contracts PASS.
