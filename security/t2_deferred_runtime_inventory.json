@@ -197,6 +197,15 @@
     },
     {
       "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "security/refactor_backend_additions.json"
+    },
+    {
+      "markers": [
         "privacy-contact",
         "product-host"
       ],

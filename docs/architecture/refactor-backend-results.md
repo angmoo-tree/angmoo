@@ -2677,3 +2677,8 @@ Tree/Lore metadata를 합치며 기존 `app.core.context_clipping`의 AR-B4 행�
 같은 후보의 CI·OSS·launcher·desktop installer·Host Tauri 계약과 DCO·구조 경계 검사가 통과했고 custom 현재 보안 검사는2226files/치명0이다. Gitleaks가 원장의 Git blob14개를 generic key로 분류한 첫 실패를 보존한다. 각각 원래 signed commit의 정확한 경로와 실제 Git blob 일치를 확인한 뒤 Residual12개와 Runtime2개를 exact 경로·행·값 조합으로만 구분했다. 실제 Gitleaks8.30.1에서 검토 값은 통과하고 값 변경 및 다른 파일은 각각 검출되는 것을 확인했다. 원장 내용과 비밀 탐지 규칙은 그대로이며 이 보정 후 전체 stock·보안·순차 PR/Hosted/설치/병합 Gate를 이어간다.
 
 보정한 signed `d82db1cc`에서 원래 공식 stock **보호2478=현재2478 /37항목 PASS**, 실제 Gitleaks tree/history 탐지0을 확인했다. Residual의 `core_modules` 중복 정정을 합친 `7cd71f43`은 해당 목록6줄 제거만 다르며 제품·테스트·원장184개는 동일하다. 이 후보의 원래 L0 **6 PASS /0.18초**, 후보 조상만 연결한 격리 Git 저장소의 custom history **10170 blobs/치명0**을 확인했다. 첫 navigation/Gitleaks 실패와 보정 후 결과를 구분하며, 전체 backend2456 PASS는 같은 제품·테스트의 ec72 원본 실행에 근거한다. 순차 PR·원격 Core 전체·Windows/installer·병합 후 검증 및 G5/최종 public_main 제거는 후속 단계다.
+
+
+### AR-B8-A Runtime/G06 PR #288: current inventory correction
+
+The first exact-head PR run at `849e6bc0` failed the deferred runtime inventory check after the preceding CI policy, OSS, allowlist, launcher, installer, Host and architecture checks passed. The original Runtime/G06 source ledger now contains the supported extension type marker; the current inventory had 23 entries and omitted that one existing ledger file. The correction adds only `security/refactor_backend_additions.json` to the generated current inventory (24 entries), preserving all 23 previous rows. Product code, tests, assertion/suppression contracts, the original source ledger184 and frozen checkpoints are unchanged. The initial failure remains recorded separately from the corrected-head CI rerun.
