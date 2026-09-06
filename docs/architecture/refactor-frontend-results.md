@@ -311,3 +311,7 @@ committed history were deleted.
   inspect editor plus real composition, and focused 12 PASS. New boundary PASS.
 - Builds, static browser, committed source capture, full preservation and final
   CI/sequential merge are still required. F3-D through F5-B remain uncompleted.
+
+- AR-F3-C Next/static builds and static browser 68 PASS (42.8s). Three source
+  files were introduced at `39d2d2b330931ba22b0a1e98a77da67607a54c30`, with zero
+  backend nodes added. Full 2753-node/37-contract preservation is running.
