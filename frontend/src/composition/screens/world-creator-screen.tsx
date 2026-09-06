@@ -2,7 +2,7 @@
 import { WorldCreatorClient as WorldDefinitionEditor } from "@/features/worlds/components/world-creator-client";
 import type { WorldRoleInput } from "@/features/worlds/types/worlds";
 import { StudioWorldCharacterList } from "@/features/creator-studio/components/studio-world-character-list";
-import { WorldPackageExportPanel } from "@/features/world-packages/public";
+import { WorldPackageExportPanel } from "@/features/world-packages/components/world-package-export-panel";
 function renderWorldTools(worldId: string, roles: WorldRoleInput[]) {
   return <><StudioWorldCharacterList worldId={worldId} roles={roles} /><WorldPackageExportPanel worldId={worldId} /></>;
 }

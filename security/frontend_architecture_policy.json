@@ -318,7 +318,6 @@
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
-    "frontend/src/features/world-packages/public.ts",
     "frontend/src/features/worlds/api/world-app-client.ts",
     "frontend/src/features/worlds/types/world-app.ts",
     "frontend/src/hooks/use-auth.ts",
@@ -346,6 +345,7 @@
       "device-home",
       "identity",
       "runtime-status",
+      "world-packages",
       "worlds"
     ],
     "common": [

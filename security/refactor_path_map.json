@@ -766,7 +766,11 @@
     "frontend/src/features/creator-studio/ui/creator-studio-dashboard.module.css": "frontend/src/features/creator-studio/components/creator-studio-dashboard.module.css",
     "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx": "frontend/src/features/creator-studio/components/studio-world-character-list.tsx",
     "frontend/src/features/creator-studio/model/studio-world-character-contract.ts": "frontend/src/features/creator-studio/types/studio-world-character.ts",
-    "frontend/src/features/creator-studio/public.ts": "frontend/src/composition/shells/creator-studio-navigation.ts"
+    "frontend/src/features/creator-studio/public.ts": "frontend/src/composition/shells/creator-studio-navigation.ts",
+    "frontend/src/features/world-packages/world-package-import-client.tsx": "frontend/src/features/world-packages/components/world-package-import-client.tsx",
+    "frontend/src/features/world-packages/world-package-export-panel.tsx": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+    "frontend/src/features/world-packages/native-delivery.ts": "frontend/src/features/world-packages/api/native-delivery.ts",
+    "frontend/src/features/world-packages/public.ts": "frontend/src/features/world-packages/components/world-package-export-panel.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135691,6 +135695,41 @@
           "loader": "frontend/src/composition/screens/studio-screen.tsx",
           "types": "frontend/src/features/creator-studio/types/studio-world-list.ts",
           "preserved": "Same API function and creator_studio surface; same AbortSignal, result and error lifecycle."
+        }
+      }
+    },
+    "AR-F3-D": {
+      "scope": "World Package components, typed contracts, file format config and browser/native delivery",
+      "files": {
+        "frontend/src/features/world-packages/world-package-import-client.tsx": "frontend/src/features/world-packages/components/world-package-import-client.tsx",
+        "frontend/src/features/world-packages/world-package-export-panel.tsx": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+        "frontend/src/features/world-packages/native-delivery.ts": "frontend/src/features/world-packages/api/native-delivery.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/world_packages/test_ui_contract.py"
+      ],
+      "frontend_retirements": {
+        "frontend/src/features/world-packages/public.ts": {
+          "reason": "All active callers use actual screen, shell, component or API owners; no published external frontend module contract.",
+          "export_destinations": {
+            "WorldPackageExportPanel": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+            "WorldPackageImportClient": "frontend/src/features/world-packages/components/world-package-import-client.tsx"
+          },
+          "verification": [
+            "No active facade imports",
+            "Actual export declarations and same source symbols",
+            "Next and static Studio scenarios"
+          ]
+        }
+      },
+      "frontend_extractions": {
+        "frontend/src/features/world-packages/api/world-package-client.ts": {
+          "api": "frontend/src/features/world-packages/api/world-package-client.ts",
+          "types": "frontend/src/features/world-packages/types/world-package.ts",
+          "constants": "frontend/src/features/world-packages/config/world-package.ts",
+          "browser_delivery": "frontend/src/features/world-packages/utils/browser-delivery.ts",
+          "preserved": "Original bodies and commands, typed preview/import/export contracts, browser URL revocation and request ordering."
         }
       }
     }

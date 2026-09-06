@@ -9676,6 +9676,19 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "9cdc53d2469c6c1683b4241fc844aefabccf1c62",
+      "feature_id": "K04",
+      "reason": "AR-F3-D World Package DTO/config/browser delivery and unchanged native token commands",
+      "tracked_files": {
+        "frontend/src/features/world-packages/config/world-package.ts": "45bbe7e6980edd2b3c32c9bb0a2755e2af96cf89",
+        "frontend/src/features/world-packages/types/world-package.ts": "587a7df1c20f919cc49be88cbc1541ce540623fa",
+        "frontend/src/features/world-packages/utils/browser-delivery.ts": "155162e18d8b765e8d864ec419b62ce7ca7a9fde"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

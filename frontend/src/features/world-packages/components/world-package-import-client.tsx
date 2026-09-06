@@ -4,17 +4,15 @@ import { AlertTriangle, CheckCircle2, FileArchive, Loader2, RotateCcw, ShieldChe
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { Button, Card, InlineError, Select } from "@/shared/ui/public";
-import {
-  commitWorldPackageImport,
-  discardWorldPackageImport,
-  stageWorldPackageImport,
-  WORLD_PACKAGE_EXTENSION,
-  WORLD_PACKAGE_MEDIA_TYPE,
-  type PreparedWorldPackageImport,
-  type WorldPackageImportResult,
-} from "./api/world-package-client";
-import { PRODUCT_ROUTES, studioWorldRoute, useRuntimeRouter } from "@/shared/navigation/public";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/surfaces";
+import { InlineError } from "@/components/ui/feedback";
+import { Select } from "@/components/ui/form-controls";
+import { commitWorldPackageImport, discardWorldPackageImport, stageWorldPackageImport } from "@/features/world-packages/api/world-package-client";
+import { WORLD_PACKAGE_EXTENSION, WORLD_PACKAGE_MEDIA_TYPE } from "@/features/world-packages/config/world-package";
+import { type PreparedWorldPackageImport, type WorldPackageImportResult } from "@/features/world-packages/types/world-package";
+import { PRODUCT_ROUTES, studioWorldRoute } from "@/lib/navigation/product-routes";
+import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 
 export function WorldPackageImportClient({
   authStatus,

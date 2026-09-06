@@ -57,6 +57,14 @@ Studio의 입력 타입은 화면이 실제 표시하는 값만 설명하며 Dev
 공용 타입으로 승격하지 않는다. 새 Studio 소비자는 제거된 `creator-studio/public.ts` 대신
 실제 component/API 또는 상위 screen을 사용한다.
 
+World Package의 preview·prepare·download·acknowledge·discard·import 요청은
+`features/world-packages/api/world-package-client.ts`가 담당한다. DTO는 `types`,
+파일 확장자·MIME은 `config`, 브라우저 object URL의 생성·해제는 `utils/browser-delivery.ts`,
+네이티브 저장 토큰을 사용하는 명령은 `api/native-delivery.ts`에 있다. 실제 저장 경로를
+프론트엔드 상태나 DTO에 노출하지 않는다. 화면은 `components`에서 라이선스·권리 확인,
+preview digest 승인, 취소·실패·정리와 저장 완료 확인 순서를 유지한다. World 편집과의
+연결은 공통 screen이 담당하며 사용하지 않는 Package facade는 두 실제 컴포넌트로 대체했다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

@@ -1,4 +1,4 @@
-import { isTauriDesktopRuntime } from "@/shared/desktop/public";
+import { isTauriDesktopRuntime } from "@/lib/desktop/product-window";
 
 type TauriInvoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>;
 

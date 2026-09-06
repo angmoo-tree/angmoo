@@ -315,3 +315,17 @@ committed history were deleted.
 - AR-F3-C Next/static builds and static browser 68 PASS (42.8s). Three source
   files were introduced at `39d2d2b330931ba22b0a1e98a77da67607a54c30`, with zero
   backend nodes added. Full 2753-node/37-contract preservation is running.
+
+## AR-F3-D World Package — local validation
+
+- Package import/export UI now lives in components, request DTOs in types,
+  extension/MIME constants in config, browser object URL download in utils and
+  opaque native destination-token commands in api. Preserve all implementation
+  bodies, native command names, cancellation/cleanup and acknowledgement order.
+- Current screen callers use actual Package components; retire the unused
+  two-export facade with exact destinations. The feature has no sibling or
+  upper-composition imports. Design markers now check the same actual primitives.
+- TypeScript/ESLint, proxy smoke, Next/static builds, web 21 (49.9s), Settings 2
+  (7.3s), 60 Package/closeout contracts PASS. Architecture/design and 324-source
+  preservation PASS; static browser, source capture, full preservation and CI
+  remain required. No frozen fixture, expectation, snapshot, lock or asset changes.
