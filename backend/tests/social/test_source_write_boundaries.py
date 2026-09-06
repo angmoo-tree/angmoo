@@ -1,4 +1,4 @@
-from app import models as _registered_models  # Register the current complete ORM metadata before partial DDL.
+from model_fixture_support import models as _registered_models  # Register the current complete ORM metadata before partial DDL.
 
 from types import SimpleNamespace
 

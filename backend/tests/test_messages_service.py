@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 
 import pytest
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.services import direct_llm
 from chat_service_support import messages
 

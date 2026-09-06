@@ -6,7 +6,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from tests.model_fixture_support import models
 
 from app.services import community_abuse_quota
 

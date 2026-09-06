@@ -4,7 +4,7 @@ from app.runtime.social import feed_history as social_feed_history
 from app.domains.routines.service import feed_history_values as social_feed_history_values
 from app.domains.social.service import posts as social_posts
 from app.config import settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.core.redaction import redact_secret_text
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.characters.models import Character

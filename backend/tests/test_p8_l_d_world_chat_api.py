@@ -9,9 +9,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.runtime.chat.message_composition import configure_chat_services
-from app import models
+from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.domains.chat.router.messages import router as messages_router
 from app.domains.chat.router.world_chat import router as world_chat_router
 

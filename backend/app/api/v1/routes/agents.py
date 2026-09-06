@@ -35,9 +35,12 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.identity.dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.domains.routines import exceptions as agent_run_service
@@ -105,7 +108,7 @@ def delete_agent(
     character_id: str,
     data: schemas.AgentDeleteCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> Response:
     try:
         agent_service.delete_agent(db, user, character_id, data)

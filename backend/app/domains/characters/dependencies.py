@@ -2,7 +2,7 @@ from app.domains.characters.contracts import CharacterImageSettingsWorkflows
 """HTTP connection to the application-composed Character runtime callbacks."""
 from fastapi import Request
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.characters.contracts import CharacterManagementWorkflows, CreatorWorkflows, CharacterMediaWorkflows, CharacterImageGenerationWorkflows
 
 

@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.runtime.social.observations import observe_source
 from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
@@ -385,7 +385,7 @@ def _seed_v2_roleless(
                 from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )
-                from app.core.db import Base
+                from app.models import Base
 
                 for name in reversed(MEMORY_BATCH_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)

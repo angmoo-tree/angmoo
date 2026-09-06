@@ -3,8 +3,8 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.relationships.service import projection_state
 from p7_graph_support import seed_projection_fixture
 

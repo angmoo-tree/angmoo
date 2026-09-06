@@ -13,11 +13,11 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.worlds import router as world_routes
 from app.config import settings
-from app.core.db import Base
+from app.models import Base
 from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )

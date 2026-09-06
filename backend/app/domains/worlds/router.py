@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import get_current_user, get_optional_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.api.world_errors import _raise_world_error
 from app.domains.worlds import schemas, service as world_service
 

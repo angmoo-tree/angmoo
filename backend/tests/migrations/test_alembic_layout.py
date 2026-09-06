@@ -93,7 +93,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
 
         def inspect_only(revisions, context):
             import app
-            from app.core.db import Base
+            from app.models import Base
             assert Path(app.__file__).resolve() == (backend / "app/__init__.py").resolve()
             assert context.connection.dialect.name == "sqlite"
             assert context.connection.engine.url.database == ":memory:"

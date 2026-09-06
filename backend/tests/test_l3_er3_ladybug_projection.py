@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.relationships.contracts.projection_commands import (
     NoGraphMutationCommand,
     RelationshipStateProjectionCommand,

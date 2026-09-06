@@ -2,7 +2,7 @@
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.config import settings
 from app.domains.relationships.contracts.diagnostics import DiagnosticsReferences
 

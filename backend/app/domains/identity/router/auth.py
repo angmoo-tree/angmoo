@@ -15,7 +15,7 @@ from app.domains.identity import (
     browser_session,
     client as turnstile,
 )
-from app.core.db import get_db
+from app.database import get_db
 from app.config import settings
 from app.domains.identity.service import (
     auth as auth_service,

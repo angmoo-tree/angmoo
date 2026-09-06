@@ -21,7 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.chat.contracts.generation_lifecycle import (
     ResponseRequestState,
     ResponseTerminalReason,

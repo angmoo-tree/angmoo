@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )

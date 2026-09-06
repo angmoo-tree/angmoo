@@ -1,7 +1,7 @@
 """Connect Memory HTTP to the application's configured runtime collaborators."""
 from fastapi import Request
 
-from app.core.db import get_db
+from app.database import get_db
 from app.api.identity_dependencies import get_current_user
 from app.domains.memory.contracts.management import MemoryWorkflows
 

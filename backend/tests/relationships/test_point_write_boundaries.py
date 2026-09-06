@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, object_session
 
-from app import models as registered_models  # Resolve the existing foreign-key metadata.
+from model_fixture_support import models as registered_models  # Resolve the existing foreign-key metadata.
 from app.domains.relationships.models.points import AgentRelationshipPoint
 from app.domains.relationships.service import points
 

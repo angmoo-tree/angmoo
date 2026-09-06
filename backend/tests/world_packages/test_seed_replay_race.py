@@ -6,7 +6,7 @@ from threading import get_ident
 import pytest
 from sqlalchemy import event
 
-from app import models
+from model_fixture_support import models
 from app.domains.world_packages.policies.collision import (
     WorldPackageCollisionPlan, WorldPackageDuplicateState,
 )

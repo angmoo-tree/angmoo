@@ -14,7 +14,7 @@ from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routine
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 
 from app.config import Settings, settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.domains.runtime.service.lease_coordinator import SchedulerLeaseCoordinator
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError, SchedulerLeaseLostError
 from app.domains.runtime.contracts.lease import SchedulerTickResult

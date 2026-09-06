@@ -19,7 +19,8 @@ from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from tests.model_fixture_support import models
 from app.core.image_generation import (
     POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
     POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL,

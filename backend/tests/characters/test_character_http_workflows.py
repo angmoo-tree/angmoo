@@ -10,10 +10,10 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, object_session
 from starlette.requests import Request
 
-from app import models as registered_models
+from model_fixture_support import models as registered_models
 from app.api.identity_dependencies import get_current_user
 from app.api.v1.routes import agents as mixed_routes
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.characters import dependencies, exceptions, models, router, schemas
 from app.domains.characters.contracts import CharacterManagementWorkflows
 from app.domains.characters.service import management

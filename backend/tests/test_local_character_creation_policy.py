@@ -6,7 +6,8 @@ from pathlib import Path
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 

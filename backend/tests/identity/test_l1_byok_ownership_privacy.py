@@ -10,11 +10,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.agents import router
 from app.core import security
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.core.redaction import sanitize_support_bundle_metadata
 from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.service.credential_resolution import CredentialResolver

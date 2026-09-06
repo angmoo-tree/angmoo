@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.memory.contracts.daypart import DaypartObservationReferences
 from app.domains.memory.models.daypart import AgentDaypartMemoryEvent
 from app.domains.memory.policies import daypart as policy

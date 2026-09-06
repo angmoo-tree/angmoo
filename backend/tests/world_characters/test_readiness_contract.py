@@ -3,8 +3,8 @@ from types import SimpleNamespace
 from datetime import UTC, datetime
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.characters.schemas import AgentActivityProfileReadinessRead
 from app.domains.world_characters.service.readiness import evaluate
 from test_runtime_mode_repair import _user, _seed_world_scope, _seed_ready_entry

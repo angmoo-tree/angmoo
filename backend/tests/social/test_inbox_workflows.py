@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models  # Register complete metadata before partial fixture DDL.
+from model_fixture_support import models  # Register complete metadata before partial fixture DDL.
 from app.core.unit_of_work import deferred_commits
 from app.domains.social.exceptions import NotificationNotFoundError
 from app.domains.social.service import inbox

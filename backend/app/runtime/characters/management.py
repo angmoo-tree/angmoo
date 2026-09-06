@@ -166,7 +166,34 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, or_, select, text, update
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+from app.domains.local_bot.models import AgentLocalKey as _model_AgentLocalKey
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.character_lore.models import CharacterLoreChunk as _model_CharacterLoreChunk
+from app.domains.character_lore.models import CharacterLoreSource as _model_CharacterLoreSource
+from app.domains.chat.models import CharacterMessageSetting as _model_CharacterMessageSetting
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.chat.models import MessageMessage as _model_MessageMessage
+from app.domains.chat.models import MessageThread as _model_MessageThread
+from app.domains.social.models.posts import Notification as _model_Notification
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.social.models.posts import PostImageGenerationJob as _model_PostImageGenerationJob
+from app.domains.social.models.posts import PostImageQuotaReservation as _model_PostImageQuotaReservation
+from app.domains.social.models.posts import PostLike as _model_PostLike
+from app.domains.social.models.posts import PostRepost as _model_PostRepost
+from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+from app.domains.identity.models import User as _model_User
+from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.characters import models as character_models
 from app.domains.characters.service import profile as character_profile
 from app.core import active_hours, security, unit_of_work
@@ -304,7 +331,7 @@ class AgentDeletionMediaCleanupError(AgentServiceError):
 
 
 
-def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]:
+def list_agents(db: Session, user: _model_User) -> list[schemas.AgentDetailRead]:
     return character_management.list_agents(db, user, workflows=build_character_management_workflows())
 
 
@@ -317,7 +344,7 @@ def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]
 
 
 def create_agent(
-    db: Session, user: models.User, data: schemas.AgentCreate
+    db: Session, user: _model_User, data: schemas.AgentCreate
 ) -> schemas.AgentDetailRead:
     return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
 
@@ -373,21 +400,21 @@ def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
 
 
 
-def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
+def get_agent(db: Session, user: _model_User, character_id: str) -> schemas.AgentDetailRead:
     return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
 
 
 
 
-def get_local_connection(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalConnectionRead:
+def get_local_connection(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalConnectionRead:
     return local_key_management.get_local_connection(db, user, character_id)
 
 
-def issue_local_key(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
+def issue_local_key(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
     return local_key_management.issue_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
-def revoke_local_key(db: Session, user: models.User, character_id: str) -> None:
+def revoke_local_key(db: Session, user: _model_User, character_id: str) -> None:
     return local_key_management.revoke_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
@@ -405,7 +432,7 @@ def revoke_local_key(db: Session, user: models.User, character_id: str) -> None:
 
 def update_profile(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentProfileUpdate,
 ) -> schemas.AgentDetailRead:
@@ -430,7 +457,7 @@ def _after_character_profile_updated(db, user, character, media_changed) -> sche
 
 def update_promotion_usage(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentPromotionUsageUpdate,
 ) -> schemas.AgentDetailRead:
@@ -441,7 +468,7 @@ def update_promotion_usage(
 
 def update_persona(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentPersonaUpdate,
 ) -> schemas.AgentDetailRead:
@@ -467,26 +494,26 @@ def _after_character_persona_updated(db, user, character) -> schemas.AgentDetail
 
 def upload_profile_media(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentProfileMediaUpload,
 ) -> schemas.AgentDetailRead:
     return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
 
-def get_image_settings(db: Session, user: models.User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def get_image_settings(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.get_image_settings(db, user, character_id, workflows=build_image_settings_workflows())
 
 
-def update_image_settings(db: Session, user: models.User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
+def update_image_settings(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=build_image_settings_workflows())
 
 
-def upload_image_seed(db: Session, user: models.User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
+def upload_image_seed(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=build_image_settings_workflows())
 
 
-def delete_image_seed(db: Session, user: models.User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def delete_image_seed(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.delete_image_seed(db, user, character_id, workflows=build_image_settings_workflows())
 
 
@@ -515,7 +542,7 @@ def delete_image_seed(db: Session, user: models.User, character_id: str) -> sche
 
 
 def delete_agent(
-    db: Session, user: models.User, character_id: str, data: schemas.AgentDeleteCreate
+    db: Session, user: _model_User, character_id: str, data: schemas.AgentDeleteCreate
 ) -> None:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
@@ -596,7 +623,7 @@ def _activity_profile_readiness(
     db: Session,
     *,
     character: character_models.Character,
-    setting: models.AgentActivitySetting,
+    setting: _model_AgentActivitySetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     return activity_profile_readiness.evaluate(
         db,
@@ -618,7 +645,7 @@ def _bind_slot_auth_profile(
     *,
     user_id: str,
     character: character_models.Character,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
 ) -> None:
     try:
         material = CredentialResolver.resolve_llm_credential(
@@ -641,11 +668,11 @@ def _bind_slot_auth_profile(
 
 
 def _release_slot_auth_profile(
-    slot: models.AgentSlot,
+    slot: _model_AgentSlot,
     *,
     user_id: str,
     character_id: str,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
 ) -> None:
     try:
         openclaw_auth_profiles.release_credential_from_slot(
@@ -706,15 +733,15 @@ def _local_key_token_prefix(token: str) -> str:
 def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: str):
     credential_ids = list(
         db.scalars(
-            select(models.LlmCredential.id).where(
-                models.LlmCredential.owner_id == user_id,
-                models.LlmCredential.character_id == character_id,
+            select(_model_LlmCredential.id).where(
+                _model_LlmCredential.owner_id == user_id,
+                _model_LlmCredential.character_id == character_id,
             )
         )
     )
-    conditions = [models.AgentSlot.assigned_character_id == character_id]
+    conditions = [_model_AgentSlot.assigned_character_id == character_id]
     if credential_ids:
-        conditions.append(models.AgentSlot.assigned_credential_id.in_(credential_ids))
+        conditions.append(_model_AgentSlot.assigned_credential_id.in_(credential_ids))
     return or_(*conditions) if len(conditions) > 1 else conditions[0]
 
 
@@ -722,11 +749,11 @@ def _ensure_agent_deletion_not_busy(
     db: Session, *, user_id: str, character_id: str
 ) -> None:
     active_run_id = db.scalar(
-        select(models.AgentRun.id)
+        select(_model_AgentRun.id)
         .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.character_id == character_id,
-            models.AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
+            _model_AgentRun.user_id == user_id,
+            _model_AgentRun.character_id == character_id,
+            _model_AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -736,12 +763,12 @@ def _ensure_agent_deletion_not_busy(
         )
 
     running_slot_id = db.scalar(
-        select(models.AgentSlot.agent_id)
+        select(_model_AgentSlot.agent_id)
         .where(
             _agent_deletion_slot_condition(
                 db, user_id=user_id, character_id=character_id
             ),
-            models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
+            _model_AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -756,13 +783,13 @@ def _release_openclaw_profile_for_agent(
 ) -> None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
                 _agent_deletion_slot_condition(
                     db, user_id=user_id, character_id=character_id
                 )
             )
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     released = False
@@ -773,7 +800,7 @@ def _release_openclaw_profile_for_agent(
             )
         if slot.assigned_credential_id is None:
             continue
-        credential = db.get(models.LlmCredential, slot.assigned_credential_id)
+        credential = db.get(_model_LlmCredential, slot.assigned_credential_id)
         if credential is None:
             continue
         try:
@@ -798,13 +825,13 @@ def _clear_resident_slots_for_agent(
 ) -> None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
                 _agent_deletion_slot_condition(
                     db, user_id=user_id, character_id=character_id
                 )
             )
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     for slot in slots:
@@ -864,108 +891,108 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
             )
         )
 
-    message_thread_ids = select(models.MessageThread.id).where(
-        models.MessageThread.character_id == character_id
+    message_thread_ids = select(_model_MessageThread.id).where(
+        _model_MessageThread.character_id == character_id
     )
     db.execute(
-        delete(models.MessageMessage).where(
-            models.MessageMessage.thread_id.in_(message_thread_ids)
+        delete(_model_MessageMessage).where(
+            _model_MessageMessage.thread_id.in_(message_thread_ids)
         )
     )
     db.execute(
-        delete(models.MessageThread).where(
-            models.MessageThread.character_id == character_id
+        delete(_model_MessageThread).where(
+            _model_MessageThread.character_id == character_id
         )
     )
     db.execute(
-        update(models.UserMessagePreference)
-        .where(models.UserMessagePreference.source_character_id == character_id)
+        update(_model_UserMessagePreference)
+        .where(_model_UserMessagePreference.source_character_id == character_id)
         .values(credential_source="message_key", source_character_id=None)
     )
     db.execute(
-        delete(models.CharacterMessageSetting).where(
-            models.CharacterMessageSetting.character_id == character_id
+        delete(_model_CharacterMessageSetting).where(
+            _model_CharacterMessageSetting.character_id == character_id
         )
     )
 
-    lore_source_ids = select(models.CharacterLoreSource.id).where(
-        models.CharacterLoreSource.character_id == character_id
+    lore_source_ids = select(_model_CharacterLoreSource.id).where(
+        _model_CharacterLoreSource.character_id == character_id
     )
     db.execute(
-        delete(models.CharacterLoreChunk).where(
+        delete(_model_CharacterLoreChunk).where(
             or_(
-                models.CharacterLoreChunk.character_id == character_id,
-                models.CharacterLoreChunk.source_id.in_(lore_source_ids),
+                _model_CharacterLoreChunk.character_id == character_id,
+                _model_CharacterLoreChunk.source_id.in_(lore_source_ids),
             )
         )
     )
     db.execute(
-        delete(models.CharacterLoreSource).where(
-            models.CharacterLoreSource.character_id == character_id
-        )
-    )
-
-    db.execute(
-        delete(models.PostImageGenerationJob).where(
-            models.PostImageGenerationJob.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.PostImageQuotaReservation).where(
-            models.PostImageQuotaReservation.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentPublicActionExecution).where(
-            models.AgentPublicActionExecution.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentDaypartMemoryEvent).where(
-            models.AgentDaypartMemoryEvent.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentRelationshipPoint).where(
-            or_(
-                models.AgentRelationshipPoint.recipient_character_id == character_id,
-                models.AgentRelationshipPoint.source_character_id == character_id,
-            )
+        delete(_model_CharacterLoreSource).where(
+            _model_CharacterLoreSource.character_id == character_id
         )
     )
 
     db.execute(
-        delete(models.AgentFeedCue).where(models.AgentFeedCue.character_id == character_id)
-    )
-    db.execute(
-        delete(models.AgentActivityLog).where(
-            models.AgentActivityLog.character_id == character_id
+        delete(_model_PostImageGenerationJob).where(
+            _model_PostImageGenerationJob.character_id == character_id
         )
     )
-    db.execute(delete(models.AgentRun).where(models.AgentRun.character_id == character_id))
-    db.execute(delete(models.PostLike).where(models.PostLike.character_id == character_id))
     db.execute(
-        delete(models.PostRepost).where(models.PostRepost.character_id == character_id)
+        delete(_model_PostImageQuotaReservation).where(
+            _model_PostImageQuotaReservation.character_id == character_id
+        )
     )
     db.execute(
-        delete(models.ProfileFollow).where(
+        delete(_model_AgentPublicActionExecution).where(
+            _model_AgentPublicActionExecution.character_id == character_id
+        )
+    )
+    db.execute(
+        delete(_model_AgentDaypartMemoryEvent).where(
+            _model_AgentDaypartMemoryEvent.character_id == character_id
+        )
+    )
+    db.execute(
+        delete(_model_AgentRelationshipPoint).where(
             or_(
-                models.ProfileFollow.follower_character_id == character_id,
-                models.ProfileFollow.target_character_id == character_id,
+                _model_AgentRelationshipPoint.recipient_character_id == character_id,
+                _model_AgentRelationshipPoint.source_character_id == character_id,
+            )
+        )
+    )
+
+    db.execute(
+        delete(_model_AgentFeedCue).where(_model_AgentFeedCue.character_id == character_id)
+    )
+    db.execute(
+        delete(_model_AgentActivityLog).where(
+            _model_AgentActivityLog.character_id == character_id
+        )
+    )
+    db.execute(delete(_model_AgentRun).where(_model_AgentRun.character_id == character_id))
+    db.execute(delete(_model_PostLike).where(_model_PostLike.character_id == character_id))
+    db.execute(
+        delete(_model_PostRepost).where(_model_PostRepost.character_id == character_id)
+    )
+    db.execute(
+        delete(_model_ProfileFollow).where(
+            or_(
+                _model_ProfileFollow.follower_character_id == character_id,
+                _model_ProfileFollow.target_character_id == character_id,
             )
         )
     )
     db.execute(
-        delete(models.Notification).where(
+        delete(_model_Notification).where(
             or_(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.actor_character_id == character_id,
+                _model_Notification.recipient_character_id == character_id,
+                _model_Notification.actor_character_id == character_id,
             )
         )
     )
     db.execute(
-        update(models.Post)
-        .where(models.Post.author_character_id == character_id)
+        update(_model_Post)
+        .where(_model_Post.author_character_id == character_id)
         .values(author_name=DELETED_CHARACTER_NAME)
     )
     db.execute(
@@ -974,23 +1001,23 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
         )
     )
     db.execute(
-        delete(models.AgentActivitySetting).where(
-            models.AgentActivitySetting.character_id == character_id
+        delete(_model_AgentActivitySetting).where(
+            _model_AgentActivitySetting.character_id == character_id
         )
     )
     db.execute(
-        delete(models.AgentImageGenerationSetting).where(
-            models.AgentImageGenerationSetting.character_id == character_id
+        delete(_model_AgentImageGenerationSetting).where(
+            _model_AgentImageGenerationSetting.character_id == character_id
         )
     )
     db.execute(
-        delete(models.LlmCredential).where(
-            models.LlmCredential.character_id == character_id
+        delete(_model_LlmCredential).where(
+            _model_LlmCredential.character_id == character_id
         )
     )
     db.execute(
-        delete(models.AgentLocalKey).where(
-            models.AgentLocalKey.character_id == character_id
+        delete(_model_AgentLocalKey).where(
+            _model_AgentLocalKey.character_id == character_id
         )
     )
 
@@ -1092,7 +1119,7 @@ def _build_agent_detail(
     )
 
 
-def _image_generation_setting_read(db: Session, setting: models.AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
+def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner._image_generation_setting_read(db, setting, workflows=build_image_settings_workflows())
 
 

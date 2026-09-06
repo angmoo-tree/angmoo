@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 
-from app import models  # Register complete current metadata before partial DDL.
+from model_fixture_support import models  # Register complete current metadata before partial DDL.
 from app.core.unit_of_work import deferred_commits
 from app.domains.social.constants import DELETED_CHARACTER_NAME
 from app.domains.social.exceptions import CharacterOwnershipError, FollowSelfError, ProfileNotFoundError

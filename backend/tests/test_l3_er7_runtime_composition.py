@@ -10,7 +10,9 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.v1.routes import world_activity_runtime
+from app.domains.relationships import router as world_activity_runtime
+from app.domains.relationships.dependencies import get_read_references
+from app.runtime.graph_projection import diagnostic_references
 from app.config import Settings
 from app.main import create_public_app as create_app
 from app.runtime.configuration import (
@@ -163,7 +165,7 @@ def guarded_import(name, *args, **kwargs):
 
 builtins.__import__ = guarded_import
 import app.main  # noqa: F401
-from app.core import db
+from app import database as db
 
 assert db._default_engine is None
 assert db._default_session_factory is None
@@ -250,7 +252,10 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
         base=Settings(_env_file=None),
     )
     request = SimpleNamespace(
-        app=SimpleNamespace(state=SimpleNamespace(runtime_settings=runtime_settings))
+        app=SimpleNamespace(state=SimpleNamespace(
+            runtime_settings=runtime_settings,
+            relationships_read_references_factory=diagnostic_references.SqlAlchemyDiagnosticReferences,
+        ))
     )
     request.app.state.relationships_read_references_factory = (
         diagnostic_references.SqlAlchemyDiagnosticReferences

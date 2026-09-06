@@ -2613,3 +2613,17 @@ Docker의 실제 contributor entrypoint와 PyInstaller의 실제 sidecar entrypo
 
 
 G06 원본 계보 보완: 현재 실제 소유 준비 `9aafe289`와 원래 `cc513f4`의 미합류 비-merge commit은 `90d7fd7`·`cc513f4` 두 개뿐임을 Git로 확인했다. 따라서 미래 G5/호환 제거 구현을 앞당기지 않고 이 두 원래 source ancestry를 지금 합류했다. 현재 소스에서 이미 보존·실행 검증한 main/profile·40개 업무 조립·15export·실제 caller·원래 test·보존 checker·frozen/current inventory·추가 원장은 모두 동일하다. 변경은 ER7 문서의 현재 ASGI 경로 한 줄과 기존 G06 결과 이력 추가뿐이며 `g06-original-ancestry-proof.json`에 목록을 보존했다. 원래90d/cc의 immutable snapshot을 현재 최초 도입 원장으로 직접 연결할 수 있으며 ancestry 검사를 완화하거나 대체 source를 최초 도입으로 기록하지 않는다.
+
+## AR-B8-G5 순차 통합 — 단일 Base·DB 연결·명시적 모델 등록
+
+Tree/Lore·Operations·Image·LocalBot·Runtime의 실제 모델 소유와 G06-A가 갖춰진 `576d3119`에 원래 G5 source `924a8361867bd0228943082227221d78507f9027`을 합류한다. 두 소스 사이의 미합류 비-merge commit은 이 G5 source 한 개다. 원래 source의 최초 도입 계보를 유지하며, 현재 B4/B5/B7 및 잔여 업무 함수·40개 앱 연결을 옛 준비 파일로 덮어쓰지 않는다.
+
+`app.models`에는 단일 ORM `Base`를, `app.database`에는 기존 engine/session·연결 함수 6개를 둔다. `runtime.persistence.model_registration.register_models()`가 실제 소유 모듈 23개를 명시적으로 등록한다. 102개 모델의 전체 class AST와 원래 DB 함수 AST가 동일하며, 등록만으로 engine·앱을 생성하지 않는다. 현재 업무 정의 504개의 본문도 정확한 import/모델 참조와 같은 시점의 명시적 등록을 정규화하면 동일하다. `public_main`의 임시 15개 export와 기존 profile 계약은 이 단계에서 유지한다.
+
+제품의 옛 `app.models` aggregate 접근은 각 실제 도메인 ORM을 직접 참조하도록 연결했다. 테스트의 기존 모델 fixture namespace는 `tests.model_fixture_support`에서 같은 102개 class를 제공한다. immutable Alembic 0089와 Chat World-scope migration은 원본 bytes를 그대로 유지하며, 역사적 `app.core.db.Base`는 실제 `app.models.Base`와 동일한 객체의 한정 호환이다. 기존 모델 alias 단언의 승계는 원래 source·실제 class·단일 Base·현재 consumer와 파일 제거를 검증하는 원래 G5 proof로 제한한다.
+
+아직 남은 네 옛 helper 파일의 간접 ORM 접근은 **정확한 임시 consumer 9개**로 기록했다. `cruds.agents`, `services.agent_runs`, `services.community_abuse_quota`, `services.world_foundation`의 원래 61개 참조와 같은 실제 ORM class를 독립 AST 검토로 확인했다. 이는 새 예외가 없다는 주장이 아니다. 각 행에 원래 함수·기존 aggregate 의존·`AR-B8-B` 제거 조건을 명시했으며, wildcard나 경계 검사 코드를 넓히지 않았다. 준비된 실제 helper 이전·호환 제거 후 이 9개 관계도 전부 제거해야 B8-B를 완료할 수 있다.
+
+고정 전 집중 검증은 모델 등록·기존 alias retirement·두 profile factory·cold contributor/sidecar·Alembic **44 PASS / 69.09초**다. 설정 경로·계정 삭제·credential transaction·SQLite 연결/동시성·embedded migration·Memory·World Package 및 기존 Chat/Memory migration 영향 묶음은 **195 PASS / 1 warning / 230.24초**다. 전체 **2,507 tests**가 수집됐고, 실제 full/public **각 196 operations**, ORM **102 tables** 및 ASGI의 frozen 계약 차이는 모두 0이다. 현재 구조는 **1,097 modules / 4,109 edges / exact legacy 50 PASS**다.
+
+위 결과는 source 준비와 집중 검증이다. 선행 184개 원장 prefix 및 현재 navigation 합류, 원래 G5 source의 append-only 최초 도입 연결, 공식 전체 보존 검사와 같은 최종 후보의 전체 backend suite는 이어서 검증한다. Hosted CI·installer·병합 및 B8-B 최종 호환 제거를 이 집중 결과만으로 완료 처리하지 않는다.

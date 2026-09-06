@@ -1,7 +1,7 @@
 """WC runtime-mode ownership preserves the activity plan caller transaction."""
 from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.orm import Session
-from app.core.db import Base
+from app.models import Base
 from app.domains.world_characters.service.runtime_modes import set_activity_runtime_mode
 from test_runtime_mode_repair import _user, _seed_world_scope, _seed_ready_entry
 

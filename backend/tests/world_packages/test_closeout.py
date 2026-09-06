@@ -12,9 +12,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )

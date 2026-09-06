@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.api.authorization import AuthorizationHeader, _bearer_token
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.local_bot.contracts.actions import LocalBotWorkflows
 from app.domains.local_bot.contracts.authentication import (
     LocalBotAuthenticationWorkflows,

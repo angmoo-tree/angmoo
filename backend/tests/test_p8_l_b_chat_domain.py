@@ -19,7 +19,7 @@ def test_legacy_message_service_is_the_canonical_runtime_module() -> None:
 
 
 def test_legacy_model_and_schema_exports_are_canonical_objects() -> None:
-    legacy_models = importlib.import_module("app.models.messages")
+    legacy_models = importlib.import_module("app.domains.chat.models")
     legacy_schemas = importlib.import_module("app.schemas.messages")
 
     assert legacy_models.CharacterMessageSetting is sqlalchemy_models.CharacterMessageSetting

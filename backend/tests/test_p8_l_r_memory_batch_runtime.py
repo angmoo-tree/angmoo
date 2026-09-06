@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
-from app import models
+from model_fixture_support import models
 from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.policies.selection_output import MemorySelectionDecision

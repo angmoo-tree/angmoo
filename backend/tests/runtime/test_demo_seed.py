@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
-from app import models  # Register the existing complete mapper set.
-from app.core.db import Base
+from tests.model_fixture_support import models  # Register the existing complete mapper set.
+from app.models import Base
 from app.runtime.bootstrap import demo_seed
 
 

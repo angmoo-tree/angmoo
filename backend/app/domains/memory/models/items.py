@@ -22,7 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryHotBriefStatus,

@@ -7,14 +7,15 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
-from app import models as registered_models, schemas as registered_schemas
-from app.core.db import Base
+from app import schemas as registered_schemas
+from model_fixture_support import models as registered_models
+from app.models import Base
 from app.core.unit_of_work import deferred_commits
 
 from app.domains.characters import contracts, models, public, schemas
 from app.domains.characters.service import profile, seed, state
 from app.domains.media import schemas as media_schemas
-from app.models import characters as legacy_models
+from app.domains.characters import models as legacy_models
 from app.schemas import agents as legacy_agent_schemas
 from app.schemas import characters as legacy_character_schemas
 from app.schemas import media_security as legacy_media_schemas

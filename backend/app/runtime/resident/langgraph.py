@@ -163,7 +163,12 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.config import settings
@@ -413,7 +418,7 @@ _planner_results_summary = partial(planner_results_service._planner_results_summ
 _compile_write_tasks = partial(writing_tasks_service._compile_write_tasks, clip=_clip, topic_workflows=_topic_arc_workflows)
 
 
-def _decrypt_api_key(credential: models.LlmCredential) -> str:
+def _decrypt_api_key(credential: _model_LlmCredential) -> str:
     try:
         return CredentialResolver.resolve_llm_credential(
             credential,
@@ -546,7 +551,7 @@ def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
 
 def _relationship_point_to_state(
     ctx: LangGraphResidentContext,
-    point: models.AgentRelationshipPoint,
+    point: _model_AgentRelationshipPoint,
 ) -> dict[str, Any] | None:
     source_post = _relationship_source_post_available(ctx, point.source_post_id)
     if source_post is None:
@@ -2125,7 +2130,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
         if isinstance(selected_relationship_point, dict):
             try:
                 db_point = ctx.db.get(
-                    models.AgentRelationshipPoint,
+                    _model_AgentRelationshipPoint,
                     int(selected_relationship_point["id"]),
                 )
                 if (
@@ -2702,7 +2707,7 @@ def _reserve_public_action(
     target_profile_type: str | None = None,
     target_profile_id: str | None = None,
     brief_hash: str | None = None,
-) -> tuple[models.AgentPublicActionExecution | None, dict[str, Any] | None]:
+) -> tuple[_model_AgentPublicActionExecution | None, dict[str, Any] | None]:
     target_id = target_post_id or (
         f"{target_profile_type}:{target_profile_id}" if target_profile_id else None
     )
@@ -2759,7 +2764,7 @@ def _reserve_public_action(
 
 def _finish_execution(
     ctx: LangGraphResidentContext,
-    execution: models.AgentPublicActionExecution,
+    execution: _model_AgentPublicActionExecution,
     *,
     status: str,
     result: dict[str, Any] | None = None,
@@ -3485,7 +3490,7 @@ def _record_relationship_points_after_publish(
     if root_post_id:
         point_id = writing_plan.get("relationship_point_id")
         if point_id:
-            point = ctx.db.get(models.AgentRelationshipPoint, int(point_id))
+            point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if point is not None and point.status in {
                 agent_run_crud.RELATIONSHIP_POINT_PENDING,
                 agent_run_crud.RELATIONSHIP_POINT_SELECTED,
@@ -3517,7 +3522,7 @@ def _record_relationship_points_after_publish(
     elif writing_plan.get("relationship_point_id"):
         point_id = writing_plan.get("relationship_point_id")
         try:
-            point = ctx.db.get(models.AgentRelationshipPoint, int(point_id))
+            point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if (
                 point is not None
                 and point.status == agent_run_crud.RELATIONSHIP_POINT_SELECTED

@@ -8,7 +8,7 @@ from functools import partial
 from app.domains.characters.service.profile import get_character
 from app.domains.social.service.image_jobs import process_one_post_image_job as process_image_job
 from app.config import settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.runtime.social import image_generation as post_image_generation
 from app.domains.social.service import image_attachment
 

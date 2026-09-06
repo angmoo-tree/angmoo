@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.world_character_dependencies import public_profile_service, studio_service, lifecycle_service
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.world_characters.schemas.identity import (
     OwnerControlledIdentityRead,
     OwnerControlledProfileWrite,

@@ -7,7 +7,7 @@ import pytest
 from pydantic import ValidationError
 from sqlalchemy import create_engine
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from model_fixture_support import models as _models  # noqa: F401 - register canonical metadata
 from app.domains.chat.schemas import WorldChatThreadModelUpdate
 from app.domains.chat.contracts.model_binding import MessageModelBindingMode
 from app.providers.gemini import build_generate_content_config

@@ -158,6 +158,9 @@ class SqliteCanonicalDatabase:
     def open(self) -> SqliteCanonicalDoctor:
         if self._engine is not None:
             return self.doctor()
+        from app.runtime.persistence.model_registration import register_models
+
+        register_models()
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         engine = create_engine(
             URL.create("sqlite+pysqlite", database=str(self.database_path)),
