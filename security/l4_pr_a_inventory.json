@@ -2522,10 +2522,10 @@
             "GET"
           ],
           "imports": [
-            "@/lib/backend"
+            "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
-          "sha256": "cb306cd45817876668dc7f6ff063b31d4a91ad7e9c71bc0eded847f2c1a6df27"
+          "sha256": "8eda69e3315d61119fc31c0e351126b4fd65566ec96b2aedbef116e94aba0f70"
         },
         {
           "exports": [
@@ -2540,20 +2540,20 @@
             "GET"
           ],
           "imports": [
-            "@/lib/backend"
+            "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/posts/[postId]/route.ts",
-          "sha256": "4276bdb772aafb9b9508d0013bc52467307b1140784e3d1b47e50671ce92e19f"
+          "sha256": "ac78631be6eb8d114f2ed6d5a313d627bf654c3fca59d6f081a39879a6516367"
         },
         {
           "exports": [
             "GET"
           ],
           "imports": [
-            "@/lib/backend"
+            "@/lib/server/backend"
           ],
           "path": "frontend/src/app/api/community/posts/route.ts",
-          "sha256": "d28dec941f0e2fd78e165f8603802c0f10011815c3f2152c90cea2fb0a29181a"
+          "sha256": "3bb8db1fe84df77d46baaaab1ce5586fd579e0c95dd9a9f82cc45982ef4036e6"
         },
         {
           "exports": [
@@ -2575,10 +2575,11 @@
           ],
           "imports": [
             "@/components/app-shell",
+            "@/features/social/api/social-feed-server",
             "@/features/social/public"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "abab7d80cd84a8bfa47970ead483f7ec846d41f9a1df29d143114eb238f2cd88"
+          "sha256": "173b505a866ce4f2b261785ef91ee53d5ff0d1a42c6fef6d92c8ff6ea533b52f"
         },
         {
           "exports": [

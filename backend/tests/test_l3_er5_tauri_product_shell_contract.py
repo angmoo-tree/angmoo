@@ -184,7 +184,7 @@ def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -
 def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
     windows = _read("desktop/src-tauri/src/product_windows.rs")
     bridge = _read("frontend/src/shared/desktop/desktop-window-bridge.tsx")
-    desktop_runtime = _read("frontend/src/shared/desktop/product-window.ts")
+    desktop_runtime = _read("frontend/src/lib/desktop/product-window.ts")
 
     for marker in (
         'Self::Studio => "studio"',
@@ -260,9 +260,9 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
 
 
 def test_programmatic_navigation_respects_product_window_boundaries() -> None:
-    desktop_runtime = _read("frontend/src/shared/desktop/product-window.ts")
+    desktop_runtime = _read("frontend/src/lib/desktop/product-window.ts")
     runtime_navigation = _read(
-        "frontend/src/shared/navigation/runtime-navigation.ts"
+        "frontend/src/hooks/use-runtime-navigation.ts"
     )
 
     assert "export async function navigateDesktopProductRoute" in desktop_runtime

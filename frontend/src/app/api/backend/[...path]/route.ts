@@ -1,4 +1,4 @@
-import { proxyBackend } from "@/lib/backend";
+import { proxyBackend } from "@/lib/server/backend";
 
 const DEFAULT_PROXY_MAX_BYTES = 1024 * 1024;
 const LORE_UPLOAD_PROXY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024;

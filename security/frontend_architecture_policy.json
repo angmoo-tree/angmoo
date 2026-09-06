@@ -295,6 +295,7 @@
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/social/api/social-agent-client.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
+    "frontend/src/features/social/api/social-feed-server.ts",
     "frontend/src/features/social/api/social-write-client.ts",
     "frontend/src/features/social/model/post-card-navigation.ts",
     "frontend/src/features/social/model/social-agent-contract.ts",
@@ -320,7 +321,8 @@
     "frontend/src/features/world-app/ui/world-app.tsx",
     "frontend/src/features/world-packages/public.ts",
     "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
-    "frontend/src/shared/api/backend-server.ts",
+    "frontend/src/lib/auth/browser-session.ts",
+    "frontend/src/lib/server/backend.ts",
     "frontend/src/shared/api/public.ts",
     "frontend/src/shared/auth/auth-provider.tsx",
     "frontend/src/shared/auth/auth-session.ts",
@@ -356,9 +358,13 @@
       "components/ui/surfaces",
       "hooks/use-mobile-pull-to-refresh",
       "hooks/use-runtime-media-url",
+      "hooks/use-runtime-navigation",
+      "lib/auth/browser-session",
+      "lib/desktop/product-window",
       "lib/media/safe-media-url",
       "lib/navigation/product-routes",
       "lib/runtime/runtime-config",
+      "lib/server/backend",
       "styles/semantic-tokens.css",
       "utils/class-names",
       "utils/profile-presentation",
@@ -378,6 +384,12 @@
         "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
       },
       {
+        "importer": "features/social/api/social-feed-server",
+        "target": "lib/server/backend",
+        "owner_stage": "AR-F3-E",
+        "removal_condition": "Server-only initial feed consumer separated in F2-B. Activate the complete Social feature scope in F3-E; client/public modules never import this server entry."
+      },
+      {
         "importer": "features/world-app/api/world-app-client",
         "target": "features/device-home/public",
         "owner_stage": "AR-F2-C",
@@ -390,124 +402,154 @@
         "removal_condition": "Move the named existing consumer to the target layout; canonical implementation already lives in the new path."
       },
       {
+        "importer": "shared/api/public",
+        "target": "lib/server/backend",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+      },
+      {
+        "importer": "shared/auth/auth-session",
+        "target": "lib/auth/browser-session",
+        "owner_stage": "AR-F3-A",
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+      },
+      {
+        "importer": "shared/desktop/desktop-window-bridge",
+        "target": "lib/desktop/product-window",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+      },
+      {
+        "importer": "shared/desktop/public",
+        "target": "lib/desktop/product-window",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+      },
+      {
         "importer": "shared/interaction/public",
         "target": "hooks/use-mobile-pull-to-refresh",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/interaction/public",
         "target": "utils/scroll-viewport",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/media/safe-media-url",
         "target": "lib/media/safe-media-url",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/media/use-runtime-media-url",
         "target": "hooks/use-runtime-media-url",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/navigation/product-routes",
         "target": "lib/navigation/product-routes",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
+      },
+      {
+        "importer": "shared/navigation/public",
+        "target": "hooks/use-runtime-navigation",
+        "owner_stage": "AR-F4-C",
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/runtime/runtime-config",
         "target": "lib/runtime/runtime-config",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/app-icon",
         "target": "components/ui/app-icon",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/button",
         "target": "components/ui/button",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/class-names",
         "target": "utils/class-names",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/avatar",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/device-frame",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/dialog",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/feedback",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/form-controls",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/navigation",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/profile-avatar",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status-badge",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/surfaces",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       },
       {
         "importer": "shared/ui/public",
         "target": "utils/profile-presentation",
         "owner_stage": "AR-F4-C",
-        "removal_condition": "Existing shared public consumers use this one-way canonical export until their feature stage; remove after the final Chat/Memory consumer moves. No implementation duplication or reverse import."
+        "removal_condition": "One-way canonical common consumer; migrate remaining feature/provider callers at the owning stage and remove the old shared export. No duplicated implementation."
       }
     ]
   }

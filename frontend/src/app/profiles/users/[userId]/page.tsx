@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
 import { UserProfileClient } from "@/components/user-profile-client";
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/lib/server/backend";
 import type { ProfileRead } from "@/lib/community";
 import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
 

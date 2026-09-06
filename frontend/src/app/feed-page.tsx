@@ -1,6 +1,6 @@
+import { getInitialSocialFeed } from "@/features/social/api/social-feed-server";
 import { AppShell } from "@/components/app-shell";
 import {
-  getInitialSocialFeed,
   PostListClient,
   type FeedPage as FeedPageData,
 } from "@/features/social/public";

@@ -1,4 +1,3 @@
-import { fetchBackendJson } from "@/shared/api/public";
 import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
 import { formatDate } from "@/shared/ui/public";
@@ -72,10 +71,6 @@ function feedPath(path: string, options: FeedListOptions): string {
   if (options.cursor) params.set("cursor", options.cursor);
   if (options.content) params.set("content", options.content);
   return `${path}?${params.toString()}`;
-}
-
-export async function getInitialSocialFeed(limit = 10): Promise<FeedPage> {
-  return fetchBackendJson<FeedPage>(`/api/v1/feed?limit=${limit}`);
 }
 
 export function listSocialFeed(options: FeedListOptions = {}) {

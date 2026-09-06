@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
 import { CharacterProfileClient } from "@/components/character-profile-client";
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/lib/server/backend";
 import type { FeedPage, ProfileFeedTab, ProfileRead } from "@/lib/community";
 import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
 

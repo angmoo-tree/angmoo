@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AppShell } from "@/components/app-shell";
 import { ProfileConnectionsClient } from "@/components/profile-connections-client";
-import { fetchBackendJson } from "@/lib/backend";
+import { fetchBackendJson } from "@/lib/server/backend";
 import type {
   ProfileConnectionTab,
   ProfileListPage,

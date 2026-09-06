@@ -9459,6 +9459,18 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_foundation.py": {}
       }
+    },
+    {
+      "commit": "f9fe45d338e86d88bf54e373f438fcd67b0168ad",
+      "feature_id": "K24",
+      "reason": "AR-F2-B separates shared browser session transport and server-only initial Social feed; preserves runtime requests and existing source/test lineages.",
+      "tracked_files": {
+        "frontend/src/features/social/api/social-feed-server.ts": "e8a61be5519a490f00b97649682ce1dfdaa45e34",
+        "frontend/src/lib/auth/browser-session.ts": "acce50c4b9e83cf0307a83dd93b92874fdcd0ddb"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

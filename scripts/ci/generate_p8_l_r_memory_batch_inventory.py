@@ -53,7 +53,7 @@ def build_inventory():
         "frontend/src/features/memory/**/*.*",
         "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx",
         "frontend/src/shared/runtime/desktop-runtime-gate.tsx",
-        "frontend/src/shared/desktop/product-window.ts",
+        "frontend/src/lib/desktop/product-window.ts",
         "browser-tests/memory-batch-fixture.ts",
         ".github/workflows/windows-installer.yml",
         "scripts/ci/*windows_installer_supported_upgrade*",

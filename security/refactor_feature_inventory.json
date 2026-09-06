@@ -93,7 +93,8 @@
         "backend/app/domains/identity/service/credential_management.py",
         "backend/app/domains/routines/service/activity_settings.py",
         "backend/app/domains/world_characters/repository/credential_scope.py",
-        "backend/app/domains/worlds/repository/credential_scope.py"
+        "backend/app/domains/worlds/repository/credential_scope.py",
+        "frontend/src/lib/auth/browser-session.ts"
       ],
       "target_paths": [
         "backend/app/domains/identity/router",
@@ -101,7 +102,8 @@
         "backend/app/domains/identity/repository",
         "backend/app/domains/identity/models.py",
         "backend/app/credentials",
-        "backend/app/runtime/account_deletion.py"
+        "backend/app/runtime/account_deletion.py",
+        "frontend/src/lib/auth/browser-session.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260514_0008_character_profile_identity.py::upgrade",
@@ -5564,10 +5566,10 @@
         "frontend/src/lib/seo.ts",
         "frontend/src/shared/desktop/desktop-window-bridge.tsx",
         "frontend/src/shared/desktop/desktop-window-controls.module.css",
-        "frontend/src/shared/desktop/product-window.ts",
+        "frontend/src/lib/desktop/product-window.ts",
         "frontend/src/shared/desktop/public.ts",
         "frontend/src/shared/navigation/public.ts",
-        "frontend/src/shared/navigation/runtime-navigation.ts",
+        "frontend/src/hooks/use-runtime-navigation.ts",
         "frontend/src/shared/navigation/static-navigation-bridge.tsx",
         "backend/app/domains/local_bot/contracts/authentication.py",
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
@@ -13787,7 +13789,7 @@
         "frontend/src/lib/use-mobile-pull-to-refresh.ts",
         "frontend/src/lib/world-activity-runtime.ts",
         "frontend/src/lib/worlds.ts",
-        "frontend/src/shared/api/backend-server.ts",
+        "frontend/src/lib/server/backend.ts",
         "frontend/src/shared/api/public.ts",
         "frontend/src/shared/auth/auth-session.ts",
         "frontend/src/shared/auth/public.ts",
@@ -13817,7 +13819,9 @@
         "backend/app/services/hosted_configuration.py",
         "backend/app/core/image_generation.py",
         "backend/app/core/public_media.py",
-        "backend/app/core/search_text.py"
+        "backend/app/core/search_text.py",
+        "frontend/src/features/social/api/social-feed-server.ts",
+        "frontend/src/lib/auth/browser-session.ts"
       ],
       "target_paths": [
         "backend/app/domains/tree",
@@ -13828,7 +13832,9 @@
         "backend/app/runtime/routine_posts/interactions.py",
         "frontend/src/composition",
         "frontend/src/features/tree",
-        "frontend/src/components"
+        "frontend/src/components",
+        "frontend/src/features/social/api/social-feed-server.ts",
+        "frontend/src/lib/auth/browser-session.ts"
       ],
       "entrypoints": [
         "GET/POST Tree community routes; existing app/router/packaging and UI entrypoints; see frozen import graph"
@@ -14593,7 +14599,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-0 MERGED / POST-MERGE RUNNING; AR-F2-A VALIDATION IN PROGRESS",
+    "status": "AR-F2-0 COMPLETE; AR-F2-A #292 MERGED / POST-MERGE PENDING; AR-F2-B PR VALIDATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14763,6 +14769,11 @@
         "status": "MOVED / VALIDATION IN PROGRESS",
         "source_map": "security/refactor_path_map.json#details.AR-F2-A",
         "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges"
+      },
+      "AR-F2-B": {
+        "status": "IMPLEMENTED - ISOLATED VALIDATION; merge follows AR-F2-A post-merge",
+        "source_map": "security/refactor_path_map.json#details.AR-F2-B",
+        "scope": "server proxy, browser session transport, runtime navigation and native commands"
       }
     }
   }
