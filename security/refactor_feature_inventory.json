@@ -5134,10 +5134,7 @@
         "backend/app/domains/runtime/contracts/status.py::RuntimeComponentStatus"
       ],
       "consumers": [
-        "backend/app/api/v1/routes/messages.py",
         "backend/app/api/v1/routes/world_character_setup.py",
-        "backend/app/api/v1/routes/world_chat.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/dependencies.py",
         "backend/app/domains/chat/router/messages.py",
         "backend/app/domains/chat/router/world_chat.py",
@@ -5829,9 +5826,6 @@
       "stage": "AR-B6 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
-        "backend/app/api/v1/routes/messages.py",
-        "backend/app/api/v1/routes/world_chat.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/repository/response_lifecycle.py",
         "backend/app/domains/chat/dependencies.py",
         "backend/app/domains/chat/service/threads.py",
@@ -5948,9 +5942,6 @@
       "consumers": [
         "backend/app/api/v1/main.py",
         "backend/app/api/v1/public.py",
-        "backend/app/api/v1/routes/messages.py",
-        "backend/app/api/v1/routes/world_chat.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/contracts/__init__.py",
         "backend/app/domains/chat/contracts/call_tracker.py",
         "backend/app/domains/chat/contracts/character_response_generator.py",
@@ -6814,7 +6805,6 @@
       "stage": "AR-B6",
       "status": "MOVED",
       "current_paths": [
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/repository/response_lifecycle.py",
         "backend/app/domains/chat/dependencies.py",
         "backend/app/domains/chat/service/threads.py",
@@ -6922,9 +6912,6 @@
       "consumers": [
         "backend/app/api/v1/main.py",
         "backend/app/api/v1/public.py",
-        "backend/app/api/v1/routes/messages.py",
-        "backend/app/api/v1/routes/world_chat.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/contracts/__init__.py",
         "backend/app/domains/chat/contracts/call_tracker.py",
         "backend/app/domains/chat/contracts/character_response_generator.py",
@@ -7128,7 +7115,6 @@
       "stage": "AR-B6 / AR-B7",
       "status": "MAPPED",
       "current_paths": [
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/__init__.py",
         "backend/app/domains/chat/infrastructure/model_binding_migration.py",
         "backend/app/domains/chat/infrastructure/world_scope_migration.py",
@@ -7282,9 +7268,6 @@
       "consumers": [
         "backend/app/api/v1/main.py",
         "backend/app/api/v1/public.py",
-        "backend/app/api/v1/routes/messages.py",
-        "backend/app/api/v1/routes/world_chat.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
         "backend/app/domains/chat/contracts/__init__.py",
         "backend/app/domains/chat/contracts/call_tracker.py",
         "backend/app/domains/chat/contracts/character_response_generator.py",
