@@ -2707,3 +2707,6 @@ B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Commu
 - 최종 원본 보호 읽기 진단은 보호2311/current2509, source·split·assertion·suppression·ASGI·APIORM·missing nodes 모두0이다. 옛 split 기록의 private 상태/helper11개도 실제 새 모듈로 연결했다. 원본source/체크포인트·동결자료는 변경하지 않았다.
 
 - C34/G06 제거 후 최종 조립에서 두 실제 확장 registry와 old import 계약, 단일 main factory 및 M4 runtime **25 passed / 39.45초**. Private 확장 경로를 위해 남긴 export는 실제 runtime 함수·객체 한 벌을 공유한다.
+## B8 통합 준비 — 이미지 거절 활동 로그 연결
+
+정적 이름 검사에서 Social 이미지 실행 모듈의 활동 로그 import 누락을 확인해 실제 Routines 활동 로그 service에 연결했다. 파일 SQLite를 사용하는 회귀 검사는 유해 이미지 요청을 보내고 provider 호출을 금지한 상태에서, 별도 Session으로 거절 로그와 skipped 이미지 job의 영속 저장을 확인한다. 새 회귀와 기존 이미지 소유권·생성 검사 **51 passed / 7.19초**다. Routines writing plan의 타입 설명도 실제 `ResidentPlanningContext`를 import한다. 순차 PR·전체 검사·설치·post-merge Gate는 이 준비 검증과 별도로 남는다.

@@ -2,7 +2,7 @@
   "architecture": {
     "backend": {
       "external_import_count": 3128,
-      "internal_edge_count": 4115,
+      "internal_edge_count": 4116,
       "legacy_import_exception_count": 0,
       "module_count": 1102,
       "module_cycles": [],
@@ -2169,6 +2169,7 @@
               "app.domains.characters.repository.image_settings",
               "app.domains.identity.models",
               "app.domains.operations.service.settings",
+              "app.domains.routines.service.activity_logs",
               "app.domains.social.contracts.image_generation",
               "app.domains.social.schemas.community",
               "app.domains.social.schemas.image_generation",

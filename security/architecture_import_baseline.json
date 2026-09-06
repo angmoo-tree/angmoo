@@ -1,5 +1,5 @@
 {
-  "edge_count": 4115,
+  "edge_count": 4116,
   "external_import_count": 3128,
   "module_count": 1102,
   "modules": [
@@ -15759,6 +15759,7 @@
         "app.domains.characters.repository.image_settings",
         "app.domains.identity.models",
         "app.domains.operations.service.settings",
+        "app.domains.routines.service.activity_logs",
         "app.domains.social.contracts.image_generation",
         "app.domains.social.schemas.community",
         "app.domains.social.schemas.image_generation",

@@ -1,6 +1,7 @@
 """Concrete image workflow: same-Session owners, credential/LLM clients and reference files."""
 from __future__ import annotations
 from app.domains.characters.repository import image_settings as image_setting_repository
+from app.domains.routines.service import activity_logs as agent_crud
 
 from app.domains.social.service import image_generation as image_policy, image_identity
 
