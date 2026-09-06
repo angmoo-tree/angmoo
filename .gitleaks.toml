@@ -246,3 +246,11 @@ regexes = [
   '''^\s*"frontend/src/hooks/use-auth\.ts":\ "db40c2e4137178ce1dbce476b9d718f97df3a777",?\s*$''',
   '''^\s*"frontend/src/lib/auth/auth-context\.ts":\ "49d031eb1d79500502c015893120c5227ec05ac6",?\s*$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact F3-B authenticated media Git blob verified at signed source 342e7ae4877b0ee23caea513174a5694e2d78f55; not a credential"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = ['''^\s*"frontend/src/lib/media/authenticated\-media\.ts": "b4ecc8f86e5da489f5cf31368f5704b599471659",?\s*$''']
