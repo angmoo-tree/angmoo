@@ -130,3 +130,20 @@ SOURCE_SHA·hash·프로세스 경로를 연결한다. 제품 코드에 자기 m
 상태는 `CI`, `DELEGATED CHECK`, `USER CHECK`로 구분한다. 최종 판정은 필수
 workflow 완료와 동일 merge의 지원 경로·설치 확인을 모두 충족해야 한다.
 P8-L-S 실제 AI 품질·인과 검증과 Release/Production은 후속 별도 단계다.
+
+### 통합 후보의 검출·보완 이력
+
+첫 통합 후보의 Windows 전체 backend는 2742 PASS·22 기존 SKIP와 3 FAIL이었다.
+2건은 Memory repository 설명 수정 후 현재 PostgreSQL 사용 목록의 source hash가
+오래된 것을 검출했다. 생성기로 그 한 값을 갱신했고 기존 inventory 8개 검사를
+통과했다. 나머지는 Core 보고서 업로드에 기존 CI 업로드 정책이 적용된 결과다.
+같은 제한은 PR #314의 최초 Security workflow `34127752377`에서도 검출됐다.
+
+Core 보고서는 backend의 JUnit/identity 2개와 browser의 JUnit 5개/identity 1개만
+정확한 파일명으로 제한한다. 전체 디렉터리·wildcard·동적 경로·다른 job/workflow·
+unpinned action·추가 upload 옵션은 허용하지 않는다. 기존 secret 참조 금지와
+read-only 권한, Installer의 private-artifact 거절 정책도 유지한다. 이 범위의
+허용/거절 16개 회귀와 기존 CI 정책 4개 검사가 통과했다.
+
+이 보완 후 새 후보에서 필수 CI와 보존/전체 비교를 확인한다. 최초 실패를
+후속 성공으로 덮거나 역사 source/assertion을 재생성하지 않는다.

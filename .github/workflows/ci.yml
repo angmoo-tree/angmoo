@@ -279,7 +279,11 @@ jobs:
         with:
           name: browser-tests-${{ github.sha }}-${{ github.run_attempt }}
           path: |
-            browser-tests/.ci/*.xml
+            browser-tests/.ci/web.xml
+            browser-tests/.ci/settings.xml
+            browser-tests/.ci/static.xml
+            browser-tests/.ci/lifecycle.xml
+            browser-tests/.ci/visual.xml
             browser-tests/.ci/browser-test-identity.json
           include-hidden-files: true
           if-no-files-found: error

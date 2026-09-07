@@ -11009,7 +11009,8 @@
         "frontend/scripts/test-character-state-parity.mjs",
         "frontend/scripts/test-feature-error-parity.mjs",
         "backend/tests/test_refactor_addition_assertion_source.py",
-        "backend/tests/migrations/test_populated_memory_upgrade.py"
+        "backend/tests/migrations/test_populated_memory_upgrade.py",
+        "backend/tests/test_ci_report_artifacts.py"
       ],
       "test_nodes": [
         "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",

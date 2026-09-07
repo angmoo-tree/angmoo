@@ -49,6 +49,54 @@ FORBIDDEN_TEXT = {
     "permissions: write": "write permission",
 }
 
+# Core test jobs use synthetic fixtures and have no repository secrets. Allow
+# only these result files, never an entire workspace, log directory or DB.
+CORE_TEST_REPORT_PATHS = {
+    "backend": ("backend/.ci/backend-junit.xml", "backend/.ci/backend-test-identity.json"),
+    "frontend": (
+        "browser-tests/.ci/web.xml", "browser-tests/.ci/settings.xml",
+        "browser-tests/.ci/static.xml", "browser-tests/.ci/lifecycle.xml",
+        "browser-tests/.ci/visual.xml", "browser-tests/.ci/browser-test-identity.json",
+    ),
+}
+
+
+def check_report_uploads(document: object, workflow_name: str, text: str) -> list[str]:
+    if workflow_name == "windows-installer.yml":
+        return []  # Its existing private-artifact rejection is checked below.
+    jobs = document.get("jobs", {}) if isinstance(document, dict) else {}
+    uploads = []
+    for job_name, job in jobs.items() if isinstance(jobs, dict) else ():
+        if not isinstance(job, dict):
+            continue
+        for step in job.get("steps", []):
+            if isinstance(step, dict) and str(step.get("uses", "")).lower().startswith("actions/upload-artifact@"):
+                uploads.append((job_name, step))
+    errors = []
+    if len(uploads) != text.lower().count("actions/upload-artifact@"):
+        errors.append("artifact upload must be a declared bounded step")
+    seen = set()
+    for job_name, step in uploads:
+        paths = CORE_TEST_REPORT_PATHS.get(job_name)
+        options = step.get("with", {})
+        prefix = "backend" if job_name == "backend" else "browser"
+        expected = {
+            "name": prefix + "-tests-${{ github.sha }}-${{ github.run_attempt }}",
+            "path": "\n".join(paths or ()),
+            "include-hidden-files": True,
+            "if-no-files-found": "error",
+        }
+        actual = dict(options) if isinstance(options, dict) else {}
+        if isinstance(actual.get("path"), str):
+            actual["path"] = actual["path"].strip()
+        if (workflow_name != "ci.yml" or paths is None or job_name in seen
+                or step.get("uses") != "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+                or step.get("if") != "always()" or actual != expected
+                or set(step) != {"name", "if", "uses", "with"}):
+            errors.append("raw artifact upload is limited to the installer or exact Core test reports")
+        seen.add(job_name)
+    return errors
+
 
 class _UniqueKeyLoader(yaml.SafeLoader):
     pass
@@ -172,8 +220,7 @@ def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], 
         for marker, label in FORBIDDEN_TEXT.items()
         if marker in text
     )
-    if "actions/upload-artifact@" in text and path.name != "windows-installer.yml":
-        errors.append("raw artifact upload is limited to windows-installer.yml")
+    errors.extend(check_report_uploads(document, path.name, text))
     if path.name == "windows-installer.yml":
         for forbidden_path in (
             "release-candidate-backup.json",

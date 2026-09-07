@@ -51,6 +51,7 @@ S07의 fake provider는 선택 결과·실패·stale 응답과 물리 호출 수
 
 - `source_sha`는 검증하려는 PR head 또는 push SHA다. `checkout_sha`·tree는 runner가 실제로 실행한 checkout이다. PR에서는 GitHub가 만든 임시 merge와 PR head가 다를 수 있으므로 둘을 모두 기록한다.
 - identity 파일의 event·run ID/attempt·Python/uv 또는 Node/pnpm·lock hash를 결과와 함께 읽는다. 과거 head의 XML을 새 head의 PASS로 옮기지 않는다.
+- 업로드는 Core의 정확한 JUnit 6개와 identity 2개로 한정한다. 일반 파일·DB·환경 파일·디렉터리 wildcard는 CI 정책에서 거절하며, 통제된 합성 fixture 결과를 보관한다.
 - 테스트가 실행되기 전에 job이 실패했거나 XML이 없으면 PASS가 아니다. 실패 보고서도 보관하며, backend 전체와 브라우저의 필수 다섯 suite를 구분한다.
 - 원장의 `test_paths`에는 fixture/helper도 포함된다. 수집 node가 없는 지원 파일은 실제 테스트 소비자와 연결하고, 실행했다고 임의의 PASS 숫자를 부여하지 않는다.
 
