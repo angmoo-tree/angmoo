@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import { getScrollTop, resolveScrollEventTarget } from "@/utils/scroll-viewport";
+import { getScrollTop, resolveScrollEventTarget } from "@/lib/dom/scroll-viewport";
 
 const PULL_THRESHOLD_PX = 70;
 const INTERACTIVE_SELECTOR =

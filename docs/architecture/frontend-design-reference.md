@@ -3,7 +3,7 @@
 The 2026-09-07 common-UI move retains the existing Local primitive implementation
 and all original adoption classifications. Its current paths are in
 `security/frontend_design_policy.json`: `components/ui`, `styles`, `hooks` and
-`utils`. No new hosted code, assets, fonts or visual decisions were imported.
+`lib/dom`, `lib/navigation` and `utils`. No new hosted code, assets, fonts or visual decisions were imported.
 Historical provenance below keeps its original reference commits.
 
 This document is the public, clean-clone companion to

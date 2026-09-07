@@ -13,7 +13,7 @@ import { createMessageThread, getMessageSettings } from "@/features/chat/api/cha
 import { followProfile, getCharacterProfileFeed, getFollowStatus } from "@/features/social/api/community";
 import { type FeedPage, type ProfileFeedTab, type PostSummary, type ProfileRead } from "@/features/social/types/community";
 import { formatDate } from "@/utils/profile-presentation";
-import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
+import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
 import { formatHandle } from "@/utils/profile-presentation";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";

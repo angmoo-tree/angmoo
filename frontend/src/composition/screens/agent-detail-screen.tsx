@@ -37,9 +37,9 @@ import { clearAuth,isAuthError } from "@/lib/auth/browser-session";
 import { getCharacterProfile, getCharacterProfileFeed } from "@/features/social/api/community";
 import { type FeedPage, type PostSummary, type ProfileFeedTab, type ProfileRead } from "@/features/social/types/community";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
-import { shouldOpenPostFromCardClick,shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
+import { shouldOpenPostFromCardClick,shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
 import { apiInstantTimestamp,formatDate,formatHandle } from "@/utils/profile-presentation";
-import { isScrollNearBottom,resolveScrollEventTarget } from "@/utils/scroll-viewport";
+import { isScrollNearBottom,resolveScrollEventTarget } from "@/lib/dom/scroll-viewport";
 import {
 AlertTriangle,
 Bird,

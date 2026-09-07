@@ -15,8 +15,8 @@ legacy_reference_dependency: none
 # Angmoo Local Frontend Design Contract
 
 > 2026-09-07 구조 이전 위치: 공용 primitive는 `src/components/ui`, 전역 semantic token은
-> `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, 순수 표시·scroll 도구는
-> `src/utils`가 구현을 소유한다. 아래 과거 UI 단계의 `shared/ui` 표기는 당시 위치이며
+> `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, DOM scroll은 `src/lib/dom`,
+> 카드 탐색은 `src/lib/navigation`, 순수 표시 도구는 `src/utils`가 구현을 소유한다. 아래 과거 UI 단계의 `shared/ui` 표기는 당시 위치이며
 > 시각·입력·출처 계약은 그대로 유지한다. 현재 위치와 실행 상태는
 > [ARCHITECTURE](ARCHITECTURE.md)와 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
 

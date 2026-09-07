@@ -854,7 +854,9 @@
     "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx",
     "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts",
     "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts",
-    "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts"
+    "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts",
+    "frontend/src/utils/post-card-navigation.ts": "frontend/src/lib/navigation/post-card-navigation.ts",
+    "frontend/src/utils/scroll-viewport.ts": "frontend/src/lib/dom/scroll-viewport.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135913,8 +135915,8 @@
             "SocialPostRow": "frontend/src/features/social/components/social-post-row.tsx",
             "SocialPostRowProps": "frontend/src/features/social/components/social-post-row.tsx",
             "SocialPostRowVariant": "frontend/src/features/social/components/social-post-row.tsx",
-            "shouldOpenPostFromCardClick": "frontend/src/utils/post-card-navigation.ts",
-            "shouldOpenPostFromCardKeyDown": "frontend/src/utils/post-card-navigation.ts",
+            "shouldOpenPostFromCardClick": "frontend/src/lib/navigation/post-card-navigation.ts",
+            "shouldOpenPostFromCardKeyDown": "frontend/src/lib/navigation/post-card-navigation.ts",
             "WorldSocialFeed": "frontend/src/features/social/components/world-social-feed.tsx",
             "WorldCharacterSocialProfileActivity": "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
             "getInitialSocialFeed": "frontend/src/features/social/api/social-feed-server.ts"
@@ -136239,10 +136241,10 @@
           "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
           "export_destinations": {
             "useMobilePullToRefresh": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
-            "getScrollTop": "frontend/src/utils/scroll-viewport.ts",
-            "isScrollNearBottom": "frontend/src/utils/scroll-viewport.ts",
-            "resolveScrollEventTarget": "frontend/src/utils/scroll-viewport.ts",
-            "ScrollEventTarget": "frontend/src/utils/scroll-viewport.ts"
+            "getScrollTop": "frontend/src/lib/dom/scroll-viewport.ts",
+            "isScrollNearBottom": "frontend/src/lib/dom/scroll-viewport.ts",
+            "resolveScrollEventTarget": "frontend/src/lib/dom/scroll-viewport.ts",
+            "ScrollEventTarget": "frontend/src/lib/dom/scroll-viewport.ts"
           },
           "verification": [
             "Every frozen named export has an actual declaration owner",
@@ -136571,8 +136573,8 @@
         "frontend/src/lib/post-card-navigation.ts": {
           "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
           "export_destinations": {
-            "shouldOpenPostFromCardClick": "frontend/src/utils/post-card-navigation.ts",
-            "shouldOpenPostFromCardKeyDown": "frontend/src/utils/post-card-navigation.ts"
+            "shouldOpenPostFromCardClick": "frontend/src/lib/navigation/post-card-navigation.ts",
+            "shouldOpenPostFromCardKeyDown": "frontend/src/lib/navigation/post-card-navigation.ts"
           },
           "verification": [
             "Every frozen named export has an actual declaration owner",
@@ -137077,6 +137079,14 @@
         "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts"
       },
       "preserved": "Source bytes unchanged; native branch unchanged; same Blob, filename, anchor lifecycle and deferred URL revocation."
+    },
+    "AR-X1-D": {
+      "scope": "Shared browser DOM and navigation ownership",
+      "files": {
+        "frontend/src/utils/post-card-navigation.ts": "frontend/src/lib/navigation/post-card-navigation.ts",
+        "frontend/src/utils/scroll-viewport.ts": "frontend/src/lib/dom/scroll-viewport.ts"
+      },
+      "preserved": "Source bytes unchanged; the existing scroll contract test only follows the mapped source path."
     }
   },
   "asgi_exports": {

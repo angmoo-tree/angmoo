@@ -14,7 +14,7 @@ import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { formatDate } from "@/utils/profile-presentation";
 import { searchNest } from "@/features/social/api/community";
 import { type CharacterSearchResult, type ProfileListItem, type PostSummary, type SearchResults } from "@/features/social/types/community";
-import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
+import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
 import { formatHandle } from "@/utils/profile-presentation";
 
 type SearchTab = "posts" | "characters";
