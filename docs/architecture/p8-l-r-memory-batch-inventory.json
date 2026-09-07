@@ -24,7 +24,7 @@
   "files": [
     {
       "path": ".github/workflows/windows-installer.yml",
-      "sha256": "aea09610bcd72c5c59ee6a9af99c88287d0ef1176a20b9198c520780d2e6a8e4"
+      "sha256": "5271860d7a363076044bf2dd6054c039753173f74d2ea6cfa7d3f86b202c0ccb"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",

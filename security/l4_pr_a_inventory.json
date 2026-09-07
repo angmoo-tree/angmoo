@@ -2972,7 +2972,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "aea09610bcd72c5c59ee6a9af99c88287d0ef1176a20b9198c520780d2e6a8e4"
+    "workflow_sha256": "5271860d7a363076044bf2dd6054c039753173f74d2ea6cfa7d3f86b202c0ccb"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {

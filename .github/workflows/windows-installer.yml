@@ -1060,6 +1060,30 @@ jobs:
             app_secret_sha256 = $secretHashAfterFirstRun.ToLowerInvariant()
           } | ConvertTo-Json -Depth 5 |
             Set-Content -LiteralPath (Join-Path $lifecycleEvidence 'localappdata-lifecycle.json') -Encoding utf8
+      - name: Capture installer transaction evidence even on early failure
+        if: always()
+        shell: pwsh
+        run: |
+          $evidence = Join-Path $env:RUNNER_TEMP 'angmoo-defender-evidence'
+          New-Item -ItemType Directory -Force -Path $evidence | Out-Null
+          $productRoot = Join-Path $env:LOCALAPPDATA 'Angmoo'
+          # Only installer-owned structured diagnostics from this synthetic CI
+          # installation; never collect databases, credentials or chat logs.
+          $diagnostics = @(
+            'logs/installer-update.jsonl',
+            'runtime/installer-transaction.json',
+            'runtime/installer-data-upgrade-result.json'
+          )
+          $availability = foreach ($relative in $diagnostics) {
+            $source = Join-Path $productRoot $relative
+            $present = Test-Path -LiteralPath $source -PathType Leaf
+            if ($present) {
+              Copy-Item -LiteralPath $source -Destination $evidence
+            }
+            [ordered]@{ diagnostic = $relative; present = $present }
+          }
+          ConvertTo-Json -InputObject @($availability) -Depth 3 |
+            Set-Content -LiteralPath (Join-Path $evidence 'installer-diagnostic-availability.json') -Encoding utf8
       - name: Capture hosted Defender evidence
         if: always()
         shell: pwsh
