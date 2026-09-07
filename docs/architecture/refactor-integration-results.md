@@ -147,3 +147,17 @@ read-only 권한, Installer의 private-artifact 거절 정책도 유지한다. �
 
 이 보완 후 새 후보에서 필수 CI와 보존/전체 비교를 확인한다. 최초 실패를
 후속 성공으로 덮거나 역사 source/assertion을 재생성하지 않는다.
+
+### 실제 실행에서 발견한 migration 진단 기준 보완
+
+PR #314 merge의 Docker와 Windows Host 화면에서 DB는 현재 SQLite v9로 정상
+열렸지만 runtime 진단이 과거 revision 0083을 head로 비교해 제한 상태를 표시했다.
+실제 DB revision·SQLite manifest·Alembic head는 모두 `20260904_0089`였다.
+진단 상수를 현재 head에 맞추고, 새 DB를 실제로 열어 진단하는 회귀를 추가했다.
+과거 및 미래 revision을 제한하는 판정은 그대로 유지한다.
+
+기존 진단 테스트는 같은 상수를 fixture에 사용하므로 상수 자체의 노후화를
+검출하지 못했다. 새 검사는 manifest와 Alembic graph를 독립적으로 대조한다.
+수정 전 새 4개 검사가 실패했고, 수정 후 기존 진단 검사와 합쳐 12개가 통과했다.
+K12·G06·G13 보존 원장에 연결하며 필수 Core CI의 전체 backend 실행에 포함한다.
+DB 데이터·migration 본문·공개/권한 정책을 변경하는 수정은 아니다.

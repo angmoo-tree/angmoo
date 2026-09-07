@@ -10478,6 +10478,40 @@
       "test_suppressions": {
         "tests/test_ci_report_artifacts.py": {}
       }
+    },
+    {
+      "commit": "120c515eae02c965921d73d15e8e69ba94300297",
+      "feature_id": "G13",
+      "reason": "AR-X6 current SQLite and Alembic migration diagnostic regression for K12, G06 and G13",
+      "tracked_files": {
+        "backend/tests/runtime/test_current_schema_diagnostics.py": "f1736b7354c5e4af063f0b682e4aa54a16179be3"
+      },
+      "test_nodes": [
+        "tests/runtime/test_current_schema_diagnostics.py::test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph",
+        "tests/runtime/test_current_schema_diagnostics.py::test_real_canonical_database_diagnostic_accepts_only_current_revision[20260825_0083]",
+        "tests/runtime/test_current_schema_diagnostics.py::test_real_canonical_database_diagnostic_accepts_only_current_revision[20990101_9999]",
+        "tests/runtime/test_current_schema_diagnostics.py::test_real_canonical_database_diagnostic_accepts_only_current_revision[None]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_current_schema_diagnostics.py": {
+          "test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == [RUNTIME_MIGRATION_HEAD]"
+          ],
+          "test_real_canonical_database_diagnostic_accepts_only_current_revision": [
+            "assert status.head_revision == doctor.source_revision",
+            "assert status.current_revision == (replacement or doctor.source_revision)",
+            "assert status.state is RuntimeComponentState.READY",
+            "assert status.reason_code is None",
+            "assert status.state is RuntimeComponentState.DEGRADED",
+            "assert status.reason_code is RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_current_schema_diagnostics.py": {}
+      }
     }
   ]
 }
