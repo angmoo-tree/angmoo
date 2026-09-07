@@ -201,3 +201,29 @@ def test_browser_relative_source_move_preserves_assertions_and_rejects_weakened_
     assert verify(tmp_path, {path: original}, {old: new}) == []
     write(tmp_path, path, moved.replace("toBe(2)", "toBe(0)"))
     assert any("frontend_oracle_changed" in error for error in verify(tmp_path, {path: original}, {old: new}))
+
+
+def test_complete_mode_rejects_a_cycle_only_between_new_composition_files(tmp_path):
+    write(tmp_path, "composition/screens/a.tsx", 'import { b } from "./b"; export const a = b;')
+    write(tmp_path, "composition/screens/b.tsx", 'import { a } from "./a"; export const b = a;')
+    assert any("refactor_module_cycle" in e for e in check_completed_frontend(tmp_path))
+
+
+def test_complete_mode_does_not_ignore_a_new_unclassified_source_root(tmp_path):
+    write(tmp_path, "misc/business.ts", 'export const hidden = true;')
+    assert any("frontend_unclassified_source" in e for e in check_completed_frontend(tmp_path))
+
+
+def test_complete_public_checker_accepts_new_valid_owners_without_scope_registration(tmp_path):
+    import json
+    from check_frontend_architecture_boundaries import check_frontend
+    policy = json.loads((ROOT / "security/frontend_architecture_policy.json").read_text())
+    policy["required_paths"] = []
+    policy["required_markers"] = {}
+    policy["refactor"] = {"complete": True, "features": [], "common": [], "bridges": []}
+    write(tmp_path, "app/page.tsx", 'import { Card } from "@/features/new/components/card";')
+    write(tmp_path, "features/new/components/card.tsx", 'import { Button } from "@/components/ui/new-button"; export const Card = Button;')
+    write(tmp_path, "components/ui/new-button.tsx", 'export const Button = 1;')
+    assert check_frontend(tmp_path, policy) == []
+    write(tmp_path, "components/ui/new-button.tsx", 'import { Card } from "@/features/new/components/card"; export const Button = Card;')
+    assert any("refactor_common_imports_application" in e for e in check_frontend(tmp_path, policy))

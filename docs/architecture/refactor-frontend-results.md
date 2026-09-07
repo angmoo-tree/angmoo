@@ -1,9 +1,10 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0~AR-F3-B #291~#296 COMPLETE; AR-F3-C #297 MERGED
-with post-merge running; AR-F3-D #298~AR-F3-F #300 pre-merge 23/23 PASS;
-AR-F3-G #301 and AR-F4-A/B/C #302~#304 in CI; AR-F5-A local implementation;
-AR-F5-B and AR-X NOT STARTED**.
+The AR-F2-0 through AR-F5-B structural implementation is present in this tree.
+The dated sections below record verification snapshots, not an implicit promotion
+of a pending merge or runtime gate. [Final integration PR #306](https://github.com/angmoo-tree/angmoo/pull/306)
+records its exact head checks and merge state; its merge commit's Actions remain
+a separate gate. AR-X is not started.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -454,3 +455,60 @@ committed history were deleted.
   checked at its real utility owner; original route operations remain unchanged.
   Memory's historical assertion is materialized from real Git source so its
   original assertion AST remains protected. Local focused 9 PASS.
+
+## AR-F5-B whole-tree mode — implementation and final validation
+
+- Enabled complete ownership checks for all frontend source and static entry
+  files. New features and common files are automatically covered. Composition-only
+  cycles and unclassified source roots now fail as well; 58 focused guard tests PASS.
+- Architecture and contributor entry documents describe actual role files and
+  current whole-tree behavior. Historical product-shell records remain explicitly
+  separated from current contribution rules.
+- Final typecheck/lint, proxy and Identity/Characters/Social request parity PASS.
+  Full backend, both builds, browser/static/lifecycle, Linux visual, clean checkout,
+  Host and installer gates remain pending at this writing. Completion of the
+  checker is not completion of these runtime gates.
+
+## Integration receipt — 2026-09-07 07:11 KST
+
+- AR-F3-C #297 merge 817071ddd549daec36f565af539280c045abf6cb:
+  all seven post-merge workflows PASS, including Installer five jobs.
+- AR-F3-D #298: exact head de1abed71db6ea00b31b455ad9673b12619bf5f0,
+  all 23 pre-merge checks PASS; merged at 07:11:08 KST as
+  618905f73b11b19f30493aca87965a981ef9d405. Post-merge remains in progress.
+
+## Final candidate verification — 2026-09-07 07:40 KST
+
+Source candidate: `6a410060cb0de7a9f3fe3060ebe345da8b7de690` (PR #306).
+The following documentation update does not change product or test implementation.
+
+| Evidence | Result |
+| --- | --- |
+| Windows backend full suite | 2739 passed, 22 existing skips, 28 warnings |
+| Clean-checkout Linux backend, Core CI 34063821697 | Same 2739 passed and 22 skips |
+| Frontend typecheck/lint, Next and static builds | PASS locally and in CI |
+| Web / Settings / static / lifecycle | 21 / 2 / 68 / 2 PASS locally and in CI |
+| Fixed Linux production/static visual corpus | 36 PASS, original snapshots unchanged |
+| Immutable frontend stock | 324; original browser assertions, fixtures, assets and locks preserved |
+| Full preservation | 2761 protected/current test nodes, 37 feature items PASS |
+| Request parity | Proxy; Identity 14, Characters 45, Social 27+4 request contracts PASS |
+| Whole-tree ownership and history secret scan | PASS; 14 features, zero legacy exception edges |
+
+PR #305 also passed full preservation with 2758 nodes and 37 items. Three final
+whole-tree regressions account for the final increase to 2761. No baseline was
+replaced to obtain these results. Host, Tauri and Installer gates and sequential
+post-merge integration were still being completed at this snapshot; follow the
+PR and merge-commit Actions for their later results.
+
+The Windows Host workflow covers wrapper/preflight, UTF-8/watch and linked
+Docker-bridge contracts. Installer CI exercises real NSIS clean install, supported
+predecessor update and failure rollback with synthetic local data. Browser fixture
+checks cover the feature screens and lifecycle. These are separate from real
+provider quality or the user's installed personal data, which remain outside this
+structural transition's claim.
+
+During final cleanup, 41 merged backend worktrees were checked and 5086 ignored
+Python/pytest cache directories removed. Tracked source, branch history, runtime
+data including `.angmoo-dev`, environments and other files were retained. The
+earlier unused backend PR-preparation worktree cleanup is recorded separately;
+active frontend worktrees and verification receipts were retained for integration.

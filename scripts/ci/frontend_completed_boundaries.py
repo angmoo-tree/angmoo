@@ -33,6 +33,8 @@ def check_completed_frontend(source_root: Path) -> list[str]:
         text = path.read_text(encoding="utf-8")
         owner = feature(key)
         parts = key.split("/")
+        if not key.startswith((*COMMON, "app/", "composition/", "features/", "testing/", "static-shell/app/", "shared/")):
+            errors.append(f"[frontend_unclassified_source] {key}")
         if key.startswith("shared/") or (owner and (key.endswith("/public") or len(parts) > 2 and parts[2] in {"ui", "model"})):
             errors.append(f"[frontend_completed_legacy_file] {key}")
         if not is_test_path(key) and COMPUTED_IMPORT.search(text):
@@ -61,7 +63,7 @@ def check_completed_frontend(source_root: Path) -> list[str]:
                 errors.append(f"[frontend_composition_imports_app] {key} -> {target}")
             if key.startswith(COMMON) and target.startswith("static-shell/"):
                 errors.append(f"[frontend_common_imports_static] {key} -> {target}")
-    errors.extend(check_frontend_edges(edges, {"features": features, "common": common, "bridges": []}))
+    errors.extend(check_frontend_edges(edges, {"features": features, "common": common, "bridges": [], "complete": True}))
     graph = {}
     for source, target in edges:
         graph.setdefault(source, set()).add(target)

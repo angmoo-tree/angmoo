@@ -389,6 +389,25 @@ Playwright의 `Page`·`Route`나 Node 서버에 종속된 fixture는 해당 실�
 
 기능에 새 파일을 추가할 때도 같은 역할·의존 방향을 따른다. 예시 트리에 없다는 이유로 필요한 동작을 삭제하거나, 검사 예외로 의존 방향을 우회하지 않는다.
 
+### 전체 소스의 경계 검사
+
+`security/frontend_architecture_policy.json`의 `refactor.complete=true`는
+`src`와 `static-shell/app`의 전체 검사 모드다. 새 기능과 공용 파일도 실제 트리에서
+발견하므로 과거 전환 대상 목록에 이름을 추가해야만 검사되는 방식이 아니다.
+
+- 기능은 다른 기능이나 `app`·`composition`을 직접 참조하지 않는다. 필요한 연결은
+  상위 화면에서 props와 callback으로 주입한다. 타입 import와 재수출도 같은 규칙이다.
+- 공용 코드는 기능·화면·진입점에 의존하지 않는다. 제품 코드는 테스트 지원 코드를
+  사용하지 않으며, `composition`과 정적 진입점은 Next `app`을 가져오지 않는다.
+- 정적 문자열의 dynamic import도 검사한다. 경로를 계산하는 import는 정적으로
+  소유권을 확인할 수 없으므로 허용하지 않는다. 클라이언트에서 서버 전용 코드로
+  이어지는 간접 참조와 모듈 순환도 검사한다.
+- 옛 `shared`, 기능의 `ui`·`model`·`public` 전달 경로와 분류되지 않은 최상위
+  소스는 검사에 실패한다. 필요한 새 역할은 문서와 검사 규칙을 함께 구체화한다.
+
+이 검사는 GitHub Actions의 기존 architecture-boundary 작업에서 실행된다.
+구조 통과와 기능 보존은 별개이므로 타입·빌드·행위·시각·설치 검증도 유지한다.
+
 ## 개발과 검증
 
 환경 설치와 공식 실행 절차는 [CONTRIBUTING.md](../CONTRIBUTING.md)가 소유한다. 공식 기여 환경은 Docker Compose의 Next dev와 FastAPI 두 서비스이며, Windows native 창 확인은 [Host Tauri 개발 안내](../docs/public/windows-host-tauri-dev.md)의 wrapper를 사용한다. 설치형 sidecar 실행과 개발용 Docker backend를 섞지 않는다.

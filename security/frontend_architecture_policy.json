@@ -385,6 +385,7 @@
       "utils/safe-navigation",
       "utils/scroll-viewport"
     ],
-    "bridges": []
+    "bridges": [],
+    "complete": true
   }
 }

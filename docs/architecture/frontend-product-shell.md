@@ -1,18 +1,25 @@
 # Frontend product-shell boundaries
 
-> **Current common ownership, 2026-09-07:** UI primitives now live in
-> `frontend/src/components/ui`, semantic tokens in `frontend/src/styles`, scroll
-> hooks in `frontend/src/hooks`, and pure presentation/scroll helpers in
-> `frontend/src/utils`. Existing shared public exports remain temporary consumer
-> bridges. The following L2.5 sections record the earlier layout; current scope
-> and verification are in [frontend results](refactor-frontend-results.md).
+Current structure: [frontend/ARCHITECTURE.md](../../frontend/ARCHITECTURE.md).
+Next `app` and `static-shell/app` share product screens, shells and providers in
+`src/composition`. Features own their components, API, types and local helpers.
+Common UI, hooks, transport, config and utilities stay independent of features.
+The former shared/public forwarding paths have been removed.
 
-> **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../frontend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; it is empty during AR-1 preparation. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
+The architecture check uses whole-tree mode (`refactor.complete=true`) over
+`src` and the static entry. New feature/common files are discovered automatically.
+Cross-feature imports, reverse common dependencies, module cycles, production
+test imports, computed imports and client-to-server paths fail the check.
+This includes type imports and re-exports; a type-only edge is still a dependency.
 
-This document is the contributor-facing architecture contract for the L2.5
-Angmoo product shell. It is incremental: existing SNS, chat, profile, and
-creator routes remain in their legacy locations until a reviewed migration PR
-moves one surface at a time.
+The current UI vocabulary and payload-backed capabilities remain governed by
+[DESIGN](../../frontend/DESIGN.md). The historical product-surface requirements
+below remain evidence of behavior to preserve, not permission to recreate the
+old layout. Implementation and deployment gates are recorded separately in
+[frontend results](refactor-frontend-results.md).
+
+<details>
+<summary>Historical L2.5 through later product-surface records</summary>
 
 ## Product surfaces
 
@@ -778,3 +785,5 @@ on navigation/unload nor duplicates the host's batch/finalizer budget.
 
 The separate `playwright.refactor-lifecycle.config.ts` runs additional race and
 native command regression checks without altering frozen browser scenarios.
+
+</details>
