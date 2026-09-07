@@ -9,7 +9,7 @@ import { InlineError } from "@/components/ui/feedback";
 import { Input, Select } from "@/components/ui/form-controls";
 
 import { acknowledgeNativeWorldPackageDelivery, discardPreparedWorldPackageExport, downloadPreparedWorldPackage, prepareWorldPackageExport, previewWorldPackageExport } from "@/features/world-packages/api/world-package-client";
-import { triggerBrowserWorldPackageDownload } from "@/features/world-packages/utils/browser-delivery";
+import { triggerBrowserWorldPackageDownload } from "@/features/world-packages/api/browser-delivery";
 import { type PreparedWorldPackageExport, type WorldPackageExportPreview, type WorldPackageExportRequest } from "@/features/world-packages/types/world-package";
 
 import { discardNativeWorldPackageDestination, selectNativeWorldPackageDestination, supportsNativeWorldPackageSaveAs, writeNativeWorldPackageDestination } from "@/features/world-packages/api/native-delivery";

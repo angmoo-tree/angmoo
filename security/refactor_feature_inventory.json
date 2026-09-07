@@ -1420,7 +1420,7 @@
         "frontend/src/features/world-packages/components/world-package-import-client.tsx",
         "frontend/src/features/world-packages/config/world-package.ts",
         "frontend/src/features/world-packages/types/world-package.ts",
-        "frontend/src/features/world-packages/utils/browser-delivery.ts"
+        "frontend/src/features/world-packages/api/browser-delivery.ts"
       ],
       "target_paths": [
         "backend/app/domains/world_characters/service",
@@ -1433,7 +1433,7 @@
         "frontend/src/features/world-packages/components/world-package-import-client.tsx",
         "frontend/src/features/world-packages/config/world-package.ts",
         "frontend/src/features/world-packages/types/world-package.ts",
-        "frontend/src/features/world-packages/utils/browser-delivery.ts"
+        "frontend/src/features/world-packages/api/browser-delivery.ts"
       ],
       "entrypoints": [
         "backend/app/api/v1/routes/world_character_setup.py::get_world_feed_status",

@@ -853,7 +853,8 @@
     "frontend/src/features/ui-foundation/public.ts": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
     "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx",
     "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts",
-    "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts"
+    "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts",
+    "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -137069,6 +137070,13 @@
         "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts"
       },
       "preserved": "Dashboard names alias the same functions used by detail/API consumers. Storage keys, event payload/order, first welcome setters and single/all-state queries remain unchanged."
+    },
+    "AR-X1-C": {
+      "scope": "World Package browser I/O ownership",
+      "files": {
+        "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts"
+      },
+      "preserved": "Source bytes unchanged; native branch unchanged; same Blob, filename, anchor lifecycle and deferred URL revocation."
     }
   },
   "asgi_exports": {
