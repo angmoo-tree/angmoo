@@ -5535,7 +5535,8 @@
         "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
         "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
         "backend/tests/test_windows_installer_supported_upgrade_verifier.py",
-        "browser-tests/refactor-lifecycle.spec.ts"
+        "browser-tests/refactor-lifecycle.spec.ts",
+        "backend/tests/runtime/test_current_schema_diagnostics.py"
       ],
       "test_nodes": [
         "tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
@@ -10523,7 +10524,8 @@
         "backend/tests/runtime/test_asgi_preservation.py",
         "backend/tests/runtime/test_canonical_bootstrap.py",
         "backend/tests/relationships/test_activity_proposals.py",
-        "backend/tests/runtime/test_public_factory_retirement.py"
+        "backend/tests/runtime/test_public_factory_retirement.py",
+        "backend/tests/runtime/test_current_schema_diagnostics.py"
       ],
       "test_nodes": [
         "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
@@ -13959,7 +13961,8 @@
         "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
         "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
-        "backend/tests/migrations/test_populated_memory_upgrade.py"
+        "backend/tests/migrations/test_populated_memory_upgrade.py",
+        "backend/tests/runtime/test_current_schema_diagnostics.py"
       ],
       "test_nodes": [
         "tests/migrations/test_alembic_layout.py::test_alembic_env_registers_canonical_metadata_on_real_memory_connection",
