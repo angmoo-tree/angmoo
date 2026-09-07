@@ -7,7 +7,7 @@ import type { FormEvent } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { TurnstileWidget } from "@/features/identity/components/turnstile-widget";
-import { clearPendingGoogleSignup, getPendingGoogleSignup } from "@/features/identity/utils/pending-signup";
+import { clearPendingGoogleSignup, getPendingGoogleSignup } from "@/features/identity/stores/pending-signup";
 import { completeGoogleSignup, updateMe } from "@/features/identity/api/identity";
 import { isAuthError, storeAuth, storeUser } from "@/lib/auth/browser-session";
 import { type PendingGoogleSignup } from "@/features/identity/types/identity";

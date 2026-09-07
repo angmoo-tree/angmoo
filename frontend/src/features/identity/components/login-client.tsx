@@ -7,7 +7,7 @@ import type { FormEvent, ReactNode } from "react";
 
 import { googleLogin, login } from "@/features/identity/api/identity";
 import { storeAuth } from "@/lib/auth/browser-session";
-import { storePendingGoogleSignup } from "@/features/identity/utils/pending-signup";
+import { storePendingGoogleSignup } from "@/features/identity/stores/pending-signup";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";

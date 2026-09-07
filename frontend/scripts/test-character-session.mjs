@@ -43,7 +43,7 @@ function harness(historical) {
   return {requests,events,window,load,setResponse(value){response=value;},
     api:load(historical?"frontend/src/lib/agents.ts":"frontend/src/features/characters/api/agents.ts"),
     session:load(historical?"frontend/src/lib/agents.ts":"frontend/src/features/characters/stores/agent-session.ts"),
-    pending:load(historical?"frontend/src/lib/agents.ts":"frontend/src/features/identity/utils/pending-signup.ts")};
+    pending:load(historical?"frontend/src/lib/agents.ts":"frontend/src/features/identity/stores/pending-signup.ts")};
 }
 // Comparing serialized values avoids realm-specific object prototypes.
 const plain=value=>JSON.parse(JSON.stringify(value));
