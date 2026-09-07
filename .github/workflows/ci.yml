@@ -116,6 +116,9 @@ jobs:
       - name: Social endpoint and transport preservation
         run: node scripts/test-social-requests.mjs
         working-directory: frontend
+      - name: Feature validation messages and transport parity
+        run: node scripts/test-feature-error-parity.mjs
+        working-directory: frontend
       - name: Install Chromium for product-shell smoke
         shell: bash
         env:

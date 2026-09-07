@@ -98,7 +98,8 @@
         "frontend/src/lib/http/api-request.ts",
         "frontend/src/composition/screens/profile-setup-screen.tsx",
         "frontend/src/composition/screens/post-feed-screen.tsx",
-        "frontend/scripts/test-identity-session.mjs"
+        "frontend/scripts/test-identity-session.mjs",
+        "frontend/src/features/identity/api/request.ts"
       ],
       "target_paths": [
         "backend/app/domains/identity/router",
@@ -114,7 +115,8 @@
         "frontend/src/lib/http/api-request.ts",
         "frontend/src/composition/screens/profile-setup-screen.tsx",
         "frontend/src/composition/screens/post-feed-screen.tsx",
-        "frontend/scripts/test-identity-session.mjs"
+        "frontend/scripts/test-identity-session.mjs",
+        "frontend/src/features/identity/api/request.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260514_0008_character_profile_identity.py::upgrade",
@@ -331,7 +333,8 @@
         "backend/tests/test_security_secret_scan.py",
         "backend/tests/media/test_replicate_url_security.py",
         "backend/tests/world_characters/test_owner_identity.py",
-        "backend/tests/identity/test_character_credential_transaction.py"
+        "backend/tests/identity/test_character_credential_transaction.py",
+        "frontend/scripts/test-feature-error-parity.mjs"
       ],
       "test_nodes": [
         "tests/test_frontend_browser_session_security.py::test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses",
@@ -928,7 +931,8 @@
         "frontend/src/features/worlds/api/worlds.ts",
         "frontend/src/features/worlds/types/world-app.ts",
         "frontend/src/features/worlds/types/worlds.ts",
-        "frontend/src/features/creator-studio/types/studio-world-list.ts"
+        "frontend/src/features/creator-studio/types/studio-world-list.ts",
+        "frontend/src/features/characters/api/request.ts"
       ],
       "target_paths": [
         "backend/app/domains/characters/router.py",
@@ -977,7 +981,8 @@
         "frontend/src/features/worlds/types/world-app.ts",
         "frontend/src/features/worlds/types/worlds.ts",
         "frontend/src/composition/screens/world-creator-screen.tsx",
-        "frontend/src/features/creator-studio/types/studio-world-list.ts"
+        "frontend/src/features/creator-studio/types/studio-world-list.ts",
+        "frontend/src/features/characters/api/request.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260522_0028_agent_creation_drafts.py::upgrade",
@@ -1211,7 +1216,8 @@
         "backend/tests/worlds/test_creator_routes.py",
         "backend/tests/worlds/test_definition_contract.py",
         "backend/tests/worlds/test_transition_contracts.py",
-        "frontend/scripts/test-character-state-parity.mjs"
+        "frontend/scripts/test-character-state-parity.mjs",
+        "frontend/scripts/test-feature-error-parity.mjs"
       ],
       "test_nodes": [
         "tests/character_lore/test_documents.py::test_chunk_lore_text_flushes_before_next_unit_exceeds_max",
@@ -2631,7 +2637,8 @@
         "frontend/src/features/social/components/profile-list-row.tsx",
         "frontend/src/features/social/components/search-results-client.tsx",
         "frontend/src/features/social/types/community.ts",
-        "frontend/src/features/social/utils/world-character-social-profile.ts"
+        "frontend/src/features/social/utils/world-character-social-profile.ts",
+        "frontend/src/features/social/api/request.ts"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -2658,7 +2665,8 @@
         "frontend/src/features/social/types/social-write-contract.ts",
         "frontend/src/features/social/types/world-character-social-profile-contract.ts",
         "frontend/src/features/social/utils/causality-presentation.ts",
-        "frontend/src/features/social/utils/world-character-social-profile.ts"
+        "frontend/src/features/social/utils/world-character-social-profile.ts",
+        "frontend/src/features/social/api/request.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260510_0001_initial_community_schema.py::upgrade",
@@ -2914,7 +2922,8 @@
         "backend/tests/social/test_l4_social_write_uow.py",
         "backend/tests/social/test_p8_l_e_world_profile_social_activity.py",
         "backend/tests/test_p8_l_e_world_social_chat_entry_inventory.py",
-        "backend/tests/relationships/test_social_event_runtime.py"
+        "backend/tests/relationships/test_social_event_runtime.py",
+        "frontend/scripts/test-feature-error-parity.mjs"
       ],
       "test_nodes": [
         "tests/social/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects",
@@ -10961,7 +10970,8 @@
         "backend/tests/routines/test_run_results.py",
         "backend/tests/routines/test_writing_parameters.py",
         "backend/tests/test_ci_pytest_paths.py",
-        "frontend/scripts/test-character-state-parity.mjs"
+        "frontend/scripts/test-character-state-parity.mjs",
+        "frontend/scripts/test-feature-error-parity.mjs"
       ],
       "test_nodes": [
         "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",

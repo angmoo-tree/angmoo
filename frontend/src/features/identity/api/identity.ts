@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/http/api-request";
+import { apiRequest } from "@/features/identity/api/request";
 import type { AuthRead, UserRead, UserFeedContentFilter as FeedContentFilter } from "@/lib/auth/browser-session";
 import type { LocalBootstrapRead, GoogleLoginRead } from "@/features/identity/types/identity";
 import { getCurrentUser, issueLocalSession as issueSharedLocalSession, updateUserFeedPreferences } from "@/features/identity/api/session";

@@ -13,8 +13,16 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 Google 가입 대기의 이메일·만료 시각과 저장/해제는
 `features/identity/stores/pending-signup.ts`가 담당한다. 로그인과 프로필 설정 화면이
 같은 저장 구현을 사용하며, 상태를 변경하는 코드를 순수 계산용 `utils`에 두지 않는다.
-`lib/http/api-request.ts`는 기존 JSON/FormData 전송과 backend 검증 오류의 표시 계약을
-보존하는 공용 도구다. endpoint·owner 판단을 추가하는 곳은 아니다.
+`lib/http/api-request.ts`는 JSON/FormData 전송·응답 파싱·401과 세션 이벤트를
+담당하며 기본 오류는 서버 메시지를 사용한다. 기능별 검증 문구는 Identity·Characters·
+Social의 `api/request.ts`가 해석해 공용 전송에 전달한다. 공용 코드가 기능을 import하거나
+기능끼리 오류 해석기를 가져오지 않는다. endpoint·owner 판단도 각 기능에 남는다.
+
+이전 API에서 수용하던 혼합 field 오류도 같은 문구를 유지한다. 예를 들어 Identity가
+받은 기존 활동 간격 오류를 이번 구조 정리에서 다른 문구로 바꾸지 않는다. 각 기능의
+작은 해석기는 이 호환 계약을 소유하며 새 기능에 파일 세트를 의무적으로 복제하지 않는다.
+`test-feature-error-parity.mjs`는 고정된 이전 소스와 세 실제 API 소비자의 같은 응답·
+요청·세션 변화를 비교한다. 기존 FormData와 endpoint 비교도 함께 유지한다.
 
 설정 화면은 설치 정보·세션과 Chat API key를 함께 보여주므로
 `composition/screens/settings-screen.tsx`에서 두 기능의 API와 화면 상태를 연결한다.

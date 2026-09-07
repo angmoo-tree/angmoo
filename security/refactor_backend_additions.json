@@ -10374,6 +10374,20 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "93acd7a22906c15c08819f279c429f215e21ae37",
+      "feature_id": "G07",
+      "reason": "AR-X1-E feature-owned validation compatibility and fixed-source API parity regression",
+      "tracked_files": {
+        "frontend/scripts/test-feature-error-parity.mjs": "a166d79d8f2c76271b6c7c264c150f2d4c223adf",
+        "frontend/src/features/characters/api/request.ts": "91f069a70a1eab6a3ce45336a10a13cd17e70e1e",
+        "frontend/src/features/identity/api/request.ts": "91f069a70a1eab6a3ce45336a10a13cd17e70e1e",
+        "frontend/src/features/social/api/request.ts": "91f069a70a1eab6a3ce45336a10a13cd17e70e1e"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
