@@ -10433,6 +10433,51 @@
       "test_suppressions": {
         "tests/migrations/test_populated_memory_upgrade.py": {}
       }
+    },
+    {
+      "commit": "9395b784585f19e26ec1ba8d928bd05bb8b63ffe",
+      "feature_id": "G07",
+      "reason": "AR-X Core artifact policy allows only exact synthetic test reports and rejects path or scope expansion",
+      "tracked_files": {
+        "backend/tests/test_ci_report_artifacts.py": "58414f8f0e304081fbd7daaa39300886ba0a0896"
+      },
+      "test_nodes": [
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[${{ github.workspace }}]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[../private]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/**]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.ci/backend-junit.xml\\nbackend/.ci/extra.json]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.ci]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.env]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[browser-tests/.ci/*.xml]",
+        "tests/test_ci_report_artifacts.py::test_exact_synthetic_test_report_files_are_allowed[backend]",
+        "tests/test_ci_report_artifacts.py::test_exact_synthetic_test_report_files_are_allowed[frontend]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[action]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[condition]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[duplicate]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[extra_option]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[ignore_missing]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[job]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[workflow]"
+      ],
+      "test_assertions": {
+        "tests/test_ci_report_artifacts.py": {
+          "report": [],
+          "errors": [],
+          "test_exact_synthetic_test_report_files_are_allowed": [
+            "assert errors(report(job), job=job) == []"
+          ],
+          "test_artifact_paths_cannot_expand_or_become_dynamic": [
+            "assert errors(step)"
+          ],
+          "test_report_exception_keeps_action_job_and_failure_limits": [
+            "assert errors(step, job=job, workflow=workflow)",
+            "assert checker.check_report_uploads(document, workflow, yaml.safe_dump(document))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_ci_report_artifacts.py": {}
+      }
     }
   ]
 }
