@@ -47,6 +47,30 @@ jobs:
       - name: Install locked backend dependencies
         run: uv sync --frozen
         working-directory: backend
+      - name: Record backend test checkout identity
+        env:
+          TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        working-directory: backend
+        run: |
+          uv run python - <<'PY'
+          import hashlib, json, os, platform, subprocess
+          from pathlib import Path
+          git = lambda *args: subprocess.check_output(["git", *args], text=True).strip()
+          result = {
+              "source_sha": os.environ["TEST_SOURCE_SHA"],
+              "checkout_sha": git("rev-parse", "HEAD"),
+              "checkout_tree": git("rev-parse", "HEAD^{tree}"),
+              "event_sha": os.environ["GITHUB_SHA"],
+              "event_name": os.environ["GITHUB_EVENT_NAME"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "python": platform.python_version(),
+              "uv": subprocess.check_output(["uv", "--version"], text=True).strip(),
+              "lock_sha256": hashlib.sha256(Path("uv.lock").read_bytes()).hexdigest(),
+          }
+          Path(".ci").mkdir(exist_ok=True)
+          Path(".ci/backend-test-identity.json").write_text(json.dumps(result, indent=2) + "\n")
+          PY
       - name: Compile and materialize the embedded baseline
         run: |
           uv run python -m compileall -q app
@@ -66,13 +90,23 @@ jobs:
         run: uv run python ../scripts/ci/generate_p8_l_r_memory_batch_inventory.py --check
         working-directory: backend
       - name: Run backend suite
-        run: uv run python -m pytest -q tests
+        run: uv run python -m pytest -q tests --junitxml=.ci/backend-junit.xml
         working-directory: backend
       - name: Verify route and project contracts
         run: |
           uv run python ../scripts/generate_public_route_inventory.py --check
           uv run python ../scripts/check_project_license.py --repo-root .. --policy ../security/license_policy.json
         working-directory: backend
+      - name: Preserve backend test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-tests-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            backend/.ci/backend-junit.xml
+            backend/.ci/backend-test-identity.json
+          include-hidden-files: true
+          if-no-files-found: error
 
   frontend:
     runs-on: ubuntu-24.04
@@ -95,6 +129,31 @@ jobs:
       - name: Install locked browser-test dependencies
         run: pnpm install --frozen-lockfile
         working-directory: browser-tests
+      - name: Record browser test checkout identity
+        env:
+          TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const { execFileSync } = require('node:child_process');
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const result = {
+            source_sha: process.env.TEST_SOURCE_SHA,
+            checkout_sha: git('rev-parse', 'HEAD'),
+            checkout_tree: git('rev-parse', 'HEAD^{tree}'),
+            event_sha: process.env.GITHUB_SHA,
+            event_name: process.env.GITHUB_EVENT_NAME,
+            run_id: process.env.GITHUB_RUN_ID,
+            run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+            node: process.version,
+            pnpm: execFileSync('pnpm', ['--version'], { encoding: 'utf8' }).trim(),
+            locks: Object.fromEntries(['frontend/pnpm-lock.yaml', 'browser-tests/pnpm-lock.yaml'].map(file =>
+              [file, crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')])),
+          };
+          fs.mkdirSync('browser-tests/.ci', { recursive: true });
+          fs.writeFileSync('browser-tests/.ci/browser-test-identity.json', JSON.stringify(result, null, 2) + '\n');
+          JS
       - name: Lint
         run: pnpm lint
         working-directory: frontend
@@ -166,10 +225,14 @@ jobs:
           exit 1
         working-directory: browser-tests
       - name: Run product-shell browser smoke
-        run: pnpm test
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/web.xml
+        run: pnpm test --reporter=github,junit
         working-directory: browser-tests
       - name: Verify UI-E Local Settings fail-closed states
-        run: pnpm test:ui-e-local-settings
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/settings.xml
+        run: pnpm test:ui-e-local-settings --reporter=github,junit
         working-directory: browser-tests
       - name: Build Local OSS profile offline
         env:
@@ -182,10 +245,14 @@ jobs:
         run: pnpm build:static
         working-directory: frontend
       - name: Verify Tauri static direct-open routes
-        run: pnpm exec playwright test --config playwright.static.config.ts
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/static.xml
+        run: pnpm exec playwright test --config playwright.static.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify shared Memory and native lifecycle boundaries
-        run: pnpm exec playwright test --config playwright.refactor-lifecycle.config.ts
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/lifecycle.xml
+        run: pnpm exec playwright test --config playwright.refactor-lifecycle.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify UI-F production and static product visual corpus
         shell: bash
@@ -194,9 +261,10 @@ jobs:
             --mount "type=bind,source=${GITHUB_WORKSPACE},target=/work" \
             --workdir /work/browser-tests \
             --env CI=true \
+            --env PLAYWRIGHT_JUNIT_OUTPUT_FILE=/work/browser-tests/.ci/visual.xml \
             mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e \
             node ./node_modules/@playwright/test/cli.js test \
-              --config=playwright.visual.config.ts
+              --config=playwright.visual.config.ts --reporter=github,junit
       - name: Reject remote build-time dependencies
         shell: bash
         run: |
@@ -205,6 +273,20 @@ jobs:
             echo "Remote build-time frontend dependency found"
             exit 1
           fi
+      - name: Preserve browser test reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-tests-${{ github.sha }}-${{ github.run_attempt }}
+          path: |
+            browser-tests/.ci/web.xml
+            browser-tests/.ci/settings.xml
+            browser-tests/.ci/static.xml
+            browser-tests/.ci/lifecycle.xml
+            browser-tests/.ci/visual.xml
+            browser-tests/.ci/browser-test-identity.json
+          include-hidden-files: true
+          if-no-files-found: error
 
   tauri-windows:
     runs-on: windows-latest

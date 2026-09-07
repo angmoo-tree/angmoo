@@ -140,7 +140,8 @@ Device frame과 링크 표현은 각각 `components/layout`, `components/navigat
 있다. 인증 context와 `useAuth`는 공용 상태 접근이며, 세션 발급 API와 provider의
 제품 초기화 순서를 재구현하지 않는다. World shell이 조회하는 DTO/API는
 `features/worlds`가 소유한다. 기존 `world-app/public.ts`의 모든 호출자는 실제
-구현으로 전환했고, 다른 미전환 feature의 공개 entry는 후속 단계에서 정리한다.
+구현으로 전환했다. 나머지 feature의 전달용 공개 entry도 제거했으며,
+새 화면은 각 기능의 실제 component/API/type을 직접 연결한다.
 
 ## 목차
 
@@ -186,7 +187,7 @@ angmoo/
 │   │   ├── hooks/                  # 공용 React hook
 │   │   ├── lib/                    # 공용 통신·탐색·데스크톱 연결
 │   │   ├── styles/                 # 필요한 공통 스타일
-│   │   ├── testing/                # 실제 소비자가 있는 공통 테스트 지원
+│   │   ├── testing/                # 선택 사항: 공통 소비자가 필요할 때 추가
 │   │   │   ├── mocks/
 │   │   │   ├── data-generators.ts
 │   │   │   ├── test-utils.tsx

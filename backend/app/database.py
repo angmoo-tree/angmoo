@@ -48,9 +48,9 @@ def get_default_engine() -> Engine:
     """Create the embedded SQLite default engine for a compatibility caller.
 
     Official embedded composition passes an explicit SQLite engine and session
-    factory.  Older domain code may still call ``SessionLocal`` while its ports
-    are migrated, but that facade resolves to the same embedded default and
-    cannot select a server database from the parent process.
+    factory. Callers that use the lazy ``SessionLocal`` compatibility facade
+    resolve to this same embedded default; they cannot select a server database
+    from the parent process. Explicit runtime composition owns its own factory.
     """
 
     global _default_engine, _default_session_factory

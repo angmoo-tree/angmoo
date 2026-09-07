@@ -2,14 +2,14 @@
   "schema_version": 1,
   "baseline_commit": "6e56f0837cc11ff42ccbb520050bbd32c5e9bc14",
   "baseline_tree": "99f679acb9aab1e3b28628d0aee6d71ae0364d74",
-  "status": "MAPPED",
+  "status": "MOVED",
   "items": [
     {
       "id": "K01",
       "title": "Local owner·인증·BYOK·프로필·삭제",
       "owner": "identity / credentials",
       "stage": "AR-B2 / AR-F3-A",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260514_0008_character_profile_identity.py",
         "backend/alembic/versions/20260520_0021_user_profile_setup.py",
@@ -623,14 +623,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Identity auth/credential policies and repository; Social/WC profiles and same-Session account deletion remain separately owned. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
         "verification": {
@@ -782,9 +783,10 @@
         "baseline": "security/refactor_source_baseline.json",
         "backend": "1845 passed / 22 skipped, source tree unchanged",
         "item_status": "Backend Device Home VERIFIED on merged PR #260; frontend Device Home VERIFIED on merged PR #261.",
-        "remaining": "AR-0/AR-1 and the Device Home pilots are complete; AR-G, AR-B2+, AR-F2+, AR-X, and P8-L-S remain pending.",
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
         "backend_pilot": "AR-B1 PR #260 head d9c3ed5 passed 23 checks and merged as a55c521b9adad624ae1342b2a7b270abc2237f79.",
-        "frontend_pilot": "AR-F1 PR #261 head 31fd5b052e9b910c8ac48027065753faa0a7ab5b passed local lint/type/build/proxy, source contracts, Home web/static scenarios, and all 22 registered Hosted checks; merged as 5b83fee1625fdd490051b840790683114d7daaab."
+        "frontend_pilot": "AR-F1 PR #261 head 31fd5b052e9b910c8ac48027065753faa0a7ab5b passed local lint/type/build/proxy, source contracts, Home web/static scenarios, and all 22 registered Hosted checks; merged as 5b83fee1625fdd490051b840790683114d7daaab.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "The repository is an existing read-only identity/World/membership projection. Service functions share the caller Session; this is not permission for arbitrary cross-domain writes.",
@@ -796,7 +798,7 @@
       "title": "Character·World Creator·readiness",
       "owner": "characters / worlds / creator-studio",
       "stage": "AR-B2 / AR-F3-B / AR-F3-C",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260522_0028_agent_creation_drafts.py",
         "backend/alembic/versions/20260604_0037_character_lore_pgvector.py",
@@ -1304,14 +1306,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Character/World Creator, lore and foundation definitions now have actual domain owners; mixed runtime collaboration is not a second policy implementation. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B2-B1 Character foundation moved: same ORM/schema identity, separate profile commit vs seed flush-only, caller-owned state write. Creator/readiness/World/runtime portions remain pending; no whole-domain completion claim. Creator ORM/schema, owner admission/prompt/promotion and image quota policy now live in Character role files. Mixed multi-domain workflows moved to runtime.characters without blanket domain completion. Six Character HTTP operations now use canonical management service and same-session runtime callbacks. Credential and runtime summary DTOs are exact partial prerequisities; activity execution ownership is unchanged. Creator lifecycle owns draft DB writes/expiry/owner admission while external callbacks preserve media/LLM order in the same Session. All eleven Character/basic Creator HTTP endpoints now call canonical services; neutral error identities and status/detail mapping are preserved. Remaining image/activity/LocalBot/deletion paths have explicit later owners.",
         "verification": {
@@ -1334,7 +1337,7 @@
       "title": "WorldCharacter 구성·시간대 routine·승인",
       "owner": "world_characters / routines",
       "stage": "AR-B2 / AR-F3-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/api/v1/routes/world_character_setup.py",
         "backend/app/api/world_character_dependencies.py",
@@ -1683,14 +1686,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "WC setup/provider/approval/readiness/Studio and Routines plan collaboration use actual roles; old domain/package markers are retired. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -1707,7 +1711,7 @@
       "title": "일일 활동·episode·beat·cursor",
       "owner": "routines / routine_posts / runtime",
       "stage": "AR-B4 / AR-F3-B / AR-F3-E",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260511_0003_agent_slots.py",
         "backend/alembic/versions/20260511_0004_resident_agent_slots.py",
@@ -2410,14 +2414,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Plan/episode/beat/cursor, resident logs/settings/execution and RoutinePost generation have actual owners. Active-hours policy is in routines/policies/active_hours.py. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -2433,7 +2438,7 @@
       "title": "SNS·Inbox·관찰·자율 후속",
       "owner": "social",
       "stage": "AR-B5 / AR-F3-E",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260510_0001_initial_community_schema.py",
         "backend/alembic/versions/20260520_0019_tree_community.py",
@@ -2988,14 +2993,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved. AR-B5-C12: Social owns manual HTTP5; existing runtime factories use the same request Session and preserve transaction/origin contracts; old manual API and execution port files removed. AR-B5-C13: actual declared subjective context policy/SQL/Same-Session facts; old persistence adapter removed; explicit provenance and no-own-commit contract preserved. AR-B5-C14-A: actual Today kind/revision/watermark/UTC values and bounded constants owned by Social; remaining read/query policy next. AR-B5-C14-B: Today actual scope/visibility/evidence/count/revision service and owned SQL; concrete mixed query collaboration preserves same Session and populated canonical reads; old reader removed. AR-B5-C15: successful action source/notification/WorldCharacter/proposal admission are actual owner services; same-Session runtime coordination preserves original flush and event/proposal order. AR-B5-C16: resident Social affordance/reply traversal/presentation23 actual functions extracted; remaining Community scope is explicit. AR-B5-C17: planner history values15/input2 and shared bounded text2 are actual owner definitions; no schema/limit change. AR-B5-WORLD-SEARCH: actual Social feed policy/owned SQL/same-Session foreign queries and process-local search binding; prior four implementation paths removed.",
         "verification": {
@@ -3011,7 +3017,7 @@
       "title": "Feed 검색·FTS·범위",
       "owner": "social / search runtime",
       "stage": "AR-B5 / AR-F3-E",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/core/search_text.py",
         "backend/app/domains/social/models/feed.py",
@@ -3227,14 +3233,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-WORLD-SEARCH: actual Social feed policy/owned SQL/same-Session foreign queries and process-local search binding; prior four implementation paths removed.",
         "verification": {
@@ -3250,7 +3257,7 @@
       "title": "SocialEvent·관계·outbox",
       "owner": "social / relationships",
       "stage": "AR-B5 / AR-F3-E / AR-F3-F",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/relationships/__init__.py",
         "backend/app/domains/relationships/service/graph_read.py",
@@ -3672,14 +3679,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending. AR-B5-C5-D owns replay admission, lease, high-water and completion records plus ordered canonical source queries. Existing runtime retains actual sidecar execution/session/clock/metrics orchestration. Relationship read/observation and remaining Social workflows are pending. AR-B5-C6-A owns diagnostics canonical queries/schema/errors; Joint read SQL belongs to Routines. Remaining diagnostics orchestration follows in C6-B. AR-B5-C6-B moves the remaining owner diagnostics workflow and two HTTP endpoints; app factories bind same-Session runtime collaborators. Source eligibility and active membership differ intentionally from historical projection reconstruction. AR-B5-C7 moves deterministic observed-source receipt/directional state/outbox into Relationships, own SQL and same-Session WC/Social reads; original zero provider, one familiarity delta, dedupe and caller rollback preserved. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved. AR-B5-C12: Social owns manual HTTP5; existing runtime factories use the same request Session and preserve transaction/origin contracts; old manual API and execution port files removed. AR-B5-C13: actual declared subjective context policy/SQL/Same-Session facts; old persistence adapter removed; explicit provenance and no-own-commit contract preserved. AR-B5-C14-A: actual Today kind/revision/watermark/UTC values and bounded constants owned by Social; remaining read/query policy next. AR-B5-C14-B: Today actual scope/visibility/evidence/count/revision service and owned SQL; concrete mixed query collaboration preserves same Session and populated canonical reads; old reader removed. AR-B5-WORLD-SEARCH: actual Social feed policy/owned SQL/same-Session foreign queries and process-local search binding; prior four implementation paths removed.",
         "verification": {
@@ -4303,9 +4311,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -4325,7 +4334,7 @@
       "title": "World Package v1",
       "owner": "world_packages",
       "stage": "AR-B3 / AR-F3-D",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/world_packages/__init__.py",
         "backend/app/domains/world_packages/archive/__init__.py",
@@ -4592,14 +4601,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "seed_uow_replay_hotfix": "Exact world_slug_unavailable after concurrent completed import: rollback then a distinct Session reads same-owner/key registry and uses the existing package/version/digest replay resolver. No completed record or any other validation rethrows without retry. Deterministic race and negative scope coverage run in local-smoke.",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
@@ -4616,7 +4626,7 @@
       "title": "이미지·media·provider",
       "owner": "integrations / providers / credentials",
       "stage": "AR-B3 / AR-B8-A / AR-F2-B / AR-F3-D",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/core/image_generation.py",
         "backend/app/core/public_media.py",
@@ -5015,14 +5025,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Shared media transport, Character candidate policy, Social image policy, shared provider adapters and credential resolution are separate actual owners. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "stage_responsibilities": {
         "AR-B3": "World Package and profile/post media ownership, validation and assets",
         "AR-B8-A": "shared provider/SDK/credential transport and registry",
@@ -5043,7 +5054,7 @@
       "title": "설치·sidecar·runtime 생명주기",
       "owner": "runtime / desktop",
       "stage": "AR-B8 / AR-F2-C / AR-F4-C",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         ".github/workflows/windows-host-tauri-dev.yml",
         ".github/workflows/windows-installer.yml",
@@ -5659,14 +5670,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved. AR-B5-C13: actual declared subjective context policy/SQL/Same-Session facts; old persistence adapter removed; explicit provenance and no-own-commit contract preserved. AR-B5-C14-A: actual Today kind/revision/watermark/UTC values and bounded constants owned by Social; remaining read/query policy next. AR-B5-C14-B: Today actual scope/visibility/evidence/count/revision service and owned SQL; concrete mixed query collaboration preserves same Session and populated canonical reads; old reader removed.",
         "verification": {
@@ -5682,7 +5694,7 @@
       "title": "제품 UI·설정·진단·PWA·Local Bot",
       "owner": "composition / settings / support",
       "stage": "AR-B8 / AR-F2-C / AR-F3-G",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
         "backend/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
@@ -5975,14 +5987,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -5998,7 +6011,7 @@
       "title": "P8 A-E World Chat",
       "owner": "chat / identity",
       "stage": "AR-B6 / AR-F4-A",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/chat/repository/response_lifecycle.py",
         "backend/app/domains/chat/dependencies.py",
@@ -6340,14 +6353,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "backend_contract_preparation": "AR-B6-A1: schemas/exceptions/policies/model-binding contracts; actual services/ORM/HTTP and B6 merge pending",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
@@ -6364,7 +6378,7 @@
       "title": "P8 F-G Memory 쓰기·관리",
       "owner": "memory",
       "stage": "AR-B7 / AR-F4-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/__init__.py",
@@ -6584,7 +6598,8 @@
         "backend/tests/test_p8_l_f_memory_inventory.py",
         "backend/tests/memory/test_p8_l_f_memory_migration.py",
         "backend/tests/test_p8_l_g_memory_inventory.py",
-        "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py"
+        "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/memory/test_p8_l_f_memory_domain.py::test_database_rejects_pending_maintenance_job_with_lease",
@@ -6632,14 +6647,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "backend_contract_preparation": "AR-B7-A0/A1: actual HTTP schemas/errors and closed value/pure policy owners; service/SQL/runtime and B7 merge pending",
       "backend_service_preparation": "AR-B7-A2: actual Memory workflow owners and existing exercised typed collaborators; SQL/HTTP/runtime and integration pending",
       "backend_daypart_scope": {
@@ -6941,7 +6957,8 @@
         "backend/tests/memory/test_p8_l_h_canonical_recall.py",
         "backend/tests/test_p8_l_h_memory_recall_inventory.py",
         "backend/tests/test_p8_l_i_graph_recall.py",
-        "backend/tests/test_p8_l_i_graph_recall_inventory.py"
+        "backend/tests/test_p8_l_i_graph_recall_inventory.py",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/memory/test_p8_l_h_canonical_recall.py::test_after_commit_projection_tombstones_off_and_ignores_rollback",
@@ -6976,9 +6993,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -7311,9 +7329,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -7333,7 +7352,7 @@
       "title": "P8 O-P HotBrief·근거·stream",
       "owner": "memory consolidation / chat",
       "stage": "AR-B6 / AR-B7 / AR-F4-A / AR-F4-C",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/chat/__init__.py",
         "backend/app/domains/chat/infrastructure/model_binding_migration.py",
@@ -7734,14 +7753,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "stage_responsibilities": {
         "AR-B6": "response/evidence/stream consumers",
         "AR-B7": "Memory consolidation and Hot Brief production"
@@ -7761,7 +7781,7 @@
       "title": "P8 Q-R Memory inspector·owner UI",
       "owner": "memory UI / owner API",
       "stage": "AR-B7 / AR-F4-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/__init__.py",
@@ -8067,14 +8087,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -8427,9 +8448,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -8449,7 +8471,7 @@
       "title": "#258 A-B SQLite v9·source delivery",
       "owner": "memory / source delivery",
       "stage": "AR-B7 / AR-F4-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260904_0089_memory_batch.py",
         "backend/app/domains/memory/schemas/batch.py",
@@ -8587,7 +8609,8 @@
         "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
-        "browser-tests/refactor-lifecycle.spec.ts"
+        "browser-tests/refactor-lifecycle.spec.ts",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
@@ -8675,14 +8698,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -8698,7 +8722,7 @@
       "title": "#258 C-D AI 배치·예약",
       "owner": "memory batch / scheduler",
       "stage": "AR-B7 / AR-F4-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/alembic/versions/20260904_0089_memory_batch.py",
         "backend/app/domains/memory/schemas/batch.py",
@@ -8813,7 +8837,8 @@
         "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
-        "browser-tests/refactor-lifecycle.spec.ts"
+        "browser-tests/refactor-lifecycle.spec.ts",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/memory/test_p8_l_r_memory_batch_api.py::test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version",
@@ -8882,14 +8907,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -8905,7 +8931,7 @@
       "title": "#258 E 종료 저장",
       "owner": "desktop shutdown / memory",
       "stage": "AR-B7 / AR-B8-A / AR-F4-C",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/runtime/memory/__init__.py",
         "backend/app/runtime/memory/batch_runtime.py",
@@ -9075,14 +9101,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -9248,9 +9275,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -9790,9 +9818,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "app.models owns only the single Base. Domain models own all tables; model_registration registers them. Mixed agent_runs/worlds aggregate owners are listed individually. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -10014,9 +10043,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Common exception classes remain in app.exceptions; domain errors stay with their actual owners. No error payload/status normalization was introduced. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -10167,9 +10197,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Shared bytes codec and independent domain cursor payload/encryption/order/scope policies remain distinct. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -10296,7 +10327,8 @@
         "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
         "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
-        "backend/tests/test_postgres_security_concurrency.py"
+        "backend/tests/test_postgres_security_concurrency.py",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
@@ -10407,9 +10439,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "app.database owns lazy engine/session construction; explicit runtime configuration and SQLite resource lifecycle keep their actual owners. core.db survives only as the historical Base alias. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -10689,9 +10722,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "Single actual main factory with full/public profiles; temporary public_main facade removed after exact consumers and frozen facade/test proof. Final merged runtime/stock/CI/new bundle installation verification remains pending.",
       "notes": "Only app.main creates apps/lifespans; create_app/app use the full profile and create_public_app/public_app the public profile. public_main is removed; final merged CI and installed-app evidence remain separate. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -10718,7 +10752,8 @@
         "backend/tests/conftest.py",
         "scripts/check_test_node_baseline.py",
         "scripts/check_ci_policy.py",
-        ".github/workflows/local-smoke.yml"
+        ".github/workflows/local-smoke.yml",
+        "docs/architecture/refactor-integration-scenarios.md"
       ],
       "target_paths": [
         "backend/tests/identity",
@@ -10737,7 +10772,8 @@
         "backend/tests/media",
         "backend/tests/common",
         "backend/tests/local_bot",
-        "backend/tests/migrations"
+        "backend/tests/migrations",
+        "docs/architecture/refactor-integration-scenarios.md"
       ],
       "entrypoints": [],
       "consumers": [],
@@ -10971,7 +11007,10 @@
         "backend/tests/routines/test_writing_parameters.py",
         "backend/tests/test_ci_pytest_paths.py",
         "frontend/scripts/test-character-state-parity.mjs",
-        "frontend/scripts/test-feature-error-parity.mjs"
+        "frontend/scripts/test-feature-error-parity.mjs",
+        "backend/tests/test_refactor_addition_assertion_source.py",
+        "backend/tests/migrations/test_populated_memory_upgrade.py",
+        "backend/tests/test_ci_report_artifacts.py"
       ],
       "test_nodes": [
         "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -12859,11 +12898,12 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: all six G07 whole-file test moves are integrated from e7241d74; 65 preserved nodes PASS. Final same-candidate CI and runtime gates remain separate.",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate.",
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
         "g07_source_commit": "e7241d74b71ec82cdc82168600d9a619addf75eb",
-        "g07_integration_commit": "32ef40651978ecefcc5ecb2fb79f18f7df73dd99"
+        "g07_integration_commit": "32ef40651978ecefcc5ecb2fb79f18f7df73dd99",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Current whole-file test locations are mapped; original node records remain historical and resolve through refactor_path_map. The six final G07 test moves are integrated with their original assertions and exact node mappings. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -12884,7 +12924,7 @@
       "title": "조건부 templates",
       "owner": "HTTP / packaging",
       "stage": "AR-B8-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/pyproject.toml",
         "frontend/package.json",
@@ -13027,14 +13067,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "CONDITIONAL_NO_EMPTY_DIRECTORY",
       "notes": "No server HTML-template consumer exists. Current/target files identify the actual JSON/API app assembly; no backend/templates directory is required or created. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -13131,9 +13172,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "pyproject.toml/uv.lock/.python-version remain actual dependency sources; backend/requirements is not an adopted second manual source. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -13153,7 +13195,7 @@
       "title": "환경 예시·설치 독립성",
       "owner": "configuration / credentials",
       "stage": "AR-G1 / AR-B8-B",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/.env.example",
         "backend/app/config.py",
@@ -13334,14 +13376,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
         "verification": {
@@ -13445,9 +13488,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -13616,9 +13660,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Actual domain/service/repository/runtime ownership is reflected in current paths; behavior contracts and recorded original nodes are retained. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -13913,7 +13958,8 @@
         "backend/tests/memory/test_p8_l_f_memory_migration.py",
         "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
         "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
-        "backend/tests/test_p8_l_r_today_sns_activity_migration.py"
+        "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
+        "backend/tests/migrations/test_populated_memory_upgrade.py"
       ],
       "test_nodes": [
         "tests/migrations/test_alembic_layout.py::test_alembic_env_registers_canonical_metadata_on_real_memory_connection",
@@ -13987,9 +14033,10 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
       "notes": "Root Alembic and actual G5 Base/registration are connected. Historical revision bytes and embedded migration sources remain unchanged; final merged installation verification is separate. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
@@ -14010,7 +14057,7 @@
       "title": "Tree 게시판·공통 실행·호환·레거시 지원 소스",
       "owner": "Tree community / shared UI / bootstrap / compatibility",
       "stage": "AR-B8-A / AR-B8-B / AR-F3-G / AR-F5-A",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
         "backend/app/__init__.py",
         "backend/app/api/v1/__init__.py",
@@ -14301,14 +14348,15 @@
       "verification": {
         "baseline": "security/refactor_source_baseline.json",
         "checkpoint": "security/refactor_backend_checkpoint.json",
-        "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+        "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
         "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
-        "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        "remaining": "Final same-merge CI, supported execution and installed-app receipts are linked from docs/architecture/refactor-integration-results.md. Historical pilot acceptance keeps its original scope; P8-L-S real-AI quality is separate.",
+        "integration_evidence": "docs/architecture/refactor-integration-results.md"
       },
       "disposition": "KEEP_UNTIL_OWNING_STAGE",
       "notes": "Tree, Operations, name/prompt policy, runtime extension registries and shared foundation have actual owners. Historical migration aliases and external extension aliases are retained explicitly; empty retired compatibility namespaces are not replacement implementations. Entry points and test_nodes preserve recorded original/intermediate references; resolve them with refactor_path_map.json. Current app consumers are direct AST importers of listed implementation modules; this is navigation, not a claim of complete branch coverage.",
       "backend_status": "MOVED",
-      "frontend_status": "MAPPED",
+      "frontend_status": "MOVED",
       "historical_transition_evidence": {
         "notes": "Backend residual sources are exhaustively classified in backend_work_items, with no generic unowned bucket. Targets are planned responsibilities; empty package markers can collapse only with explicit path-map evidence. Frontend AR-F4 remains separate.",
         "verification": {
@@ -14880,7 +14928,7 @@
   "backend_transition": {
     "checkpoint_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
     "stage": "AR-B8-B",
-    "status": "MOVED_PENDING_FINAL_INTEGRATION_VERIFICATION",
+    "status": "STRUCTURAL_IMPLEMENTATION_COMPLETE; AR_X_FINAL_GATES_SEPARATE",
     "sequence": [
       "AR-G0",
       "AR-G1",
@@ -14897,273 +14945,1037 @@
       "AR-G5",
       "AR-B8-B"
     ],
-    "status_rule": "backend_status=MOVED means actual source ownership/current references, not final CI/installation acceptance. Overall status remains MAPPED where frontend is not moved; existing Device Home pilot VERIFIED evidence is retained. AR-F2+ and AR-X remain separate."
+    "status_rule": "MOVED describes actual code ownership, not final AR-X CI/installation acceptance. Existing Device Home pilot VERIFIED evidence retains its original scope. Current frontend movement is recorded separately from final integration."
   },
   "reference_semantics": {
-    "current_paths": "Existing implementation/support files at the source_reading_map_commit; repeated historical entries are deduplicated. Retired empty markers have no proxy replacement.",
-    "target_paths": "Actual backend responsibility locations, with frontend future targets retained until section 8.3. Conditional templates/requirements decisions identify their adopted implementation/configuration, not nonexistent folders.",
+    "current_paths": "Existing implementation/support files in the current checkout; the source map commit records the AR-X2 review base. Subsequent path changes are tracked in Git and refactor_path_map.",
+    "target_paths": "Implemented backend/frontend responsibility locations. Conditional support resources identify adopted implementations, not empty future directories.",
     "consumers": "Current product Python AST direct imports into the item current implementation modules; pre-existing non-app consumers retained. Not every importer is an HTTP caller.",
     "test_paths": "Current existing associated test files; original/intermediate test_nodes are retained and resolved by refactor_path_map.json.",
     "historical_fields": "baseline_commit/tree, coverage, entrypoints, test_nodes and historical_transition_evidence retain original/intermediate evidence; none is regenerated from current source.",
-    "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f"
+    "source_reading_map_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61"
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "STRUCTURAL_IMPLEMENTATION_COMPLETE; FINAL_INTEGRATION_TRACKED_IN_PR_306",
+    "status": "STRUCTURAL_IMPLEMENTATION_COMPLETE; AR_X_FINAL_GATES_SEPARATE",
     "documentation": "docs/architecture/refactor-frontend-results.md",
-    "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
+    "scope_note": "Backend/frontend ownership has moved; existing pilot evidence and original checkpoints are retained. Final same-merge evidence belongs to AR-X.",
     "items": {
       "K01": {
         "stages": [
           "AR-F3-A"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K02": {
         "stages": [
           "AR-F2-C"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K03": {
         "stages": [
           "AR-F3-B",
           "AR-F3-C"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K04": {
         "stages": [
           "AR-F3-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K05": {
         "stages": [
           "AR-F3-B",
           "AR-F3-E"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K06": {
         "stages": [
           "AR-F3-E"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K07": {
         "stages": [
           "AR-F3-E"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K08": {
         "stages": [
           "AR-F3-E",
           "AR-F3-F"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K09": {
         "stages": [
           "AR-F3-F"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K10": {
         "stages": [
           "AR-F3-D"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K11": {
         "stages": [
           "AR-F2-B",
           "AR-F3-D"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K12": {
         "stages": [
           "AR-F2-C",
           "AR-F4-C"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K13": {
         "stages": [
           "AR-F2-C",
           "AR-F3-G"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K14": {
         "stages": [
           "AR-F4-A"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K15": {
         "stages": [
           "AR-F4-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K16": {
         "stages": [
           "AR-F4-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K17": {
         "stages": [
           "AR-F4-A"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K18": {
         "stages": [
           "AR-F4-A",
           "AR-F4-C"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K19": {
         "stages": [
           "AR-F4-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K20": {
         "stages": [
           "AR-F3-E",
           "AR-F4-A"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K21": {
         "stages": [
           "AR-F4-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K22": {
         "stages": [
           "AR-F4-B"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K23": {
         "stages": [
           "AR-F4-C"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       },
       "K24": {
         "stages": [
           "AR-F3-G",
           "AR-F5-A"
         ],
-        "status": "MAPPED"
+        "status": "MOVED"
       }
     },
     "stages": {
       "AR-F2-0": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "pr": 291,
         "head": "1daca62035f4d2eb7f938d30f073cd280b540dea",
         "merge": "72b6573898ad4a720125aba2905327f49aa7fbd2",
         "pr_checks": "23/23 SUCCESS; installer 5/5 SUCCESS"
       },
       "AR-F2-A": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F2-A",
         "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges",
         "pr": 292
       },
       "AR-F2-B": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F2-B",
         "scope": "server proxy, browser session transport, runtime navigation and native commands",
         "pr": 293
       },
       "AR-F2-C": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F2-C",
         "scope": "Next/static common screens, providers, World/Studio/Device shells",
         "pr": 294
       },
       "AR-F3-A": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-A",
         "scope": "Identity and settings ownership",
         "pr": 295
       },
       "AR-F3-B": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-B",
         "scope": "Character feature ownership and mixed-screen assembly",
         "pr": 296
       },
       "AR-F3-C": {
-        "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-C",
         "scope": "World definition and Creator Studio ownership",
         "pr": 297
       },
       "AR-F3-D": {
-        "status": "MERGED - post-merge pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-D",
         "scope": "World package import/export, preview and desktop transfer",
         "pr": 298
       },
       "AR-F3-E": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-E",
         "scope": "Social feature ownership",
         "pr": 299
       },
       "AR-F3-F": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-F",
         "scope": "Relationship graph ownership",
         "pr": 300
       },
       "AR-F3-G": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F3-G",
         "scope": "Tree, support and server/static route ownership",
         "pr": 301
       },
       "AR-F4-A": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F4-A",
         "scope": "Chat transport/UI and upper Memory panel composition",
         "pr": 302
       },
       "AR-F4-B": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F4-B",
         "scope": "Memory scope and owner/batch controls",
         "pr": 303
       },
       "AR-F4-C": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F4-C",
         "scope": "Shared screen and native lifecycle boundaries",
         "pr": 304
       },
       "AR-F5-A": {
-        "status": "IMPLEMENTED - sequential integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "source_map": "security/refactor_path_map.json#details.AR-F5-A",
         "scope": "Retire old forwarding paths and classify actual common/feature/testing owners",
         "pr": 305
       },
       "AR-F5-B": {
-        "status": "IMPLEMENTED - final validation and integration pending",
+        "status": "MOVED - completed transition receipts are retained in docs/architecture/refactor-frontend-results.md; final AR-X is separate",
         "scope": "Whole-tree frontend checks, contributor documentation and final runtime gates"
       }
     },
-    "status_snapshot": "2026-09-07: dated per-stage gate snapshots below; final exact-head and merge state are in PR306 and its merge Actions"
+    "status_snapshot": "Previous per-stage labels are retained in ar_x_precloseout_snapshot. Dated completed stage evidence and PR306/307 installation history remain in docs/architecture/refactor-frontend-results.md."
+  },
+  "ar_x_precloseout_snapshot": {
+    "source_commit": "f07dc8d3ebb4b619159c7a9e14775d2962043e61",
+    "meaning": "Previous current-state labels retained as history; not the current unfinished-work list.",
+    "items": [
+      {
+        "id": "K01",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K02",
+        "status": "VERIFIED",
+        "backend_status": "VERIFIED",
+        "frontend_status": "VERIFIED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "backend": "1845 passed / 22 skipped, source tree unchanged",
+          "item_status": "Backend Device Home VERIFIED on merged PR #260; frontend Device Home VERIFIED on merged PR #261.",
+          "remaining": "AR-0/AR-1 and the Device Home pilots are complete; AR-G, AR-B2+, AR-F2+, AR-X, and P8-L-S remain pending.",
+          "backend_pilot": "AR-B1 PR #260 head d9c3ed5 passed 23 checks and merged as a55c521b9adad624ae1342b2a7b270abc2237f79.",
+          "frontend_pilot": "AR-F1 PR #261 head 31fd5b052e9b910c8ac48027065753faa0a7ab5b passed local lint/type/build/proxy, source contracts, Home web/static scenarios, and all 22 registered Hosted checks; merged as 5b83fee1625fdd490051b840790683114d7daaab."
+        }
+      },
+      {
+        "id": "K03",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K04",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K05",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K06",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K07",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K08",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K09",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K10",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K11",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K12",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K13",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K14",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K15",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K16",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K17",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K18",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K19",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K20",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K21",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K22",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K23",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G01",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G02",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G03",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G04",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G05",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G06",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G07",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: all six G07 whole-file test moves are integrated from e7241d74; 65 preserved nodes PASS. Final same-candidate CI and runtime gates remain separate.",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate.",
+          "g07_source_commit": "e7241d74b71ec82cdc82168600d9a619addf75eb",
+          "g07_integration_commit": "32ef40651978ecefcc5ecb2fb79f18f7df73dd99"
+        }
+      },
+      {
+        "id": "G08",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G09",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G10",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G11",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G12",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "G13",
+        "status": "MOVED",
+        "backend_status": "MOVED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      },
+      {
+        "id": "K24",
+        "status": "MAPPED",
+        "backend_status": "MOVED",
+        "frontend_status": "MAPPED",
+        "verification": {
+          "baseline": "security/refactor_source_baseline.json",
+          "checkpoint": "security/refactor_backend_checkpoint.json",
+          "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+          "backend": "MOVED: actual source ownership and current references; not a new runtime verification result",
+          "remaining": "Final merged CI, supported execution and installed-app verification are recorded in docs/architecture/refactor-backend-results.md; frontend AR-F2+ and AR-X remain separate."
+        }
+      }
+    ],
+    "frontend_transition": {
+      "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
+      "status": "STRUCTURAL_IMPLEMENTATION_COMPLETE; FINAL_INTEGRATION_TRACKED_IN_PR_306",
+      "documentation": "docs/architecture/refactor-frontend-results.md",
+      "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
+      "items": {
+        "K01": {
+          "stages": [
+            "AR-F3-A"
+          ],
+          "status": "MAPPED"
+        },
+        "K02": {
+          "stages": [
+            "AR-F2-C"
+          ],
+          "status": "MAPPED"
+        },
+        "K03": {
+          "stages": [
+            "AR-F3-B",
+            "AR-F3-C"
+          ],
+          "status": "MAPPED"
+        },
+        "K04": {
+          "stages": [
+            "AR-F3-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K05": {
+          "stages": [
+            "AR-F3-B",
+            "AR-F3-E"
+          ],
+          "status": "MAPPED"
+        },
+        "K06": {
+          "stages": [
+            "AR-F3-E"
+          ],
+          "status": "MAPPED"
+        },
+        "K07": {
+          "stages": [
+            "AR-F3-E"
+          ],
+          "status": "MAPPED"
+        },
+        "K08": {
+          "stages": [
+            "AR-F3-E",
+            "AR-F3-F"
+          ],
+          "status": "MAPPED"
+        },
+        "K09": {
+          "stages": [
+            "AR-F3-F"
+          ],
+          "status": "MAPPED"
+        },
+        "K10": {
+          "stages": [
+            "AR-F3-D"
+          ],
+          "status": "MAPPED"
+        },
+        "K11": {
+          "stages": [
+            "AR-F2-B",
+            "AR-F3-D"
+          ],
+          "status": "MAPPED"
+        },
+        "K12": {
+          "stages": [
+            "AR-F2-C",
+            "AR-F4-C"
+          ],
+          "status": "MAPPED"
+        },
+        "K13": {
+          "stages": [
+            "AR-F2-C",
+            "AR-F3-G"
+          ],
+          "status": "MAPPED"
+        },
+        "K14": {
+          "stages": [
+            "AR-F4-A"
+          ],
+          "status": "MAPPED"
+        },
+        "K15": {
+          "stages": [
+            "AR-F4-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K16": {
+          "stages": [
+            "AR-F4-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K17": {
+          "stages": [
+            "AR-F4-A"
+          ],
+          "status": "MAPPED"
+        },
+        "K18": {
+          "stages": [
+            "AR-F4-A",
+            "AR-F4-C"
+          ],
+          "status": "MAPPED"
+        },
+        "K19": {
+          "stages": [
+            "AR-F4-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K20": {
+          "stages": [
+            "AR-F3-E",
+            "AR-F4-A"
+          ],
+          "status": "MAPPED"
+        },
+        "K21": {
+          "stages": [
+            "AR-F4-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K22": {
+          "stages": [
+            "AR-F4-B"
+          ],
+          "status": "MAPPED"
+        },
+        "K23": {
+          "stages": [
+            "AR-F4-C"
+          ],
+          "status": "MAPPED"
+        },
+        "K24": {
+          "stages": [
+            "AR-F3-G",
+            "AR-F5-A"
+          ],
+          "status": "MAPPED"
+        }
+      },
+      "stages": {
+        "AR-F2-0": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "pr": 291,
+          "head": "1daca62035f4d2eb7f938d30f073cd280b540dea",
+          "merge": "72b6573898ad4a720125aba2905327f49aa7fbd2",
+          "pr_checks": "23/23 SUCCESS; installer 5/5 SUCCESS"
+        },
+        "AR-F2-A": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F2-A",
+          "preservation": "Existing Local UI implementation and same feature consumers; exact one-way shared bridges",
+          "pr": 292
+        },
+        "AR-F2-B": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F2-B",
+          "scope": "server proxy, browser session transport, runtime navigation and native commands",
+          "pr": 293
+        },
+        "AR-F2-C": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F2-C",
+          "scope": "Next/static common screens, providers, World/Studio/Device shells",
+          "pr": 294
+        },
+        "AR-F3-A": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-A",
+          "scope": "Identity and settings ownership",
+          "pr": 295
+        },
+        "AR-F3-B": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-B",
+          "scope": "Character feature ownership and mixed-screen assembly",
+          "pr": 296
+        },
+        "AR-F3-C": {
+          "status": "COMPLETE - pre-merge and seven post-merge workflows PASS",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-C",
+          "scope": "World definition and Creator Studio ownership",
+          "pr": 297
+        },
+        "AR-F3-D": {
+          "status": "MERGED - post-merge pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-D",
+          "scope": "World package import/export, preview and desktop transfer",
+          "pr": 298
+        },
+        "AR-F3-E": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-E",
+          "scope": "Social feature ownership",
+          "pr": 299
+        },
+        "AR-F3-F": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-F",
+          "scope": "Relationship graph ownership",
+          "pr": 300
+        },
+        "AR-F3-G": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F3-G",
+          "scope": "Tree, support and server/static route ownership",
+          "pr": 301
+        },
+        "AR-F4-A": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F4-A",
+          "scope": "Chat transport/UI and upper Memory panel composition",
+          "pr": 302
+        },
+        "AR-F4-B": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F4-B",
+          "scope": "Memory scope and owner/batch controls",
+          "pr": 303
+        },
+        "AR-F4-C": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F4-C",
+          "scope": "Shared screen and native lifecycle boundaries",
+          "pr": 304
+        },
+        "AR-F5-A": {
+          "status": "IMPLEMENTED - sequential integration pending",
+          "source_map": "security/refactor_path_map.json#details.AR-F5-A",
+          "scope": "Retire old forwarding paths and classify actual common/feature/testing owners",
+          "pr": 305
+        },
+        "AR-F5-B": {
+          "status": "IMPLEMENTED - final validation and integration pending",
+          "scope": "Whole-tree frontend checks, contributor documentation and final runtime gates"
+        }
+      },
+      "status_snapshot": "2026-09-07: dated per-stage gate snapshots below; final exact-head and merge state are in PR306 and its merge Actions"
+    },
+    "backend_transition": {
+      "checkpoint_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
+      "stage": "AR-B8-B",
+      "status": "MOVED_PENDING_FINAL_INTEGRATION_VERIFICATION",
+      "sequence": [
+        "AR-G0",
+        "AR-G1",
+        "AR-G2",
+        "AR-G3",
+        "AR-G4",
+        "AR-B2",
+        "AR-B3",
+        "AR-B4",
+        "AR-B5",
+        "AR-B6",
+        "AR-B7",
+        "AR-B8-A",
+        "AR-G5",
+        "AR-B8-B"
+      ],
+      "status_rule": "backend_status=MOVED means actual source ownership/current references, not final CI/installation acceptance. Overall status remains MAPPED where frontend is not moved; existing Device Home pilot VERIFIED evidence is retained. AR-F2+ and AR-X remain separate."
+    },
+    "reference_semantics": {
+      "current_paths": "Existing implementation/support files at the source_reading_map_commit; repeated historical entries are deduplicated. Retired empty markers have no proxy replacement.",
+      "target_paths": "Actual backend responsibility locations, with frontend future targets retained until section 8.3. Conditional templates/requirements decisions identify their adopted implementation/configuration, not nonexistent folders.",
+      "consumers": "Current product Python AST direct imports into the item current implementation modules; pre-existing non-app consumers retained. Not every importer is an HTTP caller.",
+      "test_paths": "Current existing associated test files; original/intermediate test_nodes are retained and resolved by refactor_path_map.json.",
+      "historical_fields": "baseline_commit/tree, coverage, entrypoints, test_nodes and historical_transition_evidence retain original/intermediate evidence; none is regenerated from current source.",
+      "source_reading_map_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f"
+    }
   }
 }

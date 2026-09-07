@@ -10388,6 +10388,96 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "c6164186cd38e996ddd45a5a4e254eb7314ecaf3",
+      "feature_id": "G07",
+      "reason": "AR-X3 populated Memory migration preservation and integrated execution evidence guide",
+      "tracked_files": {
+        "backend/tests/migrations/test_populated_memory_upgrade.py": "3c0b03acbd4f9bd38d6a40a8c6b2492fc2b020fe",
+        "docs/architecture/refactor-integration-scenarios.md": "f3e126f5ae264e19e8ab752577e42f4ccc520b81"
+      },
+      "test_nodes": [
+        "tests/migrations/test_populated_memory_upgrade.py::test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change[False]",
+        "tests/migrations/test_populated_memory_upgrade.py::test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change[True]"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_populated_memory_upgrade.py": {
+          "_rows": [],
+          "_seed": [],
+          "test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change": [
+            "assert len(GENERATION) == 64",
+            "assert len(before['memory_scope_settings']) == 2",
+            "assert len(before['memory_items']) == 3",
+            "assert len(before['memory_item_evidence']) == 1",
+            "assert hashlib.sha256(source.read_bytes()).hexdigest() == source_hash",
+            "assert _rows(source) == before",
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_identity_changed')",
+            "assert marker.read_bytes() == marker_before",
+            "assert not (root / 'canonical/previous-generation.json').exists()",
+            "assert not list((root / 'canonical/generations').glob('.*.tmp-*'))",
+            "assert result.canonical.migrated is True",
+            "assert result.canonical.source_version == 8",
+            "assert result.canonical.target_version == 9",
+            "assert _rows(target) == before",
+            "assert repeated.canonical.migrated is False",
+            "assert repeated.canonical.generation == result.canonical.generation",
+            "assert _rows(target) == before",
+            "assert previous['data_version'] == 8",
+            "assert previous['generation'] == GENERATION",
+            "assert connection.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert connection.execute(f'SELECT count(*) FROM \"{name}\"').fetchone()[0] == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_populated_memory_upgrade.py": {}
+      }
+    },
+    {
+      "commit": "9395b784585f19e26ec1ba8d928bd05bb8b63ffe",
+      "feature_id": "G07",
+      "reason": "AR-X Core artifact policy allows only exact synthetic test reports and rejects path or scope expansion",
+      "tracked_files": {
+        "backend/tests/test_ci_report_artifacts.py": "58414f8f0e304081fbd7daaa39300886ba0a0896"
+      },
+      "test_nodes": [
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[${{ github.workspace }}]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[../private]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/**]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.ci/backend-junit.xml\\nbackend/.ci/extra.json]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.ci]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[backend/.env]",
+        "tests/test_ci_report_artifacts.py::test_artifact_paths_cannot_expand_or_become_dynamic[browser-tests/.ci/*.xml]",
+        "tests/test_ci_report_artifacts.py::test_exact_synthetic_test_report_files_are_allowed[backend]",
+        "tests/test_ci_report_artifacts.py::test_exact_synthetic_test_report_files_are_allowed[frontend]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[action]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[condition]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[duplicate]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[extra_option]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[ignore_missing]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[job]",
+        "tests/test_ci_report_artifacts.py::test_report_exception_keeps_action_job_and_failure_limits[workflow]"
+      ],
+      "test_assertions": {
+        "tests/test_ci_report_artifacts.py": {
+          "report": [],
+          "errors": [],
+          "test_exact_synthetic_test_report_files_are_allowed": [
+            "assert errors(report(job), job=job) == []"
+          ],
+          "test_artifact_paths_cannot_expand_or_become_dynamic": [
+            "assert errors(step)"
+          ],
+          "test_report_exception_keeps_action_job_and_failure_limits": [
+            "assert errors(step, job=job, workflow=workflow)",
+            "assert checker.check_report_uploads(document, workflow, yaml.safe_dump(document))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_ci_report_artifacts.py": {}
+      }
     }
   ]
 }

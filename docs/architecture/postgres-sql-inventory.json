@@ -508,7 +508,7 @@
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/repository/items.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "9fc62ea20410321d6ba2ac1d6dc436b7043c8d5e807a5d4dbcc3e0d4ad985a82",
+      "source_sha256": "975dc5f8232ae45b847e11ebcaaa001eb3fb9cbc0f854f9d9ac281492b97b509",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
