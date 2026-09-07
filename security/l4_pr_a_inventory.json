@@ -2611,14 +2611,14 @@
             "@/features/social/types/social-feed-contract",
             "@/hooks/use-mobile-pull-to-refresh",
             "@/lib/auth/browser-session",
-            "@/utils/scroll-viewport",
+            "@/lib/dom/scroll-viewport",
             "lucide-react",
             "next/image",
             "next/link",
             "react"
           ],
           "path": "frontend/src/composition/screens/post-list-screen.tsx",
-          "sha256": "95b113c06f747b0db1024d14192a78123a14a5baefb261ec89329e811f5974e1"
+          "sha256": "eaf80c5f31ca8282c393603ebf3fe32f36a25c1c6262cf45cba3991b6ce26062"
         },
         {
           "exports": [
