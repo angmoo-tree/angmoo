@@ -121,7 +121,8 @@ source SHA, 도구 버전·lock hash를 함께 보관한다. baseline #258의 18
 
 ## 종료 근거와 다음 단계
 
-최종 통합 PR의 본문과 같은 merge의 Actions가 후보/병합/산출물 근거다.
+[최종 통합 PR #314](https://github.com/angmoo-tree/angmoo/pull/314)의 본문과
+같은 merge의 Actions가 후보/병합/산출물 근거다.
 PR head와 임시 merge checkout, 실제 main merge를 구분하고 설치 payload의
 SOURCE_SHA·hash·프로세스 경로를 연결한다. 제품 코드에 자기 merge SHA를 다시
 커밋하는 순환 대신 workspace의 09-07 §8.4 종료 기록에 실제 실행 영수증을 남긴다.
