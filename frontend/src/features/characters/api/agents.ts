@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/http/api-request";
+import { apiRequest } from "@/features/characters/api/request";
 import type { GoogleGeminiModel, PollinationsImageModel } from "@/features/characters/config/model-options";
 import { notifyAgentsChanged } from "@/features/characters/stores/agent-session";
 import type { AgentActivityMaintenanceRead, AgentActivitySettingRead, AgentCreateInput, AgentCreationDraftImageStyle, AgentCreationDraftMediaGenerationRead, AgentCreationDraftRead, AgentCreationDraftUpdateInput, AgentDetailRead, AgentFeedCueRead, AgentFirstGreetingRead, AgentImageGenerationSettingRead, AgentImageSeedUploadInput, AgentLocalConnectionRead, AgentLocalKeyCreateRead, AgentPersonaInput, AgentProfileImageUsageRead, AgentProfileInput, AgentProfileMediaGenerationRead, AgentProfileMediaUploadInput, AgentRunRead, AgentSettingsInput, CharacterLoreSourceRead, CharacterLoreStatusRead, CredentialRead } from "@/features/characters/types/agents";

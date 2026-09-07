@@ -137087,6 +137087,17 @@
         "frontend/src/utils/scroll-viewport.ts": "frontend/src/lib/dom/scroll-viewport.ts"
       },
       "preserved": "Source bytes unchanged; the existing scroll contract test only follows the mapped source path."
+    },
+    "AR-X1-E": {
+      "scope": "Product-neutral transport and feature-owned validation message compatibility",
+      "transport": "frontend/src/lib/http/api-request.ts",
+      "feature_owners": [
+        "frontend/src/features/identity/api/request.ts",
+        "frontend/src/features/characters/api/request.ts",
+        "frontend/src/features/social/api/request.ts"
+      ],
+      "test": "frontend/scripts/test-feature-error-parity.mjs",
+      "preserved": "Same response parsing, request body/FormData, 401/auth events, field precedence and user messages. Existing mixed-field errors remain accepted within each feature; no cross-feature or common-to-feature import."
     }
   },
   "asgi_exports": {

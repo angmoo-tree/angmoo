@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/http/api-request";
+import { apiRequest } from "@/features/social/api/request";
 import type { PostDetail } from "@/features/social/types/community";
 
 export function createCommunityPost(data: {
