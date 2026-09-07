@@ -852,7 +852,8 @@
     "frontend/src/features/runtime-status/public.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
     "frontend/src/features/ui-foundation/public.ts": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
     "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx",
-    "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts"
+    "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts",
+    "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -136613,12 +136614,12 @@
             "CharacterExecutionMode": "frontend/src/features/characters/types/character.ts",
             "presentCharacterRecentActivity": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
             "CharacterRecentActivityPresentation": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
-            "CHARACTER_AUTONOMY_MUTATION_EVENT": "frontend/src/features/characters/stores/character-dashboard-session.ts",
-            "CHARACTERS_CHANGED_EVENT": "frontend/src/features/characters/stores/character-dashboard-session.ts",
-            "clearCharacterAutonomyMutationState": "frontend/src/features/characters/stores/character-dashboard-session.ts",
-            "getCharacterAutonomyMutationStates": "frontend/src/features/characters/stores/character-dashboard-session.ts",
-            "setCharacterAutonomyMutationState": "frontend/src/features/characters/stores/character-dashboard-session.ts",
-            "CharacterAutonomyMutationEventDetail": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "CHARACTER_AUTONOMY_MUTATION_EVENT": "frontend/src/features/characters/stores/agent-session.ts",
+            "CHARACTERS_CHANGED_EVENT": "frontend/src/features/characters/stores/agent-session.ts",
+            "clearCharacterAutonomyMutationState": "frontend/src/features/characters/stores/agent-session.ts",
+            "getCharacterAutonomyMutationStates": "frontend/src/features/characters/stores/agent-session.ts",
+            "setCharacterAutonomyMutationState": "frontend/src/features/characters/stores/agent-session.ts",
+            "CharacterAutonomyMutationEventDetail": "frontend/src/features/characters/stores/agent-session.ts",
             "AgentsDashboardClient": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
             "getWorldCharacterProfile": "frontend/src/features/characters/api/world-character-profile-client.ts",
             "listWorldCharacterProfiles": "frontend/src/features/characters/api/world-character-profile-client.ts",
@@ -137061,6 +137062,13 @@
         "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts"
       },
       "preserved": "Unchanged storage keys, parsing, cache removal and auth notification order. Historical source and assertions remain frozen."
+    },
+    "AR-X1-B": {
+      "scope": "One Characters onboarding/autonomy session implementation",
+      "files": {
+        "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts"
+      },
+      "preserved": "Dashboard names alias the same functions used by detail/API consumers. Storage keys, event payload/order, first welcome setters and single/all-state queries remain unchanged."
     }
   },
   "asgi_exports": {

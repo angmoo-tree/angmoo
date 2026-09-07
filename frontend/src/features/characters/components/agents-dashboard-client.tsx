@@ -29,7 +29,7 @@ import { activateCharacterAutonomy, deactivateCharacterAutonomy, listCharacterDa
 import { presentCharacterAutonomy, sortCharactersForDashboard, summarizeCharacterAutonomy } from "@/features/characters/utils/character-dashboard-presentation";
 import { type CharacterAutonomyMutationState, type CharacterDashboardItem } from "@/features/characters/types/character";
 import { presentCharacterRecentActivity } from "@/features/characters/utils/character-recent-activity-presentation";
-import { CHARACTER_AUTONOMY_MUTATION_EVENT, CHARACTERS_CHANGED_EVENT, clearCharacterAutonomyMutationState, clearFirstCharacterWelcomePending, getCharacterAutonomyMutationStates, hasFirstCharacterWelcomePending, setCharacterAutonomyMutationState, type CharacterAutonomyMutationEventDetail } from "@/features/characters/stores/character-dashboard-session";
+import { CHARACTER_AUTONOMY_MUTATION_EVENT, CHARACTERS_CHANGED_EVENT, clearCharacterAutonomyMutationState, clearFirstCharacterWelcomePending, getCharacterAutonomyMutationStates, hasFirstCharacterWelcomePending, setCharacterAutonomyMutationState, type CharacterAutonomyMutationEventDetail } from "@/features/characters/stores/agent-session";
 import styles from "./characters-dashboard.module.css";
 
 export function AgentsDashboardClient() {

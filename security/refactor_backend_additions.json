@@ -10363,6 +10363,17 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "c6ec7ad0cf55cd0b2147ebf2b47bf86fab788bbe",
+      "feature_id": "G07",
+      "reason": "AR-X1-B immutable prior-versus-current Character dashboard state parity with shared storage owner",
+      "tracked_files": {
+        "frontend/scripts/test-character-state-parity.mjs": "0484c3c777ae8f041d727b1ab89d167cabc6e2e0"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

@@ -877,7 +877,7 @@
         "frontend/src/features/characters/api/character-dashboard-client.ts",
         "frontend/src/features/characters/api/world-character-profile-client.ts",
         "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
-        "frontend/src/features/characters/stores/character-dashboard-session.ts",
+        "frontend/src/features/characters/stores/agent-session.ts",
         "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
         "frontend/src/features/characters/types/world-character-profile.ts",
         "frontend/src/features/characters/components/characters-dashboard.module.css",
@@ -916,7 +916,6 @@
         "frontend/src/features/characters/components/world-character-directory.tsx",
         "frontend/src/features/characters/components/world-character-profile-card.tsx",
         "frontend/src/features/characters/config/model-options.ts",
-        "frontend/src/features/characters/stores/agent-session.ts",
         "frontend/src/features/characters/types/activity.ts",
         "frontend/src/features/characters/types/agents.ts",
         "frontend/src/features/characters/types/character.ts",
@@ -960,7 +959,6 @@
         "frontend/src/features/characters/components/world-character-profile.module.css",
         "frontend/src/features/characters/config/model-options.ts",
         "frontend/src/features/characters/stores/agent-session.ts",
-        "frontend/src/features/characters/stores/character-dashboard-session.ts",
         "frontend/src/features/characters/types/activity.ts",
         "frontend/src/features/characters/types/agents.ts",
         "frontend/src/features/characters/types/character.ts",
@@ -1212,7 +1210,8 @@
         "backend/tests/world_characters/test_setup_contracts.py",
         "backend/tests/worlds/test_creator_routes.py",
         "backend/tests/worlds/test_definition_contract.py",
-        "backend/tests/worlds/test_transition_contracts.py"
+        "backend/tests/worlds/test_transition_contracts.py",
+        "frontend/scripts/test-character-state-parity.mjs"
       ],
       "test_nodes": [
         "tests/character_lore/test_documents.py::test_chunk_lore_text_flushes_before_next_unit_exceeds_max",
@@ -10961,7 +10960,8 @@
         "backend/tests/routines/test_run_backoff.py",
         "backend/tests/routines/test_run_results.py",
         "backend/tests/routines/test_writing_parameters.py",
-        "backend/tests/test_ci_pytest_paths.py"
+        "backend/tests/test_ci_pytest_paths.py",
+        "frontend/scripts/test-character-state-parity.mjs"
       ],
       "test_nodes": [
         "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",

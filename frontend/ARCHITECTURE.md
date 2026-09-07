@@ -29,6 +29,12 @@ Character 생성·설정·활동의 요청은 `features/characters/api`, 응답 
 목록, 프로필 카드와 설정·상태 표시를 소유한다. 작은 컴포넌트의 props와 표시 함수의
 지역 타입은 사용 위치에 함께 둘 수 있다.
 
+온보딩·자율활동의 sessionStorage 구현은 `stores/agent-session.ts` 한 곳이 소유한다.
+대시보드가 사용하는 Character 이름과 기존 Agent 이름은 같은 함수를 가리킨다.
+저장 키·이벤트 이름·payload를 바꾸지 않으며 별도 대시보드 저장 구현을 복제하지 않는다.
+상세와 대시보드 사이의 상태 공유·정리 동작은 `test-character-state-parity.mjs`가
+이전 구현과 비교한다.
+
 Character 상세 화면의 Social 프로필·피드 조회와 Chat 쪽지 설정은
 `composition/screens/agent-detail-screen.tsx`가 연결한다. 캐릭터 전용 폼과 상태 표시는
 `features/characters/components/agent-detail-parts.tsx`에 있다. World 캐릭터 프로필도
