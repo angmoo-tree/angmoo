@@ -10388,6 +10388,51 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "c6164186cd38e996ddd45a5a4e254eb7314ecaf3",
+      "feature_id": "G07",
+      "reason": "AR-X3 populated Memory migration preservation and integrated execution evidence guide",
+      "tracked_files": {
+        "backend/tests/migrations/test_populated_memory_upgrade.py": "3c0b03acbd4f9bd38d6a40a8c6b2492fc2b020fe",
+        "docs/architecture/refactor-integration-scenarios.md": "f3e126f5ae264e19e8ab752577e42f4ccc520b81"
+      },
+      "test_nodes": [
+        "tests/migrations/test_populated_memory_upgrade.py::test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change[False]",
+        "tests/migrations/test_populated_memory_upgrade.py::test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change[True]"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_populated_memory_upgrade.py": {
+          "_rows": [],
+          "_seed": [],
+          "test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change": [
+            "assert len(GENERATION) == 64",
+            "assert len(before['memory_scope_settings']) == 2",
+            "assert len(before['memory_items']) == 3",
+            "assert len(before['memory_item_evidence']) == 1",
+            "assert hashlib.sha256(source.read_bytes()).hexdigest() == source_hash",
+            "assert _rows(source) == before",
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_identity_changed')",
+            "assert marker.read_bytes() == marker_before",
+            "assert not (root / 'canonical/previous-generation.json').exists()",
+            "assert not list((root / 'canonical/generations').glob('.*.tmp-*'))",
+            "assert result.canonical.migrated is True",
+            "assert result.canonical.source_version == 8",
+            "assert result.canonical.target_version == 9",
+            "assert _rows(target) == before",
+            "assert repeated.canonical.migrated is False",
+            "assert repeated.canonical.generation == result.canonical.generation",
+            "assert _rows(target) == before",
+            "assert previous['data_version'] == 8",
+            "assert previous['generation'] == GENERATION",
+            "assert connection.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert connection.execute(f'SELECT count(*) FROM \"{name}\"').fetchone()[0] == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_populated_memory_upgrade.py": {}
+      }
     }
   ]
 }
