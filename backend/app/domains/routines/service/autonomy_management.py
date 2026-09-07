@@ -56,10 +56,14 @@ def activate_agent(
         )
         raise
     except SqliteBusyRetryExhausted as exc:
-        raise AgentAutonomyRetryableError(
-            "autonomy_activation_retryable: 자율활동 상태를 동시에 변경하고 있어요. "
-            "잠시 후 다시 시도해주세요."
-        ) from exc
+        raise _activation_retryable_error() from exc
+
+
+def _activation_retryable_error() -> AgentAutonomyRetryableError:
+    return AgentAutonomyRetryableError(
+        "autonomy_activation_retryable: 자율활동 상태를 동시에 변경하고 있어요. "
+        "잠시 후 다시 시도해주세요."
+    )
 
 
 def _activate_agent_uow(
@@ -312,17 +316,29 @@ def _log_autonomy_activation_rejection(
     character_id: str,
     error: AgentAutonomyCapacityError,
 ) -> None:
-    activity_logs.log_activity(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        action_type="autonomy_activation_rejected",
-        target_post_id=None,
-        reason=error.reason_code,
-        result=(
-            f"active_count={error.active_count}; max_active={error.max_active}"
-        ),
-    )
+    def write_rejection() -> None:
+        activity_logs.log_activity(
+            db,
+            user_id=user_id,
+            character_id=character_id,
+            action_type="autonomy_activation_rejected",
+            target_post_id=None,
+            reason=error.reason_code,
+            result=(
+                f"active_count={error.active_count}; max_active={error.max_active}"
+            ),
+        )
+
+    if db.get_bind().dialect.name != "sqlite":
+        write_rejection()
+        return
+    # Capacity rejection rolled back the activation transaction. Its audit log
+    # is a new writer and needs the same bounded coordination as activation.
+    try:
+        with unit_of_work.deferred_commits():
+            run_sqlite_session_immediate(db, write_rejection)
+    except SqliteBusyRetryExhausted as exc:
+        raise _activation_retryable_error() from exc
 
 
 def _ensure_activity_profile_ready(
