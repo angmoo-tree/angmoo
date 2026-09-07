@@ -10326,6 +10326,32 @@
       "test_suppressions": {
         "tests/routines/test_activity_limits.py": {}
       }
+    },
+    {
+      "commit": "d597eeffebbb829e8d23bb9d2549b52f8a066cab",
+      "feature_id": "G07",
+      "reason": "Existing-file additions resolve immutable assertion source from their introduction commit; exact path and predicate regression",
+      "tracked_files": {
+        "backend/tests/test_refactor_addition_assertion_source.py": "a3ed55def3c656749349a301f6dd4b4ac79afd96"
+      },
+      "test_nodes": [
+        "tests/test_refactor_addition_assertion_source.py::test_existing_file_addition_reads_its_commit_and_preserves_predicate[False]",
+        "tests/test_refactor_addition_assertion_source.py::test_existing_file_addition_reads_its_commit_and_preserves_predicate[True]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_addition_assertion_source.py": {
+          "test_existing_file_addition_reads_its_commit_and_preserves_predicate": [
+            "assert reads",
+            "assert args == ('show', expected['commit'] + ':backend/tests/test_old.py')",
+            "assert kwargs['root'] == tmp_path",
+            "assert any(('expectation missing or changed' in error for error in errors))",
+            "assert errors == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_addition_assertion_source.py": {}
+      }
     }
   ]
 }
