@@ -63,7 +63,7 @@ Studio의 입력 타입은 화면이 실제 표시하는 값만 설명하며 Dev
 
 World Package의 preview·prepare·download·acknowledge·discard·import 요청은
 `features/world-packages/api/world-package-client.ts`가 담당한다. DTO는 `types`,
-파일 확장자·MIME은 `config`, 브라우저 object URL의 생성·해제는 `utils/browser-delivery.ts`,
+파일 확장자·MIME은 `config`, 브라우저 object URL의 생성·해제는 `api/browser-delivery.ts`,
 네이티브 저장 토큰을 사용하는 명령은 `api/native-delivery.ts`에 있다. 실제 저장 경로를
 프론트엔드 상태나 DTO에 노출하지 않는다. 화면은 `components`에서 라이선스·권리 확인,
 preview digest 승인, 취소·실패·정리와 저장 완료 확인 순서를 유지한다. World 편집과의
