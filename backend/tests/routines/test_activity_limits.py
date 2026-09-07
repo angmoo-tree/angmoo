@@ -1830,6 +1830,67 @@ def test_sqlite_concurrent_world_activation_serializes_capacity_at_one(
         assert settings_rows[0].character_id == assigned_slots[0].assigned_character_id
 
 
+@pytest.mark.parametrize("persistent_busy", [False, True])
+def test_sqlite_capacity_rejection_log_has_bounded_writer_retry(
+    monkeypatch: pytest.MonkeyPatch, tmp_path, persistent_busy: bool,
+) -> None:
+    import sqlite3
+    from sqlalchemy import event
+    from sqlalchemy.exc import OperationalError
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'rejection-log.db'}")
+    _create_autonomy_capacity_tables(engine)
+    with Session(engine) as db:
+        user = _add_capacity_user(db)
+        _add_capacity_agent(db, user_id=user.id, character_id="char-rejected")
+        db.commit()
+
+    def reject_capacity(*_args, **_kwargs):
+        raise agent_service.AgentAutonomyCapacityError(
+            "capacity full", reason_code="world_autonomy_capacity_full",
+            active_count=1, max_active=1,
+        )
+
+    monkeypatch.setattr(autonomy_management, "_activate_agent_uow", reject_capacity)
+    attempts = []
+
+    def contend(_connection, _cursor, statement, parameters, _context, _many):
+        if statement.startswith("INSERT INTO agent_activity_logs"):
+            attempts.append(statement)
+            if persistent_busy or len(attempts) == 1:
+                raise OperationalError(statement, parameters, sqlite3.OperationalError("database is locked"))
+
+    event.listen(engine, "before_cursor_execute", contend)
+    try:
+        with Session(engine) as db:
+            user = db.get(models.User, "user-1")
+            assert user is not None
+            expected = (agent_service.AgentAutonomyRetryableError if persistent_busy
+                        else agent_service.AgentAutonomyCapacityError)
+            with pytest.raises(expected) as caught:
+                autonomy_management.activate_agent(
+                    db, user, "char-rejected", workflows=agent_service.build_autonomy_workflows(),
+                )
+            assert caught.value.reason_code == (
+                "autonomy_activation_retryable" if persistent_busy else "world_autonomy_capacity_full"
+            )
+        assert 2 <= len(attempts) <= 4
+        with Session(engine) as db:
+            logs = list(db.scalars(select(models.AgentActivityLog)))
+            assert len(logs) == (0 if persistent_busy else 1)
+            if logs:
+                assert logs[0].action_type == "autonomy_activation_rejected"
+                assert logs[0].reason == "world_autonomy_capacity_full"
+                assert logs[0].result == "active_count=1; max_active=1"
+            settings_rows = list(db.scalars(select(models.AgentActivitySetting)))
+            assert [(row.character_id, row.auto_enabled) for row in settings_rows] == [
+                ("char-rejected", False)
+            ]
+    finally:
+        event.remove(engine, "before_cursor_execute", contend)
+        engine.dispose()
+
+
 def test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

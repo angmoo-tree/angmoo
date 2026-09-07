@@ -9891,6 +9891,467 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_foundation.py": {}
       }
+    },
+    {
+      "commit": "e36895e74c6dfbfc7c90c72b8202a3c0d5f9a84d",
+      "feature_id": "K05",
+      "reason": "AR-X CI reproduced uncoordinated SQLite capacity-rejection audit write; bounded retry and duplicate-free rollback regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/routines/test_activity_limits.py::test_sqlite_capacity_rejection_log_has_bounded_writer_retry[False]",
+        "tests/routines/test_activity_limits.py::test_sqlite_capacity_rejection_log_has_bounded_writer_retry[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_limits.py": {
+          "_create_autonomy_capacity_tables": [],
+          "_add_capacity_user": [],
+          "_add_capacity_world": [],
+          "_add_capacity_agent": [],
+          "_add_active_routine_world_character": [],
+          "_selected_world_readiness": [
+            "assert selected is not None",
+            "assert world_character is not None"
+          ],
+          "test_agent_activity_setting_update_daily_limit_bounds": [
+            "assert valid.max_comments_per_day == 60",
+            "assert valid.max_posts_per_day == 30",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_ensure_setting_uses_default_daily_limits": [
+            "assert setting.max_posts_per_day == 10",
+            "assert setting.max_comments_per_day == 30",
+            "assert setting.active_hours_start == '14:00'",
+            "assert setting.active_hours_end == '22:00'"
+          ],
+          "test_agent_creation_draft_update_rejects_duplicate_handle": [
+            "pytest.raises(draft_service.AgentCreationDraftHandleConflictError)"
+          ],
+          "test_agent_creation_draft_update_rejects_prompt_injection_without_saving": [
+            "pytest.raises(draft_service.AgentCreationDraftValidationError, match='prompt_injection_detected')",
+            "assert draft is not None",
+            "assert draft.personality == 'quiet'"
+          ],
+          "test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving": [
+            "pytest.raises(draft_service.AgentCreationDraftValidationError, match='prompt_injection_detected')",
+            "assert draft is not None",
+            "assert draft.personality == 'quiet'"
+          ],
+          "test_agent_creation_draft_complete_rejects_prompt_injection": [
+            "pytest.raises(draft_service.AgentCreationDraftValidationError, match='prompt_injection_detected')"
+          ],
+          "test_create_agent_rejects_prompt_injection_before_insert": [
+            "pytest.raises(agent_service.PromptInjectionDetectedError, match='prompt_injection_detected')"
+          ],
+          "test_create_agent_applies_initial_activity_settings": [
+            "assert setting is not None",
+            "assert setting.activity_interval_minutes == 45",
+            "assert setting.active_hours_start == '22:00'",
+            "assert setting.active_hours_end == '06:00'"
+          ],
+          "test_update_persona_rejects_prompt_injection_without_saving": [
+            "pytest.raises(agent_service.PromptInjectionDetectedError, match='prompt_injection_detected')",
+            "assert character is not None",
+            "assert character.personality == 'quiet'",
+            "assert character.speech_style == ''"
+          ],
+          "test_give_feed_cue_rejects_prompt_injection_without_pending_cue": [
+            "pytest.raises(agent_service.PromptInjectionDetectedError, match='feed_cue_prompt_injection_detected')",
+            "assert cues == []"
+          ],
+          "test_create_agent_rejects_invalid_initial_active_hours_before_insert": [
+            "pytest.raises(agent_service.AgentActiveHoursInvalidError, match=active_hours.ACTIVE_HOURS_LIMIT_MESSAGE)"
+          ],
+          "test_active_hours_validation_allows_presets_and_custom_under_cap": [],
+          "test_active_hours_validation_rejects_all_day_over_cap_and_bad_start": [
+            "pytest.raises(ValueError, match=active_hours.ACTIVE_HOURS_LIMIT_MESSAGE)"
+          ],
+          "test_activity_policy_handles_cross_midnight_active_hours": [
+            "assert agent_activity_policy._is_within_active_hours(setting, datetime.fromisoformat('2026-06-16T14:30:00+00:00'))",
+            "assert not agent_activity_policy._is_within_active_hours(setting, datetime.fromisoformat('2026-06-16T08:00:00+00:00'))"
+          ],
+          "test_next_tick_schedule_adds_interval_jitter_without_running_early": [
+            "assert now + timedelta(minutes=60) <= schedule.next_tick_at",
+            "assert schedule.next_tick_at <= now + timedelta(minutes=75)",
+            "assert schedule.schedule_spread_reason == 'interval_jitter'"
+          ],
+          "test_active_start_spread_stays_inside_next_30_minute_boundary": [
+            "assert start <= schedule.next_tick_at < boundary",
+            "assert schedule.schedule_spread_reason == 'active_start_spread'"
+          ],
+          "test_next_tick_schedule_moves_end_of_window_to_next_active_start": [
+            "assert next_start <= schedule.next_tick_at < next_boundary",
+            "assert schedule.schedule_spread_reason == 'next_window'"
+          ],
+          "test_initial_retry_and_recovery_schedules_spread_without_running_early": [
+            "assert now <= initial.next_tick_at <= now + timedelta(minutes=10)",
+            "assert retry.next_tick_at >= now + timedelta(minutes=30)",
+            "assert retry.next_tick_at <= now + timedelta(minutes=35)",
+            "assert now <= recovery.next_tick_at <= now + timedelta(minutes=5)"
+          ],
+          "test_initial_schedule_uses_world_timezone_across_dst_boundary": [
+            "assert local_tick.date().isoformat() == '2026-03-08'",
+            "assert local_tick.utcoffset() == timedelta(hours=-4)",
+            "assert (local_tick.hour, local_tick.minute) >= (10, 0)",
+            "assert (local_tick.hour, local_tick.minute) < (10, 30)"
+          ],
+          "test_activity_timezone_comes_from_selected_world": [
+            "assert agent_activity_policy.activity_timezone_name(db, character_id=character.id) == 'America/New_York'"
+          ],
+          "test_world_timezone_change_reschedules_enabled_idle_slots": [
+            "assert changed == 1",
+            "assert slot is not None and slot.next_tick_at is not None",
+            "assert slot.next_tick_at.replace(tzinfo=UTC) == expected",
+            "assert character_id == character.id",
+            "assert timezone.key == 'America/New_York'"
+          ],
+          "test_api_agent_instants_normalize_sqlite_naive_values_to_utc": [
+            "assert slot.next_tick_at is not None",
+            "assert slot.next_tick_at.isoformat() == '2026-08-29T02:48:00+00:00'",
+            "assert slot.updated_at.isoformat() == '2026-08-29T02:48:00+00:00'",
+            "assert summary.next_activity_at is not None",
+            "assert summary.next_activity_at.isoformat() == '2026-08-29T02:48:00+00:00'",
+            "assert '\"next_tick_at\":\"2026-08-29T02:48:00Z\"' in slot.model_dump_json()"
+          ],
+          "test_file_backed_sqlite_tick_claims_two_naive_due_slots": [
+            "assert result.due_count == 2",
+            "assert result.started_count == 2",
+            "assert starts == [('angmoo-1', 0), ('angmoo-2', 10)]",
+            "assert persisted is not None and persisted.next_tick_at is not None",
+            "assert persisted.next_tick_at.tzinfo is None",
+            "assert [run.id for run in runs] == ['run-angmoo-1', 'run-angmoo-2']",
+            "assert all((run.status == 'completed' for run in runs))",
+            "assert all((slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE for slot in slots))",
+            "assert all((slot.last_run_at is not None for slot in slots))",
+            "assert all((slot.next_tick_at is not None and agent_activity_schedule.aware_utc(slot.next_tick_at) > observed_at for slot in slots))",
+            "assert slot is not None",
+            "assert slot is not None",
+            "assert slot.status == agent_run_crud.SLOT_STATUS_RUNNING",
+            "assert slot.assigned_user_id is not None",
+            "assert slot.assigned_character_id is not None"
+          ],
+          "test_maintenance_blocked_tick_counts_sqlite_naive_due_slot": [
+            "assert slot is not None",
+            "assert persisted is not None and persisted.next_tick_at is not None",
+            "assert persisted.next_tick_at.tzinfo is None",
+            "assert result.due_count == 1",
+            "assert result.started_count == 0",
+            "assert result.results == []",
+            "assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE",
+            "assert persisted.locked_by_run_id is None",
+            "assert persisted.next_tick_at is not None",
+            "assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == due_at"
+          ],
+          "test_tick_resident_slots_staggers_claimed_runs": [
+            "assert result.started_count == 3",
+            "assert starts == [('angmoo-1', 0), ('angmoo-2', 10), ('angmoo-3', 20)]",
+            "assert leases == [100 + 90 + 40]"
+          ],
+          "test_resident_scheduler_tick_runner_uses_configured_global_tick": [
+            "assert len(calls) == 1",
+            "assert result.started_count == 0",
+            "assert received_db is db",
+            "assert data.post_id == 'post-scheduler'",
+            "assert data.max_runs == 4",
+            "assert data.timeout_seconds == 120"
+          ],
+          "test_activity_policy_keeps_observe_internal_when_setting_disabled": [
+            "assert policy.allowed_actions == ('observe',)",
+            "assert policy.should_skip_llm"
+          ],
+          "test_visible_activity_actions_hide_observe": [
+            "assert agent_service._visible_activity_actions(['post', 'observe', 'like']) == ['post', 'like']"
+          ],
+          "test_update_settings_rejects_invalid_active_hours": [
+            "pytest.raises(agent_service.AgentActiveHoursInvalidError)"
+          ],
+          "test_update_settings_normalizes_observe_to_internal_enabled": [
+            "assert setting.allow_observe is True"
+          ],
+          "test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique": [
+            "assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 3",
+            "assert agent_crud.count_effective_active_server_llm_autonomy_agents(db, exclude_character_ids={'char-slot'}) == 2"
+          ],
+          "test_update_settings_rejects_direct_server_llm_auto_enabled_change": [
+            "pytest.raises(agent_service.AgentAutonomyCapacityError)",
+            "pytest.raises(agent_service.AgentAutonomyCapacityError)"
+          ],
+          "test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full": [
+            "pytest.raises(agent_service.AgentAutonomyCapacityError)",
+            "assert logs[-1].action_type == 'autonomy_activation_rejected'",
+            "assert logs[-1].reason == 'global_autonomy_capacity_full'",
+            "assert 'active_count=1' in logs[-1].result"
+          ],
+          "test_activate_agent_allows_same_user_replacement_at_capacity": [
+            "assert detail.character.id == new_character.id",
+            "assert old_setting is not None and old_setting.auto_enabled is True",
+            "assert new_setting is not None and new_setting.auto_enabled is True",
+            "assert old_slot is not None",
+            "assert new_slot is not None",
+            "assert old_slot.agent_id != new_slot.agent_id",
+            "assert old_world_character.autonomous_enabled is True",
+            "assert new_world_character.autonomous_enabled is True",
+            "assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 2",
+            "assert deactivated.settings.auto_enabled is False",
+            "assert old_setting.auto_enabled is True",
+            "assert old_world_character.autonomous_enabled is True",
+            "assert new_world_character.autonomous_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, old_character.id) is not None",
+            "assert agent_crud.get_assigned_slot(db, new_character.id) is None"
+          ],
+          "test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically": [
+            "assert agent_service.count_enabled_autonomous_world_characters(db, world_id='world-routine') == 50",
+            "assert agent_crud.get_assigned_slot(db, fiftieth.id) is not None",
+            "assert fiftieth_world_character.autonomous_enabled is True",
+            "pytest.raises(agent_service.AgentAutonomyCapacityError, match='world_autonomy_capacity_full')",
+            "assert caught.value.reason_code == 'world_autonomy_capacity_full'",
+            "assert rejected_setting is not None and rejected_setting.auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, fifty_first.id) is None",
+            "assert fifty_first_world_character.autonomous_enabled is False",
+            "assert agent_service.count_enabled_autonomous_world_characters(db, world_id='world-routine') == 50"
+          ],
+          "test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_rows": [
+            "assert agent_service.count_enabled_autonomous_world_characters(db, world_id='world-routine') == 1"
+          ],
+          "test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects": [
+            "pytest.raises(agent_service.AgentAutonomyCapacityError, match='global_autonomy_capacity_full')",
+            "assert caught.value.reason_code == 'global_autonomy_capacity_full'",
+            "assert target_setting is not None and target_setting.auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, target.id) is None",
+            "assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 100"
+          ],
+          "test_physical_slot_capacity_does_not_disable_existing_agents": [
+            "pytest.raises(agent_run_service.AgentSlotUnavailableError, match='resident_slot_unavailable')",
+            "assert agent_crud.get_setting(db, first.id).auto_enabled is True",
+            "assert agent_crud.get_setting(db, second.id).auto_enabled is True",
+            "assert agent_crud.get_setting(db, target.id).auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, first.id) is not None",
+            "assert agent_crud.get_assigned_slot(db, second.id) is not None",
+            "assert agent_crud.get_assigned_slot(db, target.id) is None"
+          ],
+          "test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fifty": [
+            "assert {slot.agent_id for slot in slots} == set(expected_ids)",
+            "assert len(slots) == 50",
+            "assert {slot.agent_id: slot.updated_at for slot in slots if slot.agent_id in original_updated_at} == original_updated_at"
+          ],
+          "test_sqlite_concurrent_world_activation_serializes_capacity_at_one": [
+            "assert sorted(results) == ['activated', 'world_autonomy_capacity_full']",
+            "assert len(settings_rows) == 1",
+            "assert len(enabled_world_characters) == 1",
+            "assert len(assigned_slots) == 1",
+            "assert settings_rows[0].character_id == enabled_world_characters[0].character_id",
+            "assert settings_rows[0].character_id == assigned_slots[0].assigned_character_id",
+            "assert user is not None"
+          ],
+          "test_sqlite_capacity_rejection_log_has_bounded_writer_retry": [
+            "assert 2 <= len(attempts) <= 4",
+            "assert user is not None",
+            "pytest.raises(expected)",
+            "assert caught.value.reason_code == ('autonomy_activation_retryable' if persistent_busy else 'world_autonomy_capacity_full')",
+            "assert len(logs) == (0 if persistent_busy else 1)",
+            "assert [(row.character_id, row.auto_enabled) for row in settings_rows] == [('char-rejected', False)]",
+            "assert logs[0].action_type == 'autonomy_activation_rejected'",
+            "assert logs[0].reason == 'world_autonomy_capacity_full'",
+            "assert logs[0].result == 'active_count=1; max_active=1'"
+          ],
+          "test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error": [
+            "pytest.raises(agent_service.AgentAutonomyRetryableError, match='autonomy_activation_retryable')"
+          ],
+          "test_activate_and_deactivate_sync_selected_routine_world_character": [
+            "assert activated.settings.auto_enabled is True",
+            "assert world_character.autonomous_enabled is True",
+            "assert world_character.version == 2",
+            "assert deactivated.settings.auto_enabled is False",
+            "assert world_character.autonomous_enabled is False",
+            "assert world_character.version == 3"
+          ],
+          "test_activation_uses_canonical_initial_schedule": [
+            "assert slot is not None and slot.next_tick_at is not None",
+            "assert slot.next_tick_at.replace(tzinfo=UTC) == expected",
+            "assert observed['character_id'] == character.id",
+            "assert observed['timezone'] == 'Asia/Seoul'"
+          ],
+          "test_enabled_idle_slot_reschedules_immediately_after_activity_window_change": [
+            "assert slot is not None and slot.next_tick_at is not None",
+            "assert slot.next_tick_at.replace(tzinfo=UTC) == expected",
+            "assert slot.heartbeat_interval_seconds == 90 * 60"
+          ],
+          "test_running_slot_keeps_current_schedule_until_run_completion": [
+            "assert slot is not None",
+            "assert slot is not None and slot.next_tick_at is not None",
+            "assert slot.next_tick_at.replace(tzinfo=UTC) == existing"
+          ],
+          "test_run_now_uses_temporary_slot_without_enabling_autonomy": [
+            "assert slot is not None",
+            "assert slot.status == 'running'",
+            "assert slot.assigned_character_id == 'char-run-now'",
+            "assert result.status == 'completed'",
+            "assert called == {'assigned': False, 'temporary': True, 'community': False}",
+            "assert setting is not None and setting.auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, character.id) is None",
+            "assert all((slot.assigned_character_id is None for slot in db.scalars(select(models.AgentSlot))))",
+            "assert list(db.scalars(select(models.AgentRun))) == []"
+          ],
+          "test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists": [
+            "assert slot is not None",
+            "assert slot.status == 'running'",
+            "assert slot.assigned_character_id == 'char-direct-world-run-now'",
+            "assert result.status == 'completed'",
+            "assert called == {'temporary': True}",
+            "assert setting is not None and setting.auto_enabled is False",
+            "assert world_character.autonomous_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, character.id) is None"
+          ],
+          "test_run_now_rejects_without_assigned_slot_and_does_not_fallback": [
+            "pytest.raises(agent_service.RunNowSlotUnavailableError)",
+            "assert called == {'claim': True, 'assigned': False, 'community': False}",
+            "assert setting is not None and setting.auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, character.id) is None"
+          ],
+          "test_run_now_releases_temporary_slot_after_runner_failure": [
+            "pytest.raises(RuntimeError, match='temporary runner failed')",
+            "assert setting is not None and setting.auto_enabled is False",
+            "assert agent_crud.get_assigned_slot(db, character.id) is None"
+          ],
+          "test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy": [
+            "assert recovered_count == 1",
+            "assert run.status == 'failed'",
+            "assert run.gateway_result is not None",
+            "assert run.gateway_result['reason'] == agent_run_crud.ORPHANED_RESIDENT_RUN_ERROR",
+            "assert setting is not None and setting.auto_enabled is False",
+            "assert slot.status == agent_run_crud.SLOT_STATUS_EMPTY",
+            "assert slot.assigned_user_id is None",
+            "assert slot.assigned_character_id is None",
+            "assert slot.assigned_credential_id is None",
+            "assert slot.locked_by_run_id is None",
+            "assert slot.lease_expires_at is None"
+          ],
+          "test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick": [
+            "assert slot is not None",
+            "assert persisted is not None and persisted.next_tick_at is not None",
+            "assert persisted.next_tick_at.tzinfo is None",
+            "assert recovered_count == 1",
+            "assert run is not None and run.status == 'failed'",
+            "assert persisted.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE",
+            "assert persisted.locked_by_run_id is None",
+            "assert persisted.lease_expires_at is None",
+            "assert persisted.next_tick_at is not None",
+            "assert agent_activity_schedule.aware_utc(persisted.next_tick_at) == now + timedelta(minutes=10)"
+          ],
+          "test_run_now_rejects_character_owned_by_another_user": [
+            "pytest.raises(agent_service.AgentNotFoundError)"
+          ],
+          "test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident": [
+            "assert result.status == 'completed'",
+            "assert result.post_id == posts[0].id",
+            "assert result.gateway_result['engine'] == 'first_greeting_writer'",
+            "assert runs[0].session_key is not None",
+            "assert ':first-greeting:' in runs[0].session_key",
+            "assert ':resident-manual:' not in runs[0].session_key",
+            "assert runs[0].post_id == posts[0].id",
+            "assert posts[0].author_character_id == character.id",
+            "assert logs[-1].action_type == 'post_created'",
+            "assert logs[-1].reason == 'onboarding_first_greeting'",
+            "assert called == {'assigned': False, 'community': False}"
+          ],
+          "test_first_greeting_cooldown_is_separate_from_run_now_cooldown": [
+            "assert agent_service._first_greeting_available_at(db, user.id) is None",
+            "assert available_at == now + agent_service.FIRST_GREETING_COOLDOWN"
+          ],
+          "test_first_greeting_claim_is_committed_before_provider_call": [
+            "assert source.index('_claim_first_greeting_run(') < source.index('_run_first_greeting_writer(')"
+          ],
+          "test_run_now_rejects_target_running_slot": [
+            "assert slot is not None",
+            "pytest.raises(agent_service.RunNowSlotBusyError)",
+            "assert list(db.scalars(select(models.AgentRun))) == []"
+          ],
+          "test_run_now_allows_two_other_live_running_slots": [
+            "assert result.status == 'completed'",
+            "assert captured['character_id'] == target.id",
+            "assert other_slot is not None"
+          ],
+          "test_run_now_rejects_target_soon_scheduled_slot": [
+            "assert slot is not None",
+            "pytest.raises(agent_service.RunNowSoonScheduledError)",
+            "assert list(db.scalars(select(models.AgentRun))) == []"
+          ],
+          "test_run_now_allows_other_imminent_slot": [
+            "assert other_slot is not None",
+            "assert result.status == 'completed'",
+            "assert captured['character_id'] == target.id"
+          ],
+          "test_run_now_rejects_when_capacity_has_three_live_running_slots": [
+            "pytest.raises(agent_service.RunNowSchedulerBusyError)",
+            "assert list(db.scalars(select(models.AgentRun))) == []",
+            "assert other_slot is not None"
+          ],
+          "test_run_now_ignores_expired_running_lease_for_capacity": [
+            "assert result.status == 'completed'",
+            "assert captured['character_id'] == target.id",
+            "assert other_slot is not None"
+          ],
+          "test_run_now_single_flight_rejects_one_live_running_slot": [
+            "assert other_slot is not None",
+            "pytest.raises(agent_service.RunNowSchedulerBusyError)",
+            "assert list(db.scalars(select(models.AgentRun))) == []"
+          ],
+          "test_run_now_allows_target_due_slot": [
+            "assert slot is not None",
+            "assert result.status == 'completed'",
+            "assert captured['user_id'] == user.id",
+            "assert captured['character_id'] == character.id",
+            "assert captured['require_public_action'] is True",
+            "assert captured['enforce_activity_policy'] is True"
+          ],
+          "test_run_now_manual_slot_does_not_preserve_previous_next_tick": [
+            "assert 'manual_next_tick_at = None' in source",
+            "assert 'manual_next_tick_at = slot.next_tick_at if require_public_action else None' not in source"
+          ],
+          "test_resident_shutdown_cancellation_marks_run_and_releases_slot": [
+            "assert slot is not None",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert cancellation_calls == ['provider_setup']",
+            "assert released is not None",
+            "assert released.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE",
+            "assert released.locked_by_run_id is None",
+            "assert released.lease_expires_at is None",
+            "assert released.last_error == 'runtime_shutdown'",
+            "assert run is not None",
+            "assert run.status == 'cancelled'",
+            "assert run.gateway_result['reason'] == 'runtime_shutdown'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_limits.py": {}
+      }
+    },
+    {
+      "commit": "d597eeffebbb829e8d23bb9d2549b52f8a066cab",
+      "feature_id": "G07",
+      "reason": "Existing-file additions resolve immutable assertion source from their introduction commit; exact path and predicate regression",
+      "tracked_files": {
+        "backend/tests/test_refactor_addition_assertion_source.py": "a3ed55def3c656749349a301f6dd4b4ac79afd96"
+      },
+      "test_nodes": [
+        "tests/test_refactor_addition_assertion_source.py::test_existing_file_addition_reads_its_commit_and_preserves_predicate[False]",
+        "tests/test_refactor_addition_assertion_source.py::test_existing_file_addition_reads_its_commit_and_preserves_predicate[True]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_addition_assertion_source.py": {
+          "test_existing_file_addition_reads_its_commit_and_preserves_predicate": [
+            "assert reads",
+            "assert args == ('show', expected['commit'] + ':backend/tests/test_old.py')",
+            "assert kwargs['root'] == tmp_path",
+            "assert any(('expectation missing or changed' in error for error in errors))",
+            "assert errors == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_addition_assertion_source.py": {}
+      }
     }
   ]
 }

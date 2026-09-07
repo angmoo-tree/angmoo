@@ -632,7 +632,7 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                      chat_retirement: dict | None = None,
                      compatibility_retirement: dict | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
-    root_cache, frozen_root_cache, frozen_text_cache = {}, {}, {}
+    root_cache, frozen_root_cache, frozen_text_cache, committed_blobs = {}, {}, {}, {}
     literals = path_literals(files)
     symbols = symbols or {}
     for snapshot in snapshots:
@@ -675,6 +675,19 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                 continue
             record = snapshot.get("tracked_files", {}).get("backend/" + old_path)
             blob = record.get("git_blob") if isinstance(record, dict) else record
+            # An additive test in an existing file has committed assertions but
+            # no new tracked-file entry. Resolve its historical source from the
+            # same introduction commit validated by addition_errors, never from
+            # today's worktree or from a replacement baseline.
+            if not blob and re.fullmatch(r"[0-9a-f]{40}", snapshot.get("commit", "")):
+                source_key = (snapshot["commit"], old_path)
+                if source_key not in committed_blobs:
+                    historical = git_bytes("show", snapshot["commit"] + ":backend/" + old_path, root=root)
+                    blob = committed_blobs[source_key] = git_blob(historical)
+                    text = historical.decode("utf-8-sig")
+                    frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
+                    frozen_text_cache[(old_path, blob)] = text
+                blob = committed_blobs[source_key]
             if blob and (old_path, blob) not in frozen_root_cache:
                 text = git_bytes("cat-file", "blob", blob, root=root).decode("utf-8-sig")
                 frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
