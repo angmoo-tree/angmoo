@@ -18,8 +18,11 @@ AR-X1-C는 PR #311의 7개 workflow를 통과해 merge
 `e23380e0a289d0eb8ecd1255614e2d9e102cee0b`로 병합했고 후속 7개 workflow도 통과했다.
 AR-X1-D는 PR #312의 수정 head `bfdc466965573f758a1c6a8cc129d6461a1f11f0`의
 7개 workflow를 통과해 merge `6032a02cf72f509bd351e868f7f5a0998d86a7bf`로 병합했다.
-그 merge의 후속 검증과 AR-X1-E의 기능별 오류 분리 검증을 진행한다.
-AR-X2~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝난 뒤 병합한다.
+그 merge의 후속 7개 workflow도 통과했다. AR-X1-E는 PR #313 head
+`0ecb6f6834ef3fdc174cb48bce7bf32b20e8354b`의 7개 workflow를 통과해
+merge `f07dc8d3ebb4b619159c7a9e14775d2962043e61`로 병합했다.
+통합 후보는 그 실제 merge를 기준으로 한다. 최종 PR과 동일 merge의
+후속 CI·설치·실행 영수증은 아래 종료 근거에서 확인한다.
 최종 merge의 CI·설치 산출물·실행 파일을 확인하기 전 전체 완료로 판정하지 않는다.
 
 출발판의 구조·디자인·frontend 보존 및 backend 계약/테스트 노드 보존 검사를 통과했다.
@@ -34,8 +37,8 @@ AR-X2~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝�
 | AR-X1-A | Identity 가입 대기를 `stores/pending-signup.ts`로 이동 | 저장 키·이메일/만료 파싱·캐시 제거·인증 이벤트와 직접 소비자 | COMPLETE · #308 병합 · post-merge 7/7 PASS |
 | AR-X1-B | Characters 상태 저장 중복 통합 | 저장/이벤트 계약·첫 안내·단일/전체 조회 | COMPLETE · #310 병합 · post-merge 7/7 PASS |
 | AR-X1-C | World Package 브라우저 전달 위치 | 다운로드·파일명·Blob URL 수명·native 분기 | COMPLETE · #311 병합 · post-merge 7/7 PASS |
-| AR-X1-D | 공용 DOM/탐색/scroll 역할 | 선택·키보드·카드 탐색·window/container scroll | #312 병합 · post-merge 확인 중 |
-| AR-X1-E | 공용 HTTP와 기능 오류 표시 분리 | 동일 응답의 문구·파싱·401·FormData | 구현 · 검증 중 |
+| AR-X1-D | 공용 DOM/탐색/scroll 역할 | 선택·키보드·카드 탐색·window/container scroll | COMPLETE · #312 병합 · post-merge 7/7 PASS |
+| AR-X1-E | 공용 HTTP와 기능 오류 표시 분리 | 동일 응답의 문구·파싱·401·FormData | #313 head 7/7 PASS · 병합 · 후속 결과는 해당 PR 참조 |
 
 검증 명령, 후보와 merge SHA, 실행 경로, 실제 결과 및 제한을 단계별로 연결한다.
 UI fixture·실제 API·fake provider·native·설치 검증은 각각의 범위로 기록한다.
@@ -90,3 +93,39 @@ Identity의 기존 활동 간격 오류 응답 같은 동작을 삭제하지 않
 수정 책임은 각 기능에 있으며 모든 새 기능에 동일 파일을 생성하는 규칙은 아니다.
 `test-feature-error-parity.mjs`가 고정된 이전 소스와 세 실제 API 소비자를 같은 22개
 응답으로 비교한다. 기존 endpoint·FormData·401·세션 비교와 CI도 계속 수행한다.
+
+## 통합 후보의 구조와 검증
+
+AR-X2는 현재 37항목의 소유 경로와 설명을 맞춘다. 이전 상태 문구는 원장의
+`ar_x_precloseout_snapshot`에 보존한다. `MOVED`는 실제 역할 이동이며 최종
+설치·실행 승인과 다르다. 기존 Device Home 파일럿의 `VERIFIED`는 당시 범위다.
+
+- backend 완료 모드와 정확한 38개 bridge·20개 retained module을 유지한다.
+  역사 migration과 외부 Hosted 확장 2개는 [소비 계약](backend-compatibility.md)을
+  제공하며 제거 기한을 임의로 만들지 않는다. 활성 `public_main.py` 구현은 없다.
+- 두 백엔드 docstring의 옛 계층 설명만 실제 service·session factory 역할에 맞춘다.
+  실행 AST는 동일하며 DB schema·migration·lock·시각 기준을 변경하지 않는다.
+- `src/testing`은 선택 사항이다. 실제 공통 helper가 없으면 빈 폴더를 추가하지 않는다.
+  임시 소스 후보가 없으며 사용 중인 worktree·가상환경·검증 자료·설치 데이터와
+  Docker volume은 삭제 대상으로 취급하지 않는다.
+
+AR-X3의 [시나리오 지도](refactor-integration-scenarios.md)는 S01~S10과 K/G의
+행위·실행 경로를 연결한다. 64자 v8 generation의 채워진 Memory 행·근거·설정을
+v9로 업그레이드하고 재실행하거나 허용되지 않은 변경을 거절하는 회귀를 추가한다.
+원래 테스트·assertion·skip 이유·snapshot은 그대로 유지한다.
+
+Core CI는 backend 및 브라우저 5개 설정의 JUnit과 실제 checkout SHA/tree,
+source SHA, 도구 버전·lock hash를 함께 보관한다. baseline #258의 1867개 node
+(1845 PASS·22 기존 SKIP)를 현재 경로에 대응시킨 결과와 최초 도입 원장의 추가
+회귀를 구분한다. 단순 수집 수나 파일 존재 여부를 행위 PASS로 취급하지 않는다.
+
+## 종료 근거와 다음 단계
+
+최종 통합 PR의 본문과 같은 merge의 Actions가 후보/병합/산출물 근거다.
+PR head와 임시 merge checkout, 실제 main merge를 구분하고 설치 payload의
+SOURCE_SHA·hash·프로세스 경로를 연결한다. 제품 코드에 자기 merge SHA를 다시
+커밋하는 순환 대신 workspace의 09-07 §8.4 종료 기록에 실제 실행 영수증을 남긴다.
+
+상태는 `CI`, `DELEGATED CHECK`, `USER CHECK`로 구분한다. 최종 판정은 필수
+workflow 완료와 동일 merge의 지원 경로·설치 확인을 모두 충족해야 한다.
+P8-L-S 실제 AI 품질·인과 검증과 Release/Production은 후속 별도 단계다.

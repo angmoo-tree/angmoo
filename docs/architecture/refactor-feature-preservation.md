@@ -4,9 +4,16 @@
 
 ## 현재 적용 범위와 검증 상태
 
-이 읽기 지도의 코드 기준은 AR-B8 통합 준비 source `7ada864c5a3a77ddd601d0faed81577615b5af0f`다. 백엔드 업무·공통 기반의 실제 소유 위치, 삭제된 집계 파일의 후속 구현, 현재 소비자와 테스트 경로를 반영했다. `MOVED`는 이 코드 이전을 뜻하며 **최종 통합 CI·설치·업그레이드·실패 복원 검증을 새로 통과했다는 뜻은 아니다.** 해당 결과와 정확한 PR·merge commit은 [백엔드 전환 결과](refactor-backend-results.md)에서 확인한다.
+현재 코드는 §8.2 백엔드·§8.3 프론트엔드 전환과 AR-X1의 역할 정리를 반영한다.
+현재 소유 파일은 inventory의 `current_paths`·`target_paths`, 원래 파일과의 연결은
+`refactor_path_map.json`으로 확인한다. `MOVED`는 실제 코드 이전을 뜻하며,
+최종 동일 merge의 CI·설치·업그레이드·실행 검증 완료와 구분한다.
+실행 결과는 [AR-X 통합 검증](refactor-integration-results.md)을 따른다.
 
-Device Home의 기존 `VERIFIED` 파일럿 증거는 유지한다. 프론트엔드의 AR-F2 이후 전환과 AR-X는 별도 단계다. 백엔드가 이전돼도 해당 기능의 `frontend_status`가 `MAPPED`이면 전체 `status`도 `MAPPED`로 남긴다. P8-L-S의 실제 AI 품질·인과·사용자 closeout 또한 이 문서의 코드 이전 판정과 구분한다.
+기존 Device Home `VERIFIED`는 파일럿 당시 범위로 유지한다. 이전 현재 상태 문구는
+inventory의 `ar_x_precloseout_snapshot`, 더 오래된 slice 증거는
+`historical_transition_evidence` 및 아래 역사 절에서 확인한다. P8-L-S의 실제 AI
+품질·인과 검증은 구조 이동이나 deterministic 회귀 결과만으로 완료 처리하지 않는다.
 
 G07의 테스트 6개는 원본 source `e7241d74`에서 합류했다. LocalBot 응답·rate limit·atomic quota는 `tests/local_bot`, profile media는 `tests/media`, prompt safety와 context text는 `tests/common`에 있다. 65개 node의 기존 단언을 보존하고 이전 후 모두 통과했으며, inventory의 현재 경로도 이 위치를 가리킨다. 최종 후보의 전체 CI·실행 경로 검증은 별도로 기록한다.
 
@@ -15,7 +22,7 @@ G07의 테스트 6개는 원본 source `e7241d74`에서 합류했다. LocalBot �
 | 자료·필드 | 의미 |
 | --- | --- |
 | inventory의 `current_paths` | 현재 존재하는 구현·지원 파일. 삭제된 빈 marker는 다른 빈 파일로 대체하지 않는다. |
-| `target_paths` | 확정된 백엔드의 실제 역할 위치. 프론트엔드의 미전환 목표 경로는 §8.3에서 구현할 대상으로 유지한다. |
+| `target_paths` | 구현된 백엔드·프론트엔드의 실제 역할 위치. 조건부 지원 영역은 실제 채택한 구성으로 설명한다. |
 | `consumers` | 현재 `backend/app` AST에서 해당 항목의 구현 파일을 직접 import하는 제품 모듈. 기존 프론트엔드·기타 비-app 소비자는 유지한다. 모두 HTTP 호출자라는 의미는 아니다. |
 | `test_paths` | 현재 존재하는 연관 회귀 파일. 이 목록만으로 모든 분기·설치 환경이 검증됐다고 판단하지 않는다. |
 | 기록된 `entrypoints`·`test_nodes` | 최초 조사 또는 중간 이전 시점의 symbol/node 연결. 현재 위치는 [경로 대응표](../../security/refactor_path_map.json)의 파일·symbol·node 기록으로 확인한다. |

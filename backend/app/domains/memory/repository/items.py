@@ -359,9 +359,9 @@ class SqlAlchemyMemoryRepository:
         """Supersede one item with an owner-authored, evidence-bound summary.
 
         ``replacement_item_id`` is derived from the request idempotency key by
-        the domain layer.  A transport retry therefore returns the same item
-        instead of creating a second correction.  The replacement keeps only
-        evidence that the application layer revalidated for the exact scope.
+        the memory item service. A transport retry therefore returns the same
+        item instead of creating a second correction. The replacement keeps only
+        evidence that the service revalidated for the exact scope.
         """
 
         setting_row = self._require_setting(setting)

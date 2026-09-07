@@ -1,12 +1,13 @@
 # Frontend refactor execution results
 
-The AR-F2-0 through AR-F5-B structural implementation is present in this tree.
-The dated sections below record verification snapshots, not an implicit promotion
-of a pending merge or runtime gate. [Final integration PR #306](https://github.com/angmoo-tree/angmoo/pull/306)
-records its exact head checks and merge state; its merge commit's Actions remain
-a separate gate. AR-X is not started.
-The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
-real-provider product verification, Release and Production remain separate.
+The AR-F2-0 through AR-F5-B transition is complete. PR #306 and the subsequent
+PR #307 installer-diagnostics closeout retain their dated checks and failure
+history below; the initial NSIS exit 50 is not retroactively assigned a root cause.
+The brief user installation check is narrower than final integrated verification.
+
+Current cross-backend/frontend work and exact merge/runtime evidence are recorded
+in [AR-X integration results](refactor-integration-results.md). P8-L-S real-provider
+quality, Release and Production remain separate gates.
 
 ## Starting point — 2026-09-07
 

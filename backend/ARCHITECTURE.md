@@ -269,3 +269,5 @@ Import inventory는 현재 파일과 의존 관계의 사실이고 import policy
 - [Tauri sidecar lifecycle](../docs/architecture/l3-er5-tauri-sidecar-lifecycle.md)
 
 이 문서는 구조·역할·연결·변경 예시를 설명합니다. 세부 API 필드, 모델별 예산 숫자, release 상태는 해당 코드와 상세 계약에서 관리해 중복된 기준이 생기지 않게 합니다.
+
+기능·공통 기반을 함께 바꾸는 경우 [통합 시나리오와 실행 근거](../docs/architecture/refactor-integration-scenarios.md)에서 K/G별 회귀와 migration·실행 환경의 차이를 확인합니다.
