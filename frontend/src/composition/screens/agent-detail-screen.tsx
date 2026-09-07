@@ -29,13 +29,8 @@ generatedMediaCandidateFromResult,
 revokeGeneratedMediaCandidate,
 type GeneratedMediaCandidate,
 } from "@/features/characters/utils/generated-media";
-import {
-createMessageThread,
-getCharacterMessageSettings,
-getMessageSettings,
-updateCharacterMessageSettings,
-type CharacterMessageSettingRead,
-} from "@/features/chat/public";
+import { createMessageThread, getCharacterMessageSettings, getMessageSettings, updateCharacterMessageSettings } from "@/features/chat/api/chat-client";
+import { type CharacterMessageSettingRead } from "@/features/chat/types/chat-contract";
 import { useAuth } from "@/hooks/use-auth";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { clearAuth,isAuthError } from "@/lib/auth/browser-session";

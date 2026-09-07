@@ -73,8 +73,8 @@ def test_memory_surface_preserves_q_reads_and_adds_r_owner_control() -> None:
 
 
 def test_chat_shows_only_deterministic_evidence_capability_and_safe_dialog() -> None:
-    chat = _read("frontend/src/features/chat/ui/world-chat.tsx")
-    contract = _read("frontend/src/features/chat/model/world-chat-contract.ts")
+    chat = _read("frontend/src/features/chat/components/world-chat.tsx") + _read("frontend/src/composition/screens/world-chat-screen.tsx")
+    contract = _read("frontend/src/features/chat/types/world-chat-contract.ts")
     inspector = _read(
         "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx"
     )

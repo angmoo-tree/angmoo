@@ -27,7 +27,7 @@ export {
 export {
   DEFAULT_MESSAGE_GOOGLE_MODEL,
   MESSAGE_GOOGLE_GEMINI_MODELS,
-} from "./model/chat-contract";
+} from "./config/models";
 export type {
   CharacterMessageSettingRead,
   MessageCredentialSource,
@@ -38,10 +38,10 @@ export type {
   MessageSettingsRead,
   MessageThreadListRead,
   MessageThreadRead,
-} from "./model/chat-contract";
+} from "./types/chat-contract";
 export {
   resolvedLegacyWorldChatRouteParts,
-} from "./model/world-chat-contract";
+} from "./utils/legacy-world-route";
 export type {
   WorldChatControlMode,
   WorldChatEntryRead,
@@ -57,7 +57,7 @@ export type {
   WorldChatThreadListRead,
   WorldChatThreadModelUpdate,
   WorldChatThreadRead,
-} from "./model/world-chat-contract";
-export { MessageThreadClient } from "./ui/message-thread-client";
-export { MessagesClient } from "./ui/messages-client";
-export { WorldChat } from "./ui/world-chat";
+} from "./types/world-chat-contract";
+export { MessageThreadClient } from "./components/message-thread-client";
+export { MessagesClient } from "./components/messages-client";
+export { WorldChat } from "./components/world-chat";

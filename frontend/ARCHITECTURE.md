@@ -97,6 +97,18 @@ metadata·dynamic 설정·AppShell 연결을 유지한다. 안내 원문을 읽�
 경계와 라이선스 전문은 그대로 유지한다. 우측 피드 인사이트는 Social, 활성 캐릭터 카드는
 Characters의 컴포넌트이며 공용 UI에 업무 구현을 남기지 않는다.
 
+Chat의 기본 쪽지·World Chat UI는 `features/chat/components`, 응답 DTO는 `types`,
+모델 목록과 기본값은 `config/models.ts`, 이전 대화의 확정된 World 경로 판단은
+`utils/legacy-world-route.ts`에 있다. API는 기존 요청·검증·NDJSON 해석·취소·재시도를
+그대로 소유하며 응답의 World/thread 경계를 확인한다.
+
+`composition/screens/world-chat-screen.tsx`는 Chat과 Memory를 같은 화면에 조립한다.
+Chat은 기억 요약과 근거 inspector의 렌더링 함수를 필수 입력으로 받으며 Memory를
+직접 import하지 않는다. 근거 request ID 선택과 닫기는 Chat이 관리하고, 상위 화면은
+그 값을 실제 Memory 컴포넌트에 전달한다. inspector의 request ID별 key와 thread 변경 시
+Chat state 초기화, 늦은 응답 취소를 유지한다. Next와 static은 같은 World App 화면을 통해
+이 연결을 사용한다. 쪽지의 임시 public/전역 전달 소비자는 AR-F5에서 마저 종료한다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

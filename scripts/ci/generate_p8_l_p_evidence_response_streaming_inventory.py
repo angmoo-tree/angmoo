@@ -87,9 +87,9 @@ REQUIRED_FILES = (
     "browser-tests/static-product-shell.spec.ts",
     "frontend/DESIGN.md",
     "frontend/src/features/chat/api/world-chat-client.ts",
-    "frontend/src/features/chat/model/world-chat-contract.ts",
-    "frontend/src/features/chat/ui/world-chat.module.css",
-    "frontend/src/features/chat/ui/world-chat.tsx",
+    "frontend/src/features/chat/types/world-chat-contract.ts",
+    "frontend/src/features/chat/components/world-chat.module.css",
+    "frontend/src/features/chat/components/world-chat.tsx",
     "docs/architecture/backend-domains.md",
     "docs/architecture/frontend-design-reference.md",
     "docs/architecture/frontend-product-shell.md",
@@ -182,7 +182,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/features/chat/ui/world-chat.tsx",
+        "frontend/src/features/chat/components/world-chat.tsx",
         (
             "}, 300);",
             "입력 중",

@@ -17,51 +17,29 @@ import {
   useState,
 } from "react";
 
-import {
-  worldChatRoute,
-  worldChatThreadRoute,
-  worldCharacterProfileRoute,
-} from "@/shared/navigation/public";
-import { LocalProductLink } from "@/features/device-shell/public";
-import {
-  MemoryScopeSummary,
-  WorldChatEvidenceInspector,
-} from "@/features/memory/public";
-import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
-import {
-  getLatestWorldChatResponseRequest,
-  getWorldChatResponseRequest,
-  getWorldChatThread,
-  listWorldChatThreads,
-  retryWorldChatResponse,
-  sendWorldChatMessage,
-  streamWorldChatResponse,
-  updateWorldChatThreadModel,
-  WorldChatApiError,
-} from "../api/world-chat-client";
-import {
-  MESSAGE_GOOGLE_GEMINI_MODELS,
-  type MessageGoogleGeminiModel,
-} from "../model/chat-contract";
-import type {
-  WorldChatGenerationRequestRead,
-  WorldChatThreadListRead,
-  WorldChatThreadRead,
-} from "../model/world-chat-contract";
+import { worldChatRoute, worldChatThreadRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import type { WorldChatViewSlots } from "@/features/chat/types/view-slots";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatHandle } from "@/utils/profile-presentation";
+import { getLatestWorldChatResponseRequest, getWorldChatResponseRequest, getWorldChatThread, listWorldChatThreads, retryWorldChatResponse, sendWorldChatMessage, streamWorldChatResponse, updateWorldChatThreadModel, WorldChatApiError } from "@/features/chat/api/world-chat-client";
+import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
+import { type MessageGoogleGeminiModel } from "@/features/chat/types/chat-contract";
+import type { WorldChatGenerationRequestRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
 
 import styles from "./world-chat.module.css";
 
 type WorldChatProps = {
   threadId?: string;
   worldId: string;
-};
+} & WorldChatViewSlots;
 
 type LoadState = "loading" | "ready" | "error";
 type ModelSelection = "default" | MessageGoogleGeminiModel;
 
-export function WorldChat({ threadId, worldId }: WorldChatProps) {
+export function WorldChat({ threadId, worldId, ...slots }: WorldChatProps) {
   return threadId ? (
-    <WorldChatThread key={`${worldId}:${threadId}`} threadId={threadId} worldId={worldId} />
+    <WorldChatThread {...slots} key={`${worldId}:${threadId}`} threadId={threadId} worldId={worldId} />
   ) : (
     <WorldChatList key={worldId} worldId={worldId} />
   );
@@ -195,10 +173,12 @@ function WorldChatList({ worldId }: { worldId: string }) {
 function WorldChatThread({
   threadId,
   worldId,
+  renderMemorySummary,
+  renderEvidenceInspector,
 }: {
   threadId: string;
   worldId: string;
-}) {
+} & WorldChatViewSlots) {
   const [thread, setThread] = useState<WorldChatThreadRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -679,10 +659,10 @@ function WorldChatThread({
         <strong>{thread.responding.display_name}</strong>
       </div>
 
-      <MemoryScopeSummary
-        subjectWorldCharacterId={thread.responding.world_character_id}
-        worldId={worldId}
-      />
+      {renderMemorySummary({
+        subjectWorldCharacterId: thread.responding.world_character_id,
+        worldId,
+      })}
 
       <div className={styles.modelControl}>
         <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>
@@ -795,16 +775,15 @@ function WorldChatThread({
         </ol>
       )}
 
-      <WorldChatEvidenceInspector
-        key={evidenceRequestId ?? "closed"}
-        onOpenChange={(open) => {
+      {renderEvidenceInspector({
+        onOpenChange: (open) => {
           if (!open) setEvidenceRequestId(null);
-        }}
-        open={evidenceRequestId !== null}
-        requestId={evidenceRequestId}
-        threadId={thread.id}
-        worldId={worldId}
-      />
+        },
+        open: evidenceRequestId !== null,
+        requestId: evidenceRequestId,
+        threadId: thread.id,
+        worldId,
+      })}
 
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>

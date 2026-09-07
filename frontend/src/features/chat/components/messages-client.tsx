@@ -2,20 +2,16 @@
 
 import { Mail, Trash2 } from "lucide-react";
 import Link from "next/link";
-import {
-  useRuntimeRouter as useRouter,
-  worldChatThreadRoute,
-} from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
+import { worldChatThreadRoute } from "@/lib/navigation/product-routes";
 import { useEffect, useState } from "react";
 
-import { useAuth } from "@/shared/auth/public";
-import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
-import {
-  deleteMessageThread,
-  listMessageThreads,
-} from "../api/chat-client";
-import type { MessageThreadListRead } from "../model/chat-contract";
-import { resolvedLegacyWorldChatRouteParts } from "../model/world-chat-contract";
+import { useAuth } from "@/hooks/use-auth";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatHandle } from "@/utils/profile-presentation";
+import { deleteMessageThread, listMessageThreads } from "@/features/chat/api/chat-client";
+import type { MessageThreadListRead } from "@/features/chat/types/chat-contract";
+import { resolvedLegacyWorldChatRouteParts } from "@/features/chat/utils/legacy-world-route";
 
 export function MessagesClient() {
   const router = useRouter();

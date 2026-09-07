@@ -2,7 +2,8 @@
 
 import { Mail, MessageCircle, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createOrGetWorldChatThread, getWorldChatEntry, type WorldChatEntryRead, WorldChatApiError } from "@/features/chat/public";
+import { createOrGetWorldChatThread, getWorldChatEntry, WorldChatApiError } from "@/features/chat/api/world-chat-client";
+import { type WorldChatEntryRead } from "@/features/chat/types/world-chat-contract";
 import { parseWorldCharacterSocialProfileTab } from "@/features/social/utils/world-character-social-profile";
 import { WorldCharacterSocialProfileActivity } from "@/features/social/components/world-character-social-profile-activity";
 import { type WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
