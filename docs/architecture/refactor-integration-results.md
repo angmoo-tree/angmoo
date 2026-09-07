@@ -10,8 +10,9 @@ AR-X는 backend와 frontend 전환 이후 남은 역할 정리와 기능·데이
 기능 원장의 K01~K24와 G01~G13 총 37항목, 원래 source/checkpoint/assertion을 유지한다.
 선행 backend/frontend 완료와 간략한 사용자 설치 확인은 이번 최종 통합 검증과 구분한다.
 
-AR-X0 기준 확인은 통과했다. AR-X1-A는 PR #308로 병합했고 merge의 후속 검증을
-확인 중이다. AR-X1-B는 그 merge 위에서 상태 중복을 통합해 검증 중이며,
+AR-X0 기준 확인은 통과했다. AR-X1-A는 PR #308로 병합했고 merge
+`9040ad3bb4a6f787a2c4f1d542d106b22e26f4ef`의 7개 후속 workflow까지 통과했다.
+AR-X1-B는 그 merge 위에서 상태 중복을 통합해 검증 중이며,
 AR-X1-C~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝난 뒤 병합한다.
 최종 merge의 CI·설치 산출물·실행 파일을 확인하기 전 전체 완료로 판정하지 않는다.
 
@@ -24,7 +25,7 @@ AR-X1-C~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝
 
 | 단계 | 변경 | 보존할 동작 | 상태 |
 | --- | --- | --- | --- |
-| AR-X1-A | Identity 가입 대기를 `stores/pending-signup.ts`로 이동 | 저장 키·이메일/만료 파싱·캐시 제거·인증 이벤트와 직접 소비자 | #308 병합 · post-merge 확인 중 |
+| AR-X1-A | Identity 가입 대기를 `stores/pending-signup.ts`로 이동 | 저장 키·이메일/만료 파싱·캐시 제거·인증 이벤트와 직접 소비자 | COMPLETE · #308 병합 · post-merge 7/7 PASS |
 | AR-X1-B | Characters 상태 저장 중복 통합 | 저장/이벤트 계약·첫 안내·단일/전체 조회 | 구현 · 검증 중 |
 | AR-X1-C | World Package 브라우저 전달 위치 | 다운로드·파일명·Blob URL 수명·native 분기 | 미착수 |
 | AR-X1-D | 공용 DOM/탐색/scroll 역할 | 선택·키보드·카드 탐색·window/container scroll | 미착수 |
