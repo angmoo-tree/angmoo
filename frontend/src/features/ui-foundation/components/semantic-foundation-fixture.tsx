@@ -14,27 +14,14 @@ import {
 import { useState } from "react";
 
 import styles from "./semantic-foundation-fixture.module.css";
-import {
-  Avatar,
-  Badge,
-  BottomNavigation,
-  Button,
-  Card,
-  DegradedPanel,
-  Dialog,
-  EmptyState,
-  Field,
-  IconButton,
-  InlineError,
-  Input,
-  ListRow,
-  PageHeader,
-  Select,
-  StatusChip,
-  Tabs,
-  Textarea,
-  Toast,
-} from "@/shared/ui/public";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge, StatusChip } from "@/components/ui/status";
+import { BottomNavigation, PageHeader, Tabs } from "@/components/ui/navigation";
+import { Button, IconButton } from "@/components/ui/button";
+import { Card, ListRow } from "@/components/ui/surfaces";
+import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
+import { Dialog } from "@/components/ui/dialog";
+import { Field, Input, Select, Textarea } from "@/components/ui/form-controls";
 
 const INLINE_ERROR_ID = "foundation-inline-error";
 

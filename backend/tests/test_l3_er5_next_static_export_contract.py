@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -13,13 +14,18 @@ def _read(relative: str) -> str:
 
 
 def test_next_and_static_home_share_one_screen_and_request_owner() -> None:
-    next_entry = _read("frontend/src/app/device-home-route-client.tsx")
+    page = _read("frontend/src/app/page.tsx")
+    assert 'import { DeviceHomeScreen as DeviceHomeRouteClient } from "@/composition/screens/device-home-screen";' in page
+    assert '<DeviceHomeRouteClient />' in page
+    assert not (ROOT / "frontend/src/app/device-home-route-client.tsx").exists()
+    # Preserve the former route alias assertion against the committed transition.
+    next_entry = subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:frontend/src/app/device-home-route-client.tsx"], cwd=ROOT, text=True, encoding="utf-8")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
     screen = _read("frontend/src/composition/screens/device-home-screen.tsx")
     home = _read(
         "frontend/src/features/device-home/components/device-home.tsx"
     )
-    public_entry = _read("frontend/src/features/device-home/public.ts")
+    public_entry = _read("frontend/src/features/device-home/api/device-home-client.ts")
 
     shared_screen = "@/composition/screens/device-home-screen"
     assert (

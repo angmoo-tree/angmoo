@@ -542,7 +542,7 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
                 "preserved UI-B semantic-foundation specs"
             )
         if visual_manifest.get("preserved_ui_b_fixture") != (
-            "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx"
+            "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx"
         ):
             errors.append(
                 "policy.visual_manifest.preserved_ui_b_fixture must retain the reviewed "

@@ -816,7 +816,42 @@
     "frontend/src/features/memory/ui/memory-workspace.tsx": "frontend/src/features/memory/components/memory-workspace.tsx",
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
     "frontend/src/features/memory/model/memory-batch-contract.ts": "frontend/src/features/memory/types/memory-batch-contract.ts",
-    "frontend/src/features/memory/model/memory-contract.ts": "frontend/src/features/memory/types/memory-contract.ts"
+    "frontend/src/features/memory/model/memory-contract.ts": "frontend/src/features/memory/types/memory-contract.ts",
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
+    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.module.css",
+    "frontend/src/lib/seo.ts": "frontend/src/config/seo.ts",
+    "frontend/src/shared/api/public.ts": "frontend/src/lib/server/backend.ts",
+    "frontend/src/shared/auth/public.ts": "frontend/src/composition/providers/auth-provider.tsx",
+    "frontend/src/shared/desktop/public.ts": "frontend/src/composition/providers/desktop-window-bridge.tsx",
+    "frontend/src/shared/interaction/public.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+    "frontend/src/shared/media/public.ts": "frontend/src/lib/media/safe-media-url.ts",
+    "frontend/src/shared/navigation/public.ts": "frontend/src/lib/navigation/product-routes.ts",
+    "frontend/src/shared/runtime/public.ts": "frontend/src/lib/runtime/runtime-config.ts",
+    "frontend/src/shared/ui/public.ts": "frontend/src/components/ui/app-icon.tsx",
+    "frontend/src/components/auth-provider.tsx": "frontend/src/composition/providers/auth-provider.tsx",
+    "frontend/src/components/agents-dashboard-client.tsx": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
+    "frontend/src/components/messages-client.tsx": "frontend/src/features/chat/components/messages-client.tsx",
+    "frontend/src/components/message-thread-client.tsx": "frontend/src/features/chat/components/message-thread-client.tsx",
+    "frontend/src/components/profile-avatar.tsx": "frontend/src/components/ui/profile-avatar.tsx",
+    "frontend/src/components/post-media-grid.tsx": "frontend/src/components/media/post-media-grid.tsx",
+    "frontend/src/components/mentioned-text.tsx": "frontend/src/components/content/mentioned-text.tsx",
+    "frontend/src/components/expandable-post-text.tsx": "frontend/src/components/content/expandable-post-text.tsx",
+    "frontend/src/lib/backend.ts": "frontend/src/lib/server/backend.ts",
+    "frontend/src/lib/profile.ts": "frontend/src/utils/profile-presentation.ts",
+    "frontend/src/lib/post-card-navigation.ts": "frontend/src/utils/post-card-navigation.ts",
+    "frontend/src/lib/safe-media-url.ts": "frontend/src/lib/media/safe-media-url.ts",
+    "frontend/src/lib/use-mobile-pull-to-refresh.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+    "frontend/src/lib/community.ts": "frontend/src/features/characters/api/activity.ts",
+    "frontend/src/lib/agents.ts": "frontend/src/features/chat/config/models.ts",
+    "frontend/src/features/characters/public.ts": "frontend/src/features/characters/api/character-dashboard-client.ts",
+    "frontend/src/features/chat/public.ts": "frontend/src/features/chat/api/chat-client.ts",
+    "frontend/src/features/device-home/public.ts": "frontend/src/features/device-home/api/device-home-client.ts",
+    "frontend/src/features/device-shell/public.ts": "frontend/src/lib/navigation/device-navigation.ts",
+    "frontend/src/features/memory/public.ts": "frontend/src/features/memory/api/memory-client.ts",
+    "frontend/src/features/pwa-shell/public.ts": "frontend/src/config/pwa.ts",
+    "frontend/src/features/runtime-status/public.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
+    "frontend/src/features/ui-foundation/public.ts": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
+    "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -136082,6 +136117,942 @@
         "browser-tests/refactor-lifecycle.spec.ts",
         "browser-tests/playwright.refactor-lifecycle.config.ts"
       ]
+    },
+    "AR-F5-A": {
+      "scope": "Retire legacy facades and classify common/feature owners; semantic showcase remains production feature UI",
+      "status": "IMPLEMENTED - validation pending",
+      "files": {
+        "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
+        "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.module.css",
+        "frontend/src/lib/seo.ts": "frontend/src/config/seo.ts",
+        "frontend/src/shared/api/public.ts": "frontend/src/lib/server/backend.ts",
+        "frontend/src/shared/auth/public.ts": "frontend/src/composition/providers/auth-provider.tsx",
+        "frontend/src/shared/desktop/public.ts": "frontend/src/composition/providers/desktop-window-bridge.tsx",
+        "frontend/src/shared/interaction/public.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+        "frontend/src/shared/media/public.ts": "frontend/src/lib/media/safe-media-url.ts",
+        "frontend/src/shared/media/safe-media-url.ts": "frontend/src/lib/media/safe-media-url.ts",
+        "frontend/src/shared/media/use-runtime-media-url.ts": "frontend/src/hooks/use-runtime-media-url.ts",
+        "frontend/src/shared/navigation/product-routes.ts": "frontend/src/lib/navigation/product-routes.ts",
+        "frontend/src/shared/navigation/public.ts": "frontend/src/lib/navigation/product-routes.ts",
+        "frontend/src/shared/runtime/public.ts": "frontend/src/lib/runtime/runtime-config.ts",
+        "frontend/src/shared/runtime/runtime-config.ts": "frontend/src/lib/runtime/runtime-config.ts",
+        "frontend/src/shared/ui/app-icon.tsx": "frontend/src/components/ui/app-icon.tsx",
+        "frontend/src/shared/ui/button.tsx": "frontend/src/components/ui/button.tsx",
+        "frontend/src/shared/ui/class-names.ts": "frontend/src/utils/class-names.ts",
+        "frontend/src/shared/ui/public.ts": "frontend/src/components/ui/app-icon.tsx",
+        "frontend/src/components/auth-provider.tsx": "frontend/src/composition/providers/auth-provider.tsx",
+        "frontend/src/components/agents-dashboard-client.tsx": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
+        "frontend/src/components/messages-client.tsx": "frontend/src/features/chat/components/messages-client.tsx",
+        "frontend/src/components/message-thread-client.tsx": "frontend/src/features/chat/components/message-thread-client.tsx",
+        "frontend/src/components/profile-avatar.tsx": "frontend/src/components/ui/profile-avatar.tsx",
+        "frontend/src/components/post-media-grid.tsx": "frontend/src/components/media/post-media-grid.tsx",
+        "frontend/src/components/mentioned-text.tsx": "frontend/src/components/content/mentioned-text.tsx",
+        "frontend/src/components/expandable-post-text.tsx": "frontend/src/components/content/expandable-post-text.tsx",
+        "frontend/src/lib/backend.ts": "frontend/src/lib/server/backend.ts",
+        "frontend/src/lib/profile.ts": "frontend/src/utils/profile-presentation.ts",
+        "frontend/src/lib/post-card-navigation.ts": "frontend/src/utils/post-card-navigation.ts",
+        "frontend/src/lib/safe-media-url.ts": "frontend/src/lib/media/safe-media-url.ts",
+        "frontend/src/lib/use-mobile-pull-to-refresh.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+        "frontend/src/lib/community.ts": "frontend/src/features/characters/api/activity.ts",
+        "frontend/src/lib/agents.ts": "frontend/src/features/chat/config/models.ts",
+        "frontend/src/features/characters/public.ts": "frontend/src/features/characters/api/character-dashboard-client.ts",
+        "frontend/src/features/chat/public.ts": "frontend/src/features/chat/api/chat-client.ts",
+        "frontend/src/features/device-home/public.ts": "frontend/src/features/device-home/api/device-home-client.ts",
+        "frontend/src/features/device-shell/public.ts": "frontend/src/lib/navigation/device-navigation.ts",
+        "frontend/src/features/memory/public.ts": "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/pwa-shell/public.ts": "frontend/src/config/pwa.ts",
+        "frontend/src/features/runtime-status/public.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
+        "frontend/src/features/ui-foundation/public.ts": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx"
+      },
+      "frontend_retirements": {
+        "frontend/src/shared/api/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "fetchBackendJson": "frontend/src/lib/server/backend.ts",
+            "proxyBackend": "frontend/src/lib/server/backend.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/auth/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "AuthProvider": "frontend/src/composition/providers/auth-provider.tsx",
+            "useAuth": "frontend/src/hooks/use-auth.ts",
+            "AUTH_CHANGED_EVENT": "frontend/src/lib/auth/browser-session.ts",
+            "cacheUser": "frontend/src/lib/auth/browser-session.ts",
+            "clearLegacyAuthStorage": "frontend/src/lib/auth/browser-session.ts",
+            "clearStoredUser": "frontend/src/lib/auth/browser-session.ts",
+            "getStoredUser": "frontend/src/lib/auth/browser-session.ts",
+            "isAuthError": "frontend/src/lib/auth/browser-session.ts",
+            "notifyAuthChanged": "frontend/src/lib/auth/browser-session.ts",
+            "storeUser": "frontend/src/lib/auth/browser-session.ts",
+            "AuthRead": "frontend/src/lib/auth/browser-session.ts",
+            "UserFeedContentFilter": "frontend/src/lib/auth/browser-session.ts",
+            "UserRead": "frontend/src/lib/auth/browser-session.ts",
+            "issueLocalSession": "frontend/src/features/identity/api/session.ts",
+            "getCurrentUser": "frontend/src/features/identity/api/session.ts",
+            "updateUserFeedPreferences": "frontend/src/features/identity/api/session.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/desktop/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "DesktopWindowBridge": "frontend/src/composition/providers/desktop-window-bridge.tsx",
+            "consumeDesktopWindowBootstrapRoute": "frontend/src/lib/desktop/product-window.ts",
+            "canonicalProductRoute": "frontend/src/lib/desktop/product-window.ts",
+            "currentDesktopRoute": "frontend/src/lib/desktop/product-window.ts",
+            "desktopWindowKindForRoute": "frontend/src/lib/desktop/product-window.ts",
+            "getDesktopWindowState": "frontend/src/lib/desktop/product-window.ts",
+            "getDesktopRuntimeStatus": "frontend/src/lib/desktop/product-window.ts",
+            "getDesktopShutdownStatus": "frontend/src/lib/desktop/product-window.ts",
+            "skipDesktopMemoryShutdown": "frontend/src/lib/desktop/product-window.ts",
+            "isTauriDesktopRuntime": "frontend/src/lib/desktop/product-window.ts",
+            "navigateBackCurrentDesktopRoute": "frontend/src/lib/desktop/product-window.ts",
+            "navigateCurrentDesktopRoute": "frontend/src/lib/desktop/product-window.ts",
+            "navigateDesktopProductRoute": "frontend/src/lib/desktop/product-window.ts",
+            "normalizeInternalRoute": "frontend/src/lib/desktop/product-window.ts",
+            "openDesktopProductWindow": "frontend/src/lib/desktop/product-window.ts",
+            "retryDesktopRuntime": "frontend/src/lib/desktop/product-window.ts",
+            "subscribeDesktopRoute": "frontend/src/lib/desktop/product-window.ts",
+            "AngmooDesktopWindowKind": "frontend/src/lib/desktop/product-window.ts",
+            "AngmooDesktopWindowState": "frontend/src/lib/desktop/product-window.ts",
+            "AngmooDesktopRuntimeStatus": "frontend/src/lib/desktop/product-window.ts",
+            "DesktopShutdownStatus": "frontend/src/lib/desktop/product-window.ts",
+            "DesktopProductNavigationResult": "frontend/src/lib/desktop/product-window.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/interaction/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "useMobilePullToRefresh": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+            "getScrollTop": "frontend/src/utils/scroll-viewport.ts",
+            "isScrollNearBottom": "frontend/src/utils/scroll-viewport.ts",
+            "resolveScrollEventTarget": "frontend/src/utils/scroll-viewport.ts",
+            "ScrollEventTarget": "frontend/src/utils/scroll-viewport.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/media/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "safeSameOriginMediaUrl": "frontend/src/lib/media/safe-media-url.ts",
+            "useRuntimeMediaUrl": "frontend/src/hooks/use-runtime-media-url.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/media/safe-media-url.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "safeSameOriginMediaUrl": "frontend/src/lib/media/safe-media-url.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/media/use-runtime-media-url.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "useRuntimeMediaUrl": "frontend/src/hooks/use-runtime-media-url.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/navigation/product-routes.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "PRODUCT_ROUTES": "frontend/src/lib/navigation/product-routes.ts",
+            "productRouteWithSearchParams": "frontend/src/lib/navigation/product-routes.ts",
+            "relationshipGraphRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "studioWorldRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldAppRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldCharacterDirectoryRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldCharacterProfileRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldChatRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldChatThreadRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldPostDetailRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "ProductRouteSearchParams": "frontend/src/lib/navigation/product-routes.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/navigation/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "PRODUCT_ROUTES": "frontend/src/lib/navigation/product-routes.ts",
+            "productRouteWithSearchParams": "frontend/src/lib/navigation/product-routes.ts",
+            "relationshipGraphRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "studioWorldRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldAppRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldChatRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldChatThreadRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldCharacterDirectoryRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldCharacterProfileRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "worldPostDetailRoute": "frontend/src/lib/navigation/product-routes.ts",
+            "ProductRouteSearchParams": "frontend/src/lib/navigation/product-routes.ts",
+            "useRuntimeBack": "frontend/src/hooks/use-runtime-navigation.ts",
+            "useRuntimePathname": "frontend/src/hooks/use-runtime-navigation.ts",
+            "useRuntimeRouter": "frontend/src/hooks/use-runtime-navigation.ts",
+            "useRuntimeSearchParams": "frontend/src/hooks/use-runtime-navigation.ts",
+            "StaticNavigationBridge": "frontend/src/composition/providers/static-navigation-bridge.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/runtime/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT": "frontend/src/lib/runtime/runtime-config.ts",
+            "getRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "isStaticFrontendProfile": "frontend/src/lib/runtime/runtime-config.ts",
+            "RuntimeFetchError": "frontend/src/lib/runtime/runtime-config.ts",
+            "resolveRuntimeMediaUrl": "frontend/src/lib/runtime/runtime-config.ts",
+            "resolveRuntimeRequestUrl": "frontend/src/lib/runtime/runtime-config.ts",
+            "runtimeFetch": "frontend/src/lib/runtime/runtime-config.ts",
+            "AngmooRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "RuntimeFetchErrorCode": "frontend/src/lib/runtime/runtime-config.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/runtime/runtime-config.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT": "frontend/src/lib/runtime/runtime-config.ts",
+            "RuntimeFetchError": "frontend/src/lib/runtime/runtime-config.ts",
+            "clearDesktopRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "getRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "installDesktopRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "isStaticFrontendProfile": "frontend/src/lib/runtime/runtime-config.ts",
+            "resolveRuntimeMediaUrl": "frontend/src/lib/runtime/runtime-config.ts",
+            "resolveRuntimeRequestUrl": "frontend/src/lib/runtime/runtime-config.ts",
+            "runtimeFetch": "frontend/src/lib/runtime/runtime-config.ts",
+            "AngmooRuntimeConfig": "frontend/src/lib/runtime/runtime-config.ts",
+            "RuntimeFetchErrorCode": "frontend/src/lib/runtime/runtime-config.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/ui/app-icon.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "AppIcon": "frontend/src/components/ui/app-icon.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/ui/button.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "Button": "frontend/src/components/ui/button.tsx",
+            "IconButton": "frontend/src/components/ui/button.tsx",
+            "ButtonProps": "frontend/src/components/ui/button.tsx",
+            "ButtonVariant": "frontend/src/components/ui/button.tsx",
+            "IconButtonProps": "frontend/src/components/ui/button.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/ui/class-names.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "classNames": "frontend/src/utils/class-names.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/shared/ui/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "AppIcon": "frontend/src/components/ui/app-icon.tsx",
+            "Avatar": "frontend/src/components/ui/avatar.tsx",
+            "AvatarProps": "frontend/src/components/ui/avatar.tsx",
+            "Button": "frontend/src/components/ui/button.tsx",
+            "IconButton": "frontend/src/components/ui/button.tsx",
+            "ButtonProps": "frontend/src/components/ui/button.tsx",
+            "ButtonVariant": "frontend/src/components/ui/button.tsx",
+            "IconButtonProps": "frontend/src/components/ui/button.tsx",
+            "Dialog": "frontend/src/components/ui/dialog.tsx",
+            "DialogProps": "frontend/src/components/ui/dialog.tsx",
+            "DeviceFrame": "frontend/src/components/ui/device-frame.tsx",
+            "DegradedPanel": "frontend/src/components/ui/feedback.tsx",
+            "EmptyState": "frontend/src/components/ui/feedback.tsx",
+            "InlineError": "frontend/src/components/ui/feedback.tsx",
+            "Toast": "frontend/src/components/ui/feedback.tsx",
+            "DegradedPanelProps": "frontend/src/components/ui/feedback.tsx",
+            "EmptyStateProps": "frontend/src/components/ui/feedback.tsx",
+            "InlineErrorProps": "frontend/src/components/ui/feedback.tsx",
+            "ToastProps": "frontend/src/components/ui/feedback.tsx",
+            "ToastTone": "frontend/src/components/ui/feedback.tsx",
+            "Field": "frontend/src/components/ui/form-controls.tsx",
+            "Input": "frontend/src/components/ui/form-controls.tsx",
+            "Select": "frontend/src/components/ui/form-controls.tsx",
+            "Textarea": "frontend/src/components/ui/form-controls.tsx",
+            "FieldProps": "frontend/src/components/ui/form-controls.tsx",
+            "InputProps": "frontend/src/components/ui/form-controls.tsx",
+            "SelectProps": "frontend/src/components/ui/form-controls.tsx",
+            "TextareaProps": "frontend/src/components/ui/form-controls.tsx",
+            "BottomNavigation": "frontend/src/components/ui/navigation.tsx",
+            "PageHeader": "frontend/src/components/ui/navigation.tsx",
+            "Tabs": "frontend/src/components/ui/navigation.tsx",
+            "BottomNavigationItem": "frontend/src/components/ui/navigation.tsx",
+            "BottomNavigationProps": "frontend/src/components/ui/navigation.tsx",
+            "PageHeaderProps": "frontend/src/components/ui/navigation.tsx",
+            "TabItem": "frontend/src/components/ui/navigation.tsx",
+            "TabsProps": "frontend/src/components/ui/navigation.tsx",
+            "ProfileAvatar": "frontend/src/components/ui/profile-avatar.tsx",
+            "apiInstantTimestamp": "frontend/src/utils/profile-presentation.ts",
+            "formatDate": "frontend/src/utils/profile-presentation.ts",
+            "formatHandle": "frontend/src/utils/profile-presentation.ts",
+            "getProfileColor": "frontend/src/utils/profile-presentation.ts",
+            "getProfileInitial": "frontend/src/utils/profile-presentation.ts",
+            "isOfficialOperatorName": "frontend/src/utils/profile-presentation.ts",
+            "OFFICIAL_OPERATOR_DISPLAY_NAME": "frontend/src/utils/profile-presentation.ts",
+            "parseApiInstant": "frontend/src/utils/profile-presentation.ts",
+            "StatusBadge": "frontend/src/components/ui/status-badge.tsx",
+            "StatusBadgeTone": "frontend/src/components/ui/status-badge.tsx",
+            "Badge": "frontend/src/components/ui/status.tsx",
+            "StatusChip": "frontend/src/components/ui/status.tsx",
+            "BadgeProps": "frontend/src/components/ui/status.tsx",
+            "StatusChipProps": "frontend/src/components/ui/status.tsx",
+            "StatusChipTone": "frontend/src/components/ui/status.tsx",
+            "Card": "frontend/src/components/ui/surfaces.tsx",
+            "ListRow": "frontend/src/components/ui/surfaces.tsx",
+            "CardProps": "frontend/src/components/ui/surfaces.tsx",
+            "ListRowProps": "frontend/src/components/ui/surfaces.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/auth-provider.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "AuthProvider": "frontend/src/composition/providers/auth-provider.tsx",
+            "useAuth": "frontend/src/hooks/use-auth.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/agents-dashboard-client.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "AgentsDashboardClient": "frontend/src/features/characters/components/agents-dashboard-client.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/messages-client.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "MessagesClient": "frontend/src/features/chat/components/messages-client.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/message-thread-client.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "MessageThreadClient": "frontend/src/features/chat/components/message-thread-client.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/profile-avatar.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "ProfileAvatar": "frontend/src/components/ui/profile-avatar.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/post-media-grid.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "PostMediaGrid": "frontend/src/components/media/post-media-grid.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/mentioned-text.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "MentionedText": "frontend/src/components/content/mentioned-text.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/components/expandable-post-text.tsx": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "ExpandablePostText": "frontend/src/components/content/expandable-post-text.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/lib/backend.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "fetchBackendJson": "frontend/src/lib/server/backend.ts",
+            "proxyBackend": "frontend/src/lib/server/backend.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/lib/profile.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "formatHandle": "frontend/src/utils/profile-presentation.ts",
+            "getProfileColor": "frontend/src/utils/profile-presentation.ts",
+            "getProfileInitial": "frontend/src/utils/profile-presentation.ts",
+            "isOfficialOperatorName": "frontend/src/utils/profile-presentation.ts",
+            "OFFICIAL_OPERATOR_DISPLAY_NAME": "frontend/src/utils/profile-presentation.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/lib/post-card-navigation.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "shouldOpenPostFromCardClick": "frontend/src/utils/post-card-navigation.ts",
+            "shouldOpenPostFromCardKeyDown": "frontend/src/utils/post-card-navigation.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/lib/safe-media-url.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "safeSameOriginMediaUrl": "frontend/src/lib/media/safe-media-url.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/lib/use-mobile-pull-to-refresh.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "useMobilePullToRefresh": "frontend/src/hooks/use-mobile-pull-to-refresh.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/characters/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "activateCharacterAutonomy": "frontend/src/features/characters/api/character-dashboard-client.ts",
+            "deactivateCharacterAutonomy": "frontend/src/features/characters/api/character-dashboard-client.ts",
+            "listCharacterDashboardItems": "frontend/src/features/characters/api/character-dashboard-client.ts",
+            "presentCharacterAutonomy": "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
+            "sortCharactersForDashboard": "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
+            "summarizeCharacterAutonomy": "frontend/src/features/characters/utils/character-dashboard-presentation.ts",
+            "CharacterAutonomyMutationState": "frontend/src/features/characters/types/character.ts",
+            "CharacterAutonomyPresentation": "frontend/src/features/characters/types/character.ts",
+            "CharacterAutonomyState": "frontend/src/features/characters/types/character.ts",
+            "CharacterDashboardItem": "frontend/src/features/characters/types/character.ts",
+            "CharacterExecutionMode": "frontend/src/features/characters/types/character.ts",
+            "presentCharacterRecentActivity": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
+            "CharacterRecentActivityPresentation": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
+            "CHARACTER_AUTONOMY_MUTATION_EVENT": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "CHARACTERS_CHANGED_EVENT": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "clearCharacterAutonomyMutationState": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "getCharacterAutonomyMutationStates": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "setCharacterAutonomyMutationState": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "CharacterAutonomyMutationEventDetail": "frontend/src/features/characters/stores/character-dashboard-session.ts",
+            "AgentsDashboardClient": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
+            "getWorldCharacterProfile": "frontend/src/features/characters/api/world-character-profile-client.ts",
+            "listWorldCharacterProfiles": "frontend/src/features/characters/api/world-character-profile-client.ts",
+            "WorldCharacterProfileApiError": "frontend/src/features/characters/api/world-character-profile-client.ts",
+            "WorldCharacterProfileListRead": "frontend/src/features/characters/types/world-character-profile.ts",
+            "WorldCharacterPublicProfile": "frontend/src/features/characters/types/world-character-profile.ts",
+            "WorldCharacterProfileCapability": "frontend/src/features/characters/types/world-character-profile.ts",
+            "WorldCharacterDirectory": "frontend/src/features/characters/components/world-character-directory.tsx",
+            "WorldCharacterProfile": "frontend/src/composition/screens/world-character-profile-screen.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/chat/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "createMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "deleteMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "getCharacterMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "getMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "getMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "listMessageThreads": "frontend/src/features/chat/api/chat-client.ts",
+            "retryThreadMessage": "frontend/src/features/chat/api/chat-client.ts",
+            "sendThreadMessage": "frontend/src/features/chat/api/chat-client.ts",
+            "updateCharacterMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "updateMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "updateMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "createOrGetWorldChatThread": "frontend/src/features/chat/api/world-chat-client.ts",
+            "getLatestWorldChatResponseRequest": "frontend/src/features/chat/api/world-chat-client.ts",
+            "getWorldChatEntry": "frontend/src/features/chat/api/world-chat-client.ts",
+            "getWorldChatResponseRequest": "frontend/src/features/chat/api/world-chat-client.ts",
+            "getWorldChatThread": "frontend/src/features/chat/api/world-chat-client.ts",
+            "listWorldChatThreads": "frontend/src/features/chat/api/world-chat-client.ts",
+            "retryWorldChatResponse": "frontend/src/features/chat/api/world-chat-client.ts",
+            "sendWorldChatMessage": "frontend/src/features/chat/api/world-chat-client.ts",
+            "streamWorldChatResponse": "frontend/src/features/chat/api/world-chat-client.ts",
+            "updateWorldChatThreadModel": "frontend/src/features/chat/api/world-chat-client.ts",
+            "WorldChatApiError": "frontend/src/features/chat/api/world-chat-client.ts",
+            "DEFAULT_MESSAGE_GOOGLE_MODEL": "frontend/src/features/chat/config/models.ts",
+            "MESSAGE_GOOGLE_GEMINI_MODELS": "frontend/src/features/chat/config/models.ts",
+            "CharacterMessageSettingRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageCredentialSource": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageGoogleGeminiModel": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageMessageRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageProfileRef": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageSendRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageSettingsRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageThreadListRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageThreadRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "resolvedLegacyWorldChatRouteParts": "frontend/src/features/chat/utils/legacy-world-route.ts",
+            "WorldChatControlMode": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatEntryRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatGenerationEvent": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatGenerationRequestRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatGenerationState": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatLatestRequestRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatModelBindingMode": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatMessageAcceptRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatRoleRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatThreadCreate": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatThreadCreateRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatThreadListRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatThreadModelUpdate": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "WorldChatThreadRead": "frontend/src/features/chat/types/world-chat-contract.ts",
+            "MessageThreadClient": "frontend/src/features/chat/components/message-thread-client.tsx",
+            "MessagesClient": "frontend/src/features/chat/components/messages-client.tsx",
+            "WorldChat": "frontend/src/features/chat/components/world-chat.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/device-home/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "getLocalWorldSurface": "frontend/src/features/device-home/api/device-home-client.ts",
+            "DEVICE_HOME_FIXED_APPS": "frontend/src/features/device-home/utils/device-home-presentation.ts",
+            "DEVICE_HOME_VISUAL_CONTRACT": "frontend/src/features/device-home/utils/device-home-presentation.ts",
+            "presentWorldLaunchability": "frontend/src/features/device-home/utils/device-home-presentation.ts",
+            "DeviceHomeFixedApp": "frontend/src/features/device-home/types/index.ts",
+            "DeviceHomeFixedAppId": "frontend/src/features/device-home/types/index.ts",
+            "LocalWorldSurfaceRead": "frontend/src/features/device-home/types/index.ts",
+            "WorldLaunchPresentation": "frontend/src/features/device-home/types/index.ts",
+            "WorldLaunchState": "frontend/src/features/device-home/types/index.ts",
+            "WorldSurface": "frontend/src/features/device-home/types/index.ts",
+            "WorldSurfaceItem": "frontend/src/features/device-home/types/index.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/device-shell/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "activeLocalDeviceNavigation": "frontend/src/lib/navigation/device-navigation.ts",
+            "isStaticLocalProductRouteSupported": "frontend/src/lib/navigation/device-navigation.ts",
+            "LOCAL_DEVICE_NAVIGATION": "frontend/src/lib/navigation/device-navigation.ts",
+            "LOCAL_PRODUCT_ROUTE_CAPABILITIES": "frontend/src/lib/navigation/device-navigation.ts",
+            "LocalDeviceNavigationId": "frontend/src/lib/navigation/device-navigation.ts",
+            "ProductRouteCapability": "frontend/src/lib/navigation/device-navigation.ts",
+            "ProductRouteExposure": "frontend/src/lib/navigation/device-navigation.ts",
+            "ProductWindowCapability": "frontend/src/lib/navigation/device-navigation.ts",
+            "DeviceShell": "frontend/src/components/layout/device-shell.tsx",
+            "DeviceShellProps": "frontend/src/components/layout/device-shell.tsx",
+            "LocalProductLink": "frontend/src/components/navigation/local-product-link.tsx",
+            "LocalDeviceNavigation": "frontend/src/composition/shells/local-device-navigation.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/memory/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "correctMemoryItem": "frontend/src/features/memory/api/memory-client.ts",
+            "deleteMemoryItem": "frontend/src/features/memory/api/memory-client.ts",
+            "getMemoryItem": "frontend/src/features/memory/api/memory-client.ts",
+            "getMemorySetting": "frontend/src/features/memory/api/memory-client.ts",
+            "getWorldChatEvidence": "frontend/src/features/memory/api/memory-client.ts",
+            "listMemoryItems": "frontend/src/features/memory/api/memory-client.ts",
+            "MemoryApiError": "frontend/src/features/memory/api/memory-client.ts",
+            "setMemoryPin": "frontend/src/features/memory/api/memory-client.ts",
+            "updateMemorySetting": "frontend/src/features/memory/api/memory-client.ts",
+            "MemoryEvidenceRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemoryItemDetailRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemoryItemListRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemoryItemMutationRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemoryItemSummaryRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemorySettingRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemorySettingMutationRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "WorldChatEvidenceItemRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "WorldChatEvidenceRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "WorldChatEvidenceSummaryRead": "frontend/src/features/memory/types/memory-contract.ts",
+            "MemoryWorkspace": "frontend/src/features/memory/components/memory-workspace.tsx",
+            "MemoryScopeSummary": "frontend/src/features/memory/components/memory-scope-summary.tsx",
+            "WorldChatEvidenceInspector": "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/pwa-shell/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "detectAngmooPwaDisplayMode": "frontend/src/config/pwa.ts",
+            "AngmooPwaDisplayMode": "frontend/src/config/pwa.ts",
+            "PwaServiceWorkerLifecycle": "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx",
+            "unregisterAngmooServiceWorker": "frontend/src/composition/providers/pwa-service-worker-lifecycle.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/runtime-status/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "presentRuntimeState": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
+            "ProductRuntimePresentation": "frontend/src/features/runtime-status/types/runtime-status.ts",
+            "ProductRuntimeState": "frontend/src/features/runtime-status/types/runtime-status.ts",
+            "RuntimeStatusSummary": "frontend/src/features/runtime-status/components/runtime-status-summary.tsx",
+            "getProductRuntimeState": "frontend/src/features/runtime-status/api/runtime-status-client.ts"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        },
+        "frontend/src/features/ui-foundation/public.ts": {
+          "reason": "All frontend consumers now import actual role owners; no published external frontend import contract.",
+          "export_destinations": {
+            "SemanticFoundationFixture": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx"
+          },
+          "verification": [
+            "Every frozen named export has an actual declaration owner",
+            "Same browser assertions, fixtures, builds and runtime paths retained"
+          ]
+        }
+      },
+      "frontend_extractions": {
+        "frontend/src/lib/community.ts": {
+          "export_destinations": {
+            "getCharacterActivity": "frontend/src/features/characters/api/activity.ts",
+            "saveCharacterState": "frontend/src/features/characters/api/activity.ts",
+            "CharacterActivityRead": "frontend/src/features/characters/types/activity.ts",
+            "apiInstantTimestamp": "frontend/src/utils/profile-presentation.ts",
+            "formatDate": "frontend/src/utils/profile-presentation.ts",
+            "parseApiInstant": "frontend/src/utils/profile-presentation.ts",
+            "CharacterRead": "frontend/src/features/characters/types/character.ts",
+            "CharacterStateRead": "frontend/src/features/characters/types/character.ts",
+            "FeedContentFilter": "frontend/src/features/social/types/community.ts",
+            "PostInfoKind": "frontend/src/features/social/types/community.ts",
+            "PostInfoMetadata": "frontend/src/features/social/types/community.ts",
+            "CommentRead": "frontend/src/features/social/types/community.ts",
+            "PostMediaRead": "frontend/src/features/social/types/community.ts",
+            "MentionedCharacterRef": "frontend/src/features/social/types/community.ts",
+            "PostSummary": "frontend/src/features/social/types/community.ts",
+            "PostReference": "frontend/src/features/social/types/community.ts",
+            "PostDetail": "frontend/src/features/social/types/community.ts",
+            "PostReportReason": "frontend/src/features/social/types/community.ts",
+            "PostReportRead": "frontend/src/features/social/types/community.ts",
+            "FeedPage": "frontend/src/features/social/types/community.ts",
+            "TodayActivityRead": "frontend/src/features/social/types/community.ts",
+            "PostThreadRead": "frontend/src/features/social/types/community.ts",
+            "ProfileRef": "frontend/src/features/social/types/community.ts",
+            "ProfileRead": "frontend/src/features/social/types/community.ts",
+            "ProfileFeedTab": "frontend/src/features/social/types/community.ts",
+            "ProfileConnectionTab": "frontend/src/features/social/types/community.ts",
+            "ProfileListItem": "frontend/src/features/social/types/community.ts",
+            "ProfileListPage": "frontend/src/features/social/types/community.ts",
+            "CharacterSearchResult": "frontend/src/features/social/types/community.ts",
+            "SearchResults": "frontend/src/features/social/types/community.ts",
+            "NotificationRead": "frontend/src/features/social/types/community.ts",
+            "NotificationPage": "frontend/src/features/social/types/community.ts",
+            "FollowRead": "frontend/src/features/social/types/community.ts",
+            "FollowStatusRead": "frontend/src/features/social/types/community.ts",
+            "FeedListOptions": "frontend/src/features/social/types/community.ts",
+            "listPosts": "frontend/src/features/social/api/community.ts",
+            "listFeed": "frontend/src/features/social/api/community.ts",
+            "listTodayActivity": "frontend/src/features/social/api/community.ts",
+            "listTodayPopularPosts": "frontend/src/features/social/api/community.ts",
+            "searchNest": "frontend/src/features/social/api/community.ts",
+            "listFollowingFeed": "frontend/src/features/social/api/community.ts",
+            "listCharacterFollowingFeed": "frontend/src/features/social/api/community.ts",
+            "getPost": "frontend/src/features/social/api/community.ts",
+            "getPostThread": "frontend/src/features/social/api/community.ts",
+            "deletePost": "frontend/src/features/social/api/community.ts",
+            "reportPost": "frontend/src/features/social/api/community.ts",
+            "createPost": "frontend/src/features/social/api/community.ts",
+            "createReply": "frontend/src/features/social/api/community.ts",
+            "createQuote": "frontend/src/features/social/api/community.ts",
+            "likePost": "frontend/src/features/social/api/community.ts",
+            "repostPost": "frontend/src/features/social/api/community.ts",
+            "getCharacterProfile": "frontend/src/features/social/api/community.ts",
+            "getCharacterProfileFeed": "frontend/src/features/social/api/community.ts",
+            "getUserProfile": "frontend/src/features/social/api/community.ts",
+            "getUserProfileFeed": "frontend/src/features/social/api/community.ts",
+            "getCharacterProfileConnections": "frontend/src/features/social/api/community.ts",
+            "getUserProfileConnections": "frontend/src/features/social/api/community.ts",
+            "followProfile": "frontend/src/features/social/api/community.ts",
+            "getFollowStatus": "frontend/src/features/social/api/community.ts",
+            "unfollowProfile": "frontend/src/features/social/api/community.ts",
+            "listNotifications": "frontend/src/features/social/api/community.ts",
+            "markNotificationRead": "frontend/src/features/social/api/community.ts"
+          },
+          "preserved": "Actual APIs, types, storage and UI relocated in earlier stage records; current wrappers have no independent owner or consumers"
+        },
+        "frontend/src/lib/agents.ts": {
+          "export_destinations": {
+            "DEFAULT_MESSAGE_GOOGLE_MODEL": "frontend/src/features/chat/config/models.ts",
+            "MESSAGE_GOOGLE_GEMINI_MODELS": "frontend/src/features/chat/config/models.ts",
+            "createMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "deleteMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "getCharacterMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "getMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "getMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "listMessageThreads": "frontend/src/features/chat/api/chat-client.ts",
+            "retryThreadMessage": "frontend/src/features/chat/api/chat-client.ts",
+            "sendThreadMessage": "frontend/src/features/chat/api/chat-client.ts",
+            "updateCharacterMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "updateMessageSettings": "frontend/src/features/chat/api/chat-client.ts",
+            "updateMessageThread": "frontend/src/features/chat/api/chat-client.ts",
+            "CharacterMessageSettingRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageCredentialSource": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageGoogleGeminiModel": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageMessageRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageSendRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageSettingsRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageThreadListRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "MessageThreadRead": "frontend/src/features/chat/types/chat-contract.ts",
+            "GOOGLE_GEMINI_MODELS": "frontend/src/features/characters/config/model-options.ts",
+            "DEFAULT_GOOGLE_GEMINI_MODEL": "frontend/src/features/characters/config/model-options.ts",
+            "DEFAULT_USER_IMAGE_MODEL": "frontend/src/features/characters/config/model-options.ts",
+            "REPLICATE_API_TOKEN_GUIDE_URL": "frontend/src/features/characters/config/model-options.ts",
+            "REPLICATE_API_TOKEN_URL": "frontend/src/features/characters/config/model-options.ts",
+            "REPLICATE_PRICING_URL": "frontend/src/features/characters/config/model-options.ts",
+            "USER_IMAGE_MODELS": "frontend/src/features/characters/config/model-options.ts",
+            "GoogleGeminiModel": "frontend/src/features/characters/config/model-options.ts",
+            "PollinationsImageModel": "frontend/src/features/characters/config/model-options.ts",
+            "getGoogleGeminiModelNote": "frontend/src/features/characters/config/model-options.ts",
+            "AgentExecutionMode": "frontend/src/features/characters/types/agents.ts",
+            "WritingRepetitionLevel": "frontend/src/features/characters/types/agents.ts",
+            "UserRead": "frontend/src/lib/auth/browser-session.ts",
+            "AuthRead": "frontend/src/lib/auth/browser-session.ts",
+            "CredentialRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentImageGenerationSettingRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActivitySettingRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActionRangeRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentSlotRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActivityLogRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActivityProfileReadinessRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentFeedCueRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActivitySummaryRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentFirstGreetingRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentRunRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentActivityMaintenanceRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentPromotionUsageRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentDetailRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentTypeCounts": "frontend/src/features/characters/types/agents.ts",
+            "getAgentTypeCounts": "frontend/src/features/characters/utils/agent-counts.ts",
+            "AgentLocalConnectionRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentLocalKeyCreateRead": "frontend/src/features/characters/types/agents.ts",
+            "CharacterLoreSourceRead": "frontend/src/features/characters/types/agents.ts",
+            "CharacterLoreStatusRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreateInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentProfileInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentPersonaInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentProfileMediaUploadInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentImageSeedUploadInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreationDraftImageStyle": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreationDraftRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreationDraftUpdateInput": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreationDraftMediaResult": "frontend/src/features/characters/types/agents.ts",
+            "AgentProfileImageUsageStatusRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentProfileImageUsageRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentCreationDraftMediaGenerationRead": "frontend/src/features/characters/types/agents.ts",
+            "AgentProfileMediaGenerationRead": "frontend/src/features/characters/types/agents.ts",
+            "AGENTS_CHANGED_EVENT": "frontend/src/features/characters/stores/agent-session.ts",
+            "AGENT_AUTONOMY_MUTATION_EVENT": "frontend/src/features/characters/stores/agent-session.ts",
+            "AgentSettingsInput": "frontend/src/features/characters/types/agents.ts",
+            "AUTH_CHANGED_EVENT": "frontend/src/lib/auth/browser-session.ts",
+            "AgentAutonomyMutationState": "frontend/src/features/characters/types/agents.ts",
+            "AgentAutonomyMutationEventDetail": "frontend/src/features/characters/types/agents.ts",
+            "getStoredUser": "frontend/src/lib/auth/browser-session.ts",
+            "notifyAuthChanged": "frontend/src/lib/auth/browser-session.ts",
+            "storeUser": "frontend/src/lib/auth/browser-session.ts",
+            "cacheUser": "frontend/src/lib/auth/browser-session.ts",
+            "clearStoredUser": "frontend/src/lib/auth/browser-session.ts",
+            "clearLegacyAuthStorage": "frontend/src/lib/auth/browser-session.ts",
+            "markFirstAgentWelcomePromptPending": "frontend/src/features/characters/stores/agent-session.ts",
+            "hasFirstAgentWelcomePromptPending": "frontend/src/features/characters/stores/agent-session.ts",
+            "clearFirstAgentWelcomePromptPending": "frontend/src/features/characters/stores/agent-session.ts",
+            "getAgentAutonomyMutationStates": "frontend/src/features/characters/stores/agent-session.ts",
+            "getAgentAutonomyMutationState": "frontend/src/features/characters/stores/agent-session.ts",
+            "setAgentAutonomyMutationState": "frontend/src/features/characters/stores/agent-session.ts",
+            "clearAgentAutonomyMutationState": "frontend/src/features/characters/stores/agent-session.ts",
+            "isAuthError": "frontend/src/lib/auth/browser-session.ts",
+            "fetchAuthenticatedMediaObjectUrl": "frontend/src/lib/media/authenticated-media.ts",
+            "getAgentActivityMaintenance": "frontend/src/features/characters/api/agents.ts",
+            "listAgents": "frontend/src/features/characters/api/agents.ts",
+            "getAgent": "frontend/src/features/characters/api/agents.ts",
+            "getAgentFeedCue": "frontend/src/features/characters/api/agents.ts",
+            "giveAgentFeedCue": "frontend/src/features/characters/api/agents.ts",
+            "createAgent": "frontend/src/features/characters/api/agents.ts",
+            "getAgentLocalConnection": "frontend/src/features/characters/api/agents.ts",
+            "listAgentLoreSources": "frontend/src/features/characters/api/agents.ts",
+            "getAgentLoreStatus": "frontend/src/features/characters/api/agents.ts",
+            "uploadAgentLoreSource": "frontend/src/features/characters/api/agents.ts",
+            "deleteAgentLoreSource": "frontend/src/features/characters/api/agents.ts",
+            "rebuildAgentLoreSource": "frontend/src/features/characters/api/agents.ts",
+            "issueAgentLocalKey": "frontend/src/features/characters/api/agents.ts",
+            "revokeAgentLocalKey": "frontend/src/features/characters/api/agents.ts",
+            "createAgentDraft": "frontend/src/features/characters/api/agents.ts",
+            "getAgentDraft": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentDraft": "frontend/src/features/characters/api/agents.ts",
+            "enhanceAgentDraftPersona": "frontend/src/features/characters/api/agents.ts",
+            "uploadAgentDraftMedia": "frontend/src/features/characters/api/agents.ts",
+            "generateAgentDraftMedia": "frontend/src/features/characters/api/agents.ts",
+            "getAgentDraftMediaUsage": "frontend/src/features/characters/api/agents.ts",
+            "applyAgentDraftMediaCandidate": "frontend/src/features/characters/api/agents.ts",
+            "discardAgentDraftMediaCandidate": "frontend/src/features/characters/api/agents.ts",
+            "generateAgentProfileMedia": "frontend/src/features/characters/api/agents.ts",
+            "getAgentProfileMediaUsage": "frontend/src/features/characters/api/agents.ts",
+            "applyAgentProfileMediaCandidate": "frontend/src/features/characters/api/agents.ts",
+            "discardAgentProfileMediaCandidate": "frontend/src/features/characters/api/agents.ts",
+            "completeAgentDraft": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentProfile": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentPromotionUsage": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentPersona": "frontend/src/features/characters/api/agents.ts",
+            "uploadAgentProfileMedia": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentSettings": "frontend/src/features/characters/api/agents.ts",
+            "updateAgentImageSettings": "frontend/src/features/characters/api/agents.ts",
+            "deleteAgentImageKey": "frontend/src/features/characters/api/agents.ts",
+            "uploadAgentImageSeed": "frontend/src/features/characters/api/agents.ts",
+            "deleteAgentImageSeed": "frontend/src/features/characters/api/agents.ts",
+            "analyzeAgentTendency": "frontend/src/features/characters/api/agents.ts",
+            "saveCredential": "frontend/src/features/characters/api/agents.ts",
+            "deleteCredential": "frontend/src/features/characters/api/agents.ts",
+            "activateAgent": "frontend/src/features/characters/api/agents.ts",
+            "deactivateAgent": "frontend/src/features/characters/api/agents.ts",
+            "deleteAgent": "frontend/src/features/characters/api/agents.ts",
+            "runAgentNow": "frontend/src/features/characters/api/agents.ts",
+            "runAgentFirstGreeting": "frontend/src/features/characters/api/agents.ts",
+            "createCommunityPost": "frontend/src/features/social/api/character-post-actions.ts",
+            "likeCommunityPost": "frontend/src/features/social/api/character-post-actions.ts",
+            "claimLocalOwner": "frontend/src/features/identity/api/identity.ts",
+            "completeGoogleSignup": "frontend/src/features/identity/api/identity.ts",
+            "createLocalBootstrapChallenge": "frontend/src/features/identity/api/identity.ts",
+            "deleteCurrentAccount": "frontend/src/features/identity/api/identity.ts",
+            "getLocalBootstrapStatus": "frontend/src/features/identity/api/identity.ts",
+            "getMe": "frontend/src/features/identity/api/identity.ts",
+            "googleLogin": "frontend/src/features/identity/api/identity.ts",
+            "issueLocalSession": "frontend/src/features/identity/api/identity.ts",
+            "linkGoogleAccount": "frontend/src/features/identity/api/identity.ts",
+            "login": "frontend/src/features/identity/api/identity.ts",
+            "logoutCurrentSession": "frontend/src/features/identity/api/identity.ts",
+            "signup": "frontend/src/features/identity/api/identity.ts",
+            "updateMe": "frontend/src/features/identity/api/identity.ts",
+            "updateMePreferences": "frontend/src/features/identity/api/identity.ts",
+            "GoogleLoginRead": "frontend/src/features/identity/types/identity.ts",
+            "LocalBootstrapRead": "frontend/src/features/identity/types/identity.ts",
+            "LocalOwnerCandidateRead": "frontend/src/features/identity/types/identity.ts",
+            "PendingGoogleSignup": "frontend/src/features/identity/types/identity.ts",
+            "clearPendingGoogleSignup": "frontend/src/features/identity/utils/pending-signup.ts",
+            "getPendingGoogleSignup": "frontend/src/features/identity/utils/pending-signup.ts",
+            "hasPendingGoogleSignup": "frontend/src/features/identity/utils/pending-signup.ts",
+            "storePendingGoogleSignup": "frontend/src/features/identity/utils/pending-signup.ts",
+            "clearAuth": "frontend/src/lib/auth/browser-session.ts",
+            "storeAuth": "frontend/src/lib/auth/browser-session.ts"
+          },
+          "preserved": "Actual APIs, types, storage and UI relocated in earlier stage records; current wrappers have no independent owner or consumers"
+        },
+        "frontend/src/app/device-home-route-client.tsx": {
+          "target": "frontend/src/composition/screens/device-home-screen.tsx",
+          "aliases": {
+            "DeviceHomeRouteClient": "DeviceHomeScreen"
+          },
+          "preserved": "No active consumers; actual Next page and static router already import the same DeviceHomeScreen"
+        }
+      },
+      "frontend_import_splits": {
+        "frontend/src/features/chat/public.ts": {
+          "MessageThreadRead": "frontend/src/features/chat/types/chat-contract.ts",
+          "WorldChatThreadRead": "frontend/src/features/chat/types/world-chat-contract.ts"
+        },
+        "frontend/src/features/characters/utils/character-dashboard-presentation.ts": {
+          "CharacterDashboardItem": "frontend/src/features/characters/types/character.ts"
+        }
+      }
     }
   },
   "asgi_exports": {

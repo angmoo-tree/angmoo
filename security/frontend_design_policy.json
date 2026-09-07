@@ -259,13 +259,12 @@
     "frontend/src/composition/static-product-router.tsx",
     "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
     "frontend/src/lib/navigation/device-navigation.ts",
-    "frontend/src/features/device-shell/public.ts",
     "frontend/src/components/layout/device-shell.module.css",
     "frontend/src/components/layout/device-shell.tsx",
     "frontend/src/composition/shells/local-device-navigation.tsx",
     "frontend/src/components/navigation/local-product-link.module.css",
     "frontend/src/components/navigation/local-product-link.tsx",
-    "frontend/src/features/memory/public.ts",
+    "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/components/memory-scope-summary.tsx",
     "frontend/src/features/memory/components/memory-workspace.module.css",
     "frontend/src/features/memory/components/memory-workspace.tsx",
@@ -282,12 +281,11 @@
     "frontend/src/features/social/components/social-presentation.module.css",
     "frontend/src/features/social/components/world-social-feed.module.css",
     "frontend/src/features/social/components/world-social-feed.tsx",
-    "frontend/src/features/ui-foundation/public.ts",
-    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
     "frontend/src/lib/desktop/product-window.ts",
     "frontend/src/utils/scroll-viewport.ts",
     "frontend/src/components/ui/profile-avatar.tsx",
-    "frontend/src/shared/ui/public.ts",
+    "frontend/src/components/ui/app-icon.tsx",
     "frontend/src/styles/semantic-tokens.css",
     "frontend/src/components/ui/status-badge.tsx",
     "security/frontend_design_policy.json"
@@ -351,7 +349,7 @@
       ]
     },
     "compatibility_facade": "frontend/src/composition/shells/app-shell.tsx",
-    "feature_public_export": "frontend/src/features/device-shell/public.ts",
+    "feature_public_export": "frontend/src/lib/navigation/device-navigation.ts",
     "owner_stage": "L4.5 UI-C",
     "product_shell": "frontend/src/components/layout/device-shell.tsx",
     "shared_neutral_primitive": "frontend/src/components/ui/device-frame.tsx",
@@ -381,44 +379,44 @@
     ],
     "docs/architecture/frontend-design-reference.md": [
       "DIRECT / ADAPTED / LOCAL / REJECTED",
+      "ManualSocialPostRead.reply_count",
+      "NOT WCAG AA PASS",
       "Raw-color baseline",
       "Route and surface inventory",
       "UI-B semantic foundation",
       "UI-D PR #207 follow-up",
-      "NOT WCAG AA PASS",
-      "ManualSocialPostRead.reply_count",
       "Visual harness extension"
     ],
     "docs/public/changing-frontend.md": [
-      "frontend/DESIGN.md",
-      "check_frontend_design_contract.py"
+      "check_frontend_design_contract.py",
+      "frontend/DESIGN.md"
     ],
     "frontend/AGENTS.md": [
       "BEGIN:angmoo-frontend-design-contract",
-      "frontend/DESIGN.md",
-      "END:angmoo-frontend-design-contract"
+      "END:angmoo-frontend-design-contract",
+      "frontend/DESIGN.md"
     ],
     "frontend/src/styles/globals.css": [
       "@import \"./semantic-tokens.css\";"
     ],
     "frontend/src/app/ui-foundation/page.tsx": [
+      "SemanticFoundationFixture",
       "follow: false",
-      "index: false",
-      "SemanticFoundationFixture"
+      "index: false"
     ],
     "frontend/src/composition/shells/app-shell.tsx": [
-      "Shared Phone screen composition",
-      "surface=\"local-phone\"",
       "@/components/layout/device-shell",
-      "@/composition/shells/local-device-navigation"
+      "@/composition/shells/local-device-navigation",
+      "Shared Phone screen composition",
+      "surface=\"local-phone\""
     ],
     "frontend/src/composition/static-product-router.tsx": [
+      "MemoryWorkspace",
+      "SemanticFoundationFixture",
+      "StaticCanonicalRouteRedirect",
       "pathname === \"/memory\"",
       "pathname === \"/memory-explorer\"",
-      "MemoryWorkspace",
-      "StaticCanonicalRouteRedirect",
-      "pathname === \"/ui-foundation\"",
-      "SemanticFoundationFixture"
+      "pathname === \"/ui-foundation\""
     ],
     "frontend/src/features/memory/components/memory-workspace.tsx": [
       "data-product-shell=\"memory\"",
@@ -426,9 +424,9 @@
       "현재 확인 가능한 근거"
     ],
     "frontend/src/features/memory/components/memory-workspace.module.css": [
-      "@media (max-width: 799px)",
+      "--color-state-warning-surface",
       "--color-surface",
-      "--color-state-warning-surface"
+      "@media (max-width: 799px)"
     ],
     "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx": [
       "Dialog",
@@ -441,24 +439,17 @@
       "target_post_id"
     ],
     "frontend/src/features/characters/components/agents-dashboard-client.tsx": [
-      "data-character-recent-activity",
       "LocalProductLink",
-      "RecentActivityMetric"
+      "RecentActivityMetric",
+      "data-character-recent-activity"
     ],
     "frontend/src/lib/navigation/device-navigation.ts": [
-      "LOCAL_DEVICE_NAVIGATION",
       "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
-      "exposure: \"hidden\"",
-      "isStaticLocalProductRouteSupported"
-    ],
-    "frontend/src/features/device-shell/public.ts": [
-      "DeviceShell",
-      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
-      "LocalDeviceNavigation",
-      "LocalProductLink"
+      "LocalDeviceNavigation"
     ],
     "frontend/src/components/layout/device-shell.tsx": [
       "DeviceFrame",
+      "DeviceShell",
       "data-device-shell=\"phone\"",
       "navigation?: ReactNode"
     ],
@@ -467,6 +458,7 @@
       "cursor: not-allowed"
     ],
     "frontend/src/components/navigation/local-product-link.tsx": [
+      "LocalProductLink",
       "aria-disabled=\"true\"",
       "data-product-route-unavailable=\"true\"",
       "isStaticFrontendProfile",
@@ -474,8 +466,8 @@
     ],
     "frontend/src/features/social/types/social-presentation-contract.ts": [
       "SocialPostActionPresentation",
-      "interaction: \"link\"",
       "interaction: \"button\"",
+      "interaction: \"link\"",
       "interaction: \"metric\""
     ],
     "frontend/src/features/social/components/social-post-row.tsx": [
@@ -494,24 +486,21 @@
       "min-height: 44px"
     ],
     "frontend/src/features/social/types/social-write-contract.ts": [
+      "ManualSocialWritePostRead",
       "avatar_url: string;",
-      "reply_count: number;",
       "like_count: number;",
-      "ManualSocialWritePostRead"
+      "reply_count: number;"
     ],
     "frontend/src/features/social/components/world-social-feed.tsx": [
       "id=\"world-owner-composer\"",
-      "오늘 이 World에 남길 이야기의 제목을 적어주세요",
+      "interaction: \"metric\"",
       "내가 조종하는 앵무의 말로 이야기를 적어보세요",
-      "interaction: \"metric\""
+      "오늘 이 World에 남길 이야기의 제목을 적어주세요"
     ],
-    "frontend/src/features/ui-foundation/public.ts": [
-      "SemanticFoundationFixture"
-    ],
-    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": [
+    "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx": [
       "data-fixture-schema=\"ui-b-semantic-primitives-v1\"",
       "data-ui-foundation-fixture",
-      "from \"@/shared/ui/public\"",
+      "from \"@/components/ui/button\"",
       "onSelect={setActiveNavigation}",
       "src=\"/icon.svg\""
     ],
@@ -527,32 +516,22 @@
       "import { InlineError } from \"@/components/ui/feedback\"",
       "import { Select } from \"@/components/ui/form-controls\""
     ],
-    "frontend/src/shared/ui/public.ts": [
-      "export { Avatar } from \"../../components/ui/avatar\";",
-      "export { Badge, StatusChip } from \"../../components/ui/status\";",
-      "export { BottomNavigation, PageHeader, Tabs } from \"../../components/ui/navigation\";",
-      "export { Button, IconButton } from \"./button\";",
-      "export { Card, ListRow } from \"../../components/ui/surfaces\";",
-      "export { DegradedPanel, EmptyState, InlineError, Toast } from \"../../components/ui/feedback\";",
-      "export { Dialog } from \"../../components/ui/dialog\";",
-      "export { Field, Input, Select, Textarea } from \"../../components/ui/form-controls\";"
-    ],
     "frontend/src/components/ui/profile-avatar.tsx": [
       "<Avatar",
       "export function ProfileAvatar",
-      "import { Avatar } from \"./avatar\";"
+      "import { Avatar } from \"@/components/ui/avatar\";"
     ],
     "frontend/src/styles/semantic-tokens.css": [
-      "--color-brand-accent: #ff6b6b;",
-      "--color-brand-accent-hover: #ff5252;",
-      "--color-brand-soft: #fff0ef;",
-      "--color-brand-soft-border: #ffb5b5;",
-      "--color-action-primary: var(--color-brand-accent);",
-      "--color-action-primary-hover: var(--color-brand-accent-hover);",
-      "--color-on-action-primary: #ffffff;",
       "--color-action-dark: #101828;",
-      "--color-on-action-dark: #ffffff;",
+      "--color-action-primary-hover: var(--color-brand-accent-hover);",
+      "--color-action-primary: var(--color-brand-accent);",
+      "--color-brand-accent-hover: #ff5252;",
+      "--color-brand-accent: #ff6b6b;",
+      "--color-brand-soft-border: #ffb5b5;",
+      "--color-brand-soft: #fff0ef;",
       "--color-canvas:",
+      "--color-on-action-dark: #ffffff;",
+      "--color-on-action-primary: #ffffff;",
       "--color-state-degraded:",
       "--color-surface:",
       "--color-text-strong:",
@@ -566,7 +545,7 @@
     "frontend/src/components/ui/status-badge.tsx": [
       "<StatusChip",
       "export function StatusBadge",
-      "import { StatusChip, type StatusChipTone } from \"./status\";"
+      "import { StatusChip, type StatusChipTone } from \"@/components/ui/status\";"
     ],
     "frontend/src/lib/desktop/product-window.ts": [
       "canonicalProductRoute",
@@ -584,14 +563,14 @@
       "isWindows ? frontendRoot : standaloneRoot"
     ],
     "frontend/DESIGN.md": [
-      "version: 1.11",
       "EXCEPTION-A",
       "EXCEPTION-B",
       "EXCEPTION-C",
-      "WCAG AA PASS가 아니다",
       "UI-A DESIGN CONTRACT CLOSEOUT",
+      "WCAG AA PASS가 아니다",
       "check_frontend_design_contract.py",
-      "frontend-design-reference.md"
+      "frontend-design-reference.md",
+      "version: 1.11"
     ],
     "scripts/ci/check_frontend_design_contract.py": [
       "UI_D_COLOR_CONTRACT",
@@ -633,6 +612,41 @@
       "[\"posts\", id] | [\"agents\", id]",
       "[\"settings\"] | [\"login\"] | [\"posts\"] | [\"agents\"]",
       "[\"worlds\", world_id, \"posts\", post_id]"
+    ],
+    "frontend/src/components/ui/avatar.tsx": [
+      "export function Avatar"
+    ],
+    "frontend/src/components/ui/status.tsx": [
+      "export function Badge",
+      "export function StatusChip"
+    ],
+    "frontend/src/components/ui/navigation.tsx": [
+      "export function BottomNavigation",
+      "export function PageHeader",
+      "export function Tabs"
+    ],
+    "frontend/src/components/ui/button.tsx": [
+      "export const Button",
+      "export const IconButton"
+    ],
+    "frontend/src/components/ui/surfaces.tsx": [
+      "export function Card",
+      "export function ListRow"
+    ],
+    "frontend/src/components/ui/feedback.tsx": [
+      "export function DegradedPanel",
+      "export function EmptyState",
+      "export function InlineError",
+      "export function Toast"
+    ],
+    "frontend/src/components/ui/dialog.tsx": [
+      "export function Dialog"
+    ],
+    "frontend/src/components/ui/form-controls.tsx": [
+      "export const Input",
+      "export const Select",
+      "export const Textarea",
+      "export function Field"
     ]
   },
   "route_surface_inventory": [
@@ -837,9 +851,9 @@
         "frontend/src/composition/static-product-router.tsx"
       ],
       "bottom_navigation_mode": "button_only_state_fixture",
-      "component": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+      "component": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
       "exposure": "unlinked_noindex_test_harness",
-      "feature_public_export": "frontend/src/features/ui-foundation/public.ts",
+      "feature_public_export": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
       "next_wrapper": "frontend/src/app/ui-foundation/page.tsx",
       "owner_stage": "L4.5 UI-B",
       "route": "/ui-foundation",
@@ -873,7 +887,7 @@
       "frontend/src/components/ui/surfaces.tsx",
       "frontend/src/utils/class-names.ts"
     ],
-    "public_export": "frontend/src/shared/ui/public.ts",
+    "public_export": "frontend/src/components/ui/app-icon.tsx",
     "direct_product_consumers": [
       "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
       "frontend/src/features/world-packages/components/world-package-import-client.tsx"
@@ -926,7 +940,7 @@
       "source": "frontend/src/app/icon.svg"
     },
     "fixture": "browser-tests/fixtures/visual-corpus.json",
-    "preserved_ui_b_fixture": "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "preserved_ui_b_fixture": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
     "projects": [
       "next-production",
       "static-export"

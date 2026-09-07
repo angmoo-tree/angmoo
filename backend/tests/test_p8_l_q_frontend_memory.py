@@ -15,7 +15,10 @@ def _read(relative: str) -> str:
 
 
 def test_memory_feature_is_feature_first_and_shared_by_next_and_static() -> None:
-    public = _read("frontend/src/features/memory/public.ts")
+    assert not (ROOT / "frontend/src/features/memory/public.ts").exists()
+    for name in ("memory-workspace", "memory-scope-summary", "world-chat-evidence-inspector"):
+        assert (ROOT / f"frontend/src/features/memory/components/{name}.tsx").is_file()
+    public = subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:frontend/src/features/memory/public.ts"], cwd=ROOT, text=True, encoding="utf-8")
     next_page = _read("frontend/src/app/memory/page.tsx")
     next_compatibility = _read("frontend/src/app/memory-explorer/page.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AppShell } from "@/composition/shells/app-shell";
 import { LocalOwnerClient } from "@/features/identity/components/local-owner-client";
 import { safeLoginReturnTo } from "@/utils/safe-navigation";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

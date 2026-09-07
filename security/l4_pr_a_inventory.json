@@ -2466,14 +2466,16 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 11,
+      "candidate_consumer_edge_count": 18,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/route.ts": [],
         "frontend/src/app/api/community/posts/route.ts": [],
         "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx": [],
-        "frontend/src/app/feed-page.tsx": [],
+        "frontend/src/app/feed-page.tsx": [
+          "frontend/src/app/posts/page.tsx"
+        ],
         "frontend/src/composition/screens/post-detail-screen.tsx": [
           "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
@@ -2493,11 +2495,17 @@
           "frontend/src/features/relationships/components/relationship-graph-client.tsx",
           "frontend/src/features/relationships/utils/relationship-graph.ts"
         ],
+        "frontend/src/features/social/api/community.ts": [
+          "frontend/src/composition/screens/agent-detail-screen.tsx",
+          "frontend/src/composition/screens/character-profile-screen.tsx",
+          "frontend/src/features/social/components/notifications-client.tsx",
+          "frontend/src/features/social/components/profile-connections-client.tsx",
+          "frontend/src/features/social/components/profile-list-row.tsx",
+          "frontend/src/features/social/components/right-rail-insights.tsx",
+          "frontend/src/features/social/components/search-results-client.tsx"
+        ],
         "frontend/src/features/social/components/world-social-feed.tsx": [
           "frontend/src/composition/screens/world-app.tsx"
-        ],
-        "frontend/src/lib/community.ts": [
-          "frontend/src/lib/agents.ts"
         ]
       },
       "candidate_count": 13,
@@ -2547,13 +2555,13 @@
             "metadata"
           ],
           "imports": [
+            "@/config/seo",
             "@/features/relationships/components/relationship-graph-client",
             "@/features/relationships/components/relationship-graph-frame",
-            "@/lib/seo",
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "2434a13767bb6f1f0f668a44f93b15a67e602fa24353e8859d28da07041c36c3"
+          "sha256": "15fd589f4f5ac113c402ae8030790aeba92cc257a77454034b8fc16644a19ebb"
         },
         {
           "exports": [
@@ -2659,6 +2667,43 @@
         },
         {
           "exports": [
+            "createPost",
+            "createQuote",
+            "createReply",
+            "deletePost",
+            "followProfile",
+            "getCharacterProfile",
+            "getCharacterProfileConnections",
+            "getCharacterProfileFeed",
+            "getFollowStatus",
+            "getPost",
+            "getPostThread",
+            "getUserProfile",
+            "getUserProfileConnections",
+            "getUserProfileFeed",
+            "likePost",
+            "listCharacterFollowingFeed",
+            "listFeed",
+            "listFollowingFeed",
+            "listNotifications",
+            "listPosts",
+            "listTodayActivity",
+            "listTodayPopularPosts",
+            "markNotificationRead",
+            "reportPost",
+            "repostPost",
+            "searchNest",
+            "unfollowProfile"
+          ],
+          "imports": [
+            "@/features/social/types/community",
+            "@/lib/http/community-request"
+          ],
+          "path": "frontend/src/features/social/api/community.ts",
+          "sha256": "fe894dc54e157b22cf460df32c453ec7c06c15cb957b60fdbeddc33da44d15ce"
+        },
+        {
+          "exports": [
             "WorldSocialFeed"
           ],
           "imports": [
@@ -2680,19 +2725,6 @@
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
           "sha256": "6b8fd525480303cd7c5f02c0c362e8cd2e844148c6a754683c97bc2442ebd506"
-        },
-        {
-          "exports": [],
-          "imports": [
-            "@/features/characters/api/activity",
-            "@/features/characters/types/activity",
-            "@/features/characters/types/character",
-            "@/features/social/api/community",
-            "@/features/social/types/community",
-            "@/shared/ui/public"
-          ],
-          "path": "frontend/src/lib/community.ts",
-          "sha256": "301c7f4887a92299ef172e51158203a848c3f0482efb6922638de2ee0fb32693"
         }
       ],
       "planned_feature_allowlist": [
@@ -2700,26 +2732,8 @@
         "social"
       ],
       "public_surfaces": {
-        "features": [
-          "frontend/src/features/characters/public.ts",
-          "frontend/src/features/chat/public.ts",
-          "frontend/src/features/device-home/public.ts",
-          "frontend/src/features/device-shell/public.ts",
-          "frontend/src/features/memory/public.ts",
-          "frontend/src/features/pwa-shell/public.ts",
-          "frontend/src/features/runtime-status/public.ts",
-          "frontend/src/features/ui-foundation/public.ts"
-        ],
-        "shared": [
-          "frontend/src/shared/api/public.ts",
-          "frontend/src/shared/auth/public.ts",
-          "frontend/src/shared/desktop/public.ts",
-          "frontend/src/shared/interaction/public.ts",
-          "frontend/src/shared/media/public.ts",
-          "frontend/src/shared/navigation/public.ts",
-          "frontend/src/shared/runtime/public.ts",
-          "frontend/src/shared/ui/public.ts"
-        ]
+        "features": [],
+        "shared": []
       }
     }
   },

@@ -18,21 +18,19 @@ The frontend still follows the staged scopes in its own policy and [frontend ARC
 | Local identity and characters | `app/domains/identity`, `app/domains/characters`; cross-owner lifecycle in `app/runtime/characters` | `frontend/src/app/agents` | ownership, sessions, limits |
 | World and Studio | `app/domains/worlds`, `world_characters`, `device_home`, `world_packages` | `features/device-home/{api,components,types,utils}`, `composition/screens/device-home-screen.tsx`, remaining Creator Studio/World App public entries and legacy World routes | schema, migration, package boundary, Next/static shared screen |
 | Routine runtime | `app/domains/routines`, `routine_posts`; worker composition in `app/runtime/resident`, `routine_posts` | agent activity surfaces | deterministic tick, duplicate write |
-| SNS and Inbox | `app/domains/social/{service,repository,schemas,models}` and router; cross-owner collaboration in `app/runtime/social` | `features/social/public.ts` | event ordering, observation receipt, relationship direction |
-| Relationship graph | `app/domains/relationships` role files; `app/runtime/relationships`, `graph_projection`; replayable LadybugDB adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
+| SNS and Inbox | `app/domains/social/{service,repository,schemas,models}` and router; cross-owner collaboration in `app/runtime/social` | `features/social/{api,components,types}` and `composition/screens` | event ordering, observation receipt, relationship direction |
+| Relationship graph | `app/domains/relationships` role files; `app/runtime/relationships`, `graph_projection`; replayable LadybugDB adapter | `features/relationships/{api,components,types,utils}` | read parity, replay, outage, World isolation |
 | Chat and Memory | `app/domains/chat`, `memory`; worker/provider composition in `app/runtime/chat`, `memory` | `features/chat`, `features/memory` | request state, source scope, evidence, cancellation, budgets, shutdown |
 | Providers and credentials | domain `client` files, `app/integrations`, `app/providers`, `app/credentials` | settings/model forms | BYOK redaction, fake provider |
 | Local Bot | `app/domains/local_bot` and runtime collaboration | `frontend/src/app/angmoo-api` | quota and response contracts |
 | App, DB and installation | `app/main.py`, `app/models.py`, `app/database.py`, `app/runtime/persistence`, `migrations` | runtime/desktop shell | same Base/Session, supported upgrades, startup and shutdown |
 
-Legacy frontend API calls remain behind `frontend/src/lib` only for surfaces
-that have not moved yet. New product-shell work belongs to
-`frontend/src/features/<feature>` and consumers import the concrete role file.
-Feature-local API clients stay under that feature instead of inventing backend
-contracts in route components. A temporary `public.ts` is allowed only for
-named unmigrated consumers with a removal stage; Device Home currently keeps
-four such API/type consumers and does not export its composition screen. See
-`docs/architecture/frontend-product-shell.md`.
+Frontend product requests and DTOs live in `frontend/src/features/<feature>`;
+consumers import the concrete role file. Screens that join features live in
+`frontend/src/composition/screens`; common transport and native commands stay in
+`lib`. Retired `public.ts`, `shared`, global business facades and unused route
+aliases are not extension points. See `frontend/ARCHITECTURE.md` and the old-to-new
+export map in `security/refactor_path_map.json` for existing work.
 
 ## Responsibility boundaries
 

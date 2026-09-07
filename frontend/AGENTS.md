@@ -24,11 +24,10 @@ Before changing user-visible frontend code, read:
 Apply these repository rules:
 
 - Record hosted-reference use as `DIRECT`, `ADAPTED`, `LOCAL`, or `REJECTED`.
-- Keep route wrappers thin. For scopes activated in the architecture policy,
-  import actual feature files from app/composition and keep feature composition
-  above features. Unmigrated scopes still use their existing public entries.
+- Keep route wrappers thin. Import actual feature files from app/composition and keep feature
+  composition above features. Do not recreate retired public facades.
 - Put product-neutral presentation in the canonical common location described
-  by ARCHITECTURE; `shared` remains for unmigrated code. Do not move World,
+  by ARCHITECTURE. Do not recreate the retired `shared` layer or move World,
   authorization, runtime, or capability decisions into a shared primitive.
 - Reuse one feature component across Next and the static/Tauri router. Do not
   create a Tauri-only visual implementation.

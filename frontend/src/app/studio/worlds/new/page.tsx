@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { WorldCreatorClient } from "@/composition/screens/world-creator-screen";
 import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

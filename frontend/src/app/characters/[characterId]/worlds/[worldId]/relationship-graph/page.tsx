@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { RelationshipGraphClient } from "@/features/relationships/components/relationship-graph-client";
 import { RelationshipGraphFrame } from "@/features/relationships/components/relationship-graph-frame";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 type PageProps = {
   params: Promise<{ characterId: string; worldId: string }>;

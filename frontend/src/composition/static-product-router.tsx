@@ -23,7 +23,7 @@ import { StudioRouteClient } from "@/composition/screens/studio-screen";
 import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
 import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
 import { MemoryWorkspaceScreen as MemoryWorkspace } from "@/composition/screens/memory-workspace-screen";
-import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
+import { SemanticFoundationFixture } from "@/features/ui-foundation/components/semantic-foundation-fixture";
 import { canonicalProductRoute, currentDesktopRoute, desktopWindowKindForRoute, getDesktopWindowState, subscribeDesktopRoute } from "@/lib/desktop/product-window";
 import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";

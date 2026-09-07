@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { FeedPage } from "../feed-page";
-import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
+import { FeedPage } from "@/app/feed-page";
+import { NO_INDEX_FOLLOW_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

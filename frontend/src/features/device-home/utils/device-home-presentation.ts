@@ -1,5 +1,5 @@
 import { PRODUCT_ROUTES } from "@/lib/navigation/product-routes";
-import type { DeviceHomeFixedApp, WorldLaunchPresentation, WorldSurfaceItem } from "../types";
+import type { DeviceHomeFixedApp, WorldLaunchPresentation, WorldSurfaceItem } from "@/features/device-home/types/index";
 
 export const DEVICE_HOME_VISUAL_CONTRACT = {
   maxWidthPx: 436,

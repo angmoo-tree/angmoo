@@ -2,14 +2,9 @@
 
 Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고, 여러 기능을 화면에서 조립하는 구조**를 사용한다. Chat을 고칠 때는 Chat 기능을, 여러 화면의 공통 버튼을 고칠 때는 공용 컴포넌트를 찾을 수 있도록 책임을 나누는 것이 목적이다.
 
-이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)에 기반한 **구조 전환의 목표 기준**이다. 2026-09-05 AR-0 기준선과 AR-1 검사 지원을 병합했고, `device-home`을 AR-F1 첫 제품 파일럿으로 옮겨 해당 범위의 새 경계 검사를 활성화했다. Home의 기능 코드는 `features/device-home`, 인증·runtime·Phone shell 조립은 `composition/screens/device-home-screen.tsx`, 공용 구현은 `components/hooks/lib/utils`가 소유한다. 다른 화면에는 `ui`, `model`, `public.ts`, `shared`가 남아 있으므로 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [전환 중인 코드 읽기](#전환-중인-코드-읽기)를 함께 확인한다.
+이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 Angmoo의 실제 코드 소유권과 의존 방향을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 구현은 `components/hooks/lib/utils/config/styles`에 둔다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
 
-2026-09-07 공용 UI 이전에서는 기존 primitive를 `src/components/ui`, 전역 semantic token을
-`src/styles/semantic-tokens.css`, scroll hook을 `src/hooks`, 순수 scroll·프로필 표시 도구를
-`src/utils`로 모았다. 새 공용 코드는 이 실제 구현을 사용한다. 아직 이전하지 않은 기능의
-`shared/ui/public.ts`·`shared/interaction/public.ts`는 구현을 복제하지 않는 임시 export이며,
-해당 기능의 이전과 함께 소비를 종료한다. 단계별 검증 상태는
-[프론트엔드 전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
+공용 primitive는 `src/components/ui`, semantic token은 `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, 순수 scroll·프로필 표시 도구는 `src/utils`에 있다. 옛 `shared`와 기능별 `public.ts` 전달 파일을 거치지 않고 실제 역할 파일을 사용한다. 이 문서의 구조 설명과 최종 배포·검증 완료 여부는 구분한다.
 
 서버 프록시는 `lib/server/backend.ts`, 네이티브 명령은 `lib/desktop/product-window.ts`,
 실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
@@ -22,8 +17,8 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 `composition/screens/settings-screen.tsx`에서 두 기능의 API와 화면 상태를 연결한다.
 피드의 사용자 표시 설정 저장도 `post-feed-screen.tsx`가 Identity API를 Social에 callback으로
 전달한다. Social이 Identity 내부를 import하지 않는다. 프로필 설정 성공 후 Character
-온보딩 연결은 `profile-setup-screen.tsx`에서 수행한다. 기존 `lib/agents.ts`의 인증 관련
-export는 미전환 소비자를 위한 전달 코드이며, 새로운 Identity 구현을 복제하지 않는다.
+온보딩 연결은 `profile-setup-screen.tsx`에서 수행한다. 인증 호출자는 실제 Identity API 또는 공통 세션 저장소를 사용하며,
+이전 `lib/agents.ts` 전달 경로는 제거했다.
 
 Character 생성·설정·활동의 요청은 `features/characters/api`, 응답 DTO는 `types`,
 모델 선택 옵션은 `config`, 온보딩과 자율활동의 브라우저 상태는 `stores`에 있다.
@@ -77,7 +72,7 @@ Social의 게시물·댓글·신고·검색·알림·프로필 활동 API는 `fe
 피드의 캐릭터 조회·활동 주제 요청은 `features/characters/api/feed-actor.ts`가 소유한다.
 공용 `lib/http/social-request.ts`는 이 요청과 Social 요청이 기존에 공유한 전송 계약이며,
 401 처리·성공 응답의 잘못된 JSON·오류 메시지 변환을 유지한다. endpoint와 업무 판단은
-각 기능에 남는다. `lib/community.ts`는 미전환 소비자의 임시 export만 제공한다.
+각 기능에 남는다. 이전 `lib/community.ts`의 호출자는 실제 Social API와 타입을 사용한다.
 이미 이전된 화면은 제거된 Social public 대신 실제 API·component·type을 사용한다.
 
 관계망 화면은 `features/relationships/components`, 응답 형식은 `types`,
@@ -107,7 +102,7 @@ Chat은 기억 요약과 근거 inspector의 렌더링 함수를 필수 입력�
 직접 import하지 않는다. 근거 request ID 선택과 닫기는 Chat이 관리하고, 상위 화면은
 그 값을 실제 Memory 컴포넌트에 전달한다. inspector의 request ID별 key와 thread 변경 시
 Chat state 초기화, 늦은 응답 취소를 유지한다. Next와 static은 같은 World App 화면을 통해
-이 연결을 사용한다. 쪽지의 임시 public/전역 전달 소비자는 AR-F5에서 마저 종료한다.
+이 연결을 사용한다. 쪽지 진입점도 실제 Chat 컴포넌트를 사용한다.
 
 Memory의 목록·상세·owner 수정·배치 설정 화면은 `features/memory/components`,
 응답 형식은 `types`, 요청과 응답 검증은 `api/memory-client.ts`가 담당한다.
@@ -140,13 +135,13 @@ Device frame과 링크 표현은 각각 `components/layout`, `components/navigat
 - [공용 UI와 디자인](#공용-ui와-디자인)
 - [테스트 지원과 실행 위치](#테스트-지원과-실행-위치)
 - [기능 추가와 버그 수정](#기능-추가와-버그-수정)
-- [전환 중인 코드 읽기](#전환-중인-코드-읽기)
+- [이전 경로와 보존 기록 읽기](#이전-경로와-보존-기록-읽기)
 - [개발과 검증](#개발과-검증)
 - [설계 근거와 관련 문서](#설계-근거와-관련-문서)
 
 ## 프로젝트 구조
 
-아래는 목표 배치다. 생략한 기능과 기존 실행·빌드 파일도 실제 소유권에 따라 유지한다. 모든 폴더를 빈 상태로 미리 만드는 구조는 아니다.
+아래는 현재 역할과 필요한 경우 추가하는 지원 영역을 함께 보여주는 대표 배치다. 생략한 기능과 기존 실행·빌드 파일도 실제 소유권에 따라 유지한다. 모든 폴더를 빈 상태로 미리 만드는 구조는 아니다.
 
 ```text
 angmoo/
@@ -156,6 +151,8 @@ angmoo/
 │   │   ├── app/                    # Next.js route·layout·metadata·웹 진입점
 │   │   ├── composition/            # 여러 기능의 화면 조립
 │   │   │   ├── screens/            # 웹·정적 실행이 공유하는 화면
+│   │   │   ├── shells/             # Device·World·Studio 화면 틀
+│   │   │   ├── providers/          # 인증·native·PWA 연결 조립
 │   │   │   └── static-product-router.tsx
 │   │   ├── features/
 │   │   │   ├── device-home/
@@ -281,7 +278,7 @@ function ChatContent(scope: Scope) {
 
 `key`는 World·Character가 바뀔 때 이 예시의 선택 상태를 초기화한다. 실제 데이터 요청도 scope별로 구분하고 이전 요청의 늦은 응답을 현재 화면에 적용하지 않아야 한다. 이 UI 처리와 서버의 권한·scope 검사는 서로 다른 책임이다.
 
-목표 구조에서는 feature의 실제 파일을 직접 import한다. `public.ts`나 전체 export용 `index.ts`를 필수 경유점으로 만들지 않는다. 예를 들어 화면은 `@/features/chat/components/world-chat`을 사용할 수 있다. 반대로 `features/chat`에서 `features/memory`나 `composition`을 가져오는 연결은 만들지 않는다.
+feature의 실제 파일을 직접 import한다. `public.ts`나 전체 export용 `index.ts`를 필수 경유점으로 만들지 않는다. 예를 들어 화면은 `@/features/chat/components/world-chat`을 사용할 수 있다. 반대로 `features/chat`에서 `features/memory`나 `composition`을 가져오는 연결은 만들지 않는다.
 
 공용 `types`로 업무 타입을 옮겨 import 검사만 통과시키지도 않는다. 여러 기능이 실제로 공유하는 계약인지, 조립 화면이 한 기능의 출력을 다른 기능의 입력으로 바꿔 주면 되는지에 따라 위치를 정한다.
 
@@ -382,24 +379,15 @@ Playwright의 `Page`·`Route`나 Node 서버에 종속된 fixture는 해당 실�
 
 백엔드 응답이나 기능 의미의 변경이 필요한 경우에는 [백엔드 아키텍처](../backend/ARCHITECTURE.md)와 해당 기능 계약도 함께 검토한다. UI 구조 이동만으로 API나 사용자 동작을 바꾸지는 않는다.
 
-## 전환 중인 코드 읽기
+## 이전 경로와 보존 기록 읽기
 
-현재 checkout과 목표 구조가 같지는 않다. 다음 대응표는 기존 기능을 찾는 출발점이다.
+옛 `features/*/ui`, `model`, `public.ts`, `shared` 및 전역 업무 전달 파일은 새 코드의 기준 경로가 아니다. 기능 UI는 `components`, DTO는 `types`, 순수 계산은 `utils`, 상태 저장은 `stores`, 요청은 `api`로 찾는다. 여러 기능의 협력은 `composition`에서 읽는다.
 
-| 현재 경로·형태 | 목표 위치·의미 |
-| --- | --- |
-| `features/*/ui` | 같은 기능의 `components`. CSS module도 소유 컴포넌트와 함께 이동 |
-| `features/*/model` | 내용에 따라 `types`, `utils`, `hooks`, 필요한 `stores` |
-| `features/*/public.ts` | 실제 파일 import로 소비자를 전환한 뒤 불필요한 facade 제거 |
-| `shared/ui` | 공용 `components` 등 제품 중립 표현 |
-| `shared/auth`, `shared/runtime`, `shared/navigation`, `shared/desktop` | 공용 transport·세션 연결·중립 helper는 `lib/hooks/utils`; 제품별 판단은 기능 또는 조립 영역 |
-| 최상위 `components`, `lib`의 업무 코드 | 실제 소유 feature의 `components/api/types` 등 |
-| 여러 기능을 묶는 `device-shell`, `world-app`, `pwa-shell`의 코드 | 조립은 `composition`, 독립 기능·중립 표현은 실제 책임별 배치 |
-| `app/*-route-client`를 정적 router가 import하는 연결 | 공통 screen을 `composition/screens`로 옮기고 두 진입점이 사용 |
+`security/refactor_path_map.json`은 옛 경로의 현재 소유자와 분할·삭제 근거를 기록한다. 한 facade가 여러 기능을 내보내던 경우 `frontend_retirements.export_destinations`에서 각 이름의 실제 선언을 찾을 수 있다. 이전에 구현을 나눈 큰 파일은 각 단계의 `frontend_extractions`로 추적한다. 보존을 위한 과거 Git snapshot 검사와 지금 실행되는 구현 경로는 구분한다.
 
-현재 [frontend AGENTS](AGENTS.md), [product-shell 계약](../docs/architecture/frontend-product-shell.md), [경계 정책](../security/frontend_architecture_policy.json)은 전환된 `device-home`과 미전환 `public.ts`·`shared` 경로를 함께 설명한다. Device Home의 `public.ts`는 Creator Studio·Memory·World App의 네 소비자만 위한 한시적 API/type/presentation facade이며 screen이나 shell을 export하지 않는다. 공용 옛 경로는 새 canonical 구현을 가리키는 명시적 re-export만 남기고 AR-F4에서 소비자를 옮긴 뒤 제거한다. 미전환 영역은 기존 규칙을 유지하고, 전환하는 영역은 코드·소비자·정책·설명을 같은 변경에서 맞춘다.
+`src/testing`은 실제 공용 테스트 helper가 필요할 때 추가하는 선택 영역이다. 현재 브라우저 전용 응답·시나리오 helper와 초기화는 `browser-tests`의 소비자 가까이에 유지한다. 지원 route인 `/ui-foundation`의 semantic showcase는 테스트 helper가 아니라 실제 렌더링되는 기능이므로 `features/ui-foundation/components`에 있다. 제품 코드가 테스트 helper를 import하지 않는다. public 이미지·폰트·라이선스와 시각 snapshot은 이동이 필요하지 않아 원래 소유 위치와 고정 자료를 유지한다.
 
-정상적인 목표 import와 금지된 역참조를 검사할 수 있어야 한다. 광범위한 예외나 검사 비활성화로 경로 변경을 통과시키지 않는다. 문서에 없는 현재 파일도 사용처·테스트·빌드 연결을 확인하며, 필요한 기능을 예시 트리 밖에 있다는 이유로 제거하지 않는다.
+기능에 새 파일을 추가할 때도 같은 역할·의존 방향을 따른다. 예시 트리에 없다는 이유로 필요한 동작을 삭제하거나, 검사 예외로 의존 방향을 우회하지 않는다.
 
 ## 개발과 검증
 

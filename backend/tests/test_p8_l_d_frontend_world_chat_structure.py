@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 import re
 
 
@@ -12,7 +13,10 @@ def _read(relative: str) -> str:
 
 
 def test_world_chat_contract_transport_and_public_boundary_are_feature_owned() -> None:
-    public = _read("frontend/src/features/chat/public.ts")
+    assert not (ROOT / "frontend/src/features/chat/public.ts").exists()
+    assert "export function WorldChat" in _read("frontend/src/features/chat/components/world-chat.tsx")
+    assert "export function resolvedLegacyWorldChatRouteParts" in _read("frontend/src/features/chat/utils/legacy-world-route.ts")
+    public = subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:frontend/src/features/chat/public.ts"], cwd=ROOT, text=True, encoding="utf-8")
     contract = _read(
         "frontend/src/features/chat/types/world-chat-contract.ts"
     )

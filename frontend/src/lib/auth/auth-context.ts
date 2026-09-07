@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext } from "react";
-import type { UserRead } from "./browser-session";
+import type { UserRead } from "@/lib/auth/browser-session";
 
 export type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 

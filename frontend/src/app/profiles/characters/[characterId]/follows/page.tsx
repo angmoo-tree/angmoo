@@ -4,7 +4,7 @@ import { AppShell } from "@/composition/shells/app-shell";
 import { ProfileConnectionsClient } from "@/features/social/components/profile-connections-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { ProfileConnectionTab, ProfileListPage, ProfileRead } from "@/features/social/types/community";
-import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_FOLLOW_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

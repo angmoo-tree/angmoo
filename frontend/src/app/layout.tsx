@@ -8,7 +8,7 @@ import {
   SITE_PREVIEW_IMAGE,
   SITE_TITLE,
   SITE_URL,
-} from "@/lib/seo";
+} from "@/config/seo";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {

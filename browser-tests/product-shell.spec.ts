@@ -1,11 +1,9 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 
-import type { CharacterDashboardItem } from "../frontend/src/features/characters/utils/character-dashboard-presentation";
+import type { CharacterDashboardItem } from "../frontend/src/features/characters/types/character";
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/utils/character-recent-activity-presentation";
-import type {
-  MessageThreadRead,
-  WorldChatThreadRead,
-} from "../frontend/src/features/chat/public";
+import type { MessageThreadRead } from "../frontend/src/features/chat/types/chat-contract";
+import type { WorldChatThreadRead } from "../frontend/src/features/chat/types/world-chat-contract";
 
 type WorldFixture = {
   world_id: string;

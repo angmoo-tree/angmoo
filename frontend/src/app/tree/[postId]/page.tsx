@@ -4,7 +4,7 @@ import { AppShell } from "@/composition/shells/app-shell";
 import { TreePostDetailClient } from "@/features/tree/components/tree-post-detail-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { TreePostDetail } from "@/features/tree/types/tree";
-import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_FOLLOW_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

@@ -10,9 +10,9 @@ import { PRODUCT_ROUTES, worldAppRoute } from "@/lib/navigation/product-routes";
 import { AppIcon } from "@/components/ui/app-icon";
 import { Button } from "@/components/ui/button";
 
-import { getLocalWorldSurface } from "../api/device-home-client";
-import type { DeviceHomeAuthStatus, WorldSurfaceItem } from "../types";
-import { DEVICE_HOME_FIXED_APPS, presentWorldLaunchability } from "../utils/device-home-presentation";
+import { getLocalWorldSurface } from "@/features/device-home/api/device-home-client";
+import type { DeviceHomeAuthStatus, WorldSurfaceItem } from "@/features/device-home/types/index";
+import { DEVICE_HOME_FIXED_APPS, presentWorldLaunchability } from "@/features/device-home/utils/device-home-presentation";
 import styles from "./device-home.module.css";
 
 
