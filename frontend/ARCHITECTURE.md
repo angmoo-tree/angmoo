@@ -451,3 +451,21 @@ Bulletproof React에서 채택한 것은 기능별 구성, 공용 코드 분리,
 - [Today SNS 계약](../docs/architecture/p8-l-r-today-sns-activity.md), [Memory batch 계약](../docs/architecture/p8-l-r-memory-batch.md): 구조 이동 중 보존할 기능 의미.
 
 설계의 작업공간 원본은 `docs/plan/09-04 Angmoo 구조 리팩터링 — 기능 보존·Bulletproof React·FastAPI 도메인 중심 전환 계획.md`다. 공개 저장소 밖의 계획 파일을 가지고 있지 않아도 이 문서와 위 저장소 내부 링크로 구조를 이해할 수 있다. 코드 이동 순서와 작업별 완료 상태는 실행계획에서 관리하며, 이 문서는 변경 위치·역할·연결의 기준을 설명한다.
+
+### 공통 화면과 종료 수명
+
+`world-app.tsx` → `world-chat-screen.tsx`와 `memory-workspace-screen.tsx`는
+Next와 static이 공유하는 제품 화면이다. Chat의 thread key와 근거 request key는
+선택 상태의 수명을 정하므로 조립 변경으로 제거하지 않는다. Memory는 scope를
+변경할 때 이전 조회를 취소하고 새 범위의 실제 응답만 표시한다.
+
+설정 화면은 Identity와 Chat 설정을 연결한다. runtime gate·native 창 bridge·
+종료 overlay는 `composition/providers`가 조립하며 명령 자체는 `lib/desktop`이
+담당한다. child 창 닫기는 `close_product_window`에 위임한다. 페이지 이동·unload에서
+전체 Memory 정리나 앱 종료를 새로 시작하지 않는다. 종료 overlay는 host의 상태를
+표시하고 사용자의 명시적 `지금 종료` 조작만 전달한다. 30초/8 batches와 finalizer의
+한도는 backend/native가 소유하며 프론트엔드에 중복 구현하지 않는다.
+
+`browser-tests/refactor-lifecycle.spec.ts`는 실제 정적 화면에서 scope 전환 중 늦은
+응답, child close 명령, host 재시작 후 종료 UI의 초기화를 검사한다. 이 fixture 검증은
+실제 provider 호출이나 설치 데이터의 기억 정리 성공을 의미하지 않는다.

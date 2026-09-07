@@ -178,6 +178,9 @@ jobs:
       - name: Verify Tauri static direct-open routes
         run: pnpm exec playwright test --config playwright.static.config.ts
         working-directory: browser-tests
+      - name: Verify shared Memory and native lifecycle boundaries
+        run: pnpm exec playwright test --config playwright.refactor-lifecycle.config.ts
+        working-directory: browser-tests
       - name: Verify UI-F production and static product visual corpus
         shell: bash
         run: |

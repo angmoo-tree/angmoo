@@ -763,3 +763,18 @@ not undo native shutdown. Child-window close and browser navigation do not
 trigger it. Keyboard focus, status announcement and reachable actions use the
 existing Dialog primitives. Source/projection/provider details remain hidden.
 See [the runtime contract](p8-l-r-memory-batch.md) for recovery and separate Gates.
+
+## AR-F4 shared lifecycle ownership
+
+Next and static compose the same World Chat and owner Memory screens from
+`composition/screens`. Chat supplies request/thread selection to actual Memory
+panels; Memory receives actual World/Character loaders. No feature imports the
+other feature's internals. Settings joins Identity and Chat at the same layer.
+
+Runtime polling, native window controls and the shutdown overlay remain in
+`composition/providers`; native commands are in `lib/desktop`. Child close and
+whole-app shutdown are distinct host operations. The UI neither starts cleanup
+on navigation/unload nor duplicates the host's batch/finalizer budget.
+
+The separate `playwright.refactor-lifecycle.config.ts` runs additional race and
+native command regression checks without altering frozen browser scenarios.

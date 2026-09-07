@@ -136061,6 +136061,27 @@
           "preserved": "Same real loaders, invocation order, abort signal, scope selection, owner mutation and batch state; no extra wrapper DOM"
         }
       }
+    },
+    "AR-F4-C": {
+      "scope": "Shared Chat/Memory/Settings and desktop lifecycle integration",
+      "status": "IMPLEMENTED - local integration validation",
+      "verification": [
+        "Same product screens in Next and static",
+        "Memory old pending response ignored after scope switch",
+        "Child close issues only window command; host restart clears shutdown UI",
+        "Original web/static scenarios, CI/native tests and frozen oracles retained"
+      ],
+      "sources": [
+        "frontend/src/composition/screens/world-chat-screen.tsx",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/composition/screens/settings-screen.tsx",
+        "frontend/src/composition/providers/desktop-runtime-gate.tsx",
+        "frontend/src/composition/providers/desktop-shutdown-overlay.tsx"
+      ],
+      "tests": [
+        "browser-tests/refactor-lifecycle.spec.ts",
+        "browser-tests/playwright.refactor-lifecycle.config.ts"
+      ]
     }
   },
   "asgi_exports": {
