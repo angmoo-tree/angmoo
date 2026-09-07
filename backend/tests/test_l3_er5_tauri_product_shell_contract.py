@@ -238,7 +238,7 @@ def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> Non
         "frontend/src/hooks/use-mobile-pull-to-refresh.ts"
     )
     scroll_viewport = _read(
-        "frontend/src/utils/scroll-viewport.ts"
+        "frontend/src/lib/dom/scroll-viewport.ts"
     )
     static_router = _read("frontend/src/composition/static-product-router.tsx")
 

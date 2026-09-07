@@ -40,7 +40,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/composition/screens/character-profile-screen.tsx",
-      "sha256": "501909196f1b5393b1908a201d623e684b14c31129b882010247457ce871f403"
+      "sha256": "5dce43afaccad63cbcb5d589c4f33da3848b6f729473a57154329e71a78f1e85"
     },
     {
       "classifications": [
@@ -54,7 +54,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-list-screen.tsx",
-      "sha256": "95b113c06f747b0db1024d14192a78123a14a5baefb261ec89329e811f5974e1"
+      "sha256": "eaf80c5f31ca8282c393603ebf3fe32f36a25c1c6262cf45cba3991b6ce26062"
     },
     {
       "classifications": [
@@ -117,7 +117,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/components/social-post-row.tsx",
-      "sha256": "114889f665f86423bb2ac37f7ab0872c5ed24d756213f03864b6b4d393c71948"
+      "sha256": "67934741f105db6c9e14c8b11a321de8374887df3eb3a848719859da00fd6748"
     },
     {
       "classifications": [
@@ -145,13 +145,13 @@
         "DIRECT"
       ],
       "path": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
-      "sha256": "268aeeefc78472c4b6abefac18e3b97b84f4ed803e6a0285498fe71a74bb39be"
+      "sha256": "ac73d03a67fb893a976b9adb9f44069afded9e3264fd50753e65d7f67171c532"
     },
     {
       "classifications": [
         "DIRECT"
       ],
-      "path": "frontend/src/utils/post-card-navigation.ts",
+      "path": "frontend/src/lib/navigation/post-card-navigation.ts",
       "sha256": "326fd7efcca17ea9ac5db55909dc242a5441ac3be8bd32bc56fb9210ba5837f2"
     }
   ],
@@ -295,7 +295,7 @@
       "frontend/src/features/social/components/world-social-feed.tsx",
       "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
       "frontend/src/lib/desktop/product-window.ts",
-      "frontend/src/utils/scroll-viewport.ts",
+      "frontend/src/lib/dom/scroll-viewport.ts",
       "frontend/src/components/ui/profile-avatar.tsx",
       "frontend/src/components/ui/app-icon.tsx",
       "frontend/src/styles/semantic-tokens.css",

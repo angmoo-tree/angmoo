@@ -306,14 +306,14 @@
     "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
     "frontend/src/lib/auth/auth-context.ts",
     "frontend/src/lib/auth/browser-session.ts",
+    "frontend/src/lib/dom/scroll-viewport.ts",
     "frontend/src/lib/navigation/device-navigation.ts",
+    "frontend/src/lib/navigation/post-card-navigation.ts",
     "frontend/src/lib/navigation/product-routes.ts",
     "frontend/src/lib/server/backend.ts",
     "frontend/src/styles/semantic-tokens.css",
     "frontend/src/utils/class-names.ts",
-    "frontend/src/utils/post-card-navigation.ts",
-    "frontend/src/utils/profile-presentation.ts",
-    "frontend/src/utils/scroll-viewport.ts"
+    "frontend/src/utils/profile-presentation.ts"
   ],
   "schema_version": 1,
   "refactor": {
@@ -368,22 +368,22 @@
       "lib/auth/auth-context",
       "lib/auth/browser-session",
       "lib/desktop/product-window",
+      "lib/dom/scroll-viewport",
       "lib/http/api-request",
       "lib/http/community-request",
       "lib/http/social-request",
       "lib/media/authenticated-media",
       "lib/media/safe-media-url",
       "lib/navigation/device-navigation",
+      "lib/navigation/post-card-navigation",
       "lib/navigation/product-routes",
       "lib/runtime/runtime-config",
       "lib/server/backend",
       "styles/globals.css",
       "styles/semantic-tokens.css",
       "utils/class-names",
-      "utils/post-card-navigation",
       "utils/profile-presentation",
-      "utils/safe-navigation",
-      "utils/scroll-viewport"
+      "utils/safe-navigation"
     ],
     "bridges": [],
     "complete": true

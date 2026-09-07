@@ -5,7 +5,7 @@ import { DeletePostDialog,FeedContentFilterBar,feedContentFilterEmptyText,type F
 
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 import { AUTH_CHANGED_EVENT,getStoredUser,storeUser,type UserRead } from "@/lib/auth/browser-session";
-import { isScrollNearBottom,resolveScrollEventTarget } from "@/utils/scroll-viewport";
+import { isScrollNearBottom,resolveScrollEventTarget } from "@/lib/dom/scroll-viewport";
 import {
 RefreshCw
 } from "lucide-react";

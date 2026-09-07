@@ -13,9 +13,11 @@ AR-X는 backend와 frontend 전환 이후 남은 역할 정리와 기능·데이
 AR-X0 기준 확인은 통과했다. AR-X1-A는 PR #308로 병합했고 merge
 `9040ad3bb4a6f787a2c4f1d542d106b22e26f4ef`의 7개 후속 workflow까지 통과했다.
 AR-X1-B는 PR #310의 7개 workflow를 통과해 merge
-`779a5b2dd208b3db6ac16e221c645083ea58a63e`로 병합했고 후속 CI를 확인 중이다.
-AR-X1-C는 그 merge 위에서 브라우저 파일 전달 위치를 옮겨 검증 중이며,
-AR-X1-D~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝난 뒤 병합한다.
+`779a5b2dd208b3db6ac16e221c645083ea58a63e`로 병합했고 후속 7개 workflow도 통과했다.
+AR-X1-C는 PR #311의 7개 workflow를 통과해 merge
+`e23380e0a289d0eb8ecd1255614e2d9e102cee0b`로 병합했고 후속 CI를 확인 중이다.
+AR-X1-D는 그 merge 위에서 공용 DOM·탐색 위치를 옮겨 검증 중이며,
+AR-X1-E~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝난 뒤 병합한다.
 최종 merge의 CI·설치 산출물·실행 파일을 확인하기 전 전체 완료로 판정하지 않는다.
 
 출발판의 구조·디자인·frontend 보존 및 backend 계약/테스트 노드 보존 검사를 통과했다.
@@ -28,9 +30,9 @@ AR-X1-D~AR-X6는 미완료다. 다음 PR은 앞선 merge의 후속 검증이 끝
 | 단계 | 변경 | 보존할 동작 | 상태 |
 | --- | --- | --- | --- |
 | AR-X1-A | Identity 가입 대기를 `stores/pending-signup.ts`로 이동 | 저장 키·이메일/만료 파싱·캐시 제거·인증 이벤트와 직접 소비자 | COMPLETE · #308 병합 · post-merge 7/7 PASS |
-| AR-X1-B | Characters 상태 저장 중복 통합 | 저장/이벤트 계약·첫 안내·단일/전체 조회 | #310 병합 · post-merge 확인 중 |
-| AR-X1-C | World Package 브라우저 전달 위치 | 다운로드·파일명·Blob URL 수명·native 분기 | 구현 · 검증 중 |
-| AR-X1-D | 공용 DOM/탐색/scroll 역할 | 선택·키보드·카드 탐색·window/container scroll | 미착수 |
+| AR-X1-B | Characters 상태 저장 중복 통합 | 저장/이벤트 계약·첫 안내·단일/전체 조회 | COMPLETE · #310 병합 · post-merge 7/7 PASS |
+| AR-X1-C | World Package 브라우저 전달 위치 | 다운로드·파일명·Blob URL 수명·native 분기 | #311 병합 · post-merge 확인 중 |
+| AR-X1-D | 공용 DOM/탐색/scroll 역할 | 선택·키보드·카드 탐색·window/container scroll | 구현 · 검증 중 |
 | AR-X1-E | 공용 HTTP와 기능 오류 표시 분리 | 동일 응답의 문구·파싱·401·FormData | 미착수 |
 
 검증 명령, 후보와 merge SHA, 실행 경로, 실제 결과 및 제한을 단계별로 연결한다.
@@ -60,3 +62,12 @@ Agent/Character 호출자 사이의 온보딩과 자율활동 상태 공유, 마
 고정 source `b648587225114ae86553381556be42e017d87f62`와 현재 함수를 각각 실행해
 동일 Blob·한글 파일명·anchor 추가/클릭/제거·timer 0 예약·지연 URL 해제 trace를 비교한다.
 기존 proxy·브라우저·static 검사를 유지하며 시각 기준을 새로 승인하지 않는다.
+
+## 공용 DOM·카드 탐색 도구
+
+`post-card-navigation.ts`는 `lib/navigation`, `scroll-viewport.ts`는 `lib/dom`이 소유한다.
+두 파일의 본문은 그대로 유지한다. React hook과 화면/기능 소비자는 이 실제 파일을
+직접 사용한다. 기존 Tauri shell 테스트의 파일 읽기 경로만 대응표대로 변경한다.
+원래 hosted 출처·분류와 시각 기준을 유지하며, 현재 경로와 import 변경의 소스 해시만
+디자인 보고서에 반영한다. 실제 선택·키보드·scroll owner·pagination·pull-to-refresh는
+기존 static Playwright에서 계속 검증한다.

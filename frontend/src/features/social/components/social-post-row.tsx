@@ -15,7 +15,7 @@ import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
 import type { SocialPostActionKind, SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
-import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
+import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
 import { ExpandablePostText } from "@/components/content/expandable-post-text";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
 import styles from "./social-presentation.module.css";

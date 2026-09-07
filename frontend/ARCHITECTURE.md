@@ -4,7 +4,7 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 
 이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 Angmoo의 실제 코드 소유권과 의존 방향을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 구현은 `components/hooks/lib/utils/config/styles`에 둔다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
 
-공용 primitive는 `src/components/ui`, semantic token은 `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, 순수 scroll·프로필 표시 도구는 `src/utils`에 있다. 옛 `shared`와 기능별 `public.ts` 전달 파일을 거치지 않고 실제 역할 파일을 사용한다. 이 문서의 구조 설명과 최종 배포·검증 완료 여부는 구분한다.
+공용 primitive는 `src/components/ui`, semantic token은 `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, DOM scroll은 `src/lib/dom`, 카드 탐색은 `src/lib/navigation`, 순수 프로필 표시 도구는 `src/utils`에 있다. 옛 `shared`와 기능별 `public.ts` 전달 파일을 거치지 않고 실제 역할 파일을 사용한다. 이 문서의 구조 설명과 최종 배포·검증 완료 여부는 구분한다.
 
 서버 프록시는 `lib/server/backend.ts`, 네이티브 명령은 `lib/desktop/product-window.ts`,
 실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
