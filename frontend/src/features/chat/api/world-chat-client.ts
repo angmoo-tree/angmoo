@@ -2,7 +2,7 @@ import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 import type { WorldChatGenerationEvent, WorldChatGenerationRequestRead, WorldChatLatestRequestRead, WorldChatMessageAcceptRead, WorldChatThreadCreate, WorldChatThreadCreateRead, WorldChatEntryRead, WorldChatThreadListRead, WorldChatThreadModelUpdate, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
-import { MESSAGE_GOOGLE_GEMINI_MODELS } from "../config/models";
+import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
 
 type WorldChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;

@@ -102,8 +102,8 @@
       "classifications": [
         "LOCAL"
       ],
-      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
-      "sha256": "c9c4c4a95b349bcb68233815d9b54c7d2cb9271eecff6c3ac99f0db99e7aff13"
+      "path": "frontend/src/features/memory/components/memory-workspace.tsx",
+      "sha256": "fb6f13946e273114c63d2465284f6291787e6e42210862b4b20c3af1ba076a48"
     },
     {
       "classifications": [
@@ -278,10 +278,10 @@
       "frontend/src/components/navigation/local-product-link.module.css",
       "frontend/src/components/navigation/local-product-link.tsx",
       "frontend/src/features/memory/public.ts",
-      "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-      "frontend/src/features/memory/ui/memory-workspace.module.css",
-      "frontend/src/features/memory/ui/memory-workspace.tsx",
-      "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+      "frontend/src/features/memory/components/memory-scope-summary.tsx",
+      "frontend/src/features/memory/components/memory-workspace.module.css",
+      "frontend/src/features/memory/components/memory-workspace.tsx",
+      "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
       "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
       "frontend/src/features/social/api/social-feed-client.ts",
       "frontend/src/features/social/api/social-write-client.ts",
@@ -1190,7 +1190,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "06de9679447b8823aacafa08dbeda12489cc8a2bec064d722c0411a02042121b",
+    "next_static_inventory_sha256": "dcd7956d0ce2bdaaa5f89972a43fc455c5a30308a0026c00783f1ba26a4e42eb",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1276,7 +1276,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "c03ad7aa69aeea3c27af269a42a8dc43475790a53b75c10641626960428cfd9f"
+        "sha256": "4e96a6b5055d16a963db8ebd0154ace2f693bd88ace33ccc248ca575252cccef"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

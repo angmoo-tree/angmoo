@@ -151,7 +151,7 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/memory/ui/memory-workspace.tsx",
+      "local_target": "frontend/src/features/memory/components/memory-workspace.tsx",
       "scope": "read-only owner Memory workspace, canonical provenance inspector, and narrow Browser reflow"
     },
     {
@@ -266,10 +266,10 @@
     "frontend/src/components/navigation/local-product-link.module.css",
     "frontend/src/components/navigation/local-product-link.tsx",
     "frontend/src/features/memory/public.ts",
-    "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-    "frontend/src/features/memory/ui/memory-workspace.module.css",
-    "frontend/src/features/memory/ui/memory-workspace.tsx",
-    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+    "frontend/src/features/memory/components/memory-scope-summary.tsx",
+    "frontend/src/features/memory/components/memory-workspace.module.css",
+    "frontend/src/features/memory/components/memory-workspace.tsx",
+    "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
     "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-write-client.ts",
@@ -420,17 +420,17 @@
       "pathname === \"/ui-foundation\"",
       "SemanticFoundationFixture"
     ],
-    "frontend/src/features/memory/ui/memory-workspace.tsx": [
+    "frontend/src/features/memory/components/memory-workspace.tsx": [
       "data-product-shell=\"memory\"",
       "기억이 꺼져 있어요",
       "현재 확인 가능한 근거"
     ],
-    "frontend/src/features/memory/ui/memory-workspace.module.css": [
+    "frontend/src/features/memory/components/memory-workspace.module.css": [
       "@media (max-width: 799px)",
       "--color-surface",
       "--color-state-warning-surface"
     ],
-    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": [
+    "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx": [
       "Dialog",
       "data-world-chat-evidence-dialog",
       "이 답변의 근거"

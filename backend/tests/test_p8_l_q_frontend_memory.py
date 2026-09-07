@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
+from tempfile import TemporaryDirectory
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +20,21 @@ def test_memory_feature_is_feature_first_and_shared_by_next_and_static() -> None
     next_compatibility = _read("frontend/src/app/memory-explorer/page.tsx")
     static_router = _read("frontend/src/composition/static-product-router.tsx")
 
+    # Current routing and scope dependency ownership are checked against live source.
+    screen = _read("frontend/src/composition/screens/memory-workspace-screen.tsx")
+    workspace = _read("frontend/src/features/memory/components/memory-workspace.tsx")
+    for route in (next_page, static_router):
+        assert 'from "@/composition/screens/memory-workspace-screen"' in route
+        assert "<MemoryWorkspace" in route
+    assert 'getLocalWorldSurface={getLocalWorldSurface}' in screen
+    assert 'listWorldCharacterProfiles={listWorldCharacterProfiles}' in screen
+    assert '@/features/characters/' not in workspace
+    assert '@/features/device-home/' not in workspace
+    # The original public-only topology belongs to the committed pre-Memory snapshot.
+    def original(relative: str) -> str:
+        return subprocess.check_output(["git", "show", "33f213b4217cd8511908586d9fd5f66f3a3104b0:" + relative], cwd=ROOT, text=True, encoding="utf-8")
+    next_page = original("frontend/src/app/memory/page.tsx")
+    static_router = original("frontend/src/composition/static-product-router.tsx")
     assert 'from "@/features/memory/public"' in next_page
     assert "<MemoryWorkspace" in next_page
     assert 'redirect("/memory")' in next_compatibility
@@ -28,17 +45,27 @@ def test_memory_feature_is_feature_first_and_shared_by_next_and_static() -> None
     assert "MemoryWorkspace" in public
     assert "MemoryScopeSummary" in public
     assert "WorldChatEvidenceInspector" in public
-    assert "@/components" not in "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in (FRONTEND / "features/memory").rglob("*.ts*")
-    )
+    # Materialize only the real historical Memory source for the original
+    # public-only assertion; current role ownership was asserted above.
+    paths = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "33f213b4217cd8511908586d9fd5f66f3a3104b0", "frontend/src/features/memory"], cwd=ROOT, text=True).splitlines()
+    with TemporaryDirectory() as directory:
+        FRONTEND = Path(directory)
+        for relative in paths:
+            destination = FRONTEND / relative.removeprefix("frontend/src/")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(original(relative), encoding="utf-8")
+        assert "@/components" not in "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (FRONTEND / "features/memory").rglob("*.ts*")
+        )
+
 
 
 def test_memory_surface_preserves_q_reads_and_adds_r_owner_control() -> None:
     client = _read("frontend/src/features/memory/api/memory-client.ts")
-    workspace = _read("frontend/src/features/memory/ui/memory-workspace.tsx")
+    workspace = _read("frontend/src/features/memory/components/memory-workspace.tsx")
     inspector = _read(
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx"
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx"
     )
 
     for getter in (
@@ -76,7 +103,7 @@ def test_chat_shows_only_deterministic_evidence_capability_and_safe_dialog() -> 
     chat = _read("frontend/src/features/chat/components/world-chat.tsx") + _read("frontend/src/composition/screens/world-chat-screen.tsx")
     contract = _read("frontend/src/features/chat/types/world-chat-contract.ts")
     inspector = _read(
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx"
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx"
     )
 
     assert "thread.evidence_summaries.find" in chat
@@ -108,7 +135,7 @@ def test_memory_window_is_wide_singleton_and_phone_rejects_memory_route() -> Non
 
 
 def test_memory_workspace_has_narrow_reflow_and_no_raw_colors() -> None:
-    css = _read("frontend/src/features/memory/ui/memory-workspace.module.css")
+    css = _read("frontend/src/features/memory/components/memory-workspace.module.css")
 
     assert "@media (max-width: 799px)" in css
     assert "grid-template-columns: 1fr" in css

@@ -460,39 +460,43 @@
     },
     {
       "path": "frontend/src/features/memory/api/memory-client.ts",
-      "sha256": "9980fd8b3e039c9283075c54c4c3674ad01b3586c4b07d8e18dfdd9e82a2f555"
+      "sha256": "9793b8f3f0ab34291fa711e06aae062ebe790cea35e8b76389cd30b2a8607204"
     },
     {
-      "path": "frontend/src/features/memory/model/memory-batch-contract.ts",
-      "sha256": "f78af1e643a60df292dfe0db224022debaa9538a0bbaf0a82c0a17141383c053"
+      "path": "frontend/src/features/memory/components/memory-batch-controls.tsx",
+      "sha256": "e84fca68c8fa89d947607660b9f181b39624de422b0b9fcc0b57b283b4a99df6"
     },
     {
-      "path": "frontend/src/features/memory/model/memory-contract.ts",
-      "sha256": "b09d751bea6b2b0981cd3cdf1563e0d691de7be0b52ffe1e8109a050181a6610"
+      "path": "frontend/src/features/memory/components/memory-scope-summary.tsx",
+      "sha256": "0b2b3a187ddb9e1a3e775fe698a1e0e87d5b198f5d84e26bd03446d3de1687a0"
     },
     {
-      "path": "frontend/src/features/memory/public.ts",
-      "sha256": "52320d92f340a5c48db1c78f2d9c064ad57109de5f5c452d179f77aadb392de9"
-    },
-    {
-      "path": "frontend/src/features/memory/ui/memory-batch-controls.tsx",
-      "sha256": "c47a72828493208ab84db958fe2f7af8bd9616b9f308f570367f32e268d52dd7"
-    },
-    {
-      "path": "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-      "sha256": "e3dc4099faa7f191abbdd5a782a8865b466216d8d0b01040c21bdd2bc9f496a1"
-    },
-    {
-      "path": "frontend/src/features/memory/ui/memory-workspace.module.css",
+      "path": "frontend/src/features/memory/components/memory-workspace.module.css",
       "sha256": "096df97f7b3b29147cadf262ea8d31b7eeaa0de655371187ec3e32e45ac0a0ae"
     },
     {
-      "path": "frontend/src/features/memory/ui/memory-workspace.tsx",
-      "sha256": "c9c4c4a95b349bcb68233815d9b54c7d2cb9271eecff6c3ac99f0db99e7aff13"
+      "path": "frontend/src/features/memory/components/memory-workspace.tsx",
+      "sha256": "fb6f13946e273114c63d2465284f6291787e6e42210862b4b20c3af1ba076a48"
     },
     {
-      "path": "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
-      "sha256": "d911b868f7d5c16b97faee9b1fdd7d84d682a06690d3a2ca9f376b5de7a2725b"
+      "path": "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+      "sha256": "0525352581d4d7ce84a67f773ef74b0f5333a47073c955e54fb22b4e1ff23918"
+    },
+    {
+      "path": "frontend/src/features/memory/public.ts",
+      "sha256": "065aa61df4799ffbc007ed0381a1321ecfb5e6416fba0dcbb156c7455e623d04"
+    },
+    {
+      "path": "frontend/src/features/memory/types/memory-batch-contract.ts",
+      "sha256": "f78af1e643a60df292dfe0db224022debaa9538a0bbaf0a82c0a17141383c053"
+    },
+    {
+      "path": "frontend/src/features/memory/types/memory-contract.ts",
+      "sha256": "b09d751bea6b2b0981cd3cdf1563e0d691de7be0b52ffe1e8109a050181a6610"
+    },
+    {
+      "path": "frontend/src/features/memory/types/scope-options.ts",
+      "sha256": "20f5f4884bcf63e92fc7983dc68234b19823203dda9d2772e0425d50b31b4611"
     },
     {
       "path": "frontend/src/lib/desktop/product-window.ts",

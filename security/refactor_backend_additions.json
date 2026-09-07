@@ -9746,6 +9746,18 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "adb49861f0764a779454903f378ad0b5bb890c1c",
+      "feature_id": "AR-F4-B",
+      "reason": "Memory components/types and shared scope loader composition; preserve owner and batch contracts",
+      "tracked_files": {
+        "frontend/src/composition/screens/memory-workspace-screen.tsx": "6bf1a54626e06db51ba4430533dfb6cd622e6250",
+        "frontend/src/features/memory/types/scope-options.ts": "18a0dc769901d2d36aede8a8d6f8028b0d3278e2"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

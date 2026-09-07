@@ -109,6 +109,14 @@ Chat은 기억 요약과 근거 inspector의 렌더링 함수를 필수 입력�
 Chat state 초기화, 늦은 응답 취소를 유지한다. Next와 static은 같은 World App 화면을 통해
 이 연결을 사용한다. 쪽지의 임시 public/전역 전달 소비자는 AR-F5에서 마저 종료한다.
 
+Memory의 목록·상세·owner 수정·배치 설정 화면은 `features/memory/components`,
+응답 형식은 `types`, 요청과 응답 검증은 `api/memory-client.ts`가 담당한다.
+World·캐릭터 선택기는 자체 표시 입력 타입을 사용하고, `memory-workspace-screen.tsx`가
+실제 Device Home/Character 조회 함수를 전달한다. 화면이 조회 시점·취소·scope 전환을
+그대로 관리하며, Next `/memory`와 static router가 같은 조립 화면을 사용한다.
+기억 ON/OFF와 유료 AI 동의는 별개이며, 예약 시간·timezone·버전 충돌·idempotency key·
+mutation 잠금은 기존 계약을 따른다. 실패 응답을 빈 목록이나 성공으로 바꾸지 않는다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

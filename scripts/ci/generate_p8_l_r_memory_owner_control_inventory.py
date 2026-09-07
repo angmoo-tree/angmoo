@@ -64,10 +64,10 @@ REQUIRED_FILES = (
     "docs/architecture/p8-l-r-memory-owner-control.md",
     "frontend/DESIGN.md",
     "frontend/src/features/memory/api/memory-client.ts",
-    "frontend/src/features/memory/model/memory-contract.ts",
+    "frontend/src/features/memory/types/memory-contract.ts",
     "frontend/src/features/memory/public.ts",
-    "frontend/src/features/memory/ui/memory-workspace.module.css",
-    "frontend/src/features/memory/ui/memory-workspace.tsx",
+    "frontend/src/features/memory/components/memory-workspace.module.css",
+    "frontend/src/features/memory/components/memory-workspace.tsx",
     "scripts/generate_public_route_inventory.py",
     "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
     "scripts/ci/generate_p8_l_r_memory_owner_control_inventory.py",
@@ -171,7 +171,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/features/memory/ui/memory-workspace.tsx",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
         (
             "mutationLockRef",
             "updateMemorySetting",

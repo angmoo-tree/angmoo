@@ -404,3 +404,14 @@ committed history were deleted.
 - Social and Relationships local full preservation each passed 2753 protected/
   current nodes and 37 contracts. Tree #301 has four new source records; its
   full preservation remains in progress. No final AR-F5-B or AR-X claim.
+
+## AR-F4-B Memory scope and controls — local implementation
+
+- UI/model sources moved to components/types. The shared product screen supplies
+  the same World and Character loaders as stable functions. Memory owns its scope
+  selection, request cancellation and all owner/batch mutation state.
+- No changes to API request bodies, consent, scheduling, retry keys, version
+  conflicts, source evidence visibility, component DOM or CSS.
+- Type/lint, architecture and 324-source preservation PASS. Browser, builds,
+  source-contract regression, immutable capture, full preservation and CI remain
+  required before sequential integration. No final AR-F5-B claim.

@@ -202,7 +202,7 @@
       "path": "frontend/src/app/memory/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/memory",
-      "source_sha256": "1ee4f962fd675e91501fcc098344df604913f0153a1abfc6d71cbb2b2bbe6eba",
+      "source_sha256": "d7ca9f7f2d84c8d245b615607d5274358a6b6e5af37c1fa469cad1400d42455d",
       "transition_pr": "ER5 PR K"
     },
     {
