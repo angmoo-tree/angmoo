@@ -255,7 +255,7 @@
     "frontend/src/features/characters/components/agents-dashboard-client.tsx",
     "frontend/src/features/characters/components/characters-dashboard.module.css",
     "frontend/src/features/characters/components/world-character-profile.module.css",
-    "frontend/src/features/characters/stores/character-dashboard-session.ts",
+    "frontend/src/features/characters/stores/agent-session.ts",
     "frontend/src/features/characters/types/feed-actor.ts",
     "frontend/src/features/characters/types/world-character-profile.ts",
     "frontend/src/features/characters/utils/character-dashboard-presentation.ts",

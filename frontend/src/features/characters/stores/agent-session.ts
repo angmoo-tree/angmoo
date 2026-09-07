@@ -99,3 +99,15 @@ export function clearAgentAutonomyMutationState(characterId: string) {
   writeAgentAutonomyMutations(mutations);
   notifyAgentAutonomyMutation(characterId, null);
 }
+
+// Dashboard and detail APIs share the same state and event implementation.
+// Preserve the existing exported vocabulary without a second storage owner.
+export const CHARACTERS_CHANGED_EVENT = AGENTS_CHANGED_EVENT;
+export const CHARACTER_AUTONOMY_MUTATION_EVENT = AGENT_AUTONOMY_MUTATION_EVENT;
+export type CharacterAutonomyMutationEventDetail = AgentAutonomyMutationEventDetail;
+export const getCharacterAutonomyMutationStates = getAgentAutonomyMutationStates;
+export const setCharacterAutonomyMutationState = setAgentAutonomyMutationState;
+export const clearCharacterAutonomyMutationState = clearAgentAutonomyMutationState;
+export const hasFirstCharacterWelcomePending = hasFirstAgentWelcomePromptPending;
+export const clearFirstCharacterWelcomePending = clearFirstAgentWelcomePromptPending;
+export const notifyCharactersChanged = notifyAgentsChanged;
