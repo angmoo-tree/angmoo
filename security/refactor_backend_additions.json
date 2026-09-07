@@ -10352,6 +10352,17 @@
       "test_suppressions": {
         "tests/test_refactor_addition_assertion_source.py": {}
       }
+    },
+    {
+      "commit": "2da7cebe152bd8d94563dfccb67f064ed75d0d9f",
+      "feature_id": "G07",
+      "reason": "AR-X1-A integration documentation introduced after verified Hotfix source; original records preserved",
+      "tracked_files": {
+        "docs/architecture/refactor-integration-results.md": "c45092b418ea20f9fd3ea67af8b6c353862ad619"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

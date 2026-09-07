@@ -10,6 +10,9 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
 캐시·인증된 JSON 전송은 `lib/auth/browser-session.ts`에 있다. 사용자 조회·세션 발급·
 로컬 owner 연결·프로필 설정 endpoint와 화면은 `features/identity`가 소유한다.
+Google 가입 대기의 이메일·만료 시각과 저장/해제는
+`features/identity/stores/pending-signup.ts`가 담당한다. 로그인과 프로필 설정 화면이
+같은 저장 구현을 사용하며, 상태를 변경하는 코드를 순수 계산용 `utils`에 두지 않는다.
 `lib/http/api-request.ts`는 기존 JSON/FormData 전송과 backend 검증 오류의 표시 계약을
 보존하는 공용 도구다. endpoint·owner 판단을 추가하는 곳은 아니다.
 

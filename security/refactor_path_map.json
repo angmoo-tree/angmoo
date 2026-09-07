@@ -851,7 +851,8 @@
     "frontend/src/features/pwa-shell/public.ts": "frontend/src/config/pwa.ts",
     "frontend/src/features/runtime-status/public.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
     "frontend/src/features/ui-foundation/public.ts": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
-    "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx"
+    "frontend/src/app/device-home-route-client.tsx": "frontend/src/composition/screens/device-home-screen.tsx",
+    "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -137053,6 +137054,13 @@
           "CharacterDashboardItem": "frontend/src/features/characters/types/character.ts"
         }
       }
+    },
+    "AR-X1-A": {
+      "scope": "Identity pending signup browser state ownership",
+      "files": {
+        "frontend/src/features/identity/utils/pending-signup.ts": "frontend/src/features/identity/stores/pending-signup.ts"
+      },
+      "preserved": "Unchanged storage keys, parsing, cache removal and auth notification order. Historical source and assertions remain frozen."
     }
   },
   "asgi_exports": {
