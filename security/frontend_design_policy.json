@@ -318,7 +318,7 @@
   },
   "raw_color_scan": {
     "baseline_files": 37,
-    "baseline_occurrences": 1408,
+    "baseline_occurrences": 1392,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",

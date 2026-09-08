@@ -1,7 +1,7 @@
 {
-  "edge_count": 3961,
-  "external_import_count": 3099,
-  "module_count": 1061,
+  "edge_count": 3980,
+  "external_import_count": 3110,
+  "module_count": 1069,
   "modules": [
     {
       "external_imports": [],
@@ -864,6 +864,7 @@
       ],
       "imports": [
         "app.domains.characters.models",
+        "app.domains.characters.policies.persona",
         "app.domains.characters.schemas"
       ],
       "module": "app.domains.characters.contracts",
@@ -917,6 +918,22 @@
       ],
       "module": "app.domains.characters.models",
       "path": "backend/app/domains/characters/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.characters.policies",
+      "path": "backend/app/domains/characters/policies/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.domains.characters.policies.persona",
+      "path": "backend/app/domains/characters/policies/persona.py",
       "wildcard_imports": []
     },
     {
@@ -995,6 +1012,7 @@
         "app.core.image_generation",
         "app.core.response_schemas",
         "app.domains.characters.constants",
+        "app.domains.characters.policies.persona",
         "app.domains.identity.schemas",
         "app.domains.media.schemas",
         "app.domains.routines.schemas"
@@ -1035,6 +1053,7 @@
         "app.core.prompt_safety",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.policies.persona",
         "app.domains.characters.schemas",
         "app.domains.characters.service.persona"
       ],
@@ -1055,6 +1074,7 @@
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.policies.persona",
         "app.domains.characters.schemas",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.persona",
@@ -1306,7 +1326,9 @@
       "imports": [
         "app.core.ids",
         "app.domains.characters.contracts",
-        "app.domains.characters.models"
+        "app.domains.characters.models",
+        "app.domains.characters.policies.persona",
+        "app.domains.characters.schemas"
       ],
       "module": "app.domains.characters.service.seed",
       "path": "backend/app/domains/characters/service/seed.py",
@@ -8954,6 +8976,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.social.models.feed",
         "app.domains.social.models.posts"
       ],
       "module": "app.domains.social.repository.manual_feed",
@@ -9769,7 +9792,6 @@
         "app.domains.social.contracts.manual_feed",
         "app.domains.social.contracts.writes",
         "app.domains.social.models.posts",
-        "app.domains.social.repository.blocks",
         "app.domains.social.repository.event_evidence",
         "app.domains.social.repository.manual_feed",
         "app.domains.social.schemas.manual"
@@ -10564,6 +10586,23 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.world_characters.policies",
+      "path": "backend/app/domains/world_characters/policies/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.policies.approved_setup",
+      "path": "backend/app/domains/world_characters/policies/approved_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.world_characters.repository",
       "path": "backend/app/domains/world_characters/repository/__init__.py",
       "wildcard_imports": []
@@ -10720,6 +10759,19 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.service.approved_setup",
+      "path": "backend/app/domains/world_characters/service/approved_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "datetime",
         "sqlalchemy",
@@ -10738,7 +10790,9 @@
         "app.domains.world_characters.contracts.runtime_modes",
         "app.domains.world_characters.exceptions",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.policies.approved_setup",
         "app.domains.world_characters.schemas.setup",
+        "app.domains.world_characters.service.approved_setup",
         "app.domains.world_characters.service.runtime_modes",
         "app.domains.world_characters.service.setup_validation",
         "app.domains.worlds.contracts",
@@ -10870,6 +10924,7 @@
         "app.domains.characters.schemas",
         "app.domains.world_characters.contracts.readiness",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.policies.approved_setup",
         "app.domains.world_characters.service.setup_validation",
         "app.domains.worlds.service.character_entry"
       ],
@@ -11007,6 +11062,7 @@
         "app.domains.world_packages.policies.archive",
         "app.domains.world_packages.schemas.content",
         "app.domains.world_packages.schemas.manifest",
+        "app.domains.world_packages.schemas.manifest_v2",
         "app.domains.world_packages.utils.canonical"
       ],
       "module": "app.domains.world_packages.archive.export",
@@ -11036,7 +11092,9 @@
         "app.domains.world_packages.policies.archive",
         "app.domains.world_packages.policies.license",
         "app.domains.world_packages.schemas.content",
+        "app.domains.world_packages.schemas.content_v2",
         "app.domains.world_packages.schemas.manifest",
+        "app.domains.world_packages.schemas.manifest_v2",
         "app.domains.world_packages.storage.staging",
         "app.domains.world_packages.utils.canonical",
         "app.domains.worlds.contracts",
@@ -11340,6 +11398,19 @@
     },
     {
       "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.world_packages.schemas.content"
+      ],
+      "module": "app.domains.world_packages.schemas.content_v2",
+      "path": "backend/app/domains/world_packages/schemas/content_v2.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -11371,10 +11442,29 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_packages.schemas.manifest"
+      ],
+      "module": "app.domains.world_packages.schemas.manifest_v2",
+      "path": "backend/app/domains/world_packages/schemas/manifest_v2.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_packages.schemas.v1",
       "path": "backend/app/domains/world_packages/schemas/v1/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.schemas.v2",
+      "path": "backend/app/domains/world_packages/schemas/v2/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -11407,9 +11497,11 @@
     {
       "external_imports": [
         "__future__",
-        "dataclasses"
+        "dataclasses",
+        "pydantic"
       ],
       "imports": [
+        "app.domains.characters.contracts",
         "app.domains.world_packages.contracts.export",
         "app.domains.world_packages.contracts.interfaces",
         "app.domains.world_packages.contracts.seed",
@@ -11417,6 +11509,7 @@
         "app.domains.world_packages.policies.archive",
         "app.domains.world_packages.policies.license",
         "app.domains.world_packages.schemas.content",
+        "app.domains.world_packages.schemas.content_v2",
         "app.domains.world_packages.schemas.manifest"
       ],
       "module": "app.domains.world_packages.service.export",
@@ -16043,6 +16136,7 @@
         "app.domains.world_packages.contracts.seed",
         "app.domains.world_packages.exceptions",
         "app.domains.world_packages.schemas.content",
+        "app.domains.world_packages.schemas.content_v2",
         "app.domains.world_packages.service.export_projection",
         "app.domains.world_packages.utils.canonical",
         "app.domains.worlds.contracts",

@@ -4535,3 +4535,49 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
   await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
 });
 import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
+
+
+test("continuity: static persona overflow uses code points and blocks the native save form", async ({ page }) => {
+  const id = "static-persona-limit";
+  const agent = staticAgentDetail(id);
+  agent.character.execution_mode = "llm";
+  let writes = 0;
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === `/api/v1/agents/${id}`) return route.fulfill({ json: agent });
+    if (url.pathname.endsWith("/persona")) { writes++; return route.fulfill({ json: agent }); }
+    return route.fallback();
+  });
+  await page.goto(`/agents/${id}?tab=settings`);
+  const field = page.getByRole("textbox", { name: "성격", exact: true });
+  await field.fill("😀".repeat(6001));
+  await expect(field).toHaveValue("😀".repeat(6001));
+  await expect(page.getByRole("alert").filter({hasText: "1자 초과"})).toBeVisible();
+  const submit = field.locator("xpath=ancestor::form").locator('button[type="submit"]');
+  await submit.click();
+  expect(writes).toBe(0);
+  await field.fill("정상 범위");
+  await submit.click();
+  await expect.poll(() => writes).toBe(1);
+});
+
+
+test("continuity: static evidence reply uses its verified root and exact target", async ({ page }) => {
+  const root = staticUiDManualPost({ id: UI_D_STATIC_ROOT_POST_ID, title: "원문", body: "원 게시글", replyCount: 60 });
+  const target = {...staticUiDManualPost({ id: "static-nested-target", title: "", body: "정확한 정적 대댓글",
+    replyToPostId: "static-parent" }), thread_root_post_id: root.id};
+  await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) return route.fulfill({json: staticUiDWorld()});
+    if (url.pathname.endsWith("/owner-character")) return route.fulfill({json: staticUiDOwnerActor()});
+    if (url.pathname.includes("/manual-social/posts/")) return route.fulfill({json: {
+      ...staticUiDManualFeed([root, target]), root_post_id: root.id, target_post_id: target.id, page_offset: 50, next_offset: null,
+    }});
+    return route.fallback();
+  });
+  await page.goto(`/worlds/${UI_D_STATIC_WORLD_ID}/posts/${target.id}`);
+  const evidence = page.getByRole("article", {name: "근거가 가리키는 답글"});
+  await expect(evidence).toContainText("정확한 정적 대댓글");
+  await expect(evidence).toBeInViewport();
+  await expect(evidence.getByRole("link", {name: /부모 답글 보기/})).toHaveAttribute("href", /static-parent\/?$/);
+});

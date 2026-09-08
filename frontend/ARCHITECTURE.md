@@ -2,27 +2,16 @@
 
 Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고, 여러 기능을 화면에서 조립하는 구조**를 사용한다. Chat을 고칠 때는 Chat 기능을, 여러 화면의 공통 버튼을 고칠 때는 공용 컴포넌트를 찾을 수 있도록 책임을 나누는 것이 목적이다.
 
-이 문서는 [Bulletproof React의 Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 Angmoo의 실제 코드 소유권과 의존 방향을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 구현은 `components/hooks/lib/utils/config/styles`에 둔다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
+이 문서는 [Bulletproof React의 구조 가이드](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)와 [Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 코드의 배치·책임·의존 방향과 기존 구현의 소유권을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 영역은 `assets/components/config/hooks/lib/stores/styles/types/utils`로 구분한다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
 
-공용 primitive는 `src/components/ui`, semantic token은 `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, DOM scroll은 `src/lib/dom`, 카드 탐색은 `src/lib/navigation`, 순수 프로필 표시 도구는 `src/utils`에 있다. 옛 `shared`와 기능별 `public.ts` 전달 파일을 거치지 않고 실제 역할 파일을 사용한다. 이 문서의 구조 설명과 최종 배포·검증 완료 여부는 구분한다.
+공용 primitive는 `src/components/ui`, semantic token은 `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, 순수 scroll·프로필 표시 도구는 `src/utils`에 있다. 옛 `shared`와 기능별 `public.ts` 전달 파일을 거치지 않고 실제 역할 파일을 사용한다. 이 문서의 구조 설명과 최종 배포·검증 완료 여부는 구분한다.
 
 서버 프록시는 `lib/server/backend.ts`, 네이티브 명령은 `lib/desktop/product-window.ts`,
 실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
 캐시·인증된 JSON 전송은 `lib/auth/browser-session.ts`에 있다. 사용자 조회·세션 발급·
 로컬 owner 연결·프로필 설정 endpoint와 화면은 `features/identity`가 소유한다.
-Google 가입 대기의 이메일·만료 시각과 저장/해제는
-`features/identity/stores/pending-signup.ts`가 담당한다. 로그인과 프로필 설정 화면이
-같은 저장 구현을 사용하며, 상태를 변경하는 코드를 순수 계산용 `utils`에 두지 않는다.
-`lib/http/api-request.ts`는 JSON/FormData 전송·응답 파싱·401과 세션 이벤트를
-담당하며 기본 오류는 서버 메시지를 사용한다. 기능별 검증 문구는 Identity·Characters·
-Social의 `api/request.ts`가 해석해 공용 전송에 전달한다. 공용 코드가 기능을 import하거나
-기능끼리 오류 해석기를 가져오지 않는다. endpoint·owner 판단도 각 기능에 남는다.
-
-이전 API에서 수용하던 혼합 field 오류도 같은 문구를 유지한다. 예를 들어 Identity가
-받은 기존 활동 간격 오류를 이번 구조 정리에서 다른 문구로 바꾸지 않는다. 각 기능의
-작은 해석기는 이 호환 계약을 소유하며 새 기능에 파일 세트를 의무적으로 복제하지 않는다.
-`test-feature-error-parity.mjs`는 고정된 이전 소스와 세 실제 API 소비자의 같은 응답·
-요청·세션 변화를 비교한다. 기존 FormData와 endpoint 비교도 함께 유지한다.
+`lib/http/api-request.ts`는 기존 JSON/FormData 전송과 backend 검증 오류의 표시 계약을
+보존하는 공용 도구다. endpoint·owner 판단을 추가하는 곳은 아니다.
 
 설정 화면은 설치 정보·세션과 Chat API key를 함께 보여주므로
 `composition/screens/settings-screen.tsx`에서 두 기능의 API와 화면 상태를 연결한다.
@@ -36,12 +25,6 @@ Character 생성·설정·활동의 요청은 `features/characters/api`, 응답 
 `utils`는 상태를 저장하지 않는 표시·변환 함수를 담고 `components`는 생성 폼,
 목록, 프로필 카드와 설정·상태 표시를 소유한다. 작은 컴포넌트의 props와 표시 함수의
 지역 타입은 사용 위치에 함께 둘 수 있다.
-
-온보딩·자율활동의 sessionStorage 구현은 `stores/agent-session.ts` 한 곳이 소유한다.
-대시보드가 사용하는 Character 이름과 기존 Agent 이름은 같은 함수를 가리킨다.
-저장 키·이벤트 이름·payload를 바꾸지 않으며 별도 대시보드 저장 구현을 복제하지 않는다.
-상세와 대시보드 사이의 상태 공유·정리 동작은 `test-character-state-parity.mjs`가
-이전 구현과 비교한다.
 
 Character 상세 화면의 Social 프로필·피드 조회와 Chat 쪽지 설정은
 `composition/screens/agent-detail-screen.tsx`가 연결한다. 캐릭터 전용 폼과 상태 표시는
@@ -71,7 +54,7 @@ Studio의 입력 타입은 화면이 실제 표시하는 값만 설명하며 Dev
 
 World Package의 preview·prepare·download·acknowledge·discard·import 요청은
 `features/world-packages/api/world-package-client.ts`가 담당한다. DTO는 `types`,
-파일 확장자·MIME은 `config`, 브라우저 object URL의 생성·해제는 `api/browser-delivery.ts`,
+파일 확장자·MIME은 `config`, 브라우저 object URL의 생성·해제는 `utils/browser-delivery.ts`,
 네이티브 저장 토큰을 사용하는 명령은 `api/native-delivery.ts`에 있다. 실제 저장 경로를
 프론트엔드 상태나 DTO에 노출하지 않는다. 화면은 `components`에서 라이선스·권리 확인,
 preview digest 승인, 취소·실패·정리와 저장 완료 확인 순서를 유지한다. World 편집과의
@@ -140,8 +123,7 @@ Device frame과 링크 표현은 각각 `components/layout`, `components/navigat
 있다. 인증 context와 `useAuth`는 공용 상태 접근이며, 세션 발급 API와 provider의
 제품 초기화 순서를 재구현하지 않는다. World shell이 조회하는 DTO/API는
 `features/worlds`가 소유한다. 기존 `world-app/public.ts`의 모든 호출자는 실제
-구현으로 전환했다. 나머지 feature의 전달용 공개 entry도 제거했으며,
-새 화면은 각 기능의 실제 component/API/type을 직접 연결한다.
+구현으로 전환했고, 다른 미전환 feature의 공개 entry는 후속 단계에서 정리한다.
 
 ## 목차
 
@@ -159,14 +141,15 @@ Device frame과 링크 표현은 각각 `components/layout`, `components/navigat
 
 ## 프로젝트 구조
 
-아래는 현재 역할과 필요한 경우 추가하는 지원 영역을 함께 보여주는 대표 배치다. 생략한 기능과 기존 실행·빌드 파일도 실제 소유권에 따라 유지한다. 모든 폴더를 빈 상태로 미리 만드는 구조는 아니다.
+아래는 코드의 책임과 배치 기준을 설명하는 대표 구조다. 현재 구현에서 사용하지 않더라도 채택한 가이드의 공용·기능별 선택 영역은 함께 표시한다. 실제 폴더와 파일은 해당 책임의 구현이 필요할 때만 만들며, 모든 폴더를 빈 상태로 미리 생성하지 않는다. 생략한 기능과 기존 실행·빌드 파일도 실제 소유권에 따라 유지한다.
 
 ```text
 angmoo/
 ├── frontend/
-│   ├── public/                     # 정적 이미지·아이콘 등
+│   ├── public/                     # URL로 직접 제공하는 정적 파일
 │   ├── src/
 │   │   ├── app/                    # Next.js route·layout·metadata·웹 진입점
+│   │   ├── assets/                 # 선택: 소스에서 참조하는 공용 이미지·폰트 등
 │   │   ├── composition/            # 여러 기능의 화면 조립
 │   │   │   ├── screens/            # 웹·정적 실행이 공유하는 화면
 │   │   │   ├── shells/             # Device·World·Studio 화면 틀
@@ -186,8 +169,9 @@ angmoo/
 │   │   ├── config/                 # 환경·실행 환경 설정
 │   │   ├── hooks/                  # 공용 React hook
 │   │   ├── lib/                    # 공용 통신·탐색·데스크톱 연결
+│   │   ├── stores/                 # 선택: 특정 기능에 속하지 않는 공용 클라이언트 상태
 │   │   ├── styles/                 # 필요한 공통 스타일
-│   │   ├── testing/                # 선택 사항: 공통 소비자가 필요할 때 추가
+│   │   ├── testing/                # 실제 소비자가 있는 공통 테스트 지원
 │   │   │   ├── mocks/
 │   │   │   ├── data-generators.ts
 │   │   │   ├── test-utils.tsx
@@ -210,17 +194,28 @@ angmoo/
 
 `app`은 URL과 Next.js에 관한 책임을 가진다. `composition`은 Chat과 Memory처럼 서로 다른 기능을 한 화면에 연결한다. `features`는 각 기능의 화면·데이터 요청·상태를 소유한다. 공용 영역에는 World나 Character 같은 특정 업무를 알아야만 동작하는 코드를 모으지 않는다.
 
+정적 자산은 제공 방식과 소유권에 따라 구분한다.
+
+- `public/`은 Next.js가 URL로 정적 파일을 제공하는 위치다. 예를 들어 `public/images/logo.png`는 `/images/logo.png`로 참조한다. [Next.js의 public 규약](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)
+- `src/assets/`는 소스 코드의 import나 스타일 참조로 사용하는 공용 이미지·폰트 등을 모으는 선택적 위치다.
+- `src/features/<feature>/assets/`는 같은 방식으로 사용하는 자산 중 해당 기능이 소유하는 것만 둔다.
+
+`assets/`는 Next.js의 특수 폴더 이름이 아니라 자산을 정리하는 관례다. `public/`과 함께 사용할 수 있으며, 어느 한쪽이 다른 쪽을 대체하지 않는다. 기능 전용 파일도 URL로 직접 제공해야 한다면 `public/` 아래에 둘 수 있다. 두 위치를 모두 설명한다고 기존 파일을 옮기거나 같은 자산을 중복 복사하지 않는다. 이들은 저장소가 소유한 배포용 정적 자산의 위치이며, 사용자 업로드나 비공개 media의 저장소가 아니다. `assets/`에 둔다고 비공개가 되는 것은 아니며, 사용자 media는 기존 백엔드 전달·권한 계약을 따른다.
+
+`src/stores/`는 특정 기능에 속하지 않는 공용 클라이언트 상태를 별도로 관리해야 할 때 사용한다. 기능이 소유하는 상태는 `src/features/<feature>/stores/`에 두며, 여러 화면에서 사용한다는 이유만으로 공용 저장소로 옮기지 않는다. 컴포넌트의 지역 상태나 기존 context·hook만으로 충분하면 별도 store를 만들거나 상태 관리 라이브러리를 추가하지 않는다.
+
 예를 들어 클릭 가능한 기본 버튼은 `components`에 속한다. 그 버튼을 눌러 기억을 삭제하고 결과를 갱신하는 부분은 `features/memory`에 속한다. 기억 삭제 권한과 저장소의 삭제 규칙은 [백엔드](../backend/ARCHITECTURE.md)의 책임이다.
 
 파일명은 `world-chat.tsx`, `memory-batch-controls.tsx`처럼 역할을 드러내는 이름을 사용한다. 같은 이름의 거대한 공용 `helpers` 파일로 여러 기능을 합치지 않는다.
 
 ## 기능 안에서 코드 나누기
 
-한 기능의 크기와 실제 역할에 따라 다음 구성을 사용한다. 아래 Chat 트리는 역할 예시이며 모든 파일이 현재 존재한다는 뜻은 아니다.
+한 기능의 크기와 실제 역할에 따라 다음 구성을 사용한다. 아래 Chat 트리는 역할 예시이며 모든 파일이 현재 존재한다는 뜻은 아니다. `assets`, `stores`를 포함해 각 폴더는 해당 역할이 필요할 때만 만든다.
 
 ```text
 features/chat/
 ├── api/                 # Chat endpoint·요청·응답 처리·stream 해석
+├── assets/              # 선택: Chat이 소유하는 이미지 등 정적 자산
 ├── components/          # 채팅 화면·메시지 목록·입력창
 ├── hooks/               # 채팅 화면의 상태와 요청 생명주기
 ├── types/               # Chat의 요청·응답·화면 계약
@@ -232,6 +227,7 @@ features/chat/
 | 위치 | 담는 내용 | 다른 곳이 담당하는 내용 |
 | --- | --- | --- |
 | `api` | endpoint, 요청 직렬화, 응답 확인, 기능별 오류와 streaming event 해석 | 실제 화면 배치, 공통 세션·실행 환경 해석 |
+| `assets` | 소스에서 참조하는 해당 기능 전용 이미지·폰트 등 정적 자산 | 공용 자산, 사용자 업로드·비공개 media의 저장과 전달 |
 | `components` | 사용자에게 보이는 화면, 입력, 이벤트 연결 | 권한 확정, scheduler·provider 실행 정책 |
 | `hooks` | loading·선택 상태·요청 취소·구독 해제 등 React 생명주기 | React와 무관한 순수 변환 |
 | `types` | 해당 기능이 사용하는 DTO와 컴포넌트 계약 | 관련 없는 기능들의 모든 타입 |
@@ -244,7 +240,7 @@ features/chat/
 
 ## 화면 조립과 의존 방향
 
-다음 화살표는 import할 수 있는 방향을 나타낸다. 공용 영역은 기능을 모르고, 각 기능은 자신을 사용하는 화면을 모른다.
+다음 화살표는 import할 수 있는 방향을 나타낸다. 공용 영역은 `src/` 바로 아래의 `assets`, `components`, `config`, `hooks`, `lib`, `stores`, `styles`, `types`, `utils`다. 공용 영역은 기능을 모르고, 각 기능은 자신을 사용하는 화면을 모른다.
 
 ```mermaid
 flowchart TD
@@ -252,7 +248,7 @@ flowchart TD
     S[static-shell 진입점] --> C
     N --> F[features]
     C --> F
-    C --> U[공용 components · config · hooks · lib · types · utils]
+    C --> U[공용 영역]
     F --> U
     N --> U
 ```
@@ -349,7 +345,7 @@ loading, empty, forbidden, not found, degraded, error는 서로 다른 상태다
 
 CSS module은 소유 컴포넌트와 함께 이동한다. 공통 스타일은 기존 semantic token을 사용하며, 폴더 정리 때문에 색상이나 화면을 다시 설계하지 않는다. Phone·Studio·Graph의 창 종류, safe-area, scroll 소유권, focus·keyboard 동작도 기존 제품 계약에 포함된다.
 
-`public`의 이미지·아이콘, 정적 빌드 자산 복사, 로컬 font와 디자인 fixture 역시 기능의 소비자다. 소스 import만 바꾸고 asset 경로·visual harness를 남겨두면 웹 또는 설치 앱 한쪽에서만 깨질 수 있다.
+`public/`과 공용·기능별 `assets/`의 이미지·아이콘, 정적 빌드 자산 복사, 로컬 font와 디자인 fixture 역시 기능의 소비자다. 소스 import만 바꾸고 asset 경로·visual harness를 남겨두면 웹 또는 설치 앱 한쪽에서만 깨질 수 있다.
 
 ## 테스트 지원과 실행 위치
 
@@ -467,6 +463,8 @@ uv run --project backend python scripts/ci/check_frontend_design_contract.py --c
 ## 설계 근거와 관련 문서
 
 Bulletproof React에서 채택한 것은 기능별 구성, 공용 코드 분리, 상위 화면 조립, 직접 파일 import와 필요한 폴더만 사용하는 방식이다. Angmoo는 여기에 웹·정적 실행을 위한 `composition`, 기존 `browser-tests`, Tauri 연결을 추가한다. Yarn·React Query·Zustand·Vitest 등 예제의 도구 선택을 구조의 필수 조건으로 가져오지 않는다.
+
+Next.js 예제의 실제 폴더 목록을 허용 목록으로 해석하지 않는다. 공용·기능별 `assets`·`stores`처럼 구조 가이드가 제시한 선택적 영역은 예제에 없더라도 해당 역할이 필요할 때 사용할 수 있다.
 
 - [Bulletproof React — Project Structure](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md): 역할 배치와 의존 방향.
 - [Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app), [공통 테스트 지원 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app/src/testing): 실제 디렉터리와 사용 사례.
