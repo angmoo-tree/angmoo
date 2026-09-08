@@ -35,6 +35,12 @@ _compatibility_spec = importlib.util.spec_from_file_location(
 compatibility_facade_retirement = importlib.util.module_from_spec(_compatibility_spec)
 _compatibility_spec.loader.exec_module(compatibility_facade_retirement)
 
+_changes_spec = importlib.util.spec_from_file_location(
+    "post_refactor_contract_changes", Path(__file__).with_name("post_refactor_contract_changes.py")
+)
+product_changes = importlib.util.module_from_spec(_changes_spec)
+_changes_spec.loader.exec_module(product_changes)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
 INVENTORY = ROOT / "security/refactor_feature_inventory.json"
@@ -630,7 +636,8 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                      model_retirements: dict[str, str] | None = None,
                      public_retirement: dict | None = None,
                      chat_retirement: dict | None = None,
-                     compatibility_retirement: dict | None = None) -> list[str]:
+                     compatibility_retirement: dict | None = None,
+                     approved_changes: list[dict] | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
     root_cache, frozen_root_cache, frozen_text_cache, committed_blobs = {}, {}, {}, {}
     literals = path_literals(files)
@@ -718,6 +725,7 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
             # path assertion are equivalent under the same exact move map.
             # Normalize both sides; behavior predicates remain mandatory.
             found = Counter(normalized_assertion(value, literals, asgi_moves, roots=new_roots) for value in actual)
+            required = product_changes.assertions(f"{new_path}::{new_function}", required, found, approved_changes or [])
             if required - found:
                 errors.append(f"preserved assertion/exception expectation missing or changed: {node} -> {new_path}::{new_function}")
     return errors
@@ -976,7 +984,9 @@ def main() -> int:
     additions = json.loads(ADDITIONS.read_text(encoding="utf-8"))
     errors = check_inventory(inventory, baseline) + checkpoint_errors(checkpoint, baseline_bytes)
     asgi_moves = {}
+    approved_changes = []
     try:
+        approved_changes = product_changes.load(ROOT)
         errors.extend(addition_errors(additions, checkpoint))
         snapshots = [checkpoint, *additions["records"]]
         sources = sorted(set(baseline["tracked_files"]).union(*(set(snapshot["tracked_files"]) for snapshot in snapshots)))
@@ -1009,15 +1019,17 @@ def main() -> int:
                                       symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
                                       model_retirements=model_retirements, public_retirement=public_retirement,
                                       chat_retirement=chat_retirement,
-                                      compatibility_retirement=compatibility_retirement))
+                                      compatibility_retirement=compatibility_retirement, approved_changes=approved_changes))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
         targets = {}
     if args.contracts:
         contracts = current_contracts(asgi_moves)
-        errors.extend(asgi_contract_errors(asgi_moves, contracts, [baseline, checkpoint]))
-        for snapshot in (baseline, checkpoint):
+        contract_snapshots = [{**snapshot, "contracts": product_changes.contracts(snapshot["contracts"], approved_changes)}
+                              for snapshot in (baseline, checkpoint)]
+        errors.extend(asgi_contract_errors(asgi_moves, contracts, contract_snapshots))
+        for snapshot in contract_snapshots:
             for name, values in snapshot["contracts"].items():
                 if contracts.get(name) != values:
                     errors.append(f"API/ORM contract changed against {snapshot['commit']}: {name}; investigate, do not regenerate frozen evidence")

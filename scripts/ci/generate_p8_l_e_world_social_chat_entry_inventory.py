@@ -85,7 +85,7 @@ def _backend_contract() -> dict[str, Any]:
         (
             "author_profile_capability",
             "author_world_character_id",
-            "world_character_pair_is_blocked",
+            "queries.blocked_authors",
         ),
     )
     _require_text(

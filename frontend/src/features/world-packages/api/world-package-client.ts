@@ -12,7 +12,7 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 export class WorldPackageApiError extends Error {
   constructor(readonly status: number, readonly detail: unknown) {
-    super(worldPackageErrorCode(status, detail));
+    super(worldPackageErrorMessage(status, detail));
     this.name = "WorldPackageApiError";
   }
 }
@@ -33,6 +33,19 @@ async function apiResponse<T>(response: Response): Promise<T> {
     throw new WorldPackageApiError(response.status, detail);
   }
   return payload as T;
+}
+
+function worldPackageErrorMessage(status: number, detail: unknown): string {
+  const code = worldPackageErrorCode(status, detail);
+  if (code === "world_package_persona_invalid" && typeof detail === "object" && detail !== null && "fields" in detail && Array.isArray(detail.fields)) {
+    const labels: Record<string, string> = {one_liner: "한 줄 소개", personality: "성격", speech_style: "말투",
+      worldview: "세계관/배경", topic_preferences: "관심 주제", safety_rules: "피해야 할 행동", persona_summary: "캐릭터 요약"};
+    const fields = detail.fields.filter((item) => item && typeof item.field === "string" && labels[item.field]
+      && Number.isInteger(item.limit) && Number.isInteger(item.actual));
+    return "캐릭터 설정의 길이를 확인해주세요. " + fields.map((item) => `${labels[item.field]}: ${item.actual.toLocaleString()} / ${item.limit.toLocaleString()}자`).join(", ");
+  }
+  if (status >= 500) return "서버가 내보내기 요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.";
+  return code;
 }
 
 function worldPackageErrorCode(status: number, detail: unknown) {

@@ -131,7 +131,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "6b8fd525480303cd7c5f02c0c362e8cd2e844148c6a754683c97bc2442ebd506"
+      "sha256": "363c1e3b14cc6b7fcebbc8e299541ad3717d579b9d62cc88e3f2139eb8230c17"
     },
     {
       "classifications": [
@@ -306,7 +306,7 @@
   },
   "raw_colors": {
     "files": 37,
-    "occurrences": 1408,
+    "occurrences": 1392,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
@@ -319,7 +319,7 @@
       },
       ".tsx": {
         "files": 35,
-        "occurrences": 1368
+        "occurrences": 1352
       }
     },
     "per_file": [
@@ -478,35 +478,35 @@
         }
       },
       {
-        "occurrences": 163,
+        "occurrences": 157,
         "path": "frontend/src/features/characters/components/agent-create-client.tsx",
         "values": {
-          "#101828": 23,
+          "#101828": 22,
           "#166534": 1,
           "#17834b": 1,
-          "#344054": 20,
+          "#344054": 19,
           "#52606d": 2,
           "#667085": 27,
           "#98a2b3": 4,
           "#b7e4c7": 1,
           "#c24141": 7,
           "#d0d5dd": 2,
-          "#e1e5eb": 7,
+          "#e1e5eb": 6,
           "#eaedf2": 2,
           "#edf0f5": 1,
           "#eef1f5": 8,
           "#f2f4f7": 1,
           "#f2fbf5": 1,
           "#f6f7f9": 9,
-          "#f9fafb": 9,
+          "#f9fafb": 8,
           "#fbfcfd": 1,
           "#ff5252": 1,
-          "#ff6b6b": 13,
+          "#ff6b6b": 12,
           "#ff8a8a": 1,
           "#ffb4b4": 1,
           "#ffcccc": 1,
           "#ffd7d7": 6,
-          "#ffe2e2": 3,
+          "#ffe2e2": 2,
           "#fff1f1": 2,
           "#fff5f5": 6,
           "#fff8f8": 1,
@@ -514,12 +514,12 @@
         }
       },
       {
-        "occurrences": 247,
+        "occurrences": 237,
         "path": "frontend/src/features/characters/components/agent-detail-parts.tsx",
         "values": {
           "#027a48": 1,
-          "#101828": 28,
-          "#344054": 31,
+          "#101828": 26,
+          "#344054": 29,
           "#475467": 4,
           "#52610f": 1,
           "#667085": 36,
@@ -531,7 +531,7 @@
           "#d0d5dd": 1,
           "#d92d20": 1,
           "#d9e0ea": 4,
-          "#e1e5eb": 17,
+          "#e1e5eb": 15,
           "#eaedf2": 8,
           "#ecfdf3": 1,
           "#eef1f5": 14,
@@ -541,12 +541,12 @@
           "#f9fafb": 9,
           "#fbfcfd": 2,
           "#ff5252": 2,
-          "#ff6b6b": 24,
+          "#ff6b6b": 22,
           "#ff8f8f": 1,
           "#ffb4b4": 2,
           "#ffb5b5": 3,
           "#ffd7d7": 3,
-          "#ffe2e2": 3,
+          "#ffe2e2": 1,
           "#fff0ef": 3,
           "#fff5f5": 3,
           "#fff7ed": 1,
@@ -1064,7 +1064,7 @@
       "#027a48": 5,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 195,
+      "#101828": 192,
       "#12b76a": 1,
       "#147a45": 3,
       "#166534": 1,
@@ -1073,7 +1073,7 @@
       "#1d2939": 3,
       "#1f2330": 1,
       "#1f2937": 1,
-      "#344054": 96,
+      "#344054": 93,
       "#3b82f6": 1,
       "#475467": 35,
       "#52606d": 2,
@@ -1111,7 +1111,7 @@
       "#d9f2e5": 3,
       "#dc6803": 1,
       "#dfe3e8": 2,
-      "#e1e5eb": 79,
+      "#e1e5eb": 76,
       "#e4a0a0": 2,
       "#e4e8de": 1,
       "#e5c91e": 1,
@@ -1143,7 +1143,7 @@
       "#f7faf6": 1,
       "#f8fafc": 1,
       "#f9df9b": 1,
-      "#f9fafb": 73,
+      "#f9fafb": 72,
       "#face": 1,
       "#fbfcfd": 4,
       "#fda29b": 1,
@@ -1151,7 +1151,7 @@
       "#fedf89": 1,
       "#ff5252": 13,
       "#ff5a32": 2,
-      "#ff6b6b": 137,
+      "#ff6b6b": 134,
       "#ff8a8a": 5,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
@@ -1161,7 +1161,7 @@
       "#ffd2d2": 1,
       "#ffd7d7": 34,
       "#ffe1e1": 1,
-      "#ffe2e2": 13,
+      "#ffe2e2": 10,
       "#ffe4bf": 1,
       "#ffe5c2": 1,
       "#fff0ef": 16,

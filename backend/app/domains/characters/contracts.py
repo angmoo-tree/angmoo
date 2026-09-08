@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.domains.characters.policies.persona import PERSONA_LIMITS, PERSONA_SUMMARY_LIMIT, normalize_persona_text
 from dataclasses import dataclass
 from datetime import date, tzinfo
 from typing import Awaitable, Callable, Protocol, TYPE_CHECKING

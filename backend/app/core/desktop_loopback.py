@@ -112,13 +112,29 @@ class DesktopLoopbackSecurityMiddleware:
             origin == self.policy.allowed_origin
         )
 
+        response_started = False
+
         async def send_with_cors(message: Message) -> None:
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
             if message["type"] == "http.response.start" and origin:
                 response_headers = MutableHeaders(scope=message)
                 self._apply_cors(response_headers)
             await send(message)
 
-        await self.app(scoped, receive, send_with_cors)
+        try:
+            await self.app(scoped, receive, send_with_cors)
+        except Exception:
+            if not response_started:
+                # Only requests already admitted by the exact-origin and token
+                # checks reach this path. Preserve an HTTP error for WebView
+                # instead of disguising it as a failed runtime connection.
+                await send_with_cors({"type": "http.response.start", "status": 500,
+                    "headers": [(b"content-type", b"application/json")]})
+                await send_with_cors({"type": "http.response.body",
+                    "body": b'{"detail":"internal_server_error"}'})
+            raise
 
     def _apply_cors(self, headers: MutableHeaders) -> None:
         headers["Access-Control-Allow-Origin"] = self.policy.allowed_origin

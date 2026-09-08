@@ -8,6 +8,7 @@ export type SocialOwnerActor = {
 };
 
 export type ManualSocialPostRead = {
+  thread_root_post_id?: string | null;
   id: string;
   world_id: string;
   author_world_character_id: string;
@@ -31,6 +32,10 @@ export type ManualSocialWritePostRead = Omit<
 >;
 
 export type ManualSocialFeedRead = {
+  root_post_id?: string | null;
+  target_post_id?: string | null;
+  page_offset?: number;
+  next_offset?: number | null;
   schema_version: "owner-manual-social-v1";
   world_id: string;
   owner_world_character_id: string;

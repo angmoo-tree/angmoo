@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "AutonomousCharacterTemplateV2": {
+      "additionalProperties": false,
+      "properties": {
+        "avatar_asset_ref": {
+          "anyOf": [
+            {
+              "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Avatar Asset Ref"
+        },
+        "banner_asset_ref": {
+          "anyOf": [
+            {
+              "pattern": "^assets/sha256-[0-9a-f]{64}\\.webp$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Banner Asset Ref"
+        },
+        "display_name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "extensions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "maxProperties": 32,
+          "title": "Extensions",
+          "type": "object"
+        },
+        "handle_hint": {
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Handle Hint",
+          "type": "string"
+        },
+        "one_liner": {
+          "default": "",
+          "maxLength": 500,
+          "title": "One Liner",
+          "type": "string"
+        },
+        "persona_summary": {
+          "default": "",
+          "maxLength": 32000,
+          "title": "Persona Summary",
+          "type": "string"
+        },
+        "personality": {
+          "default": "",
+          "maxLength": 6000,
+          "title": "Personality",
+          "type": "string"
+        },
+        "ref": {
+          "pattern": "^characters/[a-z][a-z0-9-]{0,63}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "safety_rules": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Safety Rules",
+          "type": "string"
+        },
+        "speech_style": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Speech Style",
+          "type": "string"
+        },
+        "topic_preferences": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Topic Preferences",
+          "type": "string"
+        },
+        "worldview": {
+          "default": "",
+          "maxLength": 8000,
+          "title": "Worldview",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "display_name",
+        "handle_hint"
+      ],
+      "title": "AutonomousCharacterTemplateV2",
+      "type": "object"
+    },
+    "JsonValue": {}
+  },
+  "$id": "https://angmoo.dev/schemas/world-package/v2/characters.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/AutonomousCharacterTemplateV2"
+      },
+      "maxItems": 50,
+      "title": "Characters",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "characters-content-v2",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "characters"
+  ],
+  "title": "CharactersDocumentV2",
+  "type": "object"
+}

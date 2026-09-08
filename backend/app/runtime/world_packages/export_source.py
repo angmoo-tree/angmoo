@@ -1,6 +1,7 @@
 """Read-only SQLAlchemy snapshot adapter for deterministic package export."""
 
 from __future__ import annotations
+from app.domains.world_packages.schemas.content_v2 import AutonomousCharacterTemplateV2
 
 from app.domains.world_packages.service.export_projection import _portable_key, _portable_map, _text_list, _portable_local_profile
 
@@ -145,7 +146,7 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                 )
             character_ref = f"characters/char-{ordinal:04d}"
             characters.append(
-                AutonomousCharacterTemplate(
+                AutonomousCharacterTemplateV2(
                     ref=character_ref,
                     display_name=character.name,
                     handle_hint=character.handle,
@@ -153,10 +154,8 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                     personality=character.personality,
                     speech_style=character.speech_style,
                     worldview=character.worldview,
-                    topic_preferences=_text_list(
-                        character.topic_preferences, separator=","
-                    ),
-                    safety_rules=_text_list(character.safety_rules, separator="\n"),
+                    topic_preferences=character.topic_preferences,
+                    safety_rules=character.safety_rules,
                     persona_summary=character.persona_summary,
                 )
             )

@@ -197,7 +197,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   );
 
   const loadFeed = useCallback(
-    async (signal?: AbortSignal) => {
+    async (signal?: AbortSignal, offset?: number) => {
       if (!ownerActor) return;
       const generation = ++requestGenerationRef.current;
       setLoadState({ key: routeKey, status: "loading" });
@@ -206,6 +206,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
           ? await getManualSocialPostThread(worldId, postId, {
               ownerWorldCharacterId: ownerActor.world_character_id,
               signal,
+              offset,
             })
           : await getManualSocialFeed(worldId, {
               ownerWorldCharacterId: ownerActor.world_character_id,
@@ -251,6 +252,11 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   );
   const detailRoot = postId ? roots[0] ?? null : null;
   const detailReplies = detailRoot ? items.slice(1) : [];
+
+  useEffect(() => {
+    if (!postId || currentState.status !== "ready") return;
+    document.getElementById(`world-reply-${postId}`)?.scrollIntoView({ block: "center" });
+  }, [postId, currentState]);
 
   async function submitPost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -498,6 +504,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
             {detailReplies.length > 0 ? (
               <div className={styles.replyList}>
                 {detailReplies.map((reply) => (
+                  <article key={reply.id} id={`world-reply-${reply.id}`} tabIndex={-1}
+                    className={reply.id === postId ? styles.targetReply : undefined}
+                    aria-label={reply.id === postId ? "근거가 가리키는 답글" : undefined}>
+                    {reply.reply_to_post_id !== detailRoot.id ? (
+                      <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, reply.reply_to_post_id!)}>
+                        {items.find((item) => item.id === reply.reply_to_post_id)?.author_name ?? "이전"} 답글에 대한 대댓글 · 부모 답글 보기
+                      </Link>
+                    ) : null}
                   <SocialPostRow
                     actions={aggregateManualPostActions(reply)}
                     authorHref={
@@ -512,11 +526,20 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
                     post={presentManualPost(reply)}
                     variant="reply"
                   />
+                  </article>
                 ))}
               </div>
             ) : (
               <p className={styles.noReplies}>아직 공개된 대꾸가 없어요.</p>
             )}
+            <div className={styles.threadPages}>
+              {(currentState.feed.page_offset ?? 0) > 0 ? (
+                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>이전 답글</Button>
+              ) : null}
+              {currentState.feed.next_offset != null ? (
+                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>다음 답글</Button>
+              ) : null}
+            </div>
           </section>
           {detailRoot.can_owner_reply ? (
             <form

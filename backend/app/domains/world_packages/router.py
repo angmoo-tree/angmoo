@@ -99,7 +99,8 @@ def _raise_contract_error(exc: WorldPackageContractError) -> None:
         code = status.HTTP_409_CONFLICT
     else:
         code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    raise HTTPException(status_code=code, detail=reason.value) from exc
+    detail = {"code": reason.value, "fields": list(exc.fields)} if exc.fields else reason.value
+    raise HTTPException(status_code=code, detail=detail) from exc
 
 
 @router.post(

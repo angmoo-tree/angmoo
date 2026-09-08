@@ -9,6 +9,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core import security
+from app.domains.characters.policies.persona import PERSONA_LIMITS
 from app.domains.characters import models, schemas
 from app.domains.characters.contracts import CharacterOwner, CreatorWorkflows
 from app.domains.characters.exceptions import (
@@ -140,15 +141,13 @@ async def enhance_persona(
         extra_system_prompt=_build_persona_enhance_prompt(draft),
     )
     payload = _parse_json_object(raw_text)
-    persona_values = {
-        "personality": _safe_payload_text(payload.get("personality"), 2000),
-        "speech_style": _safe_payload_text(payload.get("speech_style"), 1200),
-        "worldview": _safe_payload_text(payload.get("worldview"), 2000),
-        "topic_preferences": _safe_payload_text(
-            payload.get("topic_preferences"), 1200
-        ),
-        "safety_rules": _safe_payload_text(payload.get("safety_rules"), 1200),
-    }
+    try:
+        validated = schemas.AgentPersonaUpdate.model_validate({
+            key: _safe_payload_text(payload.get(key), limit) for key, limit in PERSONA_LIMITS.items() if key != "one_liner"
+        })
+    except ValueError as exc:
+        raise AgentCreationDraftValidationError("AI 보강 결과가 항목별 길이 또는 입력 형식 제한을 넘었습니다. 기존 내용은 유지됩니다.") from exc
+    persona_values = validated.model_dump()
     _ensure_draft_persona_prompt_safety(persona_values)
     draft.personality = persona_values["personality"]
     draft.speech_style = persona_values["speech_style"]

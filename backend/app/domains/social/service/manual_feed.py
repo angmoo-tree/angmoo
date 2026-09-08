@@ -7,7 +7,6 @@ from app.domains.social.contracts.actors import SocialCharacter
 from app.domains.social.contracts.manual_feed import ManualFeedReferences, ManualFeedWorldCharacter
 from app.domains.social.contracts.writes import SocialWriteConflictError as ManualSocialConflictError, SocialWriteForbiddenError as ManualSocialForbiddenError, SocialWriteNotFoundError as ManualSocialNotFoundError
 from app.domains.social.repository import manual_feed as queries, event_evidence as post_queries
-from app.domains.social.repository.blocks import world_character_pair_is_blocked
 
 
 def _owner_actor(
@@ -50,6 +49,7 @@ def _post_read(
     reply_count: int,
     like_count: int,
     viewer_world_character_id: str,
+    blocked_author_ids: set[str],
 ) -> ManualSocialPostRead:
     if post.world_id is None or post.author_world_character_id is None:
         raise ManualSocialConflictError("world_post_scope_missing")
@@ -65,6 +65,7 @@ def _post_read(
         world_id=post.world_id,
         author_world_character_id=post.author_world_character_id,
         viewer_world_character_id=viewer_world_character_id,
+        blocked_author_ids=blocked_author_ids,
     )
     return ManualSocialPostRead(
         id=post.id,
@@ -110,6 +111,10 @@ def _post_reads(
     if not post_ids:
         return []
 
+    author_ids = {post.author_world_character_id for post in posts if post.author_world_character_id}
+    references.prepare_authors(world_id=world_id, author_ids=author_ids)
+    blocked = queries.blocked_authors(db, world_id=world_id, viewer_id=viewer_world_character_id, author_ids=author_ids)
+
     reply_counts = queries.reply_counts(db, world_id=world_id, post_ids=post_ids)
     like_counts = queries.like_counts(db, post_ids=post_ids)
     return [
@@ -120,6 +125,7 @@ def _post_reads(
             reply_count=reply_counts.get(post.id, 0),
             like_count=like_counts.get(post.id, 0),
             viewer_world_character_id=viewer_world_character_id,
+            blocked_author_ids=blocked,
         )
         for post in posts
     ]
@@ -132,18 +138,14 @@ def _author_profile_available(
     world_id: str,
     author_world_character_id: str,
     viewer_world_character_id: str,
+    blocked_author_ids: set[str],
 ) -> bool:
     active_author_id = references.active_author_id(world_id=world_id, author_world_character_id=author_world_character_id)
     if active_author_id is None:
         return False
     if author_world_character_id == viewer_world_character_id:
         return True
-    return not world_character_pair_is_blocked(
-        db,
-        world_id=world_id,
-        first_world_character_id=viewer_world_character_id,
-        second_world_character_id=author_world_character_id,
-    )
+    return author_world_character_id not in blocked_author_ids
 
 
 def list_owner_world_feed(
@@ -173,32 +175,29 @@ def get_owner_world_post_thread(
     world_id: str,
     post_id: str,
     current_user_id: str,
+    offset: int | None = None,
 ) -> ManualSocialFeedRead:
     """Read one root post and visible replies inside an exact World scope."""
 
     actor, _character = _owner_actor(
         references, world_id=world_id, current_user_id=current_user_id
     )
-    root = post_queries.get_post(db, post_id)
-    if (
-        root is None
-        or root.world_id != world_id
-        or root.reply_to_post_id is not None
-        or root.visibility != "public"
-        or root.deleted_at is not None
-        or root.report_hidden_at is not None
-    ):
+    root = queries.resolve_visible_root(db, world_id=world_id, post_id=post_id)
+    if root is None:
         raise ManualSocialNotFoundError("post_not_in_world")
-    replies = queries.list_visible_replies(db, world_id=world_id, root=root)
+    replies, page_offset, next_offset = queries.list_visible_replies(
+        db, world_id=world_id, root=root, offset=offset or 0,
+        target_id=post_id if offset is None else None,
+    )
     items = [root, *replies]
+    reads = _post_reads(db, references=references, world_id=world_id,
+        posts=items, viewer_world_character_id=actor.id)
     return ManualSocialFeedRead(
         world_id=world_id,
+        root_post_id=root.id,
+        target_post_id=post_id,
+        page_offset=page_offset,
+        next_offset=next_offset,
         owner_world_character_id=actor.id,
-        items=_post_reads(
-            db,
-            references=references,
-            world_id=world_id,
-            posts=items,
-            viewer_world_character_id=actor.id,
-        ),
+        items=[item.model_copy(update={"thread_root_post_id": root.id}) for item in reads],
     )

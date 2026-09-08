@@ -1,4 +1,6 @@
 "use client";
+import { PersonaField } from "@/features/characters/components/persona-field";
+import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
 import { LocalProductLink } from "@/components/navigation/local-product-link";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { EXPERIMENTAL_IMAGE_ENABLED } from "@/config/features";
@@ -2157,28 +2159,15 @@ export function PersonaTextArea({
   name,
   label,
   defaultValue,
-  maxLength,
   required = false,
 }: {
-  name: string;
+  name: keyof typeof PERSONA_LIMITS;
   label: string;
   defaultValue: string;
-  maxLength: number;
   required?: boolean;
 }) {
-  return (
-    <label className="mb-4 block">
-      <span className="mb-2 block text-[15px] font-bold text-[#344054]">{label}</span>
-      <textarea
-        name={name}
-        defaultValue={defaultValue}
-        rows={4}
-        maxLength={maxLength}
-        required={required}
-        className="block min-h-28 w-full resize-y rounded-[24px] border border-[#e1e5eb] bg-white px-5 py-4 text-[16px] font-medium leading-7 text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]"
-      />
-    </label>
-  );
+  return <PersonaField name={name} label={label} defaultValue={defaultValue}
+    limit={PERSONA_LIMITS[name]} required={required} />;
 }
 
 export function TextAreaInput({
@@ -2192,17 +2181,6 @@ export function TextAreaInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  return (
-    <label className="mb-4 block">
-      <span className="mb-2 block text-[15px] font-bold text-[#344054]">{label}</span>
-      <textarea
-        name={name}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        rows={4}
-        maxLength={300}
-        className="w-full resize-none rounded-[24px] border border-[#e1e5eb] bg-white px-5 py-4 text-[16px] font-medium leading-7 text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]"
-      />
-    </label>
-  );
+  return <PersonaField name={name} label={label} value={value}
+    onChange={onChange} limit={PERSONA_LIMITS.one_liner} />;
 }

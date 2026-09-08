@@ -518,9 +518,8 @@ def test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence(
     assert first.repaired_count == 1
     assert dict(first.skipped_reasons) == {
         "imported_world": 1,
-        "profile_not_ready": 1,
+        "profile_not_ready": 2,
         "source_marker_missing": 1,
-        "world_character_contract_stale": 1,
     }
     assert second.scanned_count == 4
     assert second.repaired_count == 0

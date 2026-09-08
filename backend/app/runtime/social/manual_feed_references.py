@@ -17,20 +17,41 @@ from app.domains.worlds.service.character_entry import get_character_entry_membe
 class RuntimeManualFeedReferences:
     def __init__(self, db: Session) -> None:
         self.db = db
+        self._actors = {}
+        self._characters = {}
+        self._active = None
+
+    def prepare_authors(self, *, world_id: str, author_ids: set[str]) -> None:
+        rows = list(self.db.execute(select(WorldCharacter, Character, WorldMembership)
+            .join(Character, Character.id == WorldCharacter.character_id)
+            .join(WorldMembership, WorldMembership.id == WorldCharacter.membership_id)
+            .where(WorldCharacter.id.in_(author_ids), WorldCharacter.world_id == world_id)))
+        self._actors = {actor.id: actor for actor, _, _ in rows}
+        self._characters = {character.id: character for _, character, _ in rows}
+        self._active = {(world_id, actor.id) for actor, character, membership in rows
+            if actor.status == "active" and membership.status == "active"
+            and membership.world_id == world_id and character.deleted_at is None
+            and character.moderation_status == "active"}
 
     def get_owner_identity(self, *, world_id: str, current_user_id: str) -> OwnerControlledIdentitySnapshot:
         return OwnerControlledIdentityService(self.db).get(world_id=world_id, current_user_id=current_user_id)
 
     def get_world_character(self, world_character_id: str) -> ManualFeedWorldCharacter | None:
+        if world_character_id in self._actors:
+            return self._actors[world_character_id]
         return get_source_actor(self.db, world_character_id)
 
     def get_character(self, character_id: str) -> SocialCharacter | None:
+        if character_id in self._characters:
+            return self._characters[character_id]
         return get_character(self.db, character_id)
 
     def get_membership(self, membership_id: str) -> SourceMembership | None:
         return get_character_entry_membership(self.db, membership_id)
 
     def active_author_id(self, *, world_id: str, author_world_character_id: str) -> str | None:
+        if self._active is not None:
+            return author_world_character_id if (world_id, author_world_character_id) in self._active else None
         db = self.db
         return db.scalar(
             select(WorldCharacter.id)

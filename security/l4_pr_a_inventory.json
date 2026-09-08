@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3099,
-      "internal_edge_count": 3961,
+      "external_import_count": 3111,
+      "internal_edge_count": 3980,
       "legacy_import_exception_count": 0,
-      "module_count": 1061,
+      "module_count": 1069,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -919,6 +919,7 @@
           },
           {
             "imports": [
+              "app.domains.social.models.feed",
               "app.domains.social.models.posts"
             ],
             "module": "app.domains.social.repository.manual_feed",
@@ -1465,7 +1466,6 @@
               "app.domains.social.contracts.manual_feed",
               "app.domains.social.contracts.writes",
               "app.domains.social.models.posts",
-              "app.domains.social.repository.blocks",
               "app.domains.social.repository.event_evidence",
               "app.domains.social.repository.manual_feed",
               "app.domains.social.schemas.manual"
@@ -2724,7 +2724,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
-          "sha256": "6b8fd525480303cd7c5f02c0c362e8cd2e844148c6a754683c97bc2442ebd506"
+          "sha256": "363c1e3b14cc6b7fcebbc8e299541ad3717d579b9d62cc88e3f2139eb8230c17"
         }
       ],
       "planned_feature_allowlist": [
@@ -2821,7 +2821,7 @@
       },
       {
         "path": "backend/tests/social/test_l3_owner_manual_social_inbox.py",
-        "sha256": "413df05dcc6a64aa9e98bc020e6b1a4b5b4b35ea13dea032dbc9b396aea7aac5"
+        "sha256": "c1705d70cb3121bbf5aad00d4a8c838c296262e2d13fcbb3ac638e66f3d12b6f"
       },
       {
         "path": "backend/tests/social/test_l4_social_search_projection.py",

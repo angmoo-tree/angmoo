@@ -172,6 +172,7 @@ class WorldCharacterSetupGenerateCreate(WorldCharacterSetupSchema):
     idempotency_key: str = Field(min_length=8, max_length=128)
     consent_policy_version: str = Field(min_length=1, max_length=40)
     consented: Literal[True]
+    regenerate: bool = False
 
 
 class WorldCharacterSetupRetryCreate(WorldCharacterSetupGenerateCreate):
@@ -187,6 +188,8 @@ class WorldCharacterSetupApproveCreate(WorldCharacterSetupSchema):
 class WorldCharacterSetupRejectCreate(WorldCharacterSetupSchema):
     idempotency_key: str = Field(min_length=8, max_length=128)
     reason: str = Field(default="", max_length=280)
+    profile_id: str | None = Field(default=None, min_length=1, max_length=64)
+    repertoire_id: str | None = Field(default=None, min_length=1, max_length=64)
 
     @field_validator("reason")
     @classmethod
@@ -323,6 +326,10 @@ class WorldCharacterSetupRead(WorldCharacterSetupSchema):
     can_retry_stage: WorldSetupStage | None = None
     can_approve: bool = False
     can_regenerate: bool = False
+    can_reject: bool = False
+    persona_changed: bool = False
+    active_profile: WorldCommunityProfileRead | None = None
+    active_repertoire: WorldActivityRepertoireRead | None = None
     safe_reason_code: str | None = None
     current_character_contract_hash: str
     current_world_contract_hash: str

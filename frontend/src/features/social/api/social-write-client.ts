@@ -3,6 +3,7 @@ import { RuntimeFetchError, runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { ManualSocialFeedRead, ManualSocialWriteRead } from "@/features/social/types/social-write-contract";
 
 type ManualSocialReadOptions = {
+  offset?: number;
   ownerWorldCharacterId?: string;
   signal?: AbortSignal;
 };
@@ -92,7 +93,7 @@ export async function getManualSocialPostThread(
   options: ManualSocialReadOptions = {},
 ): Promise<ManualSocialFeedRead> {
   const result = await socialWriteRequest<ManualSocialFeedRead>(
-    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}`,
+    `/api/backend/worlds/${encodeURIComponent(worldId)}/manual-social/posts/${encodeURIComponent(postId)}${options.offset === undefined ? "" : `?offset=${options.offset}`}`,
     { signal: options.signal },
   );
   return assertWorldScopedFeed(
@@ -132,12 +133,17 @@ function assertWorldScopedFeed(
   const threadScopeMismatch =
     rootPostId !== null &&
     (result.items.length === 0 ||
-      result.items[0]?.id !== rootPostId ||
+      result.items[0]?.id !== (result.root_post_id ?? rootPostId)
+      || (result.target_post_id !== undefined && result.target_post_id !== rootPostId) ||
       result.items[0]?.reply_to_post_id !== null ||
       uniqueItemIds.size !== result.items.length ||
       result.items
         .slice(1)
-        .some((item) => item.reply_to_post_id !== rootPostId));
+        .some((item) => item.reply_to_post_id === null || (
+          item.thread_root_post_id != null
+            ? item.thread_root_post_id !== (result.root_post_id ?? rootPostId)
+            : item.reply_to_post_id !== (result.root_post_id ?? rootPostId)
+        )));
 
   if (worldScopeMismatch || threadScopeMismatch) {
     throw new SocialWriteApiError(

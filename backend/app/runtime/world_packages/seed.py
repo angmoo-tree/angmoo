@@ -172,8 +172,8 @@ class SqlAlchemyWorldPackageDestinationSeed:
                     personality=item.personality,
                     speech_style=item.speech_style,
                     worldview=item.worldview,
-                    topic_preferences=tuple(item.topic_preferences),
-                    safety_rules=tuple(item.safety_rules),
+                    topic_preferences=(item.topic_preferences,) if isinstance(item.topic_preferences, str) else tuple(item.topic_preferences),
+                    safety_rules=(item.safety_rules,) if isinstance(item.safety_rules, str) else tuple(item.safety_rules),
                     persona_summary=item.persona_summary,
                     planned_handle=planned_handles.get(item.ref),
                     avatar_url=(
