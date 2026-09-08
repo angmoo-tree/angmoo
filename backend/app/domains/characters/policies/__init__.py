@@ -1,0 +1,1 @@
+"""Pure character admission policies."""

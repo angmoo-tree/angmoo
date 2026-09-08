@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from io import BytesIO
+from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2, WorldPackageEntryV2
 import hashlib
 from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
@@ -85,12 +86,14 @@ class DeterministicWorldPackageZipArchive:
         elif license_text is not None:
             raise WorldPackageContractError(WorldPackageReasonCode.ARCHIVE_INVALID)
 
-        entries = [self._entry(path, content) for path, content in payloads.items()]
+        is_v2 = characters.schema_version == "characters-content-v2"
+        entries = [self._entry(path, content, is_v2=is_v2) for path, content in payloads.items()]
         entries.sort(key=lambda item: item.path)
-        manifest = WorldPackageManifest(
+        manifest_type = WorldPackageManifestV2 if is_v2 else WorldPackageManifest
+        manifest = manifest_type(
             format="angmoo-world-package",
-            format_version=1,
-            schema_version="world-package-v1",
+            format_version=2 if is_v2 else 1,
+            schema_version="world-package-v2" if is_v2 else "world-package-v1",
             package_id=identity.package_id,
             package_version=package_version,
             created_at=identity.created_at,
@@ -143,14 +146,15 @@ class DeterministicWorldPackageZipArchive:
         )
 
     @staticmethod
-    def _entry(path: str, content: bytes) -> WorldPackageEntry:
+    def _entry(path: str, content: bytes, *, is_v2: bool = False) -> WorldPackageEntry:
         if path.endswith(".json"):
             media_type = "application/json"
         elif path.endswith(".webp"):
             media_type = "image/webp"
         else:
             media_type = "text/plain"
-        return WorldPackageEntry(
+        entry_type = WorldPackageEntryV2 if is_v2 else WorldPackageEntry
+        return entry_type(
             path=path,
             sha256=hashlib.sha256(content).hexdigest(),
             bytes=len(content),
@@ -175,7 +179,7 @@ class DeterministicWorldPackageZipArchive:
                     )
                     for item in infos
                 ]
-                WorldPackagePolicy.validate_archive_entries(descriptors)
+                WorldPackagePolicy.validate_archive_entries(descriptors, format_version=manifest.format_version)
                 if [item.filename for item in infos] != sorted(expected):
                     raise WorldPackageContractError(
                         WorldPackageReasonCode.ARCHIVE_INVALID
@@ -185,7 +189,7 @@ class DeterministicWorldPackageZipArchive:
                         raise WorldPackageContractError(
                             WorldPackageReasonCode.INTEGRITY_MISMATCH
                         )
-                parsed = WorldPackageManifest.model_validate_json(
+                parsed = type(manifest).model_validate_json(
                     archive.read("manifest.json")
                 )
                 if parsed != manifest:

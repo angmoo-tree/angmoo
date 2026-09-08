@@ -26,6 +26,8 @@ from app.domains.world_packages.schemas.content import (  # noqa: E402
 from app.domains.world_packages.schemas.manifest import (  # noqa: E402
     WorldPackageManifest,
 )
+from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2
+from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2
 
 
 SchemaModel: TypeAlias = type[BaseModel]
@@ -48,8 +50,15 @@ def render(model: SchemaModel, filename: str) -> str:
     return json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def expected_outputs() -> dict[Path, str]:
-    return {OUTPUT_ROOT / name: render(model, name) for name, model in MODELS}
+def expected_outputs(*, include_v2: bool = False) -> dict[Path, str]:
+    outputs = {OUTPUT_ROOT / name: render(model, name) for name, model in MODELS}
+    if not include_v2:
+        return outputs
+    for name, model in (("manifest.schema.json", WorldPackageManifestV2), ("characters.schema.json", CharactersDocumentV2)):
+        outputs[OUTPUT_ROOT.parent / "v2" / name] = render(model, name).replace(
+            "https://angmoo.dev/schemas/world-package/v1/", "https://angmoo.dev/schemas/world-package/v2/"
+        )
+    return outputs
 
 
 def main() -> int:
@@ -62,7 +71,7 @@ def main() -> int:
     args = parser.parse_args()
 
     stale: list[str] = []
-    for path, payload in expected_outputs().items():
+    for path, payload in expected_outputs(include_v2=True).items():
         if args.check:
             if not path.is_file() or path.read_text(encoding="utf-8") != payload:
                 stale.append(path.relative_to(REPO_ROOT).as_posix())

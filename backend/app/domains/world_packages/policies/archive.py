@@ -35,6 +35,7 @@ class WorldPackagePolicy:
     MAX_MANIFEST_BYTES: ClassVar[int] = 256 * 1024
     MAX_LICENSE_TEXT_BYTES: ClassVar[int] = 256 * 1024
     MAX_JSON_ENTRY_BYTES: ClassVar[int] = 2 * 1024 * 1024
+    MAX_CHARACTERS_JSON_BYTES: ClassVar[int] = 32 * 1024 * 1024
     MAX_IMAGE_BYTES: ClassVar[int] = 5 * 1024 * 1024
     MAX_CHARACTERS: ClassVar[int] = 50
     MAX_ASSETS: ClassVar[int] = 100
@@ -75,6 +76,7 @@ class WorldPackagePolicy:
     def validate_archive_entries(
         cls,
         entries: Iterable[ArchiveEntryDescriptor],
+        *, format_version: int = 1,
     ) -> tuple[ArchiveEntryDescriptor, ...]:
         audited = tuple(entries)
         if not audited or len(audited) > cls.MAX_ARCHIVE_ENTRIES:
@@ -112,7 +114,7 @@ class WorldPackagePolicy:
                 > entry.compressed_bytes * cls.MAX_COMPRESSION_RATIO
             ):
                 cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
-            cls._validate_entry_size(entry)
+            cls._validate_entry_size(entry, format_version=format_version)
             paths.add(entry.path)
 
         if not cls.REQUIRED_PATHS.issubset(paths):
@@ -134,10 +136,11 @@ class WorldPackagePolicy:
             seen[collision_key] = path
 
     @classmethod
-    def _validate_entry_size(cls, entry: ArchiveEntryDescriptor) -> None:
+    def _validate_entry_size(cls, entry: ArchiveEntryDescriptor, *, format_version: int = 1) -> None:
+        json_limit = cls.MAX_CHARACTERS_JSON_BYTES if format_version == 2 and entry.path == "content/characters.json" else cls.MAX_JSON_ENTRY_BYTES
         if entry.path == "manifest.json" and entry.uncompressed_bytes > cls.MAX_MANIFEST_BYTES:
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
-        if entry.path.endswith(".json") and entry.uncompressed_bytes > cls.MAX_JSON_ENTRY_BYTES:
+        if entry.path.endswith(".json") and entry.uncompressed_bytes > json_limit:
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
         if entry.path.startswith("assets/") and entry.uncompressed_bytes > cls.MAX_IMAGE_BYTES:
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)

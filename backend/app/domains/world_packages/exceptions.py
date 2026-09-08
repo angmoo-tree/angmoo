@@ -9,6 +9,7 @@ class WorldPackageReasonCode(StrEnum):
     OWNER_REQUIRED = "world_package_owner_required"
     WORLD_NOT_EXPORTABLE = "world_package_world_not_exportable"
     SOURCE_CHANGED = "world_package_source_changed"
+    PERSONA_INVALID = "world_package_persona_invalid"
     UPLOAD_TOO_LARGE = "world_package_upload_too_large"
     ARCHIVE_INVALID = "world_package_archive_invalid"
     PATH_UNSAFE = "world_package_path_unsafe"
@@ -36,6 +37,7 @@ class WorldPackageReasonCode(StrEnum):
 class WorldPackageContractError(ValueError):
     """Fail-closed contract error that exposes only a stable reason code."""
 
-    def __init__(self, reason_code: WorldPackageReasonCode) -> None:
+    def __init__(self, reason_code: WorldPackageReasonCode, *, fields: tuple[dict, ...] = ()) -> None:
         self.reason_code = reason_code
+        self.fields = fields
         super().__init__(reason_code.value)

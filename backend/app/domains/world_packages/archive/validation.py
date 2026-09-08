@@ -15,6 +15,8 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, BadZipFile, ZipFile, ZipInfo
 
 from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
+from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2
+from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2
 
 from app.domains.world_packages.utils.canonical import (
     canonical_json_bytes,
@@ -151,7 +153,7 @@ def _validate_zip_metadata(infos: list[ZipInfo]) -> None:
                 encrypted=bool(item.flag_bits & 0x1),
             )
         )
-    WorldPackagePolicy.validate_archive_entries(descriptors)
+    WorldPackagePolicy.validate_archive_entries(descriptors, format_version=2)
 
 
 def _zip_entry_kind(info: ZipInfo) -> str:
@@ -222,15 +224,21 @@ def _validate_payloads(
     )
     if manifest_payload.get("format") != "angmoo-world-package":
         _fail(WorldPackageReasonCode.FORMAT_UNSUPPORTED)
-    if manifest_payload.get("format_version") != 1:
+    if manifest_payload.get("format_version") not in {1, 2}:
         _fail(WorldPackageReasonCode.FORMAT_UNSUPPORTED)
     try:
-        manifest = WorldPackageManifest.model_validate(manifest_payload)
+        manifest_type = WorldPackageManifestV2 if manifest_payload["format_version"] == 2 else WorldPackageManifest
+        manifest = manifest_type.model_validate(manifest_payload)
     except ValidationError as exc:
         raise WorldPackageContractError(
             WorldPackageReasonCode.ARCHIVE_INVALID
         ) from exc
 
+    for path, payload in payloads.items():
+        WorldPackagePolicy._validate_entry_size(
+            ArchiveEntryDescriptor(path, payload.size, payload.size),
+            format_version=manifest.format_version,
+        )
     expected_paths = {entry.path for entry in manifest.entries}
     actual_paths = set(payloads) - {"manifest.json"}
     if expected_paths != actual_paths:
@@ -257,8 +265,8 @@ def _validate_payloads(
         _read_json_entry(payloads["content/world.json"]),
     )
     characters = _model(
-        CharactersDocument,
-        _read_json_entry(payloads["content/characters.json"]),
+        CharactersDocumentV2 if manifest.format_version == 2 else CharactersDocument,
+        _read_entry(payloads["content/characters.json"], max_bytes=WorldPackagePolicy.MAX_CHARACTERS_JSON_BYTES if manifest.format_version == 2 else WorldPackagePolicy.MAX_JSON_ENTRY_BYTES),
     )
     world_characters = _model(
         WorldCharactersDocument,

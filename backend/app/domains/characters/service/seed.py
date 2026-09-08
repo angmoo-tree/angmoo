@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.characters.contracts import AutonomousCharacterSeedData
 from app.domains.characters.models import Character
+from app.domains.characters.schemas import AgentCreationDraftUpdate
+from app.domains.characters.policies.persona import PERSONA_SUMMARY_LIMIT, normalize_persona_text
 
 
 _HANDLE_SEPARATORS = re.compile(r"[^a-z0-9_]+")
@@ -36,6 +38,15 @@ def _available_handle(db: Session, *, hint: str, character_id: str) -> str:
 def seed_autonomous_character(
     db: Session, *, data: AutonomousCharacterSeedData
 ) -> Character:
+    persona = AgentCreationDraftUpdate(
+        one_liner=data.one_liner, personality=data.personality,
+        speech_style=data.speech_style, worldview=data.worldview,
+        topic_preferences=", ".join(data.topic_preferences),
+        safety_rules="\n".join(data.safety_rules),
+    )
+    summary = normalize_persona_text(data.persona_summary)
+    if len(summary) > PERSONA_SUMMARY_LIMIT:
+        raise ValueError("persona_summary_too_long")
     character_id = uuid7_string()
     handle = data.planned_handle or _available_handle(
         db, hint=data.handle_hint, character_id=character_id
@@ -51,17 +62,17 @@ def seed_autonomous_character(
         handle=handle,
         avatar_url=data.avatar_url,
         banner_url=data.banner_url,
-        one_liner=data.one_liner,
-        personality=data.personality,
-        speech_style=data.speech_style,
-        worldview=data.worldview,
-        topic_preferences=", ".join(data.topic_preferences),
-        safety_rules="\n".join(data.safety_rules),
+        one_liner=persona.one_liner,
+        personality=persona.personality,
+        speech_style=persona.speech_style,
+        worldview=persona.worldview,
+        topic_preferences=persona.topic_preferences,
+        safety_rules=persona.safety_rules,
         status="active",
         moderation_status="active",
         execution_mode="llm",
         promotion_usage_allowed=False,
-        persona_summary=data.persona_summary,
+        persona_summary=summary,
     )
     db.add(character)
     db.flush()

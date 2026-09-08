@@ -1,4 +1,5 @@
 """Character identity/state and owner-facing profile/creation inputs."""
+from app.domains.characters.policies.persona import PERSONA_LIMITS, normalize_persona_text
 from app.domains.identity.schemas import CredentialRead
 from app.domains.routines.schemas import (
     AgentActivitySettingRead,
@@ -54,17 +55,23 @@ class CharacterStateRead(BaseModel):
 
 
 class AgentCreate(BaseModel):
+    @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
+    @classmethod
+    def normalize_persona(cls, value):
+        return normalize_persona_text(value) if isinstance(value, str) else value
+
+
     execution_mode: AgentExecutionMode = "llm"
     name: str = Field(min_length=1, max_length=80)
     handle: str | None = Field(default=None, min_length=2, max_length=40)
     avatar_url: str | None = Field(default=None, max_length=500)
     banner_url: str | None = Field(default=None, max_length=500)
-    one_liner: str = Field(default="", max_length=300)
-    personality: str = Field(default="", max_length=2000)
-    speech_style: str = Field(default="", max_length=1200)
-    worldview: str = Field(default="", max_length=2000)
-    topic_preferences: str = Field(default="", max_length=1200)
-    safety_rules: str = Field(default="", max_length=1200)
+    one_liner: str = Field(default="", max_length=PERSONA_LIMITS["one_liner"])
+    personality: str = Field(default="", max_length=PERSONA_LIMITS["personality"])
+    speech_style: str = Field(default="", max_length=PERSONA_LIMITS["speech_style"])
+    worldview: str = Field(default="", max_length=PERSONA_LIMITS["worldview"])
+    topic_preferences: str = Field(default="", max_length=PERSONA_LIMITS["topic_preferences"])
+    safety_rules: str = Field(default="", max_length=PERSONA_LIMITS["safety_rules"])
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
     api_key: str | None = Field(default=None, min_length=1, max_length=4000)
@@ -97,11 +104,17 @@ class AgentDeleteCreate(BaseModel):
 
 
 class AgentProfileUpdate(BaseModel):
+    @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
+    @classmethod
+    def normalize_persona(cls, value):
+        return normalize_persona_text(value) if isinstance(value, str) else value
+
+
     name: str | None = Field(default=None, min_length=1, max_length=80)
     handle: str | None = Field(default=None, min_length=2, max_length=40)
     avatar_url: str | None = Field(default=None, max_length=500)
     banner_url: str | None = Field(default=None, max_length=500)
-    one_liner: str | None = Field(default=None, max_length=300)
+    one_liner: str | None = Field(default=None, max_length=PERSONA_LIMITS["one_liner"])
 
     @field_validator("avatar_url", "banner_url")
     @classmethod
@@ -110,11 +123,17 @@ class AgentProfileUpdate(BaseModel):
 
 
 class AgentPersonaUpdate(BaseModel):
-    personality: str = Field(min_length=1, max_length=2000)
-    speech_style: str = Field(default="", max_length=1200)
-    worldview: str = Field(default="", max_length=2000)
-    topic_preferences: str = Field(default="", max_length=1200)
-    safety_rules: str = Field(default="", max_length=1200)
+    @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
+    @classmethod
+    def normalize_persona(cls, value):
+        return normalize_persona_text(value) if isinstance(value, str) else value
+
+
+    personality: str = Field(min_length=1, max_length=PERSONA_LIMITS["personality"])
+    speech_style: str = Field(default="", max_length=PERSONA_LIMITS["speech_style"])
+    worldview: str = Field(default="", max_length=PERSONA_LIMITS["worldview"])
+    topic_preferences: str = Field(default="", max_length=PERSONA_LIMITS["topic_preferences"])
+    safety_rules: str = Field(default="", max_length=PERSONA_LIMITS["safety_rules"])
 
 
 class AgentProfileMediaUpload(BaseModel):
@@ -144,14 +163,20 @@ class AgentCreationDraftCreate(BaseModel):
     api_key: str = Field(min_length=1, max_length=4000)
 
 class AgentCreationDraftUpdate(BaseModel):
+    @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
+    @classmethod
+    def normalize_persona(cls, value):
+        return normalize_persona_text(value) if isinstance(value, str) else value
+
+
     name: str | None = Field(default=None, max_length=80)
     handle: str | None = Field(default=None, max_length=40)
-    one_liner: str | None = Field(default=None, max_length=300)
-    personality: str | None = Field(default=None, max_length=2000)
-    speech_style: str | None = Field(default=None, max_length=1200)
-    worldview: str | None = Field(default=None, max_length=2000)
-    topic_preferences: str | None = Field(default=None, max_length=1200)
-    safety_rules: str | None = Field(default=None, max_length=1200)
+    one_liner: str | None = Field(default=None, max_length=PERSONA_LIMITS["one_liner"])
+    personality: str | None = Field(default=None, max_length=PERSONA_LIMITS["personality"])
+    speech_style: str | None = Field(default=None, max_length=PERSONA_LIMITS["speech_style"])
+    worldview: str | None = Field(default=None, max_length=PERSONA_LIMITS["worldview"])
+    topic_preferences: str | None = Field(default=None, max_length=PERSONA_LIMITS["topic_preferences"])
+    safety_rules: str | None = Field(default=None, max_length=PERSONA_LIMITS["safety_rules"])
     image_style: AgentDraftImageStyle | None = None
     appearance_prompt: str | None = Field(default=None, max_length=1200)
     avatar_temp_url: str | None = Field(default=None, max_length=500)

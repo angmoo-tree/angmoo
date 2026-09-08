@@ -25,6 +25,24 @@ TOKEN = "a" * 64
 ORIGIN = "http://tauri.localhost"
 
 
+def test_unhandled_error_keeps_exact_origin_cors_without_exposing_exception():
+    app = FastAPI()
+    app.add_middleware(DesktopLoopbackSecurityMiddleware, policy=DesktopLoopbackPolicy(TOKEN, ORIGIN))
+
+    @app.get("/failure")
+    def failure():
+        raise ValueError("private synthetic persona text")
+
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.get("/failure", headers={"X-Angmoo-Launcher-Token": TOKEN, "Origin": ORIGIN})
+    assert response.status_code == 500
+    assert response.headers["access-control-allow-origin"] == ORIGIN
+    assert response.json() == {"detail": "internal_server_error"}
+    rejected = client.get("/failure", headers={"X-Angmoo-Launcher-Token": TOKEN, "Origin": "https://evil.test"})
+    assert rejected.status_code == 403
+    assert rejected.headers.get("access-control-allow-origin") != "https://evil.test"
+
+
 def _client() -> TestClient:
     app = FastAPI()
     app.add_middleware(

@@ -1,4 +1,6 @@
 "use client";
+import { PersonaField } from "@/features/characters/components/persona-field";
+import { PERSONA_LIMITS, personaLengthError } from "@/features/characters/utils/persona-limits";
 
 import {
   CheckCircle2,
@@ -249,7 +251,17 @@ export function AgentCreateClient() {
     setBannerUrl(nextDraft.banner_temp_url ?? "");
   }
 
+  function validatePersonaFields() {
+    const fields = {one_liner: oneLiner, personality, speech_style: speechStyle, worldview,
+      topic_preferences: topics, safety_rules: safetyRules};
+    for (const key of Object.keys(PERSONA_LIMITS) as Array<keyof typeof PERSONA_LIMITS>) {
+      const error = personaLengthError(fields[key], PERSONA_LIMITS[key]);
+      if (error) throw new Error(error);
+    }
+  }
+
   function draftPayload() {
+    validatePersonaFields();
     return {
       name,
       handle: handle.trim() || null,
@@ -552,6 +564,7 @@ export function AgentCreateClient() {
       setError(null);
       let created: AgentDetailRead | null = null;
       try {
+        validatePersonaFields();
         created = await createAgent({
           execution_mode: "llm",
           name: name.trim(),
@@ -921,13 +934,7 @@ export function AgentCreateClient() {
                       description="@아이디처럼 보이는 고유 식별자예요. 비워두면 자동으로 만들어집니다."
                     />
                   </div>
-                  <Field
-                    label="한 줄 소개"
-                    value={oneLiner}
-                    onChange={setOneLiner}
-                    placeholder="외부 실행기에서 날씨와 생활 정보를 전해주는 앵무입니다."
-                    description="프로필 이름 아래에 보이는 짧은 소개예요. 페르소나와 글쓰기 규칙은 외부 실행기에서 관리합니다."
-                  />
+                  <PersonaField label="한 줄 소개" value={oneLiner} onChange={setOneLiner} limit={PERSONA_LIMITS.one_liner} placeholder="외부 실행기에서 날씨와 생활 정보를 전해주는 앵무입니다." description="프로필 이름 아래에 보이는 짧은 소개예요. 페르소나와 글쓰기 규칙은 외부 실행기에서 관리합니다." />
                   <InfoMessage>
                     생성 후 설정 탭에서 앵무 API key를 발급받아 OpenClaw, 로컬 runner, 별도 서버에 연결할 수 있습니다.
                   </InfoMessage>
@@ -962,13 +969,7 @@ export function AgentCreateClient() {
                   description="@아이디처럼 보이는 고유 식별자예요. 프로필 주소와 검색에서 이 값으로 앵무를 구분해요."
                 />
               </div>
-              <Field
-                label="한 줄 소개"
-                value={oneLiner}
-                onChange={setOneLiner}
-                placeholder="조금 소심하지만, 먼저 움직이고 싶은 히어로 지망생입니다!"
-                description="프로필 이름 아래에 보이는 짧은 소개예요. 어떤 앵무인지 한 문장으로 적어주세요."
-              />
+              <PersonaField label="한 줄 소개" value={oneLiner} onChange={setOneLiner} limit={PERSONA_LIMITS.one_liner} placeholder="조금 소심하지만, 먼저 움직이고 싶은 히어로 지망생입니다!" description="프로필 이름 아래에 보이는 짧은 소개예요. 어떤 앵무인지 한 문장으로 적어주세요." />
               <StepActions onBack={() => setStep(0)} onNext={handleNext} disabled={busy || !canGoNext} />
             </div>
           ) : null}
@@ -1006,11 +1007,11 @@ export function AgentCreateClient() {
                   </div>
                 </div>
               ) : null}
-              <TextArea label="성격" value={personality} onChange={setPersonality} disabled={personaEnhancing} />
-              <TextArea label="말투" value={speechStyle} onChange={setSpeechStyle} disabled={personaEnhancing} />
-              <TextArea label="세계관/배경" value={worldview} onChange={setWorldview} disabled={personaEnhancing} />
-              <TextArea label="관심 주제" value={topics} onChange={setTopics} disabled={personaEnhancing} />
-              <TextArea label="피해야 할 행동/표현" value={safetyRules} onChange={setSafetyRules} disabled={personaEnhancing} />
+              <PersonaField limit={PERSONA_LIMITS.personality} label="성격" value={personality} onChange={setPersonality} disabled={personaEnhancing} />
+              <PersonaField limit={PERSONA_LIMITS.speech_style} label="말투" value={speechStyle} onChange={setSpeechStyle} disabled={personaEnhancing} />
+              <PersonaField limit={PERSONA_LIMITS.worldview} label="세계관/배경" value={worldview} onChange={setWorldview} disabled={personaEnhancing} />
+              <PersonaField limit={PERSONA_LIMITS.topic_preferences} label="관심 주제" value={topics} onChange={setTopics} disabled={personaEnhancing} />
+              <PersonaField limit={PERSONA_LIMITS.safety_rules} label="피해야 할 행동/표현" value={safetyRules} onChange={setSafetyRules} disabled={personaEnhancing} />
               {!worldFixtureReturnTo ? (
                 <button
                   type="button"
@@ -1988,30 +1989,6 @@ function Field({
           {description}
         </span>
       ) : null}
-    </label>
-  );
-}
-
-function TextArea({
-  label,
-  value,
-  onChange,
-  disabled = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-[15px] font-bold text-[#344054]">{label}</span>
-      <textarea
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        disabled={disabled}
-        className="min-h-[112px] w-full rounded-[22px] border border-[#e1e5eb] bg-white px-5 py-4 text-[16px] font-medium text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2] disabled:cursor-not-allowed disabled:bg-[#f9fafb]"
-      />
     </label>
   );
 }

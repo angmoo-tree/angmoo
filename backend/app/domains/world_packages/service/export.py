@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pydantic import ValidationError
+from app.domains.characters.contracts import PERSONA_LIMITS, PERSONA_SUMMARY_LIMIT
+from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2, upgrade_character
 
 from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
@@ -114,6 +117,27 @@ class ExportWorldPackage:
         return self._preview(material), archive
 
     def _materialize(
+        self, *, source_world_id: str, local_owner_id: str,
+        license: WorldPackageLicense, license_text: str | None,
+    ) -> WorldPackageExportMaterial:
+        try:
+            return self._materialize_validated(source_world_id=source_world_id,
+                local_owner_id=local_owner_id, license=license, license_text=license_text)
+        except ValidationError as exc:
+            limits = {**PERSONA_LIMITS, "persona_summary": PERSONA_SUMMARY_LIMIT}
+            fields = tuple(
+                {"field": str(error["loc"][-1]), "limit": limits[str(error["loc"][-1])],
+                 "actual": len(error["input"])}
+                for error in exc.errors(include_url=False)
+                if error["loc"] and str(error["loc"][-1]) in limits
+                and isinstance(error.get("input"), str)
+            )
+            raise WorldPackageContractError(
+                WorldPackageReasonCode.PERSONA_INVALID if fields else WorldPackageReasonCode.ARCHIVE_INVALID,
+                fields=fields,
+            ) from exc
+
+    def _materialize_validated(
         self,
         *,
         source_world_id: str,
@@ -137,10 +161,10 @@ class ExportWorldPackage:
                 "banner_asset_ref": resolved.reference_for("world:banner"),
             }
         )
-        characters = CharactersDocument(
-            schema_version="characters-content-v1",
+        characters = CharactersDocumentV2(
+            schema_version="characters-content-v2",
             characters=[
-                item.model_copy(
+                upgrade_character(item).model_copy(
                     update={
                         "avatar_asset_ref": resolved.reference_for(
                             f"{item.ref}:avatar"

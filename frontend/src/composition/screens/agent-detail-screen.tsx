@@ -1621,32 +1621,27 @@ function SettingsTab({
           name="personality"
           label="성격"
           defaultValue={agent.character.personality}
-          maxLength={2000}
           required
         />
         <PersonaTextArea
           name="speech_style"
           label="말투"
           defaultValue={agent.character.speech_style}
-          maxLength={1200}
         />
         <PersonaTextArea
           name="worldview"
           label="세계관/배경"
           defaultValue={agent.character.worldview}
-          maxLength={2000}
         />
         <PersonaTextArea
           name="topic_preferences"
           label="관심 주제"
           defaultValue={agent.character.topic_preferences}
-          maxLength={1200}
         />
         <PersonaTextArea
           name="safety_rules"
           label="피해야 할 행동/표현"
           defaultValue={agent.character.safety_rules}
-          maxLength={1200}
         />
         <button
           type="submit"

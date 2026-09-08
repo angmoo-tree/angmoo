@@ -98,7 +98,11 @@ def _safe_payload_text(value: Any, max_length: int) -> str:
             )
         else:
             return ""
-    return value.strip()[:max_length]
+    from app.domains.characters.policies.persona import normalize_persona_text
+    normalized = normalize_persona_text(value)
+    if len(normalized) > max_length:
+        raise AgentCreationDraftParseError("AI 보강 결과가 항목 길이 제한을 넘었습니다. 기존 내용은 유지됩니다.")
+    return normalized.strip()
 
 def _clean_text(value: Any) -> Any:
     return value.strip() if isinstance(value, str) else value
