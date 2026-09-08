@@ -134,4 +134,16 @@ test("continuity: approved activity remains visible during optional generation a
   await generate.click();
   await expect(page.locator("#world-setup-generation-error")).toBeVisible();
   await expect(generate).toBeEnabled();
+  const transportRequests: Array<Record<string, unknown>> = [];
+  await page.route("**/autonomy-setup/generate", async (route) => {
+    transportRequests.push(route.request().postDataJSON());
+    if (transportRequests.length === 1) return route.abort("failed");
+    return json(route, setup);
+  });
+  await generate.click();
+  await expect(page.locator("#world-setup-generation-error")).toBeVisible();
+  await expect(generate).toBeEnabled();
+  await generate.click();
+  await expect.poll(() => transportRequests.length).toBe(2);
+  expect(transportRequests[1].idempotency_key).toBe(transportRequests[0].idempotency_key);
 });

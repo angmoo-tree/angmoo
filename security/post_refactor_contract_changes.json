@@ -352,6 +352,51 @@
           ]
         }
       ]
+    },
+    {
+      "id": "profile-regeneration-without-daily-quota",
+      "implementation_commit": "a77600a45396c16266f42b6bd7b3d6591686935a",
+      "reason": "PR318 removes local profile generation daily quotas while preserving running and idempotency guards; historical refactor evidence remains immutable.",
+      "review": "https://github.com/angmoo-tree/angmoo/pull/318",
+      "source_blobs": {
+        "backend/app/domains/world_characters/service/autonomous_setup.py": "8a3c5f01c817dcc349bd7faf57cd0bb3d1c224d9",
+        "backend/app/domains/world_characters/schemas/setup.py": "3b9f3098258a1d052e2f3bfd9d08b252bb10848a",
+        "backend/tests/world_characters/test_persona_continuity.py": "82cb2fda751fa9a4ec42739566b18d44c0933a55"
+      },
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupPreflightRead",
+          "before": "4de703260ea4d35c3074a45a7cad44ed59863b545386d89f9b7d81e8feb6a062",
+          "after": "dbfd4bb51fcf2622bd408c10b946bb286e242419794346511907e7788a3b128c"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupPreflightRead",
+          "before": "4de703260ea4d35c3074a45a7cad44ed59863b545386d89f9b7d81e8feb6a062",
+          "after": "dbfd4bb51fcf2622bd408c10b946bb286e242419794346511907e7788a3b128c"
+        }
+      ],
+      "removed_bindings": [
+        {
+          "source": "backend/app/domains/world_characters/service/autonomous_setup.py",
+          "symbol": "PROFILE_REGENERATION_LIMIT_24H",
+          "before_ast": "Assign(targets=[Name(id='PROFILE_REGENERATION_LIMIT_24H', ctx=Store())], value=Constant(value=2))"
+        },
+        {
+          "source": "backend/app/domains/world_characters/service/autonomous_setup.py",
+          "symbol": "OWNER_REGENERATION_LIMIT_24H",
+          "before_ast": "Assign(targets=[Name(id='OWNER_REGENERATION_LIMIT_24H', ctx=Store())], value=Constant(value=5))"
+        },
+        {
+          "source": "backend/app/domains/world_characters/service/autonomous_setup.py",
+          "symbol": "_assert_regeneration_quota",
+          "before_ast": "FunctionDef(name='_assert_regeneration_quota', args=arguments(args=[arg(arg='db', annotation=Name(id='Session', ctx=Load())), arg(arg='scope', annotation=Name(id='SetupScope', ctx=Load()))]), body=[Assign(targets=[Name(id='since', ctx=Store())], value=BinOp(left=Call(func=Attribute(value=Name(id='datetime', ctx=Load()), attr='now', ctx=Load()), args=[Name(id='UTC', ctx=Load())]), op=Sub(), right=Call(func=Name(id='timedelta', ctx=Load()), keywords=[keyword(arg='hours', value=Constant(value=24))]))), Assign(targets=[Name(id='character_count', ctx=Store())], value=BoolOp(op=Or(), values=[Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()), args=[Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='id', ctx=Load())])]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='world_character_id', ctx=Load()), ops=[Eq()], comparators=[Attribute(value=Attribute(value=Name(id='scope', ctx=Load()), attr='world_character', ctx=Load()), attr='id', ctx=Load())]), Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='stage', ctx=Load()), ops=[Eq()], comparators=[Constant(value='community_profile')]), Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='created_at', ctx=Load()), ops=[GtE()], comparators=[Name(id='since', ctx=Load())])])]), Constant(value=0)])), Assign(targets=[Name(id='owner_count', ctx=Store())], value=BoolOp(op=Or(), values=[Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()), args=[Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='id', ctx=Load())])]), attr='where', ctx=Load()), args=[Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='owner_user_id', ctx=Load()), ops=[Eq()], comparators=[Attribute(value=Attribute(value=Name(id='scope', ctx=Load()), attr='character', ctx=Load()), attr='owner_id', ctx=Load())]), Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='stage', ctx=Load()), ops=[Eq()], comparators=[Constant(value='community_profile')]), Compare(left=Attribute(value=Attribute(value=Name(id='models', ctx=Load()), attr='WorldCharacterSetupAttempt', ctx=Load()), attr='created_at', ctx=Load()), ops=[GtE()], comparators=[Name(id='since', ctx=Load())])])]), Constant(value=0)])), If(test=BoolOp(op=Or(), values=[Compare(left=Name(id='character_count', ctx=Load()), ops=[GtE()], comparators=[Name(id='PROFILE_REGENERATION_LIMIT_24H', ctx=Load())]), Compare(left=Name(id='owner_count', ctx=Load()), ops=[GtE()], comparators=[Name(id='OWNER_REGENERATION_LIMIT_24H', ctx=Load())])]), body=[Raise(exc=Call(func=Name(id='WorldCharacterSetupValidationError', ctx=Load()), args=[Constant(value='regeneration_limit_reached')]))])], returns=Constant(value=None))"
+        }
+      ],
+      "assertions": []
     }
   ]
 }
