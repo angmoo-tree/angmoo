@@ -152,3 +152,11 @@ append-only introduction ledger. This does not imply PR review or USER CHECK pas
 Each thread row carries `thread_root_post_id` verified by the server so a later
 page can retain ancestry proof even when its parent is on a different page.
 Legacy direct replies remain readable; unrelated same-World rows fail validation.
+
+
+V1 compatibility retains its frozen schema and list representation. Because v1
+list items had no individual length bound, the reader also checks their joined,
+normalized persona text against current storage admission before producing a
+preview. Oversized legacy lists receive safe field/limit/actual details instead
+of failing later during seed writes. The same safe error translation is used by
+export and import validation. Valid in-budget v1 content remains unchanged.

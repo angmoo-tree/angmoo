@@ -65,3 +65,30 @@ def test_invalid_legacy_persona_produces_safe_field_error():
     assert error.value.reason_code == WorldPackageReasonCode.PERSONA_INVALID
     assert error.value.fields == ({"field": "persona_summary", "limit": 32000, "actual": 52000},)
     assert "private-text" not in str(error.value)
+
+
+@pytest.mark.parametrize("field,limit", [("topic_preferences", 3000), ("safety_rules", 4000)])
+@pytest.mark.parametrize("extra", [0, 1], ids=["within-budget", "over-budget"])
+def test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details(tmp_path, field, limit, extra):
+    import json
+    from app.domains.world_packages.schemas.content import CharactersDocument
+    from app.domains.world_packages.utils.canonical import canonical_json_bytes
+    from world_packages.test_preview import _archive, _payloads, _replace_indexed_payload
+
+    payloads = _payloads(_archive())
+    document = json.loads(payloads["content/characters.json"])
+    document["characters"][0][field] = ["😀" * (limit + extra)]
+    # This is structurally valid v1, including its historically unbounded items.
+    CharactersDocument.model_validate(document)
+    content = _replace_indexed_payload(payloads, path="content/characters.json", content=canonical_json_bytes(document))
+    if extra:
+        with pytest.raises(WorldPackageContractError) as failure:
+            _stage(tmp_path, content)
+        assert failure.value.reason_code == WorldPackageReasonCode.PERSONA_INVALID
+        assert failure.value.fields == ({"field": field, "limit": limit, "actual": limit + extra},)
+        assert "😀" not in str(failure.value)
+    else:
+        store, _, _ = _stage(tmp_path, content)
+        package = ZipWorldPackageImportValidator(store).validate(operation_id=OPERATION_ID)
+        assert package.manifest.format_version == 1
+        assert getattr(package.characters.characters[0], field) == document["characters"][0][field]

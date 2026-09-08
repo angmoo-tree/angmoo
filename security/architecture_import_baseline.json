@@ -1,6 +1,6 @@
 {
   "edge_count": 3980,
-  "external_import_count": 3110,
+  "external_import_count": 3111,
   "module_count": 1069,
   "modules": [
     {
@@ -11256,9 +11256,12 @@
     {
       "external_imports": [
         "__future__",
-        "enum"
+        "enum",
+        "pydantic"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.characters.contracts"
+      ],
       "module": "app.domains.world_packages.exceptions",
       "path": "backend/app/domains/world_packages/exceptions.py",
       "wildcard_imports": []
@@ -11501,7 +11504,6 @@
         "pydantic"
       ],
       "imports": [
-        "app.domains.characters.contracts",
         "app.domains.world_packages.contracts.export",
         "app.domains.world_packages.contracts.interfaces",
         "app.domains.world_packages.contracts.seed",

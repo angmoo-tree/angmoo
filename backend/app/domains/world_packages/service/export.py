@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pydantic import ValidationError
-from app.domains.characters.contracts import PERSONA_LIMITS, PERSONA_SUMMARY_LIMIT
 from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2, upgrade_character
 
 from app.domains.world_packages.schemas.content import (
@@ -15,6 +14,7 @@ from app.domains.world_packages.schemas.content import (
 )
 from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
+    persona_validation_error,
     WorldPackageReasonCode,
 )
 from app.domains.world_packages.contracts.export import (
@@ -124,18 +124,7 @@ class ExportWorldPackage:
             return self._materialize_validated(source_world_id=source_world_id,
                 local_owner_id=local_owner_id, license=license, license_text=license_text)
         except ValidationError as exc:
-            limits = {**PERSONA_LIMITS, "persona_summary": PERSONA_SUMMARY_LIMIT}
-            fields = tuple(
-                {"field": str(error["loc"][-1]), "limit": limits[str(error["loc"][-1])],
-                 "actual": len(error["input"])}
-                for error in exc.errors(include_url=False)
-                if error["loc"] and str(error["loc"][-1]) in limits
-                and isinstance(error.get("input"), str)
-            )
-            raise WorldPackageContractError(
-                WorldPackageReasonCode.PERSONA_INVALID if fields else WorldPackageReasonCode.ARCHIVE_INVALID,
-                fields=fields,
-            ) from exc
+            raise persona_validation_error(exc) from exc
 
     def _materialize_validated(
         self,

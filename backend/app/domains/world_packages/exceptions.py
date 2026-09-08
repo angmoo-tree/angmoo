@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 
+from pydantic import ValidationError
+from app.domains.characters.contracts import PERSONA_LIMITS, PERSONA_SUMMARY_LIMIT
+
 
 class WorldPackageReasonCode(StrEnum):
     OWNER_REQUIRED = "world_package_owner_required"
@@ -41,3 +44,19 @@ class WorldPackageContractError(ValueError):
         self.reason_code = reason_code
         self.fields = fields
         super().__init__(reason_code.value)
+
+
+def persona_validation_error(error: ValidationError) -> WorldPackageContractError:
+    """Expose field names and normalized lengths, never uploaded/private text."""
+    limits = {**PERSONA_LIMITS, "persona_summary": PERSONA_SUMMARY_LIMIT}
+    fields = tuple(
+        {"field": str(item["loc"][-1]), "limit": limits[str(item["loc"][-1])],
+         "actual": len(item["input"])}
+        for item in error.errors(include_url=False)
+        if item["loc"] and str(item["loc"][-1]) in limits
+        and isinstance(item.get("input"), str)
+    )
+    return WorldPackageContractError(
+        WorldPackageReasonCode.PERSONA_INVALID if fields else WorldPackageReasonCode.ARCHIVE_INVALID,
+        fields=fields,
+    )
