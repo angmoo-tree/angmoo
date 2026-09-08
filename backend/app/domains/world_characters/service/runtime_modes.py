@@ -137,11 +137,8 @@ def _repair_ineligibility_reason(
     )
     if role is None:
         return "role_ineligible"
-    character_hash = world_character_contracts.character_contract_hash(character)
-    if (
-        world_character.character_contract_hash != character_hash
-        or world_character.world_contract_hash != world.contract_hash
-    ):
+    character_hash = world_character.character_contract_hash
+    if world_character.world_contract_hash != world.contract_hash:
         return "world_character_contract_stale"
     profile = db.scalar(
         select(models.WorldCommunityProfile).where(

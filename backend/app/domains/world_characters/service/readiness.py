@@ -8,6 +8,7 @@ from app.domains.characters import schemas
 from app.domains.world_characters.contracts.readiness import ReadinessCharacter, ReadinessSetting
 from app.domains.worlds.service import character_entry as world_entry
 from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.domains.world_characters.policies.approved_setup import approved_pair_matches_world
 
 
 def _has_legacy_tendency_analysis(setting: ReadinessSetting) -> bool:
@@ -113,14 +114,8 @@ def evaluate(
             reason_code="world_community_profile_not_ready",
             **base,
         )
-    character_hash = world_character_contracts.character_contract_hash(character)
-    if (
-        world_character.character_contract_hash != character_hash
-        or world_character.world_contract_hash != world.contract_hash
-        or repertoire.character_contract_hash != character_hash
-        or repertoire.world_contract_hash != world.contract_hash
-        or profile.character_contract_hash != character_hash
-        or profile.world_contract_hash != world.contract_hash
+    if not approved_pair_matches_world(
+        world_character, profile, repertoire, world_hash=world.contract_hash,
     ):
         return schemas.AgentActivityProfileReadinessRead(
             ready=False,

@@ -116,7 +116,7 @@ def test_plan_hash_collaboration_keeps_readiness_order_and_attached_character(tm
         result, candidates = plans._ready_repertoire(references, scope=scope)
         assert len(candidates) == 40
         assert result.character_contract_hash == original_hash(fixture.character)
-        assert seen == ["hash", "repertoire"]
+        assert seen == ["repertoire"]  # Approved provenance, not the edited live persona hash.
         seen.clear()
         fixture.world.status = "draft"
         with pytest.raises(DailyActivityPlanValidationError, match="world_not_ready"):

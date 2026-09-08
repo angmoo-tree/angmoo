@@ -50,13 +50,13 @@ def get_autonomy_setup(
 )
 def preflight_autonomy_setup(
     world_character_id: str,
+    regenerate: bool = False,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
 ) -> schemas.WorldCharacterSetupPreflightRead:
     try:
-        return world_character_setup.preflight_setup(
-            db, world_character_id=world_character_id, user=user
-        )
+        preflight = world_character_setup.preflight_regeneration if regenerate else world_character_setup.preflight_setup
+        return preflight(db, world_character_id=world_character_id, user=user)
     except wc_errors.WorldCharacterSetupError as exc:
         _raise_setup_error(exc)
 

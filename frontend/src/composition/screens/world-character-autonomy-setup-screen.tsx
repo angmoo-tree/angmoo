@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Card } from "@/components/ui/surfaces";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -202,7 +203,7 @@ export function WorldCharacterAutonomySetupClient({
           setRoleKey(nextEntry.role_key ?? "");
           const [nextSetup, nextPreflight] = await Promise.all([
             getWorldCharacterSetup(nextEntry.id),
-            preflightWorldCharacterSetup(nextEntry.id),
+            preflightWorldCharacterSetup(nextEntry.id, true),
           ]);
           if (!active) return;
           setSetup(nextSetup);
@@ -291,7 +292,7 @@ export function WorldCharacterAutonomySetupClient({
   async function refreshSetup(worldCharacterId: string) {
     const [nextSetup, nextPreflight] = await Promise.all([
       getWorldCharacterSetup(worldCharacterId),
-      preflightWorldCharacterSetup(worldCharacterId),
+      preflightWorldCharacterSetup(worldCharacterId, true),
     ]);
     setSetup(nextSetup);
     setPreflight(nextPreflight);
@@ -375,6 +376,7 @@ export function WorldCharacterAutonomySetupClient({
       const next = await generateWorldCharacterSetup(
         entry.id,
         idempotencyKey("world-setup-generate"),
+        Boolean(setup?.profile),
       );
       setSetup(next);
       setNotice(
@@ -439,7 +441,7 @@ export function WorldCharacterAutonomySetupClient({
   }
 
   async function handleReject() {
-    if (!entry) return;
+    if (!entry || !setup?.profile || !setup.can_reject) return;
     setPending("reject");
     setError(null);
     setNotice(null);
@@ -448,9 +450,13 @@ export function WorldCharacterAutonomySetupClient({
         entry.id,
         "owner_requested_regeneration",
         idempotencyKey("world-setup-reject"),
+        setup.profile.id,
+        setup.repertoire?.id ?? null,
       );
       setSetup(next);
-      setNotice("현재 후보를 거절했습니다. 동의 후 새 후보를 생성할 수 있습니다.");
+      setNotice(next.autonomy_ready
+        ? "새 후보를 거절했습니다. 기존 World 프로필과 일과는 계속 사용합니다."
+        : "현재 후보를 거절했습니다. 동의 후 새 후보를 생성할 수 있습니다.");
     } catch (nextError) {
       setError(errorMessage(nextError));
     } finally {
@@ -626,7 +632,7 @@ export function WorldCharacterAutonomySetupClient({
                   </p>
                 </div>
                 <span className="rounded-full bg-surface-container px-4 py-2 text-sm font-bold">
-                  {statusLabel(setup.state)}
+                  {setup.autonomy_ready && setup.state !== "running" ? "기존 결과 사용 중" : statusLabel(setup.state)}
                 </span>
               </div>
               <dl className="mt-5 grid gap-3 text-sm md:grid-cols-2">
@@ -647,7 +653,7 @@ export function WorldCharacterAutonomySetupClient({
                   <Link className="font-bold underline" href={`/agents/${characterId}`}>캐릭터 설정 확인</Link>
                 </p>
               ) : null}
-              {!setup.autonomy_ready ? (
+              {setup.can_regenerate ? (
                 <label className="mt-5 flex items-start gap-3 rounded-2xl border border-outline-variant p-4">
                   <input
                     type="checkbox"
@@ -664,14 +670,14 @@ export function WorldCharacterAutonomySetupClient({
               {reasonMessage(setup.safe_reason_code) ? (
                 <p className="mt-4 text-sm text-error">{reasonMessage(setup.safe_reason_code)}</p>
               ) : null}
-              {!setup.profile && setup.can_retry_stage !== "community_profile" ? (
+              {setup.can_regenerate ? (
                 <button
                   type="button"
                   onClick={() => void handleGenerate()}
                   disabled={!consented || !preflight.credential_ready || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {pending === "generate" ? "생성 중…" : "프로필과 일과 40개 생성"}
+                  {pending === "generate" ? "생성 중…" : setup.profile ? "프로필·일과 다시 만들기" : "프로필과 일과 40개 생성"}
                 </button>
               ) : null}
               {setup.can_retry_stage === "community_profile" ? (
@@ -691,6 +697,19 @@ export function WorldCharacterAutonomySetupClient({
                 >{pending === "retry-repertoire" ? "일과 재생성 중…" : "프로필을 유지하고 일과만 다시 생성"}</button>
               ) : null}
             </section>
+
+            {setup.active_profile && setup.active_repertoire ? (
+              <Card className="p-6" aria-label="현재 사용하는 승인 결과">
+                <h2 className="text-xl font-black">현재 사용하는 프로필과 일과</h2>
+                <p className="mt-3">{setup.active_profile.visible_summary}</p>
+                <p className="mt-3 text-muted">
+                  {setup.persona_changed
+                    ? "페르소나가 수정되었습니다. 기존 승인 결과로 활동을 계속하며, 원할 때 아래에서 새 결과를 만들 수 있습니다."
+                    : "새 후보를 생성하거나 거절해도 기존 승인 결과는 유지됩니다."}
+                  {" "}새 결과를 승인하면 이후에 만드는 활동 계획부터 적용됩니다.
+                </p>
+              </Card>
+            ) : null}
 
             {setup.profile ? (
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
@@ -758,11 +777,11 @@ export function WorldCharacterAutonomySetupClient({
               </section>
             ) : null}
 
-            {setup.profile && setup.repertoire && !setup.autonomy_ready ? (
+            {setup.can_approve || setup.can_reject ? (
               <section className="rounded-[28px] border border-brand-soft-border bg-brand-soft p-6">
                 <h2 className="text-xl font-black text-text-strong">5. 최종 승인</h2>
                 <p className="mt-2 text-sm text-text-default">
-                  승인하면 이 World에서 사용할 준비 결과가 고정됩니다. 자율활동 실행은 별도 단계입니다.
+                  새 후보를 승인하면 이후 새로 만드는 계획부터 사용합니다. 기존 오늘 계획과 활동 기록은 유지됩니다.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button
@@ -774,7 +793,7 @@ export function WorldCharacterAutonomySetupClient({
                   <button
                     type="button"
                     onClick={() => void handleReject()}
-                    disabled={pending !== null}
+                    disabled={!setup.can_reject || pending !== null}
                     className="rounded-full border border-outline bg-white px-6 py-3 font-bold"
                   >후보 거절</button>
                 </div>

@@ -24,6 +24,8 @@ from app.domains.world_characters.contracts.runtime_modes import (
 )
 from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.domains.world_characters import models
+from app.domains.world_characters.policies.approved_setup import approved_pair_matches_world
+from app.domains.world_characters.service.approved_setup import get_approved_pair
 from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service.runtime_modes import (
     repair_local_autonomous_runtime_mode,
@@ -501,6 +503,14 @@ def preflight_setup(
     )
 
 
+def preflight_regeneration(
+    db: Session, *, world_character_id: str, user: CharacterOwner,
+) -> schemas.WorldCharacterSetupPreflightRead:
+    """Explicit regeneration always quotes a new profile and repertoire call."""
+    readiness = preflight_setup(db, world_character_id=world_character_id, user=user)
+    return readiness.model_copy(update={"reused": False, "logical_call_count": 2, "physical_request_count": 3})
+
+
 async def generate_setup(
     db: Session,
     *,
@@ -516,10 +526,23 @@ async def generate_setup(
         lock_for_update=True,
     )
     _require_autonomous_role(db, scope)
+    if data.regenerate:
+        replay = db.scalar(select(models.WorldCharacterSetupAttempt).where(
+            models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
+            models.WorldCharacterSetupAttempt.owner_user_id == user.id,
+            models.WorldCharacterSetupAttempt.stage == "community_profile",
+            models.WorldCharacterSetupAttempt.idempotency_key == data.idempotency_key,
+        ))
+        if replay is not None:
+            if replay.status == "succeeded" and replay.consent_policy_version == data.consent_policy_version:
+                return get_setup(db, world_character_id=world_character_id, user=user, reused=True)
+            raise WorldCharacterSetupConflictError(
+                "setup_in_progress" if replay.status == "running" else "idempotency_replay"
+            )
     material = _resolve_material(db, scope)
     character_hash = world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
-    if _ready_pair(
+    if not data.regenerate and _ready_pair(
         db,
         world_character_id=world_character_id,
         character_hash=character_hash,
@@ -546,13 +569,18 @@ async def generate_setup(
         else world_character_provider.DirectLlmWorldCharacterSetupProvider()
     )
 
-    profile = _matching_profile(
+    profile = None if data.regenerate else _matching_profile(
         db,
         world_character_id=world_character_id,
         character_hash=character_hash,
         world_hash=world_hash,
     )
     if profile is None:
+        if db.scalar(select(models.WorldCharacterSetupAttempt.id).where(
+            models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
+            models.WorldCharacterSetupAttempt.status == "running",
+        )) is not None:
+            raise WorldCharacterSetupConflictError("setup_in_progress")
         _assert_regeneration_quota(db, scope)
         attempt = _begin_attempt(
             db,
@@ -563,6 +591,14 @@ async def generate_setup(
             consent_policy_version=data.consent_policy_version,
             input_hash=input_hash,
         )
+        if data.regenerate:
+            # Only the prior review candidate is replaced. Approved outputs stay live.
+            for model in (models.WorldCommunityProfile, models.WorldActivityRepertoire):
+                db.execute(update(model).where(
+                    model.world_character_id == world_character_id,
+                    model.status.in_({"draft", "stale"}),
+                ).values(status="failed"))
+            db.commit()
         try:
             result = await stage_provider.generate_community_profile(
                 material=material,
@@ -631,6 +667,7 @@ async def retry_setup(
             idempotency_key=data.idempotency_key,
             consent_policy_version=data.consent_policy_version,
             consented=True,
+            regenerate=data.regenerate,
         )
         return await generate_setup(
             db,
@@ -794,15 +831,9 @@ def approve_setup(
         )
     )
     if existing_approval is not None:
-        if existing_approval.status == "succeeded":
-            _select_active_world_character(
-                db,
-                scope=scope,
-                approval_id=existing_approval.id,
-                selected_at=existing_approval.finished_at
-                or existing_approval.created_at,
-            )
-            db.commit()
+        if existing_approval.status == "succeeded" and existing_approval.input_hash == world_character_contracts.canonical_sha256(
+            {"profile_id": data.profile_id, "repertoire_id": data.repertoire_id}
+        ):
             return get_setup(db, world_character_id=world_character_id, user=user)
         raise WorldCharacterSetupConflictError("idempotency_replay")
 
@@ -819,6 +850,20 @@ def approve_setup(
     ):
         raise WorldCharacterSetupValidationError("world_character_ineligible")
 
+    latest_profile = _latest_profile(db, world_character_id)
+    latest_repertoire = _latest_repertoire(db, world_character_id, profile_id=profile.id)
+    if latest_profile is None or latest_profile.id != profile.id or latest_repertoire is None or latest_repertoire.id != repertoire.id:
+        raise WorldCharacterSetupConflictError("row_version_conflict")
+    if profile.status == "ready" and repertoire.status == "ready":
+        return get_setup(db, world_character_id=world_character_id, user=user, reused=True)
+
+    _claim_setup_write(db, scope)
+    if db.scalar(select(models.WorldCharacterSetupAttempt.id).where(
+        models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
+        models.WorldCharacterSetupAttempt.status == "running",
+    )) is not None:
+        raise WorldCharacterSetupConflictError("setup_in_progress")
+
     character_hash = world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
     if (
@@ -827,9 +872,11 @@ def approve_setup(
         or profile.world_contract_hash != world_hash
         or repertoire.world_contract_hash != world_hash
     ):
-        profile.status = "stale"
-        repertoire.status = "stale"
-        db.commit()
+        # A stale approval request must never invalidate the execution pair.
+        if profile.status == "draft" and repertoire.status == "draft":
+            profile.status = "stale"
+            repertoire.status = "stale"
+            db.commit()
         raise WorldCharacterSetupConflictError("contract_hash_stale")
 
     generation_context = build_world_generation_context(
@@ -927,12 +974,13 @@ def approve_setup(
     scope.world_character.character_contract_hash = character_hash
     scope.world_character.world_contract_hash = world_hash
     scope.world_character.version += 1
-    _select_active_world_character(
-        db,
-        scope=scope,
-        approval_id=approval.id,
-        selected_at=now,
-    )
+    if not previous_profiles:
+        _select_active_world_character(
+            db,
+            scope=scope,
+            approval_id=approval.id,
+            selected_at=now,
+        )
     db.add(approval)
     try:
         db.commit()
@@ -949,22 +997,36 @@ def reject_setup(
     user: CharacterOwner,
     data: schemas.WorldCharacterSetupRejectCreate,
 ) -> schemas.WorldCharacterSetupRead:
-    scope = _load_scope(db, world_character_id=world_character_id, user=user)
+    scope = _load_scope(db, world_character_id=world_character_id, user=user, lock_for_update=True)
+    request_hash = world_character_contracts.canonical_sha256({
+        "profile_id": data.profile_id, "repertoire_id": data.repertoire_id,
+        "reason": data.reason,
+    })
+    replay = db.scalar(select(models.WorldCharacterSetupAttempt).where(
+        models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
+        models.WorldCharacterSetupAttempt.owner_user_id == user.id,
+        models.WorldCharacterSetupAttempt.stage == "approval",
+        models.WorldCharacterSetupAttempt.idempotency_key == data.idempotency_key,
+    ))
+    if replay is not None:
+        if replay.status == "cancelled" and replay.input_hash == request_hash:
+            return get_setup(db, world_character_id=world_character_id, user=user)
+        raise WorldCharacterSetupConflictError("idempotency_replay")
+    _claim_setup_write(db, scope)
+    profile = _latest_profile(db, world_character_id)
+    repertoire = _latest_repertoire(db, world_character_id, profile_id=profile.id) if profile else None
+    if (
+        profile is None or profile.status not in {"draft", "stale"}
+        or data.profile_id != profile.id
+        or data.repertoire_id != (repertoire.id if repertoire else None)
+    ):
+        raise WorldCharacterSetupConflictError("row_version_conflict")
+    if db.scalar(select(models.WorldCharacterSetupAttempt.id).where(
+        models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
+        models.WorldCharacterSetupAttempt.status == "running",
+    )) is not None:
+        raise WorldCharacterSetupConflictError("setup_in_progress")
     now = datetime.now(UTC)
-    for profile in db.scalars(
-        select(models.WorldCommunityProfile).where(
-            models.WorldCommunityProfile.world_character_id == world_character_id,
-            models.WorldCommunityProfile.status == "draft",
-        )
-    ):
-        profile.status = "failed"
-    for repertoire in db.scalars(
-        select(models.WorldActivityRepertoire).where(
-            models.WorldActivityRepertoire.world_character_id == world_character_id,
-            models.WorldActivityRepertoire.status == "draft",
-        )
-    ):
-        repertoire.status = "failed"
     consent_attempt = db.scalar(
         select(models.WorldCharacterSetupAttempt)
         .where(
@@ -989,14 +1051,15 @@ def reject_setup(
             consented_at=consent_attempt.consented_at,
             logical_call_count=0,
             physical_request_count=0,
-            input_hash=world_character_contracts.canonical_sha256(
-                {"reason": data.reason, "world_character_id": scope.world_character.id}
-            ),
+            input_hash=request_hash,
             safe_error_code="owner_rejected",
             started_at=now,
             finished_at=now,
         )
     )
+    profile.status = "failed"
+    if repertoire is not None and repertoire.status in {"draft", "stale"}:
+        repertoire.status = "failed"
     try:
         db.commit()
     except IntegrityError as exc:
@@ -1016,7 +1079,10 @@ def get_setup(
     character_hash = world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
     profile = _latest_profile(db, world_character_id)
-    repertoire = _latest_repertoire(db, world_character_id)
+    repertoire = _latest_repertoire(db, world_character_id, profile_id=profile.id) if profile else None
+    active = get_approved_pair(db, world_character_id)
+    active_profile, active_repertoire = active if active is not None else (None, None)
+    active_candidates = _candidate_rows(db, active_repertoire.id) if active_repertoire else []
     running = db.scalar(
         select(models.WorldCharacterSetupAttempt.id).where(
             models.WorldCharacterSetupAttempt.world_character_id == world_character_id,
@@ -1028,35 +1094,38 @@ def get_setup(
         .where(
             models.WorldCharacterSetupAttempt.world_character_id == world_character_id
         )
-        .order_by(models.WorldCharacterSetupAttempt.created_at.desc())
+        .order_by(models.WorldCharacterSetupAttempt.created_at.desc(), models.WorldCharacterSetupAttempt.id.desc())
     )
     stale = bool(
         (profile is not None and (
-            profile.character_contract_hash != character_hash
+            (profile.status != "ready" and profile.character_contract_hash != character_hash)
             or profile.world_contract_hash != world_hash
         ))
         or (repertoire is not None and (
-            repertoire.character_contract_hash != character_hash
+            (repertoire.status != "ready" and repertoire.character_contract_hash != character_hash)
             or repertoire.world_contract_hash != world_hash
         ))
     )
     candidate_rows = _candidate_rows(db, repertoire.id) if repertoire else []
     autonomy_ready = bool(
-        profile is not None
-        and repertoire is not None
-        and profile.status == "ready"
-        and repertoire.status == "ready"
-        and not stale
-        and _daypart_counts(candidate_rows)
+        active_profile is not None
+        and active_repertoire is not None
+        and scope.world_character.status == "active"
+        and approved_pair_matches_world(
+            scope.world_character, active_profile, active_repertoire, world_hash=world_hash,
+        )
+        and _daypart_counts(active_candidates)
         == {daypart: 10 for daypart in world_character_contracts.DAYPARTS}
     )
     can_approve = bool(
         profile is not None
         and repertoire is not None
-        and profile.status in {"draft", "ready"}
-        and repertoire.status in {"draft", "ready"}
+        and profile.status == "draft"
+        and repertoire.status == "draft"
+        and repertoire.community_profile_id == profile.id
         and not stale
         and len(candidate_rows) == 40
+        and running is None
     )
     if running is not None:
         state: schemas.WorldSetupState = "running"
@@ -1069,7 +1138,7 @@ def get_setup(
     else:
         state = "ready"
     retry_stage = None
-    if latest_attempt is not None and latest_attempt.status == "failed":
+    if latest_attempt is not None and latest_attempt.status == "failed" and latest_attempt.stage in {"community_profile", "repertoire"} and not stale:
         retry_stage = latest_attempt.stage
     return schemas.WorldCharacterSetupRead(
         world_character_id=world_character_id,
@@ -1081,7 +1150,11 @@ def get_setup(
         reused=reused,
         can_retry_stage=retry_stage,
         can_approve=can_approve,
-        can_regenerate=state in {"stale", "failed"},
+        can_regenerate=running is None,
+        can_reject=bool(profile is not None and profile.status in {"draft", "stale"} and running is None),
+        persona_changed=bool(active_profile and active_profile.character_contract_hash != character_hash),
+        active_profile=_profile_read(active_profile) if active_profile else None,
+        active_repertoire=_repertoire_read(active_repertoire, active_candidates) if active_repertoire else None,
         safe_reason_code=(
             latest_attempt.safe_error_code
             if latest_attempt is not None and latest_attempt.status == "failed"
@@ -1128,6 +1201,23 @@ def _assert_regeneration_quota(db: Session, scope: SetupScope) -> None:
         raise WorldCharacterSetupValidationError("regeneration_limit_reached")
 
 
+def _claim_setup_write(db: Session, scope: SetupScope) -> None:
+    """Serialize setup mutations on SQLite as well as row-locking databases.
+
+    The existing WorldCharacter version is the compare-and-swap token. Claims
+    commit with their operation, before any provider request is awaited.
+    """
+    version = scope.world_character.version
+    result = db.execute(update(models.WorldCharacter).where(
+        models.WorldCharacter.id == scope.world_character.id,
+        models.WorldCharacter.version == version,
+    ).values(version=version + 1).execution_options(synchronize_session=False))
+    if result.rowcount != 1:
+        db.rollback()
+        raise WorldCharacterSetupConflictError("row_version_conflict")
+    db.refresh(scope.world_character)
+
+
 def _begin_attempt(
     db: Session,
     *,
@@ -1151,11 +1241,11 @@ def _begin_attempt(
         raise WorldCharacterSetupConflictError(
             "setup_in_progress" if existing.status == "running" else "idempotency_replay"
         )
+    _claim_setup_write(db, scope)
     running = db.scalar(
         select(models.WorldCharacterSetupAttempt.id).where(
             models.WorldCharacterSetupAttempt.world_character_id
             == scope.world_character.id,
-            models.WorldCharacterSetupAttempt.stage == stage,
             models.WorldCharacterSetupAttempt.status == "running",
         )
     )
@@ -1451,22 +1541,23 @@ def _latest_profile(
                 ["draft", "ready", "stale", "failed"]
             ),
         )
-        .order_by(models.WorldCommunityProfile.created_at.desc())
+        .order_by(models.WorldCommunityProfile.created_at.desc(), models.WorldCommunityProfile.id.desc())
     )
 
 
 def _latest_repertoire(
-    db: Session, world_character_id: str
+    db: Session, world_character_id: str, *, profile_id: str | None = None,
 ) -> models.WorldActivityRepertoire | None:
     return db.scalar(
         select(models.WorldActivityRepertoire)
         .where(
             models.WorldActivityRepertoire.world_character_id == world_character_id,
+            models.WorldActivityRepertoire.community_profile_id == profile_id if profile_id else True,
             models.WorldActivityRepertoire.status.in_(
                 ["draft", "ready", "stale", "failed"]
             ),
         )
-        .order_by(models.WorldActivityRepertoire.created_at.desc())
+        .order_by(models.WorldActivityRepertoire.created_at.desc(), models.WorldActivityRepertoire.id.desc())
     )
 
 

@@ -80,6 +80,10 @@ export type WorldCharacterSetupRead = {
   can_retry_stage: WorldSetupStage | null;
   can_approve: boolean;
   can_regenerate: boolean;
+  can_reject: boolean;
+  persona_changed: boolean;
+  active_profile: WorldCommunityProfileRead | null;
+  active_repertoire: WorldActivityRepertoireRead | null;
   safe_reason_code: string | null;
   current_character_contract_hash: string;
   current_world_contract_hash: string;
@@ -268,9 +272,9 @@ export function getWorldFeedStatus(worldCharacterId: string) {
   );
 }
 
-export function preflightWorldCharacterSetup(worldCharacterId: string) {
+export function preflightWorldCharacterSetup(worldCharacterId: string, regenerate = false) {
   return apiRequest<WorldCharacterSetupPreflightRead>(
-    setupPath(worldCharacterId, "/preflight"),
+    setupPath(worldCharacterId, `/preflight?regenerate=${regenerate}`),
     { method: "POST" },
   );
 }
@@ -278,6 +282,7 @@ export function preflightWorldCharacterSetup(worldCharacterId: string) {
 export function generateWorldCharacterSetup(
   worldCharacterId: string,
   idempotencyKey: string,
+  regenerate = false,
 ) {
   return apiRequest<WorldCharacterSetupRead>(
     setupPath(worldCharacterId, "/generate"),
@@ -287,6 +292,7 @@ export function generateWorldCharacterSetup(
         idempotency_key: idempotencyKey,
         consent_policy_version: "world-character-setup-v1",
         consented: true,
+        regenerate,
       },
     },
   );
@@ -306,6 +312,7 @@ export function retryWorldCharacterSetup(
         consent_policy_version: "world-character-setup-v1",
         consented: true,
         stage,
+        regenerate: stage === "community_profile",
       },
     },
   );
@@ -334,12 +341,14 @@ export function rejectWorldCharacterSetup(
   worldCharacterId: string,
   reason: string,
   idempotencyKey: string,
+  profileId: string,
+  repertoireId: string | null,
 ) {
   return apiRequest<WorldCharacterSetupRead>(
     setupPath(worldCharacterId, "/reject"),
     {
       method: "POST",
-      body: { idempotency_key: idempotencyKey, reason },
+      body: { idempotency_key: idempotencyKey, reason, profile_id: profileId, repertoire_id: repertoireId },
     },
   );
 }

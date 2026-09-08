@@ -70,7 +70,8 @@ def _ready_repertoire(
     if scope.world_character.status not in {"pending", "inactive", "active"}:
         raise DailyActivityPlanValidationError("world_character_ineligible")
 
-    character_hash = references.character_contract_hash(scope.character)
+    # The approved pair owns generation provenance; persona edits do not expire it.
+    character_hash = scope.world_character.character_contract_hash
     world_hash = scope.world.contract_hash
     repertoire = references.get_ready_repertoire(scope.world_character.id)
     if repertoire is None:
@@ -81,7 +82,10 @@ def _ready_repertoire(
     if (
         repertoire.character_contract_hash != character_hash
         or repertoire.world_contract_hash != world_hash
-        or scope.world_character.character_contract_hash != character_hash
+        or profile.character_contract_hash != character_hash
+        or profile.world_contract_hash != world_hash
+        or profile.world_character_id != scope.world_character.id
+        or repertoire.world_character_id != scope.world_character.id
         or scope.world_character.world_contract_hash != world_hash
     ):
         raise DailyActivityPlanValidationError("repertoire_stale")
