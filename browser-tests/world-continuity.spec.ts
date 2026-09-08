@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
+import { verifyMemoryRecovery } from "./memory-recovery-fixture";
 import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed, UI_D_ROOT_POST_ID } from "./continuity-next-fixture";
+
+test("memory: failed selection retry refreshes retained items and evidence", async ({ page }) => {
+  const world = uiDWorld();
+  await installBackendFixture(page, { deviceWorlds: [world] });
+  await verifyMemoryRecovery(page, world.world_id);
+});
 
 test("continuity: nested evidence opens the exact later-page reply and its parent", async ({ page }) => {
   const world = uiDWorld();
@@ -119,4 +126,12 @@ test("continuity: approved activity remains visible during optional generation a
   expect(writes[1].profile_id).toBe("review-profile");
   expect(writes[1].repertoire_id).toBe("review-repertoire");
   await expect(page.getByLabel("현재 사용하는 승인 결과")).toContainText("현재 승인된 프로필");
+  await generate.click();
+  await expect.poll(() => writes.length).toBe(3);
+  expect(writes[2].idempotency_key).not.toBe(writes[0].idempotency_key);
+  await expect(page.getByLabel("현재 사용하는 승인 결과")).toContainText("현재 승인된 프로필");
+  await page.route("**/autonomy-setup/generate", (route) => json(route, { detail: { code: "provider_failed" } }, 502));
+  await generate.click();
+  await expect(page.locator("#world-setup-generation-error")).toBeVisible();
+  await expect(generate).toBeEnabled();
 });

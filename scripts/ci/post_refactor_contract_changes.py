@@ -7,6 +7,7 @@ still fails the original preservation checker.
 from __future__ import annotations
 
 from collections import Counter
+import ast
 from copy import deepcopy
 import json
 from pathlib import Path
@@ -44,7 +45,25 @@ def load(root: Path) -> list[dict]:
         for source, blob in record["source_blobs"].items():
             if git("rev-parse", f"{commit}:{source}").decode().strip() != blob:
                 raise ValueError("product change source provenance differs")
+        for removed in record.get("removed_bindings", []):
+            source, symbol = removed["source"], removed["symbol"]
+            if source not in record["source_blobs"] or not re.fullmatch(r"[A-Za-z_]\w*", symbol):
+                raise ValueError("removed binding requires exact committed source evidence")
+            before = git("show", f"{commit}^:{source}").decode("utf-8-sig")
+            after = git("show", f"{commit}:{source}").decode("utf-8-sig")
+            def definitions(text: str) -> list[str]:
+                return [ast.dump(node, include_attributes=False) for node in ast.parse(text).body
+                        if (isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name == symbol)
+                        or (isinstance(node, (ast.Assign, ast.AnnAssign)) and any(
+                            isinstance(target, ast.Name) and target.id == symbol
+                            for target in (node.targets if isinstance(node, ast.Assign) else [node.target])))]
+            if definitions(before) != [removed["before_ast"]] or definitions(after) or definitions((root / source).read_text(encoding="utf-8-sig")):
+                raise ValueError("removed binding preimage or actual absence differs")
     return records
+
+
+def removed_bindings(records: list[dict]) -> set[tuple[str, str]]:
+    return {(item["source"], item["symbol"]) for record in records for item in record.get("removed_bindings", [])}
 
 
 def contracts(original: dict, records: list[dict]) -> dict:

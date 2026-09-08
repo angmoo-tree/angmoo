@@ -104,8 +104,6 @@ export type WorldCharacterSetupPreflightRead = {
   physical_request_count: number;
   profile_max_output_tokens: number;
   repertoire_max_output_tokens: number;
-  regeneration_limit_character_24h: number;
-  regeneration_limit_owner_24h: number;
   reused: boolean;
   safe_reason_code: string | null;
 };

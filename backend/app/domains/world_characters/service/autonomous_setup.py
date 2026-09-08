@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import func, select, text, update
+from sqlalchemy import select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -39,10 +39,6 @@ from app.domains.worlds.service import (
 from app.domains.worlds.service import character_entry as world_entry
 from app.integrations import direct_llm
 from app.providers.registry import get_model_spec
-
-
-PROFILE_REGENERATION_LIMIT_24H = 2
-OWNER_REGENERATION_LIMIT_24H = 5
 
 
 @dataclass(frozen=True)
@@ -581,7 +577,6 @@ async def generate_setup(
             models.WorldCharacterSetupAttempt.status == "running",
         )) is not None:
             raise WorldCharacterSetupConflictError("setup_in_progress")
-        _assert_regeneration_quota(db, scope)
         attempt = _begin_attempt(
             db,
             scope=scope,
@@ -1175,30 +1170,6 @@ def get_setup(
             else None
         ),
     )
-
-
-def _assert_regeneration_quota(db: Session, scope: SetupScope) -> None:
-    since = datetime.now(UTC) - timedelta(hours=24)
-    character_count = db.scalar(
-        select(func.count(models.WorldCharacterSetupAttempt.id)).where(
-            models.WorldCharacterSetupAttempt.world_character_id
-            == scope.world_character.id,
-            models.WorldCharacterSetupAttempt.stage == "community_profile",
-            models.WorldCharacterSetupAttempt.created_at >= since,
-        )
-    ) or 0
-    owner_count = db.scalar(
-        select(func.count(models.WorldCharacterSetupAttempt.id)).where(
-            models.WorldCharacterSetupAttempt.owner_user_id == scope.character.owner_id,
-            models.WorldCharacterSetupAttempt.stage == "community_profile",
-            models.WorldCharacterSetupAttempt.created_at >= since,
-        )
-    ) or 0
-    if (
-        character_count >= PROFILE_REGENERATION_LIMIT_24H
-        or owner_count >= OWNER_REGENERATION_LIMIT_24H
-    ):
-        raise WorldCharacterSetupValidationError("regeneration_limit_reached")
 
 
 def _claim_setup_write(db: Session, scope: SetupScope) -> None:

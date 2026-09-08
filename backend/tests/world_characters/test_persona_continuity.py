@@ -44,6 +44,63 @@ def _regenerate(db, owner, entry, provider, key="explicit-regenerate"):
         ), provider=provider))
 
 
+def test_repeated_generation_has_no_character_or_owner_daily_limit():
+    with Session(_engine(), expire_on_commit=False) as db:
+        owner, entry, approved = _approved(db)
+        profile_ids = {approved.profile.id}
+        for attempt in range(7):
+            provider = FakeProvider()
+            key = f"unlimited-explicit-{attempt}"
+            result = _regenerate(db, owner, entry, provider, key=key)
+            assert provider.profile_calls == provider.repertoire_calls == 1
+            assert result.profile.id not in profile_ids
+            profile_ids.add(result.profile.id)
+            assert result.active_profile.id == approved.profile.id
+            assert result.active_repertoire.id == approved.repertoire.id
+            assert result.can_regenerate
+            replay_provider = FakeProvider()
+            assert _regenerate(db, owner, entry, replay_provider, key=key).reused
+            assert replay_provider.profile_calls == replay_provider.repertoire_calls == 0
+            setup.reject_setup(db, world_character_id=entry.id, user=owner,
+                data=schemas.WorldCharacterSetupRejectCreate(
+                    idempotency_key=f"unlimited-reject-{attempt}",
+                    profile_id=result.profile.id, repertoire_id=result.repertoire.id,
+                ))
+        assert db.scalar(select(func.count()).select_from(models.WorldCharacterSetupAttempt).where(
+            models.WorldCharacterSetupAttempt.stage == "community_profile")) == 8
+        preflight = setup.preflight_regeneration(db, world_character_id=entry.id, user=owner)
+        assert "regeneration_limit_character_24h" not in preflight.model_dump()
+        assert "regeneration_limit_owner_24h" not in preflight.model_dump()
+
+
+def test_other_characters_historical_attempts_do_not_block_owner_generation():
+    with Session(_engine(), expire_on_commit=False) as db:
+        owner, entry, approved = _approved(db)
+        other_character = fixture_models.Character(id="history-character", owner_id=owner.id,
+            name="History fixture", handle="history_fixture", persona_summary="Fixture")
+        db.add(other_character)
+        db.flush()
+        other = models.WorldCharacter(id="history-entry", world_id=entry.world_id,
+            character_id=other_character.id, membership_id=entry.membership_id,
+            role_key=entry.role_key, status="active")
+        db.add(other)
+        db.flush()
+        original = db.scalar(select(models.WorldCharacterSetupAttempt).where(
+            models.WorldCharacterSetupAttempt.stage == "community_profile"))
+        values = {column.name: getattr(original, column.name)
+                  for column in models.WorldCharacterSetupAttempt.__table__.columns}
+        for index, status in enumerate(["succeeded", "failed", "cancelled", "failed", "succeeded"]):
+            db.add(models.WorldCharacterSetupAttempt(**{
+                **values, "id": f"historical-{index}", "world_character_id": other.id,
+                "idempotency_key": f"historical-key-{index}", "status": status,
+            }))
+        db.commit()
+        before = db.scalar(select(func.count()).select_from(models.WorldCharacterSetupAttempt))
+        generated = _regenerate(db, owner, entry, FakeProvider(), key="after-owner-history")
+        assert generated.can_approve and generated.active_profile.id == approved.profile.id
+        assert db.scalar(select(func.count()).select_from(models.WorldCharacterSetupAttempt)) == before + 2
+
+
 @pytest.mark.parametrize("personality", ["작은 변경", "차분하고 호기심이 많다. " * 90])
 @pytest.mark.parametrize("enabled", [False, True])
 def test_persona_save_preserves_execution_and_generation_provenance(personality, enabled):
