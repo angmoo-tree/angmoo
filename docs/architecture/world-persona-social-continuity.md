@@ -136,3 +136,19 @@ PR CI and installed USER CHECK must be recorded separately in the PR.
 
 No merge, release, installed-data rewrite or successful USER CHECK is implied by
 this document or by automated test success.
+
+## Preservation after the structural refactor
+
+PR316 intentionally changes product behavior after AR-X. The historical source,
+API/ORM checkpoints and original frontend browser oracles remain immutable.
+`security/post_refactor_contract_changes.json` records only the exact before/after
+OpenAPI operation/schema hashes and four behavioral assertion sets required by
+this change, with implementation commit/blob provenance and the PR for review.
+The preservation checker applies those entries to a copy of the old expectations;
+it still rejects unlisted API drift, ORM changes, missing tests, assertion deletion,
+and edits to prior change records. New sources/tests retain the existing
+append-only introduction ledger. This does not imply PR review or USER CHECK passed.
+
+Each thread row carries `thread_root_post_id` verified by the server so a later
+page can retain ancestry proof even when its parent is on a different page.
+Legacy direct replies remain readable; unrelated same-World rows fail validation.

@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "world-persona-social-continuity",
+      "implementation_commit": "13ac742aa6f96d2cdda8e19af5e3002c18fe6d6d",
+      "reason": "PR316: persona limits, preserved approved activity, optional generation and nested reply traversal; immutable v1 and original checkpoint remain intact.",
+      "review": "https://github.com/angmoo-tree/angmoo/pull/316",
+      "source_blobs": {
+        "backend/tests/social/test_l3_owner_manual_social_inbox.py": "a960134d838c93faaebe75928a12424f6874d1e0",
+        "backend/tests/world_characters/test_runtime_mode_repair.py": "8640a2bffc9ca03aa202f4c9c4434c6aa1acac6e",
+        "backend/tests/routines/test_activity_persistence.py": "1a25dd63fc54db4079c65ec19aa7552f73d6f0b9",
+        "backend/app/domains/characters/schemas.py": "a76bd704172933c7fc25d9005befae99bc890958",
+        "backend/app/domains/world_characters/schemas/setup.py": "2f3b70dfa5c87aa082de3082f7196aa79f3dadde"
+      },
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/manual-social/posts/{post_id}",
+          "before": "4e2197f58c66d48069eda320c795e7cb2bff53f52fba6dc1764ad85ced5e8198",
+          "after": "194317a3fd873038ba8f3f8714ef3f32ecb8e97ad8063d98853551c4746a5530"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/preflight",
+          "before": "6a12ef4c30d1cfc92c7990026bed2611a447089584c82df5ea91534a7cdf4d8f",
+          "after": "6bfb7b3713f78a70b193a41828ec42edd4ce5b3c909fe225e8f458cdf2c14ba5"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "AgentCreate",
+          "before": "2b2d993bd564d726c564b5a040a983c853a6ce6fd7a8c39ee52228f5cb630881",
+          "after": "128ba5a95c9a151732cbb93319320135b20819cf15de0643652022ef0636a509"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "AgentCreationDraftUpdate",
+          "before": "a5b78c5ead4cbb36e7d38c96765e0f09427fc9a4de5b2342a5e8aaa6cb962c84",
+          "after": "24363063eaa13479bf682c589a2c0a3f372f397da6b8310c845bfc0a163755c2"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "AgentPersonaUpdate",
+          "before": "e6f9ef5a66b4db571d89aaaab8cddf6f1055055e9df499b9fd6b6c49697cc17a",
+          "after": "8ca932fe265c583c6036318b7898a24f222cd44a19b2af475644677d672e419f"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "AgentProfileUpdate",
+          "before": "1535d995473d16e21c98d8e15706d879e1b721caeae91cfe2909af4c9dfd3bf0",
+          "after": "16574d7450acd68d9d4eb759c362a36a302aa5f941c0a8b1d60dbc42f92df3a6"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "ManualSocialFeedRead",
+          "before": "f03a439692b21611d2d214cba873e1742eb9aca2272bce681fd2f93ad24867bf",
+          "after": "0a9c635f706e35a84be38e64c8e3365f757b26de2aa6bffa55614b2eadf4ce00"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "ManualSocialPostRead",
+          "before": "52d4cb37b43cb38475861c07a50f841546971747e34f5761e57aeae3838653c9",
+          "after": "c8dfa517ead4883594390c13501ee8e9b00e53a0085cb18860d40b4dba479c18"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupGenerateCreate",
+          "before": "9634d4a42757b119290e04aea84c2f550ac3fcd6d80406952239a8610dce9295",
+          "after": "9d89eebf37c09741d27dc44bc64aa2a1c23262935464f2857078a1746845971c"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRead",
+          "before": "7d2c670a411001203c79c7fea15285ec3749603e85b7567dceae05077a195843",
+          "after": "59e3405e3e848467e93be6bc3b09b38f60ff894d9d93ede9712c542a055fb8da"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRejectCreate",
+          "before": "a94d7363c5e03dbd7f0dd93e313f168a50298f316b919c58963a6eb58ae0ec7b",
+          "after": "241469f669cd4ed6ba5b1510870f60699afc528389a8e74ca3366c5076d7d462"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRetryCreate",
+          "before": "22c123fdab62d3810d53054154aaea45fecae5af171f57b4578679fc44c5e71f",
+          "after": "cddd5f8372f2a71445925c9d201e09890dd0c685fd789aee13feac066ebfeb55"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/manual-social/posts/{post_id}",
+          "before": "4e2197f58c66d48069eda320c795e7cb2bff53f52fba6dc1764ad85ced5e8198",
+          "after": "194317a3fd873038ba8f3f8714ef3f32ecb8e97ad8063d98853551c4746a5530"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/preflight",
+          "before": "6a12ef4c30d1cfc92c7990026bed2611a447089584c82df5ea91534a7cdf4d8f",
+          "after": "6bfb7b3713f78a70b193a41828ec42edd4ce5b3c909fe225e8f458cdf2c14ba5"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "AgentCreate",
+          "before": "2b2d993bd564d726c564b5a040a983c853a6ce6fd7a8c39ee52228f5cb630881",
+          "after": "128ba5a95c9a151732cbb93319320135b20819cf15de0643652022ef0636a509"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "AgentCreationDraftUpdate",
+          "before": "a5b78c5ead4cbb36e7d38c96765e0f09427fc9a4de5b2342a5e8aaa6cb962c84",
+          "after": "24363063eaa13479bf682c589a2c0a3f372f397da6b8310c845bfc0a163755c2"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "AgentPersonaUpdate",
+          "before": "e6f9ef5a66b4db571d89aaaab8cddf6f1055055e9df499b9fd6b6c49697cc17a",
+          "after": "8ca932fe265c583c6036318b7898a24f222cd44a19b2af475644677d672e419f"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "AgentProfileUpdate",
+          "before": "1535d995473d16e21c98d8e15706d879e1b721caeae91cfe2909af4c9dfd3bf0",
+          "after": "16574d7450acd68d9d4eb759c362a36a302aa5f941c0a8b1d60dbc42f92df3a6"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "ManualSocialFeedRead",
+          "before": "f03a439692b21611d2d214cba873e1742eb9aca2272bce681fd2f93ad24867bf",
+          "after": "0a9c635f706e35a84be38e64c8e3365f757b26de2aa6bffa55614b2eadf4ce00"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "ManualSocialPostRead",
+          "before": "52d4cb37b43cb38475861c07a50f841546971747e34f5761e57aeae3838653c9",
+          "after": "c8dfa517ead4883594390c13501ee8e9b00e53a0085cb18860d40b4dba479c18"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupGenerateCreate",
+          "before": "9634d4a42757b119290e04aea84c2f550ac3fcd6d80406952239a8610dce9295",
+          "after": "9d89eebf37c09741d27dc44bc64aa2a1c23262935464f2857078a1746845971c"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRead",
+          "before": "7d2c670a411001203c79c7fea15285ec3749603e85b7567dceae05077a195843",
+          "after": "59e3405e3e848467e93be6bc3b09b38f60ff894d9d93ede9712c542a055fb8da"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRejectCreate",
+          "before": "a94d7363c5e03dbd7f0dd93e313f168a50298f316b919c58963a6eb58ae0ec7b",
+          "after": "241469f669cd4ed6ba5b1510870f60699afc528389a8e74ca3366c5076d7d462"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldCharacterSetupRetryCreate",
+          "before": "22c123fdab62d3810d53054154aaea45fecae5af171f57b4578679fc44c5e71f",
+          "after": "cddd5f8372f2a71445925c9d201e09890dd0c685fd789aee13feac066ebfeb55"
+        }
+      ],
+      "assertions": [
+        {
+          "node": "tests/social/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped",
+          "before": [
+            "Module(body=[Assert(test=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=Compare(left=Subscript(value=Name(id='item', ctx=Load()), slice=Constant(value='world_id'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='world-manual')]), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='items'), ctx=Load()), is_async=0)])]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='identity', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='reply', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='reply_as_root', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=404)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='thread', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=200)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='wrong_world', ctx=Load()), attr='status_code', ctx=Load()), ops=[In()], comparators=[Set(elts=[Constant(value=403), Constant(value=404)])]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='reply_as_root', ctx=Load()), attr='json', ctx=Load())), ops=[Eq()], comparators=[Dict(keys=[Constant(value='detail')], values=[Constant(value='post_not_in_world')])]))])",
+            "Module(body=[Assert(test=Compare(left=ListComp(elt=Subscript(value=Name(id='item', ctx=Load()), slice=Constant(value='id'), ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='items'), ctx=Load()), is_async=0)]), ops=[Eq()], comparators=[List(elts=[Constant(value='post-autonomous-target'), Subscript(value=Subscript(value=Call(func=Attribute(value=Name(id='reply', ctx=Load()), attr='json', ctx=Load())), slice=Constant(value='post'), ctx=Load()), slice=Constant(value='id'), ctx=Load())], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='world_id'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='world-manual')]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=Compare(left=Subscript(value=Name(id='item', ctx=Load()), slice=Constant(value='world_id'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='world-manual')]), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='items'), ctx=Load()), is_async=0)])]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='identity', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='reply', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='reply_as_root', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=200)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='thread', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=200)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='wrong_world', ctx=Load()), attr='status_code', ctx=Load()), ops=[In()], comparators=[Set(elts=[Constant(value=403), Constant(value=404)])]))])",
+            "Module(body=[Assert(test=Compare(left=ListComp(elt=Subscript(value=Name(id='item', ctx=Load()), slice=Constant(value='id'), ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='items'), ctx=Load()), is_async=0)]), ops=[Eq()], comparators=[List(elts=[Constant(value='post-autonomous-target'), Subscript(value=Subscript(value=Call(func=Attribute(value=Name(id='reply', ctx=Load()), attr='json', ctx=Load())), slice=Constant(value='post'), ctx=Load()), slice=Constant(value='id'), ctx=Load())], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Name(id='reply_as_root', ctx=Load()), attr='json', ctx=Load())), slice=Constant(value='root_post_id'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='post-autonomous-target')]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Name(id='reply_as_root', ctx=Load()), attr='json', ctx=Load())), slice=Constant(value='target_post_id'), ctx=Load()), ops=[Eq()], comparators=[Subscript(value=Subscript(value=Call(func=Attribute(value=Name(id='reply', ctx=Load()), attr='json', ctx=Load())), slice=Constant(value='post'), ctx=Load()), slice=Constant(value='id'), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='world_id'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='world-manual')]))])"
+          ]
+        },
+        {
+          "node": "tests/social/test_l3_owner_manual_social_inbox.py::test_manual_social_count_projection_is_exact_world_visible_and_batched",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='identity', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='thread', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=200)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Subscript(value=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='like_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Subscript(value=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='reply_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='like_queries', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='reply_queries', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='set', ctx=Load()), args=[Name(id='items_by_id', ctx=Load())]), ops=[Eq()], comparators=[Set(elts=[Constant(value='post-autonomous-target'), Constant(value='reply-count-visible')])]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.deleted_at is null'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.report_hidden_at is null'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.visibility'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.world_id'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=ListComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='id', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), is_async=0)]), ops=[Eq()], comparators=[List(elts=[Constant(value='post-autonomous-target')], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='post-autonomous-target'), ctx=Load()), slice=Constant(value='like_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='post-autonomous-target'), ctx=Load()), slice=Constant(value='reply_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='reply-count-visible'), ctx=Load()), slice=Constant(value='like_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='reply-count-visible'), ctx=Load()), slice=Constant(value='reply_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='identity', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=201)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='thread', ctx=Load()), attr='status_code', ctx=Load()), ops=[Eq()], comparators=[Constant(value=200)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Subscript(value=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='like_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Subscript(value=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='reply_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='like_queries', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='reply_queries', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='set', ctx=Load()), args=[Name(id='items_by_id', ctx=Load())]), ops=[Eq()], comparators=[Set(elts=[Constant(value='post-autonomous-target'), Constant(value='reply-count-visible'), Constant(value='reply-count-nested')])]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.deleted_at is null'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.report_hidden_at is null'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.visibility'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='posts.world_id'), ops=[In()], comparators=[Subscript(value=Name(id='reply_queries', ctx=Load()), slice=Constant(value=0), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=ListComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='id', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Attribute(value=Name(id='feed', ctx=Load()), attr='items', ctx=Load()), is_async=0)]), ops=[Eq()], comparators=[List(elts=[Constant(value='post-autonomous-target')], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='post-autonomous-target'), ctx=Load()), slice=Constant(value='like_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='post-autonomous-target'), ctx=Load()), slice=Constant(value='reply_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='reply-count-visible'), ctx=Load()), slice=Constant(value='like_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Subscript(value=Name(id='items_by_id', ctx=Load()), slice=Constant(value='reply-count-visible'), ctx=Load()), slice=Constant(value='reply_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])"
+          ]
+        },
+        {
+          "node": "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='already_ready', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='excluded_row', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='explicit_legacy', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='first', ctx=Load()), attr='repaired_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='first', ctx=Load()), attr='scanned_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=5)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='imported', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='pending', ctx=Load()), attr='consumed_at', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='pending', ctx=Load()), attr='status', ctx=Load()), ops=[Eq()], comparators=[Constant(value='pending')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='activity_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='routine_resident_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='activity_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='routine_resident_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replay', ctx=Load()), attr='id', ctx=Load()), ops=[Eq()], comparators=[Subscript(value=Name(id='ids', ctx=Load()), slice=Constant(value='eligible'), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replay', ctx=Load()), attr='reused', ctx=Load()), ops=[Is()], comparators=[Constant(value=True)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replayed_row', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replayed_row', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='second', ctx=Load()), attr='repaired_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='second', ctx=Load()), attr='scanned_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=4)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='stale', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='AgentRun', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='GraphProjectionOutbox', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='Post', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='RelationshipState', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='RelationshipStateChange', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='SocialEvent', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='dict', ctx=Load()), args=[Attribute(value=Name(id='first', ctx=Load()), attr='skipped_reasons', ctx=Load())]), ops=[Eq()], comparators=[Dict(keys=[Constant(value='imported_world'), Constant(value='profile_not_ready'), Constant(value='source_marker_missing'), Constant(value='world_character_contract_stale')], values=[Constant(value=1), Constant(value=1), Constant(value=1), Constant(value=1)])]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='already_ready', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='excluded_row', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='explicit_legacy', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='imported', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='owner', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='pending', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='repaired', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='repaired_second', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='replayed_row', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='stale', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='already_ready', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='excluded_row', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='explicit_legacy', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='first', ctx=Load()), attr='repaired_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='first', ctx=Load()), attr='scanned_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=5)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='imported', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='pending', ctx=Load()), attr='consumed_at', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='pending', ctx=Load()), attr='status', ctx=Load()), ops=[Eq()], comparators=[Constant(value='pending')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='activity_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='routine_resident_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='activity_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='routine_resident_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='repaired_second', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replay', ctx=Load()), attr='id', ctx=Load()), ops=[Eq()], comparators=[Subscript(value=Name(id='ids', ctx=Load()), slice=Constant(value='eligible'), ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replay', ctx=Load()), attr='reused', ctx=Load()), ops=[Is()], comparators=[Constant(value=True)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replayed_row', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='keyword_search_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='replayed_row', ctx=Load()), attr='version', ctx=Load()), ops=[Eq()], comparators=[Constant(value=8)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='second', ctx=Load()), attr='repaired_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='second', ctx=Load()), attr='scanned_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=4)]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='stale', ctx=Load()), attr='feed_runtime_mode', ctx=Load()), ops=[Eq()], comparators=[Constant(value='legacy_latest_v1')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='AgentRun', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='GraphProjectionOutbox', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='Post', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='RelationshipState', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='RelationshipStateChange', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='scalar', ctx=Load()), args=[Call(func=Attribute(value=Call(func=Name(id='select', ctx=Load()), args=[Call(func=Attribute(value=Name(id='func', ctx=Load()), attr='count', ctx=Load()))]), attr='select_from', ctx=Load()), args=[Attribute(value=Name(id='models', ctx=Load()), attr='SocialEvent', ctx=Load())])]), ops=[Eq()], comparators=[Constant(value=1)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='dict', ctx=Load()), args=[Attribute(value=Name(id='first', ctx=Load()), attr='skipped_reasons', ctx=Load())]), ops=[Eq()], comparators=[Dict(keys=[Constant(value='imported_world'), Constant(value='profile_not_ready'), Constant(value='source_marker_missing')], values=[Constant(value=1), Constant(value=2), Constant(value=1)])]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='already_ready', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='excluded_row', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='explicit_legacy', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='imported', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='owner', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='pending', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='repaired', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='repaired_second', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='replayed_row', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='stale', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]))])"
+          ]
+        },
+        {
+          "node": "tests/routines/test_activity_persistence.py::test_plan_hash_collaboration_keeps_readiness_order_and_attached_character",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='result', ctx=Load()), attr='character_contract_hash', ctx=Load()), ops=[Eq()], comparators=[Call(func=Name(id='original_hash', ctx=Load()), args=[Attribute(value=Name(id='fixture', ctx=Load()), attr='character', ctx=Load())])]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='candidates', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=40)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='character', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='fixture', ctx=Load()), attr='character', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='seen', ctx=Load()), ops=[Eq()], comparators=[List(ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='seen', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Constant(value='hash'), Constant(value='repertoire')], ctx=Load())]))])",
+            "Module(body=[Expr(value=Call(func=Attribute(value=Name(id='pytest', ctx=Load()), attr='raises', ctx=Load()), args=[Name(id='DailyActivityPlanValidationError', ctx=Load())], keywords=[keyword(arg='match', value=Constant(value='world_not_ready'))]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='result', ctx=Load()), attr='character_contract_hash', ctx=Load()), ops=[Eq()], comparators=[Call(func=Name(id='original_hash', ctx=Load()), args=[Attribute(value=Name(id='fixture', ctx=Load()), attr='character', ctx=Load())])]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='candidates', ctx=Load())]), ops=[Eq()], comparators=[Constant(value=40)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='character', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='fixture', ctx=Load()), attr='character', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='seen', ctx=Load()), ops=[Eq()], comparators=[List(ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='seen', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Constant(value='repertoire')], ctx=Load())]))])",
+            "Module(body=[Expr(value=Call(func=Attribute(value=Name(id='pytest', ctx=Load()), attr='raises', ctx=Load()), args=[Name(id='DailyActivityPlanValidationError', ctx=Load())], keywords=[keyword(arg='match', value=Constant(value='world_not_ready'))]))])"
+          ]
+        }
+      ]
+    }
+  ]
+}

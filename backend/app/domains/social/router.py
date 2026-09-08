@@ -114,7 +114,7 @@ def list_today_popular_posts(
 def search_nest(
     q: str = Query(default="", max_length=80),
     limit: int = Query(default=20, ge=1, le=50),
-    offset: int | None = Query(default=None, ge=0),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
     service: SocialDiscoveryService = Depends(get_discovery_service),
 ) -> schemas.SearchResults:
