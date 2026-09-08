@@ -10512,6 +10512,349 @@
       "test_suppressions": {
         "tests/runtime/test_current_schema_diagnostics.py": {}
       }
+    },
+    {
+      "commit": "20ab37d22deeee0772d3442fd2f28d59c3336b9a",
+      "feature_id": "AR-X",
+      "reason": "Post-AR-X PR316 World continuity source and regression introduction",
+      "tracked_files": {
+        "backend/app/domains/world_characters/policies/__init__.py": "435d6be7c66b0dfa27b07da1f79e31d7c7c89779",
+        "backend/app/domains/world_characters/policies/approved_setup.py": "cf0bf99c39df4cc032d7f28260f0d30882c715df",
+        "backend/app/domains/world_characters/service/approved_setup.py": "14b241f97006a5c673cfcb34d468244153e89dbe",
+        "backend/tests/world_characters/test_persona_continuity.py": "59913bf6081a7f986494c15328cd30c5e4fd225f"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_persona_continuity.py::test_concurrent_request_during_provider_work_does_not_call_another_provider",
+        "tests/world_characters/test_persona_continuity.py::test_initial_candidate_rejection_leaves_a_generation_path",
+        "tests/world_characters/test_persona_continuity.py::test_new_approval_keeps_todays_plan_and_only_changes_future_plans",
+        "tests/world_characters/test_persona_continuity.py::test_persona_save_preserves_execution_and_generation_provenance[False-\\uc791\\uc740 \\ubcc0\\uacbd]",
+        "tests/world_characters/test_persona_continuity.py::test_persona_save_preserves_execution_and_generation_provenance[False-\\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. ]",
+        "tests/world_characters/test_persona_continuity.py::test_persona_save_preserves_execution_and_generation_provenance[True-\\uc791\\uc740 \\ubcc0\\uacbd]",
+        "tests/world_characters/test_persona_continuity.py::test_persona_save_preserves_execution_and_generation_provenance[True-\\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. \\ucc28\\ubd84\\ud558\\uace0 \\ud638\\uae30\\uc2ec\\uc774 \\ub9ce\\ub2e4. ]",
+        "tests/world_characters/test_persona_continuity.py::test_regeneration_failure_keeps_approved_execution_pair",
+        "tests/world_characters/test_persona_continuity.py::test_reviewed_inputs_changing_does_not_expire_active_pair",
+        "tests/world_characters/test_persona_continuity.py::test_same_input_regeneration_keeps_active_pair_and_rejects_only_target_candidate"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_persona_continuity.py": {
+          "_approved": [],
+          "_regenerate": [],
+          "test_persona_save_preserves_execution_and_generation_provenance": [
+            "assert result.autonomy_ready and result.persona_changed",
+            "assert result.active_profile.id == approved.profile.id",
+            "assert result.active_repertoire.id == approved.repertoire.id",
+            "assert result.active_profile.character_contract_hash == original_hash",
+            "assert entry.character_contract_hash == original_hash",
+            "assert result.autonomous_enabled is enabled",
+            "assert result.can_regenerate and (not result.can_reject) and (not result.can_approve)",
+            "assert evaluate(db, character=character, setting=SimpleNamespace()).ready",
+            "assert repertoire.id == approved.repertoire.id and len(candidates) == 40",
+            "assert setup.get_setup(db, world_character_id=entry.id, user=owner).autonomy_ready",
+            "assert db.scalar(select(func.count(models.WorldCharacterSetupAttempt.id))) == 3"
+          ],
+          "test_same_input_regeneration_keeps_active_pair_and_rejects_only_target_candidate": [
+            "assert provider.profile_calls == 1 and provider.repertoire_calls == 1",
+            "assert generated.profile.id != approved.profile.id",
+            "assert generated.repertoire.id != approved.repertoire.id",
+            "assert generated.autonomy_ready and generated.can_approve and generated.can_reject",
+            "assert generated.active_profile.id == approved.profile.id",
+            "assert replay.reused and replay.profile.id == generated.profile.id",
+            "assert replay_provider.profile_calls == replay_provider.repertoire_calls == 0",
+            "assert rejected.autonomy_ready and rejected.can_regenerate and (not rejected.can_reject)",
+            "assert rejected.active_profile.id == approved.profile.id",
+            "assert rejected.active_repertoire.id == approved.repertoire.id",
+            "assert db.scalar(select(func.count(models.WorldCharacterSetupAttempt.id))) == count",
+            "pytest.raises(WorldCharacterSetupConflictError)"
+          ],
+          "test_regeneration_failure_keeps_approved_execution_pair": [
+            "pytest.raises(WorldCharacterSetupError)",
+            "assert result.autonomy_ready",
+            "assert result.active_repertoire.id == approved.repertoire.id",
+            "assert result.can_retry_stage == 'repertoire'",
+            "assert result.profile.id != result.active_profile.id"
+          ],
+          "test_initial_candidate_rejection_leaves_a_generation_path": [
+            "assert not result.autonomy_ready and result.can_regenerate",
+            "assert not result.can_reject and (not result.can_approve)",
+            "assert result.active_profile is None"
+          ],
+          "test_reviewed_inputs_changing_does_not_expire_active_pair": [
+            "pytest.raises(WorldCharacterSetupConflictError, match='contract_hash_stale')",
+            "assert result.autonomy_ready and result.can_reject and (not result.can_approve)",
+            "assert result.active_profile.id == approved.profile.id"
+          ],
+          "test_new_approval_keeps_todays_plan_and_only_changes_future_plans": [
+            "assert result.active_repertoire.id == candidate.repertoire.id",
+            "assert retained.id == today.id and retained.repertoire_id == approved.repertoire.id",
+            "assert [item.model_dump() for item in retained.items] == [item.model_dump() for item in today.items]",
+            "assert tomorrow.repertoire_id == candidate.repertoire.id",
+            "assert db.get(models.WorldActivityRepertoire, approved.repertoire.id).status == 'superseded'",
+            "assert setup.get_setup(db, world_character_id=entry.id, user=owner).active_repertoire.id == candidate.repertoire.id"
+          ],
+          "test_concurrent_request_during_provider_work_does_not_call_another_provider": [
+            "assert calls == [0]",
+            "assert result.active_repertoire.id == approved.repertoire.id",
+            "pytest.raises(WorldCharacterSetupConflictError, match='setup_in_progress')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_persona_continuity.py": {}
+      }
+    },
+    {
+      "commit": "6341e36ab081b16580866891cd915cb100fb7d48",
+      "feature_id": "AR-X",
+      "reason": "Post-AR-X PR316 World continuity source and regression introduction",
+      "tracked_files": {
+        "backend/app/domains/characters/policies/__init__.py": "66c3d745fa9769e4e7e0e7b53a97ab38eff9d333",
+        "backend/app/domains/characters/policies/persona.py": "82d020d6ced951e451816783d5617325dcb30510",
+        "backend/app/domains/world_packages/schemas/content_v2.py": "672b7858397087a83cb87b82eeefa0abfab5bba2",
+        "backend/app/domains/world_packages/schemas/manifest_v2.py": "c2d24a85d109f5c8f26f3d6deada985aec851abf",
+        "backend/app/domains/world_packages/schemas/v2/__init__.py": "935a4faeb03dcd7a99a1c7d6066952038ccd5410",
+        "backend/app/domains/world_packages/schemas/v2/characters.schema.json": "ddfc300c257048eae8006f22d20dbb823f4dfa80",
+        "backend/app/domains/world_packages/schemas/v2/manifest.schema.json": "eed06087209f148347f804ac62fcc7983c019f2f",
+        "backend/tests/world_packages/test_persona_v2.py": "f83e70a694c1109dd4325b49d6dba17d7faea0d1",
+        "frontend/src/features/characters/components/persona-field.tsx": "20e7657fb15b1edb347121402ee4f0cb7c6cbd64",
+        "frontend/src/features/characters/utils/persona-limits.ts": "4328303f690e70f2b5ca294f139de106be665564"
+      },
+      "test_nodes": [
+        "tests/test_l3_er5_desktop_sidecar_security.py::test_unhandled_error_keeps_exact_origin_cors_without_exposing_exception",
+        "tests/world_packages/test_persona_v2.py::test_fifty_maximum_personas_export_import_without_loss",
+        "tests/world_packages/test_persona_v2.py::test_invalid_legacy_persona_produces_safe_field_error",
+        "tests/world_packages/test_persona_v2.py::test_profile_and_persona_apis_share_limits",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[one_liner-500]",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[personality-6000]",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[safety_rules-4000]",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[speech_style-4000]",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[topic_preferences-3000]",
+        "tests/world_packages/test_persona_v2.py::test_write_limits_count_normalized_codepoints[worldview-8000]"
+      ],
+      "test_assertions": {
+        "tests/test_l3_er5_desktop_sidecar_security.py": {
+          "test_unhandled_error_keeps_exact_origin_cors_without_exposing_exception": [
+            "assert response.status_code == 500",
+            "assert response.headers['access-control-allow-origin'] == ORIGIN",
+            "assert response.json() == {'detail': 'internal_server_error'}",
+            "assert rejected.status_code == 403",
+            "assert rejected.headers.get('access-control-allow-origin') != 'https://evil.test'"
+          ],
+          "_client": [],
+          "test_desktop_loopback_rejects_missing_token_and_wrong_origin": [
+            "assert client.get('/health').status_code == 401",
+            "assert client.get('/health', headers={'X-Angmoo-Launcher-Token': TOKEN, 'Origin': 'https://evil.test'}).status_code == 403"
+          ],
+          "test_desktop_loopback_accepts_exact_token_and_strict_cors": [
+            "assert response.status_code == 200",
+            "assert response.headers['access-control-allow-origin'] == ORIGIN",
+            "assert response.headers['access-control-allow-credentials'] == 'true'",
+            "assert preflight.status_code == 204",
+            "assert 'idempotency-key' in preflight.headers['access-control-allow-headers']",
+            "assert 'x-angmoo-launcher-token' in preflight.headers['access-control-allow-headers']",
+            "assert rejected_preflight.status_code == 403",
+            "assert rejected_preflight.json() == {'detail': 'desktop_headers_invalid'}",
+            "assert client.get('/desktop-webview-auth', headers={'X-Angmoo-Launcher-Token': TOKEN}).json() == {'authenticated': False}",
+            "assert client.get('/desktop-webview-auth', headers={'X-Angmoo-Launcher-Token': TOKEN, 'Origin': ORIGIN}).json() == {'authenticated': True}"
+          ],
+          "test_desktop_loopback_allows_exact_world_package_capability_preflights": [
+            "assert response.status_code == 204",
+            "assert {item.strip().lower() for item in capability_headers.split(',')} <= allowed_headers",
+            "assert response.headers['access-control-allow-origin'] == ORIGIN"
+          ],
+          "test_desktop_loopback_world_package_preflight_stays_fail_closed": [
+            "assert wildcard.status_code == 403",
+            "assert wildcard.json() == {'detail': 'desktop_headers_invalid'}",
+            "assert query_token_substitute.status_code == 403",
+            "assert query_token_substitute.json() == {'detail': 'desktop_headers_invalid'}"
+          ],
+          "test_desktop_origin_is_allowed_only_with_process_launch_token": [
+            "assert allowed_origins(config) == (ORIGIN,)",
+            "assert response.status_code == 200",
+            "assert cookie_response.status_code == 204",
+            "assert len(cookies) == 2",
+            "assert all(('HttpOnly' in cookie for cookie in cookies))",
+            "assert all(('Path=/api' in cookie for cookie in cookies))",
+            "assert all(('SameSite=none' in cookie for cookie in cookies))",
+            "assert all(('Secure' in cookie for cookie in cookies))",
+            "assert missing_token.status_code == 401"
+          ],
+          "test_runtime_metadata_never_persists_launch_token": [
+            "assert lock == {'schema_version': 1, 'pid': ownership.pid, 'process_start_token': ownership.process_start_token, 'generation': 'launch-fixture'}",
+            "assert endpoint['host'] == '127.0.0.1'",
+            "assert endpoint['dynamic_port'] == 49152",
+            "assert endpoint['logical_sidecar_pid'] == ownership.pid",
+            "assert endpoint['generation'] == 'launch-fixture'",
+            "assert TOKEN not in ownership.lock_path.read_text(encoding='utf-8')",
+            "assert TOKEN not in ownership.endpoint_path.read_text(encoding='utf-8')",
+            "assert not ownership.lock_path.exists()",
+            "assert not ownership.endpoint_path.exists()"
+          ],
+          "test_runtime_ownership_rejects_duplicate_and_replaces_stale_owner": [
+            "pytest.raises(RuntimeError, match='desktop_sidecar_already_owned')",
+            "assert json.loads(replacement.lock_path.read_text(encoding='utf-8'))['pid'] == replacement.pid",
+            "assert not replacement.endpoint_path.exists()"
+          ],
+          "test_runtime_ownership_replaces_pid_reuse_with_different_start_token": [
+            "assert current['generation'] == 'launch-b'",
+            "assert current['process_start_token'] == replacement.process_start_token",
+            "assert not replacement.endpoint_path.exists()"
+          ],
+          "test_runtime_release_cleans_own_endpoint_even_when_lock_was_removed": [
+            "assert not ownership.endpoint_path.exists()"
+          ],
+          "test_shutdown_endpoint_has_no_request_parameters": [
+            "assert 'async def shutdown() -> dict[str, str]:' in source",
+            "assert 'server.should_exit = True' in source",
+            "assert 'BackgroundTasks' not in source"
+          ],
+          "test_fatal_boundary_emits_only_stable_content_free_codes": [
+            "assert _stable_fatal_code(RuntimeError(message)) == expected"
+          ]
+        },
+        "tests/world_packages/test_persona_v2.py": {
+          "test_write_limits_count_normalized_codepoints": [
+            "assert getattr(AgentCreationDraftUpdate.model_validate(payload), field) == payload[field]",
+            "pytest.raises(ValidationError)",
+            "assert getattr(normalized, field) == '가\\n' * (limit // 2)"
+          ],
+          "test_profile_and_persona_apis_share_limits": [
+            "assert len(AgentProfileUpdate(one_liner='x' * 500).one_liner) == 500",
+            "assert len(AgentPersonaUpdate(personality='x' * 6000).personality) == 6000",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_fifty_maximum_personas_export_import_without_loss": [
+            "assert archive.manifest.format_version == 2",
+            "assert len(imported.characters.characters) == 50",
+            "assert imported.characters.characters[0].model_dump() == characters[0].model_dump()",
+            "assert 2 * 1024 * 1024 < zip_file.getinfo('content/characters.json').file_size < 32 * 1024 * 1024",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_invalid_legacy_persona_produces_safe_field_error": [
+            "pytest.raises(WorldPackageContractError)",
+            "assert error.value.reason_code == WorldPackageReasonCode.PERSONA_INVALID",
+            "assert error.value.fields == ({'field': 'persona_summary', 'limit': 32000, 'actual': 52000},)",
+            "assert 'private-text' not in str(error.value)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l3_er5_desktop_sidecar_security.py": {},
+        "tests/world_packages/test_persona_v2.py": {}
+      }
+    },
+    {
+      "commit": "99803c5db0a1162bb84578283198e9bcee43c075",
+      "feature_id": "AR-X",
+      "reason": "Post-AR-X PR316 World continuity source and regression introduction",
+      "tracked_files": {
+        "backend/tests/social/test_nested_thread_visibility.py": "ca53ad521b359bae678c0c508e1e1cbe313e32ce"
+      },
+      "test_nodes": [
+        "tests/social/test_nested_thread_visibility.py::test_cycles_and_cross_world_ancestors_do_not_resolve",
+        "tests/social/test_nested_thread_visibility.py::test_nested_target_jumps_to_its_page_and_preserves_parent",
+        "tests/social/test_nested_thread_visibility.py::test_unavailable_ancestor_excludes_descendants_and_counts[deleted]",
+        "tests/social/test_nested_thread_visibility.py::test_unavailable_ancestor_excludes_descendants_and_counts[private]",
+        "tests/social/test_nested_thread_visibility.py::test_unavailable_ancestor_excludes_descendants_and_counts[reported]"
+      ],
+      "test_assertions": {
+        "tests/social/test_nested_thread_visibility.py": {
+          "_reply": [],
+          "test_nested_target_jumps_to_its_page_and_preserves_parent": [
+            "assert len(first.items) == 51 and first.next_offset == 50",
+            "assert first.items[0].reply_count == 115",
+            "assert target.root_post_id == root.id and target.target_post_id == 'reply-114'",
+            "assert target.page_offset == 100 and target.next_offset is None",
+            "assert target.items[-1].reply_to_post_id == 'reply-113'",
+            "assert previous.page_offset == 0 and previous.next_offset == 50"
+          ],
+          "test_unavailable_ancestor_excludes_descendants_and_counts": [
+            "assert resolve_visible_root(db, world_id=root.world_id, post_id=child.id) is None",
+            "assert reply_counts(db, world_id=root.world_id, post_ids=[root.id]) == {}",
+            "pytest.raises(SocialWriteNotFoundError)"
+          ],
+          "test_cycles_and_cross_world_ancestors_do_not_resolve": [
+            "assert resolve_visible_root(db, world_id=root.world_id, post_id=second.id) is None",
+            "assert resolve_visible_root(db, world_id='another-world', post_id=root.id) is None",
+            "assert reply_counts(db, world_id=root.world_id, post_ids=[root.id]) == {}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_nested_thread_visibility.py": {}
+      }
+    },
+    {
+      "commit": "13ac742aa6f96d2cdda8e19af5e3002c18fe6d6d",
+      "feature_id": "AR-X",
+      "reason": "Post-AR-X PR316 World continuity source and regression introduction",
+      "tracked_files": {
+        "browser-tests/continuity-fixture.ts": "7c238c8b7a5e7c25e9e2f81220eb4514a189962e",
+        "docs/architecture/world-persona-social-continuity.md": "d735faee882ed6f35e4c5d266fc96ecc08013fac"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "60d7c1fe73fe7a6fd471af678ba439805daf495a",
+      "feature_id": "AR-X",
+      "reason": "Post-AR-X PR316 World continuity source and regression introduction",
+      "tracked_files": {
+        "browser-tests/continuity-next-fixture.ts": "c4a2a20138702dae0e28d6527c07bad031b05a4b",
+        "browser-tests/playwright.continuity-static.config.ts": "e7f97e338ce40ae631ed37ac6aa07c901da0ce69",
+        "browser-tests/playwright.continuity.config.ts": "bdc3e95acc184bb017db5c5422c4098344768741",
+        "browser-tests/world-continuity-static.spec.ts": "785593dd55aa3096eb3f91448e4754f52413a992",
+        "browser-tests/world-continuity.spec.ts": "ef8751f6b3ca36876292f7efcc386fd3bb98bfce"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "121b3b1c3da62221e0fc9d87b87ef3943dc5fb91",
+      "feature_id": "AR-X",
+      "reason": "PR316 exact product contract evolution guards and regression evidence",
+      "tracked_files": {
+        "backend/tests/test_post_refactor_contract_changes.py": "d4097559b4a00e26ff7bfe081a892d3e1a0a9094",
+        "scripts/ci/post_refactor_contract_changes.py": "6fbc70af012930cf54aafc9cf9c63657360ac606",
+        "security/post_refactor_contract_changes.json": "1e4cbb73b3f2d4e7411a317c9a89482418c8d180"
+      },
+      "test_nodes": [
+        "tests/test_post_refactor_contract_changes.py::test_assertion_change_requires_exact_before_after_and_keeps_other_nodes",
+        "tests/test_post_refactor_contract_changes.py::test_manifest_requires_committed_provenance_and_append_only_history",
+        "tests/test_post_refactor_contract_changes.py::test_only_named_contract_changes_apply_and_original_snapshot_is_immutable",
+        "tests/test_post_refactor_contract_changes.py::test_orm_and_duplicate_changes_cannot_be_excused"
+      ],
+      "test_assertions": {
+        "tests/test_post_refactor_contract_changes.py": {
+          "test_only_named_contract_changes_apply_and_original_snapshot_is_immutable": [
+            "assert original['full']['schemas']['Persona'] == 'old'",
+            "assert expected['full']['schemas'] == {'Persona': 'new', 'Other': 'untouched'}",
+            "assert drifted != expected",
+            "pytest.raises(ValueError, match='preimage')"
+          ],
+          "test_orm_and_duplicate_changes_cannot_be_excused": [
+            "pytest.raises(ValueError, match='ORM')",
+            "pytest.raises(ValueError, match='duplicate')"
+          ],
+          "test_assertion_change_requires_exact_before_after_and_keeps_other_nodes": [
+            "assert changes.assertions('test.py::test_change', before, after, [record]) == after",
+            "assert changes.assertions('test.py::test_other', before, after, [record]) == before",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_manifest_requires_committed_provenance_and_append_only_history": [
+            "assert changes.load(tmp_path) == [record]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(ValueError, match='provenance')",
+            "assert args[1] == 'rev-parse'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_post_refactor_contract_changes.py": {}
+      }
     }
   ]
 }
