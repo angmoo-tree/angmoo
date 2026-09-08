@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "f9ed549846dbbda0713bafce4cf5c0871da9fd6cb7a1f01471c5783f06dff760"
+        "sha256": "8de43996db64194715c323dfd122e44c784f013af82933ae04145abfa5396e11"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -196,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "15bdfade51f5624f89274ff7813d8759401cb059f45b3800ad71b04ae2cab8c9"
+        "sha256": "715f1e9e00c2dc844ea0bb67b228d6431adda159f000a6adec6f9d3bdf043226"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",

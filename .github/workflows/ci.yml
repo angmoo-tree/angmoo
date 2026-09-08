@@ -227,7 +227,7 @@ jobs:
       - name: Run product-shell browser smoke
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/web.xml
-        run: pnpm test --reporter=github,junit
+        run: pnpm exec playwright test --config playwright.continuity.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify UI-E Local Settings fail-closed states
         env:
@@ -247,7 +247,7 @@ jobs:
       - name: Verify Tauri static direct-open routes
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/static.xml
-        run: pnpm exec playwright test --config playwright.static.config.ts --reporter=github,junit
+        run: pnpm exec playwright test --config playwright.continuity-static.config.ts --reporter=github,junit
         working-directory: browser-tests
       - name: Verify shared Memory and native lifecycle boundaries
         env:
