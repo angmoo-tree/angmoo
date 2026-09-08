@@ -176,7 +176,7 @@ def test_failure_preserves_safe_telemetry_but_rolls_back_all_items(memory_sessio
         return original_accept(**kwargs)
     if failure == "write":
         monkeypatch.setattr(service.writer, "accept_candidate", fail_second_write)
-    with caplog.at_level(logging.INFO, logger="app.domains.memory.service.batch_selection"):
+    with caplog.at_level(logging.WARNING, logger="app.domains.memory.service.batch_selection"):
         result = asyncio.run(service.run_next(lease_token="telemetry-failure"))
     assert result == ("memory_selection_output_incomplete" if failure == "output" else "memory_selection_provider_failed")
     memory_session.expire_all()

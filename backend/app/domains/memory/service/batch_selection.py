@@ -264,4 +264,7 @@ def _log_outcome(batch, provider, started, code: str, *, recorded: bool) -> None
     for name in ("input_tokens", "output_tokens", "thought_tokens"):
         value = getattr(usage, name, None)
         fields[name] = value if type(value) is int and value >= 0 else None
-    logging.getLogger(__name__).info("memory_batch_outcome %s", json.dumps(fields))
+    # The shipped root defaults to WARNING. Failed attempts must remain visible
+    # without changing application-wide logging or exposing provider payloads.
+    level = logging.INFO if code == "memory_selection_completed" else logging.WARNING
+    logging.getLogger(__name__).log(level, "memory_batch_outcome %s", json.dumps(fields))

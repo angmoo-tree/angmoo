@@ -252,7 +252,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/batch_selection.py",
-      "sha256": "6cc79e45cf7eeacf2544a9767003965369a60e3a4e25cb7d9454fa56ce39858f"
+      "sha256": "3a19d17c4b9e83a881d4e629b3de104673bb6bcd1bb41aaf3143d82c8e1e1305"
     },
     {
       "path": "backend/app/domains/memory/service/consolidation.py",
@@ -424,7 +424,7 @@
     },
     {
       "path": "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "62e8891c2f479172afa7fbf14ca71e4c349a1425566e9b5258e3c892f753df16"
+      "sha256": "ef9be7afa71417b1f6c30235a3700ad0a96478cd93f938bc48e55130576eb049"
     },
     {
       "path": "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",

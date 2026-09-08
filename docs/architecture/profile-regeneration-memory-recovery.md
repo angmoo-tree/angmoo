@@ -19,6 +19,8 @@ time and available token usage. A structured `memory_batch_outcome` event contai
 only the job ID, safe model/code, attempt, normalized reason and numeric telemetry.
 It excludes keys, prompts, response bodies and experience excerpts. A stale lease
 cannot overwrite another worker's diagnostic state.
+Failures use WARNING so the shipped default records them; completion diagnostics
+remain INFO. This does not change application-wide logging configuration.
 
 The Memory UI distinguishes a previous failure from the next scheduled run and
 offers the existing explicit retry. Polling completion refreshes the item list and
