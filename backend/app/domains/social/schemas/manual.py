@@ -56,6 +56,7 @@ class ManualSocialWritePostRead(BaseModel):
 
 
 class ManualSocialPostRead(ManualSocialWritePostRead):
+    thread_root_post_id: str | None = None
     reply_count: int = Field(ge=0)
     like_count: int = Field(ge=0)
 
@@ -76,6 +77,10 @@ class ManualSocialWriteRead(BaseModel):
 
 
 class ManualSocialFeedRead(BaseModel):
+    root_post_id: str | None = None
+    target_post_id: str | None = None
+    page_offset: int = Field(default=0, ge=0)
+    next_offset: int | None = Field(default=None, ge=0)
     schema_version: Literal["owner-manual-social-v1"] = "owner-manual-social-v1"
     world_id: str
     owner_world_character_id: str

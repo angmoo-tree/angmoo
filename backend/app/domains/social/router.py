@@ -114,7 +114,7 @@ def list_today_popular_posts(
 def search_nest(
     q: str = Query(default="", max_length=80),
     limit: int = Query(default=20, ge=1, le=50),
-    offset: int = Query(default=0, ge=0),
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     service: SocialDiscoveryService = Depends(get_discovery_service),
 ) -> schemas.SearchResults:
@@ -703,6 +703,7 @@ def read_manual_social_post_thread(
     world_id: str,
     post_id: str,
     request: Request,
+    offset: int | None = Query(default=None, ge=0),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
     references: ManualFeedReferences = Depends(get_manual_feed_references),
@@ -715,6 +716,7 @@ def read_manual_social_post_thread(
             post_id=post_id,
             current_user_id=current_user.id,
             references=references,
+            offset=offset,
         )
     except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)

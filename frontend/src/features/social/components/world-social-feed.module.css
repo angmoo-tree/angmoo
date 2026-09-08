@@ -258,3 +258,24 @@
     animation: none;
   }
 }
+
+.targetReply {
+  background: var(--color-surface-subtle);
+  outline: 2px solid var(--color-border-default);
+  outline-offset: -2px;
+  scroll-margin-block: var(--spacing-section);
+}
+.parentReply {
+  display: block;
+  padding: var(--spacing-control) var(--spacing-phone);
+  min-height: 44px;
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-small);
+  overflow-wrap: anywhere;
+}
+.threadPages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-control);
+  padding: var(--spacing-phone);
+}

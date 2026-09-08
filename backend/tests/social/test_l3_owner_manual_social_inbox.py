@@ -574,8 +574,9 @@ def test_owner_world_post_thread_is_exactly_world_scoped() -> None:
         f"/api/v1/worlds/world-manual/manual-social/posts/{reply.json()['post']['id']}",
         headers=FRONTEND_HEADERS,
     )
-    assert reply_as_root.status_code == 404
-    assert reply_as_root.json() == {"detail": "post_not_in_world"}
+    assert reply_as_root.status_code == 200
+    assert reply_as_root.json()["root_post_id"] == "post-autonomous-target"
+    assert reply_as_root.json()["target_post_id"] == reply.json()["post"]["id"]
 
 
 def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> None:
@@ -607,7 +608,7 @@ def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> 
         )
 
     assert [item.id for item in feed.items] == ["post-autonomous-target"]
-    assert feed.items[0].reply_count == 1
+    assert feed.items[0].reply_count == 2
     assert feed.items[0].like_count == 1
     reply_queries = [
         statement
@@ -632,8 +633,8 @@ def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> 
     )
     assert thread.status_code == 200
     items_by_id = {item["id"]: item for item in thread.json()["items"]}
-    assert set(items_by_id) == {"post-autonomous-target", "reply-count-visible"}
-    assert items_by_id["post-autonomous-target"]["reply_count"] == 1
+    assert set(items_by_id) == {"post-autonomous-target", "reply-count-visible", "reply-count-nested"}
+    assert items_by_id["post-autonomous-target"]["reply_count"] == 2
     assert items_by_id["post-autonomous-target"]["like_count"] == 1
     assert items_by_id["reply-count-visible"]["reply_count"] == 1
     assert items_by_id["reply-count-visible"]["like_count"] == 1
