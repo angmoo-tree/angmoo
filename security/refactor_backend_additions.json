@@ -10855,6 +10855,33 @@
       "test_suppressions": {
         "tests/test_post_refactor_contract_changes.py": {}
       }
+    },
+    {
+      "commit": "acbfdf27617745c92ba60268ba9d28a9c65ba7ef",
+      "feature_id": "AR-X",
+      "reason": "PR316 v1 joined-list admission: committed single-module collection and safe pre-preview boundary regression",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/world_packages/test_persona_v2.py::test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details[over-budget-safety_rules-4000]",
+        "tests/world_packages/test_persona_v2.py::test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details[over-budget-topic_preferences-3000]",
+        "tests/world_packages/test_persona_v2.py::test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details[within-budget-safety_rules-4000]",
+        "tests/world_packages/test_persona_v2.py::test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details[within-budget-topic_preferences-3000]"
+      ],
+      "test_assertions": {
+        "tests/world_packages/test_persona_v2.py": {
+          "test_v1_list_text_is_admitted_before_preview_or_rejected_with_safe_details": [
+            "pytest.raises(WorldPackageContractError)",
+            "assert failure.value.reason_code == WorldPackageReasonCode.PERSONA_INVALID",
+            "assert failure.value.fields == ({'field': field, 'limit': limit, 'actual': limit + extra},)",
+            "assert '😀' not in str(failure.value)",
+            "assert package.manifest.format_version == 1",
+            "assert getattr(package.characters.characters[0], field) == document['characters'][0][field]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_packages/test_persona_v2.py": {}
+      }
     }
   ]
 }
