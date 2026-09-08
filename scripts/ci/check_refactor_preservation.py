@@ -781,7 +781,7 @@ def defined_symbols(source: str) -> set[str]:
     return symbols
 
 
-def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) -> list[str]:
+def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT, approved_changes: list[dict] | None = None) -> list[str]:
     """A new split names actual symbols, consumers and surviving behavior tests.
 
     details[stage].split_files uses repository-relative old/new paths.
@@ -793,6 +793,7 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) 
     # exact contents within this invocation, so same-path edits remain visible.
     symbols_by_text = {}
     assertions_by_text = {}
+    removed = product_changes.removed_bindings(approved_changes or [])
 
     def memo_symbols(source):
         if source not in symbols_by_text:
@@ -834,7 +835,7 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) 
                 if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or not destination.is_file():
                     errors.append(f"{stage}: unknown or unsafe split symbol: {entry}")
                     continue
-                if new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")):
+                if new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")) and (new_path, new_symbol) not in removed:
                     errors.append(f"{stage}: split destination does not define the mapped symbol: {entry['new']}")
                 consumers, tests = entry.get("direct_consumers", []), entry.get("test_nodes", [])
                 if not consumers or not tests:
@@ -1007,7 +1008,7 @@ def main() -> int:
         asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
                                         public_retirement=public_retirement)
         errors.extend(check_sources(sources, moves["files"]))
-        errors.extend(check_split_evidence(moves, [baseline, *snapshots]))
+        errors.extend(check_split_evidence(moves, [baseline, *snapshots], approved_changes=approved_changes))
         errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets))
         symbol_snapshots = [[f"backend/{path}::{function}" for path, functions in snapshot.get("test_assertions", {}).items() for function in functions]
                             for snapshot in snapshots]

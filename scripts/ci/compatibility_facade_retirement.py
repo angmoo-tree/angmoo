@@ -98,6 +98,17 @@ class History:
         self.paths[EARLIER_ONLY] = module_path(EARLIER_ONLY)
 
     @lru_cache(maxsize=None)
+    def removed_product_bindings(self):
+        spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+        changes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(changes)
+        return changes.removed_bindings(changes.load(self.root))
+
+    def binding_removed(self, module, export):
+        owner, tail = self.terminal(self.resolve(module, export))
+        return bool(tail) and (self.paths.get(owner), tail[0]) in self.removed_product_bindings()
+
+    @lru_cache(maxsize=None)
     def source(self, module):
         commit = EARLIER_SOURCE if module == EARLIER_ONLY else SOURCE
         return self.reader("show", commit + ":" + self.paths[module], root=self.root).decode("utf-8-sig")
@@ -256,10 +267,7 @@ class History:
             raise ValueError("retired facade file/package still exists: " + module)
 
     def validate_sources(self):
-        spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
-        changes = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(changes)
-        removed = changes.removed_bindings(changes.load(self.root))
+        removed = self.removed_product_bindings()
         for commit in (SOURCE, EARLIER_SOURCE):
             if self.reader("merge-base", commit, "HEAD", root=self.root).decode().strip() != commit:
                 raise ValueError("retirement source is not an ancestor of this candidate")
@@ -345,6 +353,8 @@ def module_retired(module):
     evidence = history()
     evidence.absent(module)
     for name in evidence.exports(module):
+        if evidence.binding_removed(module, name):
+            continue
         evidence.actual(module, name)
     return bool(evidence.exports(module))
 

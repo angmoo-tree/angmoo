@@ -1069,24 +1069,24 @@
     {
       "markers": {
         "advisory_lock": [
-          88
+          84
         ],
         "driver_or_url": [
-          78,
-          85
+          74,
+          81
         ],
         "row_lock": [
-          312,
-          383,
-          426,
-          950,
-          962
+          308,
+          379,
+          422,
+          945,
+          957
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "650f6a9ea2bd194560ee91e18489907755f419f7cf5673bdd33cd61a055b5869",
+      "source_sha256": "5d8d64b7798bf18084474585d508c540a4f71a6f652fee0bbf0bfa6bf853ee8c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

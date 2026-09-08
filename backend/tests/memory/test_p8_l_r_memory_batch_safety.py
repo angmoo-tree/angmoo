@@ -112,6 +112,39 @@ def test_complete_source_schedule_selection_brief_and_reopen_are_causal(memory_s
         uninstall_memory_delivery(factory)
 
 
+def test_two_characters_at_same_daily_time_complete_without_mixing_sources(memory_session):
+    scope, _, _, repository, *_ = _stack(memory_session)
+    other = replace(scope, subject_world_character_id="consolidation-counterpart")
+    service = MemoryScopeService(repository)
+    initial = service.get_or_create(other)
+    service.update(other, expected_version=initial.version, enabled=True,
+                   retention_days=180, provider_mode=initial.provider_mode)
+    repo = SqlAlchemyMemoryBatchRepository(memory_session)
+    now = datetime.now(UTC)
+    for current in (scope, other):
+        _save(repo, current, now=now - timedelta(days=1), schedule_enabled=True, local_time="23:51")
+    memory_session.commit()
+    factory = sessionmaker(bind=memory_session.bind)
+    selector = Selector()
+    runtime = MemoryBatchRuntime(factory, lambda owner, model: selector)
+    install_memory_delivery(factory)
+    try:
+        for index, current in enumerate((scope, other)):
+            with factory() as db:
+                _post(db, current, f"same-time-{index}")
+        assert asyncio.run(runtime.tick()) == "memory_selection_completed"
+        assert asyncio.run(runtime.tick()) == "memory_selection_completed"
+        assert asyncio.run(runtime.tick()) == "memory_batch_queue_empty"
+        with factory() as db:
+            items = db.scalars(select(models.MemoryItem)).all()
+            assert len(items) == 2
+            assert {item.subject_world_character_id for item in items} == {scope.subject_world_character_id, other.subject_world_character_id}
+            assert db.scalar(select(func.count()).select_from(MemorySelectionDecisionModel)) == 2
+        assert selector.calls == 2
+    finally:
+        uninstall_memory_delivery(factory)
+
+
 def test_recovery_excludes_off_gap_and_pre_upgrade_records(memory_session):
     scope, setting, *_ = _stack(memory_session)
     epoch = memory_session.scalar(select(MemoryActivationEpoch))
