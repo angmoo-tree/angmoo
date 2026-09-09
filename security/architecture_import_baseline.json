@@ -1,6 +1,6 @@
 {
-  "edge_count": 3992,
-  "external_import_count": 3117,
+  "edge_count": 3993,
+  "external_import_count": 3118,
   "module_count": 1072,
   "modules": [
     {
@@ -12234,6 +12234,7 @@
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.selection_output",
         "app.providers.contracts",
+        "app.providers.gemini",
         "app.providers.generation_profiles",
         "app.providers.registry"
       ],
@@ -12508,6 +12509,7 @@
         "asyncio",
         "google",
         "google.genai",
+        "httpx",
         "pydantic",
         "typing"
       ],
