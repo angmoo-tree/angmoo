@@ -1,7 +1,7 @@
 {
-  "edge_count": 3980,
-  "external_import_count": 3114,
-  "module_count": 1069,
+  "edge_count": 3993,
+  "external_import_count": 3118,
+  "module_count": 1072,
   "modules": [
     {
       "external_imports": [],
@@ -1015,7 +1015,8 @@
         "app.domains.characters.policies.persona",
         "app.domains.identity.schemas",
         "app.domains.media.schemas",
-        "app.domains.routines.schemas"
+        "app.domains.routines.schemas",
+        "app.providers.generation_profiles"
       ],
       "module": "app.domains.characters.schemas",
       "path": "backend/app/domains/characters/schemas.py",
@@ -1731,7 +1732,6 @@
       "imports": [
         "app.domains.chat.contracts.model_binding",
         "app.domains.chat.infrastructure.world_scope_migration",
-        "app.domains.chat.policies",
         "app.models"
       ],
       "module": "app.domains.chat.infrastructure.model_binding_migration",
@@ -1924,6 +1924,7 @@
       "imports": [
         "app.core.profile_ref",
         "app.domains.chat.contracts.model_binding",
+        "app.providers.generation_profiles",
         "app.providers.registry"
       ],
       "module": "app.domains.chat.schemas",
@@ -2644,6 +2645,7 @@
       "imports": [
         "app.core.response_schemas",
         "app.domains.identity.contracts",
+        "app.providers.generation_profiles",
         "app.providers.registry"
       ],
       "module": "app.domains.identity.schemas",
@@ -3830,9 +3832,9 @@
         "app.domains.memory.models.batch",
         "app.domains.memory.models.items",
         "app.domains.memory.policies.batch",
-        "app.domains.memory.policies.consolidation",
         "app.domains.memory.repository.items",
-        "app.domains.memory.repository.queue"
+        "app.domains.memory.repository.queue",
+        "app.providers.generation_profiles"
       ],
       "module": "app.domains.memory.repository.batch",
       "path": "backend/app/domains/memory/repository/batch.py",
@@ -4034,7 +4036,8 @@
         "pydantic"
       ],
       "imports": [
-        "app.domains.memory.schemas"
+        "app.domains.memory.schemas",
+        "app.providers.generation_profiles"
       ],
       "module": "app.domains.memory.schemas.batch",
       "path": "backend/app/domains/memory/schemas/batch.py",
@@ -12221,6 +12224,7 @@
     },
     {
       "external_imports": [
+        "collections.abc",
         "dataclasses",
         "json"
       ],
@@ -12230,6 +12234,8 @@
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.selection_output",
         "app.providers.contracts",
+        "app.providers.gemini",
+        "app.providers.generation_profiles",
         "app.providers.registry"
       ],
       "module": "app.integrations.llm.memory_selection",
@@ -12503,6 +12509,7 @@
         "asyncio",
         "google",
         "google.genai",
+        "httpx",
         "pydantic",
         "typing"
       ],
@@ -12516,13 +12523,23 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.providers.generation_profiles",
+      "path": "backend/app/providers/generation_profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "typing"
       ],
       "imports": [
         "app.providers.contracts",
-        "app.providers.gemini"
+        "app.providers.gemini",
+        "app.providers.generation_profiles"
       ],
       "module": "app.providers.registry",
       "path": "backend/app/providers/registry.py",
@@ -13839,6 +13856,7 @@
         "app.domains.identity.models",
         "app.domains.memory.exceptions",
         "app.integrations.llm.memory_selection",
+        "app.providers.generation_profiles",
         "app.providers.registry",
         "app.runtime.chat.message_composition"
       ],
@@ -14057,6 +14075,7 @@
         "app.runtime.migrations.sqlite_versions.v6_to_v7_chat_model_binding",
         "app.runtime.migrations.sqlite_versions.v7_to_v8_social_action_subjective_context",
         "app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch",
+        "app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -14134,7 +14153,8 @@
       ],
       "imports": [
         "app.domains.chat.infrastructure.sqlalchemy_models",
-        "app.runtime.migrations.sqlite_versions.contracts"
+        "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.v5_to_v6_chat_response_requests",
       "path": "backend/app/runtime/migrations/sqlite_versions/v5_to_v6_chat_response_requests.py",
@@ -14174,10 +14194,23 @@
       ],
       "imports": [
         "app.domains.memory.infrastructure.batch_models",
-        "app.runtime.migrations.sqlite_versions.contracts"
+        "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch",
       "path": "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.persistence.sqlite_generation_profiles"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles",
+      "path": "backend/app/runtime/migrations/sqlite_versions/v9_to_v10_generation_profiles.py",
       "wildcard_imports": []
     },
     {
@@ -14326,6 +14359,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlite_generation_profiles",
+      "path": "backend/app/runtime/persistence/sqlite_generation_profiles.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "collections.abc",
@@ -14354,7 +14394,8 @@
       ],
       "imports": [
         "app.domains.chat.infrastructure.world_scope_migration",
-        "app.models"
+        "app.models",
+        "app.runtime.persistence.sqlite_generation_profiles"
       ],
       "module": "app.runtime.persistence.sqlite_schema",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",

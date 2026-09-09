@@ -98,11 +98,16 @@ class History:
         self.paths[EARLIER_ONLY] = module_path(EARLIER_ONLY)
 
     @lru_cache(maxsize=None)
-    def removed_product_bindings(self):
+    def product_evidence(self):
         spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
         changes = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(changes)
-        return changes.removed_bindings(changes.load(self.root))
+        return changes, changes.load(self.root, reader=self.reader)
+
+    @lru_cache(maxsize=None)
+    def removed_product_bindings(self):
+        changes, records = self.product_evidence()
+        return changes.removed_bindings(records)
 
     def binding_removed(self, module, export):
         owner, tail = self.terminal(self.resolve(module, export))
@@ -268,6 +273,7 @@ class History:
 
     def validate_sources(self):
         removed = self.removed_product_bindings()
+        changes, records = self.product_evidence()
         for commit in (SOURCE, EARLIER_SOURCE):
             if self.reader("merge-base", commit, "HEAD", root=self.root).decode().strip() != commit:
                 raise ValueError("retirement source is not an ancestor of this candidate")
@@ -295,6 +301,10 @@ class History:
                             continue
                         current_definition=terminal_definition(path.read_text(encoding='utf-8-sig'),tail[0])
                         original_definition=terminal_definition(self.source(owner),tail[0])
+                        if current_definition is not None and original_definition is not None and changes.definition_matches(
+                            self.root, self.paths[owner], tail[0], original_definition, current_definition, records=records
+                        ):
+                            continue
                         if type(current_definition) is not type(original_definition):
                             raise ValueError("actual terminal export must have one definition: " + parts)
                         if isinstance(current_definition,(ast.FunctionDef,ast.AsyncFunctionDef)) and (dump(current_definition.args)!=dump(original_definition.args) or [dump(n) for n in current_definition.decorator_list]!=[dump(n) for n in original_definition.decorator_list]):
@@ -614,7 +624,8 @@ def validate_test_function(evidence, path, function, current):
     expected,rewrite=transformed_function(evidence,original,function)
     tree=ast.parse(current)
     found=[n for n in tree.body if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef)) and n.name==function]
-    if len(found)!=1 or dump(found[0])!=dump(expected):
+    changes, records = evidence.product_evidence()
+    if len(found)!=1 or not changes.definition_matches(evidence.root, path, function, expected, found[0], records=records):
         raise ValueError('retirement changed behavior/fixture/monkeypatch beyond exact binding: '+path+'::'+function)
     # Imports and independently reviewed test functions may move. Executable
     # module scaffolding may not inject a conditional import or mutate a proof

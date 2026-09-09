@@ -105,7 +105,7 @@ def enqueue_scope(
                 MemoryCandidate.status == "pending",
             )
             .order_by(MemorySourceDelivery.sequence)
-            .limit(32)
+            .limit(128)
         )
         .unique()
         .all()

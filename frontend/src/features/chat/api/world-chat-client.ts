@@ -1,8 +1,8 @@
+import { generationProfilePayload } from "@/config/generation-profiles";
 import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 import type { WorldChatGenerationEvent, WorldChatGenerationRequestRead, WorldChatLatestRequestRead, WorldChatMessageAcceptRead, WorldChatThreadCreate, WorldChatThreadCreateRead, WorldChatEntryRead, WorldChatThreadListRead, WorldChatThreadModelUpdate, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
-import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
 
 type WorldChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -113,7 +113,7 @@ export async function updateWorldChatThreadModel(
       worldId,
       `/threads/${encodeURIComponent(threadId)}/model`,
     ),
-    { body: data, method: "PATCH" },
+    { body: generationProfilePayload(data, "selected_model"), method: "PATCH" },
   );
   if (
     !worldChatThreadMatchesScope(payload, worldId) ||
@@ -316,9 +316,6 @@ function worldChatThreadMatchesScope(
 ): value is WorldChatThreadRead {
   if (!value || typeof value !== "object") return false;
   const thread = value as Partial<WorldChatThreadRead>;
-  const supportedModels = new Set<string>(
-    MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => option.value),
-  );
   if (
     typeof thread.id !== "string" ||
     thread.world_id !== worldId ||
@@ -330,12 +327,13 @@ function worldChatThreadMatchesScope(
     typeof thread.requester.world_character_id !== "string" ||
     typeof thread.responding.world_character_id !== "string" ||
     thread.requester.world_character_id === thread.responding.world_character_id ||
-    !supportedModels.has(thread.selected_model ?? "") ||
-    !supportedModels.has(thread.default_model ?? "") ||
+    typeof thread.selected_model !== "string" || !thread.selected_model.trim() || thread.selected_model.length > 120 ||
+    typeof thread.default_model !== "string" || !thread.default_model.trim() || thread.default_model.length > 120 ||
     (thread.model_binding_mode !== "default" &&
       thread.model_binding_mode !== "thread_override") ||
     (thread.model_binding_mode === "default" &&
-      thread.selected_model !== thread.default_model) ||
+      (thread.selected_model !== thread.default_model ||
+        (thread.selected_thinking_level ?? "high") !== (thread.default_thinking_level ?? "high"))) ||
     !Array.isArray(thread.messages) ||
     !Array.isArray(thread.evidence_summaries)
   ) {

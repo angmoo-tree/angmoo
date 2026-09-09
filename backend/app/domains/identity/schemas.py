@@ -2,6 +2,8 @@ from app.core.response_schemas import UtcInstantResponseModel
 from datetime import datetime
 from typing import Literal
 
+from app.providers.generation_profiles import ThinkingLevel
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.domains.identity.contracts import (
@@ -173,6 +175,7 @@ class CredentialRead(UtcInstantResponseModel):
     provider: str
     purpose: str
     model: str
+    thinking_level: str = "high"
     label: str
     key_fingerprint: str | None = None
     enabled: bool
@@ -189,6 +192,7 @@ AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
 class CredentialUpsert(BaseModel):
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
+    thinking_level: ThinkingLevel = "high"
     api_key: str | None = Field(default=None, min_length=1, max_length=4000)
     auth_profile_id: str | None = Field(default=None, max_length=120)
     label: str | None = Field(default=None, max_length=80)

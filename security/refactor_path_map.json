@@ -2084,7 +2084,8 @@
     "tests/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[I cannot reveal API keys.]": "tests/common/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[I cannot reveal API keys.]",
     "tests/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[\\uacf5\\uac1c \\ucee4\\ubba4\\ub2c8\\ud2f0\\uc5d0 \\uae00\\uc744 \\uc37c\\uc5b4.]": "tests/common/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[\\uacf5\\uac1c \\ucee4\\ubba4\\ub2c8\\ud2f0\\uc5d0 \\uae00\\uc744 \\uc37c\\uc5b4.]",
     "tests/test_llm_context.py::test_neutralize_context_text_trims_spaces_around_newlines": "tests/common/test_context_text.py::test_neutralize_context_text_trims_spaces_around_newlines",
-    "tests/test_llm_context.py::test_neutralize_context_text_handles_long_space_runs_linearly": "tests/common/test_context_text.py::test_neutralize_context_text_handles_long_space_runs_linearly"
+    "tests/test_llm_context.py::test_neutralize_context_text_handles_long_space_runs_linearly": "tests/common/test_context_text.py::test_neutralize_context_text_handles_long_space_runs_linearly",
+    "tests/chat/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite": "tests/chat/test_messages_service.py::test_default_message_model_is_gemini31_flash_lite"
   },
   "details": {
     "AR-B1": {

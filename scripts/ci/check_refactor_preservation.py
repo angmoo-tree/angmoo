@@ -491,7 +491,7 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]], asgi_mo
 
 
 def validated_model_facade_retirements(moves: dict[str, str], files: dict[str, str],
-                                      snapshots: list[dict], root: Path = ROOT) -> dict[str, str]:
+                                      snapshots: list[dict], root: Path = ROOT, *, approved_changes=None) -> dict[str, str]:
     """Validate removal of pure ORM aliases before changing their existence test.
 
     The original alias must be frozen, its actual classes must still match their
@@ -587,7 +587,9 @@ def validated_model_facade_retirements(moves: dict[str, str], files: dict[str, s
                         raise ValueError("canonical model export cannot be rebound: " + alias.name)
                     if alias.name in source_classes:
                         classes += 1
-                        if alias.name not in owned or ast.dump(owned[alias.name]) != ast.dump(source_classes[alias.name]):
+                        if alias.name not in owned or not product_changes.definition_matches(
+                                root, target_path, alias.name, source_classes[alias.name], owned[alias.name],
+                                records=approved_changes or []):
                             raise ValueError("canonical model class changed or disappeared: " + alias.name)
                     elif alias.name not in source_values or alias.name not in current_values or ast.dump(source_values[alias.name]) != ast.dump(current_values[alias.name]):
                         raise ValueError("unsupported frozen model facade export")
@@ -1015,7 +1017,7 @@ def main() -> int:
         symbols = mapped_targets(sorted(set().union(*(set(nodes) for nodes in symbol_snapshots))),
                                  moves.get("test_symbols", {}), nodes=True, node_snapshots=symbol_snapshots)
         model_retirements = validated_model_facade_retirements(
-            moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots])
+            moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots], approved_changes=approved_changes)
         errors.extend(check_assertions(snapshots, targets, file_targets,
                                       symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
                                       model_retirements=model_retirements, public_retirement=public_retirement,

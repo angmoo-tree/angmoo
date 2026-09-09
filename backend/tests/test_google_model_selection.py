@@ -15,8 +15,7 @@ from app.domains.identity.service import credential_management
 
 def test_agent_google_models_are_allowed_in_agent_model_schemas():
     for model in (
-        "gemma-4-26b-a4b-it",
-        "gemma-4-31b-it",
+        "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
     ):
         create = character_schemas.AgentCreate(
@@ -61,11 +60,8 @@ def test_agent_model_schemas_reject_removed_or_message_only_models(model):
 
 def test_message_model_schemas_allow_gemini25_models():
     for model in (
-        "gemini-2.5-flash-lite",
-        "gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
         "gemini-3.1-flash-lite",
-        "gemma-4-26b-a4b-it",
-        "gemma-4-31b-it",
     ):
         settings = schema_chat_schemas.MessageSettingsUpdate(default_model=model)
         create = schema_chat_schemas.MessageThreadCreate(character_id="char-1", selected_model=model)
@@ -151,11 +147,11 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
         db,
         user,
         character.id,
-        schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
+        schema_identity_schemas.CredentialUpsert(model="gemini-3.5-flash-lite"),
         workflows=agent_service.build_character_credential_workflows(),
     )
 
-    assert result.model == "gemma-4-31b-it"
+    assert result.model == "gemini-3.5-flash-lite"
     assert credential.encrypted_api_key == "encrypted-key"
     assert credential.key_fingerprint == "fingerprint"
     assert db.committed is True
@@ -321,12 +317,13 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
             db,
             user,
             character.id,
-            schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            schema_identity_schemas.CredentialUpsert(model="gemini-3.5-flash-lite"),
             workflows=agent_service.build_character_credential_workflows(),
         )
 
 
 def test_running_slot_blocks_credential_model_update(monkeypatch):
+    """An update that replaces the key still waits for the active run."""
     db = SimpleNamespace()
     user = SimpleNamespace(id="user-1", email=None)
     character = SimpleNamespace(id="char-1", execution_mode="llm")
@@ -340,6 +337,6 @@ def test_running_slot_blocks_credential_model_update(monkeypatch):
             db,
             user,
             character.id,
-            schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            schema_identity_schemas.CredentialUpsert(model="gemini-3.5-flash-lite", api_key="replacement-fixture-key"),
             workflows=agent_service.build_character_credential_workflows(),
         )

@@ -24,6 +24,7 @@ class MemoryBatchSettings:
     next_due_at: datetime | None
     model_id: str | None
     profile_version: int
+    thinking_level: str = "high"
     pending_count: int = 0
     status: str = "disabled"
     last_code: str | None = None
@@ -41,6 +42,7 @@ class MemorySelectionBatch:
     profile_version: int
     attempt: int
     lease_token: str
+    thinking_level: str = "high"
 
 
 class MemorySelectionProviderPort(Protocol):
@@ -68,6 +70,7 @@ class MemoryBatchRepositoryPort(Protocol):
         model_id: str | None,
         idempotency_key: str,
         now: datetime,
+        thinking_level: str = "high",
     ) -> MemoryBatchSettings: ...
     def claim(
         self, *, lease_token: str, now: datetime

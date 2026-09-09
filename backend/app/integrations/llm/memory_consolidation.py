@@ -50,7 +50,7 @@ class DirectLlmMemoryConsolidationProvider:
             timeout_seconds=MEMORY_CONSOLIDATION_TIMEOUT_SECONDS,
             response_schema=memory_consolidation_response_schema(),
             response_mime_type="application/json",
-            thinking_level="low",
+            thinking_level=self._material.thinking_level,
         )
         started = time.perf_counter()
         try:

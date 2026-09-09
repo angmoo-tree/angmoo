@@ -9,6 +9,8 @@ legacy wire contract; it does not alter legacy request payloads.
 from datetime import datetime
 from typing import Any, Literal
 
+from app.providers.generation_profiles import ThinkingLevel
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.profile_ref import ProfileRef
@@ -34,7 +36,8 @@ class CharacterMessageSettingUpdate(BaseModel):
 class MessageSettingsRead(BaseModel):
     credential_source: MessageCredentialSource = "message_key"
     source_character_id: str | None = None
-    default_model: MessageGoogleModel = "gemini-2.5-flash-lite"
+    default_model: str = "gemini-3.1-flash-lite"
+    default_thinking_level: str = "high"
     message_key_fingerprint: str | None = None
     agent_key_fingerprint: str | None = None
     has_usable_key: bool = False
@@ -45,6 +48,7 @@ class MessageSettingsUpdate(BaseModel):
     credential_source: MessageCredentialSource | None = None
     source_character_id: str | None = Field(default=None, max_length=64)
     default_model: MessageGoogleModel | None = None
+    default_thinking_level: ThinkingLevel | None = None
     api_key: str | None = Field(default=None, min_length=1, max_length=4000)
     clear_message_key: bool = False
 
@@ -58,10 +62,12 @@ class MessageSettingsUpdate(BaseModel):
 class MessageThreadCreate(BaseModel):
     character_id: str = Field(min_length=1, max_length=64)
     selected_model: MessageGoogleModel | None = None
+    selected_thinking_level: ThinkingLevel | None = None
 
 
 class MessageThreadUpdate(BaseModel):
     selected_model: MessageGoogleModel
+    selected_thinking_level: ThinkingLevel = "high"
 
 
 class MessageMessageCreate(BaseModel):
@@ -86,6 +92,7 @@ class MessageThreadRead(BaseModel):
     requester: ProfileRef
     character: ProfileRef
     selected_model: str
+    selected_thinking_level: str = "high"
     model_binding_mode: MessageModelBindingMode = (
         MessageModelBindingMode.THREAD_OVERRIDE
     )
@@ -116,6 +123,7 @@ class WorldChatThreadCreate(BaseModel):
         default=None, min_length=1, max_length=64
     )
     selected_model: MessageGoogleModel | None = None
+    selected_thinking_level: ThinkingLevel | None = None
 
 
 class WorldChatRoleRead(BaseModel):
@@ -151,8 +159,10 @@ class WorldChatThreadRead(BaseModel):
     world_id: str
     requester: WorldChatRoleRead
     responding: WorldChatRoleRead
-    selected_model: MessageGoogleModel
-    default_model: MessageGoogleModel
+    selected_model: str
+    selected_thinking_level: ThinkingLevel = "high"
+    default_model: str
+    default_thinking_level: str = "high"
     model_binding_mode: MessageModelBindingMode
     last_message_at: datetime | None = None
     created_at: datetime
@@ -189,6 +199,7 @@ class WorldChatThreadCreateRead(BaseModel):
 class WorldChatThreadModelUpdate(BaseModel):
     mode: MessageModelBindingMode
     selected_model: MessageGoogleModel | None = None
+    selected_thinking_level: ThinkingLevel | None = None
 
     @model_validator(mode="after")
     def validate_binding(self) -> "WorldChatThreadModelUpdate":

@@ -1,5 +1,6 @@
 "use client";
 
+import { generationProfileLabel } from "@/config/generation-profiles";
 import { ProfileStatLink } from "@/features/characters/components/agent-detail-parts";
 import { ExpandablePostText } from "@/components/content/expandable-post-text";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
@@ -153,7 +154,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     setProfileOneLiner(next.character.one_liner ?? "");
     setProfileAvatarUrl(next.character.avatar_url ?? "");
     setProfileBannerUrl(next.character.banner_url ?? "");
-    setCredentialModel(asGoogleGeminiModel(next.credential?.model));
+    setCredentialModel(asGoogleGeminiModel(next.credential?.model, next.credential?.thinking_level));
     setImageKeyMode(next.image_settings.image_key_mode);
     setImageModel(asPollinationsImageModel(next.image_settings.pollinations_image_model));
   }, []);
@@ -240,7 +241,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       ]);
       syncAgentProfile(next);
       setMaintenance(nextMaintenance);
-      setCredentialModel(asGoogleGeminiModel(next.credential?.model));
+      setCredentialModel(asGoogleGeminiModel(next.credential?.model, next.credential?.thinking_level));
       setImageKeyMode(next.image_settings.image_key_mode);
       setImageModel(asPollinationsImageModel(next.image_settings.pollinations_image_model));
       if (next.character.execution_mode === "local") {
@@ -289,7 +290,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
           throw err;
         }
           syncAgentProfile(agentResult.value);
-          setCredentialModel(asGoogleGeminiModel(agentResult.value.credential?.model));
+          setCredentialModel(asGoogleGeminiModel(agentResult.value.credential?.model, agentResult.value.credential?.thinking_level));
           setImageModel(
             asPollinationsImageModel(
               agentResult.value.image_settings.pollinations_image_model,
@@ -524,7 +525,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     if (!agent) return;
     const nextApiKey = apiKey.trim();
     const credentialModelChanged =
-      credentialModel !== asGoogleGeminiModel(agent.credential?.model);
+      credentialModel !== asGoogleGeminiModel(agent.credential?.model, agent.credential?.thinking_level);
     if (!nextApiKey && !credentialModelChanged) return;
     setSaving(true);
     setError(null);
@@ -544,7 +545,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         ...credentialPayload,
       });
       setAgent({ ...agent, credential });
-      setCredentialModel(asGoogleGeminiModel(credential.model));
+      setCredentialModel(asGoogleGeminiModel(credential.model, credential.thinking_level));
       setApiKey("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "API key를 저장하지 못했습니다.");
@@ -1539,7 +1540,7 @@ function SettingsTab({
   const [messageSettingSaving, setMessageSettingSaving] = useState(false);
   const canDelete = deleteAgreed && deleteConfirmation === agent.character.name;
   const credentialModelChanged =
-    credentialModel !== asGoogleGeminiModel(agent.credential?.model);
+    credentialModel !== asGoogleGeminiModel(agent.credential?.model, agent.credential?.thinking_level);
   const credentialSubmitDisabled =
     saving || (!apiKey.trim() && !credentialModelChanged);
   const credentialButtonLabel = apiKey.trim()
@@ -1768,7 +1769,7 @@ function SettingsTab({
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
           <Metric label="상태" value={getCredentialKeyStatus(agent.credential)} />
           <Metric label="제공사" value={agent.credential?.provider ?? "google"} />
-          <Metric label="저장된 모델" value={agent.credential?.model ?? "-"} />
+          <Metric label="저장된 모델" value={agent.credential ? generationProfileLabel(agent.credential.model, agent.credential.thinking_level) : "-"} />
           <Metric
             label="key fingerprint"
             value={agent.credential?.key_fingerprint ?? "-"}
@@ -1785,7 +1786,8 @@ function SettingsTab({
             }
             className={inputClassName}
           >
-            {GOOGLE_GEMINI_MODELS.map((option) => (
+            <option value="" disabled>지원 모델을 선택해 주세요</option>
+                  {GOOGLE_GEMINI_MODELS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

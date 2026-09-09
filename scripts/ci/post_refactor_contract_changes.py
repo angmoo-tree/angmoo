@@ -10,6 +10,7 @@ from collections import Counter
 import ast
 from copy import deepcopy
 import json
+import hashlib
 from pathlib import Path
 import re
 import subprocess
@@ -17,7 +18,7 @@ import subprocess
 MANIFEST = "security/post_refactor_contract_changes.json"
 
 
-def load(root: Path) -> list[dict]:
+def load(root: Path, *, reader=None) -> list[dict]:
     path = root / MANIFEST
     if not path.exists():
         return []
@@ -26,7 +27,7 @@ def load(root: Path) -> list[dict]:
         raise ValueError("invalid post-refactor change manifest")
     records = payload["records"]
     def git(*args: str) -> bytes:
-        return subprocess.check_output(["git", *args], cwd=root)
+        return reader(*args, root=root) if reader is not None else subprocess.check_output(["git", *args], cwd=root)
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
         old = json.loads(git("show", f"{commit}:{MANIFEST}"))["records"]
         if records[:len(old)] != old:
@@ -45,6 +46,26 @@ def load(root: Path) -> list[dict]:
         for source, blob in record["source_blobs"].items():
             if git("rev-parse", f"{commit}:{source}").decode().strip() != blob:
                 raise ValueError("product change source provenance differs")
+        for change in record.get("definitions", []):
+            source, symbol = change["source"], change["symbol"]
+            if source not in record["source_blobs"] or change["before_ast"] == change["after_ast"]:
+                raise ValueError("definition change requires committed source evidence")
+            for revision, field in ((commit + "^", "before_ast"), (commit, "after_ast")):
+                if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != normalize_ast_dump(change[field]):
+                    raise ValueError("definition change committed preimage differs")
+        for change in record.get("frontend_files", []):
+            source = change["source"]
+            if (source not in record["source_blobs"]
+                    or not source.startswith(("frontend/", "browser-tests/"))
+                    or change["before_sha256"] == change["after_sha256"]):
+                raise ValueError("frontend change requires committed source evidence")
+            for revision, field in ((commit + "^", "before_sha256"), (commit, "after_sha256")):
+                if text_digest(git("show", f"{revision}:{source}").decode("utf-8")) != change[field]:
+                    raise ValueError("frontend change committed preimage differs")
+        if record.get("orm_tables"):
+            migrations = record.get("migration_sources", [])
+            if not migrations or any(path not in record["source_blobs"] for path in migrations):
+                raise ValueError("ORM change requires committed migration evidence")
         for removed in record.get("removed_bindings", []):
             source, symbol = removed["source"], removed["symbol"]
             if source not in record["source_blobs"] or not re.fullmatch(r"[A-Za-z_]\w*", symbol):
@@ -62,6 +83,73 @@ def load(root: Path) -> list[dict]:
     return records
 
 
+def text_digest(text: str) -> str:
+    return hashlib.sha256(text.replace("\r\n", "\n").encode("utf-8")).hexdigest()
+
+
+def frontend_matches(source: str, original: str, actual: str, records: list[dict]) -> bool:
+    """Apply only a continuous, committed, exact file delta; no broad exemption."""
+    expected = text_digest(original)
+    for record in records:
+        for change in record.get("frontend_files", []):
+            if change["source"] == source:
+                if expected != change["before_sha256"]:
+                    raise ValueError("frontend change chain preimage differs")
+                expected = change["after_sha256"]
+    return expected == text_digest(actual)
+
+
+def definition_ast(source: str, symbol: str) -> str:
+    body = ast.parse(source).body
+    for part in symbol.split("."):
+        found = [node for node in body if getattr(node, "name", None) == part or
+                 isinstance(node, (ast.Assign, ast.AnnAssign)) and any(
+                     isinstance(target, ast.Name) and target.id == part for target in
+                     (node.targets if isinstance(node, ast.Assign) else [node.target]))]
+        if len(found) != 1:
+            raise ValueError("definition change must name one exact symbol")
+        node = found[0]
+        body = getattr(node, "body", [])
+    return ast.dump(node, include_attributes=False)
+
+
+def normalize_ast_dump(value: str) -> str:
+    """Compare Python 3.11/3.13 empty-field spelling without executing text."""
+    if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
+        return value
+
+    def decode(node):
+        if isinstance(node, ast.Name) and node.id == "Ellipsis":
+            return Ellipsis
+        if isinstance(node, ast.Call):
+            constructor = getattr(ast, node.func.id, None) if isinstance(node.func, ast.Name) else None
+            if not isinstance(constructor, type) or not issubclass(constructor, ast.AST) or any(key.arg is None for key in node.keywords):
+                raise ValueError("invalid AST evidence constructor")
+            return constructor(*[decode(arg) for arg in node.args], **{key.arg: decode(key.value) for key in node.keywords})
+        if isinstance(node, ast.List):
+            return [decode(item) for item in node.elts]
+        if isinstance(node, ast.Tuple):
+            return tuple(decode(item) for item in node.elts)
+        return ast.literal_eval(node)
+
+    result = decode(ast.parse(value, mode="eval").body)
+    if not isinstance(result, ast.AST):
+        raise ValueError("invalid AST evidence root")
+    return ast.dump(result, include_attributes=False)
+
+
+def definition_matches(root: Path, source: str, symbol: str, before: ast.AST, after: ast.AST, *, records=None) -> bool:
+    expected = ast.dump(before, include_attributes=False)
+    actual = ast.dump(after, include_attributes=False)
+    if expected == actual:
+        return True
+    for record in load(root) if records is None else records:
+        for change in record.get("definitions", []):
+            if (change["source"], change["symbol"], normalize_ast_dump(change["before_ast"])) == (source, symbol, expected):
+                expected = normalize_ast_dump(change["after_ast"])
+    return expected == actual
+
+
 def removed_bindings(records: list[dict]) -> set[tuple[str, str]]:
     return {(item["source"], item["symbol"]) for record in records for item in record.get("removed_bindings", [])}
 
@@ -69,6 +157,10 @@ def removed_bindings(records: list[dict]) -> set[tuple[str, str]]:
 def contracts(original: dict, records: list[dict]) -> dict:
     result = deepcopy(original)
     for record in records:
+        for change in record.get("orm_tables", []):
+            if result["orm_tables"].get(change["key"]) != change["before"] or change["before"] == change["after"]:
+                raise ValueError("product ORM preimage differs")
+            result["orm_tables"][change["key"]] = change["after"]
         seen = set()
         for change in record.get("contracts", []):
             app, kind, key = (change[name] for name in ("application", "kind", "key"))
@@ -93,7 +185,8 @@ def assertions(node: str, required: Counter, found: Counter, records: list[dict]
         for change in record.get("assertions", []):
             if change["node"] != node:
                 continue
-            before, after = Counter(change["before"]), Counter(change["after"])
+            before = Counter(normalize_ast_dump(value) for value in change["before"])
+            after = Counter(normalize_ast_dump(value) for value in change["after"])
             # Later introduction evidence already contains the approved version.
             if required == after:
                 continue

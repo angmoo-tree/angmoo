@@ -515,6 +515,7 @@ def _after_character_created(db, user, character, data) -> character_schemas.Age
             character=character,
             provider=data.provider,
             model=data.model,
+            thinking_level=data.thinking_level,
             api_key=data.api_key,
             auth_profile_id=None,
             label=f"{character.name} {data.provider}",

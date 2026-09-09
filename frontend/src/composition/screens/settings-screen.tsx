@@ -1,5 +1,6 @@
 "use client";
 
+import { generationProfileValue } from "@/config/generation-profiles";
 import {
   AlertTriangle,
   Database,
@@ -28,10 +29,8 @@ import { safeSettingsReturnTo } from "@/utils/safe-navigation";
 
 import styles from "./settings-client.module.css";
 
-function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiModel {
-  return MESSAGE_GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
-    ? (value as MessageGoogleGeminiModel)
-    : DEFAULT_MESSAGE_GOOGLE_MODEL;
+function asMessageGoogleModel(value: string | undefined, thinking = "high"): MessageGoogleGeminiModel {
+  return generationProfileValue(value, thinking);
 }
 
 export function SettingsClient() {
@@ -115,7 +114,7 @@ export function SettingsClient() {
         if (!active) return;
         setMessageSettings(settings);
         setMessageSource(settings.credential_source);
-        setMessageModel(asMessageGoogleModel(settings.default_model));
+        setMessageModel(asMessageGoogleModel(settings.default_model, settings.default_thinking_level));
         setSourceCharacterId(settings.source_character_id ?? "");
       })
       .catch((error) => {
@@ -163,7 +162,7 @@ export function SettingsClient() {
       });
       setMessageSettings(next);
       setMessageSource(next.credential_source);
-      setMessageModel(asMessageGoogleModel(next.default_model));
+      setMessageModel(asMessageGoogleModel(next.default_model, next.default_thinking_level));
       setSourceCharacterId(next.source_character_id ?? "");
       setMessageApiKey("");
       setMessageSaved(true);
@@ -195,7 +194,7 @@ export function SettingsClient() {
       const next = await updateMessageSettings({ clear_message_key: true });
       setMessageSettings(next);
       setMessageSource(next.credential_source);
-      setMessageModel(asMessageGoogleModel(next.default_model));
+      setMessageModel(asMessageGoogleModel(next.default_model, next.default_thinking_level));
       setSourceCharacterId(next.source_character_id ?? "");
       setMessageApiKey("");
       setMessageCleared(true);
@@ -318,6 +317,7 @@ export function SettingsClient() {
                     setMessageModel(event.target.value as MessageGoogleGeminiModel)
                   }
                 >
+                  <option value="" disabled>지원 모델을 선택해 주세요</option>
                   {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}

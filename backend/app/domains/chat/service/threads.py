@@ -223,6 +223,7 @@ class ThreadService:
                     self._ensure_no_active_world_response_request(db, existing.id)
                     self.settings_service._ensure_supported_model(data.selected_model)
                     existing.selected_model = data.selected_model
+                    existing.selected_thinking_level = data.selected_thinking_level or "high"
                     existing.model_binding_mode = (
                         MessageModelBindingMode.THREAD_OVERRIDE.value
                     )
@@ -260,6 +261,7 @@ class ThreadService:
                 responding_world_character_id=responding.id,
                 world_scope_status="resolved",
                 selected_model=selected_model,
+                selected_thinking_level=(data.selected_thinking_level or "high") if data.selected_model else preference.default_thinking_level,
                 model_binding_mode=MessageModelBindingMode.THREAD_OVERRIDE.value
                 if data.selected_model is not None
                 else MessageModelBindingMode.DEFAULT.value,
@@ -307,6 +309,7 @@ class ThreadService:
             self.settings_service._ensure_supported_model(data.selected_model)
             thread.model_binding_mode = MessageModelBindingMode.THREAD_OVERRIDE.value
             thread.selected_model = data.selected_model
+            thread.selected_thinking_level = data.selected_thinking_level or "high"
             db.flush()
         read = self._world_thread_read(
             db, thread, include_messages=True, lock_scope=True
@@ -350,6 +353,7 @@ class ThreadService:
             )
             self.settings_service._ensure_supported_model(preference.default_model)
             thread.selected_model = preference.default_model
+            thread.selected_thinking_level = preference.default_thinking_level
         else:
             self.settings_service._ensure_supported_model(thread.selected_model)
         db.flush()
@@ -441,6 +445,7 @@ class ThreadService:
             if data.selected_model and existing.world_scope_status != "resolved":
                 self.settings_service._ensure_supported_model(data.selected_model)
                 existing.selected_model = data.selected_model
+                existing.selected_thinking_level = data.selected_thinking_level or "high"
                 db.commit()
                 db.refresh(existing)
             return self._legacy_thread_read(db, existing, include_messages=True)
@@ -460,6 +465,7 @@ class ThreadService:
             character_id=character.id,
             world_scope_status="ambiguous",
             selected_model=selected_model,
+            selected_thinking_level=(data.selected_thinking_level or "high") if data.selected_model else preference.default_thinking_level,
             model_binding_mode=MessageModelBindingMode.THREAD_OVERRIDE.value,
         )
         db.add(thread)
@@ -477,6 +483,7 @@ class ThreadService:
         self.settings_service._ensure_supported_model(data.selected_model)
         thread = self._get_owned_legacy_mutable_thread(db, user, thread_id)
         thread.selected_model = data.selected_model
+        thread.selected_thinking_level = data.selected_thinking_level or "high"
         thread.model_binding_mode = MessageModelBindingMode.THREAD_OVERRIDE.value
         db.commit()
         db.refresh(thread)
@@ -512,6 +519,7 @@ class ThreadService:
             requester=profiles._user_ref(thread.requester),
             character=profiles._character_ref(thread.character),
             selected_model=thread.selected_model,
+            selected_thinking_level=thread.selected_thinking_level,
             model_binding_mode=thread.model_binding_mode,
             last_message_at=thread.last_message_at,
             created_at=thread.created_at,
@@ -592,7 +600,6 @@ class ThreadService:
         default_model = (
             DEFAULT_MESSAGE_MODEL if preference is None else preference.default_model
         )
-        self.settings_service._ensure_supported_model(default_model)
         resolved_model = (
             default_model
             if thread.model_binding_mode == MessageModelBindingMode.DEFAULT.value
@@ -604,7 +611,9 @@ class ThreadService:
             requester=requester,
             responding=responding,
             selected_model=resolved_model,
+            selected_thinking_level=(preference.default_thinking_level if preference else "high") if thread.model_binding_mode == MessageModelBindingMode.DEFAULT.value else thread.selected_thinking_level,
             default_model=default_model,
+            default_thinking_level=preference.default_thinking_level if preference else "high",
             model_binding_mode=thread.model_binding_mode,
             last_message_at=thread.last_message_at,
             created_at=thread.created_at,

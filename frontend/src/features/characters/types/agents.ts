@@ -13,6 +13,7 @@ export type CredentialRead = {
   provider: string;
   purpose: string;
   model: string;
+  thinking_level: string;
   label: string;
   key_fingerprint: string | null;
   enabled: boolean;
@@ -310,6 +311,7 @@ export type AgentCreationDraftRead = {
   id: string;
   provider: string;
   model: string;
+  thinking_level: string;
   key_fingerprint: string | null;
   name: string;
   handle: string | null;

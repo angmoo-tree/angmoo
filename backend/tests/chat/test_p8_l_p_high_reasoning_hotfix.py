@@ -76,10 +76,8 @@ def test_world_chat_legacy_model_policy_remains_compatible(
     model: str,
     thinking_level: str | None,
 ) -> None:
-    policy = resolve_world_chat_model_execution_policy(model)
-
-    assert policy.thinking_level == thinking_level
-    assert policy.max_output_tokens == 3_072
+    with pytest.raises(ValueError, match="world_chat_message_model_unsupported"):
+        resolve_world_chat_model_execution_policy(model)
 
 
 def test_world_chat_execution_policy_rejects_an_unknown_future_model() -> None:
@@ -103,7 +101,7 @@ def test_gemini_35_is_message_only_and_reuses_the_reviewed_adapter() -> None:
 
     assert MESSAGE_GOOGLE_MODELS.count(model) == 1
     assert model in MESSAGE_MODELS
-    assert model not in AGENT_GOOGLE_MODELS
+    assert model in AGENT_GOOGLE_MODELS
     assert model not in EMBEDDING_GOOGLE_MODELS
     spec = get_model_spec("google", model)
     assert spec.capabilities.text is True
@@ -139,9 +137,11 @@ def test_frontend_message_catalog_exposes_35_without_expanding_agent_models() ->
     chat_contract = (REPOSITORY_ROOT / "frontend/src/features/chat/config/models.ts").read_text(encoding="utf-8")
     agent_contract = (REPOSITORY_ROOT / "frontend/src/features/characters/config/model-options.ts").read_text(encoding="utf-8")
 
-    assert chat_contract.count('value: "gemini-3.5-flash-lite"') == 1
-    assert 'label: "Gemini 3.5 Flash-Lite"' in chat_contract
-    assert "gemini-3.5-flash-lite" not in agent_contract
+    catalog = (REPOSITORY_ROOT / "frontend/src/config/generation-profiles.ts").read_text(encoding="utf-8")
+    assert "GENERATION_PROFILES" in chat_contract and "GENERATION_PROFILES" in agent_contract
+    for model in ("Gemini 3.5 Flash-Lite", "Gemini 3.1 Flash-Lite"):
+        for thinking in ("high", "medium"):
+            assert f'{model} ({thinking})' in catalog
 
 
 @pytest.mark.parametrize("model", HIGH_REASONING_MODELS)

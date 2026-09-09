@@ -85,7 +85,7 @@ pub fn request_exit(app: tauri::AppHandle) {
         let mut skip_sent = false;
         let mut skip_at = None;
         let mut deferred = response.is_none();
-        while response.is_some() && started.elapsed() < Duration::from_secs(30) {
+        while response.is_some() && started.elapsed() < Duration::from_secs(200) {
             if state.skip.load(Ordering::SeqCst) && !skip_sent {
                 desktop_runtime::memory_shutdown_request(
                     &runtime,
@@ -115,7 +115,7 @@ pub fn request_exit(app: tauri::AppHandle) {
                 "/__angmoo/desktop/shutdown-status",
             );
         }
-        if started.elapsed() >= Duration::from_secs(30) || response.is_none() {
+        if started.elapsed() >= Duration::from_secs(200) || response.is_none() {
             deferred = true;
             desktop_runtime::memory_shutdown_request(
                 &runtime,

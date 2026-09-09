@@ -1150,7 +1150,7 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
     world_chat.update_user_settings(
         response_session,
         owner,
-        MessageSettingsUpdate(default_model="gemini-2.5-flash"),
+        MessageSettingsUpdate(default_model="gemini-3.5-flash-lite"),
     )
     retried = generation_service.retry_world_response(
         response_session,
@@ -1172,7 +1172,7 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
         retried.response_request.request_id,
     )
     assert retry_snapshot is not None
-    assert retry_snapshot.selected_model == "gemini-2.5-flash"
+    assert retry_snapshot.selected_model == "gemini-3.5-flash-lite"
     assert response_session.scalar(
         select(func.count(models.MessageMessage.id)).where(
             models.MessageMessage.thread_id == "p-thread",

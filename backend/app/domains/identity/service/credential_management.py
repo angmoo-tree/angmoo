@@ -27,6 +27,7 @@ def update_credential(
     if (
         current_assigned_slot is not None
         and current_assigned_slot.status == workflows.running_slot_status
+        and data.api_key is not None
     ):
         raise workflows.slot_busy_error(
             "앵무가 지금 활동 중이라 API key 또는 모델을 바꿀 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
@@ -39,6 +40,7 @@ def update_credential(
                 character=character,
                 provider=data.provider,
                 model=data.model,
+                thinking_level=data.thinking_level,
                 api_key=data.api_key,
                 auth_profile_id=None,
                 label=data.label,
@@ -66,6 +68,7 @@ def update_credential(
                     "API key is required before changing the credential provider"
                 )
             credential.model = data.model
+            credential.thinking_level = data.thinking_level
             if data.label is not None:
                 credential.label = data.label
             credential.enabled = True

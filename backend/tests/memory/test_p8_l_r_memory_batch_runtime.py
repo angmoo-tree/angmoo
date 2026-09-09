@@ -73,7 +73,7 @@ def batch_stack(session, *, provider=None):
         schedule_enabled=False,
         local_time="22:30",
         consent_version=MEMORY_CONSENT_VERSION,
-        model_id="fixture-model",
+        model_id="gemini-3.1-flash-lite",
         idempotency_key="batch-setup",
         now=now,
     )
@@ -91,7 +91,7 @@ def batch_stack(session, *, provider=None):
         repository=repo,
         source_reader=reader,
         write_lifecycle=writer,
-        provider_factory=lambda owner, model: selector,
+        provider_factory=lambda owner, model, thinking: selector,
     )
     return scope, repo, job, selector, service
 
@@ -252,7 +252,7 @@ def test_saved_schedule_does_not_generate_or_trigger_past_time(memory_session):
         schedule_enabled=True,
         local_time="22:30",
         consent_version=MEMORY_CONSENT_VERSION,
-        model_id="fixture-model",
+        model_id="gemini-3.1-flash-lite",
         idempotency_key="schedule-save",
         now=now,
     )

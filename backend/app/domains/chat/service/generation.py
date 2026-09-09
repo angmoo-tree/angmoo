@@ -134,6 +134,7 @@ class GenerationService:
                 generation_id=generation_id,
                 attempt_number=1,
                 selected_model=selected_model,
+                selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
             )
         )
@@ -216,6 +217,7 @@ class GenerationService:
                 attempt_number=prior.attempt_number + 1,
                 retry_of_request_id=prior.request_id,
                 selected_model=selected_model,
+                selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
             )
         )
@@ -493,6 +495,7 @@ class GenerationService:
             credential_id=base_material.credential_id,
             provider=base_material.provider,
             model=record.selected_model,
+            thinking_level=record.selected_thinking_level,
             fingerprint=base_material.fingerprint,
             purpose=base_material.purpose,
             _secret=base_material.reveal(),

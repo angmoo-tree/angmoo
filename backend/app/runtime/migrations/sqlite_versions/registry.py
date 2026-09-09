@@ -58,6 +58,10 @@ from app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch import (
     upgrade_v8_to_v9,
     verify_v8_to_v9_delta,
 )
+from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import (
+    MUTABLE_IDENTITY_TABLES as V9_TO_V10_MUTABLE_TABLES,
+    capture_v9_to_v10_delta, verify_v9_to_v10_delta, upgrade_v9_to_v10,
+)
 from app.runtime.migrations.sqlite_versions.contracts import SqliteMigrationContract
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
 
@@ -107,9 +111,15 @@ MIGRATIONS: dict[int, SqliteMigration] = {
     6: upgrade_v6_to_v7,
     7: upgrade_v7_to_v8,
     8: upgrade_v8_to_v9,
+    9: upgrade_v9_to_v10,
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    9: SqliteMigrationContract(
+        source_version=9, target_version=10, name="generation_profiles",
+        mutable_identity_tables=V9_TO_V10_MUTABLE_TABLES,
+        capture=capture_v9_to_v10_delta, verify=verify_v9_to_v10_delta,
+    ),
     1: SqliteMigrationContract(
         source_version=1,
         target_version=2,

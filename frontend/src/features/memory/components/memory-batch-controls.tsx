@@ -1,5 +1,6 @@
 "use client";
 
+import { GENERATION_PROFILES, generationProfileValue, decodeGenerationProfile, THINKING_HELP } from "@/config/generation-profiles";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
@@ -68,7 +69,7 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
       } else {
         pending.current ??= {
           ai_enabled: draft.ai_enabled, shutdown_enabled: draft.shutdown_enabled, schedule_enabled: draft.schedule_enabled,
-          local_time: draft.local_time, model_id: draft.model_id,
+          local_time: draft.local_time, model_id: draft.model_id, thinking_level: draft.thinking_level,
           expected_version: draft.version, expected_profile_version: draft.profile_version,
           consent_version: draft.ai_enabled && (consent || saved?.ai_enabled) ? "memory-selection-consent.v1" : null,
           idempotency_key: crypto.randomUUID(),
@@ -97,7 +98,9 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
       {!saved.memory_enabled ? <p>기억이 꺼져 있어 자동 정리가 멈춰 있습니다. 기존 기록은 보존됩니다.</p> : null}
       <fieldset disabled={disabled || busy}>
         <label className={styles.batchCheck}><input type="checkbox" checked={draft.ai_enabled} onChange={(event) => change({ ai_enabled: event.target.checked })} />AI 선별·정리 사용</label>
-        <Field label="기억 정리 모델 · 이 설치의 모든 캐릭터 공통" helperText="쪽지용 API 설정을 사용합니다. 모델 변경은 다른 캐릭터의 다음 기억 정리에도 적용됩니다.">{(props) => <Select {...props} value={draft.model_id ?? ""} onChange={(event) => change({ model_id: event.target.value || null })}><option value="">모델을 선택해 주세요</option>{saved.available_models.map((model) => <option value={model} key={model}>{model}</option>)}</Select>}</Field>
+        <Field label="기억 정리 모델 · 이 설치의 모든 캐릭터 공통" helperText="쪽지용 API 설정을 사용합니다. 모델 변경은 다른 캐릭터의 다음 기억 정리에도 적용됩니다.">{(props) => <Select {...props} value={generationProfileValue(draft.model_id, draft.thinking_level)} onChange={(event) => { if (!event.target.value) return; const pair = decodeGenerationProfile(event.target.value); change({ model_id: pair.model, thinking_level: pair.thinking_level }); }}><option value="">모델을 선택해 주세요</option>{GENERATION_PROFILES.filter((profile) => saved.available_models.includes(profile.model)).map((profile) => <option value={profile.value} key={profile.value}>{profile.label}</option>)}</Select>}</Field>
+        <p>{THINKING_HELP}</p>
+        {draft.model_id && !generationProfileValue(draft.model_id, draft.thinking_level) ? <p role="alert">기존 모델은 지원이 종료되었습니다. 모델을 다시 선택해 주세요. 저장된 API key는 유지됩니다.</p> : null}
         {draft.ai_enabled && !saved.ai_enabled ? <label className={styles.batchCheck}><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />선택한 모델로 경험의 발췌가 전송되고 API 비용이 발생할 수 있음에 동의합니다.</label> : null}
         <label className={styles.batchCheck}><input type="checkbox" checked={draft.shutdown_enabled} onChange={(event) => change({ shutdown_enabled: event.target.checked })} />앱을 완전히 종료할 때 정리</label>
         <label className={styles.batchCheck}><input type="checkbox" checked={draft.schedule_enabled} onChange={(event) => change({ schedule_enabled: event.target.checked })} />매일 정해진 시각에 정리</label>
@@ -106,7 +109,7 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
       <p>다음 예약: {saved.next_due_at ? displayTime(saved.next_due_at, saved.timezone) : "예약 없음"}</p>
       {saved.status === "attention" && saved.next_due_at ? <p>다음 예약은 다음 정기 정리 시각입니다. 실패한 정리는 아래에서 다시 시도할 수 있어요.</p> : null}
       {saved.last_completed_at ? <p>마지막 정리: {displayTime(saved.last_completed_at, saved.timezone)}</p> : null}
-      <Button compact disabled={disabled || (draft.ai_enabled && (!draft.model_id || (!saved.ai_enabled && !consent)))} loading={busy} loadingLabel="저장 중" onClick={() => void save()}>정리 설정 저장</Button>
+      <Button compact disabled={disabled || (draft.ai_enabled && (!generationProfileValue(draft.model_id, draft.thinking_level) || (!saved.ai_enabled && !consent)))} loading={busy} loadingLabel="저장 중" onClick={() => void save()}>정리 설정 저장</Button>
       {saved.status === "attention" && saved.ai_enabled && saved.memory_enabled ? <Button compact variant="secondary" disabled={disabled} onClick={() => void save(true)}>실패한 정리 다시 시도</Button> : null}
     </>}
     {notice ? <p role={failed ? "alert" : "status"}>{notice}</p> : null}

@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import subprocess
 import tarfile
+import post_refactor_contract_changes as product_changes
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -172,6 +173,7 @@ def rewrite_split_imports(text: str, moves: dict[str, str], splits: dict, root: 
 
 def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str], splits: dict | None = None) -> list[str]:
     errors = []
+    records = None
     for old, original in sorted(frozen.items()):
         new = mapped(old, moves)
         target = (root / new).resolve()
@@ -191,6 +193,10 @@ def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str], splits: 
         else:
             expected = rewrite_paths(rewrite_split_imports(original.decode("utf-8"), moves, splits or {}, root), moves).replace("\r\n", "\n")
             equal = current.decode("utf-8").replace("\r\n", "\n") == expected
+            if not equal:
+                if records is None:
+                    records = product_changes.load(root)
+                equal = product_changes.frontend_matches(new, expected, current.decode("utf-8"), records)
         if not equal:
             errors.append(f"[frontend_oracle_changed] {old} -> {new}")
     return errors

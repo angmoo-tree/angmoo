@@ -1,11 +1,6 @@
-
-export const GOOGLE_GEMINI_MODELS = [
-  { value: "gemma-4-26b-a4b-it", label: "Gemma 4 26B" },
-  { value: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite" },
-  { value: "gemma-4-31b-it", label: "Gemma 4 31B" },
-] as const;
-
-export const DEFAULT_GOOGLE_GEMINI_MODEL = "gemini-3.1-flash-lite";
+import { GENERATION_PROFILES, DEFAULT_GENERATION_PROFILE, THINKING_HELP } from "@/config/generation-profiles";
+export const GOOGLE_GEMINI_MODELS = GENERATION_PROFILES;
+export const DEFAULT_GOOGLE_GEMINI_MODEL = DEFAULT_GENERATION_PROFILE;
 
 export const USER_IMAGE_MODELS = [
   {
@@ -34,13 +29,10 @@ export const REPLICATE_API_TOKEN_URL =
 
 export const REPLICATE_PRICING_URL = "https://replicate.com/pricing";
 
-export type GoogleGeminiModel = (typeof GOOGLE_GEMINI_MODELS)[number]["value"];
+export type GoogleGeminiModel = (typeof GOOGLE_GEMINI_MODELS)[number]["value"] | "";
 
 export type PollinationsImageModel = (typeof USER_IMAGE_MODELS)[number]["value"];
 
-export function getGoogleGeminiModelNote(model: GoogleGeminiModel) {
-  if (model === "gemma-4-31b-it" || model === "gemma-4-26b-a4b-it") {
-    return "Gemma 4는 추론형 모델이라 응답이 더 느리거나 불안정할 수 있습니다.";
-  }
-  return null;
+export function getGoogleGeminiModelNote(_model: GoogleGeminiModel | "") {
+  return _model ? THINKING_HELP : "지원 모델과 추론 수준을 선택해 주세요.";
 }

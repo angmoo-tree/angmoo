@@ -639,6 +639,8 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
       profile_capability: "available",
     },
     selected_model: "gemini-3.1-flash-lite",
+    selected_thinking_level: "high",
+    default_thinking_level: "high",
     default_model: "gemini-3.1-flash-lite",
     model_binding_mode: "default",
     last_message_at: "2026-09-01T03:04:00Z",
@@ -748,8 +750,10 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
       const body = request.postDataJSON() as {
         mode: "default" | "thread_override";
         selected_model?: WorldChatThreadRead["selected_model"];
+        selected_thinking_level?: "high" | "medium";
       };
       worldThread.model_binding_mode = body.mode;
+      worldThread.selected_thinking_level = body.selected_thinking_level ?? "high";
       worldThread.selected_model =
         body.mode === "default"
           ? worldThread.default_model
@@ -965,14 +969,14 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
   const modelSelect = page.getByRole("combobox", { name: "응답 모델" });
   await expect(modelSelect).toHaveValue("default");
-  await modelSelect.selectOption("gemini-3.5-flash-lite");
-  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite");
+  await modelSelect.selectOption("gemini-3.5-flash-lite:medium");
+  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite:medium");
   await expect(
-    page.getByText("Gemini 3.5 Flash-Lite을 이 대화에서 고정해 사용합니다."),
+    page.getByText("Gemini 3.5 Flash-Lite (medium)을 이 대화에서 고정해 사용합니다."),
   ).toBeVisible();
   failNextModelUpdate = true;
   await modelSelect.selectOption("default");
-  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite");
+  await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite:medium");
   const modelFailure = page.getByRole("alert").filter({
     hasText: "모델을 바꾸지 못했어요.",
   });
@@ -980,7 +984,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await modelFailure.getByRole("button", { name: "다시 시도" }).click();
   await expect(modelSelect).toHaveValue("default");
   await expect(
-    page.getByText("기본 모델 Gemini 3.1 Flash-Lite을 다음 답장에 사용합니다."),
+    page.getByText("기본 모델 Gemini 3.1 Flash-Lite (high)을 다음 답장에 사용합니다."),
   ).toBeVisible();
   const composer = page.getByRole("textbox", {
     name: "친구 앵무에게 보낼 메시지",
@@ -1305,6 +1309,8 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     requester,
     responding,
     selected_model: "gemini-3.1-flash-lite",
+    selected_thinking_level: "high",
+    default_thinking_level: "high",
     default_model: "gemini-3.1-flash-lite",
     model_binding_mode: "default",
     last_message_at: null,
@@ -2562,7 +2568,7 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
       url.pathname === "/api/backend/messages/threads/thread-p8-l-c" &&
       method === "PATCH"
     ) {
-      thread = { ...thread, selected_model: body.selected_model };
+      thread = { ...thread, selected_model: body.selected_model, selected_thinking_level: body.selected_thinking_level };
       return json(route, thread);
     }
     if (
@@ -2656,10 +2662,10 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
   await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
 
   await page.getByRole("combobox", { name: "모델 선택" }).selectOption(
-    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite:medium",
   );
   await expect(page.getByRole("combobox", { name: "모델 선택" })).toHaveValue(
-    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite:medium",
   );
 
   await page.getByPlaceholder("쪽지를 입력하세요").fill("새 질문");
@@ -2683,7 +2689,7 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
       path: "/api/backend/messages/threads/thread-p8-l-c/messages/2/retry",
     },
     {
-      body: { selected_model: "gemini-2.5-flash" },
+      body: { selected_model: "gemini-3.1-flash-lite", selected_thinking_level: "medium" },
       method: "PATCH",
       path: "/api/backend/messages/threads/thread-p8-l-c",
     },

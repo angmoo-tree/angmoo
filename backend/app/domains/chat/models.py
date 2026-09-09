@@ -69,7 +69,7 @@ class UserMessagePreference(Base):
         ForeignKey("characters.id"), nullable=True
     )
     default_model: Mapped[str] = mapped_column(
-        String(120), nullable=False, default="gemini-2.5-flash-lite"
+        String(120), nullable=False, default="gemini-3.1-flash-lite"
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -83,6 +83,10 @@ class UserMessagePreference(Base):
 
     user: Mapped["User"] = relationship()
     source_character: Mapped[Optional["Character"]] = relationship()
+
+    default_thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
+    )
 
 
 class MessageThread(Base):
@@ -183,7 +187,7 @@ class MessageThread(Base):
         String(20), nullable=False, default="ambiguous", server_default="ambiguous"
     )
     selected_model: Mapped[str] = mapped_column(
-        String(120), nullable=False, default="gemini-2.5-flash-lite"
+        String(120), nullable=False, default="gemini-3.1-flash-lite"
     )
     model_binding_mode: Mapped[str] = mapped_column(
         String(20),
@@ -213,6 +217,10 @@ class MessageThread(Base):
     character: Mapped["Character"] = relationship()
     messages: Mapped[list["MessageMessage"]] = relationship(
         back_populates="thread", order_by="MessageMessage.created_at"
+    )
+
+    selected_thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
     )
 
 
@@ -372,12 +380,22 @@ class ChatResponseRequest(Base):
     terminal_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
-def create_response_request_schema(connection: Connection) -> None:
-    Base.metadata.create_all(
-        connection,
-        tables=[Base.metadata.tables[name] for name in RESPONSE_REQUEST_SCHEMA_TABLES],
-        checkfirst=False,
+    selected_thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
     )
+
+
+def create_response_request_schema(connection: Connection) -> None:
+    """Released v6 migration shape; do not include later snapshot columns."""
+    from sqlalchemy import MetaData
+    metadata = MetaData()
+    for table in Base.metadata.tables.values():
+        table.to_metadata(metadata)
+    for name in RESPONSE_REQUEST_SCHEMA_TABLES:
+        table = metadata.tables[name]
+        if "selected_thinking_level" in table.c:
+            table._columns.remove(table.c.selected_thinking_level)
+        table.create(connection, checkfirst=False)
 
 
 def drop_response_request_schema(connection: Connection) -> None:

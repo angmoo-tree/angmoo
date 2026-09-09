@@ -11,13 +11,15 @@ from sqlalchemy.orm import Session
 from app.domains.memory.contracts.scope_references import MemoryScopeReferences
 from app.domains.memory.policies.batch import (
     MEMORY_CONSENT_VERSION,
+    MEMORY_BATCH_LEASE_DURATION,
+    MEMORY_BATCH_POLICY_VERSION,
     MAX_BATCH_ATTEMPTS,
     next_daily_slot,
     retry_delay,
     schedule_time,
     schedule_timezone,
 )
-from app.domains.memory.policies.consolidation import MAINTENANCE_LEASE_DURATION
+from app.providers.generation_profiles import validate_generation_profile
 from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryDomainError,
@@ -147,6 +149,7 @@ class SqlAlchemyMemoryBatchRepository:
             or not config.schedule_enabled
             else config.next_due_at,
             model_id=None if profile is None else profile.model_id,
+            thinking_level="high" if profile is None else profile.thinking_level,
             profile_version=0 if profile is None else profile.version,
             pending_count=pending,
             status=state,
@@ -168,6 +171,7 @@ class SqlAlchemyMemoryBatchRepository:
         model_id: str | None,
         idempotency_key: str,
         now: datetime,
+        thinking_level: str = "high",
     ) -> MemoryBatchSettings:
         zone = self.timezone(scope)
         schedule_time(local_time)
@@ -178,6 +182,11 @@ class SqlAlchemyMemoryBatchRepository:
             not isinstance(model_id, str) or not 1 <= len(model_id) <= 120
         ):
             raise MemoryValidationError("memory_selection_model_invalid")
+        if model_id is not None:
+            try:
+                validate_generation_profile(model_id, thinking_level)
+            except ValueError:
+                raise MemoryValidationError("memory_selection_model_unsupported") from None
         setting = self.memory.get_or_create_scope_setting(scope)
         current = self.session.get(MemoryBatchSetting, setting.id)
         profile = self.session.get(MemoryBatchProfile, scope.owner_id)
@@ -190,6 +199,7 @@ class SqlAlchemyMemoryBatchRepository:
                     local_time,
                     consent_version,
                     model_id,
+                    thinking_level,
                 ],
                 separators=(",", ":"),
             ).encode()
@@ -223,11 +233,12 @@ class SqlAlchemyMemoryBatchRepository:
                 profile = MemoryBatchProfile(
                     owner_id=scope.owner_id,
                     model_id=model_id,
+                    thinking_level=thinking_level,
                     version=1,
                     updated_at=now,
                 )
                 self.session.add(profile)
-            elif profile.model_id != model_id:
+            elif (profile.model_id, profile.thinking_level) != (model_id, thinking_level):
                 changed = self.session.execute(
                     update(MemoryBatchProfile)
                     .where(
@@ -236,12 +247,15 @@ class SqlAlchemyMemoryBatchRepository:
                     )
                     .values(
                         model_id=model_id,
+                        thinking_level=thinking_level,
                         version=expected_profile_version + 1,
                         updated_at=now,
                     )
                 )
                 if changed.rowcount != 1:
                     raise MemoryConflictError("memory_batch_settings_version_conflict")
+        if current.ai_enabled != ai_enabled or current.consent_version != (MEMORY_CONSENT_VERSION if ai_enabled else None):
+            current.execution_version = (current.execution_version or 1) + 1
         current.ai_enabled, current.shutdown_enabled = ai_enabled, shutdown_enabled
         current.consent_version = MEMORY_CONSENT_VERSION if ai_enabled else None
         current.schedule_enabled, current.local_time, current.timezone = (
@@ -319,6 +333,8 @@ class SqlAlchemyMemoryBatchRepository:
             return None
         # Key excludes trigger/clock/settings: re-opening or changing schedules
         # cannot reset this batch's durable retry budget.
+        if trigger == "explicit" and not explicit_key:
+            explicit_key = config.retry_request_key or ""
         ids_json = json.dumps(sorted(candidate_ids), separators=(",", ":"))
         key = (
             "mb2:"
@@ -338,9 +354,11 @@ class SqlAlchemyMemoryBatchRepository:
                     scope_setting_id=scope_setting_id,
                     trigger=trigger,
                     scope_version=scope.version,
-                    settings_version=config.version,
+                    settings_version=config.execution_version,
                     profile_version=profile.version,
                     model_id=profile.model_id,
+                    thinking_level=profile.thinking_level,
+                    policy_version=MEMORY_BATCH_POLICY_VERSION,
                     cutoff_sequence=cutoff,
                     candidate_ids_json=ids_json,
                     available_at=now,
@@ -389,28 +407,26 @@ class SqlAlchemyMemoryBatchRepository:
                 assigned,
             )
             .order_by(MemoryMaintenanceJob.created_at)
-            .limit(8)
+            .limit(128)
         ).all()
-        for run in runs:
-            # Repeated clicks cannot mint another paid retry. The explicit
-            # request is distinct from automatic attempts and remains audited.
-            candidates = tuple(
-                self.session.scalars(
-                    select(MemorySourceDelivery.candidate_id).where(
-                        MemorySourceDelivery.batch_job_id == run.job_id,
-                        MemorySourceDelivery.candidate_id.is_not(None),
-                    )
-                )
-            )
-            if candidates:
-                self.enqueue(
-                    scope_setting_id=setting.id,
-                    candidate_ids=candidates,
-                    cutoff=run.cutoff_sequence,
-                    trigger="explicit",
-                    explicit_key=idempotency_key,
-                    now=now,
-                )
+        if not runs:
+            return
+        # Keep every failed run and its call counters. Release only pending
+        # assignments; preparation re-reads evidence and partitions by privacy.
+        job_ids = [run.job_id for run in runs]
+        pending = select(MemoryCandidate.id).where(MemoryCandidate.status == "pending")
+        self.session.execute(
+            update(MemorySourceDelivery)
+            .where(MemorySourceDelivery.batch_job_id.in_(job_ids),
+                   MemorySourceDelivery.candidate_id.in_(pending))
+            .values(batch_job_id=None)
+        )
+        current = self.session.get(MemoryBatchSetting, setting.id)
+        current.trigger_kind = "explicit"
+        current.trigger_cutoff = max(run.cutoff_sequence for run in runs)
+        current.trigger_requested_at = None
+        current.retry_request_key = idempotency_key
+        self.session.flush()
 
     def claim(self, *, lease_token: str, now: datetime) -> MemorySelectionBatch | None:
         # Runtime calls this on a fresh session; SQLite serializes read/claim.
@@ -495,15 +511,16 @@ class SqlAlchemyMemoryBatchRepository:
             work = self.queue.claim(
                 lease_token=lease_token,
                 now=now,
-                lease_for=MAINTENANCE_LEASE_DURATION,
+                lease_for=MEMORY_BATCH_LEASE_DURATION,
                 job_id=run.job_id,
             )
             if work is None:
                 continue
             # A retry starts a new immutable settings snapshot, never revives an
             # earlier response. Attempt counters remain on this same job.
-            run.scope_version, run.settings_version = scope.version, config.version
+            run.scope_version, run.settings_version = scope.version, config.execution_version
             run.profile_version, run.model_id = profile.version, profile.model_id
+            run.thinking_level = profile.thinking_level
             config.last_claimed_at = now
             ids = json.loads(run.candidate_ids_json)
             candidates = self.session.scalars(
@@ -521,10 +538,11 @@ class SqlAlchemyMemoryBatchRepository:
                 tuple(self.memory._to_candidate(row) for row in candidates),
                 run.model_id,
                 scope.version,
-                config.version,
+                config.execution_version,
                 profile.version,
                 work.attempt_count,
                 lease_token,
+                run.thinking_level,
             )
         self.session.flush()
         return None
@@ -541,16 +559,16 @@ class SqlAlchemyMemoryBatchRepository:
             or scope.version != batch.scope_version
             or config is None
             or not config.ai_enabled
-            or config.version != batch.settings_version
+            or config.execution_version != batch.settings_version
+            or config.consent_version != MEMORY_CONSENT_VERSION
             or profile is None
-            or profile.version != batch.profile_version
         ):
             raise MemoryConflictError("memory_selection_scope_changed")
         self.queue.renew(
             job_id=batch.job_id,
             lease_token=batch.lease_token,
             now=now,
-            lease_for=MAINTENANCE_LEASE_DURATION,
+            lease_for=MEMORY_BATCH_LEASE_DURATION,
         )
 
     def record_call(self, batch: MemorySelectionBatch, *, now: datetime) -> None:
@@ -609,7 +627,9 @@ class SqlAlchemyMemoryBatchRepository:
             return False
         retryable = (
             batch.attempt < MAX_BATCH_ATTEMPTS
-            and code != "memory_selection_settings_required"
+            and code in {"memory_selection_provider_failed", "memory_selection_timeout", "memory_selection_interrupted",
+                         "memory_selection_rate_limited", "memory_selection_provider_unavailable",
+                         "memory_selection_transport_failed"}
         )
         # A cancelled/expired provider cannot commit; the same durable run is
         # recoverable without relying on a still-live lease for failure audit.

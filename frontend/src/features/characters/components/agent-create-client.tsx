@@ -1,4 +1,5 @@
 "use client";
+import { generationProfileValue } from "@/config/generation-profiles";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { PERSONA_LIMITS, personaLengthError } from "@/features/characters/utils/persona-limits";
 
@@ -236,7 +237,7 @@ export function AgentCreateClient() {
 
   function applyDraft(nextDraft: AgentCreationDraftRead) {
     setDraft(nextDraft);
-    setModel(asGoogleGeminiModel(nextDraft.model));
+    setModel(asGoogleGeminiModel(nextDraft.model, nextDraft.thinking_level));
     setName(nextDraft.name);
     setHandle(nextDraft.handle ?? "");
     setOneLiner(nextDraft.one_liner);
@@ -842,7 +843,8 @@ export function AgentCreateClient() {
                     disabled={busy}
                     className={inputClassName}
                   >
-                    {GOOGLE_GEMINI_MODELS.map((option) => (
+                    <option value="" disabled>지원 모델을 선택해 주세요</option>
+                  {GOOGLE_GEMINI_MODELS.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -2004,10 +2006,8 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function asGoogleGeminiModel(value: string): GoogleGeminiModel {
-  return GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
-    ? (value as GoogleGeminiModel)
-    : DEFAULT_GOOGLE_GEMINI_MODEL;
+function asGoogleGeminiModel(value: string | undefined, thinking = "high"): GoogleGeminiModel {
+  return generationProfileValue(value, thinking);
 }
 
 function asImageStyle(value: string): AgentCreationDraftImageStyle {

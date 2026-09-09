@@ -57,6 +57,8 @@ def test_persona_context_labels_saved_state_as_previous() -> None:
 
 def _fake_langgraph_context() -> SimpleNamespace:
     return SimpleNamespace(
+        generation_model="gemini-3.1-flash-lite",
+        generation_thinking_level="high",
         character=SimpleNamespace(
             id="char-1",
             name="Writer",
@@ -2365,7 +2367,7 @@ def test_state_recorder_length_failure_does_not_retry_and_uses_low_thinking(
     result = asyncio.run(langgraph_resident._run_state_recorder(ctx, tracker, state))
 
     assert tracker.summary()["call_count"] == 1
-    assert tracker.summary()["calls"][0]["thinking_level"] == "low"
+    assert tracker.summary()["calls"][0]["thinking_level"] == "high"
     assert generate_kwargs[0]["max_output_tokens"] == 3000
     assert result["state_result"]["status"] == "sanitized_saved"
     assert result["state_result"]["attempt_count"] == 1

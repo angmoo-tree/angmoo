@@ -244,8 +244,8 @@ def create_app(
 
         memory_runtime = MemoryBatchRuntime(
             composition.session_factory,
-            lambda owner, model: memory_provider(
-                composition.session_factory, owner, model
+            lambda owner, model, thinking: memory_provider(
+                composition.session_factory, owner, model, thinking
             ),
         )
         runtime_settings = composition.settings

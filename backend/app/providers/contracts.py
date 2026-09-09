@@ -45,6 +45,8 @@ class ProviderRequest:
     response_mime_type: str | None = None
     thinking_level: str | None = None
     image_parts: tuple[Any, ...] = ()
+    # None preserves the SDK default for callers without a durable retry owner.
+    sdk_attempts: int | None = None
 
 
 @dataclass(frozen=True)

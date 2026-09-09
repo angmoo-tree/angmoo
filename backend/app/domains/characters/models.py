@@ -152,6 +152,10 @@ class AgentCreationDraft(Base):
 
     user: Mapped["User"] = relationship()
 
+    thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
+    )
+
 
 class ProfileImageQuotaReservation(Base):
     __tablename__ = "profile_image_quota_reservations"

@@ -194,6 +194,7 @@ class CreateResponseRequest:
     attempt_number: int
     selected_model: str
     deadline_at: datetime
+    selected_thinking_level: str = "high"
     retry_of_request_id: str | None = None
 
 
@@ -213,6 +214,7 @@ class ResponseRequestRecord:
     lease_generation: int = 0
     lease_token: str | None = None
     lease_expires_at: datetime | None = None
+    selected_thinking_level: str = "high"
     retry_of_request_id: str | None = None
     route: RetrievalRoute | None = None
     workflow_recipe: WorkflowRecipe | None = None

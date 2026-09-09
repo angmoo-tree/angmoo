@@ -106,10 +106,10 @@ def test_message_thread_quota_is_locked_before_count_and_insert() -> None:
     assert source.index("active_count =") < source.index("db.add(thread)")
 
 
-def test_default_message_model_is_gemini25_flash_lite() -> None:
-    assert messages.DEFAULT_MESSAGE_MODEL == "gemini-2.5-flash-lite"
-    assert "gemini-2.5-flash-lite" in messages.MESSAGE_MODELS
-    assert "gemini-2.5-flash" in messages.MESSAGE_MODELS
+def test_default_message_model_is_gemini31_flash_lite() -> None:
+    assert messages.DEFAULT_MESSAGE_MODEL == "gemini-3.1-flash-lite"
+    assert "gemini-2.5-flash-lite" not in messages.MESSAGE_MODELS
+    assert "gemini-2.5-flash" not in messages.MESSAGE_MODELS
     assert "gemini-3.5-flash-lite" in messages.MESSAGE_MODELS
     assert "gemini-3.5-flash" not in messages.MESSAGE_MODELS
 
@@ -163,7 +163,7 @@ def test_owner_can_start_self_message_when_setting_is_off() -> None:
         )
 
         assert thread.character.id == character.id
-        assert thread.selected_model == "gemini-2.5-flash-lite"
+        assert thread.selected_model == "gemini-3.1-flash-lite"
 
 
 def test_local_character_owner_cannot_start_message() -> None:
@@ -280,7 +280,7 @@ def test_message_credential_label_uses_message_wording(monkeypatch) -> None:
         )
 
         assert credential.label == "쪽지용 Google API key"
-        assert credential.model == "gemini-2.5-flash-lite"
+        assert credential.model == "gemini-3.1-flash-lite"
 
         updated = messages._upsert_message_credential(
             db,
@@ -542,7 +542,7 @@ def test_retry_model_busy_message_updates_existing_assistant_with_current_model(
             id="thread-1",
             requester_id=owner.id,
             character_id=character.id,
-            selected_model="gemma-4-31b-it",
+            selected_model="gemini-3.5-flash-lite",
         )
         credential = models.LlmCredential(
             id="cred-msg",
@@ -584,8 +584,8 @@ def test_retry_model_busy_message_updates_existing_assistant_with_current_model(
         assert retried.content == "다시 답변 성공"
         assert retried.status == "ok"
         assert retried.error_code is None
-        assert retried.model == "gemma-4-31b-it"
-        assert calls[0]["context"].model == "gemma-4-31b-it"
+        assert retried.model == "gemini-3.5-flash-lite"
+        assert calls[0]["context"].model == "gemini-3.5-flash-lite"
         assert "아니 게임쪽은 몰라" in calls[0]["user_prompt"]
 
 
@@ -673,7 +673,7 @@ def test_retry_model_busy_failure_keeps_single_error_message(monkeypatch) -> Non
             id="thread-1",
             requester_id=owner.id,
             character_id=character.id,
-            selected_model="gemma-4-31b-it",
+            selected_model="gemini-3.5-flash-lite",
         )
         credential = models.LlmCredential(
             id="cred-msg",
@@ -715,7 +715,7 @@ def test_retry_model_busy_failure_keeps_single_error_message(monkeypatch) -> Non
         assert retried.content == messages.MODEL_BUSY_MESSAGE
         assert retried.status == "error"
         assert retried.error_code == "model_busy"
-        assert retried.model == "gemma-4-31b-it"
+        assert retried.model == "gemini-3.5-flash-lite"
 
 
 def test_retry_message_in_flight_uses_clear_korean_message(monkeypatch) -> None:

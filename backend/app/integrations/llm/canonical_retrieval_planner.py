@@ -87,7 +87,7 @@ class DirectLlmCanonicalRetrievalPlannerProvider:
         request: CanonicalPlannerRequest,
     ) -> CanonicalPlannerProviderResult:
         execution_policy = resolve_world_chat_model_execution_policy(
-            self._material.model
+            self._material.model, self._material.thinking_level
         )
         tracker = direct_llm.RunLlmTracker(max_calls=1)
         context = direct_llm.DirectLlmCallContext(

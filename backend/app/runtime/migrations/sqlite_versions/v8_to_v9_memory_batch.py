@@ -40,4 +40,7 @@ def verify_v8_to_v9_delta(connection: Connection, snapshot: frozenset[str]) -> N
 
 
 def upgrade_v8_to_v9(connection: Connection) -> None:
-    create_memory_batch_schema(connection)
+    from app.runtime.persistence.sqlite_schema import build_sqlite_v9_metadata
+    metadata = build_sqlite_v9_metadata()
+    for name in MEMORY_BATCH_TABLES:
+        metadata.tables[name].create(connection, checkfirst=False)

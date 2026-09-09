@@ -10,7 +10,10 @@ from sqlalchemy.schema import CreateIndex, CreateTable
 
 from app.models import Base
 from app.domains.chat.contracts.model_binding import MessageModelBindingMode
-from app.domains.chat.policies import MESSAGE_MODELS
+# Released v7 migration accepts the historical model set without authorizing
+# any new provider calls on these retired settings.
+MESSAGE_MODELS = {"gemini-2.5-flash-lite", "gemini-2.5-flash", "gemini-3.1-flash-lite",
+                  "gemini-3.5-flash-lite", "gemma-4-26b-a4b-it", "gemma-4-31b-it"}
 from app.domains.chat.infrastructure.world_scope_migration import (
     add_world_scoped_message_threads_v4_table,
 )
@@ -65,6 +68,8 @@ def rebuild_and_backfill_message_threads_v7(connection) -> ModelBindingBackfillS
         for table_name in ("characters", "users", "worlds", "world_characters"):
             Base.metadata.tables[table_name].to_metadata(metadata)
         target = Base.metadata.tables["message_threads"].to_metadata(metadata)
+        if "selected_thinking_level" in target.c:
+            target._columns.remove(target.c.selected_thinking_level)
         connection.execute(CreateTable(target))
         target_column_names: list[str] = []
         selected_expressions: list[str] = []

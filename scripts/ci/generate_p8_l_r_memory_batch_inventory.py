@@ -29,7 +29,7 @@ def build_inventory():
     predecessor = record(PREDECESSOR)
     if predecessor["sha256"] != PREDECESSOR_SHA256:
         raise ValueError("frozen Today predecessor drift")
-    manifest = load_sqlite_manifest(9)
+    manifest = load_sqlite_manifest(10)
     files = set()
     for pattern in (
         "backend/app/domains/memory/**/*.py",
@@ -39,7 +39,15 @@ def build_inventory():
         "backend/app/integrations/llm/memory_selection.py",
         "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
         "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",
+        "backend/app/runtime/migrations/sqlite_versions/v9_to_v10_generation_profiles.py",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v10.json",
+        "backend/app/providers/generation_profiles.py",
+        "backend/tests/memory/test_generation_profiles_batch32.py",
+        "backend/tests/identity/test_generation_profile_settings.py",
+        "frontend/src/config/generation-profiles.ts",
+        "docs/architecture/generation-profiles-memory-batch32.md",
         "backend/app/runtime/persistence/sqlite_schema.py",
+        "backend/app/runtime/persistence/sqlite_generation_profiles.py",
         "backend/app/main.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",
@@ -70,7 +78,7 @@ def build_inventory():
         "owner_stage": "P8-L-R-MEMORY-BATCH",
         "predecessor": predecessor,
         "schema": {
-            "embedded_schema_version": 9,
+            "embedded_schema_version": 10,
             "schema_digest": manifest.schema_digest,
             "canonical_table_count": manifest.canonical_table_count,
             "source_revision": manifest.source_revision,
