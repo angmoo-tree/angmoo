@@ -1241,7 +1241,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "5a5dbe94bf9e1ad02268e581e40cbb1a8c1d2f2cefe9d1d2e0f32f98bfb64eae",
+      "source_sha256": "de8a900926ccebb5d64e64239aa93c0340f880ee21dba2073248a498d91ae652",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
