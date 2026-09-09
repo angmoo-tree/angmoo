@@ -11734,6 +11734,73 @@
       "test_suppressions": {
         "tests/test_frontend_product_change_evidence.py": {}
       }
+    },
+    {
+      "commit": "15499760f41d705a2fa68d49ede258e8fcdc4fb5",
+      "feature_id": "AR-MEMORY-REQUEST-RECOVERY",
+      "reason": "PR321 user-authorized request-recovery follow-up; committed new SDK retry/typed error/reference regression tests and technical evidence. Exact committed content verified against original checkout; no source-copy directory created.",
+      "tracked_files": {
+        "backend/tests/memory/test_selection_request_recovery.py": "08c122ee380f3586cf43182b2b6dd0b92beef083",
+        "docs/architecture/memory-selection-request-recovery.md": "d3f5bef2f3f9fcab62808d6c00af5564c117617f"
+      },
+      "test_nodes": [
+        "tests/memory/test_selection_request_recovery.py::test_default_callers_keep_sdk_retry_and_output_policy",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[400-request_invalid-False]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[401-auth_failed-False]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[403-auth_failed-False]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[404-model_unavailable-False]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[418-failed-False]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[429-rate_limited-True]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[500-provider_unavailable-True]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[502-provider_unavailable-True]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[503-provider_unavailable-True]",
+        "tests/memory/test_selection_request_recovery.py::test_sdk_failure_reaches_durable_job_once_per_attempt[504-provider_unavailable-True]",
+        "tests/memory/test_selection_request_recovery.py::test_subjective_reference_is_explicit_without_weakening_parser",
+        "tests/memory/test_selection_request_recovery.py::test_transport_and_unknown_failures_are_safe[error0-timeout]",
+        "tests/memory/test_selection_request_recovery.py::test_transport_and_unknown_failures_are_safe[error1-transport_failed]",
+        "tests/memory/test_selection_request_recovery.py::test_transport_and_unknown_failures_are_safe[error2-timeout]",
+        "tests/memory/test_selection_request_recovery.py::test_transport_and_unknown_failures_are_safe[error3-failed]",
+        "tests/memory/test_selection_request_recovery.py::test_transport_changes_only_decisions_bound"
+      ],
+      "test_assertions": {
+        "tests/memory/test_selection_request_recovery.py": {
+          "test_transport_changes_only_decisions_bound": [
+            "assert selection_response_schema() == canonical",
+            "assert canonical['properties']['decisions']['maxItems'] == 32",
+            "assert _prompt_payload(sources)[1] == expected"
+          ],
+          "test_subjective_reference_is_explicit_without_weakening_parser": [
+            "assert json.loads(prompt)['sources'][0]['subjective_context_ref'] == 'source-1.subjective'",
+            "pytest.raises(MemoryValidationError)",
+            "assert len(parse_selection(payload, sources=(source,))) == 1"
+          ],
+          "test_sdk_failure_reaches_durable_job_once_per_attempt": [
+            "assert len(calls) == (3 if retryable else 1)",
+            "assert all((option.retry_options.attempts == 1 for option in options))",
+            "assert memory_session.get(MemoryBatchRun, job_id).physical_calls == len(calls)",
+            "assert memory_session.scalar(select(func.count()).select_from(MemoryItem)) == 0",
+            "assert provider.provider_code == status",
+            "assert provider.retryable == retryable",
+            "assert 'private' not in str(gemini.classify_generation_failure(errors.APIError(status, {})))",
+            "assert asyncio.run(service.run_next(lease_token=f'lease-{attempt}')) == f'memory_selection_{code}'",
+            "assert job.attempt_count == attempt",
+            "assert job.status == ('pending' if retryable and attempt < 3 else 'failed')"
+          ],
+          "test_transport_and_unknown_failures_are_safe": [
+            "assert result.failure_class == code",
+            "assert result.retryable == (code != 'failed')",
+            "assert 'secret' not in str(result)"
+          ],
+          "test_default_callers_keep_sdk_retry_and_output_policy": [
+            "assert options[0].retry_options is None",
+            "assert options[1].retry_options.attempts == 1",
+            "assert [config.max_output_tokens for config in configs] == [2048, 65536]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_selection_request_recovery.py": {}
+      }
     }
   ]
 }
