@@ -1981,6 +1981,32 @@
           ]
         }
       ]
+    },
+    {
+      "id": "memory-selection-request-recovery-20260909",
+      "implementation_commit": "15499760f41d705a2fa68d49ede258e8fcdc4fb5",
+      "reason": "PR #321 request/auth/transient failure recovery copy and additive Next/static retry-to-completion checks; preserve existing settings and owner controls.",
+      "review": "User-authorized 09-09 follow-up plan; 108 focused checks and final 32 focused checks; both Next and static Memory browser flows PASS. USER CHECK and merge remain pending.",
+      "source_blobs": {
+        "browser-tests/memory-batch-fixture.ts": "e1f1245cf83028a2e782933c0c556ea809e6a35b",
+        "frontend/src/features/memory/utils/batch-status.ts": "fc17f6f2d38722b204061ec4991541b8531af6ae"
+      },
+      "contracts": [],
+      "orm_tables": [],
+      "assertions": [],
+      "definitions": [],
+      "frontend_files": [
+        {
+          "source": "browser-tests/memory-batch-fixture.ts",
+          "before_sha256": "5e10e6585b42fa63a7ba2dd3fcbd5fab01588b27bc65ad5ba1e51dc452cdea41",
+          "after_sha256": "2c0299dc62e95acd1d0c4a7d744ce3ccedd292100c27c3278efce4aa52a380aa"
+        },
+        {
+          "source": "frontend/src/features/memory/utils/batch-status.ts",
+          "before_sha256": "3bd82a4b3cd804e6554237558d5a15a4d782a237b0cd136e74818d652be359e2",
+          "after_sha256": "f9dff90167f19cdcf5832e5e873d143c2d29253e7d250e153a1f2c567f53d961"
+        }
+      ]
     }
   ]
 }
