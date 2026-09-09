@@ -47,6 +47,7 @@ def build_inventory():
         "frontend/src/config/generation-profiles.ts",
         "docs/architecture/generation-profiles-memory-batch32.md",
         "backend/app/runtime/persistence/sqlite_schema.py",
+        "backend/app/runtime/persistence/sqlite_generation_profiles.py",
         "backend/app/main.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",

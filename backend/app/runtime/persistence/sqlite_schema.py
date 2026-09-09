@@ -263,7 +263,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
     # All callers are historical builders. Never let current ORM additions
     # silently change an already released schema/manifest.
-    from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
+    from app.runtime.persistence.sqlite_generation_profiles import ADDED_COLUMNS
     for name, columns in ADDED_COLUMNS.items():
         if name in metadata.tables:
             table = metadata.tables[name]

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3114,
-      "internal_edge_count": 3980,
+      "external_import_count": 3117,
+      "internal_edge_count": 3992,
       "legacy_import_exception_count": 0,
-      "module_count": 1069,
+      "module_count": 1072,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2793,7 +2793,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "c68d2311f9e7dfc6d0e8d5c5cf62b4fb8655021372f914ffdbdecf6b22d72e12"
+        "sha256": "d771fa5c819b7da359b238435a808341044cd5fa9bb2ceb2d1d926cf376ddd88"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -2972,7 +2972,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "5271860d7a363076044bf2dd6054c039753173f74d2ea6cfa7d3f86b202c0ccb"
+    "workflow_sha256": "6402262888055ce4b5b219a62e9df3a2bd877b112a62436ca4d6e001e602e8a8"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -3042,7 +3042,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "202849b8c8d2a785e953a404581df5ee77e35354c7f4c89973782d68d5e89799"
+        "sha256": "74373587286106df317b13bc04dadc923da59a0a4edfe582396a4959c4143e39"
       },
       "steps": [
         {

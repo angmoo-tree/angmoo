@@ -17,7 +17,7 @@ import subprocess
 MANIFEST = "security/post_refactor_contract_changes.json"
 
 
-def load(root: Path) -> list[dict]:
+def load(root: Path, *, reader=None) -> list[dict]:
     path = root / MANIFEST
     if not path.exists():
         return []
@@ -26,7 +26,7 @@ def load(root: Path) -> list[dict]:
         raise ValueError("invalid post-refactor change manifest")
     records = payload["records"]
     def git(*args: str) -> bytes:
-        return subprocess.check_output(["git", *args], cwd=root)
+        return reader(*args, root=root) if reader is not None else subprocess.check_output(["git", *args], cwd=root)
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
         old = json.loads(git("show", f"{commit}:{MANIFEST}"))["records"]
         if records[:len(old)] != old:
@@ -50,7 +50,7 @@ def load(root: Path) -> list[dict]:
             if source not in record["source_blobs"] or change["before_ast"] == change["after_ast"]:
                 raise ValueError("definition change requires committed source evidence")
             for revision, field in ((commit + "^", "before_ast"), (commit, "after_ast")):
-                if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != change[field]:
+                if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != normalize_ast_dump(change[field]):
                     raise ValueError("definition change committed preimage differs")
         if record.get("orm_tables"):
             migrations = record.get("migration_sources", [])
@@ -87,6 +87,31 @@ def definition_ast(source: str, symbol: str) -> str:
     return ast.dump(node, include_attributes=False)
 
 
+def normalize_ast_dump(value: str) -> str:
+    """Compare Python 3.11/3.13 empty-field spelling without executing text."""
+    if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
+        return value
+
+    def decode(node):
+        if isinstance(node, ast.Name) and node.id == "Ellipsis":
+            return Ellipsis
+        if isinstance(node, ast.Call):
+            constructor = getattr(ast, node.func.id, None) if isinstance(node.func, ast.Name) else None
+            if not isinstance(constructor, type) or not issubclass(constructor, ast.AST) or any(key.arg is None for key in node.keywords):
+                raise ValueError("invalid AST evidence constructor")
+            return constructor(*[decode(arg) for arg in node.args], **{key.arg: decode(key.value) for key in node.keywords})
+        if isinstance(node, ast.List):
+            return [decode(item) for item in node.elts]
+        if isinstance(node, ast.Tuple):
+            return tuple(decode(item) for item in node.elts)
+        return ast.literal_eval(node)
+
+    result = decode(ast.parse(value, mode="eval").body)
+    if not isinstance(result, ast.AST):
+        raise ValueError("invalid AST evidence root")
+    return ast.dump(result, include_attributes=False)
+
+
 def definition_matches(root: Path, source: str, symbol: str, before: ast.AST, after: ast.AST, *, records=None) -> bool:
     expected = ast.dump(before, include_attributes=False)
     actual = ast.dump(after, include_attributes=False)
@@ -94,8 +119,8 @@ def definition_matches(root: Path, source: str, symbol: str, before: ast.AST, af
         return True
     for record in load(root) if records is None else records:
         for change in record.get("definitions", []):
-            if (change["source"], change["symbol"], change["before_ast"]) == (source, symbol, expected):
-                expected = change["after_ast"]
+            if (change["source"], change["symbol"], normalize_ast_dump(change["before_ast"])) == (source, symbol, expected):
+                expected = normalize_ast_dump(change["after_ast"])
     return expected == actual
 
 
@@ -134,7 +159,8 @@ def assertions(node: str, required: Counter, found: Counter, records: list[dict]
         for change in record.get("assertions", []):
             if change["node"] != node:
                 continue
-            before, after = Counter(change["before"]), Counter(change["after"])
+            before = Counter(normalize_ast_dump(value) for value in change["before"])
+            after = Counter(normalize_ast_dump(value) for value in change["after"])
             # Later introduction evidence already contains the approved version.
             if required == after:
                 continue

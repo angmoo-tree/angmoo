@@ -51,10 +51,10 @@ const plain=value=>JSON.parse(JSON.stringify(value));
 const before=harness(true), after=harness(false);
 const names=Object.keys(after.api).filter(name=>typeof after.api[name]==="function");
 assert.equal(names.length,45,"All 45 migrated Character endpoints remain exported");
-function args(name){
+function args(name, newProfiles=false){
  if(name==="uploadAgentLoreSource")return ["character/id",new File(["lore fixture"],"fixture.txt"),{replaceExisting:true}];
  if(name==="giveAgentFeedCue")return ["character/id","fixture topic",{manualRun:true}];
- if(["createAgent","createAgentDraft"].includes(name))return [{name:"fixture",provider:"google",model:"fixture",api_key:"fixture"}];
+ if(["createAgent","createAgentDraft"].includes(name))return [{name:"fixture",provider:"google",model:newProfiles?"gemini-3.1-flash-lite:high":"gemini-3.1-flash-lite",api_key:"fixture"}];
  return ["character/id",{enabled:true,confirmation:"fixture",media_type:"avatar",image_style:"fixture",appearance_prompt:"fixture"}];
 }
 async function normalizedRequests(h){
@@ -67,11 +67,22 @@ async function normalizedRequests(h){
 for(const name of names){
  assert.equal(typeof before.api[name],"function",name+" exists before extraction");
  const a=harness(true),b=harness(false);
- const outcome=async h=>{try{return {value:await h.api[name](...args(name))};}catch(e){return {error:e.message};}};
+ const outcome=async h=>{try{return {value:await h.api[name](...args(name,h===b))};}catch(e){return {error:e.message};}};
  assert.deepEqual(plain(await outcome(b)),plain(await outcome(a)),name);
  assert.equal(a.requests.length,1,name+" issues its request");
- assert.deepEqual(await normalizedRequests(b),await normalizedRequests(a),name+" request");
+ const expected = await normalizedRequests(a);
+ if(["createAgent","createAgentDraft"].includes(name)) {
+   expected[0][1].body = JSON.stringify({...JSON.parse(expected[0][1].body), thinking_level:"high"});
+ }
+ assert.deepEqual(await normalizedRequests(b),expected,name+" request");
  assert.deepEqual(plain(b.events),plain(a.events),name+" event order");
+}
+for(const model of ["gemini-3.5-flash-lite","gemini-3.1-flash-lite"]){
+ for(const thinking of ["high","medium"]){
+  const h=harness(false);
+  await h.api.saveCredential("character/id",{model:`${model}:${thinking}`});
+  assert.deepEqual(JSON.parse(h.requests[0][1].body),{model,thinking_level:thinking});
+ }
 }
 for(const status of [401,422,503]){
  const a=harness(true),b=harness(false);

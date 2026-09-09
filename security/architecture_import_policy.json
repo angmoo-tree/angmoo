@@ -796,14 +796,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.domains.chat.infrastructure.model_binding_migration",
-        "target": "app.domains.chat.policies",
-        "owner_stage": "AR-B8-B",
-        "removal_condition": "Keep while the named supported migration imports this path. Retire only after a separately verified import-contract replacement or support retirement; no duplicate schema, policy or ORM implementation.",
-        "reason": "Supported SQLite v6-to-v7 and Alembic0087 execute the original binding migration using these identical canonical policy/value definitions.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.domains.chat.infrastructure.sqlalchemy_models",
         "target": "app.domains.chat.models",
         "owner_stage": "AR-B8-B",

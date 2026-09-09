@@ -57,6 +57,8 @@ def test_persona_context_labels_saved_state_as_previous() -> None:
 
 def _fake_langgraph_context() -> SimpleNamespace:
     return SimpleNamespace(
+        generation_model="gemini-3.1-flash-lite",
+        generation_thinking_level="high",
         character=SimpleNamespace(
             id="char-1",
             name="Writer",

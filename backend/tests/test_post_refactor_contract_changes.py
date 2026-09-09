@@ -42,6 +42,13 @@ def test_named_definition_delta_cannot_approve_a_different_owner_or_body(tmp_pat
     assert not changes.definition_matches(tmp_path, "backend/profile.py", "other", old, new, records=records)
 
 
+def test_ast_evidence_normalizes_empty_fields_but_never_executes_calls():
+    node = ast.parse("def choose():\n    return 'high'\n").body[0]
+    assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)
+    with pytest.raises(ValueError, match="constructor"):
+        changes.normalize_ast_dump("Module(body=[__import__('os').getcwd()])")
+
+
 def test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage():
     original = {"orm_tables": {"profiles": "old", "secrets": "untouched"}}
     record = {"orm_tables": [{"key": "profiles", "before": "old", "after": "new"}]}

@@ -2,6 +2,7 @@
 
 import ast
 import importlib.util
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -39,6 +40,9 @@ def candidate(tmp_path):
         *(path.replace("/api/v1/routes/", "/domains/chat/router/") for path in proof.ROUTE_FACADES),
         *(path for path, _ in proof.TESTS.values()),
     ]
+    manifest_path = "security/post_refactor_contract_changes.json"
+    records = json.loads((REPO / manifest_path).read_text(encoding="utf-8"))["records"]
+    files.extend([manifest_path, *{item["source"] for record in records for item in record.get("removed_bindings", [])}])
     for path in files:
         target = tmp_path / path
         target.parent.mkdir(parents=True, exist_ok=True)

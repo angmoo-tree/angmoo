@@ -184,7 +184,7 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
     changes = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(changes)
-    records = changes.load(root)
+    records = changes.load(root, reader=git_bytes)
 
     def matches(path, symbol, original, actual):
         return changes.definition_matches(root, path, symbol, original, actual, records=records)

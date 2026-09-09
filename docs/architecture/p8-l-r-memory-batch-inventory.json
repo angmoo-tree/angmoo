@@ -24,7 +24,7 @@
   "files": [
     {
       "path": ".github/workflows/windows-installer.yml",
-      "sha256": "5271860d7a363076044bf2dd6054c039753173f74d2ea6cfa7d3f86b202c0ccb"
+      "sha256": "6402262888055ce4b5b219a62e9df3a2bd877b112a62436ca4d6e001e602e8a8"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -412,11 +412,15 @@
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/v9_to_v10_generation_profiles.py",
-      "sha256": "501875a8db63cae711115ae0c5c3a4823ff641aa4876dd0eea72708aed7da327"
+      "sha256": "2ac6bbcd6ba72626ff02e704b0a8e5e1169c765ecfff6261653df894ff34e590"
+    },
+    {
+      "path": "backend/app/runtime/persistence/sqlite_generation_profiles.py",
+      "sha256": "c480ae265f9eda6224cf0c6aad4cad367e7add4c1ef4e959ec95bb747883e4cb"
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "sha256": "5a5dbe94bf9e1ad02268e581e40cbb1a8c1d2f2cefe9d1d2e0f32f98bfb64eae"
+      "sha256": "de8a900926ccebb5d64e64239aa93c0340f880ee21dba2073248a498d91ae652"
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
@@ -452,7 +456,7 @@
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
-      "sha256": "617a0d9cee4bec8939cb890737828c9bceacb2450c28a38cb188ecdfa82d2395"
+      "sha256": "5e10e6585b42fa63a7ba2dd3fcbd5fab01588b27bc65ad5ba1e51dc452cdea41"
     },
     {
       "path": "desktop/src-tauri/src/desktop_runtime.rs",
@@ -532,7 +536,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "be2eeb89cb8426b1ecf34cd19691e983b3ba869252c7bd763e1fc0d52db80acf"
+      "sha256": "ba2d8fb53d4591d6f3fe78024fe3f6d50a59fab866c4c1d9a11fb48a6f90703d"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
@@ -540,11 +544,11 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "bc0a0bf2f96844d94c056f0d68e6b52b2107fa2d204a0cf78165f1e7d2513963"
+      "sha256": "47d922b1d3c5f552306ca4a82293283ab4bd7e1a14b2dd56a0bcf574ad1f6609"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",
-      "sha256": "eb711ff6b4f894ab5b02bded43197a174d63ce5cbf2fbf616955bc5014bce2f3"
+      "sha256": "693e877edb8a3a6d4a2385e1e902edd55d978432f889ca73aa3de0e4d6c506d6"
     },
     {
       "path": "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",
