@@ -11613,6 +11613,98 @@
         "tests/memory/test_generation_profiles_batch32.py": {},
         "tests/test_post_refactor_contract_changes.py": {}
       }
+    },
+    {
+      "commit": "8bc7aaef56c87eb73423828a1b9524b4055b443d",
+      "feature_id": "AR-ISSUE319-VALIDATION",
+      "reason": "Issue319 adds four generation profiles, thinking snapshots, Memory batch32/output65536 and schema v10; all other preservation contracts remain frozen.",
+      "tracked_files": {
+        "backend/app/runtime/persistence/sqlite_generation_profiles.py": "52a79fa216c6123f14efb9f8f29356dfae566ca8"
+      },
+      "test_nodes": [
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[9]",
+        "tests/test_post_refactor_contract_changes.py::test_ast_evidence_normalizes_empty_fields_but_never_executes_calls"
+      ],
+      "test_assertions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 10",
+            "assert fixture['target_table_count'] == 102",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        },
+        "tests/test_post_refactor_contract_changes.py": {
+          "test_only_named_contract_changes_apply_and_original_snapshot_is_immutable": [
+            "assert original['full']['schemas']['Persona'] == 'old'",
+            "assert expected['full']['schemas'] == {'Persona': 'new', 'Other': 'untouched'}",
+            "assert drifted != expected",
+            "pytest.raises(ValueError, match='preimage')"
+          ],
+          "test_named_definition_delta_cannot_approve_a_different_owner_or_body": [
+            "assert changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, drift, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/other.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'other', old, new, records=records)"
+          ],
+          "test_ast_evidence_normalizes_empty_fields_but_never_executes_calls": [
+            "assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)",
+            "pytest.raises(ValueError, match='constructor')"
+          ],
+          "test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage": [
+            "assert changes.contracts(original, [record]) == {'orm_tables': {'profiles': 'new', 'secrets': 'untouched'}}",
+            "assert original['orm_tables']['profiles'] == 'old'",
+            "pytest.raises(ValueError, match='ORM preimage')"
+          ],
+          "test_orm_and_duplicate_changes_cannot_be_excused": [
+            "pytest.raises(ValueError, match='ORM')",
+            "pytest.raises(ValueError, match='duplicate')"
+          ],
+          "test_assertion_change_requires_exact_before_after_and_keeps_other_nodes": [
+            "assert changes.assertions('test.py::test_change', before, after, [record]) == after",
+            "assert changes.assertions('test.py::test_other', before, after, [record]) == before",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_manifest_requires_committed_provenance_and_append_only_history": [
+            "assert changes.load(tmp_path) == [record]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(ValueError, match='provenance')",
+            "assert args[1] == 'rev-parse'"
+          ],
+          "test_removed_binding_requires_exact_parent_and_committed_and_current_absence": [
+            "assert args[1] == 'show'",
+            "pytest.raises(ValueError, match='removed binding')",
+            "assert changes.removed_bindings(changes.load(tmp_path)) == {(source, 'LIMIT')}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {},
+        "tests/test_post_refactor_contract_changes.py": {}
+      }
     }
   ]
 }

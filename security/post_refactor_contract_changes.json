@@ -1689,6 +1689,143 @@
           "after_ast": "FunctionDef(name='test_identity_model_table_contracts_are_unchanged', args=arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]), body=[Assert(test=Compare(left=Attribute(value=Attribute(value=Name(id='_actual_domains_identity_models', ctx=Load()), attr='User', ctx=Load()), attr='__tablename__', ctx=Load()), ops=[Eq()], comparators=[Constant(value='users')])), Assert(test=Compare(left=Attribute(value=Attribute(value=Name(id='_actual_domains_identity_models', ctx=Load()), attr='AuthSession', ctx=Load()), attr='__tablename__', ctx=Load()), ops=[Eq()], comparators=[Constant(value='auth_sessions')])), Assert(test=Compare(left=Attribute(value=Attribute(value=Name(id='_actual_domains_identity_models', ctx=Load()), attr='LlmCredential', ctx=Load()), attr='__tablename__', ctx=Load()), ops=[Eq()], comparators=[Constant(value='llm_credentials')])), Assert(test=Call(func=Name(id='export_matches', ctx=Load()), args=[Constant(value='app.domains.identity.public'), Constant(value='User.__table__'), Attribute(value=Attribute(value=Name(id='legacy_auth_models', ctx=Load()), attr='User', ctx=Load()), attr='__table__', ctx=Load())], keywords=[])), Assert(test=Call(func=Name(id='export_matches', ctx=Load()), args=[Constant(value='app.domains.identity.public'), Constant(value='LlmCredential.__table__'), Attribute(value=Attribute(value=Name(id='legacy_credential_models', ctx=Load()), attr='LlmCredential', ctx=Load()), attr='__table__', ctx=Load())], keywords=[])), Assert(test=Compare(left=Call(func=Name(id='set', ctx=Load()), args=[Call(func=Attribute(value=Attribute(value=Attribute(value=Attribute(value=Name(id='_actual_domains_identity_models', ctx=Load()), attr='User', ctx=Load()), attr='__table__', ctx=Load()), attr='columns', ctx=Load()), attr='keys', ctx=Load()), args=[], keywords=[])], keywords=[]), ops=[Eq()], comparators=[Set(elts=[Constant(value='id'), Constant(value='email'), Constant(value='google_sub'), Constant(value='password_hash'), Constant(value='display_name'), Constant(value='is_admin'), Constant(value='display_name_normalized'), Constant(value='display_name_updated_at'), Constant(value='privacy_policy_agreed_at'), Constant(value='terms_agreed_at'), Constant(value='privacy_policy_version'), Constant(value='terms_version'), Constant(value='profile_setup_completed'), Constant(value='feed_content_filter'), Constant(value='created_at'), Constant(value='deleted_at')])])), Assert(test=Compare(left=Call(func=Name(id='set', ctx=Load()), args=[Call(func=Attribute(value=Attribute(value=Attribute(value=Attribute(value=Name(id='_actual_domains_identity_models', ctx=Load()), attr='LlmCredential', ctx=Load()), attr='__table__', ctx=Load()), attr='columns', ctx=Load()), attr='keys', ctx=Load()), args=[], keywords=[])], keywords=[]), ops=[Eq()], comparators=[Set(elts=[Constant(value='id'), Constant(value='owner_id'), Constant(value='character_id'), Constant(value='provider'), Constant(value='purpose'), Constant(value='model'), Constant(value='auth_profile_id'), Constant(value='label'), Constant(value='encrypted_api_key'), Constant(value='key_fingerprint'), Constant(value='enabled'), Constant(value='cooldown_until'), Constant(value='created_at'), Constant(value='updated_at'), Constant(value='thinking_level')])]))], decorator_list=[], returns=Constant(value=None))"
         }
       ]
+    },
+    {
+      "id": "memory-batch32-validation",
+      "implementation_commit": "8bc7aaef56c87eb73423828a1b9524b4055b443d",
+      "reason": "Issue319 adds four generation profiles, thinking snapshots, Memory batch32/output65536 and schema v10; all other preservation contracts remain frozen.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/319",
+      "source_blobs": {
+        ".github/workflows/windows-installer.yml": "7d2945dd80224dd1f493c00595dff17e86831cec",
+        "backend/app/runtime/migrations/sqlite_versions/v9_to_v10_generation_profiles.py": "f63ed7b1a1d1dce462d4f06a88fb23759129d58c",
+        "backend/app/runtime/persistence/sqlite_generation_profiles.py": "52a79fa216c6123f14efb9f8f29356dfae566ca8",
+        "backend/app/runtime/persistence/sqlite_schema.py": "53d65cea1b0415903f36d80b8ef480ece6f08bff",
+        "backend/tests/routines/test_resident_graph.py": "5950ca919b1bce0134fb74cadd717a81d15191ac",
+        "backend/tests/test_chat_forwarder_retirement.py": "be614570c595bebb72e9d8d2c0da32e22868d145",
+        "backend/tests/test_installer_update.py": "d984ad267c702c42dc90e7a4d21ac452b563432d",
+        "backend/tests/test_p8_l_d_installer_upgrade_contract.py": "9363b1210f8763383d3cf2a6eec82d029e841577",
+        "backend/tests/test_p8_l_d_world_chat_inventory.py": "5fc73ca3c76b56ab719782d31290a909b741823a",
+        "backend/tests/test_post_refactor_contract_changes.py": "ba8c870348f825d534319b1ff7dcc36eb07419d1",
+        "browser-tests/memory-batch-fixture.ts": "a2522a7da737a3be5caa871b3dbbb9a439bbf08b",
+        "browser-tests/product-shell.spec.ts": "e6ddc95b44075d9b61c4e9b9a472d3f7bf1d45bb",
+        "docs/architecture/embedded-runtime-inventory.json": "54f9fe80fd82f818aaa7c83cddd21abc59ea1628",
+        "docs/architecture/frontend-design-baseline.json": "92b0c88c0aa67788236ae8fcd2f332663bbc18eb",
+        "docs/architecture/migration-conversion-inventory.json": "99580e3a93852003de670f2795a9970ac413d4ff",
+        "docs/architecture/p8-l-r-memory-batch-inventory.json": "24b78099e8e3f3bfe23367c714fbbdd7851f6af5",
+        "docs/architecture/postgres-sql-inventory.json": "97b02658b15ef4de6da6ccbc885058b7a12b69f5",
+        "frontend/scripts/test-character-session.mjs": "d1340ee993aa4bb049774e3489e0d2a474cddd43",
+        "frontend/src/features/chat/api/world-chat-client.ts": "56e9d0d792068f32a27dc306534591b2f0caf0ee",
+        "scripts/ci/build_windows_installer_supported_upgrade_fixture.py": "03c6064a424f94a56a8df67b4fdf76b2b04d4c17",
+        "scripts/ci/chat_forwarder_retirement.py": "5bd6449f07026fc6f9c136d9163b3caf4b4cef37",
+        "scripts/ci/compatibility_facade_retirement.py": "d9ca07eb77e3ff0f67508c3d0066128c0c2a2ce9",
+        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py": "37e4854740faf487d4facd1cf93ac5ec7d553eb8",
+        "scripts/ci/post_refactor_contract_changes.py": "c11e2d388c494a1d9f0580356d472f242a6001c7",
+        "scripts/ci/run_windows_installer_supported_upgrade.ps1": "1d1c7b47a912b3d5e4d52735afc08d4068699c8f",
+        "scripts/verify_embedded_runtime_inventory.py": "a2afedf55ebf2a84d36c37f0e64ec1df2fc5f894",
+        "security/architecture_import_baseline.json": "8d98acd3f97e8b6c74a89b538d03e1e0bbb24e0b",
+        "security/architecture_import_policy.json": "9e937cad15320835e86a0b2b12e2262a69dae80b",
+        "security/l4_pr_a_inventory.json": "d81348be38583b8a6aac3d3d2797ac6db13779e3"
+      },
+      "migration_sources": [
+        "backend/alembic/versions/20260909_0090_generation_profiles.py",
+        "backend/app/runtime/migrations/sqlite_versions/v9_to_v10_generation_profiles.py"
+      ],
+      "contracts": [],
+      "orm_tables": [],
+      "assertions": [
+        {
+          "node": "tests/test_installer_update.py::test_installer_upgrade_mode_creates_current_generations_and_is_idempotent",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='desktop_sidecar', ctx=Load()), attr='main', ctx=Load())), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='status'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgraded')]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='operation'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgrade')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='loads', ctx=Load()), args=[Call(func=Attribute(value=Name(id='result_path', ctx=Load()), attr='read_text', ctx=Load()), keywords=[keyword(arg='encoding', value=Constant(value='utf-8'))])]), ops=[Eq()], comparators=[Name(id='first', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='sqlite_source_version'), ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='ladybug_source_version'), ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='status'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgraded')]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='sqlite_source_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=9)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='ladybug_source_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='canonical')), op=Div(), right=Constant(value='current-generation.json')), attr='read_bytes', ctx=Load())), ops=[Eq()], comparators=[Name(id='canonical_marker', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='graph')), op=Div(), right=Constant(value='current-generation.json')), attr='read_bytes', ctx=Load())), ops=[Eq()], comparators=[Name(id='graph_marker', ctx=Load())]))])",
+            "Module(body=[Assert(test=BoolOp(op=And(), values=[Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='is_file', ctx=Load())), Compare(left=Attribute(value=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='stat', ctx=Load())), attr='st_size', ctx=Load()), ops=[Gt()], comparators=[Constant(value=0)])]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='desktop_sidecar', ctx=Load()), attr='main', ctx=Load())), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='exists', ctx=Load()))), Compare(left=Attribute(value=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='stat', ctx=Load())), attr='st_size', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)])]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='desktop_sidecar', ctx=Load()), attr='main', ctx=Load())), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='status'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgraded')]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='operation'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgrade')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='loads', ctx=Load()), args=[Call(func=Attribute(value=Name(id='result_path', ctx=Load()), attr='read_text', ctx=Load()), keywords=[keyword(arg='encoding', value=Constant(value='utf-8'))])]), ops=[Eq()], comparators=[Name(id='first', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='sqlite_source_version'), ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='first', ctx=Load()), slice=Constant(value='ladybug_source_version'), ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='status'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='upgraded')]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='sqlite_source_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=10)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='second', ctx=Load()), slice=Constant(value='ladybug_source_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='canonical')), op=Div(), right=Constant(value='current-generation.json')), attr='read_bytes', ctx=Load())), ops=[Eq()], comparators=[Name(id='canonical_marker', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='graph')), op=Div(), right=Constant(value='current-generation.json')), attr='read_bytes', ctx=Load())), ops=[Eq()], comparators=[Name(id='graph_marker', ctx=Load())]))])",
+            "Module(body=[Assert(test=BoolOp(op=And(), values=[Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='is_file', ctx=Load())), Compare(left=Attribute(value=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='stat', ctx=Load())), attr='st_size', ctx=Load()), ops=[Gt()], comparators=[Constant(value=0)])]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Name(id='desktop_sidecar', ctx=Load()), attr='main', ctx=Load())), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=BoolOp(op=Or(), values=[UnaryOp(op=Not(), operand=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='exists', ctx=Load()))), Compare(left=Attribute(value=Call(func=Attribute(value=Name(id='wal_path', ctx=Load()), attr='stat', ctx=Load())), attr='st_size', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)])]))])"
+          ]
+        },
+        {
+          "node": "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='target_data_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=9)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='target_table_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=102)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT schema_version FROM angmoo_schema_version')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Name(id='source_version', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='PRAGMA integrity_check')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ok')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='PRAGMA foreign_key_check')]), attr='fetchall', ctx=Load())), ops=[Eq()], comparators=[List(ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT count(*) FROM message_threads')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT count(*) FROM message_messages')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Compare(left=Constant(value='chat_response_requests'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]), ops=[Eq()], comparators=[Compare(left=Name(id='source_version', ctx=Load()), ops=[GtE()], comparators=[Constant(value=6)])]))])",
+            "Module(body=[Assert(test=Compare(left=Compare(left=Constant(value='social_action_subjective_contexts'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]), ops=[Eq()], comparators=[Compare(left=Name(id='source_version', ctx=Load()), ops=[GtE()], comparators=[Constant(value=8)])]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='memory_batch_settings'), ops=[NotIn()], comparators=[Name(id='memory_tables', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='generation'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='generation'), ctx=Load())]), ops=[Eq()], comparators=[Constant(value=64)]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='memory_items'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='memory_items'), ops=[NotIn()], comparators=[Name(id='memory_tables', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='roleless_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=4)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='actual_reserved_roles', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Tuple(elts=[Constant(value='world-supported-v2-existing-role'), Constant(value='disabled'), Constant(value=3)], ctx=Load())], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='roleless_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='actual_reserved_roles', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Tuple(elts=[Constant(value='world-supported-v2'), Constant(value='enabled'), Constant(value=1)], ctx=Load()), Tuple(elts=[Constant(value='world-supported-v2-existing-role'), Constant(value='enabled'), Constant(value=4)], ctx=Load()), Tuple(elts=[Constant(value='world-supported-v2-second'), Constant(value='enabled'), Constant(value=1)], ctx=Load())], ctx=Load())]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='target_data_version'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=10)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='target_table_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=102)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT schema_version FROM angmoo_schema_version')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Name(id='source_version', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='PRAGMA integrity_check')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ok')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='PRAGMA foreign_key_check')]), attr='fetchall', ctx=Load())), ops=[Eq()], comparators=[List(ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT count(*) FROM message_threads')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Call(func=Attribute(value=Call(func=Attribute(value=Name(id='source', ctx=Load()), attr='execute', ctx=Load()), args=[Constant(value='SELECT count(*) FROM message_messages')]), attr='fetchone', ctx=Load())), slice=Constant(value=0), ctx=Load()), ops=[Eq()], comparators=[Constant(value=2)]))])",
+            "Module(body=[Assert(test=Compare(left=Compare(left=Constant(value='chat_response_requests'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]), ops=[Eq()], comparators=[Compare(left=Name(id='source_version', ctx=Load()), ops=[GtE()], comparators=[Constant(value=6)])]))])",
+            "Module(body=[Assert(test=Compare(left=Compare(left=Constant(value='social_action_subjective_contexts'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]), ops=[Eq()], comparators=[Compare(left=Name(id='source_version', ctx=Load()), ops=[GtE()], comparators=[Constant(value=8)])]))])",
+            "Module(body=[Assert(test=Compare(left=Compare(left=Constant(value='memory_batch_settings'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]), ops=[Eq()], comparators=[Compare(left=Name(id='source_version', ctx=Load()), ops=[GtE()], comparators=[Constant(value=9)])]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='generation'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8')]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Subscript(value=Name(id='fixture', ctx=Load()), slice=Constant(value='generation'), ctx=Load())]), ops=[Eq()], comparators=[Constant(value=64)]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='memory_items'), ops=[In()], comparators=[Name(id='memory_tables', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Constant(value='memory_items'), ops=[NotIn()], comparators=[Name(id='memory_tables', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='roleless_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=4)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='actual_reserved_roles', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Tuple(elts=[Constant(value='world-supported-v2-existing-role'), Constant(value='disabled'), Constant(value=3)], ctx=Load())], ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='roleless_count', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]))])",
+            "Module(body=[Assert(test=Compare(left=Name(id='actual_reserved_roles', ctx=Load()), ops=[Eq()], comparators=[List(elts=[Tuple(elts=[Constant(value='world-supported-v2'), Constant(value='enabled'), Constant(value=1)], ctx=Load()), Tuple(elts=[Constant(value='world-supported-v2-existing-role'), Constant(value='enabled'), Constant(value=4)], ctx=Load()), Tuple(elts=[Constant(value='world-supported-v2-second'), Constant(value='enabled'), Constant(value=1)], ctx=Load())], ctx=Load())]))])"
+          ]
+        },
+        {
+          "node": "tests/test_p8_l_d_world_chat_inventory.py::test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='installer_upgrade'), ctx=Load()), ops=[Eq()], comparators=[Dict(keys=[Constant(value='hosted_workflow_archive'), Constant(value='idempotent_target_reinstall_verified'), Constant(value='message_survival_verified'), Constant(value='required_predecessor'), Constant(value='supported_predecessor_present'), Constant(value='synthetic_fixture_has_resolved_and_ambiguous_threads')], values=[Constant(value='supported-v3.zip'), Constant(value=True), Constant(value=True), Constant(value=3), Constant(value=True), Constant(value=True)])]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='result', ctx=Load()), attr='returncode', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]), msg=BinOp(left=Attribute(value=Name(id='result', ctx=Load()), attr='stdout', ctx=Load()), op=Add(), right=Attribute(value=Name(id='result', ctx=Load()), attr='stderr', ctx=Load())))])",
+            "Module(body=[Assert(test=Call(func=Attribute(value=Call(func=Attribute(value=Attribute(value=Name(id='result', ctx=Load()), attr='stdout', ctx=Load()), attr='strip', ctx=Load())), attr='endswith', ctx=Load()), args=[Constant(value='v1,v2,v3,v4,v5,v6,v7,v8')]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='installer_upgrade'), ctx=Load()), ops=[Eq()], comparators=[Dict(keys=[Constant(value='hosted_workflow_archive'), Constant(value='idempotent_target_reinstall_verified'), Constant(value='message_survival_verified'), Constant(value='required_predecessor'), Constant(value='supported_predecessor_present'), Constant(value='synthetic_fixture_has_resolved_and_ambiguous_threads')], values=[Constant(value='supported-v3.zip'), Constant(value=True), Constant(value=True), Constant(value=3), Constant(value=True), Constant(value=True)])]))])",
+            "Module(body=[Assert(test=Compare(left=Attribute(value=Name(id='result', ctx=Load()), attr='returncode', ctx=Load()), ops=[Eq()], comparators=[Constant(value=0)]), msg=BinOp(left=Attribute(value=Name(id='result', ctx=Load()), attr='stdout', ctx=Load()), op=Add(), right=Attribute(value=Name(id='result', ctx=Load()), attr='stderr', ctx=Load())))])",
+            "Module(body=[Assert(test=Call(func=Attribute(value=Call(func=Attribute(value=Attribute(value=Name(id='result', ctx=Load()), attr='stdout', ctx=Load()), attr='strip', ctx=Load())), attr='endswith', ctx=Load()), args=[Constant(value='v1,v2,v3,v4,v5,v6,v7,v8,v9')]))])"
+          ]
+        }
+      ],
+      "definitions": []
     }
   ]
 }
