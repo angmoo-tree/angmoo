@@ -262,3 +262,17 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_backend_additions\.json$''']
 regexes = ['''^\s*"frontend/src/features/support/components/angmoo-api-content\.tsx": "20e056fefedc439508f501b4fccf59832d9cb8e7",?\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact Issue319 committed source blob IDs verified against implementation Git objects; not credentials"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/post_refactor_contract_changes\.json$''']
+regexes = [
+  '''^\s*"backend/app/domains/identity/service/character_credentials\.py":\ "8751c66b3db1da8649f96f970052e67b5c145e25",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/credential_management\.py":\ "e86028e6469bb3ded3a83cb2ddfa91c85a4040e9",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/credential_resolution\.py":\ "b38c153e261ab0c0468d17c7e9f9d7d2b09bdbc5",?\s*$''',
+  '''^\s*"backend/tests/chat/test_p8_l_d_world_chat_api\.py":\ "b41f15ba1fef6a18b6819db11b50fc9752a70bdf",?\s*$''',
+  '''^\s*"backend/tests/memory/test_p8_l_r_memory_batch_api\.py":\ "999d95cf8bc4c0ab0e26755594fc9247a713e61d",?\s*$'''
+]

@@ -10,6 +10,7 @@ from collections import Counter
 import ast
 from copy import deepcopy
 import json
+import hashlib
 from pathlib import Path
 import re
 import subprocess
@@ -52,6 +53,15 @@ def load(root: Path, *, reader=None) -> list[dict]:
             for revision, field in ((commit + "^", "before_ast"), (commit, "after_ast")):
                 if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != normalize_ast_dump(change[field]):
                     raise ValueError("definition change committed preimage differs")
+        for change in record.get("frontend_files", []):
+            source = change["source"]
+            if (source not in record["source_blobs"]
+                    or not source.startswith(("frontend/", "browser-tests/"))
+                    or change["before_sha256"] == change["after_sha256"]):
+                raise ValueError("frontend change requires committed source evidence")
+            for revision, field in ((commit + "^", "before_sha256"), (commit, "after_sha256")):
+                if text_digest(git("show", f"{revision}:{source}").decode("utf-8")) != change[field]:
+                    raise ValueError("frontend change committed preimage differs")
         if record.get("orm_tables"):
             migrations = record.get("migration_sources", [])
             if not migrations or any(path not in record["source_blobs"] for path in migrations):
@@ -71,6 +81,22 @@ def load(root: Path, *, reader=None) -> list[dict]:
             if definitions(before) != [removed["before_ast"]] or definitions(after) or definitions((root / source).read_text(encoding="utf-8-sig")):
                 raise ValueError("removed binding preimage or actual absence differs")
     return records
+
+
+def text_digest(text: str) -> str:
+    return hashlib.sha256(text.replace("\r\n", "\n").encode("utf-8")).hexdigest()
+
+
+def frontend_matches(source: str, original: str, actual: str, records: list[dict]) -> bool:
+    """Apply only a continuous, committed, exact file delta; no broad exemption."""
+    expected = text_digest(original)
+    for record in records:
+        for change in record.get("frontend_files", []):
+            if change["source"] == source:
+                if expected != change["before_sha256"]:
+                    raise ValueError("frontend change chain preimage differs")
+                expected = change["after_sha256"]
+    return expected == text_digest(actual)
 
 
 def definition_ast(source: str, symbol: str) -> str:
