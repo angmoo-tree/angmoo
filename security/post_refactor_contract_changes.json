@@ -1953,6 +1953,34 @@
           "after_sha256": "630190c769f451ee15ba0e88ad11198fcd7f2906f43bb292ebc786563f562f5c"
         }
       ]
+    },
+    {
+      "id": "memory-batch32-v10-inventory-count",
+      "implementation_commit": "dbd0e4e65d2d68082033175519c6e5fa5a444866",
+      "reason": "Issue319 adds Alembic0090; the live conversion inventory now owns 88 entries while historical fixtures remain frozen.",
+      "review": "https://github.com/angmoo-tree/angmoo/pull/321",
+      "source_blobs": {
+        "backend/tests/test_l3_er0_embedded_runtime_inventory.py": "c90dc07f559addafd3e8480cc3bca53594fdce45"
+      },
+      "assertions": [
+        {
+          "node": "tests/test_l3_er0_embedded_runtime_inventory.py::test_all_migrations_are_owned_exactly_once",
+          "before": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='baseline_commit'), ctx=Load()), ops=[Eq()], comparators=[Name(id='BASELINE', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='migration_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=87)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='entries', ctx=Load())]), ops=[Eq(), Eq()], comparators=[Call(func=Name(id='len', ctx=Load()), args=[SetComp(elt=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='path'), ctx=Load()), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]), Constant(value=87)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='entries', ctx=Load())]), ops=[Eq(), Eq()], comparators=[Call(func=Name(id='len', ctx=Load()), args=[SetComp(elt=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='revision'), ctx=Load()), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]), Constant(value=87)]))])",
+            "Module(body=[Assert(test=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=BoolOp(op=And(), values=[Compare(left=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='owner'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ER2')]), Compare(left=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='transition_pr'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ER2 PR G')]), Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='removal_condition'), ctx=Load())]), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]))])"
+          ],
+          "after": [
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='baseline_commit'), ctx=Load()), ops=[Eq()], comparators=[Name(id='BASELINE', ctx=Load())]))])",
+            "Module(body=[Assert(test=Compare(left=Subscript(value=Name(id='inventory', ctx=Load()), slice=Constant(value='migration_count'), ctx=Load()), ops=[Eq()], comparators=[Constant(value=88)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='entries', ctx=Load())]), ops=[Eq(), Eq()], comparators=[Call(func=Name(id='len', ctx=Load()), args=[SetComp(elt=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='path'), ctx=Load()), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]), Constant(value=88)]))])",
+            "Module(body=[Assert(test=Compare(left=Call(func=Name(id='len', ctx=Load()), args=[Name(id='entries', ctx=Load())]), ops=[Eq(), Eq()], comparators=[Call(func=Name(id='len', ctx=Load()), args=[SetComp(elt=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='revision'), ctx=Load()), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]), Constant(value=88)]))])",
+            "Module(body=[Assert(test=Call(func=Name(id='all', ctx=Load()), args=[GeneratorExp(elt=BoolOp(op=And(), values=[Compare(left=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='owner'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ER2')]), Compare(left=Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='transition_pr'), ctx=Load()), ops=[Eq()], comparators=[Constant(value='ER2 PR G')]), Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='removal_condition'), ctx=Load())]), generators=[comprehension(target=Name(id='entry', ctx=Store()), iter=Name(id='entries', ctx=Load()), is_async=0)])]))])"
+          ]
+        }
+      ]
     }
   ]
 }
