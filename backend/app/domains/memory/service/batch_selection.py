@@ -226,6 +226,8 @@ class MemoryBatchSelectionService:
             )
             if isinstance(exc, asyncio.CancelledError):
                 code = "memory_selection_interrupted"
+            elif isinstance(exc, TimeoutError):
+                code = "memory_selection_timeout"
             if (
                 not code.startswith("memory_")
                 or len(code) > 80
@@ -258,6 +260,11 @@ def _log_outcome(batch, provider, started, code: str, *, recorded: bool) -> None
                "UNEXPECTED_TOOL_CALL", "TOO_MANY_TOOL_CALLS", "FINISH_REASON_UNSPECIFIED"}
     def identifier(value):
         return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", value) else "unknown"
+    def number(value):
+        return value if type(value) is int and value >= 0 else None
+    status = getattr(provider, "provider_status", None)
+    statuses = {"INVALID_ARGUMENT", "UNAUTHENTICATED", "PERMISSION_DENIED", "NOT_FOUND",
+                "RESOURCE_EXHAUSTED", "INTERNAL", "BAD_GATEWAY", "UNAVAILABLE", "DEADLINE_EXCEEDED"}
     fields = {
         "job_id": identifier(batch.job_id), "model_id": identifier(batch.model_id),
         "thinking_level": batch.thinking_level,
@@ -265,6 +272,10 @@ def _log_outcome(batch, provider, started, code: str, *, recorded: bool) -> None
         "attempt": batch.attempt, "code": code, "recorded": recorded,
         "finish_reason": reason if isinstance(reason, str) and reason in allowed else None if reason is None else "UNKNOWN",
         "latency_ms": _elapsed_ms(started),
+        "physical_calls": number(getattr(provider, "physical_calls", None)),
+        "provider_code": number(getattr(provider, "provider_code", None)),
+        "provider_status": status if isinstance(status, str) and status in statuses else None,
+        "retryable": getattr(provider, "retryable", None) if type(getattr(provider, "retryable", None)) is bool else None,
     }
     usage = getattr(provider, "usage", None)
     for name in ("input_tokens", "output_tokens", "thought_tokens"):

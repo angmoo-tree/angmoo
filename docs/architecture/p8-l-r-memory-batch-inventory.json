@@ -188,7 +188,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/batch.py",
-      "sha256": "f4a81153b2a3c7ce9121eaadb1cc1f44b18b39ba02170d00a0f8c9444566e754"
+      "sha256": "50c4b431a2258adb9cd9ad2735c024f24d3ca4d52f1e21b4dec8566b76d84792"
     },
     {
       "path": "backend/app/domains/memory/repository/consolidation.py",
@@ -252,7 +252,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/batch_selection.py",
-      "sha256": "2bed758a8a6e85d834c9cd6805b43d17ecac50e64f9e88bf44f438df21ee27ea"
+      "sha256": "3e684936c0adcd0298909b9097c67b8971ba941694621e47709d639c1e2b3efe"
     },
     {
       "path": "backend/app/domains/memory/service/consolidation.py",
@@ -304,7 +304,7 @@
     },
     {
       "path": "backend/app/integrations/llm/memory_selection.py",
-      "sha256": "3ffbf6ea236f3153164be0207864c4e923944cd18df01ed149c9e55d1da3f206"
+      "sha256": "47453302a02a46b854276eb62f753eda6c5fbedc6a457a70c16ba60f0b3b2a9f"
     },
     {
       "path": "backend/app/main.py",
@@ -456,7 +456,7 @@
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
-      "sha256": "5e10e6585b42fa63a7ba2dd3fcbd5fab01588b27bc65ad5ba1e51dc452cdea41"
+      "sha256": "2c0299dc62e95acd1d0c4a7d744ce3ccedd292100c27c3278efce4aa52a380aa"
     },
     {
       "path": "desktop/src-tauri/src/desktop_runtime.rs",
@@ -528,7 +528,7 @@
     },
     {
       "path": "frontend/src/features/memory/utils/batch-status.ts",
-      "sha256": "3bd82a4b3cd804e6554237558d5a15a4d782a237b0cd136e74818d652be359e2"
+      "sha256": "f9dff90167f19cdcf5832e5e873d143c2d29253e7d250e153a1f2c567f53d961"
     },
     {
       "path": "frontend/src/lib/desktop/product-window.ts",

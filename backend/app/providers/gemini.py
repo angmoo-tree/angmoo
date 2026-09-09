@@ -4,7 +4,8 @@ import asyncio
 from typing import Any
 
 from google import genai
-from google.genai import types
+from google.genai import errors, types
+import httpx
 from pydantic import BaseModel
 
 from app.core.redaction import redact_exact_secret_text
@@ -217,7 +218,11 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
     client = genai.Client(
         api_key=request.api_key,
         http_options=types.HttpOptions(
-            timeout=max(1, int(request.timeout_seconds * 1000))
+            timeout=max(1, int(request.timeout_seconds * 1000)),
+            retry_options=(
+                types.HttpRetryOptions(attempts=request.sdk_attempts)
+                if request.sdk_attempts is not None else None
+            ),
         ),
     )
     config = build_generate_content_config(
@@ -321,3 +326,32 @@ class GeminiAdapter:
             provider_code=code,
             retryable=retryable,
         )
+
+
+def classify_generation_failure(exc: Exception) -> ProviderError:
+    """Safe SDK failure metadata for callers that own durable retry policy.
+
+    Do not expose exception messages, response bodies, request URLs or headers.
+    Existing callers of normalize_error retain their established behavior.
+    """
+    code = exc.code if isinstance(exc, errors.APIError) and type(exc.code) is int else None
+    failures = {
+        400: ("request_invalid", "INVALID_ARGUMENT", False),
+        401: ("auth_failed", "UNAUTHENTICATED", False),
+        403: ("auth_failed", "PERMISSION_DENIED", False),
+        404: ("model_unavailable", "NOT_FOUND", False),
+        429: ("rate_limited", "RESOURCE_EXHAUSTED", True),
+        500: ("provider_unavailable", "INTERNAL", True),
+        502: ("provider_unavailable", "BAD_GATEWAY", True),
+        503: ("provider_unavailable", "UNAVAILABLE", True),
+        504: ("provider_unavailable", "DEADLINE_EXCEEDED", True),
+    }
+    failure, status, retryable = failures.get(code, ("failed", None, False))
+    if isinstance(exc, (TimeoutError, httpx.TimeoutException)):
+        failure, retryable = "timeout", True
+    elif isinstance(exc, httpx.NetworkError):
+        failure, retryable = "transport_failed", True
+    return ProviderError(
+        "Generation request failed", failure_class=failure,
+        provider_status=status, provider_code=code, retryable=retryable,
+    )

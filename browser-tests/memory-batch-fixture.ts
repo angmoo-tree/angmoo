@@ -1,17 +1,31 @@
 import { expect, type Page, type Route } from "@playwright/test";
 
 export function memoryBatchFixture(worldId: string, subjectId: string, enabled: () => boolean) {
+  let pollsAfterSave = 0;
+  let retryCount = 0;
   let saved = {
     scope: { world_id: worldId, subject_world_character_id: subjectId }, version: 0,
     ai_enabled: false, shutdown_enabled: true, schedule_enabled: false,
     local_time: "22:30", timezone: "Asia/Seoul", next_due_at: null as string | null,
     model_id: null as string | null, thinking_level: "high", profile_version: 0, pending_count: 32,
-    status: "disabled", last_code: null, last_completed_at: null,
+    status: "disabled", last_code: null as string | null, last_completed_at: null as string | null,
     available_models: ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"],
   };
   return async (route: Route) => {
     const request = route.request();
-    if (!new URL(request.url()).pathname.endsWith("/memory/batch-settings")) return false;
+    const path = new URL(request.url()).pathname;
+    if (path.endsWith("/memory/batch-retry")) {
+      expect(request.method()).toBe("POST");
+      expect(++retryCount).toBe(1);
+      saved = { ...saved, status: "pending", last_code: null };
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...saved, memory_enabled: enabled() }) });
+      return true;
+    }
+    if (!path.endsWith("/memory/batch-settings")) return false;
+    if (request.method() === "GET" && saved.ai_enabled) {
+      if (retryCount) saved = { ...saved, status: "completed", pending_count: 0, last_code: null, last_completed_at: "2026-09-09T09:00:00Z" };
+      else if (++pollsAfterSave >= 1) saved = { ...saved, status: "attention", last_code: "memory_selection_request_invalid" };
+    }
     if (request.method() === "PUT") {
       const body = request.postDataJSON();
       expect(body.expected_version).toBe(saved.version);
@@ -44,4 +58,10 @@ export async function verifyMemoryBatchControls(page: Page) {
   await expect(region.getByLabel("예약 시각 · Asia/Seoul")).toHaveValue("23:15");
   await expect(region.getByRole("combobox")).toHaveValue("gemini-3.1-flash-lite:medium");
   await expect(region.getByText("예약 또는 종료를 기다리고 있어요", { exact: false })).toBeVisible();
+  await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toBeVisible();
+  await region.getByRole("button", { name: "실패한 정리 다시 시도" }).click();
+  await expect(region.getByText("다시 정리하도록 요청했어요.")).toBeVisible();
+  await expect(region.getByText("정리를 마쳤어요.", { exact: false })).toBeVisible();
+  await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toHaveCount(0);
+  await expect(region.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
 }

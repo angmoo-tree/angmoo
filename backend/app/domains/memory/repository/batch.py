@@ -627,7 +627,9 @@ class SqlAlchemyMemoryBatchRepository:
             return False
         retryable = (
             batch.attempt < MAX_BATCH_ATTEMPTS
-            and code in {"memory_selection_provider_failed", "memory_selection_timeout", "memory_selection_interrupted"}
+            and code in {"memory_selection_provider_failed", "memory_selection_timeout", "memory_selection_interrupted",
+                         "memory_selection_rate_limited", "memory_selection_provider_unavailable",
+                         "memory_selection_transport_failed"}
         )
         # A cancelled/expired provider cannot commit; the same durable run is
         # recoverable without relying on a still-live lease for failure audit.

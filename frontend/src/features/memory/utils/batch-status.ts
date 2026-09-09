@@ -1,6 +1,19 @@
 /** Memory-owned recovery copy; provider payloads and unknown codes stay private. */
 export function memoryBatchFailureMessage(code: string | null): string {
   switch (code) {
+    case "memory_selection_request_invalid":
+      return "AI 서비스가 정리 요청을 처리하지 못했어요. 경험은 보관되어 있습니다. 앱 업데이트 또는 지원 확인이 필요해요.";
+    case "memory_selection_auth_failed":
+      return "쪽지용 API 키와 이용 권한을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
+    case "memory_selection_model_unavailable":
+      return "선택한 모델을 사용할 수 없어요. 기억 정리 모델을 확인해 주세요.";
+    case "memory_selection_rate_limited":
+      return "AI 서비스의 사용량 제한에 도달했어요. 경험은 보관되어 있습니다. 잠시 후 다시 시도하거나 API 이용 한도를 확인해 주세요.";
+    case "memory_selection_provider_unavailable":
+    case "memory_selection_transport_failed":
+    case "memory_selection_timeout":
+    case "memory_selection_interrupted":
+      return "AI 정리를 일시적으로 완료하지 못했어요. 경험은 보관되어 있으니 잠시 후 다시 시도해 주세요.";
     case "memory_selection_settings_required":
     case "memory_selection_credential_purpose_invalid":
       return "쪽지용 AI 설정을 확인해 주세요. 정리할 경험은 보관되어 있어요.";
@@ -14,7 +27,7 @@ export function memoryBatchFailureMessage(code: string | null): string {
     case "memory_selection_credential_changed":
       return "정리하는 동안 API key 설정이 바뀌었어요. 현재 설정을 확인한 뒤 다시 시도해 주세요.";
     case "memory_selection_provider_failed":
-      return "AI 서비스의 응답을 받지 못했어요. 경험은 보관되어 있으니 잠시 후 다시 시도해 주세요.";
+      return "이전 AI 정리를 완료하지 못했어요. 경험은 보관되어 있습니다. 설정을 확인한 뒤 다시 시도해 주세요.";
     case "memory_selection_output_invalid":
     case "memory_selection_decisions_incomplete":
       return "AI 정리 결과를 검증하지 못해 기억으로 저장하지 않았어요. 경험은 보관되어 있으니 다시 시도해 주세요.";
