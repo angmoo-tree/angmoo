@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail as staticAgentDetail } from "./continuity-fixture";
+import { verifyMemoryRecovery } from "./memory-recovery-fixture";
+import { json, uiDWorld } from "./continuity-next-fixture";
+
+test("static memory: failed selection retry refreshes retained items and evidence", async ({ page }) => {
+  const world = uiDWorld();
+  await page.route("**/api/v1/worlds/mine**", (route) => json(route, {
+    schema_version: "local-world-surface-v1", surface: "device_home", items: [world],
+  }));
+  await verifyMemoryRecovery(page, world.world_id);
+});
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {

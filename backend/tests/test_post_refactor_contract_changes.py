@@ -1,4 +1,5 @@
 from collections import Counter
+import ast
 from copy import deepcopy
 import importlib.util
 import json
@@ -76,3 +77,36 @@ def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path
     blob = "c" * 40
     with pytest.raises(ValueError, match="provenance"):
         changes.load(tmp_path)
+
+
+@pytest.mark.parametrize("tamper", [None, "parent", "commit", "current", "untracked"])
+def test_removed_binding_requires_exact_parent_and_committed_and_current_absence(tmp_path, monkeypatch, tamper):
+    commit, blob = "a" * 40, "b" * 40
+    source = "backend/quota.py"
+    original = "LIMIT = 2\n"
+    record = {"id": "remove-quota", "implementation_commit": commit, "reason": "quota removal", "review": "PR",
+              "source_blobs": {source: blob}, "removed_bindings": [{"source": source, "symbol": "LIMIT",
+              "before_ast": ast.dump(ast.parse(original).body[0], include_attributes=False)}]}
+    if tamper == "untracked":
+        record["source_blobs"] = {"backend/other.py": blob}
+    path = tmp_path / changes.MANIFEST
+    path.parent.mkdir()
+    path.write_text(json.dumps({"schema_version": 1, "records": [record]}), encoding="utf-8")
+    target = tmp_path / source
+    target.parent.mkdir()
+    target.write_text(original if tamper == "current" else "", encoding="utf-8")
+    def git(args, **kwargs):
+        if args[1] in ("log", "merge-base"):
+            return b""
+        if args[1] == "rev-parse":
+            return blob.encode()
+        assert args[1] == "show"
+        if "^:" in args[2]:
+            return ("LIMIT = 5\n" if tamper == "parent" else original).encode()
+        return (original if tamper == "commit" else "").encode()
+    monkeypatch.setattr(changes.subprocess, "check_output", git)
+    if tamper:
+        with pytest.raises(ValueError, match="removed binding"):
+            changes.load(tmp_path)
+    else:
+        assert changes.removed_bindings(changes.load(tmp_path)) == {(source, "LIMIT")}

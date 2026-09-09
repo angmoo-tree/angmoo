@@ -206,7 +206,11 @@ def _finish_reason_from_response(response: Any) -> str | None:
     if not candidates:
         return None
     finish_reason = getattr(candidates[0], "finish_reason", None)
-    return str(finish_reason) if finish_reason is not None else None
+    if finish_reason is None:
+        return None
+    # SDK enums stringify to "FinishReason.STOP", not the wire code "STOP".
+    value = getattr(finish_reason, "value", finish_reason)
+    return value if isinstance(value, str) else "UNKNOWN"
 
 
 def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:

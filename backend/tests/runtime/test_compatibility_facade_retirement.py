@@ -24,6 +24,10 @@ def test_all_original_explicit_exports_resolve_to_actual_owners(evidence):
     for module, values in exports.items():
         assert values
         for name in values:
+            if evidence.binding_removed(module, name):
+                # Exact committed product deletion is checked separately from
+                # unchanged refactor exports; never fabricate a substitute.
+                continue
             # Resolves the real modules only; it never imports a retired name.
             actual = evidence.actual(module, name)
             assert proof.same_object(actual, evidence.actual(module, name))

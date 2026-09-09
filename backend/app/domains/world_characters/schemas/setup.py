@@ -309,8 +309,6 @@ class WorldCharacterSetupPreflightRead(WorldCharacterSetupSchema):
     physical_request_count: int = 3
     profile_max_output_tokens: int
     repertoire_max_output_tokens: int
-    regeneration_limit_character_24h: int = 2
-    regeneration_limit_owner_24h: int = 5
     reused: bool = False
     safe_reason_code: str | None = None
 

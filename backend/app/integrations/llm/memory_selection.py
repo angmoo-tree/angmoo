@@ -26,6 +26,7 @@ class DirectLlmMemorySelectionProvider:
             raise MemoryValidationError("memory_selection_credential_purpose_invalid")
         self.material = material
         self.usage = None
+        self.finish_reason = None
 
     def validate_sources(self, sources):
         return _prompt_payload(sources)
@@ -33,6 +34,8 @@ class DirectLlmMemorySelectionProvider:
     async def select(
         self, sources: tuple[MemorySelectionSource, ...], *, timeout: float
     ):
+        self.usage = None
+        self.finish_reason = None
         if sum(len(source.text) for source in sources) > MAX_SELECTION_INPUT_CHARACTERS:
             raise MemoryValidationError("memory_selection_input_budget_exceeded")
         adapter = get_provider_adapter(self.material.provider, self.material.model)
@@ -59,6 +62,7 @@ class DirectLlmMemorySelectionProvider:
         try:
             response = await adapter.generate_json(request)
             self.usage = response.usage
+            self.finish_reason = response.finish_reason
         except Exception:
             raise MemoryValidationError("memory_selection_provider_failed") from None
         try:

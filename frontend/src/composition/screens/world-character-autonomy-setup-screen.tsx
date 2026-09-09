@@ -73,7 +73,6 @@ const REASON_MESSAGES: Record<string, string> = {
   world_reference_invalid: "선택한 역할이나 배경이 현재 World 설정과 일치하지 않습니다.",
   role_required: "이 World에서 사용할 캐릭터 역할을 선택해 주세요.",
   contract_hash_stale: "캐릭터 또는 World 설정이 바뀌었습니다. 새 결과를 생성해 주세요.",
-  regeneration_limit_reached: "24시간 생성 한도에 도달했습니다.",
   setup_in_progress: "이미 생성이 진행 중입니다. 잠시 후 다시 확인해 주세요.",
   idempotency_replay: "같은 요청이 이미 처리되었습니다. 현재 결과를 다시 확인해 주세요.",
   repertoire_signature_mismatch: "검토 중 일과 결과가 변경되어 승인할 수 없습니다.",
@@ -169,6 +168,10 @@ export function WorldCharacterAutonomySetupClient({
   const [loading, setLoading] = useState(true);
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const generationRequest = useRef<{ scope: string; key: string; regenerate: boolean } | null>(null);
+  const generationBusy = useRef(false);
+  const retryRequest = useRef<{ scope: string; stage: string; key: string } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [planLoading, setPlanLoading] = useState(true);
   const [planPending, setPlanPending] = useState(false);
@@ -368,16 +371,22 @@ export function WorldCharacterAutonomySetupClient({
   }
 
   async function handleGenerate() {
-    if (!entry || !consented) return;
+    if (!entry || !consented || generationBusy.current || !setup?.can_regenerate) return;
+    generationBusy.current = true;
     setPending("generate");
     setError(null);
+    setGenerationError(null);
     setNotice(null);
+    if (generationRequest.current?.scope !== entry.id) {
+      generationRequest.current = { scope: entry.id, key: idempotencyKey("world-setup-generate"), regenerate: Boolean(setup.profile) };
+    }
     try {
       const next = await generateWorldCharacterSetup(
         entry.id,
-        idempotencyKey("world-setup-generate"),
-        Boolean(setup?.profile),
+        generationRequest.current.key,
+        generationRequest.current.regenerate,
       );
+      generationRequest.current = null;
       setSetup(next);
       setNotice(
         next.reused
@@ -385,24 +394,35 @@ export function WorldCharacterAutonomySetupClient({
           : "커뮤니티 프로필과 시간대별 일과 40개를 생성했습니다.",
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      // A transport failure may have lost a committed response. Replay that
+      // request; a reported domain failure permits a new explicit attempt.
+      if (nextError instanceof WorldCharacterSetupApiError) generationRequest.current = null;
+      setGenerationError(errorMessage(nextError));
       await refreshSetup(entry.id).catch(() => undefined);
     } finally {
+      generationBusy.current = false;
       setPending(null);
     }
   }
 
   async function handleRetry(stage: "community_profile" | "repertoire") {
-    if (!entry || !consented) return;
+    if (!entry || !consented || generationBusy.current) return;
+    generationBusy.current = true;
+    generationRequest.current = null;
     setPending(`retry-${stage}`);
     setError(null);
+    setGenerationError(null);
     setNotice(null);
+    if (retryRequest.current?.scope !== entry.id || retryRequest.current.stage !== stage) {
+      retryRequest.current = { scope: entry.id, stage, key: idempotencyKey(`world-setup-retry-${stage}`) };
+    }
     try {
       const next = await retryWorldCharacterSetup(
         entry.id,
         stage,
-        idempotencyKey(`world-setup-retry-${stage}`),
+        retryRequest.current.key,
       );
+      retryRequest.current = null;
       setSetup(next);
       setNotice(
         stage === "repertoire"
@@ -410,9 +430,11 @@ export function WorldCharacterAutonomySetupClient({
           : "커뮤니티 프로필부터 다시 생성했습니다.",
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      if (nextError instanceof WorldCharacterSetupApiError) retryRequest.current = null;
+      setGenerationError(errorMessage(nextError));
       await refreshSetup(entry.id).catch(() => undefined);
     } finally {
+      generationBusy.current = false;
       setPending(null);
     }
   }
@@ -674,6 +696,7 @@ export function WorldCharacterAutonomySetupClient({
                 <button
                   type="button"
                   onClick={() => void handleGenerate()}
+                  aria-describedby={generationError ? "world-setup-generation-error" : undefined}
                   disabled={!consented || !preflight.credential_ready || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -684,6 +707,7 @@ export function WorldCharacterAutonomySetupClient({
                 <button
                   type="button"
                   onClick={() => void handleRetry("community_profile")}
+                  aria-describedby={generationError ? "world-setup-generation-error" : undefined}
                   disabled={!consented || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:opacity-50"
                 >프로필부터 다시 생성</button>
@@ -692,9 +716,15 @@ export function WorldCharacterAutonomySetupClient({
                 <button
                   type="button"
                   onClick={() => void handleRetry("repertoire")}
+                  aria-describedby={generationError ? "world-setup-generation-error" : undefined}
                   disabled={!consented || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:opacity-50"
                 >{pending === "retry-repertoire" ? "일과 재생성 중…" : "프로필을 유지하고 일과만 다시 생성"}</button>
+              ) : null}
+              {generationError ? (
+                <p id="world-setup-generation-error" role="alert" className="mt-4 rounded-2xl bg-error-container p-4 text-on-error-container">
+                  {generationError}
+                </p>
               ) : null}
             </section>
 

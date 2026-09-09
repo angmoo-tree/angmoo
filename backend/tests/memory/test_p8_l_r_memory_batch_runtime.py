@@ -1,11 +1,17 @@
 import asyncio
+import json
+import logging
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+
+import pytest
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
 from model_fixture_support import models
 from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
+from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.policies.selection_output import MemorySelectionDecision
 from app.domains.memory.models.batch import (
@@ -149,6 +155,56 @@ def test_provider_failure_never_falls_back_to_accept_all(memory_session):
         == "memory_batch_queue_empty"
     )
     assert selector.calls == 1
+
+
+@pytest.mark.parametrize("failure", ["output", "write"])
+def test_failure_preserves_safe_telemetry_but_rolls_back_all_items(memory_session, monkeypatch, caplog, failure):
+    class TelemetrySelector(Selector):
+        usage = SimpleNamespace(input_tokens=100, output_tokens=80, thought_tokens=40)
+        finish_reason = "MAX_TOKENS" if failure == "output" else "STOP"
+        async def select(self, sources, *, timeout):
+            if failure == "output":
+                raise MemoryValidationError("memory_selection_output_incomplete")
+            return await super().select(sources, timeout=timeout)
+    _, repo, job, selector, service = batch_stack(memory_session, provider=TelemetrySelector())
+    original_accept = service.writer.accept_candidate
+    accepted = []
+    def fail_second_write(**kwargs):
+        if accepted:
+            raise RuntimeError("private source and secret must not be logged")
+        accepted.append(True)
+        return original_accept(**kwargs)
+    if failure == "write":
+        monkeypatch.setattr(service.writer, "accept_candidate", fail_second_write)
+    with caplog.at_level(logging.WARNING, logger="app.domains.memory.service.batch_selection"):
+        result = asyncio.run(service.run_next(lease_token="telemetry-failure"))
+    assert result == ("memory_selection_output_incomplete" if failure == "output" else "memory_selection_provider_failed")
+    memory_session.expire_all()
+    run = memory_session.get(MemoryBatchRun, job)
+    assert (run.input_tokens, run.output_tokens, run.thought_tokens) == (100, 80, 40)
+    assert run.provider_latency_ms >= 0
+    assert memory_session.scalar(select(func.count()).select_from(MemoryItem)) == 0
+    assert memory_session.scalar(select(func.count()).select_from(MemorySelectionDecisionModel)) == 0
+    records = [record.getMessage() for record in caplog.records if record.getMessage().startswith("memory_batch_outcome ")]
+    assert len(records) == 1
+    metadata = json.loads(records[0].split(" ", 1)[1])
+    assert metadata["finish_reason"] == selector.finish_reason
+    assert metadata["recorded"] is True
+    assert "private source" not in records[0] and "secret" not in records[0]
+
+
+def test_failure_telemetry_cannot_overwrite_another_lease(memory_session):
+    _, repo, job_id, _, _ = batch_stack(memory_session)
+    batch = repo.claim(lease_token="old-worker", now=datetime.now(UTC))
+    repo.commit()
+    job = memory_session.get(MemoryMaintenanceJob, job_id)
+    job.lease_token = "new-worker"
+    repo.commit()
+    assert repo.fail(batch, code="memory_selection_output_incomplete", now=datetime.now(UTC),
+        latency_ms=42, usage=SimpleNamespace(input_tokens=123)) is False
+    repo.commit()
+    assert memory_session.get(MemoryBatchRun, job_id).input_tokens is None
+    assert job.status == "running" and job.lease_token == "new-worker"
 
 
 def test_post_commit_captures_delivery_without_ai(memory_session):

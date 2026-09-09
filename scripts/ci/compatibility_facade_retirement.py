@@ -98,6 +98,17 @@ class History:
         self.paths[EARLIER_ONLY] = module_path(EARLIER_ONLY)
 
     @lru_cache(maxsize=None)
+    def removed_product_bindings(self):
+        spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+        changes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(changes)
+        return changes.removed_bindings(changes.load(self.root))
+
+    def binding_removed(self, module, export):
+        owner, tail = self.terminal(self.resolve(module, export))
+        return bool(tail) and (self.paths.get(owner), tail[0]) in self.removed_product_bindings()
+
+    @lru_cache(maxsize=None)
     def source(self, module):
         commit = EARLIER_SOURCE if module == EARLIER_ONLY else SOURCE
         return self.reader("show", commit + ":" + self.paths[module], root=self.root).decode("utf-8-sig")
@@ -256,6 +267,7 @@ class History:
             raise ValueError("retired facade file/package still exists: " + module)
 
     def validate_sources(self):
+        removed = self.removed_product_bindings()
         for commit in (SOURCE, EARLIER_SOURCE):
             if self.reader("merge-base", commit, "HEAD", root=self.root).decode().strip() != commit:
                 raise ValueError("retirement source is not an ancestor of this candidate")
@@ -279,6 +291,8 @@ class History:
                         raise ValueError("actual export owner is absent: " + owner)
                     self.validate_owner_all(owner)
                     if tail:
+                        if (self.paths[owner], tail[0]) in removed:
+                            continue
                         current_definition=terminal_definition(path.read_text(encoding='utf-8-sig'),tail[0])
                         original_definition=terminal_definition(self.source(owner),tail[0])
                         if type(current_definition) is not type(original_definition):
@@ -339,6 +353,8 @@ def module_retired(module):
     evidence = history()
     evidence.absent(module)
     for name in evidence.exports(module):
+        if evidence.binding_removed(module, name):
+            continue
         evidence.actual(module, name)
     return bool(evidence.exports(module))
 

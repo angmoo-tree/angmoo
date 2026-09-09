@@ -1,6 +1,9 @@
 """AI selection on the canonical maintenance queue, with fail-closed commits."""
 
 import asyncio
+import json
+import logging
+import re
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -48,6 +51,8 @@ class MemoryBatchSelectionService:
             repo.commit()
             return "memory_batch_queue_empty"
         repo.commit()
+        provider = None
+        started = None
         try:
             eligible = []
             sources = []
@@ -206,6 +211,7 @@ class MemoryBatchSelectionService:
                 )
             repo.complete(batch, now=self.clock())
             repo.commit()
+            _log_outcome(batch, provider, started, "memory_selection_completed", recorded=True)
             return "memory_selection_completed"
         except BaseException as exc:
             repo.rollback()
@@ -222,10 +228,43 @@ class MemoryBatchSelectionService:
                 or not code.replace("_", "").isalnum()
             ):
                 code = "memory_selection_failed"
-            repo.fail(batch, code=code, now=self.clock())
+            recorded = repo.fail(
+                batch, code=code, now=self.clock(),
+                latency_ms=_elapsed_ms(started),
+                usage=getattr(provider, "usage", None),
+            )
             repo.commit()
+            _log_outcome(batch, provider, started, code, recorded=recorded)
             if isinstance(exc, asyncio.CancelledError):
                 raise
             if not isinstance(exc, Exception):
                 raise
             return code
+
+
+def _elapsed_ms(started: float | None) -> int | None:
+    return None if started is None else max(0, int((time.monotonic() - started) * 1000))
+
+
+def _log_outcome(batch, provider, started, code: str, *, recorded: bool) -> None:
+    """Only bounded operational metadata; never serialize provider responses."""
+    reason = getattr(provider, "finish_reason", None)
+    allowed = {"STOP", "MAX_TOKENS", "SAFETY", "RECITATION", "OTHER", "BLOCKLIST",
+               "PROHIBITED_CONTENT", "SPII", "MALFORMED_FUNCTION_CALL", "IMAGE_SAFETY",
+               "UNEXPECTED_TOOL_CALL", "TOO_MANY_TOOL_CALLS", "FINISH_REASON_UNSPECIFIED"}
+    def identifier(value):
+        return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", value) else "unknown"
+    fields = {
+        "job_id": identifier(batch.job_id), "model_id": identifier(batch.model_id),
+        "attempt": batch.attempt, "code": code, "recorded": recorded,
+        "finish_reason": reason if isinstance(reason, str) and reason in allowed else None if reason is None else "UNKNOWN",
+        "latency_ms": _elapsed_ms(started),
+    }
+    usage = getattr(provider, "usage", None)
+    for name in ("input_tokens", "output_tokens", "thought_tokens"):
+        value = getattr(usage, name, None)
+        fields[name] = value if type(value) is int and value >= 0 else None
+    # The shipped root defaults to WARNING. Failed attempts must remain visible
+    # without changing application-wide logging or exposing provider payloads.
+    level = logging.INFO if code == "memory_selection_completed" else logging.WARNING
+    logging.getLogger(__name__).log(level, "memory_batch_outcome %s", json.dumps(fields))

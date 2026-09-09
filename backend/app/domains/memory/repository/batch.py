@@ -594,7 +594,10 @@ class SqlAlchemyMemoryBatchRepository:
         self.session.get(MemoryBatchSetting, batch.setting.id).brief_dirty = True
         self.queue.complete(job_id=batch.job_id, lease_token=batch.lease_token, now=now)
 
-    def fail(self, batch: MemorySelectionBatch, *, code: str, now: datetime) -> None:
+    def fail(
+        self, batch: MemorySelectionBatch, *, code: str, now: datetime,
+        latency_ms: int | None = None, usage: object | None = None,
+    ) -> bool:
         run = self.session.get(MemoryBatchRun, batch.job_id)
         job = self.session.get(MemoryMaintenanceJob, batch.job_id)
         if (
@@ -603,7 +606,7 @@ class SqlAlchemyMemoryBatchRepository:
             or job.status != "running"
             or job.lease_token != batch.lease_token
         ):
-            return
+            return False
         retryable = (
             batch.attempt < MAX_BATCH_ATTEMPTS
             and code != "memory_selection_settings_required"
@@ -627,9 +630,14 @@ class SqlAlchemyMemoryBatchRepository:
             )
         )
         if changed.rowcount != 1:
-            return
+            return False
         run.last_code, run.available_at = code, as_utc(now) + retry_delay(batch.attempt)
+        # Failure telemetry commits with the leased failure audit, after the
+        # caller rolled back any partially written memory/decision rows.
+        if latency_ms is not None:
+            self.record_telemetry(batch, latency_ms=latency_ms, usage=usage)
         self.session.flush()
+        return True
 
     def commit(self) -> None:
         self.session.commit()

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 
 import pytest
+from google.genai import types
 
 from app.providers.contracts import (
     EmbeddingRequest,
@@ -11,7 +13,7 @@ from app.providers.contracts import (
     ProviderResponse,
 )
 from app.providers.fake import FakeProviderAdapter
-from app.providers.gemini import GeminiAdapter
+from app.providers.gemini import GeminiAdapter, _finish_reason_from_response
 from app.providers.registry import get_model_spec, normalize_provider_name
 
 
@@ -110,3 +112,21 @@ def test_gemini_error_normalization_redacts_exact_secret() -> None:
 
     assert secret not in str(error)
     assert "[REDACTED]" in str(error)
+
+
+@pytest.mark.parametrize("reason", [types.FinishReason.STOP, types.FinishReason.MAX_TOKENS, types.FinishReason.SAFETY])
+def test_gemini_sdk_finish_reason_is_a_wire_code(reason) -> None:
+    response = types.GenerateContentResponse(
+        candidates=[types.Candidate(finish_reason=reason)]
+    )
+    assert _finish_reason_from_response(response) == reason.value
+
+
+@pytest.mark.parametrize(
+    ("reason", "expected"),
+    [("STOP", "STOP"), (None, None), ("UNKNOWN", "UNKNOWN"), (42, "UNKNOWN")],
+)
+def test_gemini_finish_reason_missing_and_unknown_are_not_success(reason, expected) -> None:
+    response = SimpleNamespace(candidates=[SimpleNamespace(finish_reason=reason)])
+    assert _finish_reason_from_response(response) == expected
+    assert _finish_reason_from_response(SimpleNamespace(candidates=[])) is None

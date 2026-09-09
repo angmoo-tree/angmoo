@@ -1,7 +1,10 @@
 import asyncio
+import json
 from datetime import UTC, datetime
+from types import SimpleNamespace
 
 import pytest
+from google.genai import types
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
@@ -24,8 +27,43 @@ from app.domains.memory.models.batch import (
 from app.domains.memory.models.items import MemoryMaintenanceJob
 from app.integrations.llm import memory_selection
 from app.providers.contracts import ProviderResponse, ProviderUsage
+from app.providers import gemini
 from app.runtime.memory.shutdown import MemoryShutdownAdmissionMiddleware
 from memory.test_p8_l_q_memory_read_inspector import _fixture, _seed, FRONTEND_HEADERS
+
+
+@pytest.mark.parametrize("reason", [types.FinishReason.STOP, types.FinishReason.MAX_TOKENS, types.FinishReason.SAFETY])
+def test_real_sdk_response_through_gemini_and_memory_adapter(monkeypatch, reason):
+    payload = {"version": "memory-selection.v2", "batch_ref": "batch-1", "decisions": [{
+        "candidate_ref": "candidate-1", "decision": "retain",
+        "reason_code": "meaningful_experience",
+        "memory": {"summary": "팀 연습을 마쳤다.", "evidence_refs": ["source-1"], "subjective_context_refs": []},
+    }]}
+    response = types.GenerateContentResponse(
+        candidates=[types.Candidate(finish_reason=reason,
+            content=types.Content(parts=[types.Part(text=json.dumps(payload))]))],
+        parsed=payload,
+        usage_metadata=types.GenerateContentResponseUsageMetadata(prompt_token_count=100, candidates_token_count=80),
+    )
+    calls = []
+    def generate(**kwargs):
+        calls.append(kwargs)
+        return response
+    monkeypatch.setattr(gemini.genai, "Client", lambda **kwargs: SimpleNamespace(
+        models=SimpleNamespace(generate_content=generate)))
+    provider = memory_selection.DirectLlmMemorySelectionProvider(CredentialMaterial(
+        credential_id="fixture", provider="google", model="gemini-3.5-flash-lite",
+        fingerprint="fixture", purpose=CredentialPurpose.MESSAGE_LLM, _secret="fixture-secret",
+    ))
+    sources = (MemorySelectionSource("candidate-1", "source-1", "AUTOBIOGRAPHICAL_EVENT", "팀 연습을 마쳤다."),)
+    if reason == types.FinishReason.STOP:
+        assert asyncio.run(provider.select(sources, timeout=1))[0].decision == "retain"
+    else:
+        with pytest.raises(MemoryValidationError, match="memory_selection_output_incomplete"):
+            asyncio.run(provider.select(sources, timeout=1))
+    assert len(calls) == 1
+    assert provider.finish_reason == reason.value
+    assert provider.usage.input_tokens == 100
 
 
 def test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version(
