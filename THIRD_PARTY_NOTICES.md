@@ -81,7 +81,7 @@ Package authors retain all rights granted by their respective licenses.
 - `xxhash 3.7.0` — BSD
 - `zstandard 0.25.0` — BSD-3-Clause
 
-## JavaScript production packages (56)
+## JavaScript production packages (60)
 
 - `@babel/code-frame 7.29.7` — MIT
 - `@babel/compat-data 7.29.7` — MIT
@@ -105,8 +105,9 @@ Package authors retain all rights granted by their respective licenses.
 - `@jridgewell/resolve-uri 3.1.2` — MIT
 - `@jridgewell/sourcemap-codec 1.5.5` — MIT
 - `@jridgewell/trace-mapping 0.3.31` — MIT
-- `@next/env 16.3.0` — MIT
-- `@swc/helpers 0.5.15` — Apache-2.0
+- `@next/env 16.3.3` — MIT
+- `@swc/helpers 0.5.23` — Apache-2.0
+- `@types/node 20.19.40` — MIT
 - `baseline-browser-mapping 2.11.14` — Apache-2.0
 - `browserslist 4.28.8` — MIT
 - `caniuse-lite 1.0.30001809` — CC-BY-4.0
@@ -117,6 +118,7 @@ Package authors retain all rights granted by their respective licenses.
 - `electron-to-chromium 1.5.406` — ISC
 - `escalade 3.2.0` — MIT
 - `gensync 1.0.0-beta.2` — MIT
+- `has-flag 4.0.0` — MIT
 - `js-tokens 4.0.0` — MIT
 - `jsesc 3.1.0` — MIT
 - `json5 2.2.3` — MIT
@@ -124,7 +126,7 @@ Package authors retain all rights granted by their respective licenses.
 - `lucide-react 1.29.0` — ISC
 - `ms 2.1.3` — MIT
 - `nanoid 3.3.18` — MIT
-- `next 16.3.0` — MIT
+- `next 16.3.3` — MIT
 - `node-releases 2.0.53` — MIT
 - `picocolors 1.1.1` — ISC
 - `postcss 8.5.23` — MIT
@@ -133,10 +135,12 @@ Package authors retain all rights granted by their respective licenses.
 - `scheduler 0.27.0` — MIT
 - `semver 6.3.1` — ISC
 - `semver 7.8.5` — ISC
-- `sharp 0.35.0` — Apache-2.0
+- `sharp 0.35.4` — Apache-2.0
 - `source-map-js 1.2.1` — BSD-3-Clause
 - `styled-jsx 5.1.6` — MIT
+- `supports-color 7.2.0` — MIT
 - `tslib 2.8.1` — 0BSD
+- `undici-types 6.21.0` — MIT
 - `update-browserslist-db 1.3.1` — MIT
 - `yallist 3.1.1` — ISC
 
