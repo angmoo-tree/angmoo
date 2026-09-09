@@ -11705,6 +11705,35 @@
         "tests/test_p8_l_d_installer_upgrade_contract.py": {},
         "tests/test_post_refactor_contract_changes.py": {}
       }
+    },
+    {
+      "commit": "4a4ffea26eca481f047ce8f71f65e06d55775de6",
+      "feature_id": "AR-ISSUE319-CI-HARDENING",
+      "reason": "Issue319 adds four generation profiles, thinking snapshots, Memory batch32/output65536 and schema v10; all other preservation contracts remain frozen.",
+      "tracked_files": {
+        "backend/tests/test_frontend_product_change_evidence.py": "bbdb2e1be6533b187e360a5232a0832f6ea08114"
+      },
+      "test_nodes": [
+        "tests/test_frontend_product_change_evidence.py::test_frontend_exact_chain_rejects_unrecorded_file_content_and_missing_steps",
+        "tests/test_frontend_product_change_evidence.py::test_frontend_metadata_requires_real_committed_before_and_after[commit]",
+        "tests/test_frontend_product_change_evidence.py::test_frontend_metadata_requires_real_committed_before_and_after[parent]"
+      ],
+      "test_assertions": {
+        "tests/test_frontend_product_change_evidence.py": {
+          "test_frontend_exact_chain_rejects_unrecorded_file_content_and_missing_steps": [
+            "assert changes.frontend_matches(path, 'old\\n', 'new\\r\\n', [record])",
+            "assert not changes.frontend_matches(path, 'old\\n', 'weakened\\n', [record])",
+            "assert not changes.frontend_matches('browser-tests/other.spec.ts', 'old\\n', 'new\\n', [record])",
+            "pytest.raises(ValueError, match='chain preimage')"
+          ],
+          "test_frontend_metadata_requires_real_committed_before_and_after": [
+            "pytest.raises(ValueError, match='committed preimage')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_frontend_product_change_evidence.py": {}
+      }
     }
   ]
 }
