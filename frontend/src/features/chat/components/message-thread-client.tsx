@@ -1,5 +1,6 @@
 "use client";
 
+import { generationProfileValue } from "@/config/generation-profiles";
 import { ArrowLeft, Loader2, RotateCcw, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRuntimeRouter as useRouter, useRuntimeSearchParams as useSearchParams } from "@/hooks/use-runtime-navigation";
@@ -11,14 +12,11 @@ import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { formatHandle } from "@/utils/profile-presentation";
 import { deleteMessageThread, getMessageThread, retryThreadMessage, sendThreadMessage, updateMessageThread } from "@/features/chat/api/chat-client";
 import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
-import { DEFAULT_MESSAGE_GOOGLE_MODEL } from "@/features/chat/config/models";
 import { type MessageGoogleGeminiModel, type MessageMessageRead, type MessageThreadRead } from "@/features/chat/types/chat-contract";
 import { resolvedLegacyWorldChatRouteParts } from "@/features/chat/utils/legacy-world-route";
 
-function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiModel {
-  return MESSAGE_GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
-    ? (value as MessageGoogleGeminiModel)
-    : DEFAULT_MESSAGE_GOOGLE_MODEL;
+function asMessageGoogleModel(value: string | undefined, thinking = "high"): MessageGoogleGeminiModel {
+  return generationProfileValue(value, thinking);
 }
 
 export function MessageThreadClient({ threadId }: { threadId: string }) {
@@ -72,8 +70,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
   }, [thread?.messages.length, pending, retryingMessageId]);
 
   const selectedModel = useMemo(
-    () => asMessageGoogleModel(thread?.selected_model),
-    [thread?.selected_model],
+    () => asMessageGoogleModel(thread?.selected_model, thread?.selected_thinking_level),
+    [thread?.selected_model, thread?.selected_thinking_level],
   );
   const latestMessageId =
     thread && thread.messages.length > 0
@@ -93,7 +91,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
   }
 
   async function handleModelChange(model: MessageGoogleGeminiModel) {
-    if (!thread || busy || model === thread.selected_model) return;
+    if (!thread || busy || model === generationProfileValue(thread.selected_model, thread.selected_thinking_level)) return;
     setError(null);
     try {
       setThread(await updateMessageThread(thread.id, { selected_model: model }));
@@ -337,7 +335,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
               className="h-9 max-w-[210px] rounded-full border border-[#eaedf2] bg-[#f6f7f9] px-3 text-[13px] font-extrabold text-[#344054] outline-none transition-colors focus:border-[#d0d5dd] focus:bg-[#f6f7f9] disabled:opacity-60"
               aria-label="모델 선택"
             >
-              {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
+              <option value="" disabled>지원 모델을 선택해 주세요</option>
+                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

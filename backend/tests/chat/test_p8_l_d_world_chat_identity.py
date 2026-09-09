@@ -285,21 +285,21 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
             created.thread.id,
             schemas.WorldChatThreadModelUpdate(
                 mode="thread_override",
-                selected_model="gemini-2.5-flash",
+                selected_model="gemini-3.5-flash-lite",
             ),
         )
         assert overridden.model_binding_mode == "thread_override"
-        assert overridden.selected_model == "gemini-2.5-flash"
+        assert overridden.selected_model == "gemini-3.5-flash-lite"
 
         world_chat.update_user_settings(
             db,
             owner,
-            schemas.MessageSettingsUpdate(default_model="gemini-2.5-flash-lite"),
+            schemas.MessageSettingsUpdate(default_model="gemini-3.1-flash-lite"),
         )
         persisted = db.get(models.MessageThread, created.thread.id)
         assert persisted is not None
         assert persisted.model_binding_mode == "thread_override"
-        assert persisted.selected_model == "gemini-2.5-flash"
+        assert persisted.selected_model == "gemini-3.5-flash-lite"
 
         rebound = world_chat.update_world_thread_model(
             db,
@@ -309,8 +309,8 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
             schemas.WorldChatThreadModelUpdate(mode="default"),
         )
         assert rebound.model_binding_mode == "default"
-        assert rebound.default_model == "gemini-2.5-flash-lite"
-        assert rebound.selected_model == "gemini-2.5-flash-lite"
+        assert rebound.default_model == "gemini-3.1-flash-lite"
+        assert rebound.selected_model == "gemini-3.1-flash-lite"
 
         source = models.MessageMessage(
             thread_id=created.thread.id,
@@ -330,7 +330,7 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
                 idempotency_key="active-model-idempotency",
                 generation_id="active-model-generation",
                 attempt_number=1,
-                selected_model="gemini-2.5-flash-lite",
+                selected_model="gemini-3.1-flash-lite",
                 deadline_at=datetime.now(UTC) + timedelta(minutes=2),
             )
         )
@@ -361,7 +361,7 @@ def test_world_chat_model_binding_follows_default_or_stays_thread_override() -> 
         persisted = db.get(models.MessageThread, created.thread.id)
         assert persisted is not None
         assert persisted.model_binding_mode == "default"
-        assert persisted.selected_model == "gemini-2.5-flash-lite"
+        assert persisted.selected_model == "gemini-3.1-flash-lite"
 
 
 def test_world_chat_requester_zero_and_spoof_fail_closed() -> None:
@@ -882,19 +882,19 @@ def test_world_chat_unique_conflict_recovers_the_existing_active_tuple(
             "world-a",
             schemas.WorldChatThreadCreate(
                 responding_world_character_id=responding.id,
-                selected_model="gemini-2.5-flash",
+                selected_model="gemini-3.5-flash-lite",
             ),
         )
         assert replay.outcome == "reused"
         assert replay.thread is not None
         assert replay.thread.id == created.thread.id
-        assert replay.thread.selected_model == "gemini-2.5-flash"
+        assert replay.thread.selected_model == "gemini-3.5-flash-lite"
         assert calls == 2
         assert db.scalar(select(func.count(models.MessageThread.id))) == 1
         db.expire_all()
         persisted = db.get(models.MessageThread, created.thread.id)
         assert persisted is not None
-        assert persisted.selected_model == "gemini-2.5-flash"
+        assert persisted.selected_model == "gemini-3.5-flash-lite"
 
 
 def test_world_chat_first_preference_unique_conflict_retries_once(
@@ -1116,7 +1116,7 @@ def test_world_chat_reused_thread_model_change_rolls_back_on_revalidation_error(
                 "world-a",
                 schemas.WorldChatThreadCreate(
                     responding_world_character_id=responding.id,
-                    selected_model="gemini-2.5-flash",
+                    selected_model="gemini-3.5-flash-lite",
                 ),
             )
 
@@ -1192,7 +1192,7 @@ def test_resolved_world_thread_legacy_api_is_redirect_only_and_not_mutable() -> 
                 db,
                 owner,
                 thread_id,
-                schemas.MessageThreadUpdate(selected_model="gemini-2.5-flash"),
+                schemas.MessageThreadUpdate(selected_model="gemini-3.5-flash-lite"),
             )
         with pytest.raises(world_chat.MessageValidationError):
             world_chat.delete_thread(db, owner, thread_id)

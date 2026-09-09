@@ -31,5 +31,5 @@ SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
 
 # Match the shipped SQLite manifest and Alembic graph. A real-database
 # diagnostic regression checks this contract whenever the schema advances.
-RUNTIME_MIGRATION_HEAD = "20260904_0089"
+RUNTIME_MIGRATION_HEAD = "20260909_0090"
 RECENT_PROVIDER_WINDOW = timedelta(hours=1)

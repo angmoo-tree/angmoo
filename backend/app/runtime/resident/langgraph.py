@@ -641,7 +641,7 @@ def _llm_context(
         node=node,
         lane=lane,
         provider=ctx.credential.provider,
-        model=ctx.credential.model,
+        model=ctx.generation_model,
         key_fingerprint=ctx.credential.key_fingerprint,
     )
 
@@ -721,7 +721,7 @@ async def _call_json(
             response_schema=response_schema,
             validator=_validator,
             max_output_tokens=max_output_tokens,
-            thinking_level=_thinking_level_for_lane(lane),
+            thinking_level=ctx.generation_thinking_level,
             on_rate_limit_wait=ctx.on_rate_limit_wait,
             should_retry_json_error=should_retry_json_error,
         )

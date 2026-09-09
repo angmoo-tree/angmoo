@@ -340,7 +340,7 @@ def test_resolved_world_thread_legacy_endpoints_are_redirect_only() -> None:
         assert thread is not None
         assert thread.requester_id == owner.id
         assert thread.deleted_at is None
-        assert thread.selected_model == "gemini-2.5-flash-lite"
+        assert thread.selected_model == "gemini-3.1-flash-lite"
         assert len(list(db.scalars(select(models.MessageMessage)))) == 1
 
 

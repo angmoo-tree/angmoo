@@ -46,7 +46,10 @@ def verify_v5_to_v6_delta(
 
 
 def upgrade_v5_to_v6(connection: Connection) -> None:
-    create_response_request_schema(connection)
+    from app.runtime.persistence.sqlite_schema import build_sqlite_v6_metadata
+    metadata = build_sqlite_v6_metadata()
+    for name in RESPONSE_REQUEST_SCHEMA_TABLES:
+        metadata.tables[name].create(connection, checkfirst=False)
 
 
 __all__ = [

@@ -268,6 +268,10 @@ class History:
 
     def validate_sources(self):
         removed = self.removed_product_bindings()
+        spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+        changes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(changes)
+        records = changes.load(self.root)
         for commit in (SOURCE, EARLIER_SOURCE):
             if self.reader("merge-base", commit, "HEAD", root=self.root).decode().strip() != commit:
                 raise ValueError("retirement source is not an ancestor of this candidate")
@@ -295,6 +299,10 @@ class History:
                             continue
                         current_definition=terminal_definition(path.read_text(encoding='utf-8-sig'),tail[0])
                         original_definition=terminal_definition(self.source(owner),tail[0])
+                        if current_definition is not None and original_definition is not None and changes.definition_matches(
+                            self.root, self.paths[owner], tail[0], original_definition, current_definition, records=records
+                        ):
+                            continue
                         if type(current_definition) is not type(original_definition):
                             raise ValueError("actual terminal export must have one definition: " + parts)
                         if isinstance(current_definition,(ast.FunctionDef,ast.AsyncFunctionDef)) and (dump(current_definition.args)!=dump(original_definition.args) or [dump(n) for n in current_definition.decorator_list]!=[dump(n) for n in original_definition.decorator_list]):

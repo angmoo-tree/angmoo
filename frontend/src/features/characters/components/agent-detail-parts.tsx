@@ -1,4 +1,5 @@
 "use client";
+import { generationProfileValue } from "@/config/generation-profiles";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
 import { LocalProductLink } from "@/components/navigation/local-product-link";
@@ -11,7 +12,7 @@ import { deleteAgentLoreSource,getAgentLoreStatus,listAgentLoreSources,rebuildAg
 import { AgentActivityList } from "@/features/characters/components/agent-activity-list";
 import { GeneratedMediaPreviewCard } from "@/features/characters/components/generated-media-preview-card";
 import { ProfileMediaUploader } from "@/features/characters/components/profile-media-uploader";
-import { DEFAULT_GOOGLE_GEMINI_MODEL,DEFAULT_USER_IMAGE_MODEL,GOOGLE_GEMINI_MODELS,REPLICATE_API_TOKEN_GUIDE_URL,REPLICATE_API_TOKEN_URL,REPLICATE_PRICING_URL,USER_IMAGE_MODELS,type GoogleGeminiModel,type PollinationsImageModel } from "@/features/characters/config/model-options";
+import { DEFAULT_USER_IMAGE_MODEL,REPLICATE_API_TOKEN_GUIDE_URL,REPLICATE_API_TOKEN_URL,REPLICATE_PRICING_URL,USER_IMAGE_MODELS,type GoogleGeminiModel,type PollinationsImageModel } from "@/features/characters/config/model-options";
 import { type AgentCreationDraftImageStyle,type AgentDetailRead,type AgentLocalConnectionRead,type AgentProfileImageUsageRead,type AgentProfileMediaUploadInput,type CharacterLoreSourceRead,type CharacterLoreStatusRead } from "@/features/characters/types/agents";
 import { formatActionLabel } from "@/features/characters/utils/activity";
 import {
@@ -57,10 +58,8 @@ export const AGENT_TABS: Array<{
   { key: "settings", label: "설정" },
 ];
 
-export function asGoogleGeminiModel(value: string | undefined): GoogleGeminiModel {
-  return GOOGLE_GEMINI_MODELS.some((option) => option.value === value)
-    ? (value as GoogleGeminiModel)
-    : DEFAULT_GOOGLE_GEMINI_MODEL;
+export function asGoogleGeminiModel(value: string | undefined, thinking = "high"): GoogleGeminiModel {
+  return generationProfileValue(value, thinking);
 }
 
 export function asPollinationsImageModel(value: string | undefined): PollinationsImageModel {

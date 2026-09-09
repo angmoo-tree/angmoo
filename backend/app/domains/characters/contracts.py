@@ -72,7 +72,7 @@ class CharacterManagementWorkflows:
 class DraftLlmCall(Protocol):
     def __call__(
         self, *, db: Session, user: CharacterOwner, draft_id: str, provider: str,
-        model: str, api_key: str, message: str, extra_system_prompt: str,
+        model: str, api_key: str, message: str, extra_system_prompt: str, thinking_level: str = "high",
     ) -> Awaitable[str]: ...
 
 

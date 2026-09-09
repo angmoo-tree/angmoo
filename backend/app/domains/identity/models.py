@@ -312,3 +312,7 @@ class LlmCredential(Base):
 
     owner: Mapped["User"] = relationship()
     character: Mapped[Optional["Character"]] = relationship(back_populates="credential")
+
+    thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
+    )

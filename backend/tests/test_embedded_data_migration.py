@@ -389,6 +389,13 @@ def _seed_v2_roleless(
 
                 for name in reversed(MEMORY_BATCH_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
+                # Remove only the new v10 columns from surviving historical tables.
+                from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
+                for table, columns in ADDED_COLUMNS.items():
+                    if table in MEMORY_BATCH_TABLES or table == "chat_response_requests":
+                        continue
+                    for column in columns:
+                        connection.exec_driver_sql(f'ALTER TABLE "{table}" DROP COLUMN "{column}"')
                 drop_subjective_context_schema(connection)
                 drop_response_request_schema(connection)
                 drop_memory_schema_v1(connection)
@@ -571,7 +578,7 @@ def test_max_length_v8_generation_upgrades_without_reusing_source_directory(
     assert result.canonical.migrated is True
     assert result.canonical.generation != MAX_LENGTH_V8_GENERATION
     assert len(result.canonical.generation) <= 64
-    assert result.canonical.generation.endswith("-schema-v9")
+    assert result.canonical.generation.endswith("-schema-v10")
     assert source.is_file()
     assert _sha256(source) == source_sha
     current = json.loads(

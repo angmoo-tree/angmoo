@@ -29,6 +29,29 @@ def test_only_named_contract_changes_apply_and_original_snapshot_is_immutable():
         changes.contracts(original, [record])
 
 
+def test_named_definition_delta_cannot_approve_a_different_owner_or_body(tmp_path):
+    old = ast.parse("def choose():\n    return 'high'\n").body[0]
+    new = ast.parse("def choose():\n    return 'medium'\n").body[0]
+    drift = ast.parse("def choose():\n    return 'low'\n").body[0]
+    records = [{"definitions": [{"source": "backend/profile.py", "symbol": "choose",
+        "before_ast": ast.dump(old, include_attributes=False),
+        "after_ast": ast.dump(new, include_attributes=False)}]}]
+    assert changes.definition_matches(tmp_path, "backend/profile.py", "choose", old, new, records=records)
+    assert not changes.definition_matches(tmp_path, "backend/profile.py", "choose", old, drift, records=records)
+    assert not changes.definition_matches(tmp_path, "backend/other.py", "choose", old, new, records=records)
+    assert not changes.definition_matches(tmp_path, "backend/profile.py", "other", old, new, records=records)
+
+
+def test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage():
+    original = {"orm_tables": {"profiles": "old", "secrets": "untouched"}}
+    record = {"orm_tables": [{"key": "profiles", "before": "old", "after": "new"}]}
+    assert changes.contracts(original, [record]) == {"orm_tables": {"profiles": "new", "secrets": "untouched"}}
+    assert original["orm_tables"]["profiles"] == "old"
+    record["orm_tables"][0]["before"] = "tampered"
+    with pytest.raises(ValueError, match="ORM preimage"):
+        changes.contracts(original, [record])
+
+
 def test_orm_and_duplicate_changes_cannot_be_excused():
     entry = {"application": "full", "kind": "orm_tables", "key": "Persona", "before": "old", "after": "new"}
     with pytest.raises(ValueError, match="ORM"):

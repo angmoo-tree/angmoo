@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    MetaData,
     String,
     Text,
     UniqueConstraint,
@@ -40,6 +41,10 @@ class MemoryBatchProfile(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+    thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
     )
 
 
@@ -84,6 +89,9 @@ class MemoryBatchSetting(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+    execution_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    retry_request_key: Mapped[str | None] = mapped_column(String(128))
 
 
 class MemoryActivationEpoch(Base):
@@ -182,6 +190,10 @@ class MemoryBatchRun(Base):
     output_tokens: Mapped[int | None] = mapped_column(Integer)
     thought_tokens: Mapped[int | None] = mapped_column(Integer)
 
+    thinking_level: Mapped[str] = mapped_column(
+        String(8), nullable=False, default="high", server_default="high"
+    )
+
 
 class MemorySelectionDecisionModel(Base):
     __tablename__ = "memory_selection_decisions"
@@ -211,5 +223,13 @@ class MemorySelectionDecisionModel(Base):
 
 
 def create_memory_batch_schema(connection: Connection) -> None:
+    """Released v9 migration shape; current bootstrap uses registered metadata."""
+    metadata = MetaData()
+    for table in Base.metadata.tables.values():
+        table.to_metadata(metadata)
     for name in MEMORY_BATCH_TABLES:
-        Base.metadata.tables[name].create(connection, checkfirst=False)
+        table = metadata.tables[name]
+        for field in ("thinking_level", "execution_version", "retry_request_key"):
+            if field in table.c:
+                table._columns.remove(table.c[field])
+        table.create(connection, checkfirst=False)

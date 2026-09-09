@@ -319,6 +319,7 @@ class MessageService:
             system_prompt=self._build_system_prompt(character),
             user_prompt=self._build_user_prompt(db, thread, user_message),
             max_output_tokens=MODEL_OUTPUT_TOKENS,
+            thinking_level=thread.selected_thinking_level,
             timeout_seconds=120.0,
         )
         answer = response.text.strip()

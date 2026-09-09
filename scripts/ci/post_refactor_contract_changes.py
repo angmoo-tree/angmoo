@@ -45,6 +45,17 @@ def load(root: Path) -> list[dict]:
         for source, blob in record["source_blobs"].items():
             if git("rev-parse", f"{commit}:{source}").decode().strip() != blob:
                 raise ValueError("product change source provenance differs")
+        for change in record.get("definitions", []):
+            source, symbol = change["source"], change["symbol"]
+            if source not in record["source_blobs"] or change["before_ast"] == change["after_ast"]:
+                raise ValueError("definition change requires committed source evidence")
+            for revision, field in ((commit + "^", "before_ast"), (commit, "after_ast")):
+                if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != change[field]:
+                    raise ValueError("definition change committed preimage differs")
+        if record.get("orm_tables"):
+            migrations = record.get("migration_sources", [])
+            if not migrations or any(path not in record["source_blobs"] for path in migrations):
+                raise ValueError("ORM change requires committed migration evidence")
         for removed in record.get("removed_bindings", []):
             source, symbol = removed["source"], removed["symbol"]
             if source not in record["source_blobs"] or not re.fullmatch(r"[A-Za-z_]\w*", symbol):
@@ -62,6 +73,32 @@ def load(root: Path) -> list[dict]:
     return records
 
 
+def definition_ast(source: str, symbol: str) -> str:
+    body = ast.parse(source).body
+    for part in symbol.split("."):
+        found = [node for node in body if getattr(node, "name", None) == part or
+                 isinstance(node, (ast.Assign, ast.AnnAssign)) and any(
+                     isinstance(target, ast.Name) and target.id == part for target in
+                     (node.targets if isinstance(node, ast.Assign) else [node.target]))]
+        if len(found) != 1:
+            raise ValueError("definition change must name one exact symbol")
+        node = found[0]
+        body = getattr(node, "body", [])
+    return ast.dump(node, include_attributes=False)
+
+
+def definition_matches(root: Path, source: str, symbol: str, before: ast.AST, after: ast.AST, *, records=None) -> bool:
+    expected = ast.dump(before, include_attributes=False)
+    actual = ast.dump(after, include_attributes=False)
+    if expected == actual:
+        return True
+    for record in load(root) if records is None else records:
+        for change in record.get("definitions", []):
+            if (change["source"], change["symbol"], change["before_ast"]) == (source, symbol, expected):
+                expected = change["after_ast"]
+    return expected == actual
+
+
 def removed_bindings(records: list[dict]) -> set[tuple[str, str]]:
     return {(item["source"], item["symbol"]) for record in records for item in record.get("removed_bindings", [])}
 
@@ -69,6 +106,10 @@ def removed_bindings(records: list[dict]) -> set[tuple[str, str]]:
 def contracts(original: dict, records: list[dict]) -> dict:
     result = deepcopy(original)
     for record in records:
+        for change in record.get("orm_tables", []):
+            if result["orm_tables"].get(change["key"]) != change["before"] or change["before"] == change["after"]:
+                raise ValueError("product ORM preimage differs")
+            result["orm_tables"][change["key"]] = change["after"]
         seen = set()
         for change in record.get("contracts", []):
             app, kind, key = (change[name] for name in ("application", "kind", "key"))

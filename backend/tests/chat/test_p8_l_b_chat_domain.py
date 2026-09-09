@@ -35,7 +35,7 @@ def test_chat_v1_policy_values_remain_frozen() -> None:
     assert policies.USER_MESSAGE_LIMIT == 2_000
     assert policies.MODEL_OUTPUT_TOKENS == 1024
     assert policies.MESSAGE_RESPONSE_LEASE_SECONDS == 150
-    assert policies.DEFAULT_MESSAGE_MODEL == "gemini-2.5-flash-lite"
+    assert policies.DEFAULT_MESSAGE_MODEL == "gemini-3.1-flash-lite"
 
 
 

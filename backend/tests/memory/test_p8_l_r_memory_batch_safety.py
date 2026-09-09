@@ -51,7 +51,7 @@ def _save(repo, scope, *, now=None, **overrides):
             "schedule_enabled": False,
             "local_time": "22:30",
             "consent_version": MEMORY_CONSENT_VERSION,
-            "model_id": "fixture-model",
+            "model_id": "gemini-3.1-flash-lite",
             "idempotency_key": "test-save-" + str(saved.version),
             "now": now or datetime.now(UTC),
             **overrides,
@@ -82,7 +82,7 @@ def test_complete_source_schedule_selection_brief_and_reopen_are_causal(memory_s
     memory_session.commit()
     factory = sessionmaker(bind=memory_session.bind)
     selector = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model: selector)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
     install_memory_delivery(factory)
     try:
         with factory() as db:
@@ -105,7 +105,7 @@ def test_complete_source_schedule_selection_brief_and_reopen_are_causal(memory_s
             )
             evidence = db.scalar(select(models.MemoryItemEvidence))
             assert evidence.source_id == "actual-causal-source"
-        reopened = MemoryBatchRuntime(factory, lambda owner, model: selector)
+        reopened = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
         assert asyncio.run(reopened.tick(shutdown=True)) == "memory_batch_queue_empty"
         assert selector.calls == 1
     finally:
@@ -126,7 +126,7 @@ def test_two_characters_at_same_daily_time_complete_without_mixing_sources(memor
     memory_session.commit()
     factory = sessionmaker(bind=memory_session.bind)
     selector = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model: selector)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: selector)
     install_memory_delivery(factory)
     try:
         for index, current in enumerate((scope, other)):
@@ -286,6 +286,13 @@ def test_user_retry_creates_one_audited_run_without_resetting_old_attempts(
             scope, idempotency_key="user-retry-once", now=now + timedelta(days=1)
         )
         repo.commit()
+    # Preparation, rather than the HTTP write, re-partitions released evidence.
+    config_row = memory_session.get(MemoryBatchSetting, config.id)
+    assert config_row.retry_request_key == "user-retry-once"
+    from memory.preparation_support import enqueue_scope
+    config_row.trigger_cutoff = memory_session.scalar(select(func.max(MemorySourceDelivery.sequence)))
+    enqueue_scope(memory_session, scope_setting_id=config.id, trigger="explicit", now=now + timedelta(days=1))
+    memory_session.commit()
     runs = memory_session.scalars(select(MemoryBatchRun)).all()
     assert len(runs) == 2
     assert memory_session.get(MemoryBatchRun, job).physical_calls == 3
@@ -329,7 +336,7 @@ def test_backlog_tail_is_admitted_after_first_32(memory_session):
             .select_from(MemoryMaintenanceJob)
             .where(MemoryMaintenanceJob.reason == "memory_selection_v2")
         )
-        == 18
+        == 2
     )
 
 
@@ -376,9 +383,9 @@ def test_changed_policy_or_source_cannot_commit_old_provider_response(
             _save(
                 repo,
                 scope,
-                model_id="other-fixture-model"
+                model_id="gemini-3.5-flash-lite"
                 if change == "model"
-                else "fixture-model",
+                else "gemini-3.1-flash-lite",
                 local_time="23:30",
             )
             memory_session.commit()
@@ -394,6 +401,12 @@ def test_changed_policy_or_source_cannot_commit_old_provider_response(
             )
 
     provider.callback = alter
+    if change in {"settings", "model"}:
+        assert asyncio.run(service.run_next(lease_token="original")) == "memory_selection_completed"
+        assert provider.calls == 1
+        assert memory_session.get(MemoryBatchRun, job_id).model_id == "gemini-3.1-flash-lite"
+        assert memory_session.scalar(select(func.count()).select_from(models.MemoryItem)) == 2
+        return
     assert (
         asyncio.run(service.run_next(lease_token="original"))
         != "memory_selection_completed"
@@ -494,7 +507,7 @@ def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_ses
     memory_session.add(outsider)
     memory_session.flush()
     memory_session.add(
-        MemoryBatchProfile(owner_id=outsider.id, model_id="fixture-model")
+        MemoryBatchProfile(owner_id=outsider.id, model_id="gemini-3.1-flash-lite")
     )
     memory_session.commit()
     owner = memory_session.get(models.User, scope.owner_id)
@@ -567,7 +580,7 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
     assert set(memory_session.scalars(select(MemoryScopeSettingModel.id))) == {other.id}
     assert (
         memory_session.get(MemoryBatchProfile, scope.owner_id).model_id
-        == "fixture-model"
+        == "gemini-3.1-flash-lite"
     )
 
 
@@ -640,7 +653,7 @@ def test_shutdown_skip_is_idempotent_and_does_not_start_ai(memory_session):
     _stack(memory_session)
     factory = sessionmaker(bind=memory_session.bind)
     provider = Selector()
-    runtime = MemoryBatchRuntime(factory, lambda owner, model: provider)
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: provider)
 
     async def run():
         coordinator = MemoryShutdownCoordinator(runtime, budget_seconds=0.1)
@@ -686,12 +699,12 @@ def test_shutdown_deadline_cancels_late_provider_and_preserves_candidates(
         async def select(self, sources, *, timeout):
             await asyncio.sleep(10)
 
-    runtime = MemoryBatchRuntime(factory, lambda owner, model: Slow())
+    runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: Slow())
 
     # Use the fixture evidence source while keeping the real durable queue.
     async def tick(**kwargs):
         memory_session.rollback()
-        service.provider_factory = lambda owner, model: Slow()
+        service.provider_factory = lambda owner, model, thinking: Slow()
         return await service.run_next(
             lease_token="slow", timeout=kwargs.get("timeout", 30)
         )

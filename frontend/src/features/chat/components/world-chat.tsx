@@ -1,5 +1,6 @@
 "use client";
 
+import { generationProfileValue, generationProfileLabel } from "@/config/generation-profiles";
 import {
   ArrowLeft,
   LoaderCircle,
@@ -611,8 +612,8 @@ function WorldChatThread({
   const modelControlDescription = modelControlDisabled
     ? "답장을 처리하는 동안에는 응답 모델을 변경할 수 없습니다."
     : thread.model_binding_mode === "default"
-      ? `기본 모델 ${modelLabel(thread.default_model)}을 다음 답장에 사용합니다.`
-      : `${modelLabel(thread.selected_model)}을 이 대화에서 고정해 사용합니다.`;
+      ? `기본 모델 ${generationProfileLabel(thread.default_model, thread.default_thinking_level)}을 다음 답장에 사용합니다.`
+      : `${generationProfileLabel(thread.selected_model, thread.selected_thinking_level)}을 이 대화에서 고정해 사용합니다.`;
 
   return (
     <section
@@ -676,9 +677,10 @@ function WorldChatThread({
           value={modelSelection}
         >
           <option value="default">
-            기본 모델 사용 — 현재 {modelLabel(thread.default_model)}
+            기본 모델 사용 — 현재 {generationProfileLabel(thread.default_model, thread.default_thinking_level)}
           </option>
-          {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
+          <option value="" disabled>지원 모델을 선택해 주세요</option>
+                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label} — 이 대화에서 고정
             </option>
@@ -1011,12 +1013,5 @@ function compactDate(value: string) {
 }
 
 function threadModelSelection(thread: WorldChatThreadRead): ModelSelection {
-  return thread.model_binding_mode === "default" ? "default" : thread.selected_model;
-}
-
-function modelLabel(model: MessageGoogleGeminiModel) {
-  return (
-    MESSAGE_GOOGLE_GEMINI_MODELS.find((option) => option.value === model)?.label ??
-    model
-  );
+  return thread.model_binding_mode === "default" ? "default" : generationProfileValue(thread.selected_model, thread.selected_thinking_level);
 }

@@ -34,7 +34,7 @@ services:
       timeout: 5s
       retries: 24
       start_period: 30s
-    stop_grace_period: 30s
+    stop_grace_period: 200s
 
   frontend:
     image: ghcr.io/angmoo-tree/angmoo-frontend:${ANGMOO_VERSION:-v0.3.0}

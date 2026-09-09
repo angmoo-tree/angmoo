@@ -405,7 +405,7 @@ def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
 
     source = inspect.getsource(agent_service.analyze_tendency)
     assert "max_output_tokens=TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS" in source
-    assert "thinking_level=settings.tendency_analysis_thinking_level" in source
+    assert "thinking_level=credential.thinking_level" in source
     assert "thinking=settings.tendency_analysis_thinking_level" in source
 
     monkeypatch.setattr(agent_service.settings, "TENDENCY_ANALYSIS_THINKING_LEVEL", "")

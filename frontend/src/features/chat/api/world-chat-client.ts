@@ -1,3 +1,4 @@
+import { generationProfilePayload } from "@/config/generation-profiles";
 import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
@@ -113,7 +114,7 @@ export async function updateWorldChatThreadModel(
       worldId,
       `/threads/${encodeURIComponent(threadId)}/model`,
     ),
-    { body: data, method: "PATCH" },
+    { body: generationProfilePayload(data, "selected_model"), method: "PATCH" },
   );
   if (
     !worldChatThreadMatchesScope(payload, worldId) ||

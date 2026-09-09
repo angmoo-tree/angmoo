@@ -60,6 +60,7 @@ class CredentialResolver:
             credential_id=str(getattr(credential, "id", "") or ""),
             provider=str(getattr(credential, "provider", "") or ""),
             model=str(getattr(credential, "model", "") or ""),
+            thinking_level=getattr(credential, "thinking_level", "high") or "high",
             fingerprint=getattr(credential, "key_fingerprint", None),
             purpose=purpose,
             owner_id=str(getattr(credential, "owner_id", "") or ""),
@@ -77,6 +78,7 @@ class CredentialResolver:
             credential_id=str(getattr(draft, "id", "") or ""),
             provider=str(getattr(draft, "provider", "") or ""),
             model=str(getattr(draft, "model", "") or ""),
+            thinking_level=getattr(draft, "thinking_level", "high") or "high",
             fingerprint=getattr(draft, "key_fingerprint", None),
             purpose=CredentialPurpose.CREATION_DRAFT_LLM,
             owner_id=str(getattr(draft, "user_id", "") or ""),
@@ -96,6 +98,7 @@ class CredentialResolver:
         owner_id: str | None = None,
         character_id: str | None = None,
         stored_purpose: str | None = None,
+        thinking_level: str = "high",
     ) -> CredentialMaterial:
         if not encrypted_secret:
             raise CredentialResolutionError("credential key is missing")
@@ -124,6 +127,7 @@ class CredentialResolver:
             fingerprint=fingerprint,
             purpose=purpose,
             _secret=secret,
+            thinking_level=thinking_level,
         )
 
     @staticmethod

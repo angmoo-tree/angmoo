@@ -29,6 +29,7 @@ def upsert_credential(
     auth_profile_id: str | None,
     label: str | None,
     commit: bool = True,
+    thinking_level: str = "high",
 ) -> models.LlmCredential:
     credential = credential_repository.get_character_credential(db, character.id)
     profile_id = auth_profile_id or default_auth_profile_id(provider, character.id)
@@ -66,5 +67,6 @@ def upsert_credential(
         credential.encrypted_api_key = encrypted_api_key
         credential.key_fingerprint = key_fingerprint
         credential.enabled = True
+    credential.thinking_level = thinking_level
     credential_repository.save_credential(db, credential, commit=commit)
     return credential

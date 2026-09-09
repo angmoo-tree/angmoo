@@ -38,6 +38,7 @@ class CredentialMaterial:
     fingerprint: str | None
     purpose: CredentialPurpose
     _secret: str = field(repr=False)
+    thinking_level: str = "high"
 
     def reveal(self) -> str:
         return self._secret
@@ -111,7 +112,7 @@ class CredentialSlot(Protocol):
     status: str
 
 class CharacterCredentialUpsert(Protocol):
-    def __call__(self, db: Session, *, user: User, character: CredentialCharacter, provider: str, model: str, api_key: str, auth_profile_id: str | None, label: str | None, commit: bool) -> LlmCredential: ...
+    def __call__(self, db: Session, *, user: User, character: CredentialCharacter, provider: str, model: str, api_key: str, auth_profile_id: str | None, label: str | None, commit: bool, thinking_level: str = "high") -> LlmCredential: ...
 
 class CredentialProfileBind(Protocol):
     def __call__(self, slot: CredentialSlot, *, user_id: str, character: CredentialCharacter, credential: LlmCredential) -> None: ...

@@ -310,6 +310,7 @@ async def _run_draft_llm(
     api_key: str,
     message: str,
     extra_system_prompt: str,
+    thinking_level: str = "high",
 ) -> str:
     if settings.server_llm_engine == "direct":
         run_id = str(uuid4())
@@ -329,6 +330,7 @@ async def _run_draft_llm(
             system_prompt=extra_system_prompt,
             user_prompt=message,
             max_output_tokens=2400,
+            thinking_level=thinking_level,
             timeout_seconds=settings.openclaw_timeout_seconds,
         )
         if not response.text.strip():

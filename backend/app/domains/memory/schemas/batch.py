@@ -1,6 +1,7 @@
 """Owner-only, saved-state Memory batch controls; never contains secrets."""
 
 from datetime import datetime
+from app.providers.generation_profiles import ThinkingLevel
 
 from pydantic import BaseModel, ConfigDict, Field
 from app.domains.memory.schemas import MemoryScopeRead
@@ -16,6 +17,7 @@ class MemoryBatchSettingUpdate(BaseModel):
     local_time: str = Field(pattern=r"^(?:[01]\d|2[0-3]):[0-5]\d$")
     consent_version: str | None = Field(default=None, max_length=48)
     model_id: str | None = Field(default=None, max_length=120)
+    thinking_level: ThinkingLevel = "high"
     idempotency_key: str = Field(min_length=8, max_length=128)
 
 
@@ -30,6 +32,7 @@ class MemoryBatchSettingRead(BaseModel):
     timezone: str
     next_due_at: datetime | None
     model_id: str | None
+    thinking_level: str = "high"
     profile_version: int
     pending_count: int
     status: str

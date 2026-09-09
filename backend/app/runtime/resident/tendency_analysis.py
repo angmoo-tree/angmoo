@@ -66,7 +66,7 @@ async def analyze_tendency(
                 response_schema=_TendencyAnalysisPayload,
                 validator=_validator,
                 max_output_tokens=TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS,
-                thinking_level=settings.tendency_analysis_thinking_level,
+                thinking_level=credential.thinking_level,
             )
             summary, action_ranges, planner_profile = _normalize_tendency_payload(payload)
             store_tendency_analysis(

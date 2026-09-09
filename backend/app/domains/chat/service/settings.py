@@ -50,6 +50,7 @@ class MessageSettingsService:
             credential_source=preference.credential_source,
             source_character_id=preference.source_character_id,
             default_model=preference.default_model,
+            default_thinking_level=preference.default_thinking_level,
             message_key_fingerprint=message_credential.key_fingerprint
             if message_credential
             else None,
@@ -66,9 +67,10 @@ class MessageSettingsService:
         self, db: Session, user: ChatUser, data: schemas.MessageSettingsUpdate
     ) -> schemas.MessageSettingsRead:
         preference = self.ensure_user_preference(db, user)
-        if data.default_model is not None:
-            self._ensure_supported_model(data.default_model)
-            preference.default_model = data.default_model
+        if data.default_model is not None or data.default_thinking_level is not None:
+            self._ensure_supported_model(data.default_model or preference.default_model)
+            preference.default_model = data.default_model or preference.default_model
+            preference.default_thinking_level = data.default_thinking_level or "high"
             db.execute(
                 update(models.MessageThread)
                 .where(
@@ -77,7 +79,7 @@ class MessageSettingsService:
                     models.MessageThread.model_binding_mode
                     == MessageModelBindingMode.DEFAULT.value,
                 )
-                .values(selected_model=data.default_model)
+                .values(selected_model=preference.default_model, selected_thinking_level=preference.default_thinking_level)
             )
         if data.credential_source is not None:
             preference.credential_source = data.credential_source

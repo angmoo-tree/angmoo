@@ -90,7 +90,7 @@ def test_world_thread_model_update_contract_is_closed() -> None:
     with pytest.raises(ValidationError, match="default binding cannot include"):
         WorldChatThreadModelUpdate(
             mode="default",
-            selected_model="gemini-2.5-flash-lite",
+            selected_model="gemini-3.1-flash-lite",
         )
     with pytest.raises(ValidationError, match="thread_override requires"):
         WorldChatThreadModelUpdate(mode="thread_override")

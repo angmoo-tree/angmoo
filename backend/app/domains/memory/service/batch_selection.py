@@ -14,6 +14,7 @@ from app.domains.memory.service.items import (
 )
 from app.domains.memory.policies.batch import (
     MAX_SELECTION_INPUT_CHARACTERS,
+    MAX_SELECTION_OUTPUT_TOKENS,
     MAX_SELECTION_INPUT_UTF8_BYTES,
     MEMORY_PROVIDER_TIMEOUT_SECONDS,
 )
@@ -33,7 +34,7 @@ class MemoryBatchSelectionService:
         repository: MemoryBatchRepositoryPort,
         source_reader: MemorySourceEvidenceReaderPort,
         write_lifecycle: MemoryWriteLifecycleService,
-        provider_factory: Callable[[str, str], MemorySelectionProviderPort],
+        provider_factory: Callable[[str, str, str], MemorySelectionProviderPort],
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.repository = repository
@@ -116,7 +117,7 @@ class MemoryBatchSelectionService:
             decisions = ()
             if sources:
                 provider = self.provider_factory(
-                    batch.setting.scope.owner_id, batch.model_id
+                    batch.setting.scope.owner_id, batch.model_id, batch.thinking_level
                 )
                 validator = getattr(provider, "validate_sources", None)
                 if validator is not None:
@@ -128,6 +129,9 @@ class MemoryBatchSelectionService:
                     max(0.1, min(timeout, MEMORY_PROVIDER_TIMEOUT_SECONDS))
                 ):
                     decisions = await provider.select(tuple(sources), timeout=timeout)
+                validate_credential = getattr(provider, "validate_credential", None)
+                if validate_credential is not None:
+                    validate_credential()
                 repo.record_telemetry(
                     batch,
                     latency_ms=int((time.monotonic() - started) * 1000),
@@ -256,6 +260,8 @@ def _log_outcome(batch, provider, started, code: str, *, recorded: bool) -> None
         return value if isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", value) else "unknown"
     fields = {
         "job_id": identifier(batch.job_id), "model_id": identifier(batch.model_id),
+        "thinking_level": batch.thinking_level,
+        "candidate_count": len(batch.candidates), "max_output_tokens": MAX_SELECTION_OUTPUT_TOKENS,
         "attempt": batch.attempt, "code": code, "recorded": recorded,
         "finish_reason": reason if isinstance(reason, str) and reason in allowed else None if reason is None else "UNKNOWN",
         "latency_ms": _elapsed_ms(started),

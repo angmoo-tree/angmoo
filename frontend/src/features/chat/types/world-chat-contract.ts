@@ -36,8 +36,10 @@ export type WorldChatThreadRead = {
   world_id: string;
   requester: WorldChatRoleRead;
   responding: WorldChatRoleRead;
-  selected_model: MessageGoogleGeminiModel;
-  default_model: MessageGoogleGeminiModel;
+  selected_model: string;
+  selected_thinking_level: string;
+  default_model: string;
+  default_thinking_level: string;
   model_binding_mode: WorldChatModelBindingMode;
   last_message_at: string | null;
   created_at: string;

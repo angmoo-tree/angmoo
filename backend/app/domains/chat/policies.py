@@ -9,7 +9,7 @@ CONTEXT_MESSAGE_LIMIT = 20
 CONTEXT_CHAR_LIMIT = 12_000
 USER_MESSAGE_LIMIT = 2_000
 MODEL_OUTPUT_TOKENS = 1024
-DEFAULT_MESSAGE_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_MESSAGE_MODEL = "gemini-3.1-flash-lite"
 MESSAGE_RESPONSE_LEASE_SECONDS = 150
 WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS = 3_072
 
@@ -27,14 +27,7 @@ PROMPT_INJECTION_BLOCKED_MESSAGE = (
     "그건 말해줄 수 없지만, 다른 이야기는 편하게 해도 돼."
 )
 
-MESSAGE_MODELS = {
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-3.5-flash-lite",
-    "gemma-4-26b-a4b-it",
-    "gemma-4-31b-it",
-}
+MESSAGE_MODELS = {"gemini-3.1-flash-lite", "gemini-3.5-flash-lite"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,21 +40,15 @@ class MessageModelExecutionPolicy:
 
 
 def resolve_world_chat_model_execution_policy(
-    model: str,
+    model: str, thinking_level: str = "high",
 ) -> MessageModelExecutionPolicy:
     """Fail closed while keeping Gemini-family transport details out of Chat."""
 
     normalized = model.strip().lower()
     if normalized not in MESSAGE_MODELS:
         raise ValueError("world_chat_message_model_unsupported")
-    if normalized in {"gemini-3.1-flash-lite", "gemini-3.5-flash-lite"}:
-        thinking_level = "high"
-    elif normalized in {"gemini-2.5-flash-lite", "gemini-2.5-flash"}:
-        # The Gemini adapter maps this compatibility intent to thinkingBudget=0.
-        thinking_level = "low"
-    else:
-        # Gemma models do not accept Gemini thinking controls.
-        thinking_level = None
+    if thinking_level not in {"high", "medium"}:
+        raise ValueError("world_chat_thinking_level_unsupported")
     return MessageModelExecutionPolicy(
         model=normalized,
         thinking_level=thinking_level,

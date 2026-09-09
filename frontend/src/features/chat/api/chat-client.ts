@@ -1,3 +1,4 @@
+import { generationProfilePayload } from "@/config/generation-profiles";
 import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
@@ -17,7 +18,7 @@ export function createMessageThread(data: {
 }) {
   return requestChatApi<MessageThreadRead>("/messages/threads", {
     method: "POST",
-    body: data,
+    body: generationProfilePayload(data, "selected_model"),
   });
 }
 
@@ -31,7 +32,7 @@ export function updateMessageThread(
 ) {
   return requestChatApi<MessageThreadRead>("/messages/threads/" + threadId, {
     method: "PATCH",
-    body: data,
+    body: generationProfilePayload(data, "selected_model"),
   });
 }
 
@@ -68,7 +69,7 @@ export function updateMessageSettings(data: {
 }) {
   return requestChatApi<MessageSettingsRead>("/messages/settings", {
     method: "PATCH",
-    body: data,
+    body: generationProfilePayload(data, "default_model"),
   });
 }
 

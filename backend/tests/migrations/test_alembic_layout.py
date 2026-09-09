@@ -51,9 +51,10 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
 
     script = ScriptDirectory.from_config(Config(str(INI)))
     actual_graph = {revision.revision: revision.down_revision for revision in script.walk_revisions()}
-    assert actual_graph == expected_graph
-    assert len(actual_graph) == 88
-    assert script.get_heads() == ["20260904_0089"]
+    assert {key: actual_graph[key] for key in expected_graph} == expected_graph
+    assert actual_graph["20260909_0090"] == "20260904_0089"
+    assert len(actual_graph) == 89
+    assert script.get_heads() == ["20260909_0090"]
     assert not list((BACKEND / "app/alembic").rglob("*.py"))
 
 
@@ -69,7 +70,7 @@ def test_alembic_heads_from_outside_backend(tmp_path):
         timeout=30,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip() == "20260904_0089 (head)"
+    assert result.stdout.strip() == "20260909_0090 (head)"
 
 
 def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_path):

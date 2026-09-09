@@ -87,7 +87,7 @@ async def _run_first_greeting_writer(
         response_schema=_FirstGreetingWriterPayload,
         validator=_validator,
         max_output_tokens=FIRST_GREETING_WRITER_OUTPUT_TOKENS,
-        thinking_level=settings.langgraph_post_writer_thinking_level,
+        thinking_level=credential.thinking_level,
     )
 
 async def _attach_first_greeting_image(

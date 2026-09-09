@@ -40,6 +40,7 @@ async def create_draft(
         draft_id=draft_id,
         provider=data.provider,
         model=data.model,
+        thinking_level=data.thinking_level,
         api_key=data.api_key,
         message='Return exactly this JSON: {"ok": true}',
         extra_system_prompt=(
@@ -52,6 +53,7 @@ async def create_draft(
         user_id=user.id,
         provider=data.provider,
         model=data.model,
+        thinking_level=data.thinking_level,
         encrypted_api_key=security.encrypt_secret(
             data.api_key,
             scope=security.SecretScope(
@@ -136,6 +138,7 @@ async def enhance_persona(
         draft_id=draft.id,
         provider=draft.provider,
         model=draft.model,
+        thinking_level=draft.thinking_level,
         api_key=api_key,
         message="보강할 앵무 페르소나를 JSON으로 정리해 주세요.",
         extra_system_prompt=_build_persona_enhance_prompt(draft),
@@ -199,7 +202,8 @@ def complete_draft(
         topic_preferences=draft.topic_preferences.strip(),
         safety_rules=draft.safety_rules.strip(),
         provider=draft.provider,
-        model=draft.model,  # type: ignore[arg-type]
+        model=draft.model,
+        thinking_level=draft.thinking_level,  # type: ignore[arg-type]
         api_key=api_key,
         activity_interval_minutes=data.activity_interval_minutes,
         active_hours_start=data.active_hours_start,

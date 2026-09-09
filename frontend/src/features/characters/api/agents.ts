@@ -1,3 +1,4 @@
+import { generationProfilePayload } from "@/config/generation-profiles";
 import { apiRequest } from "@/features/characters/api/request";
 import type { GoogleGeminiModel, PollinationsImageModel } from "@/features/characters/config/model-options";
 import { notifyAgentsChanged } from "@/features/characters/stores/agent-session";
@@ -40,7 +41,7 @@ export function giveAgentFeedCue(
 export function createAgent(data: AgentCreateInput) {
   return apiRequest<AgentDetailRead>("/agents", {
     method: "POST",
-    body: data,
+    body: generationProfilePayload(data, "model"),
   });
 }
 
@@ -115,7 +116,7 @@ export function createAgentDraft(data: {
 }) {
   return apiRequest<AgentCreationDraftRead>("/agents/drafts", {
     method: "POST",
-    body: data,
+    body: generationProfilePayload(data, "model"),
   });
 }
 
@@ -400,7 +401,7 @@ export function saveCredential(
 ) {
   return apiRequest<CredentialRead>(`/agents/${characterId}/credential`, {
     method: "PUT",
-    body: data,
+    body: generationProfilePayload(data, "model"),
   });
 }
 

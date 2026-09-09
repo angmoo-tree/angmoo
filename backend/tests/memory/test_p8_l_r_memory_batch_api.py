@@ -59,7 +59,7 @@ def test_real_sdk_response_through_gemini_and_memory_adapter(monkeypatch, reason
     if reason == types.FinishReason.STOP:
         assert asyncio.run(provider.select(sources, timeout=1))[0].decision == "retain"
     else:
-        with pytest.raises(MemoryValidationError, match="memory_selection_output_incomplete"):
+        with pytest.raises(MemoryValidationError, match="memory_selection_max_tokens" if reason == types.FinishReason.MAX_TOKENS else "memory_selection_output_incomplete"):
             asyncio.run(provider.select(sources, timeout=1))
     assert len(calls) == 1
     assert provider.finish_reason == reason.value
@@ -207,7 +207,7 @@ def test_memory_adapter_one_call_strict_output_and_redacted_failure(
         assert decisions[0].decision == "retain"
         assert provider.usage.thought_tokens == 40
     assert len(requests) == 1
-    assert requests[0].max_output_tokens == 2048
+    assert requests[0].max_output_tokens == 65536
     assert requests[0].thinking_level == "high"
     assert "owner_id" not in requests[0].user_prompt
     assert "fixture-secret" not in repr(requests[0])
@@ -215,7 +215,7 @@ def test_memory_adapter_one_call_strict_output_and_redacted_failure(
 
 def test_input_budget_is_complete_normalized_byte_token_bound():
     assert memory_token_upper_bound("㍍") >= len("メートル".encode("utf-8"))
-    assert memory_token_upper_bound("가" * 12000) > MAX_SELECTION_INPUT_TOKEN_BOUND
+    assert memory_token_upper_bound("가" * 400000) > MAX_SELECTION_INPUT_TOKEN_BOUND
 
 
 def test_shutdown_rejects_new_mutations_but_keeps_status_readable():

@@ -9,6 +9,8 @@ from app.domains.routines.schemas import (
 )
 from datetime import datetime
 from typing import Literal
+from app.providers.generation_profiles import ThinkingLevel
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from app.domains.media.schemas import validate_profile_media_reference
 from app.core.response_schemas import UtcInstantResponseModel
@@ -74,6 +76,7 @@ class AgentCreate(BaseModel):
     safety_rules: str = Field(default="", max_length=PERSONA_LIMITS["safety_rules"])
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
+    thinking_level: ThinkingLevel = "high"
     api_key: str | None = Field(default=None, min_length=1, max_length=4000)
     auth_profile_id: str | None = Field(default=None, max_length=120)
     activity_interval_minutes: int | None = Field(default=None, ge=30, le=1440)
@@ -160,6 +163,7 @@ AgentProfileImageBucket = Literal[
 class AgentCreationDraftCreate(BaseModel):
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
+    thinking_level: ThinkingLevel = "high"
     api_key: str = Field(min_length=1, max_length=4000)
 
 class AgentCreationDraftUpdate(BaseModel):
@@ -254,6 +258,7 @@ class AgentCreationDraftRead(UtcInstantResponseModel):
     id: str
     provider: str
     model: str
+    thinking_level: str = "high"
     key_fingerprint: str | None = None
     name: str
     handle: str | None = None

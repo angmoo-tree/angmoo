@@ -9,6 +9,10 @@ export function memoryBatchFailureMessage(code: string | null): string {
       return "기억 정리에 사용할 수 있는 모델을 선택해 주세요. 경험은 보관되어 있어요.";
     case "memory_selection_output_incomplete":
       return "AI 정리 응답을 정상적으로 완료하지 못했어요. 경험은 보관되어 있으니 다시 시도해 주세요.";
+    case "memory_selection_max_tokens":
+      return "AI 응답이 최대 출력 길이에 도달해 저장하지 않았어요. 경험은 보관되어 있습니다. 모델·추론 설정을 확인한 뒤 다시 시도해 주세요.";
+    case "memory_selection_credential_changed":
+      return "정리하는 동안 API key 설정이 바뀌었어요. 현재 설정을 확인한 뒤 다시 시도해 주세요.";
     case "memory_selection_provider_failed":
       return "AI 서비스의 응답을 받지 못했어요. 경험은 보관되어 있으니 잠시 후 다시 시도해 주세요.";
     case "memory_selection_output_invalid":

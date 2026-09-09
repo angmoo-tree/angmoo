@@ -1,7 +1,7 @@
 """Attached execution records shared by a resident run on its caller Session."""
 from __future__ import annotations
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from sqlalchemy.orm import Session
 from app.domains.characters.models import Character, CharacterState
@@ -36,3 +36,12 @@ class LangGraphResidentContext:
     social_search_index: SocialSearchIndexPort | None = None
     social_search_state: SocialSearchState = SocialSearchState.UNAVAILABLE
 
+
+    generation_model: str = field(init=False)
+    generation_thinking_level: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        # SQLAlchemy may refresh the credential during a run. Keep this run's
+        # model and thinking fixed across all nodes and repair requests.
+        object.__setattr__(self, "generation_model", self.credential.model)
+        object.__setattr__(self, "generation_thinking_level", getattr(self.credential, "thinking_level", "high") or "high")

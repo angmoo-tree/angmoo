@@ -70,7 +70,7 @@ try:
     engine = database.engine
     second = database.open()
     assert database.engine is engine
-    assert first.schema_version == second.schema_version == 9
+    assert first.schema_version == second.schema_version == 10
     assert first.canonical_table_count == second.canonical_table_count == 102
     assert first.schema_digest_matches and second.schema_digest_matches
     assert first.foreign_keys and first.synchronous == 'FULL'

@@ -7,19 +7,10 @@ from app.providers.contracts import ProviderCapabilities
 from app.providers.gemini import GeminiAdapter
 
 
-AGENT_GOOGLE_MODELS = (
-    "gemma-4-26b-a4b-it",
-    "gemini-3.1-flash-lite",
-    "gemma-4-31b-it",
-)
-MESSAGE_GOOGLE_MODELS = (
-    "gemini-2.5-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-3.5-flash-lite",
-    "gemma-4-26b-a4b-it",
-    "gemma-4-31b-it",
-)
+from app.providers.generation_profiles import GENERATION_MODELS
+
+AGENT_GOOGLE_MODELS = GENERATION_MODELS
+MESSAGE_GOOGLE_MODELS = GENERATION_MODELS
 EMBEDDING_GOOGLE_MODELS = ("gemini-embedding-2",)
 GoogleProviderName = Literal["google", "google-generative-ai", "gemini"]
 

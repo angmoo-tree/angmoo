@@ -1,6 +1,6 @@
 import type { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
 export type MessageGoogleGeminiModel =
-  (typeof MESSAGE_GOOGLE_GEMINI_MODELS)[number]["value"];
+  (typeof MESSAGE_GOOGLE_GEMINI_MODELS)[number]["value"] | "";
 
 export type MessageCredentialSource = "message_key" | "agent_key";
 
@@ -21,7 +21,8 @@ export type CharacterMessageSettingRead = {
 export type MessageSettingsRead = {
   credential_source: MessageCredentialSource;
   source_character_id: string | null;
-  default_model: MessageGoogleGeminiModel;
+  default_model: string;
+  default_thinking_level: string;
   message_key_fingerprint: string | null;
   agent_key_fingerprint: string | null;
   has_usable_key: boolean;
@@ -43,7 +44,8 @@ export type MessageThreadRead = {
   id: string;
   requester: MessageProfileRef;
   character: MessageProfileRef;
-  selected_model: MessageGoogleGeminiModel;
+  selected_model: string;
+  selected_thinking_level: string;
   last_message_at: string | null;
   created_at: string;
   latest_message: MessageMessageRead | null;

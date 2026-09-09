@@ -16,6 +16,7 @@ from app.models import Base
 from app.domains.memory.repository.delivery import sync_epoch
 from app.domains.memory.policies.batch import (
     MAX_SELECTION_CANDIDATES,
+    MEMORY_PROVIDER_TIMEOUT_SECONDS,
     MAX_SELECTION_INPUT_UTF8_BYTES,
     next_daily_slot,
     schedule_timezone,
@@ -73,6 +74,9 @@ logger = logging.getLogger(__name__)
 
 class MemoryBatchRuntime:
     def __init__(self, session_factory, provider_factory) -> None:
+        # Preserve safe success/attempt measurements without enabling verbose
+        # SDK logging or changing application-wide log levels.
+        logging.getLogger("app.domains.memory.service.batch_selection").setLevel(logging.INFO)
         self.session_factory, self.provider_factory = session_factory, provider_factory
         self.stop_event = asyncio.Event()
         self.lock = asyncio.Lock()
@@ -108,7 +112,7 @@ class MemoryBatchRuntime:
         except Exception:
             logger.warning("memory_batch_brief_rebuild_deferred")
 
-    async def tick(self, *, shutdown: bool = False, timeout: float = 30) -> str:
+    async def tick(self, *, shutdown: bool = False, timeout: float = MEMORY_PROVIDER_TIMEOUT_SECONDS) -> str:
         async with self.lock:
             self.prepare(shutdown=shutdown)
             with self.session_factory() as db:

@@ -10,6 +10,7 @@ export type MemoryBatchSetting = {
   timezone: string;
   next_due_at: string | null;
   model_id: string | null;
+  thinking_level: "high" | "medium";
   pending_count: number;
   status: "disabled" | "paused" | "waiting" | "running" | "pending" | "attention" | "completed";
   last_code: string | null;
@@ -18,7 +19,7 @@ export type MemoryBatchSetting = {
 };
 
 export type MemoryBatchUpdate = Pick<MemoryBatchSetting,
-  "ai_enabled" | "shutdown_enabled" | "schedule_enabled" | "local_time" | "model_id"
+  "ai_enabled" | "shutdown_enabled" | "schedule_enabled" | "local_time" | "model_id" | "thinking_level"
 > & {
   expected_version: number;
   expected_profile_version: number;

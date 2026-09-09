@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 9
-SOURCE_ALEMBIC_REVISION = "20260904_0089"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 88
+SQLITE_SCHEMA_VERSION = 10
+SOURCE_ALEMBIC_REVISION = "20260909_0090"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 89
 EXPECTED_CANONICAL_TABLE_COUNT = 102
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -253,7 +253,23 @@ def build_sqlite_v8_metadata() -> MetaData:
     return metadata
 
 
+def build_sqlite_v9_metadata() -> MetaData:
+    """Frozen pre-generation-profile schema for supported upgrades."""
+    metadata = build_sqlite_baseline_metadata()
+    _copy_partial_index_predicates(metadata)
+    return metadata
+
+
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    # All callers are historical builders. Never let current ORM additions
+    # silently change an already released schema/manifest.
+    from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
+    for name, columns in ADDED_COLUMNS.items():
+        if name in metadata.tables:
+            table = metadata.tables[name]
+            for column in columns:
+                if column in table.c:
+                    table._columns.remove(table.c[column])
     for table in metadata.tables.values():
         for index in table.indexes:
             postgresql_where = index.dialect_options["postgresql"].get("where")

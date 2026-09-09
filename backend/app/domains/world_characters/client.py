@@ -112,6 +112,7 @@ class DirectLlmWorldCharacterSetupProvider:
                 response_schema=GEMINI_PROFILE_RESPONSE_SCHEMA,
                 validator=world_character_contracts.validate_community_profile,
                 max_output_tokens=PROFILE_MAX_OUTPUT_TOKENS,
+                thinking_level=material.thinking_level,
             )
         except direct_llm.DirectLlmJsonError as exc:
             if exc.last_payload is not None:
@@ -167,6 +168,7 @@ class DirectLlmWorldCharacterSetupProvider:
                     response_schema=GEMINI_REPERTOIRE_RESPONSE_SCHEMAS[dayparts],
                     validator=validate_transport,
                     max_output_tokens=REPERTOIRE_MAX_OUTPUT_TOKENS,
+                    thinking_level=material.thinking_level,
                 )
             except direct_llm.DirectLlmJsonError as exc:
                 if exc.last_payload is not None:

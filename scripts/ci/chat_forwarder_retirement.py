@@ -9,6 +9,7 @@ from __future__ import annotations
 import ast
 from collections import Counter
 import hashlib
+import importlib.util
 from pathlib import Path
 
 
@@ -180,6 +181,13 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
         return None
     if enabled is not True:
         raise ValueError("Chat forwarding retirement must be the exact reviewed boolean")
+    spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+    changes = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(changes)
+    records = changes.load(root)
+
+    def matches(path, symbol, original, actual):
+        return changes.definition_matches(root, path, symbol, original, actual, records=records)
     if git_bytes("merge-base", ANCHOR, "HEAD", root=root).decode().strip() != ANCHOR:
         raise ValueError("Chat forwarding proof source must be an ancestor")
     if "Signed-off-by:" not in git_bytes("show", "-s", "--format=%B", ANCHOR, root=root).decode():
@@ -221,7 +229,7 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
         def owned(source):
             return [n for n in ast.parse(source).body if (isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == name) or (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in n.targets))]
         original, actual = owned(before(path)), owned((root / path).read_text(encoding="utf-8-sig"))
-        if len(original) != 1 or len(actual) != 1 or dump(original[0]) != dump(actual[0]):
+        if len(original) != 1 or len(actual) != 1 or not matches(TARGETS["backend/app/runtime/chat/world_generation.py"], name, original[0], actual[0]):
             raise ValueError("World generation advertised owner changed: " + name)
     # Existing owner bodies must still execute their original logic. Import-only
     # edits are permitted; stubs or copies of the retired forwarding class are not.
@@ -229,12 +237,12 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
         path = f"backend/app/domains/chat/service/{role}.py"
         old, current = class_methods(before(path), cls), class_methods((root / path).read_text(encoding="utf-8-sig"), cls)
         for name, owner in SERVICE_OWNERS.items():
-            if owner == role and (name not in current or dump(current[name]) != dump(old[name])):
+            if owner == role and (name not in current or not matches(path, cls + "." + name, old[name], current[name])):
                 raise ValueError("Chat actual owner method changed: " + name)
     repository = "backend/app/domains/chat/repository/response_lifecycle.py"
     old, current = class_methods(before(repository), "SqlAlchemyResponseLifecycleRepository"), class_methods((root / repository).read_text(encoding="utf-8-sig"), "SqlAlchemyResponseLifecycleRepository")
     for name in LIFECYCLE.values():
-        if name not in current or dump(current[name]) != dump(old[name]):
+        if name not in current or not matches(repository, "SqlAlchemyResponseLifecycleRepository." + name, old[name], current[name]):
             raise ValueError("Chat durable command changed: " + name)
     composition = "backend/app/runtime/chat/message_composition.py"
     expected_composition = ast.parse(before(composition))
