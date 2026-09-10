@@ -1,7 +1,7 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3142,
+      "external_import_count": 3143,
       "internal_edge_count": 4026,
       "legacy_import_exception_count": 0,
       "module_count": 1077,
@@ -2974,7 +2974,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "6402262888055ce4b5b219a62e9df3a2bd877b112a62436ca4d6e001e602e8a8"
+    "workflow_sha256": "1f8025f5f256ca2aa1a65dfa63ba74f25b5fccb7e6de20c3348fc5145a600fcb"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
