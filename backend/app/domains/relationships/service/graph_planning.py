@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe, detail, observing_step
+
 from dataclasses import dataclass, replace
 from datetime import datetime
 
@@ -151,79 +153,86 @@ class GraphRetrievalPlanExecutor:
         outputs: dict[str, tuple[GraphRecallResult, ...]] = {}
         executions: list[GraphPlanStepExecution] = []
 
-        for step in validated.plan.steps:
-            parameters = dict(step.parameters)
-            counterpart_ids: tuple[str | None, ...]
-            if step.input_ref is not None:
-                source_step = step.input_ref.split(".", 1)[0]
-                candidate_ids = _world_character_refs(
-                    outputs[source_step],
-                    subject_id=context.scope.subject_world_character_id,
-                )[: context.fanout_limit]
-                if not candidate_ids:
-                    result = GraphRecallResult(
-                        operation=GraphRecallOperation(step.operation),
-                        status=GraphRecallStatus.READY,
-                        source=GraphRecallSource.NONE,
-                        reason_code="graph_dependency_empty",
+        for ordinal, step in enumerate(validated.plan.steps, 1):
+            with observing_step("graph", ordinal):
+                parameters = dict(step.parameters)
+                counterpart_ids: tuple[str | None, ...]
+                if step.input_ref is not None:
+                    source_step = step.input_ref.split(".", 1)[0]
+                    candidate_ids = _world_character_refs(
+                        outputs[source_step],
+                        subject_id=context.scope.subject_world_character_id,
+                    )[: context.fanout_limit]
+                    if not candidate_ids:
+                        result = GraphRecallResult(
+                            operation=GraphRecallOperation(step.operation),
+                            status=GraphRecallStatus.READY,
+                            source=GraphRecallSource.NONE,
+                            reason_code="graph_dependency_empty",
+                        )
+                        outputs[step.id] = (result,)
+                        executions.append(
+                            GraphPlanStepExecution(
+                                step_id=step.id,
+                                queries=(),
+                                results=(result,),
+                                dependency_short_circuited=True,
+                            )
+                        )
+                        observe("step", operation=step.operation, skipped=True, executed=False, reason="graph_dependency_empty", queries=0)
+                        continue
+                    counterpart_ids = tuple(candidate_ids)
+                else:
+                    counterpart_ref = parameters.get("counterpart_ref")
+                    counterpart_ids = (
+                        None if counterpart_ref is None else bindings[str(counterpart_ref)],
                     )
-                    outputs[step.id] = (result,)
-                    executions.append(
-                        GraphPlanStepExecution(
-                            step_id=step.id,
-                            queries=(),
-                            results=(result,),
-                            dependency_short_circuited=True,
+
+                observe("step", operation=step.operation, executed=True, skipped=False, queries=len(counterpart_ids), fanout=context.fanout_limit)
+                queries: list[GraphRecallQuery] = []
+                results: list[GraphRecallResult] = []
+                for counterpart_id in counterpart_ids:
+                    query = GraphRecallQuery(
+                        operation=GraphRecallOperation(step.operation),
+                        scope=context.scope,
+                        counterpart_world_character_id=counterpart_id,
+                        direction=GraphRecallDirection(str(parameters["direction"])),
+                        ranking=GraphRecallRanking(
+                            str(parameters.get("ranking", GraphRecallRanking.POSITIVE.value))
+                        ),
+                        max_hops=min(
+                            int(parameters.get("max_hops", context.max_hops)),
+                            context.max_hops,
+                        ),
+                        depth=int(parameters.get("depth", 1)),
+                        limit=min(
+                            int(parameters.get("limit", context.row_limit)),
+                            context.row_limit,
+                            GRAPH_RECALL_PRIMITIVE_REGISTRY[
+                                GraphRecallOperation(step.operation)
+                            ].max_results,
+                        ),
+                    )
+                    observe("graph_query", operation=query.operation.value, direction=query.direction.value, ranking=query.ranking.value, limit=query.limit, hops=query.max_hops, depth=query.depth, counterpart_filter=query.counterpart_world_character_id is not None)
+                    detail(counterpart=query.counterpart_world_character_id, subject=query.scope.subject_world_character_id, operation=query.operation.value)
+                    queries.append(query)
+                    results.append(
+                        self._recall.execute(
+                            query,
+                            graph_projection_enabled=context.graph_projection_enabled,
+                            now=now,
                         )
                     )
-                    continue
-                counterpart_ids = tuple(candidate_ids)
-            else:
-                counterpart_ref = parameters.get("counterpart_ref")
-                counterpart_ids = (
-                    None if counterpart_ref is None else bindings[str(counterpart_ref)],
-                )
-
-            queries: list[GraphRecallQuery] = []
-            results: list[GraphRecallResult] = []
-            for counterpart_id in counterpart_ids:
-                query = GraphRecallQuery(
-                    operation=GraphRecallOperation(step.operation),
-                    scope=context.scope,
-                    counterpart_world_character_id=counterpart_id,
-                    direction=GraphRecallDirection(str(parameters["direction"])),
-                    ranking=GraphRecallRanking(
-                        str(parameters.get("ranking", GraphRecallRanking.POSITIVE.value))
-                    ),
-                    max_hops=min(
-                        int(parameters.get("max_hops", context.max_hops)),
-                        context.max_hops,
-                    ),
-                    depth=int(parameters.get("depth", 1)),
-                    limit=min(
-                        int(parameters.get("limit", context.row_limit)),
-                        context.row_limit,
-                        GRAPH_RECALL_PRIMITIVE_REGISTRY[
-                            GraphRecallOperation(step.operation)
-                        ].max_results,
-                    ),
-                )
-                queries.append(query)
-                results.append(
-                    self._recall.execute(
-                        query,
-                        graph_projection_enabled=context.graph_projection_enabled,
-                        now=now,
+                for result in results:
+                    observe("validated_result", status=result.status.value, source=result.source.value, reason=result.reason_code, candidates=result.candidate_count, excluded=result.excluded_count, relationships=len(result.relationships), evidence=len(result.evidence), nodes=len(result.world_character_ids), paths=int(result.path is not None), limit_reached=result.truncated)
+                outputs[step.id] = tuple(results)
+                executions.append(
+                    GraphPlanStepExecution(
+                        step_id=step.id,
+                        queries=tuple(queries),
+                        results=tuple(results),
                     )
                 )
-            outputs[step.id] = tuple(results)
-            executions.append(
-                GraphPlanStepExecution(
-                    step_id=step.id,
-                    queries=tuple(queries),
-                    results=tuple(results),
-                )
-            )
 
         return GraphPlanExecutionResult(
             request_id=context.request_id,

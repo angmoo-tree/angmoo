@@ -97,6 +97,11 @@
       "module": "app.domains.worlds.router",
       "endpoint": "remove_world_banner"
     },
+    "DELETE /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/capture": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "clear"
+    },
     "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
@@ -431,6 +436,11 @@
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat",
       "endpoint": "get_world_thread"
+    },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "diagnostics"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
       "access": "owner-only",
@@ -966,6 +976,11 @@
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "update_settings"
+    },
+    "PUT /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/capture": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "configure"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin": {
       "access": "owner-only",

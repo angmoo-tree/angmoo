@@ -24,7 +24,7 @@
   "files": [
     {
       "path": ".github/workflows/windows-installer.yml",
-      "sha256": "6402262888055ce4b5b219a62e9df3a2bd877b112a62436ca4d6e001e602e8a8"
+      "sha256": "1f8025f5f256ca2aa1a65dfa63ba74f25b5fccb7e6de20c3348fc5145a600fcb"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -212,7 +212,7 @@
     },
     {
       "path": "backend/app/domains/memory/repository/recall.py",
-      "sha256": "7d7328a9cb9a76d6fee3de5bbec33f956ccfc46a0f94802d1c9348c6e87a6872"
+      "sha256": "3d62c89a7324795433ca87f87e5269947c6a2774057e392174dc5f438aea01fa"
     },
     {
       "path": "backend/app/domains/memory/repository/recall_records.py",
@@ -284,7 +284,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/recall.py",
-      "sha256": "5d0a16f36bc160d301f08359c5b3df198e1087eb2b147af8eda06b3b17321cb5"
+      "sha256": "31764fcf024bfe6007613af71aa21f1044117acac94c793fd1e1832260e08717"
     },
     {
       "path": "backend/app/domains/memory/service/reconciliation.py",
@@ -292,7 +292,7 @@
     },
     {
       "path": "backend/app/domains/memory/service/retrieval_plan.py",
-      "sha256": "7864c2e2d2843d12b0d4138c8bcf2b3b5eb74330f1cee39c7fe02e32d8852764"
+      "sha256": "e46453330e6f996f9510b4d5c129d337de368e528797390c63debc44ca4fff43"
     },
     {
       "path": "backend/app/domains/memory/service/scope.py",
@@ -384,7 +384,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
-      "sha256": "86f0b12a1a9fbcb3c5f33983158e3bae55a71ce76a3c625c124bbfa6b1727aac"
+      "sha256": "1787539d45da3f04a6d25d289116607eaa137383ec3a8228299687083a92588d"
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
@@ -420,7 +420,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "sha256": "de8a900926ccebb5d64e64239aa93c0340f880ee21dba2073248a498d91ae652"
+      "sha256": "3a53bf114fdad332140fa63c3a15c964b3e231fcecda6b4d9129001797126f52"
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
@@ -432,7 +432,7 @@
     },
     {
       "path": "backend/tests/memory/test_generation_profiles_batch32.py",
-      "sha256": "9f1d1232c6941e34c514393f6af9940182f00161cdd9abfd3761374f9e09802e"
+      "sha256": "310720ab04c32c533b0bd006ff13e7de2a974516b70ffd1ad4bb376b25f0bb4e"
     },
     {
       "path": "backend/tests/memory/test_p8_l_r_memory_batch_api.py",
@@ -536,7 +536,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "ba2d8fb53d4591d6f3fe78024fe3f6d50a59fab866c4c1d9a11fb48a6f90703d"
+      "sha256": "a718201e6afc4bba18de4fa098544f7bacb5c06091c55560bfe9beb9f1fc27e6"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",
@@ -548,7 +548,7 @@
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",
-      "sha256": "693e877edb8a3a6d4a2385e1e902edd55d978432f889ca73aa3de0e4d6c506d6"
+      "sha256": "59e3edfbf8c5ee2969440b058bbfc9644595bc85662e3872628a9f4fb21f5bec"
     },
     {
       "path": "scripts/ci/verify_windows_installer_supported_upgrade_fixture.py",

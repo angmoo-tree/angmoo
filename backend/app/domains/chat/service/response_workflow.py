@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import Observation, current, observe
+from app.domains.chat.service.diagnostic_capture import capture
+
 import asyncio
 from collections.abc import AsyncIterator, Mapping
 from dataclasses import dataclass
@@ -139,6 +142,10 @@ class ResponseGenerationWorkflowService:
         if record.state is not ResponseRequestState.ACCEPTED:
             raise GenerationContractError("response_workflow_not_replayable")
 
+        diagnostic_scope = (command.preflight.owner_id, command.preflight.world_id, record.thread_id)
+        observation = Observation(request_id=record.request_id, detailed=capture.active(diagnostic_scope, record.request_id))
+        observation_token = current.set(observation)
+        observe("request", model=record.selected_model, thinking_level=record.selected_thinking_level)
         lease_token = f"lease-{uuid4().hex}"
         try:
             if command.today_sns_snapshot is not None and self._today_snapshot_validator is None:
@@ -186,6 +193,7 @@ class ResponseGenerationWorkflowService:
             )
 
             route = routing.intent.route
+            observe("router", route=route.value, repair_used=routing.metrics.repair_used, first_pass_valid=routing.metrics.first_pass_valid)
             workflow_recipe = None
             if route is RetrievalRoute.CURRENT_CONTEXT:
                 record = self._transition(
@@ -367,6 +375,9 @@ class ResponseGenerationWorkflowService:
                     f"{candidate.display_name} (@{candidate.handle})"
                     for candidate in routing.clarification.candidates
                 )
+            observe("crg_input", items=len(bundle.items), route=bundle.route.value)
+            for kind in {item.kind for item in bundle.items}:
+                observe("evidence_kind", source=kind.value, items=sum(item.kind is kind for item in bundle.items))
             response = await self._character_response.generate(
                 CharacterResponseGeneratorRequest(
                     user_message=command.preflight.user_message,
@@ -389,6 +400,7 @@ class ResponseGenerationWorkflowService:
                 now=datetime.now(UTC),
                 deadline_at=record.deadline_at,
             )
+            observe("crg_completed", status="completed", input_tokens=response.prompt_token_count, output_tokens=response.output_token_count, thought_tokens=response.thought_token_count, elapsed_ms=response.latency_ms)
             record = self._transition(
                 record,
                 ResponseRequestState.RESPONSE_STREAMING,
@@ -475,8 +487,16 @@ class ResponseGenerationWorkflowService:
             raise
         except Exception as exc:
             self._unit_of_work.rollback()
+            observe("workflow_failed", status="failed")
             async for event in self._fail(record, exc):
                 yield event
+        finally:
+            try:
+                capture.store(diagnostic_scope, record.request_id, observation.details)
+            except Exception:
+                pass  # Diagnostics cannot change a committed response.
+            finally:
+                current.reset(observation_token)
 
     def _propose_memory_after_commit(
         self,
@@ -545,8 +565,11 @@ class ResponseGenerationWorkflowService:
         if record.state in TERMINAL_STATES:
             return
         failure_class, retryable, reason = _classify_failure(exc)
+        observe("workflow_failed", status="failed", reason=failure_class)
         failure_diagnostic = _provider_failure_diagnostic(exc)
         router_diagnostic = _router_failure_diagnostic(exc)
+        if router_diagnostic is not None:
+            observe("router_validation", status="rejected", reason=router_diagnostic.router_validation_code, repair_used=router_diagnostic.repair_used)
         if failure_diagnostic is not None:
             failure_diagnostic["failure_class"] = failure_class
             failure_diagnostic["retryable"] = retryable

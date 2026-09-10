@@ -79,7 +79,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
     "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"
@@ -617,10 +617,12 @@ def _seed_supported_predecessor(
                 )
                 from app.models import Base
 
+                Base.metadata.tables["chat_retrieval_diagnostics"].drop(sql_connection, checkfirst=True)
                 from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
-                for table, columns in ADDED_COLUMNS.items():
-                    for column in columns:
-                        sql_connection.exec_driver_sql(f'ALTER TABLE "{table}" DROP COLUMN "{column}"')
+                if source_version <= 9:
+                    for table, columns in ADDED_COLUMNS.items():
+                        for column in columns:
+                            sql_connection.exec_driver_sql(f'ALTER TABLE "{table}" DROP COLUMN "{column}"')
                 if source_version <= 8:
                     for name in reversed(MEMORY_BATCH_TABLES):
                         Base.metadata.tables[name].drop(sql_connection, checkfirst=True)

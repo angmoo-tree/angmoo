@@ -11801,6 +11801,292 @@
       "test_suppressions": {
         "tests/memory/test_selection_request_recovery.py": {}
       }
+    },
+    {
+      "commit": "30270d661d2839eb9b4306ab49e095f2dbc5a8a6",
+      "feature_id": "AR-CHAT-DIAGNOSTICS",
+      "reason": "Issue 322 / Draft PR 323: exact first-introduction Git objects and collected diagnostic/upgrade regression nodes; no source copies or replacement baseline.",
+      "tracked_files": {
+        "backend/alembic/versions/20260910_0091_chat_retrieval_diagnostics.py": "ffe9ebe6f707f3696f7330cf7f08e32bd3d6a6ad",
+        "backend/app/contracts/retrieval_observation.py": "e77720eb655e55cbf7074a0ad72ee9dd5a0e0791",
+        "backend/app/domains/chat/repository/retrieval_diagnostics.py": "3b78595a401efd90a62befb95bffac3576a10900",
+        "backend/app/domains/chat/router/retrieval_diagnostics.py": "f487d5919c8bdb9ef40f708653009c6a3f5f0198",
+        "backend/app/domains/chat/service/diagnostic_capture.py": "b20f5c26824358de2a52f2a1501757619e836e5c",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v11.json": "cc6e014222749a1e975cd003e8c13fee32fa2167",
+        "backend/app/runtime/migrations/sqlite_versions/v10_to_v11_chat_diagnostics.py": "e7407e6d19695e20741a7b83b66004047ab6ef73",
+        "backend/tests/chat/test_retrieval_diagnostics.py": "3561f7218859b32b1367020b2e3b90b4ef7ff7ba",
+        "docs/operations/chat-retrieval-diagnostics.md": "ca728c3a8b98df84caeb12616119fcad944436b7",
+        "frontend/src/features/chat/components/retrieval-diagnostics.module.css": "7cdd91fb5310655a668afea4099d1f6b557b3cb8",
+        "frontend/src/features/chat/components/retrieval-diagnostics.tsx": "ad20cdbbf671ddf9d9aaa0e4c8dca7797b0e9164",
+        "frontend/src/features/chat/types/retrieval-diagnostics.ts": "93b0a763a68b4b2999ac06436ac0857cfa41cbd0",
+        "scripts/diagnostics/read_chat_retrieval_diagnostics.py": "fba3e0f01068ef91488e405e913dc7ad9f816dc9"
+      },
+      "test_nodes": [
+        "tests/chat/test_retrieval_diagnostics.py::test_basic_is_bounded_and_final_evidence_survives_overflow",
+        "tests/chat/test_retrieval_diagnostics.py::test_capture_requires_admission_and_is_scoped_bounded_and_ephemeral",
+        "tests/chat/test_retrieval_diagnostics.py::test_collector_and_existing_checkpoint_cost_100_samples",
+        "tests/chat/test_retrieval_diagnostics.py::test_diagnostic_http_auth_scope_origin_and_opt_in",
+        "tests/chat/test_retrieval_diagnostics.py::test_diagnostic_savepoint_failure_does_not_fail_chat",
+        "tests/chat/test_retrieval_diagnostics.py::test_quota_retains_at_most_1000_and_keeps_canonical_requests",
+        "tests/chat/test_retrieval_diagnostics.py::test_real_checkpoint_saves_diagnostics_without_stream_changes[BOTH]",
+        "tests/chat/test_retrieval_diagnostics.py::test_real_checkpoint_saves_diagnostics_without_stream_changes[CANONICAL]",
+        "tests/chat/test_retrieval_diagnostics.py::test_real_checkpoint_saves_diagnostics_without_stream_changes[CLARIFICATION]",
+        "tests/chat/test_retrieval_diagnostics.py::test_real_checkpoint_saves_diagnostics_without_stream_changes[CURRENT_CONTEXT]",
+        "tests/chat/test_retrieval_diagnostics.py::test_real_checkpoint_saves_diagnostics_without_stream_changes[GRAPH]",
+        "tests/chat/test_retrieval_diagnostics.py::test_retention_and_expiry_do_not_change_request",
+        "tests/chat/test_retrieval_diagnostics.py::test_v10_to_v11_adds_only_empty_diagnostics_table"
+      ],
+      "test_assertions": {
+        "tests/chat/test_retrieval_diagnostics.py": {
+          "test_basic_is_bounded_and_final_evidence_survives_overflow": [
+            "assert len(serialized.encode()) <= 16384",
+            "assert 'PRIVATE' not in serialized",
+            "assert not observation.details",
+            "assert payload['omitted_events'] > 0",
+            "assert payload['events'][-1] == {'event': 'crg_input', 'items': 2}"
+          ],
+          "test_capture_requires_admission_and_is_scoped_bounded_and_ephemeral": [
+            "assert not capture.active(scope, 'old')",
+            "assert capture.active(scope, '9')",
+            "assert not capture.active(scope, '10')",
+            "assert capture.read(other, '9') is None",
+            "assert capture.read(scope, '9')",
+            "assert DiagnosticCapture().read(scope, '9') is None",
+            "assert capture.read(scope, '9') is None",
+            "assert not capture.active(scope, '9')",
+            "assert not capture.active(scope, 'expired')"
+          ],
+          "test_real_checkpoint_saves_diagnostics_without_stream_changes": [
+            "assert events[-1].event_type.value == 'completed'",
+            "assert len(generator.requests) == 1",
+            "assert result['status'] == 'available'",
+            "assert 'router' in names and 'crg_input' in names and ('crg_completed' in names)",
+            "assert '오늘은' not in json.dumps(result, ensure_ascii=False)",
+            "assert all(('diagnostic' not in json.dumps(event.payload) for event in events))",
+            "assert current.get() is None"
+          ],
+          "test_diagnostic_savepoint_failure_does_not_fail_chat": [
+            "assert events[-1].event_type.value == 'completed'",
+            "assert response_session.is_active"
+          ],
+          "test_retention_and_expiry_do_not_change_request": [
+            "assert repository.read(response_session, record.request_id)['status'] == 'expired'",
+            "assert repository.read(response_session, 'unknown')['status'] == 'not_recorded'"
+          ],
+          "test_quota_retains_at_most_1000_and_keeps_canonical_requests": [
+            "assert response_session.scalar(select(func.count()).select_from(ChatRetrievalDiagnostic)) == 1000",
+            "assert response_session.scalar(select(func.count()).select_from(ChatResponseRequest)) == 1002"
+          ],
+          "test_v10_to_v11_adds_only_empty_diagnostics_table": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(10).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(11).schema_digest"
+          ],
+          "test_diagnostic_http_auth_scope_origin_and_opt_in": [
+            "assert result.status_code == 200",
+            "assert result.headers['cache-control'] == 'no-store'",
+            "assert result.json()['status'] == 'not_recorded'",
+            "assert result.json()['capture']['enabled'] is False",
+            "assert client.put(url + '/capture', json={'enabled': True}, headers={'Origin': 'https://evil.example'}).status_code == 403",
+            "assert result.status_code == 200 and result.json()['remaining'] == 10",
+            "assert client.put(url + '/capture', json={'enabled': 'true'}, headers=FRONTEND_HEADERS).status_code == 422",
+            "assert client.get(url).status_code == 403",
+            "assert client.get(url.replace('world-a', 'world-b')).status_code == 404",
+            "assert client.get(url + '?request_id=other-request').status_code == 404",
+            "assert client.delete(url + '/capture', headers=FRONTEND_HEADERS).json()['enabled'] is False",
+            "assert client.get(url).status_code == 401"
+          ],
+          "test_collector_and_existing_checkpoint_cost_100_samples": [
+            "assert len(list(response_session.scalars(select(ChatRetrievalDiagnostic)))) == 1",
+            "assert p95 < 100"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_retrieval_diagnostics.py": {}
+      }
+    },
+    {
+      "commit": "f9825c02b93d48bc2b65ffca109fd060729011d6",
+      "feature_id": "AR-CHAT-DIAGNOSTICS",
+      "reason": "Issue 322 / Draft PR 323: exact first-introduction Git objects and collected diagnostic/upgrade regression nodes; no source copies or replacement baseline.",
+      "tracked_files": {
+        "backend/tests/chat/test_retrieval_diagnostics_performance.py": "8c1774b223c67e02c6460d75495f3e6565c22299"
+      },
+      "test_nodes": [
+        "tests/chat/test_retrieval_diagnostics_performance.py::test_fake_route_on_off_100_requests[BOTH]",
+        "tests/chat/test_retrieval_diagnostics_performance.py::test_fake_route_on_off_100_requests[CANONICAL]",
+        "tests/chat/test_retrieval_diagnostics_performance.py::test_fake_route_on_off_100_requests[CLARIFICATION]",
+        "tests/chat/test_retrieval_diagnostics_performance.py::test_fake_route_on_off_100_requests[CURRENT_CONTEXT]",
+        "tests/chat/test_retrieval_diagnostics_performance.py::test_fake_route_on_off_100_requests[GRAPH]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_retrieval_diagnostics_performance.py": {
+          "DisabledContext::set": [],
+          "DisabledContext::reset": [],
+          "test_fake_route_on_off_100_requests": [
+            "assert events[-1].event_type.value == 'completed'",
+            "assert len(generator.requests) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_retrieval_diagnostics_performance.py": {
+          "test_fake_route_on_off_100_requests": [
+            "pytest.mark.skipif(os.environ.get('ANGMOO_DIAGNOSTIC_BENCHMARK') != '1', reason='explicit performance run')"
+          ]
+        }
+      }
+    },
+    {
+      "commit": "48d2cdbda25e98c835a8511111d97af17ea292bb",
+      "feature_id": "AR-CHAT-DIAGNOSTICS",
+      "reason": "Issue 322 / Draft PR 323: exact first-introduction Git objects and collected diagnostic/upgrade regression nodes; no source copies or replacement baseline.",
+      "tracked_files": {
+        "backend/tests/chat/test_retrieval_diagnostics_limits.py": "076b330f49f0e0f96fa7ce896fc65c89689b596d"
+      },
+      "test_nodes": [
+        "tests/chat/test_retrieval_diagnostics_limits.py::test_byte_limit_preserves_final_evidence_summary",
+        "tests/chat/test_retrieval_diagnostics_limits.py::test_maximum_detail_collection_two_concurrent_requests_100_samples",
+        "tests/chat/test_retrieval_diagnostics_limits.py::test_two_interleaved_detailed_requests_do_not_mix"
+      ],
+      "test_assertions": {
+        "tests/chat/test_retrieval_diagnostics_limits.py": {
+          "test_byte_limit_preserves_final_evidence_summary": [
+            "assert len(json.dumps(payload, ensure_ascii=True).encode()) <= 16384",
+            "assert payload['omitted_events'] > 1",
+            "assert payload['events'][-2:] == [{'event': 'crg_input', 'items': 3}, {'event': 'crg_completed', 'output_tokens': 120}]"
+          ],
+          "detailed_request": [
+            "assert marker not in json.dumps(payload)",
+            "assert len(json.dumps(observation.details, ensure_ascii=True).encode()) <= 65536",
+            "assert all((row['search_text'].startswith(marker) for row in observation.details))",
+            "assert 0 < len(observation.details) <= 24"
+          ],
+          "interleaved_pair": [
+            "assert current.get() is None"
+          ],
+          "test_two_interleaved_detailed_requests_do_not_mix": [
+            "assert first[1] != second[1]",
+            "assert current.get() is None"
+          ],
+          "test_maximum_detail_collection_two_concurrent_requests_100_samples": []
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_retrieval_diagnostics_limits.py": {
+          "test_maximum_detail_collection_two_concurrent_requests_100_samples": [
+            "pytest.mark.skipif(os.environ.get('ANGMOO_DIAGNOSTIC_BENCHMARK') != '1', reason='explicit performance run')"
+          ]
+        }
+      }
+    },
+    {
+      "commit": "0898217f022dc330b9a71f7864ecc758cbf4db22",
+      "feature_id": "AR-CHAT-DIAGNOSTICS",
+      "reason": "Issue 322 / Draft PR 323: exact first-introduction Git objects and collected diagnostic/upgrade regression nodes; no source copies or replacement baseline.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[10]"
+      ],
+      "test_assertions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 11",
+            "assert fixture['target_table_count'] == 103",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
+    },
+    {
+      "commit": "8c3862afd559a4a48b27b7c45bef17f5b4c00578",
+      "feature_id": "AR-CHAT-DIAGNOSTICS",
+      "reason": "Issue 322 / PR 323: verify continuous assertion transitions and reject intermediate tampering or final safety assertion removal.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_post_refactor_contract_changes.py::test_assertion_chain_checks_every_transition_and_exact_final_state"
+      ],
+      "test_assertions": {
+        "tests/test_post_refactor_contract_changes.py": {
+          "test_only_named_contract_changes_apply_and_original_snapshot_is_immutable": [
+            "assert original['full']['schemas']['Persona'] == 'old'",
+            "assert expected['full']['schemas'] == {'Persona': 'new', 'Other': 'untouched'}",
+            "assert drifted != expected",
+            "pytest.raises(ValueError, match='preimage')"
+          ],
+          "test_named_definition_delta_cannot_approve_a_different_owner_or_body": [
+            "assert changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, drift, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/other.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'other', old, new, records=records)"
+          ],
+          "test_ast_evidence_normalizes_empty_fields_but_never_executes_calls": [
+            "assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)",
+            "pytest.raises(ValueError, match='constructor')"
+          ],
+          "test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage": [
+            "assert changes.contracts(original, [record]) == {'orm_tables': {'profiles': 'new', 'secrets': 'untouched'}}",
+            "assert original['orm_tables']['profiles'] == 'old'",
+            "pytest.raises(ValueError, match='ORM preimage')"
+          ],
+          "test_orm_and_duplicate_changes_cannot_be_excused": [
+            "pytest.raises(ValueError, match='ORM')",
+            "pytest.raises(ValueError, match='duplicate')"
+          ],
+          "test_assertion_change_requires_exact_before_after_and_keeps_other_nodes": [
+            "assert changes.assertions('test.py::test_change', before, after, [record]) == after",
+            "assert changes.assertions('test.py::test_other', before, after, [record]) == before",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_assertion_chain_checks_every_transition_and_exact_final_state": [
+            "assert changes.assertions('test.py::test_change', Counter(['v9', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v10', 'safety']), final, records) == final",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_manifest_requires_committed_provenance_and_append_only_history": [
+            "assert changes.load(tmp_path) == [record]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(ValueError, match='provenance')",
+            "assert args[1] == 'rev-parse'"
+          ],
+          "test_removed_binding_requires_exact_parent_and_committed_and_current_absence": [
+            "assert args[1] == 'show'",
+            "pytest.raises(ValueError, match='removed binding')",
+            "assert changes.removed_bindings(changes.load(tmp_path)) == {(source, 'LIMIT')}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_post_refactor_contract_changes.py": {}
+      }
     }
   ]
 }

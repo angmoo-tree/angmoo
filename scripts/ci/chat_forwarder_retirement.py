@@ -229,7 +229,7 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
         def owned(source):
             return [n for n in ast.parse(source).body if (isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.name == name) or (isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in n.targets))]
         original, actual = owned(before(path)), owned((root / path).read_text(encoding="utf-8-sig"))
-        if len(original) != 1 or len(actual) != 1 or not matches(TARGETS["backend/app/runtime/chat/world_generation.py"], name, original[0], actual[0]):
+        if len(original) != 1 or len(actual) != 1 or not matches(path, name, original[0], actual[0]):
             raise ValueError("World generation advertised owner changed: " + name)
     # Existing owner bodies must still execute their original logic. Import-only
     # edits are permitted; stubs or copies of the retired forwarding class are not.

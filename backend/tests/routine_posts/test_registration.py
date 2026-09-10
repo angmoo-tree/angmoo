@@ -18,7 +18,7 @@ assert database._default_engine is None
 from app.runtime.routine_posts import sqlalchemy_runtime
 from sqlalchemy.orm import configure_mappers
 configure_mappers()
-assert len(Base.metadata.tables) == len(Base.registry.mappers) == 102
+assert len(Base.metadata.tables) == len(Base.registry.mappers) == 103
 assert all(mapper.class_.metadata is Base.metadata for mapper in Base.registry.mappers)
 assert database._default_engine is None
 assert database._default_session_factory is None

@@ -1,5 +1,8 @@
 """Canonical Memory SQL hydration and revalidation against current source rows."""
 from __future__ import annotations
+
+from collections import Counter
+from app.contracts.retrieval_observation import observe
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Any
@@ -238,10 +241,12 @@ class SqlAlchemyCanonicalRecallRepository:
             if setting is None or not setting.enabled:
                 return ()
             reader = self._source_reader_factory(session)
+            excluded = Counter()
             records: list[CanonicalRecallRecord] = []
             seen: set[str] = set()
             for candidate in candidates:
                 if candidate.document_id in seen:
+                    excluded["duplicate"] += 1
                     continue
                 item = session.get(MemoryItem, candidate.memory_item_id)
                 if (
@@ -249,6 +254,7 @@ class SqlAlchemyCanonicalRecallRepository:
                     or _item_scope(item) != scope
                     or not _item_retrievable(item, _as_utc(now))
                 ):
+                    excluded["item_missing_scope_or_lifecycle"] += 1
                     continue
                 evidences = list(
                     session.scalars(
@@ -266,12 +272,16 @@ class SqlAlchemyCanonicalRecallRepository:
                     is not None
                 ]
                 if not current:
+                    excluded["canonical_evidence_invalid"] += 1
                     continue
                 record = _candidate_record(candidate, item, current)
                 if record is None:
+                    excluded["candidate_document_mismatch"] += 1
                     continue
                 seen.add(candidate.document_id)
                 records.append(record)
+            for reason, count in sorted(excluded.items()):
+                observe("revalidation", reason=reason, excluded=count)
             return tuple(records)
 
     def execute_direct(

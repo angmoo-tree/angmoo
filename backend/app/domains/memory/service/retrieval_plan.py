@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe, detail, observing_step
+
 from dataclasses import dataclass, replace
 from datetime import datetime
 
@@ -199,70 +201,75 @@ class CanonicalRetrievalPlanExecutor:
         executions: list[CanonicalPlanStepExecution] = []
         entity_bindings = dict(context.entity_bindings)
 
-        for step in validated.plan.steps:
-            parameters = dict(step.parameters)
-            source_references: tuple[str, ...] = ()
-            if step.input_ref is not None:
-                source_step = step.input_ref.split(".", 1)[0]
-                source_references = tuple(
-                    dict.fromkeys(record.reference for record in outputs[source_step].records)
-                )
-                if not source_references:
-                    result = CanonicalRecallResult(
-                        operation=CanonicalRecallOperation(step.operation),
-                        status=CanonicalRecallStatus.READY,
-                        records=(),
-                        reason_code="canonical_dependency_empty",
+        for ordinal, step in enumerate(validated.plan.steps, 1):
+            with observing_step("canonical", ordinal):
+                parameters = dict(step.parameters)
+                source_references: tuple[str, ...] = ()
+                if step.input_ref is not None:
+                    source_step = step.input_ref.split(".", 1)[0]
+                    source_references = tuple(
+                        dict.fromkeys(record.reference for record in outputs[source_step].records)
                     )
-                    outputs[step.id] = result
-                    executions.append(
-                        CanonicalPlanStepExecution(
-                            step_id=step.id,
-                            query=None,
-                            result=result,
-                            dependency_short_circuited=True,
+                    if not source_references:
+                        result = CanonicalRecallResult(
+                            operation=CanonicalRecallOperation(step.operation),
+                            status=CanonicalRecallStatus.READY,
+                            records=(),
+                            reason_code="canonical_dependency_empty",
                         )
-                    )
-                    continue
+                        outputs[step.id] = result
+                        executions.append(
+                            CanonicalPlanStepExecution(
+                                step_id=step.id,
+                                query=None,
+                                result=result,
+                                dependency_short_circuited=True,
+                            )
+                        )
+                        observe("step", operation=step.operation, skipped=True, executed=False, reason="canonical_dependency_empty", queries=0)
+                        continue
 
-            counterpart_ref = parameters.get("counterpart_ref")
-            entity_ref = parameters.get("entity_ref")
-            limit_value = parameters.get("limit", context.row_limit)
-            if isinstance(limit_value, bool) or not isinstance(limit_value, int):
-                raise CanonicalPlanContractError("canonical_plan_limit_invalid")
-            query = CanonicalRecallQuery(
-                operation=CanonicalRecallOperation(step.operation),
-                scope=context.scope,
-                text=_optional_parameter(parameters, "search_text", str),
-                counterpart_world_character_id=(
-                    None
-                    if counterpart_ref is None
-                    else entity_bindings[str(counterpart_ref)]
-                ),
-                thread_id=(
-                    context.thread_id
-                    if parameters.get("current_thread") is True
-                    else None
-                ),
-                source_references=source_references,
-                world_character_references=(
-                    ()
-                    if entity_ref is None
-                    else (entity_bindings[str(entity_ref)],)
-                ),
-                occurred_from=context.occurred_from,
-                occurred_to=context.occurred_to,
-                limit=min(limit_value, context.row_limit),
-            )
-            result = self._recall.execute(query, now=now)
-            outputs[step.id] = result
-            executions.append(
-                CanonicalPlanStepExecution(
-                    step_id=step.id,
-                    query=query,
-                    result=result,
+                counterpart_ref = parameters.get("counterpart_ref")
+                entity_ref = parameters.get("entity_ref")
+                limit_value = parameters.get("limit", context.row_limit)
+                if isinstance(limit_value, bool) or not isinstance(limit_value, int):
+                    raise CanonicalPlanContractError("canonical_plan_limit_invalid")
+                query = CanonicalRecallQuery(
+                    operation=CanonicalRecallOperation(step.operation),
+                    scope=context.scope,
+                    text=_optional_parameter(parameters, "search_text", str),
+                    counterpart_world_character_id=(
+                        None
+                        if counterpart_ref is None
+                        else entity_bindings[str(counterpart_ref)]
+                    ),
+                    thread_id=(
+                        context.thread_id
+                        if parameters.get("current_thread") is True
+                        else None
+                    ),
+                    source_references=source_references,
+                    world_character_references=(
+                        ()
+                        if entity_ref is None
+                        else (entity_bindings[str(entity_ref)],)
+                    ),
+                    occurred_from=context.occurred_from,
+                    occurred_to=context.occurred_to,
+                    limit=min(limit_value, context.row_limit),
                 )
-            )
+                observe("step", operation=step.operation, executed=True, skipped=False, queries=1, limit=query.limit, counterpart_filter=query.counterpart_world_character_id is not None, thread_filter=query.thread_id is not None, time_filter=query.occurred_from is not None or query.occurred_to is not None, search_text_present=bool(query.text))
+                detail(search_text=query.text, counterpart=query.counterpart_world_character_id, occurred_from=None if query.occurred_from is None else query.occurred_from.isoformat(), occurred_to=None if query.occurred_to is None else query.occurred_to.isoformat(), operation=step.operation)
+                result = self._recall.execute(query, now=now)
+                observe("validated_result", status=result.status.value, reason=result.reason_code, candidates=result.candidate_count, accepted=len(result.records), excluded=result.excluded_count, limit_reached=result.truncated)
+                outputs[step.id] = result
+                executions.append(
+                    CanonicalPlanStepExecution(
+                        step_id=step.id,
+                        query=query,
+                        result=result,
+                    )
+                )
 
         return CanonicalPlanExecutionResult(
             request_id=context.request_id,

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import current
+from app.domains.chat.repository import retrieval_diagnostics
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -48,11 +50,23 @@ from app.runtime.graph_projection.relationship_graph_read import (
 class SqlAlchemyResponseWorkflowUnitOfWork:
     def __init__(self, session: Session) -> None:
         self._session = session
+        self._diagnostic_snapshot = None
 
     def checkpoint(self) -> None:
+        observation = current.get()
+        snapshot = None if observation is None else observation.payload()
+        if observation is not None and snapshot != self._diagnostic_snapshot:
+            try:
+                with self._session.begin_nested():
+                    retrieval_diagnostics.save(self._session, observation)
+                self._diagnostic_snapshot = snapshot
+            except Exception:
+                # SAVEPOINT rolled back. Do not log exception/query parameters.
+                pass
         self._session.commit()
 
     def rollback(self) -> None:
+        self._diagnostic_snapshot = None
         self._session.rollback()
 
 

@@ -7,6 +7,8 @@ and every hit must be revalidated before it can become Character evidence.
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe, detail
+
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -246,13 +248,17 @@ class SqliteMemoryRecallIndex:
             raise ValueError("Memory recall limit must be between 1 and 50")
         normalized = normalize_search_text(query.text, max_chars=1_000)
         if not normalized or not query.kinds:
+            observe("search", method="fts5", executed=False, reason="empty_search_text", returned=0)
             return ()
         terms = _lexical_terms(normalized, query_mode=True)
         if not terms:
+            observe("search", method="fts5", executed=False, reason="empty_search_terms", returned=0)
             return ()
         filters, parameters = _scope_filters(query)
         match_query = " AND ".join(_quote_fts_term(term) for term in terms)
+        detail(search_text=query.text, normalized_query=match_query)
         candidate_limit = min(200, max(query.limit, query.limit * 4))
+        fts_error = False
         sql = f"""
             SELECT d.*, bm25(memory_recall_fts) AS rank
             FROM memory_recall_fts
@@ -272,6 +278,8 @@ class SqliteMemoryRecallIndex:
                     ).fetchall()
                 except sqlite3.OperationalError:
                     rows = []
+                    fts_error = True
+                observe("search", method="fts5", executed=True, returned=len(rows), reason="fts_execution_error" if fts_error else "completed", limit=candidate_limit)
                 if not rows:
                     rows = self._fallback_rows(
                         connection,
@@ -280,6 +288,7 @@ class SqliteMemoryRecallIndex:
                         terms=terms,
                         limit=candidate_limit,
                     )
+                    observe("search", method="normalized_substring_fallback", executed=True, returned=len(rows), reason="fts_execution_error" if fts_error else "fts_empty", limit=candidate_limit)
         except sqlite3.DatabaseError as exc:
             raise MemoryRecallIndexError("Memory recall query failed") from exc
         return tuple(_row_to_candidate(row) for row in rows)

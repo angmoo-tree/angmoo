@@ -45,6 +45,12 @@ def test_named_definition_delta_cannot_approve_a_different_owner_or_body(tmp_pat
 def test_ast_evidence_normalizes_empty_fields_but_never_executes_calls():
     node = ast.parse("def choose():\n    return 'high'\n").body[0]
     assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)
+    for fragment in ("assert version == 11", "pytest.raises(ValueError, match='scope')"):
+        assert changes.normalize_ast_dump(fragment) == ast.dump(ast.parse(fragment))
+    before = Counter([ast.dump(ast.parse("assert version == 10"))])
+    after = Counter([ast.dump(ast.parse("assert version == 11"))])
+    record = {"assertions": [{"node": "test.py::test_version", "before": ["assert version == 10"], "after": ["assert version == 11"]}]}
+    assert changes.assertions("test.py::test_version", before, after, [record]) == after
     with pytest.raises(ValueError, match="constructor"):
         changes.normalize_ast_dump("Module(body=[__import__('os').getcwd()])")
 
@@ -77,6 +83,23 @@ def test_assertion_change_requires_exact_before_after_and_keeps_other_nodes():
         changes.assertions("test.py::test_change", before, Counter(["new"]), [record])
     with pytest.raises(ValueError, match="before/after"):
         changes.assertions("test.py::test_change", Counter(["changed-old"]), after, [record])
+
+
+def test_assertion_chain_checks_every_transition_and_exact_final_state():
+    records = [
+        {"assertions": [{"node": "test.py::test_change", "before": ["v9", "safety"], "after": ["v10", "safety"]}]},
+        {"assertions": [{"node": "test.py::test_change", "before": ["v10", "safety"], "after": ["v11", "safety"]}]},
+    ]
+    final = Counter(["v11", "safety"])
+    assert changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, records) == final
+    assert changes.assertions("test.py::test_change", Counter(["v10", "safety"]), final, records) == final
+    assert changes.assertions("test.py::test_change", final, final, records) == final
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "safety"]), Counter(["v11"]), records)
+    broken = deepcopy(records)
+    broken[1]["assertions"][0]["before"] = ["unreviewed", "safety"]
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, broken)
 
 
 def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path, monkeypatch):

@@ -147,3 +147,107 @@ test("continuity: approved activity remains visible during optional generation a
   await expect.poll(() => transportRequests.length).toBe(2);
   expect(transportRequests[1].idempotency_key).toBe(transportRequests[0].idempotency_key);
 });
+
+
+test("retrieval diagnostics: bounded basic view and opt-in details on narrow screen", async ({ page }) => {
+  const world = uiDWorld();
+  await installBackendFixture(page, { worldReads: { [world.world_id]: world } });
+  const worldId = world.world_id, threadId = "diagnostic-thread";
+  const worldThread = {
+    id: threadId,
+    world_id: worldId,
+    requester: {
+      world_character_id: "wc-p8-l-d-owner",
+      character_id: "character-p8-l-d-owner",
+      display_name: "사용자 앵무",
+      handle: "owner_bird",
+      avatar_url: null,
+      banner_url: null,
+      role_key: "student",
+      control_mode: "owner_controlled",
+      profile_capability: "available",
+    },
+    responding: {
+      world_character_id: "wc-p8-l-d-friend",
+      character_id: "character-p8-l-d-friend",
+      display_name: "친구 앵무",
+      handle: "friend_bird",
+      avatar_url: null,
+      banner_url: null,
+      role_key: "mentor",
+      control_mode: "autonomous",
+      profile_capability: "available",
+    },
+    selected_model: "gemini-3.1-flash-lite",
+    selected_thinking_level: "high",
+    default_thinking_level: "high",
+    default_model: "gemini-3.1-flash-lite",
+    model_binding_mode: "default",
+    last_message_at: "2026-09-01T03:04:00Z",
+    created_at: "2026-09-01T03:00:00Z",
+    latest_message: {
+      id: 2,
+      thread_id: threadId,
+      role: "assistant",
+      content: "World 경계를 기억하고 있어요.",
+      model: "gemini-2.5-flash-lite",
+      status: "ok",
+      error_code: null,
+      created_at: "2026-09-01T03:04:00Z",
+    },
+    messages: [
+      {
+        id: 1,
+        thread_id: threadId,
+        role: "user",
+        content: "여기는 어느 World야?",
+        model: "gemini-2.5-flash-lite",
+        status: "ok",
+        error_code: null,
+        created_at: "2026-09-01T03:03:00Z",
+      },
+      {
+        id: 2,
+        thread_id: threadId,
+        role: "assistant",
+        content: "World 경계를 기억하고 있어요.",
+        model: "gemini-2.5-flash-lite",
+        status: "ok",
+        error_code: null,
+        created_at: "2026-09-01T03:04:00Z",
+      },
+    ],
+    evidence_summaries: [],
+  };
+
+  let enabled = false;
+  await page.route("**/api/backend/**", async route => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/diagnostics/capture")) {
+      enabled = route.request().postDataJSON().enabled;
+      return json(route, { enabled, remaining: enabled ? 10 : 0, expires_at: null });
+    }
+    if (url.pathname.endsWith("/diagnostics")) return json(route, {
+      world_id: worldId, thread_id: threadId, request_id: "fixture-request", request_state: "committed",
+      status: "available", record: { version: "chat-retrieval-diagnostics.v1", omitted_events: 0,
+        events: [{ event: "router", route: "CANONICAL" }, { event: "step", executed: false, skipped: true, reason: "canonical_dependency_empty" }, { event: "crg_input", items: 0 }] },
+      capture: { enabled, remaining: enabled ? 9 : 0, expires_at: null },
+      details: enabled ? [{ search_text: "synthetic private query" }] : null,
+    });
+    if (url.pathname.endsWith(`/threads/${threadId}`)) return json(route, worldThread);
+    if (url.pathname.endsWith("/requests/latest")) return json(route, { response_request: null });
+    return route.fallback();
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+  await page.getByText("검색 진단 · 문제 해결", { exact: true }).click();
+  await expect(page.getByText("답변 생성에 근거 전달", { exact: true })).toBeVisible();
+  await expect(page.getByText("앞 단계 결과가 없어 건너뜀", { exact: true })).toBeVisible();
+  await expect(page.getByText("synthetic private query")).toHaveCount(0);
+  await page.getByRole("button", { name: "현재 대화의 상세 진단 켜기", exact: true }).click();
+  await page.getByText("수집한 검색 조건 보기", { exact: true }).click();
+  await expect(page.getByText(/synthetic private query/)).toBeVisible();
+  await page.getByRole("button", { name: "상세 진단 끄고 기록 지우기", exact: true }).click();
+  await expect(page.getByText(/synthetic private query/)).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});

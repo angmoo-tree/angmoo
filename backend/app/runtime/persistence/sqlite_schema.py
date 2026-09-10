@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 10
-SOURCE_ALEMBIC_REVISION = "20260909_0090"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 89
-EXPECTED_CANONICAL_TABLE_COUNT = 102
+SQLITE_SCHEMA_VERSION = 11
+SOURCE_ALEMBIC_REVISION = "20260910_0091"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 90
+EXPECTED_CANONICAL_TABLE_COUNT = 103
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 MEMORY_BATCH_V9_TABLES = (
@@ -253,6 +253,13 @@ def build_sqlite_v8_metadata() -> MetaData:
     return metadata
 
 
+def build_sqlite_v10_metadata() -> MetaData:
+    """Frozen predecessor: generation thinking settings, no diagnostics table."""
+    metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["chat_retrieval_diagnostics"])
+    return metadata
+
+
 def build_sqlite_v9_metadata() -> MetaData:
     """Frozen pre-generation-profile schema for supported upgrades."""
     metadata = build_sqlite_baseline_metadata()
@@ -261,6 +268,8 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    if "chat_retrieval_diagnostics" in metadata.tables:
+        metadata.remove(metadata.tables["chat_retrieval_diagnostics"])
     # All callers are historical builders. Never let current ORM additions
     # silently change an already released schema/manifest.
     from app.runtime.persistence.sqlite_generation_profiles import ADDED_COLUMNS

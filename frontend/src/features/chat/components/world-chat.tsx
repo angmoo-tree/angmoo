@@ -1,4 +1,5 @@
 "use client";
+import { RetrievalDiagnostics } from "./retrieval-diagnostics";
 
 import { generationProfileValue, generationProfileLabel } from "@/config/generation-profiles";
 import {
@@ -664,6 +665,8 @@ function WorldChatThread({
         subjectWorldCharacterId: thread.responding.world_character_id,
         worldId,
       })}
+
+      <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} requestIds={thread.evidence_summaries.map(item => item.request_id)} />
 
       <div className={styles.modelControl}>
         <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>

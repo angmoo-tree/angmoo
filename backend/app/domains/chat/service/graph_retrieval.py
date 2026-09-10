@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe
+
 import asyncio
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
@@ -144,6 +146,7 @@ class GraphRetrievalPlanningService:
         request = self._provider_request(command)
         remaining_seconds = (deadline_at - now).total_seconds()
         started = monotonic()
+        observe("planner_attempt", axis="graph", phase="first", status="started")
         repair_used = False
         first_physical = 0
         repair_physical = 0
@@ -159,6 +162,7 @@ class GraphRetrievalPlanningService:
                 tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
             validated = self._validator.validate(provider_result.plan, context)
         except (GraphPlannerOutputError, GraphPlanContractError) as exc:
+            observe("planner_validation", axis="graph", phase="first", status="rejected", reason="plan_contract_invalid")
             if isinstance(exc, GraphPlannerOutputError):
                 first_physical = exc.physical_attempt_count
                 for _ in range(first_physical):
@@ -189,6 +193,7 @@ class GraphRetrievalPlanningService:
                     tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
                 validated = self._validator.validate(provider_result.plan, context)
             except (GraphPlannerOutputError, GraphPlanContractError) as repaired:
+                observe("planner_validation", axis="graph", phase="repair", status="rejected", reason="plan_contract_invalid")
                 if isinstance(repaired, GraphPlannerOutputError):
                     repair_physical = repaired.physical_attempt_count
                     for _ in range(repair_physical):
@@ -200,6 +205,7 @@ class GraphRetrievalPlanningService:
                     "graph_planner_request_wide_repair_exhausted"
                 ) from repaired
 
+        observe("planner", axis="graph", planned=len(validated.plan.steps), repair_used=repair_used, first_pass_valid=not repair_used, limit_reached=bool(validated.limit_clamped_steps))
         execution = self._executor.execute(validated.plan, context, now=now)
         return GraphPlanningResult(
             request_id=command.resolved.request_id,
@@ -338,6 +344,7 @@ class GraphRetrievalPlanningService:
         *,
         reason: str,
     ) -> GraphPlanningResult:
+        observe("planner", axis="graph", skipped=True, executed=False, reason=reason)
         return GraphPlanningResult(
             request_id=command.resolved.request_id,
             plan=None,

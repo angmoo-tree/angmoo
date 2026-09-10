@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe
+
 from collections.abc import Mapping
 from datetime import UTC, datetime
 
@@ -199,6 +201,7 @@ class EvidenceBundleAssembler:
             for entry in selected_entries
             if (item := self._today_item(entry)) is not None
         )
+        observe("today_selection", input=len(snapshot.entries), output=len(today_items), excluded=len(snapshot.entries)-len(today_items), limit=available_slots)
         if not today_items:
             return bundle
         outcome = bundle.retrieval_outcome
@@ -416,6 +419,7 @@ class EvidenceBundleAssembler:
         clarification_slot: str | None = None,
     ) -> EvidenceBundle:
         items = self._dedupe_sort_truncate(candidates)
+        observe("bundle", route=route.value, input=len(candidates), output=len(items), excluded=len(candidates)-len(items))
         evidence_hash = compute_evidence_hash(
             request_id=request_id,
             request_scope_hash=request_scope_hash,
@@ -480,13 +484,20 @@ class EvidenceBundleAssembler:
         )
         output: list[EvidenceItem] = []
         chars = 0
-        for item in ordered:
+        character_excluded = 0
+        count_excluded = 0
+        for index, item in enumerate(ordered):
             if len(output) >= MAX_EVIDENCE_ITEMS:
+                count_excluded = len(ordered) - index
                 break
             if chars + len(item.text) > MAX_EVIDENCE_BUNDLE_CHARS:
+                character_excluded += 1
                 continue
             output.append(item)
             chars += len(item.text)
+        observe("evidence_deduplication", input=len(candidates), duplicates=len(candidates)-len(deduplicated), output=len(deduplicated))
+        observe("evidence_limit", reason="character_budget", excluded=character_excluded)
+        observe("evidence_limit", reason="item_budget", excluded=count_excluded, output=len(output), chars=chars)
         return tuple(output)
 
     @staticmethod

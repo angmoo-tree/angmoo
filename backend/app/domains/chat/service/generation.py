@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.domains.chat.service.diagnostic_capture import capture
+
 import logging
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
@@ -140,6 +142,7 @@ class GenerationService:
         )
         db.commit()
         db.refresh(message)
+        capture.admit((user.id, world_id, thread_id), record.request_id)
         return schemas.WorldChatMessageAcceptRead(
             outcome="accepted",
             user_message=schemas.MessageMessageRead.model_validate(message),
@@ -222,6 +225,7 @@ class GenerationService:
             )
         )
         db.commit()
+        capture.admit((user.id, world_id, thread_id), record.request_id)
         return schemas.WorldChatMessageAcceptRead(
             outcome="accepted",
             user_message=schemas.MessageMessageRead.model_validate(message),

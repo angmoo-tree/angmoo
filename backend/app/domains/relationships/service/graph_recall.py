@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe
+
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Literal, Protocol
@@ -148,11 +150,13 @@ class GraphRecallService:
             if repository is None:
                 repository = self._gateway.open_graph_repository()
                 opened_repository = True
+            observe("search", method="graph_projection", executed=True)
             result = self._execute_graph(
                 validated,
                 repository=repository,
                 counts=counts,
             )
+            observe("graph_result", candidates=result.candidate_count, excluded=result.excluded_count, status=result.status.value)
             if (
                 result.candidate_count == 0
                 and (counts.pending or counts.processing)
@@ -409,6 +413,7 @@ class GraphRecallService:
     ) -> GraphRecallResult:
         self._gateway.record_fallback(reason=reason)
         mode = GRAPH_RECALL_PRIMITIVE_REGISTRY[query.operation].fallback_mode
+        observe("search", method="graph_canonical_fallback", reason=reason, executed=mode != "none", skipped=mode == "none")
         if mode == "none":
             return GraphRecallResult(
                 operation=query.operation,

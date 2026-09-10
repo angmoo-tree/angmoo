@@ -45,7 +45,7 @@ from sqlalchemy.orm import configure_mappers
 metadata = register_models()
 configure_mappers()
 original = {mapper.class_.__tablename__: mapper.class_ for mapper in Base.registry.mappers}
-assert len(original) == len(metadata.tables) == 102
+assert len(original) == len(metadata.tables) == 103
 assert register_models() is metadata is Base.metadata
 assert {mapper.class_.__tablename__: mapper.class_ for mapper in Base.registry.mappers} == original
 assert all(model.metadata is metadata for model in original.values())
@@ -70,8 +70,8 @@ try:
     engine = database.engine
     second = database.open()
     assert database.engine is engine
-    assert first.schema_version == second.schema_version == 10
-    assert first.canonical_table_count == second.canonical_table_count == 102
+    assert first.schema_version == second.schema_version == 11
+    assert first.canonical_table_count == second.canonical_table_count == 103
     assert first.schema_digest_matches and second.schema_digest_matches
     assert first.foreign_keys and first.synchronous == 'FULL'
     assert 'app.main' not in sys.modules and 'app.public_main' not in sys.modules

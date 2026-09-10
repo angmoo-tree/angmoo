@@ -345,14 +345,14 @@
     {
       "markers": {
         "driver_or_url": [
-          142,
-          154
+          155,
+          167
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "d553e66af7db6e108425e59fb31901ba4772d5f7deb831f693a9e303d65adf43",
+      "source_sha256": "4ac73c2557ae3bd128606b20b6a01545889bdafa70ec2608d464eaf7774f0f6f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1233,15 +1233,15 @@
           89,
           90,
           91,
-          275,
-          276,
-          277
+          284,
+          285,
+          286
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "de8a900926ccebb5d64e64239aa93c0340f880ee21dba2073248a498d91ae652",
+      "source_sha256": "3a53bf114fdad332140fa63c3a15c964b3e231fcecda6b4d9129001797126f52",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
