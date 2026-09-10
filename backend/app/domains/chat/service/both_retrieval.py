@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 import hashlib
+import json
 from typing import Any
 
 from app.domains.chat.service.canonical_retrieval import (
@@ -320,8 +321,10 @@ class BothRetrievalWorkflowCoordinator:
                         observe(event["event"], **{key: value for key, value in event.items() if key != "event"})
                     parent.omitted += collector.omitted
                     for row in collector.details:
-                        if len(parent.details) < 24:
+                        if len(parent.details) < 24 and len(json.dumps([*parent.details, row], ensure_ascii=True).encode()) <= 64 * 1024:
                             parent.details.append(row)
+                        else:
+                            parent.omitted += 1
         canonical, graph = outcomes
         if isinstance(canonical, BaseException):
             raise canonical

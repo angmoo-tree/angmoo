@@ -37,7 +37,8 @@ class Observation:
         events = list(self.events)
         result = {"version": VERSION, "events": events, "omitted_events": self.omitted}
         while len(json.dumps(result, ensure_ascii=True).encode()) > MAX_BYTES and events:
-            events.pop()
+            index = next((i for i, row in enumerate(events) if row["event"] not in _CRITICAL), 0)
+            events.pop(index)
             result["omitted_events"] += 1
         return result
 
