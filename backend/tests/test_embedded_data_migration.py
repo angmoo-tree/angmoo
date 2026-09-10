@@ -387,6 +387,7 @@ def _seed_v2_roleless(
                 )
                 from app.models import Base
 
+                Base.metadata.tables["chat_retrieval_diagnostics"].drop(connection, checkfirst=True)
                 for name in reversed(MEMORY_BATCH_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 # Remove only the new v10 columns from surviving historical tables.
@@ -578,7 +579,7 @@ def test_max_length_v8_generation_upgrades_without_reusing_source_directory(
     assert result.canonical.migrated is True
     assert result.canonical.generation != MAX_LENGTH_V8_GENERATION
     assert len(result.canonical.generation) <= 64
-    assert result.canonical.generation.endswith("-schema-v10")
+    assert result.canonical.generation.endswith("-schema-v11")
     assert source.is_file()
     assert _sha256(source) == source_sha
     current = json.loads(
@@ -785,7 +786,7 @@ def test_supported_v2_creates_one_reserved_role_per_affected_world(
         )
         assert second is not None
         assert second.role_key == "no_specific_role"
-        assert second.version == 10
+        assert second.version == 11
     database.close()
 
 

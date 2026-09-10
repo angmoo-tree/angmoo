@@ -80,7 +80,7 @@ def test_all_four_profiles_send_32_ids_once_and_keep_max_output(monkeypatch, mod
 
 
 def test_released_v9_and_clean_v10_match_upgrade():
-    from app.runtime.persistence.sqlite_schema import build_sqlite_v9_metadata, build_sqlite_baseline_metadata, create_schema_version_table, sqlite_schema_contract_digest
+    from app.runtime.persistence.sqlite_schema import build_sqlite_v9_metadata, build_sqlite_v10_metadata, create_schema_version_table, sqlite_schema_contract_digest
     from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
     from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import capture_v9_to_v10_delta, upgrade_v9_to_v10, verify_v9_to_v10_delta
     with create_engine("sqlite://").begin() as connection:
@@ -93,7 +93,7 @@ def test_released_v9_and_clean_v10_match_upgrade():
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(10).schema_digest
     with create_engine("sqlite://").begin() as connection:
         create_schema_version_table(connection)
-        build_sqlite_baseline_metadata().create_all(connection)
+        build_sqlite_v10_metadata().create_all(connection)
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(10).schema_digest
 
 

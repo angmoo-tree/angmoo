@@ -102,7 +102,10 @@ class SqliteVersionManifest:
         ).hexdigest()
 
 
+from app.runtime.migrations.sqlite_versions import v10_to_v11_chat_diagnostics as chat_diagnostics
+
 MIGRATIONS: dict[int, SqliteMigration] = {
+    10: chat_diagnostics.upgrade,
     1: upgrade_v1_to_v2,
     2: upgrade_v2_to_v3,
     3: upgrade_v3_to_v4,
@@ -115,6 +118,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    10: SqliteMigrationContract(source_version=10, target_version=11, name="chat_diagnostics", mutable_identity_tables=chat_diagnostics.MUTABLE_IDENTITY_TABLES, capture=chat_diagnostics.capture_delta, verify=chat_diagnostics.verify_delta),
     9: SqliteMigrationContract(
         source_version=9, target_version=10, name="generation_profiles",
         mutable_identity_tables=V9_TO_V10_MUTABLE_TABLES,

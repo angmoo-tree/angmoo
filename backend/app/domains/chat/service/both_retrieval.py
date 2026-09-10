@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+
+from app.contracts.retrieval_observation import Observation, current, observe
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -229,6 +231,7 @@ class BothRetrievalWorkflowCoordinator:
             )
             if tracker.logical_counts[node] > 0
         )
+        observe("both_merge", recipe=selection.selected.value, parallel=selection.spec.planners_parallel, skipped=downstream_reason is not None, reason=downstream_reason, input=merge_stats["input"], unmatched=merge_stats["dropped"], duplicates=merge_stats["deduplicated"], output=len(references))
         return BothRetrievalResult(
             request_id=command.resolved.request_id,
             selection=selection,
@@ -294,21 +297,31 @@ class BothRetrievalWorkflowCoordinator:
         now: datetime,
         deadline_at: datetime,
     ) -> tuple[CanonicalPlanningResult, GraphPlanningResult]:
-        outcomes = await asyncio.gather(
-            self._run_canonical(
-                command,
-                tracker=tracker,
-                now=now,
-                deadline_at=deadline_at,
-            ),
-            self._run_graph(
-                command,
-                tracker=tracker,
-                now=now,
-                deadline_at=deadline_at,
-            ),
-            return_exceptions=True,
-        )
+        parent = current.get()
+        collectors = [Observation(detailed=bool(parent and parent.detailed)) for _ in range(2)]
+
+        async def isolated(index, awaitable):
+            token = current.set(collectors[index] if parent is not None else None)
+            try:
+                return await awaitable
+            finally:
+                current.reset(token)
+
+        try:
+            outcomes = await asyncio.gather(
+                isolated(0, self._run_canonical(command, tracker=tracker, now=now, deadline_at=deadline_at)),
+                isolated(1, self._run_graph(command, tracker=tracker, now=now, deadline_at=deadline_at)),
+                return_exceptions=True,
+            )
+        finally:
+            if parent is not None:
+                for collector in collectors:
+                    for event in collector.events:
+                        observe(event["event"], **{key: value for key, value in event.items() if key != "event"})
+                    parent.omitted += collector.omitted
+                    for row in collector.details:
+                        if len(parent.details) < 24:
+                            parent.details.append(row)
         canonical, graph = outcomes
         if isinstance(canonical, BaseException):
             raise canonical

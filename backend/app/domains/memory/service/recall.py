@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe
+
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 
@@ -179,6 +181,7 @@ class CanonicalRecallService:
                 truncated=len(records) >= validated.limit,
             )
 
+        observe("search", method="canonical_direct", executed=True, operation=validated.operation.value)
         records = self._repository.execute_direct(
             query=validated,
             now=executed_at,

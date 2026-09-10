@@ -38,6 +38,19 @@ def _sql_values(values: tuple[str, ...]) -> str:
 RESPONSE_REQUEST_SCHEMA_TABLES = ("chat_response_requests",)
 
 
+class ChatRetrievalDiagnostic(Base):
+    """Disposable content-free observations; independent retention from Chat."""
+    __tablename__ = "chat_retrieval_diagnostics"
+    __table_args__ = (
+        CheckConstraint("payload_bytes >= 0 AND payload_bytes <= 16384", name="ck_chat_diagnostic_size"),
+        Index("ix_chat_diagnostics_expiry", "expires_at"),
+    )
+    request_id: Mapped[str] = mapped_column(ForeignKey("chat_response_requests.request_id", ondelete="CASCADE"), primary_key=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    payload_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    payload_json: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 class CharacterMessageSetting(Base):
     __tablename__ = "character_message_settings"
 

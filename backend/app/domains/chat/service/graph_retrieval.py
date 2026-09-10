@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.retrieval_observation import observe
+
 import asyncio
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
@@ -200,6 +202,7 @@ class GraphRetrievalPlanningService:
                     "graph_planner_request_wide_repair_exhausted"
                 ) from repaired
 
+        observe("planner", axis="graph", planned=len(validated.plan.steps), repair_used=repair_used, first_pass_valid=not repair_used, limit_reached=bool(validated.limit_clamped_steps))
         execution = self._executor.execute(validated.plan, context, now=now)
         return GraphPlanningResult(
             request_id=command.resolved.request_id,
@@ -338,6 +341,7 @@ class GraphRetrievalPlanningService:
         *,
         reason: str,
     ) -> GraphPlanningResult:
+        observe("planner", axis="graph", skipped=True, executed=False, reason=reason)
         return GraphPlanningResult(
             request_id=command.resolved.request_id,
             plan=None,

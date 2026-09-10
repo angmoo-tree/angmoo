@@ -116,7 +116,7 @@ assert 'app.cruds.agent_runs' not in sys.modules
 metadata = register_models()
 configure_mappers()
 assert metadata is Base.metadata is register_models()
-assert len(Base.registry.mappers) == len(metadata.tables) == 102
+assert len(Base.registry.mappers) == len(metadata.tables) == 103
 assert database._default_engine is None
 assert database._default_session_factory is None
 """],

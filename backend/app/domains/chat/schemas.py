@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 from app.providers.generation_profiles import ThinkingLevel
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from app.core.profile_ref import ProfileRef
 from app.domains.chat.contracts.model_binding import MessageModelBindingMode
@@ -282,3 +282,38 @@ class WorldChatMessageAcceptRead(BaseModel):
 
 class WorldChatLatestRequestRead(BaseModel):
     response_request: WorldChatGenerationRequestRead | None = None
+
+
+# Versioned troubleshooting DTOs, separate from public evidence and streams.
+
+
+class CaptureUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    enabled: StrictBool
+
+
+class CaptureRead(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    enabled: bool
+    remaining: int = Field(ge=0, le=10)
+    expires_at: str | None = None
+    reason: Literal["capture_capacity"] | None = None
+
+
+class DiagnosticRecord(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    version: Literal["chat-retrieval-diagnostics.v1"]
+    events: list[dict[str, str | int | float | bool]] = Field(max_length=48)
+    omitted_events: int = Field(ge=0)
+
+
+class DiagnosticRead(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    world_id: str
+    thread_id: str
+    request_id: str | None
+    request_state: str | None
+    status: Literal["available", "expired", "not_recorded", "unavailable"]
+    record: DiagnosticRecord | None
+    capture: CaptureRead
+    details: list[dict[str, str | int]] | None

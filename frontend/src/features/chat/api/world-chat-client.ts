@@ -434,3 +434,17 @@ function parseGenerationEvent(
   }
   return event as WorldChatGenerationEvent;
 }
+
+
+export async function readRetrievalDiagnostics(worldId: string, threadId: string, requestId: string, signal?: AbortSignal): Promise<import("@/features/chat/types/retrieval-diagnostics").RetrievalDiagnosticsRead> {
+  const suffix = `/threads/${encodeURIComponent(threadId)}/diagnostics${requestId ? `?request_id=${encodeURIComponent(requestId)}` : ""}`;
+  const data = await requestWorldChatApi<import("@/features/chat/types/retrieval-diagnostics").RetrievalDiagnosticsRead>(worldChatApiPath(worldId, suffix), { signal });
+  if (!data || data.world_id !== worldId || data.thread_id !== threadId || (requestId && data.request_id !== requestId) || !["available", "expired", "not_recorded", "unavailable"].includes(data.status) || !data.capture || typeof data.capture.enabled !== "boolean" || (data.record && (data.record.version !== "chat-retrieval-diagnostics.v1" || !Array.isArray(data.record.events)))) {
+    throw new WorldChatApiError(502, "diagnostic_scope_mismatch");
+  }
+  return data;
+}
+
+export async function setRetrievalCapture(worldId: string, threadId: string, enabled: boolean) {
+  return requestWorldChatApi(worldChatApiPath(worldId, `/threads/${encodeURIComponent(threadId)}/diagnostics/capture`), { method: "PUT", body: { enabled } });
+}
