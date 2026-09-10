@@ -194,20 +194,23 @@ def contracts(original: dict, records: list[dict]) -> dict:
 
 
 def assertions(node: str, required: Counter, found: Counter, records: list[dict]) -> Counter:
-    applied = False
+    transitions = []
     for record in records:
         for change in record.get("assertions", []):
             if change["node"] != node:
                 continue
             before = Counter(normalize_ast_dump(value) for value in change["before"])
             after = Counter(normalize_ast_dump(value) for value in change["after"])
-            # Later introduction evidence already contains the approved version.
-            if required == after:
-                continue
-            if required != before:
+            if transitions and transitions[-1][1] != before:
                 raise ValueError(f"product assertion before/after differs: {node}")
-            required = after
-            applied = True
-    if applied and found != required:
+            transitions.append((before, after))
+    if not transitions:
+        return required
+    # A later introduction snapshot may already contain the final reviewed state.
+    states = [transitions[0][0], *(after for _, after in transitions)]
+    if required not in states:
         raise ValueError(f"product assertion before/after differs: {node}")
-    return required
+    final = states[-1]
+    if required != final and found != final:
+        raise ValueError(f"product assertion before/after differs: {node}")
+    return final

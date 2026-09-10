@@ -93,6 +93,7 @@ def test_assertion_chain_checks_every_transition_and_exact_final_state():
     final = Counter(["v11", "safety"])
     assert changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, records) == final
     assert changes.assertions("test.py::test_change", Counter(["v10", "safety"]), final, records) == final
+    assert changes.assertions("test.py::test_change", final, final, records) == final
     with pytest.raises(ValueError, match="before/after"):
         changes.assertions("test.py::test_change", Counter(["v9", "safety"]), Counter(["v11"]), records)
     broken = deepcopy(records)
