@@ -185,6 +185,7 @@ def contracts(original: dict, records: list[dict]) -> dict:
 
 
 def assertions(node: str, required: Counter, found: Counter, records: list[dict]) -> Counter:
+    applied = False
     for record in records:
         for change in record.get("assertions", []):
             if change["node"] != node:
@@ -194,7 +195,10 @@ def assertions(node: str, required: Counter, found: Counter, records: list[dict]
             # Later introduction evidence already contains the approved version.
             if required == after:
                 continue
-            if required != before or found != after:
+            if required != before:
                 raise ValueError(f"product assertion before/after differs: {node}")
             required = after
+            applied = True
+    if applied and found != required:
+        raise ValueError(f"product assertion before/after differs: {node}")
     return required

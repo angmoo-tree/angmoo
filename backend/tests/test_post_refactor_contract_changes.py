@@ -79,6 +79,22 @@ def test_assertion_change_requires_exact_before_after_and_keeps_other_nodes():
         changes.assertions("test.py::test_change", Counter(["changed-old"]), after, [record])
 
 
+def test_assertion_chain_checks_every_transition_and_exact_final_state():
+    records = [
+        {"assertions": [{"node": "test.py::test_change", "before": ["v9", "safety"], "after": ["v10", "safety"]}]},
+        {"assertions": [{"node": "test.py::test_change", "before": ["v10", "safety"], "after": ["v11", "safety"]}]},
+    ]
+    final = Counter(["v11", "safety"])
+    assert changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, records) == final
+    assert changes.assertions("test.py::test_change", Counter(["v10", "safety"]), final, records) == final
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "safety"]), Counter(["v11"]), records)
+    broken = deepcopy(records)
+    broken[1]["assertions"][0]["before"] = ["unreviewed", "safety"]
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, broken)
+
+
 def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path, monkeypatch):
     commit, blob = "a" * 40, "b" * 40
     record = {"id": "example", "implementation_commit": commit, "reason": "reviewed", "review": "PR",
