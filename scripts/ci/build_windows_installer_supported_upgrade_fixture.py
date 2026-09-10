@@ -617,6 +617,7 @@ def _seed_supported_predecessor(
                 )
                 from app.models import Base
 
+                Base.metadata.tables["chat_retrieval_diagnostics"].drop(sql_connection, checkfirst=True)
                 from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
                 for table, columns in ADDED_COLUMNS.items():
                     for column in columns:
