@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import Counter
 import ast
 from copy import deepcopy
+from functools import lru_cache
 import json
 import hashlib
 from pathlib import Path
@@ -99,6 +100,7 @@ def frontend_matches(source: str, original: str, actual: str, records: list[dict
     return expected == text_digest(actual)
 
 
+@lru_cache(maxsize=128)
 def definition_ast(source: str, symbol: str) -> str:
     body = ast.parse(source).body
     for part in symbol.split("."):
@@ -113,6 +115,7 @@ def definition_ast(source: str, symbol: str) -> str:
     return ast.dump(node, include_attributes=False)
 
 
+@lru_cache(maxsize=128)
 def normalize_ast_dump(value: str) -> str:
     """Compare Python 3.11/3.13 empty-field spelling without executing text."""
     if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
@@ -145,7 +148,8 @@ def definition_matches(root: Path, source: str, symbol: str, before: ast.AST, af
         return True
     for record in load(root) if records is None else records:
         for change in record.get("definitions", []):
-            if (change["source"], change["symbol"], normalize_ast_dump(change["before_ast"])) == (source, symbol, expected):
+            if ((change["source"], change["symbol"]) == (source, symbol)
+                    and normalize_ast_dump(change["before_ast"]) == expected):
                 expected = normalize_ast_dump(change["after_ast"])
     return expected == actual
 
