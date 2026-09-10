@@ -568,6 +568,8 @@ class ResponseGenerationWorkflowService:
         observe("workflow_failed", status="failed", reason=failure_class)
         failure_diagnostic = _provider_failure_diagnostic(exc)
         router_diagnostic = _router_failure_diagnostic(exc)
+        if router_diagnostic is not None:
+            observe("router_validation", status="rejected", reason=router_diagnostic.router_validation_code, repair_used=router_diagnostic.repair_used)
         if failure_diagnostic is not None:
             failure_diagnostic["failure_class"] = failure_class
             failure_diagnostic["retryable"] = retryable

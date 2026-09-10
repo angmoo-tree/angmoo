@@ -146,6 +146,7 @@ class GraphRetrievalPlanningService:
         request = self._provider_request(command)
         remaining_seconds = (deadline_at - now).total_seconds()
         started = monotonic()
+        observe("planner_attempt", axis="graph", phase="first", status="started")
         repair_used = False
         first_physical = 0
         repair_physical = 0
@@ -161,6 +162,7 @@ class GraphRetrievalPlanningService:
                 tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
             validated = self._validator.validate(provider_result.plan, context)
         except (GraphPlannerOutputError, GraphPlanContractError) as exc:
+            observe("planner_validation", axis="graph", phase="first", status="rejected", reason="plan_contract_invalid")
             if isinstance(exc, GraphPlannerOutputError):
                 first_physical = exc.physical_attempt_count
                 for _ in range(first_physical):
@@ -191,6 +193,7 @@ class GraphRetrievalPlanningService:
                     tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
                 validated = self._validator.validate(provider_result.plan, context)
             except (GraphPlannerOutputError, GraphPlanContractError) as repaired:
+                observe("planner_validation", axis="graph", phase="repair", status="rejected", reason="plan_contract_invalid")
                 if isinstance(repaired, GraphPlannerOutputError):
                     repair_physical = repaired.physical_attempt_count
                     for _ in range(repair_physical):

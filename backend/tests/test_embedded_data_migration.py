@@ -786,7 +786,7 @@ def test_supported_v2_creates_one_reserved_role_per_affected_world(
         )
         assert second is not None
         assert second.role_key == "no_specific_role"
-        assert second.version == 11
+        assert second.version == 10
     database.close()
 
 
