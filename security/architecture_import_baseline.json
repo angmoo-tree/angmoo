@@ -1,6 +1,6 @@
 {
   "edge_count": 4026,
-  "external_import_count": 3142,
+  "external_import_count": 3143,
   "module_count": 1077,
   "modules": [
     {
@@ -2031,6 +2031,7 @@
         "dataclasses",
         "datetime",
         "hashlib",
+        "json",
         "typing"
       ],
       "imports": [
