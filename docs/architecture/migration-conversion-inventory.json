@@ -1007,9 +1007,20 @@
       "source_sha256": "690e88107a31392a07e5edc90398534e81f2dbf9ee56b594504f5d5a29fd14a9",
       "strategy": "schema-parity-review",
       "transition_pr": "ER2 PR G"
+    },
+    {
+      "down_revision": "20260909_0090",
+      "manual_review_markers": [],
+      "owner": "ER2",
+      "path": "backend/alembic/versions/20260910_0091_chat_retrieval_diagnostics.py",
+      "removal_condition": "preserve immutable historical revision identity; do not execute as the current SQLite runtime chain",
+      "revision": "20260910_0091",
+      "source_sha256": "b78d33f007fd6853e7ed8f71cc05e0319ec7907e24d2ce465d06e358de63f425",
+      "strategy": "schema-parity-review",
+      "transition_pr": "ER2 PR G"
     }
   ],
-  "migration_count": 88,
+  "migration_count": 89,
   "purpose": "PostgreSQL-era Alembic provenance retained as immutable historical evidence",
   "schema_version": 1
 }

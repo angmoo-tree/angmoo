@@ -128,7 +128,7 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     data_root = tmp_path / "Angmoo"
-    manifest = _manifest(tmp_path / "payload.json", sqlite=(1, 10, 10))
+    manifest = _manifest(tmp_path / "payload.json", sqlite=(1, 11, 11))
     argv = [
         "angmoo-sidecar",
         "--installer-data-upgrade",

@@ -12,6 +12,11 @@
       "module": "app.api.v1.routes.agents",
       "endpoint": "delete_agent"
     },
+    "DELETE /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "delete_credential"
+    },
     "DELETE /api/v1/agents/{character_id}/image-settings/key": {
       "access": "owner-only",
       "module": "app.domains.characters.router",
@@ -97,6 +102,11 @@
       "module": "app.domains.worlds.router",
       "endpoint": "remove_world_banner"
     },
+    "DELETE /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/capture": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "clear"
+    },
     "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
@@ -136,6 +146,11 @@
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "get_agent"
+    },
+    "GET /api/v1/agents/{character_id}/credential": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "get_credential_metadata"
     },
     "GET /api/v1/agents/{character_id}/feed-cue": {
       "access": "owner-only",
@@ -251,16 +266,6 @@
       "access": "owner-only",
       "module": "app.domains.relationships.router",
       "endpoint": "get_world_character_social_memory"
-    },
-    "GET /api/v1/world-package-exports/{operation_id}/download": {
-      "access": "owner-only",
-      "module": "app.domains.world_packages.router",
-      "endpoint": "download_world_package_export"
-    },
-    "GET /api/v1/world-package-imports/{operation_id}/preview": {
-      "access": "owner-only",
-      "module": "app.domains.world_packages.router",
-      "endpoint": "read_world_package_import_preview"
     },
     "GET /api/v1/feed": {
       "access": "public",
@@ -387,6 +392,16 @@
       "module": "app.api.v1.routes.world_character_setup",
       "endpoint": "get_world_feed_status"
     },
+    "GET /api/v1/world-package-exports/{operation_id}/download": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.router",
+      "endpoint": "download_world_package_export"
+    },
+    "GET /api/v1/world-package-imports/{operation_id}/preview": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.router",
+      "endpoint": "read_world_package_import_preview"
+    },
     "GET /api/v1/worlds/mine": {
       "access": "owner-only",
       "module": "app.domains.device_home.router",
@@ -417,16 +432,6 @@
       "module": "app.domains.world_characters.router.entry",
       "endpoint": "get_world_character_entry"
     },
-    "GET /api/v1/worlds/{world_id}/creator-context": {
-      "access": "owner-only",
-      "module": "app.domains.worlds.router",
-      "endpoint": "get_world_creator_context"
-    },
-    "GET /api/v1/worlds/{world_id}/generation-context": {
-      "access": "owner-only",
-      "module": "app.domains.worlds.router",
-      "endpoint": "get_world_generation_context"
-    },
     "GET /api/v1/worlds/{world_id}/chat/threads": {
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat",
@@ -436,6 +441,11 @@
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat",
       "endpoint": "get_world_thread"
+    },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "diagnostics"
     },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
       "access": "owner-only",
@@ -456,6 +466,16 @@
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "get_world_response_evidence"
+    },
+    "GET /api/v1/worlds/{world_id}/creator-context": {
+      "access": "owner-only",
+      "module": "app.domains.worlds.router",
+      "endpoint": "get_world_creator_context"
+    },
+    "GET /api/v1/worlds/{world_id}/generation-context": {
+      "access": "owner-only",
+      "module": "app.domains.worlds.router",
+      "endpoint": "get_world_generation_context"
     },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
       "access": "owner-only",
@@ -492,25 +512,15 @@
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_item"
     },
-    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
-      "access": "owner-only",
-      "module": "app.domains.memory.router",
-      "endpoint": "read_memory_setting"
-    },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_batch_setting"
     },
-    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
-      "endpoint": "update_memory_batch_setting"
-    },
-    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-retry": {
-      "access": "owner-only",
-      "module": "app.domains.memory.router",
-      "endpoint": "retry_memory_batch"
+      "endpoint": "read_memory_setting"
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}": {
       "access": "owner-only",
@@ -862,10 +872,10 @@
       "module": "app.domains.world_characters.router.setup",
       "endpoint": "retry_autonomy_setup"
     },
-    "POST /api/v1/worlds": {
+    "POST /api/v1/world-package-exports/{operation_id}/delivery-ack": {
       "access": "owner-only",
-      "module": "app.domains.worlds.router",
-      "endpoint": "create_world"
+      "module": "app.domains.world_packages.router",
+      "endpoint": "acknowledge_world_package_export_delivery"
     },
     "POST /api/v1/world-package-imports/stage": {
       "access": "owner-only",
@@ -877,20 +887,10 @@
       "module": "app.domains.world_packages.router",
       "endpoint": "commit_world_package_import"
     },
-    "POST /api/v1/world-package-exports/{operation_id}/delivery-ack": {
+    "POST /api/v1/worlds": {
       "access": "owner-only",
-      "module": "app.domains.world_packages.router",
-      "endpoint": "acknowledge_world_package_export_delivery"
-    },
-    "POST /api/v1/worlds/{world_id}/package-exports": {
-      "access": "owner-only",
-      "module": "app.domains.world_packages.router",
-      "endpoint": "prepare_world_package_export"
-    },
-    "POST /api/v1/worlds/{world_id}/package-exports/preview": {
-      "access": "owner-only",
-      "module": "app.domains.world_packages.router",
-      "endpoint": "preview_world_package_export"
+      "module": "app.domains.worlds.router",
+      "endpoint": "create_world"
     },
     "POST /api/v1/worlds/{world_id}/archive": {
       "access": "owner-only",
@@ -927,11 +927,6 @@
       "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "retry_world_response"
     },
-    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections": {
-      "access": "owner-only",
-      "module": "app.domains.memory.router",
-      "endpoint": "correct_memory_item"
-    },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
       "module": "app.domains.social.router",
@@ -947,6 +942,16 @@
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "create_owner_character"
     },
+    "POST /api/v1/worlds/{world_id}/package-exports": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.router",
+      "endpoint": "prepare_world_package_export"
+    },
+    "POST /api/v1/worlds/{world_id}/package-exports/preview": {
+      "access": "owner-only",
+      "module": "app.domains.world_packages.router",
+      "endpoint": "preview_world_package_export"
+    },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",
       "module": "app.domains.worlds.router",
@@ -957,15 +962,15 @@
       "module": "app.domains.worlds.router",
       "endpoint": "validate_world_definition"
     },
-    "GET /api/v1/agents/{character_id}/credential": {
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections": {
       "access": "owner-only",
-      "module": "app.domains.characters.router",
-      "endpoint": "get_credential_metadata"
+      "module": "app.domains.memory.router",
+      "endpoint": "correct_memory_item"
     },
-    "DELETE /api/v1/agents/{character_id}/credential": {
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-retry": {
       "access": "owner-only",
-      "module": "app.domains.characters.router",
-      "endpoint": "delete_credential"
+      "module": "app.domains.memory.router",
+      "endpoint": "retry_memory_batch"
     },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
@@ -997,10 +1002,20 @@
       "module": "app.domains.characters.router",
       "endpoint": "update_settings"
     },
+    "PUT /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/capture": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "configure"
+    },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "update_memory_pin"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "update_memory_batch_setting"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
