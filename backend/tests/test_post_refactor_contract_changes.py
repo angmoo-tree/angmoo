@@ -45,6 +45,12 @@ def test_named_definition_delta_cannot_approve_a_different_owner_or_body(tmp_pat
 def test_ast_evidence_normalizes_empty_fields_but_never_executes_calls():
     node = ast.parse("def choose():\n    return 'high'\n").body[0]
     assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)
+    for fragment in ("assert version == 11", "pytest.raises(ValueError, match='scope')"):
+        assert changes.normalize_ast_dump(fragment) == ast.dump(ast.parse(fragment))
+    before = Counter([ast.dump(ast.parse("assert version == 10"))])
+    after = Counter([ast.dump(ast.parse("assert version == 11"))])
+    record = {"assertions": [{"node": "test.py::test_version", "before": ["assert version == 10"], "after": ["assert version == 11"]}]}
+    assert changes.assertions("test.py::test_version", before, after, [record]) == after
     with pytest.raises(ValueError, match="constructor"):
         changes.normalize_ast_dump("Module(body=[__import__('os').getcwd()])")
 

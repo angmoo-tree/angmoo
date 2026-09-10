@@ -117,8 +117,17 @@ def definition_ast(source: str, symbol: str) -> str:
 
 @lru_cache(maxsize=128)
 def normalize_ast_dump(value: str) -> str:
-    """Compare Python 3.11/3.13 empty-field spelling without executing text."""
+    """Normalize AST dumps or captured assertion source without executing text."""
     if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
+        parsed = ast.parse(value)
+        if len(parsed.body) == 1:
+            statement = parsed.body[0]
+            assertion_context = (isinstance(statement, ast.Expr)
+                and isinstance(statement.value, ast.Call)
+                and isinstance(statement.value.func, ast.Attribute)
+                and statement.value.func.attr in {"raises", "warns"})
+            if isinstance(statement, ast.Assert) or assertion_context:
+                return ast.dump(parsed, include_attributes=False)
         return value
 
     def decode(node):
