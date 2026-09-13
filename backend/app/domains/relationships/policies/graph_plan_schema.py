@@ -24,6 +24,17 @@ _OPAQUE_REF_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
 _INPUT_REF_RE = re.compile(
     r"^(?P<step>[a-z][a-z0-9_]{0,47})\.world_character_refs$"
 )
+GRAPH_GENERATED_STEP_IDS = tuple(
+    f"step{i}" for i in range(1, MAX_GRAPH_PLAN_STEPS + 1)
+)
+GRAPH_STEP_ID_INSTRUCTIONS = (
+    "Use unique step ids in order: " + ", ".join(GRAPH_GENERATED_STEP_IDS) + ". "
+    "Use only as many steps as needed. An id labels a step in this plan, not an operation or workflow node. "
+    "For a dependent lookup, input_ref must be an earlier step id followed by "
+    ".world_character_refs, for example step1.world_character_refs. "
+    "If you change a step id, update its dependent references as well. "
+    "Never reference yourself, a future or missing step, or a different property."
+)
 _TOP_LEVEL_KEYS = frozenset(
     {"version", "request_id", "envelope_version", "envelope_hash", "steps"}
 )
@@ -41,6 +52,47 @@ _COUNTERPART_OPERATIONS = frozenset(
         GraphRecallOperation.SHORTEST_PATH.value,
     }
 )
+GRAPH_COUNTERPART_INSTRUCTIONS = (
+    "Use exactly one counterpart binding: a supplied counterpart_ref with input_ref null, "
+    "or an earlier step's .world_character_refs as input_ref with counterpart_ref omitted. "
+    "Omitted means the counterpart_ref key is absent, not null. "
+    "Do not supply both bindings or invent an entity ref. Preserve the supplied relationship direction."
+)
+GRAPH_NO_COUNTERPART_INSTRUCTIONS = (
+    "This operation takes no counterpart binding: input_ref must be null and "
+    "counterpart_ref must be omitted."
+)
+
+
+def graph_operation_binding_instruction(operation: str) -> str:
+    """Describe the existing per-operation binding contract to the planner."""
+    if operation not in _GRAPH_OPERATION_VALUES:
+        raise GraphPlanContractError("graph_plan_operation_unknown")
+    return (
+        GRAPH_COUNTERPART_INSTRUCTIONS
+        if operation in _COUNTERPART_OPERATIONS
+        else GRAPH_NO_COUNTERPART_INSTRUCTIONS
+    )
+
+
+def graph_planner_repair_instruction(code: str) -> str:
+    """Return code-owned guidance, never interpolate an untrusted error body."""
+    if code in {
+        "graph_plan_step_id_invalid", "graph_plan_step_id_duplicate",
+        "graph_plan_reference_invalid", "graph_plan_input_ref_invalid",
+    }:
+        return GRAPH_STEP_ID_INSTRUCTIONS
+    if code == "graph_plan_counterpart_binding_invalid":
+        return GRAPH_COUNTERPART_INSTRUCTIONS + " " + GRAPH_STEP_ID_INSTRUCTIONS
+    if code == "graph_plan_counterpart_forbidden":
+        return GRAPH_NO_COUNTERPART_INSTRUCTIONS
+    return (
+        "Return a valid graph-plan.v1 object using the supplied catalog and binding. "
+        "Preserve the supplied entities, intent and relationship direction. "
+        "Follow the operation's required parameters and counterpart_binding rule."
+    )
+
+
 _PARAMETERS_BY_OPERATION: dict[str, frozenset[str]] = {
     GraphRecallOperation.DIRECT_RELATIONSHIP.value: frozenset(
         {"counterpart_ref", "direction", "limit"}
@@ -117,16 +169,32 @@ def graph_retrieval_plan_response_schema() -> dict[str, Any]:
                 "items": {
                     "type": "object",
                     "properties": {
-                        "id": {"type": "string"},
+                        "id": {
+                            "type": "string",
+                            "enum": list(GRAPH_GENERATED_STEP_IDS),
+                            "description": "Unique step label, assigned in order.",
+                        },
                         "operation": {
                             "type": "string",
                             "enum": sorted(_GRAPH_OPERATION_VALUES),
                         },
-                        "input_ref": {"type": ["string", "null"]},
+                        "input_ref": {
+                            "type": ["string", "null"],
+                            "description": (
+                                "Earlier step id + .world_character_refs for dependent counterpart lookups; "
+                                "otherwise null. Follow the operation's counterpart_binding rule."
+                            ),
+                        },
                         "parameters": {
                             "type": "object",
                             "properties": {
-                                "counterpart_ref": {"type": "string"},
+                                "counterpart_ref": {
+                                    "type": "string",
+                                    "description": (
+                                        "Supplied entity ref for a direct counterpart lookup. "
+                                        "Omit when input_ref is used or the operation takes no counterpart."
+                                    ),
+                                },
                                 "direction": {
                                     "type": "string",
                                     "enum": sorted(_DIRECTION_VALUES),

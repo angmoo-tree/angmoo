@@ -1035,6 +1035,98 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   expect(audit.providerCalls).toEqual([]);
 });
 
+for (const retryable of [true, false]) {
+  test(`G4 Graph failure manual retry ${retryable ? "allowed" : "blocked"} stays in one response slot`, async ({ page }) => {
+    await installBackendFixture(page, { worldReads: { [WORLD_ALPHA.world_id]: WORLD_ALPHA } });
+    const worldId = WORLD_ALPHA.world_id;
+    const threadId = "thread-graph-failure";
+    const base = `/api/backend/worlds/${worldId}/chat/threads/${threadId}`;
+    const userMessage = {
+      id: 701, thread_id: threadId, role: "user" as const, content: "이전 관계를 확인해 줘.",
+      model: null, status: "ok", error_code: null, created_at: "2026-09-12T08:00:00Z",
+    };
+    const assistant = { ...userMessage, id: 702, role: "assistant" as const, content: "확인한 관계를 설명할게요." };
+    const participant = {
+      world_character_id: "graph-requester", character_id: "graph-requester-character",
+      display_name: "사용자 앵무", handle: "graph_owner", avatar_url: null, banner_url: null,
+      role_key: "student", control_mode: "owner_controlled" as const, profile_capability: "available" as const,
+    };
+    const thread = {
+      id: threadId, world_id: worldId, requester: participant,
+      responding: { ...participant, world_character_id: "graph-responder", character_id: "graph-responder-character",
+        display_name: "친구 앵무", handle: "graph_friend", control_mode: "autonomous" as const },
+      selected_model: "gemini-3.1-flash-lite", selected_thinking_level: "high", default_thinking_level: "high",
+      default_model: "gemini-3.1-flash-lite", model_binding_mode: "default", last_message_at: userMessage.created_at,
+      created_at: userMessage.created_at, latest_message: userMessage, messages: [userMessage], evidence_summaries: [],
+    };
+    const failed = {
+      protocol_version: "chat-generation-stream.v1", request_id: "graph-failed", request_scope_hash: "a".repeat(64),
+      generation_id: "generation-graph-failed", attempt_number: 1, response_slot_id: "graph-stable-slot",
+      state: "failed", route: "GRAPH", retryable, failure_class: "retrieval_rejected", last_accepted_sequence: 1,
+      user_message: userMessage, assistant_message: null, response_metadata: {},
+    };
+    const accepted = { ...failed, request_id: "graph-retried", generation_id: "generation-graph-retried",
+      attempt_number: 2, state: "accepted", retryable: false, failure_class: null, last_accepted_sequence: -1 };
+    let retries = 0;
+    let committed = false;
+    let releaseRetry!: () => void;
+    const retryRelease = new Promise<void>((resolve) => { releaseRetry = resolve; });
+    const status = () => committed
+      ? { ...accepted, state: "committed", assistant_message: assistant, last_accepted_sequence: 2 }
+      : failed;
+    await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
+      const request = route.request();
+      const path = new URL(request.url()).pathname;
+      if (request.method() === "GET" && path === base) {
+        return json(route, { ...thread, messages: committed ? [userMessage, assistant] : [userMessage] });
+      }
+      if (path.endsWith("/requests/latest")) return json(route, { response_request: status() });
+      if (request.method() === "POST" && path === `${base}/retry`) {
+        retries += 1;
+        expect(request.postDataJSON()).toMatchObject({ failed_request_id: failed.request_id });
+        expect(request.postDataJSON().idempotency_key).toBeTruthy();
+        await retryRelease;
+        return json(route, { outcome: "accepted", user_message: userMessage, response_request: accepted });
+      }
+      if (path === `${base}/requests/${accepted.request_id}/events`) {
+        committed = true;
+        return route.fulfill({ status: 200, contentType: "application/x-ndjson", body: [
+          { ...accepted, sequence: 0, type: "accepted", payload: {} },
+          { ...accepted, sequence: 1, type: "delta", payload: { text: assistant.content } },
+          { ...accepted, sequence: 2, type: "completed", payload: {} },
+        ].map((event) => JSON.stringify(event)).join("\n") });
+      }
+      if (path === `${base}/requests/${accepted.request_id}` || path === `${base}/requests/${failed.request_id}`) {
+        return json(route, status());
+      }
+      return json(route, { detail: "fixture_unknown_path" }, 404);
+    });
+    await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+    await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toBeVisible();
+    await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "다시 시도", exact: true })).toHaveCount(retryable ? 1 : 0);
+    expect(retries).toBe(0);
+    await page.reload();
+    await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toBeVisible();
+    expect(retries).toBe(0);
+    await expect(page.getByText(/graph_plan_|graph_diagnostic|repair_exhausted/)).toHaveCount(0);
+    if (retryable) {
+      await page.getByRole("button", { name: "다시 시도", exact: true }).click();
+      await expect(page.getByRole("button", { name: "다시 시도 중", exact: true })).toBeDisabled();
+      await expect.poll(() => retries).toBe(1);
+      await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+      releaseRetry();
+      await expect(page.getByText(assistant.content, { exact: true })).toHaveCount(1);
+      await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "다시 시도", exact: true })).toHaveCount(0);
+      await page.reload();
+      await expect(page.getByText(assistant.content, { exact: true })).toHaveCount(1);
+      await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+      expect(retries).toBe(1);
+    }
+  });
+}
+
 test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, and narrow reflow", async ({
   page,
 }) => {

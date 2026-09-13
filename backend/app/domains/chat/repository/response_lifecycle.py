@@ -27,6 +27,7 @@ from app.domains.chat.contracts.response_request import (
 )
 from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
 from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.contracts.graph_failure import GraphFailureDiagnostic
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 from app.domains.chat.models import (
     ChatResponseRequest,
@@ -360,6 +361,7 @@ class SqlAlchemyResponseLifecycleRepository:
         failure_class: str | None = None,
         failure_diagnostic: dict | None = None,
         router_diagnostic: RouterFailureDiagnostic | None = None,
+        graph_diagnostic: GraphFailureDiagnostic | None = None,
         call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord:
@@ -379,6 +381,7 @@ class SqlAlchemyResponseLifecycleRepository:
             failure_class is not None
             or failure_diagnostic is not None
             or router_diagnostic is not None
+            or isinstance(graph_diagnostic, GraphFailureDiagnostic)
         ):
             row = self._require(fence.request_id, populate_existing=True)
             node_state = self._decode_json(row.node_state_json)
@@ -394,10 +397,13 @@ class SqlAlchemyResponseLifecycleRepository:
             if not isinstance(router_diagnostic, RouterFailureDiagnostic):
                 raise GenerationContractError("response_router_diagnostic_invalid")
             node_state["router_diagnostic"] = router_diagnostic.payload()
+        if isinstance(graph_diagnostic, GraphFailureDiagnostic):
+            node_state["graph_diagnostic"] = graph_diagnostic.payload()
         if (
             failure_class is not None
             or failure_diagnostic is not None
             or router_diagnostic is not None
+            or isinstance(graph_diagnostic, GraphFailureDiagnostic)
         ):
             values["node_state_json"] = _json_payload(node_state)
         if call_tracker is not None:

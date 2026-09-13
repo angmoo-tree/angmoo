@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, replace
-from datetime import UTC, date, datetime, time, timedelta
 import re
+from dataclasses import replace
+from datetime import UTC, date, datetime, time, timedelta
 from time import monotonic
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from app.domains.chat.contracts.reference_observation import resolved_references
 
 from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
 from app.domains.chat.contracts.resolved_envelope import (
@@ -22,16 +23,16 @@ from app.domains.chat.contracts.retrieval_intent import (
     RetrievalRoute,
     RetrievalTimeKind,
 )
-from app.domains.chat.contracts.retrieval_router import (
-    RetrievalRouterRepairExhaustedError,
-    RouterFailureDiagnostic,
-    router_validation_is_retryable,
-)
 from app.domains.chat.contracts.retrieval_policy import (
     CanonicalRetrievalScope,
     RetrievalEntityResolution,
     RetrievalPolicyResolverPort,
     RetrievalPreflightCommand,
+)
+from app.domains.chat.contracts.retrieval_router import (
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    router_validation_is_retryable,
 )
 from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterContextMessage,
@@ -39,61 +40,21 @@ from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterProviderPort,
     RetrievalRouterRequest,
 )
+from app.domains.chat.contracts.routing_result import (
+    ClarificationCandidate,
+    ClarificationResolution,
+    RetrievalRoutingMetrics,
+    RetrievalRoutingResult,
+)
+from app.domains.chat.contracts.workflow_recipe import workflow_recipe_for_intent
 from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
-from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
-
+from app.domains.relationships.contracts.graph_recall_gateway import (
+    GRAPH_RECALL_PRIMITIVE_REGISTRY,
+)
 
 _ABSOLUTE_RANGE_RE = re.compile(
     r"^(?P<start>\d{4}-\d{2}-\d{2})\.\.(?P<end>\d{4}-\d{2}-\d{2})$"
 )
-
-
-@dataclass(frozen=True, slots=True)
-class ClarificationCandidate:
-    ref: str
-    display_name: str
-    handle: str
-
-
-@dataclass(frozen=True, slots=True)
-class ClarificationResolution:
-    slot: str
-    candidates: tuple[ClarificationCandidate, ...] = ()
-
-
-@dataclass(frozen=True, slots=True)
-class RetrievalRoutingMetrics:
-    route: RetrievalRoute
-    router_proposed_route: RetrievalRoute
-    sufficiency_guard_reason: str | None
-    first_pass_valid: bool
-    repair_used: bool
-    rejected: bool
-    clarification: bool
-    entity_resolution_outcome: str
-    direction_resolution_outcome: str
-    time_resolution_outcome: str
-    router_logical_calls: int
-    router_physical_attempts: int
-    provider: str
-    model: str
-    prompt_token_count: int | None = None
-    output_token_count: int | None = None
-    thought_token_count: int | None = None
-    total_token_count: int | None = None
-    latency_ms: int | None = None
-    thinking_level: str | None = None
-    max_output_tokens: int | None = None
-    finish_reason: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class RetrievalRoutingResult:
-    intent: RetrievalIntentEnvelope
-    resolved: ResolvedRetrievalEnvelope
-    clarification: ClarificationResolution | None
-    metrics: RetrievalRoutingMetrics
-    call_tracker: dict
 
 
 class RetrievalRoutingService:
@@ -150,7 +111,9 @@ class RetrievalRoutingService:
             repair_used = True
             remaining_seconds -= monotonic() - started
             if remaining_seconds <= 0:
-                raise RetrievalContractError("retrieval_router_deadline_exceeded") from exc
+                raise RetrievalContractError(
+                    "retrieval_router_deadline_exceeded"
+                ) from exc
             try:
                 provider_result = await self._invoke_router(
                     replace(router_request, repair_diagnostic=exc.diagnostic),
@@ -183,6 +146,7 @@ class RetrievalRoutingService:
             tuple((entity.ref, entity.mention) for entity in intent.entities),
         )
         resolution_by_ref = {item.ref: item for item in resolutions}
+        resolved_references(intent, resolutions, phase="repair" if repair_used else "first", subject=scope.responding_world_character_id)
         if set(resolution_by_ref) != {entity.ref for entity in intent.entities}:
             raise RetrievalContractError("retrieval_entity_resolution_set_mismatch")
 
@@ -210,7 +174,14 @@ class RetrievalRoutingService:
         if direction_outcome == "ambiguous" and clarification is None:
             clarification = ClarificationResolution(slot="relationship_direction")
 
-        if clarification is not None and intent.route is not RetrievalRoute.CLARIFICATION:
+        resolved_references(intent, resolutions, phase="repair" if repair_used else "first",
+                            subject=scope.responding_world_character_id, bindings=bindings,
+                            direction=(direction_from, direction_to, direction_outcome))
+
+        if (
+            clarification is not None
+            and intent.route is not RetrievalRoute.CLARIFICATION
+        ):
             intent = self._as_clarification(intent, clarification.slot)
             direction_from = None
             direction_to = None
@@ -221,6 +192,11 @@ class RetrievalRoutingService:
                 slot=intent.clarification_slot or "entity_identity"
             )
 
+        if intent.coordination_source == "code":
+            intent = replace(intent, coordination_hint=(
+                workflow_recipe_for_intent(intent.intent).recipe.value
+                if intent.route is RetrievalRoute.BOTH else None
+            ))
         canonical_allowlist, graph_allowlist = self._operation_allowlists(intent.route)
         resolved = ResolvedRetrievalEnvelope.bind_intent(
             intent,
@@ -249,9 +225,7 @@ class RetrievalRoutingService:
         for _ in range(first_physical):
             tracker.record_physical_attempt(LlmNode.RETRIEVAL_ROUTER, now=now)
         if repair_used:
-            tracker.record_logical_call(
-                LlmNode.RETRIEVAL_ROUTER, now=now, repair=True
-            )
+            tracker.record_logical_call(LlmNode.RETRIEVAL_ROUTER, now=now, repair=True)
             for _ in range(repair_physical):
                 tracker.record_physical_attempt(LlmNode.RETRIEVAL_ROUTER, now=now)
 
@@ -285,6 +259,8 @@ class RetrievalRoutingService:
             clarification=clarification,
             metrics=metrics,
             call_tracker=tracker.snapshot(),
+            proposed_tool_calls=provider_result.tool_calls,
+            selection_mode=provider_result.selection_mode,
         )
 
     async def _invoke_router(
@@ -475,7 +451,9 @@ class RetrievalRoutingService:
             else ()
         )
         graph = (
-            tuple(sorted(operation.value for operation in GRAPH_RECALL_PRIMITIVE_REGISTRY))
+            tuple(
+                sorted(operation.value for operation in GRAPH_RECALL_PRIMITIVE_REGISTRY)
+            )
             if route in {RetrievalRoute.GRAPH, RetrievalRoute.BOTH}
             else ()
         )
@@ -492,7 +470,9 @@ class RetrievalRoutingService:
         return "resolved" if all(count == 1 for count in counts) else "ambiguous"
 
 
-def _relative_range(expression: str, local_now: datetime) -> tuple[datetime, datetime] | None:
+def _relative_range(
+    expression: str, local_now: datetime
+) -> tuple[datetime, datetime] | None:
     zone = local_now.tzinfo
     today = local_now.date()
 
@@ -560,14 +540,22 @@ def _apply_today_sns_sufficiency_guard(
     }:
         return intent, None
     normalized = " ".join(user_message.casefold().split())
-    semantic_today = intent.time_scope is not None and intent.time_scope.kind is RetrievalTimeKind.CURRENT_DAY
+    semantic_today = (
+        intent.time_scope is not None
+        and intent.time_scope.kind is RetrievalTimeKind.CURRENT_DAY
+    )
     if intent.time_scope is not None and not semantic_today:
         return intent, None
-    if not (semantic_today or any(marker in normalized for marker in _TODAY_MARKERS)) or not (
-        intent.intent.startswith("today_") or any(marker in normalized for marker in _SNS_MARKERS)
+    if not (
+        semantic_today or any(marker in normalized for marker in _TODAY_MARKERS)
+    ) or not (
+        intent.intent.startswith("today_")
+        or any(marker in normalized for marker in _SNS_MARKERS)
     ):
         return intent, None
-    if intent.relationship is not None or any(marker in normalized for marker in _RELATIONSHIP_MARKERS):
+    if intent.relationship is not None or any(
+        marker in normalized for marker in _RELATIONSHIP_MARKERS
+    ):
         return intent, None
     # The guard does not reinterpret another actor's identity or purpose. The
     # Router may choose CURRENT_CONTEXT with entity focus, but a CANONICAL
@@ -575,14 +563,20 @@ def _apply_today_sns_sufficiency_guard(
     if intent.route is RetrievalRoute.CANONICAL and intent.entities:
         return intent, "today_semantic_focus_requires_retrieval"
     if not isinstance(today_sns_context, dict):
-        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_unavailable"
+        return _intent_with_route(
+            intent, RetrievalRoute.CANONICAL
+        ), "today_context_unavailable"
     entries = today_sns_context.get("entries")
     counts = today_sns_context.get("counts")
     coverage = today_sns_context.get("coverage")
-    if not isinstance(entries, list) or not isinstance(counts, dict) or not isinstance(
-        coverage, dict
+    if (
+        not isinstance(entries, list)
+        or not isinstance(counts, dict)
+        or not isinstance(coverage, dict)
     ):
-        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_invalid"
+        return _intent_with_route(
+            intent, RetrievalRoute.CANONICAL
+        ), "today_context_invalid"
     relevant_kinds = _relevant_today_kinds(normalized)
     relevant_entries = [
         item
@@ -595,8 +589,7 @@ def _apply_today_sns_sufficiency_guard(
         if not isinstance(counts.get(kind), bool)
     )
     incomplete = any(
-        coverage.get(kind) not in {"complete", "unsupported"}
-        for kind in relevant_kinds
+        coverage.get(kind) not in {"complete", "unsupported"} for kind in relevant_kinds
     )
     exact_requested = any(
         marker in normalized
@@ -607,18 +600,33 @@ def _apply_today_sns_sufficiency_guard(
         for item in relevant_entries
     )
     omitted = known_count > len(relevant_entries)
-    if incomplete or not today_sns_context.get("counts_exact", True) or omitted or (exact_requested and content_incomplete):
-        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_incomplete"
+    if (
+        incomplete
+        or not today_sns_context.get("counts_exact", True)
+        or omitted
+        or (exact_requested and content_incomplete)
+    ):
+        return _intent_with_route(
+            intent, RetrievalRoute.CANONICAL
+        ), "today_context_incomplete"
     if known_count == 0:
         # A complete empty inventory is already a factual answer: there was no
         # matching activity today. Do not spend another LLM call searching for
         # something the canonical inventory proved absent.
         if all(coverage.get(kind) == "complete" for kind in relevant_kinds):
-            return _intent_with_route(intent, RetrievalRoute.CURRENT_CONTEXT), "today_context_complete_empty"
-        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_missing"
+            return _intent_with_route(
+                intent, RetrievalRoute.CURRENT_CONTEXT
+            ), "today_context_complete_empty"
+        return _intent_with_route(
+            intent, RetrievalRoute.CANONICAL
+        ), "today_context_missing"
     if not relevant_entries:
-        return _intent_with_route(intent, RetrievalRoute.CANONICAL), "today_context_missing"
-    return _intent_with_route(intent, RetrievalRoute.CURRENT_CONTEXT), "today_context_sufficient"
+        return _intent_with_route(
+            intent, RetrievalRoute.CANONICAL
+        ), "today_context_missing"
+    return _intent_with_route(
+        intent, RetrievalRoute.CURRENT_CONTEXT
+    ), "today_context_sufficient"
 
 
 def _relevant_today_kinds(message: str) -> set[str]:

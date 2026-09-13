@@ -77,6 +77,12 @@ class MemoryRecallSearchQuery:
     limit: int
     counterpart_world_character_id: str | None = None
     thread_id: str | None = None
+    # Backend operation policy, never an LLM-controlled search parameter.
+    korean_spacing_fallback: bool = False
+
+
+class MemoryRecallSearchIncomplete(RuntimeError):
+    """A bounded search stopped before absence could be established."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +103,13 @@ class MemoryRecallCandidate:
 
 @dataclass(frozen=True, slots=True)
 class CanonicalRecallRecord:
+    """A result identity plus its currently revalidated original-source references.
+
+    reference identifies this result (including memory-item and memory-source
+    documents). Dependent source reads consume evidence_references instead.
+    Records without source evidence cannot authorize a dependent detail read.
+    """
+
     reference: str
     kind: RecallDocumentKind
     canonical_source_id: str

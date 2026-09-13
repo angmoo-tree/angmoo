@@ -19,6 +19,7 @@ from app.domains.chat.contracts.response_request import (
 )
 from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
 from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
+from app.domains.chat.contracts.graph_failure import GraphFailureDiagnostic
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 
 
@@ -90,6 +91,7 @@ class ResponseLifecycleRepositoryPort(Protocol):
         failure_class: str | None = None,
         failure_diagnostic: dict | None = None,
         router_diagnostic: RouterFailureDiagnostic | None = None,
+        graph_diagnostic: GraphFailureDiagnostic | None = None,
         call_tracker: dict | None = None,
         now: datetime,
     ) -> ResponseRequestRecord: ...

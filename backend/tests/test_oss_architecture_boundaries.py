@@ -199,6 +199,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "integrations/llm/memory_consolidation.py": {"consolidate"},
         "integrations/llm/memory_selection.py": {"select"},
         "integrations/llm/retrieval_router.py": {"route"},
+        "integrations/llm/supervisor_selection.py": {"route"},
         "domains/chat/service/generation.py": {"stream_world_response"},
     }
     observed: dict[str, set[str]] = {}

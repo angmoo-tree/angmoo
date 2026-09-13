@@ -15,6 +15,7 @@ from app.domains.memory.contracts.recall import (
     CanonicalRecallStatus,
     MAX_CANONICAL_RECALL_RESULTS,
     MemoryRecallSearchQuery,
+    MemoryRecallSearchIncomplete,
     RecallDocumentKind,
 )
 from app.domains.memory.contracts.recall_store import (
@@ -158,7 +159,20 @@ class CanonicalRecallService:
                             validated.counterpart_world_character_id
                         ),
                         thread_id=validated.thread_id,
+                        korean_spacing_fallback=(
+                            validated.operation is CanonicalRecallOperation.SEARCH_MEMORY_ITEMS
+                            and validated.occurred_from is None
+                            and validated.occurred_to is None
+                        ),
                     )
+                )
+            except MemoryRecallSearchIncomplete:
+                return CanonicalRecallResult(
+                    operation=validated.operation,
+                    status=CanonicalRecallStatus.DEGRADED,
+                    records=(),
+                    reason_code="memory_recall_search_incomplete",
+                    truncated=True,
                 )
             except (OSError, RuntimeError, ValueError):
                 return CanonicalRecallResult(

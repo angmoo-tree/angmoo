@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from app.domains.chat.contracts.supervisor_selection import SelectionToolCall
 import json
 from typing import Protocol
 
@@ -110,6 +111,10 @@ class RetrievalRouterProviderResult:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    tool_calls: tuple[SelectionToolCall, ...] = ()
+    selection_mode: str = "legacy"
+    argument_protocol: str | None = None
+    selection_validation: dict | None = None
 
     def __post_init__(self) -> None:
         if self.physical_attempt_count < 1 or self.physical_attempt_count > 2:

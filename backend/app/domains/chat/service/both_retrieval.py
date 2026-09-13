@@ -80,9 +80,9 @@ class CoordinatedRetrievalReference:
 
 @dataclass(frozen=True, slots=True)
 class WorkflowCoordinatorMetrics:
-    requested_recipe: WorkflowRecipe
+    requested_recipe: WorkflowRecipe | None
     selected_recipe: WorkflowRecipe
-    router_hint_accepted: bool
+    router_hint_accepted: bool | None
     planners_parallel: bool
     planner_axes_called: tuple[WorkflowAxis, ...]
     dependency_reference: str | None
@@ -94,6 +94,7 @@ class WorkflowCoordinatorMetrics:
     deduplicated_count: int
     output_reference_count: int
     coordinator_llm_calls: int = 0
+    coordination_source: str = "model"
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,9 +138,11 @@ class BothRetrievalWorkflowCoordinator:
         *,
         canonical: CanonicalRetrievalPlanningService,
         graph: GraphRetrievalPlanningService,
+        parallel_runner=None,
     ) -> None:
         self._canonical = canonical
         self._graph = graph
+        self._parallel_runner = parallel_runner
 
     async def coordinate(
         self,
@@ -148,15 +151,20 @@ class BothRetrievalWorkflowCoordinator:
         now: datetime,
         deadline_at: datetime,
     ) -> BothRetrievalResult:
+        tracker = restore_call_tracker_snapshot(command.call_tracker, deadline_at=deadline_at)
+        try:
+            return await self._coordinate(command, now=now, deadline_at=deadline_at, tracker=tracker)
+        except (Exception, asyncio.CancelledError) as exc:
+            exc.call_tracker = tracker.snapshot()
+            raise
+
+    async def _coordinate(self, command: BothRetrievalCommand, *, now: datetime,
+        deadline_at: datetime, tracker: RouteAwareCallTracker) -> BothRetrievalResult:
         if now.tzinfo is None or deadline_at.tzinfo is None:
             raise RetrievalContractError("both_retrieval_deadline_timezone_required")
         if now >= deadline_at:
             raise RetrievalContractError("both_retrieval_deadline_exceeded")
         self._validate_command(command)
-        tracker = restore_call_tracker_snapshot(
-            command.call_tracker,
-            deadline_at=deadline_at,
-        )
         self._validate_start_tracker(tracker)
         selection = select_workflow_recipe(command.intent)
 
@@ -257,6 +265,7 @@ class BothRetrievalWorkflowCoordinator:
                 dropped_unmatched_count=merge_stats["dropped"],
                 deduplicated_count=merge_stats["deduplicated"],
                 output_reference_count=len(references),
+                coordination_source=selection.coordination_source,
             ),
             call_tracker=tracker.snapshot(),
         )
@@ -300,20 +309,38 @@ class BothRetrievalWorkflowCoordinator:
     ) -> tuple[CanonicalPlanningResult, GraphPlanningResult]:
         parent = current.get()
         collectors = [Observation(detailed=bool(parent and parent.detailed)) for _ in range(2)]
+        failures = {}
 
         async def isolated(index, awaitable):
             token = current.set(collectors[index] if parent is not None else None)
             try:
                 return await awaitable
+            except (Exception, asyncio.CancelledError) as exc:
+                failures[index] = exc
+                raise
             finally:
                 current.reset(token)
 
         try:
-            outcomes = await asyncio.gather(
-                isolated(0, self._run_canonical(command, tracker=tracker, now=now, deadline_at=deadline_at)),
-                isolated(1, self._run_graph(command, tracker=tracker, now=now, deadline_at=deadline_at)),
-                return_exceptions=True,
-            )
+            jobs = {
+                "CANONICAL": lambda: isolated(0, self._run_canonical(command, tracker=tracker, now=now, deadline_at=deadline_at)),
+                "GRAPH": lambda: isolated(1, self._run_graph(command, tracker=tracker, now=now, deadline_at=deadline_at)),
+            }
+            if self._parallel_runner is None:
+                tasks = [asyncio.create_task(job()) for job in jobs.values()]
+                try:
+                    outcomes = await asyncio.gather(*tasks, return_exceptions=True)
+                except asyncio.CancelledError:
+                    for task in tasks:
+                        task.cancel()
+                    await asyncio.gather(*tasks, return_exceptions=True)
+                    raise
+            else:
+                outcomes = await self._parallel_runner(jobs)
+        except asyncio.CancelledError as exc:
+            # The runner has settled cancelled children before returning.
+            exc.graph_failure_diagnostic = getattr(failures.get(1), "graph_failure_diagnostic", None)
+            raise
         finally:
             if parent is not None:
                 for collector in collectors:
@@ -327,6 +354,8 @@ class BothRetrievalWorkflowCoordinator:
                             parent.omitted += 1
         canonical, graph = outcomes
         if isinstance(canonical, BaseException):
+            if isinstance(graph, BaseException):
+                canonical.sibling_graph_failure_diagnostic = getattr(graph, "graph_failure_diagnostic", None)
             raise canonical
         if isinstance(graph, BaseException):
             raise graph

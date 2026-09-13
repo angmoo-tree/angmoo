@@ -20,6 +20,7 @@ from pathlib import Path
 import re
 import sqlite3
 from threading import RLock
+from time import monotonic
 import unicodedata
 
 from app.core.search_text import normalize_search_text
@@ -29,6 +30,8 @@ from app.domains.memory.contracts.recall import MemoryRecallCandidate
 from app.domains.memory.contracts.recall import MemoryRecallDoctor
 from app.domains.memory.contracts.recall import MemoryRecallDocument
 from app.domains.memory.contracts.recall import MemoryRecallSearchQuery
+from app.domains.memory.contracts.recall import MemoryRecallSearchIncomplete
+from app.domains.memory.policies.korean_recall import spacing_groups, spacing_matches
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
@@ -37,6 +40,9 @@ from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 _GENERATION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _WORD_PATTERN = re.compile(r"[\w]+", re.UNICODE)
 _TOKENIZER_STRATEGY = "unicode61 + CJK bigram terms + normalized substring fallback"
+_SPACING_MAX_ROWS = 2_000
+_SPACING_MAX_BYTES = 4 * 1024 * 1024
+_SPACING_SECONDS = 0.050
 
 
 class MemoryRecallIndexError(RuntimeError):
@@ -289,6 +295,14 @@ class SqliteMemoryRecallIndex:
                         limit=candidate_limit,
                     )
                     observe("search", method="normalized_substring_fallback", executed=True, returned=len(rows), reason="fts_execution_error" if fts_error else "fts_empty", limit=candidate_limit)
+                if (not rows and not fts_error and query.korean_spacing_fallback
+                        and query.kinds == (RecallDocumentKind.MEMORY_ITEM,)):
+                    groups = spacing_groups(normalized)
+                    if groups:
+                        rows = self._spacing_rows(connection, filters, parameters, groups, candidate_limit)
+                    else:
+                        observe("search", method="korean_spacing_fallback", executed=False,
+                                reason="insufficient_spacing_clues", returned=0)
         except sqlite3.DatabaseError as exc:
             raise MemoryRecallIndexError("Memory recall query failed") from exc
         return tuple(_row_to_candidate(row) for row in rows)
@@ -679,6 +693,91 @@ class SqliteMemoryRecallIndex:
             )
         ]
         return matched[:limit]
+
+    @staticmethod
+    def _spacing_rows(
+        connection: sqlite3.Connection,
+        filters: list[str],
+        parameters: list[str],
+        groups: tuple[str, ...],
+        limit: int,
+    ) -> list[sqlite3.Row]:
+        """Bounded scan of the existing projection; no writes or second full fetch.
+
+        On exhaustion discard provisional matches and surface incomplete to the
+        domain. SQL sorting is included in the deadline via progress handler.
+        Fetch one bounded normalized field at a time (at most 50k characters).
+        """
+        started = monotonic()
+        detail(operation="korean_spacing_fallback", normalized_query=" AND ".join(groups))
+        deadline = started + _SPACING_SECONDS
+        scanned = size = 0
+        ids = []
+        reason = "completed"
+        cursor = None
+        connection.set_progress_handler(lambda: int(monotonic() >= deadline), 100)
+        try:
+            # Necessary character conditions only; spaces can never create or
+            # remove these characters. This avoids fetching unrelated old rows
+            # without claiming that SQLite examined only the fetched rows.
+            anchor_group = max((g for g in groups if re.fullmatch(r"[가-힣]+", g)), key=len)
+            anchors = tuple(dict.fromkeys(anchor_group))[:4]
+            anchor_filters = ["instr(d.normalized_text, ?) > 0" for _ in anchors]
+            cursor = connection.execute(
+                f"SELECT d.document_id, d.normalized_text FROM memory_recall_documents d "
+                f"WHERE {' AND '.join([*filters, *anchor_filters])} "
+                "ORDER BY d.occurred_at DESC, d.document_id ASC LIMIT ?",
+                (*parameters, *anchors, _SPACING_MAX_ROWS + 1),
+            )
+            while row := cursor.fetchone():
+                if monotonic() >= deadline:
+                    reason = "time_budget"
+                    break
+                if scanned >= _SPACING_MAX_ROWS:
+                    reason = "row_budget"
+                    break
+                text = str(row["normalized_text"])
+                size += len(text.encode("utf-8"))
+                if size > _SPACING_MAX_BYTES:
+                    reason = "text_budget"
+                    break
+                scanned += 1
+                if spacing_matches(groups, text):
+                    ids.append(str(row["document_id"]))
+                    if len(ids) == limit:
+                        reason = "candidate_limit"
+                        break
+            if monotonic() >= deadline:
+                reason = "time_budget"
+            if reason not in {"completed", "candidate_limit"}:
+                raise MemoryRecallSearchIncomplete("memory_recall_search_incomplete")
+            if not ids:
+                return []
+            rows = connection.execute(
+                f"SELECT d.*, 0.0 AS rank FROM memory_recall_documents d "
+                f"WHERE {' AND '.join(filters)} AND d.document_id IN ({','.join('?' for _ in ids)}) "
+                "ORDER BY d.occurred_at DESC, d.document_id ASC",
+                (*parameters, *ids),
+            ).fetchall()
+            if monotonic() >= deadline:
+                reason = "time_budget"
+                raise MemoryRecallSearchIncomplete("memory_recall_search_incomplete")
+            return rows
+        except sqlite3.OperationalError as exc:
+            if monotonic() >= deadline:
+                reason = "time_budget"
+                raise MemoryRecallSearchIncomplete("memory_recall_search_incomplete") from exc
+            reason = "sqlite_error"
+            raise
+        finally:
+            if cursor is not None:
+                cursor.close()
+            connection.set_progress_handler(None, 0)
+            observe("search", method="korean_spacing_fallback", executed=True,
+                    reason=reason, groups=len(groups), scanned=scanned, bytes_scanned=size,
+                    returned=len(ids) if reason in {"completed", "candidate_limit"} else 0,
+                    truncated=reason not in {"completed", "candidate_limit"},
+                    limit=limit, elapsed_ms=(monotonic() - started) * 1000)
 
     def _require_open(self) -> None:
         if not self._opened:

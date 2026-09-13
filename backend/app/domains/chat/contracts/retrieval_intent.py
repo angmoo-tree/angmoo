@@ -12,6 +12,8 @@ import hashlib
 import json
 import re
 from typing import Any
+from app.domains.chat.contracts.reference_observation import reference_failure
+from app.domains.relationships.contracts.graph_requirements import GraphQueryRequirement, validate_graph_queries
 
 
 RETRIEVAL_INTENT_VERSION = "retrieval-intent.v1"
@@ -59,6 +61,7 @@ class RetrievalEntityMention:
 
     def __post_init__(self) -> None:
         if not _REF_RE.fullmatch(self.ref):
+            reference_failure("entity_ref", self.ref, rule="entity_ref_format.v1", reason="ref_format_invalid")
             raise RetrievalContractError("retrieval_intent_entity_ref_invalid")
         if not self.mention.strip() or len(self.mention) > 160:
             raise RetrievalContractError("retrieval_intent_entity_mention_invalid")
@@ -77,10 +80,12 @@ class RetrievalRelationshipMeaning:
     requested_polarity: str | None = None
 
     def __post_init__(self) -> None:
-        for value in (self.from_ref, self.to_ref):
+        for field_name, value in (("relationship_from", self.from_ref), ("relationship_to", self.to_ref)):
             if value not in {"requester_character", "responding_character"} and not _REF_RE.fullmatch(value):
+                reference_failure(field_name, value, rule="relationship_ref_format.v1", reason="ref_format_invalid")
                 raise RetrievalContractError("retrieval_intent_relationship_ref_invalid")
         if self.from_ref == self.to_ref:
+            reference_failure("relationship", self.from_ref, rule="relationship_pair.v1", reason="same_endpoint", related=self.to_ref)
             raise RetrievalContractError("retrieval_intent_relationship_self_invalid")
 
     def payload(self) -> dict[str, str | None]:
@@ -137,10 +142,19 @@ class RetrievalIntentEnvelope:
     coordination_hint: str | None = None
     clarification_slot: str | None = None
     version: str = RETRIEVAL_INTENT_VERSION
+    # Code-owned provenance, not part of the model wire payload or semantic hash.
+    coordination_source: str = "model"
+    graph_queries: tuple[GraphQueryRequirement, ...] = ()
 
     def __post_init__(self) -> None:
-        if self.version != RETRIEVAL_INTENT_VERSION:
+        if self.coordination_source not in {"model", "code"}:
+            raise RetrievalContractError("retrieval_intent_coordination_source_invalid")
+        if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2"}:
             raise RetrievalContractError("retrieval_intent_version_mismatch")
+        if self.graph_queries:
+            if self.version != "retrieval-intent.v2":
+                raise RetrievalContractError("retrieval_intent_version_mismatch")
+            validate_graph_queries(self.graph_queries, {e.ref for e in self.entities} | {"builtin-requester"})
         if not self.intent.strip() or len(self.intent) > 96:
             raise RetrievalContractError("retrieval_intent_name_invalid")
         if len(self.entities) > 4:
@@ -162,12 +176,14 @@ class RetrievalIntentEnvelope:
                 self.relationship.from_ref not in allowed
                 or self.relationship.to_ref not in allowed
             ):
+                reference_failure("relationship", self.relationship.from_ref, rule="relationship_bound.v1", reason="unbound", related=self.relationship.to_ref, declared=allowed)
                 raise RetrievalContractError("retrieval_intent_relationship_unbound")
         if self.route is RetrievalRoute.CLARIFICATION and not self.clarification_slot:
             raise RetrievalContractError("retrieval_intent_clarification_slot_required")
 
     def payload(self) -> dict[str, Any]:
         return {
+            **({"graph_queries": [q.payload() for q in self.graph_queries]} if self.version == "retrieval-intent.v2" else {}),
             "version": self.version,
             "decision": self.decision.value,
             "route": self.route.value,

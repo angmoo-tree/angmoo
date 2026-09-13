@@ -82,9 +82,12 @@ class ResolvedRetrievalEnvelope:
     version: str = RESOLVED_RETRIEVAL_VERSION
 
     def __post_init__(self) -> None:
-        if self.version != RESOLVED_RETRIEVAL_VERSION:
+        if self.version not in {RESOLVED_RETRIEVAL_VERSION, "resolved-retrieval.v2"}:
             raise RetrievalContractError("resolved_retrieval_version_mismatch")
-        if self.intent_version != RETRIEVAL_INTENT_VERSION:
+        if (self.version, self.intent_version) not in {
+            (RESOLVED_RETRIEVAL_VERSION, RETRIEVAL_INTENT_VERSION),
+            ("resolved-retrieval.v2", "retrieval-intent.v2"),
+        }:
             raise RetrievalContractError("resolved_retrieval_intent_version_mismatch")
         if len(self.intent_hash) != 64:
             raise RetrievalContractError("resolved_retrieval_intent_hash_invalid")
@@ -125,6 +128,8 @@ class ResolvedRetrievalEnvelope:
 
     @classmethod
     def bind_intent(cls, intent: RetrievalIntentEnvelope, **values: Any) -> "ResolvedRetrievalEnvelope":
+        if intent.version == "retrieval-intent.v2":
+            values = {**values, "intent_version": intent.version, "version": "resolved-retrieval.v2"}
         return cls(intent_hash=intent.envelope_hash, **values)
 
     def payload(self) -> dict[str, Any]:

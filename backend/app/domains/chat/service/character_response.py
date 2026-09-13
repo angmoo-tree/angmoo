@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
@@ -11,28 +10,13 @@ from app.domains.chat.contracts.call_tracker import (
     LlmNode,
     restore_call_tracker_snapshot,
 )
-from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 from app.domains.chat.contracts.character_response_generator import (
+    CharacterResponseGenerationResult,
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorPort,
     CharacterResponseGeneratorRequest,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class CharacterResponseGenerationResult:
-    text: str
-    provider: str
-    model: str
-    call_tracker: dict[str, Any]
-    prompt_token_count: int | None = None
-    output_token_count: int | None = None
-    thought_token_count: int | None = None
-    total_token_count: int | None = None
-    latency_ms: int | None = None
-    thinking_level: str | None = None
-    max_output_tokens: int | None = None
-    finish_reason: str | None = None
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
 
 
 class CharacterResponseGenerationService:
@@ -49,7 +33,9 @@ class CharacterResponseGenerationService:
         """Fence the exactly-once logical CRG call before provider I/O."""
 
         if now.tzinfo is None or deadline_at.tzinfo is None:
-            raise RetrievalContractError("character_response_deadline_timezone_required")
+            raise RetrievalContractError(
+                "character_response_deadline_timezone_required"
+            )
         tracker = restore_call_tracker_snapshot(
             call_tracker,
             deadline_at=deadline_at,
@@ -69,7 +55,9 @@ class CharacterResponseGenerationService:
         deadline_at: datetime,
     ) -> CharacterResponseGenerationResult:
         if now.tzinfo is None or deadline_at.tzinfo is None:
-            raise RetrievalContractError("character_response_deadline_timezone_required")
+            raise RetrievalContractError(
+                "character_response_deadline_timezone_required"
+            )
         tracker = restore_call_tracker_snapshot(
             call_tracker,
             deadline_at=deadline_at,
@@ -118,7 +106,9 @@ def character_response_deltas(text: str, *, max_chars: int = 48) -> tuple[str, .
 
     if not text or not 1 <= max_chars <= 512:
         raise RetrievalContractError("character_response_delta_input_invalid")
-    return tuple(text[index : index + max_chars] for index in range(0, len(text), max_chars))
+    return tuple(
+        text[index : index + max_chars] for index in range(0, len(text), max_chars)
+    )
 
 
 __all__ = [

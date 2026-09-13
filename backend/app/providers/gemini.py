@@ -15,6 +15,7 @@ from app.providers.contracts import (
     ProviderError,
     ProviderRequest,
     ProviderResponse,
+    ProviderToolCall,
     ProviderUsage,
 )
 
@@ -214,6 +215,30 @@ def _finish_reason_from_response(response: Any) -> str | None:
     return value if isinstance(value, str) else "UNKNOWN"
 
 
+def _native_parameters(schema: dict[str, Any]) -> types.Schema:
+    """Use the SDK's OpenAPI nullable form; domain validation stays authoritative."""
+    def convert(node):
+        result = {}
+        for key, value in node.items():
+            if key == "additionalProperties":
+                continue  # Enforced by the closed domain parser.
+            if key == "properties":
+                result[key] = {name: convert(item) for name, item in value.items()}
+            elif key == "items":
+                result[key] = convert(value)
+            elif key == "type" and isinstance(value, list):
+                concrete = [item for item in value if item != "null"]
+                if len(concrete) != 1 or "null" not in value:
+                    raise ValueError("native_tool_schema_union_unsupported")
+                result[key], result["nullable"] = concrete[0], True
+            elif key == "enum":
+                result[key] = [item for item in value if item is not None]
+            else:
+                result[key] = value
+        return result
+    return types.Schema.model_validate(convert(schema))
+
+
 def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
     client = genai.Client(
         api_key=request.api_key,
@@ -234,6 +259,24 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         thinking_level=request.thinking_level,
     )
     contents: Any = request.user_prompt
+    if request.require_tool_call and not request.tools:
+        raise ValueError("required_tool_declarations_missing")
+    if request.tools:
+        if request.response_schema is not None or request.response_mime_type is not None:
+            raise ValueError("native_tools_json_mode_conflict")
+        config.tools = [types.Tool(function_declarations=[
+            types.FunctionDeclaration(name=tool.name, description=tool.description,
+                                      parameters=_native_parameters(tool.parameters))
+            for tool in request.tools
+        ])]
+        config.automatic_function_calling = types.AutomaticFunctionCallingConfig(disable=True)
+        config.tool_config = types.ToolConfig(
+            # Unlike ANY, VALIDATED still permits a no-tool response, while
+            # constraining native function arguments to their declared schema.
+            function_calling_config=types.FunctionCallingConfig(
+                mode="ANY" if request.require_tool_call else "VALIDATED"
+            )
+        )
     if request.image_parts:
         parts = [types.Part.from_text(text=request.user_prompt)]
         for image_part in request.image_parts:
@@ -262,6 +305,15 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         parsed=getattr(response, "parsed", None),
         usage=_usage_from_response(response),
         finish_reason=_finish_reason_from_response(response),
+        tool_calls=tuple(
+            ProviderToolCall(name=part.function_call.name,
+                             arguments=dict(part.function_call.args or {}),
+                             call_id=part.function_call.id,
+                             thought_signature=part.thought_signature)
+            for candidate in (response.candidates or [])[:1]
+            for part in (getattr(candidate.content, "parts", None) or [])
+            if part.function_call is not None
+        ),
     )
 
 
@@ -295,6 +347,7 @@ class GeminiAdapter:
         structured_json=True,
         image_input=True,
         embedding=True,
+        tool_calls=True,
     )
 
     async def generate_text(self, request: ProviderRequest) -> ProviderResponse:

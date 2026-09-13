@@ -151,6 +151,7 @@ class _FakeRecall:
             records=(
                 CanonicalRecallRecord(
                     reference="source:chat_message:42",
+                    evidence_references=("source:chat_message:42",),
                     kind=RecallDocumentKind.THREAD_MESSAGE,
                     canonical_source_id="42",
                     text=text,

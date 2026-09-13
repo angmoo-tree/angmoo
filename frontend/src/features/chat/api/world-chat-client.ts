@@ -448,3 +448,12 @@ export async function readRetrievalDiagnostics(worldId: string, threadId: string
 export async function setRetrievalCapture(worldId: string, threadId: string, enabled: boolean) {
   return requestWorldChatApi(worldChatApiPath(worldId, `/threads/${encodeURIComponent(threadId)}/diagnostics/capture`), { method: "PUT", body: { enabled } });
 }
+
+export async function listDiagnosticRequests(worldId: string, threadId: string, cursor: string, signal?: AbortSignal) {
+  const suffix = `/threads/${encodeURIComponent(threadId)}/diagnostics/requests${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`;
+  const data = await requestWorldChatApi<import("@/features/chat/types/retrieval-diagnostics").DiagnosticRequestList>(worldChatApiPath(worldId, suffix), { signal });
+  if (!data || data.world_id !== worldId || data.thread_id !== threadId || !Array.isArray(data.items) || data.items.length > 100 ||
+      !data.items.every(row => typeof row.request_id === "string" && typeof row.created_at === "string" && typeof row.state === "string") ||
+      !(data.next_cursor === null || typeof data.next_cursor === "string")) throw new WorldChatApiError(502, "diagnostic_scope_mismatch");
+  return data;
+}

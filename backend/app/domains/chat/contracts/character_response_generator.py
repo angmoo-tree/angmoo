@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
@@ -103,6 +103,22 @@ class CharacterResponseGeneratorResult:
             or not 1 <= self.physical_attempt_count <= 2
         ):
             raise ValueError("character_response_result_invalid")
+
+
+@dataclass(frozen=True, slots=True)
+class CharacterResponseGenerationResult:
+    text: str
+    provider: str
+    model: str
+    call_tracker: dict[str, Any]
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

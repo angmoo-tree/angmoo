@@ -17,11 +17,14 @@ from typing import Any
 VERSION = "chat-retrieval-diagnostics.v1"
 MAX_BYTES = 16 * 1024
 MAX_EVENTS = 48
-_CRITICAL = frozenset({"router", "planner", "both_merge", "crg_input", "crg_completed", "workflow_failed", "evidence_kind"})
+_CRITICAL = frozenset({"router", "planner", "both_merge", "crg_input", "crg_completed", "workflow_failed", "evidence_kind", "planner_validation", "graph_failure", "decision_failure", "decision_summary"})
 _CODES = re.compile(r"^[a-zA-Z][a-zA-Z0-9_.-]{0,79}$")
-_TEXT_KEYS = frozenset({"axis", "operation", "method", "status", "reason", "recipe", "direction", "ranking", "route", "model", "thinking_level", "source", "phase"})
-_NUM_KEYS = frozenset({"relationships", "evidence", "nodes", "paths", "step", "queries", "planned", "candidates", "accepted", "excluded", "returned", "input", "output", "duplicates", "unmatched", "limit", "hops", "depth", "fanout", "items", "chars", "elapsed_ms", "input_tokens", "output_tokens", "thought_tokens"})
-_BOOL_KEYS = frozenset({"executed", "skipped", "counterpart_filter", "thread_filter", "time_filter", "limit_reached", "repair_used", "first_pass_valid", "parallel", "truncated", "search_text_present"})
+_TEXT_KEYS = frozenset({"axis", "operation", "method", "status", "reason", "recipe", "direction", "ranking", "route", "model", "thinking_level", "source", "phase", "validation_code", "failure_stage", "finish_reason", "call_ref", "terminal_code", "repair_node"})
+_NUM_KEYS = frozenset({"relationships", "evidence", "nodes", "paths", "step", "queries", "planned", "candidates", "accepted", "excluded", "returned", "input", "output", "duplicates", "unmatched", "limit", "hops", "depth", "fanout", "items", "chars", "elapsed_ms", "input_tokens", "output_tokens", "thought_tokens", "response_chars", "logical_calls", "physical_attempts", "groups", "scanned", "bytes_scanned", "attempt"})
+_BOOL_KEYS = frozenset({"executed", "skipped", "counterpart_filter", "thread_filter", "time_filter", "limit_reached", "repair_used", "first_pass_valid", "parallel", "truncated", "search_text_present", "repair_exhausted", "physical_count_complete"})
+_TEXT_KEYS |= frozenset({"field_path", "validation_pass", "applied_rule", "expected_direction", "returned_direction", "response_state", "provider", "trace_version", "function", "check", "failure_reason"})
+_NUM_KEYS |= frozenset({"tool_count", "total_tokens", "max_output_tokens", "timeout_seconds", "detail_omitted", "call", "entity_index"})
+_BOOL_KEYS |= frozenset({"matched", "response_observed", "trace_complete", "detail_captured"})
 
 
 @dataclass(slots=True)
@@ -32,14 +35,23 @@ class Observation:
     events: list[dict[str, Any]] = field(default_factory=list)
     details: list[dict[str, Any]] = field(default_factory=list)
     omitted: int = 0
+    trace_active: bool = False
+    detail_omitted: int = 0
+    trace_aliases: dict[str, dict[str, str]] = field(default_factory=dict, repr=False)
 
     def payload(self) -> dict[str, Any]:
         events = list(self.events)
+        if self.trace_active:
+            events.append({"event": "decision_summary", "trace_version": "decision-trace.v2",
+                           "detail_captured": self.detailed, "detail_omitted": self.detail_omitted,
+                           "trace_complete": self.omitted == 0 and self.detail_omitted == 0})
         result = {"version": VERSION, "events": events, "omitted_events": self.omitted}
-        while len(json.dumps(result, ensure_ascii=True).encode()) > MAX_BYTES and events:
+        while (len(events) > MAX_EVENTS or len(json.dumps(result, ensure_ascii=True).encode()) > MAX_BYTES) and events:
             index = next((i for i, row in enumerate(events) if row["event"] not in _CRITICAL), 0)
             events.pop(index)
             result["omitted_events"] += 1
+        if self.trace_active and events and events[-1]["event"] == "decision_summary":
+            events[-1]["trace_complete"] = result["omitted_events"] == 0 and self.detail_omitted == 0
         return result
 
 
@@ -99,9 +111,11 @@ def detail(**values: object) -> None:
         row = {key: redact_secret_text(value[:1500]) for key, value in values.items() if key in allowed and isinstance(value, str)}
         if step_context.get() is not None:
             row["axis"], row["step"] = step_context.get()  # type: ignore[misc]
-        if row and len(target.details) < 24:
+        if row:
             candidate = [*target.details, row]
-            if len(json.dumps(candidate, ensure_ascii=True).encode()) <= 64 * 1024:
+            if len(target.details) < 24 and len(json.dumps(candidate, ensure_ascii=True).encode()) <= 64 * 1024:
                 target.details.append(row)
+            else:
+                target.detail_omitted += 1
     except Exception:
         target.omitted += 1

@@ -1,5 +1,5 @@
 """Owner-only troubleshooting; deliberately separate from message/stream DTOs."""
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from app.domains.chat.schemas import CaptureUpdate, CaptureRead, DiagnosticRead
 from sqlalchemy.orm import Session
 from app.domains.chat.dependencies import browser_session, get_current_user, get_db, get_thread_service
@@ -10,6 +10,8 @@ from app.domains.chat.service.diagnostic_capture import capture
 from app.domains.chat.repository.retrieval_diagnostics import read
 from app.domains.chat.repository.response_requests import _latest_request_row
 from app.domains.chat.models import ChatResponseRequest
+from app.domains.chat.schemas import DiagnosticRequestListRead
+from app.domains.chat.repository.diagnostic_requests import list_requests, metadata
 
 router = APIRouter(prefix="/worlds/{world_id}/chat/threads/{thread_id}", tags=["world-chat"])
 
@@ -44,7 +46,20 @@ def diagnostics(response: Response, request_id: str | None = None,
     result = {"status": "not_recorded", "record": None} if row is None else read(db, row.request_id)
     return {"world_id": scope[1], "thread_id": scope[2], "request_id": None if row is None else row.request_id,
             "request_state": None if row is None else row.state,
+            "request": None if row is None else metadata(row),
             "capture": capture.status(scope), "details": None if row is None else capture.read(scope, row.request_id), **result}
+
+
+@router.get("/diagnostics/requests", response_model=DiagnosticRequestListRead)
+def diagnostic_requests(response: Response, cursor: str | None = Query(None, min_length=1, max_length=64),
+                        limit: int = Query(30, ge=1, le=100),
+                        scope=Depends(scope_access), db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        page = list_requests(db, scope[2], limit=limit, cursor=cursor)
+    except ValueError as exc:
+        raise HTTPException(422, "진단 요청 목록의 위치를 확인할 수 없습니다.") from exc
+    return {"world_id": scope[1], "thread_id": scope[2], **page}
 
 
 @router.put("/diagnostics/capture", response_model=CaptureRead)

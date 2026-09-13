@@ -2,104 +2,74 @@
 
 from __future__ import annotations
 
-from app.contracts.retrieval_observation import Observation, current, observe
-from app.domains.chat.service.diagnostic_capture import capture
-
 import asyncio
-from collections.abc import AsyncIterator, Mapping
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 import logging
+from app.domains.chat.contracts.graph_failure import graph_failure_diagnostic
+from app.domains.chat.graph_retry_policy import graph_failure_allows_user_retry
+from collections.abc import AsyncIterator
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
-from app.domains.chat.service.both_retrieval import (
-    BothRetrievalCommand,
-    BothRetrievalWorkflowCoordinator,
+from app.contracts.retrieval_observation import Observation, current, observe
+from app.domains.chat.contracts.character_response_generator import (
+    CharacterResponseGeneratorError,
 )
-from app.domains.chat.service.canonical_retrieval import (
-    CanonicalRetrievalCommand,
-    CanonicalRetrievalPlanningService,
-)
-from app.domains.chat.service.character_response import (
-    CharacterResponseGenerationService,
-    character_response_deltas,
-)
-from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
-from app.domains.chat.contracts.response_lifecycle import ResponseLifecycleRepositoryPort
-from app.domains.chat.service.graph_retrieval import (
-    GraphRetrievalCommand,
-    GraphRetrievalPlanningService,
-)
-from app.domains.chat.service.retrieval_routing import RetrievalRoutingService
 from app.domains.chat.contracts.generation_lifecycle import (
+    TERMINAL_STATES,
     GenerationContractError,
     GenerationEvent,
     GenerationEventType,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
-    TERMINAL_STATES,
 )
-from app.domains.chat.contracts.evidence_bundle import EvidenceKind
+from app.domains.chat.contracts.response_execution import (
+    ResponseExecutionError,
+    ResponseGraphExecutor,
+    ResponseWorkflowCommand,
+    initial_response_state,
+)
+from app.domains.chat.contracts.response_lifecycle import (
+    ResponseLifecycleRepositoryPort,
+)
 from app.domains.chat.contracts.response_request import (
     ResponseCommitPayload,
     ResponseMetadata,
     ResponseRequestRecord,
 )
+from app.domains.chat.contracts.response_workflow import ResponseWorkflowUnitOfWorkPort
 from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
     RetrievalRoute,
 )
 from app.domains.chat.contracts.retrieval_router import RouterFailureDiagnostic
-from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
-from app.domains.chat.contracts.today_sns_activity import (
-    TodaySnsSnapshotChangedError, TodaySnsSnapshotValidatorPort,
-)
-from app.domains.chat.contracts.character_response_generator import (
-    CharacterResponseContextMessage,
-    CharacterResponseGeneratorError,
-    CharacterResponseGeneratorRequest,
-    CharacterResponseProfile,
-)
-from app.domains.chat.contracts.response_workflow import ResponseWorkflowUnitOfWorkPort
 from app.domains.chat.contracts.successful_chat_memory import (
     SuccessfulChatMemoryProducerPort,
     SuccessfulChatMemorySource,
 )
-from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
-from app.domains.chat.contracts.retrieval_router_provider import RetrievalRouterContextMessage
-
+from app.domains.chat.contracts.today_sns_activity import (
+    TodaySnsSnapshotChangedError,
+    TodaySnsSnapshotValidatorPort,
+)
+from app.domains.chat.service.both_retrieval import BothRetrievalWorkflowCoordinator
+from app.domains.chat.service.canonical_retrieval import (
+    CanonicalRetrievalPlanningService,
+)
+from app.domains.chat.service.character_response import (
+    CharacterResponseGenerationService,
+    character_response_deltas,
+)
+from app.domains.chat.service.diagnostic_capture import capture
+from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
+from app.domains.chat.service.graph_retrieval import GraphRetrievalPlanningService
+from app.domains.chat.service.response_steps import (
+    ResponseExecutionProgress,
+    ResponseWorkflowSteps,
+)
+from app.domains.chat.service.retrieval_routing import RetrievalRoutingService
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True, slots=True)
-class ResponseWorkflowCommand:
-    request: ResponseRequestRecord
-    preflight: RetrievalPreflightCommand
-    profile: CharacterResponseProfile
-    router_context: tuple[RetrievalRouterContextMessage, ...]
-    response_context: tuple[CharacterResponseContextMessage, ...]
-    character_labels: Mapping[str, str]
-    today_sns_snapshot: TodaySnsActivitySnapshot | None = None
-    graph_projection_enabled: bool = True
-    lease_seconds: int = 180
-
-    def __post_init__(self) -> None:
-        if self.request.request_id != self.preflight.request_id:
-            raise RetrievalContractError("response_workflow_request_mismatch")
-        if self.request.thread_id != self.preflight.thread_id:
-            raise RetrievalContractError("response_workflow_thread_mismatch")
-        if self.today_sns_snapshot is not None and (
-            self.today_sns_snapshot.owner_id != self.preflight.owner_id
-            or self.today_sns_snapshot.world_id != self.preflight.world_id
-            or self.today_sns_snapshot.subject_world_character_id
-            != self.preflight.responding_world_character_id
-        ):
-            raise RetrievalContractError("response_workflow_today_scope_mismatch")
-        if not 30 <= self.lease_seconds <= 300:
-            raise RetrievalContractError("response_workflow_lease_invalid")
 
 
 class ResponseGenerationWorkflowService:
@@ -108,6 +78,7 @@ class ResponseGenerationWorkflowService:
     def __init__(
         self,
         *,
+        graph_executor: ResponseGraphExecutor,
         lifecycle: ResponseLifecycleRepositoryPort,
         router: RetrievalRoutingService,
         canonical: CanonicalRetrievalPlanningService,
@@ -119,6 +90,7 @@ class ResponseGenerationWorkflowService:
         memory_producer: SuccessfulChatMemoryProducerPort | None = None,
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
     ) -> None:
+        self._graph_executor = graph_executor
         self._lifecycle = lifecycle
         self._router = router
         self._canonical = canonical
@@ -142,14 +114,31 @@ class ResponseGenerationWorkflowService:
         if record.state is not ResponseRequestState.ACCEPTED:
             raise GenerationContractError("response_workflow_not_replayable")
 
-        diagnostic_scope = (command.preflight.owner_id, command.preflight.world_id, record.thread_id)
-        observation = Observation(request_id=record.request_id, detailed=capture.active(diagnostic_scope, record.request_id))
+        diagnostic_scope = (
+            command.preflight.owner_id,
+            command.preflight.world_id,
+            record.thread_id,
+        )
+        observation = Observation(
+            request_id=record.request_id,
+            detailed=capture.active(diagnostic_scope, record.request_id),
+        )
         observation_token = current.set(observation)
-        observe("request", model=record.selected_model, thinking_level=record.selected_thinking_level)
+        observe(
+            "request",
+            model=record.selected_model,
+            thinking_level=record.selected_thinking_level,
+        )
+        progress = None
         lease_token = f"lease-{uuid4().hex}"
         try:
-            if command.today_sns_snapshot is not None and self._today_snapshot_validator is None:
-                raise RetrievalContractError("response_workflow_today_validator_required")
+            if (
+                command.today_sns_snapshot is not None
+                and self._today_snapshot_validator is None
+            ):
+                raise RetrievalContractError(
+                    "response_workflow_today_validator_required"
+                )
             now = datetime.now(UTC)
             record = self._lifecycle.acquire_lease(
                 request_id=record.request_id,
@@ -167,247 +156,36 @@ class ResponseGenerationWorkflowService:
             self._unit_of_work.checkpoint()
             yield accepted
 
-            record = self._transition(record, ResponseRequestState.PREFLIGHTED)
-            record = self._transition(record, ResponseRequestState.ROUTING)
-            routing = await self._router.route(
-                command.preflight,
-                recent_context=command.router_context,
-                today_sns_context=(
-                    None
-                    if command.today_sns_snapshot is None
-                    else command.today_sns_snapshot.router_view()
-                ),
-                now=datetime.now(UTC),
-                deadline_at=record.deadline_at,
+            progress = ResponseExecutionProgress(record, record.call_tracker)
+            steps = ResponseWorkflowSteps(
+                command=command,
+                progress=progress,
+                save_transition=self._transition,
+                router=self._router,
+                canonical=self._canonical,
+                graph=self._graph,
+                both=self._both,
+                evidence=self._evidence,
+                character_response=self._character_response,
+                today_snapshot_validator=self._today_snapshot_validator,
             )
-            record = self._transition(
-                record,
-                ResponseRequestState.RESOLVING,
-                route=routing.intent.route,
-                node_state={
-                    "intent_hash": routing.intent.envelope_hash,
-                    "resolved_hash": routing.resolved.envelope_hash,
-                    "router_metrics": _safe_metrics(routing.metrics),
-                },
-                call_tracker=routing.call_tracker,
-            )
-
+            try:
+                state = await self._graph_executor.run(
+                    initial_response_state(record), steps
+                )
+                steps.assert_finished(state)
+            finally:
+                record = progress.record
+            routing = state["routing"]
             route = routing.intent.route
-            observe("router", route=route.value, repair_used=routing.metrics.repair_used, first_pass_valid=routing.metrics.first_pass_valid)
-            workflow_recipe = None
-            if route is RetrievalRoute.CURRENT_CONTEXT:
-                record = self._transition(
-                    record,
-                    ResponseRequestState.CURRENT_CONTEXT_READY,
-                )
-                bundle = self._evidence.current_context(
-                    request_id=record.request_id,
-                    request_scope_hash=record.request_scope_hash,
-                )
-                tracker = routing.call_tracker
-            elif route is RetrievalRoute.CLARIFICATION:
-                record = self._transition(
-                    record,
-                    ResponseRequestState.CLARIFICATION_PREPARED,
-                )
-                clarification = routing.clarification
-                if clarification is None:
-                    raise RetrievalContractError("response_clarification_missing")
-                bundle = self._evidence.clarification(
-                    request_id=record.request_id,
-                    request_scope_hash=record.request_scope_hash,
-                    slot=clarification.slot,
-                )
-                tracker = routing.call_tracker
-            elif route is RetrievalRoute.CANONICAL:
-                record = self._transition(
-                    record,
-                    ResponseRequestState.CANONICAL_PLANNING,
-                )
-                result = await self._canonical.plan_and_execute(
-                    CanonicalRetrievalCommand(
-                        user_message=command.preflight.user_message,
-                        thread_id=record.thread_id,
-                        intent=routing.intent,
-                        resolved=routing.resolved,
-                        call_tracker=routing.call_tracker,
-                    ),
-                    now=datetime.now(UTC),
-                    deadline_at=record.deadline_at,
-                )
-                record = self._transition(
-                    record,
-                    ResponseRequestState.OPTIONAL_RETRIEVING,
-                    node_state={"canonical_metrics": _safe_metrics(result.metrics)},
-                    call_tracker=result.call_tracker,
-                )
-                bundle = self._evidence.canonical(
-                    request_scope_hash=record.request_scope_hash,
-                    result=result,
-                )
-                tracker = result.call_tracker
-            elif route is RetrievalRoute.GRAPH:
-                record = self._transition(
-                    record,
-                    ResponseRequestState.GRAPH_PLANNING,
-                )
-                result = await self._graph.plan_and_execute(
-                    GraphRetrievalCommand(
-                        user_message=command.preflight.user_message,
-                        intent=routing.intent,
-                        resolved=routing.resolved,
-                        call_tracker=routing.call_tracker,
-                        graph_projection_enabled=command.graph_projection_enabled,
-                    ),
-                    now=datetime.now(UTC),
-                    deadline_at=record.deadline_at,
-                )
-                record = self._transition(
-                    record,
-                    ResponseRequestState.OPTIONAL_RETRIEVING,
-                    node_state={"graph_metrics": _safe_metrics(result.metrics)},
-                    call_tracker=result.call_tracker,
-                )
-                bundle = self._evidence.graph(
-                    request_scope_hash=record.request_scope_hash,
-                    result=result,
-                    character_labels=command.character_labels,
-                )
-                tracker = result.call_tracker
-            else:
-                record = self._transition(
-                    record,
-                    ResponseRequestState.BOTH_COORDINATING,
-                )
-                result = await self._both.coordinate(
-                    BothRetrievalCommand(
-                        user_message=command.preflight.user_message,
-                        thread_id=record.thread_id,
-                        intent=routing.intent,
-                        resolved=routing.resolved,
-                        call_tracker=routing.call_tracker,
-                        graph_projection_enabled=command.graph_projection_enabled,
-                    ),
-                    now=datetime.now(UTC),
-                    deadline_at=record.deadline_at,
-                )
-                workflow_recipe = result.selection.selected
-                record = self._transition(
-                    record,
-                    ResponseRequestState.OPTIONAL_RETRIEVING,
-                    workflow_recipe=workflow_recipe,
-                    node_state={
-                        "both_metrics": _safe_metrics(result.metrics),
-                        **(
-                            {
-                                "canonical_metrics": _safe_metrics(
-                                    result.canonical.metrics
-                                )
-                            }
-                            if result.canonical is not None
-                            else {}
-                        ),
-                        **(
-                            {"graph_metrics": _safe_metrics(result.graph.metrics)}
-                            if result.graph is not None
-                            else {}
-                        ),
-                    },
-                    call_tracker=result.call_tracker,
-                )
-                bundle = self._evidence.both(
-                    request_scope_hash=record.request_scope_hash,
-                    result=result,
-                    character_labels=command.character_labels,
-                )
-                tracker = result.call_tracker
-
-            if command.today_sns_snapshot is not None and self._today_snapshot_validator is not None:
-                self._today_snapshot_validator.assert_current(command.today_sns_snapshot)
-            bundle = self._evidence.with_today_sns(
-                bundle,
-                command.today_sns_snapshot,
-                user_message=command.preflight.user_message,
-            )
-            record = self._transition(
-                record,
-                ResponseRequestState.EVIDENCE_FROZEN,
-                workflow_recipe=workflow_recipe,
-                node_state={
-                    "evidence_version": bundle.version,
-                    "evidence_hash": bundle.evidence_hash,
-                    "retrieval_outcome": bundle.retrieval_outcome.value,
-                    "public_evidence_count": bundle.public_evidence_count,
-                    "today_sns_snapshot": (
-                        None
-                        if command.today_sns_snapshot is None
-                        else {
-                            "version": command.today_sns_snapshot.version,
-                            "snapshot_hash": command.today_sns_snapshot.snapshot_hash,
-                            "complete_through": (
-                                command.today_sns_snapshot.complete_through.isoformat()
-                            ),
-                            "overflow": command.today_sns_snapshot.overflow,
-                            "coverage": {
-                                key: value.value
-                                for key, value in sorted(
-                                    command.today_sns_snapshot.coverage.items()
-                                )
-                            },
-                        }
-                    ),
-                },
-                call_tracker=tracker,
-            )
-            tracker = self._character_response.reserve_call(
-                call_tracker=tracker,
-                now=datetime.now(UTC),
-                deadline_at=record.deadline_at,
-            )
-            record = self._transition(
-                record,
-                ResponseRequestState.RESPONSE_GENERATING,
-                call_tracker=tracker,
-            )
-            candidates = ()
-            if routing.clarification is not None:
-                candidates = tuple(
-                    f"{candidate.display_name} (@{candidate.handle})"
-                    for candidate in routing.clarification.candidates
-                )
-            observe("crg_input", items=len(bundle.items), route=bundle.route.value)
-            for kind in {item.kind for item in bundle.items}:
-                observe("evidence_kind", source=kind.value, items=sum(item.kind is kind for item in bundle.items))
-            response = await self._character_response.generate(
-                CharacterResponseGeneratorRequest(
-                    user_message=command.preflight.user_message,
-                    profile=command.profile,
-                    recent_context=command.response_context,
-                    evidence=bundle,
-                    clarification_candidates=candidates,
-                    today_sns_manifest=(
-                        None
-                        if command.today_sns_snapshot is None
-                        else command.today_sns_snapshot.response_manifest(
-                            included_references=tuple(
-                                item.opaque_reference for item in bundle.items
-                                if item.kind is EvidenceKind.TODAY_SNS_ACTIVITY
-                            )
-                        )
-                    ),
-                ),
-                call_tracker=tracker,
-                now=datetime.now(UTC),
-                deadline_at=record.deadline_at,
-            )
-            observe("crg_completed", status="completed", input_tokens=response.prompt_token_count, output_tokens=response.output_token_count, thought_tokens=response.thought_token_count, elapsed_ms=response.latency_ms)
+            bundle = state["bundle"]
+            response = state["response"]
+            workflow_recipe = state["workflow_recipe"]
             record = self._transition(
                 record,
                 ResponseRequestState.RESPONSE_STREAMING,
                 node_state={
-                    "character_response_metrics": _character_response_metrics(
-                        response
-                    )
+                    "character_response_metrics": _character_response_metrics(response)
                 },
                 call_tracker=response.call_tracker,
             )
@@ -431,8 +209,13 @@ class ResponseGenerationWorkflowService:
                 yield event
                 await asyncio.sleep(0)
 
-            if command.today_sns_snapshot is not None and self._today_snapshot_validator is not None:
-                self._today_snapshot_validator.assert_current(command.today_sns_snapshot)
+            if (
+                command.today_sns_snapshot is not None
+                and self._today_snapshot_validator is not None
+            ):
+                self._today_snapshot_validator.assert_current(
+                    command.today_sns_snapshot
+                )
             record = self._transition(record, ResponseRequestState.COMMITTING)
             sequence = record.last_emitted_sequence + 1
             completed = self._event(
@@ -455,7 +238,8 @@ class ResponseGenerationWorkflowService:
                 retrieval_outcome=bundle.retrieval_outcome,
                 last_accepted_sequence=sequence,
                 workflow_recipe=workflow_recipe,
-                short_circuited=bundle.retrieval_outcome.value in {
+                short_circuited=bundle.retrieval_outcome.value
+                in {
                     "memory_off",
                     "no_evidence",
                 },
@@ -481,14 +265,21 @@ class ResponseGenerationWorkflowService:
             self._unit_of_work.checkpoint()
             self._propose_memory_after_commit(command, committed)
             yield completed
-        except asyncio.CancelledError:
+        except asyncio.CancelledError as exc:
             self._unit_of_work.rollback()
-            self._cancel_if_active(record)
+            record = self._after_rollback(record)
+            self._cancel_if_active(
+                record, tracker=getattr(exc, "call_tracker", None) or (None if progress is None else progress.call_tracker),
+                graph_diagnostic=graph_failure_diagnostic(exc),
+            )
             raise
         except Exception as exc:
             self._unit_of_work.rollback()
             observe("workflow_failed", status="failed")
-            async for event in self._fail(record, exc):
+            record = self._after_rollback(record)
+            async for event in self._fail(
+                record, exc, tracker=None if progress is None else progress.call_tracker
+            ):
                 yield event
         finally:
             try:
@@ -497,6 +288,19 @@ class ResponseGenerationWorkflowService:
                 pass  # Diagnostics cannot change a committed response.
             finally:
                 current.reset(observation_token)
+
+    def _after_rollback(self, record: ResponseRequestRecord) -> ResponseRequestRecord:
+        """Refresh our own durable sequence; never adopt another lease."""
+        latest = self._lifecycle.get_request(record.request_id)
+        if (
+            latest.generation_id == record.generation_id
+            and latest.attempt_number == record.attempt_number
+            and latest.lease_token == record.lease_token
+            and latest.lease_generation == record.lease_generation
+            and latest.request_scope_hash == record.request_scope_hash
+        ):
+            return latest
+        return record
 
     def _propose_memory_after_commit(
         self,
@@ -561,15 +365,29 @@ class ResponseGenerationWorkflowService:
         self,
         record: ResponseRequestRecord,
         exc: Exception,
+        *,
+        tracker: dict | None = None,
     ) -> AsyncIterator[GenerationEvent]:
         if record.state in TERMINAL_STATES:
             return
         failure_class, retryable, reason = _classify_failure(exc)
-        observe("workflow_failed", status="failed", reason=failure_class)
+        observe(
+            "workflow_failed",
+            status="failed",
+            reason=failure_class,
+            validation_code=str(exc)
+            if isinstance(exc, ResponseExecutionError)
+            else None,
+        )
         failure_diagnostic = _provider_failure_diagnostic(exc)
         router_diagnostic = _router_failure_diagnostic(exc)
         if router_diagnostic is not None:
-            observe("router_validation", status="rejected", reason=router_diagnostic.router_validation_code, repair_used=router_diagnostic.repair_used)
+            observe(
+                "router_validation",
+                status="rejected",
+                reason=router_diagnostic.router_validation_code,
+                repair_used=router_diagnostic.repair_used,
+            )
         if failure_diagnostic is not None:
             failure_diagnostic["failure_class"] = failure_class
             failure_diagnostic["retryable"] = retryable
@@ -595,7 +413,10 @@ class ResponseGenerationWorkflowService:
                 failure_class=failure_class,
                 failure_diagnostic=failure_diagnostic,
                 router_diagnostic=router_diagnostic,
-                call_tracker=getattr(exc, "call_tracker", None),
+                graph_diagnostic=graph_failure_diagnostic(exc, include_sibling=True),
+                call_tracker=getattr(exc, "call_tracker", None)
+                or tracker
+                or record.call_tracker,
                 now=datetime.now(UTC),
             )
             self._unit_of_work.checkpoint()
@@ -604,7 +425,9 @@ class ResponseGenerationWorkflowService:
             raise exc
         yield event
 
-    def _cancel_if_active(self, record: ResponseRequestRecord) -> None:
+    def _cancel_if_active(
+        self, record: ResponseRequestRecord, *, tracker: dict | None = None, graph_diagnostic=None
+    ) -> None:
         if record.state in TERMINAL_STATES:
             return
         try:
@@ -626,6 +449,8 @@ class ResponseGenerationWorkflowService:
                 target=ResponseRequestState.CANCELLED,
                 reason=ResponseTerminalReason.USER_CANCELLED,
                 retryable=True,
+                call_tracker=tracker or record.call_tracker,
+                graph_diagnostic=graph_diagnostic,
                 now=datetime.now(UTC),
             )
             self._unit_of_work.checkpoint()
@@ -710,6 +535,12 @@ def _classify_failure(
             router_diagnostic.retryable,
             ResponseTerminalReason.RETRIEVAL_FAILURE,
         )
+    if isinstance(exc, RetrievalContractError) and str(exc) == "graph_planner_request_wide_repair_exhausted":
+        return (
+            "retrieval_rejected",
+            graph_failure_allows_user_retry(graph_failure_diagnostic(exc)),
+            ResponseTerminalReason.RETRIEVAL_FAILURE,
+        )
     text = str(exc).lower()
     retryable = any(
         marker in text
@@ -760,17 +591,6 @@ def _router_failure_diagnostic(
             return diagnostic
         current = current.__cause__ or current.__context__
     return None
-
-
-def _safe_metrics(value: Any) -> dict[str, Any]:
-    output: dict[str, Any] = {}
-    for key in getattr(value, "__dataclass_fields__", {}):
-        item = getattr(value, key)
-        if isinstance(item, (str, int, float, bool)) or item is None:
-            output[key] = item.value if hasattr(item, "value") else item
-        elif isinstance(item, tuple):
-            output[key] = [entry.value if hasattr(entry, "value") else entry for entry in item]
-    return output
 
 
 def _character_response_metrics(value: Any) -> dict[str, Any]:

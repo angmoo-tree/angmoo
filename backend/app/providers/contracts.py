@@ -11,6 +11,23 @@ class ProviderCapabilities:
     structured_json: bool = False
     image_input: bool = False
     embedding: bool = False
+    tool_calls: bool = False
+
+
+@dataclass(frozen=True)
+class ProviderToolDefinition:
+    name: str
+    description: str
+    parameters: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class ProviderToolCall:
+    name: str
+    arguments: dict[str, Any]
+    call_id: str | None = None
+    # Kept out of repr/logs; never forwarded to the persona writer.
+    thought_signature: bytes | None = field(default=None, repr=False)
 
 
 @dataclass(frozen=True)
@@ -47,6 +64,9 @@ class ProviderRequest:
     image_parts: tuple[Any, ...] = ()
     # None preserves the SDK default for callers without a durable retry owner.
     sdk_attempts: int | None = None
+    tools: tuple[ProviderToolDefinition, ...] = ()
+    # Scoped to this request; existing optional tool consumers retain their mode.
+    require_tool_call: bool = False
 
 
 @dataclass(frozen=True)
@@ -63,6 +83,7 @@ class ProviderResponse:
     parsed: Any | None
     usage: ProviderUsage
     finish_reason: str | None = None
+    tool_calls: tuple[ProviderToolCall, ...] = ()
 
 
 class ProviderError(Exception):

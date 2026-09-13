@@ -307,12 +307,29 @@ class DiagnosticRecord(BaseModel):
     omitted_events: int = Field(ge=0)
 
 
+class DiagnosticRequestRead(BaseModel):
+    request_id: str
+    created_at: datetime
+    state: str
+    user_message_id: int
+    attempt_number: int
+    retry_of_request_id: str | None
+
+
+class DiagnosticRequestListRead(BaseModel):
+    world_id: str
+    thread_id: str
+    items: list[DiagnosticRequestRead] = Field(max_length=100)
+    next_cursor: str | None
+
+
 class DiagnosticRead(BaseModel):
     model_config = ConfigDict(extra="forbid")
     world_id: str
     thread_id: str
     request_id: str | None
     request_state: str | None
+    request: DiagnosticRequestRead | None = None
     status: Literal["available", "expired", "not_recorded", "unavailable"]
     record: DiagnosticRecord | None
     capture: CaptureRead
