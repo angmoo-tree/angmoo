@@ -1,9 +1,77 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 import type { CharacterDashboardItem } from "../frontend/src/features/characters/types/character";
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/utils/character-recent-activity-presentation";
 import type { MessageThreadRead } from "../frontend/src/features/chat/types/chat-contract";
 import type { WorldChatThreadRead } from "../frontend/src/features/chat/types/world-chat-contract";
+
+// Opt-in real-provider browser Gate. Product workflow and evidence reads execute
+// in an isolated SQLite fixture; only the shell/auth HTTP transport is simulated.
+test.describe("HY14 real workflow browser", () => {
+  const runner = process.env.ANGMOO_HYBRID_REAL_RUNNER;
+  const python = process.env.ANGMOO_HYBRID_REAL_PYTHON;
+  test.skip(!runner || !python, "Requires the explicitly authorized isolated real-AI fixture");
+  for (let index = 0; index < 10; index++) {
+    test(`case ${index + 1}`, async ({ page }, testInfo) => {
+      test.setTimeout(180_000);
+      const directory = path.dirname(runner!);
+      const execute = promisify(execFile);
+      await execute(python!, [runner!, "--browser-prepare"], { timeout: 30_000 });
+      const frozen = JSON.parse(await readFile(path.join(directory, "response-quality-frozen-v1.json"), "utf8"));
+      const caseId = frozen.browser_cases[index];
+      const question = frozen.cases.find((item: { id: string }) => item.id === caseId).query;
+      const initial = JSON.parse(await readFile(path.join(directory, "response-quality-v1/browser-initial.json"), "utf8"));
+      const worldId = "p-world", threadId = "p-thread";
+      await installBackendFixture(page, { worldReads: { [worldId]: { ...WORLD_ALPHA, world_id: worldId, name: "구조 연습 모임" } } });
+      let result: any = null;
+      let accepted: any = null;
+      let committed = false;
+      await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
+        const request = route.request();
+        const pathname = new URL(request.url()).pathname;
+        const base = `/api/backend/worlds/${worldId}/chat/threads/${threadId}`;
+        if (pathname === base) return json(route, committed ? result.thread : initial);
+        if (pathname === `${base}/requests/latest`) return json(route, { response_request: accepted });
+        if (pathname === `${base}/messages` && request.method() === "POST") {
+          expect(request.postDataJSON().content).toBe(question);
+          await execute(python!, [runner!, "--browser-case-index", String(index)], { timeout: 150_000, maxBuffer: 1024 * 1024 });
+          result = JSON.parse(await readFile(path.join(directory, `response-quality-v1/browser-${caseId}--social_hybrid.json`), "utf8"));
+          expect(result.state).toBe("committed");
+          const user = result.thread.messages.find((item: { role: string }) => item.role === "user");
+          accepted = { protocol_version: "chat-generation-stream.v1", request_id: result.request_id,
+            request_scope_hash: result.request_scope_hash, generation_id: result.generation_id, attempt_number: 1,
+            response_slot_id: `slot-${result.request_id}`, state: "accepted", route: null, retryable: false,
+            failure_class: null, last_accepted_sequence: -1, user_message: user, assistant_message: null, response_metadata: {} };
+          return json(route, { outcome: "accepted", user_message: user, response_request: accepted });
+        }
+        if (pathname.endsWith("/events") && result) {
+          committed = true;
+          return route.fulfill({ status: 200, contentType: "application/x-ndjson", body: result.stream.map((row: object) => JSON.stringify(row)).join("\n") });
+        }
+        if (pathname.endsWith("/evidence") && result) return json(route, result.evidence);
+        if (accepted && pathname === `${base}/requests/${accepted.request_id}`) return json(route, { ...accepted,
+          state: "committed", assistant_message: result.thread.messages.find((row: { role: string }) => row.role === "assistant"),
+          last_accepted_sequence: result.stream.at(-1).sequence });
+        return route.fallback();
+      });
+      await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+      await page.getByRole("textbox", { name: "미도리야 이즈쿠에게 보낼 메시지" }).fill(question);
+      await page.getByRole("button", { name: "메시지 보내기" }).click();
+      await expect.poll(() => committed, { timeout: 150_000 }).toBe(true);
+      await expect(page.getByText(result.answer, { exact: true })).toBeVisible();
+      await page.getByRole("button", { name: /근거 .*개 보기/ }).click();
+      await expect(page.getByRole("dialog", { name: "이 답변의 근거" })).toBeVisible();
+      await expect(page.getByRole("region", { name: "답변에 사용한 사회적 맥락" })).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath(`hybrid-${index + 1}.png`), fullPage: true });
+      await testInfo.attach("request-diagnostics", { body: JSON.stringify({ id: result.request_id, route: result.route,
+        node_state: result.node_state, observation: result.observation }, null, 2), contentType: "application/json" });
+    });
+  }
+});
 
 type WorldFixture = {
   world_id: string;
@@ -1326,6 +1394,10 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await page.getByRole("button", { name: "기억 켜기" }).click();
   await expect(page.getByText("기억을 켰어요.", { exact: false })).toBeVisible();
   await verifyMemoryBatchControls(page);
+  handleMemoryBatch.capacityReached();
+  await expect(page.getByText("저장된 기억 100,000 / 100,000개")).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText("표시 중인 정리 작업에서 저장 1개 · 남은 경험 1개")).toBeVisible();
+  await expect(page.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "정정", exact: true }).click();

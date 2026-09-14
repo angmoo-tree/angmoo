@@ -12,7 +12,14 @@ export type MemoryBatchSetting = {
   model_id: string | null;
   thinking_level: "high" | "medium";
   pending_count: number;
-  status: "disabled" | "paused" | "waiting" | "running" | "pending" | "attention" | "completed";
+  run_saved_count: number | null;
+  run_pending_count: number | null;
+  stored_count: number;
+  storage_limit: number;
+  capacity_blocked: boolean;
+  can_run: boolean;
+  retryable: boolean;
+  status: "disabled" | "paused" | "waiting" | "running" | "pending" | "attention" | "completed" | "capacity_blocked";
   last_code: string | null;
   last_completed_at: string | null;
   available_models: string[];

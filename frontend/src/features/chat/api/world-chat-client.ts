@@ -348,7 +348,7 @@ function worldChatThreadMatchesScope(
         (summary.capability === "available" || summary.capability === "degraded") &&
         Number.isInteger(summary.count) &&
         summary.count > 0 &&
-        summary.count <= 12,
+        summary.count <= 24,
     ) &&
     (!thread.latest_message || thread.latest_message.thread_id === thread.id)
   );

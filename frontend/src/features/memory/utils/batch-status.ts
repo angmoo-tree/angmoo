@@ -1,6 +1,8 @@
 /** Memory-owned recovery copy; provider payloads and unknown codes stay private. */
 export function memoryBatchFailureMessage(code: string | null): string {
   switch (code) {
+    case "memory_capacity_reached":
+      return "저장 한도에 도달했어요. 남은 경험은 보관되며 공간이 생기면 이어 정리합니다.";
     case "memory_selection_request_invalid":
       return "AI 서비스가 정리 요청을 처리하지 못했어요. 경험은 보관되어 있습니다. 앱 업데이트 또는 지원 확인이 필요해요.";
     case "memory_selection_auth_failed":

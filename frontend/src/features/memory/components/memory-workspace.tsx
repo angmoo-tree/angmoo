@@ -34,6 +34,7 @@ import { correctMemoryItem, deleteMemoryItem, getMemoryItem, getMemorySetting, l
 import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
+import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
 
 import type { MemoryScopeLoaders, MemoryWorldOption, MemoryCharacterOption } from "@/features/memory/types/scope-options";
 
@@ -432,6 +433,7 @@ export function MemoryWorkspace({
             </div>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
             <MemoryBatchControls key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">
                 <p>{mutationFailure.message}</p>

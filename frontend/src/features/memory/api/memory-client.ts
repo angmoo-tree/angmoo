@@ -1,6 +1,33 @@
 import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
+import type { MemoryEmbeddingSetting, MemoryEmbeddingUpdate } from "@/features/memory/types/memory-embedding-contract";
+
+export function getMemoryEmbeddingSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
+  return requestMemoryApi<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { signal })
+    .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
+}
+
+export function saveMemoryEmbeddingSetting(worldId: string, subjectId: string, data: MemoryEmbeddingUpdate) {
+  return requestMemoryMutation<MemoryEmbeddingSetting>(`${scopePath(worldId, subjectId)}/memory/embedding-settings`, { method: "PUT", body: JSON.stringify(data) })
+    .then((value) => validateEmbeddingSetting(value, worldId, subjectId));
+}
+
+function validateEmbeddingSetting(value: MemoryEmbeddingSetting, worldId: string, subjectId: string) {
+  if (!value || !matchesScope(value.scope, worldId, subjectId) ||
+      !Number.isInteger(value.version) || value.version < 0 ||
+        typeof value.enabled !== "boolean" || typeof value.ready !== "boolean" ||
+        !["unknown", "stopped", "ready", "recovering", "degraded", "vector_unavailable"].includes(value.runtime_status) ||
+        typeof value.profile !== "string" ||
+        (value.reason_code !== null && typeof value.reason_code !== "string") ||
+      value.provider !== "google" || value.model !== "gemini-embedding-2" ||
+      (value.credential_id !== null && typeof value.credential_id !== "string") ||
+      !Array.isArray(value.available_credentials) || value.available_credentials.some((item) =>
+        !item || typeof item.id !== "string" || typeof item.label !== "string")) {
+    throw new MemoryApiError(502, "memory_embedding_contract_invalid");
+  }
+  return value;
+}
 
 export function getMemoryBatchSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
   return requestMemoryApi<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { signal })
@@ -19,13 +46,17 @@ export function retryMemoryBatch(worldId: string, subjectId: string, idempotency
 
 function validateBatchSetting(value: MemoryBatchSetting, worldId: string, subjectId: string) {
   if (!value || !matchesScope(value.scope, worldId, subjectId) ||
+    [value.run_saved_count, value.run_pending_count].some((count) => count !== null && (!Number.isSafeInteger(count) || count < 0)) ||
     !Number.isInteger(value.version) || value.version < 0 ||
     !Number.isInteger(value.profile_version) || value.profile_version < 0 ||
     !Number.isInteger(value.pending_count) || value.pending_count < 0 ||
+    !Number.isInteger(value.stored_count) || value.stored_count < 0 ||
+    !Number.isInteger(value.storage_limit) || value.storage_limit <= 0 ||
+    [value.capacity_blocked, value.can_run, value.retryable].some((flag) => typeof flag !== "boolean") ||
     [value.memory_enabled, value.ai_enabled, value.shutdown_enabled, value.schedule_enabled].some((flag) => typeof flag !== "boolean") ||
     typeof value.local_time !== "string" || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.local_time) ||
     typeof value.timezone !== "string" ||
-    !["disabled", "paused", "waiting", "running", "pending", "attention", "completed"].includes(value.status) ||
+    !["disabled", "paused", "waiting", "running", "pending", "attention", "completed", "capacity_blocked"].includes(value.status) ||
     !Array.isArray(value.available_models) || value.available_models.some((model) => typeof model !== "string") ||
     (value.model_id !== null && !value.available_models.includes(value.model_id)) ||
     [value.next_due_at, value.last_completed_at].some((time) => time !== null && (typeof time !== "string" || !Number.isFinite(Date.parse(time))))) {
@@ -238,7 +269,11 @@ export function getWorldChatEvidence(
       !["available", "degraded"].includes(read.capability) ||
       !Array.isArray(read.items) ||
       read.items.length > 12 ||
-      read.items.some((item) => !chatEvidenceMatches(item, worldId))
+        read.items.some((item) => !chatEvidenceMatches(item, worldId)) ||
+        (read.current_context !== undefined && (!Array.isArray(read.current_context) ||
+          read.current_context.length > 12 || read.current_context.some((item) =>
+            !chatEvidenceMatches(item, worldId) || item.kind !== "graph_relationship" ||
+            (item.availability === "available" && item.direction !== "outgoing"))))
     ) throw new MemoryApiError(502, "chat_evidence_scope_mismatch");
     return read;
   });

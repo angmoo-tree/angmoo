@@ -26,7 +26,9 @@ export async function verifyMemoryRecovery(page: Page, worldId: string) {
         pending_count: retried && !retry ? 0 : 2, status: retry ? "pending" : retried ? "completed" : "attention",
         last_code: retried ? null : "memory_selection_output_incomplete",
         last_completed_at: retried && !retry ? "2026-09-09T01:00:00Z" : null,
-        available_models: ["gemini-3.5-flash-lite"] });
+        available_models: ["gemini-3.5-flash-lite"], thinking_level: "high",
+        stored_count: retried ? 1 : 0, storage_limit: 100000, capacity_blocked: false, can_run: true, retryable: true,
+        run_saved_count: retried ? 1 : 0, run_pending_count: retried ? 0 : 1 });
     }
     if (path.endsWith("/memory/settings")) return json(route, {
       schema_version: "memory-setting-read.v1", scope, configured: true, enabled: true,

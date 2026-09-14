@@ -107,4 +107,5 @@ export type WorldChatEvidenceRead = {
   retrieval_outcome: string;
   capability: "available" | "degraded";
   items: WorldChatEvidenceItemRead[];
+  current_context?: WorldChatEvidenceItemRead[];
 };

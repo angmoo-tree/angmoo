@@ -11,6 +11,7 @@ import styles from "./memory-workspace.module.css";
 
 type Props = { worldId: string; subjectId: string; disabled: boolean; acquire: () => boolean; release: () => void; onCompleted: () => void };
 const labels: Record<MemoryBatchSetting["status"], string> = {
+  capacity_blocked: "저장 한도에 도달해 기억 정리를 멈췄어요",
   disabled: "AI 기억 정리 사용 안 함", paused: "기억 정리 일시 중지", waiting: "예약 또는 종료를 기다리고 있어요",
   running: "기억을 정리하고 있어요", pending: "다음 실행에서 이어 정리합니다", attention: "지난 기억 정리를 마치지 못했어요", completed: "정리를 마쳤어요. 보관할 경험이 없으면 새 기억은 생기지 않습니다.",
 };
@@ -94,6 +95,9 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
     <p>경험은 먼저 저장하고, AI가 예약 시각이나 앱 전체 종료 때 오래 보관할 기억을 고릅니다.</p>
     {!draft || !saved ? <Button variant="secondary" compact disabled={disabled} onClick={() => setRevision((value) => value + 1)}>{failed ? "설정 다시 불러오기" : "설정 불러오는 중"}</Button> : <>
       <p role="status">{labels[saved.status]} · 정리 대기 {saved.pending_count}개</p>
+      <p>저장된 기억 {saved.stored_count.toLocaleString("ko-KR")} / {saved.storage_limit.toLocaleString("ko-KR")}개</p>
+      {saved.run_saved_count !== null && saved.run_pending_count !== null ? <p>표시 중인 정리 작업에서 저장 {saved.run_saved_count}개 · 남은 경험 {saved.run_pending_count}개</p> : null}
+      {saved.capacity_blocked ? <p role="status">저장 한도에 도달해 새 기억 정리를 멈췄어요. 기존 기억은 보존됩니다. 불필요한 기억을 삭제하거나 보관 기간이 지나 공간이 생기면 남은 경험을 이어 정리합니다.</p> : null}
       {saved.status === "attention" ? <p role="status">{memoryBatchFailureMessage(saved.last_code)}</p> : null}
       {!saved.memory_enabled ? <p>기억이 꺼져 있어 자동 정리가 멈춰 있습니다. 기존 기록은 보존됩니다.</p> : null}
       <fieldset disabled={disabled || busy}>
@@ -110,7 +114,7 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
       {saved.status === "attention" && saved.next_due_at ? <p>다음 예약은 다음 정기 정리 시각입니다. 실패한 정리는 아래에서 다시 시도할 수 있어요.</p> : null}
       {saved.last_completed_at ? <p>마지막 정리: {displayTime(saved.last_completed_at, saved.timezone)}</p> : null}
       <Button compact disabled={disabled || (draft.ai_enabled && (!generationProfileValue(draft.model_id, draft.thinking_level) || (!saved.ai_enabled && !consent)))} loading={busy} loadingLabel="저장 중" onClick={() => void save()}>정리 설정 저장</Button>
-      {saved.status === "attention" && saved.ai_enabled && saved.memory_enabled ? <Button compact variant="secondary" disabled={disabled} onClick={() => void save(true)}>실패한 정리 다시 시도</Button> : null}
+      {saved.status === "attention" && saved.ai_enabled && saved.memory_enabled && saved.retryable ? <Button compact variant="secondary" disabled={disabled || !saved.can_run} onClick={() => void save(true)}>실패한 정리 다시 시도</Button> : null}
     </>}
     {notice ? <p role={failed ? "alert" : "status"}>{notice}</p> : null}
   </section>;

@@ -103,7 +103,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "fb6f13946e273114c63d2465284f6291787e6e42210862b4b20c3af1ba076a48"
+      "sha256": "4d3f74b2e18a8a9f9c4aa2c27bf634c4cc4854b334ded3a0cae37c685b9cc04c"
     },
     {
       "classifications": [
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "c93386f902fac02ede99fb1ada0d9cb277a90d3ebaefd9e8e7201116e8666b57"
+        "sha256": "5c42e0a4f01d5ca2c76808632cb7abae5cf15d118bdc7128d60ed3cffead802c"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -1534,7 +1534,7 @@
         }
       ]
     },
-    "screenshot_call_count": 11,
+    "screenshot_call_count": 12,
     "status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
     "target_viewports": [
       "360x800",
