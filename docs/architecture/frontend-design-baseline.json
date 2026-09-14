@@ -1413,7 +1413,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 11,
+      "expected_screenshot_call_count": 12,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1535,7 +1535,7 @@
       ]
     },
     "screenshot_call_count": 12,
-    "status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 adds one opt-in screenshot call for isolated real-workflow evidence outside the canonical visual corpus; it does not add a committed visual baseline or claim USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",

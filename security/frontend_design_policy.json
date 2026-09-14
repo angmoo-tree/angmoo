@@ -896,9 +896,9 @@
     "token_source": "frontend/src/styles/semantic-tokens.css"
   },
   "screenshot_inventory": {
-    "baseline_call_count": 11,
+    "baseline_call_count": 12,
     "committed_baseline_count": 11,
-    "current_status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
+    "current_status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 adds one opt-in screenshot call for isolated real-workflow evidence outside the canonical visual corpus; it does not add a committed visual baseline or claim USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",
@@ -921,7 +921,7 @@
       "max_diff_pixels": 25,
       "threshold": 0.1
     },
-    "expected_screenshot_call_count": 11,
+    "expected_screenshot_call_count": 12,
     "expected_snapshots": [
       "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
       "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
