@@ -18,7 +18,7 @@ from app.domains.memory.policies.batch import (
     MAX_SELECTION_INPUT_UTF8_BYTES,
     MEMORY_PROVIDER_TIMEOUT_SECONDS,
 )
-from app.domains.memory.exceptions import MemoryDomainError, MemoryValidationError
+from app.domains.memory.exceptions import MemoryDomainError, MemoryValidationError, MemoryCapacityReached
 from app.domains.memory.policies.selection_output import MemorySelectionSource
 from app.domains.memory.contracts.batch import (
     MemoryBatchRepositoryPort,
@@ -217,6 +217,13 @@ class MemoryBatchSelectionService:
             repo.commit()
             _log_outcome(batch, provider, started, "memory_selection_completed", recorded=True)
             return "memory_selection_completed"
+        except MemoryCapacityReached:
+            # The failed candidate's SAVEPOINT rolled back; keep prior accepted
+            # items, evidence, decisions and eligibility in this same commit.
+            repo.defer_capacity(batch, now=self.clock())
+            repo.commit()
+            _log_outcome(batch, provider, started, "memory_capacity_reached", recorded=True)
+            return "memory_capacity_reached"
         except BaseException as exc:
             repo.rollback()
             code = (

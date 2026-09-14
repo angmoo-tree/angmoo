@@ -105,6 +105,19 @@ class SqliteMemoryRecallIndex:
     def close(self) -> None:
         self._opened = False
 
+    @classmethod
+    def reader(cls, database_path: Path, *, settings=None):
+        """Open an existing projection for an isolated read without doctor/rebuild."""
+        reader = cls.__new__(cls)
+        reader.settings = settings or MemoryRecallIndexSettings()
+        reader.database_path = Path(database_path).resolve(strict=True)
+        reader._read_only = True
+        reader._lock = RLock()
+        with reader._connect(reader.database_path) as connection:
+            reader._validate_schema(connection)
+        reader._opened = True
+        return reader
+
     def rebuild(
         self,
         documents: Iterable[MemoryRecallDocument],
@@ -296,10 +309,14 @@ class SqliteMemoryRecallIndex:
                     )
                     observe("search", method="normalized_substring_fallback", executed=True, returned=len(rows), reason="fts_execution_error" if fts_error else "fts_empty", limit=candidate_limit)
                 if (not rows and not fts_error and query.korean_spacing_fallback
-                        and query.kinds == (RecallDocumentKind.MEMORY_ITEM,)):
+                        and RecallDocumentKind.MEMORY_ITEM in query.kinds):
                     groups = spacing_groups(normalized)
                     if groups:
-                        rows = self._spacing_rows(connection, filters, parameters, groups, candidate_limit)
+                        spacing_filters, spacing_parameters = filters, parameters
+                        if query.kinds != (RecallDocumentKind.MEMORY_ITEM,):
+                            spacing_filters = [*filters, "d.kind = ?"]
+                            spacing_parameters = (*parameters, RecallDocumentKind.MEMORY_ITEM.value)
+                        rows = self._spacing_rows(connection, spacing_filters, spacing_parameters, groups, candidate_limit)
                     else:
                         observe("search", method="korean_spacing_fallback", executed=False,
                                 reason="insufficient_spacing_clues", returned=0)
@@ -549,8 +566,10 @@ class SqliteMemoryRecallIndex:
 
     @contextmanager
     def _connect(self, path: Path, *, wal: bool = True) -> Iterator[sqlite3.Connection]:
+        read_only = getattr(self, "_read_only", False)
         connection = sqlite3.connect(
-            path,
+            path.as_uri() + "?mode=ro" if read_only else path,
+            uri=read_only,
             timeout=self.settings.busy_timeout_ms / 1_000,
             isolation_level=None,
             check_same_thread=False,
@@ -558,8 +577,9 @@ class SqliteMemoryRecallIndex:
         connection.row_factory = sqlite3.Row
         try:
             connection.execute(f"PRAGMA busy_timeout = {self.settings.busy_timeout_ms}")
-            connection.execute(f"PRAGMA journal_mode = {'WAL' if wal else 'DELETE'}")
-            connection.execute(f"PRAGMA synchronous = {self.settings.synchronous}")
+            if not read_only:
+                connection.execute(f"PRAGMA journal_mode = {'WAL' if wal else 'DELETE'}")
+                connection.execute(f"PRAGMA synchronous = {self.settings.synchronous}")
             yield connection
         finally:
             connection.close()
@@ -715,7 +735,10 @@ class SqliteMemoryRecallIndex:
         ids = []
         reason = "completed"
         cursor = None
-        connection.set_progress_handler(lambda: int(monotonic() >= deadline), 100)
+        # Avoid a Python callback for every tiny VM fragment during a large
+        # filtered scan. Row/byte checks and the native worker deadline remain
+        # independent bounds; this still checks sorting/scanning every 1000 ops.
+        connection.set_progress_handler(lambda: int(monotonic() >= deadline), 1000)
         try:
             # Necessary character conditions only; spaces can never create or
             # remove these characters. This avoids fetching unrelated old rows
@@ -907,6 +930,12 @@ def _scope_filters(query: MemoryRecallSearchQuery) -> tuple[list[str], list[str]
     if query.thread_id is not None:
         filters.append("d.thread_id = ?")
         parameters.append(query.thread_id)
+    if query.occurred_from is not None:
+        filters.append("d.occurred_at >= ?")
+        parameters.append(_utc_text(query.occurred_from))
+    if query.occurred_to is not None:
+        filters.append("d.occurred_at < ?")
+        parameters.append(_utc_text(query.occurred_to))
     return filters, parameters
 
 
@@ -935,7 +964,8 @@ def _row_to_candidate(row: sqlite3.Row) -> MemoryRecallCandidate:
         source_type=source_type,
         source_event_id=_row_optional(row, "source_event_id"),
         occurred_at=occurred_at,
-        metadata=json.loads(str(row["metadata_json"])),
+        metadata={**json.loads(str(row["metadata_json"])),
+                  "document_content_hash": hashlib.sha256(str(row["text"]).encode("utf-8")).hexdigest()},
     )
 
 

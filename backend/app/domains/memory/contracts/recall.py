@@ -79,6 +79,8 @@ class MemoryRecallSearchQuery:
     thread_id: str | None = None
     # Backend operation policy, never an LLM-controlled search parameter.
     korean_spacing_fallback: bool = False
+    occurred_from: datetime | None = None
+    occurred_to: datetime | None = None
 
 
 class MemoryRecallSearchIncomplete(RuntimeError):

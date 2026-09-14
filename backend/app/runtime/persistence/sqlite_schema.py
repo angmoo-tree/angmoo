@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 11
-SOURCE_ALEMBIC_REVISION = "20260910_0091"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 90
-EXPECTED_CANONICAL_TABLE_COUNT = 103
+SQLITE_SCHEMA_VERSION = 12
+SOURCE_ALEMBIC_REVISION = "20260914_0092"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 91
+EXPECTED_CANONICAL_TABLE_COUNT = 105
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 MEMORY_BATCH_V9_TABLES = (
@@ -255,8 +255,16 @@ def build_sqlite_v8_metadata() -> MetaData:
 
 def build_sqlite_v10_metadata() -> MetaData:
     """Frozen predecessor: generation thinking settings, no diagnostics table."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v11_metadata()
     metadata.remove(metadata.tables["chat_retrieval_diagnostics"])
+    return metadata
+
+
+def build_sqlite_v11_metadata() -> MetaData:
+    """Frozen pre-vector-registration schema; existing manifests stay immutable."""
+    metadata = build_sqlite_baseline_metadata()
+    for name in ("memory_vector_eligibility", "memory_embedding_settings"):
+        metadata.remove(metadata.tables[name])
     return metadata
 
 
@@ -268,6 +276,9 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    for name in ("memory_vector_eligibility", "memory_embedding_settings"):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
     if "chat_retrieval_diagnostics" in metadata.tables:
         metadata.remove(metadata.tables["chat_retrieval_diagnostics"])
     # All callers are historical builders. Never let current ORM additions

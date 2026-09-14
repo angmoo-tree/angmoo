@@ -227,13 +227,52 @@ class SqlAlchemyCanonicalRecallRepository:
             setting = _scope_setting(session, scope)
             return bool(setting and setting.enabled)
 
+    def read_exact_sources(self, *, scope, references, now):
+        if len(references) > 20:
+            raise ValueError("hybrid_source_limit")
+        result = []
+        with self._factory() as session:
+            setting = _scope_setting(session, scope)
+            if setting is None or not setting.enabled:
+                return ()
+            reader = self._source_reader_factory(session)
+            for reference in references:
+                parts = reference.split(":", 2)
+                if len(parts) != 3 or parts[0] != "source":
+                    continue
+                try:
+                    source_type = MemorySourceTypeV1(parts[1])
+                except ValueError:
+                    continue
+                rows = session.execute(select(MemoryItemEvidence, MemoryItem).join(
+                    MemoryItem, MemoryItem.id == MemoryItemEvidence.memory_item_id).where(
+                        MemoryItem.owner_id == scope.owner_id, MemoryItem.world_id == scope.world_id,
+                        MemoryItem.subject_world_character_id == scope.subject_world_character_id,
+                        MemoryItemEvidence.source_type == source_type.value,
+                        MemoryItemEvidence.source_id == parts[2],
+                        MemoryItem.status == "active", MemoryItem.deleted_at.is_(None),
+                        MemoryItem.superseded_by_id.is_(None),
+                    ).order_by(MemoryItemEvidence.id).limit(20))
+                for evidence, item in rows:
+                    if not _item_retrievable(item, _as_utc(now)):
+                        continue
+                    canonical = _current_evidence(reader, scope, item, evidence)
+                    if canonical is not None:
+                        result.append(_canonical_source_record(reference=reference, item=item,
+                            evidence=evidence, canonical=canonical))
+                        break
+        return tuple(result)
+
     def revalidate_candidates(
         self,
         *,
         scope: MemoryScope,
         candidates: tuple[MemoryRecallCandidate, ...],
         now: datetime,
+        evidence_limit: int | None = None,
     ) -> tuple[CanonicalRecallRecord, ...]:
+        if evidence_limit is not None and not 1 <= evidence_limit <= 20:
+            raise ValueError("memory_evidence_limit_invalid")
         if not candidates:
             return ()
         with self._factory() as session:
@@ -256,13 +295,11 @@ class SqlAlchemyCanonicalRecallRepository:
                 ):
                     excluded["item_missing_scope_or_lifecycle"] += 1
                     continue
-                evidences = list(
-                    session.scalars(
-                        select(MemoryItemEvidence)
-                        .where(MemoryItemEvidence.memory_item_id == item.id)
-                        .order_by(MemoryItemEvidence.id)
-                    )
-                )
+                statement = select(MemoryItemEvidence).where(
+                    MemoryItemEvidence.memory_item_id == item.id).order_by(MemoryItemEvidence.id)
+                if evidence_limit is not None:
+                    statement = statement.limit(evidence_limit)
+                evidences = list(session.scalars(statement))
                 current = [
                     (row, canonical)
                     for row in evidences

@@ -26,9 +26,16 @@ class MemoryBatchSettings:
     profile_version: int
     thinking_level: str = "high"
     pending_count: int = 0
+    run_saved_count: int | None = None
+    run_pending_count: int | None = None
     status: str = "disabled"
     last_code: str | None = None
     last_completed_at: datetime | None = None
+    stored_count: int = 0
+    storage_limit: int = 100_000
+    capacity_blocked: bool = False
+    can_run: bool = False
+    retryable: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +98,7 @@ class MemoryBatchRepositoryPort(Protocol):
         now: datetime,
     ) -> None: ...
     def complete(self, batch: MemorySelectionBatch, *, now: datetime) -> None: ...
+    def defer_capacity(self, batch: MemorySelectionBatch, *, now: datetime) -> None: ...
     def fail(
         self, batch: MemorySelectionBatch, *, code: str, now: datetime,
         latency_ms: int | None = None, usage: object | None = None,

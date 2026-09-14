@@ -30,7 +30,8 @@ from app.domains.memory.policies.consolidation import (
     evaluate_memory_consolidation,
     validate_consolidation_summary,
 )
-from app.domains.memory.exceptions import MemoryConflictError, MemoryDomainError
+from app.domains.memory.exceptions import MemoryConflictError, MemoryDomainError, MemoryCapacityReached
+from app.domains.memory.policies.capacity import MEMORY_STORAGE_LIMIT
 from app.domains.memory.contracts.items import (
     as_utc,
     validate_source_digest,
@@ -153,6 +154,8 @@ class MemoryConsolidationService:
                 candidate_limit=MAX_MAINTENANCE_BATCH_CANDIDATES,
             )
             eligible = []
+            if snapshot.pending_count and snapshot.active_item_count >= MEMORY_STORAGE_LIMIT:
+                raise MemoryCapacityReached()
             for candidate in snapshot.pending_candidates:
                 evidence = self._source_reader.read_evidence(
                     scope=setting.scope,
@@ -326,6 +329,16 @@ class MemoryConsolidationService:
                 provider_telemetry=provider_telemetry,
                 continuation_job_id=continuation_job_id,
             )
+        except MemoryCapacityReached:
+            self._queue.fail(job_id=work.job_id, lease_token=lease_token,
+                error_code="memory_capacity_reached", retryable=False, now=as_utc(self._clock()))
+            self._unit_of_work.commit()
+            return MemoryConsolidationRunResult(
+                outcome=MemoryConsolidationOutcome.DEGRADED, code="memory_capacity_reached",
+                job_id=work.job_id, lane=lane, accepted_item_ids=tuple(accepted_ids),
+                rejected_candidate_ids=tuple(rejected_ids), provider_call_count=provider_call_count,
+                provider_failure_code=provider_failure_code, provider_telemetry=provider_telemetry,
+            )
         except Exception as exc:
             self._unit_of_work.rollback()
             retryable = work.attempt_count < MAX_MAINTENANCE_ATTEMPTS
@@ -395,6 +408,10 @@ class MemoryConsolidationService:
                 code="memory_opt_out",
                 lane=lane,
             )
+        if snapshot.active_item_count >= MEMORY_STORAGE_LIMIT:
+            self._unit_of_work.rollback()
+            return MemoryConsolidationScheduleResult(outcome=MemoryConsolidationOutcome.NOT_DUE,
+                code="memory_capacity_reached", lane=lane)
         pending_characters = 0
         for candidate in snapshot.pending_candidates:
             evidence = self._source_reader.read_evidence(
@@ -464,6 +481,7 @@ class MemoryConsolidationService:
             not snapshot.setting.enabled
             or snapshot.setting.version != expected_scope_version
             or snapshot.pending_count == 0
+            or snapshot.active_item_count >= MEMORY_STORAGE_LIMIT
         ):
             return None
         material = "\x1f".join(

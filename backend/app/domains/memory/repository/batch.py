@@ -44,6 +44,7 @@ from app.domains.memory.models.items import (
     MemoryScopeSettingModel,
 )
 from app.domains.memory.contracts.batch import MemoryBatchSettings, MemorySelectionBatch
+from app.domains.memory.repository.capacity import stored_count, STORAGE_LIMIT
 
 
 class SqlAlchemyMemoryBatchRepository:
@@ -85,6 +86,7 @@ class SqlAlchemyMemoryBatchRepository:
             )
         )
         state, last_code = "disabled", None
+        run_saved_count, run_pending_count = None, None
         last_completed_at = (
             None
             if setting is None
@@ -106,7 +108,8 @@ class SqlAlchemyMemoryBatchRepository:
                 )
             )
             latest = self.session.execute(
-                select(MemoryMaintenanceJob.status, MemoryBatchRun.last_code)
+                select(MemoryMaintenanceJob.status, MemoryBatchRun.last_code,
+                       MemoryMaintenanceJob.id, MemoryBatchRun.candidate_ids_json)
                 .join(MemoryBatchRun, MemoryBatchRun.job_id == MemoryMaintenanceJob.id)
                 .where(
                     MemoryBatchRun.scope_setting_id == setting.id,
@@ -125,7 +128,16 @@ class SqlAlchemyMemoryBatchRepository:
                 .limit(1)
             ).first()
             if latest is not None:
-                job_state, last_code = latest
+                job_state, last_code, run_id, candidate_ids_json = latest
+                run_saved_count = int(self.session.scalar(select(func.count())
+                    .select_from(MemorySelectionDecisionModel).where(
+                        MemorySelectionDecisionModel.job_id == run_id,
+                        MemorySelectionDecisionModel.decision == "retain")) or 0)
+                run_pending_count = int(self.session.scalar(select(func.count())
+                    .select_from(MemoryCandidate).where(
+                        MemoryCandidate.scope_setting_id == setting.id,
+                        MemoryCandidate.id.in_(json.loads(candidate_ids_json)),
+                        MemoryCandidate.status == "pending")) or 0)
                 if enabled:
                     state = {
                         "running": "running",
@@ -134,6 +146,10 @@ class SqlAlchemyMemoryBatchRepository:
                         "succeeded": "completed",
                         "cancelled": "paused",
                     }.get(job_state, "waiting")
+        holdings = stored_count(self.session, scope, now=datetime.now(UTC))
+        blocked = holdings >= STORAGE_LIMIT
+        if blocked:
+            state, last_code = "capacity_blocked", "memory_capacity_reached"
         return MemoryBatchSettings(
             version=0 if config is None else config.version,
             memory_enabled=enabled,
@@ -152,9 +168,13 @@ class SqlAlchemyMemoryBatchRepository:
             thinking_level="high" if profile is None else profile.thinking_level,
             profile_version=0 if profile is None else profile.version,
             pending_count=pending,
+            run_saved_count=run_saved_count, run_pending_count=run_pending_count,
             status=state,
             last_code=last_code,
             last_completed_at=last_completed_at,
+            stored_count=holdings, storage_limit=STORAGE_LIMIT, capacity_blocked=blocked,
+            can_run=bool(enabled and config is not None and config.ai_enabled and not blocked),
+            retryable=bool(enabled and config is not None and config.ai_enabled and not blocked and state == "attention"),
         )
 
     def save_settings(
@@ -489,6 +509,10 @@ class SqlAlchemyMemoryBatchRepository:
             if profile is None:
                 continue
             job = self.session.get(MemoryMaintenanceJob, run.job_id)
+            if stored_count(self.session, self.memory._to_scope(scope).scope, now=now) >= STORAGE_LIMIT:
+                run.last_code = job.last_error_code = "memory_capacity_reached"
+                config.last_claimed_at = now
+                continue
             try:
                 self.memory.validate_scope(self.memory._to_scope(scope).scope)
             except MemoryDomainError:
@@ -611,6 +635,17 @@ class SqlAlchemyMemoryBatchRepository:
         ).last_code = "memory_selection_completed"
         self.session.get(MemoryBatchSetting, batch.setting.id).brief_dirty = True
         self.queue.complete(job_id=batch.job_id, lease_token=batch.lease_token, now=now)
+
+    def defer_capacity(self, batch: MemorySelectionBatch, *, now: datetime) -> None:
+        self.session.flush()
+        self.fence(batch, now=now)
+        job = self.session.get(MemoryMaintenanceJob, batch.job_id)
+        job.status, job.last_error_code = "pending", "memory_capacity_reached"
+        job.lease_token = job.lease_expires_at = None
+        job.started_at = job.completed_at = None
+        run = self.session.get(MemoryBatchRun, batch.job_id)
+        run.last_code, run.available_at = "memory_capacity_reached", now
+        self.session.get(MemoryBatchSetting, batch.setting.id).brief_dirty = True
 
     def fail(
         self, batch: MemorySelectionBatch, *, code: str, now: datetime,

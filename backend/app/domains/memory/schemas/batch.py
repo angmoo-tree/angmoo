@@ -35,10 +35,17 @@ class MemoryBatchSettingRead(BaseModel):
     thinking_level: str = "high"
     profile_version: int
     pending_count: int
+    run_saved_count: int | None = Field(default=None, ge=0)
+    run_pending_count: int | None = Field(default=None, ge=0)
     status: str
     last_code: str | None
     last_completed_at: datetime | None
     available_models: list[str]
+    stored_count: int = Field(ge=0)
+    storage_limit: int = 100_000
+    capacity_blocked: bool
+    can_run: bool
+    retryable: bool
 
 
 class MemoryBatchRetry(BaseModel):

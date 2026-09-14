@@ -78,6 +78,13 @@ class EmbeddingRequest:
 
 
 @dataclass(frozen=True)
+class MeasuredEmbeddingResponse:
+    vector: tuple[float, ...]
+    usage: ProviderUsage
+    physical_attempts: int
+
+
+@dataclass(frozen=True)
 class ProviderResponse:
     text: str
     parsed: Any | None

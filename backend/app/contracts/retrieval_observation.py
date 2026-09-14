@@ -18,6 +18,7 @@ VERSION = "chat-retrieval-diagnostics.v1"
 MAX_BYTES = 16 * 1024
 MAX_EVENTS = 48
 _CRITICAL = frozenset({"router", "planner", "both_merge", "crg_input", "crg_completed", "workflow_failed", "evidence_kind", "planner_validation", "graph_failure", "decision_failure", "decision_summary"})
+_CRITICAL |= frozenset({"social_context_prepared", "social_context_consumed", "hybrid_axis", "hybrid_embedding", "hybrid_fusion"})
 _CODES = re.compile(r"^[a-zA-Z][a-zA-Z0-9_.-]{0,79}$")
 _TEXT_KEYS = frozenset({"axis", "operation", "method", "status", "reason", "recipe", "direction", "ranking", "route", "model", "thinking_level", "source", "phase", "validation_code", "failure_stage", "finish_reason", "call_ref", "terminal_code", "repair_node"})
 _NUM_KEYS = frozenset({"relationships", "evidence", "nodes", "paths", "step", "queries", "planned", "candidates", "accepted", "excluded", "returned", "input", "output", "duplicates", "unmatched", "limit", "hops", "depth", "fanout", "items", "chars", "elapsed_ms", "input_tokens", "output_tokens", "thought_tokens", "response_chars", "logical_calls", "physical_attempts", "groups", "scanned", "bytes_scanned", "attempt"})
@@ -25,6 +26,7 @@ _BOOL_KEYS = frozenset({"executed", "skipped", "counterpart_filter", "thread_fil
 _TEXT_KEYS |= frozenset({"field_path", "validation_pass", "applied_rule", "expected_direction", "returned_direction", "response_state", "provider", "trace_version", "function", "check", "failure_reason"})
 _NUM_KEYS |= frozenset({"tool_count", "total_tokens", "max_output_tokens", "timeout_seconds", "detail_omitted", "call", "entity_index"})
 _BOOL_KEYS |= frozenset({"matched", "response_observed", "trace_complete", "detail_captured"})
+_TEXT_KEYS |= frozenset({"snapshot_id", "content_hash", "recall_mode", "capability_fingerprint"})
 
 
 @dataclass(slots=True)

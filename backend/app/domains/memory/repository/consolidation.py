@@ -328,18 +328,8 @@ class SqlAlchemyMemoryConsolidationRepository(SqlAlchemyMemoryRepository):
         *,
         now: datetime,
     ):
-        scope = setting.scope
-        return (
-            MemoryItem.owner_id == scope.owner_id,
-            MemoryItem.world_id == scope.world_id,
-            MemoryItem.subject_world_character_id == scope.subject_world_character_id,
-            MemoryItem.status == MemoryItemStatus.ACTIVE.value,
-            or_(
-                MemoryItem.pinned_at.is_not(None),
-                MemoryItem.valid_until.is_(None),
-                MemoryItem.valid_until > now,
-            ),
-        )
+        from app.domains.memory.repository.capacity import current_item_predicates
+        return current_item_predicates(setting.scope, now=now)
 
     def _to_hot_brief(self, row: MemoryHotBrief) -> MemoryHotBriefRecord:
         refs = tuple(

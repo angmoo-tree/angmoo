@@ -39,6 +39,31 @@ from app.domains.memory.schemas.batch import (
 
 router = APIRouter(prefix="/worlds/{world_id}/world-characters/{subject_id}", tags=["memory"])
 
+from app.domains.memory.schemas.embedding import MemoryEmbeddingRead, MemoryEmbeddingUpdate
+from app.domains.memory.service import embedding_management
+
+
+@router.get("/memory/embedding-settings", response_model=MemoryEmbeddingRead)
+def read_memory_embedding_setting(world_id: str, subject_id: str, request: Request,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return embedding_management.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows)
+    except Exception as exc:
+        _raise_memory_read_error(exc)
+
+
+@router.put("/memory/embedding-settings", response_model=MemoryEmbeddingRead)
+def update_memory_embedding_setting(world_id: str, subject_id: str, data: MemoryEmbeddingUpdate,
+    request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return embedding_management.save(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
 
 def _scope(user: User, world_id: str, subject_id: str) -> MemoryScope:
     return MemoryScope(

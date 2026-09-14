@@ -245,6 +245,8 @@ class SqlAlchemyMemoryRepository:
             memory_kind=memory_kind,
         )
         with self._session.begin_nested():
+            from app.domains.memory.repository.capacity import require_new_slot
+            require_new_slot(self._session, setting, now=now)
             item = self._new_item(
                 setting=setting,
                 evidence=evidence,
@@ -258,6 +260,8 @@ class SqlAlchemyMemoryRepository:
             self._session.add(item)
             self._session.flush()
             self._session.add(self._new_evidence(item.id, evidence))
+            from app.domains.memory.repository.vector_eligibility import register_content
+            register_content(self._session, item, now=now)
             candidate.status = MemoryCandidateStatus.ACCEPTED.value
             candidate.reason_code = None
             candidate.decided_at = now
@@ -313,6 +317,8 @@ class SqlAlchemyMemoryRepository:
             memory_kind=memory_kind,
         )
         with self._session.begin_nested():
+            from app.domains.memory.repository.capacity import require_new_slot
+            require_new_slot(self._session, setting, now=now, replacing_item_id=old_item.id)
             new_item = self._new_item(
                 setting=setting,
                 evidence=evidence,
@@ -326,6 +332,8 @@ class SqlAlchemyMemoryRepository:
             self._session.add(new_item)
             self._session.flush()
             self._session.add(self._new_evidence(new_item.id, evidence))
+            from app.domains.memory.repository.vector_eligibility import register_content
+            register_content(self._session, new_item, now=now)
             old_item.status = MemoryItemStatus.SUPERSEDED.value
             old_item.superseded_by_id = new_item.id
             old_item.version += 1
@@ -391,6 +399,8 @@ class SqlAlchemyMemoryRepository:
             raise MemoryConflictError("memory_item_version_conflict")
 
         with self._session.begin_nested():
+            from app.domains.memory.repository.capacity import require_new_slot
+            require_new_slot(self._session, setting, now=now, replacing_item_id=old.id)
             replacement = MemoryItem(
                 id=replacement_item_id,
                 owner_id=old.owner_id,
@@ -409,6 +419,10 @@ class SqlAlchemyMemoryRepository:
             )
             self._session.add(replacement)
             self._session.flush()
+            from app.domains.memory.models.embedding import MemoryVectorEligibility
+            if self._session.get(MemoryVectorEligibility, old.id) is not None:
+                from app.domains.memory.repository.vector_eligibility import register_content
+                register_content(self._session, replacement, now=now)
             for evidence in evidences:
                 self._session.add(self._new_evidence(replacement.id, evidence))
             old.status = MemoryItemStatus.SUPERSEDED.value

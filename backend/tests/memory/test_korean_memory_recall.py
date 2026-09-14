@@ -70,6 +70,26 @@ def test_participant_and_thread_filters(tmp_path):
     index.close()
 
 
+def test_mixed_kind_hybrid_request_keeps_memory_spacing_fallback(tmp_path):
+    text = "체력 훈련 지구력 심박수"
+    index = build_index(tmp_path, [document("memory", text),
+        replace(document("post", text), kind=RecallDocumentKind.POST)])
+    result = index.search(replace(query(), kinds=(RecallDocumentKind.MEMORY_ITEM, RecallDocumentKind.POST)))
+    assert [row.memory_item_id for row in result] == ["memory"]
+    index.close()
+
+
+def test_time_filter_precedes_fts_top_k(tmp_path):
+    from datetime import timedelta
+    start = datetime(2026, 9, 1, tzinfo=UTC)
+    docs = [replace(document(f"new-{n}", "훈련 약속"), occurred_at=start + timedelta(days=5)) for n in range(60)]
+    docs.append(replace(document("within-window", "훈련 약속"), occurred_at=start))
+    index = build_index(tmp_path, docs)
+    result = index.search(replace(query("훈련 약속"), limit=1, occurred_from=start, occurred_to=start + timedelta(days=1)))
+    assert [row.memory_item_id for row in result] == ["within-window"]
+    index.close()
+
+
 def test_strict_results_and_order_bypass_new_scan(tmp_path, monkeypatch):
     index = build_index(tmp_path, [document(f"m-{n}", "미세 제어 0.1초 기술") for n in range(8)])
     before = index.search(replace(query("0.1초 기술"), korean_spacing_fallback=False))

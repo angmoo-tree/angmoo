@@ -123,10 +123,12 @@ class CanonicalRecallService:
         index: MemoryRecallIndexPort,
         *,
         validator: CanonicalRecallValidator | None = None,
+        hybrid_service=None,
     ) -> None:
         self._repository = repository
         self._index = index
         self._validator = validator or CanonicalRecallValidator()
+        self.hybrid_service = hybrid_service
 
     def execute(
         self,

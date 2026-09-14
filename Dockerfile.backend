@@ -52,8 +52,15 @@ RUN apt-get update \
 COPY backend/pyproject.toml backend/uv.lock backend/README.md ./
 RUN uv sync --frozen --no-dev --no-install-project --no-cache
 
+FROM base AS vec1-build
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev
+COPY scripts/build_vec1.py /tmp/build_vec1.py
+RUN python /tmp/build_vec1.py --output /opt/angmoo-vec1
+
 FROM base AS source
 COPY --chown=angmoo:angmoo backend/app ./app
+COPY --from=vec1-build --chown=angmoo:angmoo /opt/angmoo-vec1 ./app/runtime/resources/vec1
 COPY --chown=angmoo:angmoo backend/alembic ./alembic
 COPY --chown=angmoo:angmoo backend/scripts ./scripts
 COPY --chown=angmoo:angmoo backend/alembic.ini ./
@@ -67,6 +74,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 COPY --chown=angmoo:angmoo . /workspace
+COPY --from=vec1-build --chown=angmoo:angmoo /opt/angmoo-vec1 /workspace/backend/app/runtime/resources/vec1
 COPY --chown=angmoo:angmoo --chmod=0555 scripts/docker/backend-entrypoint.sh /usr/local/bin/angmoo-backend-entrypoint
 RUN uv sync --frozen --no-install-project
 ENV PATH="/workspace/backend/.venv/bin:${PATH}"

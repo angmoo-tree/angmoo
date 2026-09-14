@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import math
+from time import monotonic
 from typing import Any
 
 from google import genai
@@ -11,6 +13,7 @@ from pydantic import BaseModel
 from app.core.redaction import redact_exact_secret_text
 from app.providers.contracts import (
     EmbeddingRequest,
+    MeasuredEmbeddingResponse,
     ProviderCapabilities,
     ProviderError,
     ProviderRequest,
@@ -361,6 +364,40 @@ class GeminiAdapter:
 
     def embed_sync(self, request: EmbeddingRequest) -> list[float]:
         return _embed_sync(request)
+
+    async def embed_measured(self, request: EmbeddingRequest, *, timeout_seconds: float) -> MeasuredEmbeddingResponse:
+        """One cancellable native async HTTP attempt; legacy lore API stays intact."""
+        if not 0 < timeout_seconds <= 60:
+            raise ValueError("embedding_timeout_invalid")
+        started = monotonic()
+        client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+            timeout=max(1, int(timeout_seconds*1000)),
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ))
+        try:
+            async with client.aio as aio:
+                async with asyncio.timeout(timeout_seconds):
+                    response = await aio.models.embed_content(model=request.model, contents=request.text,
+                        config=types.EmbedContentConfig(output_dimensionality=request.output_dimension))
+            embeddings = response.embeddings or []
+            if len(embeddings) != 1 or embeddings[0].values is None:
+                raise ProviderError("Embedding response shape invalid", failure_class="empty_embedding", retryable=False)
+            vector = tuple(float(v) for v in embeddings[0].values)
+            if len(vector) != request.output_dimension or any(not math.isfinite(v) for v in vector):
+                raise ProviderError("Embedding vector invalid", failure_class="embedding_dimension_mismatch", retryable=False)
+            # Developer API does not provide usage on this SDK response. Unknown
+            # token usage is None; never estimate it from character count.
+            return MeasuredEmbeddingResponse(vector, ProviderUsage(call_type="embed_content",
+                duration_ms=int((monotonic()-started)*1000)), physical_attempts=1)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            normalized = exc if isinstance(exc, ProviderError) else classify_generation_failure(exc)
+            normalized.physical_attempts = 1
+            normalized.duration_ms = int((monotonic()-started)*1000)
+            raise normalized from None
+        finally:
+            client.close()
 
     def normalize_error(
         self, exc: BaseException, *, api_key: str | None = None

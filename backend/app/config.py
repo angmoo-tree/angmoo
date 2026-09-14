@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     )
 
     PROJECT_NAME: str = "Angmoo"
+    CHAT_RECALL_MODE: Literal["legacy_checkpoint", "social_context_baseline", "social_hybrid"] = "legacy_checkpoint"
     API_V1_PREFIX: str = "/api/v1"
     API_DOCS_ENABLED: bool = True
     APP_ENV: Literal["development", "test", "local", "production"] = "development"
