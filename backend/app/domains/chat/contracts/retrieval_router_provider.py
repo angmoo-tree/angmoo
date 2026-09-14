@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from app.domains.chat.contracts.supervisor_selection import SelectionToolCall
 import json
 from typing import Protocol
+from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 
 from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
@@ -62,6 +63,7 @@ class RetrievalRouterRequest:
     world_language: str = "ko"
     today_sns_context: dict | None = None
     repair_diagnostic: str | None = None
+    social_snapshot: SocialContextSnapshot | None = None
 
     def __post_init__(self) -> None:
         message = self.user_message.strip()

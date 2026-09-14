@@ -4,12 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from app.domains.chat.service.social_context_inspector import social_context_inspector as _social_context_inspector
 from app.domains.chat.contracts.graph_failure import graph_failure_diagnostic
 from app.domains.chat.graph_retry_policy import graph_failure_allows_user_retry
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
+from dataclasses import replace
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.domains.relationships.contracts.graph_recall import GraphRecallScope
+from app.domains.relationships.contracts.social_context import SocialContextProvider, SocialContextChangedError
 
 from app.contracts.retrieval_observation import Observation, current, observe
 from app.domains.chat.contracts.character_response_generator import (
@@ -89,6 +94,8 @@ class ResponseGenerationWorkflowService:
         unit_of_work: ResponseWorkflowUnitOfWorkPort,
         memory_producer: SuccessfulChatMemoryProducerPort | None = None,
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
+        recall_mode: ChatRecallMode = ChatRecallMode.LEGACY,
+        social_context_provider: SocialContextProvider | None = None,
     ) -> None:
         self._graph_executor = graph_executor
         self._lifecycle = lifecycle
@@ -101,6 +108,8 @@ class ResponseGenerationWorkflowService:
         self._unit_of_work = unit_of_work
         self._memory_producer = memory_producer
         self._today_snapshot_validator = today_snapshot_validator
+        self._recall_mode = recall_mode
+        self._social_context_provider = social_context_provider
 
     async def run(
         self,
@@ -132,6 +141,18 @@ class ResponseGenerationWorkflowService:
         progress = None
         lease_token = f"lease-{uuid4().hex}"
         try:
+            if self._recall_mode is not ChatRecallMode.LEGACY:
+                if self._social_context_provider is None:
+                    raise RetrievalContractError("chat_social_context_provider_required")
+                snapshot = self._social_context_provider.prepare(GraphRecallScope(
+                    command.preflight.owner_id, command.preflight.world_id,
+                    command.preflight.responding_world_character_id,
+                ), counterpart_id=command.preflight.requester_world_character_id)
+                command = replace(command, recall_mode=self._recall_mode, social_snapshot=snapshot)
+                observe("social_context_prepared", snapshot_id="s-"+snapshot.snapshot_id,
+                        content_hash="h-"+snapshot.content_hash, status=snapshot.status,
+                        candidates=snapshot.candidate_count, excluded=snapshot.excluded_count,
+                        items=len(snapshot.items), queries=snapshot.query_count)
             if (
                 command.today_sns_snapshot is not None
                 and self._today_snapshot_validator is None
@@ -168,6 +189,7 @@ class ResponseGenerationWorkflowService:
                 evidence=self._evidence,
                 character_response=self._character_response,
                 today_snapshot_validator=self._today_snapshot_validator,
+                social_context_provider=self._social_context_provider,
             )
             try:
                 state = await self._graph_executor.run(
@@ -191,6 +213,8 @@ class ResponseGenerationWorkflowService:
             )
 
             sequence = record.last_emitted_sequence
+            if command.social_snapshot is not None:
+                self._social_context_provider.assert_current(command.social_snapshot)
             for delta in character_response_deltas(response.text):
                 sequence += 1
                 event = self._event(
@@ -217,6 +241,8 @@ class ResponseGenerationWorkflowService:
                     command.today_sns_snapshot
                 )
             record = self._transition(record, ResponseRequestState.COMMITTING)
+            if command.social_snapshot is not None:
+                self._social_context_provider.assert_current(command.social_snapshot)
             sequence = record.last_emitted_sequence + 1
             completed = self._event(
                 record,
@@ -259,6 +285,7 @@ class ResponseGenerationWorkflowService:
                     model=response.model,
                     metadata=metadata,
                     evidence_inspector_snapshot=bundle.inspector_snapshot(),
+                    social_context_inspector_snapshot=_social_context_inspector(command.social_snapshot),
                 ),
                 now=datetime.now(UTC),
             )
@@ -520,7 +547,7 @@ class ResponseGenerationWorkflowService:
 def _classify_failure(
     exc: Exception,
 ) -> tuple[str, bool, ResponseTerminalReason]:
-    if isinstance(exc, TodaySnsSnapshotChangedError):
+    if isinstance(exc, (TodaySnsSnapshotChangedError, SocialContextChangedError)):
         return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, CharacterResponseGeneratorError):
         return (

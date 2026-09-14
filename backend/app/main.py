@@ -118,6 +118,7 @@ def create_lifespan(
     runtime_settings=settings,
     runtime_disposer: Callable[[], None] | None = None,
     memory_runtime=None,
+    memory_hybrid_runtime=None,
 ) -> LifespanHandler:
     @asynccontextmanager
     async def runtime_lifespan(runtime_app: FastAPI) -> AsyncIterator[None]:
@@ -163,8 +164,12 @@ def create_lifespan(
                 await component_manager.start()
             if memory_runtime is not None:
                 await memory_runtime.start()
+            if memory_hybrid_runtime is not None:
+                await memory_hybrid_runtime.start()
         except BaseException:
             try:
+                if memory_hybrid_runtime is not None:
+                    await memory_hybrid_runtime.stop()
                 if memory_runtime is not None:
                     await memory_runtime.stop()
                 if component_manager is not None:
@@ -185,6 +190,8 @@ def create_lifespan(
             yield
         finally:
             try:
+                if memory_hybrid_runtime is not None:
+                    await memory_hybrid_runtime.stop()
                 if memory_runtime is not None:
                     await memory_runtime.stop()
                 if component_manager is not None:
@@ -314,6 +321,7 @@ def create_app(
                 runtime_settings=runtime_settings,
                 runtime_disposer=dispose_runtime,
                 memory_runtime=memory_runtime,
+                memory_hybrid_runtime=composition.memory_hybrid_runtime,
             )
     runtime_app = FastAPI(
         title=runtime_settings.project_name,
@@ -348,7 +356,8 @@ def create_app(
     from app.runtime.character_lore import build_lore_workflows
     runtime_app.state.lore_workflows = build_lore_workflows
     from app.runtime.memory_http import build_memory_workflows
-    runtime_app.state.memory_workflows = build_memory_workflows
+    runtime_app.state.memory_workflows = (build_memory_workflows if composition is None else
+        lambda: build_memory_workflows(embedding_runtime_status=composition.memory_hybrid_runtime.read_status))
     from app.runtime.characters.management import build_character_media_workflows
     runtime_app.state.character_media_workflows = build_character_media_workflows
     from app.runtime.characters.creator import build_creator_workflows

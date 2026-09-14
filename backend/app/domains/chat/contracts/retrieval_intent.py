@@ -145,8 +145,12 @@ class RetrievalIntentEnvelope:
     # Code-owned provenance, not part of the model wire payload or semantic hash.
     coordination_source: str = "model"
     graph_queries: tuple[GraphQueryRequirement, ...] = ()
+    search_text: str | None = None
 
     def __post_init__(self) -> None:
+        if self.search_text is not None and (self.route is not RetrievalRoute.CANONICAL
+            or not isinstance(self.search_text, str) or not self.search_text.strip() or len(self.search_text) > 4000):
+            raise RetrievalContractError("retrieval_search_text_invalid")
         if self.coordination_source not in {"model", "code"}:
             raise RetrievalContractError("retrieval_intent_coordination_source_invalid")
         if self.version not in {RETRIEVAL_INTENT_VERSION, "retrieval-intent.v2"}:
@@ -183,6 +187,7 @@ class RetrievalIntentEnvelope:
 
     def payload(self) -> dict[str, Any]:
         return {
+            **({"search_text": self.search_text} if self.search_text is not None else {}),
             **({"graph_queries": [q.payload() for q in self.graph_queries]} if self.version == "retrieval-intent.v2" else {}),
             "version": self.version,
             "decision": self.decision.value,

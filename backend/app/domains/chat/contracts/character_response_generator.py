@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
+from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 
 
 class CharacterResponseGeneratorError(RuntimeError):
@@ -60,6 +61,7 @@ class CharacterResponseGeneratorRequest:
     evidence: EvidenceBundle
     clarification_candidates: tuple[str, ...] = ()
     today_sns_manifest: dict[str, Any] | None = None
+    social_snapshot: SocialContextSnapshot | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:

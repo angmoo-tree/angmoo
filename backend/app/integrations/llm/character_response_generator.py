@@ -151,6 +151,7 @@ def _user_prompt(request: CharacterResponseGeneratorRequest) -> str:
         "latest_user_message": request.user_message,
         "frozen_evidence": request.evidence.provider_payload(),
         "today_sns_manifest": request.today_sns_manifest,
+        "social_context": None if request.social_snapshot is None else request.social_snapshot.prompt_view(),
         "clarification_candidates": list(request.clarification_candidates),
     }
     return (

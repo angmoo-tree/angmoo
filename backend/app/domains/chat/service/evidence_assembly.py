@@ -87,6 +87,13 @@ class EvidenceBundleAssembler:
         else:
             outcome = RetrievalOutcome.NO_EVIDENCE
             degraded = DegradedReason.NO_ACCEPTED_EVIDENCE
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+        from app.domains.memory.contracts.hybrid_recall import RecallAxisStatus
+        if (isinstance(result, HybridCanonicalResult)
+            and result.recall.status is not RecallAxisStatus.READY
+            and result.metrics.short_circuit_reason != "memory_opt_out"):
+            degraded = DegradedReason.CANONICAL_UNAVAILABLE
+            outcome = RetrievalOutcome.DEGRADED
         return self._bundle(
             request_id=result.request_id,
             request_scope_hash=request_scope_hash,
@@ -94,6 +101,7 @@ class EvidenceBundleAssembler:
             outcome=outcome,
             candidates=candidates,
             degraded_reason=degraded,
+            preserve_rank_order=isinstance(result, HybridCanonicalResult),
         )
 
     def graph(
@@ -220,6 +228,7 @@ class EvidenceBundleAssembler:
             outcome=outcome,
             candidates=bundle.items + today_items,
             partial_axes=bundle.partial_axes,
+            preserve_rank_order=bundle.preserve_rank_order,
             degraded_reason=degraded_reason,
             clarification_slot=bundle.clarification_slot,
         )
@@ -282,6 +291,13 @@ class EvidenceBundleAssembler:
     def _canonical_items(
         result: CanonicalPlanningResult,
     ) -> tuple[EvidenceItem, ...]:
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+        if isinstance(result, HybridCanonicalResult):
+            return tuple(EvidenceItem(
+                opaque_reference=opaque_evidence_reference("canonical", record.canonical_source_id, record.reference),
+                kind=EvidenceKind.CANONICAL_SOURCE, text=EvidenceBundleAssembler._bounded_text(record.text),
+                occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
+                locator=_record_locator(record)) for record in result.recall.records if record.text.strip())
         if result.execution is None:
             return ()
         items: list[EvidenceItem] = []
@@ -417,8 +433,9 @@ class EvidenceBundleAssembler:
         partial_axes: tuple[RetrievalAxis, ...] = (),
         degraded_reason: DegradedReason | None = None,
         clarification_slot: str | None = None,
+        preserve_rank_order: bool = False,
     ) -> EvidenceBundle:
-        items = self._dedupe_sort_truncate(candidates)
+        items = self._dedupe_sort_truncate(candidates, preserve_rank_order=preserve_rank_order)
         observe("bundle", route=route.value, input=len(candidates), output=len(items), excluded=len(candidates)-len(items))
         evidence_hash = compute_evidence_hash(
             request_id=request_id,
@@ -440,15 +457,17 @@ class EvidenceBundleAssembler:
             degraded_reason=degraded_reason,
             clarification_slot=clarification_slot,
             evidence_hash=evidence_hash,
+            preserve_rank_order=preserve_rank_order,
         )
 
     @staticmethod
     def _dedupe_sort_truncate(
         candidates: tuple[EvidenceItem, ...],
+        *, preserve_rank_order=False,
     ) -> tuple[EvidenceItem, ...]:
         deduplicated: dict[tuple[str, str], EvidenceItem] = {}
         for item in candidates:
-            key = (item.kind.value, item.normalized_text.casefold())
+            key = (item.kind.value, item.opaque_reference if preserve_rank_order else item.normalized_text.casefold())
             existing = deduplicated.get(key)
             if existing is None:
                 deduplicated[key] = item
@@ -470,7 +489,7 @@ class EvidenceBundleAssembler:
                 axes=axes,
                 locator=existing.locator or item.locator,
             )
-        ordered = sorted(
+        ordered = list(deduplicated.values()) if preserve_rank_order else sorted(
             deduplicated.values(),
             key=lambda item: (
                 -(

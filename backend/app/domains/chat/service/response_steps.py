@@ -26,7 +26,7 @@ from app.domains.chat.contracts.response_execution import (
     ResponseWorkflowCommand,
 )
 from app.domains.chat.contracts.response_request import ResponseRequestRecord
-from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
+from app.domains.chat.contracts.retrieval_intent import RetrievalContractError, RetrievalRoute
 from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotValidatorPort
 from app.domains.chat.policies import select_response_action, BRANCH_ACTIONS
 from app.domains.chat.service.both_retrieval import (
@@ -70,6 +70,7 @@ class ResponseWorkflowSteps:
         evidence: EvidenceBundleAssembler,
         character_response: CharacterResponseGenerationService,
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
+        social_context_provider=None,
     ) -> None:
         self.command = command
         self.progress = progress
@@ -90,6 +91,7 @@ class ResponseWorkflowSteps:
         self._evidence = evidence
         self._character_response = character_response
         self._today_snapshot_validator = today_snapshot_validator
+        self._social_context_provider = social_context_provider
 
     def assert_active(self, state: ResponseGraphState) -> None:
         record = self.progress.record
@@ -114,6 +116,8 @@ class ResponseWorkflowSteps:
         self, action: ResponseAction, state: ResponseGraphState
     ) -> ResponseGraphState:
         self.assert_active(state)
+        if not self.command.recall_mode.graph_tools_enabled and action in {ResponseAction.GRAPH, ResponseAction.BOTH}:
+            raise RetrievalContractError("chat_graph_capability_disabled")
         before = {**state, "visits": state["visits"] - 1, "action": self._last_action}
         expected = select_response_action(before)
         if (
@@ -169,6 +173,7 @@ class ResponseWorkflowSteps:
         routing = await self._router.route(
             command.preflight,
             recent_context=command.router_context,
+            **({"social_snapshot": command.social_snapshot} if command.social_snapshot is not None else {}),
             today_sns_context=(
                 None
                 if command.today_sns_snapshot is None
@@ -184,12 +189,17 @@ class ResponseWorkflowSteps:
             node_state={
                 "intent_hash": routing.intent.envelope_hash,
                 "resolved_hash": routing.resolved.envelope_hash,
+                "recall_mode": command.recall_mode.value,
+                "recall_capability_fingerprint": command.recall_mode.fingerprint,
+                "social_snapshot": None if command.social_snapshot is None else command.social_snapshot.manifest(),
                 "router_metrics": _safe_metrics(routing.metrics),
             },
             call_tracker=routing.call_tracker,
         )
 
         route = routing.intent.route
+        if not command.recall_mode.graph_tools_enabled and route in {RetrievalRoute.GRAPH, RetrievalRoute.BOTH}:
+            raise RetrievalContractError("chat_graph_capability_disabled")
         observe(
             "router",
             route=route.value,
@@ -388,6 +398,8 @@ class ResponseWorkflowSteps:
         workflow_recipe = state["workflow_recipe"]
         bundle = state["bundle"]
         tracker = self.progress.call_tracker
+        if command.social_snapshot is not None:
+            self._social_context_provider.assert_current(command.social_snapshot)
         if (
             command.today_sns_snapshot is not None
             and self._today_snapshot_validator is not None
@@ -454,6 +466,9 @@ class ResponseWorkflowSteps:
                 for candidate in routing.clarification.candidates
             )
         observe("crg_input", items=len(bundle.items), route=bundle.route.value)
+        if command.social_snapshot is not None:
+            observe("social_context_consumed", source="crg", snapshot_id="s-"+command.social_snapshot.snapshot_id,
+                    content_hash="h-"+command.social_snapshot.content_hash, status=command.social_snapshot.status)
         for kind in {item.kind for item in bundle.items}:
             observe(
                 "evidence_kind",
@@ -464,6 +479,7 @@ class ResponseWorkflowSteps:
             CharacterResponseGeneratorRequest(
                 user_message=command.preflight.user_message,
                 profile=command.profile,
+                social_snapshot=command.social_snapshot,
                 recent_context=command.response_context,
                 evidence=bundle,
                 clarification_candidates=candidates,

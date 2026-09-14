@@ -50,6 +50,7 @@ class CanonicalRetrievalCommand:
     resolved: ResolvedRetrievalEnvelope
     call_tracker: Mapping[str, Any]
     workflow_dependency: WorkflowDependencyBinding | None = None
+    call_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:

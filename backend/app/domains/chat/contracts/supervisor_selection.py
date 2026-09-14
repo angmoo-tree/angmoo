@@ -22,8 +22,14 @@ class SelectionArgumentOptions:
     code_coordination: bool = False
     positional_entity_refs: bool = False
     graph_query_contract: bool = False
+    social_context_mode: bool = False
+    hybrid_recall: bool = False
 
     def __post_init__(self):
+        if type(self.hybrid_recall) is not bool or (self.hybrid_recall and not self.social_context_mode):
+            raise ValueError("selection_argument_options_invalid")
+        if type(self.social_context_mode) is not bool or (self.social_context_mode and self.graph_query_contract):
+            raise ValueError("selection_argument_options_invalid")
         if type(self.code_coordination) is not bool or type(self.positional_entity_refs) is not bool:
             raise ValueError("selection_argument_options_invalid")
         if type(self.graph_query_contract) is not bool or (self.graph_query_contract and self.positional_entity_refs):
@@ -31,10 +37,14 @@ class SelectionArgumentOptions:
 
     @property
     def active(self):
-        return self.code_coordination or self.positional_entity_refs or self.graph_query_contract
+        return self.code_coordination or self.positional_entity_refs or self.graph_query_contract or self.social_context_mode
 
     @property
     def version(self):
+        if self.hybrid_recall:
+            return "selection-args.hybrid.v1"
+        if self.social_context_mode:
+            return "selection-args.social.v1"
         if self.graph_query_contract:
             return f"selection-args.v2.a{int(self.code_coordination)}"
         return f"selection-args.v1.a{int(self.code_coordination)}b{int(self.positional_entity_refs)}"
@@ -92,7 +102,7 @@ def tool_arguments_schema() -> dict:
             "required": list(SEMANTIC_FIELDS), "additionalProperties": False}
 
 
-def execution_arguments_schema(*, graph_query_contract=False) -> dict:
+def execution_arguments_schema(*, graph_query_contract=False, hybrid_recall=False) -> dict:
     """ToolNode consumes the normalized internal contract, not the model schema."""
     schema = tool_arguments_schema()
     # The parser checks the fixed perspective; the internal relationship value
@@ -104,12 +114,19 @@ def execution_arguments_schema(*, graph_query_contract=False) -> dict:
         from app.domains.chat.contracts.graph_query_selection import graph_queries_schema
         schema["properties"]["graph_queries"] = graph_queries_schema(internal=True)
         schema["required"].append("graph_queries")
+    if hybrid_recall:
+        schema["properties"]["search_text"] = {"type": "string", "minLength": 1, "maxLength": 4000}
+        schema["required"].append("search_text")
     return schema
 
 
 def model_arguments_schema(options: SelectionArgumentOptions = SelectionArgumentOptions()) -> dict:
     schema = tool_arguments_schema()
     properties = schema["properties"]
+    if options.hybrid_recall:
+        properties["search_text"] = {"type": "string", "minLength": 1, "maxLength": 4000,
+            "description": "Standalone recall query preserving the user's entities, event and context. Not SQL, an FTS expression or a tool plan."}
+        schema["required"].append("search_text")
     if options.code_coordination:
         del properties["coordination_hint"]
         schema["required"].remove("coordination_hint")
@@ -165,6 +182,9 @@ def control_arguments_schema(name: str, options: SelectionArgumentOptions = Sele
     if name not in CONTROL_NAMES:
         raise ValueError("unknown_selection_control")
     schema = model_arguments_schema(options)
+    if options.hybrid_recall:
+        del schema["properties"]["search_text"]
+        schema["required"].remove("search_text")
     if name == "REQUEST_CLARIFICATION":
         schema["properties"]["clarification_slot"] = retrieval_router_response_schema()["properties"]["clarification_slot"]
         schema["required"].append("clarification_slot")
@@ -187,17 +207,26 @@ def parse_control_selection(
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
     if any(call.name not in TOOL_NAMES | CONTROL_NAMES for call in calls):
         raise RetrievalContractError("retrieval_router_route_unknown")
+    if options.social_context_mode and (len(calls) != 1 or calls[0].name == "GRAPH"):
+        raise RetrievalContractError("retrieval_router_route_unknown")
     if any(call.name in CONTROL_NAMES for call in calls) and len(calls) != 1:
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
     payloads = [call.arguments() for call in calls]
+    search_text = None
     for call, payload in zip(calls, payloads, strict=True):
         expected = set(SEMANTIC_FIELDS) - ({"coordination_hint"} if options.code_coordination else set())
+        if options.hybrid_recall and call.name == "CANONICAL":
+            expected.add("search_text")
         if options.graph_query_contract:
             expected.add("graph_queries")
         if call.name == "REQUEST_CLARIFICATION":
             expected.add("clarification_slot")
         if not isinstance(payload, dict) or set(payload) != expected:
             raise RetrievalContractError("retrieval_router_payload_keys_invalid")
+        if options.hybrid_recall and call.name == "CANONICAL":
+            search_text = payload.pop("search_text")
+            if not isinstance(search_text, str) or not search_text.strip() or len(search_text) > 4000:
+                raise RetrievalContractError("retrieval_search_text_invalid")
     trace.applicable.update(
         entities=any(bool(p["entities"]) for p in payloads),
         relationship=any(p["relationship"] is not None for p in payloads),
@@ -248,7 +277,8 @@ def parse_control_selection(
             raise RetrievalContractError("graph_query_count_invalid")
         intent = replace(intent, version="retrieval-intent.v2", graph_queries=queries)
     reference_inputs(intent.payload(), "validated_intent")
-    return replace(intent, coordination_source="code") if options.code_coordination else intent
+    return replace(intent, search_text=search_text,
+                   coordination_source="code" if options.code_coordination else intent.coordination_source)
 
 
 def _normalize_model_arguments(payload, *, both, options, trace):
@@ -289,6 +319,8 @@ def _normalize_model_arguments(payload, *, both, options, trace):
 def effective_calls(request_id: str, intent, proposed: tuple[SelectionToolCall, ...]):
     names = TOOL_NAMES if intent.route.value == "BOTH" else ({intent.route.value} & TOOL_NAMES)
     arguments = {key: intent.payload()[key] for key in SEMANTIC_FIELDS}
+    if intent.search_text is not None:
+        arguments["search_text"] = intent.search_text
     if intent.version == "retrieval-intent.v2":
         arguments["graph_queries"] = [q.payload() for q in intent.graph_queries]
     by_name = {call.name: call for call in proposed}

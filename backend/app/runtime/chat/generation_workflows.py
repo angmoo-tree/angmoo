@@ -9,6 +9,8 @@ from app.config import Settings
 from app.contracts.retrieval_observation import current
 from app.domains.characters.models import Character
 from app.domains.chat.contracts.execution import GenerationExecution
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.runtime.chat.social_context import ChatSocialContextProvider
 from app.domains.chat.contracts.response_lifecycle import (
     ResponseLifecycleRepositoryPort,
 )
@@ -108,10 +110,17 @@ def build(
     lifecycle: ResponseLifecycleRepositoryPort,
     world_id: str,
 ) -> GenerationExecution:
-    canonical = CanonicalRetrievalPlanningService(
-        planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
-        executor=CanonicalRetrievalPlanExecutor(RetryingRead(memory_recall_service)),
-    )
+    recall_mode = ChatRecallMode(getattr(runtime_settings, "CHAT_RECALL_MODE", "legacy_checkpoint"))
+    if recall_mode is ChatRecallMode.SOCIAL_HYBRID:
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
+        if memory_recall_service.hybrid_service is None:
+            raise ValueError("chat_hybrid_backend_not_ready")
+        canonical = HybridCanonicalService(memory_recall_service.hybrid_service)
+    else:
+        canonical = CanonicalRetrievalPlanningService(
+            planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
+            executor=CanonicalRetrievalPlanExecutor(RetryingRead(memory_recall_service)),
+        )
     graph_recall = GraphRecallService(
         SqlAlchemyRelationshipGraphReadGateway(
             db, config=runtime_settings, graph_provider="ladybug"
@@ -133,6 +142,8 @@ def build(
                 native_controls=True,
                 code_coordination=True,
                 positional_entity_refs=False,
+                social_context_mode=not recall_mode.graph_tools_enabled,
+                hybrid_recall=recall_mode is ChatRecallMode.SOCIAL_HYBRID,
             ),
             policy=SqlAlchemyRetrievalPolicyResolver(db),
         ),
@@ -145,6 +156,8 @@ def build(
         ),
         unit_of_work=SupervisorResponseWorkflowUnitOfWork(db),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
+        recall_mode=recall_mode,
+        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
         today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(
             db, character_labels
         ),

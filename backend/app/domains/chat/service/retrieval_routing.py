@@ -77,6 +77,7 @@ class RetrievalRoutingService:
         *,
         recent_context: tuple[RetrievalRouterContextMessage, ...] = (),
         today_sns_context: dict | None = None,
+        social_snapshot=None,
         now: datetime,
         deadline_at: datetime,
     ) -> RetrievalRoutingResult:
@@ -94,6 +95,7 @@ class RetrievalRoutingService:
             responding_character_name=scope.responding_character_name,
             world_language=scope.world_language,
             today_sns_context=today_sns_context,
+            social_snapshot=social_snapshot,
         )
 
         first_physical = 0

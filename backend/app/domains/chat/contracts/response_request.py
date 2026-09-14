@@ -237,6 +237,7 @@ class ResponseCommitPayload:
     model: str
     metadata: ResponseMetadata
     evidence_inspector_snapshot: dict[str, Any] | None = None
+    social_context_inspector_snapshot: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if not self.content.strip():

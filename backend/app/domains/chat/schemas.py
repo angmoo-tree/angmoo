@@ -245,7 +245,7 @@ class WorldChatEvidenceSummaryRead(BaseModel):
     request_id: str
     assistant_message_id: int
     capability: Literal["available", "degraded"]
-    count: int = Field(ge=1, le=12)
+    count: int = Field(ge=1, le=24)
 
 
 class WorldChatEvidenceItemRead(BaseModel):
@@ -272,6 +272,7 @@ class WorldChatEvidenceRead(BaseModel):
     retrieval_outcome: str
     capability: Literal["available", "degraded"]
     items: list[WorldChatEvidenceItemRead]
+    current_context: list[WorldChatEvidenceItemRead] = Field(default_factory=list, max_length=12)
 
 
 class WorldChatMessageAcceptRead(BaseModel):

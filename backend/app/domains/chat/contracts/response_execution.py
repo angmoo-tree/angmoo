@@ -23,6 +23,8 @@ from app.domains.chat.contracts.retrieval_router_provider import (
 from app.domains.chat.contracts.routing_result import RetrievalRoutingResult
 from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 
 
 class ResponseExecutionError(GenerationContractError):
@@ -60,8 +62,18 @@ class ResponseWorkflowCommand:
     today_sns_snapshot: TodaySnsActivitySnapshot | None = None
     graph_projection_enabled: bool = True
     lease_seconds: int = 180
+    recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
+    social_snapshot: SocialContextSnapshot | None = None
 
     def __post_init__(self) -> None:
+        if not isinstance(self.recall_mode, ChatRecallMode):
+            raise RetrievalContractError("chat_recall_mode_invalid")
+        if self.social_snapshot is not None and (
+            self.social_snapshot.scope.owner_id != self.preflight.owner_id
+            or self.social_snapshot.scope.world_id != self.preflight.world_id
+            or self.social_snapshot.scope.subject_world_character_id != self.preflight.responding_world_character_id
+        ):
+            raise RetrievalContractError("chat_social_snapshot_scope_mismatch")
         if self.request.request_id != self.preflight.request_id:
             raise RetrievalContractError("response_workflow_request_mismatch")
         if self.request.thread_id != self.preflight.thread_id:

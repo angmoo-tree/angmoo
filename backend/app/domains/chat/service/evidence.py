@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from time import monotonic
+from app.contracts.read_deadline import bounded_read
 
 from sqlalchemy.orm import Session
 
@@ -54,6 +56,10 @@ class EvidenceService:
         metadata = record.response_metadata
         capability = metadata.get("evidence_capability")
         snapshot = metadata.get("_evidence_inspector_v1")
+        current_snapshot = metadata.get("_social_context_inspector_v1")
+        current_raw = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
+        if isinstance(current_raw, list) and current_raw:
+            capability = "degraded" if capability == "degraded" else "available"
         if capability not in {"available", "degraded"} or not isinstance(
             snapshot, dict
         ):
@@ -74,11 +80,26 @@ class EvidenceService:
             for raw in raw_items[:12]
             if isinstance(raw, dict)
         ]
+        current_items = []
+        current_deadline = monotonic() + 2.0
+        for raw in current_raw[:12]:
+            if not isinstance(raw, dict):
+                continue
+            locator = raw.get("locator") or {}
+            validate = getattr(self.reads, "social_relationship_current", None)
+            remaining = current_deadline - monotonic()
+            valid = False
+            if validate is not None and remaining > 0:
+                with bounded_read(remaining):
+                    valid = validate(db, scope, locator)
+            item = self._chat_evidence_item(db, scope, raw if valid else {**raw, "locator": None}, source_reader=source_reader)
+            current_items.append(item)
+        visible_items = items + current_items
         current_capability = (
             "available"
             if capability == "available"
-            and items
-            and all((item.availability == "available" for item in items))
+            and visible_items
+            and all((item.availability == "available" for item in visible_items))
             else "degraded"
         )
         return schemas.WorldChatEvidenceRead(
@@ -87,6 +108,7 @@ class EvidenceService:
             retrieval_outcome=str(metadata.get("retrieval_outcome") or "unknown"),
             capability=current_capability,
             items=items,
+            current_context=current_items,
         )
 
     def _chat_evidence_item(

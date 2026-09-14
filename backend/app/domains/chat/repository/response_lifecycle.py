@@ -464,6 +464,12 @@ class SqlAlchemyResponseLifecycleRepository:
             metadata_payload["_evidence_inspector_v1"] = (
                 payload.evidence_inspector_snapshot
             )
+        if payload.social_context_inspector_snapshot is not None:
+            snapshot = payload.social_context_inspector_snapshot
+            _validate_evidence_inspector_snapshot(snapshot, public_evidence_count=len(snapshot.get("items", [])))
+            if any(item["kind"] != "graph_relationship" or item["axes"] for item in snapshot["items"]):
+                raise GenerationContractError("response_social_inspector_invalid")
+            metadata_payload["_social_context_inspector_v1"] = snapshot
         metadata_json = _json_payload(metadata_payload)
         try:
             with self._session.begin_nested():

@@ -7,7 +7,7 @@ import asyncio
 import sqlite3
 import hashlib
 from contextvars import ContextVar
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import StructuredTool
@@ -26,6 +26,12 @@ _inside_tool: ContextVar = ContextVar("chat_inside_tool", default=False)
 
 
 def validate_result(name, result, request_id, envelope_hash=None):
+    from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+    if isinstance(result, HybridCanonicalResult):
+        if (name != "CANONICAL" or result.request_id != request_id or result.recall.request_id != request_id
+            or result.recall.envelope_hash != envelope_hash or not isinstance(result.call_tracker, dict)):
+            raise RetrievalContractError("chat_tool_result_contract_invalid")
+        return
     expected = CanonicalPlanningResult if name == "CANONICAL" else GraphPlanningResult
     if not isinstance(result, expected) or result.request_id != request_id or not isinstance(result.call_tracker, dict):
         raise RetrievalContractError("chat_tool_result_contract_invalid")
@@ -74,6 +80,10 @@ class RetrievalToolExecution:
         self.envelope_hash = routing.resolved.envelope_hash
         self.steps, self.state = steps, state
         self.receipts = {c.name: ToolReceipt(c) for c in effective_calls(self.request_id, routing.intent, routing.proposed_tool_calls)}
+        from app.domains.chat.contracts.recall_mode import ChatRecallMode
+        mode = ChatRecallMode(getattr(getattr(steps, "command", None), "recall_mode", "legacy_checkpoint"))
+        if not mode.graph_tools_enabled and "GRAPH" in self.receipts:
+            raise RetrievalContractError("chat_graph_tool_disabled")
         control_routes = {"USE_CONTEXT": "CURRENT_CONTEXT", "REQUEST_CLARIFICATION": "CLARIFICATION"}
         for call in routing.proposed_tool_calls:
             if call.name in CONTROL_NAMES:
@@ -127,6 +137,18 @@ class RetrievalToolExecution:
                     value = await _job()
                     self.steps.assert_active(self.state)
                     validate_result(_name, value, self.request_id, self.envelope_hash)
+                    from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+                    from app.domains.chat.contracts.recall_mode import ChatRecallMode
+                    is_hybrid = ChatRecallMode(getattr(getattr(self.steps, "command", None), "recall_mode", "legacy_checkpoint")) is ChatRecallMode.SOCIAL_HYBRID
+                    if _name == "CANONICAL" and is_hybrid != isinstance(value, HybridCanonicalResult):
+                        raise RetrievalContractError("chat_tool_result_mode_mismatch")
+                    if isinstance(value, HybridCanonicalResult):
+                        resolved = self.state["routing"].resolved
+                        scope = value.recall.scope
+                        if (value.recall.call_id != _receipt.call.call_id or
+                            (scope.owner_id, scope.world_id, scope.subject_world_character_id) !=
+                            (resolved.owner_id, resolved.world_id, resolved.responding_world_character_id)):
+                            raise RetrievalContractError("chat_tool_result_scope_mismatch")
                     _receipt.result, _receipt.status = value, "completed"
                     observe("tool_return", axis=_name.lower(), status="completed", executed=True, call_ref=_call_ref(_receipt.call.call_id), attempt=_receipt.attempt)
                     return ToolMessage(content="completed", name=_name, tool_call_id=_receipt.call.call_id,
@@ -145,7 +167,7 @@ class RetrievalToolExecution:
                 finally:
                     _inside_tool.reset(token)
 
-            tools.append(StructuredTool.from_function(coroutine=invoke, name=name, description="Execute a code-validated retrieval request.", args_schema=execution_arguments_schema(graph_query_contract="graph_queries" in receipt.call.arguments())))
+            tools.append(StructuredTool.from_function(coroutine=invoke, name=name, description="Execute a code-validated retrieval request.", args_schema=execution_arguments_schema(graph_query_contract="graph_queries" in receipt.call.arguments(), hybrid_recall="search_text" in receipt.call.arguments())))
             native.append({"name": name, "args": receipt.call.arguments(), "id": receipt.call.call_id, "type": "tool_call"})
         node = ToolNode(tools, handle_tool_errors=False)
         batch = StateGraph(dict)
@@ -186,6 +208,8 @@ class ToolPlanningService:
         execution = active_tool_execution.get()
         if execution is None or command.resolved.request_id != execution.request_id or command.resolved.envelope_hash != execution.envelope_hash:
             raise RetrievalContractError("chat_tool_command_scope_mismatch")
+        if self.name == "CANONICAL" and command.intent.search_text is not None:
+            command = replace(command, call_id=execution.receipts[self.name].call.call_id)
         if _inside_tool.get():
             return await self.service.plan_and_execute(command, **kwargs)
         return (await execution.run({self.name: lambda: self.service.plan_and_execute(command, **kwargs)}))[0]

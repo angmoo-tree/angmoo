@@ -21,6 +21,7 @@ from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
 from app.runtime.memory.recall_projection import EmbeddedMemoryRecallProjection
 from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository
 from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex
+from app.runtime.memory.hybrid_runtime import MemoryHybridRuntime
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search import (
     EmbeddedSocialSearchProjection,
@@ -200,6 +201,7 @@ class RuntimeComposition:
     social_search_projection: EmbeddedSocialSearchProjection
     memory_recall_projection: EmbeddedMemoryRecallProjection
     memory_recall_service: CanonicalRecallService
+    memory_hybrid_runtime: MemoryHybridRuntime
 
     def dispose(self) -> None:
         self.memory_recall_projection.stop()
@@ -217,6 +219,7 @@ def compose_runtime(
     session_factory = create_session_factory(engine)
     data_paths = StaticRuntimeDataPath(config.data_paths.root)
     memory_recall_index = SqliteMemoryRecallIndex(data_paths)
+    memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve())
     return RuntimeComposition(
         config=config,
         settings=runtime_settings,
@@ -233,7 +236,9 @@ def compose_runtime(
         memory_recall_service=CanonicalRecallService(
             SqlAlchemyCanonicalRecallRepository(session_factory),
             memory_recall_index,
+            hybrid_service=memory_hybrid_runtime.service,
         ),
+        memory_hybrid_runtime=memory_hybrid_runtime,
     )
 
 

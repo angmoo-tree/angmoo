@@ -107,6 +107,7 @@ class EvidenceBundle:
     clarification_slot: str | None = None
     version: str = EVIDENCE_BUNDLE_VERSION
     evidence_hash: str = ""
+    preserve_rank_order: bool = False
 
     def __post_init__(self) -> None:
         if self.version != EVIDENCE_BUNDLE_VERSION:
