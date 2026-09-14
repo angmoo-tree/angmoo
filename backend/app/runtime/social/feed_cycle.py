@@ -56,6 +56,8 @@ class RuntimeWorldFeedWorkflows:
 async def run_world_keyword_feed(
     ctx: WorldFeedContext, *, provider: FeedReactionProvider | None = None
 ) -> dict[str, Any]:
-    return await service.run_world_keyword_feed(
-        ctx, workflows=RuntimeWorldFeedWorkflows(), provider=provider
-    )
+    from app.runtime.social_snapshot import prepare_activity_social_context, with_social_receipts
+    from app.runtime.social.langgraph_actions import active_world_character
+    ctx = prepare_activity_social_context(ctx, active_actor=active_world_character)
+    result = await service.run_world_keyword_feed(ctx, workflows=RuntimeWorldFeedWorkflows(), provider=provider)
+    return with_social_receipts(ctx, result)

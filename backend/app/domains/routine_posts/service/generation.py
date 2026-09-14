@@ -26,6 +26,7 @@ class DirectRoutinePostProvider:
     ) -> RoutineGeneration:
         api_key = _api_key(resident_context.credential)
         common = _common_context(routine_context)
+        social = getattr(resident_context, "social_context", None)
         considered_ids = routine_context.considered_source_event_ids
         continuity_tokens = allowed_continuity_facts(routine_context)
         detail_key_tokens = allowed_detail_keys(routine_context)
@@ -96,7 +97,7 @@ Return only the requested structured JSON."""
                     lane="routine_beat_planner",
                 ),
                 tracker=tracker,
-                system_prompt=planner_system,
+                system_prompt=planner_system + ("" if social is None else social.text("routine_beat_planner")),
                 user_prompt=planner_user,
                 response_schema=planner_response_schema,
                 validator=validate_plan,
@@ -144,7 +145,7 @@ Return only the requested structured JSON."""
                     lane="routine_post_writer",
                 ),
                 tracker=tracker,
-                system_prompt=writer_system,
+                system_prompt=writer_system + ("" if social is None else social.text("routine_post_writer")),
                 user_prompt=writer_user,
                 response_schema=GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA,
                 validator=validate_draft,

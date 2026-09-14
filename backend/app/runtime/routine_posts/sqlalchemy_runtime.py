@@ -228,7 +228,15 @@ def _finish_failed_beat(
             claim_run_id,
         )
 
-async def run_routine_post_runtime(
+async def run_routine_post_runtime(resident_context, *, interaction_source=None, provider=None):
+    from app.runtime.social_snapshot import prepare_activity_social_context, with_social_receipts
+    from app.runtime.social.langgraph_actions import active_world_character
+    ctx = prepare_activity_social_context(resident_context, active_actor=active_world_character)
+    result = await _run_routine_post_runtime(ctx, interaction_source=interaction_source, provider=provider)
+    return with_social_receipts(ctx, result)
+
+
+async def _run_routine_post_runtime(
     resident_context: RoutineResidentContext,
     *,
     interaction_source: RoutineInteractionSource | None = None,
@@ -578,6 +586,8 @@ async def run_routine_post_runtime(
                 world_id=context.world.id,
                 actor_world_character_id=world_character.id,
             )
+            from app.domains.relationships.contracts.social_consumption import validate_social_context
+            validate_social_context(resident_context)
             post_read = agent_tool_actions.create_agent_tool_post(
                 db,
                 resident_context.session_key,

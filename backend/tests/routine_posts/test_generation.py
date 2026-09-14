@@ -4,6 +4,7 @@ import asyncio
 import json
 from datetime import datetime
 from types import SimpleNamespace
+from dataclasses import replace
 
 import pytest
 from sqlalchemy.orm import Session
@@ -16,8 +17,9 @@ from routine_posts.test_runtime import _engine, _resident_context, _seed, _utc
 
 
 @pytest.mark.parametrize("outcome", ("success", "invalid_plan", "writer_error"))
+@pytest.mark.parametrize("social_context_enabled", [False, True])
 def test_generation_keeps_two_calls_validation_fence_and_error_identity(
-    monkeypatch, outcome: str,
+    monkeypatch, outcome: str, social_context_enabled: bool,
 ) -> None:
     engine = _engine()
     now = _utc(datetime(2026, 8, 10, 10, 5))
@@ -27,6 +29,12 @@ def test_generation_keeps_two_calls_validation_fence_and_error_identity(
     with Session(engine, expire_on_commit=False) as db:
         fixture = _seed(db)
         resident = _resident_context(db, fixture, run_id="generation-run", now=now)
+        if social_context_enabled:
+            from relationships.test_social_context import SCOPE, relationship, result
+            from app.domains.relationships.service.social_context import SocialContextService
+            from app.domains.relationships.contracts.social_consumption import SocialContextUse
+            snapshot = SocialContextService(lambda query: result(query, [relationship()])).prepare(SCOPE, labels={"friend": "친구"})
+            resident = replace(resident, social_context=SocialContextUse(snapshot, lambda: None))
         context = assemble_routine_post_context(
             db, references=SqlAlchemyRoutineContextReferences(db),
             world_character=fixture.world_character, character=fixture.character,
@@ -95,6 +103,9 @@ def test_generation_keeps_two_calls_validation_fence_and_error_identity(
             assert call["thinking_level"] == "medium"
             assert "synthetic-routine-key" not in call["system_prompt"]
             assert "synthetic-routine-key" not in call["user_prompt"]
+            if social_context_enabled:
+                assert snapshot.snapshot_id in call["system_prompt"]
+                assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call["system_prompt"]
         assert json.loads(calls[0]["user_prompt"])["beat_identity"] == {
             "episode_id": context.episode.id, "beat_id": beat.id, "sequence_no": 1,
         }

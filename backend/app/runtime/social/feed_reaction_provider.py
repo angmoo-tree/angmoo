@@ -1,6 +1,7 @@
 """Existing credential, provider schema and direct LLM transport for feed reactions."""
 
 from __future__ import annotations
+from app.domains.relationships.contracts.social_consumption import social_prompt
 from app.domains.social.service.feed_reaction_prompts import (
     build_reaction_prompts,
     build_comment_prompts,
@@ -69,6 +70,11 @@ def _llm_context(
 
 
 class DirectFeedReactionProvider:
+    def __init__(self, *, thinking_level: str = "medium"):
+        if thinking_level not in {"minimal", "low", "medium", "high"}:
+            raise ValueError("feed_thinking_level_invalid")
+        self._thinking_level = thinking_level
+
     async def plan(
         self,
         *,
@@ -101,12 +107,12 @@ class DirectFeedReactionProvider:
                     lane="world_keyword_feed",
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt,
+                system_prompt=system_prompt + social_prompt(resident_context, "feed_reaction_planner"),
                 user_prompt=user_prompt,
                 response_schema=GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
                 validator=validator,
-                max_output_tokens=900,
-                thinking_level="medium",
+                max_output_tokens=4096 if self._thinking_level == "high" else 900,
+                thinking_level=self._thinking_level,
                 on_rate_limit_wait=resident_context.on_rate_limit_wait,
                 should_retry_json_error=lambda *_args: False,
             )
@@ -167,7 +173,7 @@ class DirectFeedReactionProvider:
                     ),
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt,
+                system_prompt=system_prompt + social_prompt(resident_context, "feed_comment_writer"),
                 user_prompt=user_prompt,
                 response_schema=(
                     GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA
@@ -175,8 +181,8 @@ class DirectFeedReactionProvider:
                     else GEMINI_FEED_COMMENT_RESPONSE_SCHEMA
                 ),
                 validator=validator,
-                max_output_tokens=1_000,
-                thinking_level="medium",
+                max_output_tokens=4096 if self._thinking_level == "high" else 1_000,
+                thinking_level=self._thinking_level,
                 on_rate_limit_wait=resident_context.on_rate_limit_wait,
             )
         except (DirectLlmError, ValidationError, ValueError) as exc:

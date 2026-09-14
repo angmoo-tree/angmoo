@@ -10,6 +10,7 @@ from app.domains.routines.models import AgentFeedCue
 from app.domains.social.contracts.search_index import SocialSearchIndexPort
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
+from app.domains.relationships.contracts.social_consumption import SocialContextUse
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ class LangGraphResidentContext:
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None
     social_search_index: SocialSearchIndexPort | None = None
     social_search_state: SocialSearchState = SocialSearchState.UNAVAILABLE
+    social_context: SocialContextUse | None = field(default=None, repr=False, compare=False)
 
 
     generation_model: str = field(init=False)

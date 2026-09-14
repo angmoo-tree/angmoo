@@ -605,6 +605,8 @@ async def run_world_keyword_feed(
                     interaction_intent=decision.interaction_intent,
                     comment_purpose=decision.comment_purpose,
                 )
+                if social := getattr(ctx, "social_context", None):
+                    social.validate()
                 action_result = _publish_action(
                     ctx,
                     workflows=workflows.publishing,

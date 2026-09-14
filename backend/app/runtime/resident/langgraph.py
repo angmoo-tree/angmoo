@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.relationships.contracts.social_consumption import social_prompt, validate_social_context
 
 from app.domains.memory.service import daypart as daypart_memory
 from app.domains.memory.policies import daypart as daypart_memory_policy
@@ -716,7 +717,7 @@ async def _call_json(
             api_key=api_key,
             context=_llm_context(ctx, node=node, lane=lane),
             tracker=tracker,
-            system_prompt=system_prompt,
+            system_prompt=system_prompt + social_prompt(ctx, lane),
             user_prompt=user_prompt,
             response_schema=response_schema,
             validator=_validator,
@@ -2875,6 +2876,7 @@ def _execute_planned_action(
     writing: dict[str, Any],
     used_reply_bodies: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    validate_social_context(ctx)
     action_type = str(action.get("action_type") or "")
     post_id = str(action.get("post_id") or "").strip() or None
     notification_id = action.get("notification_id")
@@ -3257,6 +3259,7 @@ def _execute_writing_plan(
             character_id=ctx.character.id,
         )
         with unit_of_work.deferred_commits():
+            validate_social_context(ctx)
             result = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
@@ -3601,6 +3604,8 @@ _INBOX_LANE_PRECOMPLETED_NODES = [
 async def _run_combined_inbox_lane(
     ctx: LangGraphResidentContext,
 ) -> dict[str, Any]:
+    from app.runtime.social_snapshot import prepare_activity_social_context
+    ctx = prepare_activity_social_context(ctx, active_actor=langgraph_social_apply.active_world_character)
     tracker = RunLlmTracker()
     graph = _build_graph(ctx, tracker)
     initial_state: _ResidentGraphState = {
@@ -3841,7 +3846,8 @@ async def _run_combined_inbox_lane(
         public_action_count,
         result["handled_notification_count"],
     )
-    return result
+    from app.runtime.social_snapshot import with_social_receipts
+    return with_social_receipts(ctx, result)
 
 
 async def run_resident_langgraph(
