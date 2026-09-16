@@ -6,6 +6,7 @@ import { listDiagnosticRequests, readRetrievalDiagnostics, setRetrievalCapture }
 import type { DiagnosticRequestList, RetrievalDiagnosticsRead } from "@/features/chat/types/retrieval-diagnostics";
 import { diagnosticExport, diagnosticFilename, diagnosticSnapshotMatches } from "@/features/chat/utils/diagnostic-export";
 import styles from "./retrieval-diagnostics.module.css";
+import { SearchTraceDetails } from "./search-trace-details";
 
 const labels: Record<string, string> = {
   request: "요청", router: "조회 경로 선택", step: "조회 단계", search: "실제 검색",
@@ -20,6 +21,13 @@ const labels: Record<string, string> = {
 };
 
 const stateLabels: Record<string, string> = { committed: "완료", failed: "실패", cancelled: "취소", accepted: "접수", running: "진행 중" };
+const detailLabels: Record<string, string> = {
+  pending: "이 요청의 상세 진단을 수집 중입니다.",
+  not_captured: "이 요청은 상세 수집 대상이 아니었습니다. 지금 켜도 과거 요청에 소급 적용되지 않습니다.",
+  not_retained: "수집 대상이었던 요청이지만 현재 상세 기록은 남아 있지 않습니다. 삭제·만료·재시작·용량 제한 등이 원인일 수 있습니다.",
+  unsupported: "이 요청에는 새 검색 실행 진단의 지원 정보가 없습니다.",
+  unknown: "이 요청의 상세 기록 보관 상태를 확인할 수 없습니다.",
+};
 
 export function RetrievalDiagnostics({ worldId, threadId }: {
   worldId: string; threadId: string;
@@ -97,7 +105,7 @@ export function RetrievalDiagnostics({ worldId, threadId }: {
           <p>요청 시각: {new Date(data.request.created_at).toLocaleString()}</p>
           <p>요청 ID: {data.request.request_id}</p>
           <Button variant="secondary" compact type="button" onClick={() => { void navigator.clipboard.writeText(data.request!.request_id).then(() => setActionError(false)).catch(() => setActionError(true)); }}>요청 ID 복사</Button>
-          <Button variant="secondary" compact type="button" disabled={!diagnosticSnapshotMatches(data, worldId, threadId, requestId)} onClick={download}>{data.details === null ? "기본 진단만 파일 저장" : "상세 진단 파일 저장"}</Button>
+          <Button variant="secondary" compact type="button" disabled={!diagnosticSnapshotMatches(data, worldId, threadId, requestId)} onClick={download}>{data.details === null && !data.search_trace ? "기본 진단만 파일 저장" : "상세 진단 파일 저장"}</Button>
         </>}
         {data.status !== "available" && <p>{data.status === "unavailable" ? "이 요청의 진단을 읽을 수 없어요. 채팅 기록은 그대로 유지됩니다." : data.status === "expired" ? "진단 보관 기간이 지났어요." : "이 요청에 저장된 기본 진단이 없어요. 검색 결과가 0개라는 뜻은 아닙니다."}</p>}
         {data.record && <ol aria-label="이 요청의 처리 이벤트" className={styles.events}>
@@ -110,16 +118,17 @@ export function RetrievalDiagnostics({ worldId, threadId }: {
         </ol>}
         {!!data.record?.omitted_events && <p>상한으로 생략한 관측 {data.record.omitted_events}개가 있습니다.</p>}
         <hr />
-        <p>상세 진단은 검색어와 적용 조건을 포함할 수 있습니다. 현재 대화의 다음 10개 요청 또는 30분 동안만 수집하며, 재시작하면 사라집니다.</p>
+        <p>상세 진단은 검색어와 적용 조건을 포함할 수 있습니다. 현재 대화의 다음 10개 요청 또는 30분 동안만 수집합니다. 수집한 결과는 최대 60분 보관하며, 끄기·재시작·용량 제한으로 사라질 수 있습니다.</p>
         <Button variant="secondary" compact type="button" disabled={busy} onClick={() => void toggle(!data.capture.enabled)}>
           {data.capture.enabled ? "상세 진단 끄고 기록 지우기" : "현재 대화의 상세 진단 켜기"}
         </Button>
         <p>상세 수집: {data.capture.enabled ? `켜짐 · 남은 요청 ${data.capture.remaining}개` : "꺼짐"}</p>
-        {data.details ? <>
+        {data.search_trace && <SearchTraceDetails trace={data.search_trace} />}
+        {data.details || data.search_trace ? <>
           <details><summary>수집한 검색 조건 보기</summary><pre>{JSON.stringify(data.details, null, 2)}</pre></details>
           <p>검색어에 개인 내용이 포함될 수 있습니다. 내려받은 복사본은 직접 관리해야 합니다.</p>
           <Button variant="secondary" compact type="button" disabled={busy} onClick={() => void toggle(false)}>상세 기록 지우기</Button>
-        </> : <p>이 요청의 상세 기록이 없습니다. 수집 전 요청이거나 만료·재시작으로 사라졌을 수 있습니다.</p>}
+        </> : <p>{detailLabels[data.detail_availability ?? "unknown"] ?? detailLabels.unknown}</p>}
       </>}
     </div>}
   </details>;

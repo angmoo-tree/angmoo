@@ -2,6 +2,7 @@ import asyncio
 from dataclasses import replace
 from datetime import UTC
 import hashlib
+import pytest
 from time import monotonic
 
 from app.domains.memory.contracts.embedding import EMBEDDING_PROFILE
@@ -22,7 +23,9 @@ from memory.test_p8_l_h_canonical_recall import runtime_factory, _accept_chat_me
 from memory.test_sqlite_vec1 import index, A
 
 
-def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version(runtime_factory, index, tmp_path):
+@pytest.mark.parametrize("lexical_policy", ["legacy_strict_v1", "group_or_v1"])
+@pytest.mark.parametrize("revocation", ["blocked", "deleted_source", "memory_off"])
+def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version(runtime_factory, index, tmp_path, revocation, lexical_policy):
     scope, counterpart, thread, message, item_id = _accept_chat_memory(runtime_factory)
     source = recall_document_source(runtime_factory)
     documents = source.all_documents()
@@ -45,7 +48,7 @@ def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_vers
         extension_sha256=hashlib.sha256(index._extension.read_bytes()).hexdigest())
     canonical = SqlAlchemyHybridCanonicalReader(runtime_factory, source_reader_factory=source_evidence_reader,
         canonical=canonical_recall_repository(runtime_factory))
-    service = HybridRecallService(fts=FtsHybridAxis(fts_workers), vector=VectorHybridAxis(vec_workers, embedder), canonical=canonical)
+    service = HybridRecallService(fts=FtsHybridAxis(fts_workers, lexical_policy=lexical_policy), vector=VectorHybridAxis(vec_workers, embedder), canonical=canonical)
     request = HybridRecallRequest("test-request", "test-call", "b"*64, scope, "폭우", EMBEDDING_PROFILE,
         (RecallDocumentKind.MEMORY_ITEM, RecallDocumentKind.OWNER_MEMORY_REQUEST))
     result = asyncio.run(service.execute(request, deadline=monotonic()+15))
@@ -60,3 +63,25 @@ def test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_vers
     stale = asyncio.run(service.execute(request, deadline=monotonic()+15))
     assert stale.excluded_count >= 1
     assert stale.status.value == "partial"
+    # Unresolved natural-language subjects cannot bypass current source policy,
+    # even if the vector index still contains a previously authorized record.
+    index.upsert((vector,))
+    from model_fixture_support import models
+    from app.runtime.memory.composition import memory_repository
+    from app.domains.memory.service.scope import MemoryScopeService
+    with runtime_factory() as session:
+        if revocation == "blocked":
+            session.add(models.WorldCharacterBlock(id="hybrid-test-block", world_id=scope.world_id,
+                blocker_world_character_id=scope.subject_world_character_id,
+                blocked_world_character_id=counterpart))
+        elif revocation == "deleted_source":
+            session.delete(session.get(models.MessageMessage, message))
+        else:
+            repository = memory_repository(session)
+            setting = repository.get_scope_setting(scope)
+            MemoryScopeService(repository).update(scope, expected_version=setting.version,
+                enabled=False, retention_days=setting.retention_days)
+        session.commit()
+    revoked = asyncio.run(service.execute(replace(request, search_text="미등록별명과 겪은 사건"), deadline=monotonic()+15))
+    assert revoked.records == ()
+    assert not fts_workers.active_processes and not vec_workers.active_processes

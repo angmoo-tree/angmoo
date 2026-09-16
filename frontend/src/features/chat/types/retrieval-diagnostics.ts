@@ -1,3 +1,5 @@
+import type { SearchDiagnosticTrace } from "./search-trace";
+
 export type DiagnosticRequest = {
   request_id: string; created_at: string; state: string; user_message_id: number;
   attempt_number: number; retry_of_request_id: string | null;
@@ -12,4 +14,6 @@ export type RetrievalDiagnosticsRead = {
   record: { version: "chat-retrieval-diagnostics.v1"; events: Record<string, string | number | boolean>[]; omitted_events: number } | null;
   capture: { enabled: boolean; remaining: number; expires_at: string | null };
   details: Record<string, string | number>[] | null;
+  search_trace?: SearchDiagnosticTrace | null;
+  detail_availability?: "available" | "pending" | "not_captured" | "not_retained" | "unsupported" | "unknown";
 };

@@ -23,12 +23,14 @@ from threading import RLock
 from time import monotonic
 import unicodedata
 
+from app.domains.memory.policies.lexical_terms import _lexical_terms
 from app.core.search_text import normalize_search_text
 from app.domains.memory.contracts.recall import MEMORY_RECALL_GENERATION
 from app.domains.memory.contracts.recall import MEMORY_RECALL_SCHEMA_VERSION
 from app.domains.memory.contracts.recall import MemoryRecallCandidate
 from app.domains.memory.contracts.recall import MemoryRecallDoctor
 from app.domains.memory.contracts.recall import MemoryRecallDocument
+from app.domains.memory.contracts.recall import MemoryRecallLexicalPolicy
 from app.domains.memory.contracts.recall import MemoryRecallSearchQuery
 from app.domains.memory.contracts.recall import MemoryRecallSearchIncomplete
 from app.domains.memory.policies.korean_recall import spacing_groups, spacing_matches
@@ -258,11 +260,21 @@ class SqliteMemoryRecallIndex:
             )
             self._refresh_state(connection)
 
+    def search_grouped(self, query: MemoryRecallSearchQuery, *, deadline: float):
+        from app.runtime.memory.grouped_fts_search import search_grouped
+        self._require_open()
+        if query.lexical_policy != MemoryRecallLexicalPolicy.GROUP_OR_V1 or not 1 <= query.limit <= 50:
+            raise ValueError("fts_grouped_query_invalid")
+        filters, parameters = _scope_filters(query)
+        return search_grouped(self, query, deadline, filters, parameters, _row_to_candidate)
+
     def search(
         self,
         query: MemoryRecallSearchQuery,
     ) -> tuple[MemoryRecallCandidate, ...]:
         self._require_open()
+        if query.lexical_policy != MemoryRecallLexicalPolicy.LEGACY_STRICT_V1:
+            raise ValueError("fts_policy_requires_bounded_result")
         if not 1 <= query.limit <= 50:
             raise ValueError("Memory recall limit must be between 1 and 50")
         normalized = normalize_search_text(query.text, max_chars=1_000)
@@ -565,18 +577,19 @@ class SqliteMemoryRecallIndex:
             raise MemoryRecallIndexSchemaError("Memory recall generation mismatch")
 
     @contextmanager
-    def _connect(self, path: Path, *, wal: bool = True) -> Iterator[sqlite3.Connection]:
+    def _connect(self, path: Path, *, wal: bool = True, busy_timeout_ms: int | None = None) -> Iterator[sqlite3.Connection]:
+        busy_timeout = self.settings.busy_timeout_ms if busy_timeout_ms is None else busy_timeout_ms
         read_only = getattr(self, "_read_only", False)
         connection = sqlite3.connect(
             path.as_uri() + "?mode=ro" if read_only else path,
             uri=read_only,
-            timeout=self.settings.busy_timeout_ms / 1_000,
+            timeout=busy_timeout / 1_000,
             isolation_level=None,
             check_same_thread=False,
         )
         connection.row_factory = sqlite3.Row
         try:
-            connection.execute(f"PRAGMA busy_timeout = {self.settings.busy_timeout_ms}")
+            connection.execute(f"PRAGMA busy_timeout = {busy_timeout}")
             if not read_only:
                 connection.execute(f"PRAGMA journal_mode = {'WAL' if wal else 'DELETE'}")
                 connection.execute(f"PRAGMA synchronous = {self.settings.synchronous}")
@@ -991,39 +1004,6 @@ def _projection_digest(connection: sqlite3.Connection) -> str:
         )
         digest.update(b"\n")
     return digest.hexdigest()
-
-
-def _lexical_terms(value: str, *, query_mode: bool) -> tuple[str, ...]:
-    terms: list[str] = []
-    for token in _WORD_PATTERN.findall(value):
-        if _contains_cjk(token):
-            cjk = "".join(character for character in token if _is_cjk(character))
-            if len(cjk) == 1:
-                terms.append(cjk)
-            elif len(cjk) > 1:
-                if not query_mode:
-                    terms.append(cjk)
-                terms.extend(cjk[index : index + 2] for index in range(len(cjk) - 1))
-            non_cjk = "".join(
-                character if not _is_cjk(character) else " " for character in token
-            )
-            terms.extend(_WORD_PATTERN.findall(non_cjk))
-        else:
-            terms.append(token)
-    return tuple(dict.fromkeys(term for term in terms if term))
-
-
-def _contains_cjk(value: str) -> bool:
-    return any(_is_cjk(character) for character in value)
-
-
-def _is_cjk(character: str) -> bool:
-    codepoint = ord(character)
-    return (
-        0x3400 <= codepoint <= 0x9FFF
-        or 0x3040 <= codepoint <= 0x30FF
-        or 0xAC00 <= codepoint <= 0xD7AF
-    )
 
 
 def _quote_fts_term(value: str) -> str:

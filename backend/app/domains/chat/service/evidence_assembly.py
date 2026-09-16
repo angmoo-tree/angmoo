@@ -1,6 +1,7 @@
 """Code-owned deterministic Evidence Bundle assembly."""
 
 from __future__ import annotations
+from app.contracts.search_diagnostics import collector, lineage, record_identity, evidence_identities
 
 from app.contracts.retrieval_observation import observe
 
@@ -293,11 +294,15 @@ class EvidenceBundleAssembler:
     ) -> tuple[EvidenceItem, ...]:
         from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
         if isinstance(result, HybridCanonicalResult):
-            return tuple(EvidenceItem(
+            items = tuple(EvidenceItem(
                 opaque_reference=opaque_evidence_reference("canonical", record.canonical_source_id, record.reference),
                 kind=EvidenceKind.CANONICAL_SOURCE, text=EvidenceBundleAssembler._bounded_text(record.text),
                 occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
                 locator=_record_locator(record)) for record in result.recall.records if record.text.strip())
+            if collector() is not None:
+                for record, item in zip((r for r in result.recall.records if r.text.strip()), items):
+                    lineage("evidence", "linked", identities={**record_identity(record), **evidence_identities(item)})
+            return items
         if result.execution is None:
             return ()
         items: list[EvidenceItem] = []
@@ -437,6 +442,7 @@ class EvidenceBundleAssembler:
     ) -> EvidenceBundle:
         items = self._dedupe_sort_truncate(candidates, preserve_rank_order=preserve_rank_order)
         observe("bundle", route=route.value, input=len(candidates), output=len(items), excluded=len(candidates)-len(items))
+        lineage("bundle", "count", count=len(items), reason="degraded" if degraded_reason is not None else "available")
         evidence_hash = compute_evidence_hash(
             request_id=request_id,
             request_scope_hash=request_scope_hash,
@@ -469,6 +475,13 @@ class EvidenceBundleAssembler:
         for item in candidates:
             key = (item.kind.value, item.opaque_reference if preserve_rank_order else item.normalized_text.casefold())
             existing = deduplicated.get(key)
+            if collector() is not None:
+                ids = evidence_identities(item)
+                ids["key_ref"] = ("k", key)
+                if existing is not None:
+                    ids["related_ref"] = ("e", existing.opaque_reference)
+                lineage("dedup", "kept" if existing is None else "merged", identities=ids,
+                    reason="reference" if preserve_rank_order else "text")
             if existing is None:
                 deduplicated[key] = item
                 continue
@@ -508,9 +521,11 @@ class EvidenceBundleAssembler:
         for index, item in enumerate(ordered):
             if len(output) >= MAX_EVIDENCE_ITEMS:
                 count_excluded = len(ordered) - index
+                lineage("limit", "excluded", count=count_excluded, reason="item_budget")
                 break
             if chars + len(item.text) > MAX_EVIDENCE_BUNDLE_CHARS:
                 character_excluded += 1
+                lineage("limit", "excluded", reason="character_budget", identities=evidence_identities(item))
                 continue
             output.append(item)
             chars += len(item.text)

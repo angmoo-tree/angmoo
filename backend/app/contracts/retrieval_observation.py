@@ -26,7 +26,13 @@ _BOOL_KEYS = frozenset({"executed", "skipped", "counterpart_filter", "thread_fil
 _TEXT_KEYS |= frozenset({"field_path", "validation_pass", "applied_rule", "expected_direction", "returned_direction", "response_state", "provider", "trace_version", "function", "check", "failure_reason"})
 _NUM_KEYS |= frozenset({"tool_count", "total_tokens", "max_output_tokens", "timeout_seconds", "detail_omitted", "call", "entity_index"})
 _BOOL_KEYS |= frozenset({"matched", "response_observed", "trace_complete", "detail_captured"})
+_TEXT_KEYS |= frozenset({"policy"})
+_NUM_KEYS |= frozenset({"tokens", "match_bytes", "window_candidates"})
+_BOOL_KEYS |= frozenset({"spacing_attempted"})
 _TEXT_KEYS |= frozenset({"snapshot_id", "content_hash", "recall_mode", "capability_fingerprint"})
+_CRITICAL |= frozenset({"search_worker", "search_trace_summary"})
+_TEXT_KEYS |= frozenset({"failure_code", "instrumentation_version"})
+_BOOL_KEYS |= frozenset({"worker_started", "result_received", "nn_query_started", "joined", "captured_at_request"})
 
 
 @dataclass(slots=True)
@@ -40,6 +46,7 @@ class Observation:
     trace_active: bool = False
     detail_omitted: int = 0
     trace_aliases: dict[str, dict[str, str]] = field(default_factory=dict, repr=False)
+    search_trace: Any = field(default=None, repr=False)
 
     def payload(self) -> dict[str, Any]:
         events = list(self.events)
@@ -109,7 +116,10 @@ def detail(**values: object) -> None:
         return
     try:
         from app.core.redaction import redact_secret_text
-        allowed = {"search_text", "normalized_query", "occurred_from", "occurred_to", "counterpart", "subject", "entity_ref", "operation"}
+        allowed = {"match_query", "candidate_rank", "matched_groups", "match_state", "search_text", "normalized_query", "occurred_from", "occurred_to", "counterpart", "subject", "entity_ref", "operation"}
+        # A clipped query is useful for diagnosis, but must not look complete.
+        if any(len(value) > 1500 for key, value in values.items() if key in allowed and isinstance(value, str)):
+            target.detail_omitted += 1
         row = {key: redact_secret_text(value[:1500]) for key, value in values.items() if key in allowed and isinstance(value, str)}
         if step_context.get() is not None:
             row["axis"], row["step"] = step_context.get()  # type: ignore[misc]

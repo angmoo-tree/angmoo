@@ -1,6 +1,7 @@
 """Immutable, provider-safe evidence snapshot for one Character response."""
 
 from __future__ import annotations
+from app.contracts.search_diagnostics import evidence_lineage
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -193,6 +194,7 @@ class EvidenceBundle:
         normal generation response DTO.
         """
 
+        evidence_lineage("inspector", self.items)
         return {
             "version": "evidence-inspector.v1",
             "items": [

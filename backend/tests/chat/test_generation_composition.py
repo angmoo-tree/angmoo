@@ -24,7 +24,8 @@ from chat.test_supervisor_control_tools import native
 def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     db = object()
     material = selection_material()
-    config = object()
+    # This ordering contract specifically exercises the retained legacy planners.
+    config = SimpleNamespace(CHAT_RECALL_MODE="legacy_checkpoint")
     lifecycle = object()
     labels = {"character": "Name"}
     observed = []

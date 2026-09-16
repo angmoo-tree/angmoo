@@ -69,6 +69,11 @@ class MemoryRecallDocument:
     metadata: Mapping[str, str] = field(default_factory=dict)
 
 
+class MemoryRecallLexicalPolicy(StrEnum):
+    LEGACY_STRICT_V1 = "legacy_strict_v1"
+    GROUP_OR_V1 = "group_or_v1"
+
+
 @dataclass(frozen=True, slots=True)
 class MemoryRecallSearchQuery:
     scope: MemoryScope
@@ -81,6 +86,8 @@ class MemoryRecallSearchQuery:
     korean_spacing_fallback: bool = False
     occurred_from: datetime | None = None
     occurred_to: datetime | None = None
+
+    lexical_policy: MemoryRecallLexicalPolicy = field(default=MemoryRecallLexicalPolicy.LEGACY_STRICT_V1, kw_only=True)
 
 
 class MemoryRecallSearchIncomplete(RuntimeError):
@@ -195,6 +202,7 @@ __all__ = [
     "MemoryRecallCandidate",
     "MemoryRecallDoctor",
     "MemoryRecallDocument",
+    "MemoryRecallLexicalPolicy",
     "MemoryRecallSearchQuery",
     "RecallDocumentKind",
     "SOURCE_KIND_BY_TYPE",

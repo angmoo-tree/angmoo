@@ -87,3 +87,35 @@ def test_revalidation_rejects_deleted_or_changed_relation():
     rows.clear()
     with pytest.raises(SocialContextChangedError, match="social_context_changed"):
         service.assert_current(snapshot)
+
+@pytest.mark.parametrize('enabled', [True, False])
+def test_sns_runtime_flag_prepares_context_and_revalidates_actor(monkeypatch, enabled):
+    from dataclasses import dataclass
+    from types import SimpleNamespace
+    from app.config import Settings
+    from app.runtime import social_snapshot as runtime
+    from app.domains.relationships.contracts.graph_recall import GraphRecallResult, GraphRecallSource, GraphRecallStatus
+    monkeypatch.setattr(runtime, 'settings', Settings(_env_file=None, SNS_SOCIAL_CONTEXT_ENABLED=enabled))
+    monkeypatch.setattr(runtime, 'SqlAlchemyRelationshipGraphReadGateway', lambda *a, **kw: None)
+    monkeypatch.setattr(runtime, 'GraphRecallService', lambda gateway: SimpleNamespace(execute=lambda q:
+        GraphRecallResult(q.operation, GraphRecallStatus.READY, GraphRecallSource.GRAPH)))
+    @dataclass
+    class Context:
+        db: object
+        character: object
+        user_id: str
+        social_context: object = None
+    ctx = Context(SimpleNamespace(execute=lambda query: SimpleNamespace(all=lambda: [])), SimpleNamespace(id='character'), 'owner')
+    actor = SimpleNamespace(id='actor', world_id='world')
+    calls = []
+    def active_actor(*args, **kwargs):
+        calls.append(True)
+        return actor
+    prepared = runtime.prepare_activity_social_context(ctx, active_actor=active_actor)
+    if not enabled:
+        assert prepared is ctx and not calls
+        return
+    assert prepared.social_context.snapshot.scope.subject_world_character_id == 'actor'
+    actor.id = 'different'
+    with pytest.raises(SocialContextChangedError, match='social_context_scope_changed'):
+        prepared.social_context.validate()

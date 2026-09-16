@@ -1,6 +1,7 @@
 """End-to-end P8-L-P response generation orchestration."""
 
 from __future__ import annotations
+from app.contracts.search_diagnostics import evidence_lineage
 
 import asyncio
 from collections.abc import Callable
@@ -13,6 +14,7 @@ from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
 )
 from app.domains.chat.contracts.evidence_bundle import EvidenceKind
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.generation_lifecycle import (
     TERMINAL_STATES,
     GenerationContractError,
@@ -193,6 +195,7 @@ class ResponseWorkflowSteps:
                 "recall_capability_fingerprint": command.recall_mode.fingerprint,
                 "social_snapshot": None if command.social_snapshot is None else command.social_snapshot.manifest(),
                 "router_metrics": _safe_metrics(routing.metrics),
+                "recall_interpretation": None if routing.interpretation is None else routing.interpretation.manifest(),
             },
             call_tracker=routing.call_tracker,
         )
@@ -410,6 +413,7 @@ class ResponseWorkflowSteps:
             command.today_sns_snapshot,
             user_message=command.preflight.user_message,
         )
+        evidence_lineage("freeze", bundle.items)
         record = self._transition(
             record,
             ResponseRequestState.EVIDENCE_FROZEN,
@@ -454,18 +458,30 @@ class ResponseWorkflowSteps:
             now=datetime.now(UTC),
             deadline_at=record.deadline_at,
         )
-        record = self._transition(
-            record,
-            ResponseRequestState.RESPONSE_GENERATING,
-            call_tracker=tracker,
-        )
         candidates = ()
+        interpretation = None
+        response_state = {}
+        if command.recall_mode is ChatRecallMode.SOCIAL_HYBRID:
+            if routing.interpretation is None:
+                raise RetrievalContractError("hybrid_interpretation_missing")
+            interpretation = routing.interpretation.freeze(bundle)
+            counts = tracker["logical_counts"]
+            if (counts["canonical_planner"] or counts["graph_planner"]
+                or counts["character_response_generator"] != 1
+                or counts["retrieval_router"] not in (1, 2)
+                or (counts["retrieval_router"] == 2 and tracker["repair_node"] != "retrieval_router")):
+                raise RetrievalContractError("hybrid_generation_budget_exceeded")
+            response_state = {"recall_interpretation": interpretation.manifest(),
+                "hybrid_normal_generation_calls": 2, "final_response_kind": None}
+        record = self._transition(record, ResponseRequestState.RESPONSE_GENERATING,
+            call_tracker=tracker, node_state=response_state)
         if routing.clarification is not None:
             candidates = tuple(
                 f"{candidate.display_name} (@{candidate.handle})"
                 for candidate in routing.clarification.candidates
             )
         observe("crg_input", items=len(bundle.items), route=bundle.route.value)
+        evidence_lineage("crg", bundle.items)
         if command.social_snapshot is not None:
             observe("social_context_consumed", source="crg", snapshot_id="s-"+command.social_snapshot.snapshot_id,
                     content_hash="h-"+command.social_snapshot.content_hash, status=command.social_snapshot.status)
@@ -483,6 +499,8 @@ class ResponseWorkflowSteps:
                 recent_context=command.response_context,
                 evidence=bundle,
                 clarification_candidates=candidates,
+                recall_mode=command.recall_mode,
+                recall_interpretation=interpretation,
                 today_sns_manifest=(
                     None
                     if command.today_sns_snapshot is None

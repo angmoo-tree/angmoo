@@ -219,7 +219,7 @@ def compose_runtime(
     session_factory = create_session_factory(engine)
     data_paths = StaticRuntimeDataPath(config.data_paths.root)
     memory_recall_index = SqliteMemoryRecallIndex(data_paths)
-    memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve())
+    memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve(), fts_policy=runtime_settings.CHAT_HYBRID_FTS_POLICY)
     return RuntimeComposition(
         config=config,
         settings=runtime_settings,

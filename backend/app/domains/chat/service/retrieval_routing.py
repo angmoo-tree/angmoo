@@ -9,6 +9,10 @@ from datetime import UTC, date, datetime, time, timedelta
 from time import monotonic
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.domains.chat.contracts.reference_observation import resolved_references
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.domains.chat.contracts.recall_interpretation import (
+    HYBRID_ADMISSION_REVISION, RecallInterpretationContext, text_hash,
+)
 
 from app.domains.chat.contracts.call_tracker import LlmNode, RouteAwareCallTracker
 from app.domains.chat.contracts.resolved_envelope import (
@@ -66,10 +70,12 @@ class RetrievalRoutingService:
         router: RetrievalRouterProviderPort,
         policy: RetrievalPolicyResolverPort,
         caps: RetrievalHardCaps | None = None,
+        recall_mode: ChatRecallMode = ChatRecallMode.LEGACY,
     ) -> None:
         self._router = router
         self._policy = policy
         self._caps = caps or RetrievalHardCaps()
+        self._recall_mode = ChatRecallMode(recall_mode)
 
     async def route(
         self,
@@ -176,6 +182,14 @@ class RetrievalRoutingService:
         if direction_outcome == "ambiguous" and clarification is None:
             clarification = ClarificationResolution(slot="relationship_direction")
 
+        # The requesting actor and memory subject were authorized by load_scope.
+        # Mention matching is advisory for hybrid recall, never a grant to read
+        # the mentioned person's memory. Canonical source checks still apply.
+        if (self._recall_mode is ChatRecallMode.SOCIAL_HYBRID
+            and intent.route in {RetrievalRoute.CANONICAL, RetrievalRoute.CURRENT_CONTEXT}
+            and not scope.world_ambiguous):
+            clarification = None
+
         resolved_references(intent, resolutions, phase="repair" if repair_used else "first",
                             subject=scope.responding_world_character_id, bindings=bindings,
                             direction=(direction_from, direction_to, direction_outcome))
@@ -254,7 +268,30 @@ class RetrievalRoutingService:
             thinking_level=provider_result.thinking_level,
             max_output_tokens=provider_result.max_output_tokens,
             finish_reason=provider_result.finish_reason,
+            admission_policy=(HYBRID_ADMISSION_REVISION
+                if self._recall_mode is ChatRecallMode.SOCIAL_HYBRID else "legacy"),
+            route_change_reason=(clarification.slot if clarification is not None
+                and intent.route != original_intent.route else sufficiency_guard_reason),
         )
+        interpretation = None
+        if self._recall_mode is ChatRecallMode.SOCIAL_HYBRID:
+            mentions = []
+            for entity in intent.entities:
+                result = resolution_by_ref[entity.ref]
+                safe = sum(candidate.safe_for_clarification for candidate in result.candidates)
+                status = ("resolved" if safe == 1 else "multiple" if safe > 1
+                    else "unavailable" if result.candidates else "unmatched")
+                mentions.append((entity.ref, entity.mention, status))
+            interpretation = RecallInterpretationContext(
+                request_id=scope.request_id, intent_hash=intent.envelope_hash,
+                resolved_hash=resolved.envelope_hash, user_message_hash=text_hash(command.user_message),
+                search_text=intent.search_text, mentions=tuple(mentions),
+                direction=None if intent.relationship is None else (
+                    intent.relationship.from_ref, intent.relationship.to_ref),
+                time_expression=None if intent.time_scope is None else intent.time_scope.expression,
+                time_status=time_outcome, direction_status=direction_outcome,
+                time_bounds=None if time_from is None else (time_from, time_to),
+            )
         return RetrievalRoutingResult(
             intent=intent,
             resolved=resolved,
@@ -263,6 +300,7 @@ class RetrievalRoutingService:
             call_tracker=tracker.snapshot(),
             proposed_tool_calls=provider_result.tool_calls,
             selection_mode=provider_result.selection_mode,
+            interpretation=interpretation,
         )
 
     async def _invoke_router(

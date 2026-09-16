@@ -66,6 +66,7 @@ from app.domains.chat.service.character_response import (
     character_response_deltas,
 )
 from app.domains.chat.service.diagnostic_capture import capture
+from app.contracts.search_diagnostics import trace_payload, lineage
 from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
 from app.domains.chat.service.graph_retrieval import GraphRetrievalPlanningService
 from app.domains.chat.service.response_steps import (
@@ -133,6 +134,8 @@ class ResponseGenerationWorkflowService:
             detailed=capture.active(diagnostic_scope, record.request_id),
         )
         observation_token = current.set(observation)
+        observe("search_trace_summary", instrumentation_version="search-diagnostic-trace.v1",
+                captured_at_request=observation.detailed)
         observe(
             "request",
             model=record.selected_model,
@@ -310,7 +313,7 @@ class ResponseGenerationWorkflowService:
                 yield event
         finally:
             try:
-                capture.store(diagnostic_scope, record.request_id, observation.details)
+                capture.store(diagnostic_scope, record.request_id, observation.details, trace_payload())
             except Exception:
                 pass  # Diagnostics cannot change a committed response.
             finally:

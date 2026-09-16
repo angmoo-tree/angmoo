@@ -24,12 +24,12 @@ class UnavailableVectorAxis:
 
 
 class MemoryHybridRuntime:
-    def __init__(self, session_factory, fts_index, data_paths):
+    def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1"):
         self._factory = session_factory
         self.projection = None
         self.vector_axis = UnavailableVectorAxis()
         self.status = "stopped"
-        self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path, settings=fts_index.settings))
+        self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path, settings=fts_index.settings), lexical_policy=fts_policy)
         self.service = HybridRecallService(fts=self.fts, vector=self,
             canonical=SqlAlchemyHybridCanonicalReader(session_factory, source_reader_factory=source_evidence_reader,
                 canonical=canonical_recall_repository(session_factory)))

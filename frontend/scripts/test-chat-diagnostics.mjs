@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
+
 // Use the project's compiler on Node 20 as well as runtimes with native TS stripping.
 const source = readFileSync(new URL("../src/features/chat/utils/diagnostic-export.ts", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -47,4 +48,33 @@ test("basic-only and legacy traces do not fabricate detailed capture", () => {
   assert.equal(file.details, null);
   data.details = [{ trace_version: "decision-trace.v1" }];
   assert.equal(diagnosticExport(data, "world", "thread", "").details[0].trace_version, "decision-trace.v1");
+});
+
+test("v2 export keeps structured failure nulls and strips undeclared trace fields", () => {
+  const data = sample();
+  data.details = null;
+  data.detail_availability = "available";
+  data.search_trace = {
+    version: "search-diagnostic-trace.v1", coverage: "partial", stages: [], lineage: [],
+    stage_events_dropped: 1, lineage_edges_dropped: 0, aliases_dropped: 0, credential: "must-not-export",
+    terminals: [{ axis: "vector", terminal_state: "error", worker_exit_code: -15,
+      eligible_vector_count: null, traceback: "must-not-export",
+      failure: { failure_code: "mapping_missing", failure_stage: "mapping_read",
+        exception_kind: "MemoryVectorProjectionError", sqlite_error_code: null, message: "must-not-export" } }],
+  };
+  const output = diagnosticExport(data, "world", "thread", "failed-request");
+  assert.equal(output.export_version, "angmoo-query-diagnostics.export.v2");
+  assert.equal(output.details_status, "available");
+  assert.equal(output.search_trace.terminals[0].eligible_vector_count, null);
+  assert.equal(output.search_trace.terminals[0].worker_exit_code, -15);
+  assert.ok(!JSON.stringify(output).includes("must-not-export"));
+});
+
+test("missing trace is not fabricated for old requests or lost detail", () => {
+  const data = sample();
+  data.details = null;
+  data.detail_availability = "not_retained";
+  const output = diagnosticExport(data, "world", "thread", "failed-request");
+  assert.equal(output.search_trace, null);
+  assert.equal(output.detail_availability, "not_retained");
 });

@@ -1,4 +1,4 @@
-"""Coherent request capabilities; legacy remains the rollout default."""
+"""Coherent request capabilities; runtime defaults to social hybrid."""
 from enum import StrEnum
 import hashlib
 

@@ -110,7 +110,7 @@ def build(
     lifecycle: ResponseLifecycleRepositoryPort,
     world_id: str,
 ) -> GenerationExecution:
-    recall_mode = ChatRecallMode(getattr(runtime_settings, "CHAT_RECALL_MODE", "legacy_checkpoint"))
+    recall_mode = ChatRecallMode(getattr(runtime_settings, "CHAT_RECALL_MODE", "social_hybrid"))
     if recall_mode is ChatRecallMode.SOCIAL_HYBRID:
         from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
         if memory_recall_service.hybrid_service is None:
@@ -146,6 +146,7 @@ def build(
                 hybrid_recall=recall_mode is ChatRecallMode.SOCIAL_HYBRID,
             ),
             policy=SqlAlchemyRetrievalPolicyResolver(db),
+            recall_mode=recall_mode,
         ),
         canonical=canonical,
         graph=graph,

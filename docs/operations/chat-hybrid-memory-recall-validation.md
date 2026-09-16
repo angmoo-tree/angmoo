@@ -1,10 +1,24 @@
 # 사회적 맥락·하이브리드 기억 검색 로컬 실행 결과
 
-현재 판정: **구현 및 로컬 검증 수행 / 사회적 맥락 채택 HOLD / hybrid 채택 HOLD**. 기본값은 `legacy_checkpoint`다. HY0–HY15를 모두 실행 범위에 포함했으나 모든 완료 기준이 PASS라는 뜻은 아니다. 성능의 제품 채택 기준, 실제 모델의 사실·범위 품질, 직접 사용자 검증은 닫히지 않았다. 아래의 역사적 기록은 당시 실패와 중간 결과이며 현재 상태는 이 절과 단계별 표를 따른다.
+현재 판정: **사용자 기준 Chat 22/24 = 91.7%, 85% 목표 통과 / Chat·SNS 현재 구조 기본 채택**. 기본값은 `CHAT_RECALL_MODE=social_hybrid`, `SNS_SOCIAL_CONTEXT_ENABLED=true`다. 아래 시험 당시의 HOLD는 역사 기록이며 현재 채택 상태는 이 문단과 마지막 사용자 결정 절을 따른다. 나머지 성능·설치·배포 검증 완료와 구분한다.
+
+2026-09-15 FTS 후속 현재 상태: **사용자 승인 / group_or_v1 기본 채택 / FI0–FI12 LOCAL COMPLETE**. 현재 기본은 `CHAT_HYBRID_FTS_POLICY=group_or_v1`, Chat `social_hybrid`, SNS 사회적 맥락 true다. 설정을 명시하지 않으면 새 FTS 정책을 사용하며 기존 `legacy_strict_v1` 명시 설정은 복귀 수단으로 유지한다. 최신 근거는 workspace `.task-output/fts-grouped-implementation-20260915/run-03-default/report.md` 및 FI 계획 §14.3이다. run-01/02 최초 실패·보류 이력은 보존한다.
+
+새 정책의 로컬 선택/복귀는 서버 설정 `CHAT_HYBRID_FTS_POLICY`를 각각 `group_or_v1`/`legacy_strict_v1`로 정하고 앱 runtime을 재구성하는 방식이다. 인덱스 재구축·데이터 삭제·벡터 재생성을 요구하지 않는다. 기본 구성 및 두 명시 정책의 composition·native 회귀를 검사한다. 설치 앱에 설정을 변경하거나 앱을 재시작한 검증은 아니다.
+
+FTS 구현은 기존 토큰 표현과 BM25를 유지하며 단어 묶음 OR 후 문자열을 검증한다. 32그룹/128고유 토큰/MATCH 8KiB, ID 후보 창 최대 200, 반환 최대 50, normalized/raw/metadata 적재 합계 4MiB, 단일 read transaction 및 공통 deadline을 사용한다. 정상 0건의 spacing 보완은 한 번·2,000행/50ms 이내다. PARTIAL 사유와 UNAVAILABLE 오류를 분리한다. 기본 관측은 본문 없는 `fts_search` policy/status/수치이며 MATCH·검증 정보는 요청별 상세 opt-in에서만 수집하고 redaction·잘림/누락 표시를 적용한다.
+
+재현 코드는 `backend/scripts/evaluate_grouped_fts_policy.py`, `evaluate_grouped_fts_native_cached.py`, `benchmark_grouped_fts.py`, `benchmark_grouped_fts_mixed.py`다. 각 CLI는 `--help`에 명시한 합성 입력/출력 경로를 필요로 하며 설치 DB를 자동 탐색하지 않는다. benchmark fixture는 사용자 DB 대신 별도 출력 디렉터리에서 생성한다. 실제 AI Chat 재현에 사용한 동결 corpus·로컬 runner·개별 receipt는 workspace 실행 디렉터리에 보존했다. 실제 자격 증명은 저장소에 포함하지 않았다.
+
+성능 도구의 RSS 측정은 평가 전용 `psutil`이 필요하다. 깨끗한 개발 환경에서는 backend에서 `uv run --with psutil python scripts/benchmark_grouped_fts.py --help` 또는 대응 mixed 스크립트로 실행한다. 제품 검색 경로에 새 패키지를 추가하지 않았다.
+
+이번 실제 Chat 결과는 기존 24개 최초 22/24, 전체 재시험 23/24, 새 20개 20/20이다. q28의 근거 없는 ‘오늘’은 남고, 최초 e12는 검색 전 schema 실패였으며 재시험은 성공했다. e10 FTS-only 공연 취소는 두 실행에서 원문과 답변이 일치했다. run-01 추가 e10 vector-present Chat의 크레딧 소진 429 이력은 보존했다. 결제 후 run-02 실제 비교는 두 정책 각 3/3 공연 취소 답변 성공, 연습 날짜까지 모두 명시는 각 2/3이었다. 새 FTS는 m24 3/3 발견, 기존 FTS는 0/3, vector는 두 정책 모두 3/3 1위였다. 이는 기존 q47 cached-native 비교와 별도인 실제 Supervisor→검색→RRF→CRG 시험이다. 10만 native mixed p95는 legacy/group 3.73/1.98초, 합산 RSS 표본 peak 711/208MiB였다. 이는 10만 기억의 실제 Chat 왕복 시간이나 전체 writer pipeline 비용이 아니다.
+
+최종 FI 로컬 회귀는 Memory·Chat/runtime/아키텍처 1,040개 범위에서 최초 1,039 passed/1 failed, 새 취소 테스트의 필수 인자 누락 수정 후 관련 17 passed다. 원래 실패와 수정 영수증을 모두 보존했고 미해결 회귀는 0이다. 실제 Vec1 extension 및 opt-in diagnostic 성능 검사를 활성화해 skip 없이 실행했다. 아키텍처 경계·memory inventory·diff check도 통과했다. 설치 앱 재시작·직접 USER CHECK·CI·commit/merge/release는 수행하지 않았다. 후속 run-02에서 FI10 확장 부하/취소 단계별 행렬도 완료했다. run-03 사용자 승인과 기본 전환 검증까지 마쳐 FI0–FI12를 로컬 완료 처리했다. 후속 관련 native·정책·worker/runtime 회귀는 51 passed/0 skipped, 아키텍처·inventory·diff 검사는 통과했다.
 
 실행일: 2026-09-14 KST. 계획은 workspace의 `docs/plan/09-13 채팅 FTS5·Vec1 하이브리드 기억 검색과 Planner 없는 기억 조회 전환 로컬 구현 세부 계획.md`다. 시작 저장소는 `fix/chat-retrieval-debugging`, clean HEAD `ae9744f060b5680d59486b2474d532dadccf9bf9`였다. 새 branch/issue/PR/push/merge는 수행하지 않았다. 실행 산출물은 workspace `.task-output/hybrid-memory-20260914/`에 있고 실제 키·원래 캐릭터 설정은 저장소에 복사하지 않았다.
 
-## 단계별 상태
+## 최초 HY 실행 당시 단계별 상태 (기본 채택 전)
 
 | 단계 | 구현·실행 결과 | 남은 판정 경계 |
 |---|---|---|
@@ -52,7 +66,9 @@ SNS 연결: routine generation의 계획/작성, World feed reaction planner와 
 
 | 기능 | legacy_checkpoint | social_context_baseline | social_hybrid |
 |---|---|---|---|
-| 맥락 답변·되묻기 | 기존 정책 | snapshot 포함, 검색 0회 | snapshot 포함, 검색/embedding 0회 |
+| 맥락 답변·검색 전 되묻기 | 기존 정책 | snapshot 포함, 검색 0회 | snapshot 포함, 검색/embedding 0회 |
+| 일반 회상의 이름/방향/기간 미해석 | 기존 정책 | 기존 정책 | 검색 허용·조건 보존; 이후 CRG가 답변/확인/불확실성 판단 |
+| CANONICAL 검색 후 확인 질문 | 기존 계약 | 기존 계약 | route·근거 이력 유지, 생성 호출 추가 없음 |
 | Canonical 검색 | 기존 Planner | 기존 Planner 유지 | 코드 hybrid, Planner 0 |
 | memory/message/post/reply/social/activity/relationship-event 종류 | 기존 연산별 계약 | 기존 연산별 계약 | allowlist에 있는 종류만 기억 projection에서 검색 |
 | 기간 | 기존 연산 계약 | 동일 | FTS/vector top-K 전 `[from,to)`, 원본에서도 재검증 |
@@ -159,3 +175,90 @@ Official Vec1 `version-0.7` (`8fc7b115a4`) C source SHA256 `8571bb4f77f9547d11ad
 - Memory and current-schema suite: 231 passed, 4 skipped, 1 failed. The failure was the pre-existing fixed 103-table assertion after adding two tables. Updated assertion to 105; focused schema/import/fusion/deadline checks subsequently passed (11 tests).
 - Initial 100,000 holdings fixture used an invalid memory-kind enum and failed before the boundary test; corrected to the existing AUTOBIOGRAPHICAL_EVENT value. Real 99,999 + two-candidate boundary then passed (9.93 seconds): one accepted, one pending, one new eligibility row, three blocked attempts without extra AI, OFF count preserved, expiry frees capacity and pending candidate completes.
 - At this early checkpoint, hybrid mode remained explicitly unavailable until actual retrieval wiring is complete. No real Gemini generation/embedding calls, browser quality evaluation, SNS publication, CI, adoption or direct USER CHECK is claimed by these checks.
+
+
+## 2026-09-14 HR0–HR8 후속 결과
+
+현재 hybrid admission은 질문 속 인물 ID·행동 방향 ID·미해석 기간만으로 일반 회상 검색을 차단하지 않는다. 서버의 owner/World/응답 캐릭터 범위·Memory OFF·원문 현재 권한/삭제/버전 검사는 유지한다. legacy/baseline의 사전 정책은 유지한다. 검색 후 확인 질문도 route=CANONICAL이며 검색을 하지 않은 REQUEST_CLARIFICATION과 구분한다.
+
+RecallInterpretationContext는 request/intent/resolved/question/scope/evidence hash에 결합한다. 원래 언급·semantic ref·방향·시간 해석/적용 필터만 CRG에 보내며 검색문 4,000문자·전체 payload 6,500문자 제한이다. 후보 ID/비공개 이름을 추가하지 않는다. CRG plain text를 유지해 runtime final_response_kind는 미분류(null), 질문별 판정은 평가 기록이다. 공유 tracker의 CANONICAL normal_full_path_cap=3은 기존 스키마 값이며 hybrid는 CRG 직전에 Planner 0, Router 1(+기존 repair 1), CRG 1을 별도 검증한다.
+
+최종 실제 gemini-3.1-flash-lite/high 24개: 모두 committed, 최초 schema 24/24, backend 불필요 전환 0. 기억 질문 12개 모두 실제 검색/정답 근거 전달, 핵심 사실 11/12. 신규 경계 8/12. 생성 48 logical/48 physical, Planner·추가 평가 AI 0, 질의 임베딩 physical 21. e03/e05는 두 장소/날짜의 후보를 알려주었지만 동결한 기대인 확인 질문을 하지 않아 엄격한 기준으로 HOLD다. 대안 제시를 허용하는 10/12는 사후 참고값일 뿐 Gate에 사용하지 않는다. 12/12 핵심 사실 Gate에는 미달한다.
+
+남은 실패는 q28의 근거 없는 오늘 조건/답변, e08의 0건에서 사용자 착각 추측, e10의 축제 취소 근거 미전달과 경험 부정이다. 별도 보충 h02/h03에서는 같은 이름의 허용 후보 2개(multiple)로 검색했고, h03은 장소를 특정하는 확인 질문을 했다. h10의 이전 공연 준비 맥락 이후 취소 여부는 근거 미전달로 HOLD다. 보충 3개를 원래 24개 분모에 넣지 않았다.
+
+첫 실제 24개 결과와 수정 후 24개를 별도 보존했다. q20/q24 추가 묘사는 핵심 날짜/행동 방향을 유지하는 한 사용자 기준으로 PASS이며 최초 HY 판정을 삭제하지 않는다. 기존 과거 12개 모델 선택은 12/12, backend 검색 전환 통과는 2/12였고 q28 repair 포함 생성 25회였다.
+
+로컬 회귀: Chat/architecture/inventory 786 passed, 성능 opt-in 6 skipped; 실제 native DLL의 검색/원문 차단·삭제·Memory OFF 포함 Memory 22 passed. 실제 저장 Chat의 thread/evidence 서비스 재조회 3/3, 실제 build의 legacy/baseline/hybrid 모드 분리 검증. 전체 설치 앱·직접 USER CHECK·CI·merge·release 검증은 아니다. 현재 기본 legacy_checkpoint, hybrid/사회적 맥락 채택 HOLD 유지.
+
+상세 결과: workspace `docs/plan/09-14 채팅 하이브리드 기억 검색 차단 정책 개선과 CRG 확인 질문 판단 전환 계획.md` §11 및 `.task-output/hybrid-routing-crg-20260914/run-01/report.md`. 원본은 최종 revision2-responses, 초기 validated-responses, 보충 supplement-responses로 분리되어 있다. 합성 seed 시각/24개 자료이며 10만 개 지연·RSS나 실사용 전체 정확도를 나타내지 않는다.
+
+
+## 2026-09-14 사용자 확정 기준과 기본 구조 채택
+
+사용자는 e03/e05(두 사건의 장소·시간·날짜를 올바르게 제시)와 e08(불확실성과 조심스러운 혼동 가능성 표현)을 성공으로 확정했다. 현재 채택 기준은 **22/24 = 91.7%**, 사용자 목표 **85% 이상 통과**다. 기존 엄격한 19/24 판정과 원본 응답은 역사 기록으로 보존하며, 새 모델 시험 결과로 바꾸어 설명하지 않는다. 사용자 재판정은 `.task-output/hybrid-routing-crg-20260914/run-01/user-approved-assessment.json`에 별도로 저장했다.
+
+사용자 요청에 따라 **현재 Chat 구조와 SNS 사회적 맥락 구조를 모두 기본으로 채택**했다.
+
+- `CHAT_RECALL_MODE=social_hybrid`: 사회적 snapshot → Supervisor → 필요시 FTS5/Vec1 → 기존 CRG. 기본 Graph 도구·Canonical Planner·추가 평가 AI 없음.
+- `SNS_SOCIAL_CONTEXT_ENABLED=true`: SNS 기존 판단·작성 호출에 현재 사회적 snapshot을 기본 제공한다. 채팅 모드와 별도 설정으로 분리해 각 경로를 독립적으로 되돌릴 수 있다. 기존 SNS 행동 권한·스케줄·게시 실행 규칙은 유지한다.
+- 명시적 `CHAT_RECALL_MODE=legacy_checkpoint`/`social_context_baseline`은 비교·원복용으로 유지한다. SNS만 끄려면 `SNS_SOCIAL_CONTEXT_ENABLED=false`로 설정한다. 채팅 모드를 legacy로 바꾸는 것만으로 SNS를 끄지는 않는다.
+- `app.config.Settings()`의 실제 개발 환경 해석 결과도 `social_hybrid`/`true`다. 별도 환경변수가 없는 실행에서 적용된다. 이미 실행 중인 프로세스에는 재시작 후 반영되며 설치 바이너리 교체·배포까지 수행한 것은 아니다.
+
+남은 개선은 **q28의 오늘 조건/답변 추가**와 **e10의 FTS miss 및 취소 상태 오답**이다. e10 실제 원문은 “아시도와 9월 10일 축제 공연을 연습했고 9월 13일 공연은 취소됐다.”이며 아시도·축제가 포함되어 있다. m24는 eligible=false인 FTS-only 기억이고, FTS는 실행됐지만 0건이었다. 벡터 검색 대상이 아니었던 사실을 의미 검색 실패로 혼동하지 않는다.
+
+**91.7%는 Chat 24문항의 사용자 확정 평가이며 SNS 성공률이 아니다.** SNS 기본 채택은 사용자의 별도 명시적 결정이다. 기존 SNS/사회적 맥락 품질 관찰, HY8 복구·HY13 성능, 직접 USER CHECK·CI·설치·merge·release·Production 검증이 모두 통과됐다는 뜻은 아니다. 현재 제품 기본 채택 결정과 남은 검증/개선 항목을 분리한다.
+
+
+기본 전환 검증: Chat·사회적 맥락·OSS 경계 **746 passed, 6 성능 opt-in skipped** (`default-adoption-verified.log`). SNS/social/routine/resident 묶음은 최초 **331 passed, 1 failed, 1 skipped**였고, 관계 DB를 갖지 않는 기존 no-action 단위 fixture가 SNS 기본 ON을 가정하지 않은 실패였다. 해당 fixture만 SNS OFF를 명시해 독립된 회계 시험으로 보존했고, 관련 runtime·snapshot 재시험은 **28 passed, 1 skipped** (`default-sns-targeted-final.log`)다. 기본 ON의 snapshot 생성·actor 변경 재검증과 기본 hybrid 실제 composition은 별도 테스트로 통과했다. 기존 legacy Planner 순서 시험도 모드를 명시해 보존했다. 현재 `Settings()` 해석은 social_hybrid/true, diff whitespace 검사는 통과했다. 로그 경로는 workspace `.task-output/hybrid-routing-crg-20260914/run-01/`이다.
+
+
+## 2026-09-15 FI10 확장 검증과 e10 비교 후 전환 판단
+
+기본 전환 권고 근거와 재현 자료는 workspace `.task-output/fts-grouped-implementation-20260915/run-02/`에 저장했다. FI10 확장 warm 1,600회·새 프로세스 80회·취소 30회 완료. scope 노출·잔존 worker·예상 밖 상태 0, CPU/RSS 증가 Gate 통과. cold 정의는 새 worker 시작이며 OS cache 비우기를 필수 누락 항목으로 추가하지 않는다. 결과 수신 취소는 실제 pipe 패킷 준비 후 역직렬화 전이며 중간 프레임 고장을 주입한 것은 아니다.
+
+10만 추가 부하 warm p95는 충돌 3.123초·긴 입력 3.932초·범위 1.103초·5MiB 행 0.041초다. cap에 걸린 PARTIAL을 일반 검색 성공으로 세지 않았다. 10만 projection 행 쓰기+전체 digest 갱신 5.81~6.30초는 새로 측정한 공통 유지보수 비용이며, 기존 단순 삽입 통계와 구분한다. reader 종료 후 WAL 0 bytes. 최초 manifest의 5초는 단독 benchmark 예산이며 제품 Chat 검색 caps를 바꾸지 않았다.
+
+실제 AI 재현은 backend cwd에서 `uv run python <run-02>/run_e10.py` 경량 진입점을 사용한다. 평가 모듈을 직접 실행하면 Windows spawn 자식에서 부모 전용 import 비용이 추가된다. 최초 잘못된 진입점의 실패 6회·수정 후 AI 없는 precheck·실제 AI 성공 6회를 각각 보존하며 서로 다른 분모로 관리한다. 실행 전 설치 데이터/secret의 물리 경로를 검증하고 별도 합성 DB에서 시험했다. 설치 앱의 실행 검증이나 사용자 직접 확인을 의미하지 않는다.
+
+FI12 완료: 사용자 승인 후 기본을 `group_or_v1`로 변경하고 미지정/명시 정책의 앱 구성과 실제 e10 검색, 관련 회귀 38개를 통과했다. 계획/운영 문서를 동기화했다. rollback은 `legacy_strict_v1` 명시 및 runtime 재구성이다. DB·벡터 재구축이나 memory backfill은 필요 없다. 기본 전환만을 위해 실제 AI 품질 시험을 반복하지 않았으며 추가 외부 AI 호출은 0회다. 설치 앱에 배포/재시작한 결과는 아니다.
+
+## 2026-09-15 FI12 기본값 전환 완료
+
+사용자 채택 승인 후 서버 설정 기본값과 runtime 전달·대표 e10 검색·명시 legacy 복귀를 검증했다. 관련 38 passed/0 skipped이며 실제 Vec1 extension을 사용했다. 새 기본 검색은 묶음 OR→문자열 검증→기존 RRF/원문 재검증이다. 기본값 전환 영수증은 workspace `.task-output/fts-grouped-implementation-20260915/run-03-default/`에 있다. 기존 쓰기 digest 비용과 q28 문제는 별도 후속 항목으로 남긴다.
+
+## 2026-09-15 SD0~SD10 상세 검색 진단 보강
+
+기존 **검색 진단 · 문제 해결**에서 상세 수집을 켠 뒤 새 질문을 보낸다. 완료/실패 후 **진단 새로고침 → 확인할 요청 선택 → 상세 진단 파일 저장**으로 같은 요청의 export v2를 저장한다. 새 `search_trace`는 FTS/벡터의 축 상태·worker 종료 상태·단계별 시간·안전한 실패 코드·근거 연결 별칭을 포함한다. 검색 결과를 받아 cleanup에서 terminate한 경우와, 결과 없이 timeout으로 종료한 경우를 구분한다. `eligible_vector_count=null`은 0개가 아니고, `nn_query_started=null`도 미실행 확정이 아니다.
+
+수집 범위는 대화별 다음 10건/30분, 결과 보관은 최대 60분이다. 기존 조건과 trace를 합쳐 요청당 64KiB, 최대 20건/전체 1MiB이며, OFF·재시작·용량 제한으로 사라질 수 있다. 특히 Docker development StatReload도 메모리 수집 상태를 없앤다. 재현 도중 코드/테스트 파일을 복사하지 말고 서버 재로딩 종료를 확인한 뒤 켠다. 지금 켜도 과거 요청에 소급되지 않는다. 파일은 내려받은 뒤 사용자가 직접 관리해야 한다.
+
+`available`, `pending`, `not_captured`, `not_retained`, `unsupported`, `unknown`을 구분한다. 원문·질문·검색 조건 전체가 기존 상세 영역에 있을 수 있으므로 공개 공유 전 확인한다. 새 단계/연결 trace에는 예외 메시지·traceback·SQL·토큰·경로·원문 본문을 넣지 않고 요청 내부 별칭을 사용한다. 선택한 요청 ID가 바뀐 stale 상세를 다른 요청의 파일로 내보내지 않는다.
+
+| 진단 | 의미와 다음 확인 |
+|---|---|
+| slot_wait timeout | 슬롯 경합/취소 회수 확인 |
+| process start 후 child 단계 미수신 | spawn/import/기동·부하 우선 조사. DB/NN 실패로 단정하지 않음 |
+| DB/extension 단계 safe code | 해당 단계의 오류 종류와 실제 실행 경로 확인 |
+| eligible 0 + ready | 해당 scope/profile의 정상 0건. 장애와 구분 |
+| NN deadline | NN 시작 신호·벡터 수·남은 예산 비교 |
+| source_ref 동일, key_ref 상이, dedup kept | hydrate/exact-source 참조와 canonical identity 정책 검토 |
+| coverage partial | 확인된 항목만 해석. 미수신/생략을 성공이나 0으로 바꾸지 않음 |
+
+검증은 회귀 118 passed/1 opt-in skipped, cleanup 단일 1 passed, 신규 진단 Docker Linux 28 passed, frontend export 5 passed 및 구조·디자인·lint/typecheck·Next/static 빌드 통과다. 상세 수집·직렬화 p95 OFF 0.19ms/ON 5.96ms, 큰 입력 한도 처리 6.28ms. 기존 기본 검색/RRF/권한/CRG 지침·deadline과 추가 AI 호출 수는 바꾸지 않았다. native 전체 시간은 spawn 및 환경 부하를 포함하므로 이 진단 처리 시간과 구분한다.
+
+실제 재현은 3회로 제한했다. 첫 요청 CURRENT_CONTEXT, 두 번째 aggregation 미지원 및 재로딩으로 미수집, 세 번째 FTS/vector 모두 결과 대기 deadline으로 실패했다. 마지막 파일은 `result_received=false`, `joined=true`, exit=-15, child 단계/NN/eligible count 미확인을 보존했다. **당시에는 deadline만 확정됐고 내부 지연 원인은 미확정이었다. 후속 SP 기동 수정 결과는 아래 별도 기록을 따른다.** 원래 4→8 근거 중복은 합성 fixture에서 4 source/8 reference/8 dedup key 경로를 재현했지만 실제 새 검색의 정상 결과가 없어 원래 요청의 확정 분석과 구분한다.
+
+당시 인계 항목은 AI 없는 Docker worker 기동/import 측정과 양축 실패 후 workflow 처리 확인, 정상 검색 trace의 source/key 대조 후 중복 정책 설계였다. 기동 수정은 아래 SP 결과에서 완료했으며 중복/fallback 정책은 별도로 남는다. 진단 보강을 장애 해결 완료로 표시하지 않는다. 산출물은 workspace `.task-output/search-diagnostics-20260915/run-01/`, 상세 내용은 workspace `docs/plan/09-15 채팅 상세 검색 진단의 벡터 실패 단계와 근거 중복 추적 보강 구현 세부 계획.md` §15에 있다. Docker 재빌드+개발 소스 동기화/에이전트 브라우저 확인을 수행했으며 USER CHECK·CI·MERGE·RELEASE는 별도다.
+
+## 2026-09-15 SP0~SP10 Docker 검색 기동 수정 완료
+
+contributor 모듈의 서버 전용 import를 실제 factory/status/main 실행으로 이동했다. 기존 volume·reload/non-reload·모델/data/identity 초기화 순서와 검색 scope·FTS·Vec1·RRF·CRG 계약을 유지한다. 실제 Docker에 새 파일 SHA256 `af579a2240a2e2c152385d69a0cdb3da139d4be25589af1c16c44a2b72b0d88a` 반영 및 건강 상태를 확인했다.
+
+정상 native 4조건 120/120 성공, 무복사 상세 ON 추가 100/100 성공(p95 1.85초). 별도 파일 복사 부하 중 86/100 성공·14 timeout은 실패 기록으로 남는다. 기존 검색 cap 4초/축 약 3.6초 및 CRG reserve를 유지한다. 기동 경량화가 강한 호스트 부하의 timeout까지 없애지는 않는다.
+
+실제 동일 0.1초 회상 질문 1회가 `gemini-3.1-flash-lite/high`, CANONICAL, 첫 시도 committed로 완료됐다. FTS 20건·벡터 4건, 검색/원문 검증 약 1.87초, CRG 약 4.88초, DB 요청 생성→완료 약 12.1초다. 근거 12개와 사회적 맥락 2개를 UI에서 확인했고 이번 응답에는 검색 축 사용 불가 경고가 없었다. 자세한 물리 호출/시각 해상도/trace 생략 한계는 workspace `.task-output/search-startup-20260915/run-01/real-ai-summary.json`에 있다.
+
+Windows 고유 137개 통과(최초 취소 실패 1개 단독 재시험 PASS), Linux 131개 통과/7개 사유 있는 skip, 현재 inventory/구조 정책 PASS. 추가 전체 역사 보존 검사는 기존 factory/API/ORM/테스트 도입 이력 차이로 FAIL이므로 전체 CI PASS로 표시하지 않는다. 증거는 workspace `.task-output/search-startup-20260915/run-01/validation.md`, 완료 계획은 workspace `docs/plan/09-15 Docker 채팅 검색 프로세스 기동 지연 해소와 경량 진입점 구현 세부 계획.md` §14다.
+
+양축 장애의 오류 UI와 근거 중복 정책은 유지한다. 상세 수집의 자동 만료/재시작 휘발성도 유지한다. 다음 사용자 작업은 현재 Docker에서 일반 사용과 응답/근거를 직접 확인하는 것이며, 설치판·CI·merge·release는 별도 Gate다.

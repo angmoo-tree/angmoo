@@ -136,6 +136,7 @@ runpy.run_module('app.runtime.desktop_sidecar', run_name='__main__')
 @pytest.mark.parametrize("reload", [False, True])
 def test_contributor_server_and_reload_child_receive_the_same_logging_configuration(tmp_path, monkeypatch, reload):
     from app.runtime import contributor_backend
+    import uvicorn
 
     args = SimpleNamespace(data_root=tmp_path, host="127.0.0.1", port=8080,
                            frontend_origin="http://127.0.0.1:3000", diagnostics=False, reload=reload)
@@ -143,7 +144,7 @@ def test_contributor_server_and_reload_child_receive_the_same_logging_configurat
     app = object()
     monkeypatch.setattr(contributor_backend, "create_contributor_runtime_app", lambda **kwargs: app)
     calls = []
-    monkeypatch.setattr(contributor_backend.uvicorn, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
+    monkeypatch.setattr(uvicorn, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
     monkeypatch.setenv("ANGMOO_CONTRIBUTOR_DATA_ROOT", "temporary")
     monkeypatch.setenv("ANGMOO_FRONTEND_ORIGIN", "temporary")
     contributor_backend.main()

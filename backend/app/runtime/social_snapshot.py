@@ -13,7 +13,7 @@ from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelat
 
 
 def prepare_activity_social_context(ctx, *, active_actor):
-    if settings.CHAT_RECALL_MODE == "legacy_checkpoint":
+    if not settings.SNS_SOCIAL_CONTEXT_ENABLED:
         return ctx
     actor = active_actor(ctx.db, character_id=ctx.character.id)
     scope = GraphRecallScope(ctx.user_id, actor.world_id, actor.id)

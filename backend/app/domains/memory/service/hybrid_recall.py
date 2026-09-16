@@ -2,6 +2,7 @@
 from collections.abc import Sequence
 import asyncio
 from time import monotonic
+from app.contracts.search_diagnostics import collector, lineage, record_identity
 
 from app.domains.memory.contracts.hybrid_recall import RankedMemoryCandidate
 from app.domains.memory.contracts.hybrid_recall import (
@@ -16,10 +17,13 @@ def reciprocal_rank_fusion(*axes: Sequence[RankedMemoryCandidate], limit: int = 
     scores: dict[tuple, float] = {}
     documents: dict[tuple, RankedMemoryCandidate] = {}
     order: dict[tuple, int] = {}
-    for axis in axes:
+    for axis_index, axis in enumerate(axes):
         seen: set[tuple] = set()
         for rank, item in enumerate(axis, 1):
             key = item.identity
+            lineage("axis", "returned", axis="fts" if axis_index == 0 else "vector", rank=rank,
+                identities={"document_ref": ("d", item.candidate.document_id), "identity_ref": ("i", key),
+                    "memory_ref": ("m", item.candidate.memory_item_id)})
             if key in seen:
                 continue
             seen.add(key)
@@ -27,7 +31,12 @@ def reciprocal_rank_fusion(*axes: Sequence[RankedMemoryCandidate], limit: int = 
             if key not in documents:
                 documents[key] = item
                 order[key] = len(order)
-    return tuple(documents[key] for key in sorted(scores, key=lambda k: (-scores[k], order[k]))[:limit])
+    result = tuple(documents[key] for key in sorted(scores, key=lambda k: (-scores[k], order[k]))[:limit])
+    if collector() is not None:
+        for rank, item in enumerate(result, 1):
+            lineage("rrf", "selected", rank=rank, identities={"identity_ref": ("i", item.identity),
+                "document_ref": ("d", item.candidate.document_id), "memory_ref": ("m", item.candidate.memory_item_id)})
+    return result
 
 
 class HybridRecallService:
@@ -78,6 +87,9 @@ class HybridRecallService:
             if key not in seen:
                 selected.append(record)
                 seen.add(key)
+                lineage("select", "selected", identities=record_identity(record))
+            else:
+                lineage("select", "merged", reason="memory_identity", identities=record_identity(record))
             if len(selected) >= request.result_limit:
                 break
         hydrated, sources = self._canonical.hydrate(request, tuple(selected))

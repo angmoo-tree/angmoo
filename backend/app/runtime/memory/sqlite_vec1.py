@@ -14,6 +14,7 @@ import sqlite3
 import struct
 from threading import Event, Lock
 from time import monotonic
+from app.runtime.memory.worker_diagnostics import phase, capture_failure, current_worker
 
 from app.domains.memory.contracts.vector_projection import (
     MemoryVectorDocument, MemoryVectorHit, MemoryVectorQuery, MemoryVectorSearchResult,
@@ -85,19 +86,22 @@ class SqliteMemoryVectorIndex:
 
     @contextmanager
     def _connect(self, *, cancellation: VectorCancellation | None = None, read_only=False):
-        connection = sqlite3.connect(self.database_path.as_uri()+"?mode=ro" if read_only else self.database_path,
-                                     uri=read_only, timeout=1.0)
+        with phase("db_open"):
+            connection = sqlite3.connect(self.database_path.as_uri()+"?mode=ro" if read_only else self.database_path,
+                                         uri=read_only, timeout=1.0)
         try:
-            connection.enable_load_extension(True)
-            try:
-                connection.load_extension(str(self._extension))
-            finally:
-                connection.enable_load_extension(False)
+            with phase("extension_load"):
+                connection.enable_load_extension(True)
+                try:
+                    connection.load_extension(str(self._extension))
+                finally:
+                    connection.enable_load_extension(False)
             connection.execute("PRAGMA busy_timeout=1000")
             if cancellation is not None:
                 cancellation.attach(connection)
             yield connection
-        except sqlite3.Error:
+        except sqlite3.Error as exc:
+            capture_failure(exc)
             raise MemoryVectorProjectionError(
                 "memory_vector_cancelled" if cancellation and cancellation.expired()
                 else "memory_vector_database_error"
@@ -171,7 +175,8 @@ class SqliteMemoryVectorIndex:
 
     def search(self, query: MemoryVectorQuery, *, cancellation: VectorCancellation):
         started = monotonic()
-        blob = vector_blob(query.vector)
+        with phase("query_validate"):
+            blob = vector_blob(query.vector)
         where = ["owner_id=?", "world_id=?", "subject_id=?", "profile=?"]
         values = [query.scope.owner_id, query.scope.world_id, query.scope.subject_world_character_id, query.profile]
         for clause, value in (
@@ -185,18 +190,43 @@ class SqliteMemoryVectorIndex:
         predicate = " AND ".join(where)
         with self._connect(cancellation=cancellation, read_only=True) as connection:
             connection.execute("BEGIN")
-            count = connection.execute("SELECT count(*) FROM vectors WHERE " + predicate, values).fetchone()[0]
+            diagnostic = current_worker.get()
+            if diagnostic is not None and diagnostic.detailed:
+                diagnostic.metadata["metadata_status"] = "budget_skipped"
+                with phase("metadata_read"):
+                    if cancellation.deadline - monotonic() > 0.05:
+                        # One bounded metadata read; never change query acceptance.
+                        try:
+                            metadata = connection.execute("SELECT revision,generation FROM projection_profile LIMIT 2").fetchall()
+                            if len(metadata) == 1:
+                                from app.contracts.search_diagnostics import SearchTerminal
+                                values_read = dict(observed_schema_revision=metadata[0][0], observed_generation=metadata[0][1],
+                                    generation_match=metadata[0][1] == self.generation, metadata_status="observed")
+                                SearchTerminal(axis="vector", terminal_state="success", **values_read)
+                                diagnostic.metadata.update(values_read)
+                            else:
+                                diagnostic.metadata["metadata_status"] = "unavailable"
+                        except (sqlite3.Error, ValueError, TypeError):
+                            diagnostic.metadata["metadata_status"] = "unavailable"
+            with phase("eligible_count"):
+                count = connection.execute("SELECT count(*) FROM vectors WHERE " + predicate, values).fetchone()[0]
+                if diagnostic is not None:
+                    diagnostic.metadata["eligible_vector_count"] = count
             # Vec1's empty flat model has dimension zero until its first insert.
-            rows = [] if count == 0 else connection.execute(
-                "SELECT rowid,distance FROM vectors(?,?) WHERE " + predicate,
-                [blob, query.limit, *values],
-            ).fetchall()
+            rows = []
+            if count:
+                with phase("nn_query"):
+                    rows = connection.execute(
+                        "SELECT rowid,distance FROM vectors(?,?) WHERE " + predicate,
+                        [blob, query.limit, *values],
+                    ).fetchall()
             hits = []
-            for rowid, distance in rows:
-                record = connection.execute("SELECT document_id,memory_item_id,version,content_hash FROM documents WHERE rowid=?", (rowid,)).fetchone()
-                if record is None:
-                    raise MemoryVectorProjectionError("memory_vector_mapping_missing")
-                hits.append(MemoryVectorHit(*record, distance))
+            with phase("mapping_read"):
+                for rowid, distance in rows:
+                    record = connection.execute("SELECT document_id,memory_item_id,version,content_hash FROM documents WHERE rowid=?", (rowid,)).fetchone()
+                    if record is None:
+                        raise MemoryVectorProjectionError("memory_vector_mapping_missing")
+                    hits.append(MemoryVectorHit(*record, distance))
             if cancellation.expired():
                 raise MemoryVectorProjectionError("memory_vector_cancelled")
         return MemoryVectorSearchResult(tuple(hits), count, self.generation, (monotonic()-started)*1000)

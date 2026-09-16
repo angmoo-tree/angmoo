@@ -324,6 +324,9 @@ class DiagnosticRequestListRead(BaseModel):
     next_cursor: str | None
 
 
+from app.contracts.search_diagnostics import SearchDiagnosticTrace
+
+
 class DiagnosticRead(BaseModel):
     model_config = ConfigDict(extra="forbid")
     world_id: str
@@ -335,3 +338,5 @@ class DiagnosticRead(BaseModel):
     record: DiagnosticRecord | None
     capture: CaptureRead
     details: list[dict[str, str | int]] | None
+    search_trace: SearchDiagnosticTrace | None = None
+    detail_availability: Literal["available", "pending", "not_captured", "not_retained", "unsupported", "unknown"] = "unknown"

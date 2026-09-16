@@ -1,6 +1,7 @@
 """Typed routing and resolution results shared with Chat execution."""
 
 from dataclasses import dataclass
+from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext
 from app.domains.chat.contracts.supervisor_selection import SelectionToolCall
 
 from app.domains.chat.contracts.resolved_envelope import ResolvedRetrievalEnvelope
@@ -47,6 +48,8 @@ class RetrievalRoutingMetrics:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    admission_policy: str = "legacy"
+    route_change_reason: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,3 +61,8 @@ class RetrievalRoutingResult:
     call_tracker: dict
     proposed_tool_calls: tuple[SelectionToolCall, ...] = ()
     selection_mode: str = "legacy"
+    interpretation: RecallInterpretationContext | None = None
+
+    def __post_init__(self):
+        if self.interpretation is not None:
+            self.interpretation.assert_routing(self.intent, self.resolved)

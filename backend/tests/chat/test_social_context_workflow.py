@@ -153,7 +153,12 @@ def test_hybrid_toolnode_completes_with_two_generation_calls_and_no_planner(resp
         async def route(self, *args, **kwargs):
             result = await super().route(*args, **kwargs)
             intent = replace(result.intent, search_text="훈련 약속")
-            return replace(result, intent=intent, resolved=replace(result.resolved, intent_hash=intent.envelope_hash), selection_mode="native_control")
+            resolved = replace(result.resolved, intent_hash=intent.envelope_hash)
+            from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext, text_hash
+            interpretation = RecallInterpretationContext(resolved.request_id, intent.envelope_hash,
+                resolved.envelope_hash, text_hash(args[0].user_message), intent.search_text,
+                (), None, None, "not_requested", "not_requested", None)
+            return replace(result, intent=intent, resolved=resolved, interpretation=interpretation, selection_mode="native_control")
     class Hybrid:
         calls = 0
         async def execute(self, request, *, deadline):

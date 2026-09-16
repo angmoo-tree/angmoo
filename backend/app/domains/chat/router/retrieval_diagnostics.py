@@ -11,6 +11,7 @@ from app.domains.chat.repository.retrieval_diagnostics import read
 from app.domains.chat.repository.response_requests import _latest_request_row
 from app.domains.chat.models import ChatResponseRequest
 from app.domains.chat.schemas import DiagnosticRequestListRead
+from app.domains.chat.contracts.generation_lifecycle import TERMINAL_STATES
 from app.domains.chat.repository.diagnostic_requests import list_requests, metadata
 
 router = APIRouter(prefix="/worlds/{world_id}/chat/threads/{thread_id}", tags=["world-chat"])
@@ -44,10 +45,19 @@ def diagnostics(response: Response, request_id: str | None = None,
     if request_id and row is None:
         raise HTTPException(404, "응답 요청을 찾을 수 없습니다.")
     result = {"status": "not_recorded", "record": None} if row is None else read(db, row.request_id)
+    detail_result = None if row is None else capture.read_full(scope, row.request_id)
+    summary = next((e for e in (result.get("record") or {}).get("events", []) if e.get("event") == "search_trace_summary"), None)
+    availability = ("available" if detail_result is not None else
+        "pending" if row is not None and row.state not in TERMINAL_STATES and capture.active(scope, row.request_id) else
+        "not_captured" if summary and summary.get("captured_at_request") is False else
+        "not_retained" if summary and summary.get("captured_at_request") is True else
+        "unsupported" if result.get("record") and summary is None else "unknown")
     return {"world_id": scope[1], "thread_id": scope[2], "request_id": None if row is None else row.request_id,
             "request_state": None if row is None else row.state,
             "request": None if row is None else metadata(row),
-            "capture": capture.status(scope), "details": None if row is None else capture.read(scope, row.request_id), **result}
+            "capture": capture.status(scope), "details": None if detail_result is None else detail_result["details"],
+            "search_trace": None if detail_result is None else detail_result.get("search_trace"),
+            "detail_availability": availability, **result}
 
 
 @router.get("/diagnostics/requests", response_model=DiagnosticRequestListRead)
