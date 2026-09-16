@@ -43,6 +43,7 @@ class HybridRecallRequest:
     thread_id: str | None = None
     axis_limit: int = 50
     result_limit: int = 10
+    episode_source_kinds: tuple[RecallDocumentKind, ...] = ()
 
     def __post_init__(self):
         if (not self.request_id or not self.call_id or not _HASH.fullmatch(self.envelope_hash)
@@ -52,6 +53,8 @@ class HybridRecallRequest:
             raise ValueError("hybrid_recall_request_invalid")
         if any(not isinstance(k, RecallDocumentKind) for k in self.kinds):
             raise ValueError("hybrid_recall_kind_invalid")
+        if any(not isinstance(k, RecallDocumentKind) or k is RecallDocumentKind.MEMORY_ITEM for k in self.episode_source_kinds):
+            raise ValueError("hybrid_episode_source_kind_invalid")
         if any(t is not None and t.tzinfo is None for t in (self.occurred_from, self.occurred_to)):
             raise ValueError("hybrid_recall_time_invalid")
         if self.occurred_from and self.occurred_to and self.occurred_from >= self.occurred_to:

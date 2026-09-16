@@ -1,5 +1,7 @@
 # 사회적 맥락·하이브리드 기억 검색 로컬 실행 결과
 
+2026-09-16 에피소드 기억 후속: 상황·원문·생각 opt-in 구현과 비교 결과는 [전환·복귀 안내](episode-memory.md)에 정리한다. 세 새 정책의 기본은 `legacy`이며 사용자 채택 전이다. 아래 기존 Chat/SNS/FTS 기본 채택을 에피소드 기본 채택으로 해석하지 않는다.
+
 현재 판정: **사용자 기준 Chat 22/24 = 91.7%, 85% 목표 통과 / Chat·SNS 현재 구조 기본 채택**. 기본값은 `CHAT_RECALL_MODE=social_hybrid`, `SNS_SOCIAL_CONTEXT_ENABLED=true`다. 아래 시험 당시의 HOLD는 역사 기록이며 현재 채택 상태는 이 문단과 마지막 사용자 결정 절을 따른다. 나머지 성능·설치·배포 검증 완료와 구분한다.
 
 2026-09-15 FTS 후속 현재 상태: **사용자 승인 / group_or_v1 기본 채택 / FI0–FI12 LOCAL COMPLETE**. 현재 기본은 `CHAT_HYBRID_FTS_POLICY=group_or_v1`, Chat `social_hybrid`, SNS 사회적 맥락 true다. 설정을 명시하지 않으면 새 FTS 정책을 사용하며 기존 `legacy_strict_v1` 명시 설정은 복귀 수단으로 유지한다. 최신 근거는 workspace `.task-output/fts-grouped-implementation-20260915/run-03-default/report.md` 및 FI 계획 §14.3이다. run-01/02 최초 실패·보류 이력은 보존한다.

@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from app.contracts.activity_thought import ActivityThought
 from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
 from app.domains.chat.contracts.recall_mode import ChatRecallMode
 from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext
@@ -103,6 +104,7 @@ class CharacterResponseGeneratorResult:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    activity_thought: ActivityThought | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -129,6 +131,7 @@ class CharacterResponseGenerationResult:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    activity_thought: ActivityThought | None = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

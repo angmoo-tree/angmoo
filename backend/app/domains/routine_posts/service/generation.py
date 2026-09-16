@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from typing import Any
 from pydantic import ValidationError
+from app.contracts.activity_thought import THOUGHT_PROMPT
+from app.integrations.llm.activity_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
 from app.domains.routine_posts import schemas
 from app.domains.routine_posts.client import _api_key, _llm_context
 from app.domains.routine_posts.contracts.context import RoutinePostContext
@@ -16,6 +18,9 @@ from app.integrations.direct_llm import DirectLlmError, RunLlmTracker, generate_
 
 
 class DirectRoutinePostProvider:
+    def __init__(self, *, thought_enabled: bool = False):
+        self._thought_enabled = thought_enabled
+
     async def generate(
         self,
         *,
@@ -85,7 +90,13 @@ Return only the requested structured JSON."""
             default=str,
         )
 
+        if self._thought_enabled:
+            planner_system, planner_user = without_legacy_self_view_prompt(planner_system, planner_user)
+            planner_response_schema = thought_response_schema(planner_response_schema, include_thought=False)
+
         def validate_plan(payload: dict[str, object]) -> schemas.RoutineBeatPlan:
+            if self._thought_enabled:
+                payload, _ = extract_activity_thought(payload, include_thought=False)
             return _validate_plan(payload, context=routine_context, beat=beat)
 
         try:
@@ -133,8 +144,22 @@ Return only the requested structured JSON."""
             default=str,
         )
 
+        writer_schema = GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA
+        if self._thought_enabled:
+            writer_system, writer_user = without_legacy_self_view_prompt(writer_system, writer_user)
+            writer_system += "\n" + THOUGHT_PROMPT
+            writer_schema = thought_response_schema(writer_schema, include_thought=True)
+        if reader := getattr(resident_context, "episode_memory_reader", None):
+            previous = routine_context.previous_post
+            writer_user += reader(None if previous is None else previous.id)
+
         def validate_draft(payload: dict[str, object]) -> schemas.RoutinePostDraft:
-            return schemas.RoutinePostDraft.model_validate(payload)
+            thought = None
+            if self._thought_enabled:
+                payload, thought = extract_activity_thought(payload, include_thought=True)
+            result = schemas.RoutinePostDraft.model_validate(payload)
+            result._activity_thought = thought
+            return result
 
         try:
             draft = await generate_json(
@@ -147,7 +172,7 @@ Return only the requested structured JSON."""
                 tracker=tracker,
                 system_prompt=writer_system + ("" if social is None else social.text("routine_post_writer")),
                 user_prompt=writer_user,
-                response_schema=GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA,
+                response_schema=writer_schema,
                 validator=validate_draft,
                 max_output_tokens=2_400,
                 thinking_level="medium",

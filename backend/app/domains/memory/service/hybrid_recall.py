@@ -54,7 +54,8 @@ class HybridRecallService:
         # Leave time for native worker termination and canonical validation, so
         # an axis timeout can return its unavailable receipt beside a ready axis.
         axis_deadline = deadline - min(0.5, (deadline - started) * 0.1)
-        tasks = [asyncio.create_task(axis.search(request, deadline=axis_deadline))
+        axis_request = getattr(self._canonical, "axis_request", lambda value: value)(request)
+        tasks = [asyncio.create_task(axis.search(axis_request, deadline=axis_deadline))
                  for axis in (self._fts, self._vector)]
         try:
             async with asyncio.timeout(max(0.0, deadline - monotonic())):

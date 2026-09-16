@@ -44,10 +44,10 @@ class MemoryBatchSelectionService:
         self.clock = clock or (lambda: datetime.now(UTC))
 
     async def run_next(
-        self, *, lease_token: str, timeout: float = MEMORY_PROVIDER_TIMEOUT_SECONDS
+        self, *, lease_token: str, timeout: float = MEMORY_PROVIDER_TIMEOUT_SECONDS, claimed_batch=None
     ) -> str:
         repo = self.repository
-        batch = repo.claim(lease_token=lease_token, now=self.clock())
+        batch = claimed_batch if claimed_batch is not None else repo.claim(lease_token=lease_token, now=self.clock())
         if batch is None:
             repo.commit()
             return "memory_batch_queue_empty"

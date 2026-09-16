@@ -5,6 +5,7 @@ the runtime binding performs no SQL, provider request, or transaction boundary.
 """
 
 from __future__ import annotations
+from app.contracts.activity_thought import ActivityThought
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from typing import Any, Protocol
@@ -204,6 +205,9 @@ class FeedActionWorkflows(Protocol):
 
 class WorldFeedWorkflows(Protocol):
     @property
+    def thought_enabled(self) -> bool: ...
+
+    @property
     def llm_deferred(self) -> type[Exception]: ...
     @property
     def llm_error(self) -> type[Exception]: ...
@@ -234,6 +238,9 @@ class WorldFeedWorkflows(Protocol):
         lane: ObservationLane,
         observed_at: datetime,
     ) -> SocialObservationResult: ...
+    def record_activity_thought(self, db: Session, *, execution: FeedExecution,
+                                event: SubjectiveEvent, source_post_id: str | None,
+                                thought: ActivityThought, captured_at: datetime) -> object: ...
     def record_declared_subjective_context(
         self,
         db: Session,

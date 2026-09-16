@@ -38,6 +38,8 @@ def _coerce_action_step_count(value: Any) -> int:
 
 
 def _subjective_plan_fields(value: dict[str, Any]) -> dict[str, Any]:
+    if "_activity_thought" in value:
+        return {"_activity_thought": value["_activity_thought"]}
     return {
         key: value.get(key)
         for key in (

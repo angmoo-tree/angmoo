@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
+from app.contracts.activity_thought import ActivityThought
 
 
 class TodaySocialActivityKind(StrEnum):
@@ -40,6 +41,13 @@ class TodaySocialSubjectiveRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class TodaySocialThoughtRecord:
+    thought: ActivityThought
+    source_digest: str
+    thought_id: str
+
+
+@dataclass(frozen=True, slots=True)
 class TodaySocialActivityRecord:
     record_key: str
     kind: TodaySocialActivityKind
@@ -60,6 +68,7 @@ class TodaySocialActivityRecord:
     root_title: str | None = None
     root_body: str | None = None
     subjective_context: TodaySocialSubjectiveRecord | None = None
+    thought: TodaySocialThoughtRecord | None = None
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None:
@@ -76,6 +85,7 @@ class TodaySocialActivityRead:
     source_watermarks: dict[str, str | None]
     overflow: bool
     counts_exact: bool = True
+    thought_view: bool = False
 
 
 __all__ = [

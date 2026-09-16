@@ -34,3 +34,4 @@ class MemoryPreparationDependencies:
             list[tuple[Any, Any, Any, tuple[str, ...], list[Any], Any]],
         ],
     ]
+    generation_policy: str = "legacy"

@@ -115,7 +115,8 @@ def build(
         from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
         if memory_recall_service.hybrid_service is None:
             raise ValueError("chat_hybrid_backend_not_ready")
-        canonical = HybridCanonicalService(memory_recall_service.hybrid_service)
+        canonical = HybridCanonicalService(memory_recall_service.hybrid_service,
+            episode_only=getattr(runtime_settings, "MEMORY_RECALL_REPRESENTATION", "legacy") == "episode_v1")
     else:
         canonical = CanonicalRetrievalPlanningService(
             planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
@@ -153,7 +154,9 @@ def build(
         both=ToolBothCoordinator(BothRetrievalWorkflowCoordinator(canonical=canonical, graph=graph, parallel_runner=parallel_tools)),
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
-            DirectLlmCharacterResponseGenerator(material)
+            DirectLlmCharacterResponseGenerator(
+                material, **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
+            )
         ),
         unit_of_work=SupervisorResponseWorkflowUnitOfWork(db),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),

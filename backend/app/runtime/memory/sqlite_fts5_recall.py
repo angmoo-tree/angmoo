@@ -187,16 +187,28 @@ class SqliteMemoryRecallIndex:
         documents: Iterable[MemoryRecallDocument],
         tombstoned_at: datetime | None = None,
     ) -> None:
+        self.replace_memory_items({memory_item_id: tuple(documents)}, tombstoned_at=tombstoned_at)
+
+    def replace_memory_items(self, replacements, *, tombstoned_at: datetime | None = None) -> None:
+        """Apply one canonical commit atomically and recompute validation once."""
         self._require_open()
-        item_id = _required_identifier(memory_item_id, "memory_item_id")
-        prepared = _prepare_unique_documents(documents)
-        if any(value.memory_item_id != item_id for value in prepared.values()):
-            raise ValueError("Memory recall replacement item mismatch")
+        prepared_items = {}
+        all_ids = set()
+        for memory_item_id, documents in replacements.items():
+            item_id = _required_identifier(memory_item_id, "memory_item_id")
+            prepared = _prepare_unique_documents(documents)
+            if any(value.memory_item_id != item_id for value in prepared.values()) or all_ids.intersection(prepared):
+                raise ValueError("Memory recall replacement item mismatch")
+            all_ids.update(prepared)
+            prepared_items[item_id] = prepared
+        if not prepared_items:
+            return
         tombstone_text = _utc_text(tombstoned_at or datetime.now(UTC))
         with self._write_transaction() as connection:
-            self._tombstone_item(connection, item_id, tombstone_text)
-            for document_id in sorted(prepared):
-                self._upsert_document(connection, prepared[document_id])
+            for item_id, prepared in sorted(prepared_items.items()):
+                self._tombstone_item(connection, item_id, tombstone_text)
+                for document_id in sorted(prepared):
+                    self._upsert_document(connection, prepared[document_id])
             self._refresh_state(connection)
 
     def tombstone_memory_item(
@@ -399,8 +411,11 @@ class SqliteMemoryRecallIndex:
             missing_count = int(
                 connection.execute(
                     """
+                    WITH f AS MATERIALIZED (
+                        SELECT document_id, text, lexical_terms FROM memory_recall_fts
+                    )
                     SELECT count(*) FROM memory_recall_documents AS d
-                    LEFT JOIN memory_recall_fts AS f
+                    LEFT JOIN f
                       ON f.document_id = d.document_id
                      AND f.text = d.text
                      AND f.lexical_terms = d.lexical_terms

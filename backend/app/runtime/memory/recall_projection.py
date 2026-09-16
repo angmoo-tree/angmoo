@@ -41,10 +41,11 @@ class EmbeddedMemoryRecallProjection:
         *,
         index: SqliteMemoryRecallIndex,
         session_factory: sessionmaker[Session],
+        episode_only: bool = False,
     ) -> None:
         self.index = index
         self._factory = session_factory
-        self._source = SqlAlchemyMemoryRecallDocumentSource(session_factory)
+        self._source = SqlAlchemyMemoryRecallDocumentSource(session_factory, episode_only=episode_only)
         self._listening = False
         self.state = MemoryRecallProjectionState.STOPPED
 
@@ -134,6 +135,8 @@ class EmbeddedMemoryRecallProjection:
                 setting_ids.add(entity.id)
 
     def _after_commit(self, session: Session) -> None:
+        if session.in_nested_transaction():
+            return
         item_ids = set(session.info.pop(_PENDING_ITEM_IDS, ()))
         setting_ids = tuple(session.info.pop(_PENDING_SETTING_IDS, ()))
         full_sync = bool(session.info.pop(_PENDING_FULL_SYNC, False))
@@ -147,30 +150,13 @@ class EmbeddedMemoryRecallProjection:
                 if resolved is None:
                     continue
                 scope, enabled = resolved
-                if not enabled:
-                    self.index.tombstone_scope(
-                        owner_id=scope.owner_id,
-                        world_id=scope.world_id,
-                        subject_world_character_id=(scope.subject_world_character_id),
-                    )
-                    continue
                 item_ids.update(self._source.item_ids_for_scope_setting(setting_id))
 
             documents = self._source.documents_for_item_ids(item_ids)
-            for item_id in sorted(item_ids):
-                item_documents = documents.get(item_id, ())
-                if item_documents:
-                    self.index.replace_memory_item(
-                        memory_item_id=item_id,
-                        documents=item_documents,
-                    )
-                else:
-                    self.index.tombstone_memory_item(memory_item_id=item_id)
-            self.state = (
-                MemoryRecallProjectionState.READY
-                if self.index.doctor().healthy
-                else MemoryRecallProjectionState.DEGRADED
-            )
+            self.index.replace_memory_items({item_id: documents.get(item_id, ()) for item_id in sorted(item_ids)})
+            # One transactional mutation already recomputed the full digest.
+            # Full doctor remains available at startup and explicit diagnosis.
+            self.state = MemoryRecallProjectionState.READY
         except Exception:
             # This listener executes after canonical commit. Projection failure
             # cannot roll back the already successful Memory transaction.
@@ -179,6 +165,10 @@ class EmbeddedMemoryRecallProjection:
 
     @staticmethod
     def _after_rollback(session: Session) -> None:
+        if session.in_nested_transaction():
+            # Keep the conservative dirty set for earlier successful writes in
+            # the outer transaction; discarded IDs will resolve to no documents.
+            return
         session.info.pop(_PENDING_ITEM_IDS, None)
         session.info.pop(_PENDING_SETTING_IDS, None)
         session.info.pop(_PENDING_FULL_SYNC, None)

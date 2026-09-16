@@ -25,9 +25,11 @@ class MemoryReadService:
         self,
         repository: MemoryRepositoryPort,
         source_reader: MemorySourceEvidenceReaderPort,
+        episode_reader=None,
     ) -> None:
         self._repository = repository
         self._source_reader = source_reader
+        self._episode_reader = episode_reader
 
     def setting(self, scope: MemoryScope) -> MemoryScopeSetting | None:
         """Read the setting without creating an implicit opt-in row."""
@@ -133,6 +135,7 @@ class MemoryReadService:
             item=item,
             lifecycle=memory_lifecycle(item, now=now or datetime.now(UTC)),
             evidence=tuple(evidence),
+            episode=None if self._episode_reader is None else self._episode_reader(scope, item_id, now or datetime.now(UTC)),
         )
 
 

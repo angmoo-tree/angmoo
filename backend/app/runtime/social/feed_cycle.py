@@ -10,7 +10,7 @@ from app.runtime.social.world_feed_queries import WorldFeedQueries
 from app.runtime.activity_proposals import composition as activity_proposal_runtime
 from app.runtime.social import world_feed_actions as world_feed_social_apply
 from app.runtime.social.observations import observe_source
-from app.runtime.social.subjective_composition import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context, record_activity_thought
 from app.domains.routines.repository import public_action_executions as execution_queries
 from app.domains.routines.service import public_action_executions as execution_service
 from app.runtime.social.agent_tools import agent_tool_actions
@@ -30,6 +30,11 @@ class WorldFeedExecutions:
 
 
 class RuntimeWorldFeedWorkflows:
+    @property
+    def thought_enabled(self):
+        from app.config import settings
+        return settings.ACTIVITY_THOUGHT_POLICY == "thought_v1"
+
     llm_deferred = DirectLlmDeferred
     llm_error = DirectLlmError
     llm_json_error = DirectLlmJsonError
@@ -40,6 +45,7 @@ class RuntimeWorldFeedWorkflows:
     new_tracker = staticmethod(RunLlmTracker)
     default_provider = staticmethod(DirectFeedReactionProvider)
     observe_source = staticmethod(observe_source)
+    record_activity_thought = staticmethod(record_activity_thought)
     record_declared_subjective_context = staticmethod(
         record_declared_subjective_context
     )

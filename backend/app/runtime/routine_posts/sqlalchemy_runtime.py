@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.config import settings
 
 from app.runtime.social.agent_tools import agent_tool_actions
 
@@ -510,7 +511,7 @@ async def _run_routine_post_runtime(
 
     try:
         generation = validate_routine_generation(
-            await (provider or DirectRoutinePostProvider()).generate(
+            await (provider or DirectRoutinePostProvider(thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1")).generate(
                 resident_context=resident_context,
                 routine_context=context,
                 beat=beat,
@@ -691,27 +692,36 @@ async def _run_routine_post_runtime(
                     "opening_post_id": post.opening_post_id,
                 },
             )
-            subjective_context = None
-            if (
-                generation.plan.motivation_kind is not None
-                and generation.plan.motivation_text is not None
-                and generation.plan.emotion_label is not None
-            ):
-                subjective_context = ActionSubjectiveContextV1(
-                    motivation_kind=generation.plan.motivation_kind,
-                    motivation_text=generation.plan.motivation_text,
-                    emotion_label=generation.plan.emotion_label,
-                    emotion_text=generation.plan.emotion_text,
-                    emotion_intensity=generation.plan.emotion_intensity,
+            if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
+                from app.contracts.activity_thought import ActivityThought
+                from app.runtime.social.subjective_composition import record_activity_thought
+                record_activity_thought(
+                    db, execution=execution, event=event_result.event,
+                    source_post_id=post.id, thought=generation.draft._activity_thought or ActivityThought(),
+                    captured_at=resident_context.run_started_at,
                 )
-            record_declared_subjective_context(
-                db,
-                execution=execution,
-                event=event_result.event,
-                source_post_id=post.id,
-                context=subjective_context,
-                captured_at=resident_context.run_started_at,
-            )
+            else:
+                subjective_context = None
+                if (
+                    generation.plan.motivation_kind is not None
+                    and generation.plan.motivation_text is not None
+                    and generation.plan.emotion_label is not None
+                ):
+                    subjective_context = ActionSubjectiveContextV1(
+                        motivation_kind=generation.plan.motivation_kind,
+                        motivation_text=generation.plan.motivation_text,
+                        emotion_label=generation.plan.emotion_label,
+                        emotion_text=generation.plan.emotion_text,
+                        emotion_intensity=generation.plan.emotion_intensity,
+                    )
+                record_declared_subjective_context(
+                    db,
+                    execution=execution,
+                    event=event_result.event,
+                    source_post_id=post.id,
+                    context=subjective_context,
+                    captured_at=resident_context.run_started_at,
+                )
         db.commit()
     except Exception as exc:
         db.rollback()

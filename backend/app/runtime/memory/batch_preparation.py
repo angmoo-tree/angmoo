@@ -6,7 +6,7 @@ from app.runtime.memory.composition import memory_repository, memory_batch_repos
 from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
-def build_preparation_dependencies() -> MemoryPreparationDependencies:
+def build_preparation_dependencies(*, generation_policy="legacy") -> MemoryPreparationDependencies:
     return MemoryPreparationDependencies(
         memory_repository=memory_repository,
         batch_repository=memory_batch_repository,
@@ -14,4 +14,5 @@ def build_preparation_dependencies() -> MemoryPreparationDependencies:
         source_reader=SqlAlchemyMemorySourceEvidenceReader,
         read_due_configs=read_due_batch_configs,
         source_catalog_factory=build_source_catalogs,
+        generation_policy=generation_policy,
     )

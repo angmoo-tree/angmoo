@@ -13,6 +13,10 @@ from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelat
 
 
 def prepare_activity_social_context(ctx, *, active_actor):
+    if settings.MEMORY_RECALL_REPRESENTATION == "episode_v1":
+        from app.runtime.memory.episode_sns import attach_sns_episode_reader
+        actor = active_actor(ctx.db, character_id=ctx.character.id)
+        ctx = attach_sns_episode_reader(ctx, actor=actor, active_actor=active_actor)
     if not settings.SNS_SOCIAL_CONTEXT_ENABLED:
         return ctx
     actor = active_actor(ctx.db, character_id=ctx.character.id)

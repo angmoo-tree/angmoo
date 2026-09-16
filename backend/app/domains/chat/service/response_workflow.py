@@ -285,6 +285,7 @@ class ResponseGenerationWorkflowService:
                 self._fence(record),
                 ResponseCommitPayload(
                     content=response.text,
+                    activity_thought=response.activity_thought,
                     model=response.model,
                     metadata=metadata,
                     evidence_inspector_snapshot=bundle.inspector_snapshot(),

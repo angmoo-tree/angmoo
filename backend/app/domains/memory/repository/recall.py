@@ -39,10 +39,12 @@ class SqlAlchemyMemoryRecallDocumentSource:
         *,
         source_reader_factory: SourceReaderFactory,
         now_factory=lambda: datetime.now(UTC),
+        episode_only: bool = False,
     ) -> None:
         self._factory = session_factory
         self._source_reader_factory = source_reader_factory
         self._now_factory = now_factory
+        self._episode_only = episode_only
 
     def all_documents(self) -> tuple[MemoryRecallDocument, ...]:
         item_ids = self.all_item_ids()
@@ -94,6 +96,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     item=item,
                     evidences=evidence_by_item.get(item.id, []),
                     now=now,
+                    episode_only=self._episode_only,
                 )
             return result
 
@@ -143,20 +146,21 @@ class SqlAlchemyMemoryRecallDocumentSource:
         item: MemoryItem,
         evidences: list[MemoryItemEvidence],
         now: datetime,
+        episode_only: bool = False,
     ) -> tuple[MemoryRecallDocument, ...]:
         scope = _item_scope(item)
         setting = _scope_setting(session, scope)
         if setting is None or not setting.enabled or not _item_retrievable(item, now):
             return ()
         current: list[tuple[MemoryItemEvidence, CanonicalMemoryEvidence]] = []
-        for row in evidences:
+        for row in (() if episode_only else evidences):
             canonical = _current_evidence(reader, scope, item, row)
             if canonical is not None:
                 current.append((row, canonical))
-        if not current:
+        if not current and not episode_only:
             return ()
 
-        occurred_at = max(value.source_created_at for _row, value in current)
+        occurred_at = _as_utc(max((value.source_created_at for _row, value in current), default=item.valid_from))
         evidence_ids = ",".join(row.id for row, _value in current)
         documents: list[MemoryRecallDocument] = [
             MemoryRecallDocument(
@@ -175,9 +179,12 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     "memory_kind": item.memory_kind,
                     "item_version": str(item.version),
                     "evidence_ids": evidence_ids,
+                    **({"representation": "episode_v1"} if episode_only else {}),
                 },
             )
         ]
+        if episode_only:
+            return tuple(documents)
         for row, canonical in current:
             documents.append(
                 MemoryRecallDocument(

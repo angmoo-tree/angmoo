@@ -11,11 +11,17 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 12
-SOURCE_ALEMBIC_REVISION = "20260914_0092"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 91
-EXPECTED_CANONICAL_TABLE_COUNT = 105
+SQLITE_SCHEMA_VERSION = 13
+SOURCE_ALEMBIC_REVISION = "20260916_0093"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 92
+EXPECTED_CANONICAL_TABLE_COUNT = 113
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
+
+EPISODE_V13_TABLES = (
+    "chat_message_thoughts", "social_activity_thoughts",
+    "memory_episode_bundles", "memory_episode_info", "memory_episode_units",
+    "memory_episode_unit_evidence", "memory_episode_processed_units", "memory_episode_links",
+)
 
 MEMORY_BATCH_V9_TABLES = (
     "memory_batch_profiles",
@@ -121,6 +127,8 @@ def build_sqlite_v4_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if (
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
@@ -149,6 +157,8 @@ def build_sqlite_v3_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if (
             table_name == "message_threads"
             or table_name in MEMORY_V5_TABLES
@@ -177,6 +187,8 @@ def build_sqlite_v5_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if (
             table_name == "message_threads"
             or table_name in RESPONSE_REQUEST_V6_TABLES
@@ -204,6 +216,8 @@ def build_sqlite_v6_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if (
             table_name == "message_threads"
             or table_name in SUBJECTIVE_CONTEXT_V8_TABLES
@@ -226,6 +240,8 @@ def build_sqlite_v7_metadata() -> MetaData:
 
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if (
             table_name in SUBJECTIVE_CONTEXT_V8_TABLES
             or table_name in MEMORY_BATCH_V9_TABLES
@@ -245,6 +261,8 @@ def build_sqlite_v8_metadata() -> MetaData:
     """Immutable pre-batch settings/admission schema."""
     metadata = MetaData()
     for table_name in sorted(Base.metadata.tables):
+        if table_name in EPISODE_V13_TABLES:
+            continue
         if table_name not in MEMORY_BATCH_V9_TABLES:
             Base.metadata.tables[table_name].to_metadata(metadata)
     _copy_partial_index_predicates(metadata)
@@ -262,15 +280,23 @@ def build_sqlite_v10_metadata() -> MetaData:
 
 def build_sqlite_v11_metadata() -> MetaData:
     """Frozen pre-vector-registration schema; existing manifests stay immutable."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v12_metadata()
     for name in ("memory_vector_eligibility", "memory_embedding_settings"):
+        metadata.remove(metadata.tables[name])
+    return metadata
+
+
+def build_sqlite_v12_metadata() -> MetaData:
+    """Immutable predecessor of episode/thought storage, without backfill."""
+    metadata = build_sqlite_baseline_metadata()
+    for name in reversed(EPISODE_V13_TABLES):
         metadata.remove(metadata.tables[name])
     return metadata
 
 
 def build_sqlite_v9_metadata() -> MetaData:
     """Frozen pre-generation-profile schema for supported upgrades."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v12_metadata()
     _copy_partial_index_predicates(metadata)
     return metadata
 

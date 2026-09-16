@@ -104,8 +104,10 @@ class SqliteVersionManifest:
 
 from app.runtime.migrations.sqlite_versions import v10_to_v11_chat_diagnostics as chat_diagnostics
 from app.runtime.migrations.sqlite_versions import v11_to_v12_memory_embedding as memory_embedding
+from app.runtime.migrations.sqlite_versions import v12_to_v13_episode_memory as episode_memory
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    12: episode_memory.upgrade,
     11: memory_embedding.upgrade,
     10: chat_diagnostics.upgrade,
     1: upgrade_v1_to_v2,
@@ -120,6 +122,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    12: SqliteMigrationContract(source_version=12, target_version=13, name="episode_memory", mutable_identity_tables=episode_memory.MUTABLE_IDENTITY_TABLES, capture=episode_memory.capture_delta, verify=episode_memory.verify_delta),
     11: SqliteMigrationContract(source_version=11, target_version=12, name="memory_embedding", mutable_identity_tables=memory_embedding.MUTABLE_IDENTITY_TABLES, capture=memory_embedding.capture_delta, verify=memory_embedding.verify_delta),
     10: SqliteMigrationContract(source_version=10, target_version=11, name="chat_diagnostics", mutable_identity_tables=chat_diagnostics.MUTABLE_IDENTITY_TABLES, capture=chat_diagnostics.capture_delta, verify=chat_diagnostics.verify_delta),
     9: SqliteMigrationContract(

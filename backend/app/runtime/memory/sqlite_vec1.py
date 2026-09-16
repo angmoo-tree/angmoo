@@ -161,8 +161,25 @@ class SqliteMemoryVectorIndex:
         with self._connect(read_only=True) as connection:
             return connection.execute("SELECT d.version,d.content_hash,v.profile FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=?", (document_id,)).fetchone()
 
-    def refresh_version(self, document_id, *, content_hash, version):
+    def refresh_version(self, document_id, *, content_hash, version, scope=None,
+                        occurred_at=None, counterpart_world_character_id=None, thread_id=None):
+        if scope is not None and (occurred_at is None or occurred_at.tzinfo is None):
+            raise ValueError("memory_vector_metadata_invalid")
         with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            if scope is not None:
+                row = connection.execute("SELECT d.rowid,v.vector,v.owner_id,v.world_id,v.subject_id,v.profile,v.occurred_at,v.counterpart_id,v.thread_id FROM documents d JOIN vectors v ON v.rowid=d.rowid WHERE d.document_id=? AND d.content_hash=? AND d.version<=?",
+                    (document_id, content_hash, version)).fetchone()
+                if row is None:
+                    return
+                expected = (scope.owner_id, scope.world_id, scope.subject_world_character_id,
+                            row[5], occurred_at.timestamp(), counterpart_world_character_id, thread_id)
+                if tuple(row[2:]) != expected:
+                    # Reuse the exact stored vector. Vec1 metadata changes do
+                    # not need another embedding or an in-place UPDATE feature.
+                    connection.execute("DELETE FROM vectors WHERE rowid=?", (row[0],))
+                    connection.execute("INSERT INTO vectors(rowid,vector,owner_id,world_id,subject_id,profile,occurred_at,counterpart_id,thread_id) VALUES(?,?,?,?,?,?,?,?,?)",
+                        (row[0], row[1], *expected))
             connection.execute("UPDATE documents SET version=? WHERE document_id=? AND content_hash=? AND version<=?",
                                (version, document_id, content_hash, version))
             connection.commit()

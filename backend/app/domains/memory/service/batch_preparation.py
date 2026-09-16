@@ -115,6 +115,9 @@ def enqueue_scope(
     )
     reader = dependencies.source_reader(session)
     groups = defaultdict(list)
+    episode = dependencies.generation_policy == "episode_v1"
+    epochs = dict(session.execute(select(MemorySourceDelivery.candidate_id, MemorySourceDelivery.epoch_id).where(
+        MemorySourceDelivery.candidate_id.in_([row.id for row in rows]))).all()) if episode else {}
     for candidate in rows:
         evidence = reader.read_evidence(
             scope=scope,
@@ -130,16 +133,18 @@ def enqueue_scope(
                 ).encode("utf-8")
             )
         )
-        groups[None if evidence is None else evidence.thread_id].append(
+        thread = None if evidence is None else evidence.thread_id
+        groups[(thread, epochs.get(candidate.id)) if episode else thread].append(
             (candidate.id, size)
         )
     jobs = 0
-    for group in groups.values():
+    for key, group in groups.items():
+        maximum = (50 if key[0] is not None else 20) if episode else MAX_SELECTION_CANDIDATES
         chunks, chunk, size = [], [], 0
         for candidate_id, candidate_size in group:
             if chunk and (
-                len(chunk) >= MAX_SELECTION_CANDIDATES
-                or size + candidate_size > MAX_SELECTION_INPUT_UTF8_BYTES
+                len(chunk) >= maximum
+                or (not episode and size + candidate_size > MAX_SELECTION_INPUT_UTF8_BYTES)
             ):
                 chunks.append(tuple(chunk))
                 chunk, size = [], 0
@@ -155,6 +160,7 @@ def enqueue_scope(
                     cutoff=cutoff,
                     trigger=trigger,
                     now=now,
+                    **({"generation_policy": "episode_v1"} if episode else {}),
                 )
                 is not None
             )

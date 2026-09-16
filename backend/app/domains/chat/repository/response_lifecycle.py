@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 import json
+import hashlib
 
 from sqlalchemy import or_, select, update
 from sqlalchemy.exc import IntegrityError
@@ -31,6 +32,7 @@ from app.domains.chat.contracts.graph_failure import GraphFailureDiagnostic
 from app.domains.chat.contracts.workflow_recipe import WorkflowRecipe
 from app.domains.chat.models import (
     ChatResponseRequest,
+    ChatMessageThought,
     MessageMessage,
     MessageThread,
 )
@@ -505,6 +507,17 @@ class SqlAlchemyResponseLifecycleRepository:
                 )
                 if result.rowcount != 1:
                     raise GenerationContractError("response_finalize_fence_conflict")
+                if payload.activity_thought is not None:
+                    thought = payload.activity_thought
+                    self._session.add(ChatMessageThought(
+                        message_id=assistant.id,
+                        request_id=existing.request_id,
+                        thought_text=thought.text,
+                        status=thought.status,
+                        truncated=thought.truncated,
+                        source_digest=hashlib.sha256(payload.content.encode("utf-8")).hexdigest(),
+                        created_at=now,
+                    ))
                 self._session.flush()
         except IntegrityError as exc:
             raise GenerationContractError("response_finalize_integrity_conflict") from exc
@@ -704,7 +717,7 @@ def _validate_evidence_inspector_snapshot(
         if (
             not isinstance(item.get("ref"), str)
             or not isinstance(item.get("text"), str)
-            or len(item["text"]) > 2000
+            or len(item["text"]) > (8000 if item.get("kind") == "episode_memory" else 2000)
             or not isinstance(item.get("axes"), list)
         ):
             raise GenerationContractError("response_evidence_inspector_invalid")

@@ -13,9 +13,10 @@ def canonical_recall_repository(session_factory):
     )
 
 
-def recall_document_source(session_factory, *, now_factory=lambda: datetime.now(UTC)):
+def recall_document_source(session_factory, *, now_factory=lambda: datetime.now(UTC), episode_only: bool = False):
     return SqlAlchemyMemoryRecallDocumentSource(
         session_factory,
         source_reader_factory=SqlAlchemyMemorySourceEvidenceReader,
         now_factory=now_factory,
+        episode_only=episode_only,
     )

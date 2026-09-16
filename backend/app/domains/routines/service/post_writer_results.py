@@ -264,6 +264,9 @@ def _apply_post_writer_output(
     if matched:
         result["post_title"] = title
         result["post_body"] = body
+        result.pop("_activity_thought", None)
+        if "_activity_thought" in output:
+            result["_activity_thought"] = output["_activity_thought"]
         lore_chunk_ids = _clean_lore_chunk_ids(
             post_task.get("lore_chunk_ids"), clip=clip
         )

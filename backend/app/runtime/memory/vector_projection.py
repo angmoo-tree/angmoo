@@ -15,9 +15,9 @@ from app.runtime.memory_embedding_provider import embedding_material
 
 
 class MemoryVectorProjection:
-    def __init__(self, session_factory, index, *, provider=None, on_clean_cycle=None):
+    def __init__(self, session_factory, index, *, provider=None, on_clean_cycle=None, episode_only=False):
         self._factory, self.index = session_factory, index
-        self._source = recall_document_source(session_factory)
+        self._source = recall_document_source(session_factory, episode_only=episode_only)
         self._provider = provider or GeminiAdapter()
         self._cursor = self._cleanup_cursor = ""
         self._task = None
@@ -78,7 +78,12 @@ class MemoryVectorProjection:
             return "source_unavailable"
         identity = self.index.identity(doc_id)
         if identity and identity[1:] == (digest, config.profile):
-            self.index.refresh_version(doc_id, content_hash=digest, version=version)
+            occurred = document.occurred_at
+            if occurred.tzinfo is None:
+                occurred = occurred.replace(tzinfo=UTC)
+            self.index.refresh_version(doc_id, content_hash=digest, version=version, scope=scope,
+                occurred_at=occurred, counterpart_world_character_id=document.counterpart_world_character_id,
+                thread_id=document.thread_id)
             return "current"
         with self._factory() as session:
             material = embedding_material(session, scope.owner_id, config.credential_id)

@@ -18,8 +18,9 @@ from routine_posts.test_runtime import _engine, _resident_context, _seed, _utc
 
 @pytest.mark.parametrize("outcome", ("success", "invalid_plan", "writer_error"))
 @pytest.mark.parametrize("social_context_enabled", [False, True])
+@pytest.mark.parametrize("thought_enabled", [False, True])
 def test_generation_keeps_two_calls_validation_fence_and_error_identity(
-    monkeypatch, outcome: str, social_context_enabled: bool,
+    monkeypatch, outcome: str, social_context_enabled: bool, thought_enabled: bool,
 ) -> None:
     engine = _engine()
     now = _utc(datetime(2026, 8, 10, 10, 5))
@@ -60,14 +61,16 @@ def test_generation_keeps_two_calls_validation_fence_and_error_identity(
                 })
             if outcome == "writer_error":
                 raise transport_error
+            assert ("thought" in kwargs["response_schema"].get("properties", {})) == thought_enabled
             return kwargs["validator"]({
                 "title": "A morning scene", "body": "The activity begins.",
                 "topic_signature": "morning-scene", "novelty_basis": "The current scene.",
+                **({"thought": "즐거운 마음으로 시작하고 싶다."} if thought_enabled else {}),
             })
 
         monkeypatch.setattr(generation_service, "_api_key", resolve_key)
         monkeypatch.setattr(generation_service, "generate_json", transport)
-        operation = generation_service.DirectRoutinePostProvider().generate(
+        operation = generation_service.DirectRoutinePostProvider(thought_enabled=thought_enabled).generate(
             resident_context=resident, routine_context=context, beat=beat, tracker=tracker,
         )
         if outcome == "success":
@@ -75,7 +78,12 @@ def test_generation_keeps_two_calls_validation_fence_and_error_identity(
             assert result.plan.beat_id == beat.id
             assert result.draft.body == "The activity begins."
             writer_input = json.loads(calls[1]["user_prompt"])
-            assert writer_input["validated_scene_plan"] == result.plan.model_dump()
+            expected_plan = result.plan.model_dump()
+            if thought_enabled:
+                for field in ("motivation_kind", "motivation_text", "emotion_label", "emotion_text", "emotion_intensity"):
+                    expected_plan.pop(field, None)
+                assert result.draft._activity_thought.text == "즐거운 마음으로 시작하고 싶다."
+            assert writer_input["validated_scene_plan"] == expected_plan
             assert writer_input["state_after"] == result.state_after
         elif outcome == "invalid_plan":
             with pytest.raises(ValueError, match="routine beat identity mismatch") as raised:

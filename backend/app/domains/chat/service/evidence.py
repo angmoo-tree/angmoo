@@ -125,6 +125,7 @@ class EvidenceService:
             "graph_relationship",
             "graph_event",
             "today_sns_activity",
+            "episode_memory",
         }:
             raise MessageNotFoundError("근거 형식이 올바르지 않습니다.")
         reference = raw.get("ref")
@@ -137,11 +138,13 @@ class EvidenceService:
         href = None
         related_name = None
         direction = None
+        episode = None
         label = {
             "canonical_source": "기억 근거",
             "graph_relationship": "현재 관계",
             "graph_event": "관계 사건",
             "today_sns_activity": "오늘 SNS 활동",
+            "episode_memory": "상황 기억",
         }[kind]
         if not isinstance(locator, dict):
             return schemas.WorldChatEvidenceItemRead(
@@ -270,10 +273,17 @@ class EvidenceService:
                 if (
                     detail.lifecycle is MemoryLifecycle.ACTIVE
                     and revision_matches
-                    and has_current_evidence
+                    and (has_current_evidence or kind == "episode_memory")
                 ):
                     availability = "available"
                     href = f"/memory?world={scope.world_id}&subject={scope.subject_world_character_id}&memory={memory_id}"
+                    if kind == "episode_memory":
+                        reader = getattr(self.reads, "memory_episode_receipt", None)
+                        receipt = None if reader is None else reader(db, scope, item_id=memory_id, text=text)
+                        if receipt is None:
+                            availability, href = "unavailable", None
+                        else:
+                            text, episode = receipt
                 label = "저장된 기억"
                 related_name = self.reads.world_character_name(
                     db,
@@ -325,6 +335,7 @@ class EvidenceService:
             related_character=related_name,
             direction=direction,
             canonical_href=href,
+            episode=episode,
         )
 
 

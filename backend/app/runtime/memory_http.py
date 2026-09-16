@@ -21,9 +21,11 @@ from app.domains.identity.repository.credentials import embedding_credential_opt
 
 
 def _service(db: Session) -> MemoryReadService:
+    from app.runtime.memory.episode_inspector import episode_detail_view
     return MemoryReadService(
         memory_repository(db),
         SqlAlchemyMemorySourceEvidenceReader(db),
+        episode_reader=lambda scope, item_id, now: episode_detail_view(db, scope, item_id, now),
     )
 
 

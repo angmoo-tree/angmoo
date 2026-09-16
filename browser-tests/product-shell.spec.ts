@@ -1351,6 +1351,15 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
           ...requested,
           schema_version: "memory-item-detail.v1",
           scope: { world_id: worldId, subject_world_character_id: subjectId },
+          episode: { representation: "episode_v1", partial: true, omitted_units: 1, followup_count: 1,
+            units: [
+              { sources: [{ role: "user", text: "우리 연습은 다음 주로 바뀌었어.", status: "verified" }],
+                thought: { text: "함께 준비하고 싶어서 기다리기로 했다.", status: "recorded", truncated: true }, legacy_declaration: null },
+              { sources: [{ role: "assistant", text: null, status: "missing" }],
+                thought: { text: null, status: "missing", truncated: false }, legacy_declaration: null },
+              { sources: [{ role: "assistant", text: null, status: "changed" }],
+                thought: { text: null, status: "invalid", truncated: false }, legacy_declaration: "과거에 격려하려고 했다는 선언" },
+            ] },
           evidence: [
             {
               source_kind: "CHAT_MESSAGE",
@@ -1386,6 +1395,10 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
   await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
   await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "상황에 연결된 원문과 생각" })).toBeVisible();
+  await expect(page.getByText("우리 연습은 다음 주로 바뀌었어.", { exact: false })).toBeVisible();
+  await expect(page.getByText("길이 제한으로 일부만 저장됨", { exact: false })).toBeVisible();
+  await expect(page.getByText("원문이 없습니다.", { exact: false })).toBeVisible();
   await expect(page.getByText("오늘 훈련을 마치고 함께 한 약속을 지켰어.")).toBeVisible();
   await expect(page.getByRole("link", { name: "대화 원문 열기" })).toHaveAttribute(
     "href",

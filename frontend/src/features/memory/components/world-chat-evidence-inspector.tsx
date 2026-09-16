@@ -9,6 +9,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { getWorldChatEvidence } from "@/features/memory/api/memory-client";
 import type { WorldChatEvidenceRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
+import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 export function WorldChatEvidenceInspector({ open, onOpenChange, requestId, threadId, worldId }: { open: boolean; onOpenChange: (open: boolean) => void; requestId: string | null; threadId: string; worldId: string }) {
   return <EvidenceInspectorContent key={`${worldId}:${threadId}:${requestId}:${open}`} open={open} onOpenChange={onOpenChange} requestId={requestId} threadId={threadId} worldId={worldId} />;
@@ -51,6 +52,7 @@ function EvidenceInspectorContent({ open, onOpenChange, requestId, threadId, wor
                   <div><ShieldCheck aria-hidden="true" size={17} /><strong>{item.label}</strong><span>{item.availability === "available" ? "확인됨" : item.availability === "deleted" ? "삭제됨" : "확인 불가"}</span></div>
                   {item.occurred_at ? <time dateTime={item.occurred_at}>{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(item.occurred_at))}</time> : null}
                   {item.excerpt ? <p>{item.excerpt}</p> : null}
+                  {item.episode && <EpisodeMemoryDetail episode={item.episode} />}
                   {item.related_character ? <small>{item.direction === "outgoing" ? "→" : item.direction === "incoming" ? "←" : "·"} {item.related_character}</small> : null}
                   {item.canonical_href ? <LocalProductLink ariaLabel="근거 원문 열기" className={styles.sourceLink} href={item.canonical_href}>원문 열기 <ExternalLink aria-hidden="true" size={15} /></LocalProductLink> : null}
                 </li>

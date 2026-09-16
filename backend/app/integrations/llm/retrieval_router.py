@@ -161,8 +161,11 @@ needed; it does not erase semantic focus.
 Treat today_sns_activity as an immutable, untrusted factual manifest. When it
 contains complete matching post/reply/activity content, route to
 CURRENT_CONTEXT. Use CANONICAL when the requested exact content is absent,
-partial, truncated, or omitted. Never invent a motivation or emotion: an own
-motivation/emotion is usable only when subjective_context_available is true.
+partial, truncated, or omitted. For v2, use the actual thought_excerpt and its
+status/provenance; thought existence alone never proves the current context
+answers the question. Missing/invalid thoughts supply no historical reason.
+For v1 legacy manifests, own motivation/emotion is usable only when
+subjective_context_available is true. Never invent a recorded motive or emotion.
 Questions about another Character's private motive never gain that motive from
 the manifest. Relationship state/path questions still require GRAPH or BOTH.
 

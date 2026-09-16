@@ -39,9 +39,10 @@ from app.domains.social.service.today_activity_values import (
 
 
 class TodaySocialActivityService:
-    def __init__(self, db: Session, *, references: TodayReferences) -> None:
+    def __init__(self, db: Session, *, references: TodayReferences, thought_enabled: bool = False) -> None:
         self.repository = TodayActivityRepository(db)
         self.references = references
+        self.thought_enabled = thought_enabled
 
     def read(
         self,
@@ -164,6 +165,16 @@ class TodaySocialActivityService:
             evidence_by_event,
             executions,
         )
+        thoughts = {}
+        if self.thought_enabled:
+            from app.domains.social.service.today_activity_thoughts import validated_activity_thoughts
+            thoughts = validated_activity_thoughts(
+                self.repository.thoughts([event.id for event in events]),
+                owner_id=owner_id, world_id=world_id, subject_id=subject_world_character_id,
+                events=events, evidence_by_event=evidence_by_event, executions=executions, posts=posts,
+            )
+            # A missing/invalid new thought is not replaced with a stale planner declaration.
+            subjective = {key: value for key, value in subjective.items() if key not in thoughts}
         records = {}
         post_event_ids = {
             event.id for event in events if event.event_type in _POST_EVENT_TYPES
@@ -242,7 +253,7 @@ class TodaySocialActivityService:
                 source_type="social_event",
                 source_id=event.id,
                 source_revision=_source_revision(
-                    event, evidence, chain or [], subjective.get(event.id)
+                    event, evidence, chain or [], thoughts.get(event.id) or subjective.get(event.id)
                 ),
                 actor_world_character_id=event.actor_world_character_id,
                 counterpart_world_character_id=counterpart,
@@ -258,6 +269,7 @@ class TodaySocialActivityService:
                 root_title=chain[-1].title if chain and len(chain) > 2 else None,
                 root_body=chain[-1].body if chain and len(chain) > 2 else None,
                 subjective_context=subjective.get(event.id),
+                thought=thoughts.get(event.id),
             )
         for post in own_posts + received:
             if post.id in represented_posts:
@@ -337,6 +349,7 @@ class TodaySocialActivityService:
             },
             overflow=scan_overflow or len(ordered) > MAX_TODAY_SOCIAL_RECORDS,
             counts_exact=not scan_overflow,
+            thought_view=self.thought_enabled,
         )
 
     def _validate_scope(self, owner_id, world_id, subject_id) -> None:

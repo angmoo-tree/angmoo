@@ -143,11 +143,35 @@ export function getMemoryItem(
       !Array.isArray(read.evidence) ||
       read.evidence.some((item) => !memoryEvidenceMatches(item, worldId)) ||
       typeof read.provenance_summary !== "string" ||
+      !episodeDetailMatches(read.episode) ||
       read.capabilities?.read !== "available" ||
       read.capabilities?.mutate !== "available"
     ) throw new MemoryApiError(502, "memory_detail_scope_mismatch");
     return read;
   });
+}
+
+function episodeDetailMatches(value: unknown): boolean {
+  if (value == null) return true;
+  if (typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return ["episode_v1", "legacy_summary"].includes(String(v.representation)) &&
+    typeof v.partial === "boolean" && Number.isInteger(v.omitted_units) && Number(v.omitted_units) >= 0 &&
+    Number.isInteger(v.followup_count) && Number(v.followup_count) >= 0 &&
+    Array.isArray(v.units) && v.units.every((unit: unknown) => {
+      if (!unit || typeof unit !== "object") return false;
+      const u = unit as Record<string, unknown>;
+      const thought = u.thought as Record<string, unknown> | null;
+      return (u.legacy_declaration == null || typeof u.legacy_declaration === "string") &&
+        (thought == null || (typeof thought === "object" && ["recorded", "missing", "invalid"].includes(String(thought.status)) &&
+          typeof thought.truncated === "boolean" && (thought.status === "recorded" ? typeof thought.text === "string" : thought.text == null))) &&
+        Array.isArray(u.sources) && u.sources.every((source: unknown) => {
+          if (!source || typeof source !== "object") return false;
+          const s = source as Record<string, unknown>;
+          return typeof s.role === "string" && ["verified", "missing", "changed", "unavailable"].includes(String(s.status)) &&
+            (s.status === "verified" ? typeof s.text === "string" : s.text == null);
+        });
+    });
 }
 
 export function updateMemorySetting(
@@ -402,7 +426,8 @@ function chatEvidenceMatches(value: unknown, worldId: string) {
   const item = value as WorldChatEvidenceRead["items"][number];
   return (
     typeof item.reference === "string" &&
-    ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity"].includes(item.kind) &&
+    ["canonical_source", "graph_relationship", "graph_event", "today_sns_activity", "episode_memory"].includes(item.kind) &&
+    episodeDetailMatches(item.episode) &&
     typeof item.label === "string" &&
     (item.excerpt === null || typeof item.excerpt === "string") &&
     (item.occurred_at === null || typeof item.occurred_at === "string") &&

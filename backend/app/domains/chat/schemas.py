@@ -248,6 +248,9 @@ class WorldChatEvidenceSummaryRead(BaseModel):
     count: int = Field(ge=1, le=24)
 
 
+from app.domains.memory.schemas import EpisodeDetailRead
+
+
 class WorldChatEvidenceItemRead(BaseModel):
     reference: str
     kind: Literal[
@@ -255,6 +258,7 @@ class WorldChatEvidenceItemRead(BaseModel):
         "graph_relationship",
         "graph_event",
         "today_sns_activity",
+        "episode_memory",
     ]
     label: str
     excerpt: str | None
@@ -263,6 +267,7 @@ class WorldChatEvidenceItemRead(BaseModel):
     related_character: str | None = None
     direction: Literal["incoming", "outgoing", "contextual"] | None = None
     canonical_href: str | None = None
+    episode: EpisodeDetailRead | None = None
 
 
 class WorldChatEvidenceRead(BaseModel):

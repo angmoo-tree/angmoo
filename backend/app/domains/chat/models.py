@@ -38,6 +38,24 @@ def _sql_values(values: tuple[str, ...]) -> str:
 RESPONSE_REQUEST_SCHEMA_TABLES = ("chat_response_requests",)
 
 
+class ChatMessageThought(Base):
+    """Self-expression attached to one committed assistant, never a draft."""
+    __tablename__ = "chat_message_thoughts"
+    __table_args__ = (
+        CheckConstraint("status IN ('recorded','missing','invalid')", name="ck_chat_thought_status"),
+        CheckConstraint("(status = 'recorded' AND thought_text IS NOT NULL AND length(trim(thought_text)) BETWEEN 1 AND 280) OR (status <> 'recorded' AND thought_text IS NULL AND truncated = false)", name="ck_chat_thought_content"),
+        CheckConstraint("length(source_digest) = 64", name="ck_chat_thought_digest"),
+        UniqueConstraint("request_id", name="uq_chat_thought_request"),
+    )
+    message_id: Mapped[int] = mapped_column(ForeignKey("message_messages.id", ondelete="CASCADE"), primary_key=True)
+    request_id: Mapped[str] = mapped_column(ForeignKey("chat_response_requests.request_id", ondelete="CASCADE"), nullable=False)
+    thought_text: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    truncated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    source_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
 class ChatRetrievalDiagnostic(Base):
     """Disposable content-free observations; independent retention from Chat."""
     __tablename__ = "chat_retrieval_diagnostics"

@@ -72,6 +72,24 @@ def test_filter_precedes_top_k_and_profile_isolation(index):
     assert result.index_kind == "flat" and result.search_mode == "nn"
 
 
+def test_representation_metadata_refresh_reuses_exact_vector_and_can_roll_back(index):
+    item = document()
+    index.upsert((item,))
+    earlier = datetime(2026, 9, 1, tzinfo=UTC)
+    with index._connect(read_only=True) as connection:
+        before = connection.execute("SELECT vector FROM vectors").fetchone()[0]
+    index.refresh_version(item.document_id, content_hash=item.content_hash, version=2,
+        scope=SCOPE, occurred_at=earlier, counterpart_world_character_id="peer", thread_id="thread")
+    result = search(index, occurred_to=datetime(2026, 9, 2, tzinfo=UTC), thread_id="thread")
+    assert len(result.hits) == 1 and result.hits[0].version == 2
+    with index._connect(read_only=True) as connection:
+        assert connection.execute("SELECT vector FROM vectors").fetchone()[0] == before
+    index.refresh_version(item.document_id, content_hash=item.content_hash, version=2,
+        scope=SCOPE, occurred_at=item.occurred_at)
+    assert not search(index, occurred_to=datetime(2026, 9, 2, tzinfo=UTC)).hits
+    assert search(index).hits[0].distance == 0
+
+
 def test_cancelled_before_query_has_no_late_success(index):
     token = VectorCancellation(monotonic()+5)
     token.cancel()

@@ -50,6 +50,8 @@ class MemorySelectionBatch:
     attempt: int
     lease_token: str
     thinking_level: str = "high"
+    policy_version: str = "memory-batch.v2"
+    cutoff_sequence: int = 0
 
 
 class MemorySelectionProviderPort(Protocol):

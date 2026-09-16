@@ -248,12 +248,17 @@ def create_app(
         composition = compose_runtime(runtime_config, base_settings=settings)
         from app.runtime.memory.batch_runtime import MemoryBatchRuntime
         from app.runtime.memory_selection_provider import memory_provider
+        from app.runtime.memory.episode_prior_search import episode_prior_search
 
         memory_runtime = MemoryBatchRuntime(
             composition.session_factory,
             lambda owner, model, thinking: memory_provider(
                 composition.session_factory, owner, model, thinking
             ),
+            generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
+            episode_provider_factory=lambda owner, model, thinking: memory_provider(
+                composition.session_factory, owner, model, thinking, episode=True),
+            episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
         )
         runtime_settings = composition.settings
         from app.domains.world_packages.storage.import_media import (

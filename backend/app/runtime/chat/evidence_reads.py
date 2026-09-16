@@ -47,6 +47,12 @@ def relationship_state(
     return db.get(RelationshipState, source_id)
 
 
+def memory_episode_receipt(db, scope, *, item_id, text):
+    from datetime import UTC, datetime
+    from app.runtime.memory.episode_inspector import episode_receipt_view
+    return episode_receipt_view(db, scope, item_id, datetime.now(UTC), text)
+
+
 def social_relationship_current(db: Session, scope: MemoryScope, locator: dict) -> bool:
     from app.contracts.read_deadline import bounded_read
     from app.domains.relationships.contracts.graph_recall import GraphRecallQuery, GraphRecallScope, GraphRecallOperation

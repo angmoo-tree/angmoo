@@ -30,7 +30,8 @@ class HybridCanonicalResult:
 
 
 class HybridCanonicalService:
-    def __init__(self, hybrid): self._hybrid = hybrid
+    def __init__(self, hybrid, *, episode_only=False):
+        self._hybrid, self._episode_only = hybrid, episode_only
 
     async def plan_and_execute(self, command, *, now, deadline_at):
         resolved = command.resolved
@@ -53,10 +54,11 @@ class HybridCanonicalService:
             if remaining <= 0:
                 raise RetrievalContractError("hybrid_crg_reserve_exhausted")
             request = HybridRecallRequest(resolved.request_id, command.call_id, resolved.envelope_hash, scope,
-                command.intent.search_text, EMBEDDING_PROFILE, kinds,
+                command.intent.search_text, EMBEDDING_PROFILE, (RecallDocumentKind.MEMORY_ITEM,) if self._episode_only else kinds,
                 None if resolved.absolute_time_from is None else datetime.fromisoformat(resolved.absolute_time_from),
                 None if resolved.absolute_time_to is None else datetime.fromisoformat(resolved.absolute_time_to),
-                result_limit=min(20, resolved.caps.row_limit))
+                result_limit=min(12 if self._episode_only else 20, resolved.caps.row_limit),
+                episode_source_kinds=kinds if self._episode_only and RecallDocumentKind.MEMORY_ITEM not in kinds else ())
             result = await self._hybrid.execute(request, deadline=monotonic()+min(20.0, remaining, resolved.caps.timeout_ms / 1000))
         for axis in result.axes:
             observe("hybrid_axis", axis=axis.axis, status=axis.status.value, executed=axis.executed,

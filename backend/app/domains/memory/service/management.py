@@ -235,6 +235,7 @@ def read_memory_item(
         **summary.model_dump(),
         scope=_scope_read(scope),
         evidence=evidence,
+        episode=detail.episode,
         provenance_summary=(
             f"현재 확인 가능한 근거 {available_count}개 / 전체 {len(evidence)}개"
         ),

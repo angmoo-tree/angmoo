@@ -109,7 +109,7 @@ class SqlAlchemyMemoryBatchRepository:
             )
             latest = self.session.execute(
                 select(MemoryMaintenanceJob.status, MemoryBatchRun.last_code,
-                       MemoryMaintenanceJob.id, MemoryBatchRun.candidate_ids_json)
+                       MemoryMaintenanceJob.id, MemoryBatchRun.candidate_ids_json, MemoryBatchRun.policy_version)
                 .join(MemoryBatchRun, MemoryBatchRun.job_id == MemoryMaintenanceJob.id)
                 .where(
                     MemoryBatchRun.scope_setting_id == setting.id,
@@ -128,11 +128,17 @@ class SqlAlchemyMemoryBatchRepository:
                 .limit(1)
             ).first()
             if latest is not None:
-                job_state, last_code, run_id, candidate_ids_json = latest
+                job_state, last_code, run_id, candidate_ids_json, policy_version = latest
                 run_saved_count = int(self.session.scalar(select(func.count())
                     .select_from(MemorySelectionDecisionModel).where(
                         MemorySelectionDecisionModel.job_id == run_id,
                         MemorySelectionDecisionModel.decision == "retain")) or 0)
+                if policy_version == "episode-selection.v1":
+                    from app.domains.memory.models.episode import MemoryEpisodeBundle, MemoryEpisodeInfo
+                    run_saved_count = int(self.session.scalar(select(func.count()).select_from(MemoryEpisodeInfo).join(
+                        MemoryEpisodeBundle, MemoryEpisodeBundle.id == MemoryEpisodeInfo.bundle_id).where(
+                            MemoryEpisodeBundle.scope_setting_id == setting.id,
+                            MemoryEpisodeBundle.id.startswith(run_id + ":"))) or 0)
                 run_pending_count = int(self.session.scalar(select(func.count())
                     .select_from(MemoryCandidate).where(
                         MemoryCandidate.scope_setting_id == setting.id,
@@ -335,7 +341,10 @@ class SqlAlchemyMemoryBatchRepository:
         trigger: str,
         now: datetime,
         explicit_key: str = "",
+        generation_policy: str = "legacy",
     ) -> str | None:
+        if generation_policy not in {"legacy", "episode_v1"}:
+            raise MemoryValidationError("memory_generation_policy_invalid")
         if not candidate_ids:
             return None
         scope = self.session.get(MemoryScopeSettingModel, scope_setting_id)
@@ -357,7 +366,7 @@ class SqlAlchemyMemoryBatchRepository:
             explicit_key = config.retry_request_key or ""
         ids_json = json.dumps(sorted(candidate_ids), separators=(",", ":"))
         key = (
-            "mb2:"
+            ("ep1:" if generation_policy == "episode_v1" else "mb2:")
             + hashlib.sha256(
                 (scope_setting_id + ids_json + explicit_key).encode()
             ).hexdigest()
@@ -378,7 +387,7 @@ class SqlAlchemyMemoryBatchRepository:
                     profile_version=profile.version,
                     model_id=profile.model_id,
                     thinking_level=profile.thinking_level,
-                    policy_version=MEMORY_BATCH_POLICY_VERSION,
+                    policy_version="episode-selection.v1" if generation_policy == "episode_v1" else MEMORY_BATCH_POLICY_VERSION,
                     cutoff_sequence=cutoff,
                     candidate_ids_json=ids_json,
                     available_at=now,
@@ -433,7 +442,21 @@ class SqlAlchemyMemoryBatchRepository:
             return
         # Keep every failed run and its call counters. Release only pending
         # assignments; preparation re-reads evidence and partitions by privacy.
-        job_ids = [run.job_id for run in runs]
+        job_ids = []
+        for run in runs:
+            if run.policy_version == "episode-selection.v1":
+                from app.domains.memory.repository.episode_work import SqlAlchemyEpisodeWork
+                job = self.session.get(MemoryMaintenanceJob, run.job_id)
+                SqlAlchemyEpisodeWork(self.session).grant_explicit_retry(job_id=run.job_id,
+                    setting=setting, request_key=idempotency_key, now=now, previous_job_attempts=job.attempt_count)
+                # Reuse the frozen bundle tree. Creating a fresh plan here
+                # would duplicate already completed ranges of a partial job.
+                job.status, job.attempt_count, job.completed_at = "pending", 0, None
+                job.started_at = job.lease_token = job.lease_expires_at = None
+                job.last_error_code = None
+                run.available_at, run.last_code = now, "episode_explicit_retry"
+            else:
+                job_ids.append(run.job_id)
         pending = select(MemoryCandidate.id).where(MemoryCandidate.status == "pending")
         self.session.execute(
             update(MemorySourceDelivery)
@@ -567,6 +590,8 @@ class SqlAlchemyMemoryBatchRepository:
                 work.attempt_count,
                 lease_token,
                 run.thinking_level,
+                run.policy_version,
+                run.cutoff_sequence,
             )
         self.session.flush()
         return None
@@ -647,6 +672,17 @@ class SqlAlchemyMemoryBatchRepository:
         run.last_code, run.available_at = "memory_capacity_reached", now
         self.session.get(MemoryBatchSetting, batch.setting.id).brief_dirty = True
 
+    def defer_foreground(self, batch: MemorySelectionBatch, *, now: datetime) -> None:
+        from datetime import timedelta
+        self.fence(batch, now=now)
+        job = self.session.get(MemoryMaintenanceJob, batch.job_id)
+        job.status, job.last_error_code = "pending", "memory_foreground_deferred"
+        job.lease_token = job.lease_expires_at = None
+        job.started_at = job.completed_at = None
+        job.attempt_count = max(0, job.attempt_count - 1)
+        run = self.session.get(MemoryBatchRun, batch.job_id)
+        run.last_code, run.available_at = "memory_foreground_deferred", now + timedelta(seconds=5)
+
     def fail(
         self, batch: MemorySelectionBatch, *, code: str, now: datetime,
         latency_ms: int | None = None, usage: object | None = None,
@@ -664,7 +700,8 @@ class SqlAlchemyMemoryBatchRepository:
             batch.attempt < MAX_BATCH_ATTEMPTS
             and code in {"memory_selection_provider_failed", "memory_selection_timeout", "memory_selection_interrupted",
                          "memory_selection_rate_limited", "memory_selection_provider_unavailable",
-                         "memory_selection_transport_failed"}
+                         "memory_selection_transport_failed", "episode_provider_failed", "episode_timeout", "episode_interrupted",
+                         "episode_rate_limited", "episode_provider_unavailable", "episode_transport_failed"}
         )
         # A cancelled/expired provider cannot commit; the same durable run is
         # recoverable without relying on a still-live lease for failure audit.

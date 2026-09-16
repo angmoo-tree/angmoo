@@ -1,4 +1,5 @@
 "use client";
+import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 import {
   ArrowLeft,
@@ -533,6 +534,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
         {detail.superseded_by_memory_id ? <div><dt>교체 상태</dt><dd><button className={styles.inlineButton} onClick={() => onSelectMemory(detail.superseded_by_memory_id ?? "")} type="button">새 기억 열기</button></dd></div> : null}
       </dl>
       <section className={styles.evidenceSection}>
+        {detail.episode && <EpisodeMemoryDetail episode={detail.episode} />}
         <div className={styles.sectionHeading}><h3>근거</h3><span>{detail.provenance_summary}</span></div>
         {detail.evidence.length === 0 ? <p className={styles.muted}>연결된 근거가 없습니다.</p> : (
           <ol className={styles.evidenceList}>

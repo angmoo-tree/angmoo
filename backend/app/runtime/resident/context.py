@@ -37,6 +37,7 @@ class LangGraphResidentContext:
     social_search_index: SocialSearchIndexPort | None = None
     social_search_state: SocialSearchState = SocialSearchState.UNAVAILABLE
     social_context: SocialContextUse | None = field(default=None, repr=False, compare=False)
+    episode_memory_reader: Callable[[str | None], str] | None = field(default=None, repr=False, compare=False)
 
 
     generation_model: str = field(init=False)

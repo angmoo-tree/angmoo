@@ -270,7 +270,7 @@ class EvidenceBundleAssembler:
             ):
                 if label and label.casefold() in message:
                     value += weight
-            if asks_subjective and entry.subjective_context is not None:
+            if asks_subjective and (entry.subjective_context is not None or (entry.thought is not None and entry.thought.status == "recorded")):
                 value += 6
             if any(marker in message for marker in ("방금", "최근", "아까")):
                 value += 1
@@ -296,7 +296,8 @@ class EvidenceBundleAssembler:
         if isinstance(result, HybridCanonicalResult):
             items = tuple(EvidenceItem(
                 opaque_reference=opaque_evidence_reference("canonical", record.canonical_source_id, record.reference),
-                kind=EvidenceKind.CANONICAL_SOURCE, text=EvidenceBundleAssembler._bounded_text(record.text),
+                kind=EvidenceKind.EPISODE_MEMORY if record.metadata.get("episode_packet") == "v1" else EvidenceKind.CANONICAL_SOURCE,
+                text=record.text if record.metadata.get("episode_packet") == "v1" else EvidenceBundleAssembler._bounded_text(record.text),
                 occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
                 locator=_record_locator(record)) for record in result.recall.records if record.text.strip())
             if collector() is not None:
@@ -558,7 +559,14 @@ class EvidenceBundleAssembler:
         if entry.body:
             parts.append(f"내용: {entry.body}")
         subjective = entry.subjective_context
-        if subjective is not None:
+        if entry.thought is not None:
+            if entry.thought.status == "recorded":
+                parts.append(f"이 활동에 연결된 생각(자기 관점·행동 이유): {entry.thought.text}")
+                if entry.thought.truncated:
+                    parts.append("생각은 앞 280자만 저장됨: 생략된 이유나 감정을 만들어내지 말 것")
+            else:
+                parts.append(f"생각 기록 상태: {entry.thought.status}; 행동 이유를 기록된 사실로 단정하지 말 것")
+        elif subjective is not None:
             parts.append(
                 "행동 결정 시 직접 선언한 동기: "
                 f"{subjective.motivation_text} ({subjective.motivation_kind})"

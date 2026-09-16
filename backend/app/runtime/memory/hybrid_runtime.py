@@ -24,15 +24,21 @@ class UnavailableVectorAxis:
 
 
 class MemoryHybridRuntime:
-    def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1"):
+    def __init__(self, session_factory, fts_index, data_paths, *, fts_policy="legacy_strict_v1", episode_only=False):
         self._factory = session_factory
+        self._episode_only = episode_only
         self.projection = None
         self.vector_axis = UnavailableVectorAxis()
         self.status = "stopped"
         self.fts = FtsHybridAxis(FtsReadWorkers(database_path=fts_index.database_path, settings=fts_index.settings), lexical_policy=fts_policy)
-        self.service = HybridRecallService(fts=self.fts, vector=self,
-            canonical=SqlAlchemyHybridCanonicalReader(session_factory, source_reader_factory=source_evidence_reader,
-                canonical=canonical_recall_repository(session_factory)))
+        if episode_only:
+            from app.domains.memory.repository.episode_hybrid_recall import SqlAlchemyEpisodeHybridReader
+            from app.runtime.memory.episode_details import RuntimeEpisodeDetailReader
+            reader = SqlAlchemyEpisodeHybridReader(session_factory, detail_reader_factory=RuntimeEpisodeDetailReader)
+        else:
+            reader = SqlAlchemyHybridCanonicalReader(session_factory, source_reader_factory=source_evidence_reader,
+                canonical=canonical_recall_repository(session_factory))
+        self.service = HybridRecallService(fts=self.fts, vector=self, canonical=reader)
         self._generations = VectorGenerations(data_paths.search / "memory-vectors", bundled_vector_index)
 
     async def search(self, request, *, deadline):
@@ -50,7 +56,7 @@ class MemoryHybridRuntime:
             if active is not None:
                 self._bind(active)
             projection = MemoryVectorProjection(self._factory, index,
-                on_clean_cycle=self._promote if staging is not None else None)
+                on_clean_cycle=self._promote if staging is not None else None, episode_only=self._episode_only)
             await projection.start()
             self.projection = projection
             self.status = "recovering" if staging is not None else "ready"

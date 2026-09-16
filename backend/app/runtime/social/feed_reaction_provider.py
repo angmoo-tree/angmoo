@@ -1,6 +1,9 @@
 """Existing credential, provider schema and direct LLM transport for feed reactions."""
 
 from __future__ import annotations
+from app.config import settings
+from app.contracts.activity_thought import THOUGHT_PROMPT
+from app.integrations.llm.activity_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
 from app.domains.relationships.contracts.social_consumption import social_prompt
 from app.domains.social.service.feed_reaction_prompts import (
     build_reaction_prompts,
@@ -70,10 +73,11 @@ def _llm_context(
 
 
 class DirectFeedReactionProvider:
-    def __init__(self, *, thinking_level: str = "medium"):
+    def __init__(self, *, thinking_level: str = "medium", thought_enabled: bool | None = None):
         if thinking_level not in {"minimal", "low", "medium", "high"}:
             raise ValueError("feed_thinking_level_invalid")
         self._thinking_level = thinking_level
+        self._thought_enabled = settings.ACTIVITY_THOUGHT_POLICY == "thought_v1" if thought_enabled is None else thought_enabled
 
     async def plan(
         self,
@@ -91,12 +95,22 @@ class DirectFeedReactionProvider:
             proposal_eligible_indices=proposal_eligible_indices,
         )
 
+        if self._thought_enabled:
+            system_prompt, user_prompt = without_legacy_self_view_prompt(system_prompt, user_prompt)
+            system_prompt += "\n" + THOUGHT_PROMPT + "\nFor comment or NO_ACTION return empty thought; the final comment writer owns its thought."
+
         def validator(payload: dict[str, object]) -> schemas.FeedReactionDecision:
-            return validate_reaction_decision(
+            thought = None
+            if self._thought_enabled:
+                payload, thought = extract_activity_thought(payload, include_thought=True)
+            result = validate_reaction_decision(
                 payload,
                 candidates=candidates,
                 proposal_eligible_indices=proposal_eligible_indices,
             )
+            if self._thought_enabled and result.selected_action not in {None, "comment"}:
+                result._activity_thought = thought
+            return result
 
         try:
             result = await generate_json(
@@ -109,7 +123,7 @@ class DirectFeedReactionProvider:
                 tracker=tracker,
                 system_prompt=system_prompt + social_prompt(resident_context, "feed_reaction_planner"),
                 user_prompt=user_prompt,
-                response_schema=GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
+                response_schema=thought_response_schema(GEMINI_FEED_REACTION_RESPONSE_SCHEMA, include_thought=True) if self._thought_enabled else GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
                 validator=validator,
                 max_output_tokens=4096 if self._thinking_level == "high" else 900,
                 thinking_level=self._thinking_level,
@@ -143,10 +157,22 @@ class DirectFeedReactionProvider:
             decision=decision,
             is_proposal=is_proposal,
         )
+        if reader := getattr(resident_context, "episode_memory_reader", None):
+            user_prompt += reader(candidate.post_id)
+
+        if self._thought_enabled:
+            system_prompt, user_prompt = without_legacy_self_view_prompt(system_prompt, user_prompt)
+            system_prompt += "\n" + THOUGHT_PROMPT
+        writer_schema = GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA if is_proposal else GEMINI_FEED_COMMENT_RESPONSE_SCHEMA
+        if self._thought_enabled:
+            writer_schema = thought_response_schema(writer_schema, include_thought=True)
 
         def validator(
             payload: dict[str, object],
         ) -> schemas.FeedCommentDraft | schemas.JointActivityProposalPreview:
+            thought = None
+            if self._thought_enabled:
+                payload, thought = extract_activity_thought(payload, include_thought=True)
             result = validate_comment_draft(
                 payload,
                 candidate=candidate,
@@ -158,6 +184,7 @@ class DirectFeedReactionProvider:
                 result, schemas.JointActivityProposalPreview
             ):
                 raise FeedReactionValidationError("proposal writer returned comment")
+            result._activity_thought = thought
             return result
 
         try:
@@ -175,11 +202,7 @@ class DirectFeedReactionProvider:
                 tracker=tracker,
                 system_prompt=system_prompt + social_prompt(resident_context, "feed_comment_writer"),
                 user_prompt=user_prompt,
-                response_schema=(
-                    GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA
-                    if is_proposal
-                    else GEMINI_FEED_COMMENT_RESPONSE_SCHEMA
-                ),
+                response_schema=writer_schema,
                 validator=validator,
                 max_output_tokens=4096 if self._thinking_level == "high" else 1_000,
                 thinking_level=self._thinking_level,
