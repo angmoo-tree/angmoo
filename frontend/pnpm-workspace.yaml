@@ -1,6 +1,6 @@
 overrides:
   brace-expansion: 5.0.9
-  js-yaml@>=4 <5: 4.3.1
+  js-yaml@>=4 <5: 4.3.2
   minimatch@3.1.5: 10.2.5
   postcss: 8.5.23
   '@babel/core': 7.29.7

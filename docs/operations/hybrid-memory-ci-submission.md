@@ -72,3 +72,27 @@ questions, stored thoughts, credentials and operational databases.
 
 No paid provider calls are added by this CI preparation. Windows artifacts mean
 MSI and NSIS installer EXE in GitHub Actions, not GitHub Releases or GHCR publication.
+
+## Remote submission and security triage
+
+PR #328 initially failed `oss-boundary` because the deferred-runtime inventory
+did not yet include the exact historical contract fragments in the new provenance
+manifest. Regenerating the inventory records that occurrence without removing or
+ignoring the marker. Other remote results remain separately tracked.
+
+The initial container gate also rejected 13 fixable OS findings in the pinned
+Debian base. The backend Dockerfile now upgrades gzip, PCRE2, system SQLite and
+perl-base alongside its existing security upgrades, and verifies minimum patched
+versions. Scanner severity and unfixed/secret policies are unchanged.
+
+GitHub reported GHSA-2883-xcg3-v3hh in development-only ESLint's `js-yaml`.
+The existing v4 override is advanced from 4.3.1 to patched 4.3.2; runtime frontend
+dependencies are unchanged. This finding was outside the earlier production-only
+audit and must not be described as a clean all-dependency audit before correction.
+
+The three existing GHSA-wrw7-89jp-8q8g `glib` 0.18.5 alerts concern the desktop,
+Defender experiment and native-runtime spike lockfiles. `cargo tree --locked
+--target x86_64-pc-windows-msvc -i glib` shows no Windows dependency path. They
+remain open upstream/Unix dependency follow-ups; this Windows installer scope does
+not certify Unix GTK runtime safety or dismiss those alerts. Container backend
+and frontend do not build these Rust desktop targets.
