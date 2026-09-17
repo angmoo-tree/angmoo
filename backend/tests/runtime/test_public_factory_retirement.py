@@ -1,5 +1,6 @@
 """Retire the G06 facade only with its real profiles and cold behavior intact."""
 import importlib.util
+from functools import lru_cache
 from pathlib import Path
 import subprocess
 
@@ -36,10 +37,15 @@ def candidate(tmp_path, original):
     return tmp_path, snapshots, lambda *args, **kwargs: subprocess.check_output(["git", *args], cwd=ROOT)
 
 
+@lru_cache(maxsize=1)
+def approved_product_changes():
+    return p.product_changes.load(ROOT)
+
+
 def proof(candidate):
     root, snapshots, read_blob = candidate
     return r.validate(True, {r.OLD: r.MAIN}, snapshots, root, read_blob,
-                      approved_changes=p.product_changes.load(ROOT))
+                      approved_changes=approved_product_changes())
 
 
 def test_frozen_facade_actual_profiles_and_cold_source_are_proven(candidate, original, monkeypatch):

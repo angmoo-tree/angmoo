@@ -39,6 +39,8 @@ questions, stored thoughts, credentials and operational databases.
 - Core CI explicitly builds the pinned Vec1 extension for native hybrid tests.
 - Factory preservation continues to reject arbitrary changes; lifecycle signature
   evolution requires the existing exact committed before/after product proof.
+- Product-change provenance reads each immutable Git object once per validation,
+  while retaining all source, ancestry and before/after checks.
 
 ## Local evidence so far
 
@@ -48,6 +50,12 @@ questions, stored thoughts, credentials and operational databases.
 - Browser smoke: 23 passed, one diagnostics-version expectation failed, ten
   opt-in real-provider scenarios skipped. The corrected diagnostics test passed.
 - Frontend lint, typecheck, Next build and static build passed.
+- Browser continuity: 29 passed and 10 opt-in real-provider cases skipped;
+  static continuity: 71 passed; lifecycle: 2 passed; pinned Linux visual: 36 passed.
+- Frontend preservation passed for 324 source files. Dependency vulnerability,
+  license and notice checks passed. Gitleaks candidate and ancestor-history scans
+  found no leaks; the repository scanner found zero fatal items in tree/history
+  scans (existing binary image audit notices remain distinct).
 - Current architecture, frontend architecture/design, route inventory, schema
   migration, OSS boundary, CI policy, secret metadata, release/launcher/installer
   contracts and license-policy checks passed.

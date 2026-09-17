@@ -99,14 +99,19 @@ def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypat
         assert calls[0]["context"].lane == "world_keyword_feed"
         assert calls[1]["context"].node == "ReplyWriter"
         assert calls[1]["context"].lane == "world_keyword_feed_comment"
-        assert (
-            calls[0]["response_schema"]
-            is provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA
-        )
-        assert (
-            calls[1]["response_schema"]
-            is provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA
-        )
+        for call, original_schema in zip(calls, (
+            provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
+            provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA,
+        ), strict=True):
+            from app.contracts.activity_thought_output import LEGACY_SELF_VIEW_FIELDS
+            schema = call["response_schema"]
+            assert schema["properties"]["thought"]["type"] == "string"
+            assert "thought" in schema["required"]
+            assert not set(LEGACY_SELF_VIEW_FIELDS) & schema["properties"].keys()
+            assert {key: value for key, value in schema["properties"].items() if key != "thought"} == {
+                key: value for key, value in original_schema["properties"].items()
+                if key not in LEGACY_SELF_VIEW_FIELDS
+            }
         assert calls[0]["should_retry_json_error"](None) is False
         assert "should_retry_json_error" not in calls[1]
         prompt = json.loads(calls[0]["user_prompt"])
@@ -121,7 +126,10 @@ def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypat
         writer_prompt = json.loads(calls[1]["user_prompt"])
         assert writer_prompt["requirements"]["source_post_id"] == target.id
         assert writer_prompt["requirements"]["proposal_schedule"] is None
-        assert writer_prompt["validated_decision"] == decision.model_dump(mode="json")
+        assert writer_prompt["validated_decision"] == {
+            key: value for key, value in decision.model_dump(mode="json").items()
+            if key not in LEGACY_SELF_VIEW_FIELDS
+        }
         if social_context_enabled:
             for call in calls:
                 assert snapshot.snapshot_id in call["system_prompt"]

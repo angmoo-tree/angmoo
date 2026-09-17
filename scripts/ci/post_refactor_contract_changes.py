@@ -27,6 +27,9 @@ def load(root: Path, *, reader=None) -> list[dict]:
     if payload.get("schema_version") != 1 or not isinstance(payload.get("records"), list):
         raise ValueError("invalid post-refactor change manifest")
     records = payload["records"]
+    # One immutable committed file can contain many changed definitions. Read
+    # its Git object once per validation, retaining every provenance check.
+    @lru_cache(maxsize=None)
     def git(*args: str) -> bytes:
         return reader(*args, root=root) if reader is not None else subprocess.check_output(["git", *args], cwd=root)
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():

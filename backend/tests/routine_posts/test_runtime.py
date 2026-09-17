@@ -1463,6 +1463,7 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
     # Snapshot-enabled actor validation is covered by test_social_context.
     from app.runtime import social_snapshot
     monkeypatch.setattr(social_snapshot.settings, "SNS_SOCIAL_CONTEXT_ENABLED", False)
+    monkeypatch.setattr(social_snapshot.settings, "MEMORY_RECALL_REPRESENTATION", "legacy")
     handled: list[tuple[int, str]] = []
 
     class FakeDb:

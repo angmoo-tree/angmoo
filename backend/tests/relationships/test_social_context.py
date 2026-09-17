@@ -95,7 +95,8 @@ def test_sns_runtime_flag_prepares_context_and_revalidates_actor(monkeypatch, en
     from app.config import Settings
     from app.runtime import social_snapshot as runtime
     from app.domains.relationships.contracts.graph_recall import GraphRecallResult, GraphRecallSource, GraphRecallStatus
-    monkeypatch.setattr(runtime, 'settings', Settings(_env_file=None, SNS_SOCIAL_CONTEXT_ENABLED=enabled))
+    monkeypatch.setattr(runtime, 'settings', Settings(_env_file=None,
+        SNS_SOCIAL_CONTEXT_ENABLED=enabled, MEMORY_RECALL_REPRESENTATION='legacy'))
     monkeypatch.setattr(runtime, 'SqlAlchemyRelationshipGraphReadGateway', lambda *a, **kw: None)
     monkeypatch.setattr(runtime, 'GraphRecallService', lambda gateway: SimpleNamespace(execute=lambda q:
         GraphRecallResult(q.operation, GraphRecallStatus.READY, GraphRecallSource.GRAPH)))
@@ -119,3 +120,39 @@ def test_sns_runtime_flag_prepares_context_and_revalidates_actor(monkeypatch, en
     actor.id = 'different'
     with pytest.raises(SocialContextChangedError, match='social_context_scope_changed'):
         prepared.social_context.validate()
+
+
+@pytest.mark.parametrize('enabled', [True, False])
+def test_episode_reader_scope_is_preserved_with_social_snapshot_flag(monkeypatch, enabled):
+    from dataclasses import dataclass
+    from types import SimpleNamespace
+    from app.config import Settings
+    from app.runtime import social_snapshot as runtime
+    from app.domains.relationships.contracts.graph_recall import (
+        GraphRecallResult, GraphRecallSource, GraphRecallStatus,
+    )
+
+    monkeypatch.setattr(runtime, 'settings', Settings(_env_file=None,
+        SNS_SOCIAL_CONTEXT_ENABLED=enabled, MEMORY_RECALL_REPRESENTATION='episode_v1'))
+    monkeypatch.setattr(runtime, 'SqlAlchemyRelationshipGraphReadGateway', lambda *a, **kw: None)
+    monkeypatch.setattr(runtime, 'GraphRecallService', lambda gateway: SimpleNamespace(execute=lambda q:
+        GraphRecallResult(q.operation, GraphRecallStatus.READY, GraphRecallSource.GRAPH)))
+
+    @dataclass
+    class Context:
+        db: object
+        character: object
+        user_id: str
+        selected_post_id: str = 'post'
+        social_context: object = None
+        episode_memory_reader: object = None
+
+    ctx = Context(SimpleNamespace(execute=lambda query: SimpleNamespace(all=lambda: [])),
+        SimpleNamespace(id='character'), 'owner')
+    actors = [SimpleNamespace(id='actor', world_id='world')]
+    prepared = runtime.prepare_activity_social_context(ctx, active_actor=lambda *a, **kw: actors[0])
+    assert callable(prepared.episode_memory_reader)
+    assert (prepared.social_context is not None) is enabled
+    actors[0] = SimpleNamespace(id='another-actor', world_id='world')
+    with pytest.raises(ValueError, match='episode_sns_scope_changed'):
+        prepared.episode_memory_reader()
