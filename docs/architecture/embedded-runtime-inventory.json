@@ -15,11 +15,11 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "8b31a4f475a11f8e757fbc9bb43300c93fe0b3e16f0bbcc96a83a38ad5e2ff37"
+      "sha256": "c8bc02af1a40d2cfae3733e58cbf2b3deed1bad789bc8ca1b286778db0c1e997"
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "d6fa9aa1909eb19524e045946fc7c29fb1d79d0dcac1012e76b17c2ac4eb5d82"
+      "sha256": "12f85bf7259230524c46eae4159357ca25fa247be83c736cb8b838e128075bfd"
     },
     {
       "path": "frontend/next.config.ts",

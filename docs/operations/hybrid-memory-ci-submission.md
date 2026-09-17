@@ -104,3 +104,9 @@ identified four exact Git blob lines, not credentials. Each was checked against
 its recorded introduction commit and blob object. Narrow path-and-whole-line
 exceptions preserve all other detection. Candidate scanning and the complete
 817-commit ancestor scan then passed with no leaks.
+
+The third full hosted backend run completed with 3,690 passed, one failed and
+28 explicitly gated skips. Its single failure was the generated Dockerfile hash
+inventory after the OS security patches. Updating those two digests preserves
+the historical inventory contents; all eight related ER0 tests passed locally.
+The final submission is still checked by the complete hosted suite.
