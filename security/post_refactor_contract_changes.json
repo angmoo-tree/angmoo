@@ -8480,6 +8480,26 @@
         }
       ],
       "frontend_files": []
+    },
+    {
+      "id": "hybrid-episode-submission-14",
+      "implementation_commit": "c22b2b1b67f02395b8d6248d4903f9cd26719e6c",
+      "reason": "HC11: exact development-only js-yaml 4.3.1 to 4.3.2 fix for GHSA-2883-xcg3-v3hh; pnpm 11.22.0 frozen install, full audit and lint passed. No frontend behavior or visual baseline change.",
+      "review": "https://github.com/angmoo-tree/angmoo/pull/328",
+      "source_blobs": {
+        "frontend/pnpm-lock.yaml": "8cab66e638b969891632adc70fc3fc4f31c580ad"
+      },
+      "contracts": [],
+      "orm_tables": [],
+      "assertions": [],
+      "definitions": [],
+      "frontend_files": [
+        {
+          "source": "frontend/pnpm-lock.yaml",
+          "before_sha256": "3fbf7054874e08ead1961519c14924b80095a8d79ddb831f2b7278bc0dacd5c1",
+          "after_sha256": "3c051165bfa9ee7c1fd97df36ce1ed9f621a9d799a11ec8e8d36c7f98047e606"
+        }
+      ]
     }
   ]
 }
