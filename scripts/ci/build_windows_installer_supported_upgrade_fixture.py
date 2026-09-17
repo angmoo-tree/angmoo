@@ -79,7 +79,7 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+SUPPORTED_SOURCE_VERSIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
     "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"
@@ -617,7 +617,14 @@ def _seed_supported_predecessor(
                 )
                 from app.models import Base
 
-                Base.metadata.tables["chat_retrieval_diagnostics"].drop(sql_connection, checkfirst=True)
+                from app.runtime.persistence.sqlite_schema import CONSOLIDATION_V14_TABLES, EPISODE_V13_TABLES
+                from app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding import TABLES as EMBEDDING_V12_TABLES
+                for introduced, names in ((14, CONSOLIDATION_V14_TABLES), (13, EPISODE_V13_TABLES), (12, EMBEDDING_V12_TABLES)):
+                    if source_version < introduced:
+                        for name in reversed(names):
+                            Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
+                if source_version <= 10:
+                    Base.metadata.tables["chat_retrieval_diagnostics"].drop(sql_connection, checkfirst=True)
                 from app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles import ADDED_COLUMNS
                 if source_version <= 9:
                     for table, columns in ADDED_COLUMNS.items():

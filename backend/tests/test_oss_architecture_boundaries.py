@@ -198,6 +198,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "integrations/llm/graph_retrieval_planner.py": {"plan"},
         "integrations/llm/memory_consolidation.py": {"consolidate"},
         "integrations/llm/memory_selection.py": {"select"},
+        "integrations/llm/episode_selection.py": {"select"},
         "integrations/llm/retrieval_router.py": {"route"},
         "integrations/llm/supervisor_selection.py": {"route"},
         # Authorized embedding transport boundaries: resolve owner/purpose before

@@ -59,8 +59,16 @@ questions, stored thoughts, credentials and operational databases.
 - Current architecture, frontend architecture/design, route inventory, schema
   migration, OSS boundary, CI policy, secret metadata, release/launcher/installer
   contracts and license-policy checks passed.
-- Full backend with native Vec1, provenance, final commit checks and remote CI
-  remain in progress. These partial results are not a final submission PASS.
+- Full backend with native Vec1: 3,668 passed, 20 failed, 28 skipped. The 20
+  failures identified stale packaging/security expectations and incomplete
+  predecessor fixture construction, not a passing full-suite result.
+- Corrected packaging/security subset: 80 passed. Supported Windows predecessor
+  fixtures now cover v1 through v13 before upgrade to v14; frozen historical
+  digests remain checked. The historical 89-migration conversion inventory is
+  preserved while current SQL/topology inventories include later additions.
+- Native retrieval scope tests passed all six policy/deletion/isolation cases.
+- Preservation passed for all 3,716 then-current protected test lineages; final
+  packaging additions and remote CI are verified separately before completion.
 
 No paid provider calls are added by this CI preparation. Windows artifacts mean
 MSI and NSIS installer EXE in GitHub Actions, not GitHub Releases or GHCR publication.
