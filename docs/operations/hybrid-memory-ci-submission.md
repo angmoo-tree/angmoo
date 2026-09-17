@@ -96,3 +96,11 @@ Defender experiment and native-runtime spike lockfiles. `cargo tree --locked
 remain open upstream/Unix dependency follow-ups; this Windows installer scope does
 not certify Unix GTK runtime safety or dismiss those alerts. Container backend
 and frontend do not build these Rust desktop targets.
+
+On the second CI attempt, backend image scanning passed. Frontend scanning then
+found three advisories in its Debian 12 PCRE2 package; its runtime stage now
+requires the patched 10.42-1+deb12u1 or later package. The second Gitleaks failure
+identified four exact Git blob lines, not credentials. Each was checked against
+its recorded introduction commit and blob object. Narrow path-and-whole-line
+exceptions preserve all other detection. Candidate scanning and the complete
+817-commit ancestor scan then passed with no leaks.

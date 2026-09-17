@@ -276,3 +276,23 @@ regexes = [
   '''^\s*"backend/tests/chat/test_p8_l_d_world_chat_api\.py":\ "b41f15ba1fef6a18b6819db11b50fc9752a70bdf",?\s*$''',
   '''^\s*"backend/tests/memory/test_p8_l_r_memory_batch_api\.py":\ "999d95cf8bc4c0ab0e26755594fc9247a713e61d",?\s*$'''
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact Git blob IDs verified at d299ac69498928a3f5e41baaf99ec6eded981720 and 699536aaf000b83a8542af06fe8c0a17b4fd409e; PR328 source provenance, not credentials"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/post_refactor_contract_changes\.json$''']
+regexes = [
+  '''^\s*"backend/app/domains/identity/repository/credentials\.py": "b5c792754e5a171f6fe82c85ab4dd0d9a17e019e",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/credential_resolution\.py": "a783801c5d1e6b11156da2582a29e343cf2e4862",?\s*$''',
+  '''^\s*"backend/tests/memory/test_consolidation_api\.py": "03a46b5f4d0375d2bd25efdd339fac7ec94169e9",?\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact consolidation API test Git blob verified at 699536aaf000b83a8542af06fe8c0a17b4fd409e; PR328 source provenance, not a credential"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = ['''^\s*"backend/tests/memory/test_consolidation_api\.py": "03a46b5f4d0375d2bd25efdd339fac7ec94169e9",?\s*$''']
