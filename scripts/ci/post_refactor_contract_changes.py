@@ -55,7 +55,11 @@ def load(root: Path, *, reader=None) -> list[dict]:
             if source not in record["source_blobs"] or change["before_ast"] == change["after_ast"]:
                 raise ValueError("definition change requires committed source evidence")
             for revision, field in ((commit + "^", "before_ast"), (commit, "after_ast")):
-                if definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol) != normalize_ast_dump(change[field]):
+                actual = definition_ast(git("show", f"{revision}:{source}").decode("utf-8-sig"), symbol)
+                # Current-format evidence is already an exact AST dump. Only
+                # older Python AST formats need normalization; equal strings
+                # cannot hide a structural difference.
+                if actual != change[field] and actual != normalize_ast_dump(change[field]):
                     raise ValueError("definition change committed preimage differs")
         for change in record.get("frontend_files", []):
             source = change["source"]
@@ -104,8 +108,13 @@ def frontend_matches(source: str, original: str, actual: str, records: list[dict
 
 
 @lru_cache(maxsize=128)
+def definition_body(source: str) -> list[ast.stmt]:
+    return ast.parse(source).body
+
+
+@lru_cache(maxsize=128)
 def definition_ast(source: str, symbol: str) -> str:
-    body = ast.parse(source).body
+    body = definition_body(source)
     for part in symbol.split("."):
         found = [node for node in body if getattr(node, "name", None) == part or
                  isinstance(node, (ast.Assign, ast.AnnAssign)) and any(
