@@ -1,5 +1,7 @@
 import asyncio
 import json
+from dataclasses import replace
+import pytest
 
 from sqlalchemy.orm import Session
 
@@ -12,10 +14,18 @@ from app.runtime.social.world_feed_search import (
 from social.test_feed_reaction_intent import _engine, _seed
 
 
-def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypatch):
+@pytest.mark.parametrize("social_context_enabled", [False, True])
+@pytest.mark.parametrize("thinking_level", ["medium", "high"])
+def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypatch, social_context_enabled, thinking_level):
     engine = _engine()
     with Session(engine) as db:
         context, target = _seed(db, with_candidate=True)
+        if social_context_enabled:
+            from relationships.test_social_context import SCOPE, relationship, result
+            from app.domains.relationships.service.social_context import SocialContextService
+            from app.domains.relationships.contracts.social_consumption import SocialContextUse
+            snapshot = SocialContextService(lambda query: result(query, [relationship()])).prepare(SCOPE, labels={"friend": "친구"})
+            context = replace(context, social_context=SocialContextUse(snapshot, lambda: None))
         profile = load_ready_search_profile(
             db, world_character_id="world-character-actor"
         )
@@ -49,7 +59,7 @@ def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypat
 
         monkeypatch.setattr(provider_module, "_api_key", credential)
         monkeypatch.setattr(provider_module, "generate_json", generate_json)
-        provider = provider_module.DirectFeedReactionProvider()
+        provider = provider_module.DirectFeedReactionProvider(thinking_level=thinking_level)
         tracker = provider_module.RunLlmTracker(max_calls=3)
         result = asyncio.run(
             provider.plan(
@@ -83,20 +93,25 @@ def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypat
         assert len(calls) == 2
         assert credential_contexts == [context, context]
         assert all(call["tracker"] is tracker for call in calls)
-        assert [call["max_output_tokens"] for call in calls] == [900, 1000]
-        assert [call["thinking_level"] for call in calls] == ["medium", "medium"]
+        assert [call["max_output_tokens"] for call in calls] == ([4096, 4096] if thinking_level == "high" else [900, 1000])
+        assert [call["thinking_level"] for call in calls] == [thinking_level, thinking_level]
         assert calls[0]["context"].node == "FeedReactionPlanner"
         assert calls[0]["context"].lane == "world_keyword_feed"
         assert calls[1]["context"].node == "ReplyWriter"
         assert calls[1]["context"].lane == "world_keyword_feed_comment"
-        assert (
-            calls[0]["response_schema"]
-            is provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA
-        )
-        assert (
-            calls[1]["response_schema"]
-            is provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA
-        )
+        for call, original_schema in zip(calls, (
+            provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
+            provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA,
+        ), strict=True):
+            from app.contracts.activity_thought_output import LEGACY_SELF_VIEW_FIELDS
+            schema = call["response_schema"]
+            assert schema["properties"]["thought"]["type"] == "string"
+            assert "thought" in schema["required"]
+            assert not set(LEGACY_SELF_VIEW_FIELDS) & schema["properties"].keys()
+            assert {key: value for key, value in schema["properties"].items() if key != "thought"} == {
+                key: value for key, value in original_schema["properties"].items()
+                if key not in LEGACY_SELF_VIEW_FIELDS
+            }
         assert calls[0]["should_retry_json_error"](None) is False
         assert "should_retry_json_error" not in calls[1]
         prompt = json.loads(calls[0]["user_prompt"])
@@ -111,4 +126,12 @@ def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypat
         writer_prompt = json.loads(calls[1]["user_prompt"])
         assert writer_prompt["requirements"]["source_post_id"] == target.id
         assert writer_prompt["requirements"]["proposal_schedule"] is None
-        assert writer_prompt["validated_decision"] == decision.model_dump(mode="json")
+        assert writer_prompt["validated_decision"] == {
+            key: value for key, value in decision.model_dump(mode="json").items()
+            if key not in LEGACY_SELF_VIEW_FIELDS
+        }
+        if social_context_enabled:
+            for call in calls:
+                assert snapshot.snapshot_id in call["system_prompt"]
+                assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call["system_prompt"]
+            assert [row["lane"] for row in context.social_context.receipts] == ["feed_reaction_planner", "feed_comment_writer"]

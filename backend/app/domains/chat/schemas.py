@@ -245,7 +245,10 @@ class WorldChatEvidenceSummaryRead(BaseModel):
     request_id: str
     assistant_message_id: int
     capability: Literal["available", "degraded"]
-    count: int = Field(ge=1, le=12)
+    count: int = Field(ge=1, le=24)
+
+
+from app.domains.memory.schemas import EpisodeDetailRead
 
 
 class WorldChatEvidenceItemRead(BaseModel):
@@ -255,6 +258,7 @@ class WorldChatEvidenceItemRead(BaseModel):
         "graph_relationship",
         "graph_event",
         "today_sns_activity",
+        "episode_memory",
     ]
     label: str
     excerpt: str | None
@@ -263,6 +267,7 @@ class WorldChatEvidenceItemRead(BaseModel):
     related_character: str | None = None
     direction: Literal["incoming", "outgoing", "contextual"] | None = None
     canonical_href: str | None = None
+    episode: EpisodeDetailRead | None = None
 
 
 class WorldChatEvidenceRead(BaseModel):
@@ -272,6 +277,7 @@ class WorldChatEvidenceRead(BaseModel):
     retrieval_outcome: str
     capability: Literal["available", "degraded"]
     items: list[WorldChatEvidenceItemRead]
+    current_context: list[WorldChatEvidenceItemRead] = Field(default_factory=list, max_length=12)
 
 
 class WorldChatMessageAcceptRead(BaseModel):
@@ -307,13 +313,35 @@ class DiagnosticRecord(BaseModel):
     omitted_events: int = Field(ge=0)
 
 
+class DiagnosticRequestRead(BaseModel):
+    request_id: str
+    created_at: datetime
+    state: str
+    user_message_id: int
+    attempt_number: int
+    retry_of_request_id: str | None
+
+
+class DiagnosticRequestListRead(BaseModel):
+    world_id: str
+    thread_id: str
+    items: list[DiagnosticRequestRead] = Field(max_length=100)
+    next_cursor: str | None
+
+
+from app.contracts.search_diagnostics import SearchDiagnosticTrace
+
+
 class DiagnosticRead(BaseModel):
     model_config = ConfigDict(extra="forbid")
     world_id: str
     thread_id: str
     request_id: str | None
     request_state: str | None
+    request: DiagnosticRequestRead | None = None
     status: Literal["available", "expired", "not_recorded", "unavailable"]
     record: DiagnosticRecord | None
     capture: CaptureRead
     details: list[dict[str, str | int]] | None
+    search_trace: SearchDiagnosticTrace | None = None
+    detail_availability: Literal["available", "pending", "not_captured", "not_retained", "unsupported", "unknown"] = "unknown"

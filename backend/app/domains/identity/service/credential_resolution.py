@@ -18,6 +18,7 @@ _DEFAULT_STORED_PURPOSES: dict[CredentialPurpose, frozenset[str]] = {
     CredentialPurpose.WORLD_CHARACTER_SETUP_LLM: frozenset({"agent"}),
     CredentialPurpose.MESSAGE_LLM: frozenset({"agent", "message"}),
     CredentialPurpose.LORE_EMBEDDING: frozenset({"agent"}),
+    CredentialPurpose.MEMORY_EMBEDDING: frozenset({"agent", "message"}),
     CredentialPurpose.PRIVATE_OPENCLAW: frozenset({"agent"}),
 }
 

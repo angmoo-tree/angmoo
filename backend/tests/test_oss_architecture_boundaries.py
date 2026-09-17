@@ -198,7 +198,13 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "integrations/llm/graph_retrieval_planner.py": {"plan"},
         "integrations/llm/memory_consolidation.py": {"consolidate"},
         "integrations/llm/memory_selection.py": {"select"},
+        "integrations/llm/episode_selection.py": {"select"},
         "integrations/llm/retrieval_router.py": {"route"},
+        "integrations/llm/supervisor_selection.py": {"route"},
+        # Authorized embedding transport boundaries: resolve owner/purpose before
+        # revealing to the provider, never to a domain result or diagnostic.
+        "runtime/memory_embedding_provider.py": {"query"},
+        "runtime/memory/vector_projection.py": {"sync_item"},
         "domains/chat/service/generation.py": {"stream_world_response"},
     }
     observed: dict[str, set[str]] = {}

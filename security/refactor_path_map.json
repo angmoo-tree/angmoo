@@ -2085,7 +2085,19 @@
     "tests/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[\\uacf5\\uac1c \\ucee4\\ubba4\\ub2c8\\ud2f0\\uc5d0 \\uae00\\uc744 \\uc37c\\uc5b4.]": "tests/common/test_prompt_safety.py::test_contains_prompt_injection_output_allows_refusals_and_safe_text[\\uacf5\\uac1c \\ucee4\\ubba4\\ub2c8\\ud2f0\\uc5d0 \\uae00\\uc744 \\uc37c\\uc5b4.]",
     "tests/test_llm_context.py::test_neutralize_context_text_trims_spaces_around_newlines": "tests/common/test_context_text.py::test_neutralize_context_text_trims_spaces_around_newlines",
     "tests/test_llm_context.py::test_neutralize_context_text_handles_long_space_runs_linearly": "tests/common/test_context_text.py::test_neutralize_context_text_handles_long_space_runs_linearly",
-    "tests/chat/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite": "tests/chat/test_messages_service.py::test_default_message_model_is_gemini31_flash_lite"
+    "tests/chat/test_messages_service.py::test_default_message_model_is_gemini25_flash_lite": "tests/chat/test_messages_service.py::test_default_message_model_is_gemini31_flash_lite",
+    "tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback",
+    "tests/memory/test_hybrid_native_pipeline.py::test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version": "tests/memory/test_hybrid_native_pipeline.py::test_real_fts_vec1_fusion_hydrates_authorized_sources_and_rejects_stale_version[blocked-legacy_strict_v1]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[success]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-success]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-success]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-False-success]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[True-success]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-True-success]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[invalid_plan]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-invalid_plan]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-invalid_plan]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-False-invalid_plan]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[True-invalid_plan]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-True-invalid_plan]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-writer_error]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-False-writer_error]",
+    "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[True-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-True-writer_error]",
+    "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits": "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits[medium-False]"
   },
   "details": {
     "AR-B1": {
@@ -137194,7 +137206,8 @@
     "backend/tests/test_langgraph_resident_engine.py::test_llm_tracker_counts_embedding_separately_from_generate_budget": "backend/tests/integrations/test_direct_llm.py::test_llm_tracker_counts_embedding_separately_from_generate_budget",
     "backend/tests/test_langgraph_resident_engine.py::test_writer_split_call_budget_allows_json_retry_worst_case": "backend/tests/integrations/test_direct_llm.py::test_writer_split_call_budget_allows_json_retry_worst_case",
     "backend/tests/test_langgraph_resident_engine.py::test_direct_llm_rate_limiter_waits_instead_of_failing": "backend/tests/integrations/test_direct_llm.py::test_direct_llm_rate_limiter_waits_instead_of_failing",
-    "backend/tests/test_langgraph_resident_engine.py::test_writing_composition_stream_params_omit_sampling_parameters": "backend/tests/routines/test_writing_parameters.py::test_writing_composition_stream_params_omit_sampling_parameters"
+    "backend/tests/test_langgraph_resident_engine.py::test_writing_composition_stream_params_omit_sampling_parameters": "backend/tests/routines/test_writing_parameters.py::test_writing_composition_stream_params_omit_sampling_parameters",
+    "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback"
   },
   "retired_model_facades": {
     "app.models.auth": "app.domains.identity.models",

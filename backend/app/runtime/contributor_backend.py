@@ -13,17 +13,8 @@ import os
 from pathlib import Path
 import secrets
 
-import uvicorn
-
-from app.runtime.configuration import (
-    RuntimeProfile,
-    build_embedded_runtime_config,
-    initialize_local_installation_identity,
-)
-from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
-from app.runtime.logging_config import configure_application_logging, uvicorn_logging_config
-
-
+# Spawned search workers re-import this entrypoint. Keep server composition in
+# the serving/diagnostics functions so a read worker does not initialize it.
 CONTRIBUTOR_GENERATION = "contributor-v1"
 
 
@@ -86,6 +77,7 @@ def _prepare_contributor_data_root(data_root: Path):
     from app.runtime.migrations.embedded_data import (
         EmbeddedDataUpgradeCoordinator,
     )
+    from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 
     return EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(data_root),
@@ -103,6 +95,11 @@ def create_contributor_runtime_app(
     # the same fail-closed ordering used by the packaged desktop sidecar.
     _register_canonical_models()
     from app.main import create_public_app as create_app
+    from app.runtime.configuration import (
+        RuntimeProfile,
+        build_embedded_runtime_config,
+        initialize_local_installation_identity,
+    )
 
     data_root = data_root.resolve()
     upgraded = _prepare_contributor_data_root(data_root)
@@ -161,7 +158,11 @@ def contributor_runtime_status_payload(
     from app.domains.runtime.service.status import ReadApplicationRuntimeStatus
     from app.domains.runtime.schemas import runtime_status_read
     from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
-    from app.runtime.configuration import compose_runtime
+    from app.runtime.configuration import (
+        RuntimeProfile,
+        build_embedded_runtime_config,
+        compose_runtime,
+    )
 
     data_root = data_root.resolve()
     upgraded = _prepare_contributor_data_root(data_root)
@@ -197,6 +198,8 @@ def contributor_runtime_status_payload(
 
 
 def main() -> None:
+    from app.runtime.logging_config import configure_application_logging, uvicorn_logging_config
+
     args = _parse_args()
     configure_application_logging()
     if args.diagnostics:
@@ -206,6 +209,8 @@ def main() -> None:
         )
         print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
         return
+    import uvicorn
+
     if args.reload:
         os.environ["ANGMOO_CONTRIBUTOR_DATA_ROOT"] = str(
             args.data_root.resolve()

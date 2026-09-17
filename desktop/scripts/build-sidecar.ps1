@@ -43,6 +43,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
+$vec1ResourceRoot = Join-Path $WorkRoot "vec1-resources"
+& $Python (Join-Path $repoRoot "scripts\build_vec1.py") --output $vec1ResourceRoot
+if ($LASTEXITCODE -ne 0) { throw "Pinned Vec1 resource build failed" }
+$vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
 
 & $Python -m PyInstaller `
     --clean `
@@ -56,6 +60,7 @@ $layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
     --add-data $sqliteManifestData `
     --add-data $ladybugManifestData `
     --add-data $loggingConfigData `
+    --add-data $vec1ResourceData `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `
     --exclude-module psycopg_binary `

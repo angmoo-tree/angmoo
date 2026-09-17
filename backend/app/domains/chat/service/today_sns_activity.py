@@ -12,6 +12,8 @@ from app.domains.chat.contracts.today_sns_activity import (
     TodaySnsActivitySnapshot,
     TodaySnsSubjectiveContext,
     build_today_sns_hash,
+    TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
+    TODAY_SNS_THOUGHT_SNAPSHOT_VERSION,
 )
 from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReaderPort
 
@@ -74,6 +76,8 @@ class TodaySnsActivityAssembler:
             reserved = 0 if subjective is None else (
                 len(subjective.motivation_text) + len(subjective.emotion_text or "")
             )
+            if record.thought is not None:
+                reserved = len(record.thought.thought.text or "")
             detail_budget_truncated = _fit_detail_budget(details, reserved=reserved)
             truncated = any((
                 body_truncated, title_truncated, parent_body_truncated,
@@ -117,6 +121,8 @@ class TodaySnsActivityAssembler:
                     content_complete=not truncated,
                     truncated=truncated,
                     subjective_context=subjective,
+                    thought=None if record.thought is None else record.thought.thought,
+                    thought_view=source.thought_view,
                 )
             )
         return TodaySnsActivitySnapshot(
@@ -132,6 +138,7 @@ class TodaySnsActivityAssembler:
             entries=tuple(entries),
             overflow=source.overflow,
             counts_exact=source.counts_exact,
+            version=TODAY_SNS_THOUGHT_SNAPSHOT_VERSION if source.thought_view else TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
             snapshot_hash=build_today_sns_hash(
                 owner_id=owner_id,
                 world_id=world_id,
@@ -145,6 +152,7 @@ class TodaySnsActivityAssembler:
                 entries=tuple(entries),
                 overflow=source.overflow,
                 counts_exact=source.counts_exact,
+                version=TODAY_SNS_THOUGHT_SNAPSHOT_VERSION if source.thought_view else TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
             ),
         )
 

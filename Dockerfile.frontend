@@ -33,6 +33,12 @@ RUN pnpm build
 FROM ${NODE_IMAGE} AS runtime
 ARG VCS_REF=unknown
 ARG VERSION=0.3.0
+ARG PCRE2_MIN_VERSION=10.42-1+deb12u1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --only-upgrade libpcre2-8-0 \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge "${PCRE2_MIN_VERSION}" \
+    && rm -rf /var/lib/apt/lists/*
 
 LABEL org.opencontainers.image.source="https://github.com/angmoo-tree/angmoo" \
       org.opencontainers.image.revision="${VCS_REF}" \

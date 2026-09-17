@@ -116,13 +116,18 @@ def test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change(t
         result = coordinator.upgrade()
         assert result.canonical.migrated is True
         assert result.canonical.source_version == 8
-        assert result.canonical.target_version == 11
+        from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+        assert result.canonical.target_version == SQLITE_SCHEMA_VERSION
         current = json.loads(marker.read_text(encoding='utf-8'))
         target = root/'canonical'/current['relative_path']/'angmoo.sqlite3'
         assert _rows(target) == before
         with sqlite3.connect(target) as connection:
             assert connection.execute('PRAGMA foreign_key_check').fetchall() == []
             for name in MEMORY_BATCH_TABLES:
+                assert connection.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0] == 0
+            # Upgrading preserves old memories and pending candidates without
+            # enrolling any historical content for external embedding.
+            for name in ("memory_embedding_settings", "memory_vector_eligibility"):
                 assert connection.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0] == 0
         repeated = coordinator.upgrade()
         assert repeated.canonical.migrated is False

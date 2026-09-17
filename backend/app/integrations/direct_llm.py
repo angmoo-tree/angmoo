@@ -18,7 +18,7 @@ from app.core.redaction import (
     redact_exact_secrets,
     redact_secret_text,
 )
-from app.providers.contracts import ProviderRequest
+from app.providers.contracts import ProviderRequest, ProviderToolCall, ProviderToolDefinition
 from app.providers.gemini import build_generate_content_config, genai, types
 from app.providers.registry import get_provider_adapter, normalize_provider_name
 
@@ -92,6 +92,7 @@ class DirectLlmResponse:
     parsed: Any | None
     usage: dict[str, int | None]
     finish_reason: str | None = None
+    tool_calls: tuple[ProviderToolCall, ...] = ()
 
 
 @dataclass
@@ -741,12 +742,16 @@ async def generate_text(
     thinking_level: str | None = None,
     user_image_parts: list[DirectLlmImagePart] | None = None,
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None,
+    tools: tuple[ProviderToolDefinition, ...] = (),
+    require_tool_call: bool = False,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
     semaphore = _GEMMA_MODEL_SEMAPHORE if _is_gemma_model(context.model) else None
     credential_semaphore = await _credential_semaphore(context)
     adapter = get_provider_adapter(context.provider, context.model)
+    if tools and not adapter.capabilities.tool_calls:
+        raise DirectLlmError("native_tool_calls_unsupported")
 
     async def _invoke() -> Any:
         request = ProviderRequest(
@@ -760,6 +765,9 @@ async def generate_text(
             response_mime_type=response_mime_type,
             thinking_level=thinking_level,
             image_parts=tuple(user_image_parts or ()),
+            tools=tools,
+            require_tool_call=require_tool_call,
+            sdk_attempts=1 if tools else None,
         )
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
@@ -790,6 +798,7 @@ async def generate_text(
                 parsed=response.parsed,
                 usage=usage,
                 finish_reason=response.finish_reason,
+                tool_calls=response.tool_calls,
             )
             tracker.record_call(
                 context=context,

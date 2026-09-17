@@ -92,6 +92,11 @@ def _ids_match_direction(
     subject = query.scope.subject_world_character_id
     counterpart = query.counterpart_world_character_id
     if counterpart is None:
+        if query.enforce_collection_direction:
+            if query.direction is GraphRecallDirection.INCOMING:
+                return target_id == subject and actor_id != subject
+            if query.direction is GraphRecallDirection.OUTGOING:
+                return actor_id == subject and target_id != subject
         return True
     outgoing = (
         actor_id == subject
@@ -268,6 +273,7 @@ def _bounded_neighborhood(
     relationships: tuple[GraphRecallRelationship, ...],
     *,
     depth: int,
+    direction: GraphRecallDirection = GraphRecallDirection.EITHER,
 ) -> tuple[tuple[GraphRecallRelationship, ...], set[str]]:
     reached = {center_id}
     selected: list[GraphRecallRelationship] = []
@@ -281,6 +287,10 @@ def _bounded_neighborhood(
                 continue
             actor = relationship.actor_world_character_id
             target = relationship.target_world_character_id
+            if direction is GraphRecallDirection.OUTGOING and actor not in frontier:
+                continue
+            if direction is GraphRecallDirection.INCOMING and target not in frontier:
+                continue
             if actor not in frontier and target not in frontier:
                 continue
             selected.append(relationship)

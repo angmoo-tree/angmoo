@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
+from app.domains.relationships.contracts.graph_requirements import GraphQueryRequirement
 
 from app.domains.relationships.contracts.graph_plan import (
     GraphPlanContractError,
@@ -70,6 +71,7 @@ class GraphPlannerRequest:
     aggregation_target: str | None = None
     max_hops_hint: int = 3
     repair_diagnostic: str | None = None
+    graph_queries: tuple[GraphQueryRequirement, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.request_id or len(self.request_id) > 128:

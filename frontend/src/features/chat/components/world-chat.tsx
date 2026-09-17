@@ -666,7 +666,7 @@ function WorldChatThread({
         worldId,
       })}
 
-      <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} requestIds={thread.evidence_summaries.map(item => item.request_id)} />
+      <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} />
 
       <div className={styles.modelControl}>
         <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>

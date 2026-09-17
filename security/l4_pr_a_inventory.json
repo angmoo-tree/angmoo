@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3143,
-      "internal_edge_count": 4026,
+      "external_import_count": 3446,
+      "internal_edge_count": 4564,
       "legacy_import_exception_count": 0,
-      "module_count": 1077,
+      "module_count": 1184,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -47,9 +47,15 @@
             "path": "backend/app/domains/relationships/contracts/events.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.relationships.contracts.graph_diagnostics",
+            "path": "backend/app/domains/relationships/contracts/graph_diagnostics.py"
+          },
+          {
             "imports": [
               "app.domains.relationships.contracts.graph_plan",
-              "app.domains.relationships.contracts.graph_recall"
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.contracts.graph_requirements"
             ],
             "module": "app.domains.relationships.contracts.graph_execution",
             "path": "backend/app/domains/relationships/contracts/graph_execution.py"
@@ -61,7 +67,8 @@
           },
           {
             "imports": [
-              "app.domains.relationships.contracts.graph_plan"
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_requirements"
             ],
             "module": "app.domains.relationships.contracts.graph_planner",
             "path": "backend/app/domains/relationships/contracts/graph_planner.py"
@@ -91,6 +98,13 @@
             ],
             "module": "app.domains.relationships.contracts.graph_recall_gateway",
             "path": "backend/app/domains/relationships/contracts/graph_recall_gateway.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_plan"
+            ],
+            "module": "app.domains.relationships.contracts.graph_requirements",
+            "path": "backend/app/domains/relationships/contracts/graph_requirements.py"
           },
           {
             "imports": [
@@ -147,6 +161,20 @@
             ],
             "module": "app.domains.relationships.contracts.routine_interactions",
             "path": "backend/app/domains/relationships/contracts/routine_interactions.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.social_context"
+            ],
+            "module": "app.domains.relationships.contracts.social_consumption",
+            "path": "backend/app/domains/relationships/contracts/social_consumption.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_recall"
+            ],
+            "module": "app.domains.relationships.contracts.social_context",
+            "path": "backend/app/domains/relationships/contracts/social_context.py"
           },
           {
             "imports": [
@@ -221,6 +249,15 @@
             ],
             "module": "app.domains.relationships.policies.graph_plan_schema",
             "path": "backend/app/domains/relationships/policies/graph_plan_schema.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_requirements",
+              "app.domains.relationships.policies.graph_plan_schema"
+            ],
+            "module": "app.domains.relationships.policies.graph_query_plan",
+            "path": "backend/app/domains/relationships/policies/graph_query_plan.py"
           },
           {
             "imports": [
@@ -407,12 +444,23 @@
           },
           {
             "imports": [
+              "app.contracts.decision_observation",
+              "app.domains.relationships.contracts.graph_diagnostics",
+              "app.domains.relationships.contracts.graph_recall"
+            ],
+            "module": "app.domains.relationships.service.graph_observation",
+            "path": "backend/app/domains/relationships/service/graph_observation.py"
+          },
+          {
+            "imports": [
               "app.contracts.retrieval_observation",
               "app.domains.relationships.contracts.graph_execution",
               "app.domains.relationships.contracts.graph_plan",
               "app.domains.relationships.contracts.graph_recall",
               "app.domains.relationships.contracts.graph_recall_gateway",
               "app.domains.relationships.policies.graph_plan_schema",
+              "app.domains.relationships.policies.graph_query_plan",
+              "app.domains.relationships.service.graph_observation",
               "app.domains.relationships.service.graph_recall"
             ],
             "module": "app.domains.relationships.service.graph_planning",
@@ -533,6 +581,16 @@
           },
           {
             "imports": [
+              "app.contracts.read_deadline",
+              "app.core.context_text",
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.contracts.social_context"
+            ],
+            "module": "app.domains.relationships.service.social_context",
+            "path": "backend/app/domains/relationships/service/social_context.py"
+          },
+          {
+            "imports": [
               "app.core.ids",
               "app.domains.relationships.contracts.source_posts",
               "app.domains.relationships.models"
@@ -637,6 +695,7 @@
           },
           {
             "imports": [
+              "app.contracts.activity_thought",
               "app.domains.social.contracts.action_scope",
               "app.domains.social.contracts.observations",
               "app.domains.social.contracts.search_index",
@@ -756,7 +815,9 @@
             "path": "backend/app/domains/social/contracts/timeline.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.contracts.activity_thought"
+            ],
             "module": "app.domains.social.contracts.today_activity",
             "path": "backend/app/domains/social/contracts/today_activity.py"
           },
@@ -825,6 +886,13 @@
             "imports": [],
             "module": "app.domains.social.models",
             "path": "backend/app/domains/social/models/__init__.py"
+          },
+          {
+            "imports": [
+              "app.models"
+            ],
+            "module": "app.domains.social.models.activity_thought",
+            "path": "backend/app/domains/social/models/activity_thought.py"
           },
           {
             "imports": [
@@ -1006,6 +1074,7 @@
           {
             "imports": [
               "app.domains.social.constants",
+              "app.domains.social.models.activity_thought",
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context"
@@ -1089,6 +1158,7 @@
           },
           {
             "imports": [
+              "app.contracts.activity_thought",
               "app.domains.social.contracts.subjective_context"
             ],
             "module": "app.domains.social.schemas.feed",
@@ -1157,6 +1227,18 @@
             ],
             "module": "app.domains.social.service.activity_results",
             "path": "backend/app/domains/social/service/activity_results.py"
+          },
+          {
+            "imports": [
+              "app.contracts.activity_thought",
+              "app.core.ids",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.activity_thought",
+              "app.domains.social.repository.subjective_context"
+            ],
+            "module": "app.domains.social.service.activity_thought",
+            "path": "backend/app/domains/social/service/activity_thought.py"
           },
           {
             "imports": [
@@ -1288,6 +1370,7 @@
           },
           {
             "imports": [
+              "app.contracts.activity_thought",
               "app.core.unit_of_work",
               "app.domains.social.contracts.feed_execution",
               "app.domains.social.contracts.observations",
@@ -1647,6 +1730,16 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.subjective_context",
+              "app.domains.social.contracts.today_activity",
+              "app.domains.social.service.subjective_context",
+              "app.domains.social.service.today_activity_values"
+            ],
+            "module": "app.domains.social.service.subjective_records",
+            "path": "backend/app/domains/social/service/subjective_records.py"
+          },
+          {
+            "imports": [
               "app.domains.characters.service.profile",
               "app.domains.social.contracts.actors",
               "app.domains.social.contracts.timeline",
@@ -1668,16 +1761,26 @@
           {
             "imports": [
               "app.domains.social.constants",
-              "app.domains.social.contracts.subjective_context",
               "app.domains.social.contracts.today_activity",
               "app.domains.social.contracts.today_references",
               "app.domains.social.exceptions",
               "app.domains.social.repository.today_activity",
-              "app.domains.social.service.subjective_context",
+              "app.domains.social.service.subjective_records",
+              "app.domains.social.service.today_activity_thoughts",
               "app.domains.social.service.today_activity_values"
             ],
             "module": "app.domains.social.service.today_activity",
             "path": "backend/app/domains/social/service/today_activity.py"
+          },
+          {
+            "imports": [
+              "app.contracts.activity_thought",
+              "app.domains.social.contracts.today_activity",
+              "app.domains.social.service.activity_thought",
+              "app.domains.social.service.today_activity_values"
+            ],
+            "module": "app.domains.social.service.today_activity_thoughts",
+            "path": "backend/app/domains/social/service/today_activity_thoughts.py"
           },
           {
             "imports": [
@@ -1774,6 +1877,7 @@
           },
           {
             "imports": [
+              "app.contracts.read_deadline",
               "app.domains.relationships.contracts.graph_query",
               "app.domains.relationships.contracts.projection",
               "app.domains.relationships.contracts.projection_commands"
@@ -1966,7 +2070,10 @@
           },
           {
             "imports": [
+              "app.config",
+              "app.contracts.activity_thought",
               "app.core.unit_of_work",
+              "app.domains.relationships.contracts.social_consumption",
               "app.domains.routine_posts.constants",
               "app.domains.routine_posts.contracts.context",
               "app.domains.routine_posts.contracts.generation",
@@ -1995,9 +2102,11 @@
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
               "app.runtime.social.agent_tools",
+              "app.runtime.social.langgraph_actions",
               "app.runtime.social.manual_inbox",
               "app.runtime.social.observations",
-              "app.runtime.social.subjective_composition"
+              "app.runtime.social.subjective_composition",
+              "app.runtime.social_snapshot"
             ],
             "module": "app.runtime.routine_posts.sqlalchemy_runtime",
             "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py"
@@ -2114,6 +2223,7 @@
           },
           {
             "imports": [
+              "app.config",
               "app.domains.routines.repository.public_action_executions",
               "app.domains.routines.service.public_action_executions",
               "app.domains.social.contracts.feed_execution",
@@ -2123,10 +2233,12 @@
               "app.runtime.activity_proposals.composition",
               "app.runtime.social.agent_tools",
               "app.runtime.social.feed_reaction_provider",
+              "app.runtime.social.langgraph_actions",
               "app.runtime.social.observations",
               "app.runtime.social.subjective_composition",
               "app.runtime.social.world_feed_actions",
-              "app.runtime.social.world_feed_queries"
+              "app.runtime.social.world_feed_queries",
+              "app.runtime.social_snapshot"
             ],
             "module": "app.runtime.social.feed_cycle",
             "path": "backend/app/runtime/social/feed_cycle.py"
@@ -2165,7 +2277,11 @@
           },
           {
             "imports": [
+              "app.config",
+              "app.contracts.activity_thought",
+              "app.contracts.activity_thought_output",
               "app.credentials",
+              "app.domains.relationships.contracts.social_consumption",
               "app.domains.social.contracts.feed_execution",
               "app.domains.social.contracts.world_feed",
               "app.domains.social.exceptions",
@@ -2357,9 +2473,11 @@
           },
           {
             "imports": [
+              "app.contracts.activity_thought",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.contracts.subjective_persistence",
               "app.domains.social.models.subjective_context",
+              "app.domains.social.service.activity_thought",
               "app.domains.social.service.subjective_context",
               "app.runtime.social.subjective_references"
             ],
@@ -2389,6 +2507,7 @@
           },
           {
             "imports": [
+              "app.config",
               "app.domains.social.service.today_activity",
               "app.runtime.social.today_activity_queries"
             ],
@@ -2795,7 +2914,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "8747e24c9e9b5c436564e3c8db012e86837bc4825d5f0aef13b4e0058df87571"
+        "sha256": "8af5882af63bd0949bde0147216d35ad0147e71b38cbebf5be06eb4e65d0e2ec"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -2974,7 +3093,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "1f8025f5f256ca2aa1a65dfa63ba74f25b5fccb7e6de20c3348fc5145a600fcb"
+    "workflow_sha256": "6a7188138b199aa7e8798549c4b2918893dffe53db89637b9fd56fbffe7218f5"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -3044,7 +3163,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "1c0f5301731781f812255ae4571244434dda7c3f10a525026c43e80a63dda0ff"
+        "sha256": "6989fde6e3ecd372f7d0d0d148a46dda7a73404665605324eb822f42f4587e7f"
       },
       "steps": [
         {

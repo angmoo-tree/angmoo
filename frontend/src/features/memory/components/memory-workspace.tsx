@@ -1,4 +1,5 @@
 "use client";
+import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 import {
   ArrowLeft,
@@ -34,6 +35,7 @@ import { correctMemoryItem, deleteMemoryItem, getMemoryItem, getMemorySetting, l
 import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
+import { MemoryEmbeddingControls } from "@/features/memory/components/memory-embedding-controls";
 
 import type { MemoryScopeLoaders, MemoryWorldOption, MemoryCharacterOption } from "@/features/memory/types/scope-options";
 
@@ -431,7 +433,8 @@ export function MemoryWorkspace({
               </Button>
             </div>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? "현재 캐릭터"} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">
                 <p>{mutationFailure.message}</p>
@@ -531,6 +534,7 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
         {detail.superseded_by_memory_id ? <div><dt>교체 상태</dt><dd><button className={styles.inlineButton} onClick={() => onSelectMemory(detail.superseded_by_memory_id ?? "")} type="button">새 기억 열기</button></dd></div> : null}
       </dl>
       <section className={styles.evidenceSection}>
+        {detail.episode && <EpisodeMemoryDetail episode={detail.episode} />}
         <div className={styles.sectionHeading}><h3>근거</h3><span>{detail.provenance_summary}</span></div>
         {detail.evidence.length === 0 ? <p className={styles.muted}>연결된 근거가 없습니다.</p> : (
           <ol className={styles.evidenceList}>

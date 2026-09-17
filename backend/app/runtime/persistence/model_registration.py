@@ -10,9 +10,12 @@ def register_models() -> MetaData:
     import app.domains.chat.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
     import app.domains.local_bot.models  # noqa: F401 - explicit ORM registration
+    import app.domains.memory.models.consolidation_request  # noqa: F401
     import app.domains.memory.models.batch  # noqa: F401 - explicit ORM registration
+    import app.domains.memory.models.embedding  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.daypart  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.items  # noqa: F401 - explicit ORM registration
+    import app.domains.memory.models.episode  # noqa: F401 - explicit ORM registration
     import app.domains.operations.models  # noqa: F401 - explicit ORM registration
     import app.domains.relationships.models.points  # noqa: F401 - explicit ORM registration
     import app.domains.relationships.models.projection  # noqa: F401 - explicit ORM registration
@@ -24,6 +27,7 @@ def register_models() -> MetaData:
     import app.domains.social.models.manual_writes  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.posts  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.subjective_context  # noqa: F401 - explicit ORM registration
+    import app.domains.social.models.activity_thought  # noqa: F401 - explicit ORM registration
     import app.domains.tree.models  # noqa: F401 - explicit ORM registration
     import app.domains.world_characters.models  # noqa: F401 - explicit ORM registration
     import app.domains.world_packages.models  # noqa: F401 - explicit ORM registration

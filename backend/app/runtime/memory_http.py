@@ -16,12 +16,16 @@ from app.domains.memory.service.items import MemoryWriteLifecycleService
 from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.world_characters.composition import public_profile_service
 from app.runtime.memory_selection_provider import memory_provider
+from app.runtime.memory_embedding_provider import validate_embedding_credential
+from app.domains.identity.repository.credentials import embedding_credential_options
 
 
 def _service(db: Session) -> MemoryReadService:
+    from app.runtime.memory.episode_inspector import episode_detail_view
     return MemoryReadService(
         memory_repository(db),
         SqlAlchemyMemorySourceEvidenceReader(db),
+        episode_reader=lambda scope, item_id, now: episode_detail_view(db, scope, item_id, now),
     )
 
 
@@ -53,7 +57,7 @@ def _validate_provider(db: Session, owner_id: str, model_id: str) -> None:
     memory_provider(lambda: nullcontext(db), owner_id, model_id)
 
 
-def build_memory_workflows() -> MemoryWorkflows:
+def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
     return MemoryWorkflows(
         read_service=_service,
         scope_service=_scope_service,
@@ -61,4 +65,7 @@ def build_memory_workflows() -> MemoryWorkflows:
         batch_repository=memory_batch_repository,
         character_names=_character_names,
         validate_provider=_validate_provider,
+        validate_embedding_credential=validate_embedding_credential,
+        embedding_credential_options=embedding_credential_options,
+        embedding_runtime_status=embedding_runtime_status,
     )

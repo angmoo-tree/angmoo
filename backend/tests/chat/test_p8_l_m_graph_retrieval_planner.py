@@ -380,7 +380,8 @@ def test_graph_planner_uses_only_remaining_request_wide_repair() -> None:
         )
     )
     assert len(planner.requests) == 2
-    assert planner.requests[1].repair_diagnostic == "malformed_json"
+    # Unknown provider text is not a safe contract diagnostic.
+    assert planner.requests[1].repair_diagnostic == "unknown"
     assert result.metrics.repair_used is True
     assert result.call_tracker["repair_node"] == "graph_planner"
     assert result.call_tracker["logical_counts"]["graph_planner"] == 2

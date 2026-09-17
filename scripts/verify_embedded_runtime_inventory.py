@@ -265,13 +265,31 @@ def _assignment_literals(tree: ast.AST) -> dict[str, object]:
 def build_migration_inventory() -> dict[str, Any]:
     directory = ROOT / "backend" / "alembic" / "versions"
     entries: list[dict[str, Any]] = []
+    # Preserve the already-reviewed 89-revision historical inventory. New
+    # SQLite product revisions are checked by the live Alembic/embedded chain.
+    revisions = {
+        _assignment_literals(ast.parse(path.read_text(encoding="utf-8"))).get("revision"):
+        _assignment_literals(ast.parse(path.read_text(encoding="utf-8"))).get("down_revision")
+        for path in directory.glob("*.py")
+    }
+    historical = set()
+    pending = ["20260910_0091"]
+    while pending:
+        revision = pending.pop()
+        if revision is None or revision in historical:
+            continue
+        if revision not in revisions:
+            raise ValueError("historical migration predecessor missing: " + revision)
+        historical.add(revision)
+        parent = revisions[revision]
+        pending.extend(parent if isinstance(parent, tuple) else [parent])
     for path in sorted(directory.glob("*.py")):
         text = path.read_text(encoding="utf-8")
         tree = ast.parse(text, filename=str(path))
         values = _assignment_literals(tree)
         # This inventory preserves PostgreSQL-era schema provenance. It is not
         # an executable import source or the current SQLite forward chain.
-        if values.get("revision") == "20260825_0083":
+        if values.get("revision") not in historical or values.get("revision") == "20260825_0083":
             continue
         markers = sorted(
             marker for marker, pattern in POSTGRES_MARKERS.items() if pattern.search(text)

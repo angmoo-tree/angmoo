@@ -23,6 +23,32 @@ from app.domains.memory.contracts.retrieval_plan import (
 )
 from app.domains.memory.contracts.recall import CanonicalRecallOperation
 
+CANONICAL_GENERATED_STEP_IDS = tuple(
+    f"step{i}" for i in range(1, MAX_CANONICAL_PLAN_STEPS + 1)
+)
+CANONICAL_MEMORY_SUBJECT_INSTRUCTIONS = (
+    "Memory searches are already scoped to the responding character by the backend. "
+    "memory_subject_refs contains supplied entity refs that code resolved to that character. "
+    "For search_memory_items, counterpart_ref is only an additional filter for another participant. "
+    "Never use a memory_subject_ref as counterpart_ref, even if its model-assigned role says counterpart. "
+    "Naming the memory owner or saying 'your memories' does not add a counterpart condition. "
+    "If no other participant is required, omit counterpart_ref from parameters; do not output null. "
+    "For example, searching the named memory owner's training memories needs search_text only; "
+    "searching advice received from a different named mentor keeps that mentor's supplied ref. "
+    "Do not invent refs, change the memory owner, or remove genuine other-participant or time conditions."
+)
+CANONICAL_STEP_ID_INSTRUCTIONS = (
+    "Use unique step ids in order: " + ", ".join(CANONICAL_GENERATED_STEP_IDS) + ". "
+    "An id labels a step in this plan, not an operation or workflow node. "
+    "Ids must start with a lowercase letter and contain only lowercase letters, digits "
+    "or underscores (1-48 characters). Valid: step1, step_1, search_memory. "
+    "Invalid: step-1, Step1, 1step. "
+    "For dependent operations set input_ref to an earlier id plus .source_refs "
+    "(for example step1.source_refs); update input_ref when renaming an id. "
+    "Never reference yourself, a future or missing step, or a different property. "
+    "For other operations input_ref must be null."
+)
+
 MAX_CANONICAL_SEARCH_TEXT_CHARACTERS = 160
 _OPAQUE_REF_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
 _INPUT_REF_RE = re.compile(r"^(?P<step>[a-z][a-z0-9_]{0,47})\.source_refs$")
@@ -130,7 +156,11 @@ def canonical_retrieval_plan_response_schema() -> dict[str, Any]:
                 "items": {
                     "type": "object",
                     "properties": {
-                        "id": {"type": "string"},
+                        "id": {
+                            "type": "string",
+                            "enum": list(CANONICAL_GENERATED_STEP_IDS),
+                            "description": "Unique step label, assigned in order.",
+                        },
                         "operation": {
                             "type": "string",
                             "enum": sorted(_CANONICAL_OPERATION_VALUES),
@@ -140,7 +170,14 @@ def canonical_retrieval_plan_response_schema() -> dict[str, Any]:
                             "type": "object",
                             "properties": {
                                 "search_text": {"type": "string"},
-                                "counterpart_ref": {"type": "string"},
+                                "counterpart_ref": {
+                                    "type": "string",
+                                    "description": (
+                                        "Optional other-participant ref. Omit when no counterpart is "
+                                        "required; null is invalid. For search_memory_items, never "
+                                        "use a ref listed in memory_subject_refs."
+                                    ),
+                                },
                                 "entity_ref": {"type": "string"},
                                 "current_thread": {"type": "boolean"},
                                 "limit": {"type": "integer"},
@@ -338,7 +375,29 @@ def _required_hash(value: Any) -> str:
     return normalized
 
 
+def canonical_planner_repair_instruction(code: str) -> str:
+    if code in {
+        "canonical_plan_memory_subject_as_counterpart",
+        "canonical_plan_counterpart_ref_invalid",
+    }:
+        return CANONICAL_MEMORY_SUBJECT_INSTRUCTIONS + " " + CANONICAL_STEP_ID_INSTRUCTIONS
+    if code in {
+        "canonical_plan_step_id_invalid", "canonical_plan_step_id_duplicate",
+        "canonical_plan_reference_invalid", "canonical_plan_input_ref_invalid",
+        "canonical_plan_input_ref_required", "canonical_plan_input_ref_forbidden",
+    }:
+        return CANONICAL_STEP_ID_INSTRUCTIONS
+    return (
+        "Return a valid canonical-plan.v1 object using the supplied catalog and binding. "
+        + CANONICAL_STEP_ID_INSTRUCTIONS
+    )
+
+
 __all__ = [
+    "CANONICAL_MEMORY_SUBJECT_INSTRUCTIONS",
+    "CANONICAL_GENERATED_STEP_IDS",
+    "CANONICAL_STEP_ID_INSTRUCTIONS",
+    "canonical_planner_repair_instruction",
     "MAX_CANONICAL_SEARCH_TEXT_CHARACTERS",
     "canonical_retrieval_plan_response_schema",
     "parse_canonical_retrieval_plan_payload",

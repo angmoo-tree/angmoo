@@ -26,6 +26,7 @@ _GENERATIVE_CAPABILITIES = ProviderCapabilities(
     text=True,
     structured_json=True,
     image_input=True,
+    tool_calls=True,
 )
 _EMBEDDING_CAPABILITIES = ProviderCapabilities(embedding=True)
 _MODEL_SPECS = {

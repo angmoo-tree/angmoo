@@ -8,10 +8,11 @@ unbounded semantic values before any canonical lookup runs.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 import json
 from typing import Any
+from app.domains.chat.contracts.reference_observation import reference_entity, reference_value, reference_failure
 
 from app.domains.chat.contracts.retrieval_intent import (
     RETRIEVAL_INTENT_VERSION,
@@ -92,16 +93,23 @@ ROUTER_VALIDATION_CODES = frozenset(
         "relationship_unbound",
         "current_context_not_minimal",
         "both_coordination_missing",
+        "coordination_intent_unsupported",
         "coordination_route_mismatch",
         "clarification_slot_missing",
         "clarification_route_mismatch",
         "time_scope_invalid",
         "aggregation_invalid",
         "nullable_shape_invalid",
+        "native_output_incomplete",
         "forbidden_field",
         "raw_query_forbidden",
         "repair_exhausted",
         "router_validation_unknown",
+        "graph_selection_person_invalid", "graph_selection_person_unbound",
+        "graph_query_direction_invalid", "graph_query_collection_target_forbidden",
+        "graph_query_target_required", "graph_query_target_invalid", "graph_query_dependency_invalid",
+        "graph_query_count_invalid", "graph_query_target_unbound", "graph_query_keys_invalid",
+        "graph_query_self_target_invalid",
     }
 )
 ROUTER_SECURITY_VALIDATION_CODES = frozenset(
@@ -109,6 +117,8 @@ ROUTER_SECURITY_VALIDATION_CODES = frozenset(
 )
 
 _ROUTER_VALIDATION_CODE_MAP = {
+    "retrieval_workflow_intent_not_registered": "coordination_intent_unsupported",
+    "retrieval_router_native_output_incomplete": "native_output_incomplete",
     "JSONDecodeError": "json_decode_failed",
     "empty_json_response": "json_decode_failed",
     "json_response_not_object": "json_not_object",
@@ -413,7 +423,11 @@ def retrieval_router_response_schema() -> dict[str, Any]:
     }
 
 
-def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalIntentEnvelope:
+def parse_retrieval_intent_payload(
+    payload: Mapping[str, Any],
+    *,
+    validation_step: Callable[[str, str], None] | None = None,
+) -> RetrievalIntentEnvelope:
     """Parse one untrusted Router payload with exact-key validation."""
 
     if not isinstance(payload, Mapping):
@@ -422,9 +436,17 @@ def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalInten
     _require_exact_keys(payload, _TOP_LEVEL_KEYS, "retrieval_router_payload")
 
     version = _required_string(payload.get("version"), "version", maximum=64)
+    if version != RETRIEVAL_INTENT_VERSION:
+        raise RetrievalContractError("retrieval_intent_version_mismatch")
     decision = _enum(RetrievalDecision, payload.get("decision"), "decision")
     route = _enum(RetrievalRoute, payload.get("route"), "route")
     intent = _closed_string(payload.get("intent"), ROUTER_INTENTS, "intent")
+
+    def step(stage: str, status: str) -> None:
+        if validation_step is not None:
+            validation_step(stage, status)
+
+    step("entities", "running")
 
     raw_entities = payload.get("entities")
     if not isinstance(raw_entities, Sequence) or isinstance(
@@ -434,7 +456,8 @@ def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalInten
     if len(raw_entities) > 4:
         raise RetrievalContractError("retrieval_router_entity_limit_exceeded")
     entities: list[RetrievalEntityMention] = []
-    for raw_entity in raw_entities:
+    for entity_index, raw_entity in enumerate(raw_entities):
+        reference_entity(entity_index)
         entity = _object(raw_entity, "entity")
         _require_exact_keys(entity, {"ref", "mention", "role"}, "entity")
         entities.append(
@@ -449,9 +472,15 @@ def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalInten
             )
         )
 
+    step("entities", "pass")
+    step("relationship", "running")
     relationship = _parse_relationship(payload.get("relationship"))
+    step("relationship", "pass")
+    step("meaning", "running")
     time_scope = _parse_time_scope(payload.get("time_scope"))
     aggregation = _parse_aggregation(payload.get("aggregation"))
+    step("meaning", "pass")
+    step("coordination", "running")
     coordination_hint = _optional_closed_string(
         payload.get("coordination_hint"),
         ROUTER_COORDINATION_HINTS,
@@ -479,6 +508,7 @@ def parse_retrieval_intent_payload(payload: Mapping[str, Any]) -> RetrievalInten
         raise RetrievalContractError("retrieval_router_both_coordination_required")
     if route is not RetrievalRoute.BOTH and coordination_hint is not None:
         raise RetrievalContractError("retrieval_router_coordination_route_mismatch")
+    step("coordination", "pass")
     # CURRENT_CONTEXT describes retrieval sufficiency, not an absence of
     # semantic focus. Today SNS questions may retain entity, time, relationship
     # and aggregation meaning while requiring no additional database plan.
@@ -581,14 +611,21 @@ def _require_exact_keys(
     value: Mapping[str, Any], expected: set[str] | frozenset[str], field: str
 ) -> None:
     if set(value) != set(expected):
+        if field == "entity" and "ref" not in value:
+            reference_failure("entity_ref", None, rule="entity_keys.v1", reason="missing")
         raise RetrievalContractError(f"retrieval_router_{field}_keys_invalid")
 
 
 def _required_string(value: Any, field: str, *, maximum: int) -> str:
+    reference_value(field, value)
     if not isinstance(value, str):
+        if field in {"entity_ref", "relationship_from", "relationship_to"}:
+            reference_failure(field, value, rule="required_string.v1", reason="invalid_type")
         raise RetrievalContractError(f"retrieval_router_{field}_invalid")
     normalized = " ".join(value.split())
     if not normalized or len(normalized) > maximum:
+        if field in {"entity_ref", "relationship_from", "relationship_to"}:
+            reference_failure(field, normalized, rule="required_string.v1", reason="empty_after_normalization" if not normalized else "length_exceeded")
         raise RetrievalContractError(f"retrieval_router_{field}_invalid")
     return normalized
 

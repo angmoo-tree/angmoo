@@ -11,7 +11,8 @@ from app.domains.relationships.models.social import (
 )
 from app.domains.routines.models.resident import AgentPublicActionExecution
 from app.domains.social.models.posts import PostLike
-from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
+from app.domains.social.repository.today_activity import TodayActivityRepository
+from app.domains.social.service.subjective_records import read_subjective_records
 
 
 def read_subjective_source(session, scope, *, source_type, source_id):
@@ -75,8 +76,8 @@ def read_subjective_source(session, scope, *, source_type, source_id):
             )
         )
     }
-    reader = SqlAlchemyTodaySocialActivityReader(session)
-    validated = reader._subjective_by_event(
+    validated = read_subjective_records(
+        TodayActivityRepository(session),
         scope.owner_id,
         scope.world_id,
         scope.subject_world_character_id,

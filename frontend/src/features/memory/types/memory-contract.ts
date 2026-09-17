@@ -61,7 +61,20 @@ export type MemoryItemDetailRead = MemoryItemSummaryRead & {
   scope: MemoryScopeRead;
   evidence: MemoryEvidenceRead[];
   provenance_summary: string;
+  episode?: EpisodeDetailRead | null;
   capabilities: { read: "available"; mutate: "available" };
+};
+
+export type EpisodeDetailRead = {
+  representation: "episode_v1" | "legacy_summary";
+  partial: boolean;
+  omitted_units: number;
+  followup_count: number;
+  units: {
+    sources: { role: string; text: string | null; status: "verified" | "missing" | "changed" | "unavailable" }[];
+    thought: { text: string | null; status: "recorded" | "missing" | "invalid"; truncated: boolean } | null;
+    legacy_declaration: string | null;
+  }[];
 };
 
 export type MemorySettingMutationRead = {
@@ -90,7 +103,8 @@ export type WorldChatEvidenceSummaryRead = {
 
 export type WorldChatEvidenceItemRead = {
   reference: string;
-  kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity";
+  kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity" | "episode_memory";
+  episode?: EpisodeDetailRead | null;
   label: string;
   excerpt: string | null;
   occurred_at: string | null;
@@ -107,4 +121,5 @@ export type WorldChatEvidenceRead = {
   retrieval_outcome: string;
   capability: "available" | "degraded";
   items: WorldChatEvidenceItemRead[];
+  current_context?: WorldChatEvidenceItemRead[];
 };

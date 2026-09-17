@@ -69,6 +69,11 @@ class MemoryRecallDocument:
     metadata: Mapping[str, str] = field(default_factory=dict)
 
 
+class MemoryRecallLexicalPolicy(StrEnum):
+    LEGACY_STRICT_V1 = "legacy_strict_v1"
+    GROUP_OR_V1 = "group_or_v1"
+
+
 @dataclass(frozen=True, slots=True)
 class MemoryRecallSearchQuery:
     scope: MemoryScope
@@ -77,6 +82,16 @@ class MemoryRecallSearchQuery:
     limit: int
     counterpart_world_character_id: str | None = None
     thread_id: str | None = None
+    # Backend operation policy, never an LLM-controlled search parameter.
+    korean_spacing_fallback: bool = False
+    occurred_from: datetime | None = None
+    occurred_to: datetime | None = None
+
+    lexical_policy: MemoryRecallLexicalPolicy = field(default=MemoryRecallLexicalPolicy.LEGACY_STRICT_V1, kw_only=True)
+
+
+class MemoryRecallSearchIncomplete(RuntimeError):
+    """A bounded search stopped before absence could be established."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +112,13 @@ class MemoryRecallCandidate:
 
 @dataclass(frozen=True, slots=True)
 class CanonicalRecallRecord:
+    """A result identity plus its currently revalidated original-source references.
+
+    reference identifies this result (including memory-item and memory-source
+    documents). Dependent source reads consume evidence_references instead.
+    Records without source evidence cannot authorize a dependent detail read.
+    """
+
     reference: str
     kind: RecallDocumentKind
     canonical_source_id: str
@@ -180,6 +202,7 @@ __all__ = [
     "MemoryRecallCandidate",
     "MemoryRecallDoctor",
     "MemoryRecallDocument",
+    "MemoryRecallLexicalPolicy",
     "MemoryRecallSearchQuery",
     "RecallDocumentKind",
     "SOURCE_KIND_BY_TYPE",

@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+from app.contracts.decision_observation import decision_scope, emit
+
 from app.contracts.retrieval_observation import observe
+from app.domains.chat.contracts.graph_failure import GraphFailureDiagnostic
+from app.domains.chat.service.planner_diagnostics import observe_graph_rejection
+from app.domains.relationships.contracts.graph_diagnostics import (
+    GraphAttemptObservation, GraphRejection, graph_rejection,
+)
 
 import asyncio
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from time import monotonic
 from typing import Any
@@ -94,6 +101,14 @@ class GraphPlanningResult:
     call_tracker: dict[str, Any]
 
 
+@dataclass
+class _PlanningProgress:
+    rejections: list[GraphRejection] = field(default_factory=list)
+    physical_count_complete: bool = True
+    phase: str = "request"
+    stage: str = "request"
+
+
 class GraphRetrievalPlanningService:
     """Call one graph specialist, validate it and execute P8-L-I typed reads."""
 
@@ -116,20 +131,45 @@ class GraphRetrievalPlanningService:
         deadline_at: datetime,
         _tracker: RouteAwareCallTracker | None = None,
     ) -> GraphPlanningResult:
+        tracker = _tracker or restore_call_tracker_snapshot(command.call_tracker, deadline_at=deadline_at)
+        progress = _PlanningProgress()
+        try:
+            return await self._plan_and_execute(command, now=now, deadline_at=deadline_at,
+                tracker=tracker, progress=progress, coordinator_owned=_tracker is not None)
+        except (Exception, asyncio.CancelledError) as exc:
+            # This copy belongs to the standalone request; BOTH replaces it with
+            # its final shared snapshot after all sibling tasks are settled.
+            emit("graph_execution", axis="graph", phase="execution",
+                 execution_state="failed" if progress.phase == "execution" else "not_entered",
+                 basic={"status": "failed", "check": "executor_entered" if progress.phase == "execution" else "not_entered"})
+            exc.call_tracker = tracker.snapshot()
+            terminal = str(exc)
+            if isinstance(exc, asyncio.CancelledError):
+                terminal = "graph_retrieval_cancelled"
+            elif terminal not in {"graph_planner_request_wide_repair_exhausted", "graph_retrieval_deadline_exceeded"}:
+                terminal = "graph_retrieval_failed"
+            rows = list(progress.rejections)
+            if not rows or rows[-1].phase != progress.phase:
+                rows.append(graph_rejection(exc, phase=progress.phase, stage=progress.stage))
+            diagnostic = GraphFailureDiagnostic(terminal, tuple(rows),
+                tracker.snapshot()["repair_node"], progress.physical_count_complete)
+            exc.graph_failure_diagnostic = diagnostic
+            observe("graph_failure", axis="graph", status="failed", terminal_code=terminal,
+                **rows[-1].payload(), repair_node=diagnostic.repair_node,
+                repair_exhausted=terminal == "graph_planner_request_wide_repair_exhausted",
+                physical_count_complete=diagnostic.physical_count_complete,
+                logical_calls=tracker.logical_counts[LlmNode.GRAPH_PLANNER],
+                physical_attempts=tracker.physical_counts[LlmNode.GRAPH_PLANNER])
+            raise
+
+    async def _plan_and_execute(self, command: GraphRetrievalCommand, *, now: datetime,
+        deadline_at: datetime, tracker: RouteAwareCallTracker, progress: _PlanningProgress,
+        coordinator_owned: bool) -> GraphPlanningResult:
         if now.tzinfo is None or deadline_at.tzinfo is None:
             raise RetrievalContractError("graph_retrieval_deadline_timezone_required")
         if now >= deadline_at:
             raise RetrievalContractError("graph_retrieval_deadline_exceeded")
-        coordinator_owned = _tracker is not None
         self._validate_command(command, allow_both=coordinator_owned)
-        tracker = (
-            _tracker
-            if _tracker is not None
-            else restore_call_tracker_snapshot(
-                command.call_tracker,
-                deadline_at=deadline_at,
-            )
-        )
         if tracker.route is not command.intent.route:
             raise RetrievalContractError("graph_retrieval_tracker_route_mismatch")
 
@@ -150,23 +190,22 @@ class GraphRetrievalPlanningService:
         repair_used = False
         first_physical = 0
         repair_physical = 0
+        physical_before = tracker.physical_counts[LlmNode.GRAPH_PLANNER]
 
         tracker.record_logical_call(LlmNode.GRAPH_PLANNER, now=now)
+        progress.phase = "first"
         try:
             provider_result = await self._invoke_planner(
                 request,
-                timeout_seconds=remaining_seconds,
+                timeout_seconds=remaining_seconds, tracker=tracker, progress=progress, now=now,
             )
             first_physical = provider_result.physical_attempt_count
-            for _ in range(first_physical):
-                tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
-            validated = self._validator.validate(provider_result.plan, context)
+            progress.stage = "execution_contract"
+            with decision_scope("graph", "first"):
+                validated = self._validator.validate(provider_result.plan, context)
         except (GraphPlannerOutputError, GraphPlanContractError) as exc:
-            observe("planner_validation", axis="graph", phase="first", status="rejected", reason="plan_contract_invalid")
-            if isinstance(exc, GraphPlannerOutputError):
-                first_physical = exc.physical_attempt_count
-                for _ in range(first_physical):
-                    tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
+            first_physical = tracker.physical_counts[LlmNode.GRAPH_PLANNER] - physical_before
+            progress.rejections.append(observe_graph_rejection(exc, phase="first", stage=progress.stage, tracker=tracker))
             repair_used = True
             remaining_seconds -= monotonic() - started
             if remaining_seconds <= 0:
@@ -177,36 +216,41 @@ class GraphRetrievalPlanningService:
                     now=now,
                     repair=True,
                 )
-            except RetrievalContractError as budget_exc:
+            except RetrievalContractError:
                 raise RetrievalContractError(
                     "graph_planner_request_wide_repair_exhausted"
-                ) from budget_exc
-            diagnostic = getattr(exc, "diagnostic", str(exc))
-            repaired_request = replace(request, repair_diagnostic=diagnostic[:160])
+                ) from exc
+            # Reuse the same bounded cause-derived code as the diagnostic record.
+            repaired_request = replace(
+                request, repair_diagnostic=progress.rejections[-1].validation_code,
+            )
+            progress.phase = "repair"
             try:
                 provider_result = await self._invoke_planner(
                     repaired_request,
-                    timeout_seconds=remaining_seconds,
+                    timeout_seconds=remaining_seconds, tracker=tracker, progress=progress, now=now,
                 )
                 repair_physical = provider_result.physical_attempt_count
-                for _ in range(repair_physical):
-                    tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
-                validated = self._validator.validate(provider_result.plan, context)
+                progress.stage = "execution_contract"
+                with decision_scope("graph", "repair"):
+                    validated = self._validator.validate(provider_result.plan, context)
             except (GraphPlannerOutputError, GraphPlanContractError) as repaired:
-                observe("planner_validation", axis="graph", phase="repair", status="rejected", reason="plan_contract_invalid")
                 if isinstance(repaired, GraphPlannerOutputError):
                     repair_physical = repaired.physical_attempt_count
-                    for _ in range(repair_physical):
-                        tracker.record_physical_attempt(
-                            LlmNode.GRAPH_PLANNER,
-                            now=now,
-                        )
+                progress.rejections.append(observe_graph_rejection(repaired, phase="repair", stage=progress.stage, tracker=tracker))
                 raise RetrievalContractError(
                     "graph_planner_request_wide_repair_exhausted"
                 ) from repaired
 
         observe("planner", axis="graph", planned=len(validated.plan.steps), repair_used=repair_used, first_pass_valid=not repair_used, limit_reached=bool(validated.limit_clamped_steps))
-        execution = self._executor.execute(validated.plan, context, now=now)
+        progress.phase = "execution"
+        progress.stage = "execution"
+        emit("graph_execution", axis="graph", phase="execution", execution_state="executor_entered",
+             basic={"status": "started", "stage": "execution"})
+        with decision_scope("graph", "repair" if repair_used else "first", "executor"):
+            execution = self._executor.execute(validated.plan, context, now=now)
+        emit("graph_execution", axis="graph", phase="execution", execution_state="completed",
+             basic={"status": "completed", "stage": "execution", "returned": len(execution.results)})
         return GraphPlanningResult(
             request_id=command.resolved.request_id,
             plan=execution.plan,
@@ -236,17 +280,40 @@ class GraphRetrievalPlanningService:
             call_tracker=tracker.snapshot(),
         )
 
-    async def _invoke_planner(
-        self,
-        request: GraphPlannerRequest,
-        *,
-        timeout_seconds: float,
-    ):
+    async def _invoke_planner(self, request: GraphPlannerRequest, *, timeout_seconds: float,
+        tracker: RouteAwareCallTracker, progress: _PlanningProgress, now: datetime):
+        progress.stage = "provider_output"
         try:
             async with asyncio.timeout(timeout_seconds):
-                return await self._planner.plan(request)
-        except TimeoutError as exc:
-            raise RetrievalContractError("graph_retrieval_deadline_exceeded") from exc
+                result = await self._planner.plan(request)
+        except (Exception, asyncio.CancelledError) as exc:
+            current = exc
+            attempt = None
+            for _ in range(6):
+                if current is None:
+                    break
+                candidate = getattr(current, "graph_attempt", None)
+                if isinstance(candidate, GraphAttemptObservation):
+                    attempt = candidate
+                    break
+                current = current.__cause__
+            if attempt is None and isinstance(exc, GraphPlannerOutputError):
+                attempt = GraphAttemptObservation(exc.physical_attempt_count)
+            if attempt is None:
+                attempt = GraphAttemptObservation(0, complete=False)
+            for _ in range(attempt.physical_attempts):
+                tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
+            progress.physical_count_complete &= attempt.complete
+            if isinstance(exc, (TimeoutError, asyncio.CancelledError)):
+                progress.stage = "cancelled" if isinstance(exc, asyncio.CancelledError) else "transport"
+            elif not isinstance(exc, GraphPlanContractError):
+                progress.stage = "transport"
+            if isinstance(exc, TimeoutError):
+                raise RetrievalContractError("graph_retrieval_deadline_exceeded") from exc
+            raise
+        for _ in range(result.physical_attempt_count):
+            tracker.record_physical_attempt(LlmNode.GRAPH_PLANNER, now=now)
+        return result
 
     @staticmethod
     def _validate_command(
@@ -306,6 +373,7 @@ class GraphRetrievalPlanningService:
                 None if aggregation is None else aggregation.target_role
             ),
             max_hops_hint=command.resolved.caps.max_hops,
+            graph_queries=command.intent.graph_queries,
         )
 
     @staticmethod
@@ -323,7 +391,7 @@ class GraphRetrievalPlanningService:
             entity_bindings=tuple(
                 (binding.ref, binding.world_character_id)
                 for binding in resolved.entity_bindings
-            ),
+            ) + ((("builtin-requester", resolved.requester_world_character_id),) if command.intent.graph_queries else ()),
             operation_allowlist=resolved.graph_operation_allowlist,
             row_limit=resolved.caps.row_limit,
             max_hops=resolved.caps.max_hops,
@@ -335,6 +403,7 @@ class GraphRetrievalPlanningService:
                 resolved.relationship_to_world_character_id
             ),
             graph_projection_enabled=command.graph_projection_enabled,
+            graph_queries=command.intent.graph_queries,
         )
 
     @staticmethod

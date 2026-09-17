@@ -2629,6 +2629,7 @@ def _patch_root_post_social_contract(monkeypatch) -> None:
         "record_declared_subjective_context",
         lambda *_args, **_kwargs: None,
     )
+    monkeypatch.setattr(langgraph_resident, "record_activity_thought", lambda *_args, **_kwargs: None)
 
 
 def _fake_writing_db() -> SimpleNamespace:
@@ -3058,6 +3059,7 @@ def test_topic_arc_progress_past_target_date_is_ignored(monkeypatch) -> None:
 
 
 def _patch_reply_execution(monkeypatch, *, created: list[dict[str, str]]) -> None:
+    monkeypatch.setattr(langgraph_resident, "record_activity_thought", lambda *_args, **_kwargs: None)
     def fake_reserve(_ctx, **kwargs):
         return (
             SimpleNamespace(

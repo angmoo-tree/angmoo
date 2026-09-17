@@ -1,6 +1,7 @@
 """Validated graph execution bindings and typed results."""
 from __future__ import annotations
 from dataclasses import (dataclass)
+from app.domains.relationships.contracts.graph_requirements import GraphQueryRequirement, validate_graph_queries
 
 from app.domains.relationships.contracts.graph_plan import (
     GraphPlanContractError,
@@ -31,6 +32,7 @@ class GraphPlanExecutionContext:
     relationship_from_world_character_id: str | None = None
     relationship_to_world_character_id: str | None = None
     graph_projection_enabled: bool = True
+    graph_queries: tuple[GraphQueryRequirement, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.request_id or not self.envelope_version or len(self.envelope_hash) != 64:
@@ -45,6 +47,13 @@ class GraphPlanExecutionContext:
             raise GraphPlanContractError("graph_execution_scope_invalid")
         refs = [ref for ref, _identifier in self.entity_bindings]
         identifiers = [identifier for _ref, identifier in self.entity_bindings]
+        if self.graph_queries:
+            if self.envelope_version != "resolved-retrieval.v2":
+                raise GraphPlanContractError("graph_execution_binding_invalid")
+            validate_graph_queries(self.graph_queries, set(refs))
+            bindings = dict(self.entity_bindings)
+            if any(q.target_ref is not None and bindings[q.target_ref] == self.scope.subject_world_character_id for q in self.graph_queries):
+                raise GraphPlanContractError("graph_query_self_target_invalid")
         if (
             len(refs) != len(set(refs))
             or any(not ref for ref in refs)

@@ -136,6 +136,40 @@ def test_create_app_owns_explicit_embedded_session_and_runtime_state(
         app.state.restore_process_settings()
 
 
+@pytest.mark.parametrize('policy', [None, 'legacy_strict_v1', 'group_or_v1'])
+def test_hybrid_fts_policy_reaches_application_owned_axis(tmp_path, policy, monkeypatch):
+    import asyncio
+    from time import monotonic
+    from app.domains.memory.contracts.hybrid_recall import HybridRecallRequest
+    from app.domains.memory.contracts.recall import RecallDocumentKind
+    from memory.test_korean_memory_recall_quality import SCOPE, document
+
+    monkeypatch.delenv('CHAT_HYBRID_FTS_POLICY', raising=False)
+    config = _embedded_config(tmp_path)
+    overrides = {} if policy is None else {'CHAT_HYBRID_FTS_POLICY': policy}
+    expected = 'group_or_v1' if policy is None else policy
+    composition = compose_runtime(config, base_settings=Settings(_env_file=None, **overrides))
+    try:
+        assert composition.settings.CHAT_HYBRID_FTS_POLICY == expected
+        axis = composition.memory_hybrid_runtime.fts
+        assert axis._policy.value == expected
+        index = composition.memory_recall_projection.index
+        index.open()
+        index.rebuild([document('m24',
+            '아시도와 9월 10일 축제 공연을 연습했고 9월 13일 공연은 취소됐다.',
+            metadata={'item_version': '1'})])
+        request = HybridRecallRequest('e10-default', 'call', 'a'*64, SCOPE,
+            '아시도와 축제 공연을 진행했는지 확인', 'profile',
+            (RecallDocumentKind.MEMORY_ITEM,))
+        result = asyncio.run(axis.search(request, deadline=monotonic()+10))
+        assert result.receipt.status.value == 'ready'
+        assert {row.candidate.memory_item_id for row in result.candidates} == (
+            {'m24'} if expected == 'group_or_v1' else set())
+        assert not axis._workers.active_processes
+    finally:
+        composition.dispose()
+
+
 def test_typed_runtime_materializes_secret_and_media_for_legacy_service_refs(
     tmp_path: Path,
 ) -> None:

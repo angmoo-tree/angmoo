@@ -8,26 +8,36 @@ from sqlalchemy import func, select
 
 from app.domains.chat import models
 from app.domains.chat.contracts import GenerationEventType, ResponseRequestState
+from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.retrieval_router_provider import RetrievalRouterRequest
 from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
+from app.providers.contracts import ProviderToolCall
 from app.runtime.chat import generation_workflows
 from app.runtime.chat.message_composition import generation_service
 from chat.test_p8_l_j_response_generation_lifecycle import _command, response_session
+from chat.test_supervisor_argument_patches import material as selection_material
+from chat.test_supervisor_control_tools import native
 
 
 def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     db = object()
-    material = object()
-    config = object()
+    material = selection_material()
+    # This ordering contract specifically exercises the retained legacy planners.
+    config = SimpleNamespace(CHAT_RECALL_MODE="legacy_checkpoint")
     lifecycle = object()
     labels = {"character": "Name"}
     observed = []
+    selector_class = generation_workflows.DirectLlmSupervisorSelectionProvider
 
     def provider(name):
-        def create(value):
+        def create(value, **options):
             assert value is material
             observed.append(name)
+            if name == "router":
+                return selector_class(value, **options)
+            assert not options
             return SimpleNamespace(name=name)
 
         return create
@@ -35,7 +45,9 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     for symbol, name in (
         ("DirectLlmCanonicalRetrievalPlannerProvider", "canonical"),
         ("DirectLlmGraphRetrievalPlannerProvider", "graph"),
-        ("DirectLlmRetrievalRouterProvider", "router"),
+        # Preserve the historical selection-role trace label and order contract;
+        # the factory is now Supervisor's native selector, not a Router node.
+        ("DirectLlmSupervisorSelectionProvider", "router"),
         ("DirectLlmCharacterResponseGenerator", "response"),
     ):
         monkeypatch.setattr(generation_workflows, symbol, provider(name))
@@ -99,6 +111,38 @@ def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
     assert execution.workflow._unit_of_work._session is db
     assert execution.workflow._memory_producer.session is db
     assert execution.workflow._today_snapshot_validator.session is db
+
+    # Exercise the selector produced by the real builder at its LLM boundary.
+    # Missing activation or a stale model-owned coordination field must fail here.
+    captured = []
+    control = native(RetrievalRoute.CURRENT_CONTEXT)
+    arguments = control.arguments()
+    arguments.pop("coordination_hint")
+
+    async def generate_text(**kwargs):
+        captured.append(kwargs)
+        return SimpleNamespace(
+            text="",
+            finish_reason="STOP",
+            tool_calls=(ProviderToolCall(control.name, arguments, control.call_id),),
+        )
+
+    monkeypatch.setattr("app.integrations.direct_llm.generate_text", generate_text)
+    selection = asyncio.run(
+        execution.workflow._router._router.route(RetrievalRouterRequest(user_message="hello"))
+    )
+    assert selection.intent.route is RetrievalRoute.CURRENT_CONTEXT
+    assert selection.intent.coordination_source == "code"
+    assert selection.selection_mode == "native_control"
+    assert selection.argument_protocol == "selection-args.v1.a1b0"
+    assert len(captured) == 1
+    assert captured[0]["require_tool_call"] is True
+    assert [tool.name for tool in captured[0]["tools"]] == [
+        "CANONICAL", "GRAPH", "USE_CONTEXT", "REQUEST_CLARIFICATION"
+    ]
+    for tool in captured[0]["tools"]:
+        assert "coordination_hint" not in tool.parameters["properties"]
+        assert "ref" in tool.parameters["properties"]["entities"]["items"]["required"]
 
 
 def test_unavailable_memory_fails_durably_before_any_provider_builder(

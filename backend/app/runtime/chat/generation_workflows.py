@@ -2,17 +2,19 @@
 
 from __future__ import annotations
 
-from app.contracts.retrieval_observation import current
-from app.domains.chat.repository import retrieval_diagnostics
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
+from app.contracts.retrieval_observation import current
 from app.domains.characters.models import Character
 from app.domains.chat.contracts.execution import GenerationExecution
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.runtime.chat.social_context import ChatSocialContextProvider
 from app.domains.chat.contracts.response_lifecycle import (
     ResponseLifecycleRepositoryPort,
 )
+from app.domains.chat.repository import retrieval_diagnostics
 from app.domains.chat.service import (
     BothRetrievalWorkflowCoordinator,
     CanonicalRetrievalPlanningService,
@@ -25,17 +27,19 @@ from app.domains.chat.service import (
 from app.domains.identity.contracts import CredentialMaterial
 from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
-from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
+from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.world_characters.models import WorldCharacter
 from app.integrations.llm import (
     DirectLlmCanonicalRetrievalPlannerProvider,
     DirectLlmCharacterResponseGenerator,
     DirectLlmGraphRetrievalPlannerProvider,
-    DirectLlmRetrievalRouterProvider,
 )
 from app.runtime.chat.evidence_reads import today_reader as today_reader
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
+from app.runtime.chat.response_graph import LangGraphResponseExecutor
+from app.integrations.llm.supervisor_selection import DirectLlmSupervisorSelectionProvider
+from app.runtime.chat.retrieval_tools import ToolPlanningService, ToolBothCoordinator, parallel_tools, RetryingRead
 from app.runtime.chat.retrieval_policy import (
     build_retrieval_policy as SqlAlchemyRetrievalPolicyResolver,
 )
@@ -70,6 +74,33 @@ class SqlAlchemyResponseWorkflowUnitOfWork:
         self._session.rollback()
 
 
+class SupervisorResponseWorkflowUnitOfWork(SqlAlchemyResponseWorkflowUnitOfWork):
+    """Batch graph decisions while retaining the existing transaction owner."""
+
+    def checkpoint(self) -> None:
+        observation = current.get()
+        snapshot = None if observation is None else observation.payload()
+        if observation is not None and _diagnostic_trigger(
+            snapshot
+        ) == _diagnostic_trigger(self._diagnostic_snapshot):
+            self._diagnostic_snapshot = snapshot
+        super().checkpoint()
+
+
+def _diagnostic_trigger(snapshot: dict | None) -> dict | None:
+    """Include Supervisor decisions in the next existing diagnostic write.
+
+    A decision alone must not add a SAVEPOINT/upsert at every workflow boundary.
+    Router, retrieval, CRG and terminal observations still flush the full payload.
+    """
+    if snapshot is None:
+        return None
+    return {
+        **snapshot,
+        "events": [row for row in snapshot["events"] if row["event"] != "supervisor"],
+    }
+
+
 def build(
     db: Session,
     material: CredentialMaterial,
@@ -79,10 +110,18 @@ def build(
     lifecycle: ResponseLifecycleRepositoryPort,
     world_id: str,
 ) -> GenerationExecution:
-    canonical = CanonicalRetrievalPlanningService(
-        planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
-        executor=CanonicalRetrievalPlanExecutor(memory_recall_service),
-    )
+    recall_mode = ChatRecallMode(getattr(runtime_settings, "CHAT_RECALL_MODE", "social_hybrid"))
+    if recall_mode is ChatRecallMode.SOCIAL_HYBRID:
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
+        if memory_recall_service.hybrid_service is None:
+            raise ValueError("chat_hybrid_backend_not_ready")
+        canonical = HybridCanonicalService(memory_recall_service.hybrid_service,
+            episode_only=getattr(runtime_settings, "MEMORY_RECALL_REPRESENTATION", "legacy") == "episode_v1")
+    else:
+        canonical = CanonicalRetrievalPlanningService(
+            planner=DirectLlmCanonicalRetrievalPlannerProvider(material),
+            executor=CanonicalRetrievalPlanExecutor(RetryingRead(memory_recall_service)),
+        )
     graph_recall = GraphRecallService(
         SqlAlchemyRelationshipGraphReadGateway(
             db, config=runtime_settings, graph_provider="ladybug"
@@ -90,24 +129,39 @@ def build(
     )
     graph = GraphRetrievalPlanningService(
         planner=DirectLlmGraphRetrievalPlannerProvider(material),
-        executor=GraphRetrievalPlanExecutor(graph_recall),
+        executor=GraphRetrievalPlanExecutor(RetryingRead(graph_recall)),
     )
+    canonical = ToolPlanningService("CANONICAL", canonical)
+    graph = ToolPlanningService("GRAPH", graph)
     character_labels = _character_labels(db, world_id)
     workflow = ResponseGenerationWorkflowService(
+        graph_executor=LangGraphResponseExecutor(),
         lifecycle=lifecycle,
         router=RetrievalRoutingService(
-            router=DirectLlmRetrievalRouterProvider(material),
+            router=DirectLlmSupervisorSelectionProvider(
+                material,
+                native_controls=True,
+                code_coordination=True,
+                positional_entity_refs=False,
+                social_context_mode=not recall_mode.graph_tools_enabled,
+                hybrid_recall=recall_mode is ChatRecallMode.SOCIAL_HYBRID,
+            ),
             policy=SqlAlchemyRetrievalPolicyResolver(db),
+            recall_mode=recall_mode,
         ),
         canonical=canonical,
         graph=graph,
-        both=BothRetrievalWorkflowCoordinator(canonical=canonical, graph=graph),
+        both=ToolBothCoordinator(BothRetrievalWorkflowCoordinator(canonical=canonical, graph=graph, parallel_runner=parallel_tools)),
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
-            DirectLlmCharacterResponseGenerator(material)
+            DirectLlmCharacterResponseGenerator(
+                material, **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
+            )
         ),
-        unit_of_work=SqlAlchemyResponseWorkflowUnitOfWork(db),
+        unit_of_work=SupervisorResponseWorkflowUnitOfWork(db),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
+        recall_mode=recall_mode,
+        social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
         today_snapshot_validator=SqlAlchemyTodaySnsSnapshotValidator(
             db, character_labels
         ),

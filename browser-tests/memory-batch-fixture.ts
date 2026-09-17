@@ -1,6 +1,13 @@
 import { expect, type Page, type Route } from "@playwright/test";
 
 export function memoryBatchFixture(worldId: string, subjectId: string, enabled: () => boolean) {
+  let embedding = { scope: { world_id: worldId, subject_world_character_id: subjectId }, enabled: false,
+    provider: "google", model: "gemini-embedding-2", credential_id: null as string | null,
+    profile: "fixture-profile", version: 0, ready: false, reason_code: "memory_embedding_disabled" as string | null,
+    runtime_status: "ready", available_credentials: [{ id: "fixture-google-key", label: "기존 Google 설정" }] };
+  let manualPolls = 0;
+  let manualRequests = 0;
+  let manualKey: string | null = null;
   let pollsAfterSave = 0;
   let retryCount = 0;
   let saved = {
@@ -10,10 +17,41 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     model_id: null as string | null, thinking_level: "high", profile_version: 0, pending_count: 32,
     status: "disabled", last_code: null as string | null, last_completed_at: null as string | null,
     available_models: ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"],
+    stored_count: 4, storage_limit: 100000, capacity_blocked: false, can_run: true, retryable: true,
+    run_saved_count: null as number | null, run_pending_count: null as number | null,
   };
-  return async (route: Route) => {
+  const handle = async (route: Route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
+      accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
+      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null });
+    if (path.endsWith("/memory/batch-progress")) {
+      if (manualKey) manualPolls++;
+      await route.fulfill({ json: { scope: saved.scope, progress: manualKey ? manualProgress() : null } });
+      return true;
+    }
+    if (path.endsWith("/memory/batch-run")) {
+      expect(request.method()).toBe("POST");
+      const body = request.postDataJSON();
+      expect(body.expected_version).toBe(saved.version);
+      expect(body.expected_profile_version).toBe(saved.profile_version);
+      expect(body.expected_scope_version).toBeGreaterThan(0);
+      expect(++manualRequests).toBe(1);
+      manualKey = body.idempotency_key;
+      await route.fulfill({ status: 202, json: { scope: saved.scope, disposition: "accepted", ...manualProgress() } });
+      return true;
+    }
+    if (path.endsWith("/memory/embedding-settings")) {
+      if (request.method() === "PUT") {
+        const body = request.postDataJSON();
+        expect(body.expected_version).toBe(embedding.version);
+        embedding = { ...embedding, enabled: body.enabled, credential_id: body.credential_id,
+          version: embedding.version + 1, ready: body.enabled, reason_code: body.enabled ? null : "memory_embedding_disabled" };
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(embedding) });
+      return true;
+    }
     if (path.endsWith("/memory/batch-retry")) {
       expect(request.method()).toBe("POST");
       expect(++retryCount).toBe(1);
@@ -22,7 +60,7 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
       return true;
     }
     if (!path.endsWith("/memory/batch-settings")) return false;
-    if (request.method() === "GET" && saved.ai_enabled) {
+    if (request.method() === "GET" && saved.ai_enabled && !saved.capacity_blocked) {
       if (retryCount) saved = { ...saved, status: "completed", pending_count: 0, last_code: null, last_completed_at: "2026-09-09T09:00:00Z" };
       else if (++pollsAfterSave >= 1) saved = { ...saved, status: "attention", last_code: "memory_selection_request_invalid" };
     }
@@ -38,9 +76,27 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...saved, memory_enabled: enabled() }) });
     return true;
   };
+  return Object.assign(handle, { capacityReached() {
+    saved = { ...saved, status: "capacity_blocked", stored_count: 100000,
+      capacity_blocked: true, can_run: false, retryable: false, pending_count: 1,
+      run_saved_count: 1, run_pending_count: 1, last_code: "memory_capacity_reached" };
+  } });
 }
 
 export async function verifyMemoryBatchControls(page: Page) {
+  const embedding = page.getByRole("region", { name: "기억 의미 검색", exact: true });
+  await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
+  await embedding.getByLabel("의미 검색 사용", { exact: true }).check();
+  await expect(embedding.getByRole("button", { name: "의미 검색 설정 저장" })).toBeDisabled();
+  await expect(embedding.getByLabel("임베딩 모델", { exact: true })).toBeDisabled();
+  await embedding.getByLabel("의미 검색용 API 설정", { exact: true }).selectOption("fixture-google-key");
+  await embedding.getByRole("button", { name: "의미 검색 설정 저장" }).click();
+  await expect(embedding.getByText("의미 검색 설정을 저장했어요.", { exact: true })).toBeVisible();
+  await expect(embedding.getByText("의미 검색 설정됨", { exact: true })).toBeVisible();
+  await embedding.getByLabel("의미 검색 사용", { exact: true }).uncheck();
+  await embedding.getByRole("button", { name: "의미 검색 설정 저장" }).click();
+  await expect(embedding.getByText("의미 검색 꺼짐", { exact: true })).toBeVisible();
+  await expect(embedding.getByLabel("의미 검색용 API 설정", { exact: true })).toHaveValue("fixture-google-key");
   const region = page.getByRole("region", { name: "기억 정리 예약" });
   await expect(region.getByText("AI 기억 정리 사용 안 함", { exact: false })).toBeVisible();
   await region.getByLabel("AI 선별·정리 사용", { exact: true }).check();
@@ -64,4 +120,12 @@ export async function verifyMemoryBatchControls(page: Page) {
   await expect(region.getByText("정리를 마쳤어요.", { exact: false })).toBeVisible();
   await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toHaveCount(0);
   await expect(region.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
+  await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:16");
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
+  await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
+  await region.getByRole("button", { name: "지금 기억 정리", exact: true }).click();
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
+  await expect(region.getByText("AI가 경험을 읽고 기억을 정리하고 있어요", { exact: true })).toBeVisible();
+  await expect(region.getByText("기억 정리를 마쳤어요 · 새 기억 2개", { exact: true })).toBeVisible();
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeEnabled();
 }

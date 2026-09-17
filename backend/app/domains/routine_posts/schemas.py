@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from app.contracts.activity_thought import ActivityThought
+from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
@@ -21,6 +22,7 @@ RoutineEventEffectKind = Literal[
 
 
 class RoutinePostSchema(BaseModel):
+    _activity_thought: ActivityThought | None = PrivateAttr(default=None)
     model_config = ConfigDict(extra="forbid")
 
 

@@ -6,4 +6,6 @@ from app.runtime.social.today_activity_queries import RuntimeTodayReferences
 
 
 def today_social_activity_reader(db: Session) -> TodaySocialActivityService:
-    return TodaySocialActivityService(db, references=RuntimeTodayReferences(db))
+    from app.config import settings
+    return TodaySocialActivityService(db, references=RuntimeTodayReferences(db),
+        thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1")

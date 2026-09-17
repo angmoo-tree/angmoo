@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.contracts.activity_thought import ActivityThought
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
@@ -237,6 +239,8 @@ class ResponseCommitPayload:
     model: str
     metadata: ResponseMetadata
     evidence_inspector_snapshot: dict[str, Any] | None = None
+    social_context_inspector_snapshot: dict[str, Any] | None = None
+    activity_thought: ActivityThought | None = None
 
     def __post_init__(self) -> None:
         if not self.content.strip():

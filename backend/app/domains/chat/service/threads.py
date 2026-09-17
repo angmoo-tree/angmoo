@@ -638,6 +638,11 @@ class ThreadService:
                 continue
             capability = metadata.get("evidence_capability")
             count = metadata.get("public_evidence_count")
+            current_snapshot = metadata.get("_social_context_inspector_v1")
+            current = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
+            if isinstance(current, list) and 0 < len(current) <= 12:
+                count = (count if isinstance(count, int) else 0) + len(current)
+                capability = "degraded" if capability == "degraded" else "available"
             if (
                 capability not in {"available", "degraded"}
                 or not isinstance(count, int)

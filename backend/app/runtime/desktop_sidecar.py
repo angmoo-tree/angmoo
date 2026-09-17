@@ -479,6 +479,9 @@ def _run_installer_mode() -> int:
 
 
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "--memory-vector-probe":
+        from app.runtime.memory.native_probe import main as vector_probe
+        return vector_probe(sys.argv[2:])
     from app.runtime.logging_config import configure_application_logging
 
     configure_application_logging()
@@ -606,6 +609,8 @@ def _stable_fatal_code(exc: Exception) -> str:
 
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     try:
         raise SystemExit(main())
     except Exception as exc:  # noqa: BLE001 - process boundary must emit one code

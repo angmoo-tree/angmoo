@@ -1459,6 +1459,11 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
 def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
     monkeypatch,
 ) -> None:
+    # This no-action accounting fixture has no World/relationship database.
+    # Snapshot-enabled actor validation is covered by test_social_context.
+    from app.runtime import social_snapshot
+    monkeypatch.setattr(social_snapshot.settings, "SNS_SOCIAL_CONTEXT_ENABLED", False)
+    monkeypatch.setattr(social_snapshot.settings, "MEMORY_RECALL_REPRESENTATION", "legacy")
     handled: list[tuple[int, str]] = []
 
     class FakeDb:

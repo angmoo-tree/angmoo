@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.domains.social.models.posts import Post
 from app.domains.social.models.feed import WorldCharacterBlock
 from app.domains.social.models.subjective_context import SocialActionSubjectiveContext
+from app.domains.social.models.activity_thought import SocialActivityThought
 from app.domains.social.constants import MAX_TODAY_SOCIAL_SCAN, MAX_TODAY_QUERY_BATCH
 
 
@@ -87,3 +88,6 @@ class TodayActivityRepository:
             SocialActionSubjectiveContext.social_event_id,
             event_ids,
         )
+
+    def thoughts(self, event_ids):
+        return self._by_ids(SocialActivityThought, SocialActivityThought.social_event_id, event_ids)

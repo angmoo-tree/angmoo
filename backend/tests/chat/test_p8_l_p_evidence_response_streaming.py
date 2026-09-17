@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.chat.response_graph import LangGraphResponseExecutor
+
 import asyncio
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -585,6 +587,7 @@ def _workflow(
 ):
     lifecycle = SqlAlchemyResponseLifecycleRepository(session)
     return ResponseGenerationWorkflowService(
+        graph_executor=LangGraphResponseExecutor(),
         lifecycle=lifecycle,
         router=router or _Router(route),
         canonical=_Canonical(),

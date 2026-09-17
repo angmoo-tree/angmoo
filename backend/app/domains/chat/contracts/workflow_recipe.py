@@ -101,10 +101,11 @@ WORKFLOW_RECIPE_REGISTRY = MappingProxyType(
 
 @dataclass(frozen=True, slots=True)
 class WorkflowRecipeSelection:
-    requested: WorkflowRecipe
+    requested: WorkflowRecipe | None
     selected: WorkflowRecipe
-    hint_accepted: bool
+    hint_accepted: bool | None
     spec: WorkflowRecipeSpec
+    coordination_source: str = "model"
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,6 +147,17 @@ class WorkflowDependencyBinding:
             raise RetrievalContractError("retrieval_workflow_dependency_values_invalid")
 
 
+def workflow_recipe_for_intent(intent: str) -> WorkflowRecipeSpec:
+    """One registry owns both wire normalization and execution ordering."""
+    selected = next(
+        (spec for spec in WORKFLOW_RECIPE_REGISTRY.values() if intent in spec.intents),
+        None,
+    )
+    if selected is None:
+        raise RetrievalContractError("retrieval_workflow_intent_not_registered")
+    return selected
+
+
 def select_workflow_recipe(
     intent: RetrievalIntentEnvelope,
 ) -> WorkflowRecipeSelection:
@@ -166,17 +178,16 @@ def select_workflow_recipe(
             "retrieval_workflow_coordination_hint_invalid"
         ) from exc
 
-    selected_spec = next(
-        (spec for spec in WORKFLOW_RECIPE_REGISTRY.values() if intent.intent in spec.intents),
-        None,
-    )
-    if selected_spec is None:
-        raise RetrievalContractError("retrieval_workflow_intent_not_registered")
+    selected_spec = workflow_recipe_for_intent(intent.intent)
+    code_owned = intent.coordination_source == "code"
+    if code_owned and requested is not selected_spec.recipe:
+        raise RetrievalContractError("retrieval_workflow_code_recipe_mismatch")
     return WorkflowRecipeSelection(
-        requested=requested,
+        requested=None if code_owned else requested,
         selected=selected_spec.recipe,
-        hint_accepted=requested is selected_spec.recipe,
+        hint_accepted=None if code_owned else requested is selected_spec.recipe,
         spec=selected_spec,
+        coordination_source=intent.coordination_source,
     )
 
 

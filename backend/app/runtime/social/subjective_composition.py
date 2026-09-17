@@ -30,3 +30,16 @@ def record_declared_subjective_context(
         captured_at=captured_at,
         references=RuntimeSubjectiveReferences(db),
     )
+
+
+from app.contracts.activity_thought import ActivityThought
+from app.domains.social.service.activity_thought import record_activity_thought as _record_activity_thought
+
+
+def record_activity_thought(db: Session, *, execution: SubjectiveExecution,
+                            event: SubjectiveEvent, source_post_id: str | None,
+                            thought: ActivityThought, captured_at: datetime):
+    return _record_activity_thought(
+        db, execution=execution, event=event, source_post_id=source_post_id,
+        thought=thought, captured_at=captured_at, references=RuntimeSubjectiveReferences(db),
+    )

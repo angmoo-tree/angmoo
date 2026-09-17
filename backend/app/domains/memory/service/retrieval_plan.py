@@ -24,6 +24,7 @@ from app.domains.memory.contracts.recall import (
     CanonicalRecallQuery,
     CanonicalRecallResult,
     CanonicalRecallStatus,
+    MAX_CANONICAL_RECALL_RESULTS,
 )
 from app.domains.memory.contracts.scope import MemoryScope
 
@@ -133,7 +134,8 @@ class CanonicalRetrievalPlanValidator:
             raise CanonicalPlanContractError(
                 "canonical_execution_allowlist_operation_unknown"
             )
-        entity_refs = {ref for ref, _identifier in context.entity_bindings}
+        entity_bindings = dict(context.entity_bindings)
+        entity_refs = set(entity_bindings)
         normalized_steps: list[CanonicalPlanStep] = []
         clamped: list[str] = []
         seen: set[str] = set()
@@ -152,6 +154,15 @@ class CanonicalRetrievalPlanValidator:
             if "entity_ref" in parameters and parameters["entity_ref"] not in entity_refs:
                 raise CanonicalPlanContractError(
                     "canonical_plan_entity_ref_unresolved"
+                )
+            if (
+                step.operation == CanonicalRecallOperation.SEARCH_MEMORY_ITEMS.value
+                and "counterpart_ref" in parameters
+                and entity_bindings[parameters["counterpart_ref"]]
+                == context.scope.subject_world_character_id
+            ):
+                raise CanonicalPlanContractError(
+                    "canonical_plan_memory_subject_as_counterpart"
                 )
             if step.input_ref is not None:
                 source_step, _, slot = step.input_ref.partition(".")
@@ -207,9 +218,7 @@ class CanonicalRetrievalPlanExecutor:
                 source_references: tuple[str, ...] = ()
                 if step.input_ref is not None:
                     source_step = step.input_ref.split(".", 1)[0]
-                    source_references = tuple(
-                        dict.fromkeys(record.reference for record in outputs[source_step].records)
-                    )
+                    source_references = _dependency_source_references(outputs[source_step])
                     if not source_references:
                         result = CanonicalRecallResult(
                             operation=CanonicalRecallOperation(step.operation),
@@ -277,6 +286,26 @@ class CanonicalRetrievalPlanExecutor:
             steps=tuple(executions),
             limit_clamped_steps=validated.limit_clamped_steps,
         )
+
+
+def _dependency_source_references(result: CanonicalRecallResult) -> tuple[str, ...]:
+    """Bind .source_refs to verified sources, never to search-document identities."""
+    references = tuple(
+        reference
+        for record in result.records
+        for reference in record.evidence_references
+    ) if result.status is CanonicalRecallStatus.READY else ()
+    unique = tuple(dict.fromkeys(references))
+    bounded = unique[:MAX_CANONICAL_RECALL_RESULTS]
+    observe(
+        "dependency_refs",
+        input=len(references),
+        output=len(bounded),
+        duplicates=len(references) - len(unique),
+        excluded=len(unique) - len(bounded),
+        truncated=len(unique) > len(bounded),
+    )
+    return bounded
 
 
 def _optional_parameter(

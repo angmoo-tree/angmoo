@@ -6,6 +6,10 @@ FROM ${PYTHON_IMAGE} AS base
 ARG UV_VERSION=0.12.5
 ARG UTIL_LINUX_MIN_VERSION=2.41.5-0+deb13u1
 ARG OPENSSL_MIN_VERSION=3.5.7-1~deb13u2
+ARG GZIP_MIN_VERSION=1.13-1+deb13u1
+ARG PCRE2_MIN_VERSION=10.46-1~deb13u2
+ARG SQLITE_MIN_VERSION=3.46.1-7+deb13u2
+ARG PERL_MIN_VERSION=5.40.1-6+deb13u1
 ARG VCS_REF=unknown
 ARG VERSION=0.3.0
 
@@ -25,9 +29,12 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --only-upgrade \
         bsdutils \
+        gzip \
         libblkid1 \
         liblastlog2-2 \
         libmount1 \
+        libpcre2-8-0 \
+        libsqlite3-0 \
         libssl3t64 \
         libsmartcols1 \
         libuuid1 \
@@ -35,6 +42,7 @@ RUN apt-get update \
         mount \
         openssl \
         openssl-provider-legacy \
+        perl-base \
         util-linux \
     && dpkg --compare-versions \
         "$(dpkg-query -W -f='${Version}' util-linux)" \
@@ -42,6 +50,10 @@ RUN apt-get update \
     && dpkg --compare-versions \
         "$(dpkg-query -W -f='${Version}' openssl)" \
         ge "${OPENSSL_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' gzip)" ge "${GZIP_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libpcre2-8-0)" ge "${PCRE2_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libsqlite3-0)" ge "${SQLITE_MIN_VERSION}" \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' perl-base)" ge "${PERL_MIN_VERSION}" \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --gid 10001 angmoo \
     && useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin angmoo \
@@ -52,8 +64,15 @@ RUN apt-get update \
 COPY backend/pyproject.toml backend/uv.lock backend/README.md ./
 RUN uv sync --frozen --no-dev --no-install-project --no-cache
 
+FROM base AS vec1-build
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev
+COPY scripts/build_vec1.py /tmp/build_vec1.py
+RUN python /tmp/build_vec1.py --output /opt/angmoo-vec1
+
 FROM base AS source
 COPY --chown=angmoo:angmoo backend/app ./app
+COPY --from=vec1-build --chown=angmoo:angmoo /opt/angmoo-vec1 ./app/runtime/resources/vec1
 COPY --chown=angmoo:angmoo backend/alembic ./alembic
 COPY --chown=angmoo:angmoo backend/scripts ./scripts
 COPY --chown=angmoo:angmoo backend/alembic.ini ./
@@ -67,6 +86,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 COPY --chown=angmoo:angmoo . /workspace
+COPY --from=vec1-build --chown=angmoo:angmoo /opt/angmoo-vec1 /workspace/backend/app/runtime/resources/vec1
 COPY --chown=angmoo:angmoo --chmod=0555 scripts/docker/backend-entrypoint.sh /usr/local/bin/angmoo-backend-entrypoint
 RUN uv sync --frozen --no-install-project
 ENV PATH="/workspace/backend/.venv/bin:${PATH}"

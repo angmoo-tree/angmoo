@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta
 import json
 from threading import RLock
 from typing import Any
+from app.contracts.search_diagnostics import bounded_capture
 
 Scope = tuple[str, str, str]
 
@@ -65,11 +66,11 @@ class DiagnosticCapture:
             admitted = self._admitted.get(request_id)
             return admitted is not None and admitted[0] == scope
 
-    def store(self, scope: Scope, request_id: str, details: list[dict]) -> None:
+    def store(self, scope: Scope, request_id: str, details: list[dict], search_trace=None) -> None:
         with self._lock:
             if not self.active(scope, request_id):
                 return
-            payload = json.dumps(details, ensure_ascii=True)
+            payload = json.dumps(bounded_capture(details, search_trace), ensure_ascii=True)
             if len(payload.encode()) > 64 * 1024:
                 return
             self._results[request_id] = (scope, datetime.now(UTC) + timedelta(minutes=60), payload)
@@ -78,10 +79,17 @@ class DiagnosticCapture:
                 self._results.popitem(last=False)
 
     def read(self, scope: Scope, request_id: str) -> list[dict] | None:
+        result = self.read_full(scope, request_id)
+        return None if result is None else result["details"]
+
+    def read_full(self, scope: Scope, request_id: str) -> dict | None:
         with self._lock:
             self._prune(datetime.now(UTC))
             row = self._results.get(request_id)
-            return json.loads(row[2]) if row is not None and row[0] == scope else None
+            if row is None or row[0] != scope:
+                return None
+            result = json.loads(row[2])
+            return {"details": result, "search_trace": None} if isinstance(result, list) else result
 
 
 capture = DiagnosticCapture()

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import math
+from time import monotonic
 from typing import Any
 
 from google import genai
@@ -11,10 +13,12 @@ from pydantic import BaseModel
 from app.core.redaction import redact_exact_secret_text
 from app.providers.contracts import (
     EmbeddingRequest,
+    MeasuredEmbeddingResponse,
     ProviderCapabilities,
     ProviderError,
     ProviderRequest,
     ProviderResponse,
+    ProviderToolCall,
     ProviderUsage,
 )
 
@@ -214,6 +218,30 @@ def _finish_reason_from_response(response: Any) -> str | None:
     return value if isinstance(value, str) else "UNKNOWN"
 
 
+def _native_parameters(schema: dict[str, Any]) -> types.Schema:
+    """Use the SDK's OpenAPI nullable form; domain validation stays authoritative."""
+    def convert(node):
+        result = {}
+        for key, value in node.items():
+            if key == "additionalProperties":
+                continue  # Enforced by the closed domain parser.
+            if key == "properties":
+                result[key] = {name: convert(item) for name, item in value.items()}
+            elif key == "items":
+                result[key] = convert(value)
+            elif key == "type" and isinstance(value, list):
+                concrete = [item for item in value if item != "null"]
+                if len(concrete) != 1 or "null" not in value:
+                    raise ValueError("native_tool_schema_union_unsupported")
+                result[key], result["nullable"] = concrete[0], True
+            elif key == "enum":
+                result[key] = [item for item in value if item is not None]
+            else:
+                result[key] = value
+        return result
+    return types.Schema.model_validate(convert(schema))
+
+
 def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
     client = genai.Client(
         api_key=request.api_key,
@@ -234,6 +262,24 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         thinking_level=request.thinking_level,
     )
     contents: Any = request.user_prompt
+    if request.require_tool_call and not request.tools:
+        raise ValueError("required_tool_declarations_missing")
+    if request.tools:
+        if request.response_schema is not None or request.response_mime_type is not None:
+            raise ValueError("native_tools_json_mode_conflict")
+        config.tools = [types.Tool(function_declarations=[
+            types.FunctionDeclaration(name=tool.name, description=tool.description,
+                                      parameters=_native_parameters(tool.parameters))
+            for tool in request.tools
+        ])]
+        config.automatic_function_calling = types.AutomaticFunctionCallingConfig(disable=True)
+        config.tool_config = types.ToolConfig(
+            # Unlike ANY, VALIDATED still permits a no-tool response, while
+            # constraining native function arguments to their declared schema.
+            function_calling_config=types.FunctionCallingConfig(
+                mode="ANY" if request.require_tool_call else "VALIDATED"
+            )
+        )
     if request.image_parts:
         parts = [types.Part.from_text(text=request.user_prompt)]
         for image_part in request.image_parts:
@@ -262,6 +308,15 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         parsed=getattr(response, "parsed", None),
         usage=_usage_from_response(response),
         finish_reason=_finish_reason_from_response(response),
+        tool_calls=tuple(
+            ProviderToolCall(name=part.function_call.name,
+                             arguments=dict(part.function_call.args or {}),
+                             call_id=part.function_call.id,
+                             thought_signature=part.thought_signature)
+            for candidate in (response.candidates or [])[:1]
+            for part in (getattr(candidate.content, "parts", None) or [])
+            if part.function_call is not None
+        ),
     )
 
 
@@ -295,6 +350,7 @@ class GeminiAdapter:
         structured_json=True,
         image_input=True,
         embedding=True,
+        tool_calls=True,
     )
 
     async def generate_text(self, request: ProviderRequest) -> ProviderResponse:
@@ -308,6 +364,40 @@ class GeminiAdapter:
 
     def embed_sync(self, request: EmbeddingRequest) -> list[float]:
         return _embed_sync(request)
+
+    async def embed_measured(self, request: EmbeddingRequest, *, timeout_seconds: float) -> MeasuredEmbeddingResponse:
+        """One cancellable native async HTTP attempt; legacy lore API stays intact."""
+        if not 0 < timeout_seconds <= 60:
+            raise ValueError("embedding_timeout_invalid")
+        started = monotonic()
+        client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+            timeout=max(1, int(timeout_seconds*1000)),
+            retry_options=types.HttpRetryOptions(attempts=1),
+        ))
+        try:
+            async with client.aio as aio:
+                async with asyncio.timeout(timeout_seconds):
+                    response = await aio.models.embed_content(model=request.model, contents=request.text,
+                        config=types.EmbedContentConfig(output_dimensionality=request.output_dimension))
+            embeddings = response.embeddings or []
+            if len(embeddings) != 1 or embeddings[0].values is None:
+                raise ProviderError("Embedding response shape invalid", failure_class="empty_embedding", retryable=False)
+            vector = tuple(float(v) for v in embeddings[0].values)
+            if len(vector) != request.output_dimension or any(not math.isfinite(v) for v in vector):
+                raise ProviderError("Embedding vector invalid", failure_class="embedding_dimension_mismatch", retryable=False)
+            # Developer API does not provide usage on this SDK response. Unknown
+            # token usage is None; never estimate it from character count.
+            return MeasuredEmbeddingResponse(vector, ProviderUsage(call_type="embed_content",
+                duration_ms=int((monotonic()-started)*1000)), physical_attempts=1)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            normalized = exc if isinstance(exc, ProviderError) else classify_generation_failure(exc)
+            normalized.physical_attempts = 1
+            normalized.duration_ms = int((monotonic()-started)*1000)
+            raise normalized from None
+        finally:
+            client.close()
 
     def normalize_error(
         self, exc: BaseException, *, api_key: str | None = None

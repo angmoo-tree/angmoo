@@ -75,6 +75,8 @@ class GraphRecallQuery:
     max_hops: int = 2
     depth: int = 1
     limit: int = 5
+    # v2 code-owned contract; legacy API callers retain their existing behavior.
+    enforce_collection_direction: bool = False
 
 
 @dataclass(frozen=True, slots=True)

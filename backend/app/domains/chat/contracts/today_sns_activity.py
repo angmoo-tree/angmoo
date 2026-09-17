@@ -9,11 +9,13 @@ import json
 from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Protocol
+from app.contracts.activity_thought import ActivityThought
 
 from app.domains.social.contracts.today_activity import TodaySocialActivityRead, TodaySocialCoverageStatus
 
 
 TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION = "today-sns-activity-snapshot.v1"
+TODAY_SNS_THOUGHT_SNAPSHOT_VERSION = "today-sns-activity-snapshot.v2"
 MAX_TODAY_ROUTER_ENTRIES = 12
 MAX_TODAY_ENTRY_TEXT_CHARS = 900
 MAX_TODAY_ROUTER_EXCERPT_CHARS = 180
@@ -53,6 +55,8 @@ class TodaySnsActivityEntry:
     content_complete: bool
     truncated: bool
     subjective_context: TodaySnsSubjectiveContext | None
+    thought: ActivityThought | None = None
+    thought_view: bool = False
 
     def __post_init__(self) -> None:
         if self.occurred_at.tzinfo is None or len(self.source_revision) != 64:
@@ -106,6 +110,21 @@ class TodaySnsActivityEntry:
                     "parent_excerpt": _excerpt(self.parent_body),
                 }
             )
+        if self.thought_view:
+            for key in ("subjective_context_available", "motivation_kind", "emotion_label",
+                        "motivation_text", "emotion_text", "emotion_intensity"):
+                payload.pop(key, None)
+            legacy_text = None if subjective is None else " | ".join(
+                value for value in (subjective.motivation_text, subjective.emotion_text) if value
+            )
+            text = self.thought.text if self.thought is not None else legacy_text
+            payload.update({
+                "thought_status": self.thought.status if self.thought is not None else "legacy" if subjective else "missing",
+                "thought_provenance": "activity" if self.thought is not None else "legacy_declaration" if subjective else None,
+                "thought_truncated": self.thought.truncated if self.thought is not None else False,
+                "thought" if include_content else "thought_excerpt": text if include_content else _excerpt(text),
+                "thought_excerpt_complete": include_content or text is None or len(text) <= MAX_TODAY_ROUTER_EXCERPT_CHARS,
+            })
         return payload
 
 
@@ -130,7 +149,7 @@ class TodaySnsActivitySnapshot:
         object.__setattr__(self, "counts", MappingProxyType(dict(self.counts)))
         object.__setattr__(self, "coverage", MappingProxyType(dict(self.coverage)))
         object.__setattr__(self, "source_watermarks", MappingProxyType(dict(self.source_watermarks)))
-        if self.version != TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION:
+        if self.version not in {TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION, TODAY_SNS_THOUGHT_SNAPSHOT_VERSION}:
             raise ValueError("today_sns_snapshot_version_invalid")
         if self.started_at.tzinfo is None or self.complete_through.tzinfo is None:
             raise ValueError("today_sns_snapshot_timezone_required")
@@ -142,7 +161,7 @@ class TodaySnsActivitySnapshot:
     def router_view(self) -> dict:
         selected = list(self.entries[:MAX_TODAY_ROUTER_ENTRIES])
         payload = {
-            "version": "today-sns-router-view.v1",
+            "version": "today-sns-router-view.v2" if self.version == TODAY_SNS_THOUGHT_SNAPSHOT_VERSION else "today-sns-router-view.v1",
             "day_timezone": self.timezone,
             "counts": dict(self.counts),
             "counts_exact": self.counts_exact,

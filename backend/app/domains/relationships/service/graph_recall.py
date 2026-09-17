@@ -81,6 +81,8 @@ class GraphRecallValidator:
             raise RelationshipGraphRequestError("graph_recall_direction_invalid")
         if not isinstance(query.ranking, GraphRecallRanking):
             raise RelationshipGraphRequestError("graph_recall_ranking_invalid")
+        if type(query.enforce_collection_direction) is not bool:
+            raise RelationshipGraphRequestError("graph_recall_direction_invalid")
         _validate_reference(query.scope.owner_id, "owner")
         _validate_reference(query.scope.world_id, "world")
         _validate_reference(
@@ -339,6 +341,8 @@ class GraphRecallService:
                 excluded_count=excluded,
             )
         if query.operation is GraphRecallOperation.RANK_RELATED_CHARACTERS:
+            if query.enforce_collection_direction and query.direction is GraphRecallDirection.INCOMING:
+                return self._incoming_rank(query, status=status)
             raw = repository.rank_related_characters(
                 world_id=query.scope.world_id,
                 source_world_character_id=(
@@ -390,6 +394,7 @@ class GraphRecallService:
             query.scope.subject_world_character_id,
             accepted,
             depth=query.depth,
+            direction=query.direction if query.enforce_collection_direction else GraphRecallDirection.EITHER,
         )
         return _result(
             query,
@@ -412,6 +417,9 @@ class GraphRecallService:
         status: GraphRecallStatus = GraphRecallStatus.DEGRADED,
     ) -> GraphRecallResult:
         self._gateway.record_fallback(reason=reason)
+        if (query.enforce_collection_direction and query.operation is GraphRecallOperation.RANK_RELATED_CHARACTERS
+                and query.direction is GraphRecallDirection.INCOMING):
+            return self._incoming_rank(query, status=status)
         mode = GRAPH_RECALL_PRIMITIVE_REGISTRY[query.operation].fallback_mode
         observe("search", method="graph_canonical_fallback", reason=reason, executed=mode != "none", skipped=mode == "none")
         if mode == "none":
@@ -543,6 +551,30 @@ class GraphRecallService:
                 event_ids.append(value.event_id)
         bounded = tuple(dict.fromkeys(event_ids))[: query.limit]
         return bounded, raw_count, excluded
+
+    def _incoming_rank(self, query, *, status):
+        """Bounded canonical support where the projection has no incoming rank primitive.
+
+        Keep the original observer, revalidate every edge, and disclose the scan
+        bound instead of presenting this as an exhaustive relationship ranking.
+        """
+        raw = self._gateway.canonical_direct_hits(
+            world_id=query.scope.world_id, center_id=query.scope.subject_world_character_id,
+            target_id=None, limit=MAX_GRAPH_RECALL_EDGES,
+        )
+        accepted, excluded = self._revalidate_hits(query.scope, raw)
+        accepted, direction_excluded = _filter_direction(query, accepted)
+        ranked = sorted(accepted, key=lambda value: _rank_key(value, query.ranking), reverse=True)
+        self._gateway.record_fallback(reason="incoming_rank_bounded_canonical")
+        observe("search", method="graph_canonical_fallback", reason="incoming_rank_bounded_canonical", executed=True)
+        return GraphRecallResult(
+            operation=query.operation, status=status, source=GraphRecallSource.CANONICAL_FALLBACK,
+            relationships=tuple(ranked[:query.limit]),
+            world_character_ids=tuple(value.actor_world_character_id for value in ranked[:query.limit]),
+            candidate_count=len(raw), excluded_count=excluded + direction_excluded,
+            truncated=len(raw) >= MAX_GRAPH_RECALL_EDGES or len(ranked) > query.limit,
+            reason_code="incoming_rank_bounded_canonical",
+        )
 
     def _canonical_direct_hits(
         self,

@@ -1,9 +1,77 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 import type { CharacterDashboardItem } from "../frontend/src/features/characters/types/character";
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/utils/character-recent-activity-presentation";
 import type { MessageThreadRead } from "../frontend/src/features/chat/types/chat-contract";
 import type { WorldChatThreadRead } from "../frontend/src/features/chat/types/world-chat-contract";
+
+// Opt-in real-provider browser Gate. Product workflow and evidence reads execute
+// in an isolated SQLite fixture; only the shell/auth HTTP transport is simulated.
+test.describe("HY14 real workflow browser", () => {
+  const runner = process.env.ANGMOO_HYBRID_REAL_RUNNER;
+  const python = process.env.ANGMOO_HYBRID_REAL_PYTHON;
+  test.skip(!runner || !python, "Requires the explicitly authorized isolated real-AI fixture");
+  for (let index = 0; index < 10; index++) {
+    test(`case ${index + 1}`, async ({ page }, testInfo) => {
+      test.setTimeout(180_000);
+      const directory = path.dirname(runner!);
+      const execute = promisify(execFile);
+      await execute(python!, [runner!, "--browser-prepare"], { timeout: 30_000 });
+      const frozen = JSON.parse(await readFile(path.join(directory, "response-quality-frozen-v1.json"), "utf8"));
+      const caseId = frozen.browser_cases[index];
+      const question = frozen.cases.find((item: { id: string }) => item.id === caseId).query;
+      const initial = JSON.parse(await readFile(path.join(directory, "response-quality-v1/browser-initial.json"), "utf8"));
+      const worldId = "p-world", threadId = "p-thread";
+      await installBackendFixture(page, { worldReads: { [worldId]: { ...WORLD_ALPHA, world_id: worldId, name: "구조 연습 모임" } } });
+      let result: any = null;
+      let accepted: any = null;
+      let committed = false;
+      await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
+        const request = route.request();
+        const pathname = new URL(request.url()).pathname;
+        const base = `/api/backend/worlds/${worldId}/chat/threads/${threadId}`;
+        if (pathname === base) return json(route, committed ? result.thread : initial);
+        if (pathname === `${base}/requests/latest`) return json(route, { response_request: accepted });
+        if (pathname === `${base}/messages` && request.method() === "POST") {
+          expect(request.postDataJSON().content).toBe(question);
+          await execute(python!, [runner!, "--browser-case-index", String(index)], { timeout: 150_000, maxBuffer: 1024 * 1024 });
+          result = JSON.parse(await readFile(path.join(directory, `response-quality-v1/browser-${caseId}--social_hybrid.json`), "utf8"));
+          expect(result.state).toBe("committed");
+          const user = result.thread.messages.find((item: { role: string }) => item.role === "user");
+          accepted = { protocol_version: "chat-generation-stream.v1", request_id: result.request_id,
+            request_scope_hash: result.request_scope_hash, generation_id: result.generation_id, attempt_number: 1,
+            response_slot_id: `slot-${result.request_id}`, state: "accepted", route: null, retryable: false,
+            failure_class: null, last_accepted_sequence: -1, user_message: user, assistant_message: null, response_metadata: {} };
+          return json(route, { outcome: "accepted", user_message: user, response_request: accepted });
+        }
+        if (pathname.endsWith("/events") && result) {
+          committed = true;
+          return route.fulfill({ status: 200, contentType: "application/x-ndjson", body: result.stream.map((row: object) => JSON.stringify(row)).join("\n") });
+        }
+        if (pathname.endsWith("/evidence") && result) return json(route, result.evidence);
+        if (accepted && pathname === `${base}/requests/${accepted.request_id}`) return json(route, { ...accepted,
+          state: "committed", assistant_message: result.thread.messages.find((row: { role: string }) => row.role === "assistant"),
+          last_accepted_sequence: result.stream.at(-1).sequence });
+        return route.fallback();
+      });
+      await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+      await page.getByRole("textbox", { name: "미도리야 이즈쿠에게 보낼 메시지" }).fill(question);
+      await page.getByRole("button", { name: "메시지 보내기" }).click();
+      await expect.poll(() => committed, { timeout: 150_000 }).toBe(true);
+      await expect(page.getByText(result.answer, { exact: true })).toBeVisible();
+      await page.getByRole("button", { name: /근거 .*개 보기/ }).click();
+      await expect(page.getByRole("dialog", { name: "이 답변의 근거" })).toBeVisible();
+      await expect(page.getByRole("region", { name: "답변에 사용한 사회적 맥락" })).toBeVisible();
+      await page.screenshot({ path: testInfo.outputPath(`hybrid-${index + 1}.png`), fullPage: true });
+      await testInfo.attach("request-diagnostics", { body: JSON.stringify({ id: result.request_id, route: result.route,
+        node_state: result.node_state, observation: result.observation }, null, 2), contentType: "application/json" });
+    });
+  }
+});
 
 type WorldFixture = {
   world_id: string;
@@ -1035,6 +1103,98 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   expect(audit.providerCalls).toEqual([]);
 });
 
+for (const retryable of [true, false]) {
+  test(`G4 Graph failure manual retry ${retryable ? "allowed" : "blocked"} stays in one response slot`, async ({ page }) => {
+    await installBackendFixture(page, { worldReads: { [WORLD_ALPHA.world_id]: WORLD_ALPHA } });
+    const worldId = WORLD_ALPHA.world_id;
+    const threadId = "thread-graph-failure";
+    const base = `/api/backend/worlds/${worldId}/chat/threads/${threadId}`;
+    const userMessage = {
+      id: 701, thread_id: threadId, role: "user" as const, content: "이전 관계를 확인해 줘.",
+      model: null, status: "ok", error_code: null, created_at: "2026-09-12T08:00:00Z",
+    };
+    const assistant = { ...userMessage, id: 702, role: "assistant" as const, content: "확인한 관계를 설명할게요." };
+    const participant = {
+      world_character_id: "graph-requester", character_id: "graph-requester-character",
+      display_name: "사용자 앵무", handle: "graph_owner", avatar_url: null, banner_url: null,
+      role_key: "student", control_mode: "owner_controlled" as const, profile_capability: "available" as const,
+    };
+    const thread = {
+      id: threadId, world_id: worldId, requester: participant,
+      responding: { ...participant, world_character_id: "graph-responder", character_id: "graph-responder-character",
+        display_name: "친구 앵무", handle: "graph_friend", control_mode: "autonomous" as const },
+      selected_model: "gemini-3.1-flash-lite", selected_thinking_level: "high", default_thinking_level: "high",
+      default_model: "gemini-3.1-flash-lite", model_binding_mode: "default", last_message_at: userMessage.created_at,
+      created_at: userMessage.created_at, latest_message: userMessage, messages: [userMessage], evidence_summaries: [],
+    };
+    const failed = {
+      protocol_version: "chat-generation-stream.v1", request_id: "graph-failed", request_scope_hash: "a".repeat(64),
+      generation_id: "generation-graph-failed", attempt_number: 1, response_slot_id: "graph-stable-slot",
+      state: "failed", route: "GRAPH", retryable, failure_class: "retrieval_rejected", last_accepted_sequence: 1,
+      user_message: userMessage, assistant_message: null, response_metadata: {},
+    };
+    const accepted = { ...failed, request_id: "graph-retried", generation_id: "generation-graph-retried",
+      attempt_number: 2, state: "accepted", retryable: false, failure_class: null, last_accepted_sequence: -1 };
+    let retries = 0;
+    let committed = false;
+    let releaseRetry!: () => void;
+    const retryRelease = new Promise<void>((resolve) => { releaseRetry = resolve; });
+    const status = () => committed
+      ? { ...accepted, state: "committed", assistant_message: assistant, last_accepted_sequence: 2 }
+      : failed;
+    await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
+      const request = route.request();
+      const path = new URL(request.url()).pathname;
+      if (request.method() === "GET" && path === base) {
+        return json(route, { ...thread, messages: committed ? [userMessage, assistant] : [userMessage] });
+      }
+      if (path.endsWith("/requests/latest")) return json(route, { response_request: status() });
+      if (request.method() === "POST" && path === `${base}/retry`) {
+        retries += 1;
+        expect(request.postDataJSON()).toMatchObject({ failed_request_id: failed.request_id });
+        expect(request.postDataJSON().idempotency_key).toBeTruthy();
+        await retryRelease;
+        return json(route, { outcome: "accepted", user_message: userMessage, response_request: accepted });
+      }
+      if (path === `${base}/requests/${accepted.request_id}/events`) {
+        committed = true;
+        return route.fulfill({ status: 200, contentType: "application/x-ndjson", body: [
+          { ...accepted, sequence: 0, type: "accepted", payload: {} },
+          { ...accepted, sequence: 1, type: "delta", payload: { text: assistant.content } },
+          { ...accepted, sequence: 2, type: "completed", payload: {} },
+        ].map((event) => JSON.stringify(event)).join("\n") });
+      }
+      if (path === `${base}/requests/${accepted.request_id}` || path === `${base}/requests/${failed.request_id}`) {
+        return json(route, status());
+      }
+      return json(route, { detail: "fixture_unknown_path" }, 404);
+    });
+    await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+    await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toBeVisible();
+    await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "다시 시도", exact: true })).toHaveCount(retryable ? 1 : 0);
+    expect(retries).toBe(0);
+    await page.reload();
+    await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toBeVisible();
+    expect(retries).toBe(0);
+    await expect(page.getByText(/graph_plan_|graph_diagnostic|repair_exhausted/)).toHaveCount(0);
+    if (retryable) {
+      await page.getByRole("button", { name: "다시 시도", exact: true }).click();
+      await expect(page.getByRole("button", { name: "다시 시도 중", exact: true })).toBeDisabled();
+      await expect.poll(() => retries).toBe(1);
+      await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+      releaseRetry();
+      await expect(page.getByText(assistant.content, { exact: true })).toHaveCount(1);
+      await expect(page.getByText("답장을 만들지 못했어요.", { exact: true })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "다시 시도", exact: true })).toHaveCount(0);
+      await page.reload();
+      await expect(page.getByText(assistant.content, { exact: true })).toHaveCount(1);
+      await expect(page.getByText(userMessage.content, { exact: true })).toHaveCount(1);
+      expect(retries).toBe(1);
+    }
+  });
+}
+
 test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, and narrow reflow", async ({
   page,
 }) => {
@@ -1191,6 +1351,15 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
           ...requested,
           schema_version: "memory-item-detail.v1",
           scope: { world_id: worldId, subject_world_character_id: subjectId },
+          episode: { representation: "episode_v1", partial: true, omitted_units: 1, followup_count: 1,
+            units: [
+              { sources: [{ role: "user", text: "우리 연습은 다음 주로 바뀌었어.", status: "verified" }],
+                thought: { text: "함께 준비하고 싶어서 기다리기로 했다.", status: "recorded", truncated: true }, legacy_declaration: null },
+              { sources: [{ role: "assistant", text: null, status: "missing" }],
+                thought: { text: null, status: "missing", truncated: false }, legacy_declaration: null },
+              { sources: [{ role: "assistant", text: null, status: "changed" }],
+                thought: { text: null, status: "invalid", truncated: false }, legacy_declaration: "과거에 격려하려고 했다는 선언" },
+            ] },
           evidence: [
             {
               source_kind: "CHAT_MESSAGE",
@@ -1226,6 +1395,10 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await expect(page.getByText("기억이 꺼져 있어요", { exact: true })).toBeVisible();
   await expect(page.getByText("현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.", { exact: false })).toBeVisible();
   await expect(page.getByRole("heading", { name: item.summary })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "상황에 연결된 원문과 생각" })).toBeVisible();
+  await expect(page.getByText("우리 연습은 다음 주로 바뀌었어.", { exact: false })).toBeVisible();
+  await expect(page.getByText("길이 제한으로 일부만 저장됨", { exact: false })).toBeVisible();
+  await expect(page.getByText("원문이 없습니다.", { exact: false })).toBeVisible();
   await expect(page.getByText("오늘 훈련을 마치고 함께 한 약속을 지켰어.")).toBeVisible();
   await expect(page.getByRole("link", { name: "대화 원문 열기" })).toHaveAttribute(
     "href",
@@ -1234,6 +1407,10 @@ test("P8-L-R Memory owner controls save, supersede, delete, retry-safe scope, an
   await page.getByRole("button", { name: "기억 켜기" }).click();
   await expect(page.getByText("기억을 켰어요.", { exact: false })).toBeVisible();
   await verifyMemoryBatchControls(page);
+  handleMemoryBatch.capacityReached();
+  await expect(page.getByText("저장된 기억 100,000 / 100,000개")).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText("표시 중인 정리 작업에서 저장 1개 · 남은 경험 1개")).toBeVisible();
+  await expect(page.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
   await page.getByRole("button", { name: "고정", exact: true }).click();
   await expect(page.getByRole("button", { name: "고정 해제", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "정정", exact: true }).click();

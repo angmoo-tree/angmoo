@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from app.contracts.activity_thought import ActivityThought
+from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
@@ -45,6 +46,7 @@ FeedNoActionReason = Literal[
 
 
 class WorldFeedSchema(BaseModel):
+    _activity_thought: ActivityThought | None = PrivateAttr(default=None)
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
 

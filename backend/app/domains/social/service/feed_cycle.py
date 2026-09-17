@@ -605,6 +605,8 @@ async def run_world_keyword_feed(
                     interaction_intent=decision.interaction_intent,
                     comment_purpose=decision.comment_purpose,
                 )
+                if social := getattr(ctx, "social_context", None):
+                    social.validate()
                 action_result = _publish_action(
                     ctx,
                     workflows=workflows.publishing,
@@ -646,16 +648,25 @@ async def run_world_keyword_feed(
                     status="succeeded",
                     result=action_result,
                 )
-                workflows.record_declared_subjective_context(
-                    ctx.db,
-                    execution=execution,
-                    event=social_apply.event,
-                    source_post_id=str(
-                        action_result.get("post_id") or candidate.post_id
-                    ),
-                    context=_declared_subjective_context(decision),
-                    captured_at=ctx.run_started_at,
-                )
+                thought = draft._activity_thought if draft is not None else decision._activity_thought
+                if thought is not None or getattr(workflows, "thought_enabled", False):
+                    from app.contracts.activity_thought import ActivityThought
+                    workflows.record_activity_thought(
+                        ctx.db, execution=execution, event=social_apply.event,
+                        source_post_id=str(action_result["post_id"]) if draft is not None else None,
+                        thought=thought or ActivityThought(), captured_at=ctx.run_started_at,
+                    )
+                else:
+                    workflows.record_declared_subjective_context(
+                        ctx.db,
+                        execution=execution,
+                        event=social_apply.event,
+                        source_post_id=str(
+                            action_result.get("post_id") or candidate.post_id
+                        ),
+                        context=_declared_subjective_context(decision),
+                        captured_at=ctx.run_started_at,
+                    )
                 cycle_summary = _summary(
                     ctx=ctx,
                     profile=profile,

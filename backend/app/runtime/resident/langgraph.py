@@ -1,4 +1,9 @@
 from __future__ import annotations
+from app.contracts.activity_thought import ActivityThought, THOUGHT_PROMPT
+from app.contracts.activity_thought_output import resident_thought_schema, resident_thought_payload, without_legacy_self_view_prompt
+from app.providers.gemini import build_gemini_developer_response_schema
+from app.runtime.social.subjective_composition import record_activity_thought
+from app.domains.relationships.contracts.social_consumption import social_prompt, validate_social_context
 
 from app.domains.memory.service import daypart as daypart_memory
 from app.domains.memory.policies import daypart as daypart_memory_policy
@@ -708,7 +713,24 @@ async def _call_json(
 ) -> dict[str, Any]:
     api_key = _decrypt_api_key(ctx.credential)
 
+    thought_nodes = {"FeedActionPlanner", "InboxActionPlanner", "RelationshipActionPlanner", "IndependentTopicComposer", "IndependentWritingPlanner", "ReplyWriter", "ReplyWriterRepair", "PostWriter", "PostWriterRepair", "PostWriterPlanner"}
+    thought_enabled = settings.ACTIVITY_THOUGHT_POLICY == "thought_v1" and node in thought_nodes
+    writer = node in {"ReplyWriter", "ReplyWriterRepair", "PostWriter", "PostWriterRepair"}
+    if writer and (reader := getattr(ctx, "episode_memory_reader", None)):
+        user_prompt += reader(ctx.selected_post_id)
+    wire_schema = response_schema
+    if thought_enabled:
+        wire_schema = resident_thought_schema(build_gemini_developer_response_schema(response_schema), writer=writer)
+        system_prompt, user_prompt = without_legacy_self_view_prompt(system_prompt, user_prompt)
+        system_prompt += "\nDo not generate the superseded motivation/emotion fields. "
+        if writer:
+            system_prompt += THOUGHT_PROMPT + " Return thought in each final text task object."
+        else:
+            system_prompt += "Only non-text actions have thought in the action object. Text actions receive thought from their final writer. " + THOUGHT_PROMPT
+
     def _validator(payload: dict[str, Any]) -> dict[str, Any]:
+        if thought_enabled:
+            return resident_thought_payload(payload, response_schema, writer=writer)
         return response_schema.model_validate(payload).model_dump()
 
     try:
@@ -716,9 +738,9 @@ async def _call_json(
             api_key=api_key,
             context=_llm_context(ctx, node=node, lane=lane),
             tracker=tracker,
-            system_prompt=system_prompt,
+            system_prompt=system_prompt + social_prompt(ctx, lane),
             user_prompt=user_prompt,
-            response_schema=response_schema,
+            response_schema=wire_schema,
             validator=_validator,
             max_output_tokens=max_output_tokens,
             thinking_level=ctx.generation_thinking_level,
@@ -2875,6 +2897,7 @@ def _execute_planned_action(
     writing: dict[str, Any],
     used_reply_bodies: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    validate_social_context(ctx)
     action_type = str(action.get("action_type") or "")
     post_id = str(action.get("post_id") or "").strip() or None
     notification_id = action.get("notification_id")
@@ -3069,18 +3092,31 @@ def _execute_planned_action(
             action_result = _finish_execution(
                 ctx, execution, status="succeeded", result=payload
             )
-            record_declared_subjective_context(
-                ctx.db,
-                execution=execution,
-                event=social_result.event,
-                source_post_id=(
-                    str(payload.get("post_id"))
-                    if payload.get("post_id") is not None
-                    else post_id
-                ),
-                context=_declared_action_subjective_context(action_type, action),
-                captured_at=occurred_at,
-            )
+            if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
+                thought_value = action.get("_activity_thought")
+                if action_type == "reply":
+                    task_id = (writer_validation or {}).get("task_id")
+                    task_result = _reply_task_results_by_id(writing).get(task_id, {})
+                    thought_value = task_result.get("_activity_thought") if str(task_result.get("body") or "").strip() == body else None
+                thought = ActivityThought(**thought_value) if isinstance(thought_value, dict) else ActivityThought()
+                record_activity_thought(
+                    ctx.db, execution=execution, event=social_result.event,
+                    source_post_id=str(payload["post_id"]) if action_type == "reply" else None,
+                    thought=thought, captured_at=occurred_at,
+                )
+            else:
+                record_declared_subjective_context(
+                    ctx.db,
+                    execution=execution,
+                    event=social_result.event,
+                    source_post_id=(
+                        str(payload.get("post_id"))
+                        if payload.get("post_id") is not None
+                        else post_id
+                    ),
+                    context=_declared_action_subjective_context(action_type, action),
+                    captured_at=occurred_at,
+                )
             ctx.db.commit()
         action_result["social_event_id"] = social_result.event.id
         if writer_validation is not None:
@@ -3257,6 +3293,7 @@ def _execute_writing_plan(
             character_id=ctx.character.id,
         )
         with unit_of_work.deferred_commits():
+            validate_social_context(ctx)
             result = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
@@ -3317,14 +3354,22 @@ def _execute_writing_plan(
                 status="succeeded",
                 result=execution_result,
             )
-            record_declared_subjective_context(
-                ctx.db,
-                execution=execution,
-                event=social_result.event,
-                source_post_id=result.id,
-                context=_declared_action_subjective_context("post", writing_plan),
-                captured_at=ctx.run_started_at,
-            )
+            if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
+                thought_value = writing.get("_activity_thought")
+                record_activity_thought(
+                    ctx.db, execution=execution, event=social_result.event, source_post_id=result.id,
+                    thought=ActivityThought(**thought_value) if isinstance(thought_value, dict) else ActivityThought(),
+                    captured_at=ctx.run_started_at,
+                )
+            else:
+                record_declared_subjective_context(
+                    ctx.db,
+                    execution=execution,
+                    event=social_result.event,
+                    source_post_id=result.id,
+                    context=_declared_action_subjective_context("post", writing_plan),
+                    captured_at=ctx.run_started_at,
+                )
         ctx.db.commit()
         if image_attempt is not None:
             action_result["image_attempt"] = image_attempt
@@ -3601,6 +3646,8 @@ _INBOX_LANE_PRECOMPLETED_NODES = [
 async def _run_combined_inbox_lane(
     ctx: LangGraphResidentContext,
 ) -> dict[str, Any]:
+    from app.runtime.social_snapshot import prepare_activity_social_context
+    ctx = prepare_activity_social_context(ctx, active_actor=langgraph_social_apply.active_world_character)
     tracker = RunLlmTracker()
     graph = _build_graph(ctx, tracker)
     initial_state: _ResidentGraphState = {
@@ -3841,7 +3888,8 @@ async def _run_combined_inbox_lane(
         public_action_count,
         result["handled_notification_count"],
     )
-    return result
+    from app.runtime.social_snapshot import with_social_receipts
+    return with_social_receipts(ctx, result)
 
 
 async def run_resident_langgraph(

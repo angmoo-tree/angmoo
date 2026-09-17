@@ -46,7 +46,7 @@ def get_epoch_setting(session, epoch):
     return session.get(MemoryScopeSettingModel, epoch.scope_setting_id)
 
 
-def recover_catalog(session, *, setting, epoch, catalog):
+def recover_catalog(session, *, setting, epoch, catalog, before=None):
     source, captured, identity, kinds, predicates, content = catalog
     delivery = MemorySourceDelivery.__table__
     missing = ~exists(
@@ -56,7 +56,9 @@ def recover_catalog(session, *, setting, epoch, catalog):
             delivery.c.source_id == identity.cast(delivery.c.source_id.type),
         )
     )
-    predicates += [captured >= epoch.opened_at, missing]
+    predicates = list(predicates) + [captured >= epoch.opened_at, missing]
+    if before is not None:
+        predicates.append(captured <= before)
     if epoch.closed_at is not None:
         predicates.append(captured < epoch.closed_at)
     rows = (
@@ -97,3 +99,5 @@ def recover_catalog(session, *, setting, epoch, catalog):
                     captured_at=row["admitted_at"],
                 )
             )
+
+    return len(rows)

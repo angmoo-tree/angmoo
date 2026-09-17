@@ -71,6 +71,7 @@ class MemoryItemDetail:
     item: MemoryItemRecord
     lifecycle: MemoryLifecycle
     evidence: tuple[MemoryEvidenceRead, ...]
+    episode: dict | None = None
 
 
 __all__ = [

@@ -1,6 +1,7 @@
 """Code-owned deterministic Evidence Bundle assembly."""
 
 from __future__ import annotations
+from app.contracts.search_diagnostics import collector, lineage, record_identity, evidence_identities
 
 from app.contracts.retrieval_observation import observe
 
@@ -87,6 +88,13 @@ class EvidenceBundleAssembler:
         else:
             outcome = RetrievalOutcome.NO_EVIDENCE
             degraded = DegradedReason.NO_ACCEPTED_EVIDENCE
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+        from app.domains.memory.contracts.hybrid_recall import RecallAxisStatus
+        if (isinstance(result, HybridCanonicalResult)
+            and result.recall.status is not RecallAxisStatus.READY
+            and result.metrics.short_circuit_reason != "memory_opt_out"):
+            degraded = DegradedReason.CANONICAL_UNAVAILABLE
+            outcome = RetrievalOutcome.DEGRADED
         return self._bundle(
             request_id=result.request_id,
             request_scope_hash=request_scope_hash,
@@ -94,6 +102,7 @@ class EvidenceBundleAssembler:
             outcome=outcome,
             candidates=candidates,
             degraded_reason=degraded,
+            preserve_rank_order=isinstance(result, HybridCanonicalResult),
         )
 
     def graph(
@@ -220,6 +229,7 @@ class EvidenceBundleAssembler:
             outcome=outcome,
             candidates=bundle.items + today_items,
             partial_axes=bundle.partial_axes,
+            preserve_rank_order=bundle.preserve_rank_order,
             degraded_reason=degraded_reason,
             clarification_slot=bundle.clarification_slot,
         )
@@ -260,7 +270,7 @@ class EvidenceBundleAssembler:
             ):
                 if label and label.casefold() in message:
                     value += weight
-            if asks_subjective and entry.subjective_context is not None:
+            if asks_subjective and (entry.subjective_context is not None or (entry.thought is not None and entry.thought.status == "recorded")):
                 value += 6
             if any(marker in message for marker in ("방금", "최근", "아까")):
                 value += 1
@@ -282,6 +292,18 @@ class EvidenceBundleAssembler:
     def _canonical_items(
         result: CanonicalPlanningResult,
     ) -> tuple[EvidenceItem, ...]:
+        from app.domains.chat.service.hybrid_canonical import HybridCanonicalResult
+        if isinstance(result, HybridCanonicalResult):
+            items = tuple(EvidenceItem(
+                opaque_reference=opaque_evidence_reference("canonical", record.canonical_source_id, record.reference),
+                kind=EvidenceKind.EPISODE_MEMORY if record.metadata.get("episode_packet") == "v1" else EvidenceKind.CANONICAL_SOURCE,
+                text=record.text if record.metadata.get("episode_packet") == "v1" else EvidenceBundleAssembler._bounded_text(record.text),
+                occurred_at=EvidenceBundleAssembler._aware(record.occurred_at), axes=(RetrievalAxis.CANONICAL,),
+                locator=_record_locator(record)) for record in result.recall.records if record.text.strip())
+            if collector() is not None:
+                for record, item in zip((r for r in result.recall.records if r.text.strip()), items):
+                    lineage("evidence", "linked", identities={**record_identity(record), **evidence_identities(item)})
+            return items
         if result.execution is None:
             return ()
         items: list[EvidenceItem] = []
@@ -417,9 +439,11 @@ class EvidenceBundleAssembler:
         partial_axes: tuple[RetrievalAxis, ...] = (),
         degraded_reason: DegradedReason | None = None,
         clarification_slot: str | None = None,
+        preserve_rank_order: bool = False,
     ) -> EvidenceBundle:
-        items = self._dedupe_sort_truncate(candidates)
+        items = self._dedupe_sort_truncate(candidates, preserve_rank_order=preserve_rank_order)
         observe("bundle", route=route.value, input=len(candidates), output=len(items), excluded=len(candidates)-len(items))
+        lineage("bundle", "count", count=len(items), reason="degraded" if degraded_reason is not None else "available")
         evidence_hash = compute_evidence_hash(
             request_id=request_id,
             request_scope_hash=request_scope_hash,
@@ -440,16 +464,25 @@ class EvidenceBundleAssembler:
             degraded_reason=degraded_reason,
             clarification_slot=clarification_slot,
             evidence_hash=evidence_hash,
+            preserve_rank_order=preserve_rank_order,
         )
 
     @staticmethod
     def _dedupe_sort_truncate(
         candidates: tuple[EvidenceItem, ...],
+        *, preserve_rank_order=False,
     ) -> tuple[EvidenceItem, ...]:
         deduplicated: dict[tuple[str, str], EvidenceItem] = {}
         for item in candidates:
-            key = (item.kind.value, item.normalized_text.casefold())
+            key = (item.kind.value, item.opaque_reference if preserve_rank_order else item.normalized_text.casefold())
             existing = deduplicated.get(key)
+            if collector() is not None:
+                ids = evidence_identities(item)
+                ids["key_ref"] = ("k", key)
+                if existing is not None:
+                    ids["related_ref"] = ("e", existing.opaque_reference)
+                lineage("dedup", "kept" if existing is None else "merged", identities=ids,
+                    reason="reference" if preserve_rank_order else "text")
             if existing is None:
                 deduplicated[key] = item
                 continue
@@ -470,7 +503,7 @@ class EvidenceBundleAssembler:
                 axes=axes,
                 locator=existing.locator or item.locator,
             )
-        ordered = sorted(
+        ordered = list(deduplicated.values()) if preserve_rank_order else sorted(
             deduplicated.values(),
             key=lambda item: (
                 -(
@@ -489,9 +522,11 @@ class EvidenceBundleAssembler:
         for index, item in enumerate(ordered):
             if len(output) >= MAX_EVIDENCE_ITEMS:
                 count_excluded = len(ordered) - index
+                lineage("limit", "excluded", count=count_excluded, reason="item_budget")
                 break
             if chars + len(item.text) > MAX_EVIDENCE_BUNDLE_CHARS:
                 character_excluded += 1
+                lineage("limit", "excluded", reason="character_budget", identities=evidence_identities(item))
                 continue
             output.append(item)
             chars += len(item.text)
@@ -524,7 +559,14 @@ class EvidenceBundleAssembler:
         if entry.body:
             parts.append(f"내용: {entry.body}")
         subjective = entry.subjective_context
-        if subjective is not None:
+        if entry.thought is not None:
+            if entry.thought.status == "recorded":
+                parts.append(f"이 활동에 연결된 생각(자기 관점·행동 이유): {entry.thought.text}")
+                if entry.thought.truncated:
+                    parts.append("생각은 앞 280자만 저장됨: 생략된 이유나 감정을 만들어내지 말 것")
+            else:
+                parts.append(f"생각 기록 상태: {entry.thought.status}; 행동 이유를 기록된 사실로 단정하지 말 것")
+        elif subjective is not None:
             parts.append(
                 "행동 결정 시 직접 선언한 동기: "
                 f"{subjective.motivation_text} ({subjective.motivation_kind})"

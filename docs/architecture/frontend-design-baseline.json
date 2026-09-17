@@ -103,7 +103,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "fb6f13946e273114c63d2465284f6291787e6e42210862b4b20c3af1ba076a48"
+      "sha256": "03102defb82af92362a2d9c96bfebfaa8f0322194cd68c8e7666f95c00fe6a92"
     },
     {
       "classifications": [
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "162c0767598d607a9c3c7228b96956119b8f5b2a2d31b4a970f63f99ba0033b1"
+        "sha256": "b167aeeb189034a0202ca16395238725ca17be1b247a7afe8974a60a19252bbd"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -1413,7 +1413,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 11,
+      "expected_screenshot_call_count": 12,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1534,8 +1534,8 @@
         }
       ]
     },
-    "screenshot_call_count": 11,
-    "status": "UI-F extends the preserved UI-B semantic-foundation baseline into the deterministic production/static product visual corpus; the manifest owns the reviewed viewport, screenshot-call, and committed snapshot contract.",
+    "screenshot_call_count": 12,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 adds one opt-in screenshot call for isolated real-workflow evidence outside the canonical visual corpus; it does not add a committed visual baseline or claim USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",

@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Any, Protocol
 
+from app.contracts.activity_thought import ActivityThought
 from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
+from app.domains.chat.contracts.recall_mode import ChatRecallMode
+from app.domains.chat.contracts.recall_interpretation import RecallInterpretationContext
+from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 
 
 class CharacterResponseGeneratorError(RuntimeError):
@@ -60,8 +64,15 @@ class CharacterResponseGeneratorRequest:
     evidence: EvidenceBundle
     clarification_candidates: tuple[str, ...] = ()
     today_sns_manifest: dict[str, Any] | None = None
+    social_snapshot: SocialContextSnapshot | None = None
+    recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
+    recall_interpretation: RecallInterpretationContext | None = None
 
     def __post_init__(self) -> None:
+        if self.recall_interpretation is not None:
+            if self.recall_mode is not ChatRecallMode.SOCIAL_HYBRID:
+                raise ValueError("character_response_interpretation_mode_mismatch")
+            self.recall_interpretation.assert_response(self.user_message, self.evidence)
         if not self.user_message.strip() or len(self.user_message) > 4_000:
             raise ValueError("character_response_message_invalid")
         if len(self.recent_context) > 24:
@@ -93,6 +104,7 @@ class CharacterResponseGeneratorResult:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    activity_thought: ActivityThought | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -103,6 +115,23 @@ class CharacterResponseGeneratorResult:
             or not 1 <= self.physical_attempt_count <= 2
         ):
             raise ValueError("character_response_result_invalid")
+
+
+@dataclass(frozen=True, slots=True)
+class CharacterResponseGenerationResult:
+    text: str
+    provider: str
+    model: str
+    call_tracker: dict[str, Any]
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
+    activity_thought: ActivityThought | None = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from app.domains.chat.contracts.supervisor_selection import SelectionToolCall
 import json
 from typing import Protocol
+from app.domains.relationships.contracts.social_context import SocialContextSnapshot
 
 from app.domains.chat.contracts.retrieval_intent import (
     RetrievalContractError,
@@ -61,6 +63,7 @@ class RetrievalRouterRequest:
     world_language: str = "ko"
     today_sns_context: dict | None = None
     repair_diagnostic: str | None = None
+    social_snapshot: SocialContextSnapshot | None = None
 
     def __post_init__(self) -> None:
         message = self.user_message.strip()
@@ -110,6 +113,10 @@ class RetrievalRouterProviderResult:
     thinking_level: str | None = None
     max_output_tokens: int | None = None
     finish_reason: str | None = None
+    tool_calls: tuple[SelectionToolCall, ...] = ()
+    selection_mode: str = "legacy"
+    argument_protocol: str | None = None
+    selection_validation: dict | None = None
 
     def __post_init__(self) -> None:
         if self.physical_attempt_count < 1 or self.physical_attempt_count > 2:

@@ -1,6 +1,7 @@
 """Immutable, provider-safe evidence snapshot for one Character response."""
 
 from __future__ import annotations
+from app.contracts.search_diagnostics import evidence_lineage
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -25,6 +26,7 @@ MAX_EVIDENCE_BUNDLE_CHARS = 8_000
 
 class EvidenceKind(StrEnum):
     CANONICAL_SOURCE = "canonical_source"
+    EPISODE_MEMORY = "episode_memory"
     GRAPH_RELATIONSHIP = "graph_relationship"
     GRAPH_EVENT = "graph_event"
     TODAY_SNS_ACTIVITY = "today_sns_activity"
@@ -80,7 +82,7 @@ class EvidenceItem:
             not self.opaque_reference
             or len(self.opaque_reference) > 96
             or not self.text.strip()
-            or len(self.text) > MAX_EVIDENCE_ITEM_CHARS
+            or len(self.text) > (MAX_EVIDENCE_BUNDLE_CHARS if self.kind is EvidenceKind.EPISODE_MEMORY else MAX_EVIDENCE_ITEM_CHARS)
         ):
             raise EvidenceBundleContractError("evidence_item_shape_invalid")
         if not self.source_succeeded or not self.observable:
@@ -107,6 +109,7 @@ class EvidenceBundle:
     clarification_slot: str | None = None
     version: str = EVIDENCE_BUNDLE_VERSION
     evidence_hash: str = ""
+    preserve_rank_order: bool = False
 
     def __post_init__(self) -> None:
         if self.version != EVIDENCE_BUNDLE_VERSION:
@@ -192,6 +195,7 @@ class EvidenceBundle:
         normal generation response DTO.
         """
 
+        evidence_lineage("inspector", self.items)
         return {
             "version": "evidence-inspector.v1",
             "items": [

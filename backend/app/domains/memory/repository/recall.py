@@ -39,10 +39,12 @@ class SqlAlchemyMemoryRecallDocumentSource:
         *,
         source_reader_factory: SourceReaderFactory,
         now_factory=lambda: datetime.now(UTC),
+        episode_only: bool = False,
     ) -> None:
         self._factory = session_factory
         self._source_reader_factory = source_reader_factory
         self._now_factory = now_factory
+        self._episode_only = episode_only
 
     def all_documents(self) -> tuple[MemoryRecallDocument, ...]:
         item_ids = self.all_item_ids()
@@ -94,6 +96,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     item=item,
                     evidences=evidence_by_item.get(item.id, []),
                     now=now,
+                    episode_only=self._episode_only,
                 )
             return result
 
@@ -143,20 +146,21 @@ class SqlAlchemyMemoryRecallDocumentSource:
         item: MemoryItem,
         evidences: list[MemoryItemEvidence],
         now: datetime,
+        episode_only: bool = False,
     ) -> tuple[MemoryRecallDocument, ...]:
         scope = _item_scope(item)
         setting = _scope_setting(session, scope)
         if setting is None or not setting.enabled or not _item_retrievable(item, now):
             return ()
         current: list[tuple[MemoryItemEvidence, CanonicalMemoryEvidence]] = []
-        for row in evidences:
+        for row in (() if episode_only else evidences):
             canonical = _current_evidence(reader, scope, item, row)
             if canonical is not None:
                 current.append((row, canonical))
-        if not current:
+        if not current and not episode_only:
             return ()
 
-        occurred_at = max(value.source_created_at for _row, value in current)
+        occurred_at = _as_utc(max((value.source_created_at for _row, value in current), default=item.valid_from))
         evidence_ids = ",".join(row.id for row, _value in current)
         documents: list[MemoryRecallDocument] = [
             MemoryRecallDocument(
@@ -175,9 +179,12 @@ class SqlAlchemyMemoryRecallDocumentSource:
                     "memory_kind": item.memory_kind,
                     "item_version": str(item.version),
                     "evidence_ids": evidence_ids,
+                    **({"representation": "episode_v1"} if episode_only else {}),
                 },
             )
         ]
+        if episode_only:
+            return tuple(documents)
         for row, canonical in current:
             documents.append(
                 MemoryRecallDocument(
@@ -227,13 +234,52 @@ class SqlAlchemyCanonicalRecallRepository:
             setting = _scope_setting(session, scope)
             return bool(setting and setting.enabled)
 
+    def read_exact_sources(self, *, scope, references, now):
+        if len(references) > 20:
+            raise ValueError("hybrid_source_limit")
+        result = []
+        with self._factory() as session:
+            setting = _scope_setting(session, scope)
+            if setting is None or not setting.enabled:
+                return ()
+            reader = self._source_reader_factory(session)
+            for reference in references:
+                parts = reference.split(":", 2)
+                if len(parts) != 3 or parts[0] != "source":
+                    continue
+                try:
+                    source_type = MemorySourceTypeV1(parts[1])
+                except ValueError:
+                    continue
+                rows = session.execute(select(MemoryItemEvidence, MemoryItem).join(
+                    MemoryItem, MemoryItem.id == MemoryItemEvidence.memory_item_id).where(
+                        MemoryItem.owner_id == scope.owner_id, MemoryItem.world_id == scope.world_id,
+                        MemoryItem.subject_world_character_id == scope.subject_world_character_id,
+                        MemoryItemEvidence.source_type == source_type.value,
+                        MemoryItemEvidence.source_id == parts[2],
+                        MemoryItem.status == "active", MemoryItem.deleted_at.is_(None),
+                        MemoryItem.superseded_by_id.is_(None),
+                    ).order_by(MemoryItemEvidence.id).limit(20))
+                for evidence, item in rows:
+                    if not _item_retrievable(item, _as_utc(now)):
+                        continue
+                    canonical = _current_evidence(reader, scope, item, evidence)
+                    if canonical is not None:
+                        result.append(_canonical_source_record(reference=reference, item=item,
+                            evidence=evidence, canonical=canonical))
+                        break
+        return tuple(result)
+
     def revalidate_candidates(
         self,
         *,
         scope: MemoryScope,
         candidates: tuple[MemoryRecallCandidate, ...],
         now: datetime,
+        evidence_limit: int | None = None,
     ) -> tuple[CanonicalRecallRecord, ...]:
+        if evidence_limit is not None and not 1 <= evidence_limit <= 20:
+            raise ValueError("memory_evidence_limit_invalid")
         if not candidates:
             return ()
         with self._factory() as session:
@@ -256,13 +302,11 @@ class SqlAlchemyCanonicalRecallRepository:
                 ):
                     excluded["item_missing_scope_or_lifecycle"] += 1
                     continue
-                evidences = list(
-                    session.scalars(
-                        select(MemoryItemEvidence)
-                        .where(MemoryItemEvidence.memory_item_id == item.id)
-                        .order_by(MemoryItemEvidence.id)
-                    )
-                )
+                statement = select(MemoryItemEvidence).where(
+                    MemoryItemEvidence.memory_item_id == item.id).order_by(MemoryItemEvidence.id)
+                if evidence_limit is not None:
+                    statement = statement.limit(evidence_limit)
+                evidences = list(session.scalars(statement))
                 current = [
                     (row, canonical)
                     for row in evidences

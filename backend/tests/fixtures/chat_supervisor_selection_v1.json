@@ -1,0 +1,385 @@
+[
+  {
+    "id": "case-01",
+    "split": "development",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "체력훈련하면서 지구력 데이터와 심박수 관련해서 기록하지 않았어?",
+    "context": "오늘은 팀원들과 구조 경로와 역할을 이야기했어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-02",
+    "split": "development",
+    "language": "ko",
+    "expected": "CURRENT_CONTEXT",
+    "question": "앞으로 심박수도 기록해보는 건 어때?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-03",
+    "split": "development",
+    "language": "ko",
+    "expected": "GRAPH",
+    "question": "너와 민지는 어떤 관계야?",
+    "context": "민지는 이 세계에서 한 명뿐이에요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-04",
+    "split": "development",
+    "language": "ko",
+    "expected": "BOTH",
+    "question": "너와 민지는 어떤 관계이고, 그 관계를 보여주는 예전 대화도 찾아줘.",
+    "context": "민지는 이 세계에서 한 명뿐이에요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-05",
+    "split": "development",
+    "language": "ko",
+    "expected": "CLARIFICATION",
+    "question": "그 사람과 그때 어떻게 됐어?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-06",
+    "split": "development",
+    "language": "en",
+    "expected": "CANONICAL",
+    "question": "What did you decide about the garden last time?",
+    "context": "I watered a plant today.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-07",
+    "split": "development",
+    "language": "en",
+    "expected": "CURRENT_CONTEXT",
+    "question": "Hello, how are you feeling?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-08",
+    "split": "development",
+    "language": "en",
+    "expected": "GRAPH",
+    "question": "Who do you and Mina both know?",
+    "context": "Mina is uniquely identifiable in this world.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-09",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "체력 훈련하면서 지구력 데이터와 심박수 관련해서 기록하지 않았어?",
+    "context": "오늘은 팀원들과 구조 경로와 역할을 이야기했어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-10",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "체력훈련하면서 지구력 데이터와 심박수 관련해서 기록하지 않았어?",
+    "context": "아직 심박수와 지구력을 기록하지 못했어요. 이 말의 근거는 확인하지 않았어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-11",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CURRENT_CONTEXT",
+    "question": "전에 지구력과 심박수를 기록했었지?",
+    "context": "확인된 저장 기록: 기초 체력 훈련에서 지구력 데이터와 심박수 회복 지점을 기록하고 분석했다.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-12",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "전에 지구력과 심박수를 기록했던 기억과 연결된 원문을 찾아줘.",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-13",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "전에 새로 시작한 기초 훈련은 뭐였지?",
+    "context": "오늘은 훈련장에 갔어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-14",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "그 여행을 준비할 때 어떤 물건을 챙겼어?",
+    "context": "우리는 지난달 제주 여행에 관해 이야기하고 있어요. 준비물은 현재 맥락에 없어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-15",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "전에 책장을 정리할 때 어떤 기준으로 나눴지?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-16",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "오늘 쓴 댓글의 정확한 원문을 알려줘.",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": {
+      "version": "today-sns-router-view.v1",
+      "day_timezone": "Asia/Seoul",
+      "counts": {
+        "posts_authored": 0,
+        "replies_authored": 1,
+        "replies_received": 0,
+        "mentions_received": 0,
+        "reactions_given": 0,
+        "reactions_received": 0,
+        "reposts": 0,
+        "follows": 0
+      },
+      "counts_exact": true,
+      "coverage": {
+        "posts_authored": "complete",
+        "replies_authored": "partial",
+        "replies_received": "complete",
+        "mentions_received": "complete",
+        "reactions_given": "complete",
+        "reactions_received": "complete",
+        "reposts": "complete",
+        "follows": "complete"
+      },
+      "entries": [
+        {
+          "kind": "replies_authored",
+          "body_excerpt": "오늘은 정말...",
+          "content_complete": false,
+          "truncated": true
+        }
+      ],
+      "omitted_count": 0,
+      "overflow": false,
+      "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "id": "case-17",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CURRENT_CONTEXT",
+    "question": "아까 말한 연습 방법을 쉽게 설명해줘.",
+    "context": "시선을 한곳에 고정하지 않고 넓게 보면서 팀원 위치를 확인하는 연습이에요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-18",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CANONICAL",
+    "question": "민지가 전에 나한테 어떤 조언을 했었지?",
+    "context": "민지는 이 세계에서 한 명뿐이에요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-19",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "GRAPH",
+    "question": "너는 민지를 얼마나 신뢰해?",
+    "context": "민지는 이 세계에서 한 명뿐이에요. 관계 데이터는 현재 맥락에 없어요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-20",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "GRAPH",
+    "question": "너와 민지가 공통으로 아는 사람은 누구야?",
+    "context": "민지는 이 세계에서 한 명뿐이에요.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-21",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CLARIFICATION",
+    "question": "민준이랑 너는 어떤 사이야?",
+    "context": "이 세계에는 이름이 같은 민준 두 명이 있어요. 요리사 민준과 교사 민준 중 누구인지는 아직 정하지 않았어요.",
+    "resolver": "duplicate_minjun",
+    "today_sns": null
+  },
+  {
+    "id": "case-22",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CURRENT_CONTEXT",
+    "question": "안녕, 반가워!",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-23",
+    "split": "heldout",
+    "language": "ko",
+    "expected": "CURRENT_CONTEXT",
+    "question": "오늘 올린 게시글이 몇 개야?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": {
+      "version": "today-sns-router-view.v1",
+      "day_timezone": "Asia/Seoul",
+      "counts": {
+        "posts_authored": 0,
+        "replies_authored": 0,
+        "replies_received": 0,
+        "mentions_received": 0,
+        "reactions_given": 0,
+        "reactions_received": 0,
+        "reposts": 0,
+        "follows": 0
+      },
+      "counts_exact": true,
+      "coverage": {
+        "posts_authored": "complete",
+        "replies_authored": "complete",
+        "replies_received": "complete",
+        "mentions_received": "complete",
+        "reactions_given": "complete",
+        "reactions_received": "complete",
+        "reposts": "complete",
+        "follows": "complete"
+      },
+      "entries": [],
+      "omitted_count": 0,
+      "overflow": false,
+      "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "id": "case-24",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CANONICAL",
+    "question": "Where did we leave the telescope project?",
+    "context": "I cleaned my desk today.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-25",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CANONICAL",
+    "question": "Did you ever record the recovery time after running?",
+    "context": "I have been discussing teamwork, not training measurements.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-26",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CURRENT_CONTEXT",
+    "question": "Can you explain that exercise more simply?",
+    "context": "The exercise is to scan the whole room and identify the exits before moving.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-27",
+    "split": "heldout",
+    "language": "en",
+    "expected": "GRAPH",
+    "question": "What is your relationship with Mina?",
+    "context": "Mina is uniquely identifiable in this world.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-28",
+    "split": "heldout",
+    "language": "en",
+    "expected": "BOTH",
+    "question": "What is your relationship with Mina, and what past exchange demonstrates it?",
+    "context": "Mina is uniquely identifiable in this world.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-29",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CLARIFICATION",
+    "question": "What happened with that person back then?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-30",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CANONICAL",
+    "question": "What did Mina say about the concert?",
+    "context": "Mina is uniquely identifiable in this world. No concert conversation is provided.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-31",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CURRENT_CONTEXT",
+    "question": "Would keeping a reading diary be a good idea?",
+    "context": "",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  },
+  {
+    "id": "case-32",
+    "split": "heldout",
+    "language": "en",
+    "expected": "CURRENT_CONTEXT",
+    "question": "Did you record the recovery time yesterday?",
+    "context": "Verified record: yesterday I logged the time needed for my heart rate to recover after running.",
+    "resolver": "unique_named_entities",
+    "today_sns": null
+  }
+]

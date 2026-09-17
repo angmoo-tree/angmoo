@@ -9,6 +9,8 @@ from app.domains.memory.models.batch import MemoryBatchSetting, MemorySourceDeli
 from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.memory.policies.batch import next_daily_slot, schedule_timezone
 from app.domains.memory.service.batch_preparation import enqueue_scope
+from app.domains.memory.repository.consolidation_requests import admit
+from app.domains.memory.service.consolidation_requests import prepare_requests
 
 
 def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, now: datetime, shutdown: bool = False) -> None:
@@ -32,6 +34,10 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
             .values(trigger_kind="shutdown", trigger_requested_at=now)
         )
         session.flush()
+        for setting in session.scalars(select(MemoryScopeSettingModel).join(MemoryBatchSetting,
+                MemoryBatchSetting.scope_setting_id == MemoryScopeSettingModel.id).where(
+                    consent, MemoryScopeSettingModel.enabled.is_(True), MemoryBatchSetting.shutdown_enabled.is_(True))):
+            admit(session, setting=setting, kind="shutdown", key="shutdown:" + now.isoformat(), now=now)
     deliveries = MemorySourceDelivery.__table__
     ready_source = exists(
         select(deliveries.c.sequence).where(
@@ -57,18 +63,12 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
             # next bounded scan, without authorizing a provider request.
             config.last_claimed_at = now
             continue
-        consumed = (
-            None
-            if config.last_consumed_date is None
-            else date.fromisoformat(config.last_consumed_date)
-        )
         if config.timezone != zone:
             config.timezone, config.version = zone, config.version + 1
             config.next_due_at = next_daily_slot(
                 after=now,
                 local_time=config.local_time,
                 timezone=zone,
-                last_consumed_date=consumed,
             )
         due = (
             config.schedule_enabled
@@ -76,6 +76,18 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
             and as_utc(config.next_due_at) <= as_utc(now)
         )
         if due:
+            slot = as_utc(config.next_due_at)
+            next_slot = next_daily_slot(after=now, local_time=config.local_time, timezone=zone)
+            claimed = session.execute(update(MemoryBatchSetting).where(
+                MemoryBatchSetting.scope_setting_id == config.scope_setting_id,
+                MemoryBatchSetting.version == config.version,
+                MemoryBatchSetting.next_due_at == config.next_due_at,
+                MemoryBatchSetting.schedule_enabled.is_(True), consent,
+            ).values(next_due_at=next_slot))
+            if claimed.rowcount != 1:
+                session.expire(config)
+                continue
+            admit(session, setting=setting, kind="scheduled", key="scheduled:" + slot.isoformat(), now=now, scheduled_for=slot)
             latest = (
                 session.scalar(
                     select(func.max(MemorySourceDelivery.sequence)).where(
@@ -93,9 +105,8 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
                 after=now,
                 local_time=config.local_time,
                 timezone=zone,
-                last_consumed_date=date.fromisoformat(config.last_consumed_date),
             )
-        if config.trigger_kind:
+        if config.trigger_kind == "explicit":
             enqueue_scope(
                 session,
                 dependencies=dependencies,
@@ -106,3 +117,4 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
                 requested_at=config.trigger_requested_at,
             )
     session.commit()
+    prepare_requests(session, dependencies=dependencies, now=now)

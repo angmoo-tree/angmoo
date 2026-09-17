@@ -13,6 +13,8 @@ dependencies = [
     "google-genai>=2.17.0",
     "ladybug==0.19.1",
     "langgraph>=1.0.4",
+    "langgraph-prebuilt>=1.0.4",
+    "langchain-core>=1.0.0",
     "oci>=2.175.0",
     "pillow>=12.0.0",
     "pydantic-settings>=2.12.0",

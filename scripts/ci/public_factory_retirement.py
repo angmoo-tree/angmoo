@@ -91,7 +91,7 @@ def facade_exports(source):
     return aliases
 
 
-def validate_main(source, frozen):
+def validate_main(source, frozen, *, approved_definition=None):
     tree, before = ast.parse(source), ast.parse(frozen)
     bindings, original = definitions(tree), definitions(before)
     totals = counts(tree.body)
@@ -114,7 +114,11 @@ def validate_main(source, frozen):
             raise ValueError('actual full/public default or export changed: ' + name)
     for name in ('create_app', 'create_lifespan'):
         n, old = bindings[name], original[name]
-        if not isinstance(n, ast.FunctionDef) or n.decorator_list or dump(n.args) != dump(old.args):
+        if not isinstance(n, ast.FunctionDef) or n.decorator_list:
+            raise ValueError('actual factory arguments/defaults changed: ' + name)
+        if dump(n.args) != dump(old.args) and not (
+            approved_definition is not None and approved_definition(name, old, n)
+        ):
             raise ValueError('actual factory arguments/defaults changed: ' + name)
         if any(counts(n.body)[x] for x in ('FastAPI', 'partial', 'create_app', 'create_lifespan')):
             raise ValueError('factory shadows its actual construction primitives')
@@ -258,7 +262,7 @@ def active_consumers(root):
                         raise ValueError('retired public facade has a dynamic consumer: ' + str(path))
 
 
-def validate(enabled, files, snapshots, root, git_bytes):
+def validate(enabled, files, snapshots, root, git_bytes, *, approved_changes=()):
     if not enabled:
         return None
     if enabled is not True or files.get(OLD) != MAIN:
@@ -290,7 +294,16 @@ def validate(enabled, files, snapshots, root, git_bytes):
         raise ValueError('G5 changed the protected one-way facade')
     oldmain, oldtest = source(FACTORY_SOURCE, MAIN), source(FACTORY_SOURCE, TEST)
     validate_main(oldmain, source(FACADE_SOURCE, MAIN))
-    validate_main((root/MAIN).read_text(encoding='utf-8-sig'),oldmain)
+    # A post-refactor product change may add a lifecycle collaborator. Require
+    # the existing exact committed before/after proof, never a name allowlist.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "factory_product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+    product_changes = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(product_changes)
+    validate_main((root/MAIN).read_text(encoding='utf-8-sig'), oldmain,
+                  approved_definition=lambda name, old, new: product_changes.definition_matches(
+                      root, MAIN, name, old, new, records=approved_changes))
     validate_tests(oldtest,(root/TEST).read_text(encoding='utf-8-sig'))
     active_consumers(root)
     return {'exports':aliases,'frozen_main':oldmain,'frozen_facade':facade}

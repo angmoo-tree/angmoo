@@ -104,11 +104,38 @@ class MemoryEvidenceRead(BaseModel):
     canonical_href: str | None = None
 
 
+class EpisodeSourceRead(BaseModel):
+    role: str
+    text: str | None
+    status: Literal["verified", "missing", "changed", "unavailable"]
+
+
+class EpisodeThoughtRead(BaseModel):
+    text: str | None = None
+    status: Literal["recorded", "missing", "invalid"]
+    truncated: bool = False
+
+
+class EpisodeUnitRead(BaseModel):
+    sources: list[EpisodeSourceRead]
+    thought: EpisodeThoughtRead | None = None
+    legacy_declaration: str | None = None
+
+
+class EpisodeDetailRead(BaseModel):
+    representation: Literal["episode_v1", "legacy_summary"]
+    partial: bool
+    omitted_units: int
+    followup_count: int
+    units: list[EpisodeUnitRead]
+
+
 class MemoryItemDetailRead(MemoryItemSummaryRead):
     schema_version: Literal["memory-item-detail.v1"] = "memory-item-detail.v1"
     scope: MemoryScopeRead
     evidence: list[MemoryEvidenceRead]
     provenance_summary: str
+    episode: EpisodeDetailRead | None = None
     capabilities: MemoryCapabilitiesRead = Field(
         default_factory=MemoryCapabilitiesRead
     )

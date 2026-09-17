@@ -4,22 +4,15 @@ from __future__ import annotations
 from collections import Counter
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.domains.social.contracts.subjective_context import (
-    ActionEmotionLabel,
-    ActionMotivationKind,
-    ActionSubjectiveContextV1,
-    SubjectiveContextProvenance,
-)
 from app.domains.social.contracts.today_activity import (
     TodaySocialActivityKind,
     TodaySocialActivityRead,
     TodaySocialActivityRecord,
     TodaySocialCoverageStatus,
-    TodaySocialSubjectiveRecord,
 )
 from app.domains.social.contracts.today_references import TodayReferences
 from app.domains.social.repository.today_activity import TodayActivityRepository
-from app.domains.social.service.subjective_context import subjective_context_digest
+from app.domains.social.service.subjective_records import read_subjective_records
 from app.domains.social.constants import (
     MAX_TODAY_SOCIAL_RECORDS,
     MAX_TODAY_BRANCH_DEPTH,
@@ -39,9 +32,10 @@ from app.domains.social.service.today_activity_values import (
 
 
 class TodaySocialActivityService:
-    def __init__(self, db: Session, *, references: TodayReferences) -> None:
+    def __init__(self, db: Session, *, references: TodayReferences, thought_enabled: bool = False) -> None:
         self.repository = TodayActivityRepository(db)
         self.references = references
+        self.thought_enabled = thought_enabled
 
     def read(
         self,
@@ -164,6 +158,16 @@ class TodaySocialActivityService:
             evidence_by_event,
             executions,
         )
+        thoughts = {}
+        if self.thought_enabled:
+            from app.domains.social.service.today_activity_thoughts import validated_activity_thoughts
+            thoughts = validated_activity_thoughts(
+                self.repository.thoughts([event.id for event in events]),
+                owner_id=owner_id, world_id=world_id, subject_id=subject_world_character_id,
+                events=events, evidence_by_event=evidence_by_event, executions=executions, posts=posts,
+            )
+            # A missing/invalid new thought is not replaced with a stale planner declaration.
+            subjective = {key: value for key, value in subjective.items() if key not in thoughts}
         records = {}
         post_event_ids = {
             event.id for event in events if event.event_type in _POST_EVENT_TYPES
@@ -242,7 +246,7 @@ class TodaySocialActivityService:
                 source_type="social_event",
                 source_id=event.id,
                 source_revision=_source_revision(
-                    event, evidence, chain or [], subjective.get(event.id)
+                    event, evidence, chain or [], thoughts.get(event.id) or subjective.get(event.id)
                 ),
                 actor_world_character_id=event.actor_world_character_id,
                 counterpart_world_character_id=counterpart,
@@ -258,6 +262,7 @@ class TodaySocialActivityService:
                 root_title=chain[-1].title if chain and len(chain) > 2 else None,
                 root_body=chain[-1].body if chain and len(chain) > 2 else None,
                 subjective_context=subjective.get(event.id),
+                thought=thoughts.get(event.id),
             )
         for post in own_posts + received:
             if post.id in represented_posts:
@@ -337,6 +342,7 @@ class TodaySocialActivityService:
             },
             overflow=scan_overflow or len(ordered) > MAX_TODAY_SOCIAL_RECORDS,
             counts_exact=not scan_overflow,
+            thought_view=self.thought_enabled,
         )
 
     def _validate_scope(self, owner_id, world_id, subject_id) -> None:
@@ -356,58 +362,7 @@ class TodaySocialActivityService:
     def _subjective_by_event(
         self, owner_id, world_id, subject_id, events, evidence_by_event, executions
     ):
-        rows = self.repository.subjective([event.id for event in events])
-        event_by_id, output = ({event.id: event for event in events}, {})
-        for row in rows:
-            event, evidence = (
-                event_by_id.get(row.social_event_id),
-                evidence_by_event.get(row.social_event_id),
-            )
-            execution = executions.get(row.public_action_execution_id)
-            if (
-                row.owner_id != owner_id
-                or row.world_id != world_id
-                or row.actor_world_character_id != subject_id
-                or (row.invalidated_at is not None)
-                or (event is None)
-                or (evidence is None)
-                or (event.actor_world_character_id != subject_id)
-                or (event.result != "succeeded")
-                or (event.invalidated_at is not None)
-                or (
-                    evidence.public_action_execution_id
-                    != row.public_action_execution_id
-                )
-                or (not _execution_matches(execution, event))
-                or (_aware(row.captured_at) > _aware(event.occurred_at))
-            ):
-                continue
-            try:
-                context = ActionSubjectiveContextV1(
-                    version=row.schema_version,
-                    motivation_kind=ActionMotivationKind(row.motivation_kind),
-                    motivation_text=row.motivation_text,
-                    emotion_label=ActionEmotionLabel(row.emotion_label),
-                    emotion_text=row.emotion_text,
-                    emotion_intensity=row.emotion_intensity,
-                    provenance_kind=SubjectiveContextProvenance(row.provenance_kind),
-                )
-                digest = subjective_context_digest(
-                    execution=execution,
-                    event=event,
-                    source_content_digest=evidence.content_sha256,
-                    context=context,
-                )
-            except (TypeError, ValueError):
-                continue
-            if row.source_digest != digest:
-                continue
-            output[row.social_event_id] = TodaySocialSubjectiveRecord(
-                motivation_kind=context.motivation_kind.value,
-                motivation_text=context.normalized_motivation_text,
-                emotion_label=context.emotion_label.value,
-                emotion_text=context.normalized_emotion_text,
-                emotion_intensity=context.emotion_intensity,
-                source_digest=digest,
-            )
-        return output
+        return read_subjective_records(
+            self.repository, owner_id, world_id, subject_id,
+            events, evidence_by_event, executions,
+        )

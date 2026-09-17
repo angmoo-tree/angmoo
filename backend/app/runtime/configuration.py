@@ -20,7 +20,8 @@ from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
 from app.runtime.memory.recall_projection import EmbeddedMemoryRecallProjection
 from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository
-from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex
+from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex, MemoryRecallIndexSettings
+from app.runtime.memory.hybrid_runtime import MemoryHybridRuntime
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search import (
     EmbeddedSocialSearchProjection,
@@ -200,6 +201,7 @@ class RuntimeComposition:
     social_search_projection: EmbeddedSocialSearchProjection
     memory_recall_projection: EmbeddedMemoryRecallProjection
     memory_recall_service: CanonicalRecallService
+    memory_hybrid_runtime: MemoryHybridRuntime
 
     def dispose(self) -> None:
         self.memory_recall_projection.stop()
@@ -216,7 +218,11 @@ def compose_runtime(
     engine = create_database_engine(runtime_settings.database_url)
     session_factory = create_session_factory(engine)
     data_paths = StaticRuntimeDataPath(config.data_paths.root)
-    memory_recall_index = SqliteMemoryRecallIndex(data_paths)
+    episode_only = runtime_settings.MEMORY_RECALL_REPRESENTATION == "episode_v1"
+    memory_recall_index = SqliteMemoryRecallIndex(data_paths,
+        settings=MemoryRecallIndexSettings(generation="memory-episode-v1") if episode_only else None)
+    memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve(),
+        fts_policy=runtime_settings.CHAT_HYBRID_FTS_POLICY, episode_only=episode_only)
     return RuntimeComposition(
         config=config,
         settings=runtime_settings,
@@ -229,11 +235,14 @@ def compose_runtime(
         memory_recall_projection=EmbeddedMemoryRecallProjection(
             index=memory_recall_index,
             session_factory=session_factory,
+            episode_only=episode_only,
         ),
         memory_recall_service=CanonicalRecallService(
             SqlAlchemyCanonicalRecallRepository(session_factory),
             memory_recall_index,
+            hybrid_service=memory_hybrid_runtime.service,
         ),
+        memory_hybrid_runtime=memory_hybrid_runtime,
     )
 
 

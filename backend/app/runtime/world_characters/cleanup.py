@@ -12,6 +12,7 @@ from app.domains.routines.models.plans import JointActivity as _model_JointActiv
 from app.domains.routines.models.plans import JointActivityParticipant as _model_JointActivityParticipant
 from app.domains.routines.models.plans import JointActivityRepresentationClaim as _model_JointActivityRepresentationClaim
 from app.domains.social.models.subjective_context import SocialActionSubjectiveContext as _model_SocialActionSubjectiveContext
+from app.domains.social.models.activity_thought import SocialActivityThought
 from app.domains.world_characters.models import WorldActivityCandidate as _model_WorldActivityCandidate
 from app.domains.world_characters.models import WorldActivityRepertoire as _model_WorldActivityRepertoire
 from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
@@ -41,6 +42,10 @@ def delete_setup_data_for_characters(
     )
     if not world_character_ids:
         return
+
+    db.execute(delete(SocialActivityThought).where(
+        SocialActivityThought.actor_world_character_id.in_(world_character_ids)
+    ))
 
     # Public-safe declarations remain private action state, not public posts.
     # Remove them before the legacy scrub path removes their executions.

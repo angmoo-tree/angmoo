@@ -15,11 +15,11 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "29bd56befd55c3c5b9cd7b0f300858715c3c84c41c1d46f4f5ca0ae475b57e2f"
+      "sha256": "c8bc02af1a40d2cfae3733e58cbf2b3deed1bad789bc8ca1b286778db0c1e997"
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "d6fa9aa1909eb19524e045946fc7c29fb1d79d0dcac1012e76b17c2ac4eb5d82"
+      "sha256": "12f85bf7259230524c46eae4159357ca25fa247be83c736cb8b838e128075bfd"
     },
     {
       "path": "frontend/next.config.ts",
@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "2f547a08274f3a2ba5befb05ff9beb7673b7ffeedeef9ccd54ee7d91585c8f90"
+      "sha256": "d159cb02f1214a1bc03392f892f849a7f6daf9c801ed6411d6ce13b5a3dc6a19"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -47,6 +47,8 @@
         "google-auth[requests]>=2.40.0",
         "google-genai>=2.17.0",
         "ladybug==0.19.1",
+        "langchain-core>=1.0.0",
+        "langgraph-prebuilt>=1.0.4",
         "langgraph>=1.0.4",
         "oci>=2.175.0",
         "pillow>=12.0.0",
@@ -66,6 +68,7 @@
       {
         "base_images": [
           "${PYTHON_IMAGE} AS base",
+          "base AS vec1-build",
           "base AS source",
           "base AS development",
           "source AS runtime"
@@ -287,7 +290,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "2f547a08274f3a2ba5befb05ff9beb7673b7ffeedeef9ccd54ee7d91585c8f90",
+      "source_sha256": "d159cb02f1214a1bc03392f892f849a7f6daf9c801ed6411d6ce13b5a3dc6a19",
       "transition_pr": "ER4 PR J"
     },
     {

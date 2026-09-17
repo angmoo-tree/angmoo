@@ -47,6 +47,34 @@ def relationship_state(
     return db.get(RelationshipState, source_id)
 
 
+def memory_episode_receipt(db, scope, *, item_id, text):
+    from datetime import UTC, datetime
+    from app.runtime.memory.episode_inspector import episode_receipt_view
+    return episode_receipt_view(db, scope, item_id, datetime.now(UTC), text)
+
+
+def social_relationship_current(db: Session, scope: MemoryScope, locator: dict) -> bool:
+    from app.contracts.read_deadline import bounded_read
+    from app.domains.relationships.contracts.graph_recall import GraphRecallQuery, GraphRecallScope, GraphRecallOperation
+    from app.domains.relationships.service.graph_recall import GraphRecallService
+    from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
+    if locator.get("actor_world_character_id") != scope.subject_world_character_id:
+        return False
+    gateway = SqlAlchemyRelationshipGraphReadGateway(db)
+    try:
+        with bounded_read(1):
+            result = GraphRecallService(gateway).execute(GraphRecallQuery(
+                GraphRecallOperation.DIRECT_RELATIONSHIP,
+                GraphRecallScope(scope.owner_id, scope.world_id, scope.subject_world_character_id),
+                counterpart_world_character_id=locator.get("target_world_character_id"), limit=1))
+        return any(row.relationship_state_id == locator.get("source_id")
+                   and str(row.relationship_version) == locator.get("source_revision") for row in result.relationships)
+    except Exception:
+        return False
+    finally:
+        gateway.close_graph_repository()
+
+
 def world_character_name(
     db: Session,
     world_character_id: str | None,

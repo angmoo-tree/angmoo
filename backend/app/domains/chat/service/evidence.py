@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from time import monotonic
+from app.contracts.read_deadline import bounded_read
 
 from sqlalchemy.orm import Session
 
@@ -54,6 +56,10 @@ class EvidenceService:
         metadata = record.response_metadata
         capability = metadata.get("evidence_capability")
         snapshot = metadata.get("_evidence_inspector_v1")
+        current_snapshot = metadata.get("_social_context_inspector_v1")
+        current_raw = current_snapshot.get("items", []) if isinstance(current_snapshot, dict) else []
+        if isinstance(current_raw, list) and current_raw:
+            capability = "degraded" if capability == "degraded" else "available"
         if capability not in {"available", "degraded"} or not isinstance(
             snapshot, dict
         ):
@@ -74,11 +80,26 @@ class EvidenceService:
             for raw in raw_items[:12]
             if isinstance(raw, dict)
         ]
+        current_items = []
+        current_deadline = monotonic() + 2.0
+        for raw in current_raw[:12]:
+            if not isinstance(raw, dict):
+                continue
+            locator = raw.get("locator") or {}
+            validate = getattr(self.reads, "social_relationship_current", None)
+            remaining = current_deadline - monotonic()
+            valid = False
+            if validate is not None and remaining > 0:
+                with bounded_read(remaining):
+                    valid = validate(db, scope, locator)
+            item = self._chat_evidence_item(db, scope, raw if valid else {**raw, "locator": None}, source_reader=source_reader)
+            current_items.append(item)
+        visible_items = items + current_items
         current_capability = (
             "available"
             if capability == "available"
-            and items
-            and all((item.availability == "available" for item in items))
+            and visible_items
+            and all((item.availability == "available" for item in visible_items))
             else "degraded"
         )
         return schemas.WorldChatEvidenceRead(
@@ -87,6 +108,7 @@ class EvidenceService:
             retrieval_outcome=str(metadata.get("retrieval_outcome") or "unknown"),
             capability=current_capability,
             items=items,
+            current_context=current_items,
         )
 
     def _chat_evidence_item(
@@ -103,6 +125,7 @@ class EvidenceService:
             "graph_relationship",
             "graph_event",
             "today_sns_activity",
+            "episode_memory",
         }:
             raise MessageNotFoundError("근거 형식이 올바르지 않습니다.")
         reference = raw.get("ref")
@@ -115,11 +138,13 @@ class EvidenceService:
         href = None
         related_name = None
         direction = None
+        episode = None
         label = {
             "canonical_source": "기억 근거",
             "graph_relationship": "현재 관계",
             "graph_event": "관계 사건",
             "today_sns_activity": "오늘 SNS 활동",
+            "episode_memory": "상황 기억",
         }[kind]
         if not isinstance(locator, dict):
             return schemas.WorldChatEvidenceItemRead(
@@ -248,10 +273,17 @@ class EvidenceService:
                 if (
                     detail.lifecycle is MemoryLifecycle.ACTIVE
                     and revision_matches
-                    and has_current_evidence
+                    and (has_current_evidence or kind == "episode_memory")
                 ):
                     availability = "available"
                     href = f"/memory?world={scope.world_id}&subject={scope.subject_world_character_id}&memory={memory_id}"
+                    if kind == "episode_memory":
+                        reader = getattr(self.reads, "memory_episode_receipt", None)
+                        receipt = None if reader is None else reader(db, scope, item_id=memory_id, text=text)
+                        if receipt is None:
+                            availability, href = "unavailable", None
+                        else:
+                            text, episode = receipt
                 label = "저장된 기억"
                 related_name = self.reads.world_character_name(
                     db,
@@ -303,6 +335,7 @@ class EvidenceService:
             related_character=related_name,
             direction=direction,
             canonical_href=href,
+            episode=episode,
         )
 
 

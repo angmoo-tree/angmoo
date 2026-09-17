@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from app.contracts.retrieval_observation import observe, detail, observing_step
+from app.domains.relationships.service.graph_observation import (
+    observe_validation, validation_step, validation_counterpart, validation_direction,
+)
 
 from dataclasses import dataclass, replace
 from datetime import datetime
@@ -13,6 +16,7 @@ from app.domains.relationships.contracts.graph_plan import (
     GraphRetrievalPlan,
 )
 from app.domains.relationships.policies.graph_plan_schema import (parse_graph_retrieval_plan_payload)
+from app.domains.relationships.policies.graph_query_plan import validate_query_coverage
 from app.domains.relationships.contracts.graph_recall import (
     GraphRecallDirection,
     GraphRecallOperation,
@@ -36,6 +40,7 @@ from app.domains.relationships.contracts.graph_execution import (
 class GraphRetrievalPlanValidator:
     """Bind one untrusted graph-only plan to immutable resolved policy."""
 
+    @observe_validation
     def validate(
         self,
         plan: GraphRetrievalPlan,
@@ -70,11 +75,14 @@ class GraphRetrievalPlanValidator:
         if not allowed <= registry:
             raise GraphPlanContractError("graph_execution_allowlist_operation_unknown")
         entity_bindings = dict(context.entity_bindings)
+        if context.graph_queries:
+            validate_query_coverage(plan, context.graph_queries)
         normalized_steps: list[GraphPlanStep] = []
         limit_clamped: list[str] = []
         hop_clamped: list[str] = []
         seen: set[str] = set()
         for step in plan.steps:
+            validation_step(step)
             if step.operation not in registry or step.operation not in allowed:
                 raise GraphPlanContractError("graph_plan_operation_forbidden")
             parameters = dict(step.parameters)
@@ -82,7 +90,8 @@ class GraphRetrievalPlanValidator:
             if counterpart_ref is not None:
                 if not isinstance(counterpart_ref, str) or counterpart_ref not in entity_bindings:
                     raise GraphPlanContractError("graph_plan_entity_ref_unresolved")
-                expected_counterpart = context.expected_counterpart_id
+                expected_counterpart = None if context.graph_queries else context.expected_counterpart_id
+                validation_counterpart(expected_counterpart, entity_bindings[counterpart_ref])
                 if expected_counterpart is not None and (
                     entity_bindings[counterpart_ref] != expected_counterpart
                 ):
@@ -97,7 +106,8 @@ class GraphRetrievalPlanValidator:
                 direction = GraphRecallDirection(str(raw_direction))
             except ValueError as exc:
                 raise GraphPlanContractError("graph_plan_direction_invalid") from exc
-            expected_direction = context.expected_direction
+            expected_direction = None if context.graph_queries else context.expected_direction
+            validation_direction(expected_direction, direction)
             if expected_direction is not None and direction is not expected_direction:
                 raise GraphPlanContractError("graph_plan_direction_mismatch")
 
@@ -195,6 +205,7 @@ class GraphRetrievalPlanExecutor:
                     query = GraphRecallQuery(
                         operation=GraphRecallOperation(step.operation),
                         scope=context.scope,
+                        enforce_collection_direction=bool(context.graph_queries),
                         counterpart_world_character_id=counterpart_id,
                         direction=GraphRecallDirection(str(parameters["direction"])),
                         ranking=GraphRecallRanking(

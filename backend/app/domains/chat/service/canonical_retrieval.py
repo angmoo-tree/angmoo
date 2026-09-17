@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.contracts.retrieval_observation import observe
+from app.domains.chat.service.planner_diagnostics import observe_canonical_rejection
 
 import asyncio
 from collections.abc import Mapping
@@ -27,6 +28,7 @@ from app.domains.chat.contracts.workflow_recipe import (
     WorkflowDependencyBinding,
 )
 from app.domains.memory.contracts.retrieval_plan import CanonicalPlanContractError
+from app.domains.memory.contracts.planner_provider import canonical_planner_diagnostic
 from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionContext
 from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionResult
 from app.domains.memory.contracts.planner_provider import CanonicalPlannerEntity
@@ -48,6 +50,7 @@ class CanonicalRetrievalCommand:
     resolved: ResolvedRetrievalEnvelope
     call_tracker: Mapping[str, Any]
     workflow_dependency: WorkflowDependencyBinding | None = None
+    call_id: str | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -169,7 +172,6 @@ class CanonicalRetrievalPlanningService:
                 tracker.record_physical_attempt(LlmNode.CANONICAL_PLANNER, now=now)
             validated = self._validator.validate(provider_result.plan, context)
         except (CanonicalPlannerOutputError, CanonicalPlanContractError) as exc:
-            observe("planner_validation", axis="canonical", phase="first", status="rejected", reason="plan_contract_invalid")
             if isinstance(exc, CanonicalPlannerOutputError):
                 first_physical = exc.physical_attempt_count
                 for _ in range(first_physical):
@@ -177,6 +179,7 @@ class CanonicalRetrievalPlanningService:
                         LlmNode.CANONICAL_PLANNER,
                         now=now,
                     )
+            observe_canonical_rejection(exc, phase="first", tracker=tracker)
             repair_used = True
             remaining_seconds -= monotonic() - started
             if remaining_seconds <= 0:
@@ -190,10 +193,10 @@ class CanonicalRetrievalPlanningService:
                     repair=True,
                 )
             except RetrievalContractError as budget_exc:
-                raise RetrievalContractError(
-                    "canonical_planner_request_wide_repair_exhausted"
-                ) from budget_exc
-            diagnostic = getattr(exc, "diagnostic", str(exc))
+                failure = RetrievalContractError("canonical_planner_request_wide_repair_exhausted")
+                failure.call_tracker = tracker.snapshot()
+                raise failure from budget_exc
+            diagnostic = canonical_planner_diagnostic(exc)
             repaired_request = replace(
                 request,
                 repair_diagnostic=diagnostic[:160],
@@ -211,7 +214,6 @@ class CanonicalRetrievalPlanningService:
                     )
                 validated = self._validator.validate(provider_result.plan, context)
             except (CanonicalPlannerOutputError, CanonicalPlanContractError) as repaired:
-                observe("planner_validation", axis="canonical", phase="repair", status="rejected", reason="plan_contract_invalid")
                 if isinstance(repaired, CanonicalPlannerOutputError):
                     repair_physical = repaired.physical_attempt_count
                     for _ in range(repair_physical):
@@ -219,9 +221,10 @@ class CanonicalRetrievalPlanningService:
                             LlmNode.CANONICAL_PLANNER,
                             now=now,
                         )
-                raise RetrievalContractError(
-                    "canonical_planner_request_wide_repair_exhausted"
-                ) from repaired
+                observe_canonical_rejection(repaired, phase="repair", tracker=tracker)
+                failure = RetrievalContractError("canonical_planner_request_wide_repair_exhausted")
+                failure.call_tracker = tracker.snapshot()
+                raise failure from repaired
 
         observe("planner", axis="canonical", planned=len(validated.plan.steps), repair_used=repair_used, first_pass_valid=not repair_used, limit_reached=bool(validated.limit_clamped_steps))
         execution = self._executor.execute(validated.plan, context, now=now)
@@ -311,6 +314,12 @@ class CanonicalRetrievalPlanningService:
                     role=entity.role,
                 )
                 for entity in command.intent.entities
+            ),
+            memory_subject_refs=tuple(
+                binding.ref
+                for binding in command.resolved.entity_bindings
+                if binding.world_character_id
+                == command.resolved.responding_world_character_id
             ),
             relationship=(
                 None

@@ -26,6 +26,7 @@ class CredentialPurpose(StrEnum):
     CREATION_DRAFT_LLM = "creation_draft_llm"
     MESSAGE_LLM = "message_llm"
     LORE_EMBEDDING = "lore_embedding"
+    MEMORY_EMBEDDING = "memory_embedding"
     USER_IMAGE = "user_image"
     SERVICE_IMAGE = "service_image"
     PRIVATE_OPENCLAW = "private_openclaw"

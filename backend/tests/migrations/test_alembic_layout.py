@@ -54,8 +54,11 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert {key: actual_graph[key] for key in expected_graph} == expected_graph
     assert actual_graph["20260909_0090"] == "20260904_0089"
     assert actual_graph["20260910_0091"] == "20260909_0090"
-    assert len(actual_graph) == 90
-    assert script.get_heads() == ["20260910_0091"]
+    assert actual_graph["20260914_0092"] == "20260910_0091"
+    assert actual_graph["20260916_0093"] == "20260914_0092"
+    assert actual_graph["20260917_0094"] == "20260916_0093"
+    assert len(actual_graph) == 93
+    assert script.get_heads() == ["20260917_0094"]
     assert not list((BACKEND / "app/alembic").rglob("*.py"))
 
 
@@ -71,7 +74,7 @@ def test_alembic_heads_from_outside_backend(tmp_path):
         timeout=30,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip() == "20260910_0091 (head)"
+    assert result.stdout.strip() == "20260917_0094 (head)"
 
 
 def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_path):
@@ -88,7 +91,13 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
 
         backend = Path(sys.argv[1])
         checkpoint = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
-        expected_tables = set(checkpoint["contracts"]["orm_tables"]) | {"chat_retrieval_diagnostics"}
+        expected_tables = set(checkpoint["contracts"]["orm_tables"]) | {
+            "chat_retrieval_diagnostics", "memory_embedding_settings", "memory_vector_eligibility",
+            "chat_message_thoughts", "social_activity_thoughts", "memory_episode_bundles",
+            "memory_episode_info", "memory_episode_units", "memory_episode_unit_evidence",
+            "memory_episode_processed_units", "memory_episode_links",
+            "memory_consolidation_requests", "memory_consolidation_jobs",
+        }
         config = Config(str(backend / "alembic.ini"))
         script = ScriptDirectory.from_config(config)
         inspected = []
@@ -126,7 +135,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     result_data = json.loads(result.stdout)
     expected_count = len(json.loads(CHECKPOINT.read_text(encoding="utf-8"))["contracts"]["orm_tables"])
-    assert result_data == {"registered_tables": expected_count + 1, "revision_bodies_run": 0}
+    assert result_data == {"registered_tables": expected_count + 13, "revision_bodies_run": 0}
     assert not list(tmp_path.rglob("*.sqlite3"))
 
 

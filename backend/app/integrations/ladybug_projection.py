@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import ctypes
 from collections import defaultdict, deque
+from contextlib import contextmanager
+from time import monotonic
 from dataclasses import fields
 from datetime import datetime
 import gc
@@ -21,6 +23,7 @@ import threading
 from typing import Any
 
 import ladybug as lb
+from app.contracts.read_deadline import current_read_deadline
 
 from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.domains.relationships.contracts.graph_query import (GraphQueryTemplate)
@@ -355,18 +358,40 @@ class LadybugRelationshipProjection:
         finally:
             self._writer_lock.release()
 
+    @contextmanager
+    def _read_access(self):
+        deadline = current_read_deadline.get()
+        acquired = (self._access_lock.acquire() if deadline is None else
+                    self._access_lock.acquire(timeout=max(0.0, deadline - monotonic())))
+        if not acquired:
+            raise LadybugProjectionError("ladybug_read_deadline")
+        try:
+            yield
+        finally:
+            self._access_lock.release()
+
     def _execute(
         self, query: str, parameters: dict[str, Any] | None = None
     ) -> list[list[Any]]:
         connection = self._connection
         if connection is None or self._closed:
             raise LadybugProjectionError("ladybug_unavailable")
+        deadline = current_read_deadline.get()
+        previous_timeout = getattr(connection, "_query_timeout_ms", 0)
         try:
+            if deadline is not None:
+                remaining = deadline - monotonic()
+                if remaining <= 0:
+                    raise LadybugProjectionError("ladybug_read_deadline")
+                connection.set_query_timeout(max(1, int(remaining * 1000)))
             return _rows(connection.execute(query, parameters=parameters or {}))
         except LadybugProjectionError:
             raise
         except Exception:
             raise LadybugProjectionError("ladybug_transient") from None
+        finally:
+            if deadline is not None:
+                connection.set_query_timeout(previous_timeout)
 
     def bootstrap(self) -> None:
         with self._access_lock:
@@ -424,7 +449,7 @@ class LadybugRelationshipProjection:
             return int(rows[0][0])
 
     def verify_connectivity(self) -> None:
-        with self._access_lock:
+        with self._read_access():
             rows = self._execute("RETURN 1")
             if rows != [[1]]:
                 raise LadybugProjectionError("ladybug_unavailable")
@@ -445,7 +470,28 @@ class LadybugRelationshipProjection:
             "relationship_version": int(row[12] or 0),
         }
 
-    def _relationship_rows(self, *, world_id: str) -> list[dict[str, Any]]:
+    def _relationship_rows(self, *, world_id: str, source_id: str | None = None,
+                           target_id: str | None = None, mode: str | None = None,
+                           limit: int | None = None) -> list[dict[str, Any]]:
+        filters = ""
+        parameters: dict[str, Any] = {"world_id": world_id}
+        if source_id is not None:
+            filters += " AND actor.world_character_id = $source_id"
+            parameters["source_id"] = source_id
+        if target_id is not None:
+            filters += " AND target.world_character_id = $target_id"
+            parameters["target_id"] = target_id
+        orders = {
+            "positive": "relationship.familiarity DESC, relationship.affinity DESC, relationship.trust DESC, relationship.tension ASC, target.world_character_id ASC",
+            "tense": "relationship.tension DESC, relationship.affinity ASC, coalesce(relationship.updated_at, '') DESC, target.world_character_id ASC",
+            "recent": "coalesce(relationship.updated_at, '') DESC, relationship.interaction_count DESC, target.world_character_id ASC",
+        }
+        tail = "" if mode is None else " ORDER BY " + orders[mode]
+        if limit is not None:
+            if not 1 <= limit <= 20:
+                raise LadybugProjectionError("ladybug_query_limit")
+            tail += " LIMIT $result_limit"
+            parameters["result_limit"] = limit
         rows = self._execute(
             """
             MATCH (actor:WorldCharacter)-[relationship:RELATES_TO]->
@@ -453,6 +499,7 @@ class LadybugRelationshipProjection:
             WHERE actor.world_id = $world_id
               AND target.world_id = $world_id
               AND relationship.world_id = $world_id
+            """ + filters + """
             RETURN actor.world_character_id,
                    target.world_character_id,
                    relationship.world_id,
@@ -466,8 +513,8 @@ class LadybugRelationshipProjection:
                    relationship.last_event_at,
                    relationship.updated_at,
                    relationship.relationship_version
-            """,
-            {"world_id": world_id},
+            """ + tail,
+            parameters,
         )
         return [
             {
@@ -595,7 +642,18 @@ class LadybugRelationshipProjection:
         world_id = str(parameters["world_id"])
         source_id = str(parameters.get("source_id") or "")
         target_id = str(parameters.get("target_id") or "")
-        with self._access_lock:
+        with self._read_access():
+            if template == GraphQueryTemplate.DIRECT_RELATIONSHIP:
+                return self._relationship_rows(world_id=world_id, source_id=source_id,
+                                               target_id=target_id, limit=1)
+            rank_modes = {
+                GraphQueryTemplate.RANK_POSITIVE: "positive",
+                GraphQueryTemplate.RANK_TENSE: "tense",
+                GraphQueryTemplate.RANK_RECENT: "recent",
+            }
+            if template in rank_modes:
+                return self._relationship_rows(world_id=world_id, source_id=source_id,
+                                               mode=rank_modes[template], limit=int(parameters.get("limit") or 20))
             relationships = self._relationship_rows(world_id=world_id)
 
             if template == GraphQueryTemplate.DIRECT_RELATIONSHIP:
