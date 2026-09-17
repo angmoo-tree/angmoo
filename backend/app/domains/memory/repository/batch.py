@@ -45,6 +45,7 @@ from app.domains.memory.models.items import (
 )
 from app.domains.memory.contracts.batch import MemoryBatchSettings, MemorySelectionBatch
 from app.domains.memory.repository.capacity import stored_count, STORAGE_LIMIT
+from app.domains.memory.repository.consolidation_requests import independently_requested_job
 
 
 class SqlAlchemyMemoryBatchRepository:
@@ -282,6 +283,8 @@ class SqlAlchemyMemoryBatchRepository:
                     raise MemoryConflictError("memory_batch_settings_version_conflict")
         if current.ai_enabled != ai_enabled or current.consent_version != (MEMORY_CONSENT_VERSION if ai_enabled else None):
             current.execution_version = (current.execution_version or 1) + 1
+        preserve_due = (current.schedule_enabled and current.ai_enabled and schedule_enabled and ai_enabled
+            and current.local_time == local_time and current.timezone == zone and current.next_due_at is not None)
         current.ai_enabled, current.shutdown_enabled = ai_enabled, shutdown_enabled
         current.consent_version = MEMORY_CONSENT_VERSION if ai_enabled else None
         current.schedule_enabled, current.local_time, current.timezone = (
@@ -289,21 +292,11 @@ class SqlAlchemyMemoryBatchRepository:
             local_time,
             zone,
         )
-        consumed = (
-            None
-            if current.last_consumed_date is None
-            else date.fromisoformat(current.last_consumed_date)
-        )
-        current.next_due_at = (
-            next_daily_slot(
-                after=now,
-                local_time=local_time,
-                timezone=zone,
-                last_consumed_date=consumed,
-            )
-            if schedule_enabled and ai_enabled
-            else None
-        )
+        if schedule_enabled and ai_enabled:
+            if not preserve_due:
+                current.next_due_at = next_daily_slot(after=now, local_time=local_time, timezone=zone)
+        else:
+            current.next_due_at = None
         current.last_request_key, current.last_request_digest, current.updated_at = (
             idempotency_key,
             digest,
@@ -323,6 +316,8 @@ class SqlAlchemyMemoryBatchRepository:
                 )
             ).all()
             for job in jobs:
+                if independently_requested_job(self.session, job.id):
+                    continue
                 job.status, job.completed_at = "cancelled", now
                 self.session.execute(
                     update(MemorySourceDelivery)
@@ -342,6 +337,7 @@ class SqlAlchemyMemoryBatchRepository:
         now: datetime,
         explicit_key: str = "",
         generation_policy: str = "legacy",
+        request_id: str | None = None,
     ) -> str | None:
         if generation_policy not in {"legacy", "episode_v1"}:
             raise MemoryValidationError("memory_generation_policy_invalid")
@@ -381,7 +377,7 @@ class SqlAlchemyMemoryBatchRepository:
                 MemoryBatchRun(
                     job_id=job,
                     scope_setting_id=scope_setting_id,
-                    trigger=trigger,
+                    trigger="recovery" if trigger == "manual" else trigger,
                     scope_version=scope.version,
                     settings_version=config.execution_version,
                     profile_version=profile.version,
@@ -398,15 +394,29 @@ class SqlAlchemyMemoryBatchRepository:
             previous = self.session.get(MemoryMaintenanceJob, job)
             if previous.status == "cancelled" and previous.attempt_count == 0:
                 previous.status, previous.completed_at = "pending", None
-                self.session.get(MemoryBatchRun, job).trigger = trigger
+                self.session.get(MemoryBatchRun, job).trigger = "recovery" if trigger == "manual" else trigger
         self.session.execute(
             update(MemorySourceDelivery)
             .where(
                 MemorySourceDelivery.scope_setting_id == scope_setting_id,
                 MemorySourceDelivery.candidate_id.in_(candidate_ids),
+                MemorySourceDelivery.batch_job_id.is_(None),
             )
             .values(batch_job_id=job)
         )
+        conflicting = self.session.scalar(select(MemorySourceDelivery.sequence).where(
+            MemorySourceDelivery.scope_setting_id == scope_setting_id,
+            MemorySourceDelivery.candidate_id.in_(candidate_ids),
+            MemorySourceDelivery.batch_job_id.is_not(None), MemorySourceDelivery.batch_job_id != job).limit(1))
+        if conflicting is not None:
+            raise MemoryConflictError("memory_delivery_assignment_conflict")
+        if request_id:
+            from app.domains.memory.models.consolidation_request import MemoryConsolidationJob
+            if self.session.get(MemoryConsolidationJob, (request_id, job)) is None:
+                self.session.add(MemoryConsolidationJob(request_id=request_id, job_id=job, phase="queued"))
+                # Production sessions disable autoflush. Publish the link within
+                # this transaction before overlap recovery queries it again.
+                self.session.flush()
         return job
 
     def retry_failed(

@@ -9,14 +9,16 @@ import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/ty
 import { memoryBatchFailureMessage } from "@/features/memory/utils/batch-status";
 import styles from "./memory-workspace.module.css";
 
-type Props = { worldId: string; subjectId: string; disabled: boolean; acquire: () => boolean; release: () => void; onCompleted: () => void };
+import { MemoryConsolidationControls } from "./memory-consolidation-controls";
+
+type Props = { subjectName: string; scopeVersion: number; worldId: string; subjectId: string; disabled: boolean; acquire: () => boolean; release: () => void; onCompleted: () => void };
 const labels: Record<MemoryBatchSetting["status"], string> = {
   capacity_blocked: "저장 한도에 도달해 기억 정리를 멈췄어요",
   disabled: "AI 기억 정리 사용 안 함", paused: "기억 정리 일시 중지", waiting: "예약 또는 종료를 기다리고 있어요",
   running: "기억을 정리하고 있어요", pending: "다음 실행에서 이어 정리합니다", attention: "지난 기억 정리를 마치지 못했어요", completed: "정리를 마쳤어요. 보관할 경험이 없으면 새 기억은 생기지 않습니다.",
 };
 
-export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, release, onCompleted }: Props) {
+export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVersion, disabled, acquire, release, onCompleted }: Props) {
   const [saved, setSaved] = useState<MemoryBatchSetting | null>(null);
   const [draft, setDraft] = useState<MemoryBatchSetting | null>(null);
   const [consent, setConsent] = useState(false);
@@ -92,7 +94,7 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
 
   return <section className={styles.batchControls} aria-label="기억 정리 예약">
     <h2>기억 정리</h2>
-    <p>경험은 먼저 저장하고, AI가 예약 시각이나 앱 전체 종료 때 오래 보관할 기억을 고릅니다.</p>
+    <p>경험은 먼저 저장하고, AI가 지금 기억 정리, 예약 시각이나 앱 전체 종료 때 오래 보관할 기억을 고릅니다.</p>
     {!draft || !saved ? <Button variant="secondary" compact disabled={disabled} onClick={() => setRevision((value) => value + 1)}>{failed ? "설정 다시 불러오기" : "설정 불러오는 중"}</Button> : <>
       <p role="status">{labels[saved.status]} · 정리 대기 {saved.pending_count}개</p>
       <p>저장된 기억 {saved.stored_count.toLocaleString("ko-KR")} / {saved.storage_limit.toLocaleString("ko-KR")}개</p>
@@ -100,6 +102,10 @@ export function MemoryBatchControls({ worldId, subjectId, disabled, acquire, rel
       {saved.capacity_blocked ? <p role="status">저장 한도에 도달해 새 기억 정리를 멈췄어요. 기존 기억은 보존됩니다. 불필요한 기억을 삭제하거나 보관 기간이 지나 공간이 생기면 남은 경험을 이어 정리합니다.</p> : null}
       {saved.status === "attention" ? <p role="status">{memoryBatchFailureMessage(saved.last_code)}</p> : null}
       {!saved.memory_enabled ? <p>기억이 꺼져 있어 자동 정리가 멈춰 있습니다. 기존 기록은 보존됩니다.</p> : null}
+      <MemoryConsolidationControls worldId={worldId} subjectId={subjectId} subjectName={subjectName}
+        scopeVersion={scopeVersion} version={saved.version} profileVersion={saved.profile_version}
+        disabled={disabled || busy || !saved.can_run} dirty={draft.ai_enabled !== saved.ai_enabled || draft.shutdown_enabled !== saved.shutdown_enabled || draft.schedule_enabled !== saved.schedule_enabled || draft.local_time !== saved.local_time || draft.model_id !== saved.model_id || draft.thinking_level !== saved.thinking_level}
+        acquire={acquire} release={release} onCompleted={onCompleted} />
       <fieldset disabled={disabled || busy}>
         <label className={styles.batchCheck}><input type="checkbox" checked={draft.ai_enabled} onChange={(event) => change({ ai_enabled: event.target.checked })} />AI 선별·정리 사용</label>
         <Field label="기억 정리 모델 · 이 설치의 모든 캐릭터 공통" helperText="쪽지용 API 설정을 사용합니다. 모델 변경은 다른 캐릭터의 다음 기억 정리에도 적용됩니다.">{(props) => <Select {...props} value={generationProfileValue(draft.model_id, draft.thinking_level)} onChange={(event) => { if (!event.target.value) return; const pair = decodeGenerationProfile(event.target.value); change({ model_id: pair.model, thinking_level: pair.thinking_level }); }}><option value="">모델을 선택해 주세요</option>{GENERATION_PROFILES.filter((profile) => saved.available_models.includes(profile.model)).map((profile) => <option value={profile.value} key={profile.value}>{profile.label}</option>)}</Select>}</Field>

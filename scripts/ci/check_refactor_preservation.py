@@ -998,7 +998,8 @@ def main() -> int:
                                  node_snapshots=[baseline["test_nodes"], *(snapshot["test_nodes"] for snapshot in snapshots)])
         file_targets = mapped_targets(sources, moves["files"])
         public_retirement = public_factory_retirement.validate(
-            moves.get("retired_public_main", False), file_targets, [baseline, *snapshots], ROOT, git_bytes
+            moves.get("retired_public_main", False), file_targets, [baseline, *snapshots], ROOT, git_bytes,
+            approved_changes=approved_changes,
         )
         chat_retirement = chat_forwarder_retirement.validate(
             moves.get("retired_chat_forwarders", False), file_targets, [baseline, *snapshots], ROOT, git_bytes

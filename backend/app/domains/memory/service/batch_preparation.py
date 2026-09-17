@@ -71,6 +71,7 @@ def enqueue_scope(
     now: datetime,
     cutoff: int | None = None,
     requested_at: datetime | None = None,
+    request_id: str | None = None,
 ) -> int:
     repo = dependencies.batch_repository(session)
     setting = session.get(MemoryScopeSettingModel, scope_setting_id)
@@ -159,6 +160,7 @@ def enqueue_scope(
                     candidate_ids=chunk,
                     cutoff=cutoff,
                     trigger=trigger,
+                    **({"request_id": request_id} if request_id else {}),
                     now=now,
                     **({"generation_policy": "episode_v1"} if episode else {}),
                 )

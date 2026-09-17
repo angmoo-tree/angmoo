@@ -18,6 +18,7 @@ class DirectLlmEpisodeSelectionProvider:
     def __init__(self, material: CredentialMaterial, *, validate_credential: Callable[[], None] | None = None):
         if material.purpose is not CredentialPurpose.MESSAGE_LLM:
             raise MemoryValidationError("episode_credential_purpose_invalid")
+        self.phase_observer = None
         self.material = material
         self.validate_credential = validate_credential
         self.usage = None
@@ -50,6 +51,8 @@ class DirectLlmEpisodeSelectionProvider:
             thinking_level=self.material.thinking_level, sdk_attempts=1,
         )
         try:
+            if self.phase_observer:
+                self.phase_observer("ai_running")
             self.physical_calls = 1
             response = await adapter.generate_json(request)
         except Exception as exc:
@@ -58,6 +61,9 @@ class DirectLlmEpisodeSelectionProvider:
             self.provider_status = failure.provider_status
             self.retryable = failure.retryable
             raise MemoryValidationError(f"episode_{failure.failure_class}") from None
+        finally:
+            if self.phase_observer:
+                self.phase_observer("applying")
         self.usage = response.usage
         self.finish_reason = response.finish_reason
         if self.validate_credential:

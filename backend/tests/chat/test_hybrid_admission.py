@@ -176,7 +176,7 @@ def test_production_composition_native_selection(response_session, monkeypatch, 
             if mode is ChatRecallMode.SOCIAL_HYBRID:
                 args["search_text"] = query
             return SimpleNamespace(text="", finish_reason="STOP", tool_calls=(ProviderToolCall("CANONICAL", args, "native-hr"),))
-        return SimpleNamespace(text="어느 장소에서 만나기로 했던 약속을 말하는 건가요?", finish_reason="STOP", tool_calls=())
+        return SimpleNamespace(text=json.dumps({"text": "어느 장소에서 만나기로 했던 약속을 말하는 건가요?", "thought": "약속을 구분하려고 장소를 확인하고 싶다."}, ensure_ascii=False), parsed=None, finish_reason="STOP", tool_calls=())
     monkeypatch.setattr("app.integrations.direct_llm.generate_text", provider)
     execution = build(db, material, memory_recall_service=SimpleNamespace(hybrid_service=Hybrid()),
         runtime_settings=runtime_settings, lifecycle=SqlAlchemyResponseLifecycleRepository(db), world_id="p-world")

@@ -1,6 +1,6 @@
 """Owner-only Memory HTTP endpoints and stable error translation."""
 from __future__ import annotations
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import browser_session
@@ -310,3 +310,32 @@ def delete_memory_item(
 
 
 __all__ = ["router"]
+
+
+from app.domains.memory.schemas.batch import MemoryBatchStart
+from app.domains.memory.service import consolidation_requests
+
+
+@router.post("/memory/batch-run", status_code=202)
+def start_memory_batch(world_id: str, subject_id: str, data: MemoryBatchStart, request: Request, response: Response,
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        result = consolidation_requests.submit(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
+        if result["state"] not in ("preparing", "queued", "waiting_for_chat", "ai_running", "applying"):
+            response.status_code = 200
+        return result
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)
+
+
+@router.get("/memory/batch-progress")
+def read_memory_batch_progress(world_id: str, subject_id: str, request: Request,
+    request_id: str | None = Query(default=None, max_length=64), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user), workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return consolidation_requests.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, request_id=request_id)
+    except Exception as exc:
+        _raise_memory_read_error(exc)

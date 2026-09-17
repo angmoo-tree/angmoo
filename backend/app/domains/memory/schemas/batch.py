@@ -51,3 +51,11 @@ class MemoryBatchSettingRead(BaseModel):
 class MemoryBatchRetry(BaseModel):
     model_config = ConfigDict(extra="forbid")
     idempotency_key: str = Field(min_length=8, max_length=128)
+
+
+class MemoryBatchStart(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    idempotency_key: str = Field(min_length=8, max_length=128)
+    expected_version: int = Field(ge=1)
+    expected_profile_version: int = Field(ge=1)
+    expected_scope_version: int = Field(ge=1)

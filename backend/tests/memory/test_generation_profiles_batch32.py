@@ -47,7 +47,8 @@ def test_compatible_experiences_are_one_call_per_32(memory_session, count):
             _post(memory_session, scope, f"batch32-source-{index}")
         for _ in range(4):
             asyncio.run(runtime.tick(shutdown=True))
-        assert sizes == [32] * (count // 32) + ([count % 32] if count % 32 else [])
+        # Equally due jobs may be claimed by ID in either order; size and calls are the contract.
+        assert sorted(sizes) == sorted([32] * (count // 32) + ([count % 32] if count % 32 else []))
         assert selector.calls == (count + 31) // 32
         assert all(row.status == "succeeded" for row in memory_session.scalars(select(MemoryMaintenanceJob)))
     finally:

@@ -58,7 +58,7 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
   const exported = JSON.parse(Buffer.concat(chunks).toString());
   expect(exported.request.request_id).toBe("request-1");
   expect(exported.request.state).toBe("failed");
-  expect(exported.export_version).toBe("angmoo-query-diagnostics.export.v1");
+  expect(exported.export_version).toBe("angmoo-query-diagnostics.export.v2");
   // Opening the nested details must not refresh the parent or lose selection.
   await page.getByText("수집한 검색 조건 보기", { exact: true }).click();
   await expect(select).toHaveValue("request-1");

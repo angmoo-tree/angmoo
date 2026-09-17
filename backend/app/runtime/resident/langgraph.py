@@ -1,6 +1,6 @@
 from __future__ import annotations
 from app.contracts.activity_thought import ActivityThought, THOUGHT_PROMPT
-from app.integrations.llm.activity_output import resident_thought_schema, resident_thought_payload, without_legacy_self_view_prompt
+from app.contracts.activity_thought_output import resident_thought_schema, resident_thought_payload, without_legacy_self_view_prompt
 from app.providers.gemini import build_gemini_developer_response_schema
 from app.runtime.social.subjective_composition import record_activity_thought
 from app.domains.relationships.contracts.social_consumption import social_prompt, validate_social_context

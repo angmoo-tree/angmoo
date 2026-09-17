@@ -45,6 +45,20 @@ async def run_episode_batch(repository, batch, *, provider_factory, timeout, clo
                 repository.commit()
                 return "memory_foreground_deferred"
             provider = provider_factory(batch.setting.scope.owner_id, batch.model_id, batch.thinking_level)
+            if hasattr(provider, "phase_observer"):
+                def observe(phase):
+                    # Best-effort telemetry uses a separate short transaction;
+                    # failures must never reissue a successfully completed AI call.
+                    from sqlalchemy.orm import Session
+                    from app.domains.memory.repository.consolidation_requests import set_phase
+                    try:
+                        with Session(db.get_bind()) as telemetry:
+                            set_phase(telemetry, job_id=batch.job_id, phase=phase, now=clock(),
+                                work_id=next_work.id, call_number=next_work.calls + 1, lease_token=batch.lease_token)
+                            telemetry.commit()
+                    except Exception:
+                        logging.getLogger(__name__).warning("memory_phase_record_unavailable")
+                provider.phase_observer = observe
             code = await service.run_work(work=next_work, setting=batch.setting, provider=provider,
                 model_id=batch.model_id, thinking_level=batch.thinking_level, profile_version=batch.profile_version,
                 timeout=timeout, job_fence=fence)

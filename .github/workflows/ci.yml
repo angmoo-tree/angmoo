@@ -47,6 +47,10 @@ jobs:
       - name: Install locked backend dependencies
         run: uv sync --frozen
         working-directory: backend
+      - name: Build pinned Vec1 for native hybrid regression
+        run: |
+          uv run --project backend python scripts/build_vec1.py --output "$RUNNER_TEMP/angmoo-test-vec1"
+          echo "ANGMOO_TEST_VEC1_EXTENSION=$RUNNER_TEMP/angmoo-test-vec1/vec1.so" >> "$GITHUB_ENV"
       - name: Record backend test checkout identity
         env:
           TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

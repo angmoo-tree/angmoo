@@ -126,6 +126,10 @@ class MemoryBatchRuntime:
             if not shutdown and self.generation_policy == "episode_v1":
                 with self.session_factory() as db:
                     if chat_is_active(db, now=datetime.now(UTC)):
+                        from app.domains.memory.models.consolidation_request import MemoryConsolidationRequest
+                        db.execute(update(MemoryConsolidationRequest).where(
+                            MemoryConsolidationRequest.state.in_(("preparing", "queued"))).values(last_code="memory_foreground_deferred"))
+                        db.commit()
                         return "memory_foreground_deferred"
             self.prepare(shutdown=shutdown)
             with self.session_factory() as db:

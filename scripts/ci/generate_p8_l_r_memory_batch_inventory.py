@@ -26,6 +26,12 @@ def record(path):
 
 
 def build_inventory():
+    # Current validation is owned by the hybrid/episode successor.
+    successor = ROOT / "docs/architecture/hybrid-episode-memory-inventory.json"
+    if successor.is_file():
+        if record(OUTPUT)["sha256"] != "3529d4d33a9d7fa75d556423f9a85a2749130259ed54f0b2cbe43ce06903b213":
+            raise ValueError("frozen Memory batch predecessor drift")
+        return json.loads(OUTPUT.read_text(encoding="utf-8"))
     predecessor = record(PREDECESSOR)
     if predecessor["sha256"] != PREDECESSOR_SHA256:
         raise ValueError("frozen Today predecessor drift")
@@ -130,7 +136,10 @@ def main():
         OUTPUT.write_text(rendered, encoding="utf-8", newline="\n")
     elif not OUTPUT.is_file() or OUTPUT.read_text(encoding="utf-8") != rendered:
         raise SystemExit("Memory batch inventory drift: run --write")
-    print("P8-L-R Memory batch inventory is current")
+    if (ROOT / "docs/architecture/hybrid-episode-memory-inventory.json").is_file():
+        from generate_hybrid_episode_memory_inventory import verify
+        verify()
+    print("P8-L-R frozen Memory batch and current successor verified")
 
 
 if __name__ == "__main__":

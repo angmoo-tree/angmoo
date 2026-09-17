@@ -5,6 +5,9 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     provider: "google", model: "gemini-embedding-2", credential_id: null as string | null,
     profile: "fixture-profile", version: 0, ready: false, reason_code: "memory_embedding_disabled" as string | null,
     runtime_status: "ready", available_credentials: [{ id: "fixture-google-key", label: "기존 Google 설정" }] };
+  let manualPolls = 0;
+  let manualRequests = 0;
+  let manualKey: string | null = null;
   let pollsAfterSave = 0;
   let retryCount = 0;
   let saved = {
@@ -20,6 +23,25 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
   const handle = async (route: Route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
+      accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
+      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null });
+    if (path.endsWith("/memory/batch-progress")) {
+      if (manualKey) manualPolls++;
+      await route.fulfill({ json: { scope: saved.scope, progress: manualKey ? manualProgress() : null } });
+      return true;
+    }
+    if (path.endsWith("/memory/batch-run")) {
+      expect(request.method()).toBe("POST");
+      const body = request.postDataJSON();
+      expect(body.expected_version).toBe(saved.version);
+      expect(body.expected_profile_version).toBe(saved.profile_version);
+      expect(body.expected_scope_version).toBeGreaterThan(0);
+      expect(++manualRequests).toBe(1);
+      manualKey = body.idempotency_key;
+      await route.fulfill({ status: 202, json: { scope: saved.scope, disposition: "accepted", ...manualProgress() } });
+      return true;
+    }
     if (path.endsWith("/memory/embedding-settings")) {
       if (request.method() === "PUT") {
         const body = request.postDataJSON();
@@ -98,4 +120,12 @@ export async function verifyMemoryBatchControls(page: Page) {
   await expect(region.getByText("정리를 마쳤어요.", { exact: false })).toBeVisible();
   await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toHaveCount(0);
   await expect(region.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
+  await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:16");
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
+  await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
+  await region.getByRole("button", { name: "지금 기억 정리", exact: true }).click();
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
+  await expect(region.getByText("AI가 경험을 읽고 기억을 정리하고 있어요", { exact: true })).toBeVisible();
+  await expect(region.getByText("기억 정리를 마쳤어요 · 새 기억 2개", { exact: true })).toBeVisible();
+  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeEnabled();
 }

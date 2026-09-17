@@ -7,17 +7,17 @@ from sqlalchemy import create_engine
 from app.runtime.persistence.model_registration import register_models
 
 from app.runtime.persistence.sqlite_schema import (
-    build_sqlite_v13_metadata, build_sqlite_v12_metadata,
+    build_sqlite_baseline_metadata, build_sqlite_v13_metadata,
     create_schema_version_table, sqlite_schema_contract_digest,
 )
 
 
-def test_episode_alembic_matches_embedded_and_roundtrips(tmp_path):
+def test_consolidation_alembic_matches_embedded_and_roundtrips(tmp_path):
     register_models()
     before = create_engine(f"sqlite+pysqlite:///{(tmp_path / 'old.sqlite').as_posix()}")
     fresh = create_engine(f"sqlite+pysqlite:///{(tmp_path / 'new.sqlite').as_posix()}")
-    build_sqlite_v12_metadata().create_all(before)
-    build_sqlite_v13_metadata().create_all(fresh)
+    build_sqlite_v13_metadata().create_all(before)
+    build_sqlite_baseline_metadata().create_all(fresh)
     for engine in (before, fresh):
         with engine.begin() as connection:
             create_schema_version_table(connection)
@@ -25,7 +25,7 @@ def test_episode_alembic_matches_embedded_and_roundtrips(tmp_path):
         expected = sqlite_schema_contract_digest(connection)
     with before.connect() as connection:
         original = sqlite_schema_contract_digest(connection)
-    path = Path(__file__).parents[2] / "alembic/versions/20260916_0093_episode_memory.py"
+    path = Path(__file__).parents[2] / "alembic/versions/20260917_0094_consolidation_requests.py"
     spec = importlib.util.spec_from_file_location("episode_migration_0093", path)
     migration = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(migration)

@@ -442,6 +442,11 @@
       "module": "app.domains.chat.router.retrieval_diagnostics",
       "endpoint": "diagnostics"
     },
+    "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/requests": {
+      "access": "owner-only",
+      "module": "app.domains.chat.router.retrieval_diagnostics",
+      "endpoint": "diagnostic_requests"
+    },
     "GET /api/v1/worlds/{world_id}/chat/threads/{thread_id}/requests/latest": {
       "access": "owner-only",
       "module": "app.domains.chat.router.world_chat_response",
@@ -507,10 +512,20 @@
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_item"
     },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-progress": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "read_memory_batch_progress"
+    },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-settings": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "read_memory_batch_setting"
+    },
+    "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/embedding-settings": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "read_memory_embedding_setting"
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",
@@ -947,6 +962,11 @@
       "module": "app.domains.memory.router",
       "endpoint": "retry_memory_batch"
     },
+    "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "start_memory_batch"
+    },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
       "module": "app.domains.characters.router",
@@ -991,6 +1011,11 @@
       "access": "owner-only",
       "module": "app.domains.memory.router",
       "endpoint": "update_memory_batch_setting"
+    },
+    "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/embedding-settings": {
+      "access": "owner-only",
+      "module": "app.domains.memory.router",
+      "endpoint": "update_memory_embedding_setting"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/settings": {
       "access": "owner-only",

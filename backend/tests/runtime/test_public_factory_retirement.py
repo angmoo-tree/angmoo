@@ -38,7 +38,8 @@ def candidate(tmp_path, original):
 
 def proof(candidate):
     root, snapshots, read_blob = candidate
-    return r.validate(True, {r.OLD: r.MAIN}, snapshots, root, read_blob)
+    return r.validate(True, {r.OLD: r.MAIN}, snapshots, root, read_blob,
+                      approved_changes=p.product_changes.load(ROOT))
 
 
 def test_frozen_facade_actual_profiles_and_cold_source_are_proven(candidate, original, monkeypatch):

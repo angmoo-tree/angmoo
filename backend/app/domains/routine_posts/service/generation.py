@@ -4,7 +4,7 @@ import json
 from typing import Any
 from pydantic import ValidationError
 from app.contracts.activity_thought import THOUGHT_PROMPT
-from app.integrations.llm.activity_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
+from app.contracts.activity_thought_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
 from app.domains.routine_posts import schemas
 from app.domains.routine_posts.client import _api_key, _llm_context
 from app.domains.routine_posts.contracts.context import RoutinePostContext

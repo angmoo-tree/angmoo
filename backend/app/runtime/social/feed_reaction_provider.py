@@ -3,7 +3,7 @@
 from __future__ import annotations
 from app.config import settings
 from app.contracts.activity_thought import THOUGHT_PROMPT
-from app.integrations.llm.activity_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
+from app.contracts.activity_thought_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
 from app.domains.relationships.contracts.social_consumption import social_prompt
 from app.domains.social.service.feed_reaction_prompts import (
     build_reaction_prompts,

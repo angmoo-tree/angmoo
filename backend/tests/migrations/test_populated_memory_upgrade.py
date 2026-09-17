@@ -116,7 +116,8 @@ def test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change(t
         result = coordinator.upgrade()
         assert result.canonical.migrated is True
         assert result.canonical.source_version == 8
-        assert result.canonical.target_version == 13
+        from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+        assert result.canonical.target_version == SQLITE_SCHEMA_VERSION
         current = json.loads(marker.read_text(encoding='utf-8'))
         target = root/'canonical'/current['relative_path']/'angmoo.sqlite3'
         assert _rows(target) == before

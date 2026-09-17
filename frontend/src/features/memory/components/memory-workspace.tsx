@@ -433,7 +433,7 @@ export function MemoryWorkspace({
               </Button>
             </div>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? "현재 캐릭터"} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
             <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">

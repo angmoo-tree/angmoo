@@ -387,6 +387,9 @@ def _seed_v2_roleless(
                 )
                 from app.models import Base
 
+                from app.runtime.persistence.sqlite_schema import EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES
+                for name in reversed(CONSOLIDATION_V14_TABLES + EPISODE_V13_TABLES + ("memory_vector_eligibility", "memory_embedding_settings")):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
                 Base.metadata.tables["chat_retrieval_diagnostics"].drop(connection, checkfirst=True)
                 for name in reversed(MEMORY_BATCH_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
@@ -579,7 +582,7 @@ def test_max_length_v8_generation_upgrades_without_reusing_source_directory(
     assert result.canonical.migrated is True
     assert result.canonical.generation != MAX_LENGTH_V8_GENERATION
     assert len(result.canonical.generation) <= 64
-    assert result.canonical.generation.endswith("-schema-v11")
+    assert result.canonical.generation.endswith(f"-schema-v{SQLITE_SCHEMA_VERSION}")
     assert source.is_file()
     assert _sha256(source) == source_sha
     current = json.loads(
