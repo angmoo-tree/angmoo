@@ -11,6 +11,7 @@ from app.domains.world_packages.models import WorldPackageImport
 from app.domains.characters.models import Character
 from app.domains.social.models.posts import Post
 from app.domains.social.models.feed import WorldCharacterBlock
+from app.domains.social.models.topics import RecommendationPost
 from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,
 )
@@ -19,6 +20,10 @@ from app.domains.world_characters.service.setup_validation import (
 class WorldFeedQueries:
     def __init__(self, db: Session):
         self.db = db
+
+    def recommendation_candidates(self, *, profile, allowed_policy_actions, now):
+        from app.runtime.social.recommendation_feed import candidates
+        return candidates(self.db, profile=profile, allowed_policy_actions=allowed_policy_actions, now=now, references=self)
 
     def world_character(self, identity: str):
         return self.db.get(WorldCharacter, identity)
@@ -81,6 +86,7 @@ class WorldFeedQueries:
             query = (
                 select(Post, author_wc)
                 .join(author_wc, author_wc.id == Post.author_world_character_id)
+                .join(Character, Character.id == author_wc.character_id)
                 .join(
                     author_membership,
                     and_(
@@ -99,15 +105,22 @@ class WorldFeedQueries:
                     Post.author_world_character_id.is_not(None),
                     Post.author_world_character_id != profile.world_character.id,
                     author_wc.status == "active",
+                    author_wc.world_id == profile.world.id,
+                    Character.deleted_at.is_(None),
+                    Character.owner_id == author_membership.user_id,
                     author_membership.status == "active",
                     Post.id.in_(post_ids),
                     ~block_from_actor,
                     ~block_to_actor,
                 )
             )
+            if profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
+                query = query.where(exists(select(RecommendationPost.post_id).where(
+                    RecommendationPost.post_id == Post.id, RecommendationPost.world_id == profile.world.id,
+                )))
             canonical_rows = {
                 post.id: (post, world_character)
-                for post, world_character in self.db.execute(query).all()
+                for post, world_character in self.db.execute(query.execution_options(populate_existing=True)).all()
             }
             return canonical_rows
 

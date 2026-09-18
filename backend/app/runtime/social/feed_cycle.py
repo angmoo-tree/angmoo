@@ -30,6 +30,26 @@ class WorldFeedExecutions:
 
 
 class RuntimeWorldFeedWorkflows:
+    def refresh_social_context(self, ctx, *, counterpart_id=None):
+        from dataclasses import replace
+        from app.runtime.social_snapshot import prepare_activity_social_context
+        from app.runtime.social.langgraph_actions import active_world_character
+        refreshed = prepare_activity_social_context(ctx, active_actor=active_world_character, counterpart_id=counterpart_id)
+        previous = getattr(ctx, "social_context", None)
+        current = getattr(refreshed, "social_context", None)
+        if previous is not None and current is not None:
+            refreshed = replace(refreshed, social_context=replace(current, receipts=previous.receipts))
+        return refreshed
+
+    def validate_candidate_relationships(self, db, profile, candidates):
+        from app.runtime.social.feed_relationship_context import validate
+        if profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
+            validate(db, profile, candidates)
+
+    def refresh_candidate_relationships(self, db, profile, candidates):
+        from app.runtime.social.feed_relationship_context import refresh
+        return refresh(db, profile, candidates)
+
     @property
     def thought_enabled(self):
         from app.config import settings

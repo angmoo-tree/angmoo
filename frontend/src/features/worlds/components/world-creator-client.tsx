@@ -379,8 +379,8 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
                   {context ? definition.name || "이름 없는 World" : "새 World 만들기"}
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-[#667085]">
-                  세계관과 그 안의 일상을 작성합니다. P2에서 이 정의와 캐릭터 정체성을 결합해
-                  캐릭터별 일과 40개를 생성하며, 이 화면에서는 AI를 호출하지 않습니다.
+                  세계관과 그 안의 일상을 작성합니다. 이 정의와 캐릭터 정체성을 바탕으로 일과를 준비합니다.
+                  추천 주제 AI는 키를 연결한 새 World의 최초 공개 또는 주제 다시 만들기 실행 시 사용합니다.
                 </p>
               </div>
               {context ? (

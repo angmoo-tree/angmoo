@@ -112,6 +112,12 @@ class DirectFeedReactionProvider:
                 result._activity_thought = thought
             return result
 
+        delivery = getattr(self, "delivery", None)
+        system_prompt = system_prompt + social_prompt(resident_context, "feed_reaction_planner")
+        if len(system_prompt) + len(user_prompt) > 64000:
+            raise FeedReactionValidationError("feed_model_input_budget_exceeded")
+        if delivery is not None:
+            delivery.dispatched()
         try:
             result = await generate_json(
                 api_key=api_key,
@@ -121,7 +127,7 @@ class DirectFeedReactionProvider:
                     lane="world_keyword_feed",
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt + social_prompt(resident_context, "feed_reaction_planner"),
+                system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 response_schema=thought_response_schema(GEMINI_FEED_REACTION_RESPONSE_SCHEMA, include_thought=True) if self._thought_enabled else GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
                 validator=validator,
@@ -129,6 +135,7 @@ class DirectFeedReactionProvider:
                 thinking_level=self._thinking_level,
                 on_rate_limit_wait=resident_context.on_rate_limit_wait,
                 should_retry_json_error=lambda *_args: False,
+                on_response=delivery.delivered if delivery is not None else None,
             )
         except (DirectLlmError, ValidationError, ValueError) as exc:
             setattr(exc, "node", "FeedReactionPlanner")
@@ -187,6 +194,9 @@ class DirectFeedReactionProvider:
             result._activity_thought = thought
             return result
 
+        system_prompt = system_prompt + social_prompt(resident_context, "feed_comment_writer")
+        if len(system_prompt) + len(user_prompt) > 64000:
+            raise FeedReactionValidationError("feed_model_input_budget_exceeded")
         try:
             result = await generate_json(
                 api_key=api_key,
@@ -200,7 +210,7 @@ class DirectFeedReactionProvider:
                     ),
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt + social_prompt(resident_context, "feed_comment_writer"),
+                system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 response_schema=writer_schema,
                 validator=validator,

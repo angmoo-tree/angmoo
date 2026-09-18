@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.identity_dependencies import get_current_user, get_optional_current_user
 from app.database import get_db
 from app.api.world_errors import _raise_world_error
+from app.api.recommendation_dependencies import recommendation_workflows
 from app.domains.worlds import schemas, service as world_service
 
 
@@ -24,9 +25,10 @@ def create_world(
     data: schemas.WorldDraftCreate,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
+    topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCreatorContextRead:
     try:
-        return world_service.create_world(db, user=user, data=data)
+        return world_service.create_world(db, user=user, data=data, on_created=topics.mark_new_subject)
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)
         raise AssertionError("unreachable")
@@ -107,19 +109,22 @@ def validate_world_definition(
     "/{world_id}/publish",
     response_model=schemas.WorldCreatorContextRead,
 )
-def publish_world(
+async def publish_world(
     world_id: str,
     data: schemas.WorldMutationRequest,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
+    topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCreatorContextRead:
     try:
-        return world_service.publish_world(
+        result = world_service.publish_world(
             db,
             world_id=world_id,
             user=user,
             data=data,
         )
+        await topics.prepare_initial_world(db, world_id=world_id, owner_id=user.id)
+        return result
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)
         raise AssertionError("unreachable")

@@ -94,6 +94,8 @@ def _request(app: FastAPI, method: str, path: str, **kwargs) -> httpx.Response:
 
 def _app(engine, principal: dict[str, models.User | None]) -> FastAPI:
     app = FastAPI()
+    from app.runtime.social.composition import configure_social_runtime
+    configure_social_runtime(app)
     app.include_router(world_routes.router, prefix="/api/v1")
     app.include_router(world_creator_routes.router, prefix="/api/v1")
     app.include_router(feed_status_routes.router, prefix="/api/v1")
@@ -263,7 +265,7 @@ def _seed(db: Session) -> tuple[models.User, models.WorldCharacter]:
         status="pending",
         autonomous_enabled=False,
         activity_runtime_mode="routine_resident_v1",
-        feed_runtime_mode="keyword_search_v1",
+        feed_runtime_mode="topic_recommendation_v1",
         local_profile={"background": "second-year alchemy student"},
     )
     credential = models.LlmCredential(
@@ -588,12 +590,18 @@ def test_approval_rejects_stored_candidate_signature_drift() -> None:
         assert world_character.autonomous_enabled is False
 
 
+@pytest.mark.parametrize("new_topic_subject", [False, True])
 def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     monkeypatch: pytest.MonkeyPatch,
+    new_topic_subject: bool,
 ) -> None:
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:
         owner, _world_character = _seed(db)
+        if new_topic_subject:
+            from app.domains.social.service.recommendation_topics import mark_new_subject
+            mark_new_subject(db, world_id=_world_character.world_id, world_character_id=_world_character.id)
+            db.commit()
     principal: dict[str, models.User | None] = {"user": owner}
     app = _app(engine, principal)
     provider = FakeProvider()
@@ -648,6 +656,10 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     assert approved.status_code == 200
     assert approved.json()["autonomy_ready"] is True
     assert approved.json()["autonomous_enabled"] is False
+    from app.domains.social.models.topics import RecommendationTopicSource
+    with Session(engine) as db:
+        assert bool(db.scalar(select(RecommendationTopicSource))) == new_topic_subject
+    assert provider.profile_calls == provider.repertoire_calls == 1
 
     reentered = _request(
         app,
@@ -674,7 +686,7 @@ def test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy(
     assert restored.json()["autonomous_enabled"] is False
     assert feed_status.status_code == 200
     assert feed_status.json()["world_character_id"] == "world-character-a"
-    assert feed_status.json()["feed_runtime_mode"] == "keyword_search_v1"
+    assert feed_status.json()["feed_runtime_mode"] == "topic_recommendation_v1"
     assert feed_status.json()["runtime_state"] == "autonomy_disabled"
     assert feed_status.json()["profile_keyword_count"] == 8
     assert feed_status.json()["profile_keywords_ready"] is True
@@ -760,7 +772,7 @@ def test_feed_status_distinguishes_runtime_lane_states() -> None:
     with Session(engine) as db:
         stored = db.get(models.WorldCharacter, world_character.id)
         assert stored is not None
-        stored.feed_runtime_mode = "keyword_search_v1"
+        stored.feed_runtime_mode = "topic_recommendation_v1"
         stored.autonomous_enabled = True
         db.add(
             models.WorldCharacterFeedCursor(
@@ -774,7 +786,7 @@ def test_feed_status_distinguishes_runtime_lane_states() -> None:
             )
         )
         db.commit()
-    assert status_payload()["runtime_state"] == "feed_search_degraded"
+    assert status_payload()["runtime_state"] == "three_lane_ready"
 
     with Session(engine) as db:
         cursor = db.get(models.WorldCharacterFeedCursor, world_character.id)
@@ -852,7 +864,7 @@ def test_world_entry_creates_pending_world_character_without_provider_or_autonom
         assert stored.control_mode == "autonomous"
         assert stored.owner_user_id is None
         assert stored.activity_runtime_mode == "routine_resident_v1"
-        assert stored.feed_runtime_mode == "keyword_search_v1"
+        assert stored.feed_runtime_mode == "topic_recommendation_v1"
         assert stored.local_profile == {
             "entry_idempotency_key": "enter-character-b-world-a",
             "background": "A first-day exchange student",
@@ -933,7 +945,7 @@ def test_world_entry_requires_explicit_no_specific_role_selection() -> None:
         )
         assert stored is not None
         assert stored.activity_runtime_mode == "routine_resident_v1"
-        assert stored.feed_runtime_mode == "keyword_search_v1"
+        assert stored.feed_runtime_mode == "topic_recommendation_v1"
         assert reserved is not None
         assert reserved.name == NO_SPECIFIC_ROLE_NAME
         assert reserved.description == NO_SPECIFIC_ROLE_DESCRIPTION

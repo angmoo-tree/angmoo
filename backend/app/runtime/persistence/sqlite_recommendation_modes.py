@@ -1,0 +1,20 @@
+"""Frozen SQLite WorldCharacter table rebuild for recommendation mode."""
+CREATE_TABLE = "CREATE TABLE world_characters (\n\tid VARCHAR(64) NOT NULL, \n\tworld_id VARCHAR(64) NOT NULL, \n\tcharacter_id VARCHAR(64) NOT NULL, \n\tmembership_id VARCHAR(64) NOT NULL, \n\trole_key VARCHAR(64), \n\tstatus VARCHAR(20) NOT NULL, \n\tcontrol_mode VARCHAR(24) DEFAULT 'autonomous' NOT NULL, \n\towner_user_id VARCHAR(64), \n\tautonomous_enabled BOOLEAN DEFAULT 0 NOT NULL, \n\tactivity_runtime_mode VARCHAR(32) DEFAULT 'legacy_resident_v1' NOT NULL, \n\tfeed_runtime_mode VARCHAR(32) DEFAULT 'legacy_latest_v1' NOT NULL, \n\tlocal_profile JSON, \n\tcharacter_contract_hash VARCHAR(64), \n\tworld_contract_hash VARCHAR(64), \n\tversion INTEGER NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id), \n\tCONSTRAINT ck_world_characters_status CHECK (status IN ('pending','inactive','active','left','rejected','banned')), \n\tCONSTRAINT ck_world_characters_control_mode CHECK (control_mode IN ('autonomous','owner_controlled')), \n\tCONSTRAINT ck_world_characters_owner_binding CHECK ((control_mode = 'autonomous' AND owner_user_id IS NULL) OR (control_mode = 'owner_controlled' AND owner_user_id IS NOT NULL)), \n\tCONSTRAINT ck_world_characters_owner_autonomy_disabled CHECK (control_mode <> 'owner_controlled' OR autonomous_enabled = false), \n\tCONSTRAINT ck_world_characters_activity_runtime_mode CHECK (activity_runtime_mode IN ('legacy_resident_v1','routine_resident_v1')), \n\tCONSTRAINT ck_world_characters_feed_runtime_mode CHECK (feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1','topic_recommendation_v1')), \n\tCONSTRAINT ck_world_characters_version CHECK (version >= 1), \n\tCONSTRAINT fk_world_characters_membership_world FOREIGN KEY(world_id, membership_id) REFERENCES world_memberships (world_id, id), \n\tCONSTRAINT uq_world_characters_world_character UNIQUE (world_id, character_id), \n\tCONSTRAINT uq_world_characters_id_world UNIQUE (id, world_id), \n\tCONSTRAINT uq_world_characters_id_character UNIQUE (id, character_id), \n\tFOREIGN KEY(world_id) REFERENCES worlds (id), \n\tFOREIGN KEY(character_id) REFERENCES characters (id), \n\tFOREIGN KEY(owner_user_id) REFERENCES users (id)\n)"
+INDEXES = ('CREATE INDEX ix_world_characters_character_status ON world_characters (character_id, status)', 'CREATE INDEX ix_world_characters_owner_status ON world_characters (owner_user_id, status)', 'CREATE INDEX ix_world_characters_world_status ON world_characters (world_id, status)', "CREATE UNIQUE INDEX uq_world_characters_active_owner_controlled ON world_characters (world_id, owner_user_id) WHERE control_mode = 'owner_controlled' AND status = 'active'")
+COLUMNS = '"id", "world_id", "character_id", "membership_id", "role_key", "status", "control_mode", "owner_user_id", "autonomous_enabled", "activity_runtime_mode", "feed_runtime_mode", "local_profile", "character_contract_hash", "world_contract_hash", "version", "created_at", "updated_at"'
+
+def upgrade_modes(connection):
+    if connection.exec_driver_sql("PRAGMA foreign_keys").scalar_one():
+        raise RuntimeError("recommendation_mode_requires_foreign_keys_off")
+    connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+    try:
+        connection.exec_driver_sql("ALTER TABLE world_characters RENAME TO world_characters_before_topics")
+        connection.exec_driver_sql(CREATE_TABLE)
+        connection.exec_driver_sql(f"INSERT INTO world_characters ({COLUMNS}) SELECT {COLUMNS} FROM world_characters_before_topics")
+        connection.exec_driver_sql("DROP TABLE world_characters_before_topics")
+        for statement in INDEXES:
+            connection.exec_driver_sql(statement)
+        connection.exec_driver_sql("UPDATE world_characters SET feed_runtime_mode='topic_recommendation_v1' WHERE feed_runtime_mode='keyword_search_v1'")
+        connection.exec_driver_sql("CREATE INDEX ix_posts_world_author_created ON posts (world_id, author_world_character_id, created_at, id)")
+    finally:
+        connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")

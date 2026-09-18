@@ -1398,7 +1398,7 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
         "routine_world_character_for_character",
         lambda *_args, **_kwargs: SimpleNamespace(
             id="world-character-keyword-feed",
-            feed_runtime_mode="keyword_search_v1",
+            feed_runtime_mode="topic_recommendation_v1",
         ),
     )
     monkeypatch.setattr(
@@ -1434,7 +1434,7 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
     async def fake_feed(_context):
         call_order.append("feed")
         return {
-            "engine": "keyword_search_v1",
+            "engine": "topic_recommendation_v1",
             "status": "observed",
             "publish_result": {"public_action_count": 0},
             "llm_usage_summary": {"provider_call_count": 0},
@@ -1446,7 +1446,7 @@ def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
 
     result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
 
-    assert result["engine"] == "routine_resident_v1+keyword_search_v1"
+    assert result["engine"] == "routine_resident_v1+topic_recommendation_v1"
     assert result["status"] == "completed"
     assert result["publish_result"]["public_action_count"] == 1
     assert result["inbox_lane"]["outcome"] == "INBOX_ACTION_SUCCEEDED"

@@ -43,7 +43,7 @@ def build_reaction_prompts(
                 "name": _clip(profile.character.name, 80),
                 "persona_summary": _clip(profile.character.persona_summary, 1500),
                 "speech_style": _clip(profile.character.speech_style, 800),
-                "world_local_profile": profile.world_character.local_profile or {},
+                "world_local_profile": _clip(json.dumps(profile.world_character.local_profile or {}, ensure_ascii=False), 4000),
                 "community_summary": _clip(profile.profile.visible_summary, 280),
                 "action_profile": _action_notes(profile),
             },

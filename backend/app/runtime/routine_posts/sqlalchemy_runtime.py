@@ -598,6 +598,7 @@ async def _run_routine_post_runtime(
                     author_character_id=resident_context.character.id,
                 ),
                 topic_signature=generation.draft.topic_signature,
+                final_topic_signature=generation.draft.topic_signature,
                 novelty_basis=generation.draft.novelty_basis,
                 world_id=context.world.id,
                 author_world_character_id=world_character.id,

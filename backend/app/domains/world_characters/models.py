@@ -55,7 +55,7 @@ class WorldCharacter(Base):
             name="ck_world_characters_activity_runtime_mode",
         ),
         CheckConstraint(
-            "feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1')",
+            "feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1','topic_recommendation_v1')",
             name="ck_world_characters_feed_runtime_mode",
         ),
         CheckConstraint("version >= 1", name="ck_world_characters_version"),

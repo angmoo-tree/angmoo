@@ -497,6 +497,11 @@
       "module": "app.domains.world_characters.router.profile",
       "endpoint": "read_owner_character"
     },
+    "GET /api/v1/worlds/{world_id}/recommendation-topics": {
+      "access": "owner-only",
+      "module": "app.domains.social.recommendation_router",
+      "endpoint": "read"
+    },
     "GET /api/v1/worlds/{world_id}/world-characters": {
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
@@ -972,6 +977,11 @@
       "module": "app.domains.worlds.router",
       "endpoint": "publish_world"
     },
+    "POST /api/v1/worlds/{world_id}/recommendation-topics/regenerate": {
+      "access": "owner-only",
+      "module": "app.domains.social.recommendation_router",
+      "endpoint": "regenerate"
+    },
     "POST /api/v1/worlds/{world_id}/validate": {
       "access": "owner-only",
       "module": "app.domains.worlds.router",
@@ -1026,6 +1036,11 @@
       "access": "owner-only",
       "module": "app.domains.chat.router.retrieval_diagnostics",
       "endpoint": "configure"
+    },
+    "PUT /api/v1/worlds/{world_id}/recommendation-topics/key": {
+      "access": "owner-only",
+      "module": "app.domains.social.recommendation_router",
+      "endpoint": "connect"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin": {
       "access": "owner-only",

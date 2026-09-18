@@ -696,6 +696,19 @@ rights-cleared.
 
 ## Contributor workflow
 
+### 2026-09-18 SNS recommendation topics
+
+World Creator recommendation tools and the character settings topic panel are
+`LOCAL` additions inside existing surfaces. Both Next and static composition use
+`features/social/components/recommendation-topics-panel.tsx`. They reuse existing
+Button, Field, Select and InlineError primitives and semantic tokens, with no
+external image, font, icon package, new raw color, or borrowed hosted asset.
+The source/build checks are recorded in
+[`sns-topic-recommendation.md`](../operations/sns-topic-recommendation.md).
+Direct visual and real-provider acceptance remain USER CHECK PENDING.
+
+### Workflow
+
 Before changing user-visible frontend code:
 
 1. read `frontend/DESIGN.md` and this inventory;

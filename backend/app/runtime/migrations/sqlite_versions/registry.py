@@ -107,8 +107,12 @@ from app.runtime.migrations.sqlite_versions import v11_to_v12_memory_embedding a
 from app.runtime.migrations.sqlite_versions import v12_to_v13_episode_memory as episode_memory
 
 from app.runtime.migrations.sqlite_versions import v13_to_v14_consolidation_requests as consolidation_requests
+from app.runtime.migrations.sqlite_versions import v14_to_v15_recommendation as recommendation
+from app.runtime.migrations.sqlite_versions import v15_to_v16_recommendation_mode as recommendation_mode
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    15: recommendation_mode.upgrade,
+    14: recommendation.upgrade,
     13: consolidation_requests.upgrade,
     12: episode_memory.upgrade,
     11: memory_embedding.upgrade,
@@ -125,6 +129,8 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    15: SqliteMigrationContract(source_version=15, target_version=16, name="social_recommendation_mode", mutable_identity_tables=recommendation_mode.MUTABLE_IDENTITY_TABLES, capture=recommendation_mode.capture_delta, verify=recommendation_mode.verify_delta),
+    14: SqliteMigrationContract(source_version=14, target_version=15, name="social_recommendation", mutable_identity_tables=recommendation.MUTABLE_IDENTITY_TABLES, capture=recommendation.capture_delta, verify=recommendation.verify_delta),
     13: SqliteMigrationContract(source_version=13, target_version=14, name="consolidation_requests", mutable_identity_tables=consolidation_requests.MUTABLE_IDENTITY_TABLES, capture=consolidation_requests.capture_delta, verify=consolidation_requests.verify_delta),
     12: SqliteMigrationContract(source_version=12, target_version=13, name="episode_memory", mutable_identity_tables=episode_memory.MUTABLE_IDENTITY_TABLES, capture=episode_memory.capture_delta, verify=episode_memory.verify_delta),
     11: SqliteMigrationContract(source_version=11, target_version=12, name="memory_embedding", mutable_identity_tables=memory_embedding.MUTABLE_IDENTITY_TABLES, capture=memory_embedding.capture_delta, verify=memory_embedding.verify_delta),

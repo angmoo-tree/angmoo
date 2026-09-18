@@ -11,13 +11,19 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 14
-SOURCE_ALEMBIC_REVISION = "20260917_0094"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 93
-EXPECTED_CANONICAL_TABLE_COUNT = 115
+SQLITE_SCHEMA_VERSION = 16
+SOURCE_ALEMBIC_REVISION = "20260918_0096"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 95
+EXPECTED_CANONICAL_TABLE_COUNT = 122
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 CONSOLIDATION_V14_TABLES = ("memory_consolidation_requests", "memory_consolidation_jobs")
+RECOMMENDATION_V15_TABLES = (
+    "social_recommendation_catalogs", "social_recommendation_topics",
+    "social_recommendation_topic_sources", "social_recommendation_posts",
+    "social_recommendation_post_topics", "social_recommendation_preparations",
+    "social_recommendation_deliveries",
+)
 
 EPISODE_V13_TABLES = (
     "chat_message_thoughts", "social_activity_thoughts",
@@ -304,6 +310,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_recommendation_schema(metadata)
     for name in ("memory_vector_eligibility", "memory_embedding_settings"):
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -511,7 +518,39 @@ __all__ = [
 
 def build_sqlite_v13_metadata() -> MetaData:
     """Frozen episode-memory schema preceding trigger receipts."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v14_metadata()
     for name in reversed(CONSOLIDATION_V14_TABLES):
         metadata.remove(metadata.tables[name])
+    return metadata
+
+
+def _remove_recommendation_schema(metadata: MetaData) -> None:
+    for name in reversed(RECOMMENDATION_V15_TABLES):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    _restore_legacy_feed_constraint(metadata)
+
+
+def _restore_legacy_feed_constraint(metadata: MetaData) -> None:
+    posts = metadata.tables.get("posts")
+    if posts is not None:
+        for index in tuple(posts.indexes):
+            if index.name == "ix_posts_world_author_created":
+                posts.indexes.remove(index)
+    table = metadata.tables.get("world_characters")
+    if table is not None:
+        for constraint in table.constraints:
+            if constraint.name == "ck_world_characters_feed_runtime_mode":
+                constraint.sqltext = text("feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1')")
+
+
+def build_sqlite_v14_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _remove_recommendation_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v15_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _restore_legacy_feed_constraint(metadata)
     return metadata

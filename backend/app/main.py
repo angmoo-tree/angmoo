@@ -308,7 +308,8 @@ def create_app(
                 repair_result.repaired_count,
                 sum(count for _reason, count in repair_result.skipped_reasons),
             )
-            composition.social_search_projection.start()
+            # SNS recommendation uses canonical topic/recency/relation indexes.
+            # Do not rebuild or subscribe the retired SNS FTS projection.
             composition.memory_recall_projection.start()
 
         if runtime_lifespan is None:

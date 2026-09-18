@@ -46,6 +46,8 @@ def _fixture():
     Base.metadata.create_all(engine)
     principal: dict[str, models.User | None] = {"user": None}
     app = FastAPI()
+    from app.runtime.social.composition import configure_social_runtime
+    configure_social_runtime(app)
     app.include_router(studio_router, prefix="/api/v1")
     app.include_router(worlds_router, prefix="/api/v1")
     app.include_router(world_creator_router, prefix="/api/v1")

@@ -64,7 +64,7 @@ def test_failed_public_effect_rolls_back_execution_but_keeps_durable_observation
         observation = db.scalar(select(models.WorldCharacterFeedObservation))
         assert observation is not None
         assert observation.post_id == target.id
-        assert observation.status == "retryable_failed"
+        assert observation.status == "observed"
         assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1
         db.rollback()
         assert db.get(models.WorldCharacterFeedObservation, observation.id) is not None

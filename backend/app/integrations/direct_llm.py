@@ -1028,6 +1028,7 @@ async def generate_json(
     thinking_level: str | None = None,
     user_image_parts: list[DirectLlmImagePart] | None = None,
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None,
+    on_response: Callable[[], None] | None = None,
     should_retry_json_error: Callable[
         [BaseException, dict[str, Any] | None, dict[str, Any], int], bool
     ]
@@ -1061,6 +1062,8 @@ async def generate_json(
                 user_image_parts=user_image_parts,
                 on_rate_limit_wait=on_rate_limit_wait,
             )
+            if on_response is not None:
+                on_response()
             payload = _coerce_json_payload(response)
             payload_coerced = True
             last_payload = payload

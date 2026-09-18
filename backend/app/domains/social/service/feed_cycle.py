@@ -193,7 +193,9 @@ async def run_world_keyword_feed(
     ctx.db.commit()
     if not claims.candidates:
         reason: schemas.FeedNoActionReason = (
-            "no_candidate" if search.raw_candidate_count == 0 else "no_allowed_action"
+            "no_candidate" if search.raw_candidate_count == 0 or (
+                profile.world_character.feed_runtime_mode == "topic_recommendation_v1" and search.filtered_candidate_count == 0
+            ) else "no_allowed_action"
         )
         cycle_summary = _summary(
             ctx=ctx,
@@ -236,6 +238,97 @@ async def run_world_keyword_feed(
         )
 
     observation_receipts = []
+    proposal_eligible_indices = frozenset(
+        candidate.candidate_index
+        for candidate in claims.candidates
+        if workflows.proposals.proposal_eligibility(
+            ctx.db,
+            actor_world_character_id=profile.world_character.id,
+            target_post_id=candidate.post_id,
+            now=ctx.run_started_at,
+        ).eligible
+    )
+    from app.domains.social.service.feed_delivery import FeedDelivery
+    def validate_delivery_targets():
+        ids = {candidate.post_id for candidate in claims.candidates}
+        current = workflows.search_references(ctx.db).candidate_rows(profile)(ids)
+        if set(current) != ids:
+            raise ValueError("feed_delivery_target_stale")
+        for candidate in claims.candidates:
+            post = current[candidate.post_id][0]
+            if post.title[:160] != candidate.title or post.body[:len(candidate.body_preview)] != candidate.body_preview:
+                raise ValueError("feed_delivery_body_changed")
+        workflows.validate_candidate_relationships(ctx.db, profile, claims.candidates)
+    delivery = FeedDelivery(ctx.db, profile=profile, cycle_key=cycle_key, claims=claims, validate=validate_delivery_targets)
+    reaction_provider = provider or workflows.default_provider()
+    reaction_provider.delivery = delivery
+    planner_started = perf_counter()
+    try:
+        decision = validate_reaction_decision(
+            await reaction_provider.plan(
+                resident_context=ctx,
+                profile=profile,
+                candidates=claims.candidates,
+                tracker=tracker,
+                proposal_eligible_indices=proposal_eligible_indices,
+            ),
+            candidates=claims.candidates,
+            proposal_eligible_indices=proposal_eligible_indices,
+        )
+    except workflows.llm_deferred:
+        delivery.uncertain()
+        mark_claims_retryable(
+            ctx.db, observations=claims.observations, now=ctx.run_started_at
+        )
+        ctx.db.commit()
+        raise
+    except (
+        workflows.llm_error,
+        ValidationError,
+        FeedReactionValidationError,
+        ValueError,
+    ) as exc:
+        delivery.uncertain()
+        if delivery.row.state == "delivered":
+            # A malformed decision does not undo reading. Persist canonical
+            # observations after the response, without applying any action.
+            try:
+                for candidate in claims.candidates:
+                    observation_receipts.append(workflows.observe_source(
+                        ctx.db, world_id=profile.world.id,
+                        observer_world_character_id=profile.world_character.id,
+                        source_social_event_id=None, source_post_id=candidate.post_id,
+                        lane="feed", observed_at=ctx.run_started_at,
+                    ))
+                ctx.db.commit()
+            except SocialObservationError:
+                ctx.db.rollback()
+                observation_receipts.clear()
+        mark_claims_retryable(
+            ctx.db, observations=claims.observations, now=ctx.run_started_at
+        )
+        ctx.db.commit()
+        logger.warning(
+            "world_feed_planner_failed run_id=%s world_id=%s failure_class=%s",
+            ctx.run_id,
+            profile.world.id,
+            type(exc).__name__,
+        )
+        return _safe_result(
+            outcome="planner_failed",
+            tracker=tracker,
+            world_id=profile.world.id,
+            world_character_id=profile.world_character.id,
+            status="failed",
+            failure_class=type(exc).__name__,
+            summary={
+                "outcome": "FOLLOW_UP_PLANNING_FAILED",
+                "reason_code": "planner_failed",
+                "observation_receipt_count": len(observation_receipts),
+            },
+        )
+    planner_latency_ms = int((perf_counter() - planner_started) * 1000)
+    delivery.delivered()
     try:
         for candidate in claims.candidates:
             observation_receipts.append(
@@ -249,8 +342,7 @@ async def run_world_keyword_feed(
                     observed_at=ctx.run_started_at,
                 )
             )
-        # Observation is durable before planning. A later NO_ACTION or failed
-        # follow-up must never erase the fact that the source entered context.
+        # Provider delivery is confirmed before relation observation is persisted.
         ctx.db.commit()
     except SocialObservationError as exc:
         ctx.db.rollback()
@@ -278,66 +370,10 @@ async def run_world_keyword_feed(
             },
         )
 
-    proposal_eligible_indices = frozenset(
-        candidate.candidate_index
-        for candidate in claims.candidates
-        if workflows.proposals.proposal_eligibility(
-            ctx.db,
-            actor_world_character_id=profile.world_character.id,
-            target_post_id=candidate.post_id,
-            now=ctx.run_started_at,
-        ).eligible
-    )
-    reaction_provider = provider or workflows.default_provider()
-    planner_started = perf_counter()
-    try:
-        decision = validate_reaction_decision(
-            await reaction_provider.plan(
-                resident_context=ctx,
-                profile=profile,
-                candidates=claims.candidates,
-                tracker=tracker,
-                proposal_eligible_indices=proposal_eligible_indices,
-            ),
-            candidates=claims.candidates,
-            proposal_eligible_indices=proposal_eligible_indices,
-        )
-    except workflows.llm_deferred:
-        mark_claims_retryable(
-            ctx.db, observations=claims.observations, now=ctx.run_started_at
-        )
-        ctx.db.commit()
-        raise
-    except (
-        workflows.llm_error,
-        ValidationError,
-        FeedReactionValidationError,
-        ValueError,
-    ) as exc:
-        mark_claims_retryable(
-            ctx.db, observations=claims.observations, now=ctx.run_started_at
-        )
-        ctx.db.commit()
-        logger.warning(
-            "world_feed_planner_failed run_id=%s world_id=%s failure_class=%s",
-            ctx.run_id,
-            profile.world.id,
-            type(exc).__name__,
-        )
-        return _safe_result(
-            outcome="planner_failed",
-            tracker=tracker,
-            world_id=profile.world.id,
-            world_character_id=profile.world_character.id,
-            status="failed",
-            failure_class=type(exc).__name__,
-            summary={
-                "outcome": "FOLLOW_UP_PLANNING_FAILED",
-                "reason_code": "planner_failed",
-                "observation_receipt_count": len(observation_receipts),
-            },
-        )
-    planner_latency_ms = int((perf_counter() - planner_started) * 1000)
+    from dataclasses import replace
+    claims = replace(claims, candidates=workflows.refresh_candidate_relationships(ctx.db, profile, claims.candidates))
+    counterpart_id = None if decision.selected_candidate_index is None else claims.candidates[decision.selected_candidate_index].author_world_character_id
+    ctx = workflows.refresh_social_context(ctx, counterpart_id=counterpart_id)
 
     if decision.selected_action is None:
         reason = decision.reason_code or "model_abstained"
@@ -745,7 +781,7 @@ async def run_world_keyword_feed(
         tracker.summary()["provider_call_count"],
     )
     return {
-        "engine": "keyword_search_v1",
+        "engine": "topic_recommendation_v1",
         "status": "completed",
         "summary": "World keyword feed public reaction completed.",
         "feed_outcome": "ACTION_SUCCEEDED",

@@ -502,7 +502,7 @@ def test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence(
         assert replay.reused is True
         replayed_row = db.get(models.WorldCharacter, replay.id)
         assert replayed_row is not None
-        assert replayed_row.feed_runtime_mode == "keyword_search_v1"
+        assert replayed_row.feed_runtime_mode == "topic_recommendation_v1"
         assert replayed_row.version == 8
 
     first = reconcile_local_autonomous_runtime_modes(
@@ -531,11 +531,11 @@ def test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence(
         already_ready = db.get(models.WorldCharacter, ids["already_ready"])
         assert repaired is not None
         assert repaired.activity_runtime_mode == "routine_resident_v1"
-        assert repaired.feed_runtime_mode == "keyword_search_v1"
+        assert repaired.feed_runtime_mode == "topic_recommendation_v1"
         assert repaired.version == 8
         assert repaired_second is not None
         assert repaired_second.activity_runtime_mode == "routine_resident_v1"
-        assert repaired_second.feed_runtime_mode == "keyword_search_v1"
+        assert repaired_second.feed_runtime_mode == "topic_recommendation_v1"
         assert repaired_second.version == 8
         assert explicit_legacy is not None
         assert explicit_legacy.feed_runtime_mode == "legacy_latest_v1"

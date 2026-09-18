@@ -118,6 +118,7 @@ def enter_world(
     world_id: str,
     user: CharacterOwner,
     data: schemas.WorldCharacterEntryCreate,
+    on_created=None,
 ) -> schemas.WorldCharacterEntryRead:
     world = world_entry.get_character_entry_world(db, world_id)
     if world is None:
@@ -211,6 +212,9 @@ def enter_world(
     )
     db.add(world_character)
     try:
+        db.flush()
+        if on_created is not None:
+            on_created(db, world_id=world_id, world_character_id=world_character.id)
         db.commit()
     except IntegrityError as exc:
         db.rollback()

@@ -91,9 +91,9 @@ def _safe_result(
     failure_class: str | None = None,
 ) -> dict[str, object]:
     return {
-        "engine": "keyword_search_v1",
+        "engine": "topic_recommendation_v1",
         "status": status,
-        "summary": f"World keyword feed outcome: {outcome}.",
+        "summary": f"World feed outcome: {outcome}.",
         "feed_outcome": outcome,
         "world_id": world_id,
         "world_character_id": world_character_id,
@@ -130,8 +130,8 @@ def _summary(
         "world_id": profile.world.id,
         "world_character_id": profile.world_character.id,
         "feed_runtime_mode": profile.world_character.feed_runtime_mode,
-        "keyword_count": len(claim.keywords),
-        "keywords": list(claim.keywords),
+        "keyword_count": 0 if profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else len(claim.keywords),
+        "keywords": [] if profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else list(claim.keywords),
         "keyword_offset": claim.cursor_offset,
         "raw_candidate_count": raw_candidate_count,
         "filtered_candidate_count": filtered_candidate_count,

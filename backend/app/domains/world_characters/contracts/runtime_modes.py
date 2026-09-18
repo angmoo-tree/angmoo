@@ -7,7 +7,7 @@ from typing import Mapping
 
 
 AUTONOMOUS_ACTIVITY_RUNTIME_MODE = "routine_resident_v1"
-AUTONOMOUS_FEED_RUNTIME_MODE = "keyword_search_v1"
+AUTONOMOUS_FEED_RUNTIME_MODE = "topic_recommendation_v1"
 LEGACY_FEED_RUNTIME_MODE = "legacy_latest_v1"
 LOCAL_ENTRY_IDEMPOTENCY_PROFILE_KEY = "entry_idempotency_key"
 

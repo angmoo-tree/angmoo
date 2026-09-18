@@ -8,6 +8,7 @@ from typing import Iterable
 from uuid import uuid4
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import update, or_
 from sqlalchemy.orm import Session
 from app.core.search_text import normalize_search_text
 from app.domains.social.contracts.search_index import SocialSearchIndexPort
@@ -64,7 +65,7 @@ def load_ready_search_profile(
     world_character = references.world_character(world_character_id)
     if world_character is None or world_character.status != "active":
         raise WorldFeedReadinessError("world_character_not_ready")
-    if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+    if world_character.feed_runtime_mode not in {AUTONOMOUS_FEED_RUNTIME_MODE, "keyword_search_v1"}:
         raise WorldFeedReadinessError("feed_runtime_mode_not_enabled")
     character = references.character(world_character.character_id)
     membership = references.membership(world_character.membership_id)
@@ -115,7 +116,7 @@ def load_ready_search_profile(
     # path over 10,000 posts in one World at 1.744 ms. Keep one-character
     # keywords fail-closed because they are both less meaningful and less
     # selective.
-    if any(len(keyword) < MIN_KEYWORD_LENGTH for keyword in keywords):
+    if world_character.feed_runtime_mode != "topic_recommendation_v1" and any(len(keyword) < MIN_KEYWORD_LENGTH for keyword in keywords):
         raise WorldFeedReadinessError("short_keyword_requires_repair")
     avoid_topics = tuple(
         normalize_search_text(topic, max_chars=40)
@@ -213,6 +214,8 @@ def search_world_feed_candidates(
     search_index: SocialSearchIndexPort | None,
     search_state: SocialSearchState,
 ) -> CandidateSearchResult:
+    if profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
+        return references.recommendation_candidates(profile=profile, allowed_policy_actions=allowed_policy_actions, now=now)
     started = time.perf_counter()
     candidate_rows = references.candidate_rows(profile)
     lookup = find_keyword_post_ids(
@@ -440,19 +443,21 @@ def claim_feed_observations(
                 conflicts += 1
                 continue
         else:
-            observation.status = "claimed"
-            observation.claim_token = uuid4().hex
-            observation.lease_expires_at = current + OBSERVATION_LEASE
-            observation.cycle_key = cycle_key
-            observation.run_id = run_id
-            observation.matched_keywords = list(candidate.matched_keywords)
-            observation.matched_fields = list(candidate.matched_fields)
-            observation.rank_score = candidate.rank_score
-            observation.post_created_at = candidate.created_at
-            observation.claimed_at = current
-            observation.observed_at = None
-            db.add(observation)
-            db.flush()
+            acquired = db.execute(update(WorldCharacterFeedObservation).where(
+                WorldCharacterFeedObservation.id == observation.id,
+                WorldCharacterFeedObservation.status != "observed",
+                or_(WorldCharacterFeedObservation.status != "claimed",
+                    WorldCharacterFeedObservation.lease_expires_at <= current),
+            ).values(status="claimed", claim_token=uuid4().hex,
+                     lease_expires_at=current + OBSERVATION_LEASE, cycle_key=cycle_key,
+                     run_id=run_id, matched_keywords=list(candidate.matched_keywords),
+                     matched_fields=list(candidate.matched_fields), rank_score=candidate.rank_score,
+                     post_created_at=candidate.created_at, claimed_at=current,
+                     observed_at=None)).rowcount
+            if not acquired:
+                conflicts += 1
+                continue
+            db.refresh(observation)
         claimed_candidates.append(
             candidate.model_copy(update={"candidate_index": len(claimed_candidates)})
         )
@@ -540,6 +545,8 @@ def mark_claims_retryable(
 ) -> None:
     current = _aware_utc(now)
     for observation in observations:
+        if observation.status == "observed":
+            continue
         observation.status = "retryable_failed"
         observation.lease_expires_at = current
         db.add(observation)
@@ -582,7 +589,7 @@ def finalize_feed_cycle(
     )
     if cursor is None or cursor.world_id != profile.world.id:
         raise WorldFeedReadinessError("feed_cursor_invalid")
-    cursor.next_keyword_offset = (
+    cursor.next_keyword_offset = 0 if profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else (
         claim.cursor_offset + KEYWORDS_PER_CYCLE
     ) % KEYWORD_COUNT
     cursor.last_cycle_summary = summary
@@ -613,7 +620,7 @@ def world_feed_cycle_status(
     offset = cursor.next_keyword_offset if cursor else 0
     next_keywords = (
         [keywords[offset], keywords[(offset + 1) % KEYWORD_COUNT]]
-        if keyword_contract_ready and offset in KEYWORD_OFFSETS
+        if world_character.feed_runtime_mode != "topic_recommendation_v1" and keyword_contract_ready and offset in KEYWORD_OFFSETS
         else []
     )
     rows = list(
@@ -695,7 +702,7 @@ def _feed_runtime_state(
         return "autonomy_disabled"
     summary = cursor.last_cycle_summary if cursor is not None else None
     reason_code = summary.get("reason_code") if isinstance(summary, dict) else None
-    if reason_code in {
+    if world_character.feed_runtime_mode != "topic_recommendation_v1" and reason_code in {
         "search_rebuilding",
         "search_schema_mismatch",
         "search_digest_stale",

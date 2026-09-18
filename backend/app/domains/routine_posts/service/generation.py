@@ -127,6 +127,8 @@ Return only the requested structured JSON."""
         writer_system = """You write one public Angmoo SNS root post as the given character.
 Use only the validated scene plan and bounded public context. Continue the prior successful post when present.
 Do not claim events that are absent, planned, failed, or not listed as used. Do not expose hidden data.
+Return topic_signature as a short Korean description of the completed title/body, at most 300 characters.
+Include natural topic names where relevant, but do not constrain the story to topic words or expose private conversations or unwritten plans.
 Return only the requested structured JSON."""
         writer_user = json.dumps(
             {

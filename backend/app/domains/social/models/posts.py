@@ -50,6 +50,7 @@ class Post(Base):
         ),
         UniqueConstraint("id", "world_id", name="uq_posts_id_world"),
         Index("ix_posts_world_created_at", "world_id", "created_at"),
+        Index("ix_posts_world_author_created", "world_id", "author_world_character_id", "created_at", "id"),
     )
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)

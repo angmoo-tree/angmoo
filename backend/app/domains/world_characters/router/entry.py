@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.domains.world_characters.schemas import setup as schemas
 from app.api.identity_dependencies import get_current_user
 from app.database import get_db
+from app.api.recommendation_dependencies import recommendation_workflows
 from app.api.identity_dependencies import browser_session
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.domains.world_characters import exceptions as wc_errors
@@ -83,6 +84,7 @@ def enter_world_with_character(
     data: schemas.WorldCharacterEntryCreate,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
+    topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCharacterEntryRead:
     try:
         return world_character_setup.enter_world(
@@ -90,6 +92,7 @@ def enter_world_with_character(
             world_id=world_id,
             user=user,
             data=data,
+            on_created=topics.mark_new_subject,
         )
     except world_character_setup.WorldCharacterSetupError as exc:
         _raise_world_character_error(exc)

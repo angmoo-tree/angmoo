@@ -36,6 +36,8 @@ def _app():
 
     Base.metadata.create_all(engine)
     app = FastAPI()
+    from app.runtime.social.composition import configure_social_runtime
+    configure_social_runtime(app)
     app.include_router(world_routes.router, prefix="/api/v1")
     principal: dict[str, models.User | None] = {"user": None}
 
@@ -139,6 +141,10 @@ def test_creator_route_lifecycle_and_stable_conflict() -> None:
     with Session(engine) as db:
         assert db.query(models.Post).count() == 0
         assert db.query(models.AgentRun).count() == 0
+        from app.domains.social.models.topics import RecommendationPreparation, RecommendationTopic
+        prep = db.query(RecommendationPreparation).one()
+        assert prep.state == "pending" and prep.request_id == "initial-completed"
+        assert db.query(RecommendationTopic).count() == 0  # No key: retain World without AI.
 
 
 def test_reserved_no_role_is_system_owned_and_survives_user_definition_sync() -> None:

@@ -51,7 +51,7 @@ class WorldFeedSchema(BaseModel):
 
 
 class WorldFeedCandidateRead(WorldFeedSchema):
-    candidate_index: int = Field(ge=0, le=7)
+    candidate_index: int = Field(ge=0, le=19)
     post_id: str
     author_world_character_id: str
     author_character_id: str
@@ -67,10 +67,13 @@ class WorldFeedCandidateRead(WorldFeedSchema):
     matched_fields: list[Literal["title", "body", "topic_signature"]]
     rank_score: float
     allowed_actions: list[FeedAction]
+    sources: list[str] = Field(default_factory=list)
+    allocated_lane: str | None = None
+    relationship_context: dict[str, int | str] | None = None
 
 
 class FeedReactionDecision(WorldFeedSchema):
-    selected_candidate_index: int | None = Field(default=None, ge=0, le=7)
+    selected_candidate_index: int | None = Field(default=None, ge=0, le=19)
     selected_action: FeedAction | None = None
     interaction_intent: FeedInteractionIntent | None = None
     comment_purpose: FeedCommentPurpose | None = None
@@ -185,7 +188,7 @@ class WorldFeedObservationRead(WorldFeedSchema):
 class WorldFeedCycleStatusRead(WorldFeedSchema):
     world_id: str
     world_character_id: str
-    feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1"]
+    feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1", "topic_recommendation_v1"]
     runtime_state: Literal[
         "routine_only_legacy_feed",
         "three_lane_ready",
