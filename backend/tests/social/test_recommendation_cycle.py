@@ -32,9 +32,14 @@ def test_pre_cutover_excluded_without_fts_then_delivery_never_repeats():
         assert provider.plan_calls == 1
         assert db.scalar(select(models.WorldCharacterFeedObservation)).status == "observed"
         assert db.scalar(select(RecommendationDelivery)).state == "delivered"
+        from app.runtime.social.recommendation_history import read_delivery_history
+        history = read_delivery_history(db, world_id=actor.world_id, world_character_id=actor.id)
+        assert history[0]["posts"][0]["post_id"] == target.id
+        assert history[0]["posts"][0]["result_state"] == "no_action"
         ctx = replace(ctx, run_id="third-cycle", run_started_at=ctx.run_started_at+timedelta(hours=1))
         third = asyncio.run(run_world_keyword_feed(ctx, provider=provider))
         assert third["feed_outcome"] == "no_candidate" and provider.plan_calls == 1
+        assert read_delivery_history(db, world_id=actor.world_id, world_character_id=actor.id) == history
     engine.dispose()
 
 

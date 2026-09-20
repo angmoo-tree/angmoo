@@ -41,14 +41,26 @@ def _execution_signature(
     decision: schemas.FeedReactionDecision,
     cycle_key: str,
 ) -> str:
+    return execution_signature_values(
+        world_character_id=profile.world_character.id, world_id=profile.world.id,
+        action=decision.selected_action, post_id=candidate.post_id,
+        interaction_intent=decision.interaction_intent, cycle_key=cycle_key,
+    )
+
+
+def execution_signature_values(
+    *, world_character_id: str, world_id: str, action: str | None,
+    post_id: str, interaction_intent: str | None, cycle_key: str,
+) -> str:
+    """Shared identity for writes and read-only verification of reused executions."""
     raw = "|".join(
         (
             WORLD_FEED_RUNTIME_VERSION,
-            profile.world_character.id,
-            profile.world.id,
-            str(decision.selected_action or ""),
-            candidate.post_id,
-            str(decision.interaction_intent or ""),
+            world_character_id,
+            world_id,
+            str(action or ""),
+            post_id,
+            str(interaction_intent or ""),
             cycle_key,
         )
     )

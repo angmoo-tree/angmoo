@@ -1,7 +1,7 @@
 {
-  "edge_count": 4630,
-  "external_import_count": 3492,
-  "module_count": 1199,
+  "edge_count": 4638,
+  "external_import_count": 3495,
+  "module_count": 1200,
   "modules": [
     {
       "external_imports": [],
@@ -17874,6 +17874,27 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.routines.models.resident",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.models.topics",
+        "app.domains.social.schemas.recommendation",
+        "app.domains.social.service.feed_cycle_values",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.social.recommendation_history",
+      "path": "backend/app/runtime/social/recommendation_history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "collections.abc",
         "sqlalchemy.orm"
       ],
@@ -18041,8 +18062,6 @@
         "app.domains.identity.service.credential_resolution",
         "app.domains.identity.service.world_character_credentials",
         "app.domains.social.contracts.recommendation",
-        "app.domains.social.models.feed",
-        "app.domains.social.models.posts",
         "app.domains.social.models.topics",
         "app.domains.social.schemas.recommendation",
         "app.domains.social.service.recommendation_topics",
@@ -18052,7 +18071,8 @@
         "app.domains.worlds.models",
         "app.domains.worlds.service.generation_context",
         "app.integrations.direct_llm",
-        "app.providers.gemini"
+        "app.providers.gemini",
+        "app.runtime.social.recommendation_history"
       ],
       "module": "app.runtime.social.topic_preparation",
       "path": "backend/app/runtime/social/topic_preparation.py",

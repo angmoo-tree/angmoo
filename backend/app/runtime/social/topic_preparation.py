@@ -15,9 +15,7 @@ from app.domains.characters.models import Character
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service.credential_resolution import CredentialResolver
 from app.domains.identity.service.world_character_credentials import find_world_character_credential
-from app.domains.social.models.topics import RecommendationCatalog, RecommendationPreparation, RecommendationTopic, RecommendationTopicSource, RecommendationDelivery
-from app.domains.social.models.feed import WorldCharacterFeedObservation
-from app.domains.social.models.posts import Post
+from app.domains.social.models.topics import RecommendationCatalog, RecommendationPreparation, RecommendationTopic, RecommendationTopicSource
 from app.domains.social.schemas.recommendation import TopicGenerationResult
 from app.domains.social.service.recommendation_topics import ensure_catalog, replace_source_topics, normalize_topic, mark_new_subject
 from app.domains.social.contracts.recommendation import TopicPreparationError
@@ -28,6 +26,7 @@ from app.domains.worlds.models import World, WorldMembership
 from app.domains.worlds.service.generation_context import build_world_generation_context
 from app.integrations import direct_llm
 from app.providers.gemini import build_gemini_developer_response_schema
+from app.runtime.social.recommendation_history import read_delivery_history, legacy_feed
 
 MODEL = "gemini-3.1-flash-lite"
 
@@ -90,33 +89,13 @@ def read_topics(db: Session, *, world_id: str, owner_id: str, world_character_id
         state = "stale"
     if prep and prep.state == "running" and prep.lease_expires_at and prep.lease_expires_at.replace(tzinfo=UTC) <= datetime.now(UTC):
         state = "failed"  # Read-only recovery indication; a new button request claims the expired lease.
-    recent_feed = []
-    if world_character_id:
-        deliveries = list(db.scalars(select(RecommendationDelivery).where(
-            RecommendationDelivery.world_character_id == world_character_id,
-            RecommendationDelivery.world_id == world_id,
-            RecommendationDelivery.state == "delivered",
-        ).order_by(RecommendationDelivery.updated_at.desc()).limit(5)))
-        traces = {}
-        for delivery in deliveries:
-            for identity, trace in (delivery.trace or {}).items():
-                traces.setdefault(identity, trace)
-        for observation, post in db.execute(select(WorldCharacterFeedObservation, Post).join(
-            Post, Post.id == WorldCharacterFeedObservation.post_id,
-        ).where(WorldCharacterFeedObservation.observer_world_character_id == world_character_id,
-                WorldCharacterFeedObservation.status == "observed", Post.world_id == world_id,
-                Post.deleted_at.is_(None), Post.report_hidden_at.is_(None), Post.visibility == "public",
-        ).order_by(WorldCharacterFeedObservation.observed_at.desc()).limit(20)):
-            trace = traces.get(post.id, {})
-            recent_feed.append({"post_id": post.id, "title": post.title[:160],
-                "sources": trace.get("sources", []), "lane": trace.get("lane"),
-                "outcome": observation.decision_outcome, "action": observation.selected_action})
+    deliveries = read_delivery_history(db, world_id=world_id, world_character_id=world_character_id) if world_character_id else []
     return {"world_id": world_id, "world_character_id": world_character_id, "state": state,
             "topics": [{"id": t.id, "name": t.name, "scope": "common" if t.world_id is None else "world"} for t in topics],
             "key_world_character_id": catalog.key_world_character_id if catalog else None,
             "model": MODEL, "thinking_level": "high", "last_code": prep.last_code if prep else None,
             "approval_required": bool(scope.source.get("approval_required")),
-            "recent_feed": recent_feed}
+            "recent_deliveries": deliveries, "recent_feed": legacy_feed(deliveries)}
 
 
 def connect_key(db: Session, *, world_id: str, owner_id: str, world_character_id: str | None):

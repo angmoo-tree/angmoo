@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Select } from "@/components/ui/form-controls";
 import { InlineError } from "@/components/ui/feedback";
+import { RecommendationHistory } from "@/features/social/components/recommendation-history";
 import { connectRecommendationKey, readRecommendationTopics, regenerateRecommendationTopics, type RecommendationTopics } from "@/features/social/api/recommendation-topics";
 
 export type TopicCharacterChoice = { id: string; name: string };
 const labels = { pending: "주제 준비 필요", running: "주제 만드는 중", ready: "준비됨", failed: "주제 생성 실패 · 이전 결과 유지", stale: "저장된 설정으로 갱신 필요" };
-const lanes: Record<string, string> = { latest: "최신글", interest: "관심사", relation: "관계", explore: "탐색" };
 
 // LOCAL: existing semantic form/button primitives; shared by Next and static screens.
 export function RecommendationTopicsPanel({ worldId, characterId, characters = [] }: {
@@ -16,6 +16,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
 }) {
   const [data, setData] = useState<RecommendationTopics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [readError, setReadError] = useState<{ scope: string; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [keyId, setKeyId] = useState("");
   const [reload, setReload] = useState(0);
@@ -29,8 +30,8 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
     const controller = new AbortController();
     readRecommendationTopics(worldId, characterId, controller.signal).then((result) => {
       if (controller.signal.aborted) return;
-      setData(result); setKeyId(result.key_world_character_id ?? ""); setError(null);
-    }).catch(() => { if (!controller.signal.aborted) setError("추천 주제를 불러오지 못했습니다. 승인 프로필과 접근 권한을 확인해 주세요."); });
+      setData(result); setKeyId(result.key_world_character_id ?? ""); setError(null); setReadError(null);
+    }).catch(() => { if (!controller.signal.aborted) setReadError({ scope: `${worldId}:${characterId ?? "world"}`, message: "추천 주제와 전달 이력을 불러오지 못했습니다. 접근 권한을 확인한 뒤 상태 새로고침을 눌러 주세요." }); });
     return () => controller.abort();
   }, [worldId, characterId, reload]);
 
@@ -52,6 +53,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
     }
   }
   const current = data?.world_id === worldId && data?.world_character_id === (characterId ?? null) ? data : null;
+  const currentReadError = readError?.scope === `${worldId}:${characterId ?? "world"}` ? readError.message : undefined;
   return <section className="space-y-4 rounded-2xl border border-border-default bg-surface p-5" aria-busy={busy}>
     <h3 className="font-bold text-text-strong">{characterId ? "캐릭터 관심 주제" : "World 추천 주제"}</h3>
     <p className="text-sm text-text-secondary">저장한 설정을 바탕으로 주제를 준비합니다. 설정을 수정한 뒤에는 다시 만들기를 눌러 갱신해 주세요.</p>
@@ -67,18 +69,11 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
     </div>}
     {current && <p className="text-xs text-text-secondary">{current.model} · thinking {current.thinking_level}{characterId ? " · 이 캐릭터의 일과 생성 키 사용" : ""}</p>}
     {error && <InlineError>{error}</InlineError>}
+    {currentReadError && <InlineError>{currentReadError}</InlineError>}
     <div className="flex flex-wrap gap-2">
       <Button loading={busy} disabled={!current || current.approval_required || (!characterId && !current.key_world_character_id)} onClick={() => void mutate("generate")}>{characterId ? "캐릭터 주제 다시 만들기" : "World 주제 다시 만들기"}</Button>
-      <Button variant="ghost" disabled={busy} onClick={() => setReload(value => value + 1)}>상태 새로고침</Button>
+      <Button variant="ghost" disabled={busy} onClick={() => { setData(null); setReadError(null); setReload(value => value + 1); }}>상태 새로고침</Button>
     </div>
-    {characterId && current && <div className="space-y-2 border-t border-border-default pt-4">
-      <h4 className="font-semibold text-text-strong">최근 전달된 Feed</h4>
-      <p className="text-xs text-text-secondary">검색 후보가 아닌 실제 전달된 글입니다. 반응하지 않은 글도 다음 Feed에서 제외됩니다.</p>
-      {current.recent_feed.length === 0 ? <p className="text-sm text-text-secondary">아직 전달된 글이 없습니다.</p> :
-        <ul className="space-y-2">{current.recent_feed.map(post => <li key={post.post_id} className="text-sm text-text-default">
-          <span className="font-medium">{post.title}</span>
-          <span className="ml-2 text-xs text-text-secondary">{post.lane ? lanes[post.lane] ?? post.lane : "이전 전달"} · {post.action ?? (post.outcome === "no_action" ? "읽고 지나감" : "전달됨")}</span>
-        </li>)}</ul>}
-    </div>}
+    {characterId && <RecommendationHistory deliveries={current?.recent_deliveries} loading={!current} error={currentReadError} />}
   </section>;
 }

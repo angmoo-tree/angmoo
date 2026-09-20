@@ -1,5 +1,24 @@
 import { requestSocialApi } from "@/lib/http/social-request";
 
+export type DeliveryPost = {
+  post_id: string;
+  title: string;
+  sources: ("latest" | "interest" | "relation" | "explore")[];
+  lane: "latest" | "interest" | "relation" | "explore" | null;
+  selected_action: "like" | "comment" | "repost" | "follow" | null;
+  result_state: "unrecorded" | "no_action" | "not_selected" | "selected" | "pending" | "succeeded" | "failed" | "not_performed";
+};
+
+export type RecommendationDelivery = {
+  delivery_id: string;
+  recorded_at: string;
+  recorded_post_count: number | null;
+  visible_post_count: number;
+  unavailable_post_count: number | null;
+  is_partial: boolean;
+  posts: DeliveryPost[];
+};
+
 export type RecommendationTopics = {
   world_id: string;
   world_character_id: string | null;
@@ -10,6 +29,7 @@ export type RecommendationTopics = {
   thinking_level: string;
   last_code: string | null;
   approval_required: boolean;
+  recent_deliveries?: RecommendationDelivery[];
   recent_feed: { post_id: string; title: string; sources: string[]; lane: string | null; outcome: string | null; action: string | null }[];
 };
 

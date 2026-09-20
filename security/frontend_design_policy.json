@@ -896,9 +896,9 @@
     "token_source": "frontend/src/styles/semantic-tokens.css"
   },
   "screenshot_inventory": {
-    "baseline_call_count": 12,
+    "baseline_call_count": 13,
     "committed_baseline_count": 11,
-    "current_status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 adds one opt-in screenshot call for isolated real-workflow evidence outside the canonical visual corpus; it does not add a committed visual baseline or claim USER CHECK.",
+    "current_status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",
@@ -921,7 +921,7 @@
       "max_diff_pixels": 25,
       "threshold": 0.1
     },
-    "expected_screenshot_call_count": 12,
+    "expected_screenshot_call_count": 13,
     "expected_snapshots": [
       "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
       "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
