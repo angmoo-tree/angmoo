@@ -97,7 +97,7 @@ def test_schema_projection_is_idempotent_and_reopens(tmp_path: Path) -> None:
         "world_characters": ['["wc-mango"]', '["wc-sage"]'],
         "events": ['["event-comment-1"]'],
         "relationships": [
-            '["relationship-world-arcana","wc-mango","wc-sage",2,14,9,7,2,5]'
+            '["relationship-world-arcana","wc-mango","wc-sage",2,14,9,7,2,5,null,null,1]'
         ],
         "evidence": [
             '["relationship-world-arcana","wc-mango","wc-sage",'
@@ -135,7 +135,7 @@ def test_stale_version_does_not_replace_relationship_state(tmp_path: Path) -> No
         digest = projection.world_digest(current.event.world_id)
 
     assert digest["relationships"] == [
-        '["relationship-world-arcana","wc-mango","wc-sage",3,15,10,8,3,6]'
+        '["relationship-world-arcana","wc-mango","wc-sage",3,15,10,8,3,6,null,null,1]'
     ]
 
 
@@ -233,3 +233,20 @@ def test_ladybug_outage_keeps_sqlite_outbox_pending() -> None:
         assert row.lease_owner is None
     assert result.retried == 1
     assert result.graph_degraded is True
+
+
+def test_current_snapshot_without_social_event_preserves_text_and_rejects_same_version_conflict(tmp_path):
+    command = replace(_relationship(version=5), event=None, world_id="world-arcana", last_event_id=None,
+        last_event_at=None, relationship_label="함께 성장하는 동료", perception="어려운 때 도와주는 상대다.", view_version=2)
+    with LadybugRelationshipProjection(database_root=_root(tmp_path)) as projection:
+        assert projection.apply(command) == "applied"
+        assert projection.apply(command) == "applied"
+        assert projection.apply(replace(command, relationship_version=4)) == "stale_noop"
+        with pytest.raises(LadybugProjectionError):
+            projection.apply(replace(command, perception="동일 버전의 다른 내용"))
+        digest = projection.world_digest("world-arcana")
+        assert digest["events"] == []
+        assert digest["evidence"] == []
+        assert "함께 성장하는 동료" in __import__("json").loads(digest["relationships"][0])
+    with LadybugRelationshipProjection(database_root=_root(tmp_path)) as projection:
+        assert projection.world_digest("world-arcana") == digest

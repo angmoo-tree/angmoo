@@ -389,6 +389,21 @@ def _seed_v2_roleless(
 
                 from app.runtime.persistence.sqlite_schema import EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES, RECOMMENDATION_V15_TABLES, build_sqlite_v14_metadata
                 from sqlalchemy.schema import CreateTable, CreateIndex
+                from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
+                for name in reversed(RELATIONSHIP_V17_TABLES):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                for name in ("relationship_states", "graph_projection_outbox"):
+                    historical = build_sqlite_v16_metadata().tables[name]
+                    old = name + "_current_fixture"
+                    connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
+                    connection.execute(CreateTable(historical))
+                    cols = ", ".join(c.name for c in historical.columns)
+                    connection.exec_driver_sql(f"INSERT INTO {name} ({cols}) SELECT {cols} FROM {old}")
+                    connection.exec_driver_sql(f"DROP TABLE {old}")
+                    for index in historical.indexes:
+                        connection.execute(CreateIndex(index))
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
                 # This fixture intentionally reconstructs v2 from the current baseline.
                 historical_wc = build_sqlite_v14_metadata().tables["world_characters"]
                 connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
@@ -938,7 +953,7 @@ def test_graph_version_change_replays_to_staging_and_preserves_previous(
     current = json.loads(
         (root / "graph" / "current-generation.json").read_text(encoding="utf-8")
     )
-    assert current["relative_path"].startswith("generations/ladybug-v2")
+    assert current["relative_path"].startswith("generations/ladybug-v3")
     previous = json.loads(
         (root / "graph" / "previous-generation.json").read_text(encoding="utf-8")
     )
@@ -963,7 +978,7 @@ def test_graph_rebuild_failure_degrades_without_replacing_previous(
     def fail_rebuild(**_kwargs):
         raise graph_registry.LadybugVersionContractError("ladybug_rebuild_injected")
 
-    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 2, fail_rebuild)
+    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 3, fail_rebuild)
     result = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
         fallback_generation=GENERATION,

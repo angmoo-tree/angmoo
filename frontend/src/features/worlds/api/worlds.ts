@@ -210,3 +210,14 @@ export function updateOwnerControlledIdentity(
     { method: "PATCH", body: data },
   );
 }
+
+
+export function listOwnerControlledIdentities(worldId: string) {
+  return apiRequest<OwnerControlledIdentityRead[]>(worldPath(worldId, "/owner-characters"));
+}
+export function selectOwnerControlledIdentity(worldId: string, id: string) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, `/owner-characters/${encodeURIComponent(id)}/select`), { method: "POST" });
+}
+export function replaceOwnerControlledIdentity(worldId: string, data: OwnerControlledProfileWrite) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/owner-characters"), { method: "POST", body: data });
+}

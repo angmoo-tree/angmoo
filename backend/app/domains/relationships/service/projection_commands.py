@@ -1,6 +1,8 @@
 """Build graph commands only after canonical source and relationship checks."""
 from __future__ import annotations
 from typing import Literal
+import hashlib
+import json
 from sqlalchemy.orm import Session
 from app.domains.relationships import models
 from app.domains.relationships.contracts.projection_commands import (
@@ -82,6 +84,28 @@ def build_projection_command(
     row = state_repository.get_outbox(db, outbox_id)
     if row is None:
         raise ProjectionCommandError("source_missing", cancelled=True)
+    if row.projection_type == "relationship_snapshot":
+        payload = row.payload
+        if (row.payload_version != "relationship-snapshot-v1" or not isinstance(payload, dict)
+            or set(payload) != {"world_id", "relationship_state_id", "relationship_version"}
+            or row.source_event_id is not None or payload["world_id"] != row.world_id
+            or payload["relationship_state_id"] != row.relationship_state_id
+            or hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest() != row.source_signature):
+            raise ProjectionCommandError("payload_invalid")
+        relationship = projection_repository.get_relationship(db, row.relationship_state_id)
+        if relationship is None or relationship.world_id != row.world_id:
+            raise ProjectionCommandError("source_missing", cancelled=True)
+        actor = references.world_character(world_id=row.world_id, world_character_id=relationship.actor_world_character_id)
+        target = references.world_character(world_id=row.world_id, world_character_id=relationship.target_world_character_id)
+        return RelationshipStateProjectionCommand(event=None, world_id=row.world_id,
+            relationship_state_id=relationship.id, actor_world_character_id=actor.id, actor_character_id=actor.character_id,
+            target_world_character_id=target.id, target_character_id=target.character_id,
+            familiarity=relationship.familiarity, affinity=relationship.affinity, trust=relationship.trust,
+            tension=relationship.tension, interaction_count=relationship.interaction_count,
+            last_event_id=relationship.last_event_id, last_event_at=relationship.last_event_at,
+            updated_at=relationship.updated_at, relationship_version=relationship.version,
+            relationship_label=relationship.relationship_label, perception=relationship.perception,
+            view_version=relationship.view_version, view_updated_at=relationship.view_updated_at, reviewed_at=relationship.reviewed_at)
     (
         world_id,
         event_id,
@@ -171,5 +195,10 @@ def build_projection_command(
         last_event_id=relationship.last_event_id,
         last_event_at=relationship.last_event_at,
         updated_at=relationship.updated_at,
+        relationship_label=relationship.relationship_label,
+        perception=relationship.perception,
+        view_version=relationship.view_version,
+        view_updated_at=relationship.view_updated_at,
+        reviewed_at=relationship.reviewed_at,
         relationship_version=relationship.version,
     )

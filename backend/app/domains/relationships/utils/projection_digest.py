@@ -38,14 +38,14 @@ def projection_digest(
             if isinstance(command, RelationshipStateProjectionCommand)
             else command
         )
-        if not isinstance(event, SocialEventProjectionCommand):
-            continue
-        world_characters.add(event.actor_world_character_id)
-        if event.target_world_character_id is not None:
-            world_characters.add(event.target_world_character_id)
-        events.add(event.event_id)
+        if isinstance(event, SocialEventProjectionCommand):
+            world_characters.add(event.actor_world_character_id)
+            if event.target_world_character_id is not None:
+                world_characters.add(event.target_world_character_id)
+            events.add(event.event_id)
 
         if isinstance(command, RelationshipStateProjectionCommand):
+            world_characters.update((command.actor_world_character_id, command.target_world_character_id))
             relationships[command.relationship_state_id] = (
                 command.relationship_state_id,
                 command.actor_world_character_id,
@@ -56,7 +56,12 @@ def projection_digest(
                 command.trust,
                 command.tension,
                 command.interaction_count,
+                command.relationship_label,
+                command.perception,
+                command.view_version,
             )
+            if event is None:
+                continue
             evidence.add(
                 (
                     command.relationship_state_id,

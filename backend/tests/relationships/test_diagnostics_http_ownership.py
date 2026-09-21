@@ -29,9 +29,9 @@ def test_both_factories_bind_relationship_readers_and_register_each_route_once()
         assert dependencies.get_read_references(request, session).config is request_config
         routes = [route for route, _ in _iter_routes_with_context(app.routes)]
         owned = [route for route in routes if getattr(getattr(route, "endpoint", None), "__module__", "") == "app.domains.relationships.router"]
-        assert len(owned) == 2
+        assert len(owned) == 3
         assert [route.name for route in owned] == [
-            "get_world_character_social_memory", "get_world_character_relationship_graph"
+            "get_world_character_social_memory", "get_world_character_relationship_graph", "get_relationship_review"
         ]
     assert dependencies.get_current_user is identity_dependencies.get_current_user
 

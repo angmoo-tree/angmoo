@@ -81,6 +81,11 @@ def _relationship(
         tension=int(payload.get("tension") or 0),
         interaction_count=int(payload.get("interaction_count") or 0),
         relationship_version=int(payload.get("relationship_version") or 0),
+        relationship_label=payload.get("relationship_label"),
+        perception=payload.get("perception"),
+        view_version=int(payload.get("view_version") or 1),
+        view_updated_at=_graph_datetime(payload.get("view_updated_at"), field_name="view_updated_at"),
+        reviewed_at=_graph_datetime(payload.get("reviewed_at"), field_name="reviewed_at"),
         last_event_id=(
             str(payload["last_event_id"])
             if payload.get("last_event_id") is not None

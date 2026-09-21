@@ -73,7 +73,7 @@ logger = logging.getLogger(__name__)
 
 
 class MemoryBatchRuntime:
-    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, episode_prior_search=None) -> None:
+    def __init__(self, session_factory, provider_factory, *, generation_policy="legacy", episode_provider_factory=None, episode_prior_search=None, idle_work=None) -> None:
         # Preserve safe success/attempt measurements without enabling verbose
         # SDK logging or changing application-wide log levels.
         logging.getLogger("app.domains.memory.service.batch_selection").setLevel(logging.INFO)
@@ -85,6 +85,7 @@ class MemoryBatchRuntime:
         self.generation_policy = generation_policy
         self.episode_provider_factory = episode_provider_factory
         self.episode_prior_search = episode_prior_search
+        self.idle_work = idle_work
         self.preparation = build_preparation_dependencies(generation_policy=generation_policy)
         self.stop_event = asyncio.Event()
         self.lock = asyncio.Lock()
@@ -138,6 +139,8 @@ class MemoryBatchRuntime:
                 batch = repository.claim(lease_token=token, now=datetime.now(UTC))
                 repository.commit()
                 if batch is None:
+                    if self.idle_work is not None and not shutdown:
+                        return await self.idle_work()
                     return "memory_batch_queue_empty"
                 if batch.policy_version == "episode-selection.v1":
                     if self.episode_provider_factory is None:

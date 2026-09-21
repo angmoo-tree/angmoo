@@ -14,7 +14,7 @@ from app.providers.generation_profiles import validate_generation_profile
 from app.runtime.chat.message_composition import settings_service
 
 
-def memory_provider(session_factory, owner_id: str, model: str, thinking_level: str = "high", *, episode=False):
+def memory_provider(session_factory, owner_id: str, model: str, thinking_level: str = "high", *, episode=False, relationship=False):
     try:
         validate_generation_profile(model, thinking_level)
     except ValueError:
@@ -42,6 +42,9 @@ def memory_provider(session_factory, owner_id: str, model: str, thinking_level: 
             except Exception:
                 raise MemoryValidationError("memory_selection_credential_changed") from None
 
+    if relationship:
+        from app.integrations.llm.relationship_review import DirectRelationshipReviewProvider
+        return DirectRelationshipReviewProvider(snapshot, validate_credential=validate_credential)
     if episode:
         from app.integrations.llm.episode_selection import DirectLlmEpisodeSelectionProvider
         return DirectLlmEpisodeSelectionProvider(snapshot, validate_credential=validate_credential)

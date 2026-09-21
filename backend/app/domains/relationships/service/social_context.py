@@ -49,6 +49,9 @@ def _row(item: SocialContextItem) -> dict:
     value = item.relationship
     return {
         "target": item.display_name,
+        "target_id": value.target_world_character_id,
+        "relationship_label": value.relationship_label,
+        "perception": value.perception,
         "familiarity": value.familiarity,
         "affinity": value.affinity,
         "trust": value.trust,

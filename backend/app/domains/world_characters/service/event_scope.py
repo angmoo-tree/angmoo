@@ -12,6 +12,7 @@ def validate_event_scope(
     world_id: str,
     world_character_id: str,
     lock: bool = False,
+    allow_retained_owner: bool = False,
 ) -> models.WorldCharacter:
     statement = select(models.WorldCharacter).where(
         models.WorldCharacter.id == world_character_id
@@ -21,7 +22,7 @@ def validate_event_scope(
     row = db.scalar(statement)
     if row is None or row.world_id != world_id:
         raise WorldCharacterSocialScopeError("cross_world_reference")
-    if row.status != "active":
+    if row.status != "active" and not (allow_retained_owner and row.control_mode == "owner_controlled" and row.status == "inactive"):
         raise WorldCharacterSocialScopeError("world_character_inactive")
     membership = get_character_entry_membership(db, row.membership_id)
     if (

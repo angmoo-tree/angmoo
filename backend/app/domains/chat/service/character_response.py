@@ -99,6 +99,7 @@ class CharacterResponseGenerationService:
             max_output_tokens=result.max_output_tokens,
             finish_reason=result.finish_reason,
             activity_thought=result.activity_thought,
+            relationship_metrics=result.relationship_metrics,
         )
 
 

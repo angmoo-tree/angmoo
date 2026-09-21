@@ -105,6 +105,7 @@ class CharacterResponseGeneratorResult:
     max_output_tokens: int | None = None
     finish_reason: str | None = None
     activity_thought: ActivityThought | None = None
+    relationship_metrics: object = None
 
     def __post_init__(self) -> None:
         if (
@@ -132,6 +133,7 @@ class CharacterResponseGenerationResult:
     max_output_tokens: int | None = None
     finish_reason: str | None = None
     activity_thought: ActivityThought | None = None
+    relationship_metrics: object = None
 
 
 class CharacterResponseGeneratorPort(Protocol):

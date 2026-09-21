@@ -148,7 +148,8 @@ def active_participant_ids(session, ids, world_id):
         .where(
             models.WorldCharacter.id.in_(ids),
             models.WorldCharacter.world_id == world_id,
-            models.WorldCharacter.status == "active",
+            or_(models.WorldCharacter.status == "active",
+                (models.WorldCharacter.control_mode == "owner_controlled") & (models.WorldCharacter.status == "inactive")),
             models.WorldMembership.status == "active",
         )
     )

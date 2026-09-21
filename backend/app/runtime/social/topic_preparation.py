@@ -17,7 +17,7 @@ from app.domains.identity.service.credential_resolution import CredentialResolve
 from app.domains.identity.service.world_character_credentials import find_world_character_credential
 from app.domains.social.models.topics import RecommendationCatalog, RecommendationPreparation, RecommendationTopic, RecommendationTopicSource
 from app.domains.social.schemas.recommendation import TopicGenerationResult
-from app.domains.social.service.recommendation_topics import ensure_catalog, replace_source_topics, normalize_topic, mark_new_subject
+from app.domains.social.service.recommendation_topics import ensure_catalog, replace_source_topics, normalize_topic, mark_new_subject as _mark_new_subject
 from app.domains.social.contracts.recommendation import TopicPreparationError
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.service.approved_setup import get_approved_pair
@@ -226,3 +226,9 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
         db.commit()
         # Provider details/credentials never enter the response or persisted failure.
     return read_topics(db, world_id=world_id, owner_id=owner_id, world_character_id=world_character_id)
+
+
+def mark_new_subject(db, *, world_id, world_character_id=None):
+    from app.domains.relationships.service.policy_activation import activate_policy
+    activate_policy(db, world_id=world_id)
+    return _mark_new_subject(db, world_id=world_id, world_character_id=world_character_id)

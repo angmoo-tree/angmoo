@@ -47,6 +47,11 @@ function graphRead(phase: Exclude<GraphPhase, "provider-error">) {
             relationship_state_id: "relationship-ui-e",
             actor_world_character_id: "wc-ui-e-center",
             target_world_character_id: "wc-ui-e-peer",
+            relationship_label: "의견이 달라도 서로 믿으며 함께 성장하는 오랜 동료",
+            perception: "경쟁심도 느끼지만 중요한 순간에는 믿고 의지할 수 있는 상대다. ".repeat(4),
+            view_version: 2,
+            view_updated_at: "2026-09-22T00:00:00Z",
+            reviewed_at: "2026-09-22T00:00:00Z",
             familiarity: 3,
             affinity: 2,
             trust: 1,
@@ -94,6 +99,12 @@ async function installGraphFixture(
     const url = new URL(request.url());
     if (url.pathname === "/api/backend/auth/me") {
       await json(route, OWNER);
+      return;
+    }
+    if (url.pathname.endsWith("/relationship-review")) {
+      await json(route, {mode:"interpreted",activated_at:"2026-09-22T00:00:00Z",
+        configuration:{status:"scheduled",local_time:"02:00",timezone:"Asia/Seoul"},
+        jobs:[],states:[],excluded_counts:{}});
       return;
     }
     if (url.pathname.endsWith("/relationship-graph")) {
@@ -178,4 +189,22 @@ test("UI-E Relationship Graph never presents a provider outage as healthy", asyn
   await page.getByRole("button", { name: "다시 시도" }).click();
   await expect(page.locator('[data-relationship-graph-state="ready"]')).toBeVisible();
   expect(new Set(requestedProviders)).toEqual(new Set(["ladybug"]));
+});
+
+
+test("RI relationship labels, perception and daily status remain readable at 200 percent", async ({page}) => {
+  const mutations: string[] = [];
+  page.on("request", request => { if (request.url().includes("/api/backend/") && request.method() !== "GET") mutations.push(request.method()); });
+  await installGraphFixture(page, () => "ready", []);
+  await page.goto("/characters/character-ui-e-center/worlds/world-ui-e-graph/relationship-graph");
+  await expect(page.getByRole("heading", {name:"하루 관계 정리",exact:true})).toBeVisible();
+  await expect(page.getByText("의견이 달라도 서로 믿으며 함께 성장하는 오랜 동료", {exact:true}).last()).toBeVisible();
+  await page.locator("body").evaluate(element => { element.style.zoom="2"; });
+  const summary = page.locator("summary").filter({hasText:"인식"});
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("경쟁심도 느끼지만 중요한 순간에는 믿고 의지할 수 있는 상대다.", {exact:false}).last()).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("아직 관계 정리 기록이 없습니다.", {exact:false})).toBeVisible();
+  expect(mutations).toEqual([]);
 });

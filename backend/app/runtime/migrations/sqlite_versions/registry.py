@@ -110,7 +110,10 @@ from app.runtime.migrations.sqlite_versions import v13_to_v14_consolidation_requ
 from app.runtime.migrations.sqlite_versions import v14_to_v15_recommendation as recommendation
 from app.runtime.migrations.sqlite_versions import v15_to_v16_recommendation_mode as recommendation_mode
 
+from app.runtime.migrations.sqlite_versions import v16_to_v17_relationship_personalization as relationship_personalization
+
 MIGRATIONS: dict[int, SqliteMigration] = {
+    16: relationship_personalization.upgrade,
     15: recommendation_mode.upgrade,
     14: recommendation.upgrade,
     13: consolidation_requests.upgrade,
@@ -129,6 +132,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    16: SqliteMigrationContract(source_version=16, target_version=17, name="relationship_personalization", mutable_identity_tables=relationship_personalization.MUTABLE_IDENTITY_TABLES, capture=relationship_personalization.capture_delta, verify=relationship_personalization.verify_delta),
     15: SqliteMigrationContract(source_version=15, target_version=16, name="social_recommendation_mode", mutable_identity_tables=recommendation_mode.MUTABLE_IDENTITY_TABLES, capture=recommendation_mode.capture_delta, verify=recommendation_mode.verify_delta),
     14: SqliteMigrationContract(source_version=14, target_version=15, name="social_recommendation", mutable_identity_tables=recommendation.MUTABLE_IDENTITY_TABLES, capture=recommendation.capture_delta, verify=recommendation.verify_delta),
     13: SqliteMigrationContract(source_version=13, target_version=14, name="consolidation_requests", mutable_identity_tables=consolidation_requests.MUTABLE_IDENTITY_TABLES, capture=consolidation_requests.capture_delta, verify=consolidation_requests.verify_delta),

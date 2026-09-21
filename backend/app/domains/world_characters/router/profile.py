@@ -269,3 +269,34 @@ def update_owner_character(
 
 
 __all__ = ["router"]
+
+
+@router.get("/{world_id}/owner-characters", response_model=list[OwnerControlledIdentityRead])
+def list_owner_characters(world_id: str, request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return [identity_read(row) for row in OwnerControlledIdentityService(db).list_identities(world_id=world_id, current_user_id=current_user.id)]
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+
+
+@router.post("/{world_id}/owner-characters", response_model=OwnerControlledIdentityRead)
+def replace_owner_character(world_id: str, data: OwnerControlledProfileWrite, request: Request,
+                            db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return identity_read(OwnerControlledIdentityService(db).create_replacement(world_id=world_id,
+            current_user_id=current_user.id, profile=data.domain_profile()))
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+
+
+@router.post("/{world_id}/owner-characters/{world_character_id}/select", response_model=OwnerControlledIdentityRead)
+def select_owner_character(world_id: str, world_character_id: str, request: Request,
+                           db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return identity_read(OwnerControlledIdentityService(db).select_identity(world_id=world_id,
+            current_user_id=current_user.id, world_character_id=world_character_id))
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)

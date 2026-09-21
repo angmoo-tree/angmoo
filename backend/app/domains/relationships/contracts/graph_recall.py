@@ -91,6 +91,11 @@ class GraphRecallRelationship:
     tension: int
     interaction_count: int
     relationship_version: int
+    relationship_label: str | None = None
+    perception: str | None = None
+    view_version: int = 1
+    view_updated_at: datetime | str | None = None
+    reviewed_at: datetime | str | None = None
     last_event_id: str | None = None
     last_event_at: datetime | None = None
     updated_at: datetime | None = None

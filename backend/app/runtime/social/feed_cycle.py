@@ -85,5 +85,9 @@ async def run_world_keyword_feed(
     from app.runtime.social_snapshot import prepare_activity_social_context, with_social_receipts
     from app.runtime.social.langgraph_actions import active_world_character
     ctx = prepare_activity_social_context(ctx, active_actor=active_world_character)
-    result = await service.run_world_keyword_feed(ctx, workflows=RuntimeWorldFeedWorkflows(), provider=provider)
+    try:
+        result = await service.run_world_keyword_feed(ctx, workflows=RuntimeWorldFeedWorkflows(), provider=provider)
+    finally:
+        from app.runtime.relationships.social_metrics import settle_activity
+        settle_activity(ctx)
     return with_social_receipts(ctx, result)

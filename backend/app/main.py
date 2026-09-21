@@ -250,6 +250,10 @@ def create_app(
         from app.runtime.memory_selection_provider import memory_provider
         from app.runtime.memory.episode_prior_search import episode_prior_search
 
+        from app.runtime.relationships.review_runtime import RelationshipReviewRuntime
+        relationship_review = RelationshipReviewRuntime(composition.session_factory,
+            lambda material: memory_provider(composition.session_factory, material["owner_id"],
+                material["model_id"], material["thinking_level"], relationship=True))
         memory_runtime = MemoryBatchRuntime(
             composition.session_factory,
             lambda owner, model, thinking: memory_provider(
@@ -259,6 +263,7 @@ def create_app(
             episode_provider_factory=lambda owner, model, thinking: memory_provider(
                 composition.session_factory, owner, model, thinking, episode=True),
             episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
+            idle_work=relationship_review.tick,
         )
         runtime_settings = composition.settings
         from app.domains.world_packages.storage.import_media import (
@@ -294,6 +299,8 @@ def create_app(
                 )
 
         def recover_embedded_runtime() -> None:
+            from app.runtime.relationships.policy_activation import activate_relationship_policies
+            activate_relationship_policies(composition.session_factory)
             world_package_import_committer.recover_media()
             repair_result = reconcile_local_autonomous_runtime_modes(
                 composition.session_factory,

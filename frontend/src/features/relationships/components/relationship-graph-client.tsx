@@ -1,4 +1,5 @@
 "use client";
+import { RelationshipReviewPanel } from "./relationship-review-panel";
 import { relationshipGraphPresentationState } from "@/features/relationships/utils/relationship-graph";
 
 import Link from "next/link";
@@ -153,7 +154,7 @@ export function RelationshipGraphClient({
         <p className="text-sm font-bold text-state-running">P7 · RELATIONSHIP GRAPH</p>
         <h1 className="mt-2 text-3xl font-black">World 관계망</h1>
         <p className="mt-3 max-w-3xl text-sm text-on-surface-variant">
-          실제 SNS 쓰기에 성공한 사건만 관계 근거로 사용합니다. 화살표는 보는 방향을 뜻하며,
+          채팅·SNS에서 실제로 접한 경험과 저장된 기억을 바탕으로 한 관계입니다. 화살표는 AI 캐릭터가 상대를 바라보는 방향이며,
           반대 방향은 별도의 관계입니다.
         </p>
         {provider === "ladybug" ? (
@@ -253,6 +254,8 @@ export function RelationshipGraphClient({
         />
       ) : null}
 
+      <RelationshipReviewPanel key={`${worldId}:${characterId}`} characterId={characterId} worldId={worldId} revision={requestVersion} authenticated={status === "authenticated"} names={Object.fromEntries((graph?.nodes ?? []).map((node) => [node.world_character_id, node.display_name]))} />
+
       {graph && showGraph ? (
         <>
           <section className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
@@ -289,17 +292,22 @@ export function RelationshipGraphClient({
                   const start = positions.get(edge.actor_world_character_id);
                   const end = positions.get(edge.target_world_character_id);
                   if (!start || !end) return null;
+                  const length = Math.hypot(end.x-start.x, end.y-start.y) || 1;
+                  const dx = -(end.y-start.y)/length*18;
+                  const dy = (end.x-start.x)/length*18;
+                  const cx = (start.x+end.x)/2+dx;
+                  const cy = (start.y+end.y)/2+dy;
                   return (
-                    <line
-                      key={edge.relationship_state_id}
-                      x1={start.x}
-                      y1={start.y}
-                      x2={end.x}
-                      y2={end.y}
+                    <g key={edge.relationship_state_id}>
+                    <path
+                      d={`M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`}
+                      fill="none"
                       className="stroke-state-running"
                       strokeWidth="2"
                       markerEnd="url(#arrow)"
                     />
+                    {edge.relationship_label ? <text x={cx} y={cy - 7} textAnchor="middle" className="fill-on-surface text-[10px] font-bold"><title>{edge.relationship_label}</title>{Array.from(edge.relationship_label).slice(0, 10).join("")}{edge.relationship_label.length > 10 ? "…" : ""}</text> : null}
+                    </g>
                   );
                 })}
                 {orderedNodes.map((node) => {
@@ -338,6 +346,13 @@ export function RelationshipGraphClient({
                 return (
                   <article key={edge.relationship_state_id} className="rounded-2xl border border-outline-variant p-4">
                     <h3 className="font-black">{actor?.display_name ?? "알 수 없음"} → {target?.display_name ?? "알 수 없음"}</h3>
+                    <p className="mt-2 font-semibold">{edge.relationship_label ?? "아직 정리된 관계 유형이 없습니다"}</p>
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-sm font-bold">상대에 대한 인식 보기</summary>
+                      <p className="mt-2 whitespace-pre-wrap break-words text-sm">{edge.perception ?? "아직 정리된 인식이 없습니다."}</p>
+                      <p className="mt-2 text-xs text-on-surface-variant">인식 변경: {edge.view_updated_at ? new Date(edge.view_updated_at).toLocaleString("ko-KR") : "미작성"}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">저장 기억 최근 검토: {edge.reviewed_at ? new Date(edge.reviewed_at).toLocaleString("ko-KR") : "미검토"}</p>
+                    </details>
                     <p className="mt-2 text-sm text-on-surface-variant">
                       친숙 {edge.familiarity} · 호감 {edge.affinity} · 신뢰 {edge.trust} · 긴장 {edge.tension}
                     </p>

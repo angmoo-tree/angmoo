@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime.relationships.social_metrics import invoke_graph as _invoke_relationship_graph
 from app.contracts.activity_thought import ActivityThought, THOUGHT_PROMPT
 from app.contracts.activity_thought_output import resident_thought_schema, resident_thought_payload, without_legacy_self_view_prompt
 from app.providers.gemini import build_gemini_developer_response_schema
@@ -728,10 +729,20 @@ async def _call_json(
         else:
             system_prompt += "Only non-text actions have thought in the action object. Text actions receive thought from their final writer. " + THOUGHT_PROMPT
 
+    relationship_node = node == "InboxActionPlanner"
+    if relationship_node:
+        from app.domains.relationships.policies.interpretation_prompt import with_metric_schema, METRIC_INSTRUCTIONS
+        wire_schema = with_metric_schema(wire_schema if isinstance(wire_schema, dict) else build_gemini_developer_response_schema(wire_schema))
+        system_prompt += METRIC_INSTRUCTIONS
+
     def _validator(payload: dict[str, Any]) -> dict[str, Any]:
-        if thought_enabled:
-            return resident_thought_payload(payload, response_schema, writer=writer)
-        return response_schema.model_validate(payload).model_dump()
+        payload = dict(payload)
+        metrics = payload.pop("relationship_metrics", None)
+        result = (resident_thought_payload(payload, response_schema, writer=writer) if thought_enabled
+                  else response_schema.model_validate(payload).model_dump())
+        if relationship_node:
+            result["relationship_metrics"] = metrics
+        return result
 
     try:
         return await generate_json(
@@ -1923,6 +1934,12 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                     f"relationship_memory: {_format_json_for_prompt(state.get('relationship_memory', {}), max_chars=4000)}",
                 ]
             )
+            from app.runtime.relationships.social_metrics import prepare_sources, source_prompt, stage_sources
+            metric_actor = langgraph_social_apply.active_world_character(ctx.db, character_id=ctx.character.id)
+            metric_sources = prepare_sources(ctx.db, actor=metric_actor,
+                post_ids=[item.get("source_post_id") for item in items if isinstance(item, dict)])
+            if metric_sources:
+                user_prompt += "\nrelationship_experiences: " + json.dumps(source_prompt(metric_sources), ensure_ascii=False)
             try:
                 plan = await _call_json(
                     ctx,
@@ -1938,6 +1955,9 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 plan = _planner_json_failed_plan(
                     exc, node="InboxActionPlanner", lane="inbox_action_planner"
                 )
+            if metric_sources and not plan.get("planner_error"):
+                stage_sources(ctx.db, actor=metric_actor, manifest=metric_sources,
+                    raw=plan.pop("relationship_metrics", None), decision_key=f"inbox:{ctx.run_id}", now=datetime.now(UTC))
             raw_actions = plan.get("inbox_actions")
             raw_selected_action_count = (
                 len(raw_actions) if isinstance(raw_actions, list) else 0
@@ -3673,7 +3693,7 @@ async def _run_combined_inbox_lane(
         },
     }
     try:
-        final_state = await graph.ainvoke(
+        final_state = await _invoke_relationship_graph(graph, ctx,
             initial_state,
             config={"recursion_limit": _langgraph_recursion_limit()},
         )
@@ -4008,7 +4028,7 @@ async def run_resident_langgraph(
     graph = _build_graph(ctx, tracker)
     try:
         async with _GRAPH_SEMAPHORE:
-            final_state = await graph.ainvoke(
+            final_state = await _invoke_relationship_graph(graph, ctx,
                 {
                     "steps": 0,
                     "completed_nodes": [],

@@ -4,6 +4,7 @@ The caller owns the transaction. This service preserves the observation directio
 without creating another successful source event or inferring an emotional delta.
 """
 from __future__ import annotations
+from app.domains.relationships.service.personalized_metrics import interpreted_policy
 import json
 from hashlib import sha256
 from sqlalchemy.orm import Session
@@ -97,11 +98,13 @@ def observe(
         )
 
     before = _relationship_snapshot(state)
-    state.familiarity = _clamp_relationship(state.familiarity + 1, 0, 100)
-    state.interaction_count += 1
-    state.last_event_id = source_event.id
-    state.last_event_at = _aware_utc(command.observed_at)
-    state.version += 1
+    legacy_metrics = interpreted_policy(db, command.world_id) is None
+    if legacy_metrics:
+        state.familiarity = _clamp_relationship(state.familiarity + 1, 0, 100)
+        state.interaction_count += 1
+        state.last_event_id = source_event.id
+        state.last_event_at = _aware_utc(command.observed_at)
+        state.version += 1
     receipt = models.RelationshipStateChange(
         id=uuid7_string(),
         relationship_state_id=state.id,
@@ -111,14 +114,14 @@ def observe(
         target_world_character_id=target.id,
         valence="neutral",
         intensity="low",
-        delta_familiarity=1,
+        delta_familiarity=1 if legacy_metrics else 0,
         delta_affinity=0,
         delta_trust=0,
         delta_tension=0,
         before_snapshot=before,
         after_snapshot=_relationship_snapshot(state),
-        applied=True,
-        not_applied_reason=None,
+        applied=legacy_metrics,
+        not_applied_reason=None if legacy_metrics else "no_delta_event",
     )
     db.add(receipt)
     _enqueue_observation_outbox(

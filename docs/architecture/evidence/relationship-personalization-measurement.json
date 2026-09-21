@@ -1,0 +1,41 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.12",
+  "provider_calls": 0,
+  "scope": "one hot directional pair; synthetic receipts, real SQLite commits; partition in memory; no full-world concurrency",
+  "measurements": [
+    {
+      "experience_rows": 1000,
+      "measured_transactions": 100,
+      "metric_p50_ms": 23.53,
+      "metric_p95_ms": 28.87,
+      "partition_memories": 1000,
+      "partition_parts": 16,
+      "partition_ms": 157.3,
+      "partition_peak_mib": 0.43,
+      "sqlite_mib": 2.68
+    },
+    {
+      "experience_rows": 10000,
+      "measured_transactions": 100,
+      "metric_p50_ms": 23.28,
+      "metric_p95_ms": 27.42,
+      "partition_memories": 10000,
+      "partition_parts": 156,
+      "partition_ms": 1554.82,
+      "partition_peak_mib": 4.19,
+      "sqlite_mib": 6.22
+    },
+    {
+      "experience_rows": 100000,
+      "measured_transactions": 100,
+      "metric_p50_ms": 23.59,
+      "metric_p95_ms": 28.97,
+      "partition_memories": 100000,
+      "partition_parts": 1563,
+      "partition_ms": 15919.39,
+      "partition_peak_mib": 41.94,
+      "sqlite_mib": 41.93
+    }
+  ]
+}

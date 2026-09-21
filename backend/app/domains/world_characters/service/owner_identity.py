@@ -125,6 +125,53 @@ class OwnerControlledIdentityService:
         self._db.flush()
         return character, world_character
 
+    def list_identities(self, *, world_id: str, current_user_id: str):
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        rows = self._db.scalars(select(WorldCharacter).where(
+            WorldCharacter.world_id == world_id, WorldCharacter.owner_user_id == current_user_id,
+            WorldCharacter.control_mode == "owner_controlled", WorldCharacter.status.in_(("active", "inactive"))
+        ).order_by(WorldCharacter.created_at, WorldCharacter.id))
+        return [_snapshot(character, row) for row in rows
+                if (character := get_character(self._db, row.character_id)) is not None and character.deleted_at is None]
+
+    def select_identity(self, *, world_id: str, current_user_id: str, world_character_id: str):
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        selected = self._db.get(WorldCharacter, world_character_id)
+        if (selected is None or selected.world_id != world_id or selected.owner_user_id != current_user_id
+            or selected.control_mode != "owner_controlled" or selected.status not in {"active", "inactive"}):
+            raise OwnerControlledIdentityNotFoundError(world_character_id)
+        character = get_character(self._db, selected.character_id)
+        if character is None or character.deleted_at is not None:
+            raise OwnerControlledIdentityNotFoundError(world_character_id)
+        previous = self._find_identity(world_id, current_user_id)
+        if previous is not None and previous.id != selected.id:
+            previous.status = "inactive"
+            previous.version += 1
+            self._db.flush()
+        if selected.status != "active":
+            selected.status = "active"
+            selected.version += 1
+        self._db.commit()
+        return _snapshot(character, selected)
+
+    def create_replacement(self, *, world_id: str, current_user_id: str, profile):
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        previous = self._find_identity(world_id, current_user_id)
+        try:
+            if previous is not None:
+                previous.status = "inactive"
+                previous.version += 1
+                self._db.flush()
+            character, row = self.seed_create(world_id=world_id, current_user_id=current_user_id, profile=profile)
+            self._db.commit()
+            return _snapshot(character, row)
+        except Exception:
+            self._db.rollback()
+            raise
+
     def update(
         self,
         *,

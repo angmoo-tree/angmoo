@@ -13,6 +13,7 @@ def contexts(db, profile, author_ids):
         RelationshipState.target_world_character_id.in_(author_ids),
     ).execution_options(populate_existing=True)).all()
     return {row.target_world_character_id: {
+        "relationship_label": row.relationship_label or "", "perception": row.perception or "",
         "direction": "actor_outgoing_only", "state_id": row.id, "version": row.version,
         "familiarity": row.familiarity, "affinity": row.affinity, "trust": row.trust, "tension": row.tension,
     } for row in rows}
