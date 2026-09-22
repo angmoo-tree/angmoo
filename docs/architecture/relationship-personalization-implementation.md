@@ -158,3 +158,18 @@ Windows11 / Python3.13.12, 임시 SQLite, provider 호출0, 기존 source 영수
 `relationship_review_requests`(SQLite v18)가 수동 기억 요청 뒤 후속 실행을 영속 보관한다. `ManualRelationshipFollowup`과 `advance_manual_requests`가 기존 memory/review worker를 조립하며, 자동 예약과 AI 프롬프트는 유지한다. 새 API·전체 집계·고정 참조·재시도는 [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)에 정리했다.
 
 실제 UI 대조에서 Ladybug의 `_relationship_rows/_relationship_payload`가 저장된 유형·인식을 반환하지 않는 기존 누락을 발견했다. SELECT/payload에 다섯 view 필드를 추가하고 실제 Ladybug repository roundtrip 테스트 및 실제 화면을 확인했다. 이 수정은 저장 데이터 재생성·별도 AI 호출을 필요로 하지 않는다.
+
+
+## 2026-09-22 SC0–SC7 날짜 정규화 후속 수정
+
+- 원인: SQLite datetime와 Ladybug ISO 문자열의 `view_updated_at`/`reviewed_at`을 공통 조회 결과에서 그대로 비교하여 동일 관계를 변경으로 오탐했다. 과거 13:23/13:45/13:59 실패의 내부 필드 전환 로그는 없으므로 모든 실패의 유일한 원인이라고 단정하지 않는다.
+- 수정: `relationships/policies/graph_recall.py::_relationship_record()`에서 두 날짜를 기존 `_optional_datetime()`으로 UTC 정규화. 정상 공통 결과 타입은 `datetime | None`. 문자열을 허용하는 provider hit 계약과 그래프 저장 형식은 유지한다.
+- 보존: 스냅샷 전체 비교, 실제 지표/문구/버전/시각 변경 차단, World·주체·자격 검사. DB 마이그레이션·관계 재생성·추가 AI 호출 없음.
+- 신규 회귀 `tests/relationships/test_snapshot_dates.py`: 26 PASS. 날짜/offset/null/파서 정책, prepare 중 원본↔그래프 전환, 실제 변화 차단, 실제 임시 Ladybug keep/update 조회, 실제 Routine provider/runtime의 Planner→Writer→게시 경계와 동일 tick 중복 방지.
+- 수정 전 첫 실행: 13 FAIL/10 PASS. 날짜/조회 전환 관련11개 실패 외에 임시 Ladybug fixture의 world_id 누락2개가 있었고 fixture를 보완했다. 실제 결함과 테스트 준비 오류를 구분한다.
+- 관련 묶음: **103 PASS / 1 SKIP**(40.82초, 신규26 포함). SKIP은 `SECURITY_CONCURRENCY_DATABASE_URL` 미설정 PostgreSQL 20-session 테스트. 임시 Ladybug 검사는 PASS이며 skip이 아니다. Ladybug 기존 파일 추가 확인9 PASS는 위103과 중복이므로 합산하지 않는다.
+- 실행 명령: `uv run --directory backend python -m pytest -q tests/relationships/test_snapshot_dates.py tests/test_p8_l_i_graph_recall.py tests/relationships/test_social_context.py tests/relationships/test_relationship_graph_repository.py tests/routine_posts/test_generation.py tests/routine_posts/test_runtime.py tests/chat/test_social_context_workflow.py tests/social/test_relationship_metrics_runtime.py tests/test_l3_er3_ladybug_projection.py tests/test_relationship_daily_review.py --tb=short`
+- Docker: backend/frontend healthy, watch reload/startup 완료, 컨테이너 소스의 수정 반영 확인. canonical DB를 mode=ro로 조회한 실제 관계3쌍 모두 UTC 공통 결과와 ISO 표현의 동등성 통과. 이 검사는 운영 Ladybug의 실제 교차 조회가 아니라 운영 원본값으로 표현 전환을 재현한 검사다. 실제 그래프 왕복은 임시 Ladybug에서 검증했다.
+- 코드 수정 시각: 2026-09-22 14:24:35 KST. 올마이트 14:22 run `e4a2af33-3a1b-52d0-a5af-85c2a9e40c43`는 Planner/Writer ok, root post `post-ea3f5cf681a2` 저장 성공이나 수정 전이라 SC6 PASS로 사용하지 않는다.
+- **SC6 PENDING USER CHECK**: 두 캐릭터의 수정 후 적격 Routine에서 Planner/Writer ok·독립 게시글 저장·beat/execution 성공을 각각 확인한다. 자연스러운 다음 활동을 기다리며 강제 활동·예약 변경·운영 DB 변경은 수행하지 않았다. 실제 관계 변경으로 인한 오류는 날짜 오탐과 구분한다.
+- SC0~SC5 로컬 구현/검증 완료, SC7 문서·로컬 인계. U1 부분/U3 확인 사례 PASS 유지, U4 개인화 인과·U7 장기 운영은 별도. PR·push·CI·main merge 없음. 프론트 변경 없음.
