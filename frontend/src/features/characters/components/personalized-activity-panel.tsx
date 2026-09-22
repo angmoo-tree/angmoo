@@ -81,7 +81,7 @@ export function PersonalizedActivityPanel({ worldId, actorId }: { worldId: strin
         {current.runs.length ? current.runs.map((run) => <div key={run.activity_id}>
           <p>{new Date(run.started_at).toLocaleString("ko-KR")} · {statuses[run.status] ?? "확인 필요"}{run.public_action_count !== null && ` · 행동 ${run.public_action_count}개`}</p>
           {(run.status === "running" || run.status === "waiting") && <p role="status" className="text-xs">{stages[run.stage] ?? "활동 진행 중"}</p>}
-          {Object.entries(run.paths ?? {}).map(([name, path]) => <p key={name} className="text-xs">{({ inbox: "받은 대화", routine: "일과", feed: "피드" } as Record<string, string>)[name] ?? name} · {statuses[path.status] ?? "확인 필요"} · 행동 {path.public_action_count}개 · 선택 {path.selected_count}개 · 기억 검색 {path.recall_count}회{path.state_status && ` · ${stateResults[path.state_status] ?? "상태 확인 필요"}`}{path.reason && ` · ${reasons[path.reason] ?? "이 경로를 완료하지 못했습니다. 다음 활동 결과를 확인해 주세요."}`}</p>)}
+          {Object.entries(run.paths ?? {}).map(([name, path]) => <p key={name} className="text-xs">{({ inbox: "받은 대화", routine: "일과", feed: "피드" } as Record<string, string>)[name] ?? name} · {statuses[path.status] ?? "확인 필요"} · 행동 {path.public_action_count}개 · 선택 {path.selected_count === null ? "미기록" : `${path.selected_count}개`} · 기억 검색 {path.recall_count === null ? "미기록" : `${path.recall_count}회`}{path.state_status && ` · ${stateResults[path.state_status] ?? "상태 확인 필요"}`}{path.reason && ` · ${reasons[path.reason] ?? "이 경로를 완료하지 못했습니다. 다음 활동 결과를 확인해 주세요."}`}</p>)}
         </div>) : <p>아직 이 방식으로 기록된 실행이 없습니다.</p>}
       </div>
     </>}

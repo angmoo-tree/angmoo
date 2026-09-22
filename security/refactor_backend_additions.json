@@ -16109,6 +16109,31 @@
         "tests/runtime/test_activity_provider.py": {},
         "tests/runtime/test_personalized_inbox_lane.py": {}
       }
+    },
+    {
+      "commit": "14763f850b2bf7f2738c91a3968d68127d715c5d",
+      "feature_id": "AR-AG-SETTLEMENT-RESUME",
+      "reason": "Preserve completed path diagnostics and replay only settlement after transient SQLite contention",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_personalized_parent.py::test_parent_preserves_completed_paths_and_resumes_busy_settlement"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_personalized_parent.py": {
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == {'inbox', 'routine'}",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_personalized_parent.py": {}
+      }
     }
   ]
 }

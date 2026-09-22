@@ -211,6 +211,8 @@ class RoutineLane:
         result = (state.get("executions") or [state.get("lane_data", {}).get("skipped", {})])[0]
         return {"result": {"path": "routine", "status": "failed" if state.get("failure") else result.get("status", "no_action"),
             "failure": state.get("failure"),
+            "selected_ids": [s["target_id"] for s in state.get("selections", [])],
+            "recall_status": {key: item["status"] for key, item in state.get("memories", {}).items()},
             "public_action_count": result.get("publish_result", {}).get("public_action_count", 0),
             "routine_result": result, "settlement": state.get("settlement", {})}}
 
