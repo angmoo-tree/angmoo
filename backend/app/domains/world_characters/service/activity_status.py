@@ -31,6 +31,7 @@ def activity_status(db, *, actor):
         "runs": [{"activity_id": r.activity_id, "engine": r.engine, "status": r.status,
             "stage": r.stage, "started_at": utc(r.started_at), "finished_at": utc(r.finished_at),
             "paths": {name: {"status": path.get("status"), "public_action_count": path.get("public_action_count", 0),
+                "state_status": (path.get("settlement") or {}).get("state"),
                 "selected_count": len(path.get("selected_ids", [])), "recall_count": len(path.get("recall_status", {})),
                 "reason": path.get("reason") or (path.get("failure") or {}).get("reason")}
                 for name, path in (r.result or {}).get("paths", {}).items()},

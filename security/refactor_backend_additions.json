@@ -16072,6 +16072,43 @@
         "tests/runtime/test_personalized_routine_lane.py": {},
         "tests/world_characters/test_activity_state.py": {}
       }
+    },
+    {
+      "commit": "d3a12ab60bfcf81f6055f698bd04a59af80082f0",
+      "feature_id": "AR-AG-PILOT-FIX",
+      "reason": "V2 selected Inbox public receipt replay, deleted candidate eligibility and optional input budget regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_activity_provider.py::test_budget_removes_whole_optional_records_without_mutating_shared_input",
+        "tests/runtime/test_personalized_inbox_lane.py::test_deleted_notifications_do_not_starve_new_valid_inbox",
+        "tests/runtime/test_personalized_inbox_lane.py::test_partial_execution_restart_uses_public_success_receipt"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_activity_provider.py": {
+          "test_budget_removes_whole_optional_records_without_mutating_shared_input": [
+            "assert len(captured['context']['today_activity']['records']) == 1",
+            "assert captured['required_source'] == payload['required_source']",
+            "assert captured['context']['input_omissions']['today_activity'] == 1",
+            "assert len(payload['context']['today_activity']['records']) == 2",
+            "pytest.raises(ValueError, match='activity_input_budget_exceeded')"
+          ]
+        },
+        "tests/runtime/test_personalized_inbox_lane.py": {
+          "test_partial_execution_restart_uses_public_success_receipt": [
+            "pytest.raises(RuntimeError, match='process_exit_after_first_reply')",
+            "assert [r['status'] for r in result['executions']] == ['reused', 'succeeded']",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id))) == 2"
+          ],
+          "test_deleted_notifications_do_not_starve_new_valid_inbox": [
+            "assert len(candidates) == 1",
+            "assert [p.id for p in candidates[0]['posts']] == [source.id]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_activity_provider.py": {},
+        "tests/runtime/test_personalized_inbox_lane.py": {}
+      }
     }
   ]
 }

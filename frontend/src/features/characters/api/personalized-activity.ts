@@ -14,7 +14,7 @@ export type ActivityRuntimeStatus = {
     state_note: string | null; changed_at: string | null; confirmed_at: string | null;
   };
   runs: Array<{ activity_id: string; engine: string; status: string; stage: string;
-    paths: Record<string, { status: string; public_action_count: number; selected_count: number; recall_count: number; reason: string | null }>;
+    paths: Record<string, { status: string; state_status: string | null; public_action_count: number; selected_count: number; recall_count: number; reason: string | null }>;
     started_at: string; finished_at: string | null; public_action_count: number | null; reason: string | null }>;
 };
 

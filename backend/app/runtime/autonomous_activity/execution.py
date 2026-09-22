@@ -71,6 +71,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             if expected and read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)["version"] != expected["version"]:
                 raise ActivityScopeChangedError("activity_state_changed")
         slot.lease_expires_at = now + timedelta(minutes=10)
+        completed_paths = {path: state[f"{path}_result"] for path in ("inbox", "routine", "feed") if f"{path}_result" in state}
+        if completed_paths:
+            row.result = {**(row.result or {}), "paths": {**(row.result or {}).get("paths", {}), **completed_paths}}
+        row.status = "running"
         row.stage = state.get("stage", "LoadContext")
         ctx.db.commit()
         return {}
@@ -130,7 +134,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             row.status = "aborted" if isinstance(exc, ActivityScopeChangedError) else "interrupted" if not isinstance(exc, Exception) else "waiting"
             if row.status == "aborted":
                 row.finished_at = datetime.now(UTC)
-            row.result = {"reason": type(exc).__name__, "stage": row.stage}
+            row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
             ctx.db.commit()
             raise
         from app.runtime.autonomous_activity.checkpoints import prune_completed
