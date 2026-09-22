@@ -1,12 +1,14 @@
 """Read pending conversations without consuming notification or observation state."""
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.domains.social.models.posts import Notification, Post
 from app.domains.social.service.resident_affordances import resident_inbox_action_affordance
 
 
 def pending_conversations(db, *, actor, allowed_actions, limit=10):
-    rows = list(db.scalars(select(Notification).where(
+    rows = list(db.scalars(select(Notification).join(Post, Post.id == func.coalesce(Notification.source_post_id, Notification.post_id)).where(
+        Post.world_id == actor.world_id, Post.deleted_at.is_(None), Post.report_hidden_at.is_(None),
+        Post.visibility == "public", Post.author_world_character_id.is_not(None), Post.author_world_character_id != actor.id,
         Notification.world_id == actor.world_id,
         Notification.recipient_world_character_id == actor.id,
         Notification.recipient_character_id == actor.character_id,
@@ -31,7 +33,8 @@ def pending_conversations(db, *, actor, allowed_actions, limit=10):
             character_id=actor.character_id, allowed_actions=allowed_actions)
         entry = groups.setdefault(key, {"branch_id": branch, "counterpart_id": key[0],
             "posts": [], "notifications": [], "parent": parent, "affordance": affordance})
-        entry["posts"].append(post)
+        if all(p.id != post.id for p in entry["posts"]):
+            entry["posts"].append(post)
         entry["notifications"].append(row)
         entry["affordance"] = affordance
     return list(groups.values())

@@ -173,7 +173,8 @@ class ActivityProvider:
         def serialized():
             return json.dumps(payload, ensure_ascii=False, default=str)
         user = serialized()
-        today = context.get("today_activity", [])
+        today_data = context.get("today_activity", [])
+        today = today_data.get("records", []) if isinstance(today_data, dict) else today_data
         while len(system) + len(user) > 64000 and isinstance(today, list) and today:
             today.pop(0)
             omissions["today_activity"] += 1

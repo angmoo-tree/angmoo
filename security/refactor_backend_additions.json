@@ -15858,6 +15858,220 @@
       "test_suppressions": {
         "tests/test_p8_l_d_installer_upgrade_contract.py": {}
       }
+    },
+    {
+      "commit": "36db8c67f75d2466b1b5882bc105639ea039a301",
+      "feature_id": "AR-AG-V2",
+      "reason": "AG0-AG14: V2 subgraphs, shared state, SQLite checkpoints and bounded provider/recall adapters with regression coverage.",
+      "tracked_files": {
+        "backend/alembic/versions/20260923_0097_personalized_activity.py": "e0e9de51f4c5e828f2fc4ddd097fe0e9ea72c28f",
+        "backend/app/domains/social/service/activity_inbox.py": "79620c296049fe55f3bef8ec6306ea40022efde3",
+        "backend/app/domains/world_characters/activity_models.py": "cbdc3c26651ee998790c99b840b8b47a0a2ab0db",
+        "backend/app/domains/world_characters/router/activity.py": "d0aa193ab9bc5a6f7289964c1bb70087086bedfa",
+        "backend/app/domains/world_characters/schemas/activity_state.py": "0bcb533cfceee4b2033540fcf65276d7d6bfb13d",
+        "backend/app/domains/world_characters/service/activity_engines.py": "fd870b8c39e334c4b97dffae80f99f05aee1eb73",
+        "backend/app/domains/world_characters/service/activity_state.py": "78f8652d1f984017fedc5e8b40c8f12222e10ded",
+        "backend/app/domains/world_characters/service/activity_status.py": "edfc06c9fec8a395798c50f56f6eada8da162828",
+        "backend/app/runtime/autonomous_activity/__init__.py": "5bfeff3f92b3db3cd62c8bdc65a8351a22cbfee1",
+        "backend/app/runtime/autonomous_activity/binding.py": "84d2d898e9c16090c93354f6af605f9687dd9ba9",
+        "backend/app/runtime/autonomous_activity/checkpoints.py": "b07a70303027c7484271ca590604e2809a053b43",
+        "backend/app/runtime/autonomous_activity/contracts.py": "e9404eda860f6456c331ee5da9d8c6c679ea776a",
+        "backend/app/runtime/autonomous_activity/execution.py": "3b5071bb67e472fa00e402fd39924990177a1454",
+        "backend/app/runtime/autonomous_activity/feed.py": "864702f92291d7fa6f7575e1b52d1deaaa65ed54",
+        "backend/app/runtime/autonomous_activity/feed_effects.py": "fbab0851bb2c61af1aabcce8c94389dcd3d7a931",
+        "backend/app/runtime/autonomous_activity/graph.py": "0834630beb07f9637e4f3f171ded773526c8e841",
+        "backend/app/runtime/autonomous_activity/inbox.py": "fdc080d2d212f752e121ed29ec57a507de20bc9d",
+        "backend/app/runtime/autonomous_activity/inputs.py": "ab7ea918df176c85a6ad6237a3613492771af2c1",
+        "backend/app/runtime/autonomous_activity/provider.py": "0eb0ae508aad6038d22b0e7d47674addd9e095bc",
+        "backend/app/runtime/autonomous_activity/queries.py": "0f17dd9c3179b44ef94708ba9cf7f7629b9f50cd",
+        "backend/app/runtime/autonomous_activity/recall.py": "45aa6b18ad0036644aef3fc31520f9657aea13ea",
+        "backend/app/runtime/autonomous_activity/revalidation.py": "1821920cb84f8d40351f0b6542d7f517e7a895c6",
+        "backend/app/runtime/autonomous_activity/routine.py": "9987bafc212008a5dafe53d38687fd8ae7c3cd07",
+        "backend/app/runtime/autonomous_activity/routine_resume.py": "74a7f0d269aea9e5d07c0b78a685d8327a1090fe",
+        "backend/app/runtime/autonomous_activity/routine_sources.py": "e94afc407acd604d97ada1b479e5b511e4348354",
+        "backend/app/runtime/autonomous_activity/social_lane.py": "be4ae4aaa35f1ada2edcb4f7518ee26196264a2e",
+        "backend/app/runtime/character_activity_access.py": "4b413397ab729e19ed3960c015f3f0063cb3f61d",
+        "backend/app/runtime/character_activity_state.py": "707a863ea6a7a05e4e7f338749ead51de90ccefe",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v19.json": "2baa5cb3a3e60463043b84558e8de798b3982e03",
+        "backend/app/runtime/migrations/sqlite_versions/v18_to_v19_activity_graph.py": "f5efc1e01c562e37c062799ca879f02b336c6c4a",
+        "backend/app/runtime/social/status_composition.py": "0d8ba6648d1fd2b9064cc434b2f34e8953568309",
+        "backend/scripts/check_personalized_recall.py": "28d600a2db23c24587b6d5bd985fd91bf65b300e",
+        "backend/scripts/evaluate_activity_comparisons.py": "c7b424ecd5b3f31726419d3ec0d1d50cc3958e5d",
+        "backend/scripts/evaluate_personalized_activity.py": "19ec4176a1991814265939a10bf08e63d0df8798",
+        "backend/scripts/freeze_activity_schema.py": "85974a68368136e70d6dcc88a614f6c811035b77",
+        "backend/scripts/replay_activity_planners.py": "7ead7e79555f63a25afbbb062bd5efc436158572",
+        "backend/tests/migrations/test_activity_graph_schema.py": "2c5827981fd72751ec8820cf7af4ba711d1cf086",
+        "backend/tests/runtime/test_activity_memory_revalidation.py": "2f800e8490284771d07f28c078ba52653bd6584b",
+        "backend/tests/runtime/test_activity_provider.py": "1326d1472bc32358d04ed81f726f9b8b6f99874e",
+        "backend/tests/runtime/test_activity_queries.py": "12e2766687f2bda6822c045893ffe1370dffe3f4",
+        "backend/tests/runtime/test_autonomous_activity_graph.py": "7d449dcd99b1216db4e6aa4af740407c8752c55e",
+        "backend/tests/runtime/test_personalized_feed_lane.py": "f74aeb051d3482bd5b76fe41c1c9efea44de2efd",
+        "backend/tests/runtime/test_personalized_inbox_lane.py": "4b62253c660cd0af2cffdbb6478b00e77e6b1304",
+        "backend/tests/runtime/test_personalized_parent.py": "2073c5c234f2125bc38cbbbffdf8a94d796b89c8",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "2d09bbd5b095398ad0ea4b8d7efaf17abc580bfe",
+        "backend/tests/world_characters/test_activity_state.py": "f29d0a9f05b01592fae3a517e7da73ee07ae3b60"
+      },
+      "test_nodes": [
+        "tests/migrations/test_activity_graph_schema.py::test_v18_to_v19_additive_frozen_schema_matches_new_database",
+        "tests/migrations/test_activity_graph_schema.py::test_frozen_alembic_upgrade_matches_v19",
+        "tests/runtime/test_activity_memory_revalidation.py::test_existing_bounded_followups_are_not_concurrent_changes_but_new_edges_are",
+        "tests/runtime/test_activity_provider.py::test_invalid_optional_state_keeps_valid_like_but_invalid_target_fails",
+        "tests/runtime/test_activity_provider.py::test_no_action_can_update_state_only_from_present_source",
+        "tests/runtime/test_activity_provider.py::test_missing_state_is_invalid_auxiliary_but_explicit_null_is_keep",
+        "tests/runtime/test_activity_queries.py::test_bad_auxiliary_query_preserves_valid_selection_but_bad_target_fails",
+        "tests/runtime/test_activity_queries.py::test_routine_query_tracks_success_and_retains_fixed_routine_anchor",
+        "tests/runtime/test_autonomous_activity_graph.py::test_durable_child_resume_does_not_repeat_completed_ai_or_recall",
+        "tests/runtime/test_autonomous_activity_graph.py::test_reopen_after_each_completed_checkpoint_preserves_prior_results[ResolveQuery]",
+        "tests/runtime/test_autonomous_activity_graph.py::test_reopen_after_each_completed_checkpoint_preserves_prior_results[BuildDecisionContext]",
+        "tests/runtime/test_autonomous_activity_graph.py::test_reopen_after_each_completed_checkpoint_preserves_prior_results[ValidateDecision]",
+        "tests/runtime/test_autonomous_activity_graph.py::test_reopen_after_each_completed_checkpoint_preserves_prior_results[Settle]",
+        "tests/runtime/test_autonomous_activity_graph.py::test_reopen_after_each_completed_checkpoint_preserves_prior_results[PathResult]",
+        "tests/runtime/test_personalized_feed_lane.py::test_one_feed_candidate_skips_selector_and_delivers_before_planning",
+        "tests/runtime/test_personalized_inbox_lane.py::test_inbox_selects_one_branch_and_preserves_unselected_and_late_notifications",
+        "tests/runtime/test_personalized_parent.py::test_parent_real_adapters_respect_slot_and_commit_single_feed_effect",
+        "tests/runtime/test_personalized_routine_lane.py::test_routine_nodes_publish_state_and_restore_only_canonical_references",
+        "tests/world_characters/test_activity_state.py::test_state_receipts_cas_time_and_duplicate_experience",
+        "tests/world_characters/test_activity_state.py::test_policy_inheritance_and_claim_frozen_across_global_transition"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_activity_graph_schema.py": {
+          "test_v18_to_v19_additive_frozen_schema_matches_new_database": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(18).schema_digest",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert sqlite_schema_contract_digest(connection) == migrated == load_sqlite_manifest(19).schema_digest"
+          ],
+          "test_frozen_alembic_upgrade_matches_v19": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ]
+        },
+        "tests/runtime/test_activity_memory_revalidation.py": {
+          "test_existing_bounded_followups_are_not_concurrent_changes_but_new_edges_are": [
+            "pytest.raises(ValueError, match='activity_memory_followup_changed')",
+            "pytest.raises(ValueError, match='activity_memory_changed')"
+          ]
+        },
+        "tests/runtime/test_activity_provider.py": {
+          "test_invalid_optional_state_keeps_valid_like_but_invalid_target_fails": [
+            "assert result['decisions'][0]['action'] == 'like'",
+            "assert result['state_status'] == 'invalid'",
+            "assert result['state_update'] is None",
+            "pytest.raises(ValueError, match='decision_target_invalid')"
+          ],
+          "test_no_action_can_update_state_only_from_present_source": [
+            "assert parse_action(payload, [candidate])['state_status'] == 'valid'",
+            "assert parse_action(payload, [candidate])['state_status'] == 'invalid'"
+          ],
+          "test_missing_state_is_invalid_auxiliary_but_explicit_null_is_keep": [
+            "assert parse_action(payload, [candidate])['state_status'] == 'invalid'",
+            "assert parse_action({**payload, 'state_update': None}, [candidate])['state_status'] == 'valid'"
+          ]
+        },
+        "tests/runtime/test_activity_queries.py": {
+          "test_bad_auxiliary_query_preserves_valid_selection_but_bad_target_fails": [
+            "assert query.origin == 'natural' and 'did not agree' in query.query",
+            "pytest.raises(ValueError)",
+            "assert validate_selection({'selections': []}, [c], 1) == []"
+          ],
+          "test_routine_query_tracks_success_and_retains_fixed_routine_anchor": [
+            "assert routine_query(title='repair', activity_seed='clean tools', previous=None).query == 'repair clean tools'",
+            "assert routine_query(title='repair', activity_seed='clean tools', previous={'topic_signature': 'fixed handle'}).query == 'fixed handle repair'",
+            "assert routine_query(title='repair', activity_seed='clean tools', previous={'topic_signature': ' ', 'title': 'finished', 'body': 'stored the tools'}).query == 'finished stored the tools repair'"
+          ]
+        },
+        "tests/runtime/test_autonomous_activity_graph.py": {
+          "lane_ports": [
+            "assert state['identity']['world_id'] == 'world'",
+            "assert len(state['queries']) == 1",
+            "assert state['decision_context']['memory']['selected']['text'] == 'already replied'"
+          ],
+          "test_durable_child_resume_does_not_repeat_completed_ai_or_recall": [],
+          "_resume": [
+            "assert result['result']['status'] == 'completed'",
+            "assert not any((call == 'routine:select' for call in calls))",
+            "pytest.raises(RuntimeError, match='simulated_process_exit')",
+            "assert calls.count(f'{name}:recall') == 1",
+            "assert calls.count(f'{name}:plan') == 1",
+            "assert calls.count(f'{name}:execute') == 1"
+          ],
+          "test_reopen_after_each_completed_checkpoint_preserves_prior_results": [
+            "assert result['result']['status'] == 'completed'",
+            "pytest.raises(RuntimeError, match='checkpoint_boundary_exit')",
+            "assert calls.count('inbox:' + step) == 1"
+          ]
+        },
+        "tests/runtime/test_personalized_feed_lane.py": {
+          "test_one_feed_candidate_skips_selector_and_delivers_before_planning": [
+            "assert calls == ['plan']",
+            "assert len(result['queries']) == 1",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert delivery.state == 'delivered' and delivery.post_ids == [post.id]"
+          ]
+        },
+        "tests/runtime/test_personalized_inbox_lane.py": {
+          "test_inbox_selects_one_branch_and_preserves_unselected_and_late_notifications": [
+            "assert len(result['queries']) == 1",
+            "assert first.handled_at is not None",
+            "assert second.handled_at is None and db.get(Notification, 1003).handled_at is None",
+            "assert result['result']['public_action_count'] == 0"
+          ]
+        },
+        "tests/runtime/test_personalized_parent.py": {
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect": [
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert repeated == result"
+          ]
+        },
+        "tests/runtime/test_personalized_routine_lane.py": {
+          "test_routine_nodes_publish_state_and_restore_only_canonical_references": [
+            "assert calls == ['RoutineActionPlanner', 'RoutineWriter']",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert kwargs['schema']['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ]
+        },
+        "tests/world_characters/test_activity_state.py": {
+          "test_state_receipts_cas_time_and_duplicate_experience": [
+            "assert not read_state(db, world_id=actor.world_id, actor_id=actor.id)['known']",
+            "assert settle_state(db, **args, decision_key='d1', expected_version=0, proposal=proposal) == 'updated'",
+            "assert settle_state(db, **args, decision_key='d1', expected_version=0, proposal=proposal) == 'updated'",
+            "assert settle_state(db, **args, decision_key='d2', expected_version=1, proposal=proposal) == 'already_interpreted'",
+            "assert settle_state(db, **args, decision_key='d3', expected_version=0, proposal=proposal) == 'conflict_not_applied'",
+            "assert settle_state(db, **args, decision_key='d4', expected_version=1, proposal=None) == 'kept'",
+            "assert state['version'] == 2",
+            "assert state['changed_at'] == now.isoformat()",
+            "assert state['confirmed_at'] == (now + timedelta(hours=2)).isoformat()",
+            "assert state['mood'] == 'hopeful'",
+            "pytest.raises(ValueError, match='scope_invalid')"
+          ],
+          "test_policy_inheritance_and_claim_frozen_across_global_transition": [
+            "assert resolve_engine(db, actor)['engine'] == 'current'",
+            "assert bind_run(db, actor=actor, activity_id='first').engine == first.engine == 'current'",
+            "assert bind_run(db, actor=actor, activity_id='second').engine == 'personalized_graph_v2'",
+            "assert resolve_engine(db, actor)['source'] == 'character'",
+            "assert bind_run(db, actor=actor, activity_id='second').engine == 'personalized_graph_v2'",
+            "assert resolve_engine(db, actor)['engine'] == 'personalized_graph_v2'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_activity_graph_schema.py": {},
+        "tests/runtime/test_activity_memory_revalidation.py": {},
+        "tests/runtime/test_activity_provider.py": {},
+        "tests/runtime/test_activity_queries.py": {},
+        "tests/runtime/test_autonomous_activity_graph.py": {},
+        "tests/runtime/test_personalized_feed_lane.py": {},
+        "tests/runtime/test_personalized_inbox_lane.py": {},
+        "tests/runtime/test_personalized_parent.py": {},
+        "tests/runtime/test_personalized_routine_lane.py": {},
+        "tests/world_characters/test_activity_state.py": {}
+      }
     }
   ]
 }
