@@ -2,7 +2,7 @@ from __future__ import annotations
 from app.domains.social.schemas.feed_status import FeedStatusRead
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from app.contracts.activity_thought import ActivityThought
 from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator
@@ -75,9 +75,16 @@ class WorldFeedCandidateRead(WorldFeedSchema):
 
 class FeedReactionDecision(WorldFeedSchema):
     selected_candidate_index: int | None = Field(default=None, ge=0, le=19)
-    selected_action: FeedAction | None = None
-    interaction_intent: FeedInteractionIntent | None = None
-    comment_purpose: FeedCommentPurpose | None = None
+    # The provider converter preserves descriptions on the non-null union branch.
+    selected_action: Annotated[FeedAction, Field(
+        description="One allowed candidate action, or null for NO_ACTION.",
+    )] | None = None
+    interaction_intent: Annotated[FeedInteractionIntent, Field(
+        description="Comment only: ordinary_comment or an eligible joint_activity_proposal. Must be null for like, repost, follow and NO_ACTION.",
+    )] | None = None
+    comment_purpose: Annotated[FeedCommentPurpose, Field(
+        description="Required for ordinary_comment. Return null for a proposal, like, repost, follow and NO_ACTION, even when liking to encourage someone.",
+    )] | None = None
     reason_code: FeedNoActionReason | None = None
     brief: str | None = Field(default=None, max_length=280)
     motivation_kind: ActionMotivationKind | None = None

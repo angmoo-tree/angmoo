@@ -1,5 +1,11 @@
 # 관계 개인화: 구현 구조와 검증·운영 인계
 
+> **2026-09-22 FP 후속:** Feed가 좋아요와 일반 댓글 메타데이터를 함께 반환한 경우의 제한적 보정을 구현했다.
+> 선택 행동은 보존하고 두 댓글 필드만 정리한 후 기존 검증을 적용한다. 관계 지표는 기존 전달·근거·중복 검증 경로를 유지한다.
+> 생각 ON/OFF·지표 유무를 포함한 raw JSON → 실제 C안 실행 회귀 및 관련 테스트 **118 PASS**.
+> Docker 소스 적용 확인, 실제 AI 후속 활동 FP6는 대기다. 기존 관계 개인화 USER CHECK 전체를 PASS로 변경하지 않는다.
+> 상세 계약과 실사용 안내: [SNS 추천 운영 문서](../operations/sns-topic-recommendation.md#2026-09-22-feed-planner-비댓글-응답-보정).
+
 > **2026-09-22 MC 후속:** [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)을 추가했다. 수동 버튼은 예약 시각과 독립적으로 기억 완료 후 관계를 실행한다. 실제 검토3건(유지2/갱신1), Ladybug 문구 표시와 반복 요청무자료 확인. 아래 초기 검증 기록은 당시 증거이며 인간 품질은 별도다.
 
 > 실행일: 2026-09-22 / 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `def5953a`

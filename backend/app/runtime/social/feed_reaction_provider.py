@@ -1,6 +1,7 @@
 """Existing credential, provider schema and direct LLM transport for feed reactions."""
 
 from __future__ import annotations
+import logging
 from datetime import UTC, datetime
 from app.domains.relationships.policies.interpretation_prompt import METRIC_INSTRUCTIONS, with_metric_schema
 from app.runtime.relationships.social_metrics import prepare_sources, stage_sources
@@ -37,6 +38,9 @@ from app.integrations.direct_llm import (
     generate_json,
 )
 from app.domains.social.contracts.world_feed import ReadySearchProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 GEMINI_FEED_REACTION_RESPONSE_SCHEMA = build_gemini_developer_response_schema(
@@ -117,6 +121,15 @@ class DirectFeedReactionProvider:
                 candidates=candidates,
                 proposal_eligible_indices=proposal_eligible_indices,
             )
+            cleared_fields = [
+                field for field in ("interaction_intent", "comment_purpose")
+                if payload.get(field) is not None and getattr(result, field) is None
+            ]
+            if cleared_fields:
+                logger.info(
+                    "world_feed_decision_normalized run_id=%s selected_action=%s fields=%s reason_code=non_comment_metadata_cleared",
+                    resident_context.run_id, result.selected_action, ",".join(cleared_fields),
+                )
             if self._thought_enabled and result.selected_action not in {None, "comment"}:
                 result._activity_thought = thought
             return result

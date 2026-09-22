@@ -11,6 +11,31 @@
 
 ## 구현 경계
 
+### 2026-09-22 Feed Planner 비댓글 응답 보정
+
+`like`·`repost`·`follow`에는 댓글 의도와 목적을 반환하지 않도록 프롬프트와 provider schema 설명을 맞췄다.
+이미 받은 응답에 `ordinary_comment` 및 기존 허용 댓글 목적만 잘못 붙었다면, Social 결정 검증에서
+두 필드를 null로 정리하고 엄격한 모델·후보·허용 행동 검증을 수행한다. 선택 행동·후보·brief는 보존한다.
+제안 의도, 알 수 없는 값, 모순된 무행동, 잘못된 대상은 자동 보정하지 않는다.
+
+- 구현: `feed_reaction_validation.py`, `feed_reaction_prompts.py`, `schemas/feed.py`, runtime `feed_reaction_provider.py`.
+- 공통 Gemini adapter·JSON retry·모델·출력 예산·DB schema는 변경하지 않았다. nullable 설명은
+  `Annotated`의 non-null 타입 분기에 두어 현재 schema 변환에서도 보존한다.
+- 성공한 보정만 `world_feed_decision_normalized`에 run ID·선택 행동·필드 이름·사유 코드를 남긴다.
+  원문·생각·관계 해석은 이 로그에 포함하지 않는다.
+- 자동 검증: 관련 9개 파일 **118 PASS**. 실제 JSON parser/validator와 C안 cycle을 사용한 격리 DB 검증에서
+  좋아요 1회·Writer 0회·보완 AI 0회, 생각 저장·지표 1회 적용·재실행/재노출 방지 확인.
+- 정상 댓글, 무행동, 보정 불가 응답, 계획 중 삭제, 실행 직전 삭제, 기존 effect rollback 경계도 검증했다.
+- **실제 AI 후속 활동은 FP6 PENDING USER CHECK.** 2026-09-22 15:09 KST 무렵 확인한 최신 run은
+  패치 전 올마이트 14:37 실행이다. Docker 소스 일치·순수 함수 smoke·health 확인을 실사용 PASS로 대체하지 않는다.
+- 기존 실패 run `91f926d8-8c27-543f-bdfc-69c9824545e1`과 전달 이력은 보존한다.
+
+실사용 확인: 새 적격 Feed가 있는 정상 활동 후 새 run의 Planner 결과와 실제 execution을 확인한다.
+AI가 정상 댓글 또는 무행동을 선택해도 정상 결과이며, 보정 이벤트가 없으면 실제 보정 발생은 미관찰로 기록한다.
+후보가 없는 활동만으로 Planner 확인을 완료하지 않는다. PR·push·CI·main merge는 수행하지 않았다.
+
+### 기존 C안 책임
+
 - Social이 사전·출처 연결·게시글 연결·전달 기록을 소유한다. World/캐릭터 생성 명령은 주입된
   `on_created` 협력을 같은 트랜잭션에서 호출한다. HTTP 완료 흐름은 runtime에 주입된 준비 기능을 호출한다.
 - `runtime/social/topic_preparation.py`가 승인 프로필·World·기존 일과 키를 조합한다.
