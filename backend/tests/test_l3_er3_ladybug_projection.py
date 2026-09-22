@@ -248,5 +248,13 @@ def test_current_snapshot_without_social_event_preserves_text_and_rejects_same_v
         assert digest["events"] == []
         assert digest["evidence"] == []
         assert "함께 성장하는 동료" in __import__("json").loads(digest["relationships"][0])
+        from app.integrations.relationship_graph_read import RelationshipGraphRepository
+        hits = RelationshipGraphRepository(projection).get_direct_relationship(
+            world_id=command.world_id, source_world_character_id=command.actor_world_character_id,
+            target_world_character_id=command.target_world_character_id)
+        assert len(hits) == 1
+        assert hits[0].relationship_label == command.relationship_label
+        assert hits[0].perception == command.perception
+        assert hits[0].view_version == 2
     with LadybugRelationshipProjection(database_root=_root(tmp_path)) as projection:
         assert projection.world_digest("world-arcana") == digest

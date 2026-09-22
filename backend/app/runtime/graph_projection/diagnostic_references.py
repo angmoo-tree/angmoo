@@ -51,5 +51,5 @@ class SqlAlchemyDiagnosticReferences:
         if not batch or not batch.ai_enabled or not batch.consent_version:
             return {"status": "consent_or_ai_required"}
         if not batch.schedule_enabled:
-            return {"status": "schedule_disabled"}
-        return {"status": "scheduled", "local_time": batch.local_time, "timezone": batch.timezone}
+            return {"status": "schedule_disabled", "manual_available": True}
+        return {"status": "scheduled", "manual_available": True, "local_time": batch.local_time, "timezone": batch.timezone}

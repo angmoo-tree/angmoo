@@ -473,6 +473,11 @@ class LadybugRelationshipProjection:
             "last_event_at": str(row[10]) if row[10] is not None else None,
             "updated_at": str(row[11]) if row[11] is not None else None,
             "relationship_version": int(row[12] or 0),
+            "relationship_label": row[13],
+            "perception": row[14],
+            "view_version": int(row[15] or 1),
+            "view_updated_at": row[16],
+            "reviewed_at": row[17],
         }
 
     def _relationship_rows(self, *, world_id: str, source_id: str | None = None,
@@ -517,7 +522,12 @@ class LadybugRelationshipProjection:
                    relationship.last_event_id,
                    relationship.last_event_at,
                    relationship.updated_at,
-                   relationship.relationship_version
+                   relationship.relationship_version,
+                   relationship.relationship_label,
+                   relationship.perception,
+                   relationship.view_version,
+                   relationship.view_updated_at,
+                   relationship.reviewed_at
             """ + tail,
             parameters,
         )

@@ -102,9 +102,9 @@ export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVers
       {saved.capacity_blocked ? <p role="status">저장 한도에 도달해 새 기억 정리를 멈췄어요. 기존 기억은 보존됩니다. 불필요한 기억을 삭제하거나 보관 기간이 지나 공간이 생기면 남은 경험을 이어 정리합니다.</p> : null}
       {saved.status === "attention" ? <p role="status">{memoryBatchFailureMessage(saved.last_code)}</p> : null}
       {!saved.memory_enabled ? <p>기억이 꺼져 있어 자동 정리가 멈춰 있습니다. 기존 기록은 보존됩니다.</p> : null}
-      <MemoryConsolidationControls worldId={worldId} subjectId={subjectId} subjectName={subjectName}
+      <MemoryConsolidationControls timezone={saved.timezone} key={`${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} subjectName={subjectName}
         scopeVersion={scopeVersion} version={saved.version} profileVersion={saved.profile_version}
-        disabled={disabled || busy || !saved.can_run} dirty={draft.ai_enabled !== saved.ai_enabled || draft.shutdown_enabled !== saved.shutdown_enabled || draft.schedule_enabled !== saved.schedule_enabled || draft.local_time !== saved.local_time || draft.model_id !== saved.model_id || draft.thinking_level !== saved.thinking_level}
+        disabled={disabled || busy || !saved.memory_enabled || !saved.ai_enabled} dirty={draft.ai_enabled !== saved.ai_enabled || draft.shutdown_enabled !== saved.shutdown_enabled || draft.schedule_enabled !== saved.schedule_enabled || draft.local_time !== saved.local_time || draft.model_id !== saved.model_id || draft.thinking_level !== saved.thinking_level}
         acquire={acquire} release={release} onCompleted={onCompleted} />
       <fieldset disabled={disabled || busy}>
         <label className={styles.batchCheck}><input type="checkbox" checked={draft.ai_enabled} onChange={(event) => change({ ai_enabled: event.target.checked })} />AI 선별·정리 사용</label>

@@ -25,15 +25,20 @@ export function memoryBatchFixture(worldId: string, subjectId: string, enabled: 
     const path = new URL(request.url()).pathname;
     const manualProgress = () => ({ request_id: "manual-receipt", effective_request_id: "manual-receipt", kind: "manual",
       accepted_at: "2026-09-17T04:00:00Z", state: manualPolls < 2 ? "queued" : manualPolls < 4 ? "ai_running" : "completed",
-      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null });
+      saved_count: manualPolls >= 4 ? 2 : 0, remaining_count: 0, job_count: 2, completed_job_count: manualPolls >= 4 ? 2 : 0, last_code: null, workflow_version: 1, followup: "relationships",
+      flow_state: manualPolls < 4 ? "memory_running" : manualPolls < 6 ? "relationship_running" : "completed",
+      relationship: { state: manualPolls < 6 ? "running" : "completed", request_id: "manual-receipt",
+        target_count: manualPolls < 4 ? null : 1, memory_count: manualPolls < 4 ? null : 2,
+        completed_count: manualPolls < 6 ? 0 : 1, kept_count: manualPolls < 6 ? 0 : 1, changed_count: 0, last_code: null, completed_at: null } });
     if (path.endsWith("/memory/batch-progress")) {
       if (manualKey) manualPolls++;
-      await route.fulfill({ json: { scope: saved.scope, progress: manualKey ? manualProgress() : null } });
+      await route.fulfill({ json: { scope: saved.scope, capability: { relationships: true, reason: null }, progress: manualKey ? manualProgress() : null } });
       return true;
     }
     if (path.endsWith("/memory/batch-run")) {
       expect(request.method()).toBe("POST");
       const body = request.postDataJSON();
+      expect(body.followup).toBe("relationships");
       expect(body.expected_version).toBe(saved.version);
       expect(body.expected_profile_version).toBe(saved.profile_version);
       expect(body.expected_scope_version).toBeGreaterThan(0);
@@ -121,11 +126,19 @@ export async function verifyMemoryBatchControls(page: Page) {
   await expect(region.getByText("앱 업데이트 또는 지원 확인이 필요해요.", { exact: false })).toHaveCount(0);
   await expect(region.getByRole("button", { name: "실패한 정리 다시 시도" })).toHaveCount(0);
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:16");
-  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
+  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeDisabled();
   await region.getByLabel("예약 시각 · Asia/Seoul").fill("23:15");
-  await region.getByRole("button", { name: "지금 기억 정리", exact: true }).click();
-  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeDisabled();
-  await expect(region.getByText("AI가 경험을 읽고 기억을 정리하고 있어요", { exact: true })).toBeVisible();
-  await expect(region.getByText("기억 정리를 마쳤어요 · 새 기억 2개", { exact: true })).toBeVisible();
-  await expect(region.getByRole("button", { name: "지금 기억 정리", exact: true })).toBeEnabled();
+  const manualButton = region.getByRole("button", { name: "지금 기억·관계 정리", exact: true });
+  await manualButton.focus();
+  await expect(manualButton).toBeFocused();
+  await manualButton.press("Enter");
+  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeDisabled();
+  await expect(region.getByText("기억 정리 중", { exact: true })).toBeVisible();
+  await expect(region.getByText("기억 정리 완료 · 관계 정리 중 · 새 기억 2개", { exact: true })).toBeVisible();
+  await expect(region.getByText("기억·관계 정리 완료 · 새 기억 2개", { exact: true })).toBeVisible();
+  await expect(region.getByRole("button", { name: "지금 기억·관계 정리", exact: true })).toBeEnabled();
+  await page.evaluate(() => { document.documentElement.style.zoom = "2"; });
+  await expect(manualButton).toBeVisible();
+  expect(await region.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await page.evaluate(() => { document.documentElement.style.zoom = ""; });
 }

@@ -463,21 +463,30 @@ function errorDetail(payload: unknown, fallback: string) {
 }
 
 
-import { consolidationStates, type ConsolidationProgress, type ConsolidationStart } from "@/features/memory/types/consolidation-contract";
+import { consolidationStates, flowStates, type ConsolidationCapability, type ConsolidationProgress, type ConsolidationStart } from "@/features/memory/types/consolidation-contract";
 
 function validateConsolidation(value: ConsolidationProgress) {
   if (!value || typeof value.request_id !== "string" || typeof value.effective_request_id !== "string" ||
       typeof value.accepted_at !== "string" || !consolidationStates.includes(value.state) ||
       ![value.saved_count, value.remaining_count, value.job_count, value.completed_job_count].every((n) => Number.isInteger(n) && n >= 0))
     throw new MemoryApiError(502, "memory_progress_invalid");
+  if (value.followup !== undefined) {
+    const r = value.relationship;
+    if (value.workflow_version !== 1 || value.followup !== "relationships" || !value.flow_state || !flowStates.includes(value.flow_state) ||
+        !r || typeof r.request_id !== "string" || typeof r.state !== "string" ||
+        ![r.target_count, r.memory_count].every(n => n === null || Number.isInteger(n) && n >= 0) ||
+        ![r.completed_count, r.changed_count, r.kept_count].every(n => Number.isInteger(n) && n >= 0))
+      throw new MemoryApiError(502, "memory_followup_progress_invalid");
+  }
   return value;
 }
 
 export async function getMemoryConsolidation(worldId: string, subjectId: string, signal: AbortSignal) {
-  const read = await requestMemoryApi<{scope: {world_id: string; subject_world_character_id: string}; progress: ConsolidationProgress | null}>(
+  const read = await requestMemoryApi<{scope: {world_id: string; subject_world_character_id: string}; progress: ConsolidationProgress | null; capability?: ConsolidationCapability}>(
     `${scopePath(worldId, subjectId)}/memory/batch-progress`, { signal });
   if (!matchesScope(read.scope, worldId, subjectId)) throw new MemoryApiError(502, "memory_progress_scope_mismatch");
-  return read.progress === null ? null : validateConsolidation(read.progress);
+  return { progress: read.progress === null ? null : validateConsolidation(read.progress),
+    capability: read.capability ?? { relationships: false, reason: "unsupported" } };
 }
 
 export async function startMemoryConsolidation(worldId: string, subjectId: string, data: ConsolidationStart) {
@@ -485,4 +494,9 @@ export async function startMemoryConsolidation(worldId: string, subjectId: strin
     `${scopePath(worldId, subjectId)}/memory/batch-run`, { method: "POST", body: JSON.stringify(data) });
   if (!matchesScope(read.scope, worldId, subjectId)) throw new MemoryApiError(502, "memory_progress_scope_mismatch");
   return validateConsolidation(read);
+}
+
+export async function retryMemoryConsolidation(worldId: string, subjectId: string, requestId: string, key: string) {
+  await requestMemoryMutation(`${scopePath(worldId, subjectId)}/memory/batch-run/${encodeURIComponent(requestId)}/retry`,
+    { method: "POST", body: JSON.stringify({ idempotency_key: key }) });
 }

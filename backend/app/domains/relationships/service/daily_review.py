@@ -43,6 +43,9 @@ def _new_work(db, *, world_id, actor_id, target_id, period_key, part_key, phase,
 def plan_review(db: Session, *, world_id: str, actor_id: str, target_id: str,
                 period_key: str, base: dict, memories: list[dict]) -> RelationshipReviewWork | None:
     """Freeze only admitted saved memories; no history backfill or empty calls."""
+    # Serialize automatic/manual planning before testing the active root.
+    from app.domains.relationships.models.personalization import RelationshipPolicy
+    db.execute(update(RelationshipPolicy).where(RelationshipPolicy.world_id == world_id).values(version=RelationshipPolicy.version))
     existing = db.scalar(select(RelationshipReviewWork).where(
         RelationshipReviewWork.world_id == world_id, RelationshipReviewWork.actor_world_character_id == actor_id,
         RelationshipReviewWork.target_world_character_id == target_id, RelationshipReviewWork.parent_id.is_(None),

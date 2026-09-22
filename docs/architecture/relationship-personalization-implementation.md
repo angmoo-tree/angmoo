@@ -1,5 +1,7 @@
 # 관계 개인화: 구현 구조와 검증·운영 인계
 
+> **2026-09-22 MC 후속:** [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)을 추가했다. 수동 버튼은 예약 시각과 독립적으로 기억 완료 후 관계를 실행한다. 실제 검토3건(유지2/갱신1), Ladybug 문구 표시와 반복 요청무자료 확인. 아래 초기 검증 기록은 당시 증거이며 인간 품질은 별도다.
+
 > 실행일: 2026-09-22 / 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `def5953a`
 > 상태: 로컬 구현·선택한 자동 회귀·위임 UI 확인 완료, 실사용 검증 인계. 실제 새 활동·하루 AI 결과에 대한 USER CHECK는 아래에 별도 보존한다.
 > 기준: workspace의 `09-21 관계 유형·지표·인식과 하루 관계 정리·LadybugDB 구현 세부 계획.md` RI0–RI17.
@@ -127,13 +129,13 @@ Windows11 / Python3.13.12, 임시 SQLite, provider 호출0, 기존 source 영수
 
 1. 전환 이후 정상 채팅1회: AI→당시 사용자 인물의 지표만 반영되는지, 응답 재생성으로 추가 가산되지 않는지. thought ON/OFF 모두 확인.
 2. 새 Feed/Inbox 활동: 같은 경험을 캐릭터가 다르게 해석하는지, 무행동이어도 필요한 지표가 변하는지, 댓글 목적 고정 보너스가 중복되지 않는지.
-3. 기존 기억 예약 이후 새 에피소드가 정상 생성되고, 같은 상대의 기억만으로 유형·인식이 생성/유지되는지. 실제 모델의 의미 손실·과도한 변화/허구/상대 오귀속 확인.
+3. 기억→상대별 정리→저장/투영/화면의 기술 흐름은 MC 후속에서 실제 확인했다. 같은 상대의 기억에 대한 유지/변경 판단의 자연스러움, 의미 손실·과도한 변화/허구/상대 오귀속 품질은 사용자 확인으로 남긴다.
 4. 자기 채팅에서 형성된 인식이 자기 SNS 행동에 실제 영향을 주는지. 다른 캐릭터에게 사적인 경험이 자동 복사되지 않는지.
 5. 실제 provider 제한/중단·재시작 뒤 완료 부분 재사용과 최종 한 번 적용. 이전 정상 문구가 대기 중 유지되는지.
 6. 사용자가 원할 때 새 사용자 인물을 만들고 복귀하여 기존 관계가 그대로 이어지는지. 서버 고정ID/거절은 자동 검증했고 실제 계정은 변경하지 않았다.
 7. C안 독립 게시·댓글·후보/노출 회귀, 빈번한 채팅과 SNS 병행의 체감 지연, 장기 backlog/DB 증가.
 
-관계도에 유형·인식이 아직 없는 것은 적용 전 기억을 자동 정리하지 않는 계약과 일치한다. 실제 새 기억과 하루 작업 완료 전에 생성됐다고 판단하지 않는다.
+초기 확인 당시 유형·인식이 없었던 기록은 보존한다. MC 후속에서는 아오이 하루를 향한 인식이 생성됐고, 미도리야↔올마이트 두 방향은 검토 완료 뒤에도 AI의 keep으로 null을 유지했다. 문구 부재만으로 미실행을 단정하지 말고 작업 결과·reviewed_at을 확인한다.
 
 ## 8. 다음 작업에서 재사용할 경계
 
@@ -149,3 +151,10 @@ Windows11 / Python3.13.12, 임시 SQLite, provider 호출0, 기존 source 영수
 - 정정된 에피소드의 replacement ID 계보를 재귀 조회하여, 원래 에피소드의 후속 정정이 일반 기억으로 잘못 빠지지 않도록 했다.
 - CRG thought ON/OFF × 관계 메타데이터 누락/오류에서 정상 답변 보존·provider1회 계약을 추가 검증했다.
 - 최종 Docker health: backend/frontend healthy, API status ok / sqlite / ladybug. 로컬 테스트 캐시·개발 데이터를 Docker context에서 제외하도록 `.dockerignore`를 보완했다. 캐시와 사용자 볼륨은 삭제하지 않았다.
+
+
+### MC 후속과 Ladybug 조회 보완
+
+`relationship_review_requests`(SQLite v18)가 수동 기억 요청 뒤 후속 실행을 영속 보관한다. `ManualRelationshipFollowup`과 `advance_manual_requests`가 기존 memory/review worker를 조립하며, 자동 예약과 AI 프롬프트는 유지한다. 새 API·전체 집계·고정 참조·재시도는 [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)에 정리했다.
+
+실제 UI 대조에서 Ladybug의 `_relationship_rows/_relationship_payload`가 저장된 유형·인식을 반환하지 않는 기존 누락을 발견했다. SELECT/payload에 다섯 view 필드를 추가하고 실제 Ladybug repository roundtrip 테스트 및 실제 화면을 확인했다. 이 수정은 저장 데이터 재생성·별도 AI 호출을 필요로 하지 않는다.

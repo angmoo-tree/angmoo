@@ -8,7 +8,7 @@ from app.domains.relationships.models.personalization import RelationshipPolicy,
 from app.domains.relationships.models.social import GraphProjectionOutbox
 from app.domains.relationships.contracts.metric_interpretation import MetricInterpretation
 from app.domains.relationships.service.personalized_metrics import ExperiencedSource, stage_experience, apply_staged_experience
-from app.runtime.persistence.sqlite_schema import build_sqlite_v16_metadata, build_sqlite_baseline_metadata, create_schema_version_table, sqlite_schema_contract_digest
+from app.runtime.persistence.sqlite_schema import build_sqlite_v16_metadata, build_sqlite_v17_metadata, create_schema_version_table, sqlite_schema_contract_digest
 from app.runtime.migrations.sqlite_versions.v16_to_v17_relationship_personalization import upgrade, capture_delta, verify_delta
 
 
@@ -61,7 +61,7 @@ def test_v16_upgrade_and_fresh_install_have_identical_schema():
     digests = []
     for fresh in (True, False):
         with create_engine("sqlite://").begin() as connection:
-            (build_sqlite_baseline_metadata() if fresh else build_sqlite_v16_metadata()).create_all(connection)
+            (build_sqlite_v17_metadata() if fresh else build_sqlite_v16_metadata()).create_all(connection)
             create_schema_version_table(connection)
             if not fresh:
                 old_manifest = json.loads(Path("app/runtime/migrations/sqlite_versions/manifests/v16.json").read_text())

@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 17
+SQLITE_SCHEMA_VERSION = 18
 SOURCE_ALEMBIC_REVISION = "20260918_0096"
 SOURCE_ALEMBIC_MIGRATION_COUNT = 95
-EXPECTED_CANONICAL_TABLE_COUNT = 128
+EXPECTED_CANONICAL_TABLE_COUNT = 129
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 CONSOLIDATION_V14_TABLES = ("memory_consolidation_requests", "memory_consolidation_jobs")
@@ -567,6 +567,8 @@ RELATIONSHIP_V17_COLUMNS = (
 
 
 def _remove_relationship_personalization_schema(metadata: MetaData) -> None:
+    if "relationship_review_requests" in metadata.tables:
+        metadata.remove(metadata.tables["relationship_review_requests"])
     for name in reversed(RELATIONSHIP_V17_TABLES):
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -592,4 +594,10 @@ def _remove_relationship_personalization_schema(metadata: MetaData) -> None:
 def build_sqlite_v16_metadata() -> MetaData:
     metadata = build_sqlite_baseline_metadata()
     _remove_relationship_personalization_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v17_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    metadata.remove(metadata.tables["relationship_review_requests"])
     return metadata

@@ -2,11 +2,11 @@
 
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
-from sqlalchemy import select, or_, case
+from sqlalchemy import select, or_, case, update
 
 from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.memory.models.batch import MemoryBatchSetting, MemoryBatchProfile
-from app.domains.relationships.models.personalization import RelationshipReviewWork
+from app.domains.relationships.models.personalization import RelationshipReviewWork, RelationshipPolicy
 from app.domains.relationships.service.daily_review import plan_review, run_review_step, apply_review
 from app.runtime.relationships.review_memories import collect_new_review_memories, ReviewMemoryReferences
 from app.runtime.relationships.review_refresh import refresh_review_inputs
@@ -31,6 +31,7 @@ class RelationshipReviewRuntime:
                 if local.strftime("%H:%M") < batch.local_time:
                     continue
                 period = local.date().isoformat()
+                db.execute(update(RelationshipPolicy).where(RelationshipPolicy.world_id == setting.world_id).values(version=RelationshipPolicy.version))
                 for target, memories in collect_new_review_memories(db, setting=setting, now=now).items():
                     existing = db.scalar(select(RelationshipReviewWork.id).where(
                         RelationshipReviewWork.world_id == setting.world_id,
@@ -57,6 +58,10 @@ class RelationshipReviewRuntime:
         with self.session_factory() as db:
             if chat_is_active(db, now=now):
                 return "relationship_foreground_deferred"
+        from app.runtime.relationships.manual_review_worker import advance_manual_requests
+        with self.session_factory() as db:
+            advance_manual_requests(db, now)
+            db.commit()
         # Code-only recovery never re-calls AI and waits for active writers.
         from app.runtime.relationships.experience_metrics import recover_pending_metrics
         recover_pending_metrics(self.session_factory, now=now)
