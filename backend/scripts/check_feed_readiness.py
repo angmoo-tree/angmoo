@@ -42,7 +42,7 @@ with Session(engine) as db:
             outcome = "ready"
         except WorldFeedReadinessError as error:
             outcome = error.reason_code
-        from app.runtime.social.feed_status import read_feed_status
+        from app.runtime.social.status_composition import read_feed_status
         current = read_feed_status(db, world_character_id=identity)
         attempt = current.last_attempt
         results.append({"last_attempt": ({"result": attempt.result, "candidate_count": attempt.candidate_count,

@@ -33,6 +33,7 @@ def register_models() -> MetaData:
     import app.domains.social.models.activity_thought  # noqa: F401 - explicit ORM registration
     import app.domains.tree.models  # noqa: F401 - explicit ORM registration
     import app.domains.world_characters.models  # noqa: F401 - explicit ORM registration
+    import app.domains.world_characters.activity_models  # noqa: F401
     import app.domains.world_packages.models  # noqa: F401 - explicit ORM registration
     import app.domains.worlds.models  # noqa: F401 - explicit ORM registration
 

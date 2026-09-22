@@ -24,6 +24,7 @@ from app.domains.chat.router import world_chat_response, retrieval_diagnostics
 from app.domains.device_home.router import router as device_home_router
 from app.domains.identity.router.local import router as local_identity_router
 from app.domains.world_characters.router.profile import router as world_character_router
+from app.domains.world_characters.router.activity import router as activity_runtime_router
 from app.domains.world_packages.router import router as world_package_router
 
 
@@ -41,6 +42,7 @@ PUBLIC_ROUTERS = (
     world_chat_response.router,
     retrieval_diagnostics.router,
     world_character_router,
+    activity_runtime_router,
     manual_social_router,
     world_package_router,
     auth.public_router,

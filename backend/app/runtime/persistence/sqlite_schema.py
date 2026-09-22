@@ -11,11 +11,16 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 18
+SQLITE_SCHEMA_VERSION = 19
 SOURCE_ALEMBIC_REVISION = "20260918_0096"
 SOURCE_ALEMBIC_MIGRATION_COUNT = 95
-EXPECTED_CANONICAL_TABLE_COUNT = 129
+EXPECTED_CANONICAL_TABLE_COUNT = 133
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
+
+ACTIVITY_V19_TABLES = (
+    "world_character_activity_states", "world_character_state_receipts",
+    "activity_engine_policies", "activity_graph_runs",
+)
 
 CONSOLIDATION_V14_TABLES = ("memory_consolidation_requests", "memory_consolidation_jobs")
 RECOMMENDATION_V15_TABLES = (
@@ -310,6 +315,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_activity_schema(metadata)
     _remove_relationship_personalization_schema(metadata)
     _remove_recommendation_schema(metadata)
     for name in ("memory_vector_eligibility", "memory_embedding_settings"):
@@ -592,12 +598,24 @@ def _remove_relationship_personalization_schema(metadata: MetaData) -> None:
 
 
 def build_sqlite_v16_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v18_metadata()
     _remove_relationship_personalization_schema(metadata)
     return metadata
 
 
 def build_sqlite_v17_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v18_metadata()
     metadata.remove(metadata.tables["relationship_review_requests"])
+    return metadata
+
+
+def _remove_activity_schema(metadata: MetaData) -> None:
+    for name in reversed(ACTIVITY_V19_TABLES):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+
+
+def build_sqlite_v18_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _remove_activity_schema(metadata)
     return metadata

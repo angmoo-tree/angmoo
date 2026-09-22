@@ -29,7 +29,7 @@ def test_feed_preserves_approved_pair_after_persona_save(personality):
 def test_invalid_scope_or_pair_remains_blocked(invalid):
     from datetime import datetime, UTC
     from app.domains.social.exceptions import WorldFeedReadinessError
-    from app.runtime.social.feed_status import read_feed_status
+    from app.runtime.social.status_composition import read_feed_status
     with Session(_engine(), expire_on_commit=False) as db:
         owner, entry, approved = _approved(db)
         entry.feed_runtime_mode = "topic_recommendation_v1"
@@ -55,7 +55,7 @@ def test_invalid_scope_or_pair_remains_blocked(invalid):
 def test_status_is_read_only_and_scope_bound_and_survives_compaction():
     from datetime import datetime, UTC, timedelta
     from app.domains.routines.service.run_results import _stored_gateway_result
-    from app.runtime.social.feed_status import read_feed_status
+    from app.runtime.social.status_composition import read_feed_status
     with Session(_engine(), expire_on_commit=False) as db:
         owner, entry, approved = _approved(db)
         entry.feed_runtime_mode = "topic_recommendation_v1"

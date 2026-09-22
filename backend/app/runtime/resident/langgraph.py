@@ -3027,6 +3027,9 @@ def _execute_planned_action(
         return reused
     assert execution is not None
     try:
+        if action.get("interaction_intent") == "ordinary_comment":
+            execution.interaction_intent = "ordinary_comment"
+            execution.comment_purpose = action.get("comment_purpose")
         occurred_at = datetime.now(UTC)
         prepared_proposal_response = None
         if proposal_response_input is not None:
@@ -3912,6 +3915,23 @@ async def _run_combined_inbox_lane(
     return with_social_receipts(ctx, result)
 
 
+def _bind_activity_run(ctx, actor):
+    from app.domains.world_characters.service.activity_engines import bind_run
+    from sqlalchemy import select
+    from app.domains.world_characters.activity_models import ActivityGraphRun
+    row = ctx.db.scalar(select(ActivityGraphRun).where(
+        ActivityGraphRun.world_character_id == actor.id, ActivityGraphRun.world_id == actor.world_id,
+        ActivityGraphRun.engine == "personalized_graph_v2",
+        ActivityGraphRun.status.in_(("running", "waiting", "interrupted")),
+    ).order_by(ActivityGraphRun.started_at).limit(1))
+    if row is None:
+        row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id)
+    if row.engine == "current":
+        row.status = "delegated_current"
+    ctx.db.commit()
+    return row
+
+
 async def run_resident_langgraph(
     ctx: LangGraphResidentContext,
 ) -> dict[str, Any]:
@@ -3936,6 +3956,10 @@ async def run_resident_langgraph(
                 "llm_usage_summary": RunLlmTracker(max_calls=3).summary(),
             }
         async with _GRAPH_SEMAPHORE:
+            activity_run = _bind_activity_run(ctx, routine_world_character)
+            if activity_run.engine == "personalized_graph_v2":
+                from app.runtime.autonomous_activity.execution import run_personalized_activity
+                return await run_personalized_activity(ctx, actor=routine_world_character, run=activity_run, action_executor=_execute_planned_action)
             feed_runtime_mode = getattr(
                 routine_world_character,
                 "feed_runtime_mode",

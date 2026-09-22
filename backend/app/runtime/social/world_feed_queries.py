@@ -42,7 +42,11 @@ class WorldFeedQueries:
 
     def feed_status(self, world_character_id: str):
         from app.runtime.social.feed_status import read_feed_status
-        return read_feed_status(self.db, world_character_id=world_character_id)
+        return read_feed_status(self.db, world_character_id=world_character_id, references=self)
+
+    def approved_pair_matches_world(self, world_character, profile, repertoire, *, world_hash):
+        from app.domains.world_characters.policies.approved_setup import approved_pair_matches_world
+        return approved_pair_matches_world(world_character, profile, repertoire, world_hash=world_hash)
 
     def approved_pair(self, world_character_id: str):
         from app.domains.world_characters.service.approved_setup import get_approved_pair

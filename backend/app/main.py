@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import AbstractAsyncContextManager, asynccontextmanager
+from app.runtime.autonomous_activity.binding import ActivityRuntimeBinding
 from dataclasses import dataclass
 from functools import partial
 import logging
@@ -122,6 +123,7 @@ def create_lifespan(
 ) -> LifespanHandler:
     @asynccontextmanager
     async def runtime_lifespan(runtime_app: FastAPI) -> AsyncIterator[None]:
+        activity_runtime_binding = getattr(runtime_app.state, "activity_runtime_binding", None)
         configuration_registered = False
         component_manager = component_manager_factory()
         coordinator = getattr(runtime_app.state, "memory_shutdown", None)
@@ -160,6 +162,9 @@ def create_lifespan(
                         )
                 raise
         try:
+            if activity_runtime_binding is not None:
+                from app.runtime.autonomous_activity.binding import register
+                register(activity_runtime_binding)
             if component_manager is not None:
                 await component_manager.start()
             if memory_runtime is not None:
@@ -175,6 +180,9 @@ def create_lifespan(
                 if component_manager is not None:
                     await component_manager.stop()
             finally:
+                if activity_runtime_binding is not None:
+                    from app.runtime.autonomous_activity.binding import unregister
+                    unregister(activity_runtime_binding)
                 if extension is not None:
                     for hook in reversed(extension.shutdown_hooks):
                         await hook()
@@ -197,6 +205,9 @@ def create_lifespan(
                 if component_manager is not None:
                     await component_manager.stop()
             finally:
+                if activity_runtime_binding is not None:
+                    from app.runtime.autonomous_activity.binding import unregister
+                    unregister(activity_runtime_binding)
                 if extension is not None:
                     try:
                         for hook in reversed(extension.shutdown_hooks):
@@ -345,6 +356,8 @@ def create_app(
         redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
         openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
     )
+    if composition is not None:
+        runtime_app.state.activity_runtime_binding = ActivityRuntimeBinding(composition.memory_hybrid_runtime.service, composition.config.data_paths.root)
     from app.runtime.account_deletion import delete_current_user_account
 
     runtime_app.state.account_deletion_workflow = delete_current_user_account
@@ -361,6 +374,8 @@ def create_app(
     runtime_app.state.character_management_workflows = build_character_management_workflows
     from app.runtime.characters.management import build_character_credential_workflows
     runtime_app.state.character_credential_workflows = build_character_credential_workflows
+    from app.runtime.character_activity_access import read_character as activity_character_reader
+    runtime_app.state.activity_character_reader = activity_character_reader
     from app.runtime.characters.management import configure_character_activity_http
     configure_character_activity_http(runtime_app)
 

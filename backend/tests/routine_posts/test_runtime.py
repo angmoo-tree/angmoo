@@ -1358,6 +1358,7 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
 def test_langgraph_routes_routine_mode_without_building_legacy_graph(
     monkeypatch,
 ) -> None:
+    monkeypatch.setattr(langgraph_resident, "_bind_activity_run", lambda *_: SimpleNamespace(engine="current"))
     context = SimpleNamespace(
         db=object(),
         character=SimpleNamespace(id="character-routine"),
@@ -1389,6 +1390,7 @@ def test_langgraph_routes_routine_mode_without_building_legacy_graph(
 def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
     monkeypatch,
 ) -> None:
+    monkeypatch.setattr(langgraph_resident, "_bind_activity_run", lambda *_: SimpleNamespace(engine="current"))
     context = SimpleNamespace(
         db=object(),
         character=SimpleNamespace(id="character-keyword-feed"),

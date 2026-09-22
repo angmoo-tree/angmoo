@@ -237,14 +237,56 @@ async def run_routine_post_runtime(resident_context, *, interaction_source=None,
     return with_social_receipts(ctx, result)
 
 
-async def _run_routine_post_runtime(
-    resident_context: RoutineResidentContext,
-    *,
-    interaction_source: RoutineInteractionSource | None = None,
-    provider: RoutinePostProvider | None = None,
-) -> dict[str, object]:
+from dataclasses import dataclass
+from typing import Any
+
+@dataclass
+class PreparedRoutine:
+    context: Any
+    beat: Any
+    world_character: Any
+    joint_activity: Any
+    opening_claim: Any
+    claimed_manual_source_ids: list[str]
+    execution_signature: str
+    tracker: Any
+    common_state_managed: bool = False
+
+
+def observe_prepared_sources(resident_context, *, context, beat, world_character):
     db = resident_context.db
-    tracker = RunLlmTracker(max_calls=3)
+    for source in context.source_events:
+        manual_source_post_id = (
+            claimed_observation_post_id(
+                db,
+                source_event_id=source.source_event_id,
+                world_id=context.world.id,
+                consumer_world_character_id=world_character.id,
+                target_activity_beat_id=beat.id,
+                claim_run_id=resident_context.run_id,
+            )
+            if is_manual_inbox_source(source.source_event_id)
+            else None
+        )
+        observe_source(
+            db,
+            world_id=context.world.id,
+            observer_world_character_id=world_character.id,
+            source_social_event_id=(
+                None
+                if is_manual_inbox_source(source.source_event_id)
+                else source.source_event_id
+            ),
+            source_post_id=manual_source_post_id,
+            lane="routine",
+            observed_at=resident_context.run_started_at,
+        )
+    db.commit()
+
+
+def prepare_routine_activity(resident_context, *, interaction_source=None, tracker=None, observe_inputs=True):
+    db = resident_context.db
+    tracker = tracker or RunLlmTracker(max_calls=3)
     world_character = routine_world_character_for_character(
         db, character_id=resident_context.character.id
     )
@@ -401,32 +443,8 @@ async def _run_routine_post_runtime(
         )
 
     try:
-        for source in context.source_events:
-            manual_source_post_id = (
-                claimed_observation_post_id(
-                    db,
-                    source_event_id=source.source_event_id,
-                    world_id=context.world.id,
-                    consumer_world_character_id=world_character.id,
-                    target_activity_beat_id=beat.id,
-                    claim_run_id=resident_context.run_id,
-                )
-                if is_manual_inbox_source(source.source_event_id)
-                else None
-            )
-            observe_source(
-                db,
-                world_id=context.world.id,
-                observer_world_character_id=world_character.id,
-                source_social_event_id=(
-                    None
-                    if is_manual_inbox_source(source.source_event_id)
-                    else source.source_event_id
-                ),
-                source_post_id=manual_source_post_id,
-                lane="routine",
-                observed_at=resident_context.run_started_at,
-            )
+        if observe_inputs:
+            observe_prepared_sources(resident_context, context=context, beat=beat, world_character=world_character)
         # Source claims and observations are durable before provider work. A
         # later generation/publication failure cannot undo actual observation.
         db.commit()
@@ -509,6 +527,27 @@ async def _run_routine_post_runtime(
                     tracker=tracker,
                 )
 
+    return PreparedRoutine(context, beat, world_character, joint_activity, opening_claim,
+        claimed_manual_source_ids, execution_signature, tracker)
+
+
+async def _run_routine_post_runtime(
+    resident_context: RoutineResidentContext,
+    *,
+    interaction_source: RoutineInteractionSource | None = None,
+    provider: RoutinePostProvider | None = None,
+) -> dict[str, object]:
+    prepared = prepare_routine_activity(resident_context, interaction_source=interaction_source)
+    if isinstance(prepared, dict):
+        return prepared
+    from app.runtime.character_activity_state import common_state_for_routine
+    prepared.context = common_state_for_routine(resident_context.db, context=prepared.context)
+    db = resident_context.db
+    context, beat = prepared.context, prepared.beat
+    world_character, joint_activity = prepared.world_character, prepared.joint_activity
+    opening_claim = prepared.opening_claim
+    claimed_manual_source_ids = prepared.claimed_manual_source_ids
+    execution_signature, tracker = prepared.execution_signature, prepared.tracker
     try:
         generation = validate_routine_generation(
             await (provider or DirectRoutinePostProvider(thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1")).generate(
@@ -557,6 +596,20 @@ async def _run_routine_post_runtime(
             failure_class=type(exc).__name__,
         )
 
+    return publish_routine_activity(resident_context, prepared=prepared, generation=generation)
+
+
+def publish_routine_activity(resident_context, *, prepared, generation):
+    db = resident_context.db
+    context, beat = prepared.context, prepared.beat
+    world_character, joint_activity = prepared.world_character, prepared.joint_activity
+    opening_claim = prepared.opening_claim
+    claimed_manual_source_ids = prepared.claimed_manual_source_ids
+    execution_signature, tracker = prepared.execution_signature, prepared.tracker
+    existing = public_action_queries.get_public_action_execution_by_signature(db, execution_signature)
+    if existing is not None and existing.status == "succeeded":
+        return {"engine": "routine_resident_v1", "status": "completed", "routine_outcome": "REUSED_SUCCESS",
+            "publish_result": {"public_action_count": 0, **(existing.result or {}), "reused": True}}
     result_snapshot: dict[str, object] = {
         "routine_contract_version": ROUTINE_CONTRACT_VERSION,
         "planner_output_hash": _planner_hash(generation),
@@ -723,6 +776,9 @@ async def _run_routine_post_runtime(
                     context=subjective_context,
                     captured_at=resident_context.run_started_at,
                 )
+            if not prepared.common_state_managed and context.common_state:
+                from app.runtime.character_activity_state import settle_legacy_success
+                settle_legacy_success(db, prepared=prepared, run_id=resident_context.run_id, generation=generation)
         db.commit()
     except Exception as exc:
         db.rollback()

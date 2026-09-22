@@ -95,7 +95,7 @@ def stage_chat_metrics(db, *, request_id, raw, now):
         decision_key=request_id, interpretation=interpretation, metadata_status=parsed.status if not parsed.interpretations or interpretation else "invalid")
 
 
-def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None, limit=100):
+def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None, decision_key=None, source_keys=None, limit=100):
     query = select(RelationshipMetricApplication.id).join(RelationshipExperienceReceipt,
         RelationshipExperienceReceipt.id == RelationshipMetricApplication.experience_id).where(
         RelationshipMetricApplication.status == "pending", RelationshipExperienceReceipt.world_id == world_id)
@@ -103,6 +103,10 @@ def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None, limi
         query = query.where(RelationshipExperienceReceipt.source_kind == source_kind)
     if actor_id:
         query = query.where(RelationshipExperienceReceipt.actor_world_character_id == actor_id)
+    if decision_key is not None:
+        query = query.where(RelationshipMetricApplication.decision_key == decision_key)
+    if source_keys is not None:
+        query = query.where(RelationshipExperienceReceipt.source_key.in_(tuple(source_keys)))
     ids = list(db.scalars(query.order_by(RelationshipMetricApplication.created_at, RelationshipMetricApplication.id).limit(limit)))
     for identifier in ids:
         try:

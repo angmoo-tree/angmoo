@@ -56,7 +56,6 @@ from app.domains.social.service.keyword_feed import find_keyword_post_ids
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
-from app.domains.world_characters.policies.approved_setup import approved_pair_matches_world
 from app.domains.world_characters.schemas.setup import WorldCommunityProfilePayload
 
 
@@ -88,7 +87,7 @@ def load_ready_search_profile(
         if pair is None:
             raise WorldFeedReadinessError("approved_setup_required")
         profile, repertoire = pair
-        if not approved_pair_matches_world(world_character, profile, repertoire, world_hash=world.contract_hash):
+        if not references.approved_pair_matches_world(world_character, profile, repertoire, world_hash=world.contract_hash):
             raise WorldFeedReadinessError("approved_setup_invalid")
     else:
         profile = references.ready_profile(world_character.id)

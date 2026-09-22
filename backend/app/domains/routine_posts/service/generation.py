@@ -22,14 +22,22 @@ class DirectRoutinePostProvider:
         self._thought_enabled = thought_enabled
 
     async def generate(
+        self, *, resident_context, routine_context, beat, tracker,
+    ) -> RoutineGeneration:
+        api_key = _api_key(resident_context.credential)
+        plan = await self.plan(resident_context=resident_context, routine_context=routine_context, beat=beat, tracker=tracker, api_key=api_key)
+        return await self.write(resident_context=resident_context, routine_context=routine_context, beat=beat, tracker=tracker, plan=plan, api_key=api_key)
+
+    async def plan(
         self,
         *,
         resident_context: Any,
         routine_context: RoutinePostContext,
         beat: Any,
         tracker: RunLlmTracker,
-    ) -> RoutineGeneration:
-        api_key = _api_key(resident_context.credential)
+        api_key: str | None = None,
+    ) -> schemas.RoutineBeatPlan:
+        api_key = api_key or _api_key(resident_context.credential)
         common = _common_context(routine_context)
         social = getattr(resident_context, "social_context", None)
         considered_ids = routine_context.considered_source_event_ids
@@ -122,6 +130,12 @@ Return only the requested structured JSON."""
             raise
         if not isinstance(plan, schemas.RoutineBeatPlan):
             plan = schemas.RoutineBeatPlan.model_validate(plan)
+        return plan
+
+    async def write(self, *, resident_context, routine_context, beat, tracker, plan, api_key=None) -> RoutineGeneration:
+        api_key = api_key or _api_key(resident_context.credential)
+        common = _common_context(routine_context)
+        social = getattr(resident_context, "social_context", None)
         state_after = _state_after(routine_context.state_before, plan)
 
         writer_system = """You write one public Angmoo SNS root post as the given character.

@@ -2,6 +2,7 @@
 
 import { getWorldFeedStatus, type WorldFeedCycleStatusRead } from "@/features/social/api/feed-status";
 import { FeedStatusPanel } from "@/features/social/components/feed-status";
+import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
 import Link from "next/link";
 import { Card } from "@/components/ui/surfaces";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -1031,6 +1032,8 @@ export function WorldCharacterAutonomySetupClient({
                     {feedStatusError}
                   </p>
                 ) : null}
+
+                  {entry && <div className="mt-5"><PersonalizedActivityPanel key={`${worldId}:${entry.id}`} worldId={worldId} actorId={entry.id} /></div>}
 
                 {feedStatus?.feed_runtime_mode === "topic_recommendation_v1" ? (
                   <div className="mt-5"><FeedStatusPanel status={feedStatus.feed_status} /></div>

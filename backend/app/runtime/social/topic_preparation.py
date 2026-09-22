@@ -90,7 +90,7 @@ def read_topics(db: Session, *, world_id: str, owner_id: str, world_character_id
     if prep and prep.state == "running" and prep.lease_expires_at and prep.lease_expires_at.replace(tzinfo=UTC) <= datetime.now(UTC):
         state = "failed"  # Read-only recovery indication; a new button request claims the expired lease.
     deliveries = read_delivery_history(db, world_id=world_id, world_character_id=world_character_id) if world_character_id else []
-    from app.runtime.social.feed_status import read_feed_status
+    from app.runtime.social.status_composition import read_feed_status
     return {"feed_status": read_feed_status(db, world_character_id=world_character_id) if world_character_id else None,
             "world_id": world_id, "world_character_id": world_character_id, "state": state,
             "topics": [{"id": t.id, "name": t.name, "scope": "common" if t.world_id is None else "world"} for t in topics],

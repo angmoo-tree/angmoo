@@ -65,11 +65,14 @@ def stage_sources(db, *, actor, manifest, raw, decision_key, now):
 
 
 def settle_activity(ctx):
-    from app.runtime.social.langgraph_actions import active_world_character
+    from app.domains.world_characters.models import CharacterActiveWorld, WorldCharacter
     if not hasattr(ctx, "db"):
         return
     try:
-        actor = active_world_character(ctx.db, character_id=ctx.character.id)
+        active = ctx.db.get(CharacterActiveWorld, ctx.character.id)
+        actor = ctx.db.get(WorldCharacter, active.world_character_id) if active else None
+        if actor is None or actor.status != "active":
+            return
         if interpreted_policy(ctx.db, actor.world_id) is not None:
             apply_pending_metrics(ctx.db, world_id=actor.world_id, actor_id=actor.id, source_kind="post")
     except Exception:

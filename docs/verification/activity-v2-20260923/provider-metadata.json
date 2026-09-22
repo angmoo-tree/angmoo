@@ -1,0 +1,8 @@
+{
+  "model": "gemini-3.1-flash-lite",
+  "thinking": "high",
+  "kind": "real_ai_synthetic_inputs",
+  "retrieval_performed": false,
+  "operational_writes": false,
+  "prompt_hash": "b443bc6ef5704da7beb5c60bbe4afc073d096e413786750643a4ffbf6044c0c3"
+}

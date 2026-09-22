@@ -1,0 +1,294 @@
+[
+  {
+    "target": "post-b96a4737544e",
+    "query_sha256": "4c14805388ca17795f992a9b8ad5d0c146c1e43a8c4f1ea62cfe53e75ccc1f8c",
+    "query_chars": 155,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "4a9725c4-34d0-52b4-b53b-2daa87606ac5",
+      "6b63c771-eb1c-56ec-9dca-396022c8f3d0",
+      "9815feca-496e-51c5-9fd4-b0c2781a5726",
+      "604dbafc-dddc-5817-a353-bd81264e5df6",
+      "4012f9e2-a9e8-59ce-b101-7dc4c02e57b6"
+    ],
+    "verification": "valid",
+    "duration_ms": 3988.9519499993185,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "partial",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3239.159030999872,
+        "reason_code": "fts_input_truncated",
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3905.600719001086,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 691
+    },
+    "ai_query": {
+      "sha256": "d0a62c7eea97ad3689b3c7416efd02094e0a97fcba147a67f0a920b32c792d4b",
+      "origin": "selector",
+      "chars": 124,
+      "memory_ids": [
+        "26c7e26e-53bf-59e8-bd2e-b3c91f88d0fc",
+        "d4056354-30ca-5fc1-b6ee-8cc010f79c70",
+        "604dbafc-dddc-5817-a353-bd81264e5df6",
+        "4012f9e2-a9e8-59ce-b101-7dc4c02e57b6",
+        "6b63c771-eb1c-56ec-9dca-396022c8f3d0",
+        "4a9725c4-34d0-52b4-b53b-2daa87606ac5",
+        "29161a8f-dfdb-5af4-a8e0-15ed827b5865"
+      ],
+      "duration_ms": 3538.6380839991034,
+      "status": "partial"
+    },
+    "query_overlap": 4,
+    "decisions": {
+      "none": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "encouragement"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "19699b4d5b9685c285177497d6b2815a563fde2163977789826108982fef6a15"
+        ]
+      },
+      "natural": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "empathy"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "d197843ff17e8d1f679459b3146e7136eebb317f6f1aa612aff5058cf69222f2"
+        ]
+      },
+      "ai": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "empathy"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "83c9cb0cba93022e0d23fd53728744a9b2edba35e1d374b7771ee22df7b55cfc"
+        ]
+      }
+    }
+  },
+  {
+    "target": "post-a05472264b56",
+    "query_sha256": "8309279f2ac941bf2335e52056362ff907a90f7aec09ead857e0808620145a69",
+    "query_chars": 41,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "23cfd91d-fe0f-5465-9073-80514108dc86",
+      "c0aa9730-6a8c-530a-8128-6275da6cb5e7",
+      "d556cdd6-4c5b-5066-ae76-7ab56f0f332d",
+      "09ce45c6-43b1-5ee4-8488-f925f9c26763",
+      "a747f724-4f29-59a4-a587-af0e82ab1791"
+    ],
+    "verification": "valid",
+    "duration_ms": 3662.0573220061488,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3146.4657289980096,
+        "reason_code": null,
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3627.478685004462,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 537
+    },
+    "ai_query": {
+      "sha256": "dd579dfcb0d076d0476fe39df6b914296aad7d607149f180ec9c6d2f5bebe35f",
+      "origin": "selector",
+      "chars": 94,
+      "memory_ids": [
+        "e0719ea8-c174-5edd-9f57-c9c53e5b3a84",
+        "23cfd91d-fe0f-5465-9073-80514108dc86",
+        "c0aa9730-6a8c-530a-8128-6275da6cb5e7",
+        "d556cdd6-4c5b-5066-ae76-7ab56f0f332d",
+        "09ce45c6-43b1-5ee4-8488-f925f9c26763"
+      ],
+      "duration_ms": 3495.1876740014995,
+      "status": "partial"
+    },
+    "query_overlap": 4,
+    "decisions": {
+      "none": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "encouragement"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "4b5e989b5081d3ce0531472d6921900fafbf939033b98f475fde4b634b60b414"
+        ]
+      },
+      "natural": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "encouragement"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "cdbd49520d43402beac2b60768223ab879b27c5202b65af1fd8f2c75509729d2"
+        ]
+      },
+      "ai": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "encouragement"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "d3bcc1fdae7416df31521d2168ef1736d185782ca54b60fa702597ddf3baac30"
+        ]
+      }
+    }
+  },
+  {
+    "target": "post-16fc1459dca6",
+    "query_sha256": "19ee178817c5a96c67afa31487bacce7b9af9f111111643cb9e07119720a5062",
+    "query_chars": 107,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "29161a8f-dfdb-5af4-a8e0-15ed827b5865",
+      "efb16af8-ebbe-51b9-9bd6-71a344e28b9d",
+      "69dbfa84-c0be-5b9c-9a66-62329ea71fda",
+      "950f2228-b8a9-55c0-b4ed-4b0d9ff4fee9",
+      "34d6740b-a681-5409-b892-c2fbe0dd778e"
+    ],
+    "verification": "valid",
+    "duration_ms": 3986.769169001491,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3346.847663000517,
+        "reason_code": null,
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3943.848250004521,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 567
+    },
+    "ai_query": {
+      "sha256": "4fb6702a94ee6fb044f2c6ab1362c5f4f3b412ac8e8d6de69e962fd202abde3e",
+      "origin": "selector",
+      "chars": 201,
+      "memory_ids": [
+        "51a12608-b846-5e29-a01f-d1d09d78860d",
+        "4a9725c4-34d0-52b4-b53b-2daa87606ac5",
+        "6b63c771-eb1c-56ec-9dca-396022c8f3d0",
+        "29161a8f-dfdb-5af4-a8e0-15ed827b5865"
+      ],
+      "duration_ms": 3722.9968280007597,
+      "status": "partial"
+    },
+    "query_overlap": 1,
+    "decisions": {
+      "none": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "encouragement"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "cdbc0d6b823a41167201dd8ef183c0373f200f5742aef3e7398f2e431bbaa49a"
+        ]
+      },
+      "natural": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "empathy"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "b8c2eac43fa18b61b86c0bf4001b00d9bdc283b27f87905dac4a0ba76f95d733"
+        ]
+      },
+      "ai": {
+        "actions": [
+          "comment"
+        ],
+        "purposes": [
+          "observation"
+        ],
+        "state_status": "valid",
+        "brief_hashes": [
+          "92709d71c40d73fd02980252072bf01844d93ba9f7d44e550a5c979bd5143e33"
+        ]
+      }
+    }
+  }
+]

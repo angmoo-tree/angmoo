@@ -4,11 +4,9 @@ from pydantic import ValidationError
 from app.domains.routines.models.resident import AgentRun
 from app.domains.social.schemas.feed_status import FeedAttemptRead, FeedStatusRead
 from app.domains.social.service.world_feed import feed_readiness
-from app.runtime.social.world_feed_queries import WorldFeedQueries
 
 
-def read_feed_status(db, *, world_character_id):
-    references = WorldFeedQueries(db)
+def read_feed_status(db, *, world_character_id, references):
     readiness = feed_readiness(db, references=references, world_character_id=world_character_id)
     wc = references.world_character(world_character_id)
     attempt = None
