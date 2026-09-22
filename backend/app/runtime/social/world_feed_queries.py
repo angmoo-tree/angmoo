@@ -40,6 +40,14 @@ class WorldFeedQueries:
     def character_hash(self, character):
         return character_contract_hash(character)
 
+    def feed_status(self, world_character_id: str):
+        from app.runtime.social.feed_status import read_feed_status
+        return read_feed_status(self.db, world_character_id=world_character_id)
+
+    def approved_pair(self, world_character_id: str):
+        from app.domains.world_characters.service.approved_setup import get_approved_pair
+        return get_approved_pair(self.db, world_character_id)
+
     def ready_profile(self, world_character_id: str):
         return self.db.scalar(
             select(WorldCommunityProfile)

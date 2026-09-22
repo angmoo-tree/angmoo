@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Select } from "@/components/ui/form-controls";
 import { InlineError } from "@/components/ui/feedback";
+import { FeedStatusPanel } from "@/features/social/components/feed-status";
 import { RecommendationHistory } from "@/features/social/components/recommendation-history";
 import { connectRecommendationKey, readRecommendationTopics, regenerateRecommendationTopics, type RecommendationTopics } from "@/features/social/api/recommendation-topics";
 
@@ -74,6 +75,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
       <Button loading={busy} disabled={!current || current.approval_required || (!characterId && !current.key_world_character_id)} onClick={() => void mutate("generate")}>{characterId ? "캐릭터 주제 다시 만들기" : "World 주제 다시 만들기"}</Button>
       <Button variant="ghost" disabled={busy} onClick={() => { setData(null); setReadError(null); setReload(value => value + 1); }}>상태 새로고침</Button>
     </div>
+    {characterId && current && !currentReadError && <FeedStatusPanel status={current.feed_status} />}
     {characterId && <RecommendationHistory deliveries={current?.recent_deliveries} loading={!current} error={currentReadError} />}
   </section>;
 }

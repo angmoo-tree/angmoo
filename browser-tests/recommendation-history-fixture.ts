@@ -85,6 +85,36 @@ export function recommendationHistoryTests(staticMode: boolean, bootstrap: (page
     expect(methods.every(method => method === "GET")).toBe(true);
   });
 
+  test("feed readiness separates old results and refresh remains read-only", async ({ page }, testInfo) => {
+    const { state, methods } = await setup(page);
+    const refresh = page.getByRole("button", { name: "상태 새로고침", exact: true });
+    state.body = { ...base, recent_deliveries: [], feed_status: {
+      readiness: { state: "ready", reason_code: null, persona_changed: true, checked_at: "2026-09-22T00:00:00Z" },
+      last_attempt: { run_id: "test", occurred_at: "2026-09-21T00:00:00Z", result: "world_community_profile_stale",
+        reason_code: null, candidate_count: null, delivered_count: 0, delivery_state: null },
+    } };
+    await refresh.click();
+    const panel = page.getByRole("region", { name: "Feed 실행 상태", exact: true });
+    await expect(panel.getByText("현재 준비 상태 · Feed 실행 준비됨")).toBeVisible();
+    await expect(panel.getByText(/기존 승인 프로필·일과로 활동을 계속/)).toBeVisible();
+    await expect(panel.getByText(/이전 준비 검사에서 차단됨/)).toBeVisible();
+    await expect(panel.getByText("후보 미확인 · 전달 0개")).toBeVisible();
+    state.body = { ...base, recent_deliveries: [], feed_status: {
+      readiness: { state: "blocked", reason_code: "approved_setup_invalid", persona_changed: false, checked_at: "2026-09-22T00:00:00Z" },
+      last_attempt: { run_id: "test", occurred_at: "2026-09-21T00:00:00Z", result: "planner_failed",
+        reason_code: null, candidate_count: 2, delivered_count: null, delivery_state: "uncertain" },
+    } };
+    await refresh.focus(); await page.keyboard.press("Enter");
+    await expect(panel.getByText(/현재 준비 상태 · Feed 준비 확인 필요/)).toBeVisible();
+    await expect(panel.getByText(/전달 완료 여부가 불확실/)).toBeVisible();
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.locator("body").evaluate(node => { node.style.zoom = "2"; });
+    await panel.scrollIntoViewIfNeeded();
+    expect(await panel.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath("feed-status-mobile-200pct.png") });
+    expect(methods.every(method => method === "GET")).toBe(true);
+  });
+
   test("recommendation history handles failed old and late responses without legacy fallback", async ({ page }) => {
     const { state, methods } = await setup(page);
     const panel = page.getByLabel("최근 전달된 Feed", { exact: true });

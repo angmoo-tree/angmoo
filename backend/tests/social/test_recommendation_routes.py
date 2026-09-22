@@ -60,7 +60,11 @@ def test_character_get_history_has_no_write_or_provider_side_effects(scope, monk
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
             path = f"/api/v1/worlds/{world.id}/recommendation-topics?world_character_id={wc.id}"
             one = await client.get(path); two = await client.get(path)
-            assert one.status_code == 200 and one.json() == two.json()
+            assert one.status_code == two.status_code == 200
+            one_body, two_body = one.json(), two.json()
+            for body in (one_body, two_body):
+                assert body["feed_status"]["readiness"].pop("checked_at")
+            assert one_body == two_body
             assert one.json()["recent_deliveries"][0]["posts"][0]["result_state"] == "no_action"
     try:
         asyncio.run(run())

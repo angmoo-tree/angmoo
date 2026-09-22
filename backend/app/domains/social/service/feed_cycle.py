@@ -88,7 +88,7 @@ async def run_world_keyword_feed(
             tracker=tracker,
             world_character_id=active_world.world_character_id,
         )
-    if profile.imported_world_runtime_locked:
+    if profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled:
         return _safe_result(
             outcome="AUTONOMY_DISABLED",
             tracker=tracker,
@@ -250,6 +250,9 @@ async def run_world_keyword_feed(
     )
     from app.domains.social.service.feed_delivery import FeedDelivery
     def validate_delivery_targets():
+        current_profile = load_ready_search_profile(ctx.db, references=workflows.search_references(ctx.db), world_character_id=profile.world_character.id)
+        if current_profile.profile.id != profile.profile.id or not current_profile.world_character.autonomous_enabled:
+            raise ValueError("feed_approved_setup_changed")
         ids = {candidate.post_id for candidate in claims.candidates}
         current = workflows.search_references(ctx.db).candidate_rows(profile)(ids)
         if set(current) != ids:

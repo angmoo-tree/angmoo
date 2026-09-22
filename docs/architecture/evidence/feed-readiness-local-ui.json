@@ -1,0 +1,44 @@
+{
+  "delegated_ui_check": true,
+  "triggered_ai_calls": 0,
+  "mutation_count": 0,
+  "existing_read_only_preflight_posts": 4,
+  "results": [
+    {
+      "character_index": 0,
+      "surface": "topics",
+      "readiness": "ready",
+      "persona_changed": true,
+      "last_attempt_present": false,
+      "read_count": 3,
+      "narrow_200pct": true
+    },
+    {
+      "character_index": 0,
+      "surface": "setup",
+      "readiness": "ready",
+      "persona_changed": true,
+      "last_attempt_present": false,
+      "read_count": 2,
+      "narrow_200pct": true
+    },
+    {
+      "character_index": 1,
+      "surface": "topics",
+      "readiness": "ready",
+      "persona_changed": false,
+      "last_attempt_present": true,
+      "read_count": 3,
+      "narrow_200pct": true
+    },
+    {
+      "character_index": 1,
+      "surface": "setup",
+      "readiness": "ready",
+      "persona_changed": false,
+      "last_attempt_present": true,
+      "read_count": 2,
+      "narrow_200pct": true
+    }
+  ]
+}

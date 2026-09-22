@@ -1,3 +1,4 @@
+import type { FeedStatus } from "@/features/social/api/feed-status";
 import { requestSocialApi } from "@/lib/http/social-request";
 
 export type DeliveryPost = {
@@ -20,6 +21,7 @@ export type RecommendationDelivery = {
 };
 
 export type RecommendationTopics = {
+  feed_status?: FeedStatus | null;
   world_id: string;
   world_character_id: string | null;
   state: "pending" | "running" | "ready" | "failed" | "stale";

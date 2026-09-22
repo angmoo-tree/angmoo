@@ -1,5 +1,7 @@
 "use client";
 
+import { getWorldFeedStatus, type WorldFeedCycleStatusRead } from "@/features/social/api/feed-status";
+import { FeedStatusPanel } from "@/features/social/components/feed-status";
 import Link from "next/link";
 import { Card } from "@/components/ui/surfaces";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -24,7 +26,6 @@ import {
   enterWorldWithCharacter,
   generateWorldCharacterSetup,
   getExistingWorldCharacterEntry,
-  getWorldFeedStatus,
   getWorldCharacterSetup,
   preflightWorldCharacterSetup,
   rejectWorldCharacterSetup,
@@ -33,7 +34,6 @@ import {
   WorldCharacterSetupApiError,
   type WorldActivityDaypart,
   type WorldCharacterEntryRead,
-  type WorldFeedCycleStatusRead,
   type WorldCharacterSetupPreflightRead,
   type WorldCharacterSetupRead,
 } from "@/features/characters/api/world-character-setup";
@@ -158,7 +158,8 @@ export function WorldCharacterAutonomySetupClient({
   const [entry, setEntry] = useState<WorldCharacterEntryRead | null>(null);
   const [setup, setSetup] = useState<WorldCharacterSetupRead | null>(null);
   const [activityPlan, setActivityPlan] = useState<DailyActivityPlanRead | null>(null);
-  const [feedStatus, setFeedStatus] = useState<WorldFeedCycleStatusRead | null>(null);
+  const [storedFeedStatus, setFeedStatus] = useState<WorldFeedCycleStatusRead | null>(null);
+  const feedStatus = storedFeedStatus?.world_id === worldId && storedFeedStatus?.world_character_id === entry?.id ? storedFeedStatus : null;
   const [preflight, setPreflight] =
     useState<WorldCharacterSetupPreflightRead | null>(null);
   const [roleKey, setRoleKey] = useState("");
@@ -245,7 +246,7 @@ export function WorldCharacterAutonomySetupClient({
   }, [characterId, setup?.autonomy_ready, worldId]);
 
   useEffect(() => {
-    if (!entry?.id || !setup?.autonomy_ready) return;
+    if (!entry?.id || !setup) return;
     let active = true;
     void getWorldFeedStatus(entry.id)
       .then((nextStatus) => {
@@ -260,7 +261,7 @@ export function WorldCharacterAutonomySetupClient({
     return () => {
       active = false;
     };
-  }, [entry?.id, setup?.autonomy_ready]);
+  }, [entry?.id, setup]);
 
 
   useEffect(() => {
@@ -1001,14 +1002,14 @@ export function WorldCharacterAutonomySetupClient({
               </section>
             ) : null}
 
-            {setup.autonomy_ready ? (
+            {setup ? (
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-bold text-brand-accent">P5 · WORLD KEYWORD FEED</p>
-                    <h2 className="mt-1 text-xl font-black">관심 키워드 피드</h2>
+                    <p className="text-sm font-bold text-brand-accent">WORLD FEED</p>
+                    <h2 className="mt-1 text-xl font-black">캐릭터 Feed</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
-                      승인된 World 전용 키워드를 두 개씩 순환해 같은 World의 관련 게시글을 찾습니다.
+                      같은 World의 게시글을 캐릭터에게 전달하는 Feed의 준비·실행 상태입니다.
                       이 영역은 최근 검색·반응 상태만 보여주며 자율활동이나 P5 모드를 켜지 않습니다.
                     </p>
                   </div>
@@ -1031,7 +1032,9 @@ export function WorldCharacterAutonomySetupClient({
                   </p>
                 ) : null}
 
-                {feedStatus ? (
+                {feedStatus?.feed_runtime_mode === "topic_recommendation_v1" ? (
+                  <div className="mt-5"><FeedStatusPanel status={feedStatus.feed_status} /></div>
+                ) : feedStatus ? (
                   <>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="rounded-2xl bg-surface-container-low p-4">

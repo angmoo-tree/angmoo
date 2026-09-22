@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.social.schemas.feed_status import FeedStatusRead
 
 from datetime import date, datetime
 from typing import Literal
@@ -186,6 +187,7 @@ class WorldFeedObservationRead(WorldFeedSchema):
 
 
 class WorldFeedCycleStatusRead(WorldFeedSchema):
+    feed_status: FeedStatusRead | None = None
     world_id: str
     world_character_id: str
     feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1", "topic_recommendation_v1"]
@@ -195,6 +197,7 @@ class WorldFeedCycleStatusRead(WorldFeedSchema):
         "imported_locked",
         "autonomy_disabled",
         "feed_search_degraded",
+        "feed_setup_blocked",
     ]
     profile_keyword_count: int = Field(ge=0, le=64)
     profile_keywords_ready: bool

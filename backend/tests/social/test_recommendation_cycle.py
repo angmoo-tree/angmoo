@@ -6,12 +6,25 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
-from social.test_feed_reaction_intent import FakeFeedProvider, _engine, _seed
+from social.test_feed_reaction_intent import FakeFeedProvider, _engine, _seed as _legacy_seed
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.social.models.topics import RecommendationDelivery
 from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.service.recommendation_topics import enroll_native_post
 from app.runtime.social.feed_cycle import run_world_keyword_feed
+
+
+def _seed(db, *, with_candidate):
+    ctx, target = _legacy_seed(db, with_candidate=with_candidate)
+    profile = db.get(models.WorldCommunityProfile, "community-profile-actor")
+    db.add(models.WorldActivityRepertoire(id="feed-approved-repertoire",
+        world_character_id=profile.world_character_id, community_profile_id=profile.id,
+        status="ready", generator_version="fixture-v1", schema_version=1,
+        character_contract_hash=profile.character_contract_hash, world_contract_hash=profile.world_contract_hash,
+        provider=profile.provider, model=profile.model, credential_id=profile.credential_id,
+        generated_at=profile.generated_at, approved_at=profile.approved_at))
+    db.flush()
+    return ctx, target
 
 
 def test_pre_cutover_excluded_without_fts_then_delivery_never_repeats():
@@ -20,6 +33,7 @@ def test_pre_cutover_excluded_without_fts_then_delivery_never_repeats():
         ctx, target = _seed(db, with_candidate=True)
         actor = db.scalar(select(models.WorldCharacter).where(models.WorldCharacter.character_id == ctx.character.id))
         actor.feed_runtime_mode = "topic_recommendation_v1"
+        ctx.character.personality = "Changed persona; keep the approved pair"
         db.commit()
         ctx = replace(ctx, social_search_index=None, social_search_state=SocialSearchState.UNAVAILABLE)
         provider = FakeFeedProvider(FeedReactionDecision(reason_code="model_abstained"))
@@ -30,6 +44,7 @@ def test_pre_cutover_excluded_without_fts_then_delivery_never_repeats():
         ctx = replace(ctx, run_id="second-cycle", run_started_at=ctx.run_started_at+timedelta(hours=1))
         second = asyncio.run(run_world_keyword_feed(ctx, provider=provider))
         assert provider.plan_calls == 1
+        assert second["delivered_count"] == 1 and second["delivery_state"] == "delivered"
         assert db.scalar(select(models.WorldCharacterFeedObservation)).status == "observed"
         assert db.scalar(select(RecommendationDelivery)).state == "delivered"
         from app.runtime.social.recommendation_history import read_delivery_history
@@ -59,7 +74,8 @@ def test_failed_response_delivery_boundary(delivery_state, expected):
                 if delivery_state == "invalid_response":
                     self.delivery.delivered()
                 raise DirectLlmError("synthetic response failure")
-        asyncio.run(run_world_keyword_feed(ctx, provider=FailedProvider()))
+        result = asyncio.run(run_world_keyword_feed(ctx, provider=FailedProvider()))
+        assert result["delivered_count"] == (1 if expected == "delivered" else None if expected == "uncertain" else 0)
         db.expire_all()
         assert db.scalar(select(RecommendationDelivery)).state == expected
         observation = db.scalar(select(models.WorldCharacterFeedObservation))

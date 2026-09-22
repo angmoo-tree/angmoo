@@ -62,7 +62,11 @@ class LegacyFeedRead(BaseModel):
     action: FeedAction | None
 
 
+from app.domains.social.schemas.feed_status import FeedStatusRead
+
+
 class RecommendationTopicsRead(BaseModel):
+    feed_status: FeedStatusRead | None = None
     world_id: str
     world_character_id: str | None
     state: Literal["pending", "running", "ready", "failed", "stale"]
