@@ -3184,7 +3184,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "5a560dfe43ebb12d470808fd18bec60f0272ccd1b710bc680d2c825b2f04b290"
+        "sha256": "f89ad6730026fee3b45a03cb669d05cf2308511faa0fefadb63389ee87710eab"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3204,7 +3204,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "f3ed2fd568b9c53cf94e8915beda7c90ea3d48df6527a0ff2d51f25d57d2d4ea"
+        "sha256": "a3c7e9318eb356ba3132a4c0caf58d9ab19ee53b86dca35edc4b5e04499f07bd"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

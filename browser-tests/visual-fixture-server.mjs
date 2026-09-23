@@ -149,6 +149,23 @@ const server = createServer((request, response) => {
     return;
   }
 
+  if (url.pathname.endsWith("/relationship-review")) {
+    sendJson(response, {
+      mode: "interpreted",
+      activated_at: "2026-09-22T00:00:00Z",
+      configuration: {
+        status: "scheduled",
+        manual_available: true,
+        local_time: "02:00",
+        timezone: "Asia/Seoul",
+      },
+      jobs: [],
+      states: [],
+      excluded_counts: {},
+    });
+    return;
+  }
+
   if (url.pathname.endsWith("/relationship-graph")) {
     sendJson(response, fixture.graph);
     return;

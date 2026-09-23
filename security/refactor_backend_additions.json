@@ -16134,6 +16134,1318 @@
       "test_suppressions": {
         "tests/runtime/test_personalized_parent.py": {}
       }
+    },
+    {
+      "commit": "f934cc3f9adc7a5542d5133daac5289b28612a27",
+      "feature_id": "AR-SNS-TOPIC-FEED",
+      "reason": "Topic Feed recommendation sources and regression nodes for Issue 335",
+      "tracked_files": {
+        "backend/alembic/versions/20260918_0095_social_recommendation.py": "69d7a71eaaec4c2620c3ac6fa08ae309ba277a5b",
+        "backend/alembic/versions/20260918_0096_recommendation_mode.py": "2c40320560a270771ec9930bbb38b630ca343d31",
+        "backend/app/api/recommendation_dependencies.py": "e346b3cbaa44ef6ff6e4ab1bfa08b15775a02bdb",
+        "backend/app/domains/social/contracts/recommendation.py": "ed09e61b3d6969f375083638b4d99222a923c1ae",
+        "backend/app/domains/social/models/topics.py": "a17ed4223908dd96d385efae97c144e0e5a9baa7",
+        "backend/app/domains/social/policies/recommendation.py": "a1dbe741c9c5349740511e9fea17f9f2539585f2",
+        "backend/app/domains/social/recommendation_router.py": "7157d81e88f19ee37f35e5675c77f4041fb86cda",
+        "backend/app/domains/social/schemas/recommendation.py": "9db73c36ec16eb2380753888d8c55bbbe106680b",
+        "backend/app/domains/social/service/feed_delivery.py": "0ada08e68175f6b8f0bb325cbbdf897309effbf9",
+        "backend/app/domains/social/service/recommendation_topics.py": "29212f96fa6be4fd55630ce3be3ff2a632efc7dc",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v15.json": "2f00814e6da7424e29b662b6ca85109535617d80",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v16.json": "2ccbe7ffef13e733d7480ef2cfa2cc6ae39985c1",
+        "backend/app/runtime/migrations/sqlite_versions/v14_to_v15_recommendation.py": "b4bdba5b736a0580cc5e132eb936cff8fa6c3668",
+        "backend/app/runtime/migrations/sqlite_versions/v15_to_v16_recommendation_mode.py": "2eda49c4ae39a09629e234cb8290f0a4dd1acf05",
+        "backend/app/runtime/persistence/sqlite_recommendation_modes.py": "4e8ff705e80e81fd1f554eb647aa41476ce856c5",
+        "backend/app/runtime/social/feed_relationship_context.py": "d5e85c35a1db32516a770314af7b48b2ba79abfe",
+        "backend/app/runtime/social/recommendation_feed.py": "343cba81eac3757c8cc2f4fe10c08705ae45d966",
+        "backend/app/runtime/social/topic_preparation.py": "7901190e1c9d3eda2ab195f213c705b8ec5c9738",
+        "backend/app/runtime/social/topic_scope.py": "2b6a31deb5f749d1def1a6f97a6ba34b8d61fd03",
+        "backend/scripts/measure_topic_recommendation.py": "4ae4ce6ae6bd38956bdd1257cf019058a95a9b75",
+        "backend/tests/social/test_recommendation_cycle.py": "ed8149cab25885116038023505992362113a6fbb",
+        "backend/tests/social/test_recommendation_migration.py": "36cb090df910c52e774208f19cc9f3acc11a3f9d",
+        "backend/tests/social/test_recommendation_routes.py": "e6e31489fbf812efec99569a97434dd809aac15d",
+        "backend/tests/social/test_recommendation_selection.py": "35e4d3bbf67ddbbe2736c59f9269fcff0cdc4caa",
+        "backend/tests/social/test_recommendation_topics.py": "bd1c3728126ff9bd88f7be3163dcbd24f50e0837",
+        "backend/tests/social/test_topic_preparation.py": "0dea1f10c74f6216c126833a0290d5b110685d42",
+        "docs/operations/sns-topic-recommendation-measurement.json": "2fcca9fcb7ecbb81750cb0bd6fb234bdeec8899e",
+        "docs/operations/sns-topic-recommendation.md": "39d4ee0acfb9e253a6132303e54ea4686646b0c0",
+        "frontend/src/composition/screens/world-recommendation-tools.tsx": "44fd17763a2f0081cb84c6f452836833fb51bdc0",
+        "frontend/src/features/social/api/recommendation-topics.ts": "f9ac35506db82fc878d5c5e75bb99d521cce3933",
+        "frontend/src/features/social/components/recommendation-topics-panel.tsx": "2f87661e1be738e25a0d06974611783ab019c67e"
+      },
+      "test_nodes": [
+        "tests/social/test_recommendation_cycle.py::test_failed_response_delivery_boundary[invalid_response-delivered]",
+        "tests/social/test_recommendation_cycle.py::test_failed_response_delivery_boundary[precall-prepared]",
+        "tests/social/test_recommendation_cycle.py::test_failed_response_delivery_boundary[timeout-uncertain]",
+        "tests/social/test_recommendation_cycle.py::test_pre_cutover_excluded_without_fts_then_delivery_never_repeats",
+        "tests/social/test_recommendation_migration.py::test_additive_migration_does_not_enroll_or_generate",
+        "tests/social/test_recommendation_migration.py::test_alembic_recommendation_heads_match_embedded",
+        "tests/social/test_recommendation_migration.py::test_populated_v14_to_v16_matches_fresh_and_keeps_switches",
+        "tests/social/test_recommendation_routes.py::test_read_is_side_effect_free_and_mutations_reject_foreign_owner",
+        "tests/social/test_recommendation_selection.py::test_author_limit_does_not_remove_latest_ten",
+        "tests/social/test_recommendation_selection.py::test_latest_quota_personalized_lanes_no_duplicates",
+        "tests/social/test_recommendation_selection.py::test_shortage_latest_can_exceed_ten_but_keeps_real_source",
+        "tests/social/test_recommendation_topics.py::test_full_dictionary_before_six_link_limit",
+        "tests/social/test_recommendation_topics.py::test_membership_and_deleted_character_invalidate_same_transaction_matcher",
+        "tests/social/test_recommendation_topics.py::test_metadata_errors_do_not_become_text",
+        "tests/social/test_recommendation_topics.py::test_no_backfill_no_new_topic_and_edit_drops_signature",
+        "tests/social/test_recommendation_topics.py::test_world_and_other_character_union_reuse_and_retirement",
+        "tests/social/test_topic_preparation.py::test_generation_idempotence_and_failure_preserve_current",
+        "tests/social/test_topic_preparation.py::test_read_does_not_initialize_existing_world_and_foreign_key_is_rejected",
+        "tests/social/test_topic_preparation.py::test_running_request_does_not_dispatch_second_generation",
+        "tests/social/test_topic_preparation.py::test_source_changed_during_generation_keeps_last_normal_topics",
+        "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy[False]",
+        "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy[True]"
+      ],
+      "test_assertions": {
+        "tests/social/test_recommendation_cycle.py": {
+          "test_pre_cutover_excluded_without_fts_then_delivery_never_repeats": [
+            "assert first['feed_outcome'] == 'no_candidate' and provider.plan_calls == 0",
+            "assert provider.plan_calls == 1",
+            "assert db.scalar(select(models.WorldCharacterFeedObservation)).status == 'observed'",
+            "assert db.scalar(select(RecommendationDelivery)).state == 'delivered'",
+            "assert third['feed_outcome'] == 'no_candidate' and provider.plan_calls == 1"
+          ],
+          "test_failed_response_delivery_boundary": [
+            "assert db.scalar(select(RecommendationDelivery)).state == expected",
+            "assert (observation.status == 'observed') == (expected == 'delivered')"
+          ]
+        },
+        "tests/social/test_recommendation_migration.py": {
+          "test_additive_migration_does_not_enroll_or_generate": [
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()"
+          ],
+          "test_alembic_recommendation_heads_match_embedded": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(16).schema_digest",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()"
+          ],
+          "test_populated_v14_to_v16_matches_fresh_and_keeps_switches": [
+            "assert sqlite_schema_contract_digest(connection) == load_manifest(14).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_manifest(15).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_manifest(16).schema_digest",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert connection.exec_driver_sql('SELECT autonomous_enabled FROM world_characters').scalar() == 0"
+          ]
+        },
+        "tests/social/test_recommendation_routes.py": {
+          "test_read_is_side_effect_free_and_mutations_reject_foreign_owner": [
+            "assert response.status_code == 200 and response.json()['state'] == 'pending'",
+            "assert not db.scalar(select(RecommendationPreparation))",
+            "assert denied.status_code == 403",
+            "assert denied.status_code == 403",
+            "assert not db.scalar(select(RecommendationPreparation))"
+          ]
+        },
+        "tests/social/test_recommendation_selection.py": {
+          "test_latest_quota_personalized_lanes_no_duplicates": [
+            "assert len(selected) == len({c.id for c, _ in selected}) == 20",
+            "assert [c.id for c, _ in selected[:10]] == [str(i) for i in range(10)]",
+            "assert [lane for _, lane in selected[10:]] == ['interest'] * 5 + ['relation'] * 3 + ['explore'] * 2"
+          ],
+          "test_shortage_latest_can_exceed_ten_but_keeps_real_source": [
+            "assert len(selected) == 20",
+            "assert all((lane == 'latest' for _, lane in selected))"
+          ],
+          "test_author_limit_does_not_remove_latest_ten": [
+            "assert len(selected) == 10"
+          ]
+        },
+        "tests/social/test_recommendation_topics.py": {
+          "scope": [],
+          "post": [],
+          "test_full_dictionary_before_six_link_limit": [
+            "assert matcher.match(['축구전술 항목4999']) == ['id-4999', 'football']",
+            "assert len(matcher.match([' '.join((f'항목{i:04}' for i in range(100)))])) == 6",
+            "assert matcher.match(['축', '구']) == []"
+          ],
+          "test_world_and_other_character_union_reuse_and_retirement": [
+            "assert match_post(db, row, final_signature='축구 골키퍼의 선방')",
+            "assert football in {t.id for t in available_topics(db, world.id)}",
+            "assert football in {t.id for t in available_topics(db, world.id)}",
+            "assert not available_topics(db, world.id)",
+            "assert db.get(RecommendationTopic, football)",
+            "assert list(db.scalars(select(RecommendationPostTopic).where(RecommendationPostTopic.post_id == row.id)))",
+            "assert replace_source_topics(db, world_id=world.id, world_character_id=None, topics=[('축구', 'common')]) == [football]"
+          ],
+          "test_no_backfill_no_new_topic_and_edit_drops_signature": [
+            "assert match_post(db, old, final_signature='축구') == []",
+            "assert db.get(RecommendationPost, old.id) is None",
+            "assert match_post(db, new, final_signature='축구 외계어') == [football]",
+            "assert match_post(db, new) == []",
+            "assert db.get(RecommendationPost, new.id).final_signature is None",
+            "assert len(list(db.scalars(select(RecommendationTopic)))) == 1",
+            "assert match_post(db, new, final_signature={'topic': '축구'}) == []"
+          ],
+          "test_metadata_errors_do_not_become_text": [
+            "assert valid_final_signature(' 축구 ') == '축구'",
+            "assert valid_final_signature(value) is None",
+            "assert draft.body == '본문은 보존' and draft.topic_signature == ''"
+          ],
+          "test_membership_and_deleted_character_invalidate_same_transaction_matcher": [
+            "assert match_post(db, row) == [topic]",
+            "assert match_post(db, row) == []",
+            "assert match_post(db, row) == [topic]",
+            "assert match_post(db, row) == []"
+          ]
+        },
+        "tests/social/test_topic_preparation.py": {
+          "connected": [
+            "assert kwargs['owner_id'] == character.owner_id and kwargs['character_id'] == character.id"
+          ],
+          "result": [],
+          "test_read_does_not_initialize_existing_world_and_foreign_key_is_rejected": [
+            "assert service.read_topics(db, world_id=world.id, owner_id=world.owner_user_id)['state'] == 'pending'",
+            "assert not db.scalar(select(RecommendationPreparation))",
+            "pytest.raises(service.TopicPreparationError, match='character_not_owned')",
+            "assert not available_topics(db, world.id)"
+          ],
+          "test_generation_idempotence_and_failure_preserve_current": [
+            "assert first['topics'] == second['topics'] and len(calls) == 1",
+            "assert failure['state'] == 'failed' and failure['topics'] == first['topics']",
+            "assert failure['last_code'] == 'generation_failed'"
+          ],
+          "test_source_changed_during_generation_keeps_last_normal_topics": [
+            "assert response['state'] == 'stale'",
+            "assert [t['name'] for t in response['topics']] == ['기존 주제']"
+          ],
+          "test_running_request_does_not_dispatch_second_generation": [
+            "assert response['state'] == 'ready' and len(calls) == 1",
+            "assert duplicate['state'] == 'running'"
+          ]
+        },
+        "tests/world_characters/test_setup_service.py": {
+          "_engine": [],
+          "_request": [],
+          "_app": [
+            "assert principal['user'] is not None"
+          ],
+          "_profile_payload": [],
+          "_repertoire_payload": [],
+          "FakeProvider::__init__": [],
+          "FakeProvider::generate_community_profile": [],
+          "FakeProvider::generate_repertoire": [],
+          "_seed": [],
+          "_generate": [],
+          "test_two_logical_calls_create_profile_and_exact_forty_candidates": [
+            "assert provider.profile_calls == 1",
+            "assert provider.repertoire_calls == 1",
+            "assert sum(db.scalars(select(models.WorldCharacterSetupAttempt.physical_request_count))) == 3",
+            "assert result.state == 'ready'",
+            "assert result.can_approve is True",
+            "assert result.autonomy_ready is False",
+            "assert result.autonomous_enabled is False",
+            "assert result.repertoire is not None",
+            "assert len(result.repertoire.candidates) == 40",
+            "assert {daypart: sum((candidate.daypart == daypart for candidate in result.repertoire.candidates)) for daypart in DAYPARTS} == {daypart: 10 for daypart in DAYPARTS}",
+            "assert world_character.autonomous_enabled is False"
+          ],
+          "test_approval_activates_contract_but_not_autonomous_execution": [
+            "assert generated.profile is not None",
+            "assert generated.repertoire is not None",
+            "assert approved.autonomy_ready is True",
+            "assert approved.autonomous_enabled is False",
+            "assert approved.profile is not None and approved.profile.status == 'ready'",
+            "assert approved.repertoire is not None",
+            "assert approved.repertoire.status == 'ready'",
+            "assert world_character.status == 'active'",
+            "assert world_character.autonomous_enabled is False",
+            "assert active_world is not None",
+            "assert active_world.world_character_id == world_character.id",
+            "assert active_world.version == 1"
+          ],
+          "test_ready_same_hash_pair_is_reused_without_provider_calls": [
+            "assert generated.profile is not None and generated.repertoire is not None",
+            "assert reused.reused is True",
+            "assert reused.autonomy_ready is True",
+            "assert provider.profile_calls == 0",
+            "assert provider.repertoire_calls == 0"
+          ],
+          "test_owner_controlled_identity_is_rejected_before_provider_or_writes": [
+            "pytest.raises(world_character_setup.WorldCharacterSetupValidationError)",
+            "assert exc.value.reason_code == 'owner_controlled_automation_disabled'",
+            "assert provider.profile_calls == 0",
+            "assert provider.repertoire_calls == 0",
+            "assert db.scalar(select(func.count(models.WorldCharacterSetupAttempt.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldCommunityProfile.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldActivityRepertoire.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldActivityCandidate.id))) == 0",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0",
+            "assert db.scalar(select(func.count(models.AgentRun.id))) == 0"
+          ],
+          "test_credential_deletion_preserves_approved_setup_and_zero_call_reentry": [
+            "assert generated.profile is not None and generated.repertoire is not None",
+            "assert credential is not None",
+            "assert restored.autonomy_ready is True",
+            "assert restored.profile is not None",
+            "assert restored.repertoire is not None",
+            "assert len(restored.repertoire.candidates) == 40",
+            "assert preflight.credential_ready is False",
+            "assert preflight.safe_reason_code == 'credential_required'",
+            "assert preflight.reused is True",
+            "assert preflight.logical_call_count == 0",
+            "assert preflight.physical_request_count == 0",
+            "assert db.scalar(select(func.count(models.WorldCommunityProfile.id))) == 1",
+            "assert db.scalar(select(func.count(models.WorldActivityRepertoire.id))) == 1",
+            "assert db.scalar(select(func.count(models.WorldActivityCandidate.id))) == 40"
+          ],
+          "test_character_privacy_cleanup_removes_setup_outputs_only": [
+            "assert generated.profile is not None",
+            "assert generated.repertoire is not None",
+            "assert db.scalar(select(func.count(models.WorldCommunityProfile.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldActivityRepertoire.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldActivityCandidate.id))) == 0",
+            "assert db.scalar(select(func.count(models.WorldCharacterSetupAttempt.id))) == 0",
+            "assert db.get(models.WorldCharacter, world_character.id) is not None"
+          ],
+          "test_repertoire_failure_preserves_profile_and_retry_calls_only_repertoire": [
+            "pytest.raises(world_character_setup.WorldCharacterSetupValidationError)",
+            "assert exc.value.reason_code == 'provider_timeout'",
+            "assert failing.profile_calls == 1",
+            "assert failing.repertoire_calls == 1",
+            "assert profile_count is not None",
+            "assert retry_provider.profile_calls == 0",
+            "assert retry_provider.repertoire_calls == 1",
+            "assert result.repertoire is not None",
+            "assert len(result.repertoire.candidates) == 40"
+          ],
+          "test_approval_rejects_stored_candidate_signature_drift": [
+            "assert generated.profile is not None and generated.repertoire is not None",
+            "assert candidate is not None",
+            "pytest.raises(world_character_setup.WorldCharacterSetupConflictError)",
+            "assert exc.value.reason_code == 'repertoire_signature_mismatch'",
+            "assert world_character.autonomous_enabled is False"
+          ],
+          "test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy": [
+            "assert initial.status_code == 200",
+            "assert initial.json()['state'] == 'needs_profile'",
+            "assert preflight.status_code == 200",
+            "assert preflight.json()['credential_ready'] is True",
+            "assert preflight.json()['logical_call_count'] == 2",
+            "assert preflight.json()['physical_request_count'] == 3",
+            "assert generated.status_code == 200",
+            "assert len(generated.json()['repertoire']['candidates']) == 40",
+            "assert generated.json()['autonomous_enabled'] is False",
+            "assert approved.status_code == 200",
+            "assert approved.json()['autonomy_ready'] is True",
+            "assert approved.json()['autonomous_enabled'] is False",
+            "assert provider.profile_calls == provider.repertoire_calls == 1",
+            "assert reentered.status_code == 200",
+            "assert reentered.json()['id'] == 'world-character-a'",
+            "assert reentered.json()['status'] == 'active'",
+            "assert reentered.json()['reused'] is True",
+            "assert restored.status_code == 200",
+            "assert restored.json()['autonomy_ready'] is True",
+            "assert restored.json()['autonomous_enabled'] is False",
+            "assert feed_status.status_code == 200",
+            "assert feed_status.json()['world_character_id'] == 'world-character-a'",
+            "assert feed_status.json()['feed_runtime_mode'] == 'topic_recommendation_v1'",
+            "assert feed_status.json()['runtime_state'] == 'autonomy_disabled'",
+            "assert feed_status.json()['profile_keyword_count'] == 8",
+            "assert feed_status.json()['profile_keywords_ready'] is True",
+            "assert feed_status.json()['recent_observations'] == []",
+            "assert bool(db.scalar(select(RecommendationTopicSource))) == new_topic_subject"
+          ],
+          "test_routes_hide_missing_and_foreign_world_characters": [
+            "assert forbidden.status_code == 403",
+            "assert forbidden.json() == {'detail': 'character_not_owned'}",
+            "assert missing.status_code == 404",
+            "assert missing.json() == {'detail': 'world_character_not_found'}",
+            "assert feed_forbidden.status_code == 403",
+            "assert feed_forbidden.json() == {'detail': 'world_character_forbidden'}",
+            "assert feed_missing.status_code == 404",
+            "assert feed_missing.json() == {'detail': 'world_character_not_found'}"
+          ],
+          "test_feed_status_distinguishes_runtime_lane_states": [
+            "assert status_payload()['runtime_state'] == 'autonomy_disabled'",
+            "assert status_payload()['runtime_state'] == 'routine_only_legacy_feed'",
+            "assert status_payload()['runtime_state'] == 'three_lane_ready'",
+            "assert status_payload()['runtime_state'] == 'three_lane_ready'",
+            "assert response.status_code == 200",
+            "assert stored is not None",
+            "assert stored is not None",
+            "assert cursor is not None"
+          ],
+          "test_world_entry_creates_pending_world_character_without_provider_or_autonomy": [
+            "assert missing_entry.status_code == 404",
+            "assert missing_entry.json() == {'detail': 'world_character_not_found'}",
+            "assert entered.status_code == 201",
+            "assert entered.json()['status'] == 'pending'",
+            "assert entered.json()['autonomous_enabled'] is False",
+            "assert entered.json()['reused'] is False",
+            "assert replayed.status_code == 201",
+            "assert replayed.json()['id'] == entered.json()['id']",
+            "assert replayed.json()['reused'] is True",
+            "assert stored is not None",
+            "assert stored.control_mode == 'autonomous'",
+            "assert stored.owner_user_id is None",
+            "assert stored.activity_runtime_mode == 'routine_resident_v1'",
+            "assert stored.feed_runtime_mode == 'topic_recommendation_v1'",
+            "assert stored.local_profile == {'entry_idempotency_key': 'enter-character-b-world-a', 'background': 'A first-day exchange student'}",
+            "assert db.scalar(select(models.WorldCharacterSetupAttempt)) is None",
+            "assert db.scalar(select(func.count(models.AgentRun.id))) == 0",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 0",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0"
+          ],
+          "test_world_entry_requires_explicit_no_specific_role_selection": [
+            "assert missing_role.status_code == 422",
+            "assert missing_role.json() == {'detail': 'role_required'}",
+            "assert entered.status_code == 201",
+            "assert entered.json()['role_key'] == NO_SPECIFIC_ROLE_KEY",
+            "assert entered.json()['status'] == 'pending'",
+            "assert entered.json()['autonomous_enabled'] is False",
+            "assert role is not None",
+            "assert stored is not None",
+            "assert stored.activity_runtime_mode == 'routine_resident_v1'",
+            "assert stored.feed_runtime_mode == 'topic_recommendation_v1'",
+            "assert reserved is not None",
+            "assert reserved.name == NO_SPECIFIC_ROLE_NAME",
+            "assert reserved.description == NO_SPECIFIC_ROLE_DESCRIPTION",
+            "assert reserved.autonomous_allowed is True",
+            "assert reserved.status == 'enabled'"
+          ],
+          "test_v2_to_v3_normalizes_existing_autonomous_null_role_idempotently": [
+            "assert migrated is not None",
+            "assert migrated.world_id == original_world_id",
+            "assert migrated.character_id == original_character_id",
+            "assert migrated.role_key == NO_SPECIFIC_ROLE_KEY",
+            "assert db.get(models.User, original_owner_id) is not None",
+            "assert db.get(models.Character, original_character_id) is not None",
+            "assert reserved is not None",
+            "assert reserved.name == NO_SPECIFIC_ROLE_NAME",
+            "assert db.scalar(select(func.count()).select_from(models.WorldRole).where(models.WorldRole.world_id == original_world_id, models.WorldRole.role_key == NO_SPECIFIC_ROLE_KEY)) == 1"
+          ],
+          "test_existing_world_character_role_can_be_changed_to_explicit_no_role": [
+            "assert changed.status_code == 200",
+            "assert changed.json()['role_key'] == NO_SPECIFIC_ROLE_KEY",
+            "assert changed.json()['version'] == initial_version + 1",
+            "assert stale.status_code == 409",
+            "assert stale.json() == {'detail': 'row_version_conflict'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_recommendation_cycle.py": {},
+        "tests/social/test_recommendation_migration.py": {},
+        "tests/social/test_recommendation_routes.py": {},
+        "tests/social/test_recommendation_selection.py": {},
+        "tests/social/test_recommendation_topics.py": {},
+        "tests/social/test_topic_preparation.py": {},
+        "tests/world_characters/test_setup_service.py": {}
+      }
+    },
+    {
+      "commit": "58c0d0c521b2aabfeee382dcc3393a65d20fd6a9",
+      "feature_id": "AR-SNS-DELIVERY-HISTORY",
+      "reason": "Confirmed recommendation delivery history sources and tests for Issue 335",
+      "tracked_files": {
+        "backend/app/runtime/social/recommendation_history.py": "50ee9d3aaba0d55630161142cb84fb1c3638516b",
+        "backend/tests/social/test_recommendation_history.py": "0e555c6a90cb47c9e68bc81958e7b69876163151",
+        "browser-tests/agent-detail-fixture.ts": "e16d60dfc28e02377615f8893f023a3d97e883ee",
+        "browser-tests/recommendation-history-fixture.ts": "f999e932a5949e15ff7dd21a190c344e82df4beb",
+        "frontend/src/features/social/components/recommendation-history.tsx": "e1033d52e3d1e1738ed506087d5029f38a217850"
+      },
+      "test_nodes": [
+        "tests/social/test_recommendation_history.py::test_bounded_batches_order_and_read_only",
+        "tests/social/test_recommendation_history.py::test_current_visibility_hides_details_but_keeps_delivery[block]",
+        "tests/social/test_recommendation_history.py::test_current_visibility_hides_details_but_keeps_delivery[deleted_at]",
+        "tests/social/test_recommendation_history.py::test_current_visibility_hides_details_but_keeps_delivery[membership]",
+        "tests/social/test_recommendation_history.py::test_current_visibility_hides_details_but_keeps_delivery[report_hidden_at]",
+        "tests/social/test_recommendation_history.py::test_current_visibility_hides_details_but_keeps_delivery[visibility]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[action_type-like]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[actor_world_character_id-None]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[character_id-other]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[feed_observation_id-None]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[interaction_intent-ordinary_comment]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[scope-other]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[target_post_id-None]",
+        "tests/social/test_recommendation_history.py::test_execution_scope_mismatch_is_unknown[world_id-None]",
+        "tests/social/test_recommendation_history.py::test_legacy_observation_is_not_delivery_history",
+        "tests/social/test_recommendation_history.py::test_malformed_receipt_is_bounded_and_never_fake_zero[None-None]",
+        "tests/social/test_recommendation_history.py::test_malformed_receipt_is_bounded_and_never_fake_zero[ids1-None]",
+        "tests/social/test_recommendation_history.py::test_malformed_receipt_is_bounded_and_never_fake_zero[ids2-1]",
+        "tests/social/test_recommendation_history.py::test_malformed_receipt_is_bounded_and_never_fake_zero[ids3-None]",
+        "tests/social/test_recommendation_history.py::test_non_delivered_states_never_appear[dispatched]",
+        "tests/social/test_recommendation_history.py::test_non_delivered_states_never_appear[prepared]",
+        "tests/social/test_recommendation_history.py::test_non_delivered_states_never_appear[uncertain]",
+        "tests/social/test_recommendation_history.py::test_only_delivered_ids_and_same_cycle_results_are_used",
+        "tests/social/test_recommendation_history.py::test_result_without_action_is_not_invented[None-None-unrecorded]",
+        "tests/social/test_recommendation_history.py::test_result_without_action_is_not_invented[no_action-None-unrecorded]",
+        "tests/social/test_recommendation_history.py::test_result_without_action_is_not_invented[no_action-model_abstained-no_action]",
+        "tests/social/test_recommendation_history.py::test_result_without_action_is_not_invented[no_action-writer_invalid-not_performed]",
+        "tests/social/test_recommendation_history.py::test_result_without_action_is_not_invented[not_selected-None-not_selected]",
+        "tests/social/test_recommendation_history.py::test_reused_success_requires_same_cycle_signature[False]",
+        "tests/social/test_recommendation_history.py::test_reused_success_requires_same_cycle_signature[True]",
+        "tests/social/test_recommendation_history.py::test_selection_is_not_success[None-selected]",
+        "tests/social/test_recommendation_history.py::test_selection_is_not_success[failed-failed]",
+        "tests/social/test_recommendation_history.py::test_selection_is_not_success[pending-pending]",
+        "tests/social/test_recommendation_history.py::test_selection_is_not_success[succeeded-succeeded]",
+        "tests/social/test_recommendation_history.py::test_selection_is_not_success[unknown-unrecorded]",
+        "tests/social/test_recommendation_history.py::test_world_character_and_owner_isolation",
+        "tests/social/test_recommendation_routes.py::test_character_get_history_has_no_write_or_provider_side_effects"
+      ],
+      "test_assertions": {
+        "tests/social/test_recommendation_history.py": {
+          "observation": [],
+          "delivery": [],
+          "read": [],
+          "test_legacy_observation_is_not_delivery_history": [
+            "assert response['recent_feed'] == []",
+            "assert response['recent_deliveries'] == []"
+          ],
+          "test_only_delivered_ids_and_same_cycle_results_are_used": [
+            "assert [p['post_id'] for p in response['recent_feed']] == [new.id]",
+            "assert item['lane'] == 'latest' and item['result_state'] == 'unrecorded'"
+          ],
+          "test_non_delivered_states_never_appear": [
+            "assert read(scope)['recent_feed'] == []"
+          ],
+          "execution": [],
+          "test_selection_is_not_success": [
+            "assert item['result_state'] == expected"
+          ],
+          "test_execution_scope_mismatch_is_unknown": [
+            "assert read(scope)['recent_deliveries'][0]['posts'][0]['result_state'] == 'unrecorded'"
+          ],
+          "test_reused_success_requires_same_cycle_signature": [
+            "assert read(scope)['recent_deliveries'][0]['posts'][0]['result_state'] == ('succeeded' if valid else 'unrecorded')"
+          ],
+          "test_result_without_action_is_not_invented": [
+            "assert item['result_state'] == expected",
+            "assert item['lane'] is None and item['sources'] == ['latest']"
+          ],
+          "test_current_visibility_hides_details_but_keeps_delivery": [
+            "assert len(history) == 1 and history[0]['posts'] == []",
+            "assert history[0]['unavailable_post_count'] == 1 and history[0]['recorded_post_count'] == 1"
+          ],
+          "test_bounded_batches_order_and_read_only": [
+            "assert len(history) == 5 and history[0]['delivery_id'] == 'delivery-cycle-5'",
+            "assert len(history[1]['posts']) == 20",
+            "assert [p['post_id'] for p in history[1]['posts']] == [p.id for p in rows[80:100]]",
+            "assert len(statements) <= 6 and all((s.lstrip().upper().startswith('SELECT') for s in statements))",
+            "assert not db.dirty and (not db.new) and (not db.deleted)"
+          ],
+          "test_malformed_receipt_is_bounded_and_never_fake_zero": [
+            "assert group['recorded_post_count'] == count",
+            "assert group['is_partial'] == (count is None)",
+            "assert len(group['posts']) <= 1"
+          ],
+          "test_world_character_and_owner_isolation": [
+            "assert read(scope)['recent_deliveries'] == []",
+            "pytest.raises(TopicPreparationError)",
+            "pytest.raises(TopicPreparationError)"
+          ]
+        },
+        "tests/social/test_recommendation_routes.py": {
+          "test_read_is_side_effect_free_and_mutations_reject_foreign_owner": [
+            "assert response.status_code == 200 and response.json()['state'] == 'pending'",
+            "assert response.json()['recent_deliveries'] == []",
+            "assert not db.scalar(select(RecommendationPreparation))",
+            "assert denied.status_code == 403",
+            "assert denied.status_code == 403",
+            "assert not db.scalar(select(RecommendationPreparation))"
+          ],
+          "test_character_get_history_has_no_write_or_provider_side_effects": [
+            "assert all((s.lstrip().upper().startswith('SELECT') for s in statements))",
+            "assert one.status_code == 200 and one.json() == two.json()",
+            "assert one.json()['recent_deliveries'][0]['posts'][0]['result_state'] == 'no_action'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_recommendation_history.py": {},
+        "tests/social/test_recommendation_routes.py": {}
+      }
+    },
+    {
+      "commit": "04c1fa4d346a23cdc93c33f68efa71012b217db3",
+      "feature_id": "AR-SNS-RELATIONSHIPS",
+      "reason": "Personalized relationship metrics and daily review sources and tests for Issue 335",
+      "tracked_files": {
+        "backend/app/domains/relationships/contracts/daily_review.py": "251a4eb901ee2fb0f8afa603663df3a08f248341",
+        "backend/app/domains/relationships/contracts/metric_interpretation.py": "b22fb757537c97e96bc3afe9a3c7cecd6625b2b7",
+        "backend/app/domains/relationships/models/personalization.py": "b0e5124d073b2fa00637cc6352ae47e333985f42",
+        "backend/app/domains/relationships/policies/daily_review.py": "6d08c0f6d342bd9016b5cb8a5c8c1060b69d972f",
+        "backend/app/domains/relationships/policies/interpretation_prompt.py": "e6d61dd77bbe5742316d45184651e1cc4f17c730",
+        "backend/app/domains/relationships/policies/personalized_metrics.py": "5e92191eb2975f90b924ff163b1e8e5f2f8184ef",
+        "backend/app/domains/relationships/service/daily_review.py": "94bf757b18cd849c441e4f825abf44420f167063",
+        "backend/app/domains/relationships/service/personalized_metrics.py": "bcc08ce986933daa3a31705c5be529a4edc735fa",
+        "backend/app/domains/relationships/service/policy_activation.py": "054d8a9a083c83ce939de28ff70da0649adf9f24",
+        "backend/app/domains/relationships/service/review_status.py": "4cd7c09ecbbbb576c3f6adb519686f2354c92e18",
+        "backend/app/integrations/llm/relationship_review.py": "c6d071be10b68835311700799675f0112167cd0a",
+        "backend/app/runtime/migrations/ladybug_versions/manifests/v3.json": "e03c657664dcc4c152c39f6a212f0e09a43d0f92",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v17.json": "a71705acba878f3ab82d3eef1ef7460630e56f68",
+        "backend/app/runtime/migrations/sqlite_versions/relationship_v17_ddl.py": "f8b7fe89cf261d4893162dec1f92896fda6cee8d",
+        "backend/app/runtime/migrations/sqlite_versions/v16_to_v17_relationship_personalization.py": "0732883c99719dac75d04f11b5a5d206c1f169ea",
+        "backend/app/runtime/relationships/experience_metrics.py": "03ff0bdf04281f5ab1db08c0cb359027d73885c5",
+        "backend/app/runtime/relationships/policy_activation.py": "5ff24ae92a424fcdadad21be1e72f2040a0f0ee8",
+        "backend/app/runtime/relationships/review_identity.py": "5debbacad1bc98c4a08a882cf9a7db3527664d8d",
+        "backend/app/runtime/relationships/review_memories.py": "3f50626af1f1a679b4c06942e4228b593bf0599e",
+        "backend/app/runtime/relationships/review_refresh.py": "71ddf41cc1a65116156ae687dadc56fe4907512c",
+        "backend/app/runtime/relationships/review_runtime.py": "87d0f1d2d39352fc3d5577801391006b740cf046",
+        "backend/app/runtime/relationships/social_metrics.py": "edc4289908c08f074b8b71d58a068977870d6b7c",
+        "backend/scripts/check_relationship_local_ui.py": "fd3e57dfab74d88bbf8418e46272d29e8fda430a",
+        "backend/scripts/measure_relationship_personalization.py": "89254c3b3ed6a79b9788415cb4946cd7f1619252",
+        "backend/tests/chat/test_relationship_metrics_runtime.py": "2812df85be5c628ec4d11925425b4cea6d5338aa",
+        "backend/tests/memory/test_relationship_episode_lineage.py": "53ef157c216a5e12cf4948a3fd7e62d4a88ce989",
+        "backend/tests/social/test_relationship_metrics_runtime.py": "67f7ad70892cb8ecac903f20d8b5d85d951ca932",
+        "backend/tests/test_relationship_daily_review.py": "ade8586255e334f16e700ce413d5971c96834233",
+        "backend/tests/test_relationship_personalization_policy.py": "8f4dd87216b79559aaf41b0c7ae1813afa57ff9d",
+        "backend/tests/test_relationship_personalization_storage.py": "3747f29446fea9f1c500246c1781a6f0fa7ea152",
+        "backend/tests/test_relationship_review_counterparts.py": "2530b6948296a5feb7e11ca815cb7ee4b353da69",
+        "backend/tests/test_relationship_review_recovery.py": "3c4a757070e0a431b037039ecaef5e2c155a7c73",
+        "docs/architecture/evidence/relationship-local-ui.json": "e426fbf83344b2f45c341c6acecfa22b4200c441",
+        "docs/architecture/evidence/relationship-personalization-measurement.json": "8c1838d3e2748a13b721cfd7b477a59f32fca8cb",
+        "docs/architecture/relationship-personalization-implementation.md": "0d5ad3338c69b551d848dbc276451b754ff102a5",
+        "frontend/src/features/relationships/components/relationship-review-panel.tsx": "aef2b6d072da776111c767ebd685a2a2c61a0c47"
+      },
+      "test_nodes": [
+        "tests/chat/test_relationship_metrics_runtime.py::test_committed_chat_metadata_is_applied_once_to_fixed_persona",
+        "tests/chat/test_relationship_metrics_runtime.py::test_crg_relation_metadata_does_not_regenerate_valid_text[None-False]",
+        "tests/chat/test_relationship_metrics_runtime.py::test_crg_relation_metadata_does_not_regenerate_valid_text[None-True]",
+        "tests/chat/test_relationship_metrics_runtime.py::test_crg_relation_metadata_does_not_regenerate_valid_text[metadata1-False]",
+        "tests/chat/test_relationship_metrics_runtime.py::test_crg_relation_metadata_does_not_regenerate_valid_text[metadata1-True]",
+        "tests/chat/test_relationship_metrics_runtime.py::test_retained_owner_persona_is_still_a_valid_memory_counterpart",
+        "tests/memory/test_relationship_episode_lineage.py::test_episode_correction_chain_retains_eligibility_without_rewriting_episode",
+        "tests/social/test_relationship_metrics_runtime.py::test_read_without_comment_and_cross_lane_replay_only_apply_once",
+        "tests/test_l3_er3_ladybug_projection.py::test_current_snapshot_without_social_event_preserves_text_and_rejects_same_version_conflict",
+        "tests/test_relationship_daily_review.py::test_direct_result_is_durable_and_applied_once_without_metric_change",
+        "tests/test_relationship_daily_review.py::test_split_retry_reuses_finished_parts_and_only_final_updates",
+        "tests/test_relationship_personalization_policy.py::test_clamps_do_not_consume_unused_budget",
+        "tests/test_relationship_personalization_policy.py::test_final_review_cannot_invent_references_or_unbounded_perception",
+        "tests/test_relationship_personalization_policy.py::test_limits_are_shared_but_directional_not_net",
+        "tests/test_relationship_personalization_policy.py::test_optional_metadata_failure_is_distinct_from_keep",
+        "tests/test_relationship_personalization_policy.py::test_partition_preserves_full_memories_and_reduces_bounded_outputs",
+        "tests/test_relationship_personalization_policy.py::test_scope_refs_are_bounded_and_duplicates_rejected",
+        "tests/test_relationship_personalization_storage.py::test_confirmed_experience_replay_preserves_single_delta_and_outbox",
+        "tests/test_relationship_personalization_storage.py::test_pre_activation_source_never_gets_replayed_as_new_experience",
+        "tests/test_relationship_personalization_storage.py::test_v16_upgrade_and_fresh_install_have_identical_schema",
+        "tests/test_relationship_review_counterparts.py::test_null_representative_requires_verified_single_counterpart[multiple-counterpart_ambiguous_or_missing]",
+        "tests/test_relationship_review_counterparts.py::test_null_representative_requires_verified_single_counterpart[single-None]",
+        "tests/test_relationship_review_counterparts.py::test_null_representative_requires_verified_single_counterpart[unobserved-source_unavailable_or_changed]",
+        "tests/test_relationship_review_counterparts.py::test_null_representative_requires_verified_single_counterpart[wrong_world-source_unavailable_or_changed]",
+        "tests/test_relationship_review_recovery.py::test_modified_result_is_rejected_and_view_conflict_rebases",
+        "tests/test_relationship_review_recovery.py::test_provider_incomplete_splits_without_applying_partial_state",
+        "tests/world_characters/test_owner_identity.py::test_persona_replacement_reselection_preserves_fixed_ids_and_rejects_npc"
+      ],
+      "test_assertions": {
+        "tests/chat/test_relationship_metrics_runtime.py": {
+          "test_committed_chat_metadata_is_applied_once_to_fixed_persona": [
+            "assert application.status == 'pending'",
+            "assert state.actor_world_character_id == 'response-responding'",
+            "assert state.target_world_character_id == 'response-requester'",
+            "assert (state.familiarity, state.trust) == (1, 1)",
+            "assert state.version == version",
+            "assert len(list(db.scalars(select(RelationshipMetricApplication)))) == 1"
+          ],
+          "test_retained_owner_persona_is_still_a_valid_memory_counterpart": [
+            "assert list(active_participant_ids(db, [old.id], 'response-world')) == [old.id]",
+            "assert list(active_participant_ids(db, [old.id], 'response-world')) == []"
+          ],
+          "test_crg_relation_metadata_does_not_regenerate_valid_text": [
+            "assert result.text == '함께 해보자.'",
+            "assert len(calls) == 1",
+            "assert 'recent_context' in calls[0]['user_prompt']",
+            "assert result.activity_thought is None",
+            "assert 'thought' not in calls[0]['response_schema']['required']"
+          ]
+        },
+        "tests/memory/test_relationship_episode_lineage.py": {
+          "test_episode_correction_chain_retains_eligibility_without_rewriting_episode": [
+            "assert set(db.scalars(select(lineage.c.id))) == {ids[0], 'corrected-0', 'corrected-1'}"
+          ]
+        },
+        "tests/social/test_relationship_metrics_runtime.py": {
+          "test_read_without_comment_and_cross_lane_replay_only_apply_once": [
+            "assert f.relationship.affinity == before + 1",
+            "assert f.relationship.version == version",
+            "assert len(list(db.scalars(select(RelationshipMetricApplication)))) == 1"
+          ]
+        },
+        "tests/test_l3_er3_ladybug_projection.py": {
+          "_event": [],
+          "_relationship": [],
+          "_root": [],
+          "test_projection_schema_contains_no_human_node_table": [
+            "assert 'CREATE NODE TABLE IF NOT EXISTS WorldCharacter' in bootstrap",
+            "assert 'CREATE NODE TABLE IF NOT EXISTS Human' not in bootstrap"
+          ],
+          "test_schema_projection_is_idempotent_and_reopens": [
+            "assert first_digest == {'world_characters': ['[\"wc-mango\"]', '[\"wc-sage\"]'], 'events': ['[\"event-comment-1\"]'], 'relationships': ['[\"relationship-world-arcana\",\"wc-mango\",\"wc-sage\",2,14,9,7,2,5,null,null,1]'], 'evidence': ['[\"relationship-world-arcana\",\"wc-mango\",\"wc-sage\",\"event-comment-1\",2]']}",
+            "assert projection.apply(command) == 'applied'",
+            "assert projection.apply(command) == 'applied'",
+            "assert reopened.world_digest(command.event.world_id) == first_digest"
+          ],
+          "test_event_without_target_projects_only_actor_and_source": [
+            "assert digest == {'world_characters': ['[\"wc-mango\"]'], 'events': ['[\"event-post-1\"]'], 'relationships': [], 'evidence': []}",
+            "assert projection.apply(event) == 'applied'",
+            "assert projection.apply(event) == 'applied'"
+          ],
+          "test_stale_version_does_not_replace_relationship_state": [
+            "assert digest['relationships'] == ['[\"relationship-world-arcana\",\"wc-mango\",\"wc-sage\",3,15,10,8,3,6,null,null,1]']",
+            "assert projection.apply(current) == 'applied'",
+            "assert projection.apply(stale) == 'stale_noop'"
+          ],
+          "test_source_exclusion_is_idempotent_and_removes_only_evidence": [
+            "assert digest['events'] == []",
+            "assert digest['evidence'] == []",
+            "assert len(digest['relationships']) == 1",
+            "assert projection.apply(command) == 'applied'",
+            "assert projection.apply(exclusion) == 'removed'",
+            "assert projection.apply(exclusion) == 'noop'"
+          ],
+          "test_world_scope_clear_and_noop_do_not_cross_worlds": [
+            "assert projection.apply(arcana) == 'applied'",
+            "assert projection.apply(other) == 'applied'",
+            "assert projection.apply(NoGraphMutationCommand(world_id=arcana.event.world_id, event_id='noop-1', reason='unsupported_event')) == 'noop'",
+            "assert projection.world_digest(arcana.event.world_id) == {'world_characters': [], 'events': [], 'relationships': [], 'evidence': []}",
+            "assert len(projection.world_digest(other.event.world_id)['relationships']) == 1"
+          ],
+          "test_second_read_write_owner_is_rejected_and_lock_is_released": [
+            "pytest.raises(LadybugProjectionError)",
+            "assert exc_info.value.error_class == 'ladybug_writer_lock_unavailable'"
+          ],
+          "_UnavailableLadybugProjection::apply": [],
+          "test_ladybug_outage_keeps_sqlite_outbox_pending": [
+            "assert result.retried == 1",
+            "assert result.graph_degraded is True",
+            "assert row is not None",
+            "assert row.status == 'pending'",
+            "assert row.last_error_class == 'ladybug_unavailable'",
+            "assert row.lease_owner is None"
+          ],
+          "test_current_snapshot_without_social_event_preserves_text_and_rejects_same_version_conflict": [
+            "assert projection.apply(command) == 'applied'",
+            "assert projection.apply(command) == 'applied'",
+            "assert projection.apply(replace(command, relationship_version=4)) == 'stale_noop'",
+            "pytest.raises(LadybugProjectionError)",
+            "assert digest['events'] == []",
+            "assert digest['evidence'] == []",
+            "assert '함께 성장하는 동료' in __import__('json').loads(digest['relationships'][0])",
+            "assert projection.world_digest('world-arcana') == digest"
+          ]
+        },
+        "tests/test_relationship_daily_review.py": {
+          "References::revalidate": [
+            "assert work.actor_world_character_id != work.target_world_character_id"
+          ],
+          "Provider::__init__": [],
+          "Provider::review": [],
+          "seed": [],
+          "run": [],
+          "test_direct_result_is_durable_and_applied_once_without_metric_change": [
+            "assert run(factory, root_id, provider) == 'ready'",
+            "assert run(factory, root_id, provider) == 'ready'",
+            "assert len(provider.calls) == 1",
+            "assert state.relationship_label is None",
+            "assert apply_review(db, work_id=root_id, references=References(), now=datetime.now(UTC)) == 'applied'",
+            "assert apply_review(db, work_id=root_id, references=References(), now=datetime.now(UTC)) == 'applied'",
+            "assert state.version == version",
+            "assert before == (state.familiarity, state.affinity, state.trust, state.tension)",
+            "assert state.relationship_label == '함께 성장하는 동료'",
+            "assert set(db.scalars(select(RelationshipReviewMemoryReceipt.status))) == {'applied'}"
+          ],
+          "test_split_retry_reuses_finished_parts_and_only_final_updates": [
+            "assert run(factory, root_id, provider) == 'waiting_for_parts'",
+            "assert not provider.calls",
+            "assert run(factory, parts[0], provider) == 'ready'",
+            "assert run(factory, parts[1], provider) == 'retry_pending'",
+            "assert run(factory, parts[0], provider) == 'ready'",
+            "assert run(factory, root_id, provider) == 'ready'",
+            "assert len(provider.calls) == len(parts) + 2",
+            "assert len(parts) > 1",
+            "assert run(factory, part, provider) == 'ready'",
+            "assert db.get(RelationshipState, state_id).perception is None",
+            "assert set(db.scalars(select(RelationshipReviewMemoryReceipt.status))) == {'pending'}",
+            "assert apply_review(db, work_id=root_id, references=References(), now=datetime.now(UTC)) == 'applied'"
+          ]
+        },
+        "tests/test_relationship_personalization_policy.py": {
+          "proposal": [],
+          "test_optional_metadata_failure_is_distinct_from_keep": [
+            "assert parse_metric_interpretations(None).status == 'missing'",
+            "assert parse_metric_interpretations([]).status == 'valid'",
+            "assert parse_metric_interpretations([{'trust': 99}]).status == 'invalid'"
+          ],
+          "test_scope_refs_are_bounded_and_duplicates_rejected": [
+            "assert parse_metric_interpretations([row, row]).status == 'invalid'",
+            "assert parse_metric_interpretations([row], max_targets=0).status == 'invalid'",
+            "assert parse_metric_interpretations([{**row, 'new_evidence_refs': ['p'] * 4}]).status == 'invalid'"
+          ],
+          "test_limits_are_shared_but_directional_not_net": [
+            "assert current == dict(familiarity=4, affinity=0, trust=2, tension=16)",
+            "assert current == dict(familiarity=4, affinity=0, trust=0, tension=20)",
+            "assert result.deltas == dict(familiarity=0, affinity=0, trust=0, tension=0)"
+          ],
+          "test_clamps_do_not_consume_unused_budget": [
+            "assert result.usage == {}",
+            "assert not any(result.deltas.values())"
+          ],
+          "test_partition_preserves_full_memories_and_reduces_bounded_outputs": [
+            "assert len(partitions) > 1",
+            "assert all((fits_input(p) for p in partitions))",
+            "assert [m for p in partitions for m in p['memories']] == entries",
+            "assert partition_review_inputs({}, []) == []"
+          ],
+          "test_final_review_cannot_invent_references_or_unbounded_perception": [
+            "pytest.raises(ValueError)",
+            "assert validate_review_result({'decision': 'keep', 'memory_refs': []}, partial=False, allowed_refs={'m'})['decision'] == 'keep'",
+            "pytest.raises(ValueError)"
+          ]
+        },
+        "tests/test_relationship_personalization_storage.py": {
+          "References::__init__": [],
+          "References::validate": [
+            "assert (source.world_id, source.actor_id, source.target_id, source.key) == (self.source.world_id, self.source.actor_id, self.source.target_id, self.source.key)"
+          ],
+          "test_confirmed_experience_replay_preserves_single_delta_and_outbox": [
+            "assert app is not None",
+            "assert replay.id == app.id",
+            "assert f.relationship.trust == before + 1",
+            "assert len(db.scalars(select(RelationshipMetricApplication)).all()) == 1",
+            "assert len(db.scalars(select(GraphProjectionOutbox).where(GraphProjectionOutbox.projection_type == 'relationship_snapshot')).all()) == 1"
+          ],
+          "test_pre_activation_source_never_gets_replayed_as_new_experience": [
+            "assert stage_experience(db, references=References(source), source=source, decision_key='new-read', interpretation=None) is None"
+          ],
+          "test_v16_upgrade_and_fresh_install_have_identical_schema": [
+            "assert digests[0] == digests[1] == manifest['schema_digest']",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(connection) == old_manifest['schema_digest']"
+          ]
+        },
+        "tests/test_relationship_review_counterparts.py": {
+          "test_null_representative_requires_verified_single_counterpart": [
+            "assert actual == reason",
+            "assert item.counterpart_world_character_id is None",
+            "assert target == f.target_world_character.id",
+            "assert payload['summary'] == item.summary"
+          ]
+        },
+        "tests/test_relationship_review_recovery.py": {
+          "test_modified_result_is_rejected_and_view_conflict_rebases": [
+            "assert run(factory, root_id, Provider()) == 'ready'",
+            "pytest.raises(ValueError, match='result_changed')",
+            "assert apply_review(db, work_id=root_id, references=References(), now=datetime.now(UTC)) == 'rebased'",
+            "assert root.status == 'pending'",
+            "assert state.perception == '이미 다른 검토에서 갱신됨'"
+          ],
+          "test_provider_incomplete_splits_without_applying_partial_state": [
+            "assert run(factory, root_id, Incomplete()) == 'split_pending'",
+            "assert root.phase == 'final'",
+            "assert root.status == 'pending'",
+            "assert len(parts) == 2",
+            "assert sum((len(p.manifest['payload']['memories']) for p in parts)) == 4"
+          ]
+        },
+        "tests/world_characters/test_owner_identity.py": {
+          "_user": [],
+          "_fixture": [],
+          "_seed_world": [],
+          "_payload": [],
+          "test_owner_identity_create_update_reentry_is_private_and_write_bounded": [
+            "assert created.status_code == 201",
+            "assert payload['control_mode'] == 'owner_controlled'",
+            "assert payload['autonomous_enabled'] is False",
+            "assert payload['profile']['display_name'] == '구름'",
+            "assert 'owner_user_id' not in created.text",
+            "assert 'owner-a@example.test' not in created.text",
+            "assert duplicate.status_code == 409",
+            "assert duplicate.json() == {'detail': 'owner_controlled_identity_exists'}",
+            "assert updated.status_code == 200",
+            "assert updated.json()['version'] == 2",
+            "assert updated.json()['profile']['interests'] == ['친구']",
+            "assert reentered.status_code == 200",
+            "assert reentered.json() == updated.json()",
+            "assert world_character is not None",
+            "assert world_character.owner_user_id == 'owner-a'",
+            "assert world_character.control_mode == 'owner_controlled'",
+            "assert world_character.autonomous_enabled is False",
+            "assert character is not None and character.execution_mode == 'local'",
+            "assert db.query(models.Post).count() == 0",
+            "assert db.query(models.Comment).count() == 0",
+            "assert db.query(models.AgentRun).count() == 0"
+          ],
+          "test_owner_identity_rejects_cross_owner_and_cross_world_role": [
+            "assert forbidden.status_code == 403",
+            "assert forbidden.json() == {'detail': 'local_owner_required'}",
+            "assert invalid_role.status_code == 422",
+            "assert invalid_role.json() == {'detail': 'owner_controlled_role_invalid'}"
+          ],
+          "test_creator_studio_lists_existing_world_characters_without_writes": [
+            "assert response.status_code == 200",
+            "assert payload['schema_version'] == 'studio-world-character-list-v1'",
+            "assert payload['world_id'] == 'world-a'",
+            "assert by_mode['autonomous'] == {'world_character_id': 'wc-autonomous-studio', 'character_id': 'autonomous-studio', 'display_name': '망고', 'confirmation_name': '망고', 'avatar_url': 'https://example.test/mango.png', 'intro': '마법학교의 자율 앵무', 'role_key': 'student', 'control_mode': 'autonomous', 'status': 'active', 'autonomous_enabled': False, 'selected_active_world': False, 'version': 3, 'activity_setup_state': 'approved'}",
+            "assert by_mode['owner_controlled']['character_id'] == owner_identity['character_id']",
+            "assert by_mode['owner_controlled']['activity_setup_state'] == 'unavailable_for_owner_controlled'",
+            "assert forbidden.status_code == 403",
+            "assert before == (db.query(models.Post).count(), db.query(models.Comment).count(), db.query(models.AgentRun).count())"
+          ],
+          "test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous": [
+            "assert [slot.agent_id for slot in claimed] == ['slot-autonomous']",
+            "assert db.get(models.AgentSlot, 'slot-owner').status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE"
+          ],
+          "test_owner_controlled_execution_preflight_blocks_run_now_and_provider": [
+            "assert owner is not None and character is not None",
+            "pytest.raises(agent_service.AgentExecutionModeError, match='owner_controlled_manual_write_not_available')",
+            "assert result.status == 'no_action'",
+            "assert result.gateway_result == {'status': 'no_action', 'reason_code': 'owner_controlled_automation_disabled', 'provider_call_count': 0, 'public_write_count': 0}",
+            "assert released is not None",
+            "assert released.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE",
+            "assert released.locked_by_run_id is None",
+            "assert released.last_error == 'owner_controlled_automation_disabled'",
+            "assert db.query(models.AgentRun).count() == 0",
+            "assert db.query(models.Post).count() == 0",
+            "assert db.query(models.Comment).count() == 0"
+          ],
+          "test_owner_controlled_migration_refuses_provenance_losing_downgrade": [
+            "assert spec is not None and spec.loader is not None",
+            "pytest.raises(RuntimeError, match='downgrade_refused_owner_controlled_world_characters_exist')"
+          ],
+          "test_persona_replacement_reselection_preserves_fixed_ids_and_rejects_npc": [
+            "assert first.status_code == 201",
+            "assert second.status_code == 200",
+            "assert second.json()['world_character_id'] != original['world_character_id']",
+            "assert len(listing.json()) == 2",
+            "assert restored.status_code == 200",
+            "assert restored.json()['character_id'] == original['character_id']",
+            "assert client.post('/api/v1/worlds/world-a/owner-characters/npc-id/select', headers=FRONTEND_HEADERS).status_code == 404"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_relationship_metrics_runtime.py": {},
+        "tests/memory/test_relationship_episode_lineage.py": {},
+        "tests/social/test_relationship_metrics_runtime.py": {},
+        "tests/test_l3_er3_ladybug_projection.py": {},
+        "tests/test_relationship_daily_review.py": {},
+        "tests/test_relationship_personalization_policy.py": {},
+        "tests/test_relationship_personalization_storage.py": {},
+        "tests/test_relationship_review_counterparts.py": {},
+        "tests/test_relationship_review_recovery.py": {},
+        "tests/world_characters/test_owner_identity.py": {}
+      }
+    },
+    {
+      "commit": "65c97262cb384093f1c0bde2c801a9129b385087",
+      "feature_id": "AR-SNS-APPROVED-SETUP",
+      "reason": "Approved setup continuity in Topic Feed sources and tests for Issue 335",
+      "tracked_files": {
+        "backend/app/domains/social/schemas/feed_status.py": "5fb4411f761182c3cff716a0775eeb0da50bcd29",
+        "backend/app/runtime/social/feed_status.py": "bec3e3532870340a8ca6517a5cec1f36c55c7f50",
+        "backend/scripts/check_feed_local_ui.py": "d5eacdab92d98ff87683adf5b4a5025f08c24be9",
+        "backend/scripts/check_feed_readiness.py": "3568f2588ff94ccb94a23457ab6156f0f8e96709",
+        "backend/tests/social/test_feed_approved_continuity.py": "c50ce1a3f4fbed3907f0a77cec53ce78953c295a",
+        "docs/architecture/evidence/feed-readiness-local-ui.json": "2ecfbee7642ff38832e444fe0a8919fa739611c7",
+        "docs/architecture/feed-approved-continuity-implementation.md": "26badfbe515efe911c35dac8e3438564c31d0a9d",
+        "frontend/src/features/social/api/feed-status.ts": "1834b7330e3fb0743aaea76d9d88bb2992d2b897",
+        "frontend/src/features/social/components/feed-status.tsx": "90f42b4e4a333dc27030e92f5051131ae5d4432e"
+      },
+      "test_nodes": [
+        "tests/social/test_feed_approved_continuity.py::test_candidate_revalidation_rejects_world_change_after_planning",
+        "tests/social/test_feed_approved_continuity.py::test_feed_preserves_approved_pair_after_persona_save[\\uc0c8\\ub85c\\uc6b4 \\uc131\\uaca9]",
+        "tests/social/test_feed_approved_continuity.py::test_feed_preserves_approved_pair_after_persona_save[\\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 \\uc644\\uc804\\ud788 \\ub2e4\\ub978 \\uc131\\uaca9 ]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[character_deleted]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[inactive]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[membership]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[missing]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[owner_controlled]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[profile_status]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[repertoire_hash]",
+        "tests/social/test_feed_approved_continuity.py::test_invalid_scope_or_pair_remains_blocked[world_hash]",
+        "tests/social/test_feed_approved_continuity.py::test_new_candidate_failure_rejection_and_approval_keep_feed_pair_contract",
+        "tests/social/test_feed_approved_continuity.py::test_pair_identity_is_checked_even_if_adapter_returns_bad_pair[broken_link]",
+        "tests/social/test_feed_approved_continuity.py::test_pair_identity_is_checked_even_if_adapter_returns_bad_pair[foreign_profile]",
+        "tests/social/test_feed_approved_continuity.py::test_pair_identity_is_checked_even_if_adapter_returns_bad_pair[foreign_repertoire]",
+        "tests/social/test_feed_approved_continuity.py::test_preflight_failure_has_no_candidate_zero_or_delivery_claim",
+        "tests/social/test_feed_approved_continuity.py::test_status_is_read_only_and_scope_bound_and_survives_compaction",
+        "tests/social/test_feed_approved_continuity.py::test_topic_regeneration_does_not_rewrite_approved_provenance"
+      ],
+      "test_assertions": {
+        "tests/social/test_feed_approved_continuity.py": {
+          "test_feed_preserves_approved_pair_after_persona_save": [
+            "assert profile.profile.id == approved.profile.id",
+            "assert entry.character_contract_hash == original"
+          ],
+          "test_invalid_scope_or_pair_remains_blocked": [
+            "pytest.raises(WorldFeedReadinessError)",
+            "assert read_feed_status(db, world_character_id=entry.id).readiness.state == 'blocked'"
+          ],
+          "test_status_is_read_only_and_scope_bound_and_survives_compaction": [
+            "assert compact == _stored_gateway_result(compact)",
+            "assert 'private' not in str(compact)",
+            "assert status.readiness.state == 'ready'",
+            "assert status.last_attempt.run_id == 'status-0'",
+            "assert status.last_attempt.delivered_count == 1",
+            "assert not writes",
+            "assert status.readiness.state == 'blocked'",
+            "assert status.last_attempt.result == 'model_abstained'"
+          ],
+          "test_preflight_failure_has_no_candidate_zero_or_delivery_claim": [
+            "assert compact['result'] == 'approved_setup_required'",
+            "assert 'candidate_count' not in compact and compact['delivered_count'] == 0",
+            "assert provider.plan_calls == provider.writer_calls == 0",
+            "assert db.scalar(select(RecommendationDelivery)) is None",
+            "assert db.scalar(select(models.WorldCharacterFeedCursor)) is None"
+          ],
+          "test_candidate_revalidation_rejects_world_change_after_planning": [
+            "assert candidates.candidates",
+            "assert revalidate_candidate_actions(db, references=refs, profile=profile, candidate=candidates.candidates[0], allowed_policy_actions=ctx.activity_policy.allowed_actions) is None"
+          ],
+          "test_new_candidate_failure_rejection_and_approval_keep_feed_pair_contract": [
+            "pytest.raises(WorldCharacterSetupError)",
+            "assert current() == approved.profile.id",
+            "assert current() == approved.profile.id",
+            "assert current() == approved.profile.id",
+            "assert current() == candidate.profile.id"
+          ],
+          "test_topic_regeneration_does_not_rewrite_approved_provenance": [
+            "assert result['state'] == 'ready'",
+            "assert baseline() == before",
+            "assert load_ready_search_profile(db, references=refs, world_character_id=entry.id).profile.id == approved.profile.id"
+          ],
+          "test_pair_identity_is_checked_even_if_adapter_returns_bad_pair": [
+            "pytest.raises(WorldFeedReadinessError, match='approved_setup_invalid')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_feed_approved_continuity.py": {}
+      }
+    },
+    {
+      "commit": "13a64a7500d74dc0cda8f0863fffc0e1be183c75",
+      "feature_id": "AR-SNS-MANUAL-REVIEW",
+      "reason": "Durable manual memory and relationship review sources and tests for Issue 335",
+      "tracked_files": {
+        "backend/app/domains/relationships/models/manual_review.py": "8c52c32845df9c34efdd4cd438ff00a3fdb18922",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v18.json": "f69a75237c40d7bfe142c219f22b4a7651eae6f0",
+        "backend/app/runtime/migrations/sqlite_versions/v17_to_v18_manual_review.py": "43d98f46c5add0332318f8f6058f3cb747321c3e",
+        "backend/app/runtime/relationships/manual_review.py": "996daf020416d047448c2c92a066d54751b9cbc5",
+        "backend/app/runtime/relationships/manual_review_worker.py": "4d76261604d9345003aa54f64a1392a7dc3a76d8",
+        "backend/tests/memory/test_manual_relationship_followup.py": "e213b96b3a394bdafabe35210761699401a4a650",
+        "docs/architecture/manual-memory-relationship-consolidation.md": "8b421c0e76331c383ebe0723f1c6316f9feef8fa"
+      },
+      "test_nodes": [
+        "tests/memory/test_manual_relationship_followup.py::test_active_automatic_root_does_not_lose_leftover_memory",
+        "tests/memory/test_manual_relationship_followup.py::test_admission_failure_rolls_back_both_receipts",
+        "tests/memory/test_manual_relationship_followup.py::test_atomic_admission_replay_coalesce_and_pure_read",
+        "tests/memory/test_manual_relationship_followup.py::test_automatic_manual_concurrent_planning_uses_one_root",
+        "tests/memory/test_manual_relationship_followup.py::test_capacity_allows_empty_memory_stage_but_blocks_new_generation",
+        "tests/memory/test_manual_relationship_followup.py::test_concurrent_http_admission_has_one_canonical_followup[False]",
+        "tests/memory/test_manual_relationship_followup.py::test_concurrent_http_admission_has_one_canonical_followup[True]",
+        "tests/memory/test_manual_relationship_followup.py::test_failed_memory_jobs_block_followup_and_retry_is_request_scoped[False]",
+        "tests/memory/test_manual_relationship_followup.py::test_failed_memory_jobs_block_followup_and_retry_is_request_scoped[True]",
+        "tests/memory/test_manual_relationship_followup.py::test_frozen_snapshot_ignores_late_memory",
+        "tests/memory/test_manual_relationship_followup.py::test_incomplete_memory_never_starts_relationship[cancelled]",
+        "tests/memory/test_manual_relationship_followup.py::test_incomplete_memory_never_starts_relationship[paused]",
+        "tests/memory/test_manual_relationship_followup.py::test_incomplete_memory_never_starts_relationship[preparing]",
+        "tests/memory/test_manual_relationship_followup.py::test_progress_counts_all_roots_and_preserves_partial_success",
+        "tests/memory/test_manual_relationship_followup.py::test_retry_preserves_provider_backoff_and_completed_parts",
+        "tests/memory/test_manual_relationship_followup.py::test_saved_memories_only_run_without_schedule_and_survive_restart[keep]",
+        "tests/memory/test_manual_relationship_followup.py::test_saved_memories_only_run_without_schedule_and_survive_restart[update]",
+        "tests/memory/test_manual_relationship_followup.py::test_v18_migration_preserves_v17_manifest_and_fresh_parity"
+      ],
+      "test_assertions": {
+        "tests/memory/test_manual_relationship_followup.py": {
+          "setup": [],
+          "finish_memory": [],
+          "memories": [],
+          "test_atomic_admission_replay_coalesce_and_pure_read": [
+            "assert first['flow_state'] == 'memory_running'",
+            "assert service.submit(scope=scope, db=db, workflows=workflows, data=data)['request_id'] == first['request_id']",
+            "assert second['relationship']['request_id'] == first['request_id']",
+            "assert db.scalar(select(func.count()).select_from(RelationshipReviewRequest)) == before",
+            "assert db.scalar(select(func.count()).select_from(RelationshipReviewWork)) == 0",
+            "assert service.read(scope=scope, db=db, workflows=workflows)['progress']['flow_state'] == 'relationship_waiting'"
+          ],
+          "test_admission_failure_rolls_back_both_receipts": [
+            "pytest.raises(RuntimeError)",
+            "assert db.scalar(select(func.count()).select_from(RelationshipReviewRequest)) == 0",
+            "assert db.scalar(select(func.count()).select_from(MemoryConsolidationRequest)) == 0"
+          ],
+          "test_incomplete_memory_never_starts_relationship": [
+            "assert db.get(RelationshipReviewRequest, row.id).snapshot is None"
+          ],
+          "test_saved_memories_only_run_without_schedule_and_survive_restart": [
+            "assert len(request.snapshot) == 2 and len(request.work_ids) == 1",
+            "assert asyncio.run(run_review_step(factory, work_id=work_id, references_factory=lambda db: References(), provider_factory=lambda base: provider)) == 'ready'",
+            "assert read['flow_state'] == 'completed'",
+            "assert read['relationship']['kept_count' if decision == 'keep' else 'changed_count'] == 1",
+            "assert len(provider.calls) == 1",
+            "assert db.scalar(select(func.count()).select_from(MemoryItem)) == len(payloads)",
+            "assert service.read(scope=scope, db=db, workflows=workflows)['progress']['flow_state'] == 'no_work'"
+          ],
+          "test_active_automatic_root_does_not_lose_leftover_memory": [
+            "assert len(request.snapshot) == 2 and request.work_ids == [root.id]",
+            "assert len(request.work_ids) == 2",
+            "assert [m['memory_id'] for m in later.manifest['memories']] == [payloads[1]['memory_id']]",
+            "assert result['flow_state'] == 'completed'",
+            "assert result['relationship']['target_count'] == result['relationship']['completed_count'] == 1"
+          ],
+          "test_v18_migration_preserves_v17_manifest_and_fresh_parity": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest"
+          ],
+          "test_concurrent_http_admission_has_one_canonical_followup": [
+            "assert len({r['relationship']['request_id'] for r in results}) == 1",
+            "assert session.scalar(select(func.count()).select_from(RelationshipReviewRequest).where(RelationshipReviewRequest.canonical_request_id.is_(None))) == 1"
+          ],
+          "test_automatic_manual_concurrent_planning_uses_one_root": [
+            "assert len(set(ids)) == 1",
+            "assert session.scalar(select(func.count()).select_from(RelationshipReviewWork)) == 1",
+            "assert session.scalar(select(func.count()).select_from(RelationshipReviewMemoryReceipt)) == 2"
+          ],
+          "test_frozen_snapshot_ignores_late_memory": [
+            "assert request.snapshot == frozen",
+            "assert len(request.work_ids) == 1"
+          ],
+          "test_retry_preserves_provider_backoff_and_completed_parts": [
+            "assert work.next_attempt_at == before",
+            "assert service.read(scope=scope, db=db, workflows=workflows)['progress']['flow_state'] == 'relationship_retry_needed'"
+          ],
+          "test_capacity_allows_empty_memory_stage_but_blocks_new_generation": [
+            "assert service.read(scope=scope, db=db, workflows=workflows)['progress']['state'] == 'no_work'",
+            "assert value['state'] == 'paused' and value['last_code'] == 'memory_capacity_reached'"
+          ],
+          "test_failed_memory_jobs_block_followup_and_retry_is_request_scoped": [
+            "assert value['state'] == ('partial_failed' if partial else 'failed')",
+            "assert db.get(RelationshipReviewRequest, result['request_id']).snapshot is None",
+            "assert set(requested) == ({'failed', 'success'} if partial else {'failed'})",
+            "assert db.get(MemoryMaintenanceJob, 'unrelated').status == 'failed'",
+            "assert db.get(MemoryMaintenanceJob, 'success').status == 'succeeded'"
+          ],
+          "test_progress_counts_all_roots_and_preserves_partial_success": [
+            "assert value['flow_state'] == 'relationship_retry_needed'",
+            "assert value['relationship']['memory_count'] == 45",
+            "assert value['relationship']['target_count'] == 2",
+            "assert value['relationship']['completed_count'] == value['relationship']['kept_count'] == 1",
+            "assert all((db.get(RelationshipReviewWork, identifier).status == 'applied' for identifier in roots[:-1]))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_manual_relationship_followup.py": {}
+      }
+    },
+    {
+      "commit": "1a663b1be92b8b2727d1a6de95450d17cc8dbccd",
+      "feature_id": "AR-SNS-SNAPSHOT-DATES",
+      "reason": "Relationship snapshot date normalization test for Issue 335",
+      "tracked_files": {
+        "backend/tests/relationships/test_snapshot_dates.py": "74aa33a1262f444bd66276e7fafb03a52849c40d"
+      },
+      "test_nodes": [
+        "tests/relationships/test_snapshot_dates.py::test_canonical_and_graph_switch_during_snapshot_and_revalidation[False]",
+        "tests/relationships/test_snapshot_dates.py::test_canonical_and_graph_switch_during_snapshot_and_revalidation[True]",
+        "tests/relationships/test_snapshot_dates.py::test_nullable_dates_keep_existing_parser_contract[None]",
+        "tests/relationships/test_snapshot_dates.py::test_nullable_dates_keep_existing_parser_contract[invalid-date]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes0]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes1]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes2]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes3]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes4]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes5]",
+        "tests/relationships/test_snapshot_dates.py::test_real_changes_remain_rejected[changes6]",
+        "tests/relationships/test_snapshot_dates.py::test_routine_publication_uses_real_snapshot_fences[None]",
+        "tests/relationships/test_snapshot_dates.py::test_routine_publication_uses_real_snapshot_fences[planner]",
+        "tests/relationships/test_snapshot_dates.py::test_routine_publication_uses_real_snapshot_fences[writer]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22 13:11:59.123456+09:00-False]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22 13:11:59.123456+09:00-True]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22T04:11:59.123456+00:00-False]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22T04:11:59.123456+00:00-True]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22T04:11:59.123456Z-False]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[2026-09-22T04:11:59.123456Z-True]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[value0-False]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[value0-True]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[value1-False]",
+        "tests/relationships/test_snapshot_dates.py::test_same_instant_has_one_recall_representation[value1-True]",
+        "tests/relationships/test_snapshot_dates.py::test_temporary_ladybug_review_dates_roundtrip[False]",
+        "tests/relationships/test_snapshot_dates.py::test_temporary_ladybug_review_dates_roundtrip[True]"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_snapshot_dates.py": {
+          "date_hit": [],
+          "test_same_instant_has_one_recall_representation": [
+            "assert actual.reviewed_at == NOW",
+            "assert actual.view_updated_at == (NOW if updated else None)"
+          ],
+          "test_nullable_dates_keep_existing_parser_contract": [
+            "assert actual.reviewed_at is None and actual.view_updated_at is None"
+          ],
+          "test_canonical_and_graph_switch_during_snapshot_and_revalidation": [
+            "assert len(snapshot.items) == 1",
+            "assert 'changed_during_preparation' not in snapshot.truncation_reasons",
+            "assert gateway.stale_edges > 0"
+          ],
+          "test_real_changes_remain_rejected": [
+            "pytest.raises(SocialContextChangedError)"
+          ],
+          "test_temporary_ladybug_review_dates_roundtrip": [
+            "assert graph_value == sqlite_value",
+            "assert graph_value.reviewed_at == NOW"
+          ],
+          "test_routine_publication_uses_real_snapshot_fences": [
+            "assert calls == (['RoutineBeatPlanner'] if change_at == 'planner' else ['RoutineBeatPlanner', 'PostWriter'])",
+            "assert output['status'] == 'completed'",
+            "assert output['publish_result']['public_action_count'] == 1",
+            "assert len(posts) == 1",
+            "assert len(executions) == 1 and executions[0].status == 'succeeded'",
+            "assert len(list(db.scalars(select(models.Post)))) == 1",
+            "assert output['status'] == 'failed'",
+            "assert posts == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_snapshot_dates.py": {}
+      }
+    },
+    {
+      "commit": "737dab337a76fc12512970234632f17da9814235",
+      "feature_id": "AR-SNS-FEED-DECISION",
+      "reason": "Feed non-comment decision normalization tests for Issue 335",
+      "tracked_files": {
+        "backend/tests/social/test_feed_decision_normalization.py": "ed49a654eb861d8eac395f60a0edbcd84b2b7863",
+        "backend/tests/social/test_feed_normalized_execution.py": "cbcb40e3bd98b26abb4a5ef7c76bc37c9417e404"
+      },
+      "test_nodes": [
+        "tests/social/test_feed_decision_normalization.py::test_canonical_model_remains_strict",
+        "tests/social/test_feed_decision_normalization.py::test_comments_proposal_eligibility_and_no_action_keep_their_contract",
+        "tests/social/test_feed_decision_normalization.py::test_missing_comment_fields_remain_optional",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields0-follow]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields0-like]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields0-repost]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields1-follow]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields1-like]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields1-repost]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields2-follow]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields2-like]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields2-repost]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields3-follow]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields3-like]",
+        "tests/social/test_feed_decision_normalization.py::test_non_comment_keeps_action_and_source_without_mutating_input[fields3-repost]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes0]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes10]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes11]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes12]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes13]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes14]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes15]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes16]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes17]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes18]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes19]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes1]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes2]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes3]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes4]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes5]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes6]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes7]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes8]",
+        "tests/social/test_feed_decision_normalization.py::test_normalization_does_not_hide_other_invalid_fields[changes9]",
+        "tests/social/test_feed_decision_normalization.py::test_server_affordance_is_still_required",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[comment-ACTION_SUCCEEDED]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[deleted_while_planning-observation_failed]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[invalid-planner_failed]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[invalid_candidate-planner_failed]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[no_action-model_abstained]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[normal_like-ACTION_SUCCEEDED]",
+        "tests/social/test_feed_normalized_execution.py::test_other_raw_decisions_and_stale_target_keep_boundaries[stale-target_stale]",
+        "tests/social/test_feed_normalized_execution.py::test_raw_normalized_like_executes_once_without_writer_or_recall[False-False]",
+        "tests/social/test_feed_normalized_execution.py::test_raw_normalized_like_executes_once_without_writer_or_recall[False-True]",
+        "tests/social/test_feed_normalized_execution.py::test_raw_normalized_like_executes_once_without_writer_or_recall[True-False]",
+        "tests/social/test_feed_normalized_execution.py::test_raw_normalized_like_executes_once_without_writer_or_recall[True-True]"
+      ],
+      "test_assertions": {
+        "tests/social/test_feed_decision_normalization.py": {
+          "candidates": [],
+          "raw_decision": [],
+          "test_non_comment_keeps_action_and_source_without_mutating_input": [
+            "assert raw == original",
+            "assert result.selected_action == action",
+            "assert result.selected_candidate_index == raw['selected_candidate_index']",
+            "assert result.brief == raw['brief']",
+            "assert result.interaction_intent is result.comment_purpose is None",
+            "assert validate_reaction_decision(result, candidates=candidates) is result",
+            "assert result._activity_thought.text == 'A useful note.'",
+            "assert validate_reaction_decision(result.model_dump(), candidates=candidates).model_dump() == result.model_dump()"
+          ],
+          "test_missing_comment_fields_remain_optional": [
+            "assert validate_reaction_decision(raw, candidates=candidates).selected_action == 'like'"
+          ],
+          "test_normalization_does_not_hide_other_invalid_fields": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_server_affordance_is_still_required": [
+            "pytest.raises(ValueError, match='not allowed')"
+          ],
+          "test_comments_proposal_eligibility_and_no_action_keep_their_contract": [
+            "assert comment.comment_purpose == 'encouragement'",
+            "pytest.raises(ValueError, match='eligibility')",
+            "assert validate_reaction_decision(proposal, candidates=candidates, proposal_eligible_indices=frozenset({0})).interaction_intent == 'joint_activity_proposal'",
+            "assert validate_reaction_decision({'reason_code': 'model_abstained'}, candidates=candidates).selected_action is None"
+          ],
+          "test_canonical_model_remains_strict": [
+            "pytest.raises(ValidationError, match='non-comment action cannot have intent or purpose')"
+          ]
+        },
+        "tests/social/test_feed_normalized_execution.py": {
+          "seed_cycle": [],
+          "test_raw_normalized_like_executes_once_without_writer_or_recall": [
+            "assert result['feed_outcome'] == 'ACTION_SUCCEEDED'",
+            "assert result['delivered_count'] == 1",
+            "assert len(calls) == 1",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "assert db.scalar(select(func.count(models.Post.id))) == 1",
+            "assert execution.action_type == 'like' and execution.status == 'succeeded'",
+            "assert execution.interaction_intent is execution.comment_purpose is None",
+            "assert db.scalar(select(RecommendationDelivery)).state == 'delivered'",
+            "assert observation.status == 'observed' and observation.selected_action == 'like'",
+            "assert observation.interaction_intent is observation.comment_purpose is None",
+            "assert 'For like, repost, follow or NO_ACTION, return null for both' in request['system_prompt']",
+            "assert examples[0] == dict(selected_action='like', interaction_intent=None, comment_purpose=None)",
+            "assert 'Must be null for like' in properties['interaction_intent']['description']",
+            "assert 'null' in properties['comment_purpose']['type']",
+            "assert ('thought' in properties) == thought",
+            "assert ('relationship_metrics' in properties) == metrics",
+            "assert len(normalization) == 1",
+            "assert 'fields=interaction_intent,comment_purpose' in normalization[0]",
+            "assert 'A helpful note' not in normalization[0] and 'Acknowledge' not in normalization[0]",
+            "assert again['feed_outcome'] == 'duplicate_cycle'",
+            "assert asyncio.run(run_world_keyword_feed(later, provider=provider))['feed_outcome'] == 'no_candidate'",
+            "assert len(calls) == 1",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "assert db.scalar(select(func.count(models.AgentPublicActionExecution.id))) == 1",
+            "assert kwargs['context'].node == 'FeedReactionPlanner'",
+            "assert saved_thought.thought_text == 'A helpful note worth acknowledging.'",
+            "assert application is not None",
+            "assert application.status == 'applied'",
+            "assert application.actual_delta['affinity'] == 1",
+            "assert application.actual_delta['trust'] == 0",
+            "assert application.state_version == version",
+            "assert db.scalar(select(func.count(RelationshipMetricApplication.id))) == 1"
+          ],
+          "test_other_raw_decisions_and_stale_target_keep_boundaries": [
+            "assert result['feed_outcome'] == expected",
+            "assert nodes == (['FeedReactionPlanner', 'ReplyWriter'] if mode == 'comment' else ['FeedReactionPlanner'])",
+            "assert db.scalar(select(RecommendationDelivery)).state == 'delivered'",
+            "assert not any(('world_feed_decision_normalized' in r.getMessage() for r in caplog.records))",
+            "assert db.scalar(select(func.count(models.AgentPublicActionExecution.id))) == 0",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert mode == 'comment'",
+            "assert db.scalar(select(func.count(models.Post.id)).where(models.Post.reply_to_post_id == target.id)) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_feed_decision_normalization.py": {},
+        "tests/social/test_feed_normalized_execution.py": {}
+      }
     }
   ]
 }

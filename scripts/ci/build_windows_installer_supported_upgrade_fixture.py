@@ -59,6 +59,7 @@ from app.runtime.migrations.generation import EmbeddedGenerationController
 from app.runtime.migrations.ladybug_projection import (
     LadybugProjectionUpgradeCoordinator,
 )
+from app.integrations.ladybug_projection import LADYBUG_PROJECTION_SCHEMA_VERSION
 from app.runtime.migrations.ladybug_versions.registry import (
     load_ladybug_manifest,
 )
@@ -561,7 +562,7 @@ def _seed_supported_predecessor(
         StaticRuntimeDataPath(root),
         session_factory=database.session_factory,
     ).upgrade()
-    if graph.degraded or graph.target_version != 2:
+    if graph.degraded or graph.target_version != LADYBUG_PROJECTION_SCHEMA_VERSION:
         raise RuntimeError("supported_upgrade_fixture_graph_invalid")
     # The fixture represents the last supported installed predecessor. Build
     # with the current adapter, then freeze the empty graph at the immutable v1
@@ -616,9 +617,59 @@ def _seed_supported_predecessor(
                     MEMORY_BATCH_TABLES,
                 )
                 from app.models import Base
+                from sqlalchemy.schema import CreateIndex, CreateTable
 
-                from app.runtime.persistence.sqlite_schema import CONSOLIDATION_V14_TABLES, EPISODE_V13_TABLES
+                from app.runtime.persistence.sqlite_schema import (
+                    ACTIVITY_V19_TABLES,
+                    CONSOLIDATION_V14_TABLES,
+                    EPISODE_V13_TABLES,
+                    RECOMMENDATION_V15_TABLES,
+                    RELATIONSHIP_V17_TABLES,
+                    build_sqlite_v14_metadata,
+                    build_sqlite_v16_metadata,
+                )
                 from app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding import TABLES as EMBEDDING_V12_TABLES
+                for name in reversed(ACTIVITY_V19_TABLES):
+                    Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
+                for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):
+                    Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
+                # v17 extended these existing tables. Restore their frozen
+                # pre-v17 definitions instead of dropping only their columns.
+                sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                try:
+                    historical_v16 = build_sqlite_v16_metadata()
+                    for name in ("relationship_states", "graph_projection_outbox"):
+                        historical = historical_v16.tables[name]
+                        previous = f"{name}_current_fixture"
+                        sql_connection.exec_driver_sql(f'ALTER TABLE "{name}" RENAME TO "{previous}"')
+                        sql_connection.execute(CreateTable(historical))
+                        columns = ", ".join(column.name for column in historical.columns)
+                        sql_connection.exec_driver_sql(
+                            f'INSERT INTO "{name}" ({columns}) SELECT {columns} FROM "{previous}"'
+                        )
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{previous}"')
+                        for index in historical.indexes:
+                            sql_connection.execute(CreateIndex(index))
+                    # v15/v16 introduced the topic Feed mode. All supported
+                    # predecessor fixtures here are v13 or earlier.
+                    historical_wc = build_sqlite_v14_metadata().tables["world_characters"]
+                    sql_connection.exec_driver_sql(
+                        "ALTER TABLE world_characters RENAME TO world_characters_current_fixture"
+                    )
+                    sql_connection.execute(CreateTable(historical_wc))
+                    columns = ", ".join(column.name for column in historical_wc.columns)
+                    sql_connection.exec_driver_sql(
+                        f"INSERT INTO world_characters ({columns}) SELECT {columns} "
+                        "FROM world_characters_current_fixture"
+                    )
+                    sql_connection.exec_driver_sql("DROP TABLE world_characters_current_fixture")
+                    for index in historical_wc.indexes:
+                        sql_connection.execute(CreateIndex(index))
+                finally:
+                    sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
+                sql_connection.exec_driver_sql("DROP INDEX IF EXISTS ix_posts_world_author_created")
+                for name in reversed(RECOMMENDATION_V15_TABLES):
+                    Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
                 for introduced, names in ((14, CONSOLIDATION_V14_TABLES), (13, EPISODE_V13_TABLES), (12, EMBEDDING_V12_TABLES)):
                     if source_version < introduced:
                         for name in reversed(names):
