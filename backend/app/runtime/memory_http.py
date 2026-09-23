@@ -58,7 +58,9 @@ def _validate_provider(db: Session, owner_id: str, model_id: str) -> None:
 
 
 def build_memory_workflows(*, embedding_runtime_status=None) -> MemoryWorkflows:
+    from app.runtime.relationships.manual_review import ManualRelationshipFollowup
     return MemoryWorkflows(
+        consolidation_followup=ManualRelationshipFollowup,
         read_service=_service,
         scope_service=_scope_service,
         write_service=_write_service,

@@ -37,3 +37,19 @@ class SqlAlchemyDiagnosticReferences:
 
     def graph_gateway(self, *, graph_provider: GraphProvider) -> RelationshipGraphReadGateway:
         return SqlAlchemyRelationshipGraphReadGateway(self.db, config=self.config, graph_provider=graph_provider)
+
+
+    def review_configuration(self, *, world_id, actor_id):
+        from sqlalchemy import select
+        from app.domains.memory.models.items import MemoryScopeSettingModel
+        from app.domains.memory.models.batch import MemoryBatchSetting
+        setting = self.db.scalar(select(MemoryScopeSettingModel).where(
+            MemoryScopeSettingModel.world_id == world_id, MemoryScopeSettingModel.subject_world_character_id == actor_id))
+        batch = self.db.get(MemoryBatchSetting, setting.id) if setting else None
+        if not setting or not setting.enabled:
+            return {"status": "memory_disabled"}
+        if not batch or not batch.ai_enabled or not batch.consent_version:
+            return {"status": "consent_or_ai_required"}
+        if not batch.schedule_enabled:
+            return {"status": "schedule_disabled", "manual_available": True}
+        return {"status": "scheduled", "manual_available": True, "local_time": batch.local_time, "timezone": batch.timezone}

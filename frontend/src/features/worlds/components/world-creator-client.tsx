@@ -21,7 +21,7 @@ import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 import { useAuth } from "@/hooks/use-auth";
-import { createOwnerControlledIdentity, createWorld, getOwnerControlledIdentity, getWorldCreatorContext, publishWorld, removeWorldBanner, requestValidationFields, updateWorld, updateOwnerControlledIdentity, uploadWorldBanner, validateWorld, WorldApiError } from "@/features/worlds/api/worlds";
+import { listOwnerControlledIdentities, selectOwnerControlledIdentity, replaceOwnerControlledIdentity, createOwnerControlledIdentity, createWorld, getOwnerControlledIdentity, getWorldCreatorContext, publishWorld, removeWorldBanner, requestValidationFields, updateWorld, updateOwnerControlledIdentity, uploadWorldBanner, validateWorld, WorldApiError } from "@/features/worlds/api/worlds";
 import type { WorldCreatorContext, OwnerControlledIdentityRead, OwnerControlledProfileWrite, WorldDaypart, WorldDefinition, WorldGlossaryTermInput, WorldPlaceInput, WorldRoleInput, WorldRuleInput, WorldValidationIssue } from "@/features/worlds/types/worlds";
 
 const DAYPARTS: { key: WorldDaypart; label: string; hours: string }[] = [
@@ -379,8 +379,8 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
                   {context ? definition.name || "이름 없는 World" : "새 World 만들기"}
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-[#667085]">
-                  세계관과 그 안의 일상을 작성합니다. P2에서 이 정의와 캐릭터 정체성을 결합해
-                  캐릭터별 일과 40개를 생성하며, 이 화면에서는 AI를 호출하지 않습니다.
+                  세계관과 그 안의 일상을 작성합니다. 이 정의와 캐릭터 정체성을 바탕으로 일과를 준비합니다.
+                  추천 주제 AI는 키를 연결한 새 World의 최초 공개 또는 주제 다시 만들기 실행 시 사용합니다.
                 </p>
               </div>
               {context ? (
@@ -526,6 +526,8 @@ function OwnerControlledIdentityPanel({
   roles: WorldRoleInput[];
   worldId: string;
 }) {
+  const [identities, setIdentities] = useState<OwnerControlledIdentityRead[]>([]);
+  const [creatingNew, setCreatingNew] = useState(false);
   const [identity, setIdentity] = useState<OwnerControlledIdentityRead | null>(null);
   const [profile, setProfile] = useState<OwnerControlledProfileWrite>(
     EMPTY_OWNER_PROFILE,
@@ -537,6 +539,7 @@ function OwnerControlledIdentityPanel({
 
   useEffect(() => {
     let active = true;
+    void listOwnerControlledIdentities(worldId).then((rows) => { if (active) setIdentities(rows); }).catch(() => {});
     void getOwnerControlledIdentity(worldId)
       .then((next) => {
         if (!active) return;
@@ -577,10 +580,12 @@ function OwnerControlledIdentityPanel({
       interests: parseCommaList(interestsText, 12),
     };
     try {
-      const next = identity
+      const next = creatingNew ? await replaceOwnerControlledIdentity(worldId, payload) : identity
         ? await updateOwnerControlledIdentity(worldId, payload)
         : await createOwnerControlledIdentity(worldId, payload);
       setIdentity(next);
+      setCreatingNew(false);
+      setIdentities(await listOwnerControlledIdentities(worldId));
       setProfile(next.profile);
       setInterestsText(next.profile.interests.join(", "));
       setMessage(identity ? "사용자 조종 앵무를 수정했습니다." : "사용자 조종 앵무를 만들었습니다.");
@@ -611,6 +616,24 @@ function OwnerControlledIdentityPanel({
               아직 이 World에서 사용자가 조종할 앵무가 없습니다.
             </p>
           )}
+          <Field label="보존된 내 앵무 선택" hint="다른 인물을 선택해도 기존 대화와 그 인물을 향한 관계는 보존됩니다.">
+            <select className={inputClass} disabled={saving} value={creatingNew ? "new" : identity?.world_character_id ?? ""} onChange={async (event) => {
+              const id = event.target.value;
+              if (id === "new") { setCreatingNew(true); setProfile(EMPTY_OWNER_PROFILE); setInterestsText(""); return; }
+              setSaving(true);
+              try {
+                const next = await selectOwnerControlledIdentity(worldId, id);
+                setIdentity(next); setCreatingNew(false); setProfile(next.profile); setInterestsText(next.profile.interests.join(", "));
+                setIdentities(await listOwnerControlledIdentities(worldId));
+                setMessage("이 인물로 활동합니다. 이전 관계는 보존했습니다.");
+              } catch (reason) { setMessage(errorMessage(reason)); }
+              finally { setSaving(false); }
+            }}>
+              {!identity ? <option value="">먼저 앵무를 만들어 주세요</option> : null}
+              {identities.map((row) => <option key={row.world_character_id} value={row.world_character_id}>{row.profile.display_name}</option>)}
+              {identity ? <option value="new">다른 내 앵무 새로 만들기</option> : null}
+            </select>
+          </Field>
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="표시 이름" counter={`${profile.display_name.length}/80`}>
               <input className={inputClass} maxLength={80} value={profile.display_name} onChange={(event) => patchProfile("display_name", event.target.value)} placeholder="예: 진구의 앵무" />
@@ -640,7 +663,7 @@ function OwnerControlledIdentityPanel({
           {message ? <p className="text-sm font-bold text-[#475467]">{message}</p> : null}
           <button type="button" className={secondaryButtonClass} disabled={saving || !profile.display_name.trim() || !profile.avatar_url.trim() || !profile.intro.trim()} onClick={() => void saveIdentity()}>
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            {identity ? "조종 앵무 수정" : "조종 앵무 만들기"}
+            {creatingNew ? "새 인물로 만들고 선택" : identity ? "조종 앵무 수정" : "조종 앵무 만들기"}
           </button>
         </>
       )}

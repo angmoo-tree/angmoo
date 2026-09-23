@@ -13,6 +13,8 @@ from app.runtime.installer_update import (
     InstallerUpdateContractError,
     preflight_installer_embedded_data,
 )
+from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+from app.integrations.ladybug_projection import LADYBUG_PROJECTION_SCHEMA_VERSION
 
 
 BUILD_COMMIT = "a" * 40
@@ -128,7 +130,11 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     data_root = tmp_path / "Angmoo"
-    manifest = _manifest(tmp_path / "payload.json", sqlite=(1, 14, 14))
+    manifest = _manifest(
+        tmp_path / "payload.json",
+        sqlite=(1, SQLITE_SCHEMA_VERSION, SQLITE_SCHEMA_VERSION),
+        ladybug=(0, LADYBUG_PROJECTION_SCHEMA_VERSION, LADYBUG_PROJECTION_SCHEMA_VERSION),
+    )
     argv = [
         "angmoo-sidecar",
         "--installer-data-upgrade",
@@ -184,8 +190,8 @@ def test_installer_upgrade_mode_creates_current_generations_and_is_idempotent(
     finally:
         writer.close()
     assert second["status"] == "upgraded"
-    assert second["sqlite_source_version"] == 14
-    assert second["ladybug_source_version"] == 2
+    assert second["sqlite_source_version"] == SQLITE_SCHEMA_VERSION
+    assert second["ladybug_source_version"] == LADYBUG_PROJECTION_SCHEMA_VERSION
     assert (data_root / "canonical" / "current-generation.json").read_bytes() == canonical_marker
     assert (data_root / "graph" / "current-generation.json").read_bytes() == graph_marker
 

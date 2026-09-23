@@ -480,6 +480,7 @@ def create_world(
     *,
     user: UserIdentity,
     data: schemas.WorldDraftCreate,
+    on_created=None,
 ) -> schemas.WorldCreatorContextRead:
     try:
         outcome = seed_world(db, user=user, data=data)
@@ -487,6 +488,8 @@ def create_world(
             return _creator_context(
                 db, world=outcome.world, membership=outcome.membership
             )
+        if on_created is not None:
+            on_created(db, world_id=outcome.world.id)
         db.commit()
     except IntegrityError as exc:
         db.rollback()

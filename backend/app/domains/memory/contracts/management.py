@@ -18,6 +18,15 @@ class MemoryOwner(Protocol):
     id: str
 
 
+class ConsolidationFollowup(Protocol):
+    """Runtime-owned collaborator; methods share the caller's transaction."""
+    def admit(self, scope: MemoryScope, row) -> None: ...
+    def active(self, setting_id: str): ...
+    def extend(self, row, value: dict) -> dict: ...
+    def capability(self, scope: MemoryScope) -> dict: ...
+    def retry(self, scope: MemoryScope, row) -> None: ...
+
+
 @dataclass(frozen=True)
 class MemoryWorkflows:
     """Lazy factories and foreign reads using each request's existing Session.
@@ -33,4 +42,5 @@ class MemoryWorkflows:
     validate_provider: Callable[[Session, str, str], None]
     validate_embedding_credential: Callable[[Session, str, str], None] | None = None
     embedding_credential_options: Callable[[Session, str, str | None], list[dict[str, str]]] | None = None
+    consolidation_followup: Callable[[Session], ConsolidationFollowup] | None = None
     embedding_runtime_status: Callable[[], str] | None = None

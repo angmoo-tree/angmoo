@@ -29,6 +29,16 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV13FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV14FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV15FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV16FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV17FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV18FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -90,6 +100,11 @@ foreach ($required in @(
     $SupportedV11FixtureArchive,
     $SupportedV12FixtureArchive,
     $SupportedV13FixtureArchive,
+    $SupportedV14FixtureArchive,
+    $SupportedV15FixtureArchive,
+    $SupportedV16FixtureArchive,
+    $SupportedV17FixtureArchive,
+    $SupportedV18FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -366,6 +381,56 @@ try {
             ([int]$supportedContract.ladybug_source_data_version)
 
         $supportedManifest = Restore-IsolatedFixture $SupportedV13FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV14FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV15FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV16FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV17FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV18FixtureArchive
         $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
             ConvertFrom-Json
         Invoke-Installer 0

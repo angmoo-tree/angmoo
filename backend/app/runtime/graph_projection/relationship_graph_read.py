@@ -291,6 +291,11 @@ class SqlAlchemyRelationshipGraphReadGateway:
             tension=row.tension,
             interaction_count=row.interaction_count,
             relationship_version=row.version,
+            relationship_label=row.relationship_label,
+            perception=row.perception,
+            view_version=row.view_version,
+            view_updated_at=row.view_updated_at,
+            reviewed_at=row.reviewed_at,
             last_event_id=row.last_event_id,
             last_event_at=row.last_event_at,
             updated_at=row.updated_at,
@@ -427,12 +432,13 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 ),
                 actor_active=(
                     actor is not None
+                    and actor.control_mode == "autonomous"
                     and actor.status == "active"
                     and actor.membership_id in active_memberships
                 ),
                 target_active=(
                     target is not None
-                    and target.status == "active"
+                    and (target.status == "active" or (target.control_mode == "owner_controlled" and target.status == "inactive"))
                     and target.membership_id in active_memberships
                 ),
                 blocked=(
@@ -446,6 +452,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
                         row is not None
                         and row.last_event_id in observed_event_ids
                     )
+                    or (row is not None and row.actor_world_character_id == subject_world_character_id
+                        and (row.last_metric_at is not None or row.reviewed_at is not None))
                 ),
             )
         return facts

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 import time
 from typing import Iterable
 from uuid import uuid4
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import update, or_
 from sqlalchemy.orm import Session
 from app.core.search_text import normalize_search_text
 from app.domains.social.contracts.search_index import SocialSearchIndexPort
@@ -62,9 +63,9 @@ def load_ready_search_profile(
     db: Session, *, references: WorldFeedReferences, world_character_id: str
 ) -> ReadySearchProfile:
     world_character = references.world_character(world_character_id)
-    if world_character is None or world_character.status != "active":
+    if world_character is None or world_character.status != "active" or world_character.control_mode != "autonomous":
         raise WorldFeedReadinessError("world_character_not_ready")
-    if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
+    if world_character.feed_runtime_mode not in {AUTONOMOUS_FEED_RUNTIME_MODE, "keyword_search_v1"}:
         raise WorldFeedReadinessError("feed_runtime_mode_not_enabled")
     character = references.character(world_character.character_id)
     membership = references.membership(world_character.membership_id)
@@ -81,17 +82,23 @@ def load_ready_search_profile(
         or world.readiness_status != "publish_ready"
     ):
         raise WorldFeedReadinessError("world_scope_not_ready")
-    profile = references.ready_profile(world_character.id)
-    if profile is None:
-        raise WorldFeedReadinessError("world_community_profile_not_ready")
-    character_hash = references.character_hash(character)
-    if (
-        world_character.character_contract_hash != character_hash
-        or world_character.world_contract_hash != world.contract_hash
-        or profile.character_contract_hash != character_hash
-        or profile.world_contract_hash != world.contract_hash
-    ):
-        raise WorldFeedReadinessError("world_community_profile_stale")
+    if world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
+        pair = references.approved_pair(world_character.id)
+        if pair is None:
+            raise WorldFeedReadinessError("approved_setup_required")
+        profile, repertoire = pair
+        if not references.approved_pair_matches_world(world_character, profile, repertoire, world_hash=world.contract_hash):
+            raise WorldFeedReadinessError("approved_setup_invalid")
+    else:
+        profile = references.ready_profile(world_character.id)
+        if profile is None:
+            raise WorldFeedReadinessError("world_community_profile_not_ready")
+        character_hash = references.character_hash(character)
+        if (world_character.character_contract_hash != character_hash
+            or world_character.world_contract_hash != world.contract_hash
+            or profile.character_contract_hash != character_hash
+            or profile.world_contract_hash != world.contract_hash):
+            raise WorldFeedReadinessError("world_community_profile_stale")
     try:
         validated = WorldCommunityProfilePayload(
             visible_summary=profile.visible_summary,
@@ -115,7 +122,7 @@ def load_ready_search_profile(
     # path over 10,000 posts in one World at 1.744 ms. Keep one-character
     # keywords fail-closed because they are both less meaningful and less
     # selective.
-    if any(len(keyword) < MIN_KEYWORD_LENGTH for keyword in keywords):
+    if world_character.feed_runtime_mode != "topic_recommendation_v1" and any(len(keyword) < MIN_KEYWORD_LENGTH for keyword in keywords):
         raise WorldFeedReadinessError("short_keyword_requires_repair")
     avoid_topics = tuple(
         normalize_search_text(topic, max_chars=40)
@@ -138,6 +145,22 @@ def load_ready_search_profile(
         action_profile=validated.action_profile.model_dump(mode="json"),
         imported_world_runtime_locked=imported_world_runtime_locked,
     )
+
+
+def feed_readiness(db: Session, *, references: WorldFeedReferences, world_character_id: str):
+    """Use the execution validator without claiming a cycle or calling a model."""
+    from app.domains.social.schemas.feed_status import FeedReadinessRead
+    checked_at = datetime.now(UTC)
+    try:
+        profile = load_ready_search_profile(db, references=references, world_character_id=world_character_id)
+    except WorldFeedReadinessError as exc:
+        return FeedReadinessRead(state="unsupported" if exc.reason_code == "feed_runtime_mode_not_enabled" else "blocked",
+                                 reason_code=exc.reason_code, checked_at=checked_at)
+    changed = references.character_hash(profile.character) != profile.profile.character_contract_hash
+    disabled = profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled
+    return FeedReadinessRead(state="disabled" if disabled else "ready",
+        reason_code=("imported_locked" if profile.imported_world_runtime_locked else "autonomy_disabled") if disabled else None,
+        persona_changed=changed, checked_at=checked_at)
 
 
 def claim_cycle_keywords(
@@ -213,6 +236,8 @@ def search_world_feed_candidates(
     search_index: SocialSearchIndexPort | None,
     search_state: SocialSearchState,
 ) -> CandidateSearchResult:
+    if profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
+        return references.recommendation_candidates(profile=profile, allowed_policy_actions=allowed_policy_actions, now=now)
     started = time.perf_counter()
     candidate_rows = references.candidate_rows(profile)
     lookup = find_keyword_post_ids(
@@ -440,19 +465,21 @@ def claim_feed_observations(
                 conflicts += 1
                 continue
         else:
-            observation.status = "claimed"
-            observation.claim_token = uuid4().hex
-            observation.lease_expires_at = current + OBSERVATION_LEASE
-            observation.cycle_key = cycle_key
-            observation.run_id = run_id
-            observation.matched_keywords = list(candidate.matched_keywords)
-            observation.matched_fields = list(candidate.matched_fields)
-            observation.rank_score = candidate.rank_score
-            observation.post_created_at = candidate.created_at
-            observation.claimed_at = current
-            observation.observed_at = None
-            db.add(observation)
-            db.flush()
+            acquired = db.execute(update(WorldCharacterFeedObservation).where(
+                WorldCharacterFeedObservation.id == observation.id,
+                WorldCharacterFeedObservation.status != "observed",
+                or_(WorldCharacterFeedObservation.status != "claimed",
+                    WorldCharacterFeedObservation.lease_expires_at <= current),
+            ).values(status="claimed", claim_token=uuid4().hex,
+                     lease_expires_at=current + OBSERVATION_LEASE, cycle_key=cycle_key,
+                     run_id=run_id, matched_keywords=list(candidate.matched_keywords),
+                     matched_fields=list(candidate.matched_fields), rank_score=candidate.rank_score,
+                     post_created_at=candidate.created_at, claimed_at=current,
+                     observed_at=None)).rowcount
+            if not acquired:
+                conflicts += 1
+                continue
+            db.refresh(observation)
         claimed_candidates.append(
             candidate.model_copy(update={"candidate_index": len(claimed_candidates)})
         )
@@ -472,6 +499,13 @@ def revalidate_candidate_actions(
     candidate: feed_schemas.WorldFeedCandidateRead,
     allowed_policy_actions: Iterable[str],
 ) -> tuple[Post, list[feed_schemas.FeedAction]] | None:
+    if profile.world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
+        try:
+            current = load_ready_search_profile(db, references=references, world_character_id=profile.world_character.id)
+        except WorldFeedReadinessError:
+            return None
+        if current.profile.id != profile.profile.id or not current.world_character.autonomous_enabled:
+            return None
     post = repository.get_post(db, candidate.post_id)
     if (
         post is None
@@ -540,6 +574,8 @@ def mark_claims_retryable(
 ) -> None:
     current = _aware_utc(now)
     for observation in observations:
+        if observation.status == "observed":
+            continue
         observation.status = "retryable_failed"
         observation.lease_expires_at = current
         db.add(observation)
@@ -582,7 +618,7 @@ def finalize_feed_cycle(
     )
     if cursor is None or cursor.world_id != profile.world.id:
         raise WorldFeedReadinessError("feed_cursor_invalid")
-    cursor.next_keyword_offset = (
+    cursor.next_keyword_offset = 0 if profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else (
         claim.cursor_offset + KEYWORDS_PER_CYCLE
     ) % KEYWORD_COUNT
     cursor.last_cycle_summary = summary
@@ -598,6 +634,7 @@ def world_feed_cycle_status(
     world_character: FeedWorldCharacter,
     recent_limit: int = 12,
 ) -> feed_schemas.WorldFeedCycleStatusRead:
+    status = references.feed_status(world_character.id)
     cursor = repository.get_cursor(db, world_character.id)
     profile = references.ready_profile(world_character.id)
     keywords = tuple(
@@ -613,7 +650,7 @@ def world_feed_cycle_status(
     offset = cursor.next_keyword_offset if cursor else 0
     next_keywords = (
         [keywords[offset], keywords[(offset + 1) % KEYWORD_COUNT]]
-        if keyword_contract_ready and offset in KEYWORD_OFFSETS
+        if world_character.feed_runtime_mode != "topic_recommendation_v1" and keyword_contract_ready and offset in KEYWORD_OFFSETS
         else []
     )
     rows = list(
@@ -638,7 +675,9 @@ def world_feed_cycle_status(
             references=references,
             world_character=world_character,
             cursor=cursor,
+            readiness=status.readiness,
         ),
+        feed_status=status,
         profile_keyword_count=len(keywords),
         profile_keywords_ready=keyword_contract_ready,
         next_keywords=next_keywords,
@@ -684,6 +723,7 @@ def _feed_runtime_state(
     references: WorldFeedReferences,
     world_character: FeedWorldCharacter,
     cursor: WorldCharacterFeedCursor | None,
+    readiness,
 ) -> str:
     if _is_imported_world_runtime_locked(
         db, references=references, world_character=world_character
@@ -695,13 +735,15 @@ def _feed_runtime_state(
         return "autonomy_disabled"
     summary = cursor.last_cycle_summary if cursor is not None else None
     reason_code = summary.get("reason_code") if isinstance(summary, dict) else None
-    if reason_code in {
+    if world_character.feed_runtime_mode != "topic_recommendation_v1" and reason_code in {
         "search_rebuilding",
         "search_schema_mismatch",
         "search_digest_stale",
         "search_unavailable",
     }:
         return "feed_search_degraded"
+    if readiness.state == "blocked":
+        return "feed_setup_blocked"
     return "three_lane_ready"
 
 

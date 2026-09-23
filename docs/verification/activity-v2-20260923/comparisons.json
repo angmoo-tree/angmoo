@@ -1,0 +1,651 @@
+[
+  {
+    "case": "repetition",
+    "kind": "real_ai_frozen_contract_comparison",
+    "operational_writes": false,
+    "selection_only": {
+      "selections": [
+        {
+          "target_id": "p"
+        }
+      ]
+    },
+    "selection_query": {
+      "selections": [
+        {
+          "target_id": "p",
+          "memory_query": "partner advice against overworking and suggestion to rest together"
+        }
+      ]
+    },
+    "with_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "no_action",
+          "interaction_intent": null,
+          "comment_purpose": null,
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "",
+          "thought": null
+        }
+      ],
+      "relationship_metrics": [],
+      "state_update": null,
+      "state_source_refs": [],
+      "state_status": "valid",
+      "judged_at": "2026-09-22T20:08:18.132620+00:00"
+    },
+    "without_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "comment",
+          "interaction_intent": "ordinary_comment",
+          "comment_purpose": "empathy",
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "그래, 다음엔 같이 쉬도록 하지.",
+          "thought": "이미 쉬기로 답했지만, 걱정해주는 마음은 고맙군. 짧게 긍정적으로 답하겠다."
+        }
+      ],
+      "relationship_metrics": [
+        {
+          "target_ref": "p",
+          "affinity": "increase",
+          "trust": "keep",
+          "tension": "keep",
+          "new_evidence_refs": [
+            "p"
+          ]
+        }
+      ],
+      "state_update": null,
+      "state_source_refs": [],
+      "state_status": "valid"
+    },
+    "v1_feed_planner": {
+      "selected_candidate_index": 0,
+      "selected_action": "comment",
+      "interaction_intent": "ordinary_comment",
+      "comment_purpose": "encouragement",
+      "reason_code": null,
+      "brief": "그래, 다음 작업 때는 속도 조절을 고려해 보지.",
+      "motivation_kind": "relationship_maintenance",
+      "motivation_text": "동료의 배려를 받아들이고 유대를 유지하기 위해.",
+      "emotion_label": "affectionate",
+      "emotion_text": "동료의 걱정에 고마움을 느낌",
+      "emotion_intensity": 70
+    },
+    "status": "valid",
+    "duration_ms": 17273,
+    "usage": {
+      "summary_version": 3,
+      "call_count": 5,
+      "provider_call_count": 5,
+      "generate_call_count": 5,
+      "embedding_call_count": 0,
+      "max_calls": 5,
+      "total_prompt_tokens": 4012,
+      "total_output_tokens": 437,
+      "total_thought_tokens": 2870,
+      "total_tokens": 7319,
+      "calls": [
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 1,
+          "call_order_in_run": 1,
+          "agent_run_id": "comparison-repetition",
+          "node": "ComparisonSelectionOnly",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 2001,
+          "usage": {
+            "prompt_token_count": 374,
+            "candidates_token_count": 13,
+            "thoughts_token_count": 189,
+            "total_token_count": 576,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 2,
+          "call_order_in_run": 2,
+          "agent_run_id": "comparison-repetition",
+          "node": "FeedTargetSelector",
+          "lane": "feed_selector",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 2733,
+          "usage": {
+            "prompt_token_count": 559,
+            "candidates_token_count": 30,
+            "thoughts_token_count": 414,
+            "total_token_count": 1003,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 3,
+          "call_order_in_run": 3,
+          "agent_run_id": "comparison-repetition",
+          "node": "FeedActionPlanner",
+          "lane": "feed_action_planner",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 3212,
+          "usage": {
+            "prompt_token_count": 1283,
+            "candidates_token_count": 66,
+            "thoughts_token_count": 541,
+            "total_token_count": 1890,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 4,
+          "call_order_in_run": 4,
+          "agent_run_id": "comparison-repetition",
+          "node": "ComparisonActionWithoutState",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 5426,
+          "usage": {
+            "prompt_token_count": 849,
+            "candidates_token_count": 176,
+            "thoughts_token_count": 907,
+            "total_token_count": 1932,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 5,
+          "call_order_in_run": 5,
+          "agent_run_id": "comparison-repetition",
+          "node": "ComparisonV1FeedPlanner",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 3880,
+          "usage": {
+            "prompt_token_count": 947,
+            "candidates_token_count": 152,
+            "thoughts_token_count": 819,
+            "total_token_count": 1918,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        }
+      ],
+      "rate_limit_waits": []
+    }
+  },
+  {
+    "case": "ordinary",
+    "kind": "real_ai_frozen_contract_comparison",
+    "operational_writes": false,
+    "selection_only": {
+      "selections": [
+        {
+          "target_id": "p"
+        }
+      ]
+    },
+    "selection_query": {
+      "selections": [
+        {
+          "target_id": "p",
+          "memory_query": "파트너가 오늘 점심으로 국수를 먹었다고 언급함"
+        }
+      ]
+    },
+    "with_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "comment",
+          "interaction_intent": "ordinary_comment",
+          "comment_purpose": "observation",
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "국수구나. 속이 편하고 좋은 메뉴네. 맛있게 먹어.",
+          "thought": "점심 메뉴에 대한 정보를 공유해준 것에 대해 차분하게 화답한다."
+        }
+      ],
+      "relationship_metrics": [
+        {
+          "target_ref": "partner",
+          "affinity": "keep",
+          "trust": "keep",
+          "tension": "keep",
+          "new_evidence_refs": [
+            "p"
+          ]
+        }
+      ],
+      "state_update": null,
+      "state_source_refs": [
+        "p"
+      ],
+      "state_status": "valid",
+      "judged_at": "2026-09-22T20:08:37.641960+00:00"
+    },
+    "without_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "comment",
+          "interaction_intent": "ordinary_comment",
+          "comment_purpose": "observation",
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "국수는 소화도 잘 되고 점심 메뉴로 적당하겠군요. 맛있게 드세요.",
+          "thought": "점심 메뉴에 대한 단순한 정보 공유다. 무리하지 않고 차분하게 확인하며 대답한다."
+        }
+      ],
+      "relationship_metrics": [
+        {
+          "target_ref": "p",
+          "affinity": "keep",
+          "trust": "keep",
+          "tension": "keep",
+          "new_evidence_refs": [
+            "p"
+          ]
+        }
+      ],
+      "state_update": null,
+      "state_source_refs": [],
+      "state_status": "valid"
+    },
+    "v1_feed_planner": {
+      "selected_candidate_index": 0,
+      "selected_action": "comment",
+      "interaction_intent": "ordinary_comment",
+      "comment_purpose": "encouragement",
+      "reason_code": null,
+      "brief": "맛있는 점심 식사 되시길 바랍니다.",
+      "motivation_kind": "relationship_maintenance",
+      "motivation_text": "동료의 일상을 확인하고 따뜻한 인사를 건네기 위해.",
+      "emotion_label": "neutral",
+      "emotion_text": null,
+      "emotion_intensity": null
+    },
+    "status": "valid",
+    "duration_ms": 19997,
+    "usage": {
+      "summary_version": 3,
+      "call_count": 5,
+      "provider_call_count": 5,
+      "generate_call_count": 5,
+      "embedding_call_count": 0,
+      "max_calls": 5,
+      "total_prompt_tokens": 3937,
+      "total_output_tokens": 569,
+      "total_thought_tokens": 3857,
+      "total_tokens": 8363,
+      "calls": [
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 1,
+          "call_order_in_run": 1,
+          "agent_run_id": "comparison-ordinary",
+          "node": "ComparisonSelectionOnly",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 2176,
+          "usage": {
+            "prompt_token_count": 367,
+            "candidates_token_count": 13,
+            "thoughts_token_count": 277,
+            "total_token_count": 657,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 2,
+          "call_order_in_run": 2,
+          "agent_run_id": "comparison-ordinary",
+          "node": "FeedTargetSelector",
+          "lane": "feed_selector",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 3346,
+          "usage": {
+            "prompt_token_count": 552,
+            "candidates_token_count": 30,
+            "thoughts_token_count": 667,
+            "total_token_count": 1249,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 3,
+          "call_order_in_run": 3,
+          "agent_run_id": "comparison-ordinary",
+          "node": "FeedActionPlanner",
+          "lane": "feed_action_planner",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 4660,
+          "usage": {
+            "prompt_token_count": 1256,
+            "candidates_token_count": 202,
+            "thoughts_token_count": 837,
+            "total_token_count": 2295,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 4,
+          "call_order_in_run": 4,
+          "agent_run_id": "comparison-ordinary",
+          "node": "ComparisonActionWithoutState",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 3824,
+          "usage": {
+            "prompt_token_count": 822,
+            "candidates_token_count": 186,
+            "thoughts_token_count": 643,
+            "total_token_count": 1651,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 5,
+          "call_order_in_run": 5,
+          "agent_run_id": "comparison-ordinary",
+          "node": "ComparisonV1FeedPlanner",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 5975,
+          "usage": {
+            "prompt_token_count": 940,
+            "candidates_token_count": 138,
+            "thoughts_token_count": 1433,
+            "total_token_count": 2511,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        }
+      ],
+      "rate_limit_waits": []
+    }
+  },
+  {
+    "case": "proposal",
+    "kind": "real_ai_frozen_contract_comparison",
+    "operational_writes": false,
+    "selection_only": {
+      "selections": [
+        {
+          "target_id": "p"
+        }
+      ]
+    },
+    "selection_query": {
+      "selections": [
+        {
+          "target_id": "p",
+          "memory_query": "partner invited the speaker to view an exhibition together next week"
+        }
+      ]
+    },
+    "with_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "comment",
+          "interaction_intent": "ordinary_comment",
+          "comment_purpose": "observation",
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "좋은 제안 감사합니다! 전시회라니 정말 흥미롭네요. 다음 주 일정을 확인해보고 조만간 다시 말씀드릴게요.",
+          "thought": "지난번에는 아쉽게 거절했지만, 이번 제안은 반갑다. 호의를 기쁘게 받아들이고 일정을 조율해보고 싶다는 의사를 표현하자."
+        }
+      ],
+      "relationship_metrics": [
+        {
+          "target_ref": "partner",
+          "affinity": "increase",
+          "trust": "keep",
+          "tension": "keep",
+          "new_evidence_refs": [
+            "p"
+          ]
+        }
+      ],
+      "state_update": {
+        "mood": "hopeful",
+        "mood_intensity": 40,
+        "state_note": "전시회 제안을 받아 기대감이 생겼고, 가능한 날짜를 확인하고 싶어졌다."
+      },
+      "state_source_refs": [
+        "p"
+      ],
+      "state_status": "valid",
+      "judged_at": "2026-09-22T20:08:58.097973+00:00"
+    },
+    "without_state": {
+      "decisions": [
+        {
+          "target_id": "p",
+          "action": "comment",
+          "interaction_intent": "ordinary_comment",
+          "comment_purpose": "information",
+          "proposal": null,
+          "proposal_response": null,
+          "brief": "지난번에는 아쉬웠는데 이번엔 좋을 것 같아요! 일정을 확인해보고 다시 말씀드릴게요.",
+          "thought": "지난번에 거절했음에도 다시 제안해주셔서 감사합니다. 긍정적으로 검토하겠습니다."
+        }
+      ],
+      "relationship_metrics": [
+        {
+          "target_ref": "p",
+          "affinity": "increase",
+          "trust": "keep",
+          "tension": "keep",
+          "new_evidence_refs": [
+            "p"
+          ]
+        }
+      ],
+      "state_update": null,
+      "state_source_refs": [],
+      "state_status": "valid"
+    },
+    "v1_feed_planner": {
+      "selected_candidate_index": 0,
+      "selected_action": "comment",
+      "interaction_intent": "ordinary_comment",
+      "comment_purpose": "encouragement",
+      "reason_code": null,
+      "brief": "좋아요, 전시 보러 가요! 기대되네요.",
+      "motivation_kind": "encourage_counterpart",
+      "motivation_text": "동료의 전시회 제안에 긍정적으로 호응합니다.",
+      "emotion_label": "joyful",
+      "emotion_text": "좋은 제안을 받아 기분이 좋습니다.",
+      "emotion_intensity": 80
+    },
+    "status": "valid",
+    "duration_ms": 21380,
+    "usage": {
+      "summary_version": 3,
+      "call_count": 5,
+      "provider_call_count": 5,
+      "generate_call_count": 5,
+      "embedding_call_count": 0,
+      "max_calls": 5,
+      "total_prompt_tokens": 4037,
+      "total_output_tokens": 692,
+      "total_thought_tokens": 4202,
+      "total_tokens": 8931,
+      "calls": [
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 1,
+          "call_order_in_run": 1,
+          "agent_run_id": "comparison-proposal",
+          "node": "ComparisonSelectionOnly",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 2095,
+          "usage": {
+            "prompt_token_count": 377,
+            "candidates_token_count": 13,
+            "thoughts_token_count": 331,
+            "total_token_count": 721,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 2,
+          "call_order_in_run": 2,
+          "agent_run_id": "comparison-proposal",
+          "node": "FeedTargetSelector",
+          "lane": "feed_selector",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 2485,
+          "usage": {
+            "prompt_token_count": 562,
+            "candidates_token_count": 49,
+            "thoughts_token_count": 426,
+            "total_token_count": 1037,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 2048,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 3,
+          "call_order_in_run": 3,
+          "agent_run_id": "comparison-proposal",
+          "node": "FeedActionPlanner",
+          "lane": "feed_action_planner",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 6062,
+          "usage": {
+            "prompt_token_count": 1291,
+            "candidates_token_count": 291,
+            "thoughts_token_count": 1150,
+            "total_token_count": 2732,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 4,
+          "call_order_in_run": 4,
+          "agent_run_id": "comparison-proposal",
+          "node": "ComparisonActionWithoutState",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 4482,
+          "usage": {
+            "prompt_token_count": 857,
+            "candidates_token_count": 186,
+            "thoughts_token_count": 870,
+            "total_token_count": 1913,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        },
+        {
+          "call_type": "generate_content",
+          "provider_call_order_in_run": 5,
+          "call_order_in_run": 5,
+          "agent_run_id": "comparison-proposal",
+          "node": "ComparisonV1FeedPlanner",
+          "lane": "evaluation",
+          "provider": "google",
+          "model": "gemini-3.1-flash-lite",
+          "status": "ok",
+          "duration_ms": 6237,
+          "usage": {
+            "prompt_token_count": 950,
+            "candidates_token_count": 153,
+            "thoughts_token_count": 1425,
+            "total_token_count": 2528,
+            "cached_content_token_count": null
+          },
+          "thinking_level": "high",
+          "max_output_tokens": 4096,
+          "finish_reason": "STOP"
+        }
+      ],
+      "rate_limit_waits": []
+    }
+  }
+]

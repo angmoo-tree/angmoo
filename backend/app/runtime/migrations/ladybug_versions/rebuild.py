@@ -60,3 +60,8 @@ __all__ = [
     "rebuild_projection_v1",
     "rebuild_projection_v2",
 ]
+
+
+def rebuild_projection_v3(*, database_root: Path, replay_source: ProjectionReplaySource):
+    """Replay current relationship snapshots, including chat-only relationships."""
+    return _rebuild_projection(database_root=database_root, replay_source=replay_source)

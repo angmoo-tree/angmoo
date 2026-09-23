@@ -1,0 +1,8 @@
+{
+  "projection_schema_version": 3,
+  "schema_digest": "29e56ba4f511cee026501015d6c93f467045cd111cc3f923f83dd62f7612c273",
+  "projection_command_digest": "a3d062e69870dc1408621ff2e6b1eb5e807d595d814336bbe547edafdeac1213",
+  "typed_query_digest": "2e725389e2165c361da030e9924d4383053158c5b85926382b0281f40147ed77",
+  "parity_contract_version": 1,
+  "minimum_ladybug_version": "0.19.1"
+}

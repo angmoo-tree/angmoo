@@ -13,6 +13,7 @@ from app.domains.routines.models.plans import JointActivityParticipant as _model
 from app.domains.routines.models.plans import JointActivityRepresentationClaim as _model_JointActivityRepresentationClaim
 from app.domains.social.models.subjective_context import SocialActionSubjectiveContext as _model_SocialActionSubjectiveContext
 from app.domains.social.models.activity_thought import SocialActivityThought
+from app.domains.social.models.topics import RecommendationCatalog, RecommendationDelivery, RecommendationPreparation, RecommendationTopicSource
 from app.domains.world_characters.models import WorldActivityCandidate as _model_WorldActivityCandidate
 from app.domains.world_characters.models import WorldActivityRepertoire as _model_WorldActivityRepertoire
 from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
@@ -42,6 +43,13 @@ def delete_setup_data_for_characters(
     )
     if not world_character_ids:
         return
+
+    affected_worlds = select(_model_WorldCharacter.world_id).where(_model_WorldCharacter.id.in_(world_character_ids))
+    db.execute(update(RecommendationCatalog).where(RecommendationCatalog.world_id.in_(affected_worlds)).values(version=RecommendationCatalog.version + 1))
+    db.execute(update(RecommendationCatalog).where(RecommendationCatalog.key_world_character_id.in_(world_character_ids)).values(key_world_character_id=None))
+    for topic_record in (RecommendationTopicSource, RecommendationPreparation, RecommendationDelivery):
+        db.execute(delete(topic_record).where(topic_record.world_character_id.in_(world_character_ids)))
+    # Historical public post/topic IDs remain intact; private interests and jobs do not.
 
     db.execute(delete(SocialActivityThought).where(
         SocialActivityThought.actor_world_character_id.in_(world_character_ids)

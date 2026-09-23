@@ -241,6 +241,7 @@ class ResponseCommitPayload:
     evidence_inspector_snapshot: dict[str, Any] | None = None
     social_context_inspector_snapshot: dict[str, Any] | None = None
     activity_thought: ActivityThought | None = None
+    relationship_metrics: object = None
 
     def __post_init__(self) -> None:
         if not self.content.strip():

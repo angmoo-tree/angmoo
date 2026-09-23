@@ -296,3 +296,50 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_backend_additions\.json$''']
 regexes = ['''^\s*"backend/tests/memory/test_consolidation_api\.py": "03a46b5f4d0375d2bd25efdd339fac7ec94169e9",?\s*$''']
+
+# Exact reviewed Issue335 public fingerprints; 2026-09-23; each entry is an exact reviewed digest, scoped to its source file.
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Synthetic pilot decision digests in pseudonymized verification results; Exact reviewed Issue335 public fingerprints; 2026-09-23"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)docs/verification/activity-v2-20260923/pilot-results\.json''']
+regexes = [
+  '''^54421c621e8795d35162603b28eda78083cbd484dbf8cc4e1645ee0506362e67$''',
+  '''^769f95c67f90be90fb775e39a870295fe6bbd7df8ef8d0cc44f6d41015964064$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Public API and ORM SHA-256 contract digests in before snapshot; Exact reviewed Issue335 public fingerprints; 2026-09-23"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)docs/verification/activity-v2-20260923/preimplementation-contracts\.json''']
+regexes = [
+  '''^15b9efe138c19b802cf9429b14356aecfe0250f1a392197ebbf1b1928d541e8b$''',
+  '''^1aa9782b9ec0a9f737372c298efee05fbc448506bd3292f35169bcc17b52a358$''',
+  '''^1e4caeb3d4d1c900a79aa3738182b2f294982cb2a0d070a09a669f95592f1613$''',
+  '''^4e68c5a0a6b65acef0061f88433cda14c69037312216bf420638144e4d865489$''',
+  '''^5c24613353cbb4960cd231feca31ccac31ba2fe6878a220d07b9ef43ad185b4f$''',
+  '''^5cb73b6f1d04216bd4ae3fb8a70059727fa6514937c33648bf6cfaba58a46e87$''',
+  '''^66aa77475f8e34060c5e9a968788cea4aff5de480ab424da4c51f55116c26c05$''',
+  '''^68089162f0a23331338cb9ce12a1c5962d6651bc233d34d04a62c7f31b4602eb$''',
+  '''^69a66509c773ac84059287ec8edc68a162a70b12dd25b4c9b0f0992c44febed5$''',
+  '''^846effc97c6e599d304798d6455d8fe837210e924015474e90815b55e785fd5b$''',
+  '''^94666084a74d5b8955b487470022245e2226a5801658b5f777da20f70baa176f$''',
+  '''^9e6de93ecdf4afacf26d0b265ecab2ad56285201eee66d02c47d0d02817cb132$''',
+  '''^d1eb43cbcb2f019faa3871663386f31f588ca09cbba41f4c2fe567b47d49d729$''',
+  '''^d78fdea308c61d4f962f6b964f27fdea52f7a53fa7844cf38f8d67b7970c9028$''',
+  '''^ed77f6c5df0ffbce4297451ea00f16dd244bca65fa9835df8c569a1bacacf46e$''',
+  '''^f825e0832b9e00ad0f57d9c355d60f3a86ed73275fb4896346829784f1d28667$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Verified Git blob ID in append-only refactor provenance; Exact reviewed Issue335 public fingerprints; 2026-09-23"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)security/refactor_backend_additions\.json''']
+regexes = [
+  '''^4b413397ab729e19ed3960c015f3f0063cb3f61d$''',
+]

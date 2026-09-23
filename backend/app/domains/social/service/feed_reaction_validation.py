@@ -1,7 +1,27 @@
 """Validate the selected server candidate, its permitted action and writer evidence."""
 
+from typing import get_args
+
 from app.domains.social.schemas import feed as schemas
 from app.domains.social.exceptions import FeedReactionValidationError
+
+
+def _normalize_non_comment_metadata(payload: object) -> object:
+    """Discard only recognized ordinary-comment metadata, never infer an action."""
+    if not isinstance(payload, dict):
+        return payload
+    # Tuple membership also leaves malformed list/dict values to model validation.
+    if payload.get("selected_action") not in ("like", "repost", "follow"):
+        return payload
+    if payload.get("interaction_intent") not in (None, "ordinary_comment"):
+        return payload
+    if payload.get("comment_purpose") not in (None, *get_args(schemas.FeedCommentPurpose)):
+        return payload
+    result = dict(payload)
+    for field in ("interaction_intent", "comment_purpose"):
+        if result.get(field) is not None:
+            result[field] = None
+    return result
 
 
 def validate_reaction_decision(
@@ -10,7 +30,9 @@ def validate_reaction_decision(
     candidates: tuple[schemas.WorldFeedCandidateRead, ...],
     proposal_eligible_indices: frozenset[int] = frozenset(),
 ) -> schemas.FeedReactionDecision:
-    decision = schemas.FeedReactionDecision.model_validate(payload)
+    decision = schemas.FeedReactionDecision.model_validate(
+        _normalize_non_comment_metadata(payload)
+    )
     if decision.selected_action is None:
         return decision
     index = decision.selected_candidate_index

@@ -696,6 +696,31 @@ rights-cleared.
 
 ## Contributor workflow
 
+### 2026-09-18 SNS recommendation topics
+
+World Creator recommendation tools and the character settings topic panel are
+`LOCAL` additions inside existing surfaces. Both Next and static composition use
+`features/social/components/recommendation-topics-panel.tsx`. They reuse existing
+Button, Field, Select and InlineError primitives and semantic tokens, with no
+external image, font, icon package, new raw color, or borrowed hosted asset.
+The source/build checks are recorded in
+[`sns-topic-recommendation.md`](../operations/sns-topic-recommendation.md).
+Direct visual and real-provider acceptance remain USER CHECK PENDING.
+
+#### 2026-09-20 delivery-history correction — LOCAL
+
+`features/social/components/recommendation-history.tsx` now presents confirmed
+delivery rounds in the same Next/static topic panel. It uses semantic colors,
+native keyboard-operable details/summary (minimum 44px), localized timestamps,
+and payload-backed selection/execution states. No hosted assets or new raw colors.
+The shared `browser-tests/recommendation-history-fixture.ts` verifies empty,
+error, legacy-schema, delayed-response and successful-round states in both runtimes.
+Its 360x800 diagnostic screenshot is reviewed local evidence, not a new canonical
+pixel baseline or USER CHECK. Screenshot-call inventory is intentionally 13;
+the 11 committed UI-B/UI-F snapshots and their thresholds are unchanged.
+
+### Workflow
+
 Before changing user-visible frontend code:
 
 1. read `frontend/DESIGN.md` and this inventory;

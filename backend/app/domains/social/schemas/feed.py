@@ -1,7 +1,8 @@
 from __future__ import annotations
+from app.domains.social.schemas.feed_status import FeedStatusRead
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
 from app.contracts.activity_thought import ActivityThought
 from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator
@@ -51,7 +52,7 @@ class WorldFeedSchema(BaseModel):
 
 
 class WorldFeedCandidateRead(WorldFeedSchema):
-    candidate_index: int = Field(ge=0, le=7)
+    candidate_index: int = Field(ge=0, le=19)
     post_id: str
     author_world_character_id: str
     author_character_id: str
@@ -67,13 +68,23 @@ class WorldFeedCandidateRead(WorldFeedSchema):
     matched_fields: list[Literal["title", "body", "topic_signature"]]
     rank_score: float
     allowed_actions: list[FeedAction]
+    sources: list[str] = Field(default_factory=list)
+    allocated_lane: str | None = None
+    relationship_context: dict[str, int | str] | None = None
 
 
 class FeedReactionDecision(WorldFeedSchema):
-    selected_candidate_index: int | None = Field(default=None, ge=0, le=7)
-    selected_action: FeedAction | None = None
-    interaction_intent: FeedInteractionIntent | None = None
-    comment_purpose: FeedCommentPurpose | None = None
+    selected_candidate_index: int | None = Field(default=None, ge=0, le=19)
+    # The provider converter preserves descriptions on the non-null union branch.
+    selected_action: Annotated[FeedAction, Field(
+        description="One allowed candidate action, or null for NO_ACTION.",
+    )] | None = None
+    interaction_intent: Annotated[FeedInteractionIntent, Field(
+        description="Comment only: ordinary_comment or an eligible joint_activity_proposal. Must be null for like, repost, follow and NO_ACTION.",
+    )] | None = None
+    comment_purpose: Annotated[FeedCommentPurpose, Field(
+        description="Required for ordinary_comment. Return null for a proposal, like, repost, follow and NO_ACTION, even when liking to encourage someone.",
+    )] | None = None
     reason_code: FeedNoActionReason | None = None
     brief: str | None = Field(default=None, max_length=280)
     motivation_kind: ActionMotivationKind | None = None
@@ -183,15 +194,17 @@ class WorldFeedObservationRead(WorldFeedSchema):
 
 
 class WorldFeedCycleStatusRead(WorldFeedSchema):
+    feed_status: FeedStatusRead | None = None
     world_id: str
     world_character_id: str
-    feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1"]
+    feed_runtime_mode: Literal["legacy_latest_v1", "keyword_search_v1", "topic_recommendation_v1"]
     runtime_state: Literal[
         "routine_only_legacy_feed",
         "three_lane_ready",
         "imported_locked",
         "autonomy_disabled",
         "feed_search_degraded",
+        "feed_setup_blocked",
     ]
     profile_keyword_count: int = Field(ge=0, le=64)
     profile_keywords_ready: bool

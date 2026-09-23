@@ -65,6 +65,7 @@ class AgentToolActionService:
         data: schemas.PostCreate,
         *,
         topic_signature: str | None = None,
+        final_topic_signature: str | None = None,
         novelty_basis: str | None = None,
         lore_chunk_ids: list[str] | None = None,
         retrieval_mode: str | None = None,
@@ -136,6 +137,11 @@ class AgentToolActionService:
             message=f"Created post {post.id}.",
         )
         topic_metadata = _topic_metadata_from_result(result)
+        from app.domains.social.models.posts import Post
+        from app.domains.social.service.recommendation_topics import match_post
+        canonical_post = db.get(Post, post.id)
+        if canonical_post is not None:
+            match_post(db, canonical_post, final_signature=final_topic_signature)
         _store_post_topic_metadata(
             db,
             post_id=post.id,

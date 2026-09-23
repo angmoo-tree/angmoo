@@ -107,8 +107,20 @@ from app.runtime.migrations.sqlite_versions import v11_to_v12_memory_embedding a
 from app.runtime.migrations.sqlite_versions import v12_to_v13_episode_memory as episode_memory
 
 from app.runtime.migrations.sqlite_versions import v13_to_v14_consolidation_requests as consolidation_requests
+from app.runtime.migrations.sqlite_versions import v14_to_v15_recommendation as recommendation
+from app.runtime.migrations.sqlite_versions import v15_to_v16_recommendation_mode as recommendation_mode
+
+from app.runtime.migrations.sqlite_versions import v16_to_v17_relationship_personalization as relationship_personalization
+
+from app.runtime.migrations.sqlite_versions import v17_to_v18_manual_review as manual_review
+from app.runtime.migrations.sqlite_versions import v18_to_v19_activity_graph as activity_graph
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    18: activity_graph.upgrade,
+    17: manual_review.upgrade,
+    16: relationship_personalization.upgrade,
+    15: recommendation_mode.upgrade,
+    14: recommendation.upgrade,
     13: consolidation_requests.upgrade,
     12: episode_memory.upgrade,
     11: memory_embedding.upgrade,
@@ -125,6 +137,11 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    18: SqliteMigrationContract(source_version=18, target_version=19, name="personalized_activity_graph", mutable_identity_tables=activity_graph.MUTABLE_IDENTITY_TABLES, capture=activity_graph.capture_delta, verify=activity_graph.verify_delta),
+    17: SqliteMigrationContract(source_version=17, target_version=18, name="manual_relationship_review", mutable_identity_tables=manual_review.MUTABLE_IDENTITY_TABLES, capture=manual_review.capture_delta, verify=manual_review.verify_delta),
+    16: SqliteMigrationContract(source_version=16, target_version=17, name="relationship_personalization", mutable_identity_tables=relationship_personalization.MUTABLE_IDENTITY_TABLES, capture=relationship_personalization.capture_delta, verify=relationship_personalization.verify_delta),
+    15: SqliteMigrationContract(source_version=15, target_version=16, name="social_recommendation_mode", mutable_identity_tables=recommendation_mode.MUTABLE_IDENTITY_TABLES, capture=recommendation_mode.capture_delta, verify=recommendation_mode.verify_delta),
+    14: SqliteMigrationContract(source_version=14, target_version=15, name="social_recommendation", mutable_identity_tables=recommendation.MUTABLE_IDENTITY_TABLES, capture=recommendation.capture_delta, verify=recommendation.verify_delta),
     13: SqliteMigrationContract(source_version=13, target_version=14, name="consolidation_requests", mutable_identity_tables=consolidation_requests.MUTABLE_IDENTITY_TABLES, capture=consolidation_requests.capture_delta, verify=consolidation_requests.verify_delta),
     12: SqliteMigrationContract(source_version=12, target_version=13, name="episode_memory", mutable_identity_tables=episode_memory.MUTABLE_IDENTITY_TABLES, capture=episode_memory.capture_delta, verify=episode_memory.verify_delta),
     11: SqliteMigrationContract(source_version=11, target_version=12, name="memory_embedding", mutable_identity_tables=memory_embedding.MUTABLE_IDENTITY_TABLES, capture=memory_embedding.capture_delta, verify=memory_embedding.verify_delta),

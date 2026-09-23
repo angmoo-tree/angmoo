@@ -14,6 +14,10 @@ from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnit
 
 
 def configure_social_runtime(app: FastAPI) -> None:
+    from app.runtime.social import topic_preparation
+    from app.runtime.social.topic_scope import configure
+    configure()
+    app.state.recommendation_topics = topic_preparation
     app.state.social_timeline_service = timeline_service
     app.state.social_inbox_service = inbox_service
     app.state.social_discovery_service = discovery_service

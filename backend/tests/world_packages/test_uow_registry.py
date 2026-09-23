@@ -136,7 +136,7 @@ def test_destination_seed_is_a_caller_owned_port_and_commit_is_atomic(
         assert world_character.owner_user_id is None
         assert world_character.autonomous_enabled is False
         assert world_character.activity_runtime_mode == "routine_resident_v1"
-        assert world_character.feed_runtime_mode == "keyword_search_v1"
+        assert world_character.feed_runtime_mode == "topic_recommendation_v1"
         assert _count(db, models.CharacterState) == 0
         assert _count(db, models.CharacterActiveWorld) == 0
         assert _count(db, models.LlmCredential) == 0

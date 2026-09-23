@@ -16,6 +16,7 @@ from app.integrations.ladybug_projection import (
 from app.runtime.migrations.ladybug_versions.rebuild import (
     rebuild_projection_v1,
     rebuild_projection_v2,
+    rebuild_projection_v3,
 )
 
 
@@ -23,6 +24,7 @@ GraphRebuild = Callable[..., dict[str, dict[str, list[str]]]]
 GRAPH_REBUILDS: dict[int, GraphRebuild] = {
     1: rebuild_projection_v1,
     2: rebuild_projection_v2,
+    3: rebuild_projection_v3,
 }
 _MANIFEST_ROOT = Path(__file__).with_name("manifests")
 

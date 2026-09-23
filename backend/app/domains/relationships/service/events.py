@@ -7,6 +7,7 @@ from app.domains.relationships.contracts.events import EvidenceInput, EventApply
 from app.domains.relationships.exceptions import SocialEventRuntimeError
 from app.domains.relationships.service.evidence import _validate_evidence_source
 from app.domains.relationships.policies.events import _snapshot, _clamp, _delta
+from app.domains.relationships.service.personalized_metrics import interpreted_policy
 from app.domains.relationships.service.state import _relationship_state, _delta_is_capped
 from app.domains.relationships.service.projection_events import _enqueue_outbox
 from datetime import datetime
@@ -149,6 +150,7 @@ def record_successful_social_event(
     if (
         target_world_character_id is not None
         and event_type in _RELATION_EVENT_TYPES
+        and interpreted_policy(db, world_id) is None
     ):
         state = _relationship_state(
             db,

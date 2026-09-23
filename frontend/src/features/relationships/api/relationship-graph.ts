@@ -1,5 +1,5 @@
 import { RuntimeFetchError, runtimeFetch } from "@/lib/runtime/runtime-config";
-import type { RelationshipGraphRead } from "@/features/relationships/types/relationship-graph";
+import type { RelationshipGraphRead, RelationshipReviewRead } from "@/features/relationships/types/relationship-graph";
 
 export class RelationshipGraphApiError extends Error {
   constructor(
@@ -52,4 +52,13 @@ export async function getRelationshipGraph(
     );
   }
   return payload as RelationshipGraphRead;
+}
+
+
+export async function getRelationshipReview(characterId: string, worldId: string): Promise<RelationshipReviewRead> {
+  const response = await runtimeFetch(`/api/backend/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-review`, {
+    cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new RelationshipGraphApiError("relationship_review_unavailable", response.status);
+  return response.json();
 }

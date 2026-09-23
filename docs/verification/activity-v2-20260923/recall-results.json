@@ -1,0 +1,133 @@
+[
+  {
+    "target": "post-a05472264b56",
+    "query_sha256": "8309279f2ac941bf2335e52056362ff907a90f7aec09ead857e0808620145a69",
+    "query_chars": 41,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "23cfd91d-fe0f-5465-9073-80514108dc86",
+      "c0aa9730-6a8c-530a-8128-6275da6cb5e7",
+      "d556cdd6-4c5b-5066-ae76-7ab56f0f332d",
+      "09ce45c6-43b1-5ee4-8488-f925f9c26763",
+      "a747f724-4f29-59a4-a587-af0e82ab1791"
+    ],
+    "verification": "valid",
+    "duration_ms": 3635.724857005698,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3054.9796169943875,
+        "reason_code": null,
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3556.51676600246,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 546
+    }
+  },
+  {
+    "target": "post-16fc1459dca6",
+    "query_sha256": "19ee178817c5a96c67afa31487bacce7b9af9f111111643cb9e07119720a5062",
+    "query_chars": 107,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "29161a8f-dfdb-5af4-a8e0-15ed827b5865",
+      "efb16af8-ebbe-51b9-9bd6-71a344e28b9d",
+      "69dbfa84-c0be-5b9c-9a66-62329ea71fda",
+      "950f2228-b8a9-55c0-b4ed-4b0d9ff4fee9",
+      "34d6740b-a681-5409-b892-c2fbe0dd778e"
+    ],
+    "verification": "valid",
+    "duration_ms": 3471.240653001587,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 2825.3254829978687,
+        "reason_code": null,
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3436.347807000857,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 499
+    }
+  },
+  {
+    "target": "post-0c41b7256a66",
+    "query_sha256": "01feee2c2bb9154201d89b896b868ce5fc722f3c8c44442d5372a1f6f2d4fedc",
+    "query_chars": 120,
+    "status": "partial",
+    "packets": 2,
+    "memory_ids": [
+      "6b63c771-eb1c-56ec-9dca-396022c8f3d0",
+      "4012f9e2-a9e8-59ce-b101-7dc4c02e57b6",
+      "d556cdd6-4c5b-5066-ae76-7ab56f0f332d",
+      "09ce45c6-43b1-5ee4-8488-f925f9c26763"
+    ],
+    "verification": "valid",
+    "duration_ms": 3767.344530002447,
+    "axes": [
+      {
+        "axis": "fts",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3065.1559260004433,
+        "reason_code": null,
+        "generation": null,
+        "physical_scan_count": null
+      },
+      {
+        "axis": "vector",
+        "status": "ready",
+        "executed": true,
+        "candidate_count": 50,
+        "duration_ms": 3733.315974001016,
+        "reason_code": null,
+        "generation": "v1",
+        "physical_scan_count": null
+      }
+    ],
+    "embedding_usage": {
+      "logical_calls": 1,
+      "physical_attempts": 1,
+      "input_tokens": null,
+      "duration_ms": 727
+    }
+  }
+]

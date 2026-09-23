@@ -605,3 +605,20 @@ def test_owner_controlled_migration_refuses_provenance_losing_downgrade(
         match="downgrade_refused_owner_controlled_world_characters_exist",
     ):
         migration.downgrade()
+
+
+def test_persona_replacement_reselection_preserves_fixed_ids_and_rejects_npc():
+    client, engine, principal = _fixture()
+    _seed_world(engine, principal)
+    first = client.post("/api/v1/worlds/world-a/owner-character", json=_payload(), headers=FRONTEND_HEADERS)
+    assert first.status_code == 201
+    original = first.json()
+    second = client.post("/api/v1/worlds/world-a/owner-characters", json=_payload(display_name="두 번째 인물"), headers=FRONTEND_HEADERS)
+    assert second.status_code == 200
+    assert second.json()["world_character_id"] != original["world_character_id"]
+    listing = client.get("/api/v1/worlds/world-a/owner-characters")
+    assert len(listing.json()) == 2
+    restored = client.post(f"/api/v1/worlds/world-a/owner-characters/{original['world_character_id']}/select", headers=FRONTEND_HEADERS)
+    assert restored.status_code == 200
+    assert restored.json()["character_id"] == original["character_id"]
+    assert client.post("/api/v1/worlds/world-a/owner-characters/npc-id/select", headers=FRONTEND_HEADERS).status_code == 404

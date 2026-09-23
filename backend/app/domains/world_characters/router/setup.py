@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.domains.world_characters.schemas import setup as schemas
 from app.api.identity_dependencies import get_current_user
 from app.database import get_db
+from app.api.recommendation_dependencies import recommendation_workflows
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.domains.world_characters import exceptions as wc_errors
 
@@ -112,14 +113,17 @@ def approve_autonomy_setup(
     data: schemas.WorldCharacterSetupApproveCreate,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
+    topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCharacterSetupRead:
     try:
-        return world_character_setup.approve_setup(
+        result = world_character_setup.approve_setup(
             db,
             world_character_id=world_character_id,
             user=user,
             data=data,
         )
+        topics.prepare_initial_character(db, world_id=result.world_id, owner_id=user.id, world_character_id=world_character_id)
+        return result
     except wc_errors.WorldCharacterSetupError as exc:
         _raise_setup_error(exc)
 

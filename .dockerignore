@@ -34,3 +34,17 @@
 **/coverage/**
 **/uploads
 **/uploads/**
+
+# Local diagnostics/package caches are not application build inputs.
+**/.pnpm-store
+**/.pnpm-store/**
+**/.angmoo-dev
+**/.angmoo-dev/**
+**/.task-output
+**/.task-output/**
+**/.ruff_cache
+**/.ruff_cache/**
+**/playwright-report
+**/playwright-report/**
+**/test-results
+**/test-results/**

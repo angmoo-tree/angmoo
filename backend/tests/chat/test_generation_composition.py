@@ -22,6 +22,7 @@ from chat.test_supervisor_control_tools import native
 
 
 def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):
+    monkeypatch.setattr("app.domains.relationships.service.personalized_metrics.interpreted_policy", lambda db, world: None)
     db = object()
     material = selection_material()
     # This ordering contract specifically exercises the retained legacy planners.

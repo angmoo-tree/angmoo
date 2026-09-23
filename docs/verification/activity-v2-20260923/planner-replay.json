@@ -1,0 +1,97 @@
+{
+  "operational_writes": false,
+  "activity_id": "6fba8df5-fe1c-5828-8672-ada7248fdc9f",
+  "feed": {
+    "status": "valid",
+    "actions": [
+      "comment"
+    ]
+  },
+  "routine": {
+    "status": "valid",
+    "identity_matches": true,
+    "scene_kind": "continue",
+    "draft_count": 1
+  },
+  "usage": {
+    "summary_version": 3,
+    "call_count": 3,
+    "provider_call_count": 3,
+    "generate_call_count": 3,
+    "embedding_call_count": 0,
+    "max_calls": 3,
+    "total_prompt_tokens": 57534,
+    "total_output_tokens": 1710,
+    "total_thought_tokens": 3884,
+    "total_tokens": 63128,
+    "calls": [
+      {
+        "call_type": "generate_content",
+        "provider_call_order_in_run": 1,
+        "call_order_in_run": 1,
+        "agent_run_id": "readonly-replay",
+        "node": "FeedActionPlanner",
+        "lane": "feed_action_planner",
+        "provider": "google",
+        "model": "gemini-3.1-flash-lite",
+        "status": "ok",
+        "duration_ms": 5848,
+        "usage": {
+          "prompt_token_count": 16687,
+          "candidates_token_count": 412,
+          "thoughts_token_count": 1010,
+          "total_token_count": 18109,
+          "cached_content_token_count": null
+        },
+        "thinking_level": "high",
+        "max_output_tokens": 4096,
+        "finish_reason": "STOP"
+      },
+      {
+        "call_type": "generate_content",
+        "provider_call_order_in_run": 2,
+        "call_order_in_run": 2,
+        "agent_run_id": "readonly-replay",
+        "node": "RoutineActionPlanner",
+        "lane": "routine_action_planner",
+        "provider": "google",
+        "model": "gemini-3.1-flash-lite",
+        "status": "ok",
+        "duration_ms": 7743,
+        "usage": {
+          "prompt_token_count": 20614,
+          "candidates_token_count": 955,
+          "thoughts_token_count": 1319,
+          "total_token_count": 22888,
+          "cached_content_token_count": null
+        },
+        "thinking_level": "high",
+        "max_output_tokens": 4096,
+        "finish_reason": "STOP"
+      },
+      {
+        "call_type": "generate_content",
+        "provider_call_order_in_run": 3,
+        "call_order_in_run": 3,
+        "agent_run_id": "readonly-replay",
+        "node": "RoutineWriter",
+        "lane": "routine_writer",
+        "provider": "google",
+        "model": "gemini-3.1-flash-lite",
+        "status": "ok",
+        "duration_ms": 7494,
+        "usage": {
+          "prompt_token_count": 20233,
+          "candidates_token_count": 343,
+          "thoughts_token_count": 1555,
+          "total_token_count": 22131,
+          "cached_content_token_count": null
+        },
+        "thinking_level": "high",
+        "max_output_tokens": 2400,
+        "finish_reason": "STOP"
+      }
+    ],
+    "rate_limit_waits": []
+  }
+}

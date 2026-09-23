@@ -24,6 +24,10 @@ export type RelationshipGraphEdge = {
   tension: number;
   interaction_count: number;
   relationship_version: number;
+  relationship_label?: string | null;
+  perception?: string | null;
+  view_updated_at?: string | null;
+  reviewed_at?: string | null;
   last_event_id: string | null;
   last_event_at: string | null;
 };
@@ -64,3 +68,12 @@ export type RelationshipGraphPresentationState =
   | "degraded"
   | "unavailable"
   | "failed";
+
+
+export type RelationshipReviewRead = {
+  mode: string;
+  configuration: { status: string; manual_available?: boolean; local_time?: string; timezone?: string };
+  excluded_counts: Record<string, number>;
+  states: { target_id: string; last_metric_at: string | null; view_updated_at: string | null; reviewed_at: string | null }[];
+  jobs: { id: string; target_id: string; period: string; phase: string; status: string; memory_count: number; error_code: string | null }[];
+};

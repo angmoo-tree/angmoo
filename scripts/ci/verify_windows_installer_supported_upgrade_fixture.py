@@ -378,11 +378,14 @@ def verify_upgraded(
 ) -> None:
     _source_database(data_root, fixture)
     target_version = int(fixture.get("target_data_version", 0))
-    if target_version <= 0:
+    graph_target_version = int(fixture.get("ladybug_target_data_version", 0))
+    if target_version <= 0 or graph_target_version < expected_ladybug_source_version:
         _fail("supported_upgrade_fixture_contract_invalid")
     payload = _verify_payload(data_root / "app")
     sqlite_contract = payload.get("embedded_data", {}).get("sqlite", {})
     if int(sqlite_contract.get("target_version", 0)) != target_version:
+        _fail("supported_upgrade_candidate_contract_invalid")
+    if int(payload.get("embedded_data", {}).get("ladybug", {}).get("target_version", 0)) != graph_target_version:
         _fail("supported_upgrade_candidate_contract_invalid")
     if _sha256(data_root / "app" / "angmoo-desktop.exe") == fixture.get(
         "app_host_sha256"
@@ -407,7 +410,7 @@ def verify_upgraded(
         or int(result.get("sqlite_target_version", 0)) != target_version
         or int(result.get("ladybug_source_version", 0))
         != expected_ladybug_source_version
-        or int(result.get("ladybug_target_version", 0)) != 2
+        or int(result.get("ladybug_target_version", 0)) != graph_target_version
         or result.get("build_commit") != payload.get("build_commit")
         or result.get("payload_generation") != payload.get("payload_generation")
     ):
@@ -417,7 +420,7 @@ def verify_upgraded(
         data_root,
         fixture,
         expected_source_version=expected_ladybug_source_version,
-        expected_version=2,
+        expected_version=graph_target_version,
         expect_rebuild=True,
     )
     _verify_external_data(data_root, fixture)
@@ -429,6 +432,9 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
     marker = _json(data_root / "canonical" / "current-generation.json")
     source_version = int(fixture.get("source_data_version", 0))
     target_version = int(fixture.get("target_data_version", 0))
+    graph_target_version = int(fixture.get("ladybug_target_data_version", 0))
+    if graph_target_version <= 1:
+        _fail("supported_upgrade_fixture_contract_invalid")
     if int(marker.get("data_version", 0)) != source_version:
         _fail("supported_upgrade_failure_changed_active_generation")
     if (data_root / "canonical" / "previous-generation.json").exists():
@@ -478,7 +484,7 @@ def verify_restored(data_root: Path, fixture: dict[str, Any]) -> None:
         or int(result.get("sqlite_target_version", 0)) != target_version
         or int(result.get("ladybug_source_version", 0)) != 1
         or int(result.get("ladybug_active_version", 0)) != 1
-        or int(result.get("ladybug_target_version", 0)) != 2
+        or int(result.get("ladybug_target_version", 0)) != graph_target_version
         or result.get("build_commit") == payload.get("build_commit")
         or len(str(result.get("build_commit") or "")) != 40
         or len(str(result.get("payload_generation") or "")) != 64

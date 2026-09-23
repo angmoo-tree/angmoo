@@ -55,7 +55,7 @@ def manual(session, *, repository, scope, data, now):
                     .values(updated_at=MemoryBatchSetting.updated_at))
     normalize_memory_idempotency_key(data.idempotency_key)
     receipt_key = "manual:" + hashlib.sha256(data.idempotency_key.encode()).hexdigest()
-    digest = hashlib.sha256(json.dumps(data.model_dump(exclude={"idempotency_key"}), sort_keys=True).encode()).hexdigest()
+    digest = hashlib.sha256(json.dumps(data.model_dump(exclude={"idempotency_key"}, exclude_none=True), sort_keys=True).encode()).hexdigest()
     old = session.scalar(select(Request).where(Request.scope_setting_id == setting.id, Request.idempotency_key == receipt_key))
     if old is not None:
         if old.request_digest != digest:
@@ -67,7 +67,7 @@ def manual(session, *, repository, scope, data, now):
         raise MemoryValidationError("memory_selection_consent_required")
     if (data.expected_version, data.expected_profile_version, data.expected_scope_version) != (config.version, profile.version, setting.version):
         raise MemoryConflictError("memory_batch_settings_version_conflict")
-    if repository.settings(scope).capacity_blocked:
+    if repository.settings(scope).capacity_blocked and not data.followup:
         raise MemoryConflictError("memory_capacity_reached")
     return admit(session, setting=setting, kind="manual", key=receipt_key, digest=digest, now=now, coalesce=True)
 

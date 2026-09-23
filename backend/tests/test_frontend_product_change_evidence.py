@@ -1,5 +1,6 @@
 """Product changes do not exempt unrelated browser assertions or lock drift."""
 import importlib.util
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,16 @@ def test_frontend_exact_chain_rejects_unrecorded_file_content_and_missing_steps(
     assert not changes.frontend_matches("browser-tests/other.spec.ts", "old\n", "new\n", [record])
     with pytest.raises(ValueError, match="chain preimage"):
         changes.frontend_matches(path, "different old\n", "new\n", [record])
+    png = "browser-tests/snapshots/ui-f/example.png"
+    old_image, new_image = b"old png bytes", b"new png bytes"
+    image_record = {"frontend_assets": [{"source": png,
+        "before_sha256": hashlib.sha256(old_image).hexdigest(),
+        "after_sha256": hashlib.sha256(new_image).hexdigest()}]}
+    assert changes.frontend_asset_matches(png, old_image, new_image, [image_record])
+    assert not changes.frontend_asset_matches(png, old_image, b"different", [image_record])
+    assert not changes.frontend_asset_matches("browser-tests/snapshots/ui-f/other.png", old_image, new_image, [image_record])
+    with pytest.raises(ValueError, match="chain preimage"):
+        changes.frontend_asset_matches(png, b"different old", new_image, [image_record])
 
 
 @pytest.mark.parametrize("revision", ["parent", "commit"])

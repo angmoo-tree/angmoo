@@ -1,4 +1,5 @@
 "use client";
+import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 
 import { generationProfileLabel } from "@/config/generation-profiles";
 import { ProfileStatLink } from "@/features/characters/components/agent-detail-parts";
@@ -1198,6 +1199,14 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         ) : (
           <div className="px-5 py-7 md:px-9">
             {activeTab === "status" ? <StatusTab agent={agent} /> : null}
+
+            {activeTab === "settings" && agent.activity_profile_readiness.world_id && agent.activity_profile_readiness.world_character_id ? (
+              <RecommendationTopicsPanel
+                key={agent.activity_profile_readiness.world_character_id}
+                worldId={agent.activity_profile_readiness.world_id}
+                characterId={agent.activity_profile_readiness.world_character_id}
+              />
+            ) : null}
 
             {activeTab === "settings" && isLocalAgent ? (
               <LocalConnectionSettings

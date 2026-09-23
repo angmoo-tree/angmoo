@@ -1811,7 +1811,7 @@ async def _run_resident_slot_once(
 
             if (
                 gateway_result.get("engine")
-                == "routine_resident_v1+keyword_search_v1"
+                == "routine_resident_v1+topic_recommendation_v1"
             ):
                 selected_post_id = _combined_runtime_evidence_post_id(
                     gateway_result

@@ -137,6 +137,7 @@ def create_agent_tool_post_from_brief(
         session_key,
         post_data,
         topic_signature=topic_signature,
+        final_topic_signature=payload.get("topic_signature"),
         novelty_basis=novelty_basis,
         lore_chunk_ids=lore_chunk_ids,
         retrieval_mode=retrieval_mode,

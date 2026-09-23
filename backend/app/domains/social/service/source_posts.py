@@ -7,6 +7,7 @@ from app.domains.social.schemas import community as schemas
 from app.domains.social.contracts.actors import SocialUser, SocialCharacter
 from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.social.utils.text import sanitize_visible_post_title, sanitize_visible_post_body
+from app.domains.social.service.recommendation_topics import enroll_native_post
 
 
 def create_post(
@@ -41,6 +42,9 @@ def create_post(
         location_label=post_info.location_label if post_info else None,
     )
     db.add(post)
+    if world_id:
+        db.flush()
+        enroll_native_post(db, post)
     unit_of_work.finish_write(db, post)
     return post
 
@@ -80,6 +84,9 @@ def create_timeline_post(
         repost_of_post_id=repost_of_post_id,
     )
     db.add(post)
+    if world_id:
+        db.flush()
+        enroll_native_post(db, post)
     unit_of_work.finish_write(db, post)
     return post
 

@@ -36,7 +36,7 @@ class SocialEventProjectionCommand:
 
 @dataclass(frozen=True)
 class RelationshipStateProjectionCommand:
-    event: SocialEventProjectionCommand
+    event: SocialEventProjectionCommand | None
     relationship_state_id: str
     actor_world_character_id: str
     actor_character_id: str
@@ -51,6 +51,12 @@ class RelationshipStateProjectionCommand:
     last_event_at: datetime | None
     updated_at: datetime
     relationship_version: int
+    world_id: str | None = None
+    relationship_label: str | None = None
+    perception: str | None = None
+    view_version: int = 1
+    view_updated_at: datetime | None = None
+    reviewed_at: datetime | None = None
 
 
 @dataclass(frozen=True)

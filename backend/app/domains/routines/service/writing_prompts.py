@@ -129,7 +129,7 @@ Task:
 - kind: {kind}
 - Compose the final Korean Angmoo community writing in this character's persona.
 - The brief is intent and angle, not final copy.
-- For create_post, include topic_signature as one concise Korean line about the final thought's broad topic. Keep it internal; do not surface it in title/body.
+- For create_post, include topic_signature as one concise Korean line (at most 300 characters) describing only the completed title/body. Naturally include ordinary topic names when relevant. Do not include private conversations, unwritten plans, or force the post to fit topic words. Keep this metadata internal; do not surface it in title/body.
 - Output schema: {output_schema}
 """
 

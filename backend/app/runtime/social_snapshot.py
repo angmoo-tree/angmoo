@@ -12,7 +12,7 @@ from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
 
 
-def prepare_activity_social_context(ctx, *, active_actor):
+def prepare_activity_social_context(ctx, *, active_actor, counterpart_id=None):
     if settings.MEMORY_RECALL_REPRESENTATION == "episode_v1":
         from app.runtime.memory.episode_sns import attach_sns_episode_reader
         actor = active_actor(ctx.db, character_id=ctx.character.id)
@@ -26,7 +26,7 @@ def prepare_activity_social_context(ctx, *, active_actor):
             WorldCharacter.status == "active", Character.deleted_at.is_(None), Character.moderation_status == "active")).all())
     gateway = GraphRecallService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings, graph_provider="ladybug"))
     service = SocialContextService(gateway.execute)
-    snapshot = service.prepare(scope, labels=labels)
+    snapshot = service.prepare(scope, labels=labels, counterpart_id=counterpart_id)
     def validate():
         current = active_actor(ctx.db, character_id=ctx.character.id)
         if (current.id, current.world_id) != (scope.subject_world_character_id, scope.world_id):

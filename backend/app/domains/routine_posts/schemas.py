@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal
 
 from app.contracts.activity_thought import ActivityThought
-from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator
+from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator, field_validator
 
 from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
@@ -105,5 +105,10 @@ class RoutineBeatPlan(RoutinePostSchema):
 class RoutinePostDraft(RoutinePostSchema):
     title: str = Field(min_length=1, max_length=160)
     body: str = Field(min_length=1, max_length=4000)
-    topic_signature: str = Field(min_length=1, max_length=300)
+    topic_signature: str = Field(default="", max_length=300)
     novelty_basis: str = Field(min_length=1, max_length=500)
+
+    @field_validator("topic_signature", mode="before")
+    @classmethod
+    def optional_signature(cls, value):
+        return value.strip() if isinstance(value, str) and len(value) <= 300 else ""

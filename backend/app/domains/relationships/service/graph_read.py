@@ -355,6 +355,11 @@ def get_owner_relationship_graph(
             tension=hit.tension,
             interaction_count=hit.interaction_count,
             relationship_version=hit.relationship_version,
+            relationship_label=hit.relationship_label,
+            perception=hit.perception,
+            view_version=hit.view_version,
+            view_updated_at=hit.view_updated_at,
+            reviewed_at=hit.reviewed_at,
             last_event_id=hit.last_event_id,
             last_event_at=hit.last_event_at,
         )

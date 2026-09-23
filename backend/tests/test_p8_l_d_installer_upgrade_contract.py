@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13))
+@pytest.mark.parametrize("source_version", tuple(range(1, 19)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -104,7 +104,11 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         assert ("chat_retrieval_diagnostics" in memory_tables) == (source_version >= 11)
         assert ("memory_embedding_settings" in memory_tables) == (source_version >= 12)
         assert ("memory_episode_info" in memory_tables) == (source_version >= 13)
-        assert "memory_consolidation_requests" not in memory_tables
+        assert ("memory_consolidation_requests" in memory_tables) == (source_version >= 14)
+        assert ("social_recommendation_catalogs" in memory_tables) == (source_version >= 15)
+        assert ("relationship_experience_receipts" in memory_tables) == (source_version >= 17)
+        assert ("relationship_review_requests" in memory_tables) == (source_version >= 18)
+        assert "activity_graph_runs" not in memory_tables
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "
@@ -137,8 +141,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 14
-    assert fixture["target_table_count"] == 115
+    assert fixture["target_data_version"] == 19
+    assert fixture["target_table_count"] == 133
     if source_version == 8:
         assert fixture["generation"] == (
             "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"

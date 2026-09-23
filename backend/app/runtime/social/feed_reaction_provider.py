@@ -1,6 +1,10 @@
 """Existing credential, provider schema and direct LLM transport for feed reactions."""
 
 from __future__ import annotations
+import logging
+from datetime import UTC, datetime
+from app.domains.relationships.policies.interpretation_prompt import METRIC_INSTRUCTIONS, with_metric_schema
+from app.runtime.relationships.social_metrics import prepare_sources, stage_sources
 from app.config import settings
 from app.contracts.activity_thought import THOUGHT_PROMPT
 from app.contracts.activity_thought_output import thought_response_schema, extract_activity_thought, without_legacy_self_view_prompt
@@ -34,6 +38,9 @@ from app.integrations.direct_llm import (
     generate_json,
 )
 from app.domains.social.contracts.world_feed import ReadySearchProfile
+
+
+logger = logging.getLogger(__name__)
 
 
 GEMINI_FEED_REACTION_RESPONSE_SCHEMA = build_gemini_developer_response_schema(
@@ -89,6 +96,9 @@ class DirectFeedReactionProvider:
         proposal_eligible_indices: frozenset[int] = frozenset(),
     ) -> schemas.FeedReactionDecision:
         api_key = _api_key(resident_context)
+        metric_sources = prepare_sources(resident_context.db, actor=profile.world_character,
+            post_ids=[candidate.post_id for candidate in candidates])
+        metric_raw = None
         system_prompt, user_prompt = build_reaction_prompts(
             profile=profile,
             candidates=candidates,
@@ -100,6 +110,9 @@ class DirectFeedReactionProvider:
             system_prompt += "\n" + THOUGHT_PROMPT + "\nFor comment or NO_ACTION return empty thought; the final comment writer owns its thought."
 
         def validator(payload: dict[str, object]) -> schemas.FeedReactionDecision:
+            nonlocal metric_raw
+            payload = dict(payload)
+            metric_raw = payload.pop("relationship_metrics", None)
             thought = None
             if self._thought_enabled:
                 payload, thought = extract_activity_thought(payload, include_thought=True)
@@ -108,10 +121,29 @@ class DirectFeedReactionProvider:
                 candidates=candidates,
                 proposal_eligible_indices=proposal_eligible_indices,
             )
+            cleared_fields = [
+                field for field in ("interaction_intent", "comment_purpose")
+                if payload.get(field) is not None and getattr(result, field) is None
+            ]
+            if cleared_fields:
+                logger.info(
+                    "world_feed_decision_normalized run_id=%s selected_action=%s fields=%s reason_code=non_comment_metadata_cleared",
+                    resident_context.run_id, result.selected_action, ",".join(cleared_fields),
+                )
             if self._thought_enabled and result.selected_action not in {None, "comment"}:
                 result._activity_thought = thought
             return result
 
+        planner_schema = thought_response_schema(GEMINI_FEED_REACTION_RESPONSE_SCHEMA, include_thought=True) if self._thought_enabled else GEMINI_FEED_REACTION_RESPONSE_SCHEMA
+        if metric_sources:
+            planner_schema = with_metric_schema(planner_schema)
+            system_prompt += METRIC_INSTRUCTIONS + "\nUse each candidate author_world_character_id as target_ref and post_id as source_ref."
+        delivery = getattr(self, "delivery", None)
+        system_prompt = system_prompt + social_prompt(resident_context, "feed_reaction_planner")
+        if len(system_prompt) + len(user_prompt) > 64000:
+            raise FeedReactionValidationError("feed_model_input_budget_exceeded")
+        if delivery is not None:
+            delivery.dispatched()
         try:
             result = await generate_json(
                 api_key=api_key,
@@ -121,24 +153,25 @@ class DirectFeedReactionProvider:
                     lane="world_keyword_feed",
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt + social_prompt(resident_context, "feed_reaction_planner"),
+                system_prompt=system_prompt,
                 user_prompt=user_prompt,
-                response_schema=thought_response_schema(GEMINI_FEED_REACTION_RESPONSE_SCHEMA, include_thought=True) if self._thought_enabled else GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
+                response_schema=planner_schema,
                 validator=validator,
                 max_output_tokens=4096 if self._thinking_level == "high" else 900,
                 thinking_level=self._thinking_level,
                 on_rate_limit_wait=resident_context.on_rate_limit_wait,
                 should_retry_json_error=lambda *_args: False,
+                on_response=delivery.delivered if delivery is not None else None,
             )
         except (DirectLlmError, ValidationError, ValueError) as exc:
             setattr(exc, "node", "FeedReactionPlanner")
             setattr(exc, "lane", "world_keyword_feed")
             raise
-        return (
-            result
-            if isinstance(result, schemas.FeedReactionDecision)
-            else validator(result)
-        )
+        decision = result if isinstance(result, schemas.FeedReactionDecision) else validator(result)
+        if metric_sources and delivery is not None and delivery.row.state == "delivered":
+            stage_sources(resident_context.db, actor=profile.world_character, manifest=metric_sources,
+                raw=metric_raw, decision_key=delivery.row.id, now=datetime.now(UTC))
+        return decision
 
     async def write_comment(
         self,
@@ -187,6 +220,9 @@ class DirectFeedReactionProvider:
             result._activity_thought = thought
             return result
 
+        system_prompt = system_prompt + social_prompt(resident_context, "feed_comment_writer")
+        if len(system_prompt) + len(user_prompt) > 64000:
+            raise FeedReactionValidationError("feed_model_input_budget_exceeded")
         try:
             result = await generate_json(
                 api_key=api_key,
@@ -200,7 +236,7 @@ class DirectFeedReactionProvider:
                     ),
                 ),
                 tracker=tracker,
-                system_prompt=system_prompt + social_prompt(resident_context, "feed_comment_writer"),
+                system_prompt=system_prompt,
                 user_prompt=user_prompt,
                 response_schema=writer_schema,
                 validator=validator,

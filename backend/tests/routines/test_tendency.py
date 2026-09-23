@@ -1371,6 +1371,10 @@ def test_post_created_activity_result_stores_topic_metadata():
     assert payload["retrieval_mode"] == "pgvector"
 
 def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
+    monkeypatch.setattr(
+        "app.domains.social.service.recommendation_topics.match_post",
+        lambda *args, **kwargs: None,
+    )
     run = SimpleNamespace(
         id="run-1", user_id="user-1", character_id="char-1", post_id=None
     )
@@ -1437,6 +1441,10 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     assert stored["novelty_basis"] == "새 관점"
 
 def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatch):
+    monkeypatch.setattr(
+        "app.domains.social.service.recommendation_topics.match_post",
+        lambda *args, **kwargs: None,
+    )
     run = SimpleNamespace(
         id="run-1", user_id="user-1", character_id="char-1", post_id=None
     )

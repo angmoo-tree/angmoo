@@ -1,0 +1,68 @@
+{
+  "contracts": [
+    {
+      "application": "full",
+      "kind": "operations",
+      "key": "GET /api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime",
+      "before": null,
+      "after": "edc4ab244ced32eb1eb3b77c68204f12ca47fba5d003042e65c18b5aa49d4935"
+    },
+    {
+      "application": "full",
+      "kind": "operations",
+      "key": "PUT /api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime",
+      "before": null,
+      "after": "ef234518cf74e54c099fc6539cc17957407fcb868e82e3314764dc58b7462cf1"
+    },
+    {
+      "application": "full",
+      "kind": "schemas",
+      "key": "EngineWrite",
+      "before": null,
+      "after": "a1841c3cf38b220c768dee3797e81c57c1e6a0e49d189dd7c8cc38c0f2789303"
+    },
+    {
+      "application": "public",
+      "kind": "operations",
+      "key": "GET /api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime",
+      "before": null,
+      "after": "edc4ab244ced32eb1eb3b77c68204f12ca47fba5d003042e65c18b5aa49d4935"
+    },
+    {
+      "application": "public",
+      "kind": "operations",
+      "key": "PUT /api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime",
+      "before": null,
+      "after": "ef234518cf74e54c099fc6539cc17957407fcb868e82e3314764dc58b7462cf1"
+    },
+    {
+      "application": "public",
+      "kind": "schemas",
+      "key": "EngineWrite",
+      "before": null,
+      "after": "a1841c3cf38b220c768dee3797e81c57c1e6a0e49d189dd7c8cc38c0f2789303"
+    }
+  ],
+  "orm_tables": [
+    {
+      "key": "activity_engine_policies",
+      "before": null,
+      "after": "dfd7d5f23cc0ee3eb592598646a7e8ee1df003b568f7cc254cefaf6bffc6e27d"
+    },
+    {
+      "key": "activity_graph_runs",
+      "before": null,
+      "after": "7fba2c081c98832370c083cc0095548275d9ec9bb920a98602d8c7df9c16db0a"
+    },
+    {
+      "key": "world_character_activity_states",
+      "before": null,
+      "after": "e838e39a5c3ac3de65d86b3342a69e24b8069596f91f47638ad3ebeb04eca1aa"
+    },
+    {
+      "key": "world_character_state_receipts",
+      "before": null,
+      "after": "f7ece9aa26e112fe7cf6945bf48f0a7067883aa719ae9cc1a863783fbf042202"
+    }
+  ]
+}

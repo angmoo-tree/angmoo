@@ -387,8 +387,38 @@ def _seed_v2_roleless(
                 )
                 from app.models import Base
 
-                from app.runtime.persistence.sqlite_schema import EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES
-                for name in reversed(CONSOLIDATION_V14_TABLES + EPISODE_V13_TABLES + ("memory_vector_eligibility", "memory_embedding_settings")):
+                from app.runtime.persistence.sqlite_schema import ACTIVITY_V19_TABLES, EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES, RECOMMENDATION_V15_TABLES, build_sqlite_v14_metadata
+                from sqlalchemy.schema import CreateTable, CreateIndex
+                from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
+                for name in reversed(ACTIVITY_V19_TABLES):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                for name in ("relationship_states", "graph_projection_outbox"):
+                    historical = build_sqlite_v16_metadata().tables[name]
+                    old = name + "_current_fixture"
+                    connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
+                    connection.execute(CreateTable(historical))
+                    cols = ", ".join(c.name for c in historical.columns)
+                    connection.exec_driver_sql(f"INSERT INTO {name} ({cols}) SELECT {cols} FROM {old}")
+                    connection.exec_driver_sql(f"DROP TABLE {old}")
+                    for index in historical.indexes:
+                        connection.execute(CreateIndex(index))
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
+                # This fixture intentionally reconstructs v2 from the current baseline.
+                historical_wc = build_sqlite_v14_metadata().tables["world_characters"]
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                connection.exec_driver_sql("ALTER TABLE world_characters RENAME TO world_characters_current_fixture")
+                connection.execute(CreateTable(historical_wc))
+                columns = ", ".join(column.name for column in historical_wc.columns)
+                connection.exec_driver_sql(f"INSERT INTO world_characters ({columns}) SELECT {columns} FROM world_characters_current_fixture")
+                connection.exec_driver_sql("DROP TABLE world_characters_current_fixture")
+                for index in historical_wc.indexes:
+                    connection.execute(CreateIndex(index))
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
+                connection.exec_driver_sql("DROP INDEX ix_posts_world_author_created")
+                for name in reversed(RECOMMENDATION_V15_TABLES + CONSOLIDATION_V14_TABLES + EPISODE_V13_TABLES + ("memory_vector_eligibility", "memory_embedding_settings")):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 Base.metadata.tables["chat_retrieval_diagnostics"].drop(connection, checkfirst=True)
                 for name in reversed(MEMORY_BATCH_TABLES):
@@ -925,7 +955,7 @@ def test_graph_version_change_replays_to_staging_and_preserves_previous(
     current = json.loads(
         (root / "graph" / "current-generation.json").read_text(encoding="utf-8")
     )
-    assert current["relative_path"].startswith("generations/ladybug-v2")
+    assert current["relative_path"].startswith("generations/ladybug-v3")
     previous = json.loads(
         (root / "graph" / "previous-generation.json").read_text(encoding="utf-8")
     )
@@ -950,7 +980,7 @@ def test_graph_rebuild_failure_degrades_without_replacing_previous(
     def fail_rebuild(**_kwargs):
         raise graph_registry.LadybugVersionContractError("ladybug_rebuild_injected")
 
-    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 2, fail_rebuild)
+    monkeypatch.setitem(graph_registry.GRAPH_REBUILDS, 3, fail_rebuild)
     result = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(root),
         fallback_generation=GENERATION,

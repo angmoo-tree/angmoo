@@ -11,6 +11,7 @@ from app.api.v1.routes import community
 from app.domains.chat.router import messages
 from app.domains.memory import router as memory
 from app.domains.social.router import manual_router as manual_social_router
+from app.domains.social.recommendation_router import router as recommendation_router
 from app.domains.runtime import router as runtime_status
 from app.domains.tree import router as tree
 from app.domains.world_characters.router import entry as worlds
@@ -23,6 +24,7 @@ from app.domains.chat.router import world_chat_response, retrieval_diagnostics
 from app.domains.device_home.router import router as device_home_router
 from app.domains.identity.router.local import router as local_identity_router
 from app.domains.world_characters.router.profile import router as world_character_router
+from app.domains.world_characters.router.activity import router as activity_runtime_router
 from app.domains.world_packages.router import router as world_package_router
 
 
@@ -31,6 +33,7 @@ class HostedRouterConfigurationError(RuntimeError):
 
 
 PUBLIC_ROUTERS = (
+    recommendation_router,
     local_identity_router,
     device_home_router,
     memory.router,
@@ -39,6 +42,7 @@ PUBLIC_ROUTERS = (
     world_chat_response.router,
     retrieval_diagnostics.router,
     world_character_router,
+    activity_runtime_router,
     manual_social_router,
     world_package_router,
     auth.public_router,

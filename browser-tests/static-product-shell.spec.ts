@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { staticAgentDetail } from "./agent-detail-fixture";
+import { recommendationHistoryTests } from "./recommendation-history-fixture";
 
 const ROUTES = [
   "/",
@@ -266,110 +268,6 @@ function staticUiDPostMedia(postId: string, index: number) {
   };
 }
 
-function staticAgentDetail(characterId: string) {
-  return {
-    character: {
-      id: characterId,
-      owner_id: "owner-static-probe",
-      name: "Profile Scroll Parrot",
-      handle: "profile_scroll",
-      avatar_url: null,
-      banner_url: null,
-      one_liner: "Device owner pagination probe",
-      personality: "calm",
-      speech_style: "brief",
-      worldview: "local",
-      topic_preferences: "testing",
-      safety_rules: "safe",
-      status: "active",
-      execution_mode: "local",
-      persona_summary: "Device owner pagination probe",
-    },
-    state: null,
-    credential: null,
-    settings: {
-      character_id: characterId,
-      auto_enabled: false,
-      activity_level: "normal",
-      activity_interval_minutes: 60,
-      comment_cooldown_minutes: 30,
-      max_comments_per_day: 10,
-      post_cooldown_hours: 2,
-      max_posts_per_day: 10,
-      allow_post: true,
-      allow_reply: true,
-      allow_like: true,
-      allow_repost: false,
-      allow_follow: false,
-      allow_unfollow: false,
-      allow_observe: true,
-      tendency_summary: "",
-      tendency_action_ranges: {},
-      tendency_analysis_ready: true,
-      tendency_updated_at: null,
-      tendency_error: null,
-      active_hours_start: "10:00",
-      active_hours_end: "20:00",
-      writing_temperature: 0.7,
-      writing_repetition_level: "normal",
-      updated_at: "2026-08-30T00:00:00Z",
-    },
-    image_settings: {
-      character_id: characterId,
-      image_generation_enabled: false,
-      image_key_mode: "disabled",
-      max_images_per_day: 0,
-      pollinations_image_model: "replicate-zimage-turbo-lora",
-      seed_image_url: null,
-      key_fingerprint: null,
-      has_pollinations_api_key: false,
-      replicate_key_fingerprint: null,
-      has_replicate_api_key: false,
-      service_image_available: false,
-      service_image_model: "",
-      service_image_model_label: "",
-      service_free_quota_limit: 0,
-      service_free_quota_used: 0,
-      service_free_quota_remaining: 0,
-      service_free_quota_date: null,
-      visual_identity_prompt_available: false,
-      visual_identity_prompt: null,
-      visual_identity_mode: "none",
-      visual_identity_source_hash: null,
-      updated_at: "2026-08-30T00:00:00Z",
-    },
-    promotion_usage: {
-      promotion_usage_allowed: false,
-      promotion_usage_agreed_at: null,
-      promotion_usage_revoked_at: null,
-      promotion_usage_policy_version: null,
-    },
-    assigned_slot: null,
-    activity_profile_readiness: {
-      ready: true,
-      source: "legacy_tendency",
-      reason_code: null,
-      world_id: null,
-      world_character_id: null,
-    },
-    activity_summary: {
-      within_active_hours: true,
-      timezone: "Asia/Seoul",
-      allowed_actions: [],
-      blocked_reasons: {},
-      last_activity_at: null,
-      next_activity_at: null,
-      manual_run_available_at: null,
-      first_greeting_available_at: null,
-      today_comment_count: 0,
-      max_comments_per_day: 10,
-      today_post_count: 0,
-      max_posts_per_day: 10,
-      today_like_count: 0,
-    },
-    recent_activity: [],
-  };
-}
 
 function staticUiECharacter({
   activityActionType = "post_created",
@@ -2138,7 +2036,7 @@ test("Studio World-local leave stops autonomy, refreshes version, and preserves 
   });
 
   await page.goto(studioRoute);
-  await expect(page.getByText("빛나", { exact: true })).toBeVisible();
+  await expect(page.getByRole("article").getByText("빛나", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "이 World에서 제거" }).click();
 
   await expect(page.getByRole("dialog", { name: "이 World에서 제거" })).toBeVisible();
@@ -4535,3 +4433,5 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
   await expect(page.getByText("지원하지 않는 Angmoo 경로입니다.")).toHaveCount(0);
 });
 import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
+
+recommendationHistoryTests(true);

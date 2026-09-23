@@ -1,0 +1,298 @@
+{
+  "read_only": true,
+  "runs": [
+    {
+      "activity_id": "761dac68-5729-5a56-90af-e67d040d32cb",
+      "actor_id": "1be8aeaf-d182-5a79-98d0-0ed3e5466601",
+      "status": "failed",
+      "stage": "Finalize",
+      "started_at": "2026-09-22 20:02:29.062295",
+      "finished_at": "2026-09-22 20:02:32.208941",
+      "reason": null,
+      "paths": {
+        "inbox": {
+          "status": "no_action",
+          "reason": null,
+          "public_action_count": 0,
+          "selected_ids": [],
+          "recall_status": {},
+          "settlement": {}
+        },
+        "routine": {
+          "status": "failed",
+          "reason": "ValueError",
+          "public_action_count": 0,
+          "selected_ids": null,
+          "recall_status": null,
+          "settlement": null
+        },
+        "feed": {
+          "status": "no_action",
+          "reason": null,
+          "public_action_count": 0,
+          "selected_ids": [],
+          "recall_status": {},
+          "settlement": {}
+        }
+      },
+      "checkpoints": {
+        "FeedActivityGraph": {
+          "selected_count": 0,
+          "recall_count": 0,
+          "state_input_version": 1,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": []
+        },
+        "RoutineActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 1,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": [
+            "branch:to:ActionPlanner"
+          ]
+        },
+        "InboxActivityGraph": {
+          "selected_count": 0,
+          "recall_count": 0,
+          "state_input_version": 1,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": []
+        }
+      }
+    },
+    {
+      "activity_id": "6fba8df5-fe1c-5828-8672-ada7248fdc9f",
+      "actor_id": "4d45ccec-da46-5309-ad39-84945fa977c5",
+      "status": "failed",
+      "stage": "Finalize",
+      "started_at": "2026-09-22 20:11:42.440846",
+      "finished_at": "2026-09-22 20:12:25.418292",
+      "reason": null,
+      "paths": {
+        "inbox": {
+          "status": "completed",
+          "reason": null,
+          "public_action_count": 1,
+          "selected_ids": [
+            "f7fc9c00365ac46497cbe58bc24df8dea15776890d88c761664160f212f45f6e"
+          ],
+          "recall_status": {
+            "f7fc9c00365ac46497cbe58bc24df8dea15776890d88c761664160f212f45f6e": "partial"
+          },
+          "settlement": {
+            "state": "kept",
+            "decision_key": "769f95c67f90be90fb775e39a870295fe6bbd7df8ef8d0cc44f6d41015964064"
+          }
+        },
+        "routine": {
+          "status": "failed",
+          "reason": "DirectLlmJsonError",
+          "public_action_count": 0,
+          "selected_ids": null,
+          "recall_status": null,
+          "settlement": null
+        },
+        "feed": {
+          "status": "failed",
+          "reason": "DirectLlmJsonError",
+          "public_action_count": 0,
+          "selected_ids": null,
+          "recall_status": null,
+          "settlement": null
+        }
+      },
+      "checkpoints": {
+        "FeedActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 2,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": [
+            "branch:to:ActionPlanner"
+          ]
+        },
+        "RoutineActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 2,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": [
+            "branch:to:ActionPlanner"
+          ]
+        },
+        "InboxActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 1,
+          "actions": [
+            "comment"
+          ],
+          "state_status": "valid",
+          "settlement": {
+            "state": "kept",
+            "decision_key": "769f95c67f90be90fb775e39a870295fe6bbd7df8ef8d0cc44f6d41015964064"
+          },
+          "execution_ids": [
+            null
+          ],
+          "next": []
+        }
+      }
+    },
+    {
+      "activity_id": "f9cb9be5-dccf-5c08-bf6c-c1bb2f70601d",
+      "actor_id": "1be8aeaf-d182-5a79-98d0-0ed3e5466601",
+      "status": "completed",
+      "stage": "Finalize",
+      "started_at": "2026-09-22 20:36:06.060179",
+      "finished_at": "2026-09-22 20:43:36.740239",
+      "reason": null,
+      "paths": {
+        "inbox": {
+          "status": "completed",
+          "reason": null,
+          "public_action_count": 1,
+          "selected_ids": [
+            "6ac08eaf901d5ee561ca8d444047babe6cb991662eeaa0bf576648d7f2846c9e"
+          ],
+          "recall_status": {
+            "6ac08eaf901d5ee561ca8d444047babe6cb991662eeaa0bf576648d7f2846c9e": "partial"
+          },
+          "settlement": {
+            "state": "kept",
+            "decision_key": "54421c621e8795d35162603b28eda78083cbd484dbf8cc4e1645ee0506362e67"
+          }
+        },
+        "routine": {
+          "status": "completed",
+          "reason": null,
+          "public_action_count": 1,
+          "selected_ids": null,
+          "recall_status": null,
+          "settlement": {
+            "state": "updated"
+          }
+        },
+        "feed": {
+          "status": "no_action",
+          "reason": null,
+          "public_action_count": 0,
+          "selected_ids": [],
+          "recall_status": {},
+          "settlement": {}
+        }
+      },
+      "checkpoints": {
+        "FeedActivityGraph": {
+          "selected_count": 0,
+          "recall_count": 0,
+          "state_input_version": 3,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": []
+        },
+        "RoutineActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 2,
+          "actions": [],
+          "state_status": "valid",
+          "settlement": {
+            "state": "updated"
+          },
+          "execution_ids": [
+            null
+          ],
+          "next": []
+        },
+        "InboxActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 1,
+          "actions": [
+            "like"
+          ],
+          "state_status": "valid",
+          "settlement": {
+            "state": "kept",
+            "decision_key": "54421c621e8795d35162603b28eda78083cbd484dbf8cc4e1645ee0506362e67"
+          },
+          "execution_ids": [
+            null
+          ],
+          "next": []
+        }
+      }
+    },
+    {
+      "activity_id": "8a26bbce-b5a4-57d2-af92-c9d77340da74",
+      "actor_id": "4d45ccec-da46-5309-ad39-84945fa977c5",
+      "status": "waiting",
+      "stage": "Settle",
+      "started_at": "2026-09-22 20:42:59.409939",
+      "finished_at": null,
+      "reason": "OperationalError",
+      "paths": {},
+      "checkpoints": {
+        "FeedActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 2,
+          "actions": [
+            "comment"
+          ],
+          "state_status": "valid",
+          "settlement": null,
+          "execution_ids": [
+            283
+          ],
+          "next": [
+            "branch:to:Settle"
+          ]
+        },
+        "RoutineActivityGraph": {
+          "selected_count": 1,
+          "recall_count": 1,
+          "state_input_version": 2,
+          "actions": [],
+          "state_status": "invalid",
+          "settlement": {
+            "state": "invalid"
+          },
+          "execution_ids": [
+            null
+          ],
+          "next": []
+        },
+        "InboxActivityGraph": {
+          "selected_count": 0,
+          "recall_count": 0,
+          "state_input_version": 2,
+          "actions": [],
+          "state_status": null,
+          "settlement": null,
+          "execution_ids": [],
+          "next": []
+        }
+      }
+    }
+  ]
+}

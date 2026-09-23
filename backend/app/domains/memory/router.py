@@ -323,7 +323,8 @@ def start_memory_batch(world_id: str, subject_id: str, data: MemoryBatchStart, r
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         result = consolidation_requests.submit(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, data=data)
-        if result["state"] not in ("preparing", "queued", "waiting_for_chat", "ai_running", "applying"):
+        active = result.get("flow_state") in ("memory_running", "relationship_waiting", "relationship_running", "relationship_retry_needed") if result.get("followup") else result["state"] in ("preparing", "queued", "waiting_for_chat", "ai_running", "applying")
+        if not active:
             response.status_code = 200
         return result
     except Exception as exc:
@@ -339,3 +340,15 @@ def read_memory_batch_progress(world_id: str, subject_id: str, request: Request,
         return consolidation_requests.read(scope=_scope(user, world_id, subject_id), db=db, workflows=workflows, request_id=request_id)
     except Exception as exc:
         _raise_memory_read_error(exc)
+
+
+@router.post("/memory/batch-run/{request_id}/retry")
+def retry_memory_relationship_batch(world_id: str, subject_id: str, request_id: str,
+    data: MemoryBatchRetry, request: Request, db: Session = Depends(get_db),
+    user: User = Depends(get_current_user), workflows: MemoryWorkflows = Depends(get_memory_workflows)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return consolidation_requests.retry(scope=_scope(user, world_id, subject_id), db=db,
+            workflows=workflows, request_id=request_id, key=data.idempotency_key)
+    except Exception as exc:
+        _raise_memory_mutation_error(exc)

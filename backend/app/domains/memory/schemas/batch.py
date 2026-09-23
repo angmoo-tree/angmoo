@@ -1,6 +1,7 @@
 """Owner-only, saved-state Memory batch controls; never contains secrets."""
 
 from datetime import datetime
+from typing import Literal
 from app.providers.generation_profiles import ThinkingLevel
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -54,6 +55,7 @@ class MemoryBatchRetry(BaseModel):
 
 
 class MemoryBatchStart(BaseModel):
+    followup: Literal["relationships"] | None = None
     model_config = ConfigDict(extra="forbid")
     idempotency_key: str = Field(min_length=8, max_length=128)
     expected_version: int = Field(ge=1)

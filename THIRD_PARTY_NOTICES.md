@@ -3,12 +3,13 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (75)
+## Python packages (78)
 
+- `aiosqlite 0.22.1` — OSI Approved :: MIT License
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
 - `annotated-types 0.7.0` — OSI Approved :: MIT License
-- `anyio 4.13.0` — MIT
+- `anyio 4.15.1` — MIT
 - `certifi 2026.4.22` — MPL-2.0
 - `cffi 2.0.0` — MIT
 - `charset-normalizer 3.4.7` — MIT
@@ -34,6 +35,7 @@ Package authors retain all rights granted by their respective licenses.
 - `langchain-protocol 0.0.16` — MIT
 - `langgraph 1.2.2` — MIT
 - `langgraph-checkpoint 4.1.1` — MIT
+- `langgraph-checkpoint-sqlite 3.1.1` — MIT
 - `langgraph-prebuilt 1.1.0` — MIT
 - `langgraph-sdk 0.3.15` — MIT
 - `langsmith 0.10.10` — MIT
@@ -69,9 +71,10 @@ Package authors retain all rights granted by their respective licenses.
 - `six 1.17.0` — MIT
 - `sniffio 1.3.1` — MIT OR Apache-2.0
 - `sqlalchemy 2.0.51` — MIT
+- `sqlite-vec 0.1.9` — MIT License, Apache License, Version 2.0
 - `starlette 1.3.1` — BSD-3-Clause
 - `tenacity 9.1.4` — Apache 2.0
-- `typing-extensions 4.15.0` — PSF-2.0
+- `typing-extensions 4.16.0` — PSF-2.0
 - `typing-inspection 0.4.2` — MIT
 - `tzdata 2026.2` — Apache-2.0
 - `urllib3 2.7.0` — MIT

@@ -36,7 +36,7 @@ from app.domains.relationships.contracts.projection_commands import (
 )
 
 
-LADYBUG_PROJECTION_SCHEMA_VERSION = 2
+LADYBUG_PROJECTION_SCHEMA_VERSION = 3
 
 _QUERY_RESULT_CONTRACT = {
     "direct_relationship": ("actor_id", "target_id", "relationship"),
@@ -280,7 +280,12 @@ _BOOTSTRAP_STATEMENTS = (
       last_event_id STRING,
       last_event_at STRING,
       updated_at STRING,
-      relationship_version INT64
+      relationship_version INT64,
+      relationship_label STRING,
+      perception STRING,
+      view_version INT64,
+      view_updated_at STRING,
+      reviewed_at STRING
     )
     """,
     """
@@ -468,6 +473,11 @@ class LadybugRelationshipProjection:
             "last_event_at": str(row[10]) if row[10] is not None else None,
             "updated_at": str(row[11]) if row[11] is not None else None,
             "relationship_version": int(row[12] or 0),
+            "relationship_label": row[13],
+            "perception": row[14],
+            "view_version": int(row[15] or 1),
+            "view_updated_at": row[16],
+            "reviewed_at": row[17],
         }
 
     def _relationship_rows(self, *, world_id: str, source_id: str | None = None,
@@ -512,7 +522,12 @@ class LadybugRelationshipProjection:
                    relationship.last_event_id,
                    relationship.last_event_at,
                    relationship.updated_at,
-                   relationship.relationship_version
+                   relationship.relationship_version,
+                   relationship.relationship_label,
+                   relationship.perception,
+                   relationship.view_version,
+                   relationship.view_updated_at,
+                   relationship.reviewed_at
             """ + tail,
             parameters,
         )
@@ -913,8 +928,13 @@ class LadybugRelationshipProjection:
                 return "applied"
 
             event = command.event
-            self._merge_event(event)
-            parameters = _event_parameters(event)
+            if event is not None:
+                self._merge_event(event)
+                parameters = _event_parameters(event)
+            else:
+                if not command.world_id:
+                    raise LadybugProjectionError("world_missing")
+                parameters = {"world_id": command.world_id}
             parameters.update(
                 {
                     "actor_world_character_id": command.actor_world_character_id,
@@ -923,6 +943,17 @@ class LadybugRelationshipProjection:
                     "target_character_id": command.target_character_id,
                 }
             )
+            if event is None:
+                self._execute("""
+                    MERGE (world:World {world_id: $world_id})
+                    MERGE (actor:WorldCharacter {world_character_id: $actor_world_character_id})
+                    SET actor.character_id = $actor_character_id, actor.world_id = $world_id
+                    MERGE (target:WorldCharacter {world_character_id: $target_world_character_id})
+                    SET target.character_id = $target_character_id, target.world_id = $world_id
+                    MERGE (actor)-[am:MEMBER_OF]->(world) SET am.world_id = $world_id
+                    MERGE (target)-[tm:MEMBER_OF]->(world) SET tm.world_id = $world_id
+                    RETURN actor.world_character_id
+                """, parameters)
             existing_rows = self._execute(
                 """
                 MATCH (actor:WorldCharacter {
@@ -934,7 +965,9 @@ class LadybugRelationshipProjection:
                   world_id: $world_id
                 })
                 WHERE relationship.world_id = $world_id
-                RETURN relationship.relationship_version
+                RETURN relationship.relationship_version, relationship.relationship_state_id,
+                       relationship.familiarity, relationship.affinity, relationship.trust, relationship.tension,
+                       relationship.interaction_count, relationship.relationship_label, relationship.perception, relationship.view_version
                 LIMIT 1
                 """,
                 parameters,
@@ -942,6 +975,11 @@ class LadybugRelationshipProjection:
             existing_version = int(existing_rows[0][0] or 0) if existing_rows else 0
             if existing_version > command.relationship_version:
                 return "stale_noop"
+            if existing_rows and existing_version == command.relationship_version:
+                expected = [command.relationship_state_id, command.familiarity, command.affinity, command.trust,
+                    command.tension, command.interaction_count, command.relationship_label, command.perception, command.view_version]
+                if list(existing_rows[0][1:]) != expected:
+                    raise LadybugProjectionError("relationship_same_version_payload_mismatch")
             parameters.update(
                 {
                     "relationship_state_id": command.relationship_state_id,
@@ -954,6 +992,11 @@ class LadybugRelationshipProjection:
                     "last_event_at": _datetime_text(command.last_event_at),
                     "updated_at": _datetime_text(command.updated_at),
                     "relationship_version": command.relationship_version,
+                    "relationship_label": command.relationship_label,
+                    "perception": command.perception,
+                    "view_version": command.view_version,
+                    "view_updated_at": _datetime_text(command.view_updated_at),
+                    "reviewed_at": _datetime_text(command.reviewed_at),
                 }
             )
             self._execute(
@@ -966,9 +1009,6 @@ class LadybugRelationshipProjection:
                   world_character_id: $target_world_character_id,
                   world_id: $world_id
                 })
-                MATCH (event:SocialEvent {
-                  event_id: $event_id, world_id: $world_id
-                })
                 MERGE (actor)-[relationship:RELATES_TO]->(target)
                 SET relationship.world_id = $world_id,
                     relationship.relationship_state_id = $relationship_state_id,
@@ -980,7 +1020,20 @@ class LadybugRelationshipProjection:
                     relationship.last_event_id = $last_event_id,
                     relationship.last_event_at = $last_event_at,
                     relationship.updated_at = $updated_at,
-                    relationship.relationship_version = $relationship_version
+                    relationship.relationship_version = $relationship_version,
+                    relationship.relationship_label = $relationship_label,
+                    relationship.perception = $perception,
+                    relationship.view_version = $view_version,
+                    relationship.view_updated_at = $view_updated_at,
+                    relationship.reviewed_at = $reviewed_at
+                RETURN relationship.relationship_version
+                """,
+                parameters,
+            )
+            if event is not None:
+                self._execute("""
+                MATCH (actor:WorldCharacter {world_character_id: $actor_world_character_id, world_id: $world_id})
+                MATCH (event:SocialEvent {event_id: $event_id, world_id: $world_id})
                 MERGE (actor)-[grounded:RELATIONSHIP_GROUNDED_IN {
                   world_id: $world_id,
                   target_world_character_id: $target_world_character_id,
@@ -988,10 +1041,8 @@ class LadybugRelationshipProjection:
                   event_id: $event_id
                 }]->(event)
                 SET grounded.relationship_version = $relationship_version
-                RETURN relationship.relationship_version
-                """,
-                parameters,
-            )
+                RETURN grounded.relationship_version
+                """, parameters)
             return "applied"
 
     def clear_world(self, world_id: str) -> None:
@@ -1036,7 +1087,10 @@ class LadybugRelationshipProjection:
                        relationship.affinity,
                        relationship.trust,
                        relationship.tension,
-                       relationship.interaction_count
+                       relationship.interaction_count,
+                       relationship.relationship_label,
+                       relationship.perception,
+                       relationship.view_version
                 ORDER BY relationship.relationship_state_id
                 """,
                 {"world_id": world_id},

@@ -420,7 +420,7 @@ class SqlAlchemyMemoryBatchRepository:
         return job
 
     def retry_failed(
-        self, scope: MemoryScope, *, idempotency_key: str, now: datetime
+        self, scope: MemoryScope, *, idempotency_key: str, now: datetime, request_job_ids: tuple[str, ...] | None = None
     ) -> None:
         normalize_memory_idempotency_key(idempotency_key)
         setting = self.memory.get_scope_setting(scope)
@@ -443,6 +443,7 @@ class SqlAlchemyMemoryBatchRepository:
             .where(
                 MemoryBatchRun.scope_setting_id == setting.id,
                 MemoryMaintenanceJob.status == "failed",
+                True if request_job_ids is None else MemoryBatchRun.job_id.in_(request_job_ids),
                 assigned,
             )
             .order_by(MemoryMaintenanceJob.created_at)

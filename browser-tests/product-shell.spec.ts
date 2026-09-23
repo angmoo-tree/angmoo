@@ -1,3 +1,4 @@
+import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -2897,3 +2898,5 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
   ).toBeGreaterThanOrEqual(1);
 });
 import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
+
+recommendationHistoryTests(false, async (page) => { await installBackendFixture(page); });

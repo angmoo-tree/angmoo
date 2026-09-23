@@ -110,7 +110,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-      "sha256": "da7af0942fc6ca99c70cb7f0b131c7e42c1b49ce758cfa0235951fe7dfecba61"
+      "sha256": "9ef2972dbf92464b29d9d008e231f57e89938286003417a65b31882474524a7b"
     },
     {
       "classifications": [
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "b167aeeb189034a0202ca16395238725ca17be1b247a7afe8974a60a19252bbd"
+        "sha256": "c49d457209e655fd4fca04b0a88b3caa61c2edad2ca5ccb1576c9808bae3823e"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -188,7 +188,7 @@
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
-        "sha256": "d5fd280716ec04006c17989f9629b009aedfa3ffdbf2278ce9febe00de7382e3"
+        "sha256": "0d799054370fbb1a4555f438be4a4221f746dc9b304185a6d0ad688e657af3c9"
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
@@ -196,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "715f1e9e00c2dc844ea0bb67b228d6431adda159f000a6adec6f9d3bdf043226"
+        "sha256": "ca034a7e7ee1ae86c8a11843918142fc39bcae1842f867480cdc9710005ac941"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1413,7 +1413,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 12,
+      "expected_screenshot_call_count": 14,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1508,12 +1508,12 @@
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
           "present": true,
-          "sha256": "77d248293a18a5ae74df2a1dabb5910e634b53535aa7ce8699b1dbb19d4b9ed3"
+          "sha256": "871829621f71f15c3758ff0f189f9f913213f115363968bec41505ed1f6a2921"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
           "present": true,
-          "sha256": "0995ec874d7c1681f5377b1d3334cbc554c4ad6348a5d60743187a79b56ff18d"
+          "sha256": "dcc5358171e49fb8f97342651c60c9aca134b8825fca11a8011fca484b17d9c1"
         },
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
@@ -1534,8 +1534,8 @@
         }
       ]
     },
-    "screenshot_call_count": 12,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 adds one opt-in screenshot call for isolated real-workflow evidence outside the canonical visual corpus; it does not add a committed visual baseline or claim USER CHECK.",
+    "screenshot_call_count": 14,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots.",
     "target_viewports": [
       "360x800",
       "390x844",

@@ -286,6 +286,7 @@ class ResponseGenerationWorkflowService:
                 ResponseCommitPayload(
                     content=response.text,
                     activity_thought=response.activity_thought,
+                    relationship_metrics=response.relationship_metrics,
                     model=response.model,
                     metadata=metadata,
                     evidence_inspector_snapshot=bundle.inspector_snapshot(),

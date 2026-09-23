@@ -126,7 +126,7 @@ def world_chat_role(
         .where(
             WorldCharacter.id == world_character_id,
             WorldCharacter.world_id == world_id,
-            WorldCharacter.status == "active",
+            ((WorldCharacter.status == "active") | ((WorldCharacter.control_mode == "owner_controlled") & (WorldCharacter.status == "inactive"))),
             WorldMembership.status == "active",
             Character.deleted_at.is_(None),
             Character.moderation_status == "active",

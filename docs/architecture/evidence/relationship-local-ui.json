@@ -1,0 +1,27 @@
+{
+  "delegated_ui_check": true,
+  "real_ai_calls_triggered": 0,
+  "non_auth_mutation_requests": [],
+  "results": [
+    {
+      "character_index": 0,
+      "http_status": 200,
+      "mode": "interpreted",
+      "job_count": 0,
+      "configuration": "scheduled",
+      "review_reads": 2,
+      "keyboard_focus_tag": "A",
+      "zoom_200_visible": true
+    },
+    {
+      "character_index": 1,
+      "http_status": 200,
+      "mode": "interpreted",
+      "job_count": 0,
+      "configuration": "scheduled",
+      "review_reads": 2,
+      "keyboard_focus_tag": "A",
+      "zoom_200_visible": true
+    }
+  ]
+}

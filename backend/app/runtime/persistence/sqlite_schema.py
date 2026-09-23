@@ -11,13 +11,24 @@ from sqlalchemy import Connection, MetaData, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 14
-SOURCE_ALEMBIC_REVISION = "20260917_0094"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 93
-EXPECTED_CANONICAL_TABLE_COUNT = 115
+SQLITE_SCHEMA_VERSION = 19
+SOURCE_ALEMBIC_REVISION = "20260918_0096"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 95
+EXPECTED_CANONICAL_TABLE_COUNT = 133
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
+ACTIVITY_V19_TABLES = (
+    "world_character_activity_states", "world_character_state_receipts",
+    "activity_engine_policies", "activity_graph_runs",
+)
+
 CONSOLIDATION_V14_TABLES = ("memory_consolidation_requests", "memory_consolidation_jobs")
+RECOMMENDATION_V15_TABLES = (
+    "social_recommendation_catalogs", "social_recommendation_topics",
+    "social_recommendation_topic_sources", "social_recommendation_posts",
+    "social_recommendation_post_topics", "social_recommendation_preparations",
+    "social_recommendation_deliveries",
+)
 
 EPISODE_V13_TABLES = (
     "chat_message_thoughts", "social_activity_thoughts",
@@ -304,6 +315,9 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_activity_schema(metadata)
+    _remove_relationship_personalization_schema(metadata)
+    _remove_recommendation_schema(metadata)
     for name in ("memory_vector_eligibility", "memory_embedding_settings"):
         if name in metadata.tables:
             metadata.remove(metadata.tables[name])
@@ -511,7 +525,97 @@ __all__ = [
 
 def build_sqlite_v13_metadata() -> MetaData:
     """Frozen episode-memory schema preceding trigger receipts."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v14_metadata()
     for name in reversed(CONSOLIDATION_V14_TABLES):
         metadata.remove(metadata.tables[name])
+    return metadata
+
+
+def _remove_recommendation_schema(metadata: MetaData) -> None:
+    for name in reversed(RECOMMENDATION_V15_TABLES):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    _restore_legacy_feed_constraint(metadata)
+
+
+def _restore_legacy_feed_constraint(metadata: MetaData) -> None:
+    posts = metadata.tables.get("posts")
+    if posts is not None:
+        for index in tuple(posts.indexes):
+            if index.name == "ix_posts_world_author_created":
+                posts.indexes.remove(index)
+    table = metadata.tables.get("world_characters")
+    if table is not None:
+        for constraint in table.constraints:
+            if constraint.name == "ck_world_characters_feed_runtime_mode":
+                constraint.sqltext = text("feed_runtime_mode IN ('legacy_latest_v1','keyword_search_v1')")
+
+
+def build_sqlite_v14_metadata() -> MetaData:
+    metadata = build_sqlite_v16_metadata()
+    _remove_recommendation_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v15_metadata() -> MetaData:
+    metadata = build_sqlite_v16_metadata()
+    _restore_legacy_feed_constraint(metadata)
+    return metadata
+
+
+RELATIONSHIP_V17_TABLES = (
+    "relationship_policies", "relationship_experience_receipts", "relationship_metric_applications",
+    "relationship_metric_budgets", "relationship_review_work", "relationship_review_memory_receipts",
+)
+RELATIONSHIP_V17_COLUMNS = (
+    "relationship_label", "perception", "view_version", "view_updated_at", "reviewed_at", "last_metric_at",
+)
+
+
+def _remove_relationship_personalization_schema(metadata: MetaData) -> None:
+    if "relationship_review_requests" in metadata.tables:
+        metadata.remove(metadata.tables["relationship_review_requests"])
+    for name in reversed(RELATIONSHIP_V17_TABLES):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    state = metadata.tables.get("relationship_states")
+    if state is not None:
+        for name in RELATIONSHIP_V17_COLUMNS:
+            if name in state.c:
+                state._columns.remove(state.c[name])
+    outbox = metadata.tables.get("graph_projection_outbox")
+    if outbox is not None:
+        if "relationship_state_id" in outbox.c:
+            column = outbox.c.relationship_state_id
+            for fk in tuple(column.foreign_keys):
+                outbox.foreign_keys.discard(fk)
+                outbox.constraints.discard(fk.constraint)
+            outbox._columns.remove(column)
+        outbox.c.source_event_id.nullable = False
+        for constraint in outbox.constraints:
+            if constraint.name == "ck_graph_projection_outbox_type":
+                constraint.sqltext = text("projection_type IN ('social_event','relationship_state','source_exclusion')")
+
+
+def build_sqlite_v16_metadata() -> MetaData:
+    metadata = build_sqlite_v18_metadata()
+    _remove_relationship_personalization_schema(metadata)
+    return metadata
+
+
+def build_sqlite_v17_metadata() -> MetaData:
+    metadata = build_sqlite_v18_metadata()
+    metadata.remove(metadata.tables["relationship_review_requests"])
+    return metadata
+
+
+def _remove_activity_schema(metadata: MetaData) -> None:
+    for name in reversed(ACTIVITY_V19_TABLES):
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+
+
+def build_sqlite_v18_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _remove_activity_schema(metadata)
     return metadata

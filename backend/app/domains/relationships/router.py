@@ -102,3 +102,17 @@ def get_world_character_relationship_graph(
         )
     except errors.RelationshipGraphReadError as exc:
         _raise_relationship_graph_error(exc)
+
+
+@router.get("/{character_id}/worlds/{world_id}/relationship-review")
+def get_relationship_review(character_id: str, world_id: str,
+    db: Session = Depends(get_db), user: DiagnosticsOwner = Depends(get_current_user),
+    references: DiagnosticsReferences = Depends(get_read_references)):
+    from app.domains.relationships.service.review_status import read_review_status
+    try:
+        actor_id = graph_read._owner_world_character(references.graph_gateway(graph_provider="ladybug"),
+            character_id=character_id, world_id=world_id, owner_id=user.id)
+        return read_review_status(db, world_id=world_id, actor_id=actor_id,
+            configuration=references.review_configuration(world_id=world_id, actor_id=actor_id))
+    except errors.RelationshipGraphReadError as exc:
+        _raise_relationship_graph_error(exc)

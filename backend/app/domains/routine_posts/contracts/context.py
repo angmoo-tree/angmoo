@@ -52,6 +52,7 @@ class RoutinePostContext:
     eligible_event_count: int
     overflow_reason_counts: dict[str, int]
     prompt_comment_chars: int
+    common_state: dict[str, object] | None = None
 
     @property
     def considered_source_event_ids(self) -> list[str]:

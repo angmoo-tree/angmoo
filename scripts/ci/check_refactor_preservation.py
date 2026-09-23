@@ -867,7 +867,7 @@ def addition_errors(additions: dict, checkpoint: dict, root: Path = ROOT) -> lis
     errors = []
     if additions.get("schema_version") != 1 or additions.get("checkpoint_commit") != checkpoint["commit"]:
         return ["invalid backend additions schema/checkpoint"]
-    records, seen = additions.get("records", []), set()
+    records, seen = additions.get("records", []), {}
     history_path = ADDITIONS.relative_to(ROOT).as_posix()
     history = git_bytes("log", "--format=%H", f"{checkpoint['commit']}..HEAD", "--", history_path, root=root).decode().splitlines()
     for commit in history:
@@ -881,10 +881,23 @@ def addition_errors(additions: dict, checkpoint: dict, root: Path = ROOT) -> lis
         if not re.fullmatch(r"[0-9a-f]{40}", commit) or not re.fullmatch(r"(?:K\d\d|G\d\d|AR-[A-Z0-9-]+)", record.get("feature_id", "")) or not record.get("reason"):
             errors.append("addition requires exact introduction commit, feature_id and reason")
             continue
-        if commit in seen:
-            errors.append(f"duplicate addition commit: {commit}")
+        prior = seen.get(commit, [])
+        if prior:
+            # An old immutable record may have omitted files introduced by its
+            # source commit. Admit a later, disjoint supplement without editing
+            # the original record or changing the first-introduction check.
+            prior_files = set().union(*(set(item.get("tracked_files", {})) for item in prior))
+            prior_nodes = set().union(*(set(item.get("test_nodes", [])) for item in prior))
+            if (record.get("supplements") != prior[0]["feature_id"]
+                    or not record.get("tracked_files") and not record.get("test_nodes")
+                    or prior_files.intersection(record.get("tracked_files", {}))
+                    or prior_nodes.intersection(record.get("test_nodes", []))):
+                errors.append(f"duplicate addition commit without disjoint supplement: {commit}")
+                continue
+        elif record.get("supplements"):
+            errors.append(f"addition supplement lacks an earlier commit record: {commit}")
             continue
-        seen.add(commit)
+        seen.setdefault(commit, []).append(record)
         try:
             git_bytes("merge-base", "--is-ancestor", checkpoint["commit"], commit, root=root)
             git_bytes("merge-base", "--is-ancestor", commit, "HEAD", root=root)

@@ -187,9 +187,39 @@ def _compact_writing_composition_lane(value: Any) -> dict[str, Any]:
     return compact
 
 
+def _compact_feed_result(value):
+    """Explicit metadata whitelist: no bodies, prompts, keywords or credentials."""
+    if not isinstance(value, dict):
+        return {}
+    compact = {}
+    for key in ("world_id", "world_character_id", "result", "reason_code", "delivery_state"):
+        item = value.get(key)
+        if isinstance(item, str) and 0 < len(item) <= 128:
+            compact[key] = item
+    outcome = value.get("feed_outcome")
+    if isinstance(outcome, str) and 0 < len(outcome) <= 128:
+        compact["result"] = outcome
+    summary = value.get("feed_cycle_summary")
+    if isinstance(summary, dict):
+        count = summary.get("filtered_candidate_count")
+        if isinstance(count, int) and not isinstance(count, bool) and count >= 0:
+            compact["candidate_count"] = count
+        reason = summary.get("reason_code")
+        if isinstance(reason, str) and 0 < len(reason) <= 128:
+            compact["reason_code"] = reason
+    for key in ("candidate_count", "delivered_count"):
+        item = value.get(key)
+        if isinstance(item, int) and not isinstance(item, bool) and item >= 0:
+            compact[key] = item
+    return compact
+
+
 def _stored_gateway_result(value: dict[str, object]) -> dict[str, object]:
     redacted = _safe_gateway_result(value)
     stored: dict[str, object] = {}
+    feed = _compact_feed_result(redacted.get("feed_result"))
+    if feed:
+        stored["feed_result"] = feed
     for key in (
         "status",
         "engine",

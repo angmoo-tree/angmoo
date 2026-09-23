@@ -52,8 +52,9 @@ from app.runtime.graph_projection.relationship_graph_read import (
 
 
 class SqlAlchemyResponseWorkflowUnitOfWork:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: Session, *, relationship_world_id=None) -> None:
         self._session = session
+        self._relationship_world_id = relationship_world_id
         self._diagnostic_snapshot = None
 
     def checkpoint(self) -> None:
@@ -68,6 +69,12 @@ class SqlAlchemyResponseWorkflowUnitOfWork:
                 # SAVEPOINT rolled back. Do not log exception/query parameters.
                 pass
         self._session.commit()
+        if self._relationship_world_id:
+            try:
+                from app.runtime.relationships.experience_metrics import apply_pending_metrics
+                apply_pending_metrics(self._session, world_id=self._relationship_world_id, source_kind="chat_message")
+            except Exception:
+                self._session.rollback()  # Durable pending receipts retry at the next safe checkpoint.
 
     def rollback(self) -> None:
         self._diagnostic_snapshot = None
@@ -110,6 +117,15 @@ def build(
     lifecycle: ResponseLifecycleRepositoryPort,
     world_id: str,
 ) -> GenerationExecution:
+    from app.domains.relationships.service.personalized_metrics import interpreted_policy
+    from app.runtime.relationships.experience_metrics import RelationshipChatLifecycle, apply_pending_metrics
+    relationship_enabled = interpreted_policy(db, world_id) is not None
+    if relationship_enabled:
+        try:
+            apply_pending_metrics(db, world_id=world_id, source_kind="chat_message")
+        except Exception:
+            db.rollback()
+        lifecycle = RelationshipChatLifecycle(db, lifecycle)
     recall_mode = ChatRecallMode(getattr(runtime_settings, "CHAT_RECALL_MODE", "social_hybrid"))
     if recall_mode is ChatRecallMode.SOCIAL_HYBRID:
         from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
@@ -155,10 +171,10 @@ def build(
         evidence=EvidenceBundleAssembler(),
         character_response=CharacterResponseGenerationService(
             DirectLlmCharacterResponseGenerator(
-                material, **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
+                material, **({"relationship_enabled": True} if relationship_enabled else {}), **({"thought_enabled": True} if getattr(runtime_settings, "ACTIVITY_THOUGHT_POLICY", "legacy") == "thought_v1" else {})
             )
         ),
-        unit_of_work=SupervisorResponseWorkflowUnitOfWork(db),
+        unit_of_work=SupervisorResponseWorkflowUnitOfWork(db, relationship_world_id=world_id if relationship_enabled else None),
         memory_producer=SqlAlchemySuccessfulChatMemoryProducer(db),
         recall_mode=recall_mode,
         social_context_provider=ChatSocialContextProvider(graph_recall, character_labels),
