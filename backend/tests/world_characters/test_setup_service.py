@@ -746,7 +746,18 @@ def test_feed_status_distinguishes_runtime_lane_states() -> None:
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:
         owner, world_character = _seed(db)
-        world_character.status = "active"
+        generated = _generate(db, owner=owner, provider=FakeProvider())
+        assert generated.profile is not None and generated.repertoire is not None
+        world_character_setup.approve_setup(
+            db,
+            world_character_id=world_character.id,
+            user=owner,
+            data=schemas.WorldCharacterSetupApproveCreate(
+                idempotency_key="approve-feed-status-world-character-a",
+                profile_id=generated.profile.id,
+                repertoire_id=generated.repertoire.id,
+            ),
+        )
         db.commit()
     principal: dict[str, models.User | None] = {"user": owner}
     app = _app(engine, principal)

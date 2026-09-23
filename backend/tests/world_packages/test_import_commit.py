@@ -1152,6 +1152,11 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
         )
         imported_world = db.get(models.World, imported_world_id)
         assert imported_profile is not None and imported_world is not None
+        assert world_character.feed_runtime_mode == "topic_recommendation_v1"
+        # Compare the same legacy keyword-feed path in both Worlds. The default
+        # topic mode is asserted above and has its own recommendation tests.
+        world_character.feed_runtime_mode = "keyword_search_v1"
+        db.flush()
 
         direct_owner = models.User(
             id="package-parity-direct-owner",
