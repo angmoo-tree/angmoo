@@ -1508,12 +1508,12 @@
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
           "present": true,
-          "sha256": "77d248293a18a5ae74df2a1dabb5910e634b53535aa7ce8699b1dbb19d4b9ed3"
+          "sha256": "871829621f71f15c3758ff0f189f9f913213f115363968bec41505ed1f6a2921"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
           "present": true,
-          "sha256": "0995ec874d7c1681f5377b1d3334cbc554c4ad6348a5d60743187a79b56ff18d"
+          "sha256": "dcc5358171e49fb8f97342651c60c9aca134b8825fca11a8011fca484b17d9c1"
         },
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
