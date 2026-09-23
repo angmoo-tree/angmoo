@@ -207,7 +207,7 @@ def test_local_character_delete_copy_keeps_exact_character_scope() -> None:
 
 def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:
     setup = _read("composition/screens/world-character-autonomy-setup-screen.tsx")
-    contract = _read("features/characters/api/world-character-setup.ts")
+    contract = _read("features/social/api/feed-status.ts")
 
     assert 'data-feed-runtime-state={feedStatus.runtime_state}' in setup
     assert 'data-feed-lane-state="routine-only"' in setup
