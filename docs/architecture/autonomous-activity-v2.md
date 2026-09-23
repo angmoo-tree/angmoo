@@ -2,7 +2,7 @@
 
 작성일: 2026-09-23. 대상: `feat/sns-relationship-context`. 구현 시작 HEAD: `11a5534b46c5337865316598f074ddca2b50775c`.
 
-**현재 상태: 코드 구현·로컬 회귀·실제 AI 비교·루멘 World 시범을 진행했다. 전체 기본값 전환과 활동 누적이 필요한 USER CHECK는 아직 완료하지 않았다.** 이 문서는 실제 구현을 설명한다. 장기간의 개인화 품질까지 검증됐다는 뜻은 아니다.
+**현재 상태: 코드 구현·로컬 회귀·실제 AI 비교·루멘 World 시범 후 로컬 전역 정책과 코드의 미설정 기본값을 V2로 전환했다. 다음 실제 claim·새/import 대상·활동 누적 USER CHECK와 개발 Gate는 아직 완료하지 않았다.** 이 문서는 실제 구현을 설명한다. 장기간의 개인화 품질까지 검증됐다는 뜻은 아니다.
 
 ## 1. 실행 구조
 
@@ -82,7 +82,7 @@ checkpoint는 resolved data directory의 `runtime/activity/activity-checkpoints.
 
 `backup_checkpoint()`는 SQLite backup API를 제공한다. 앱 전체의 새 백업 관리 UI는 추가하지 않았다. 백업할 때 활동 실행을 멈춘 상태에서 canonical과 checkpoint를 함께 snapshot해야 한다. checkpoint DB만 삭제하거나 canonical만 과거로 되돌리는 방식은 사용하지 않는다. World 콘텐츠 export에 개인 checkpoint를 넣지 않는다.
 
-설정 우선순위는 **캐릭터 명시 선택 → World 명시 선택 → 전역 선택 → current**다. 없는 행은 상속이며 기존 V1 강제 행을 캐릭터마다 만들지 않는다. 실행 claim의 엔진은 고정되며 설정 변경은 다음 claim부터 적용된다.
+설정 우선순위는 **캐릭터 명시 선택 → World 명시 선택 → 전역 선택 → `personalized_graph_v2`**다. 마지막은 정책 행이 없는 새 설치의 코드 기본값이다. 없는 행은 상속이고 명시적 `current` 선택은 계속 우선한다. 실행 claim의 엔진은 고정되며 설정 변경은 다음 claim부터 적용된다.
 
 GET/PUT `/api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime`에서 소유·scope·정책 버전을 검증한다. UI는 World 캐릭터 자율 설정 화면에 붙었다. 기존 semantic surface/44px 조작을 이용한 작은 LOCAL 패널이며 독립 디자인 시스템이나 modal 흐름을 만들지 않았다.
 
@@ -131,7 +131,7 @@ World `c10b91ed-55b0-5847-8fb7-0d61b320a383` 전체에 V2를 설정했다. 미�
 | AV-U5 | CAS/keep/다음 경로 refresh 구현·검증. 실제 상태 변화 후 다음 행동의 자연스러움은 PENDING | 의미 있는 격려·갈등·해소 등을 경험한 뒤 다음 활동의 상태/태도가 이어지는지 확인. 특정 수치 변경을 강제하지 않음 |
 | AV-U6 | 실제 hybrid 검색·주체 범위·원본/생각 패킷 재검증 통과. 다양한 자기 채팅까지 활동 기여 사례 추가 가능 | 같은 World의 본인이 경험한 관련 에피소드가 있을 때 입력 packet과 행동 비교 |
 | AV-U7 | 물리 saver 재개·공개 성공 재사용·설정 복귀 fixture 통과. 개발 서버 실제 중단 뒤 미도리야 완료 단계 재사용 확인. V1 활동 재실행까지 포함한 복귀 사례는 PENDING | 기록을 보존한 개발 환경에서 진행 중 정상 종료/재시작하고 중복 게시·이중 반영 여부 확인 |
-| AV-U8 | 전역 상속/claim 고정 fixture 통과. 실제 전체 기본값 전환은 미실행 | 필수 검증 해소 뒤 이미 확정된 계약으로 전역 V2를 적용하고 기존/신규/import 대상 확인. 재승인 사항이 아님 |
+| AV-U8 | 전역 정책 V2·코드 기본값 V2 적용, 현재 대상의 유효 엔진 확인. 실제 다음 claim·새/import 대상은 미확인 | 다음 적격 활동에서 엔진 고정과 새/import 대상 상속을 확인. 남은 검증은 별도 기록 |
 
 활동 기록이 필요한 항목 때문에 기억을 지우거나 과거 기억을 다시 만들지 않는다. 현재 기능 적용 이후 적격 기억을 그대로 사용한다. 운영 DB를 테스트용으로 고쳐 cooldown이나 자격을 우회하지 않는다.
 
@@ -178,8 +178,8 @@ World `c10b91ed-55b0-5847-8fb7-0d61b320a383` 전체에 V2를 설정했다. 미�
 - 올마이트 `8a26bbce-b5a4-57d2-af92-c9d77340da74`는 Feed `Settle`에서 `waiting`이다. 05:54 확인한 기존 UI 수동 버튼은 **06:13에 사용 가능**이다. 그 이후 올마이트의 **지금 한 번 활동**을 누르거나 정상 예약 실행을 기다린다. 원래 activity ID의 마지막 정산이 완료되고 Routine 게시·Feed 댓글이 또 작성되지 않아야 한다. 실패가 계속되면 같은 run/정산 원장을 조사하며 기존 성공 글과 관계를 초기화하지 않는다.
 - 사용자 실사용 품질 확인: 루멘 World의 미도리야·올마이트 활동을 계속 두고 AV-U2 복수 대화 대기, AV-U4 같은 일과의 2~3회 진행·반복, AV-U5 감정 변화가 다음 활동 태도에 이어지는지, AV-U6 자기 채팅 기억의 행동 기여를 확인한다. 기억을 억지로 재생성하거나 특정 감정 변화가 나오도록 점수를 수정할 필요가 없다.
 - 개발 검증 잔여: 기존 preservation 등록 누락 분리 해결, root browser-tests/200%·late-response·static 화면 조합, 모든 취소/lease/다중 프로세스 장애 조합, 실제 V2→V1 활동→V2 복귀, 선택 범위가 큰 자연 Feed·Inbox. 이 항목을 단순히 사용자가 기다리면 되는 테스트로 포장하지 않는다.
-- 루멘의 World 정책 V2와 전역 current를 유지한다. 전체 전환 계약은 확정돼 있지만 필수 검증 미완료로 아직 실행하지 않았다. 전역 전환을 위해 채택 승인을 다시 받을 필요는 없고, 남은 Gate를 마친 뒤 전체 기본값을 바꾸고 기존/신규/import 대상까지 확인한다.
-- 전체 계획은 CLOSED가 아니다. 코드 구현·시범·문서/로컬 커밋 인계와 전체 검증 완료를 분리한다.
+- 이 최초 인계 당시에는 루멘 World 정책 V2·전역 기본 current를 유지했다. 이후 사용자 요청으로 전역 정책과 코드 기본값을 V2로 전환했다. 아래 최신 전환 기록을 따른다.
+- 전체 계획은 CLOSED가 아니다. 코드 구현·시범·기본값 정책 적용과 실제 후속 활동·새/import 대상·남은 검증을 분리한다.
 
 ### 최종 영향 범위 검사
 
@@ -187,3 +187,20 @@ World `c10b91ed-55b0-5847-8fb7-0d61b320a383` 전체에 V2를 설정했다. 미�
 - 최종 architecture inventory: modules1255 / internal edges4959. backend 경계·frontend 경계·design contract 모두 재통과.
 - 위 숫자는 서로 겹치는 테스트 세트다. 합산해서 독립 테스트 수로 보고하지 않는다.
 - 원격 CI와 설치형 MSIX 앱 검증은 실행하지 않았다. 실제 UI·DB 검증 대상은 요청한 localhost3000의 Docker 개발 앱이다.
+
+## 10. 2026-09-23 로컬 전체 기본값 전환과 남은 확인
+
+사용자의 후속 요청으로 장기 USER CHECK와 일부 개발 Gate를 마친 것으로 간주하지 않은 채 전체 기본값 적용을 먼저 진행했다. 전환 직전 백엔드를 정지하고 현재 canonical generation과 활동 checkpoint를 SQLite backup API로 각각 보존했다.
+
+| 사본 | Docker 데이터 경로 | SHA-256·무결성 |
+| --- | --- | --- |
+| canonical | `/var/lib/angmoo/runtime/backups/before-v2-global-20260923T052301Z-canonical.sqlite3` | `74cd33aaac9d881baa39c9c529d1f33612b2eaee578aea37a72e2907326beba5` · `ok` |
+| checkpoint | `/var/lib/angmoo/runtime/backups/before-v2-global-20260923T052301Z-checkpoint.sqlite3` | `97a41e1241d4d02a0c1909ad131526bb7082632ef1c1727fc0846aaead838b9f` · `ok` |
+
+백엔드 재시작과 health 확인 후 2026-09-23 05:24 UTC에 domain `set_engine`으로 `global` 정책을 `personalized_graph_v2`, 버전 1로 저장했다. 루멘 World의 기존 V2 정책 버전 2는 유지했다. 정책 우선순위에 따라 현재 3 World·4 WorldCharacter의 유효 엔진은 모두 V2다. 자율 ON 2명과 owner-controlled/OFF 2명의 제어 모드와 활동 자격은 바꾸지 않았다. 정책 행이 없는 새 환경의 코드 기본값도 V2로 수정했으며, 명시적 V1 선택은 계속 우선한다.
+
+이후 `compose.yml`·`compose.dev.yml`의 로컬 백엔드 이미지를 재빌드·재생성했다. 실행 중인 컨테이너에서 `DEFAULT_ACTIVITY_ENGINE=personalized_graph_v2`를 확인했고 backend·frontend health, localhost:3000 HTTP 200, 기존 전역/World 정책과 4명 유효 엔진, 미도리야 `Settle` 대기 run 보존, canonical `PRAGMA quick_check=ok`를 재확인했다. 실제 다음 활동 claim은 아직 발생하지 않았다.
+
+전환 전후 canonical의 World 3·WorldCharacter 4·게시글 261·기억 252·사회 사건 303·활동 run 13·공통 상태 2는 동일했다. 정책 행만 1→2로 증가하고 canonical `PRAGMA quick_check=ok`를 확인했다. 이전 올마이트 `8a26bbce-b5a4-57d2-af92-c9d77340da74` run은 후속 조회에서 `completed`·공개 행동 2개다. 현재 미도리야의 `5677cfaf-95b0-5e9e-80e9-3ea705c54d00` V2 `Settle` 대기는 그대로 남아 있다. 기존 실행 기록을 지우거나 엔진을 소급 변경하지 않았다.
+
+로컬 회귀 두 묶음에서 11개와 24개, 합계 35개가 통과했다. 이 결과는 새 설치·새/import World의 **코드 기반 상속**과 명시적 V1 우선순위, 기존 claim의 엔진 고정을 검사한다. 실제 전환 후 새 claim과 실제 새/import 대상은 아직 발생하지 않아 AV-U8 전체 PASS로 기록하지 않는다. UI 자동화 런타임 오류로 이번 전환 뒤 화면 재확인은 수행하지 못했으며, DB 서비스 조회의 유효 엔진 증거와 구분한다. 전체 preservation Gate, root browser tests, 실제 V2→V1→V2 복귀, 장기 행동 품질은 후속 검증이다. PR·push·원격 CI·main 머지·배포는 이번 전환에 포함되지 않았다.

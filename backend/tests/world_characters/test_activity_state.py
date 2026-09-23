@@ -37,9 +37,10 @@ def test_state_receipts_cas_time_and_duplicate_experience():
 def test_policy_inheritance_and_claim_frozen_across_global_transition():
     with Session(_engine(), expire_on_commit=False) as db:
         _, actor, _ = _approved(db)
-        assert resolve_engine(db, actor)["engine"] == "current"
+        assert resolve_engine(db, actor) == {"engine": "personalized_graph_v2", "source": "default", "version": 0}
+        set_engine(db, engine="current", expected_version=0)
         first = bind_run(db, actor=actor, activity_id="first")
-        set_engine(db, engine="personalized_graph_v2", expected_version=0)
+        set_engine(db, engine="personalized_graph_v2", expected_version=1)
         assert bind_run(db, actor=actor, activity_id="first").engine == first.engine == "current"
         assert bind_run(db, actor=actor, activity_id="second").engine == "personalized_graph_v2"
         set_engine(db, engine="current", expected_version=0, world_id=actor.world_id, actor_id=actor.id)
@@ -47,3 +48,19 @@ def test_policy_inheritance_and_claim_frozen_across_global_transition():
         assert bind_run(db, actor=actor, activity_id="second").engine == "personalized_graph_v2"
         set_engine(db, engine=None, expected_version=1, world_id=actor.world_id, actor_id=actor.id)
         assert resolve_engine(db, actor)["engine"] == "personalized_graph_v2"
+
+
+def test_world_and_character_overrides_preserve_explicit_v1_after_default_switch():
+    with Session(_engine(), expire_on_commit=False) as db:
+        _, actor, _ = _approved(db)
+        set_engine(db, engine="current", expected_version=0)
+        set_engine(db, engine="personalized_graph_v2", expected_version=0, world_id=actor.world_id)
+        assert resolve_engine(db, actor)["source"] == "world"
+        set_engine(db, engine="current", expected_version=0, world_id=actor.world_id, actor_id=actor.id)
+        assert resolve_engine(db, actor)["engine"] == "current"
+        set_engine(db, engine=None, expected_version=1, world_id=actor.world_id, actor_id=actor.id)
+        assert resolve_engine(db, actor)["source"] == "world"
+        set_engine(db, engine=None, expected_version=1, world_id=actor.world_id)
+        assert resolve_engine(db, actor)["engine"] == "current"
+        set_engine(db, engine=None, expected_version=1)
+        assert resolve_engine(db, actor) == {"engine": "personalized_graph_v2", "source": "default", "version": 0}

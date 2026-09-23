@@ -9,6 +9,7 @@ from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.schemas.activity_state import ActivityEngine
 
 CONTRACT_VERSION = 1
+DEFAULT_ACTIVITY_ENGINE: ActivityEngine = "personalized_graph_v2"
 
 
 def resolve_engine(db: Session, actor: WorldCharacter) -> dict:
@@ -18,7 +19,7 @@ def resolve_engine(db: Session, actor: WorldCharacter) -> dict:
             if row.world_id not in (None, actor.world_id) or row.world_character_id not in (None, actor.id):
                 raise ValueError("engine_policy_scope_invalid")
             return {"engine": row.engine, "source": source, "version": row.version}
-    return {"engine": "current", "source": "default", "version": 0}
+    return {"engine": DEFAULT_ACTIVITY_ENGINE, "source": "default", "version": 0}
 
 
 def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: int,
