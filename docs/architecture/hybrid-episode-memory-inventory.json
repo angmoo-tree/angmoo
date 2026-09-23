@@ -2186,11 +2186,11 @@
     },
     {
       "path": "backend/security/public_route_security_inventory.json",
-      "sha256": "7a2e6d038446ba889a3b841db14cdd01b5fcde663fcb764587763fc88f76d557"
+      "sha256": "f7d77ad96c1b39d16c7a3669700ea7b1a565a2b9a4918a7255cb26e6c9c930bc"
     },
     {
       "path": "backend/security/route_security_inventory.json",
-      "sha256": "afd61bcc23e5ee9e4a7c27c383ab84b63e06d40bb72b3358188d28198182f91d"
+      "sha256": "45e5c8b06f83c693b4a2864be9748e145ae301fe2b32f84598782189e4299e7c"
     },
     {
       "path": "backend/tests/chat/test_canonical_memory_subject.py",
@@ -2406,7 +2406,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "fa279077d63fc16b3a8048ac268548a3cb0cf88034d903899b127326c62e9e53"
+      "sha256": "0c6102240fa3a379e5b5658c96df6544381ac8086a5db7c2f8c5c9380822ee9d"
     },
     {
       "path": "backend/tests/memory/test_embedding_settings.py",
@@ -2510,7 +2510,7 @@
     },
     {
       "path": "backend/tests/memory/test_hybrid_episode_inventory.py",
-      "sha256": "1c8f20c654fb74a89edb6eb419ce9765723c6d6707d07a859eb2ec4e9d35f5e9"
+      "sha256": "3e14aa5f3d7b4685b66941b570c040e6724abe79421d74adde6222bc0fed6742"
     },
     {
       "path": "backend/tests/memory/test_hybrid_native_pipeline.py",
@@ -2534,7 +2534,7 @@
     },
     {
       "path": "backend/tests/memory/test_manual_relationship_followup.py",
-      "sha256": "3ed0a2551072c6f6d75837a91e823196dd34d91ac158674afd8011cf6b1c429d"
+      "sha256": "0063f4792043266aa9f861fb103140a3dd6e9db3962dba06b72f5a2d8cd58bd5"
     },
     {
       "path": "backend/tests/memory/test_p8_l_f_memory_domain.py",
@@ -2622,7 +2622,7 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "fc678febbc4c13de37c3a78915b6519f65e03cc4ff9e0ca86e3b239f1b7bdb37"
+      "sha256": "2735f1e58792623cb24eabd9931d00fb9789fc79d89f0faf7bf02372287df20f"
     },
     {
       "path": "backend/tests/migrations/test_consolidation_schema_parity.py",
