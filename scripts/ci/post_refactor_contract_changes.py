@@ -70,6 +70,16 @@ def load(root: Path, *, reader=None) -> list[dict]:
             for revision, field in ((commit + "^", "before_sha256"), (commit, "after_sha256")):
                 if text_digest(git("show", f"{revision}:{source}").decode("utf-8")) != change[field]:
                     raise ValueError("frontend change committed preimage differs")
+        for change in record.get("frontend_assets", []):
+            source = change["source"]
+            if (source not in record["source_blobs"]
+                    or not re.fullmatch(r"browser-tests/snapshots/[A-Za-z0-9_./-]+\.png", source)
+                    or ".." in Path(source).parts
+                    or change["before_sha256"] == change["after_sha256"]):
+                raise ValueError("visual asset change requires exact committed source evidence")
+            for revision, field in ((commit + "^", "before_sha256"), (commit, "after_sha256")):
+                if hashlib.sha256(git("show", f"{revision}:{source}")).hexdigest() != change[field]:
+                    raise ValueError("visual asset committed preimage differs")
         if record.get("orm_tables"):
             migrations = record.get("migration_sources", [])
             if not migrations or any(path not in record["source_blobs"] for path in migrations):
@@ -105,6 +115,18 @@ def frontend_matches(source: str, original: str, actual: str, records: list[dict
                     raise ValueError("frontend change chain preimage differs")
                 expected = change["after_sha256"]
     return expected == text_digest(actual)
+
+
+def frontend_asset_matches(source: str, original: bytes, actual: bytes, records: list[dict]) -> bool:
+    """Accept only a continuous, commit-verified chain for a named visual PNG."""
+    expected = hashlib.sha256(original).hexdigest()
+    for record in records:
+        for change in record.get("frontend_assets", []):
+            if change["source"] == source:
+                if expected != change["before_sha256"]:
+                    raise ValueError("visual asset change chain preimage differs")
+                expected = change["after_sha256"]
+    return expected == hashlib.sha256(actual).hexdigest()
 
 
 @lru_cache(maxsize=128)

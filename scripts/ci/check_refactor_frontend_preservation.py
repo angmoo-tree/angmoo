@@ -190,6 +190,10 @@ def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str], splits: 
         current = target.read_bytes()
         if Path(old).suffix in {".png", ".ico", ".jpg", ".woff", ".woff2"}:
             equal = current == original
+            if not equal and Path(old).suffix == ".png":
+                if records is None:
+                    records = product_changes.load(root)
+                equal = product_changes.frontend_asset_matches(new, original, current, records)
         else:
             expected = rewrite_paths(rewrite_split_imports(original.decode("utf-8"), moves, splits or {}, root), moves).replace("\r\n", "\n")
             equal = current.decode("utf-8").replace("\r\n", "\n") == expected
