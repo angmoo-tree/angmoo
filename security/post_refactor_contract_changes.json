@@ -8597,6 +8597,657 @@
           "after": "f7ece9aa26e112fe7cf6945bf48f0a7067883aa719ae9cc1a863783fbf042202"
         }
       ]
+    },
+    {
+      "id": "relationship-chat-metrics-owner-20260922",
+      "implementation_commit": "04c1fa4d346a23cdc93c33f68efa71012b217db3",
+      "reason": "Chat response checkpoint and build now stage and apply interpreted relationship metrics through durable receipts.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/runtime/chat/generation_workflows.py": "3308ccc7240792f05fb6577b0db76f9377ea821d"
+      },
+      "definitions": [
+        {
+          "source": "backend/app/runtime/chat/generation_workflows.py",
+          "symbol": "SqlAlchemyResponseWorkflowUnitOfWork",
+          "before_ast": "ClassDef(name='SqlAlchemyResponseWorkflowUnitOfWork', body=[FunctionDef(name='__init__', args=arguments(args=[arg(arg='self'), arg(arg='session', annotation=Name(id='Session', ctx=Load()))]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Store())], value=Name(id='session', ctx=Load())), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Constant(value=None))], returns=Constant(value=None)), FunctionDef(name='checkpoint', args=arguments(args=[arg(arg='self')]), body=[Assign(targets=[Name(id='observation', ctx=Store())], value=Call(func=Attribute(value=Name(id='current', ctx=Load()), attr='get', ctx=Load()))), Assign(targets=[Name(id='snapshot', ctx=Store())], value=IfExp(test=Compare(left=Name(id='observation', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=Constant(value=None), orelse=Call(func=Attribute(value=Name(id='observation', ctx=Load()), attr='payload', ctx=Load())))), If(test=BoolOp(op=And(), values=[Compare(left=Name(id='observation', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Compare(left=Name(id='snapshot', ctx=Load()), ops=[NotEq()], comparators=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Load())])]), body=[Try(body=[With(items=[withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='begin_nested', ctx=Load())))], body=[Expr(value=Call(func=Attribute(value=Name(id='retrieval_diagnostics', ctx=Load()), attr='save', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), Name(id='observation', ctx=Load())]))]), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Name(id='snapshot', ctx=Load()))], handlers=[ExceptHandler(type=Name(id='Exception', ctx=Load()), body=[Pass()])])]), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='commit', ctx=Load())))], returns=Constant(value=None)), FunctionDef(name='rollback', args=arguments(args=[arg(arg='self')]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Constant(value=None)), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='rollback', ctx=Load())))], returns=Constant(value=None))])",
+          "after_ast": "ClassDef(name='SqlAlchemyResponseWorkflowUnitOfWork', body=[FunctionDef(name='__init__', args=arguments(args=[arg(arg='self'), arg(arg='session', annotation=Name(id='Session', ctx=Load()))], kwonlyargs=[arg(arg='relationship_world_id')], kw_defaults=[Constant(value=None)]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Store())], value=Name(id='session', ctx=Load())), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_relationship_world_id', ctx=Store())], value=Name(id='relationship_world_id', ctx=Load())), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Constant(value=None))], returns=Constant(value=None)), FunctionDef(name='checkpoint', args=arguments(args=[arg(arg='self')]), body=[Assign(targets=[Name(id='observation', ctx=Store())], value=Call(func=Attribute(value=Name(id='current', ctx=Load()), attr='get', ctx=Load()))), Assign(targets=[Name(id='snapshot', ctx=Store())], value=IfExp(test=Compare(left=Name(id='observation', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=Constant(value=None), orelse=Call(func=Attribute(value=Name(id='observation', ctx=Load()), attr='payload', ctx=Load())))), If(test=BoolOp(op=And(), values=[Compare(left=Name(id='observation', ctx=Load()), ops=[IsNot()], comparators=[Constant(value=None)]), Compare(left=Name(id='snapshot', ctx=Load()), ops=[NotEq()], comparators=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Load())])]), body=[Try(body=[With(items=[withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='begin_nested', ctx=Load())))], body=[Expr(value=Call(func=Attribute(value=Name(id='retrieval_diagnostics', ctx=Load()), attr='save', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), Name(id='observation', ctx=Load())]))]), Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Name(id='snapshot', ctx=Load()))], handlers=[ExceptHandler(type=Name(id='Exception', ctx=Load()), body=[Pass()])])]), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='commit', ctx=Load()))), If(test=Attribute(value=Name(id='self', ctx=Load()), attr='_relationship_world_id', ctx=Load()), body=[Try(body=[ImportFrom(module='app.runtime.relationships.experience_metrics', names=[alias(name='apply_pending_metrics')], level=0), Expr(value=Call(func=Name(id='apply_pending_metrics', ctx=Load()), args=[Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load())], keywords=[keyword(arg='world_id', value=Attribute(value=Name(id='self', ctx=Load()), attr='_relationship_world_id', ctx=Load())), keyword(arg='source_kind', value=Constant(value='chat_message'))]))], handlers=[ExceptHandler(type=Name(id='Exception', ctx=Load()), body=[Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='rollback', ctx=Load())))])])])], returns=Constant(value=None)), FunctionDef(name='rollback', args=arguments(args=[arg(arg='self')]), body=[Assign(targets=[Attribute(value=Name(id='self', ctx=Load()), attr='_diagnostic_snapshot', ctx=Store())], value=Constant(value=None)), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='_session', ctx=Load()), attr='rollback', ctx=Load())))], returns=Constant(value=None))])"
+        },
+        {
+          "source": "backend/app/runtime/chat/generation_workflows.py",
+          "symbol": "build",
+          "before_ast": "FunctionDef(name='build', args=arguments(args=[arg(arg='db', annotation=Name(id='Session', ctx=Load())), arg(arg='material', annotation=Name(id='CredentialMaterial', ctx=Load()))], kwonlyargs=[arg(arg='memory_recall_service', annotation=Name(id='CanonicalRecallService', ctx=Load())), arg(arg='runtime_settings', annotation=Name(id='Settings', ctx=Load())), arg(arg='lifecycle', annotation=Name(id='ResponseLifecycleRepositoryPort', ctx=Load())), arg(arg='world_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None, None, None]), body=[Assign(targets=[Name(id='recall_mode', ctx=Store())], value=Call(func=Name(id='ChatRecallMode', ctx=Load()), args=[Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='CHAT_RECALL_MODE'), Constant(value='social_hybrid')])])), If(test=Compare(left=Name(id='recall_mode', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='ChatRecallMode', ctx=Load()), attr='SOCIAL_HYBRID', ctx=Load())]), body=[ImportFrom(module='app.domains.chat.service.hybrid_canonical', names=[alias(name='HybridCanonicalService')], level=0), If(test=Compare(left=Attribute(value=Name(id='memory_recall_service', ctx=Load()), attr='hybrid_service', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Raise(exc=Call(func=Name(id='ValueError', ctx=Load()), args=[Constant(value='chat_hybrid_backend_not_ready')]))]), Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='HybridCanonicalService', ctx=Load()), args=[Attribute(value=Name(id='memory_recall_service', ctx=Load()), attr='hybrid_service', ctx=Load())], keywords=[keyword(arg='episode_only', value=Compare(left=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='MEMORY_RECALL_REPRESENTATION'), Constant(value='legacy')]), ops=[Eq()], comparators=[Constant(value='episode_v1')]))]))], orelse=[Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='CanonicalRetrievalPlanningService', ctx=Load()), keywords=[keyword(arg='planner', value=Call(func=Name(id='DirectLlmCanonicalRetrievalPlannerProvider', ctx=Load()), args=[Name(id='material', ctx=Load())])), keyword(arg='executor', value=Call(func=Name(id='CanonicalRetrievalPlanExecutor', ctx=Load()), args=[Call(func=Name(id='RetryingRead', ctx=Load()), args=[Name(id='memory_recall_service', ctx=Load())])]))]))]), Assign(targets=[Name(id='graph_recall', ctx=Store())], value=Call(func=Name(id='GraphRecallService', ctx=Load()), args=[Call(func=Name(id='SqlAlchemyRelationshipGraphReadGateway', ctx=Load()), args=[Name(id='db', ctx=Load())], keywords=[keyword(arg='config', value=Name(id='runtime_settings', ctx=Load())), keyword(arg='graph_provider', value=Constant(value='ladybug'))])])), Assign(targets=[Name(id='graph', ctx=Store())], value=Call(func=Name(id='GraphRetrievalPlanningService', ctx=Load()), keywords=[keyword(arg='planner', value=Call(func=Name(id='DirectLlmGraphRetrievalPlannerProvider', ctx=Load()), args=[Name(id='material', ctx=Load())])), keyword(arg='executor', value=Call(func=Name(id='GraphRetrievalPlanExecutor', ctx=Load()), args=[Call(func=Name(id='RetryingRead', ctx=Load()), args=[Name(id='graph_recall', ctx=Load())])]))])), Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='ToolPlanningService', ctx=Load()), args=[Constant(value='CANONICAL'), Name(id='canonical', ctx=Load())])), Assign(targets=[Name(id='graph', ctx=Store())], value=Call(func=Name(id='ToolPlanningService', ctx=Load()), args=[Constant(value='GRAPH'), Name(id='graph', ctx=Load())])), Assign(targets=[Name(id='character_labels', ctx=Store())], value=Call(func=Name(id='_character_labels', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='world_id', ctx=Load())])), Assign(targets=[Name(id='workflow', ctx=Store())], value=Call(func=Name(id='ResponseGenerationWorkflowService', ctx=Load()), keywords=[keyword(arg='graph_executor', value=Call(func=Name(id='LangGraphResponseExecutor', ctx=Load()))), keyword(arg='lifecycle', value=Name(id='lifecycle', ctx=Load())), keyword(arg='router', value=Call(func=Name(id='RetrievalRoutingService', ctx=Load()), keywords=[keyword(arg='router', value=Call(func=Name(id='DirectLlmSupervisorSelectionProvider', ctx=Load()), args=[Name(id='material', ctx=Load())], keywords=[keyword(arg='native_controls', value=Constant(value=True)), keyword(arg='code_coordination', value=Constant(value=True)), keyword(arg='positional_entity_refs', value=Constant(value=False)), keyword(arg='social_context_mode', value=UnaryOp(op=Not(), operand=Attribute(value=Name(id='recall_mode', ctx=Load()), attr='graph_tools_enabled', ctx=Load()))), keyword(arg='hybrid_recall', value=Compare(left=Name(id='recall_mode', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='ChatRecallMode', ctx=Load()), attr='SOCIAL_HYBRID', ctx=Load())]))])), keyword(arg='policy', value=Call(func=Name(id='SqlAlchemyRetrievalPolicyResolver', ctx=Load()), args=[Name(id='db', ctx=Load())])), keyword(arg='recall_mode', value=Name(id='recall_mode', ctx=Load()))])), keyword(arg='canonical', value=Name(id='canonical', ctx=Load())), keyword(arg='graph', value=Name(id='graph', ctx=Load())), keyword(arg='both', value=Call(func=Name(id='ToolBothCoordinator', ctx=Load()), args=[Call(func=Name(id='BothRetrievalWorkflowCoordinator', ctx=Load()), keywords=[keyword(arg='canonical', value=Name(id='canonical', ctx=Load())), keyword(arg='graph', value=Name(id='graph', ctx=Load())), keyword(arg='parallel_runner', value=Name(id='parallel_tools', ctx=Load()))])])), keyword(arg='evidence', value=Call(func=Name(id='EvidenceBundleAssembler', ctx=Load()))), keyword(arg='character_response', value=Call(func=Name(id='CharacterResponseGenerationService', ctx=Load()), args=[Call(func=Name(id='DirectLlmCharacterResponseGenerator', ctx=Load()), args=[Name(id='material', ctx=Load())], keywords=[keyword(value=IfExp(test=Compare(left=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='ACTIVITY_THOUGHT_POLICY'), Constant(value='legacy')]), ops=[Eq()], comparators=[Constant(value='thought_v1')]), body=Dict(keys=[Constant(value='thought_enabled')], values=[Constant(value=True)]), orelse=Dict()))])])), keyword(arg='unit_of_work', value=Call(func=Name(id='SupervisorResponseWorkflowUnitOfWork', ctx=Load()), args=[Name(id='db', ctx=Load())])), keyword(arg='memory_producer', value=Call(func=Name(id='SqlAlchemySuccessfulChatMemoryProducer', ctx=Load()), args=[Name(id='db', ctx=Load())])), keyword(arg='recall_mode', value=Name(id='recall_mode', ctx=Load())), keyword(arg='social_context_provider', value=Call(func=Name(id='ChatSocialContextProvider', ctx=Load()), args=[Name(id='graph_recall', ctx=Load()), Name(id='character_labels', ctx=Load())])), keyword(arg='today_snapshot_validator', value=Call(func=Name(id='SqlAlchemyTodaySnsSnapshotValidator', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='character_labels', ctx=Load())]))])), Return(value=Call(func=Name(id='GenerationExecution', ctx=Load()), args=[Name(id='workflow', ctx=Load()), Name(id='character_labels', ctx=Load())]))], returns=Name(id='GenerationExecution', ctx=Load()))",
+          "after_ast": "FunctionDef(name='build', args=arguments(args=[arg(arg='db', annotation=Name(id='Session', ctx=Load())), arg(arg='material', annotation=Name(id='CredentialMaterial', ctx=Load()))], kwonlyargs=[arg(arg='memory_recall_service', annotation=Name(id='CanonicalRecallService', ctx=Load())), arg(arg='runtime_settings', annotation=Name(id='Settings', ctx=Load())), arg(arg='lifecycle', annotation=Name(id='ResponseLifecycleRepositoryPort', ctx=Load())), arg(arg='world_id', annotation=Name(id='str', ctx=Load()))], kw_defaults=[None, None, None, None]), body=[ImportFrom(module='app.domains.relationships.service.personalized_metrics', names=[alias(name='interpreted_policy')], level=0), ImportFrom(module='app.runtime.relationships.experience_metrics', names=[alias(name='RelationshipChatLifecycle'), alias(name='apply_pending_metrics')], level=0), Assign(targets=[Name(id='relationship_enabled', ctx=Store())], value=Compare(left=Call(func=Name(id='interpreted_policy', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='world_id', ctx=Load())]), ops=[IsNot()], comparators=[Constant(value=None)])), If(test=Name(id='relationship_enabled', ctx=Load()), body=[Try(body=[Expr(value=Call(func=Name(id='apply_pending_metrics', ctx=Load()), args=[Name(id='db', ctx=Load())], keywords=[keyword(arg='world_id', value=Name(id='world_id', ctx=Load())), keyword(arg='source_kind', value=Constant(value='chat_message'))]))], handlers=[ExceptHandler(type=Name(id='Exception', ctx=Load()), body=[Expr(value=Call(func=Attribute(value=Name(id='db', ctx=Load()), attr='rollback', ctx=Load())))])]), Assign(targets=[Name(id='lifecycle', ctx=Store())], value=Call(func=Name(id='RelationshipChatLifecycle', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='lifecycle', ctx=Load())]))]), Assign(targets=[Name(id='recall_mode', ctx=Store())], value=Call(func=Name(id='ChatRecallMode', ctx=Load()), args=[Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='CHAT_RECALL_MODE'), Constant(value='social_hybrid')])])), If(test=Compare(left=Name(id='recall_mode', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='ChatRecallMode', ctx=Load()), attr='SOCIAL_HYBRID', ctx=Load())]), body=[ImportFrom(module='app.domains.chat.service.hybrid_canonical', names=[alias(name='HybridCanonicalService')], level=0), If(test=Compare(left=Attribute(value=Name(id='memory_recall_service', ctx=Load()), attr='hybrid_service', ctx=Load()), ops=[Is()], comparators=[Constant(value=None)]), body=[Raise(exc=Call(func=Name(id='ValueError', ctx=Load()), args=[Constant(value='chat_hybrid_backend_not_ready')]))]), Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='HybridCanonicalService', ctx=Load()), args=[Attribute(value=Name(id='memory_recall_service', ctx=Load()), attr='hybrid_service', ctx=Load())], keywords=[keyword(arg='episode_only', value=Compare(left=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='MEMORY_RECALL_REPRESENTATION'), Constant(value='legacy')]), ops=[Eq()], comparators=[Constant(value='episode_v1')]))]))], orelse=[Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='CanonicalRetrievalPlanningService', ctx=Load()), keywords=[keyword(arg='planner', value=Call(func=Name(id='DirectLlmCanonicalRetrievalPlannerProvider', ctx=Load()), args=[Name(id='material', ctx=Load())])), keyword(arg='executor', value=Call(func=Name(id='CanonicalRetrievalPlanExecutor', ctx=Load()), args=[Call(func=Name(id='RetryingRead', ctx=Load()), args=[Name(id='memory_recall_service', ctx=Load())])]))]))]), Assign(targets=[Name(id='graph_recall', ctx=Store())], value=Call(func=Name(id='GraphRecallService', ctx=Load()), args=[Call(func=Name(id='SqlAlchemyRelationshipGraphReadGateway', ctx=Load()), args=[Name(id='db', ctx=Load())], keywords=[keyword(arg='config', value=Name(id='runtime_settings', ctx=Load())), keyword(arg='graph_provider', value=Constant(value='ladybug'))])])), Assign(targets=[Name(id='graph', ctx=Store())], value=Call(func=Name(id='GraphRetrievalPlanningService', ctx=Load()), keywords=[keyword(arg='planner', value=Call(func=Name(id='DirectLlmGraphRetrievalPlannerProvider', ctx=Load()), args=[Name(id='material', ctx=Load())])), keyword(arg='executor', value=Call(func=Name(id='GraphRetrievalPlanExecutor', ctx=Load()), args=[Call(func=Name(id='RetryingRead', ctx=Load()), args=[Name(id='graph_recall', ctx=Load())])]))])), Assign(targets=[Name(id='canonical', ctx=Store())], value=Call(func=Name(id='ToolPlanningService', ctx=Load()), args=[Constant(value='CANONICAL'), Name(id='canonical', ctx=Load())])), Assign(targets=[Name(id='graph', ctx=Store())], value=Call(func=Name(id='ToolPlanningService', ctx=Load()), args=[Constant(value='GRAPH'), Name(id='graph', ctx=Load())])), Assign(targets=[Name(id='character_labels', ctx=Store())], value=Call(func=Name(id='_character_labels', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='world_id', ctx=Load())])), Assign(targets=[Name(id='workflow', ctx=Store())], value=Call(func=Name(id='ResponseGenerationWorkflowService', ctx=Load()), keywords=[keyword(arg='graph_executor', value=Call(func=Name(id='LangGraphResponseExecutor', ctx=Load()))), keyword(arg='lifecycle', value=Name(id='lifecycle', ctx=Load())), keyword(arg='router', value=Call(func=Name(id='RetrievalRoutingService', ctx=Load()), keywords=[keyword(arg='router', value=Call(func=Name(id='DirectLlmSupervisorSelectionProvider', ctx=Load()), args=[Name(id='material', ctx=Load())], keywords=[keyword(arg='native_controls', value=Constant(value=True)), keyword(arg='code_coordination', value=Constant(value=True)), keyword(arg='positional_entity_refs', value=Constant(value=False)), keyword(arg='social_context_mode', value=UnaryOp(op=Not(), operand=Attribute(value=Name(id='recall_mode', ctx=Load()), attr='graph_tools_enabled', ctx=Load()))), keyword(arg='hybrid_recall', value=Compare(left=Name(id='recall_mode', ctx=Load()), ops=[Is()], comparators=[Attribute(value=Name(id='ChatRecallMode', ctx=Load()), attr='SOCIAL_HYBRID', ctx=Load())]))])), keyword(arg='policy', value=Call(func=Name(id='SqlAlchemyRetrievalPolicyResolver', ctx=Load()), args=[Name(id='db', ctx=Load())])), keyword(arg='recall_mode', value=Name(id='recall_mode', ctx=Load()))])), keyword(arg='canonical', value=Name(id='canonical', ctx=Load())), keyword(arg='graph', value=Name(id='graph', ctx=Load())), keyword(arg='both', value=Call(func=Name(id='ToolBothCoordinator', ctx=Load()), args=[Call(func=Name(id='BothRetrievalWorkflowCoordinator', ctx=Load()), keywords=[keyword(arg='canonical', value=Name(id='canonical', ctx=Load())), keyword(arg='graph', value=Name(id='graph', ctx=Load())), keyword(arg='parallel_runner', value=Name(id='parallel_tools', ctx=Load()))])])), keyword(arg='evidence', value=Call(func=Name(id='EvidenceBundleAssembler', ctx=Load()))), keyword(arg='character_response', value=Call(func=Name(id='CharacterResponseGenerationService', ctx=Load()), args=[Call(func=Name(id='DirectLlmCharacterResponseGenerator', ctx=Load()), args=[Name(id='material', ctx=Load())], keywords=[keyword(value=IfExp(test=Name(id='relationship_enabled', ctx=Load()), body=Dict(keys=[Constant(value='relationship_enabled')], values=[Constant(value=True)]), orelse=Dict())), keyword(value=IfExp(test=Compare(left=Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='runtime_settings', ctx=Load()), Constant(value='ACTIVITY_THOUGHT_POLICY'), Constant(value='legacy')]), ops=[Eq()], comparators=[Constant(value='thought_v1')]), body=Dict(keys=[Constant(value='thought_enabled')], values=[Constant(value=True)]), orelse=Dict()))])])), keyword(arg='unit_of_work', value=Call(func=Name(id='SupervisorResponseWorkflowUnitOfWork', ctx=Load()), args=[Name(id='db', ctx=Load())], keywords=[keyword(arg='relationship_world_id', value=IfExp(test=Name(id='relationship_enabled', ctx=Load()), body=Name(id='world_id', ctx=Load()), orelse=Constant(value=None)))])), keyword(arg='memory_producer', value=Call(func=Name(id='SqlAlchemySuccessfulChatMemoryProducer', ctx=Load()), args=[Name(id='db', ctx=Load())])), keyword(arg='recall_mode', value=Name(id='recall_mode', ctx=Load())), keyword(arg='social_context_provider', value=Call(func=Name(id='ChatSocialContextProvider', ctx=Load()), args=[Name(id='graph_recall', ctx=Load()), Name(id='character_labels', ctx=Load())])), keyword(arg='today_snapshot_validator', value=Call(func=Name(id='SqlAlchemyTodaySnsSnapshotValidator', ctx=Load()), args=[Name(id='db', ctx=Load()), Name(id='character_labels', ctx=Load())]))])), Return(value=Call(func=Name(id='GenerationExecution', ctx=Load()), args=[Name(id='workflow', ctx=Load()), Name(id='character_labels', ctx=Load())]))], returns=Name(id='GenerationExecution', ctx=Load()))"
+        }
+      ]
+    },
+    {
+      "id": "sns-recommendation-history-browser-20260920",
+      "implementation_commit": "58c0d0c521b2aabfeee382dcc3393a65d20fd6a9",
+      "reason": "Topic Feed delivery history adds Next/static browser coverage; the static character fixture moved unchanged into its own module.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "browser-tests/product-shell.spec.ts": "24bdd07612254490f1f0134527ed889078ed315a",
+        "browser-tests/static-product-shell.spec.ts": "897197783702c1905bf0fdf6e86de4c4eefa071a",
+        "browser-tests/agent-detail-fixture.ts": "e16d60dfc28e02377615f8893f023a3d97e883ee",
+        "browser-tests/recommendation-history-fixture.ts": "f999e932a5949e15ff7dd21a190c344e82df4beb"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/product-shell.spec.ts",
+          "before_sha256": "b167aeeb189034a0202ca16395238725ca17be1b247a7afe8974a60a19252bbd",
+          "after_sha256": "c49d457209e655fd4fca04b0a88b3caa61c2edad2ca5ccb1576c9808bae3823e"
+        },
+        {
+          "source": "browser-tests/static-product-shell.spec.ts",
+          "before_sha256": "715f1e9e00c2dc844ea0bb67b228d6431adda159f000a6adec6f9d3bdf043226",
+          "after_sha256": "658f673f7f13882e7ff8a13ca346f44eb878174c5a97180b616a6966234d4fe9"
+        }
+      ]
+    },
+    {
+      "id": "relationship-view-browser-20260921",
+      "implementation_commit": "04c1fa4d346a23cdc93c33f68efa71012b217db3",
+      "reason": "Relationship label, perception, and daily review UI need explicit browser fixture and accessibility checks.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "browser-tests/relationship-graph/product-shell.spec.ts": "ca84f7598ca5d62a0783390d8e6c0d835c1d79e9"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/relationship-graph/product-shell.spec.ts",
+          "before_sha256": "d5fd280716ec04006c17989f9629b009aedfa3ffdbf2278ce9febe00de7382e3",
+          "after_sha256": "0d799054370fbb1a4555f438be4a4221f746dc9b304185a6d0ad688e657af3c9"
+        }
+      ]
+    },
+    {
+      "id": "manual-memory-relationship-browser-20260922",
+      "implementation_commit": "13a64a7500d74dc0cda8f0863fffc0e1be183c75",
+      "reason": "Manual memory and relationship followup changes the progress contract, keyboard action, and 200 percent layout assertion.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "browser-tests/memory-batch-fixture.ts": "cc5370f235aa3cf4439362f91470c43a47aa9f08"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/memory-batch-fixture.ts",
+          "before_sha256": "7590cde761a2d46d9d3505c61f1c16db507d7f0e68376db2acc132db6dd48fb6",
+          "after_sha256": "fedc11cef38a85876f79717297ce0c5eaba17c17666bd3780238ad31857914f8"
+        }
+      ]
+    },
+    {
+      "id": "static-world-leave-selector-20260923",
+      "implementation_commit": "85f2d0bf65d4d67fd0d191629d5cfa128e3a58a5",
+      "reason": "The topic selectors add duplicate visible character names; scope the existing World-leave assertion to its character article without weakening the behavior check.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "browser-tests/static-product-shell.spec.ts": "476fca71b03cc6ac06568b101f87b13a7d92d46e"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/static-product-shell.spec.ts",
+          "before_sha256": "658f673f7f13882e7ff8a13ca346f44eb878174c5a97180b616a6966234d4fe9",
+          "after_sha256": "ca034a7e7ee1ae86c8a11843918142fc39bcae1842f867480cdc9710005ac941"
+        }
+      ]
+    },
+    {
+      "id": "sns-topic-feed-runtime-mode-20260920",
+      "implementation_commit": "f934cc3f9adc7a5542d5133daac5289b28612a27",
+      "reason": "Issue #335 Topic Feed changes the autonomous Feed runtime mode while preserving the legacy compatibility constant.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/domains/world_characters/contracts/runtime_modes.py": "85c17a5ff08909e53553a1b8867b4da4e6f88df7"
+      },
+      "definitions": [
+        {
+          "source": "backend/app/domains/world_characters/contracts/runtime_modes.py",
+          "symbol": "AUTONOMOUS_FEED_RUNTIME_MODE",
+          "before_ast": "Assign(targets=[Name(id='AUTONOMOUS_FEED_RUNTIME_MODE', ctx=Store())], value=Constant(value='keyword_search_v1'))",
+          "after_ast": "Assign(targets=[Name(id='AUTONOMOUS_FEED_RUNTIME_MODE', ctx=Store())], value=Constant(value='topic_recommendation_v1'))"
+        }
+      ]
+    },
+    {
+      "id": "issue335-contracts-f934cc3f",
+      "implementation_commit": "f934cc3f9adc7a5542d5133daac5289b28612a27",
+      "reason": "Issue #335 f934cc3f: exact API and ORM transition at its introducing commit, captured against its parent checkout.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/main.py": "7ed1faad559f23f05990ad92d2cab2e02b69cef8",
+        "backend/app/api/v1/public.py": "a82ca36a3f943ca8f133ec0e9ae17f10108887b4",
+        "backend/app/domains/social/recommendation_router.py": "7157d81e88f19ee37f35e5675c77f4041fb86cda",
+        "backend/app/domains/social/schemas/recommendation.py": "9db73c36ec16eb2380753888d8c55bbbe106680b",
+        "backend/app/domains/social/models/topics.py": "a17ed4223908dd96d385efae97c144e0e5a9baa7",
+        "backend/app/domains/world_characters/models.py": "cd3c78043b14d087c03050934c1ad22a796b7ab7",
+        "backend/alembic/versions/20260918_0095_social_recommendation.py": "69d7a71eaaec4c2620c3ac6fa08ae309ba277a5b",
+        "backend/alembic/versions/20260918_0096_recommendation_mode.py": "2c40320560a270771ec9930bbb38b630ca343d31"
+      },
+      "migration_sources": [
+        "backend/alembic/versions/20260918_0095_social_recommendation.py",
+        "backend/alembic/versions/20260918_0096_recommendation_mode.py"
+      ],
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/recommendation-topics",
+          "before": null,
+          "after": "f125d52bc6396fc481e1301cfede13542e097f457eb171e64888ac95fd59c8c6"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/recommendation-topics/regenerate",
+          "before": null,
+          "after": "fdd4c9824e3a0a25fb8b8a86b2002d2dc21753832840e10861daf6afc7d986d0"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "PUT /api/v1/worlds/{world_id}/recommendation-topics/key",
+          "before": null,
+          "after": "bab74ce885baa7c401c46e751da774061d59064fdcde74255121ff8559690bdb"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "TopicKeyRequest",
+          "before": null,
+          "after": "1aa9782b9ec0a9f737372c298efee05fbc448506bd3292f35169bcc17b52a358"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "TopicRegenerateRequest",
+          "before": null,
+          "after": "42d3ee78829021ddcd06768f35fbb941d2e8ff74e2088c038b59511866922cb3"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldFeedCycleStatusRead",
+          "before": "5e778b14a348fdb66e37b5749870a84ce42ec90d5407db76166a1767e8defe3e",
+          "after": "921d1b7437ac1f5fd24e5f14c28675f45f4f6ad018ba27244803aaf69b34c265"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/recommendation-topics",
+          "before": null,
+          "after": "f125d52bc6396fc481e1301cfede13542e097f457eb171e64888ac95fd59c8c6"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/recommendation-topics/regenerate",
+          "before": null,
+          "after": "fdd4c9824e3a0a25fb8b8a86b2002d2dc21753832840e10861daf6afc7d986d0"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "PUT /api/v1/worlds/{world_id}/recommendation-topics/key",
+          "before": null,
+          "after": "bab74ce885baa7c401c46e751da774061d59064fdcde74255121ff8559690bdb"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "TopicKeyRequest",
+          "before": null,
+          "after": "1aa9782b9ec0a9f737372c298efee05fbc448506bd3292f35169bcc17b52a358"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "TopicRegenerateRequest",
+          "before": null,
+          "after": "42d3ee78829021ddcd06768f35fbb941d2e8ff74e2088c038b59511866922cb3"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldFeedCycleStatusRead",
+          "before": "5e778b14a348fdb66e37b5749870a84ce42ec90d5407db76166a1767e8defe3e",
+          "after": "921d1b7437ac1f5fd24e5f14c28675f45f4f6ad018ba27244803aaf69b34c265"
+        }
+      ],
+      "orm_tables": [
+        {
+          "key": "posts",
+          "before": "cd75e5a396543e1b1a618bcfede6244b3311e68332e82556860a5950bd8cfcfc",
+          "after": "3abd696a2ac99943a216b74c732094d0e47ace4ffa466fc47c9c4b4a4d327df2"
+        },
+        {
+          "key": "social_recommendation_catalogs",
+          "before": null,
+          "after": "32ac73555d7137f32bf1d8915a0cc33a97df7d82c4ed1d9384939cc6149f5341"
+        },
+        {
+          "key": "social_recommendation_deliveries",
+          "before": null,
+          "after": "22e08dd8bdd93dc3d4c57794068ddea48375fbe983330425e97eedd6fb53a499"
+        },
+        {
+          "key": "social_recommendation_post_topics",
+          "before": null,
+          "after": "2ee606316f33b63e1b37443091f1708990b26fa09753ebd805c9fd5a8a1b6b93"
+        },
+        {
+          "key": "social_recommendation_posts",
+          "before": null,
+          "after": "6c6ea6b99c051b6bea2f37ac7d5a6e12c89594a7a34f82b46166b94588ec8268"
+        },
+        {
+          "key": "social_recommendation_preparations",
+          "before": null,
+          "after": "f73d93343a7f4b50ca08001f2876070a689ed831c4d865146d0e1911bcbe7092"
+        },
+        {
+          "key": "social_recommendation_topic_sources",
+          "before": null,
+          "after": "20658e29d10eedf5bfac867603e739e4bd360caac73cf5be51edcca8f560d83e"
+        },
+        {
+          "key": "social_recommendation_topics",
+          "before": null,
+          "after": "979b5be68a927583c44d51fe8f0460f1782785ed56ae165103b49dc4d2ae6508"
+        }
+      ]
+    },
+    {
+      "id": "issue335-contracts-58c0d0c5",
+      "implementation_commit": "58c0d0c521b2aabfeee382dcc3393a65d20fd6a9",
+      "reason": "Issue #335 58c0d0c5: exact API and ORM transition at its introducing commit, captured against its parent checkout.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/domains/social/recommendation_router.py": "7642185260bdb936a00856fa477a58e5d4ec6f8f",
+        "backend/app/domains/social/schemas/recommendation.py": "b3a9313e0e246807e4f548e35b350c121f2e104e"
+      },
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/recommendation-topics",
+          "before": "f125d52bc6396fc481e1301cfede13542e097f457eb171e64888ac95fd59c8c6",
+          "after": "ca680a088d7116b3c2b813876b26c33a27c3a4e0c416c18b9f90a26c2d860dab"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/recommendation-topics/regenerate",
+          "before": "fdd4c9824e3a0a25fb8b8a86b2002d2dc21753832840e10861daf6afc7d986d0",
+          "after": "a602fefaac7bc1ade88f96cf3694d101e443a1e4ce0751686d598affb88504d4"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "PUT /api/v1/worlds/{world_id}/recommendation-topics/key",
+          "before": "bab74ce885baa7c401c46e751da774061d59064fdcde74255121ff8559690bdb",
+          "after": "846effc97c6e599d304798d6455d8fe837210e924015474e90815b55e785fd5b"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "DeliveryHistoryRead",
+          "before": null,
+          "after": "a9ce2ba72b8841d96a26e8739987ae7cfa9127b637568dc684535971c1c851fd"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "DeliveryPostRead",
+          "before": null,
+          "after": "f1386c09dc68dbec5a04d79358bbaa2e77ce68f9e6a642237d4673f52abba1b7"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "LegacyFeedRead",
+          "before": null,
+          "after": "474aa969db40069f76b128f9a891cd6ae0e5aa5a24b7ea9c30f4244b4f9dc305"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "RecommendationTopicsRead",
+          "before": null,
+          "after": "1a6ef67031fcc85275ba67fb3797af4473b0f255fc67abc4428c7d8dde7015fd"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "TopicRead",
+          "before": null,
+          "after": "a888f497f09c4e75f2a87013461dddf157fb008427dad4c2de35de6ad5ecde4d"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/recommendation-topics",
+          "before": "f125d52bc6396fc481e1301cfede13542e097f457eb171e64888ac95fd59c8c6",
+          "after": "ca680a088d7116b3c2b813876b26c33a27c3a4e0c416c18b9f90a26c2d860dab"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/recommendation-topics/regenerate",
+          "before": "fdd4c9824e3a0a25fb8b8a86b2002d2dc21753832840e10861daf6afc7d986d0",
+          "after": "a602fefaac7bc1ade88f96cf3694d101e443a1e4ce0751686d598affb88504d4"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "PUT /api/v1/worlds/{world_id}/recommendation-topics/key",
+          "before": "bab74ce885baa7c401c46e751da774061d59064fdcde74255121ff8559690bdb",
+          "after": "846effc97c6e599d304798d6455d8fe837210e924015474e90815b55e785fd5b"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "DeliveryHistoryRead",
+          "before": null,
+          "after": "a9ce2ba72b8841d96a26e8739987ae7cfa9127b637568dc684535971c1c851fd"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "DeliveryPostRead",
+          "before": null,
+          "after": "f1386c09dc68dbec5a04d79358bbaa2e77ce68f9e6a642237d4673f52abba1b7"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "LegacyFeedRead",
+          "before": null,
+          "after": "474aa969db40069f76b128f9a891cd6ae0e5aa5a24b7ea9c30f4244b4f9dc305"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "RecommendationTopicsRead",
+          "before": null,
+          "after": "1a6ef67031fcc85275ba67fb3797af4473b0f255fc67abc4428c7d8dde7015fd"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "TopicRead",
+          "before": null,
+          "after": "a888f497f09c4e75f2a87013461dddf157fb008427dad4c2de35de6ad5ecde4d"
+        }
+      ]
+    },
+    {
+      "id": "issue335-contracts-04c1fa4d",
+      "implementation_commit": "04c1fa4d346a23cdc93c33f68efa71012b217db3",
+      "reason": "Issue #335 04c1fa4d: exact API and ORM transition at its introducing commit, captured against its parent checkout.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/main.py": "9af3ae8aafdbe9368c44807aee4223ae152ade06",
+        "backend/app/domains/relationships/router.py": "761023d7cc6a9b096fbf5ee9fa377499d7cb6941",
+        "backend/app/domains/relationships/schemas.py": "0c9cdfdbab9668d33579667d094c456853f533eb",
+        "backend/app/domains/relationships/models/personalization.py": "b0e5124d073b2fa00637cc6352ae47e333985f42",
+        "backend/app/domains/relationships/models/social.py": "3320a5467988ba2d8d48cc857dddcdec76a51f62",
+        "backend/app/domains/chat/contracts/character_response_generator.py": "c808aa699fd6f27f63e0b7338611f41e6bd7c4b4",
+        "backend/app/runtime/migrations/sqlite_versions/v16_to_v17_relationship_personalization.py": "0732883c99719dac75d04f11b5a5d206c1f169ea"
+      },
+      "migration_sources": [
+        "backend/app/runtime/migrations/sqlite_versions/v16_to_v17_relationship_personalization.py"
+      ],
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-review",
+          "before": null,
+          "after": "07ac712c672e6270bf5ea2053c391eba62a0a77edef060c6718c27b1b67a193a"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/owner-characters",
+          "before": null,
+          "after": "883056876892d8fd1d8657ac314000ccd3da03affaf63f3c8d2f07d16e0ca45a"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/owner-characters",
+          "before": null,
+          "after": "a09347b7b4a7bd315f6bd8c2116042464864d54548e6ce0284ab8f4b032ba0d5"
+        },
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/owner-characters/{world_character_id}/select",
+          "before": null,
+          "after": "6d9d3bdccea168334ea0b445894ac6074545eac2dd29f9e90606a834f02005fb"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "RelationshipGraphEdgeRead",
+          "before": "6b5dc05d10724ea1137aaff9f8cfeb3b8de19d2dae61e201628143c8f0225dd1",
+          "after": "c6e2da3e8502b51cb3a0e97dcc64b762cc9c4317a947edc7932ee26b7d2b2fa7"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-review",
+          "before": null,
+          "after": "07ac712c672e6270bf5ea2053c391eba62a0a77edef060c6718c27b1b67a193a"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "GET /api/v1/worlds/{world_id}/owner-characters",
+          "before": null,
+          "after": "883056876892d8fd1d8657ac314000ccd3da03affaf63f3c8d2f07d16e0ca45a"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/owner-characters",
+          "before": null,
+          "after": "a09347b7b4a7bd315f6bd8c2116042464864d54548e6ce0284ab8f4b032ba0d5"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/owner-characters/{world_character_id}/select",
+          "before": null,
+          "after": "6d9d3bdccea168334ea0b445894ac6074545eac2dd29f9e90606a834f02005fb"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "RelationshipGraphEdgeRead",
+          "before": "6b5dc05d10724ea1137aaff9f8cfeb3b8de19d2dae61e201628143c8f0225dd1",
+          "after": "c6e2da3e8502b51cb3a0e97dcc64b762cc9c4317a947edc7932ee26b7d2b2fa7"
+        }
+      ],
+      "orm_tables": [
+        {
+          "key": "graph_projection_outbox",
+          "before": "f35dbc592320390b21ac45762e5aba933584468fe2f69f7e090f14913c888733",
+          "after": "721fcf8cac02a09121773f37b9d54fb44663c7fa67b0adf1a4649c620b168d83"
+        },
+        {
+          "key": "relationship_experience_receipts",
+          "before": null,
+          "after": "52f2a3cdfb6efb44cf15532547f32ea9640328b89ee1f13eab9c5735111e2e1d"
+        },
+        {
+          "key": "relationship_metric_applications",
+          "before": null,
+          "after": "3a01d2e4b4eb65966571ec5b34e36b70d3a5df8957b7a1548920951e96492b9f"
+        },
+        {
+          "key": "relationship_metric_budgets",
+          "before": null,
+          "after": "3c3f589807d10df7ef5262b0152c1db1f19938e076df100e83df708e9ac431f9"
+        },
+        {
+          "key": "relationship_policies",
+          "before": null,
+          "after": "09f1284df8e26c234fa2c07c286b78083291180175ebec66ed6be6ee57b935ef"
+        },
+        {
+          "key": "relationship_review_memory_receipts",
+          "before": null,
+          "after": "41e0763c5c855d7286f0e183ceb4af336a37199eb7ac6647ae0c0f1f756f2175"
+        },
+        {
+          "key": "relationship_review_work",
+          "before": null,
+          "after": "2118c650bfe8a7cc6d45b78497bf99ea49a2e5b1f3180c573276812c4f4468ec"
+        },
+        {
+          "key": "relationship_states",
+          "before": "fc1dd9c358a26d327af070ff716b11e1b0a34a29e1550629ba7f5af0726b0ab7",
+          "after": "1a5e1acccd0e7555e2a1fb4bea78906c84dc233d2216797486841bd3df9ab2e0"
+        }
+      ]
+    },
+    {
+      "id": "issue335-contracts-65c97262",
+      "implementation_commit": "65c97262cb384093f1c0bde2c801a9129b385087",
+      "reason": "Issue #335 65c97262: exact API and ORM transition at its introducing commit, captured against its parent checkout.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/domains/social/schemas/feed.py": "d42799cc5de11ef5011aa360079f06cb134315b7",
+        "backend/app/domains/social/schemas/feed_status.py": "5fb4411f761182c3cff716a0775eeb0da50bcd29",
+        "backend/app/domains/social/schemas/recommendation.py": "4248f2898f756ce0f8a9d8907c6d566dabc4a159"
+      },
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "FeedAttemptRead",
+          "before": null,
+          "after": "85a7c35dc00ec3fb9adda8fe3db94e6a8fd94fb7199dedfc8e43cea285a37af9"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "FeedReadinessRead",
+          "before": null,
+          "after": "0e648f9c6158cff6e6f650e9a0dffdc286d1e94d35b441a46a38c28279738a65"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "FeedStatusRead",
+          "before": null,
+          "after": "354870c2a60f05333b74aa6a40f657e6e2a88a58dc0618bf82559096a2730f0d"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "RecommendationTopicsRead",
+          "before": "1a6ef67031fcc85275ba67fb3797af4473b0f255fc67abc4428c7d8dde7015fd",
+          "after": "a8d1b077ea1bbb1163d00b452a13ea14983fe08027f9582ab7a654d266c2e378"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "WorldFeedCycleStatusRead",
+          "before": "921d1b7437ac1f5fd24e5f14c28675f45f4f6ad018ba27244803aaf69b34c265",
+          "after": "7f04e5d1682721719ad2c78e858684b908bb938cade5fdd0ca297b73dee40742"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "FeedAttemptRead",
+          "before": null,
+          "after": "85a7c35dc00ec3fb9adda8fe3db94e6a8fd94fb7199dedfc8e43cea285a37af9"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "FeedReadinessRead",
+          "before": null,
+          "after": "0e648f9c6158cff6e6f650e9a0dffdc286d1e94d35b441a46a38c28279738a65"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "FeedStatusRead",
+          "before": null,
+          "after": "354870c2a60f05333b74aa6a40f657e6e2a88a58dc0618bf82559096a2730f0d"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "RecommendationTopicsRead",
+          "before": "1a6ef67031fcc85275ba67fb3797af4473b0f255fc67abc4428c7d8dde7015fd",
+          "after": "a8d1b077ea1bbb1163d00b452a13ea14983fe08027f9582ab7a654d266c2e378"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "WorldFeedCycleStatusRead",
+          "before": "921d1b7437ac1f5fd24e5f14c28675f45f4f6ad018ba27244803aaf69b34c265",
+          "after": "7f04e5d1682721719ad2c78e858684b908bb938cade5fdd0ca297b73dee40742"
+        }
+      ]
+    },
+    {
+      "id": "issue335-contracts-13a64a75",
+      "implementation_commit": "13a64a7500d74dc0cda8f0863fffc0e1be183c75",
+      "reason": "Issue #335 13a64a75: exact API and ORM transition at its introducing commit, captured against its parent checkout.",
+      "review": "https://github.com/angmoo-tree/angmoo/issues/335",
+      "source_blobs": {
+        "backend/app/domains/memory/router.py": "3d2f5fd82c37a30e0e46d2be30cff9459de33c5b",
+        "backend/app/domains/memory/schemas/batch.py": "f66a32a0118d28ea0a31eba9daa2a8381c78078c",
+        "backend/app/domains/relationships/models/manual_review.py": "8c52c32845df9c34efdd4cd438ff00a3fdb18922",
+        "backend/app/runtime/migrations/sqlite_versions/v17_to_v18_manual_review.py": "43d98f46c5add0332318f8f6058f3cb747321c3e"
+      },
+      "migration_sources": [
+        "backend/app/runtime/migrations/sqlite_versions/v17_to_v18_manual_review.py"
+      ],
+      "contracts": [
+        {
+          "application": "full",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run/{request_id}/retry",
+          "before": null,
+          "after": "821f7021e2c8940cbc88bba8420c39bc1f01914b0c6c63af7f87c1b74f8924bf"
+        },
+        {
+          "application": "full",
+          "kind": "schemas",
+          "key": "MemoryBatchStart",
+          "before": "a7e07256e894466ff570546928074be83518a780b66894297032871be1246d80",
+          "after": "83b2f3430b85e2130eaf411c3f1d89c975d4336f3de67e0152dd0621312035d7"
+        },
+        {
+          "application": "public",
+          "kind": "operations",
+          "key": "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memory/batch-run/{request_id}/retry",
+          "before": null,
+          "after": "821f7021e2c8940cbc88bba8420c39bc1f01914b0c6c63af7f87c1b74f8924bf"
+        },
+        {
+          "application": "public",
+          "kind": "schemas",
+          "key": "MemoryBatchStart",
+          "before": "a7e07256e894466ff570546928074be83518a780b66894297032871be1246d80",
+          "after": "83b2f3430b85e2130eaf411c3f1d89c975d4336f3de67e0152dd0621312035d7"
+        }
+      ],
+      "orm_tables": [
+        {
+          "key": "relationship_review_requests",
+          "before": null,
+          "after": "b294bbae9b4c9c328aa559d021d6cc88b1ba9e75722ffa52b0dc26ed12a3d03f"
+        }
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 # 개인화 SNS V2 실제 구현 구조와 검증 인계
 
-작성일: 2026-09-23. 대상: `feat/sns-relationship-context`. 구현 시작 HEAD: `11a5534b46c5337865316598f074ddca2b50775c`.
+작성일: 2026-09-23. 대상: `feat/sns-relationship-context`. 구현 시작 HEAD: `737dab337a76fc12512970234632f17da9814235`.
 
 **현재 상태: 코드 구현·로컬 회귀·실제 AI 비교·루멘 World 시범 후 로컬 전역 정책과 코드의 미설정 기본값을 V2로 전환했다. 다음 실제 claim·새/import 대상·활동 누적 USER CHECK와 개발 Gate는 아직 완료하지 않았다.** 이 문서는 실제 구현을 설명한다. 장기간의 개인화 품질까지 검증됐다는 뜻은 아니다.
 
@@ -116,7 +116,7 @@ GET/PUT `/api/v1/worlds/{world_id}/world-characters/{actor_id}/activity-runtime`
 
 고정 역사 baseline의 API/ORM 보존 검사는 기존 09-20~09-22 기능 중 등록되지 않은 계약 변경도 보고했다. 시작 HEAD를 별도 임시 소스 디렉터리로 추출해 OpenAPI/ORM hash를 비교한 결과 **이번 작업의 계약 차이는 GET/PUT activity-runtime, EngineWrite, 새 네 테이블뿐**이다. `preimplementation-contracts.json`과 `contract-delta.json`이 그 근거다.
 
-이번 구현의 변경은 정확한 로컬 commit/AST/blob 증거로 append-only 등록한다. 과거 baseline을 현재 값으로 덮어쓰거나 과거 변경을 이번 승인 범위로 일괄 등록하지 않는다. 전체 preservation Gate는 **FAIL / 기존 등록 누락으로 BLOCKED**다. 첫 실패는 수정하지 않은 `runtime/chat/generation_workflows.py`의 advertised owner와 기존 API/ORM·기존 테스트 도입 증거다. `git diff 11a5534b -- backend/app/runtime/chat/generation_workflows.py backend/tests/character_lore/test_documents.py`는 비어 있다. 이 Gate와 root browser-tests 미실행을 로컬 검증 전체 PASS로 표현하지 않는다.
+이번 구현의 변경은 정확한 로컬 commit/AST/blob 증거로 append-only 등록한다. 과거 baseline을 현재 값으로 덮어쓰거나 과거 변경을 이번 승인 범위로 일괄 등록하지 않는다. 전체 preservation Gate는 **FAIL / 기존 등록 누락으로 BLOCKED**다. 첫 실패는 수정하지 않은 `runtime/chat/generation_workflows.py`의 advertised owner와 기존 API/ORM·기존 테스트 도입 증거다. `git diff 737dab33 -- backend/app/runtime/chat/generation_workflows.py backend/tests/character_lore/test_documents.py`는 비어 있다. 이 Gate와 root browser-tests 미실행을 로컬 검증 전체 PASS로 표현하지 않는다.
 
 ## 7. 루멘 시범과 남은 사용자 확인
 
@@ -165,9 +165,9 @@ World `c10b91ed-55b0-5847-8fb7-0d61b320a383` 전체에 V2를 설정했다. 미�
 
 ### 로컬 커밋과 보존 범위
 
-- `fe054fe825196f9fbc5944a2514e4b59703c459a`: V2 코드·데이터·회귀·비교 하네스 구현.
-- `f329c9189a30b1cdefa81b70336acb6455eaac04`: 삭제된 Inbox 알림의 후보 고갈 방지·입력 예산·실행 단계 UI·증거 등록.
-- `7c658ee5`: 중단 경로 진단 보존·상태 정산 표시·DB busy 재개 회귀.
+- `36db8c67f75d2466b1b5882bc105639ea039a301`: V2 코드·데이터·회귀·비교 하네스 구현.
+- `d3a12ab60bfcf81f6055f698bd04a59af80082f0`: 삭제된 Inbox 알림의 후보 고갈 방지·입력 예산·실행 단계 UI·증거 등록.
+- `14763f85`: 중단 경로 진단 보존·상태 정산 표시·DB busy 재개 회귀.
 - 후속 진단/문서 commit은 이 파일의 Git 이력에서 확인한다. 루트 계획 문서는 Git 저장소 밖에 있어 로컬 파일로 보존한다.
 - PR·push·원격 CI·main merge·배포를 수행하지 않았다. 로컬 `scripts/ci/` 검사는 원격 CI 실행이 아니다.
 - 운영 post·memory·relationship·승인 프로필·일과·활동 ON/OFF를 초기화하지 않았다. 시범 전 canonical backup은 `/var/lib/angmoo/runtime/backups/before-v2-pilot-20260922T192932Z.sqlite3`다.

@@ -6,9 +6,9 @@
 > Docker 소스 적용 확인, 실제 AI 후속 활동 FP6는 대기다. 기존 관계 개인화 USER CHECK 전체를 PASS로 변경하지 않는다.
 > 상세 계약과 실사용 안내: [SNS 추천 운영 문서](../operations/sns-topic-recommendation.md#2026-09-22-feed-planner-비댓글-응답-보정).
 
-> **2026-09-22 MC 후속:** [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)을 추가했다. 수동 버튼은 예약 시각과 독립적으로 기억 완료 후 관계를 실행한다. 실제 검토3건(유지2/갱신1), Ladybug 문구 표시와 반복 요청무자료 확인. 아래 초기 검증 기록은 당시 증거이며 인간 품질은 별도다.
+> **2026-09-22 MC 후속:** [수동 통합 실행 구현·검증](manual-memory-relationship-consolidation.md)을 추가했다. 수동 버튼은 예약 시각과 독립적으로 기억 완료 후 관계를 실행한다. 실제 검토3건(유지2/갱신1), Ladybug 문구 표시와 반복 요청무자료 확인. 아래 초기 검증 기록은 당시 증거이며 인간 품질은 별도다.
 
-> 실행일: 2026-09-22 / 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `def5953a`
+> 실행일: 2026-09-22 / 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `dc57e719`
 > 상태: 로컬 구현·선택한 자동 회귀·위임 UI 확인 완료, 실사용 검증 인계. 실제 새 활동·하루 AI 결과에 대한 USER CHECK는 아래에 별도 보존한다.
 > 기준: workspace의 `09-21 관계 유형·지표·인식과 하루 관계 정리·LadybugDB 구현 세부 계획.md` RI0–RI17.
 
@@ -161,7 +161,7 @@ Windows11 / Python3.13.12, 임시 SQLite, provider 호출0, 기존 source 영수
 
 ### MC 후속과 Ladybug 조회 보완
 
-`relationship_review_requests`(SQLite v18)가 수동 기억 요청 뒤 후속 실행을 영속 보관한다. `ManualRelationshipFollowup`과 `advance_manual_requests`가 기존 memory/review worker를 조립하며, 자동 예약과 AI 프롬프트는 유지한다. 새 API·전체 집계·고정 참조·재시도는 [수동 통합 실행 구현·검증](D:/project_code/angmoo-workspace/angmoo-tree-angmoo/docs/architecture/manual-memory-relationship-consolidation.md)에 정리했다.
+`relationship_review_requests`(SQLite v18)가 수동 기억 요청 뒤 후속 실행을 영속 보관한다. `ManualRelationshipFollowup`과 `advance_manual_requests`가 기존 memory/review worker를 조립하며, 자동 예약과 AI 프롬프트는 유지한다. 새 API·전체 집계·고정 참조·재시도는 [수동 통합 실행 구현·검증](manual-memory-relationship-consolidation.md)에 정리했다.
 
 실제 UI 대조에서 Ladybug의 `_relationship_rows/_relationship_payload`가 저장된 유형·인식을 반환하지 않는 기존 누락을 발견했다. SELECT/payload에 다섯 view 필드를 추가하고 실제 Ladybug repository roundtrip 테스트 및 실제 화면을 확인했다. 이 수정은 저장 데이터 재생성·별도 AI 호출을 필요로 하지 않는다.
 

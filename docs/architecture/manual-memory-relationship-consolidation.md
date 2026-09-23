@@ -1,7 +1,7 @@
 # 수동 기억·관계 정리 통합 실행 — 구현과 검증
 
 > 기준일: 2026-09-22 / MC0–MC10 로컬 구현·검증·인계 완료
-> 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `1fde70101d6d06142bcfa44000585fb07d181fb5`
+> 브랜치: `feat/sns-relationship-context` / 시작 HEAD: `65c97262cb384093f1c0bde2c801a9129b385087`
 > 실제 Docker/AI 확인은 에이전트에게 위임한 검증이다. 인간의 관계 품질 USER CHECK와 구분한다.
 
 ## 1. 사용 방법과 결과 의미

@@ -6,7 +6,7 @@
 `0e667dffbeb8361f9782e842188af7f308a2cce9`.
 
 **2026-09-20 마무리: C안은 로컬 코드와 확인한 Docker 환경에 적용됐고, 구현·자동 검증·핵심 실제 동작 확인 및 C11 인계를 완료했다.** 사용자는 추가 검증을 다른 개발 작업·실사용과 병행하기로 결정했다. 표시 오류도 수정·자동 검증·로컬 커밋을 완료했다. 직접 수정 화면 판정과 나머지 C10 시나리오는 미검증으로 보존하며, 전체 USER CHECK PASS로 기록하지 않는다. 별도 채택 선언을 기다리는 상태가 아니다.
-구현 커밋은 `6615a4f886281f46b45ee7555f0590d19d934171`, 표시 수정 커밋은 `7a0b871dbfa236c1c7ae25c5923bc3f0a176c955`다.
+구현 커밋은 `f934cc3f9adc7a5542d5133daac5289b28612a27`, 표시 수정 커밋은 `58c0d0c521b2aabfeee382dcc3393a65d20fd6a9`다.
 이 변경에는 PR, push, 원격 CI, main merge, 설치 앱 업데이트가 포함되지 않는다.
 
 ## 구현 경계
@@ -168,7 +168,7 @@ README의 contributor 경로에서 **현재 체크아웃을 실행**해야 한�
 이미 설치된 앱은 이번 로컬 코드를 포함한다고 볼 수 없다.
 
 ```powershell
-Set-Location D:\project_code\angmoo-workspace\angmoo-tree-angmoo
+# Run from the current repository checkout root
 git branch --show-current
 git log -1 --oneline
 docker compose -f compose.yml -f compose.dev.yml up --watch
