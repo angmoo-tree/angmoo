@@ -17446,6 +17446,75 @@
         "tests/social/test_feed_decision_normalization.py": {},
         "tests/social/test_feed_normalized_execution.py": {}
       }
+    },
+    {
+      "commit": "36db8c67f75d2466b1b5882bc105639ea039a301",
+      "feature_id": "AR-AG-V2-SUPPLEMENT",
+      "reason": "Completes original AG V2 introduction with exact omitted frontend source blobs.",
+      "tracked_files": {
+        "frontend/src/features/characters/api/personalized-activity.ts": "e779f9c57fd43cd406e24c7083478e826f7c5203",
+        "frontend/src/features/characters/components/personalized-activity-panel.tsx": "8d59911e34538bcabe5074194892d1440f48158d",
+        "docs/verification/activity-v2-20260923/comparisons.json": "b1c8bd9a6b0fad4ced01d84b2ee21e9cc1e0ae86",
+        "docs/verification/activity-v2-20260923/contract-delta.json": "ebfe470d004d58077151f3aff01a3d4d371c5cb2",
+        "docs/verification/activity-v2-20260923/planner-replay.json": "552b628b117e30bd4764a99d5cd858145dfb4266",
+        "docs/verification/activity-v2-20260923/preimplementation-contracts.json": "102e8c7ab7ebf72745b6dbedbf94ee0cc8a298b1",
+        "docs/verification/activity-v2-20260923/provider-metadata.json": "20c5cf9bad2f6234704cc279ac41817b9f002bfd",
+        "docs/verification/activity-v2-20260923/provider-results-r2.jsonl": "7d5bc618c98b194db5a407903b461793a3b12bbe",
+        "docs/verification/activity-v2-20260923/provider-results-r3.jsonl": "6aeaead9d8adef4a5e5adff31a55a9623f16da5b",
+        "docs/verification/activity-v2-20260923/provider-results.jsonl": "3891381d3a309f2299faadb6221b3b3f3c7a09e5",
+        "docs/verification/activity-v2-20260923/recall-comparison.json": "cefe59f22e203e9e5d17753e7c16cc662d164f6d",
+        "docs/verification/activity-v2-20260923/recall-results.json": "6b1505c0d5efb11ea7e411f6228132d7a16556db"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {},
+      "supplements": "AR-AG-V2"
+    },
+    {
+      "commit": "e80df4581bb551c303042df2a035e753830f4562",
+      "feature_id": "AR-AG-V2-ARCH",
+      "reason": "Records the V2 architecture handoff at its first committed source.",
+      "tracked_files": {
+        "docs/architecture/autonomous-activity-v2.md": "aa101a93c6da41aaad2bd678554373a4d8945f5f",
+        "docs/verification/activity-v2-20260923/pilot-results.json": "25b8a0e8a347d4d944da7685a36d96d3c0909cb1"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "77f819fea5ea9b59945bb64a2ab0a74e92370fab",
+      "feature_id": "AR-AG-V2-DEFAULT",
+      "reason": "Records the explicit V1 override regression introduced with V2 default selection.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/world_characters/test_activity_state.py::test_world_and_character_overrides_preserve_explicit_v1_after_default_switch"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_activity_state.py": {
+          "test_world_and_character_overrides_preserve_explicit_v1_after_default_switch": [
+            "assert resolve_engine(db, actor)['source'] == 'world'",
+            "assert resolve_engine(db, actor)['engine'] == 'current'",
+            "assert resolve_engine(db, actor)['source'] == 'world'",
+            "assert resolve_engine(db, actor)['engine'] == 'current'",
+            "assert resolve_engine(db, actor) == {'engine': 'personalized_graph_v2', 'source': 'default', 'version': 0}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_activity_state.py": {}
+      }
+    },
+    {
+      "commit": "9e54b60e747aa4bd8ecd4ce4c2c55370869fa38b",
+      "feature_id": "AR-AG-V2-VERIFICATION",
+      "reason": "Records pseudonymized V2 pilot artifacts at their first committed source.",
+      "tracked_files": {
+        "docs/verification/activity-v2-20260923/README.md": "410dac66d7daff4bce0a1f3e6f853bd711ce6a6d"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
