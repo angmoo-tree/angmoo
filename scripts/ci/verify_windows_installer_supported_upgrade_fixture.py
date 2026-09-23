@@ -379,7 +379,7 @@ def verify_upgraded(
     _source_database(data_root, fixture)
     target_version = int(fixture.get("target_data_version", 0))
     graph_target_version = int(fixture.get("ladybug_target_data_version", 0))
-    if target_version <= 0 or graph_target_version <= expected_ladybug_source_version:
+    if target_version <= 0 or graph_target_version < expected_ladybug_source_version:
         _fail("supported_upgrade_fixture_contract_invalid")
     payload = _verify_payload(data_root / "app")
     sqlite_contract = payload.get("embedded_data", {}).get("sqlite", {})

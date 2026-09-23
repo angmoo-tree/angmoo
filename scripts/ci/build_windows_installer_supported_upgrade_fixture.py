@@ -80,7 +80,9 @@ from app.runtime.persistence.sqlite_schema import (
 )
 
 
-SUPPORTED_SOURCE_VERSIONS = tuple(range(1, SQLITE_SCHEMA_VERSION))
+SUPPORTED_SOURCE_VERSIONS = (
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+)
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
     "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"

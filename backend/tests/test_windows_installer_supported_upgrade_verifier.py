@@ -44,10 +44,14 @@ def test_verifier_distinguishes_graph_rebuild_from_idempotent_reinstall(
     payload = {
         "build_commit": "a" * 40,
         "payload_generation": "b" * 64,
-        "embedded_data": {"sqlite": {"target_version": 4}},
+        "embedded_data": {
+            "sqlite": {"target_version": 4},
+            "ladybug": {"target_version": 2},
+        },
     }
     fixture = {
         "ladybug_source_data_version": 1,
+        "ladybug_target_data_version": 2,
         "app_host_sha256": "0" * 64,
         "target_data_version": 4,
     }
