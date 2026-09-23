@@ -227,6 +227,29 @@ def test_addition_records_require_commit_feature_and_reason(monkeypatch, tmp_pat
     additions = {"schema_version": 1, "checkpoint_commit": checkpoint["commit"], "records": [{"commit": "HEAD"}]}
     assert any("exact introduction commit" in error for error in p.addition_errors(additions, checkpoint, tmp_path))
 
+    commit = "b" * 40
+    source = b"A = 1\n"
+    blob = p.git_blob(source)
+    first = {"commit": commit, "feature_id": "G01", "reason": "Initial source",
+             "tracked_files": {"backend/a.py": blob}, "test_nodes": []}
+    supplement = {"commit": commit, "feature_id": "G02", "supplements": "G01",
+                  "reason": "Exact omitted source", "tracked_files": {"backend/b.py": blob}, "test_nodes": []}
+
+    def evidence(*args, **kwargs):
+        if args[0] == "show":
+            return source
+        if args[0] == "log" and "--diff-filter=A" in args:
+            return (commit + "\n").encode()
+        return b""
+
+    monkeypatch.setattr(p, "git_bytes", evidence)
+    additions["records"] = [first, supplement]
+    assert p.addition_errors(additions, checkpoint, tmp_path) == []
+    additions["records"][1] = {**supplement, "supplements": "wrong"}
+    assert any("disjoint supplement" in error for error in p.addition_errors(additions, checkpoint, tmp_path))
+    additions["records"][1] = {**supplement, "tracked_files": {"backend/a.py": blob}}
+    assert any("disjoint supplement" in error for error in p.addition_errors(additions, checkpoint, tmp_path))
+
 
 def test_addition_history_cannot_be_removed_or_rewritten(monkeypatch, tmp_path):
     checkpoint = {"commit": "a" * 40, "test_nodes": []}
