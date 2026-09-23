@@ -2036,7 +2036,7 @@ test("Studio World-local leave stops autonomy, refreshes version, and preserves 
   });
 
   await page.goto(studioRoute);
-  await expect(page.getByText("빛나", { exact: true })).toBeVisible();
+  await expect(page.getByRole("article").getByText("빛나", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "이 World에서 제거" }).click();
 
   await expect(page.getByRole("dialog", { name: "이 World에서 제거" })).toBeVisible();
