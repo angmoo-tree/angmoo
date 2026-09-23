@@ -176,6 +176,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_google_api_key_for_character",
         },
         "runtime/social/feed_reaction_provider.py": {"_api_key"},
+        "runtime/social/topic_preparation.py": {"generate_topics"},
         "runtime/resident/langgraph.py": {"_decrypt_api_key"},
         "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "runtime/social/image_generation.py": {
@@ -195,6 +196,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         },
         "integrations/llm/canonical_retrieval_planner.py": {"plan"},
         "integrations/llm/character_response_generator.py": {"generate"},
+        "integrations/llm/relationship_review.py": {"review"},
         "integrations/llm/graph_retrieval_planner.py": {"plan"},
         "integrations/llm/memory_consolidation.py": {"consolidate"},
         "integrations/llm/memory_selection.py": {"select"},
