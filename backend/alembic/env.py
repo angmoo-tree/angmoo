@@ -38,10 +38,28 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        sqlite = connection.dialect.name == "sqlite"
+        if sqlite:
+            # The v20 table rebuild must start with foreign keys disabled,
+            # before the transaction. SQLite otherwise treats DDL as autocommit
+            # and can leave a partially rebuilt table on a failed migration.
+            connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
+            connection.commit()
+            connection.exec_driver_sql("BEGIN IMMEDIATE")
         context.configure(connection=connection, target_metadata=target_metadata)
-
-        with context.begin_transaction():
-            context.run_migrations()
+        try:
+            with context.begin_transaction():
+                context.run_migrations()
+            if sqlite:
+                connection.commit()
+        except BaseException:
+            if sqlite:
+                connection.rollback()
+            raise
+        if sqlite:
+            connection.exec_driver_sql("PRAGMA foreign_keys = ON")
+            if connection.exec_driver_sql("PRAGMA foreign_key_check").first() is not None:
+                raise RuntimeError("sqlite_foreign_key_check_failed")
 
 
 if context.is_offline_mode():

@@ -13,6 +13,32 @@ def find_outbox_by_dedupe(db: Session, *, dedupe_key: str) -> models.GraphProjec
     )
 
 
+def insert_observation_outbox_if_absent(
+    db: Session, *, values: dict[str, object],
+) -> models.GraphProjectionOutbox:
+    """Only a matching dedupe conflict is an expected concurrent replay."""
+    from sqlalchemy.dialects.postgresql import insert as postgresql_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+    table = models.GraphProjectionOutbox.__table__
+    dialect = db.get_bind().dialect.name
+    if dialect == "sqlite":
+        insert = sqlite_insert(table)
+    elif dialect == "postgresql":
+        insert = postgresql_insert(table)
+    else:
+        raise RuntimeError("observation_outbox_dialect_unsupported")
+    db.execute(
+        insert.values(**values).on_conflict_do_nothing(
+            index_elements=[table.c.dedupe_key]
+        )
+    )
+    row = find_outbox_by_dedupe(db, dedupe_key=str(values["dedupe_key"]))
+    if row is None:
+        raise RuntimeError("observation_outbox_insert_missing")
+    return row
+
+
 def source_event_ids(db: Session, *, unique_post_ids: list[str]) -> list[str]:
     return list(
         db.scalars(

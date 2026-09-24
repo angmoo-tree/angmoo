@@ -1,7 +1,7 @@
 {
-  "edge_count": 4968,
-  "external_import_count": 3682,
-  "module_count": 1258,
+  "edge_count": 4974,
+  "external_import_count": 3693,
+  "module_count": 1260,
   "modules": [
     {
       "external_imports": [],
@@ -448,6 +448,7 @@
     {
       "external_imports": [
         "__future__",
+        "hashlib",
         "secrets",
         "time",
         "uuid"
@@ -6011,6 +6012,22 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.exceptions"
+      ],
+      "module": "app.domains.relationships.policies.observation_outbox",
+      "path": "backend/app/domains/relationships/policies/observation_outbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "collections.abc",
         "dataclasses"
       ],
@@ -6029,7 +6046,8 @@
       ],
       "imports": [
         "app.domains.relationships.constants",
-        "app.domains.relationships.contracts.projection_commands"
+        "app.domains.relationships.contracts.projection_commands",
+        "app.domains.relationships.policies.observation_outbox"
       ],
       "module": "app.domains.relationships.policies.projection_commands",
       "path": "backend/app/domains/relationships/policies/projection_commands.py",
@@ -6066,6 +6084,8 @@
       "external_imports": [
         "datetime",
         "sqlalchemy",
+        "sqlalchemy.dialects.postgresql",
+        "sqlalchemy.dialects.sqlite",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -6406,16 +6426,14 @@
     {
       "external_imports": [
         "__future__",
-        "hashlib",
-        "json",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.ids",
-        "app.domains.relationships.constants",
         "app.domains.relationships.contracts.observations",
         "app.domains.relationships.models",
         "app.domains.relationships.policies.events",
+        "app.domains.relationships.policies.observation_outbox",
         "app.domains.relationships.repository.events",
         "app.domains.relationships.repository.observations",
         "app.domains.relationships.repository.state",
@@ -14361,11 +14379,12 @@
     },
     {
       "external_imports": [
-        "hashlib",
         "pydantic",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.core.ids"
+      ],
       "module": "app.runtime.autonomous_activity.contracts",
       "path": "backend/app/runtime/autonomous_activity/contracts.py",
       "wildcard_imports": []
@@ -15360,7 +15379,7 @@
         "uuid"
       ],
       "imports": [
-        "app.runtime.autonomous_activity.contracts",
+        "app.core.ids",
         "app.runtime.diagnostics.sns_observation"
       ],
       "module": "app.runtime.diagnostics.sns_observation_report",
@@ -16710,6 +16729,22 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
+      "path": "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "dataclasses",
         "hashlib",
@@ -16719,6 +16754,7 @@
       ],
       "imports": [
         "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
         "app.runtime.migrations.sqlite_versions.v10_to_v11_chat_diagnostics",
         "app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding",
         "app.runtime.migrations.sqlite_versions.v12_to_v13_episode_memory",

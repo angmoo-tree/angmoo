@@ -61,6 +61,52 @@ def test_durable_child_resume_does_not_repeat_completed_ai_or_recall(tmp_path):
     asyncio.run(_resume(tmp_path))
 
 
+def test_feed_path_result_storage_failure_reuses_completed_actions(tmp_path):
+    from dataclasses import replace
+    from app.domains.relationships.exceptions import ObservationOutboxIntegrityError
+
+    async def scenario():
+        calls = []
+        fail = [True]
+
+        async def load(_state):
+            return {"shared_context": {"mood": "calm"}}
+
+        async def finish(_state):
+            return {"result": {"status": "completed"}}
+
+        def graph(saver):
+            lanes = {name: lane_ports(name, calls)
+                     for name in ("inbox", "routine", "feed")}
+            completed = lanes["feed"].finalize
+
+            async def feed_final(state):
+                calls.append("feed:path_result")
+                if fail[0]:
+                    fail[0] = False
+                    raise ObservationOutboxIntegrityError("observation_outbox_identity_mismatch")
+                return await completed(state)
+
+            lanes["feed"] = replace(lanes["feed"], finalize=feed_final)
+            return build_autonomous_graph(
+                lanes=lanes, load_context=load, refresh=load,
+                finalize=finish, checkpointer=saver,
+            )
+
+        config = checkpoint_config(activity_id="feed-path-result-retry")
+        async with activity_checkpointer(tmp_path) as saver:
+            with pytest.raises(ObservationOutboxIntegrityError):
+                await graph(saver).ainvoke({"identity": {"world_id": "world"}}, config)
+        async with activity_checkpointer(tmp_path) as saver:
+            result = await graph(saver).ainvoke(None, config)
+        assert result["result"]["status"] == "completed"
+        assert calls.count("feed:path_result") == 2
+        for step in ("plan", "write", "execute", "settle"):
+            assert calls.count("feed:" + step) == 1
+
+    asyncio.run(scenario())
+
+
 async def _resume(tmp_path):
     calls = []
     fail = [True]

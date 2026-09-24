@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from app.runtime.persistence.model_registration import register_models
-from app.runtime.persistence.sqlite_schema import build_sqlite_baseline_metadata, build_sqlite_v18_metadata, create_schema_version_table, sqlite_schema_contract_digest
+from app.runtime.persistence.sqlite_schema import build_sqlite_v19_metadata, build_sqlite_v18_metadata, create_schema_version_table, sqlite_schema_contract_digest
 from app.runtime.migrations.sqlite_versions import v18_to_v19_activity_graph as migration
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 
@@ -18,7 +18,7 @@ def test_v18_to_v19_additive_frozen_schema_matches_new_database():
         migrated = sqlite_schema_contract_digest(connection)
         assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
     with fresh.begin() as connection:
-        build_sqlite_baseline_metadata().create_all(connection)
+        build_sqlite_v19_metadata().create_all(connection)
         create_schema_version_table(connection)
         assert sqlite_schema_contract_digest(connection) == migrated == load_sqlite_manifest(19).schema_digest
     old.dispose()

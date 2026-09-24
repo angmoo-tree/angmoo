@@ -13,7 +13,7 @@ import sqlite3
 from typing import Any
 from uuid import uuid4
 
-from app.runtime.autonomous_activity.contracts import identity_key
+from app.core.ids import length_prefixed_identity_key as identity_key
 from app.runtime.diagnostics.sns_observation import (
     SCHEMA_VERSION, _atomic_json, active_session, deadline, observation_root,
     read_session, session_path, utc,

@@ -19,6 +19,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -401,12 +402,28 @@ class GraphProjectionOutbox(Base):
         CheckConstraint(
             "attempt_count >= 0", name="ck_graph_projection_outbox_attempts"
         ),
+        CheckConstraint(
+            "NOT (projection_type = 'relationship_state' AND "
+            "payload_version = 'relationship-observation-v1') OR "
+            "(source_event_id IS NOT NULL AND relationship_state_id IS NOT NULL)",
+            name="ck_graph_projection_outbox_observation_identity",
+        ),
         UniqueConstraint("dedupe_key", name="uq_graph_projection_outbox_dedupe"),
-        UniqueConstraint(
+        Index(
+            "uq_graph_projection_outbox_observation",
+            "projection_type", "source_event_id", "payload_version", "relationship_state_id",
+            unique=True,
+            sqlite_where=text("projection_type = 'relationship_state' AND payload_version = 'relationship-observation-v1'"),
+            postgresql_where=text("projection_type = 'relationship_state' AND payload_version = 'relationship-observation-v1'"),
+        ),
+        Index(
+            "uq_graph_projection_outbox_source_event",
             "projection_type",
             "source_event_id",
             "payload_version",
-            name="uq_graph_projection_outbox_event",
+            unique=True,
+            sqlite_where=text("source_event_id IS NOT NULL AND NOT (projection_type = 'relationship_state' AND payload_version = 'relationship-observation-v1')"),
+            postgresql_where=text("source_event_id IS NOT NULL AND NOT (projection_type = 'relationship_state' AND payload_version = 'relationship-observation-v1')"),
         ),
         Index(
             "ix_graph_projection_outbox_pending",

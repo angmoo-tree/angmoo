@@ -25,6 +25,8 @@ from app.runtime.graph_projection.sqlalchemy_commands import (
     RelationshipStateProjectionCommand,
     build_projection_command,
 )
+from app.runtime.graph_projection.replay import GraphProjectionReplayService, create_replay_run
+from app.runtime.graph_projection.worker import GraphProjectionWorker
 
 
 @dataclass(frozen=True)
@@ -367,6 +369,139 @@ def test_observation_is_directional_idempotent_and_independent_from_follow_up() 
                 raise
         assert db.get(models.RelationshipStateChange, observed.receipt_id)
         assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
+
+
+def test_two_observers_can_observe_one_source_event() -> None:
+    engine = _engine()
+    occurred_at = datetime(2026, 8, 11, 2, 0, tzinfo=UTC)
+    with Session(engine, expire_on_commit=False) as db:
+        fixture = _seed(db)
+        second_user = _user("second-observer")
+        second_character = _character(second_user, "second-observer")
+        db.add_all((second_user, second_character))
+        db.flush()
+        membership = models.WorldMembership(
+            id="membership-social-second-observer",
+            world_id=fixture.world.id,
+            user_id=second_user.id,
+            role="member",
+            status="active",
+            joined_at=occurred_at,
+        )
+        db.add(membership)
+        db.flush()
+        second_observer = models.WorldCharacter(
+            id="world-character-social-second-observer",
+            world_id=fixture.world.id,
+            character_id=second_character.id,
+            membership_id=membership.id,
+            role_key="student",
+            status="active",
+            character_contract_hash=world_character_contracts.character_contract_hash(second_character),
+            world_contract_hash=fixture.world.contract_hash,
+        )
+        db.add(second_observer)
+        source = _post(
+            db,
+            post_id="post-two-observers-source",
+            author=fixture.actor,
+            author_world_character=fixture.actor_world_character,
+            body="A small discovery in class.",
+        )
+        source_event = models.SocialEvent(
+            id="event-two-observers-source",
+            world_id=fixture.world.id,
+            actor_world_character_id=fixture.actor_world_character.id,
+            target_world_character_id=fixture.target_world_character.id,
+            event_type="post_published",
+            result="succeeded",
+            occurred_at=occurred_at,
+            idempotency_key="event-two-observers-source",
+            schema_version="social-event-v1",
+            retrieval_status="audit_only",
+        )
+        db.add(source_event)
+        db.flush()
+        db.add(models.SocialEventEvidence(
+            id="evidence-two-observers-source",
+            social_event_id=source_event.id,
+            evidence_kind="post",
+            source_object_type="post",
+            source_object_id=source.id,
+            root_post_id=source.id,
+            source_post_id=source.id,
+            source_visibility_at_event="public",
+            source_author_id_at_event=fixture.actor_world_character.id,
+            occurred_at=occurred_at,
+        ))
+        db.commit()
+
+        first = observe_source(
+            db, world_id=fixture.world.id,
+            observer_world_character_id=fixture.target_world_character.id,
+            source_social_event_id=source_event.id, source_post_id=source.id,
+            lane="feed", observed_at=occurred_at + timedelta(minutes=1),
+        )
+        db.commit()
+        first_outbox = db.scalar(select(models.GraphProjectionOutbox))
+        assert first_outbox is not None
+        first_outbox.status = "succeeded"
+        db.commit()
+
+        second = observe_source(
+            db, world_id=fixture.world.id,
+            observer_world_character_id=second_observer.id,
+            source_social_event_id=source_event.id, source_post_id=source.id,
+            lane="feed", observed_at=occurred_at + timedelta(minutes=2),
+        )
+        db.commit()
+        assert second.relationship_state_id != first.relationship_state_id
+        assert second.receipt_id != first.receipt_id
+        outboxes = list(db.scalars(select(models.GraphProjectionOutbox).order_by(models.GraphProjectionOutbox.id)))
+        assert len(outboxes) == 2
+        assert {row.relationship_state_id for row in outboxes} == {
+            first.relationship_state_id, second.relationship_state_id,
+        }
+        assert db.scalar(select(func.count(models.SocialEvent.id))) == 1
+        for row in outboxes:
+            command = build_projection_command(db, outbox_id=row.id)
+            assert isinstance(command, RelationshipStateProjectionCommand)
+            assert command.relationship_state_id == row.relationship_state_id
+            assert command.target_world_character_id == fixture.actor_world_character.id
+
+        replay = create_replay_run(
+            db, world_id=fixture.world.id, mode="event_reprocess",
+            source_event_id=source_event.id, requested_by="local-test",
+            reason_code="two_observers",
+        )
+        db.commit()
+
+    class RecordingStore:
+        def __init__(self):
+            self.commands = []
+
+        def apply(self, command, *, timeout_seconds=5.0):
+            self.commands.append(command)
+            return "applied"
+
+    store = RecordingStore()
+    completed = GraphProjectionReplayService(
+        session_factory=lambda: Session(engine, expire_on_commit=False),
+        store=store, worker_id="replay-two-observers",
+    ).execute(replay.id)
+    assert completed.total_count == completed.applied_count == 2
+    assert {command.relationship_state_id for command in store.commands} == {
+        first.relationship_state_id, second.relationship_state_id,
+    }
+    worker_store = RecordingStore()
+    processed = GraphProjectionWorker(
+        session_factory=lambda: Session(engine, expire_on_commit=False),
+        store=worker_store, worker_id="worker-two-observers", concurrency=1,
+    ).process_batch()
+    assert processed.succeeded == 1
+    assert [command.relationship_state_id for command in worker_store.commands] == [
+        second.relationship_state_id
+    ]
 
 
 def test_observation_revalidates_hidden_source_before_any_relationship_write() -> None:

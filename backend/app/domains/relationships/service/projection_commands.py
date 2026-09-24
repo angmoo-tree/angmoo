@@ -123,6 +123,19 @@ def build_projection_command(
         raise ProjectionCommandError("world_mismatch")
     if event.result != "succeeded":
         raise ProjectionCommandError("source_ineligible")
+    observation_state = None
+    if observation_relationship:
+        observation_state = projection_repository.get_relationship(db, relationship_state_id)
+        if observation_state is None:
+            raise ProjectionCommandError("source_missing", cancelled=True)
+        if (
+            observation_state.world_id != world_id
+            or observation_state.actor_world_character_id != payload_actor_id
+            or observation_state.target_world_character_id != payload_target_id
+            or payload_target_id != event.actor_world_character_id
+            or payload_actor_id == event.actor_world_character_id
+        ):
+            raise ProjectionCommandError("relationship_direction_mismatch")
 
     if projection_type == "source_exclusion":
         reason = explicit_reason or _source_exclusion_reason(db, event=event, references=references)
@@ -157,7 +170,7 @@ def build_projection_command(
     if projection_type != "relationship_state" or relationship_state_id is None:
         raise ProjectionCommandError("payload_invalid")
 
-    relationship = projection_repository.get_relationship(db, relationship_state_id)
+    relationship = observation_state or projection_repository.get_relationship(db, relationship_state_id)
     if relationship is None:
         raise ProjectionCommandError("source_missing", cancelled=True)
     expected_actor_id = (

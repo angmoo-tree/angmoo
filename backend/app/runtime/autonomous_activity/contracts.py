@@ -1,8 +1,8 @@
 """Serializable graph channels. Live sessions/providers remain outside State."""
-from hashlib import sha256
 from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
+from app.core.ids import length_prefixed_identity_key
 
 CONTRACT_VERSION = 1
 FEED_TARGET_LIMIT = 1
@@ -17,7 +17,7 @@ TODAY_LIMIT = 12
 
 def identity_key(*parts: str) -> str:
     # Length-prefix avoids ambiguity if a source ID contains a separator.
-    return sha256("".join(f"{len(p)}:{p}" for p in parts).encode()).hexdigest()
+    return length_prefixed_identity_key(*parts)
 
 
 class ActivityIdentity(BaseModel):
