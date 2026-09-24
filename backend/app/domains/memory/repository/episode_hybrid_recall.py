@@ -8,7 +8,9 @@ import json
 from sqlalchemy import select
 from app.contracts.search_diagnostics import lineage
 
-from app.domains.memory.contracts.hybrid_recall import HybridSourceReceipt, RecallAxisStatus
+from app.domains.memory.contracts.hybrid_recall import (
+    EpisodeValidationSnapshot, HybridHydrationResult, HybridSourceReceipt, RecallAxisStatus,
+)
 from app.domains.memory.contracts.recall import CanonicalRecallRecord, RecallDocumentKind, SOURCE_KIND_BY_TYPE
 from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
 from app.domains.memory.policies.episode_packets import bounded_episode_packets
@@ -104,19 +106,8 @@ class SqlAlchemyEpisodeHybridReader:
             ids = tuple(row.memory_item_id for row in records if row.memory_item_id in snapshots
                 and str(snapshots[row.memory_item_id].version) == row.metadata.get("item_version")
                 and snapshots[row.memory_item_id].summary == row.text)
-            from app.domains.memory.repository.episode_candidates import EpisodeFollowups
             candidate_reader = SqlAlchemyEpisodeCandidates(db)
-            ordered, truncated = [], False
-            for identifier in ids:
-                if identifier in ordered:
-                    continue
-                if len(ordered) >= 12:
-                    truncated = True
-                    break
-                linked = candidate_reader.followups(scope=request.scope, item_ids=(identifier,), now=now, limit=12 - len(ordered))
-                ordered.extend(value for value in linked.item_ids if value not in ordered)
-                truncated |= linked.truncated
-            updates = EpisodeFollowups(tuple(ordered), truncated)
+            updates = candidate_reader.collect_followups(scope=request.scope, seed_ids=ids, now=now)
             packets = SqlAlchemyEpisodePackets(db, detail_reader=self.details(db)).read(
                 scope=request.scope, item_ids=updates.item_ids, now=now)
             packets = tuple(replace(packet, followup_truncated=updates.truncated) for packet in packets)
@@ -148,4 +139,9 @@ class SqlAlchemyEpisodeHybridReader:
                 receipts.append(HybridSourceReceipt(f"memory-item:{item.id}",
                     RecallAxisStatus.PARTIAL if value["partial"] or updates.truncated else RecallAxisStatus.READY,
                     value["source_statuses"]["verified"]))
-            return tuple(output), tuple(receipts)
+            snapshot = EpisodeValidationSnapshot(
+                scope=request.scope, seed_memory_ids=ids,
+                hydrated_memory_ids=updates.item_ids,
+                item_revisions=updates.item_revisions, link_probes=updates.link_probes,
+                traversal_truncated=updates.truncated, captured_at=now)
+            return HybridHydrationResult(tuple(output), tuple(receipts), snapshot)

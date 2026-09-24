@@ -93,7 +93,8 @@ class HybridRecallService:
                 lineage("select", "merged", reason="memory_identity", identities=record_identity(record))
             if len(selected) >= request.result_limit:
                 break
-        hydrated, sources = self._canonical.hydrate(request, tuple(selected))
+        hydration = self._canonical.hydrate(request, tuple(selected))
+        hydrated, sources = hydration.records, hydration.sources
         if monotonic() >= deadline:
             raise TimeoutError("hybrid_recall_deadline")
         partial = (len(records) < len(fused)
@@ -104,4 +105,5 @@ class HybridRecallService:
             RecallAxisStatus.PARTIAL if partial else RecallAxisStatus.READY,
             hydrated, (fts.receipt, vector.receipt), sources, vector.embedding_usage,
             len(fused), len(fused)-len(records), (monotonic()-started)*1000,
+            hydration.validation_snapshot,
         )

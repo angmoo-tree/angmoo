@@ -36,7 +36,8 @@ def test_episode_validation_hydration_preserves_missing_summary_with_partial_sta
     validated = reader.revalidate(request, (candidate,))
     assert len(validated) == 1
     details.values = {}
-    hydrated, receipts = reader.hydrate(request, validated)
+    hydration = reader.hydrate(request, validated)
+    hydrated, receipts = hydration.records, hydration.sources
     assert len(hydrated) == 1
     payload = json.loads(hydrated[0].text)
     assert payload["partial"]
@@ -58,6 +59,8 @@ def test_candidate_version_hash_and_scope_are_not_granted_by_projection(memory_s
     row.summary = "이후 수정된 상황"
     memory_session.commit()
     assert reader.hydrate(request, accepted) == ((), ())
+    hydration = reader.hydrate(request, accepted)
+    assert hydration.records == () and hydration.sources == ()
 
 
 def test_episode_interval_and_participants_use_all_linked_sources(memory_session):
@@ -94,7 +97,8 @@ def test_packet_survives_evidence_assembly_without_prefix_cutting(memory_session
     details.read_sources = lengthy
     # Stored ranges in this fixture are short; use a complete packet payload
     # to exercise the assembler's transport boundary separately.
-    records, receipts = reader.hydrate(request, reader.revalidate(request, (candidate,)))
+    hydration = reader.hydrate(request, reader.revalidate(request, (candidate,)))
+    records, receipts = hydration.records, hydration.sources
     packet = json.loads(records[0].text)
     packet["units"][0]["sources"][0]["text"] = "문맥" * 1200 + " 끝은 취소"
     text = json.dumps(packet, ensure_ascii=False)

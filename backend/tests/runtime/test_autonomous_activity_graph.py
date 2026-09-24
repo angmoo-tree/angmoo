@@ -112,3 +112,22 @@ def test_reopen_after_each_completed_checkpoint_preserves_prior_results(tmp_path
         for step in ("select", "recall", "plan", "write", "execute", "settle"):
             assert calls.count("inbox:" + step) == 1
     asyncio.run(scenario())
+
+
+def test_retry_guard_failure_at_writer_does_not_soft_settle_stale_plan():
+    from dataclasses import replace
+    from app.runtime.autonomous_activity.graph import build_lane
+    from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
+    async def scenario():
+        calls, events = [], []
+        ports = lane_ports("inbox", calls)
+        async def stale_write(_state):
+            raise ActivityRetryGuardError(ValueError("activity_memory_changed"))
+        ports = replace(ports, write=stale_write,
+            observe=lambda kind, node, **details: events.append((kind, node, details.get("phase"))))
+        with pytest.raises(ValueError, match="activity_memory_changed"):
+            await build_lane("inbox", ports).ainvoke({"identity": {"world_id": "world"},
+                "shared_context": {}})
+        assert "inbox:settle" not in calls
+        assert ("node_failed", "Writer", "retry_guard") in events
+    asyncio.run(scenario())

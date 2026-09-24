@@ -2,7 +2,7 @@
 from datetime import UTC, datetime
 import json
 from copy import deepcopy
-from typing import Any, Literal
+from typing import Any, Awaitable, Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -13,6 +13,11 @@ from app.providers.gemini import build_gemini_developer_response_schema
 from app.runtime.social.feed_reaction_provider import _api_key, _llm_context
 from app.domains.routines.schemas.resident_planning import _ReplyTaskText
 from app.domains.social.schemas.feed import JointActivityProposalPreview
+from app.runtime.autonomous_activity.contracts import Candidate
+from app.runtime.autonomous_activity.output_recovery import (
+    FIRST_OUTPUT_TOKENS, RETRY_OUTPUT_TOKENS, retry_truncated_json,
+)
+from app.runtime.autonomous_activity.queries import validate_selection
 
 
 SELECTOR_INSTRUCTIONS = """Choose which currently supplied conversation(s) or post deserves closer attention.
@@ -164,7 +169,10 @@ class ActivityProvider:
         self.context, self.tracker = context, tracker
 
     async def call(self, *, node: str, lane: str, system: str, payload: dict,
-                   schema: dict, validator, max_tokens: int, delivery=None):
+                   schema: dict, validator, max_tokens: int, delivery=None,
+                   recover_truncation: bool = False,
+                   before_json_retry: Callable[[int], Awaitable[None]] | None = None,
+                   on_input_receipt: Callable[[dict], None] | None = None):
         # Remove optional whole units before rejecting an oversized required
         # input. Never cut a source sentence, original thought or correction.
         payload = deepcopy(payload)
@@ -194,6 +202,28 @@ class ActivityProvider:
                     user = serialized()
         if len(system) + len(user) > 64000:
             raise ValueError("activity_input_budget_exceeded")
+        from hashlib import sha256
+        receipt = {"node": node, "input_sha256": sha256(user.encode()).hexdigest(),
+            "memory_packet_refs": [packet.get("ref") for item in (context.get("memories") or {}).values()
+                if isinstance(item, dict) for packet in item.get("packets", [])]
+            if isinstance(context, dict) else [], "omissions": dict(omissions)}
+        if on_input_receipt is not None:
+            on_input_receipt(receipt)
+        if getattr(self.tracker, "observer", None) is not None:
+            memories = context.get("memories") if isinstance(context, dict) else None
+            self.tracker._notify("input_manifest", {
+                "node": node, "lane": lane, "input_chars": len(system) + len(user),
+                "schema_sha256": sha256(json.dumps(schema, sort_keys=True, default=str).encode()).hexdigest(),
+                "prompt_sha256": sha256(system.encode()).hexdigest(),
+                "selection_limit": payload.get("selection_limit"),
+                "candidate_count": len(payload.get("candidates") or []),
+                "selected_target_count": len(payload.get("selected_targets") or []),
+                "omissions": omissions,
+                "memory_packet_refs": [packet.get("ref") for item in (memories or {}).values()
+                    if isinstance(item, dict) for packet in item.get("packets", [])],
+                "source_ids": [item.get("post_id") for item in context.get("source_manifest", [])]
+                    if isinstance(context, dict) else [],
+            })
         if delivery is not None:
             delivery.dispatched()
         try:
@@ -202,31 +232,47 @@ class ActivityProvider:
                 system_prompt=system, user_prompt=user, response_schema=schema, validator=validator,
                 max_output_tokens=max_tokens, thinking_level=self.context.generation_thinking_level,
                 on_rate_limit_wait=self.context.on_rate_limit_wait,
-                should_retry_json_error=lambda *_: False,
+                should_retry_json_error=retry_truncated_json if recover_truncation else lambda *_: False,
+                retry_max_output_tokens=RETRY_OUTPUT_TOKENS if recover_truncation else None,
+                before_json_retry=before_json_retry,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None:
                 delivery.uncertain()
             raise
 
-    async def select(self, *, lane: str, context: dict, candidates: list[dict], limit: int, delivery=None):
+    async def select(self, *, lane: str, context: dict, candidates: list[dict], limit: int,
+                     delivery=None, before_json_retry=None):
         from app.runtime.autonomous_activity.queries import compact
+        effective_limit = min(limit, len(candidates))
         previews = []
         for candidate in candidates:
             preview = dict(candidate)
-            for key, limit in (("text", 1000), ("parent_text", 400)):
+            for key, text_limit in (("text", 1000), ("parent_text", 400)):
                 original = str(candidate.get(key) or "")
-                preview[key] = compact(original, limit)
+                preview[key] = compact(original, text_limit)
                 preview[key + "_partial"] = preview[key] != original.strip()
                 if original and not preview[key]:
                     preview[key] = "[Long unbroken source omitted; full source available after selection]"
             previews.append(preview)
+        schema = build_gemini_developer_response_schema(TargetOutput)
+        schema["properties"]["selections"]["maxItems"] = effective_limit
+        selection_fields = schema["properties"]["selections"]["items"]["properties"]
+        selection_fields["target_id"]["enum"] = [c["target_id"] for c in candidates]
+        # An overlong auxiliary query is handled by resolve_query's natural
+        # fallback; it must not invalidate an otherwise valid target choice.
+        selection_fields["memory_query"].pop("maxLength", None)
+        parsed_candidates = [Candidate.model_validate(c) for c in candidates]
+        def validate(value):
+            return {"selections": [item.model_dump() for item in
+                validate_selection(value, parsed_candidates, effective_limit)]}
         return await self.call(node=f"{lane.title()}TargetSelector", lane=f"{lane}_selector",
-            system=SELECTOR_INSTRUCTIONS, payload={"context": context, "candidates": previews, "selection_limit": limit},
-            schema=build_gemini_developer_response_schema(TargetOutput), validator=lambda value: value,
-            max_tokens=2048, delivery=delivery)
+            system=SELECTOR_INSTRUCTIONS, payload={"context": context, "candidates": previews, "selection_limit": effective_limit},
+            schema=schema, validator=validate, max_tokens=FIRST_OUTPUT_TOKENS,
+            recover_truncation=True, before_json_retry=before_json_retry, delivery=delivery)
 
-    async def plan(self, *, lane: str, context: dict, candidates: list[dict], delivery=None):
+    async def plan(self, *, lane: str, context: dict, candidates: list[dict],
+                   delivery=None, on_input_receipt=None):
         schema = with_metric_schema(build_gemini_developer_response_schema(ActionOutput))
         schema["properties"]["decisions"]["maxItems"] = len(candidates)
         schema["properties"]["decisions"]["items"]["properties"]["target_id"]["enum"] = [c["target_id"] for c in candidates]
@@ -235,10 +281,11 @@ class ActivityProvider:
                 "\nCopy relationship target_ref and new_evidence_refs from context.metric_sources exactly. "
                 "A selection target_id identifies a conversation/post, NOT the relationship's target_ref.",
             payload={"context": context, "selected_targets": candidates}, schema=schema,
-            validator=lambda value: parse_action(value, candidates), max_tokens=4096, delivery=delivery)
+            validator=lambda value: parse_action(value, candidates), max_tokens=4096,
+            delivery=delivery, on_input_receipt=on_input_receipt)
         return {**result, "judged_at": datetime.now(UTC).isoformat()}
 
-    async def write(self, *, lane: str, context: dict, assignments: list[dict]):
+    async def write(self, *, lane: str, context: dict, assignments: list[dict], on_input_receipt=None):
         # Normal Inbox uses one call. Large selected batches can use at most
         # three calls; never search or select an additional target here.
         if len(assignments) > 1 and len(json.dumps({"context": context, "assignments": assignments}, ensure_ascii=False, default=str)) > 40000:
@@ -248,7 +295,8 @@ class ActivityProvider:
                 scoped = dict(context)
                 if target and isinstance(context.get("memories"), dict):
                     scoped["memories"] = {k:v for k,v in context["memories"].items() if k == target}
-                result = await self.write(lane=lane, context=scoped, assignments=[assignment])
+                result = await self.write(lane=lane, context=scoped, assignments=[assignment],
+                    on_input_receipt=on_input_receipt)
                 replies.extend(result.get("reply_task_results", []))
             return {"reply_task_results": replies}
         from app.contracts.activity_thought import THOUGHT_PROMPT, parse_activity_thought
@@ -278,4 +326,5 @@ class ActivityProvider:
                 repair_attempted=False, writer_node=f"{lane.title()}Writer")[0]
         return await self.call(node=f"{lane.title()}Writer", lane=f"{lane}_writer", system=system,
             payload={"context": context, "assignments": assignments},
-            schema=build_gemini_developer_response_schema(WriterOutput), validator=validate, max_tokens=4096)
+            schema=build_gemini_developer_response_schema(WriterOutput), validator=validate,
+            max_tokens=4096, on_input_receipt=on_input_receipt)

@@ -102,6 +102,14 @@ class RunLlmTracker:
     provider_call_order_in_run: int = 0
     calls: list[dict[str, Any]] = field(default_factory=list)
     rate_limit_waits: list[dict[str, Any]] = field(default_factory=list)
+    observer: Callable[[str, dict[str, Any]], None] | None = field(default=None, repr=False, compare=False)
+
+    def _notify(self, event: str, payload: dict[str, Any]) -> None:
+        if self.observer is not None:
+            try:
+                self.observer(event, payload)
+            except Exception:
+                pass  # Diagnostics must not affect the provider call.
 
     def next_call_order(self) -> int:
         if self.call_order_in_run >= self.max_calls:
@@ -137,6 +145,7 @@ class RunLlmTracker:
                 "recorded_at": datetime.now(UTC).isoformat(),
             }
         )
+        self._notify("rate_wait", self.rate_limit_waits[-1])
 
     def record_call(
         self,
@@ -187,6 +196,7 @@ class RunLlmTracker:
         if finish_reason:
             payload["finish_reason"] = str(finish_reason)[:64]
         self.calls.append(payload)
+        self._notify("call", payload)
 
     def annotate_last_json_postprocess_error(
         self, *, context: DirectLlmCallContext, diagnostic: dict[str, Any]
@@ -199,6 +209,7 @@ class RunLlmTracker:
             if call.get("agent_run_id") != context.agent_run_id:
                 continue
             call["json_postprocess_error"] = diagnostic
+            self._notify("json_postprocess_error", call)
             return
 
     def record_embedding_call(
@@ -230,6 +241,7 @@ class RunLlmTracker:
         if provider_error_hint:
             payload["provider_error_hint"] = provider_error_hint
         self.calls.append(payload)
+        self._notify("call", payload)
 
     def summary(self) -> dict[str, Any]:
         total_prompt_tokens = 0
@@ -929,6 +941,8 @@ def _json_shape_hint(
         return "markdown_fence"
     if not stripped.startswith(("{", "[")):
         return "natural_text_only"
+    if isinstance(exc, TypeError) and stripped.startswith("[") and stripped.endswith("]"):
+        return "wrong_root_type"
     if isinstance(exc, json.JSONDecodeError):
         message = exc.msg.lower()
         if "extra data" in message:
@@ -1033,12 +1047,18 @@ async def generate_json(
         [BaseException, dict[str, Any] | None, dict[str, Any], int], bool
     ]
     | None = None,
+    retry_max_output_tokens: int | None = None,
+    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
 ) -> Any:
     last_error_type = "unknown"
     last_validation_summary: list[dict[str, str]] | None = None
     json_error_diagnostics: list[dict[str, Any]] = []
     last_payload: dict[str, Any] | None = None
     for attempt in range(2):
+        # A retry guard belongs to the caller's workflow. Keep it outside the
+        # JSON exception handler so stale state is never classified as bad JSON.
+        if attempt and before_json_retry is not None:
+            await before_json_retry(attempt + 1)
         response: DirectLlmResponse | None = None
         payload_coerced = False
         last_payload = None
@@ -1054,7 +1074,8 @@ async def generate_json(
                     f"{user_prompt}\n\nThe previous attempt failed validation. "
                     f"Return one valid JSON object only. error_type={last_error_type}"
                 ),
-                max_output_tokens=max_output_tokens,
+                max_output_tokens=(retry_max_output_tokens or max_output_tokens)
+                if attempt else max_output_tokens,
                 timeout_seconds=timeout_seconds,
                 response_schema=response_schema,
                 response_mime_type="application/json",
@@ -1067,7 +1088,13 @@ async def generate_json(
             payload = _coerce_json_payload(response)
             payload_coerced = True
             last_payload = payload
-            return validator(payload) if validator is not None else payload
+            result = validator(payload) if validator is not None else payload
+            tracker._notify("json_attempt", {"node": context.node, "lane": context.lane,
+                "json_attempt": attempt + 1, "status": "valid",
+                "max_output_tokens": (retry_max_output_tokens or max_output_tokens)
+                    if attempt else max_output_tokens,
+                "finish_reason": response.finish_reason})
+            return result
         except (json.JSONDecodeError, TypeError, ValueError) as exc:
             last_error_type = type(exc).__name__
             last_validation_summary = _validation_summary(
@@ -1091,6 +1118,10 @@ async def generate_json(
                 else True
             )
             if attempt == 0 and should_retry:
+                tracker._notify("json_attempt", {"node": context.node, "lane": context.lane,
+                    "json_attempt": 1, "status": "retry_scheduled",
+                    "max_output_tokens": max_output_tokens,
+                    "finish_reason": diagnostic.get("finish_reason")})
                 continue
             raise DirectLlmJsonError(
                 "direct LLM JSON parse failed",
@@ -1129,6 +1160,10 @@ async def generate_json(
                     else True
                 )
                 if attempt == 0 and should_retry:
+                    tracker._notify("json_attempt", {"node": context.node, "lane": context.lane,
+                        "json_attempt": 1, "status": "retry_scheduled",
+                        "max_output_tokens": max_output_tokens,
+                        "finish_reason": diagnostic.get("finish_reason")})
                     continue
                 raise DirectLlmJsonError(
                     "direct LLM JSON parse failed",

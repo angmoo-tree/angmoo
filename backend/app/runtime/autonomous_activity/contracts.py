@@ -81,7 +81,10 @@ class LaneState(TypedDict, total=False):
     selections: list[dict]
     queries: list[dict]
     memories: dict[str, dict]
+    memory_validations: dict[str, dict]
     decision_context: dict
+    decision_input_receipt: dict
+    writer_input_receipts: list[dict]
     decision: dict
     assignments: list[dict]
     drafts: list[dict]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 4959,
-  "external_import_count": 3647,
-  "module_count": 1255,
+  "edge_count": 4968,
+  "external_import_count": 3682,
+  "module_count": 1258,
   "modules": [
     {
       "external_imports": [],
@@ -4700,6 +4700,8 @@
     {
       "external_imports": [
         "dataclasses",
+        "datetime",
+        "hashlib",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -14329,11 +14331,14 @@
     {
       "external_imports": [
         "dataclasses",
+        "logging",
         "pathlib",
         "threading",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.runtime.diagnostics.sns_observation"
+      ],
       "module": "app.runtime.autonomous_activity.binding",
       "path": "backend/app/runtime/autonomous_activity/binding.py",
       "wildcard_imports": []
@@ -14388,6 +14393,7 @@
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inbox",
         "app.runtime.autonomous_activity.inputs",
+        "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.revalidation",
         "app.runtime.autonomous_activity.routine",
         "app.runtime.autonomous_activity.social_lane",
@@ -14447,11 +14453,14 @@
         "collections.abc",
         "dataclasses",
         "langgraph.graph",
-        "typing"
+        "time",
+        "typing",
+        "uuid"
       ],
       "imports": [
         "app.integrations.direct_llm",
         "app.runtime.autonomous_activity.contracts",
+        "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.queries"
       ],
       "module": "app.runtime.autonomous_activity.graph",
@@ -14498,9 +14507,19 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.autonomous_activity.output_recovery",
+      "path": "backend/app/runtime/autonomous_activity/output_recovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "copy",
         "dataclasses",
         "datetime",
+        "hashlib",
         "json",
         "pydantic",
         "typing"
@@ -14514,6 +14533,8 @@
         "app.domains.world_characters.schemas.activity_state",
         "app.integrations.direct_llm",
         "app.providers.gemini",
+        "app.runtime.autonomous_activity.contracts",
+        "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.queries",
         "app.runtime.social.feed_reaction_provider"
       ],
@@ -14553,6 +14574,7 @@
     },
     {
       "external_imports": [
+        "dataclasses",
         "datetime",
         "json",
         "sqlalchemy"
@@ -14590,6 +14612,7 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
+        "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.provider",
         "app.runtime.autonomous_activity.queries",
         "app.runtime.autonomous_activity.recall",
@@ -14657,6 +14680,7 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
+        "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.provider",
         "app.runtime.autonomous_activity.recall",
         "app.runtime.relationships.experience_metrics",
@@ -15295,6 +15319,52 @@
       ],
       "module": "app.runtime.diagnostics.http",
       "path": "backend/app/runtime/diagnostics/http.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "contextlib",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "queue",
+        "re",
+        "sqlite3",
+        "threading",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "imports": [],
+      "module": "app.runtime.diagnostics.sns_observation",
+      "path": "backend/app/runtime/diagnostics/sns_observation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "csv",
+        "datetime",
+        "json",
+        "pathlib",
+        "shutil",
+        "sqlite3",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.runtime.autonomous_activity.contracts",
+        "app.runtime.diagnostics.sns_observation"
+      ],
+      "module": "app.runtime.diagnostics.sns_observation_report",
+      "path": "backend/app/runtime/diagnostics/sns_observation_report.py",
       "wildcard_imports": []
     },
     {

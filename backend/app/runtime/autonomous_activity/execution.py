@@ -7,13 +7,14 @@ from app.domains.world_characters.activity_models import ActivityGraphRun
 from app.domains.world_characters.models import WorldCharacter, CharacterActiveWorld
 from app.domains.worlds.models import World, WorldMembership
 from app.integrations.direct_llm import RunLlmTracker
-from app.runtime.autonomous_activity.binding import current
+from app.runtime.autonomous_activity.binding import current, observer
 from app.runtime.autonomous_activity.checkpoints import activity_checkpointer, checkpoint_config
 from app.runtime.autonomous_activity.contracts import ActivityIdentity
 from app.runtime.autonomous_activity.feed import FeedLane
 from app.runtime.autonomous_activity.graph import build_autonomous_graph
 from app.runtime.autonomous_activity.inbox import InboxLane
 from app.runtime.autonomous_activity.inputs import shared_input
+from app.runtime.autonomous_activity.output_recovery import MAX_CALL_BUDGET
 from app.runtime.autonomous_activity.routine import RoutineLane
 from app.runtime.autonomous_activity.social_lane import plain
 from app.runtime.character_activity_state import initialize_from_last_success
@@ -31,10 +32,22 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     if run.activity_id != lease_run_id:
         # New live slot owns recovery; effects retain the original canonical run ID.
         ctx = replace(ctx, run_id=run.activity_id)
-    # Eight normal calls, plus at most two selected Inbox Writer splits.
-    tracker = RunLlmTracker(max_calls=10)
+    # Diagnostics are optional and cannot hold the activity's execution lease.
+    try:
+        sink = observer()
+        attempt = sink.begin(activity_id=run.activity_id, agent_run_id=lease_run_id,
+            world_id=actor.world_id, actor_id=actor.id, activity_started_at=run.started_at) if sink else None
+    except Exception:
+        attempt = None
+    # Normal graph budget plus one bounded recovery for each eligible node.
+    tracker = RunLlmTracker(max_calls=MAX_CALL_BUDGET, observer=attempt.tracker_event if attempt else None)
     identity = ActivityIdentity(activity_id=run.activity_id, world_id=actor.world_id, actor_id=actor.id,
         cause="manual" if "manual" in ctx.session_key else "scheduled", generation_model=ctx.generation_model, thinking_level=ctx.generation_thinking_level).model_dump()
+    if attempt:
+        attempt.emit("activity_identity", details={
+            "cause": identity["cause"], "contract_version": identity["contract_version"],
+            "generation_model": identity["generation_model"],
+            "thinking_level": identity["thinking_level"]})
 
     async def guard(state):
         stored_identity = state.get("identity", identity)
@@ -66,7 +79,11 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("activity_claim_lost")
         if state.get("stage") in {"ActionPlanner", "ValidateDecision", "Writer", "Execute"}:
             from app.runtime.autonomous_activity.revalidation import assert_memories_current
-            assert_memories_current(ctx.db, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id, memories=state.get("memories", {}))
+            if any(value.get("packets") and target not in state.get("memory_validations", {})
+                   for target, value in state.get("memories", {}).items()):
+                raise ActivityScopeChangedError("activity_memory_validation_unavailable")
+            assert_memories_current(ctx.db, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id,
+                memories=state.get("memories", {}), validations=state.get("memory_validations", {}))
             expected = state.get("shared_context", {}).get("current_state")
             if expected and read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)["version"] != expected["version"]:
                 raise ActivityScopeChangedError("activity_state_changed")
@@ -95,6 +112,11 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row = ctx.db.get(ActivityGraphRun, run.activity_id)
         row.status, row.stage, row.result, row.finished_at = result["status"], "Finalize", plain(result), datetime.now(UTC)
         ctx.db.commit()
+        if attempt:
+            attempt.emit("activity_result", classification=result["status"], details={
+                "status": result["status"], "public_action_count": count,
+                "paths": {path: {"status": item.get("status"),
+                    "public_action_count": item.get("public_action_count", 0)} for path, item in results.items()}})
         return {"result": result}
 
     adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service, guard=guard,
@@ -105,6 +127,9 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         async def failed(exc, lane=path):
             from app.integrations.direct_llm import DirectLlmDeferred, DirectLlmError
             from app.domains.social.exceptions import WorldFeedError
+            if attempt:
+                attempt.emit("lane_error", lane=lane, classification="deferred" if isinstance(exc, DirectLlmDeferred) else "failed",
+                    exc=exc, caused_by_event_id=attempt.last_error_event_id)
             if isinstance(exc, (ActivityScopeChangedError, DirectLlmDeferred)):
                 raise exc
             if not isinstance(exc, (ValueError, DirectLlmError, WorldFeedError)):
@@ -118,12 +143,22 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                 adapters[lane].release_failed(reason)
             row = ctx.db.get(ActivityGraphRun, run.activity_id)
             return {"path": lane, "status": "failed", "reason": reason, "failed_stage": row.stage, "public_action_count": 0}
-        lanes[path] = replace(port, on_error=failed)
+        def trace(event_type, name, *, path=path, **details):
+            if attempt:
+                attempt.node(event_type, lane=path, node=name, **details)
+        lanes[path] = replace(port, on_error=failed, observe=trace)
     async with activity_checkpointer(binding.data_directory) as saver:
-        graph = build_autonomous_graph(lanes=lanes, load_context=load, refresh=load, finalize=finish, checkpointer=saver)
+        def trace_parent(event_type, name, **details):
+            if attempt:
+                attempt.node(event_type, lane="parent", node=name, **details)
+        graph = build_autonomous_graph(lanes=lanes, load_context=load, refresh=load, finalize=finish,
+            checkpointer=saver, observe=trace_parent if attempt else None)
         config = checkpoint_config(activity_id=run.activity_id)
         checkpoint = await graph.aget_state(config)
         if checkpoint.values and not checkpoint.next and checkpoint.values.get("result"):
+            if attempt:
+                attempt.emit("activity_reused", classification="success",
+                    details={"status": checkpoint.values["result"].get("status")})
             return checkpoint.values["result"]
         try:
             await guard({"stage": "Resume" if checkpoint.values else "LoadContext", "identity": checkpoint.values.get("identity", identity)})
@@ -136,6 +171,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                 row.finished_at = datetime.now(UTC)
             row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
             ctx.db.commit()
+            if attempt:
+                attempt.emit("activity_interrupted", classification=row.status,
+                    details={"stage": row.stage, "status": row.status}, exc=exc,
+                    caused_by_event_id=attempt.last_error_event_id)
             raise
         from app.runtime.autonomous_activity.checkpoints import prune_completed
         try:

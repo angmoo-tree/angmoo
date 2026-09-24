@@ -11,7 +11,8 @@ from app.runtime.autonomous_activity.contracts import INBOX_TARGET_LIMIT, identi
 from app.runtime.autonomous_activity.graph import LanePorts
 from app.runtime.autonomous_activity.inputs import relationship_snapshot
 from app.runtime.autonomous_activity.provider import ActivityProvider
-from app.runtime.autonomous_activity.recall import SelectedRecall, context_memories
+from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
+from app.runtime.autonomous_activity.recall import SelectedRecall, context_memories, split_validation
 from app.runtime.relationships.experience_metrics import apply_pending_metrics, post_revision
 from app.runtime.relationships.social_metrics import prepare_sources, stage_sources, source_prompt
 
@@ -56,27 +57,43 @@ class SocialLane:
         return [c for c in state["candidates"] if c["target_id"] in ids]
 
     async def select(self, state):
+        async def before_retry(_attempt):
+            try:
+                await self.guard({**state, "stage": "TargetSelector"})
+            except Exception as exc:
+                raise ActivityRetryGuardError(exc) from exc
         return await self.provider.select(lane=self.lane, context=state["shared_context"],
             candidates=state["candidates"], limit=INBOX_TARGET_LIMIT if self.lane == "inbox" else 1,
-            delivery=self.delivery(state))
+            delivery=self.delivery(state), before_json_retry=before_retry)
 
     def delivery(self, state):
         return None
 
     async def recall(self, state):
-        return {"memories": await self.retriever.selected(activity_id=state["identity"]["activity_id"],
-            targets=self.selected(state), queries=state["queries"])}
+        return split_validation(await self.retriever.selected(activity_id=state["identity"]["activity_id"],
+            targets=self.selected(state), queries=state["queries"]))
 
     async def context(self, state):
+        refreshed = {}
+        if any(value.get("packets") and target not in state.get("memory_validations", {})
+               for target, value in state.get("memories", {}).items()):
+            # Pre-Planner legacy checkpoint: return rebuilt evidence as real
+            # State channels, rather than mutating the guard's input dict.
+            refreshed = split_validation(await self.retriever.selected(
+                activity_id=state["identity"]["activity_id"],
+                targets=self.selected(state), queries=state["queries"]))
         candidates = self.selected(state)
         manifest = prepare_sources(self.ctx.db, actor=self.actor,
             post_ids=[ref for c in candidates for ref in c["source_ids"]])
-        return {"decision_context": plain({**state["shared_context"], "memories": context_memories(state["memories"]),
+        return {**refreshed, "decision_context": plain({**state["shared_context"],
+            "memories": context_memories(refreshed.get("memories", state["memories"])),
             "metric_sources": source_prompt(manifest), "source_manifest": manifest})}
 
     async def plan(self, state):
-        return {"decision": await self.provider.plan(lane=self.lane,
-            context=state["decision_context"], candidates=self.selected(state), delivery=self.delivery(state))}
+        receipt = {}
+        decision = await self.provider.plan(lane=self.lane, context=state["decision_context"],
+            candidates=self.selected(state), delivery=self.delivery(state), on_input_receipt=receipt.update)
+        return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):
         from app.domains.routines.policies.writer_tasks import _reply_task_id
@@ -97,8 +114,10 @@ class SocialLane:
 
     async def write(self, state):
         # Reuse proposal-capable Writer output and canonical writer validation.
-        writing = await self.provider.write(lane=self.lane, context=state["decision_context"], assignments=state["assignments"])
-        return {"drafts": writing.get("reply_task_results", [])}
+        receipts = []
+        writing = await self.provider.write(lane=self.lane, context=state["decision_context"],
+            assignments=state["assignments"], on_input_receipt=receipts.append)
+        return {"drafts": writing.get("reply_task_results", []), "writer_input_receipts": receipts}
 
     async def execute(self, state):
         if self.action_executor is None and any(d["action"] != "no_action" for d in state["decision"]["decisions"]):
@@ -179,4 +198,13 @@ class SocialLane:
 
     def relationship(self, counterpart_id):
         snapshot = relationship_snapshot(self.ctx, self.actor, counterpart_id=counterpart_id)
+        if snapshot and getattr(self.tracker, "observer", None) is not None:
+            try:
+                self.tracker._notify("relationship_lookup", {
+                    "lane": self.lane, "counterpart_id": counterpart_id,
+                    "manifest": snapshot.manifest(),
+                    "sources": [item.source for item in snapshot.items],
+                })
+            except Exception:
+                pass  # Diagnostic metadata cannot affect relationship recall.
         return plain(snapshot.prompt_view()) if snapshot else {}

@@ -31,7 +31,8 @@ def test_four_sources_become_eight_different_references_and_diagnostics_do_not_c
         observation = Observation(detailed=detailed)
         token = current.set(observation)
         try:
-            hydrated, receipts = reader.hydrate(SimpleNamespace(scope=scope), records)
+            hydration = reader.hydrate(SimpleNamespace(scope=scope), records)
+            hydrated, receipts = hydration.records, hydration.sources
             assert len(hydrated) == 8
             recall = HybridRecallResult("request", "call", "a"*64, scope, RecallAxisStatus.READY,
                 hydrated, tuple(RecallAxisReceipt(a, RecallAxisStatus.READY, True, 4, 1) for a in ("fts", "vector")),
