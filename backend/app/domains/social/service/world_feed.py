@@ -465,6 +465,7 @@ def claim_feed_observations(
                 conflicts += 1
                 continue
         else:
+            # Reconcile from the database result; SQLite may reload this lease as naive.
             acquired = db.execute(update(WorldCharacterFeedObservation).where(
                 WorldCharacterFeedObservation.id == observation.id,
                 WorldCharacterFeedObservation.status != "observed",
@@ -475,7 +476,7 @@ def claim_feed_observations(
                      run_id=run_id, matched_keywords=list(candidate.matched_keywords),
                      matched_fields=list(candidate.matched_fields), rank_score=candidate.rank_score,
                      post_created_at=candidate.created_at, claimed_at=current,
-                     observed_at=None)).rowcount
+                     observed_at=None).execution_options(synchronize_session="fetch")).rowcount
             if not acquired:
                 conflicts += 1
                 continue
