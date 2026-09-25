@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import pytest
 
 from sqlalchemy.orm import Session
 
@@ -13,7 +14,7 @@ from app.domains.world_characters.service.activity_state import read_state
 from routine_posts.test_runtime import _engine, _seed, _resident_context, _utc, FakeRoutineProvider
 
 
-def test_routine_nodes_publish_state_and_restore_only_canonical_references(monkeypatch):
+def test_routine_nodes_publish_state_and_restore_only_canonical_references(monkeypatch, combined=False):
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:
             fixture = _seed(db)
@@ -23,25 +24,35 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             shared = shared_input(ctx, fixture.world_character, fixture.world)
             async def guard(state):
                 return {}
-            lane = RoutineLane(ctx, actor=fixture.world_character, tracker=RunLlmTracker(max_calls=8), hybrid_service=None, guard=guard)
+            from app.runtime.autonomous_activity.combined_lanes import CombinedRoutineLane
+            from app.runtime.autonomous_activity.provider import ActivityProvider
+            from types import SimpleNamespace
+            lane_type = CombinedRoutineLane if combined else RoutineLane
+            lane = lane_type(ctx, actor=fixture.world_character, tracker=RunLlmTracker(max_calls=8), hybrid_service=None, guard=guard,
+                **({"ledger": SimpleNamespace(reserve=lambda key: pytest.fail("normal generation must not repair"))} if combined else {}))
             calls = []
             fake = FakeRoutineProvider()
-            async def call(**kwargs):
+            async def call(_provider, **kwargs):
                 calls.append(kwargs["node"])
                 generation = await fake.generate(resident_context=ctx, routine_context=lane.prepared.context,
                     beat=lane.prepared.beat, tracker=RunLlmTracker(max_calls=2))
-                if kwargs["node"] == "RoutineActionPlanner":
+                if kwargs["node"] in {"RoutineActionPlanner", "RoutineDecisionDraft"}:
                     assert kwargs["payload"]["beat_identity"] == {"episode_id": lane.prepared.context.episode.id, "beat_id": lane.prepared.beat.id, "sequence_no": lane.prepared.beat.sequence_no}
-                    assert kwargs["schema"]["properties"]["episode_id"]["enum"] == [lane.prepared.context.episode.id]
+                    schema = kwargs["schema"]["properties"]["decision"] if combined else kwargs["schema"]
+                    assert schema["properties"]["episode_id"]["enum"] == [lane.prepared.context.episode.id]
                     frozen = freeze_prepared(lane.prepared)
                     lane.prepared = restore_prepared(ctx, frozen, lane.tracker)
-                    return kwargs["validator"]({**generation.plan.model_dump(),
+                    decision = {**generation.plan.model_dump(),
                         "state_update": {"mood": "hopeful", "mood_intensity": 35, "state_note": "새 시도를 마친 뒤 의욕이 생겼다."},
-                        "state_source_refs": []})
+                        "state_source_refs": []}
+                    if kwargs.get("on_input_receipt"):
+                        kwargs["on_input_receipt"]({"node": kwargs["node"]})
+                    return kwargs["validator"]({"decision": decision,
+                        "draft": {**generation.draft.model_dump(), "thought": "차근차근 시도해 보고 싶었다."}} if combined else decision)
                 return kwargs["validator"]({**generation.draft.model_dump(), "thought": "차근차근 시도해 보고 싶었다."})
-            monkeypatch.setattr(lane.provider, "call", call)
-            result = await build_lane("routine", lane.ports()).ainvoke({"identity": {"activity_id": ctx.run_id}, "shared_context": shared})
-            assert calls == ["RoutineActionPlanner", "RoutineWriter"]
+            monkeypatch.setattr(ActivityProvider, "call", call)
+            result = await build_lane("routine", lane.ports(), combined=combined).ainvoke({"identity": {"activity_id": ctx.run_id}, "shared_context": shared})
+            assert calls == (["RoutineDecisionDraft"] if combined else ["RoutineActionPlanner", "RoutineWriter"])
             assert result["result"]["public_action_count"] == 1
             assert result["result"]["settlement"]["state"] == "updated"
             current = read_state(db, world_id=fixture.world.id, actor_id=fixture.world_character.id)
@@ -51,3 +62,7 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             assert replay["executions"][0]["routine_outcome"] == "REUSED_SUCCESS"
             assert replay["executions"][0]["publish_result"]["public_action_count"] == 0
     asyncio.run(scenario())
+
+
+def test_combined_routine_publishes_and_reuses_canonical_result(monkeypatch):
+    test_routine_nodes_publish_state_and_restore_only_canonical_references(monkeypatch, combined=True)

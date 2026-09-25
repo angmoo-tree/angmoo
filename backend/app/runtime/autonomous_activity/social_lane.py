@@ -37,7 +37,7 @@ class SocialLane:
         await self.scope_guard(state)
         # Committed effects can change affordances, so do not recheck old target
         # snapshots after Execute. Settlement validates its own source receipts.
-        if state.get("stage") in {"TargetSelector", "BuildDecisionContext", "ActionPlanner", "ValidateDecision", "Writer", "Execute"}:
+        if state.get("stage") in {"TargetSelector", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             selected = {s["target_id"] for s in state.get("selections", [])}
             for candidate in state.get("candidates", []):
                 if selected and candidate["target_id"] not in selected:

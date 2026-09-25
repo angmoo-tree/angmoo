@@ -15,7 +15,7 @@ from app.domains.social.constants import OBSERVATION_LEASE
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.social.models.feed import WorldCharacterFeedObservation
 from app.domains.social.models.posts import Post
-from app.domains.social.service.world_feed import claim_feed_observations
+from app.domains.social.service.world_feed import claim_feed_observations, renew_owned_feed_claims
 from app.runtime.social.world_feed_search import (
     load_ready_search_profile,
     search_world_feed_candidates,
@@ -30,6 +30,22 @@ from social.test_world_feed_search import (
 
 
 NOW = datetime(2026, 8, 11, 7, 0, tzinfo=UTC)
+
+
+def test_same_token_renewal_after_expiry_never_steals_replaced_owner():
+    engine, actor_id, candidates, observation_id, token = _claimed_candidate()
+    with Session(engine) as db:
+        renew_owned_feed_claims(db, claim_tokens={observation_id: token}, run_id="previous-run", now=NOW)
+        db.commit()
+        assert db.get(WorldCharacterFeedObservation, observation_id).claim_token == token
+        with pytest.raises(ValueError, match="feed_claim_changed"):
+            renew_owned_feed_claims(db, claim_tokens={observation_id: token}, run_id="other-run", now=NOW)
+        db.rollback()
+        replacement = _claim(db, actor_id, candidates, now=NOW + OBSERVATION_LEASE + timedelta(seconds=1), run_id="replacement")
+        assert replacement.observations
+        db.commit()
+        with pytest.raises(ValueError, match="feed_claim_changed"):
+            renew_owned_feed_claims(db, claim_tokens={observation_id: token}, run_id="previous-run", now=NOW + timedelta(days=1))
 
 
 def _claimed_candidate(engine=None):

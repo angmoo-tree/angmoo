@@ -51,7 +51,7 @@ class RoutineLane:
                 self.ctx.db.commit()
             elif beat.status != "succeeded":
                 raise ValueError("routine_claim_lost")
-        if state.get("decision_context") and state.get("stage") in {"ActionPlanner", "ValidateDecision", "Writer", "Execute"}:
+        if state.get("decision_context") and state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             from app.runtime.autonomous_activity.routine_sources import source_manifest
             from app.runtime.autonomous_activity.inputs import relationship_snapshot
             expected = state["decision_context"]

@@ -4,7 +4,7 @@ from typing import Any, Literal, TypedDict
 from pydantic import BaseModel, ConfigDict, Field
 from app.core.ids import length_prefixed_identity_key
 
-CONTRACT_VERSION = 1
+from app.domains.world_characters.service.activity_engines import CONTRACT_VERSION
 FEED_TARGET_LIMIT = 1
 INBOX_TARGET_LIMIT = 3
 RECALL_CONCURRENCY = 2
@@ -26,7 +26,7 @@ class ActivityIdentity(BaseModel):
     world_id: str
     actor_id: str
     engine: Literal["personalized_graph_v2"] = "personalized_graph_v2"
-    contract_version: Literal[1] = 1
+    contract_version: Literal[1, 2] = 1
     cause: Literal["manual", "scheduled", "recovery"]
     generation_model: str | None = None
     thinking_level: str | None = None
@@ -93,6 +93,8 @@ class LaneState(TypedDict, total=False):
     result: dict
     lane_data: dict
     failure: dict
+    generation_mode: str
+    preparation_error: dict
 
 
 class ParentState(TypedDict, total=False):
@@ -102,3 +104,5 @@ class ParentState(TypedDict, total=False):
     routine_result: dict
     feed_result: dict
     result: dict
+    prepared_lanes: dict
+    selection_mode: str

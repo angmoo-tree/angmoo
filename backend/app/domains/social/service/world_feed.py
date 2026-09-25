@@ -492,6 +492,30 @@ def claim_feed_observations(
     )
 
 
+def renew_owned_feed_claims(db: Session, *, claim_tokens: dict[str, str], run_id: str,
+                           now: datetime) -> None:
+    """Renew the same claim only; never steal a token replaced by another run.
+
+    Caller owns commit/rollback. Observed rows need no lease renewal but their
+    run/token identity still must match before using the frozen delivery.
+    """
+    for identifier, token in claim_tokens.items():
+        row = db.get(WorldCharacterFeedObservation, identifier, populate_existing=True)
+        if row is None or row.claim_token != token or row.run_id != run_id:
+            raise ValueError("feed_claim_changed")
+        if row.status == "observed":
+            continue
+        result = db.execute(update(WorldCharacterFeedObservation).where(
+            WorldCharacterFeedObservation.id == identifier,
+            WorldCharacterFeedObservation.claim_token == token,
+            WorldCharacterFeedObservation.run_id == run_id,
+            WorldCharacterFeedObservation.status.in_(("claimed", "retryable_failed")),
+        ).values(status="claimed", lease_expires_at=now + OBSERVATION_LEASE)
+            .execution_options(synchronize_session="fetch"))
+        if result.rowcount != 1:
+            raise ValueError("feed_claim_changed")
+
+
 def revalidate_candidate_actions(
     db: Session,
     *,
@@ -626,6 +650,33 @@ def finalize_feed_cycle(
     cursor.version += 1
     db.add(cursor)
     db.flush()
+
+
+def finalize_unavailable_feed_cycle(db: Session, *, profile: ReadySearchProfile,
+                                  cycle_key: str, run_id: str, claim: KeywordClaim,
+                                  claim_tokens: dict[str, str], summary: dict[str, object],
+                                  now: datetime) -> None:
+    """Close only this cycle's owned claims without asserting unseen delivery."""
+    cursor = repository.cursor_for_update(db, world_character_id=profile.world_character.id)
+    if cursor is None or cursor.last_cycle_key != cycle_key or cursor.last_run_id != run_id:
+        return
+    if cursor.last_cycle_summary == summary:
+        return
+    observed = []
+    for identifier, token in claim_tokens.items():
+        row = db.get(WorldCharacterFeedObservation, identifier, populate_existing=True)
+        if row is None or row.claim_token != token or row.run_id != run_id:
+            continue
+        if row.status == "observed":
+            observed.append(row)
+        else:
+            row.status = "retryable_failed"
+            row.decision_outcome = "no_action"
+            row.reason_code = "target_stale"
+    finalize_feed_cycle(db, profile=profile, claim=claim, observations=tuple(observed),
+        selected_index=None, selected_action=None, interaction_intent=None,
+        comment_purpose=None, reason_code="target_stale", public_action_execution_id=None,
+        summary=summary, now=now)
 
 
 def world_feed_cycle_status(

@@ -202,6 +202,7 @@ def _canonical_rows(db, manifest: dict, included: set[str]) -> tuple[list[dict],
         result = json.loads(row["result"]) if row["result"] else {}
         paths = result.get("paths") or {}
         runs.append({"activity_id": row["activity_id"], "actor_id": row["world_character_id"],
+                     "contract_version": result.get("contract_version", 1),
                      "engine": row["engine"], "status": row["status"], "stage": row["stage"],
                      "started_at": row["started_at"], "finished_at": row["finished_at"],
                      "paths": {lane: {"status": item.get("status"), "public_action_count": item.get("public_action_count", 0),
@@ -315,9 +316,15 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                                "last_at": occurrences[-1].get("occurred_at")})
     grouped_errors.sort(key=lambda row: (-row["count"], row["first_at"] or ""))
     planner_events = [item for item in call_events
-                      if item.get("node") in {"InboxActionPlanner", "FeedActionPlanner"}]
+                      if item.get("node") in {"InboxActionPlanner", "FeedActionPlanner", "InboxDecisionDraft", "FeedDecisionDraft", "RoutineDecisionDraft"}]
     output_failures = [item for item in planner_events
                        if item.get("event_type") == "llm_json_postprocess_error"]
+    draft_failures = [item for item in call_events
+                      if item.get("event_type") == "llm_draft_validation_error"]
+    writer_recovered_paths = {(item.get("activity_id"), item.get("lane")) for item in events
+        if item.get("event_type") == "node_completed" and item.get("node") == "ValidateDraft"
+        and (item.get("details") or {}).get("writer_recovery")
+        and not (item.get("details") or {}).get("soft_failure")}
     retry_events = [item for item in planner_events
                     if item.get("event_type") == "llm_json_attempt"
                     and (item.get("details") or {}).get("status") == "retry_scheduled"]
@@ -327,7 +334,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                  and (item.get("details") or {}).get("status") == "valid"
                  and (item.get("details") or {}).get("json_attempt") == 2}
     planner_final_failures = {item.get("activity_id") for item in errors
-                              if item.get("node") == "ActionPlanner"
+                              if item.get("node") in {"ActionPlanner", "DecisionDraft"}
                               and item.get("activity_id")
                               and item.get("lane") in {"inbox", "feed"}}
     planner_failure_types = Counter(
@@ -366,6 +373,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "planner_retries_scheduled": len(retry_events),
                 "planner_recovered_activities": len(recovered),
                 "planner_final_failures": len(planner_final_failures),
+                "combined_draft_validation_failures": len(draft_failures),
+                "writer_recovered_paths": len(writer_recovered_paths),
                 "damaged_event_lines": damaged, "dropped_events": dropped,
                 "lane_statuses": {key: dict(value) for key, value in lane_counts.items()},
                 "effect_statuses": effect_statuses,
@@ -419,6 +428,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                   f"- Output validation failures: {len(output_failures)}; by safe code or shape: {dict(planner_failure_types)}",
                   f"- Retries scheduled: {len(retry_events)}; recovered activities: {len(recovered)}; "
                   f"final path failures: {len(planner_final_failures)}",
+                  f"- Combined draft validation failures: {len(draft_failures)}; "
+                  f"writer-recovered paths: {len(writer_recovered_paths)}. Physical requests remain in calls.jsonl.",
                   "", "## Repeated errors", ""])
     for row in grouped_errors:
         lines.append(f"- {row['lane'] or 'parent'} / {row['node'] or 'unknown'} / {row['error']}: "

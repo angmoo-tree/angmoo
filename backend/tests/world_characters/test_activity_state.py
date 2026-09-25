@@ -64,3 +64,23 @@ def test_world_and_character_overrides_preserve_explicit_v1_after_default_switch
         assert resolve_engine(db, actor)["engine"] == "current"
         set_engine(db, engine=None, expected_version=1)
         assert resolve_engine(db, actor) == {"engine": "personalized_graph_v2", "source": "default", "version": 0}
+
+
+def test_contract_version_transition_and_rollback_do_not_rebind_existing_runs(monkeypatch):
+    from app.domains.world_characters.service import activity_engines
+    with Session(_engine(), expire_on_commit=False) as db:
+        _, actor, _ = _approved(db)
+        assert bind_run(db, actor=actor, activity_id="old").contract_version == 1
+        monkeypatch.setattr(activity_engines, "CONTRACT_VERSION", 2)
+        assert bind_run(db, actor=actor, activity_id="new").contract_version == 2
+        assert bind_run(db, actor=actor, activity_id="old").contract_version == 1
+        monkeypatch.setattr(activity_engines, "CONTRACT_VERSION", 1)
+        assert bind_run(db, actor=actor, activity_id="new").contract_version == 2
+        assert bind_run(db, actor=actor, activity_id="rollback").contract_version == 1
+        set_engine(db, engine="current", expected_version=0)
+        monkeypatch.setattr(activity_engines, "CONTRACT_VERSION", 2)
+        assert bind_run(db, actor=actor, activity_id="legacy").contract_version == 1
+        unsupported = bind_run(db, actor=actor, activity_id="unknown")
+        unsupported.contract_version = 99
+        with pytest.raises(ValueError, match="scope_or_version_invalid"):
+            bind_run(db, actor=actor, activity_id="unknown")

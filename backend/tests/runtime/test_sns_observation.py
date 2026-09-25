@@ -170,6 +170,31 @@ def test_export_separates_recovered_planner_output_from_final_failure(data_root,
         assert "SECRET_PRIVATE" not in (output / filename).read_text(encoding="utf-8")
 
 
+def test_export_distinguishes_writer_repair_from_planner_retry(data_root, tmp_path):
+    now = datetime.now(UTC)
+    _insert_run(data_root, activity_id="combined", started_at=now)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="combined", agent_run_id="lease",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        attempt.tracker_event("draft_validation_error", {"node": "InboxDecisionDraft", "lane": "inbox",
+            "validation_code": "combined_draft_body_invalid", "field_path": "draft", "body": "PRIVATE"})
+        attempt.node("node_completed", lane="inbox", node="ValidateDraft", state={}, result={
+            "drafts": [{"body": "PRIVATE"}], "writer_input_receipts": [{"writer_recovery": True}]})
+        observer.queue.join()
+    finally:
+        observer.close()
+    output = tmp_path / "combined-export"
+    coverage = export_session(data_root, manifest["session_id"], destination=output)
+    assert coverage["combined_draft_validation_failures"] == 1
+    assert coverage["writer_recovered_paths"] == 1
+    assert coverage["planner_retries_scheduled"] == 0
+    assert coverage["planner_final_failures"] == 0
+    calls = (output / "calls.jsonl").read_text(encoding="utf-8")
+    assert "combined_draft_body_invalid" in calls and "PRIVATE" not in calls
+
+
 def test_scope_stop_and_recorder_failure_do_not_change_activity(data_root):
     manifest = start_session(data_root, world_id="world-1")
     observer = SNSObserver(data_root)

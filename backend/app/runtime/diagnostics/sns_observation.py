@@ -36,6 +36,10 @@ _PLANNER_VALIDATION_CODES = frozenset({
     "non_comment_proposal_invalid", "comment_intent_missing", "proposal_not_eligible",
     "proposal_target_mismatch", "unexpected_proposal", "proposal_response_missing",
     "unexpected_proposal_response",
+    "decision_missing", "combined_draft_invalid", "combined_draft_missing",
+    "combined_draft_shape", "combined_draft_target_mismatch", "combined_draft_task_id_forbidden",
+    "combined_draft_body_invalid", "combined_routine_draft_missing",
+    "writer_duplicate_task", "writer_task_mismatch", "writer_changed_proposal_decision",
 })
 _SESSION = re.compile(r"sns-[0-9a-f]{32}\Z")
 
@@ -60,7 +64,7 @@ def validation_code(value: Any) -> str | None:
 
 
 def field_path(value: Any) -> str | None:
-    return value if isinstance(value, str) and _FIELD_PATH.fullmatch(value) else None
+    return value if isinstance(value, str) and (value in {"decision", "draft"} or _FIELD_PATH.fullmatch(value)) else None
 
 
 def identifier(value: Any) -> str | None:
@@ -178,6 +182,13 @@ def _safe_error(exc: BaseException) -> dict[str, Any]:
 
 def _node_summary(name: str, state: dict, result: dict) -> dict:
     """Select structural facts only, never LangGraph State or generated text."""
+    if name in {"ChooseGenerationMode", "ChooseSelectionMode"}:
+        return {"mode": code(result.get("generation_mode") or result.get("selection_mode"))}
+    if name in {"PrepareCandidates", "CombinedTargetSelector"}:
+        return {"lanes": {lane: {"candidate_count": len(item.get("candidates") or []),
+            "selected_ids": ids([s.get("target_id") for s in item.get("selections") or []]),
+            "selection_error": code((item.get("preparation_error") or {}).get("reason"))}
+            for lane, item in (result.get("prepared_lanes") or {}).items() if lane in {"inbox", "feed"}}}
     if name == "LoadCandidates":
         candidates = result.get("candidates") or []
         feed = (result.get("lane_data") or {}).get("_feed") or {}
@@ -220,7 +231,7 @@ def _node_summary(name: str, state: dict, result: dict) -> dict:
         return {"memory_packet_refs": ids([p.get("ref") for v in memory.values() if isinstance(v, dict)
                  for p in v.get("packets", [])]), "source_ids": ids([r.get("post_id") for r in context.get("source_manifest", [])]),
                 "state_version": numbers((context.get("current_state") or {}).get("version"))}
-    if name == "ActionPlanner":
+    if name in {"ActionPlanner", "DecisionDraft"}:
         decision = result.get("decision") or {}
         return {"actions": [{"target_id": identifier(d.get("target_id")), "action": code(d.get("action")),
                  "interaction_intent": code(d.get("interaction_intent")), "comment_purpose": code(d.get("comment_purpose"))}
@@ -230,8 +241,9 @@ def _node_summary(name: str, state: dict, result: dict) -> dict:
     if name == "ValidateDecision":
         return {"assignment_count": len(result.get("assignments") or []),
                 "task_ids": ids([item.get("task_id") or item.get("beat_id") for item in result.get("assignments") or []])}
-    if name == "Writer":
-        return {"draft_count": len(result.get("drafts") or []), "soft_failure": bool(result.get("failure"))}
+    if name in {"Writer", "ValidateDraft"}:
+        return {"draft_count": len(result.get("drafts") or []), "soft_failure": bool(result.get("failure")),
+            "writer_recovery": any(r.get("writer_recovery") for r in result.get("writer_input_receipts", []))}
     if name == "Execute":
         return {"effects": [{"target_id": identifier(item.get("target_id")), "status": code(item.get("status")),
                  "execution_id": numbers(item.get("execution_id")),
@@ -313,6 +325,10 @@ class SNSAttempt:
                 "selection_limit": numbers(payload.get("selection_limit")),
                 "candidate_count": numbers(payload.get("candidate_count")),
                 "selected_target_count": numbers(payload.get("selected_target_count")),
+                "lane_inputs": {name: {"candidate_count": numbers(value.get("candidate_count")),
+                    "selection_limit": numbers(value.get("selection_limit"))}
+                    for name, value in (payload.get("lane_inputs") or {}).items()
+                    if name in {"inbox", "feed"} and isinstance(value, dict)},
                 "memory_packet_refs": ids(payload.get("memory_packet_refs")),
                 "source_ids": ids(payload.get("source_ids")),
                 "omissions": {key: numbers((payload.get("omissions") or {}).get(key))
@@ -338,6 +354,8 @@ class SNSAttempt:
             })
             return
         details = {"call_type": code(payload.get("call_type")), "call_order": numbers(payload.get("call_order_in_run")),
+                   "validation_code": validation_code(payload.get("validation_code")),
+                   "field_path": field_path(payload.get("field_path")),
                    "provider_call_order": numbers(payload.get("provider_call_order_in_run")),
                    "json_attempt": numbers(payload.get("json_attempt")),
                    "provider": code(payload.get("provider")), "model": code(payload.get("model")),
@@ -359,7 +377,7 @@ class SNSAttempt:
                 "validation_code": validation_code(diagnostic.get("validation_code")),
                 "field_path": field_path(diagnostic.get("field_path"))}
         self.emit("llm_" + kind, lane=code(payload.get("lane")), node=code(payload.get("node")), details=details,
-                  classification="degraded" if kind == "json_postprocess_error" else None)
+                  classification="degraded" if kind in {"json_postprocess_error", "draft_validation_error"} else None)
 
 
 def _scheduler_snapshot(data_root: Path, manifest: dict) -> dict:

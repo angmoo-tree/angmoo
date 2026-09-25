@@ -29,6 +29,8 @@ def activity_status(db, *, actor):
         "effective": resolve_engine(db, actor), "policies": policies,
         "current_state": read_state(db, world_id=actor.world_id, actor_id=actor.id),
         "runs": [{"activity_id": r.activity_id, "engine": r.engine, "status": r.status,
+            "contract_version": r.contract_version,
+            "execution_order": ["inbox", "feed", "routine"] if r.contract_version == 2 else ["inbox", "routine", "feed"],
             "stage": r.stage, "started_at": utc(r.started_at), "finished_at": utc(r.finished_at),
             "paths": {name: {"status": path.get("status"), "public_action_count": path.get("public_action_count", 0),
                 "state_status": (path.get("settlement") or {}).get("state"),

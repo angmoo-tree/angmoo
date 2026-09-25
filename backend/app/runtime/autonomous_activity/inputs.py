@@ -14,6 +14,7 @@ from app.domains.world_characters.service.activity_state import read_state
 from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
 from app.runtime.social.today_activity import today_social_activity_reader
 from app.config import settings
+from app.runtime.autonomous_activity.contracts import TODAY_LIMIT
 
 
 def relationship_snapshot(ctx, actor, *, counterpart_id=None):
@@ -36,9 +37,9 @@ def shared_input(ctx, actor, world):
     data = asdict(today)
     # Provider needs bounded actual records, not projection internals.
     records = data.get("records", [])
-    if len(records) > 12:
-        data["records"] = records[-12:]
-        data["omitted_records"] = len(records) - 12
+    if len(records) > TODAY_LIMIT:
+        data["records"] = records[:TODAY_LIMIT]
+        data["omitted_records"] = len(records) - TODAY_LIMIT
     character = ctx.character
     state = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)
     confirmed = datetime.fromisoformat(state["confirmed_at"]) if state["confirmed_at"] else None
