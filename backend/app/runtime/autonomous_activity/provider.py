@@ -2,20 +2,19 @@
 from datetime import UTC, datetime
 import json
 from copy import deepcopy
-from typing import Any, Awaitable, Callable, Literal
+from typing import Any, Awaitable, Callable
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from app.domains.relationships.policies.interpretation_prompt import METRIC_INSTRUCTIONS, with_metric_schema
-from app.domains.world_characters.schemas.activity_state import StateUpdate
 from app.integrations.direct_llm import generate_json
 from app.providers.gemini import build_gemini_developer_response_schema
 from app.runtime.social.feed_reaction_provider import _api_key, _llm_context
 from app.domains.routines.schemas.resident_planning import _ReplyTaskText
-from app.domains.social.schemas.feed import JointActivityProposalPreview
 from app.runtime.autonomous_activity.contracts import Candidate
+from app.runtime.autonomous_activity.planner_contract import parse_action, planner_response_schema
 from app.runtime.autonomous_activity.output_recovery import (
-    FIRST_OUTPUT_TOKENS, RETRY_OUTPUT_TOKENS, retry_truncated_json,
+    FIRST_OUTPUT_TOKENS, RETRY_OUTPUT_TOKENS, planner_json_retry, retry_truncated_json,
 )
 from app.runtime.autonomous_activity.queries import validate_selection
 
@@ -48,6 +47,10 @@ Return at most ONE decision and ONE action per selected target_id. Never return 
 Each decision must use a selected target_id and an allowed action. Do not select a new target.
 For non-comment actions interaction_intent and comment_purpose MUST be null.
 For ordinary comments set ordinary_comment and a valid purpose. Keep brief concise.
+For EVERY actual action (comment, like, repost, follow), brief is required and
+must be a non-blank direction for that action, at most 280 characters.
+For no_action, brief may be omitted or empty. Example: like -> brief "Recognize the
+careful explanation"; comment -> brief "Ask which book helped with the task".
 For an open activity_proposal decide accept/reject/counter in proposal_response now; Writer must express this fixed decision.
 No proposal_response without a supplied open proposal.
 Propose joint activity only when proposal_eligible is true, using the supplied target ID and counterpart ID.
@@ -78,90 +81,12 @@ class TargetOutput(BaseModel):
     selections: list[ChosenTarget]
 
 
-class ProposalDecision(_ReplyTaskText):
-    task_id: str = "planner"
-    body: None = None
-
-
-class ProposalPlan(JointActivityProposalPreview):
-    text: str = "Planner proposal"
-
-
-class ActionChoice(BaseModel):
-    target_id: str
-    action: Literal["no_action", "comment", "like", "repost", "follow"]
-    interaction_intent: Literal["ordinary_comment", "joint_activity_proposal", "proposal_response"] | None = None
-    comment_purpose: Literal["question", "advice", "empathy", "encouragement", "information", "humor", "disagreement", "competition", "observation"] | None = None
-    proposal: ProposalPlan | None = None
-    proposal_response: ProposalDecision | None = None
-    brief: str = Field(default="", max_length=280)
-    thought: str | None = Field(default=None, max_length=280)
-
-
-class ActionOutput(BaseModel):
-    decisions: list[ActionChoice]
-    state_update: StateUpdate | None
-    state_source_refs: list[str] = Field(default_factory=list)
-
-
 class WrittenReply(_ReplyTaskText):
     thought: str | None = None
 
 
 class WriterOutput(BaseModel):
     replies: list[WrittenReply] = Field(max_length=3)
-
-
-def parse_action(payload: dict, candidates: list[dict]) -> dict:
-    """A malformed optional state never discards a valid core action."""
-    body = dict(payload)
-    metrics = body.pop("relationship_metrics", None)
-    state_present = "state_update" in body
-    proposed = body.pop("state_update", None)
-    refs = body.pop("state_source_refs", [])
-    state_status = "valid"
-    try:
-        if not state_present:
-            raise ValueError("missing_state_update")
-        state = StateUpdate.model_validate(proposed).model_dump() if proposed is not None else None
-        if not isinstance(refs, list) or any(not isinstance(ref, str) for ref in refs):
-            raise ValueError("invalid_state_refs")
-    except (ValidationError, ValueError):
-        state, refs, state_status = None, [], "invalid"
-    parsed = ActionOutput.model_validate({**body, "state_update": None})
-    by_id = {c["target_id"]: c for c in candidates}
-    seen = set()
-    for decision in parsed.decisions:
-        if decision.target_id in seen or decision.target_id not in by_id:
-            raise ValueError("decision_target_invalid")
-        seen.add(decision.target_id)
-        if decision.action != "no_action" and decision.action not in by_id[decision.target_id]["allowed_actions"]:
-            raise ValueError("decision_action_not_allowed")
-        if decision.action != "comment":
-            if decision.interaction_intent in {"joint_activity_proposal", "proposal_response"} or decision.proposal_response is not None or decision.proposal is not None:
-                raise ValueError("non_comment_proposal_invalid")
-            decision.interaction_intent = decision.comment_purpose = None
-        elif decision.interaction_intent is None or (decision.interaction_intent == "ordinary_comment" and decision.comment_purpose is None):
-            raise ValueError("comment_intent_missing")
-        if decision.interaction_intent == "joint_activity_proposal":
-            if not by_id[decision.target_id].get("proposal_eligible") or decision.proposal is None:
-                raise ValueError("proposal_not_eligible")
-            if decision.proposal.source_post_id != decision.target_id or decision.proposal.target_world_character_id != by_id[decision.target_id].get("counterpart_id"):
-                raise ValueError("proposal_target_mismatch")
-        elif decision.proposal is not None:
-            raise ValueError("unexpected_proposal")
-        if decision.interaction_intent == "proposal_response":
-            if not by_id[decision.target_id].get("activity_proposal") or decision.proposal_response is None or decision.proposal_response.proposal_decision is None:
-                raise ValueError("proposal_response_missing")
-        elif decision.proposal_response is not None:
-            raise ValueError("unexpected_proposal_response")
-        if decision.action != "no_action" and not decision.brief.strip():
-            raise ValueError("action_brief_missing")
-    allowed_refs = {ref for c in candidates for ref in c["source_ids"]}
-    if not set(refs) <= allowed_refs:
-        state, refs, state_status = None, [], "invalid"
-    return {"decisions": [d.model_dump() for d in parsed.decisions], "relationship_metrics": metrics,
-            "state_update": state, "state_source_refs": refs, "state_status": state_status}
 
 
 class ActivityProvider:
@@ -171,6 +96,7 @@ class ActivityProvider:
     async def call(self, *, node: str, lane: str, system: str, payload: dict,
                    schema: dict, validator, max_tokens: int, delivery=None,
                    recover_truncation: bool = False,
+                   json_retry_policy=None,
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None):
         # Remove optional whole units before rejecting an oversized required
@@ -232,8 +158,12 @@ class ActivityProvider:
                 system_prompt=system, user_prompt=user, response_schema=schema, validator=validator,
                 max_output_tokens=max_tokens, thinking_level=self.context.generation_thinking_level,
                 on_rate_limit_wait=self.context.on_rate_limit_wait,
-                should_retry_json_error=retry_truncated_json if recover_truncation else lambda *_: False,
+                should_retry_json_error=retry_truncated_json if recover_truncation else (
+                    None if json_retry_policy is not None else lambda *_: False),
                 retry_max_output_tokens=RETRY_OUTPUT_TOKENS if recover_truncation else None,
+                json_retry_policy=json_retry_policy,
+                retry_input_char_limit=64000 if json_retry_policy is not None else None,
+                sdk_attempts=1,
                 before_json_retry=before_json_retry,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
@@ -272,16 +202,15 @@ class ActivityProvider:
             recover_truncation=True, before_json_retry=before_json_retry, delivery=delivery)
 
     async def plan(self, *, lane: str, context: dict, candidates: list[dict],
-                   delivery=None, on_input_receipt=None):
-        schema = with_metric_schema(build_gemini_developer_response_schema(ActionOutput))
-        schema["properties"]["decisions"]["maxItems"] = len(candidates)
-        schema["properties"]["decisions"]["items"]["properties"]["target_id"]["enum"] = [c["target_id"] for c in candidates]
+                   delivery=None, on_input_receipt=None, before_json_retry=None):
+        schema = with_metric_schema(planner_response_schema(candidates))
         result = await self.call(node=f"{lane.title()}ActionPlanner", lane=f"{lane}_action_planner",
             system=PLANNER_INSTRUCTIONS + "\n" + METRIC_INSTRUCTIONS +
                 "\nCopy relationship target_ref and new_evidence_refs from context.metric_sources exactly. "
                 "A selection target_id identifies a conversation/post, NOT the relationship's target_ref.",
             payload={"context": context, "selected_targets": candidates}, schema=schema,
             validator=lambda value: parse_action(value, candidates), max_tokens=4096,
+            json_retry_policy=planner_json_retry, before_json_retry=before_json_retry,
             delivery=delivery, on_input_receipt=on_input_receipt)
         return {**result, "judged_at": datetime.now(UTC).isoformat()}
 

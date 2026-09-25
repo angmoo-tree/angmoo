@@ -30,6 +30,13 @@ EVENT_LIMIT = 8192
 FILE_LIMIT = 4 * 1024 * 1024
 SESSION_LIMIT = 64 * 1024 * 1024
 _CODE = re.compile(r"[A-Za-z0-9_./:@-]{1,160}\Z")
+_FIELD_PATH = re.compile(r"decisions\.\d+\.(?:target_id|action|interaction_intent|comment_purpose|proposal|proposal_response|brief)\Z")
+_PLANNER_VALIDATION_CODES = frozenset({
+    "action_brief_missing", "decision_target_invalid", "decision_action_not_allowed",
+    "non_comment_proposal_invalid", "comment_intent_missing", "proposal_not_eligible",
+    "proposal_target_mismatch", "unexpected_proposal", "proposal_response_missing",
+    "unexpected_proposal_response",
+})
 _SESSION = re.compile(r"sns-[0-9a-f]{32}\Z")
 
 
@@ -46,6 +53,14 @@ def code(value: Any) -> str | None:
         return None
     text = str(value)
     return text if _CODE.fullmatch(text) else None
+
+
+def validation_code(value: Any) -> str | None:
+    return value if isinstance(value, str) and value in _PLANNER_VALIDATION_CODES else None
+
+
+def field_path(value: Any) -> str | None:
+    return value if isinstance(value, str) and _FIELD_PATH.fullmatch(value) else None
 
 
 def identifier(value: Any) -> str | None:
@@ -123,6 +138,8 @@ def deadline(manifest: dict) -> datetime:
 
 def _safe_error(exc: BaseException) -> dict[str, Any]:
     details: dict[str, Any] = {"error_type": type(exc).__name__}
+    details["validation_code"] = validation_code(getattr(exc, "validation_code", None))
+    details["field_path"] = field_path(getattr(exc, "field_path", None))
     message = code(str(exc))
     # Provider exception text may contain payloads. Keep only known backend codes.
     if message is not None and re.fullmatch(
@@ -151,7 +168,9 @@ def _safe_error(exc: BaseException) -> dict[str, Any]:
         details["json_diagnostics"] = [
             {"attempt": numbers(item.get("attempt")), "response_length": numbers(item.get("response_length")),
              "finish_reason": code(item.get("finish_reason")), "shape_hint": code(item.get("shape_hint")),
-             "parsed_present": item.get("parsed_present") is True}
+             "parsed_present": item.get("parsed_present") is True,
+             "validation_code": validation_code(item.get("validation_code")),
+             "field_path": field_path(item.get("field_path"))}
             for item in diagnostics[:2] if isinstance(item, dict)
         ]
     return details
@@ -325,6 +344,8 @@ class SNSAttempt:
                    "status": code(payload.get("status")), "duration_ms": numbers(payload.get("duration_ms")),
                    "finish_reason": code(payload.get("finish_reason")), "failure_class": code(payload.get("failure_class")),
                    "max_output_tokens": numbers(payload.get("max_output_tokens")),
+                   "input_sha256": code(payload.get("input_sha256")),
+                   "retry_reason": code(payload.get("retry_reason")),
                    "wait_seconds": numbers(payload.get("wait_seconds")), "wait_reason": code(payload.get("reason"))}
         usage = payload.get("usage")
         details["usage"] = {key: numbers(usage.get(key)) for key in ("prompt_token_count", "candidates_token_count",
@@ -333,7 +354,10 @@ class SNSAttempt:
         if isinstance(diagnostic, dict):
             details["json_postprocess"] = {"parse_error_type": code(diagnostic.get("parse_error_type")),
                 "response_length": numbers(diagnostic.get("response_length")),
-                "finish_reason": code(diagnostic.get("finish_reason")), "shape_hint": code(diagnostic.get("shape_hint"))}
+                "finish_reason": code(diagnostic.get("finish_reason")), "shape_hint": code(diagnostic.get("shape_hint")),
+                "attempt": numbers(diagnostic.get("attempt")),
+                "validation_code": validation_code(diagnostic.get("validation_code")),
+                "field_path": field_path(diagnostic.get("field_path"))}
         self.emit("llm_" + kind, lane=code(payload.get("lane")), node=code(payload.get("node")), details=details,
                   classification="degraded" if kind == "json_postprocess_error" else None)
 

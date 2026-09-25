@@ -1,6 +1,6 @@
 import pytest
 
-from app.runtime.autonomous_activity.provider import parse_action
+from app.runtime.autonomous_activity.planner_contract import parse_action
 
 
 def test_invalid_optional_state_keeps_valid_like_but_invalid_target_fails():

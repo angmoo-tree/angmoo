@@ -302,16 +302,38 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         details = item.get("details") or {}
         first = (details.get("validation") or [{}])[0]
         fingerprint = (item.get("lane"), item.get("node"), details.get("error_code") or details.get("error_type"),
-                       first.get("path"), first.get("type"))
+                       details.get("validation_code") or "unknown",
+                       details.get("field_path") or first.get("path"), first.get("type"))
         groups[fingerprint].append(item)
     grouped_errors = []
     for key, occurrences in groups.items():
-        grouped_errors.append({"lane": key[0], "node": key[1], "error": key[2], "field_path": key[3],
-                               "field_type": key[4], "count": len(occurrences),
+        grouped_errors.append({"lane": key[0], "node": key[1], "error": key[2],
+                               "validation_code": key[3], "field_path": key[4],
+                               "field_type": key[5], "count": len(occurrences),
                                "activity_count": len({item.get("activity_id") for item in occurrences}),
                                "first_at": occurrences[0].get("occurred_at"),
                                "last_at": occurrences[-1].get("occurred_at")})
     grouped_errors.sort(key=lambda row: (-row["count"], row["first_at"] or ""))
+    planner_events = [item for item in call_events
+                      if item.get("node") in {"InboxActionPlanner", "FeedActionPlanner"}]
+    output_failures = [item for item in planner_events
+                       if item.get("event_type") == "llm_json_postprocess_error"]
+    retry_events = [item for item in planner_events
+                    if item.get("event_type") == "llm_json_attempt"
+                    and (item.get("details") or {}).get("status") == "retry_scheduled"]
+    recovered = {item.get("activity_id") for item in planner_events
+                 if item.get("event_type") == "llm_json_attempt"
+                 and item.get("activity_id")
+                 and (item.get("details") or {}).get("status") == "valid"
+                 and (item.get("details") or {}).get("json_attempt") == 2}
+    planner_final_failures = {item.get("activity_id") for item in errors
+                              if item.get("node") == "ActionPlanner"
+                              and item.get("activity_id")
+                              and item.get("lane") in {"inbox", "feed"}}
+    planner_failure_types = Counter(
+        ((item.get("details") or {}).get("json_postprocess") or {}).get("validation_code")
+        or ((item.get("details") or {}).get("json_postprocess") or {}).get("shape_hint")
+        or "unknown" for item in output_failures)
     status = session_status(data_root, session_id, now=now)
     health = status["recorder_health"]
     dropped = sum(int(item.get("dropped_count") or 0) for item in health)
@@ -340,6 +362,10 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "window_started_at": manifest["started_at"], "window_ends_at": manifest["ends_at"],
                 "tail_ends_at": manifest["tail_ends_at"], "session_state": session_status(data_root, session_id)["state"],
                 "events": len(events), "run_count": len(runs), "error_count": len(errors),
+                "planner_output_failures": len(output_failures),
+                "planner_retries_scheduled": len(retry_events),
+                "planner_recovered_activities": len(recovered),
+                "planner_final_failures": len(planner_final_failures),
                 "damaged_event_lines": damaged, "dropped_events": dropped,
                 "lane_statuses": {key: dict(value) for key, value in lane_counts.items()},
                 "effect_statuses": effect_statuses,
@@ -372,7 +398,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     for path in directory.glob("events-*.jsonl"):
         shutil.copyfile(path, events_dir / path.name)
     with (destination / "errors.csv").open("w", encoding="utf-8", newline="") as output:
-        columns = ("lane", "node", "error", "field_path", "field_type", "count", "activity_count", "first_at", "last_at")
+        columns = ("lane", "node", "error", "validation_code", "field_path", "field_type",
+                   "count", "activity_count", "first_at", "last_at")
         writer = csv.DictWriter(output, fieldnames=columns)
         writer.writeheader()
         writer.writerows(grouped_errors)
@@ -387,10 +414,16 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     lines.extend(["", "## Scheduler attempts", "",
                   f"- {coverage['scheduler_statuses'] if scheduler_runs else 'NOT_OBSERVED'}",
                   "", "## Confirmed effects", "", f"- {effect_statuses}",
+                  "", "## ActionPlanner output", "",
+                  f"- Generated calls: {sum(item.get('event_type') == 'llm_call' for item in planner_events)}",
+                  f"- Output validation failures: {len(output_failures)}; by safe code or shape: {dict(planner_failure_types)}",
+                  f"- Retries scheduled: {len(retry_events)}; recovered activities: {len(recovered)}; "
+                  f"final path failures: {len(planner_final_failures)}",
                   "", "## Repeated errors", ""])
     for row in grouped_errors:
         lines.append(f"- {row['lane'] or 'parent'} / {row['node'] or 'unknown'} / {row['error']}: "
-                     f"{row['count']} events, {row['activity_count']} activities; field `{row['field_path'] or '-'}`")
+                     f"{row['count']} events, {row['activity_count']} activities; "
+                     f"validation `{row['validation_code']}`; field `{row['field_path'] or '-'}`")
     if not grouped_errors:
         lines.append("- No recorded errors. Check lane coverage and recorder health before calling this a pass.")
     if unclosed:

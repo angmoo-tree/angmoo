@@ -91,8 +91,14 @@ class SocialLane:
 
     async def plan(self, state):
         receipt = {}
+        async def before_retry(_attempt):
+            try:
+                await self.guard({**state, "stage": "ActionPlanner"})
+            except Exception as exc:
+                raise ActivityRetryGuardError(exc) from exc
         decision = await self.provider.plan(lane=self.lane, context=state["decision_context"],
-            candidates=self.selected(state), delivery=self.delivery(state), on_input_receipt=receipt.update)
+            candidates=self.selected(state), delivery=self.delivery(state),
+            on_input_receipt=receipt.update, before_json_retry=before_retry)
         return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):

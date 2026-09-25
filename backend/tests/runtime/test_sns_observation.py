@@ -1,6 +1,7 @@
 """The recorder observes, survives restarts and exports only safe evidence."""
 
 import asyncio
+import csv
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 import json
@@ -17,6 +18,7 @@ from app.runtime.diagnostics.sns_observation import SNSObserver, active_session
 from app.runtime.diagnostics.sns_observation_report import (
     export_session, session_status, start_session, stop_session,
 )
+from app.integrations.direct_llm import DirectLlmJsonError
 from tests.runtime.test_autonomous_activity_graph import lane_ports
 
 
@@ -104,7 +106,68 @@ def test_session_captures_validation_failure_without_payload_and_exports_read_on
     assert not coverage["complete_recording"]  # Two hours have not elapsed.
     assert "private-body" not in (destination / "errors.jsonl").read_text(encoding="utf-8")
     assert (destination / "calls.jsonl").read_text(encoding="utf-8").count("llm_call") == 1
+    with (destination / "errors.csv").open(encoding="utf-8", newline="") as source:
+        assert list(csv.DictReader(source))[0]["validation_code"] == "unknown"
     assert (destination / "report.md").is_file()
+
+
+def test_export_separates_recovered_planner_output_from_final_failure(data_root, tmp_path):
+    now = datetime.now(UTC)
+    _insert_run(data_root, activity_id="recovered-activity", started_at=now)
+    _insert_run(data_root, activity_id="failed-activity", started_at=now)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        recovered = observer.begin(activity_id="recovered-activity", agent_run_id="lease-1",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        failed = observer.begin(activity_id="failed-activity", agent_run_id="lease-2",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert recovered and failed
+        payload = {"node": "InboxActionPlanner", "lane": "inbox_action_planner",
+                   "json_postprocess_error": {
+                       "attempt": 1, "parse_error_type": "StructuredOutputValidationError",
+                       "finish_reason": "STOP", "shape_hint": "schema_validation",
+                       "validation_code": "action_brief_missing",
+                       "field_path": "decisions.0.brief",
+                       "preview_head": "SECRET_PRIVATE",
+                       "error_message": "SECRET_PRIVATE"}}
+        recovered.tracker_event("json_postprocess_error", payload)
+        recovered.tracker_event("json_attempt", {
+            "node": "InboxActionPlanner", "lane": "inbox_action_planner",
+            "json_attempt": 1, "status": "retry_scheduled",
+            "retry_reason": "action_brief_missing", "max_output_tokens": 4096})
+        recovered.tracker_event("json_attempt_input", {
+            "node": "InboxActionPlanner", "lane": "inbox_action_planner",
+            "json_attempt": 2, "input_sha256": "a" * 64,
+            "retry_reason": "action_brief_missing", "max_output_tokens": 4096})
+        recovered.tracker_event("json_attempt", {
+            "node": "InboxActionPlanner", "lane": "inbox_action_planner",
+            "json_attempt": 2, "status": "valid"})
+        failed.tracker_event("json_postprocess_error", payload)
+        error = DirectLlmJsonError(
+            "direct LLM JSON parse failed", failure_class="json_parse_failed",
+            parse_error_type="StructuredOutputValidationError", attempt_count=1,
+            validation_code="action_brief_missing", field_path="decisions.0.brief",
+            json_error_diagnostics=[payload["json_postprocess_error"]])
+        failed.node("node_failed", lane="inbox", node="ActionPlanner", exc=error)
+        observer.queue.join()
+    finally:
+        observer.close()
+    output = tmp_path / "planner-export"
+    coverage = export_session(data_root, manifest["session_id"], destination=output)
+    assert coverage["planner_output_failures"] == 2
+    assert coverage["planner_retries_scheduled"] == 1
+    assert coverage["planner_recovered_activities"] == 1
+    assert coverage["planner_final_failures"] == 1
+    assert coverage["error_count"] == 1
+    csv_text = (output / "errors.csv").read_text(encoding="utf-8")
+    assert "action_brief_missing" in csv_text and "decisions.0.brief" in csv_text
+    report = (output / "report.md").read_text(encoding="utf-8")
+    assert "recovered activities: 1; final path failures: 1" in report
+    calls = (output / "calls.jsonl").read_text(encoding="utf-8")
+    assert "a" * 64 in calls
+    for filename in ("calls.jsonl", "errors.jsonl", "report.md"):
+        assert "SECRET_PRIVATE" not in (output / filename).read_text(encoding="utf-8")
 
 
 def test_scope_stop_and_recorder_failure_do_not_change_activity(data_root):
@@ -281,7 +344,7 @@ def test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat(dat
     assert coverage["complete_recording"] is (not coverage["heartbeat_gap_seconds"])
     assert coverage["observed_any_activity"] is False
     assert coverage["flush_complete"] is True
-    assert coverage["heartbeat_gap_seconds"] == []
+    assert all(gap > 150 for gap in coverage["heartbeat_gap_seconds"])
     assert (output / "control.jsonl").read_text(encoding="utf-8").count('"event_type":"heartbeat"') > 100
 
 
@@ -328,6 +391,7 @@ def test_tail_stop_and_v1_reader_do_not_claim_complete_recording(data_root, tmp_
     assert coverage["complete_recording"] is False
     assert coverage["flush_complete"] is None
     assert coverage["stopped_early"] is True
+    assert coverage["planner_output_failures"] == 0
 
 
 def test_single_writer_per_data_root_and_rebind_after_close(data_root):

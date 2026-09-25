@@ -1,11 +1,14 @@
 import asyncio
+import json
 
 import pytest
 from pydantic import BaseModel
 
 from app.integrations import direct_llm
+from app.providers.contracts import StructuredOutputValidationError
 from app.runtime.autonomous_activity.output_recovery import (
-    MAX_CALL_BUDGET, NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, retry_truncated_json,
+    MAX_CALL_BUDGET, NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET,
+    planner_json_retry, retry_truncated_json,
 )
 
 
@@ -15,7 +18,7 @@ class _Required(BaseModel):
 
 
 def test_retry_policy_is_limited_to_unusable_truncated_output():
-    assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 3, 13)
+    assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 5, 15)
     truncated = {"finish_reason": "MAX_TOKENS", "shape_hint": "truncated_or_unclosed"}
     assert retry_truncated_json(ValueError(), None, truncated, 1)
     assert not retry_truncated_json(ValueError(), None, {**truncated, "finish_reason": "STOP"}, 1)
@@ -24,6 +27,33 @@ def test_retry_policy_is_limited_to_unusable_truncated_output():
     with pytest.raises(Exception) as missing:
         _Required.model_validate({"selected": "p"})
     assert retry_truncated_json(missing.value, {"selected": "p"}, truncated, 1)
+
+
+def test_planner_policy_recovers_only_observed_failures():
+    unfinished = '{"decisions":[{"brief":"unfinished'
+    exc = None
+    try:
+        json.loads(unfinished)
+    except json.JSONDecodeError as caught:
+        exc = caught
+    assert exc is not None
+    truncated = {"finish_reason": "MAX_TOKENS", "shape_hint": "bad_escape"}
+    assert retry_truncated_json(exc, None, truncated, 1)
+    decision = planner_json_retry(exc, None, truncated, 1)
+    assert (decision.reason_code, decision.max_output_tokens) == (
+        "planner_output_truncated", 8192)
+    brief = StructuredOutputValidationError("action_brief_missing", "decisions.0.brief")
+    stopped = planner_json_retry(brief, {"decisions": []},
+                                 {"finish_reason": "STOP"}, 1)
+    assert (stopped.reason_code, stopped.max_output_tokens) == (
+        "action_brief_missing", 4096)
+    assert "decisions.0.brief" in stopped.feedback
+    assert planner_json_retry(exc, None, {"finish_reason": "STOP"}, 1) is None
+    assert planner_json_retry(ValueError("private message"), None, truncated, 1) is None
+    assert planner_json_retry(StructuredOutputValidationError(
+        "decision_target_invalid", "decisions.0.target_id"),
+        {}, {"finish_reason": "STOP"}, 1) is None
+    assert planner_json_retry(brief, {}, {"finish_reason": "STOP"}, 2) is None
 
 
 def _context():

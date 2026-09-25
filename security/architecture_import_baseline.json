@@ -1,7 +1,7 @@
 {
-  "edge_count": 4974,
-  "external_import_count": 3693,
-  "module_count": 1260,
+  "edge_count": 4980,
+  "external_import_count": 3696,
+  "module_count": 1261,
   "modules": [
     {
       "external_imports": [],
@@ -14526,11 +14526,30 @@
     },
     {
       "external_imports": [
+        "json",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.providers.contracts"
+      ],
       "module": "app.runtime.autonomous_activity.output_recovery",
       "path": "backend/app/runtime/autonomous_activity/output_recovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.schemas.resident_planning",
+        "app.domains.social.schemas.feed",
+        "app.domains.world_characters.schemas.activity_state",
+        "app.providers.contracts",
+        "app.providers.gemini"
+      ],
+      "module": "app.runtime.autonomous_activity.planner_contract",
+      "path": "backend/app/runtime/autonomous_activity/planner_contract.py",
       "wildcard_imports": []
     },
     {
@@ -14548,12 +14567,11 @@
         "app.domains.relationships.policies.interpretation_prompt",
         "app.domains.routines.policies.writer_outputs",
         "app.domains.routines.schemas.resident_planning",
-        "app.domains.social.schemas.feed",
-        "app.domains.world_characters.schemas.activity_state",
         "app.integrations.direct_llm",
         "app.providers.gemini",
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.output_recovery",
+        "app.runtime.autonomous_activity.planner_contract",
         "app.runtime.autonomous_activity.queries",
         "app.runtime.social.feed_reaction_provider"
       ],
@@ -14632,6 +14650,7 @@
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
         "app.runtime.autonomous_activity.output_recovery",
+        "app.runtime.autonomous_activity.planner_contract",
         "app.runtime.autonomous_activity.provider",
         "app.runtime.autonomous_activity.queries",
         "app.runtime.autonomous_activity.recall",

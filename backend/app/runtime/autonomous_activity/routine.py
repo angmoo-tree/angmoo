@@ -14,7 +14,8 @@ from app.domains.world_characters.service.activity_state import settle_state
 from app.providers.gemini import build_gemini_developer_response_schema
 from app.runtime.autonomous_activity.contracts import Candidate, identity_key
 from app.runtime.autonomous_activity.graph import LanePorts
-from app.runtime.autonomous_activity.provider import ActivityProvider, ActionOutput, PLANNER_INSTRUCTIONS, parse_action
+from app.runtime.autonomous_activity.provider import ActivityProvider, PLANNER_INSTRUCTIONS
+from app.runtime.autonomous_activity.planner_contract import ActionOutput, parse_action
 from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError, FIRST_OUTPUT_TOKENS
 from app.runtime.autonomous_activity.queries import routine_query
 from app.runtime.autonomous_activity.recall import SelectedRecall, context_memories, split_validation

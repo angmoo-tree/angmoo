@@ -5,6 +5,22 @@ from datetime import datetime
 from typing import Any, Protocol
 
 
+class StructuredOutputValidationError(ValueError):
+    """A fixed application validation code with a structural field path."""
+
+    def __init__(self, code: str, field_path: str) -> None:
+        self.validation_code = code
+        self.field_path = field_path
+        super().__init__(code)
+
+
+@dataclass(frozen=True)
+class JsonRetryDecision:
+    reason_code: str
+    max_output_tokens: int
+    feedback: str
+
+
 @dataclass(frozen=True)
 class ProviderCapabilities:
     text: bool = False
