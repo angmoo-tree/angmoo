@@ -10823,6 +10823,28 @@
           ]
         }
       ]
+    },
+    {
+      "id": "sns-outbox-v20-alembic-head-oracle-20260926",
+      "implementation_commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "reason": "The v20 outbox migration advances the single Alembic head from 0097 to 0098.",
+      "review": "Exact committed assertion transition for the protected Alembic-head test.",
+      "source_blobs": {
+        "backend/tests/migrations/test_alembic_layout.py": "134ec0900928884387b8971c27b2bbb84d7ed75e"
+      },
+      "assertions": [
+        {
+          "node": "tests/migrations/test_alembic_layout.py::test_alembic_heads_from_outside_backend",
+          "before": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260923_0097 (head)'"
+          ],
+          "after": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260924_0098 (head)'"
+          ]
+        }
+      ]
     }
   ]
 }
