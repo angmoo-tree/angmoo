@@ -3,6 +3,7 @@ import { proxyBackend } from "@/lib/server/backend";
 const DEFAULT_PROXY_MAX_BYTES = 1024 * 1024;
 const LORE_UPLOAD_PROXY_MAX_BYTES = 10 * 1024 * 1024 + 256 * 1024;
 const PROFILE_MEDIA_PROXY_MAX_BYTES = 8_000_000 + 256 * 1024;
+const CHARACTER_CARD_PROXY_MAX_BYTES = 28_000_000 + 256 * 1024;
 const FORWARDED_COOKIE_NAMES = new Set([
   "angmoo_browser_session",
   "angmoo_google_signup_pending",
@@ -192,7 +193,22 @@ function isProfileMediaUpload(path: string[], method: string) {
   );
 }
 
+function isCharacterCardUpload(path: string[], method: string) {
+  return (
+    method === "POST" &&
+    path.length === 4 &&
+    path[0] === "agents" &&
+    path[1] === "drafts" &&
+    Boolean(path[2]) &&
+    !path[2].includes("/") &&
+    path[3] === "card"
+  );
+}
+
 function requestBodyLimit(path: string[], method: string) {
+  if (isCharacterCardUpload(path, method)) {
+    return CHARACTER_CARD_PROXY_MAX_BYTES;
+  }
   if (isLoreUpload(path, method)) {
     return LORE_UPLOAD_PROXY_MAX_BYTES;
   }

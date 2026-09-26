@@ -7,7 +7,7 @@ import zlib
 import pytest
 from PIL import Image
 
-from app.integrations.character_cards.parser import CardParseError, parse_card
+from app.integrations.character_cards.parser import MAX_FILE_BYTES, CardParseError, parse_card
 from app.domains.characters.service.card_mapping import map_card
 
 
@@ -72,6 +72,17 @@ def test_plain_truncated_and_corrupt_png_rejected():
     broken[30] ^= 1
     with pytest.raises(CardParseError, match="crc"):
         parse_card(bytes(broken))
+
+
+def test_file_cap_remains_distinct_from_upload_request_cap():
+    valid = png((b"chara", base64.b64encode(encoded(card()))))
+    padding = MAX_FILE_BYTES + 1 - len(valid) - 12
+    oversized = valid[:-12] + chunk(b"pADd", b"x" * padding) + valid[-12:]
+
+    assert len(oversized) == MAX_FILE_BYTES + 1
+    assert 4 * ((len(oversized) + 2) // 3) <= 28_000_000
+    with pytest.raises(CardParseError, match="card_file_size_limit"):
+        parse_card(oversized)
 
 
 def test_complexity_unknown_version_and_bad_field_rejected():

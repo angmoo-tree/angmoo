@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:world-package-proxy": "node ./scripts/test-world-package-proxy.mjs",
+    "test:character-card-proxy": "node ./scripts/test-character-card-proxy.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
