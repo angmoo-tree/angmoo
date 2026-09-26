@@ -106,6 +106,11 @@ def build_routine_prompt_context(
     }
 
 
+# The frozen split-evidence map names this binding; runtime callers use the
+# public builder and pass their checkpointed decision instant explicitly.
+_common_context = build_routine_prompt_context
+
+
 def allowed_continuity_facts(context: RoutinePostContext) -> list[str]:
     if context.previous_beat is None or context.previous_post is None:
         return []
