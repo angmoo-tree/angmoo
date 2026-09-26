@@ -1,4 +1,5 @@
 import asyncio
+from copy import deepcopy
 from datetime import datetime
 import pytest
 
@@ -22,6 +23,7 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             initialize_from_last_success(db, actor=fixture.world_character)
             db.commit()
             shared = shared_input(ctx, fixture.world_character, fixture.world)
+            shared["now"] = ctx.run_started_at.isoformat()
             async def guard(state):
                 return {}
             from app.runtime.autonomous_activity.combined_lanes import CombinedRoutineLane
@@ -34,6 +36,15 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             fake = FakeRoutineProvider()
             async def call(_provider, **kwargs):
                 calls.append(kwargs["node"])
+                if kwargs["node"] in {"RoutineActionPlanner", "RoutineDecisionDraft", "RoutineWriter"}:
+                    prompt_context = kwargs["payload"].get("context", kwargs["payload"])
+                    temporal = prompt_context["routine"].get("temporal_context")
+                    if temporal is not None:
+                        assert temporal["local_datetime"] == "2026-08-10T10:05:00+09:00"
+                        assert temporal["activity_window"]["contains_reference_time"] is True
+                    else:
+                        assert kwargs["node"] == "RoutineWriter"  # An older saved decision has no time block.
+                    assert "conclude" in kwargs["system"]
                 generation = await fake.generate(resident_context=ctx, routine_context=lane.prepared.context,
                     beat=lane.prepared.beat, tracker=RunLlmTracker(max_calls=2))
                 if kwargs["node"] in {"RoutineActionPlanner", "RoutineDecisionDraft"}:
@@ -53,6 +64,7 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             monkeypatch.setattr(ActivityProvider, "call", call)
             result = await build_lane("routine", lane.ports(), combined=combined).ainvoke({"identity": {"activity_id": ctx.run_id}, "shared_context": shared})
             assert calls == (["RoutineDecisionDraft"] if combined else ["RoutineActionPlanner", "RoutineWriter"])
+            assert result["decision_context"]["routine"]["temporal_context"]["as_of_utc"] == ctx.run_started_at.isoformat()
             assert result["result"]["public_action_count"] == 1
             assert result["result"]["settlement"]["state"] == "updated"
             current = read_state(db, world_id=fixture.world.id, actor_id=fixture.world_character.id)
@@ -61,6 +73,29 @@ def test_routine_nodes_publish_state_and_restore_only_canonical_references(monke
             replay = await lane.execute(result)
             assert replay["executions"][0]["routine_outcome"] == "REUSED_SUCCESS"
             assert replay["executions"][0]["publish_result"]["public_action_count"] == 0
+            advanced = deepcopy(result)
+            advanced["shared_context"]["now"] = _utc(datetime(2026, 8, 10, 12, 5)).isoformat()
+            if combined:
+                # A valid draft in an old checkpoint is reused without another request.
+                old = deepcopy(advanced)
+                old["decision_context"]["routine"].pop("temporal_context")
+                assert (await lane.write(old))["drafts"]
+                assert calls == ["RoutineDecisionDraft"]
+
+                # An invalid provisional draft follows the existing Writer recovery path.
+                reservations = []
+                lane.provider.ledger = SimpleNamespace(reserve=reservations.append)
+                advanced["decision"]["provisional_draft"] = None
+                assert (await lane.write(advanced))["drafts"]
+                assert calls == ["RoutineDecisionDraft", "RoutineWriter"]
+                assert len(reservations) == 1
+            else:
+                # Retried Writer receives the saved decision time, not the advanced clock.
+                assert (await lane.write(advanced))["drafts"]
+                old = deepcopy(advanced)
+                old["decision_context"]["routine"].pop("temporal_context")
+                assert (await lane.write(old))["drafts"]
+                assert calls == ["RoutineActionPlanner", "RoutineWriter", "RoutineWriter", "RoutineWriter"]
     asyncio.run(scenario())
 
 

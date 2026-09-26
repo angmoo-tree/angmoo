@@ -1,7 +1,7 @@
 {
-  "edge_count": 5017,
-  "external_import_count": 3706,
-  "module_count": 1265,
+  "edge_count": 5023,
+  "external_import_count": 3710,
+  "module_count": 1266,
   "modules": [
     {
       "external_imports": [],
@@ -6855,6 +6855,7 @@
       "external_imports": [
         "__future__",
         "copy",
+        "datetime",
         "typing"
       ],
       "imports": [
@@ -6862,6 +6863,7 @@
         "app.domains.routine_posts.contracts.context",
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.schemas",
+        "app.domains.routine_posts.service.temporal_context",
         "app.domains.routine_posts.utils.text",
         "app.domains.routines.service",
         "app.providers.gemini"
@@ -6885,10 +6887,24 @@
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
+        "app.domains.routine_posts.service.temporal_context",
         "app.integrations.direct_llm"
       ],
       "module": "app.domains.routine_posts.service.generation",
       "path": "backend/app/domains/routine_posts/service/generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.service"
+      ],
+      "module": "app.domains.routine_posts.service.temporal_context",
+      "path": "backend/app/domains/routine_posts/service/temporal_context.py",
       "wildcard_imports": []
     },
     {
@@ -7910,7 +7926,9 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.routines.policies.activity_state"
+        "app.domains.routines.policies.activity_state",
+        "app.domains.routines.policies.planning",
+        "app.domains.routines.service.scheduling"
       ],
       "module": "app.domains.routines.service",
       "path": "backend/app/domains/routines/service/__init__.py",
@@ -14725,6 +14743,7 @@
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
+        "app.domains.routine_posts.service.temporal_context",
         "app.domains.routines.service.joint_activity",
         "app.domains.world_characters.schemas.activity_state",
         "app.domains.world_characters.service.activity_state",

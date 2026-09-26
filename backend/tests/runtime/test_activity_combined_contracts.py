@@ -1,9 +1,10 @@
 import asyncio
+import json
 from types import SimpleNamespace
 
 import pytest
 
-from app.runtime.autonomous_activity.generation_contracts import parse_envelope, parse_social_draft
+from app.runtime.autonomous_activity.generation_contracts import generation_mode, parse_envelope, parse_social_draft
 from app.runtime.autonomous_activity.planner_contract import parse_action
 from app.runtime.autonomous_activity.combined_provider import CombinedActivityProvider, RecoveryLedger
 from app.runtime.autonomous_activity import provider as transport
@@ -79,3 +80,14 @@ def test_combined_social_calls_transport_once_and_retains_all_decision_fields(mo
     assert result["state_status"] == "valid"
     assert "relationship_metrics" in result and "judged_at" in result
     assert result["provisional_draft"] == {"replies": []}
+
+
+def test_added_routine_time_context_uses_existing_split_boundary() -> None:
+    baseline = {"decision_context": {"routine": {"padding": ""}}, "candidates": []}
+    size = len(json.dumps({"context": baseline["decision_context"],
+        "targets": baseline["candidates"]}, ensure_ascii=False))
+    baseline["decision_context"]["routine"]["padding"] = "x" * (40000 - size)
+    assert asyncio.run(generation_mode(baseline)) == {"generation_mode": "combined"}
+    with_time = {"decision_context": {"routine": {**baseline["decision_context"]["routine"],
+        "temporal_context": {"local_datetime": "2026-09-26T11:15:00+09:00"}}}, "candidates": []}
+    assert asyncio.run(generation_mode(with_time)) == {"generation_mode": "split"}
