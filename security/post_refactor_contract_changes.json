@@ -11158,6 +11158,58 @@
           ]
         }
       ]
+    },
+    {
+      "id": "sns-planner-recovery-and-observer-oracle-20260926",
+      "implementation_commit": "02004120c34968e7b9cca60fb385c5ec9921b6c9",
+      "reason": "Planner recovery reserves five calls instead of three; accelerated observer heartbeat gaps are classified as incomplete when Windows scheduling creates more than 150 virtual seconds between heartbeats.",
+      "review": "Exact committed transitions of two protected tests introduced earlier in the SNS stabilization branch; no frozen or introduction evidence replaced.",
+      "source_blobs": {
+        "backend/tests/runtime/test_activity_output_recovery.py": "969aeaf1c632fcde3ac247302754de60a36d9350",
+        "backend/tests/runtime/test_sns_observation.py": "02469831df13db9ef8a47971f36a5c2c9ec14a30"
+      },
+      "assertions": [
+        {
+          "node": "tests/runtime/test_activity_output_recovery.py::test_retry_policy_is_limited_to_unusable_truncated_output",
+          "before": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 3, 13)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ],
+          "after": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 5, 15)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_sns_observation.py::test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat",
+          "before": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert coverage['heartbeat_gap_seconds'] == []",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "after": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ]
+        }
+      ]
     }
   ]
 }
