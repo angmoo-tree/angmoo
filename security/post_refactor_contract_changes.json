@@ -10845,6 +10845,319 @@
           ]
         }
       ]
+    },
+    {
+      "id": "sns-protected-tests-ab38040e-20260926",
+      "implementation_commit": "ab38040e1d940c9c1424f7443d4afcc4aad142fd",
+      "reason": "V2 memory revalidation keeps source-bound candidate evidence.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/memory/test_episode_hybrid_reader.py": "a1d05bd3231b54fb9ea02ee4feffede1a5dd5db9"
+      },
+      "assertions": [
+        {
+          "node": "tests/memory/test_episode_hybrid_reader.py::test_candidate_version_hash_and_scope_are_not_granted_by_projection",
+          "before": [
+            "assert not reader.revalidate(request, (replace(candidate, version=999),))",
+            "assert not reader.revalidate(request, (replace(candidate, content_hash='f' * 64),))",
+            "assert not reader.revalidate(replace(request, scope=replace(request.scope, owner_id='other')), (candidate,))",
+            "assert reader.hydrate(request, accepted) == ((), ())"
+          ],
+          "after": [
+            "assert not reader.revalidate(request, (replace(candidate, version=999),))",
+            "assert not reader.revalidate(request, (replace(candidate, content_hash='f' * 64),))",
+            "assert not reader.revalidate(replace(request, scope=replace(request.scope, owner_id='other')), (candidate,))",
+            "assert reader.hydrate(request, accepted) == ((), ())",
+            "assert hydration.records == () and hydration.sources == ()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-9bfa939a-20260926",
+      "implementation_commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "reason": "SQLite v20 advances the diagnostic schema head.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/runtime/test_current_schema_diagnostics.py": "a699053aa4d0abc7277385d64427fdf30baa5748"
+      },
+      "assertions": [
+        {
+          "node": "tests/runtime/test_current_schema_diagnostics.py::test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph",
+          "before": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260923_0097']",
+            "assert scripts.get_revision('20260923_0097').down_revision == RUNTIME_MIGRATION_HEAD"
+          ],
+          "after": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260924_0098']",
+            "assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == '20260923_0097'",
+            "assert load_sqlite_manifest(19).source_revision == '20260918_0096'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-78aad157-20260926",
+      "implementation_commit": "78aad157ae1530b30238eed78e3d4b5eac9c3c33",
+      "reason": "Versioned four-call activity updates protected inventory, parent, Routine and SQLite assertions.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/memory/test_hybrid_episode_inventory.py": "aac5fc261abbb320341ffb7dd2d3e8311856170b",
+        "backend/tests/memory/test_manual_relationship_followup.py": "afae63b79b965f419334e1d65724dcbee11d5086",
+        "backend/tests/runtime/test_personalized_parent.py": "e86c14fcc0bfa5ea5f9247117b066518adcfc9dd",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "3c7e91d7521280d581daa57beb02c56a9d1b3905",
+        "backend/tests/test_l3_er2_sqlite_canonical_adapter.py": "f08e6fef0463184336dc30f57cdff4b7e82fecc2"
+      },
+      "assertions": [
+        {
+          "node": "tests/memory/test_hybrid_episode_inventory.py::test_current_inventory_preserves_predecessor_and_runtime_contract",
+          "before": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 19",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ],
+          "after": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 20",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ]
+        },
+        {
+          "node": "tests/memory/test_manual_relationship_followup.py::test_v18_migration_preserves_v17_manifest_and_fresh_parity",
+          "before": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(19).schema_digest"
+          ],
+          "after": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(20).schema_digest"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_parent.py::test_parent_preserves_completed_paths_and_resumes_busy_settlement",
+          "before": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == {'inbox', 'routine'}",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ],
+          "after": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == ({'inbox'} if version == 2 else {'inbox', 'routine'})",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_routine_lane.py::test_routine_nodes_publish_state_and_restore_only_canonical_references",
+          "before": [
+            "assert calls == ['RoutineActionPlanner', 'RoutineWriter']",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert kwargs['schema']['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ],
+          "after": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ]
+        },
+        {
+          "node": "tests/test_l3_er2_sqlite_canonical_adapter.py::test_file_backed_baseline_records_lineage_pragmas_and_schema_digest",
+          "before": [
+            "assert Path(first.database_path).is_file()",
+            "assert Path(first.database_path) == (tmp_path / '앵무 데이터' / 'canonical' / 'generations' / 'test-v1' / 'angmoo.sqlite3').resolve()",
+            "assert first.schema_version == SQLITE_SCHEMA_VERSION",
+            "assert first.source_revision == SOURCE_ALEMBIC_REVISION",
+            "assert first.source_migration_count == SOURCE_ALEMBIC_MIGRATION_COUNT",
+            "assert first.canonical_table_count == EXPECTED_CANONICAL_TABLE_COUNT",
+            "assert first.schema_digest_matches is True",
+            "assert first.foreign_keys is True",
+            "assert first.journal_mode == 'WAL'",
+            "assert first.synchronous == 'FULL'",
+            "assert first.busy_timeout_ms == 5000",
+            "assert first.wal_autocheckpoint_pages == 1000",
+            "assert first.page_size == 4096",
+            "assert database.checkpoint()[0] == 0",
+            "assert len(partial_indexes) == 15",
+            "assert lore_columns['embedding'] == 'TEXT'",
+            "assert reopened.schema_digest == first.schema_digest",
+            "assert reopened.schema_digest_matches is True"
+          ],
+          "after": [
+            "assert Path(first.database_path).is_file()",
+            "assert Path(first.database_path) == (tmp_path / '앵무 데이터' / 'canonical' / 'generations' / 'test-v1' / 'angmoo.sqlite3').resolve()",
+            "assert first.schema_version == SQLITE_SCHEMA_VERSION",
+            "assert first.source_revision == SOURCE_ALEMBIC_REVISION",
+            "assert first.source_migration_count == SOURCE_ALEMBIC_MIGRATION_COUNT",
+            "assert first.canonical_table_count == EXPECTED_CANONICAL_TABLE_COUNT",
+            "assert first.schema_digest_matches is True",
+            "assert first.foreign_keys is True",
+            "assert first.journal_mode == 'WAL'",
+            "assert first.synchronous == 'FULL'",
+            "assert first.busy_timeout_ms == 5000",
+            "assert first.wal_autocheckpoint_pages == 1000",
+            "assert first.page_size == 4096",
+            "assert database.checkpoint()[0] == 0",
+            "assert len(partial_indexes) == 17",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= {index['name'] for index in partial_indexes}",
+            "assert lore_columns['embedding'] == 'TEXT'",
+            "assert reopened.schema_digest == first.schema_digest",
+            "assert reopened.schema_digest_matches is True"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-9ddeb8b5-20260926",
+      "implementation_commit": "9ddeb8b50c5ff976455b33d54711dfe8a8a4edf4",
+      "reason": "Routine local-time context is delivered through its validated generation and resume paths.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/routine_posts/test_generation.py": "cfd184cc089b392ea907ef0716f5a48e1e787115",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "0c229b00e3d727acb283efaf22611c20e0e8b931"
+      },
+      "assertions": [
+        {
+          "node": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity",
+          "before": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert ('thought' in kwargs['response_schema'].get('properties', {})) == thought_enabled",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == expected_plan",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "assert result.draft._activity_thought.text == '즐거운 마음으로 시작하고 싶다.'",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'",
+            "assert snapshot.snapshot_id in call['system_prompt']",
+            "assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call['system_prompt']"
+          ],
+          "after": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert ('thought' in kwargs['response_schema'].get('properties', {})) == thought_enabled",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == expected_plan",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert writer_input['temporal_context'] == json.loads(calls[0]['user_prompt'])['temporal_context']",
+            "assert writer_input['temporal_context']['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert writer_input['temporal_context']['activity_window']['contains_reference_time'] is True",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "assert 'temporal_context' in json.loads(call['user_prompt'])",
+            "assert 'prior posts' in call['system_prompt'].lower()",
+            "assert result.draft._activity_thought.text == '즐거운 마음으로 시작하고 싶다.'",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'",
+            "assert snapshot.snapshot_id in call['system_prompt']",
+            "assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call['system_prompt']"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_routine_lane.py::test_routine_nodes_publish_state_and_restore_only_canonical_references",
+          "before": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ],
+          "after": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['decision_context']['routine']['temporal_context']['as_of_utc'] == ctx.run_started_at.isoformat()",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert (await lane.write(old))['drafts']",
+            "assert calls == ['RoutineDecisionDraft']",
+            "assert (await lane.write(advanced))['drafts']",
+            "assert calls == ['RoutineDecisionDraft', 'RoutineWriter']",
+            "assert len(reservations) == 1",
+            "assert (await lane.write(advanced))['drafts']",
+            "assert (await lane.write(old))['drafts']",
+            "assert calls == ['RoutineActionPlanner', 'RoutineWriter', 'RoutineWriter', 'RoutineWriter']",
+            "assert 'conclude' in kwargs['system']",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]",
+            "assert temporal['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert temporal['activity_window']['contains_reference_time'] is True",
+            "assert kwargs['node'] == 'RoutineWriter'"
+          ]
+        }
+      ]
     }
   ]
 }
