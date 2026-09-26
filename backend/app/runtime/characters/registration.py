@@ -104,6 +104,8 @@ def register_draft(db, user, draft, data):
         db.add(CharacterActiveWorld(character_id=character.id, world_character_id=row.id,
             selected_at=datetime.now(UTC), idempotency_key=f"register:{draft.id}", version=1))
         ensure_setting(db, character.id, commit=False)
+        from app.domains.characters.repository.image_settings import ensure_image_generation_setting
+        ensure_image_generation_setting(db, character.id, commit=False)
         source = db.scalar(select(models.CharacterCardSource).where(models.CharacterCardSource.draft_id == draft.id))
         if source:
             source.character_id = character.id

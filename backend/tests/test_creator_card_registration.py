@@ -143,3 +143,25 @@ def test_foreign_media_and_stale_card_replacement_cannot_change_draft(db):
         drafts.update_draft(session, owner, draft.id, schemas.AgentCreationDraftUpdate(
             revision=imported.revision, avatar_temp_url="/media/drafts/foreign/avatar.webp"), workflows=workflows)
     assert session.get(models.AgentCreationDraft, draft.id).avatar_temp_url is None
+
+
+@pytest.mark.parametrize("account", [False, True])
+def test_private_card_and_receipt_removed_with_existing_deletion_transaction(db, account):
+    from app.runtime.creator_privacy import delete_creator_private_data
+    from app.domains.world_characters.models import CharacterWorldBinding
+    from app.domains.worlds.models import OwnerDefaultWorld
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, schemas.AgentCreationDraftCreate(), workflows=workflows))
+    imported = card_import.import_card(session, owner, draft.id, revision=1, content=card_bytes(), workflows=workflows)["draft"]
+    result = drafts.complete_draft(session, owner, draft.id, schemas.AgentCreationDraftComplete(revision=imported.revision), workflows=workflows)
+    delete_creator_private_data(session, character_ids=[result.character.id], owner_id=owner.id if account else None)
+    session.flush()
+    assert session.scalar(select(models.CharacterCardSource.id)) is None
+    assert session.get(models.CharacterRegistrationReceipt, draft.id) is None
+    assert session.get(models.AgentCreationDraft, draft.id) is None
+    assert session.get(CharacterWorldBinding, result.character.id) is None
+    assert (session.get(OwnerDefaultWorld, owner.id) is None) is account
+    session.rollback()
+    assert session.get(models.CharacterRegistrationReceipt, draft.id) is not None
+    assert card_import.read_source(session, owner, draft.id)["document"]["data"]["name"] == "Original"

@@ -7,7 +7,7 @@ import json
 from typing import Any
 
 from sqlalchemy import Connection, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 from app.domains.routines.models import DailyActivityPlan
 from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
@@ -28,6 +28,16 @@ from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
 from app.runtime.migrations.sqlite_versions.contracts import (
     SqliteMigrationDeltaError,
 )
+from app.runtime.persistence.sqlite_schema import build_sqlite_v1_metadata
+
+
+def _historical_world(session: Session, world_id: str) -> World | None:
+    """Read the frozen predecessor projection, never newly added ORM columns."""
+    columns = build_sqlite_v1_metadata().tables["worlds"].columns
+    return session.get(
+        World, world_id,
+        options=[load_only(*(getattr(World, c.name) for c in columns), raiseload=True)],
+    )
 
 
 MUTABLE_IDENTITY_TABLES = frozenset(
@@ -227,7 +237,7 @@ def verify_v2_to_v3_delta(
             _delta_mismatch()
         session = Session(bind=connection, join_transaction_mode="rollback_only")
         try:
-            world = session.get(World, world_id)
+            world = _historical_world(session, world_id)
             if world is None:
                 _delta_mismatch()
             recomputed = definition_repository.world_contract_hash(session, world)
@@ -308,7 +318,7 @@ def upgrade_v2_to_v3(connection: Connection) -> None:
             )
         )
         for world_id in world_ids:
-            world = session.get(World, world_id)
+            world = _historical_world(session, world_id)
             if world is None:
                 raise ValueError("roleless_world_missing")
             old_world_hash = world.contract_hash

@@ -133,6 +133,23 @@ from app.domains.characters.dependencies import get_tendency_analysis_runner
 router = APIRouter(prefix="/agents", tags=["agents"])
 
 
+@router.post("/drafts/{draft_id}/adopt", response_model=schemas.AgentCreationDraftRead)
+def adopt_agent_draft(draft_id: str, data: schemas.AgentCreationDraftAdopt,
+                      db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user),
+                      workflows: CreatorWorkflows = Depends(get_creator_workflows)):
+    from app.domains.characters.service.drafts import adopt_legacy_draft
+    try:
+        return adopt_legacy_draft(db, user, draft_id, data, workflows=workflows)
+    except errors.AgentCreationDraftNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="이전 초안을 찾을 수 없습니다.") from exc
+    except errors.AgentCreationDraftExpiredError as exc:
+        raise HTTPException(status_code=410, detail="이전 초안의 보관 기간이 지났습니다.") from exc
+    except errors.AgentCreationDraftHandleConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except errors.AgentCreationDraftValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @router.post("/drafts/{draft_id}/card")
 def import_character_card(draft_id: str, data: schemas.CharacterCardUpload,
                           db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user),

@@ -107,6 +107,11 @@
       "module": "app.domains.chat.router.retrieval_diagnostics",
       "endpoint": "clear"
     },
+    "DELETE /api/v1/worlds/{world_id}/icon": {
+      "access": "owner-only",
+      "module": "app.domains.worlds.router",
+      "endpoint": "remove_world_icon"
+    },
     "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
       "access": "owner-only",
       "module": "app.domains.memory.router",
@@ -126,6 +131,11 @@
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "get_agent_draft"
+    },
+    "GET /api/v1/agents/drafts/{draft_id}/card-source": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "read_character_card_source"
     },
     "GET /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/content": {
       "access": "owner-only",
@@ -637,6 +647,11 @@
       "module": "app.domains.chat.router.world_chat",
       "endpoint": "update_world_thread_model"
     },
+    "PATCH /api/v1/worlds/{world_id}/my-profile": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.profile",
+      "endpoint": "patch_my_profile"
+    },
     "PATCH /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",
       "module": "app.domains.world_characters.router.profile",
@@ -652,10 +667,25 @@
       "module": "app.domains.characters.router",
       "endpoint": "create_agent_draft"
     },
+    "POST /api/v1/agents/drafts/{draft_id}/adopt": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "adopt_agent_draft"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/card": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "import_character_card"
+    },
     "POST /api/v1/agents/drafts/{draft_id}/complete": {
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "complete_agent_draft"
+    },
+    "POST /api/v1/agents/drafts/{draft_id}/copy-settings": {
+      "access": "owner-only",
+      "module": "app.domains.characters.router",
+      "endpoint": "copy_character_settings"
     },
     "POST /api/v1/agents/drafts/{draft_id}/enhance-persona": {
       "access": "owner-only",
@@ -927,6 +957,11 @@
       "module": "app.domains.worlds.router",
       "endpoint": "create_world"
     },
+    "POST /api/v1/worlds/default-space/ensure": {
+      "access": "owner-only",
+      "module": "app.domains.worlds.router",
+      "endpoint": "ensure_default_space"
+    },
     "POST /api/v1/worlds/{world_id}/archive": {
       "access": "owner-only",
       "module": "app.domains.worlds.router",
@@ -962,6 +997,11 @@
       "module": "app.domains.chat.router.world_chat_response",
       "endpoint": "retry_world_response"
     },
+    "POST /api/v1/worlds/{world_id}/icon": {
+      "access": "owner-only",
+      "module": "app.domains.worlds.router",
+      "endpoint": "upload_world_icon"
+    },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
       "module": "app.domains.social.router",
@@ -971,6 +1011,16 @@
       "access": "owner-only",
       "module": "app.domains.social.router",
       "endpoint": "write_owner_reply"
+    },
+    "POST /api/v1/worlds/{world_id}/my-profile/ensure": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.profile",
+      "endpoint": "ensure_my_profile"
+    },
+    "POST /api/v1/worlds/{world_id}/my-profile/media": {
+      "access": "owner-only",
+      "module": "app.domains.world_characters.router.profile",
+      "endpoint": "upload_my_profile_media"
     },
     "POST /api/v1/worlds/{world_id}/owner-character": {
       "access": "owner-only",

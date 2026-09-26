@@ -151,3 +151,39 @@ test("settings copy uses same guide and preserves return destination", async ({ 
   await page.keyboard.press("Tab");
   await expect(page.locator(":focus")).toBeVisible();
 });
+
+
+test("same World selection opens existing profile without creating a draft", async ({ page }) => {
+  const state = await fixture(page);
+  await page.route("**/worlds/world-test/characters?surface=studio", route => route.fulfill({json:{
+    schema_version:"studio-world-character-list-v1",world_id:"world-test",
+    items:[{character_id:"source",world_character_id:"source-wc"}],
+  }}));
+  await page.goto("/agents/new?worldId=world-test&mode=copy");
+  await page.getByLabel("설정을 복사할 캐릭터", {exact:true}).selectOption("source");
+  await page.getByRole("button", {name:"저장하고 다음"}).click();
+  await expect(page).toHaveURL(/worlds\/world-test\/characters\/source-wc/);
+  expect(state.writes.filter(item=>item.path.startsWith("/agents/drafts"))).toHaveLength(0);
+});
+
+
+test("legacy draft resumes only after explicit adoption without key setup", async ({ page }) => {
+  const state = await fixture(page);
+  await page.addInitScript(() => sessionStorage.setItem("angmoo.agentCreationDraftId","legacy"));
+  const legacy = {id:"legacy",contract_version:1,revision:1,target_world_id:null,source_kind:"direct",status:"editing",
+    name:"이전 초안",handle:null,one_liner:"보존 소개",personality:"친절함",speech_style:"",worldview:"",topic_preferences:"",safety_rules:""};
+  let adopted = false;
+  await page.route("**/agents/drafts/legacy", route=>route.fulfill({json:legacy}));
+  await page.route("**/agents/drafts/legacy/adopt", route=>{
+    adopted = true;
+    expect(route.request().postDataJSON()).toEqual({revision:1,target_world_id:"world-test"});
+    return route.fulfill({json:{...legacy,contract_version:2,revision:2,target_world_id:"world-test"}});
+  });
+  await page.goto("/agents/new?worldId=world-test");
+  await expect(page.getByRole("button",{name:"이전 초안 이어가기"})).toBeVisible();
+  expect(adopted).toBe(false);
+  await page.getByRole("button",{name:"이전 초안 이어가기"}).click();
+  await expect(page.getByRole("textbox",{name:"이름",exact:true})).toHaveValue("이전 초안");
+  expect(adopted).toBe(true);
+  expect(state.writes.some(row=>/generate|enhance|credential|setup/.test(row.path))).toBe(false);
+});

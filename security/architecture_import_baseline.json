@@ -1,7 +1,7 @@
 {
-  "edge_count": 5087,
-  "external_import_count": 3743,
-  "module_count": 1275,
+  "edge_count": 5095,
+  "external_import_count": 3744,
+  "module_count": 1276,
   "modules": [
     {
       "external_imports": [],
@@ -12577,6 +12577,7 @@
         "app.domains.characters.service.profile",
         "app.domains.identity.service.owner_context",
         "app.domains.world_characters.contracts.owner_identity",
+        "app.domains.world_characters.exceptions",
         "app.domains.world_characters.models",
         "app.domains.world_characters.schemas.identity",
         "app.domains.worlds.service",
@@ -14432,6 +14433,7 @@
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context",
         "app.integrations.media.files",
+        "app.runtime.creator_privacy",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
@@ -15212,6 +15214,7 @@
         "app.integrations.media.files",
         "app.integrations.media.images",
         "app.policies.name_policy",
+        "app.runtime.creator_privacy",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.local_bot.keys",
         "app.runtime.memory_privacy",
@@ -15243,6 +15246,7 @@
         "app.core.ids",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.repository.image_settings",
         "app.domains.characters.schemas",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.media_storage",
@@ -15574,6 +15578,19 @@
       ],
       "module": "app.runtime.contributor_backend",
       "path": "backend/app/runtime/contributor_backend.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.creator_privacy",
+      "path": "backend/app/runtime/creator_privacy.py",
       "wildcard_imports": []
     },
     {
@@ -17207,7 +17224,8 @@
         "app.domains.worlds.infrastructure.definition_repository",
         "app.domains.worlds.infrastructure.sqlalchemy_models",
         "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles",
-        "app.runtime.migrations.sqlite_versions.contracts"
+        "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role",
       "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",

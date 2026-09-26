@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useAuth } from "@/hooks/use-auth";
 import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
-import { studioWorldRoute, worldCharacterDirectoryRoute } from "@/lib/navigation/product-routes";
+import { studioWorldRoute, worldCharacterDirectoryRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { ProfileMediaUploader } from "@/features/characters/components/profile-media-uploader";
 import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
-import { completeAgentDraft, copyAgentSettings, createAgentDraft, getAgentCardSource, getAgentDraft, importAgentCard, listAgents, updateAgentDraft, uploadAgentDraftMedia } from "@/features/characters/api/agents";
+import { adoptLegacyAgentDraft, completeAgentDraft, copyAgentSettings, createAgentDraft, findExistingWorldCharacter, getAgentCardSource, getAgentDraft, importAgentCard, listAgents, updateAgentDraft, uploadAgentDraftMedia } from "@/features/characters/api/agents";
 import type { AgentCreationDraftRead, AgentDetailRead } from "@/features/characters/types/agents";
 
 // ADAPTED: existing creation steps, PersonaField and ProfileMediaUploader.
@@ -55,17 +55,20 @@ function CreationGuide() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [created, setCreated] = useState<AgentDetailRead | null>(null);
   const [restoring, setRestoring] = useState(true);
+  const [legacyDraft, setLegacyDraft] = useState<AgentCreationDraftRead | null>(null);
   const requestEpoch = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
     const epoch = ++requestEpoch.current;
-    const id = sessionStorage.getItem(storageKey);
+    const currentId = sessionStorage.getItem(storageKey);
+    const id = currentId ?? sessionStorage.getItem("angmoo.agentCreationDraftId");
     async function restore() {
       try {
         if (id) {
           const value = await getAgentDraft(id);
           if (!cancelled && epoch === requestEpoch.current) {
+            if (!currentId && value.contract_version === 1) { setLegacyDraft(value); return; }
             if (value.contract_version !== 2 || (target && value.target_world_id !== target)) throw new Error("이 초안의 대상 World를 확인해주세요.");
             setDraft(value);
             setMode(value.source_kind === "external" ? "external" : value.source_kind === "card" ? "card" : "direct");
@@ -110,6 +113,11 @@ function CreationGuide() {
     return saved;
   }
   async function start() {
+    if (mode === "copy") {
+      if (!copyId || !target) throw new Error("설정을 복사할 캐릭터를 선택해주세요.");
+      const existing = await findExistingWorldCharacter(target, copyId);
+      if (existing) { router.push(worldCharacterProfileRoute(target, existing)); return; }
+    }
     let current = draft;
     if (!current) {
       current = await createAgentDraft({ target_world_id: target, execution_mode: mode === "external" ? "local" : "llm" });
@@ -167,6 +175,14 @@ function CreationGuide() {
     <p>{target ? "이 World에서 활동할 캐릭터" : "기본 SNS 공간에서 활동할 캐릭터"}를 등록합니다. 생성과 카드 가져오기에는 AI 호출이나 API 키가 필요하지 않습니다.</p>
     <ol className="flex flex-wrap gap-3" aria-label="생성 단계">{STEPS.map((label, index) => <li key={label} aria-current={index === step ? "step" : undefined}>{index + 1}. {label}{index === step ? " · 현재" : ""}</li>)}</ol>
     {error && <p role="alert">{error}</p>}
+    {legacyDraft && !draft && <aside className="space-y-3" aria-label="이전 초안 복구">
+      <p>이전에 저장한 ‘{legacyDraft.name || "이름 없는 앵무"}’ 초안이 있습니다. 설정과 이미지를 이어서 편집할 수 있습니다. 등록은 이 공간에 자율활동 OFF로 진행하며, 이전 키를 자동 연결하지 않습니다.</p>
+      <Button disabled={busy} onClick={() => void perform(async () => {
+        const value = await adoptLegacyAgentDraft(legacyDraft.id, legacyDraft.revision, target);
+        setDraft(value); setLegacyDraft(null); setStep(1);
+        sessionStorage.setItem(storageKey, value.id); sessionStorage.removeItem("angmoo.agentCreationDraftId");
+      })}>이전 초안 이어가기</Button>
+    </aside>}
     <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); void perform(async () => {
       if (step === 0) await start(); else if (step === 4) await finish(); else { await save(); setStep(step + 1); }
     }); }}>

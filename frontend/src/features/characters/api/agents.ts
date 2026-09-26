@@ -14,6 +14,22 @@ export function listAgents() {
   return apiRequest<AgentDetailRead[]>("/agents");
 }
 
+export function adoptLegacyAgentDraft(id: string, revision: number, targetWorldId?: string) {
+  return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${encodeURIComponent(id)}/adopt`, {
+    method: "POST", body: { revision, target_world_id: targetWorldId },
+  });
+}
+
+export async function findExistingWorldCharacter(worldId: string, characterId: string) {
+  const result = await apiRequest<{ schema_version: string; world_id: string; items: { character_id: string; world_character_id: string }[] }>(
+    `/worlds/${encodeURIComponent(worldId)}/characters?surface=studio`,
+  );
+  if (result.schema_version !== "studio-world-character-list-v1" || result.world_id !== worldId || !Array.isArray(result.items)) {
+    throw new Error("World의 캐릭터 목록을 확인하지 못했습니다.");
+  }
+  return result.items.find((item) => item.character_id === characterId)?.world_character_id;
+}
+
 export function getAgent(characterId: string) {
   return apiRequest<AgentDetailRead>(`/agents/${characterId}`);
 }

@@ -48,7 +48,11 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
   relationships: <Network size={19} strokeWidth={2.2} />,
 };
 
-export function WorldApp({
+export function WorldApp(props: WorldAppProps) {
+  return <WorldAppContent key={`${props.worldId}:${props.authStatus}`} {...props} />;
+}
+
+function WorldAppContent({
   authStatus,
   chatThreadId,
   postId,
@@ -63,8 +67,6 @@ export function WorldApp({
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
-    setLoading(true);
-    setError(null);
     const controller = new AbortController();
     void Promise.all([
       getLocalWorldApp(worldId, { signal: controller.signal }),

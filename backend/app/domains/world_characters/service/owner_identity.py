@@ -41,9 +41,11 @@ class OwnerControlledIdentityService:
     def ensure(self, *, world_id: str, current_user_id: str):
         self._require_local_owner(current_user_id)
         self._require_owned_world_membership(world_id, current_user_id)
-        if self._find_identity(world_id, current_user_id) is not None:
-            return self.get(world_id=world_id, current_user_id=current_user_id)
-        if self.list_identities(world_id=world_id, current_user_id=current_user_id):
+        identities = self.list_identities(world_id=world_id, current_user_id=current_user_id)
+        active = next((identity for identity in identities if identity.status == "active"), None)
+        if active is not None:
+            return active
+        if identities:
             raise OwnerProfileSelectionRequiredError(world_id)
         try:
             return self.create(world_id=world_id, current_user_id=current_user_id,

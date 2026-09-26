@@ -660,15 +660,18 @@ def delete_agent(
 def _quarantine_agent_private_media(
     db: Session, user_id: str, character_id: str
 ) -> media_files.PrivateMediaQuarantine:
+    completed_draft_ids = list(db.scalars(select(character_models.CharacterRegistrationReceipt.draft_id).where(
+        character_models.CharacterRegistrationReceipt.character_id == character_id)))
     candidate_ids = list(
         db.scalars(
             select(character_models.ProfileImageCandidate.id).where(
-                character_models.ProfileImageCandidate.character_id == character_id
+                (character_models.ProfileImageCandidate.character_id == character_id) | character_models.ProfileImageCandidate.draft_id.in_(completed_draft_ids)
             )
         )
     )
     media_root = settings.media_root_path
     paths = [media_root / "characters" / character_id]
+    paths.extend(media_root / "drafts" / draft_id for draft_id in completed_draft_ids)
     paths.extend(
         media_root / "profile-candidates" / user_id / candidate_id
         for candidate_id in candidate_ids
@@ -875,6 +878,9 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
 
     from app.runtime.world_characters import cleanup as world_character_setup
     from app.runtime.memory_privacy import scrub_memory_data
+
+    from app.runtime.creator_privacy import delete_creator_private_data
+    delete_creator_private_data(db, character_ids=[character_id])
 
     scrub_memory_data(db, owner_id=character.owner_id, character_id=character_id)
 

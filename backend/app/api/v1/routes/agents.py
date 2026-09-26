@@ -128,6 +128,10 @@ router.routes.append(_character_routes["list_agents"])
 router.routes.append(_character_routes["create_agent"])
 
 router.routes.append(_character_routes["create_agent_draft"])
+router.routes.append(_character_routes["adopt_agent_draft"])
+router.routes.append(_character_routes["import_character_card"])
+router.routes.append(_character_routes["copy_character_settings"])
+router.routes.append(_character_routes["read_character_card_source"])
 
 router.routes.append(_character_routes["get_agent_draft"])
 

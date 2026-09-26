@@ -211,6 +211,11 @@ class CharacterSettingsCopy(BaseModel):
     revision: int = Field(ge=1)
     character_id: str = Field(min_length=1, max_length=64)
 
+
+class AgentCreationDraftAdopt(BaseModel):
+    revision: int = Field(ge=1)
+    target_world_id: str | None = Field(default=None, max_length=64)
+
 class AgentCreationDraftGenerateMediaCreate(BaseModel):
     image_style: AgentDraftImageStyle = "기본"
     appearance_prompt: str = Field(min_length=1, max_length=1200)

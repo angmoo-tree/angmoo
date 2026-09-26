@@ -283,6 +283,9 @@ def _scrub_account_data(
 
     from app.runtime.memory_privacy import scrub_memory_data
 
+    from app.runtime.creator_privacy import delete_creator_private_data
+    delete_creator_private_data(db, character_ids=character_ids, owner_id=user.id)
+
     scrub_memory_data(db, owner_id=user.id)
     from app.domains.social.models.activity_thought import SocialActivityThought
     db.execute(delete(SocialActivityThought).where(SocialActivityThought.owner_id == user.id))

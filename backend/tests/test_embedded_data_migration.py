@@ -390,6 +390,23 @@ def _seed_v2_roleless(
                 from app.runtime.persistence.sqlite_schema import ACTIVITY_V19_TABLES, EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES, RECOMMENDATION_V15_TABLES, build_sqlite_v14_metadata
                 from sqlalchemy.schema import CreateTable, CreateIndex
                 from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
+                from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata
+                for name in reversed(CREATOR_V21_TABLES):
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                # Reconstruct the predecessor before applying its older deltas.
+                # Do not let current creator columns or nullable credentials leak into v2.
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                for name in ("worlds", "agent_creation_drafts"):
+                    historical = build_sqlite_v20_metadata().tables[name]
+                    old = name + "_creator_fixture"
+                    connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
+                    connection.execute(CreateTable(historical))
+                    cols = ", ".join(c.name for c in historical.columns)
+                    connection.exec_driver_sql(f"INSERT INTO {name} ({cols}) SELECT {cols} FROM {old}")
+                    connection.exec_driver_sql(f"DROP TABLE {old}")
+                    for index in historical.indexes:
+                        connection.execute(CreateIndex(index))
+                connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
                 for name in reversed(ACTIVITY_V19_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):

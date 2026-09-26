@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -631,6 +631,22 @@ def _seed_supported_predecessor(
                     build_sqlite_v19_metadata,
                 )
                 from app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding import TABLES as EMBEDDING_V12_TABLES
+                if source_version < 21:
+                    from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata
+                    for name in reversed(CREATOR_V21_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
+                    sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                    for name in ("worlds", "agent_creation_drafts"):
+                        historical = build_sqlite_v20_metadata().tables[name]
+                        old = name + "_creator_fixture"
+                        sql_connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
+                        sql_connection.execute(CreateTable(historical))
+                        columns = ", ".join(c.name for c in historical.columns)
+                        sql_connection.exec_driver_sql(f"INSERT INTO {name} ({columns}) SELECT {columns} FROM {old}")
+                        sql_connection.exec_driver_sql(f"DROP TABLE {old}")
+                        for index in historical.indexes:
+                            sql_connection.execute(CreateIndex(index))
+                    sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
                 if source_version < 19:
                     for name in reversed(ACTIVITY_V19_TABLES):
                         Base.metadata.tables[name].drop(sql_connection, checkfirst=True)

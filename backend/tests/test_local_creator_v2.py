@@ -200,3 +200,77 @@ def test_two_independent_sessions_ensure_same_space_and_profile(db):
     with ThreadPoolExecutor(2) as pool:
         identities = list(pool.map(ensure, range(2)))
     assert identities[0] == identities[1]
+
+
+def test_legacy_draft_explicit_adoption_preserves_fields_and_never_attaches_key(db):
+    from datetime import timedelta
+    from app.domains.characters.schemas import AgentCreationDraftAdopt
+    from app.domains.characters.exceptions import AgentCreationDraftValidationError
+    session, owner = db
+    legacy = AgentCreationDraft(id="legacy-resume", user_id=owner.id, provider="google",
+        model="gemini-3.1-flash-lite", encrypted_api_key="preserved-private-ciphertext",
+        name="보존 초안", personality="친절함", expires_at=datetime.now(UTC)+timedelta(days=1))
+    session.add(legacy); session.commit()
+    workflows = build_creator_workflows()
+    with pytest.raises(AgentCreationDraftValidationError, match="이전 초안"):
+        drafts.complete_draft(session, owner, legacy.id, workflows=workflows)
+    result = drafts.adopt_legacy_draft(session, owner, legacy.id,
+        AgentCreationDraftAdopt(revision=legacy.revision), workflows=workflows)
+    assert result.name == "보존 초안" and result.contract_version == 2
+    assert legacy.encrypted_api_key == "preserved-private-ciphertext"
+    registered = drafts.complete_draft(session, owner, legacy.id,
+        AgentCreationDraftComplete(revision=result.revision), workflows=workflows)
+    assert registered.credential is None
+    assert registered.settings.auto_enabled is False
+    assert session.get(CharacterWorldBinding, registered.character.id).world_id == result.target_world_id
+
+
+def test_expired_draft_get_is_read_only(db):
+    from datetime import timedelta
+    from app.domains.characters.exceptions import AgentCreationDraftExpiredError
+    session, owner = db
+    expired = AgentCreationDraft(id="expired-read", user_id=owner.id, provider="google", model="fixture",
+        encrypted_api_key="preserved", expires_at=datetime.now(UTC)-timedelta(days=1))
+    session.add(expired); session.commit()
+    with pytest.raises(AgentCreationDraftExpiredError):
+        drafts.get_draft(session, owner, expired.id, workflows=build_creator_workflows())
+    assert session.get(AgentCreationDraft, "expired-read") is not None
+    assert not session.deleted and not session.dirty
+
+
+def test_http_keyless_register_replay_and_detail_use_real_persistence(db):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.domains.characters import router, dependencies
+    session, owner = db
+    app = FastAPI()
+    from app.api.v1.routes.agents import router as product_router
+    app.include_router(product_router, prefix="/api/v1")
+    app.dependency_overrides[dependencies.get_db] = lambda: session
+    app.dependency_overrides[dependencies.get_current_user] = lambda: owner
+    app.state.creator_workflows = build_creator_workflows
+    with TestClient(app) as client:
+        created = client.post("/api/v1/agents/drafts", json={})
+        assert created.status_code == 201, created.text
+        draft = created.json()
+        saved = client.patch(f"/api/v1/agents/drafts/{draft['id']}", json={
+            "revision": draft["revision"], "name": "HTTP 앵무", "personality": "다정하고 신중함"})
+        assert saved.status_code == 200, saved.text
+        payload = {"revision": saved.json()["revision"]}
+        done = client.post(f"/api/v1/agents/drafts/{draft['id']}/complete", json=payload)
+        assert done.status_code == 200, done.text
+        repeated = client.post(f"/api/v1/agents/drafts/{draft['id']}/complete", json=payload)
+        assert repeated.status_code == 200, repeated.text
+        assert repeated.json()["character"]["id"] == done.json()["character"]["id"]
+        assert done.json()["credential"] is None
+        assert done.json()["settings"]["auto_enabled"] is False
+        # Exercise the production aggregator, not an otherwise-unmounted domain router.
+        import base64, json
+        card_draft = client.post("/api/v1/agents/drafts", json={}).json()
+        raw = json.dumps({"name":"카드", "description":"배경", "personality":"다정함", "scenario":"", "first_mes":"", "mes_example":""}).encode()
+        imported = client.post(f"/api/v1/agents/drafts/{card_draft['id']}/card", json={
+            "revision":card_draft["revision"], "data_base64":base64.b64encode(raw).decode()})
+        assert imported.status_code == 200, imported.text
+        source = client.get(f"/api/v1/agents/drafts/{card_draft['id']}/card-source")
+        assert source.status_code == 200 and source.headers["cache-control"] == "private, no-store"
+        assert source.json()["document"]["name"] == "카드"
