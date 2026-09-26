@@ -6,14 +6,14 @@ import hashlib
 import json
 import re
 
-from sqlalchemy import Connection, MetaData, text
+from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 19
-SOURCE_ALEMBIC_REVISION = "20260918_0096"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 95
+SQLITE_SCHEMA_VERSION = 20
+SOURCE_ALEMBIC_REVISION = "20260924_0098"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 97
 EXPECTED_CANONICAL_TABLE_COUNT = 133
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -316,6 +316,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
     _remove_activity_schema(metadata)
+    _restore_pre_v20_outbox_identity(metadata)
     _remove_relationship_personalization_schema(metadata)
     _remove_recommendation_schema(metadata)
     for name in ("memory_vector_eligibility", "memory_embedding_settings"):
@@ -616,6 +617,36 @@ def _remove_activity_schema(metadata: MetaData) -> None:
 
 
 def build_sqlite_v18_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v19_metadata()
     _remove_activity_schema(metadata)
+    return metadata
+
+
+def _restore_pre_v20_outbox_identity(metadata: MetaData) -> None:
+    outbox = metadata.tables.get("graph_projection_outbox")
+    if outbox is None:
+        return
+    for index in tuple(outbox.indexes):
+        if index.name in {
+            "uq_graph_projection_outbox_observation",
+            "uq_graph_projection_outbox_source_event",
+        }:
+            outbox.indexes.remove(index)
+    for constraint in tuple(outbox.constraints):
+        if constraint.name == "ck_graph_projection_outbox_observation_identity":
+            outbox.constraints.remove(constraint)
+    if not any(
+        constraint.name == "uq_graph_projection_outbox_event"
+        for constraint in outbox.constraints
+    ):
+        UniqueConstraint(
+            outbox.c.projection_type, outbox.c.source_event_id,
+            outbox.c.payload_version, name="uq_graph_projection_outbox_event",
+        )
+
+
+def build_sqlite_v19_metadata() -> MetaData:
+    """Last released outbox identity, isolated from the v20 model."""
+    metadata = build_sqlite_baseline_metadata()
+    _restore_pre_v20_outbox_identity(metadata)
     return metadata

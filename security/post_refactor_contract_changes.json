@@ -10643,6 +10643,573 @@
           "after_ast": "FunctionDef(name='test_verifier_distinguishes_graph_rebuild_from_idempotent_reinstall', args=arguments(args=[arg(arg='tmp_path', annotation=Name(id='Path', ctx=Load())), arg(arg='monkeypatch', annotation=Attribute(value=Name(id='pytest', ctx=Load()), attr='MonkeyPatch', ctx=Load()))]), body=[Assign(targets=[Name(id='verifier', ctx=Store())], value=Call(func=Name(id='_verifier_module', ctx=Load()))), Assign(targets=[Name(id='data_root', ctx=Store())], value=BinOp(left=Name(id='tmp_path', ctx=Load()), op=Div(), right=Constant(value='Angmoo'))), Assign(targets=[Name(id='result_path', ctx=Store())], value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='runtime')), op=Div(), right=Constant(value='installer-data-upgrade-result.json'))), Expr(value=Call(func=Attribute(value=Attribute(value=Name(id='result_path', ctx=Load()), attr='parent', ctx=Load()), attr='mkdir', ctx=Load()), keywords=[keyword(arg='parents', value=Constant(value=True))])), Assign(targets=[Name(id='app_root', ctx=Store())], value=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='app'))), Expr(value=Call(func=Attribute(value=Name(id='app_root', ctx=Load()), attr='mkdir', ctx=Load()))), Expr(value=Call(func=Attribute(value=BinOp(left=Name(id='app_root', ctx=Load()), op=Div(), right=Constant(value='angmoo-desktop.exe')), attr='write_bytes', ctx=Load()), args=[Constant(value=b'candidate')])), Expr(value=Call(func=Attribute(value=BinOp(left=BinOp(left=Name(id='data_root', ctx=Load()), op=Div(), right=Constant(value='runtime')), op=Div(), right=Constant(value='installer-transaction.json')), attr='write_text', ctx=Load()), args=[Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Dict(keys=[Constant(value='phase')], values=[Constant(value='complete')])])], keywords=[keyword(arg='encoding', value=Constant(value='utf-8'))])), Assign(targets=[Name(id='payload', ctx=Store())], value=Dict(keys=[Constant(value='build_commit'), Constant(value='payload_generation'), Constant(value='embedded_data')], values=[BinOp(left=Constant(value='a'), op=Mult(), right=Constant(value=40)), BinOp(left=Constant(value='b'), op=Mult(), right=Constant(value=64)), Dict(keys=[Constant(value='sqlite'), Constant(value='ladybug')], values=[Dict(keys=[Constant(value='target_version')], values=[Constant(value=4)]), Dict(keys=[Constant(value='target_version')], values=[Constant(value=2)])])])), Assign(targets=[Name(id='fixture', ctx=Store())], value=Dict(keys=[Constant(value='ladybug_source_data_version'), Constant(value='ladybug_target_data_version'), Constant(value='app_host_sha256'), Constant(value='target_data_version')], values=[Constant(value=1), Constant(value=2), BinOp(left=Constant(value='0'), op=Mult(), right=Constant(value=64)), Constant(value=4)])), Expr(value=Call(func=Attribute(value=Name(id='monkeypatch', ctx=Load()), attr='setattr', ctx=Load()), args=[Name(id='verifier', ctx=Load()), Constant(value='_source_database'), Lambda(args=arguments(vararg=arg(arg='_')), body=Constant(value=None))])), Expr(value=Call(func=Attribute(value=Name(id='monkeypatch', ctx=Load()), attr='setattr', ctx=Load()), args=[Name(id='verifier', ctx=Load()), Constant(value='_verify_payload'), Lambda(args=arguments(vararg=arg(arg='_')), body=Name(id='payload', ctx=Load()))])), Expr(value=Call(func=Attribute(value=Name(id='monkeypatch', ctx=Load()), attr='setattr', ctx=Load()), args=[Name(id='verifier', ctx=Load()), Constant(value='_verify_database'), Lambda(args=arguments(vararg=arg(arg='_')), body=Constant(value=None))])), Expr(value=Call(func=Attribute(value=Name(id='monkeypatch', ctx=Load()), attr='setattr', ctx=Load()), args=[Name(id='verifier', ctx=Load()), Constant(value='_verify_graph'), Lambda(args=arguments(vararg=arg(arg='_'), kwarg=arg(arg='__')), body=Constant(value=None))])), Expr(value=Call(func=Attribute(value=Name(id='monkeypatch', ctx=Load()), attr='setattr', ctx=Load()), args=[Name(id='verifier', ctx=Load()), Constant(value='_verify_external_data'), Lambda(args=arguments(vararg=arg(arg='_')), body=Constant(value=None))])), Expr(value=Call(func=Attribute(value=Name(id='result_path', ctx=Load()), attr='write_text', ctx=Load()), args=[Call(func=Attribute(value=Name(id='json', ctx=Load()), attr='dumps', ctx=Load()), args=[Dict(keys=[Constant(value='schema_version'), Constant(value='status'), Constant(value='operation'), Constant(value='sqlite_source_version'), Constant(value='sqlite_target_version'), Constant(value='ladybug_source_version'), Constant(value='ladybug_target_version'), Constant(value='build_commit'), Constant(value='payload_generation')], values=[Constant(value=1), Constant(value='upgraded'), Constant(value='upgrade'), Constant(value=3), Constant(value=4), Constant(value=2), Constant(value=2), Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='build_commit'), ctx=Load()), Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='payload_generation'), ctx=Load())])])], keywords=[keyword(arg='encoding', value=Constant(value='utf-8'))])), Expr(value=Call(func=Attribute(value=Name(id='verifier', ctx=Load()), attr='verify_upgraded', ctx=Load()), args=[Name(id='data_root', ctx=Load()), Name(id='fixture', ctx=Load())], keywords=[keyword(arg='expected_source_version', value=Constant(value=3)), keyword(arg='expected_ladybug_source_version', value=Constant(value=2))])), With(items=[withitem(context_expr=Call(func=Attribute(value=Name(id='pytest', ctx=Load()), attr='raises', ctx=Load()), args=[Name(id='SystemExit', ctx=Load())], keywords=[keyword(arg='match', value=Constant(value='supported_upgrade_result_invalid'))]))], body=[Expr(value=Call(func=Attribute(value=Name(id='verifier', ctx=Load()), attr='verify_upgraded', ctx=Load()), args=[Name(id='data_root', ctx=Load()), Name(id='fixture', ctx=Load())], keywords=[keyword(arg='expected_source_version', value=Constant(value=3)), keyword(arg='expected_ladybug_source_version', value=Constant(value=1))]))])], returns=Constant(value=None))"
         }
       ]
+    },
+    {
+      "id": "sns-observation-outbox-v20-contract-20260926",
+      "implementation_commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "reason": "SQLite v20 gives relationship observations observer-specific outbox identity while retaining v19 upgrade evidence.",
+      "review": "User-authorized 09-26 SNS stabilization publish plan; exact v19-to-v20 migration and preserved historical schema.",
+      "source_blobs": {
+        "backend/app/domains/relationships/models/social.py": "d185740bcf749f107e7b3b1d537fcad1825b857b",
+        "backend/alembic/versions/20260924_0098_observation_outbox_identity.py": "6640e29a3da9b822274ef856aed3be0e8a19365a",
+        "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py": "d1a1587dc07e12cb8bf98ca5177e76bc3420149c",
+        "backend/tests/migrations/test_alembic_layout.py": "134ec0900928884387b8971c27b2bbb84d7ed75e"
+      },
+      "migration_sources": [
+        "backend/alembic/versions/20260924_0098_observation_outbox_identity.py",
+        "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py"
+      ],
+      "orm_tables": [
+        {
+          "key": "graph_projection_outbox",
+          "before": "721fcf8cac02a09121773f37b9d54fb44663c7fa67b0adf1a4649c620b168d83",
+          "after": "24899d37e05267acb4675193b1875d0281d15d86628254b163d029141df0c7a3"
+        }
+      ],
+      "assertions": [
+        {
+          "node": "tests/migrations/test_alembic_layout.py::test_historical_revision_blobs_and_graph_remain_unchanged",
+          "before": [
+            "assert len(historical) == 88",
+            "assert {key: actual_graph[key] for key in expected_graph} == expected_graph",
+            "assert actual_graph['20260909_0090'] == '20260904_0089'",
+            "assert actual_graph['20260910_0091'] == '20260909_0090'",
+            "assert actual_graph['20260914_0092'] == '20260910_0091'",
+            "assert actual_graph['20260916_0093'] == '20260914_0092'",
+            "assert actual_graph['20260917_0094'] == '20260916_0093'",
+            "assert actual_graph['20260918_0095'] == '20260917_0094'",
+            "assert actual_graph['20260918_0096'] == '20260918_0095'",
+            "assert actual_graph['20260923_0097'] == '20260918_0096'",
+            "assert len(actual_graph) == 96",
+            "assert script.get_heads() == ['20260923_0097']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ],
+          "after": [
+            "assert len(historical) == 88",
+            "assert {key: actual_graph[key] for key in expected_graph} == expected_graph",
+            "assert actual_graph['20260909_0090'] == '20260904_0089'",
+            "assert actual_graph['20260910_0091'] == '20260909_0090'",
+            "assert actual_graph['20260914_0092'] == '20260910_0091'",
+            "assert actual_graph['20260916_0093'] == '20260914_0092'",
+            "assert actual_graph['20260917_0094'] == '20260916_0093'",
+            "assert actual_graph['20260918_0095'] == '20260917_0094'",
+            "assert actual_graph['20260918_0096'] == '20260918_0095'",
+            "assert actual_graph['20260923_0097'] == '20260918_0096'",
+            "assert actual_graph['20260924_0098'] == '20260923_0097'",
+            "assert len(actual_graph) == 97",
+            "assert script.get_heads() == ['20260924_0098']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-installer-v20-predecessor-contract-20260926",
+      "implementation_commit": "e17b225a26ece7619c1b9e819af50942a0e2ab66",
+      "reason": "Require actual v1-v19 installer predecessors and current schema v20 target while preserving all older frozen manifests.",
+      "review": "User-authorized 09-26 SNS stabilization publish plan; 20 local installer contract tests and v19 migration regression passed.",
+      "source_blobs": {
+        ".github/workflows/windows-installer.yml": "6dcaa41d4daf3efdab9c6371f277c7ba59147ac9",
+        "backend/tests/test_p8_l_d_installer_upgrade_contract.py": "d7fb99e365e5a933b28db848b7ed760c60108c6c",
+        "scripts/ci/build_windows_installer_supported_upgrade_fixture.py": "db1dae43d97fd0a85b2f5d130d91a26572dd87cf",
+        "scripts/ci/run_windows_installer_supported_upgrade.ps1": "3beb77057b133b9ef3110db934eab341447d80d5"
+      },
+      "assertions": [
+        {
+          "node": "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor",
+          "before": [
+            "assert fixture['target_data_version'] == 19",
+            "assert fixture['target_table_count'] == 133",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert 'activity_graph_runs' not in memory_tables",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "after": [
+            "assert fixture['target_data_version'] == 20",
+            "assert fixture['target_table_count'] == 133",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-four-call-browser-oracles-20260926",
+      "implementation_commit": "78aad157ae1530b30238eed78e3d4b5eac9c3c33",
+      "reason": "Add the same personalized activity browser regression fixture to Next and static product shells.",
+      "review": "User-authorized 09-26 SNS stabilization publish plan; preserve both existing product-shell test oracles.",
+      "source_blobs": {
+        "browser-tests/product-shell.spec.ts": "c12acc52b558a4d3f820c686e45f793b96ad474c",
+        "browser-tests/static-product-shell.spec.ts": "57b9f62f17e3f6d4236171be7a4dcc2338fc035b"
+      },
+      "frontend_files": [
+        {
+          "source": "browser-tests/product-shell.spec.ts",
+          "before_sha256": "c49d457209e655fd4fca04b0a88b3caa61c2edad2ca5ccb1576c9808bae3823e",
+          "after_sha256": "bd9db3565fc6fcf274192515521babefb289e671d31730589a95a57ac277fe67"
+        },
+        {
+          "source": "browser-tests/static-product-shell.spec.ts",
+          "before_sha256": "ca034a7e7ee1ae86c8a11843918142fc39bcae1842f867480cdc9710005ac941",
+          "after_sha256": "b22c73f39e5daaf0c391d6fa7bfac5f8b0530e0d7e7eebf16017ce26c3aa00a4"
+        }
+      ]
+    },
+    {
+      "id": "sns-installer-v19-matrix-oracle-20260926",
+      "implementation_commit": "33ba7c4a6f3bce1f5880889a37559f7dcee78b0d",
+      "reason": "The hosted installer matrix now includes every v1-v19 readable predecessor.",
+      "review": "User-authorized 09-26 SNS stabilization publish plan; four World Chat inventory regressions passed.",
+      "source_blobs": {
+        "backend/tests/test_p8_l_d_world_chat_inventory.py": "4687ebc6f735cd3d7512b792284a2d598bacba13"
+      },
+      "assertions": [
+        {
+          "node": "tests/test_p8_l_d_world_chat_inventory.py::test_p8_l_d_requires_real_v3_installer_fixture_in_hosted_matrix",
+          "before": [
+            "assert inventory['installer_upgrade'] == {'hosted_workflow_archive': 'supported-v3.zip', 'idempotent_target_reinstall_verified': True, 'message_survival_verified': True, 'required_predecessor': 3, 'supported_predecessor_present': True, 'synthetic_fixture_has_resolved_and_ambiguous_threads': True}",
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip().endswith(','.join((f'v{version}' for version in range(1, 19))))"
+          ],
+          "after": [
+            "assert inventory['installer_upgrade'] == {'hosted_workflow_archive': 'supported-v3.zip', 'idempotent_target_reinstall_verified': True, 'message_survival_verified': True, 'required_predecessor': 3, 'supported_predecessor_present': True, 'synthetic_fixture_has_resolved_and_ambiguous_threads': True}",
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip().endswith(','.join((f'v{version}' for version in range(1, 20))))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-outbox-v20-alembic-head-oracle-20260926",
+      "implementation_commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "reason": "The v20 outbox migration advances the single Alembic head from 0097 to 0098.",
+      "review": "Exact committed assertion transition for the protected Alembic-head test.",
+      "source_blobs": {
+        "backend/tests/migrations/test_alembic_layout.py": "134ec0900928884387b8971c27b2bbb84d7ed75e"
+      },
+      "assertions": [
+        {
+          "node": "tests/migrations/test_alembic_layout.py::test_alembic_heads_from_outside_backend",
+          "before": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260923_0097 (head)'"
+          ],
+          "after": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260924_0098 (head)'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-ab38040e-20260926",
+      "implementation_commit": "ab38040e1d940c9c1424f7443d4afcc4aad142fd",
+      "reason": "V2 memory revalidation keeps source-bound candidate evidence.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/memory/test_episode_hybrid_reader.py": "a1d05bd3231b54fb9ea02ee4feffede1a5dd5db9"
+      },
+      "assertions": [
+        {
+          "node": "tests/memory/test_episode_hybrid_reader.py::test_candidate_version_hash_and_scope_are_not_granted_by_projection",
+          "before": [
+            "assert not reader.revalidate(request, (replace(candidate, version=999),))",
+            "assert not reader.revalidate(request, (replace(candidate, content_hash='f' * 64),))",
+            "assert not reader.revalidate(replace(request, scope=replace(request.scope, owner_id='other')), (candidate,))",
+            "assert reader.hydrate(request, accepted) == ((), ())"
+          ],
+          "after": [
+            "assert not reader.revalidate(request, (replace(candidate, version=999),))",
+            "assert not reader.revalidate(request, (replace(candidate, content_hash='f' * 64),))",
+            "assert not reader.revalidate(replace(request, scope=replace(request.scope, owner_id='other')), (candidate,))",
+            "assert reader.hydrate(request, accepted) == ((), ())",
+            "assert hydration.records == () and hydration.sources == ()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-9bfa939a-20260926",
+      "implementation_commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "reason": "SQLite v20 advances the diagnostic schema head.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/runtime/test_current_schema_diagnostics.py": "a699053aa4d0abc7277385d64427fdf30baa5748"
+      },
+      "assertions": [
+        {
+          "node": "tests/runtime/test_current_schema_diagnostics.py::test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph",
+          "before": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260923_0097']",
+            "assert scripts.get_revision('20260923_0097').down_revision == RUNTIME_MIGRATION_HEAD"
+          ],
+          "after": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260924_0098']",
+            "assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == '20260923_0097'",
+            "assert load_sqlite_manifest(19).source_revision == '20260918_0096'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-78aad157-20260926",
+      "implementation_commit": "78aad157ae1530b30238eed78e3d4b5eac9c3c33",
+      "reason": "Versioned four-call activity updates protected inventory, parent, Routine and SQLite assertions.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/memory/test_hybrid_episode_inventory.py": "aac5fc261abbb320341ffb7dd2d3e8311856170b",
+        "backend/tests/memory/test_manual_relationship_followup.py": "afae63b79b965f419334e1d65724dcbee11d5086",
+        "backend/tests/runtime/test_personalized_parent.py": "e86c14fcc0bfa5ea5f9247117b066518adcfc9dd",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "3c7e91d7521280d581daa57beb02c56a9d1b3905",
+        "backend/tests/test_l3_er2_sqlite_canonical_adapter.py": "f08e6fef0463184336dc30f57cdff4b7e82fecc2"
+      },
+      "assertions": [
+        {
+          "node": "tests/memory/test_hybrid_episode_inventory.py::test_current_inventory_preserves_predecessor_and_runtime_contract",
+          "before": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 19",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ],
+          "after": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 20",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ]
+        },
+        {
+          "node": "tests/memory/test_manual_relationship_followup.py::test_v18_migration_preserves_v17_manifest_and_fresh_parity",
+          "before": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(19).schema_digest"
+          ],
+          "after": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(20).schema_digest"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_parent.py::test_parent_preserves_completed_paths_and_resumes_busy_settlement",
+          "before": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == {'inbox', 'routine'}",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ],
+          "after": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == ({'inbox'} if version == 2 else {'inbox', 'routine'})",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_routine_lane.py::test_routine_nodes_publish_state_and_restore_only_canonical_references",
+          "before": [
+            "assert calls == ['RoutineActionPlanner', 'RoutineWriter']",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert kwargs['schema']['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ],
+          "after": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ]
+        },
+        {
+          "node": "tests/test_l3_er2_sqlite_canonical_adapter.py::test_file_backed_baseline_records_lineage_pragmas_and_schema_digest",
+          "before": [
+            "assert Path(first.database_path).is_file()",
+            "assert Path(first.database_path) == (tmp_path / '앵무 데이터' / 'canonical' / 'generations' / 'test-v1' / 'angmoo.sqlite3').resolve()",
+            "assert first.schema_version == SQLITE_SCHEMA_VERSION",
+            "assert first.source_revision == SOURCE_ALEMBIC_REVISION",
+            "assert first.source_migration_count == SOURCE_ALEMBIC_MIGRATION_COUNT",
+            "assert first.canonical_table_count == EXPECTED_CANONICAL_TABLE_COUNT",
+            "assert first.schema_digest_matches is True",
+            "assert first.foreign_keys is True",
+            "assert first.journal_mode == 'WAL'",
+            "assert first.synchronous == 'FULL'",
+            "assert first.busy_timeout_ms == 5000",
+            "assert first.wal_autocheckpoint_pages == 1000",
+            "assert first.page_size == 4096",
+            "assert database.checkpoint()[0] == 0",
+            "assert len(partial_indexes) == 15",
+            "assert lore_columns['embedding'] == 'TEXT'",
+            "assert reopened.schema_digest == first.schema_digest",
+            "assert reopened.schema_digest_matches is True"
+          ],
+          "after": [
+            "assert Path(first.database_path).is_file()",
+            "assert Path(first.database_path) == (tmp_path / '앵무 데이터' / 'canonical' / 'generations' / 'test-v1' / 'angmoo.sqlite3').resolve()",
+            "assert first.schema_version == SQLITE_SCHEMA_VERSION",
+            "assert first.source_revision == SOURCE_ALEMBIC_REVISION",
+            "assert first.source_migration_count == SOURCE_ALEMBIC_MIGRATION_COUNT",
+            "assert first.canonical_table_count == EXPECTED_CANONICAL_TABLE_COUNT",
+            "assert first.schema_digest_matches is True",
+            "assert first.foreign_keys is True",
+            "assert first.journal_mode == 'WAL'",
+            "assert first.synchronous == 'FULL'",
+            "assert first.busy_timeout_ms == 5000",
+            "assert first.wal_autocheckpoint_pages == 1000",
+            "assert first.page_size == 4096",
+            "assert database.checkpoint()[0] == 0",
+            "assert len(partial_indexes) == 17",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= {index['name'] for index in partial_indexes}",
+            "assert lore_columns['embedding'] == 'TEXT'",
+            "assert reopened.schema_digest == first.schema_digest",
+            "assert reopened.schema_digest_matches is True"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-protected-tests-9ddeb8b5-20260926",
+      "implementation_commit": "9ddeb8b50c5ff976455b33d54711dfe8a8a4edf4",
+      "reason": "Routine local-time context is delivered through its validated generation and resume paths.",
+      "review": "Exact source-commit before/after assertions for protected tests changed by SNS stabilization.",
+      "source_blobs": {
+        "backend/tests/routine_posts/test_generation.py": "cfd184cc089b392ea907ef0716f5a48e1e787115",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "0c229b00e3d727acb283efaf22611c20e0e8b931"
+      },
+      "assertions": [
+        {
+          "node": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity",
+          "before": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert ('thought' in kwargs['response_schema'].get('properties', {})) == thought_enabled",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == expected_plan",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "assert result.draft._activity_thought.text == '즐거운 마음으로 시작하고 싶다.'",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'",
+            "assert snapshot.snapshot_id in call['system_prompt']",
+            "assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call['system_prompt']"
+          ],
+          "after": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert ('thought' in kwargs['response_schema'].get('properties', {})) == thought_enabled",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == expected_plan",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert writer_input['temporal_context'] == json.loads(calls[0]['user_prompt'])['temporal_context']",
+            "assert writer_input['temporal_context']['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert writer_input['temporal_context']['activity_window']['contains_reference_time'] is True",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "assert 'temporal_context' in json.loads(call['user_prompt'])",
+            "assert 'prior posts' in call['system_prompt'].lower()",
+            "assert result.draft._activity_thought.text == '즐거운 마음으로 시작하고 싶다.'",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'",
+            "assert snapshot.snapshot_id in call['system_prompt']",
+            "assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call['system_prompt']"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_personalized_routine_lane.py::test_routine_nodes_publish_state_and_restore_only_canonical_references",
+          "before": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ],
+          "after": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['decision_context']['routine']['temporal_context']['as_of_utc'] == ctx.run_started_at.isoformat()",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert (await lane.write(old))['drafts']",
+            "assert calls == ['RoutineDecisionDraft']",
+            "assert (await lane.write(advanced))['drafts']",
+            "assert calls == ['RoutineDecisionDraft', 'RoutineWriter']",
+            "assert len(reservations) == 1",
+            "assert (await lane.write(advanced))['drafts']",
+            "assert (await lane.write(old))['drafts']",
+            "assert calls == ['RoutineActionPlanner', 'RoutineWriter', 'RoutineWriter', 'RoutineWriter']",
+            "assert 'conclude' in kwargs['system']",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]",
+            "assert temporal['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert temporal['activity_window']['contains_reference_time'] is True",
+            "assert kwargs['node'] == 'RoutineWriter'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sns-planner-recovery-and-observer-oracle-20260926",
+      "implementation_commit": "02004120c34968e7b9cca60fb385c5ec9921b6c9",
+      "reason": "Planner recovery reserves five calls instead of three; accelerated observer heartbeat gaps are classified as incomplete when Windows scheduling creates more than 150 virtual seconds between heartbeats.",
+      "review": "Exact committed transitions of two protected tests introduced earlier in the SNS stabilization branch; no frozen or introduction evidence replaced.",
+      "source_blobs": {
+        "backend/tests/runtime/test_activity_output_recovery.py": "969aeaf1c632fcde3ac247302754de60a36d9350",
+        "backend/tests/runtime/test_sns_observation.py": "02469831df13db9ef8a47971f36a5c2c9ec14a30"
+      },
+      "assertions": [
+        {
+          "node": "tests/runtime/test_activity_output_recovery.py::test_retry_policy_is_limited_to_unusable_truncated_output",
+          "before": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 3, 13)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ],
+          "after": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 5, 15)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_sns_observation.py::test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat",
+          "before": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert coverage['heartbeat_gap_seconds'] == []",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "after": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ]
+        }
+      ]
     }
   ]
 }

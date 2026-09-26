@@ -35,6 +35,10 @@ class SocialEventRuntimeError(Exception):
         self.reason_code = reason_code
 
 
+class ObservationOutboxIntegrityError(RuntimeError):
+    """An existing projection row conflicts with a validated observation."""
+
+
 class ActivityProposalRuntimeError(Exception):
     def __init__(self, reason_code: str) -> None:
         super().__init__(reason_code)

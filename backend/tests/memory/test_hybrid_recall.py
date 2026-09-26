@@ -37,7 +37,9 @@ def test_axes_overlap_and_preserve_partial_status_without_any_planner():
         def revalidate(self, request, candidates):
             assert [c.candidate.document_id for c in candidates] == ["summary"]
             return (CanonicalRecallRecord("memory-item:one", RecallDocumentKind.MEMORY_ITEM, "one", "verified", datetime.now(UTC), memory_item_id="one"),)
-        def hydrate(self, request, records): return records, ()
+        def hydrate(self, request, records):
+            from app.domains.memory.contracts.hybrid_recall import HybridHydrationResult
+            return HybridHydrationResult(records, ())
     request = HybridRecallRequest("request", "call", "b"*64, MemoryScope("owner", "world", "self"), "기억", "profile", (RecallDocumentKind.MEMORY_ITEM,))
     service = HybridRecallService(fts=Axis("fts"), vector=Axis("vector"), canonical=Canonical())
     result = asyncio.run(service.execute(request, deadline=monotonic()+2))

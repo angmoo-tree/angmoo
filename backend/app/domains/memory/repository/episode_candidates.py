@@ -1,6 +1,8 @@
 """Bounded SQL candidates and follow-up edges; no generation or embedding calls."""
 
 from dataclasses import dataclass
+from datetime import UTC
+from hashlib import sha256
 
 from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.orm import aliased
@@ -15,6 +17,8 @@ from app.domains.memory.repository.recall_records import _item_retrievable
 class EpisodeFollowups:
     item_ids: tuple[str, ...]
     truncated: bool
+    link_probes: tuple[tuple[str, str, str], ...] = ()
+    item_revisions: tuple[tuple[str, int, str], ...] = ()
 
 
 def _owned(item, scope):
@@ -93,22 +97,29 @@ class SqlAlchemyEpisodeCandidates:
         truncated = len(ordered) > limit
         ordered = ordered[:limit]
         visited, frontier = set(ordered), tuple(ordered)
+        inspected = set(roots)
+        probes = []
         prior = aliased(MemoryItem)
         for _ in range(depth_limit):
             if not frontier:
                 break
-            rows = self.session.execute(select(MemoryEpisodeLink.prior_item_id, MemoryItem.id).join(
+            rows = self.session.execute(select(MemoryEpisodeLink.prior_item_id, MemoryItem.id,
+                MemoryEpisodeLink.created_at).join(
                 MemoryItem, MemoryItem.id == MemoryEpisodeLink.following_item_id,
             ).join(prior, prior.id == MemoryEpisodeLink.prior_item_id).where(
                 MemoryEpisodeLink.prior_item_id.in_(frontier), _owned(prior, scope), _owned(MemoryItem, scope),
                 _available(prior, now), _available(MemoryItem, now),
                 # A malformed edge cannot move a public episode into a private thread.
                 or_(MemoryItem.thread_id.is_(None), MemoryItem.thread_id == prior.thread_id),
-            ).order_by(MemoryEpisodeLink.created_at.desc(), MemoryItem.id).limit(65)).all()
+            ).order_by(MemoryEpisodeLink.created_at.desc(), MemoryItem.id,
+                MemoryEpisodeLink.prior_item_id).limit(65)).all()
             if len(rows) > 64:
                 truncated = True
             next_ids = []
-            for _, identifier in rows[:64]:
+            for prior_id, identifier, created_at in rows[:64]:
+                inspected.add(identifier)
+                stamp = created_at.replace(tzinfo=UTC) if created_at.tzinfo is None else created_at.astimezone(UTC)
+                probes.append((prior_id, identifier, stamp.isoformat()))
                 if identifier in visited:
                     continue
                 visited.add(identifier)
@@ -122,4 +133,30 @@ class SqlAlchemyEpisodeCandidates:
             # Conservatively mark depth-bound results, without claiming that
             # the last visited update was necessarily the latest one.
             truncated = truncated or bool(frontier)
-        return EpisodeFollowups(tuple(ordered), truncated)
+        revisions = tuple(sorted((row.id, row.version, sha256(row.summary.encode()).hexdigest())
+            for row in self.session.scalars(select(MemoryItem).where(
+                MemoryItem.id.in_(inspected), _owned(MemoryItem, scope), _available(MemoryItem, now)))))
+        return EpisodeFollowups(tuple(ordered), truncated, tuple(probes), revisions)
+
+    def collect_followups(self, *, scope, seed_ids, now, limit=12, depth_limit=8):
+        """Apply one shared budget in original seed order for hydrate and guard."""
+        seeds = tuple(dict.fromkeys(seed_ids))
+        if len(seeds) > 50 or not 1 <= limit <= 50 or not 1 <= depth_limit <= 8:
+            raise ValueError("episode_followup_limit")
+        ordered, probes, revisions = [], [], {}
+        truncated = False
+        for identifier in seeds:
+            if identifier in ordered:
+                continue
+            if len(ordered) >= limit:
+                truncated = True
+                break
+            linked = self.followups(scope=scope, item_ids=(identifier,), now=now,
+                limit=limit - len(ordered), depth_limit=depth_limit)
+            ordered.extend(value for value in linked.item_ids if value not in ordered)
+            probes.extend(linked.link_probes)
+            revisions.update((item_id, (version, digest))
+                for item_id, version, digest in linked.item_revisions)
+            truncated |= linked.truncated
+        return EpisodeFollowups(tuple(ordered), truncated, tuple(probes),
+            tuple(sorted((item_id, version, digest) for item_id, (version, digest) in revisions.items())))

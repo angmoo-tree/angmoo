@@ -176,7 +176,7 @@ def test_v18_migration_preserves_v17_manifest_and_fresh_parity():
         assert not c.exec_driver_sql("PRAGMA foreign_key_check").all()
     with create_engine("sqlite://").begin() as c:
         build_sqlite_baseline_metadata().create_all(c); create_schema_version_table(c)
-        assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(19).schema_digest
+        assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(20).schema_digest
 
 
 @pytest.mark.parametrize("same_key", [True, False])

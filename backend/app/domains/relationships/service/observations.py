@@ -5,13 +5,13 @@ without creating another successful source event or inferring an emotional delta
 """
 from __future__ import annotations
 from app.domains.relationships.service.personalized_metrics import interpreted_policy
-import json
-from hashlib import sha256
 from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.relationships import models
-from app.domains.relationships.constants import OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION as OBSERVATION_GRAPH_PAYLOAD_VERSION
 from app.domains.relationships.contracts.observations import ObservationPost, ObservationReferences
+from app.domains.relationships.policies.observation_outbox import (
+    build_observation_outbox_values, validate_observation_outbox,
+)
 from app.domains.relationships.policies.events import _aware_utc, _snapshot as _relationship_snapshot, _clamp as _clamp_relationship
 from app.domains.relationships.repository import observations as queries, events as event_queries, state as state_queries
 from app.domains.social.contracts.observations import SocialObservationCommand, SocialObservationError, SocialObservationResult
@@ -124,6 +124,7 @@ def observe(
         not_applied_reason=None if legacy_metrics else "no_delta_event",
     )
     db.add(receipt)
+    db.flush()
     _enqueue_observation_outbox(
         db,
         source_event=source_event,
@@ -231,37 +232,33 @@ def _enqueue_observation_outbox(
 ) -> models.GraphProjectionOutbox:
     """Project observer direction while preserving source-event direction."""
 
-    payload: dict[str, object] = {
-        "world_id": source_event.world_id,
-        "source_event_id": source_event.id,
-        "actor_world_character_id": relationship_state.actor_world_character_id,
-        "target_world_character_id": relationship_state.target_world_character_id,
-        "relationship_state_id": relationship_state.id,
-    }
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    signature = sha256(canonical.encode("utf-8")).hexdigest()
-    dedupe_key = sha256(
-        (
-            f"relationship_state|{source_event.id}|"
-            f"{OBSERVATION_GRAPH_PAYLOAD_VERSION}|{relationship_state.id}"
-        ).encode("utf-8")
-    ).hexdigest()
-    existing = event_queries.find_outbox_by_dedupe(db, dedupe_key=dedupe_key)
-    if existing is not None:
-        return existing
-    row = models.GraphProjectionOutbox(
-        id=uuid7_string(),
+    expected = build_observation_outbox_values(
         world_id=source_event.world_id,
         source_event_id=source_event.id,
-        projection_type="relationship_state",
-        payload_version=OBSERVATION_GRAPH_PAYLOAD_VERSION,
-        payload=payload,
-        source_signature=signature,
-        dedupe_key=dedupe_key,
-        status="pending",
-        attempt_count=0,
+        observer_id=relationship_state.actor_world_character_id,
+        target_id=relationship_state.target_world_character_id,
+        relationship_state_id=relationship_state.id,
     )
-    db.add(row)
+    existing = event_queries.find_outbox_by_dedupe(db, dedupe_key=expected.dedupe_key)
+    if existing is not None:
+        validate_observation_outbox(
+            {name: getattr(existing, name) for name in expected.__dataclass_fields__},
+            expected,
+        )
+        return existing
+    row = event_queries.insert_observation_outbox_if_absent(
+        db,
+        values={
+            **{name: getattr(expected, name) for name in expected.__dataclass_fields__},
+            "id": uuid7_string(),
+            "status": "pending",
+            "attempt_count": 0,
+        },
+    )
+    validate_observation_outbox(
+        {name: getattr(row, name) for name in expected.__dataclass_fields__},
+        expected,
+    )
     return row
 
 

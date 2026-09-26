@@ -114,8 +114,10 @@ from app.runtime.migrations.sqlite_versions import v16_to_v17_relationship_perso
 
 from app.runtime.migrations.sqlite_versions import v17_to_v18_manual_review as manual_review
 from app.runtime.migrations.sqlite_versions import v18_to_v19_activity_graph as activity_graph
+from app.runtime.migrations.sqlite_versions import observation_outbox_v20 as observation_outbox
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    19: observation_outbox.upgrade,
     18: activity_graph.upgrade,
     17: manual_review.upgrade,
     16: relationship_personalization.upgrade,
@@ -137,6 +139,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    19: SqliteMigrationContract(source_version=19, target_version=20, name="observation_outbox_identity", mutable_identity_tables=observation_outbox.MUTABLE_IDENTITY_TABLES, capture=observation_outbox.capture_delta, verify=observation_outbox.verify_delta),
     18: SqliteMigrationContract(source_version=18, target_version=19, name="personalized_activity_graph", mutable_identity_tables=activity_graph.MUTABLE_IDENTITY_TABLES, capture=activity_graph.capture_delta, verify=activity_graph.verify_delta),
     17: SqliteMigrationContract(source_version=17, target_version=18, name="manual_relationship_review", mutable_identity_tables=manual_review.MUTABLE_IDENTITY_TABLES, capture=manual_review.capture_delta, verify=manual_review.verify_delta),
     16: SqliteMigrationContract(source_version=16, target_version=17, name="relationship_personalization", mutable_identity_tables=relationship_personalization.MUTABLE_IDENTITY_TABLES, capture=relationship_personalization.capture_delta, verify=relationship_personalization.verify_delta),

@@ -1,10 +1,10 @@
 """Serializable graph channels. Live sessions/providers remain outside State."""
-from hashlib import sha256
 from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
+from app.core.ids import length_prefixed_identity_key
 
-CONTRACT_VERSION = 1
+from app.domains.world_characters.service.activity_engines import CONTRACT_VERSION
 FEED_TARGET_LIMIT = 1
 INBOX_TARGET_LIMIT = 3
 RECALL_CONCURRENCY = 2
@@ -17,7 +17,7 @@ TODAY_LIMIT = 12
 
 def identity_key(*parts: str) -> str:
     # Length-prefix avoids ambiguity if a source ID contains a separator.
-    return sha256("".join(f"{len(p)}:{p}" for p in parts).encode()).hexdigest()
+    return length_prefixed_identity_key(*parts)
 
 
 class ActivityIdentity(BaseModel):
@@ -26,7 +26,7 @@ class ActivityIdentity(BaseModel):
     world_id: str
     actor_id: str
     engine: Literal["personalized_graph_v2"] = "personalized_graph_v2"
-    contract_version: Literal[1] = 1
+    contract_version: Literal[1, 2] = 1
     cause: Literal["manual", "scheduled", "recovery"]
     generation_model: str | None = None
     thinking_level: str | None = None
@@ -81,7 +81,10 @@ class LaneState(TypedDict, total=False):
     selections: list[dict]
     queries: list[dict]
     memories: dict[str, dict]
+    memory_validations: dict[str, dict]
     decision_context: dict
+    decision_input_receipt: dict
+    writer_input_receipts: list[dict]
     decision: dict
     assignments: list[dict]
     drafts: list[dict]
@@ -90,6 +93,8 @@ class LaneState(TypedDict, total=False):
     result: dict
     lane_data: dict
     failure: dict
+    generation_mode: str
+    preparation_error: dict
 
 
 class ParentState(TypedDict, total=False):
@@ -99,3 +104,5 @@ class ParentState(TypedDict, total=False):
     routine_result: dict
     feed_result: dict
     result: dict
+    prepared_lanes: dict
+    selection_mode: str

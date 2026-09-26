@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import secrets
 import time
+from hashlib import sha256
 from uuid import UUID
+
+
+def length_prefixed_identity_key(*parts: str) -> str:
+    """Hash ordered identifiers without separator ambiguity."""
+    return sha256("".join(f"{len(part)}:{part}" for part in parts).encode()).hexdigest()
 
 
 def uuid7_string(*, timestamp_ms: int | None = None) -> str:

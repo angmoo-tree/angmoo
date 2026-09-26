@@ -7,7 +7,7 @@ from app.domains.world_characters.service.activity_state import read_state
 from app.integrations.direct_llm import RunLlmTracker
 from app.runtime.autonomous_activity.inbox import InboxLane
 from app.runtime.autonomous_activity.graph import build_lane
-from app.runtime.autonomous_activity.provider import parse_action
+from app.runtime.autonomous_activity.planner_contract import parse_action
 from social.test_feed_reaction_intent import _engine, _seed
 
 

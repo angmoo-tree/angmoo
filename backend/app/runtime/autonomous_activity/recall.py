@@ -55,8 +55,22 @@ def context_memories(memories):
             packets.append({"ref": ref, "already_in_context": True} if ref in seen else packet)
             if ref:
                 seen.add(ref)
-        result[target] = {**value, "packets": packets}
+        # Search receipts and canonical validation data are checkpoint metadata,
+        # not instructions or evidence for the model.
+        result[target] = {key: value[key] for key in
+            ("status", "reason", "omitted_packets", "omitted_units") if key in value}
+        result[target]["packets"] = packets
     return result
+
+
+def split_validation(results):
+    """Keep canonical snapshots in State, outside the model-facing memories."""
+    memories, validations = {}, {}
+    for target, value in results.items():
+        memories[target] = {key: item for key, item in value.items() if key != "validation_snapshot"}
+        if value.get("validation_snapshot") is not None:
+            validations[target] = value["validation_snapshot"]
+    return {"memories": memories, "memory_validations": validations}
 
 
 class SelectedRecall:
@@ -92,6 +106,8 @@ class SelectedRecall:
         packet = bounded_records(result.records)
         return {**packet, "status": "empty" if not result.records else "partial" if result.status.value == "partial" or packet["omitted_units"] or packet["omitted_packets"] else "ready",
             "ranked_memory_ids": [r.memory_item_id for r in result.records],
+            "validation_snapshot": json.loads(json.dumps(asdict(result.validation_snapshot), default=str))
+                if result.validation_snapshot is not None else None,
             "retrieved_after": retrieved_after,
             "duration_ms": result.duration_ms, "axes": [json.loads(json.dumps(asdict(a), default=lambda v: v.value)) for a in result.axes],
             "embedding_usage": asdict(result.embedding_usage)}

@@ -1,0 +1,113 @@
+{
+  "contract": "routine-temporal-evaluation-v1",
+  "baseline_commit": "2890beb919a46567a2579c736cd10b01672b30de",
+  "cases": [
+    {
+      "id": "Q-1",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T11:15:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "능력 조절 훈련",
+      "activity_seed": "힘을 조절하고 오전 연습을 복기한다.",
+      "previous_post_local": "2026-09-26T10:32:00+09:00",
+      "previous_post_body": "오늘 연습을 마쳤다. 오늘 밤 내일을 준비하며 잠자리에 들어야겠다.",
+      "state_note": "오늘 밤 내일의 훈련 전략을 정리하겠다.",
+      "focus": "오전 현재 장면을 취침이나 하루 종료로 옮기지 않는다. 계획과 글을 함께 확인한다."
+    },
+    {
+      "id": "Q-2",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T10:30:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "능력 조절 훈련",
+      "activity_seed": "힘을 조절하고 오전 연습을 복기한다.",
+      "previous_post_local": "2026-09-26T10:00:00+09:00",
+      "previous_post_body": "이번 훈련을 마쳤다. 어려웠던 동작을 정리해야겠다.",
+      "previous_scene_kind": "conclude",
+      "previous_scene_brief": "이번 연습을 마치고 배운 점을 정리한다.",
+      "state_note": "훈련의 배움을 곱씹고 있다.",
+      "focus": "마친 훈련을 처음부터 반복하거나 근거 없이 밤으로 진행하지 않는다. 오전 복기나 정리는 가능하다."
+    },
+    {
+      "id": "Q-3",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T09:30:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "능력 조절 훈련",
+      "activity_seed": "오전의 훈련을 이어간다.",
+      "previous_post_local": "2026-09-26T09:00:00+09:00",
+      "previous_post_body": "내일도 훈련을 열심히 하고 싶다.",
+      "state_note": "내일의 훈련을 기대하고 있다.",
+      "focus": "내일의 포부는 허용하되 현재 날짜가 내일이 되었다고 서술하지 않는다."
+    },
+    {
+      "id": "Q-4",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T10:10:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "능력 조절 훈련",
+      "activity_seed": "오전의 훈련을 이어간다.",
+      "previous_post_local": "2026-09-25T23:00:00+09:00",
+      "previous_post_body": "어젯밤에 들은 조언이 마음에 남는다.",
+      "state_note": "어제의 조언을 기억하고 있다.",
+      "focus": "과거 기억은 허용하고 현재 오전 장면과 구분한다."
+    },
+    {
+      "id": "Q-5",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T23:05:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "evening",
+      "activity_title": "하루의 독서 정리",
+      "activity_seed": "밤에 읽은 내용을 정리하고 쉰다.",
+      "previous_post_local": "2026-09-26T22:30:00+09:00",
+      "previous_post_body": "책을 덮고 핵심을 노트에 적었다.",
+      "state_note": "피곤하지만 만족스럽다.",
+      "focus": "밤의 자연스러운 휴식과 마무리를 허용한다."
+    },
+    {
+      "id": "Q-6",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T10:20:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "밤샘 업무 후 정리",
+      "activity_seed": "밤 근무를 마친 뒤 오전에 쉬면서 기록한다.",
+      "previous_post_local": "2026-09-26T09:50:00+09:00",
+      "previous_post_body": "야간 업무가 끝나서 오전에 잠시 쉬기로 했다.",
+      "state_note": "피로를 느끼며 쉬고 있다.",
+      "focus": "오전의 휴식은 근거가 있으면 허용한다. 오후나 밤이 된 것처럼 쓰지 않는다."
+    },
+    {
+      "id": "Q-7",
+      "timezone": "America/New_York",
+      "reference_local": "2026-11-01T00:40:00-04:00",
+      "plan_date": "2026-11-01",
+      "daypart": "dawn",
+      "activity_title": "새벽 일기",
+      "activity_seed": "지역의 새벽 시간을 기준으로 지난날을 돌아본다.",
+      "previous_post_local": "2026-10-31T23:30:00-04:00",
+      "previous_post_body": "내일은 새 날짜의 일기를 쓰겠다.",
+      "state_note": "지난날을 돌아보고 있다.",
+      "focus": "현지 날짜와 DST 경계에서 오늘·어제·내일을 정확히 구분한다."
+    },
+    {
+      "id": "Q-8",
+      "follow_up_of": "Q-1",
+      "timezone": "Asia/Seoul",
+      "reference_local": "2026-09-26T11:45:00+09:00",
+      "plan_date": "2026-09-26",
+      "daypart": "morning",
+      "activity_title": "능력 조절 훈련",
+      "activity_seed": "힘을 조절하고 오전 연습을 복기한다.",
+      "previous_post_local": "2026-09-26T11:16:00+09:00",
+      "previous_post_body": "Q-1에서 실제로 생성된 글로 교체할 자리",
+      "state_note": "Q-1에서 실제로 생성된 상태 메모로 교체할 자리",
+      "focus": "실AI 평가에서는 Q-1의 실제 결과로 앞선 글과 상태를 바꿔 입력한다. 같은 오전을 유지하는지 본다."
+    }
+  ]
+}

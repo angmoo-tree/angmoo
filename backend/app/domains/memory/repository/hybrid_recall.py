@@ -107,4 +107,5 @@ class SqlAlchemyHybridCanonicalReader:
                 lineage("hydrate", "existing", identities=record_identity(by_ref[ref]))
             else:
                 lineage("hydrate", "missing", identities={"record_ref": ("r", ref)})
-        return tuple(ordered), receipts
+        from app.domains.memory.contracts.hybrid_recall import HybridHydrationResult
+        return HybridHydrationResult(tuple(ordered), receipts)

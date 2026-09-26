@@ -1,6 +1,6 @@
 import pytest
 
-from app.runtime.autonomous_activity.provider import parse_action
+from app.runtime.autonomous_activity.planner_contract import parse_action
 
 
 def test_invalid_optional_state_keeps_valid_like_but_invalid_target_fails():
@@ -56,3 +56,61 @@ def test_budget_removes_whole_optional_records_without_mutating_shared_input(mon
         with pytest.raises(ValueError,match="activity_input_budget_exceeded"):
             await actor.call(node="test",lane="feed",system="rules",payload={"source":"x"*65000},schema={},validator=lambda x:x,max_tokens=100)
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("lane,limit,count,expected", [
+    ("inbox", 3, 5, 3), ("feed", 1, 5, 1), ("inbox", 3, 2, 2),
+])
+def test_selector_limit_schema_and_validator_agree(monkeypatch, lane, limit, count, expected):
+    import asyncio
+    from app.runtime.autonomous_activity.provider import ActivityProvider
+    from app.runtime.autonomous_activity.contracts import Candidate, Selection
+    from app.runtime.autonomous_activity.queries import resolve_query
+    actor = ActivityProvider(None, None)
+    captured = {}
+    async def call(**kwargs):
+        captured.update(kwargs)
+        return kwargs["validator"]({"selections": [{"target_id": "p0", "memory_query": "x" * 401}]})
+    monkeypatch.setattr(actor, "call", call)
+    candidates = [Candidate(target_id=f"p{i}", text="sample", allowed_actions=["like"]).model_dump()
+        for i in range(count)]
+    result = asyncio.run(actor.select(lane=lane, context={}, candidates=candidates, limit=limit))
+    assert captured["payload"]["selection_limit"] == expected
+    assert captured["schema"]["properties"]["selections"]["maxItems"] == expected
+    assert captured["max_tokens"] == 4096
+    assert captured["recover_truncation"] is True
+    assert result["selections"][0]["target_id"] == "p0"
+    assert resolve_query(Selection.model_validate(result["selections"][0]),
+        Candidate.model_validate(candidates[0]), lane=lane).origin == "natural"
+    with pytest.raises(ValueError, match="selection_target_invalid"):
+        captured["validator"]({"selections": [{"target_id": "p0"}] * (expected + 1)})
+
+
+def test_provider_receipt_matches_final_trimmed_input_and_keeps_original_packet(monkeypatch):
+    import asyncio, json
+    from types import SimpleNamespace
+    from app.runtime.autonomous_activity import provider as module
+    from app.runtime.autonomous_activity.recall import context_memories
+    actor = module.ActivityProvider(SimpleNamespace(generation_thinking_level=None,
+        on_rate_limit_wait=None), None)
+    monkeypatch.setattr(module, "_api_key", lambda _: "test")
+    monkeypatch.setattr(module, "_llm_context", lambda *args, **kwargs: None)
+    sent, receipt = {}, {}
+    async def generate(**kwargs):
+        sent.update(json.loads(kwargs["user_prompt"]))
+        return {}
+    monkeypatch.setattr(module, "generate_json", generate)
+    original = {"ref": "memory-1", "situation": "x" * 63000, "units": []}
+    memories = context_memories({"first": {"status": "ready", "packets": [original]},
+        "second": {"status": "ready", "packets": [original]},
+        "third": {"status": "ready", "packets": [{"ref": "memory-2",
+            "situation": "z" * 1100, "units": []}]}})
+    asyncio.run(actor.call(node="test", lane="inbox", system="rules",
+        payload={"context": {"memories": memories}}, schema={}, validator=lambda x: x,
+        max_tokens=100, on_input_receipt=receipt.update))
+    assert sent["context"]["memories"]["first"]["packets"][0]["situation"] == "x" * 63000
+    assert sent["context"]["memories"]["second"]["packets"] == [{"ref": "memory-1", "already_in_context": True}]
+    assert sent["context"]["memories"]["third"]["packets"] == []
+    assert receipt["memory_packet_refs"] == ["memory-1", "memory-1"]
+    assert receipt["omissions"]["memory_packets"] == 1
+    assert memories["second"]["packets"] == [{"ref": "memory-1", "already_in_context": True}]

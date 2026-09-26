@@ -123,6 +123,63 @@ class HybridSourceReceipt:
 
 
 @dataclass(frozen=True, slots=True)
+class EpisodeValidationSnapshot:
+    """Bounded canonical follow-up view captured with episode hydration."""
+
+    scope: MemoryScope
+    seed_memory_ids: tuple[str, ...]
+    hydrated_memory_ids: tuple[str, ...]
+    item_revisions: tuple[tuple[str, int, str], ...]
+    link_probes: tuple[tuple[str, str, str], ...]
+    traversal_truncated: bool
+    captured_at: datetime
+    schema_version: int = 1
+    policy_version: str = "episode-followups-v1"
+    traversal_limit: int = 12
+    depth_limit: int = 8
+
+    def __post_init__(self):
+        if (not isinstance(self.scope, MemoryScope) or self.schema_version != 1
+                or self.policy_version != "episode-followups-v1"
+                or self.traversal_limit != 12 or self.depth_limit != 8
+                or not isinstance(self.traversal_truncated, bool)
+                or self.captured_at.tzinfo is None
+                or len(self.seed_memory_ids) > 50
+                or len(self.hydrated_memory_ids) > self.traversal_limit
+                or any(not isinstance(value, str) or not value for value in
+                       (*self.seed_memory_ids, *self.hydrated_memory_ids))
+                or any(len(row) != 3 or not isinstance(row[0], str)
+                       or not _count(row[1]) or row[1] < 1 or not _HASH.fullmatch(row[2])
+                       for row in self.item_revisions)
+                or any(len(row) != 3 or not all(isinstance(value, str) and value for value in row)
+                       for row in self.link_probes)):
+            raise ValueError("episode_validation_snapshot_invalid")
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class HybridHydrationResult:
+    records: tuple[CanonicalRecallRecord, ...]
+    sources: tuple[HybridSourceReceipt, ...]
+    validation_snapshot: EpisodeValidationSnapshot | None = None
+
+    def __post_init__(self):
+        if (not isinstance(self.records, tuple) or not isinstance(self.sources, tuple)
+                or self.validation_snapshot is not None
+                and not isinstance(self.validation_snapshot, EpisodeValidationSnapshot)):
+            raise ValueError("hybrid_hydration_result_invalid")
+
+    def __eq__(self, other):
+        # An older direct reader assertion/caller compared the two-part result
+        # to a tuple. New consumers use the named snapshot-bearing fields.
+        if isinstance(other, tuple) and len(other) == 2:
+            return (self.records, self.sources) == other
+        if isinstance(other, HybridHydrationResult):
+            return (self.records, self.sources, self.validation_snapshot) == (
+                other.records, other.sources, other.validation_snapshot)
+        return NotImplemented
+
+
+@dataclass(frozen=True, slots=True)
 class HybridRecallResult:
     request_id: str
     call_id: str
@@ -136,6 +193,7 @@ class HybridRecallResult:
     fused_count: int
     excluded_count: int
     duration_ms: float
+    validation_snapshot: EpisodeValidationSnapshot | None = None
 
     def __post_init__(self):
         if (not self.request_id or not self.call_id or not _HASH.fullmatch(self.envelope_hash)
@@ -146,7 +204,10 @@ class HybridRecallResult:
                 or {r.axis for r in self.axes} != {"fts", "vector"}
                 or not _count(self.fused_count) or not _count(self.excluded_count)
                 or self.excluded_count > self.fused_count or self.fused_count > 50
-                or not _duration(self.duration_ms) or len(self.sources) > 400):
+                or not _duration(self.duration_ms) or len(self.sources) > 400
+                or (self.validation_snapshot is not None
+                    and (not isinstance(self.validation_snapshot, EpisodeValidationSnapshot)
+                         or self.validation_snapshot.scope != self.scope))):
             raise ValueError("hybrid_recall_result_invalid")
 
 
@@ -170,4 +231,4 @@ class HybridSearchAxis(Protocol):
 
 class HybridCanonicalReader(Protocol):
     def revalidate(self, request: HybridRecallRequest, candidates: tuple[RankedMemoryCandidate, ...]) -> tuple[CanonicalRecallRecord, ...]: ...
-    def hydrate(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...]) -> tuple[tuple[CanonicalRecallRecord, ...], tuple[HybridSourceReceipt, ...]]: ...
+    def hydrate(self, request: HybridRecallRequest, records: tuple[CanonicalRecallRecord, ...]) -> HybridHydrationResult: ...

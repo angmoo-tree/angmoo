@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3647,
-      "internal_edge_count": 4959,
+      "external_import_count": 3710,
+      "internal_edge_count": 5023,
       "legacy_import_exception_count": 0,
-      "module_count": 1255,
+      "module_count": 1266,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -306,6 +306,14 @@
           },
           {
             "imports": [
+              "app.domains.relationships.constants",
+              "app.domains.relationships.exceptions"
+            ],
+            "module": "app.domains.relationships.policies.observation_outbox",
+            "path": "backend/app/domains/relationships/policies/observation_outbox.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.contracts.metric_interpretation"
             ],
             "module": "app.domains.relationships.policies.personalized_metrics",
@@ -314,7 +322,8 @@
           {
             "imports": [
               "app.domains.relationships.constants",
-              "app.domains.relationships.contracts.projection_commands"
+              "app.domains.relationships.contracts.projection_commands",
+              "app.domains.relationships.policies.observation_outbox"
             ],
             "module": "app.domains.relationships.policies.projection_commands",
             "path": "backend/app/domains/relationships/policies/projection_commands.py"
@@ -549,10 +558,10 @@
           {
             "imports": [
               "app.core.ids",
-              "app.domains.relationships.constants",
               "app.domains.relationships.contracts.observations",
               "app.domains.relationships.models",
               "app.domains.relationships.policies.events",
+              "app.domains.relationships.policies.observation_outbox",
               "app.domains.relationships.repository.events",
               "app.domains.relationships.repository.observations",
               "app.domains.relationships.repository.state",
@@ -3170,7 +3179,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "ca034a7e7ee1ae86c8a11843918142fc39bcae1842f867480cdc9710005ac941"
+        "sha256": "b22c73f39e5daaf0c391d6fa7bfac5f8b0530e0d7e7eebf16017ce26c3aa00a4"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -3228,7 +3237,7 @@
       },
       {
         "path": "backend/tests/relationships/test_social_event_runtime.py",
-        "sha256": "95c989bf02b84a7a84a8bafb2c5702d84762fc2dd8ebde9cebc0e069c29a5a94"
+        "sha256": "730ea5edc6476f87b044116f3a07327b1de369525c2576503e53d0903c2d3a75"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
@@ -3243,7 +3252,7 @@
         "sha256": "aed01497163fa24346b3fd62f7ec5ba4728d09192758488fef750b7199a4cda9"
       }
     ],
-    "parity_test_node_count": 99,
+    "parity_test_node_count": 100,
     "parity_test_nodes": [
       "backend/tests/relationships/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
       "backend/tests/relationships/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
@@ -3277,6 +3286,7 @@
       "backend/tests/relationships/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
       "backend/tests/relationships/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
       "backend/tests/relationships/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox",
+      "backend/tests/relationships/test_social_event_runtime.py::test_two_observers_can_observe_one_source_event",
       "backend/tests/social/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
       "backend/tests/social/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
       "backend/tests/social/test_feed_reaction_intent.py::test_reaction_contract_rejects_public_ignore_and_invalid_action_shape",
@@ -3363,7 +3373,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "b5e962ca13c8b0b5eb9e2a1252649f49b2c5e37ee35a60472e74d389c61a4787"
+    "workflow_sha256": "5a1817de6e21aeb303a7eec857b65322ca22e3c5ae62aac9d1083dbc451ae20c"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -3433,7 +3443,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "45dd14f5346d559412ed4a0eca554d73cf725334f1c959e9a8063c1c7750350a"
+        "sha256": "9308955a453f682bbf52e363faae712acb0165e1961fae9a83a1beb7129454de"
       },
       "steps": [
         {

@@ -11,6 +11,7 @@ from app.domains.relationships.constants import (
 from app.domains.relationships.contracts.projection_commands import (
     ProjectionCommandError, ProjectionOutboxPayload,
 )
+from app.domains.relationships.policies.observation_outbox import observation_dedupe_key
 
 
 def _canonical_json(payload: dict[str, object]) -> str:
@@ -56,6 +57,11 @@ def _strict_payload(
         RELATIONSHIP_PAYLOAD_VERSION,
         OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION,
     }:
+        observation_relationship = (
+            row.payload_version == OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION
+        )
+        if observation_relationship and row.projection_type != "relationship_state":
+            raise ProjectionCommandError("payload_invalid")
         allowed = {
             "world_id",
             "source_event_id",
@@ -70,9 +76,6 @@ def _strict_payload(
         relationship_state_id = _validate_identifier(
             payload.get("relationship_state_id"),
             nullable=row.projection_type != "relationship_state",
-        )
-        observation_relationship = (
-            row.payload_version == OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION
         )
     else:
         raise ProjectionCommandError("payload_version_unsupported")
@@ -90,6 +93,15 @@ def _strict_payload(
     target_id = _validate_identifier(
         payload.get("target_world_character_id"), nullable=True
     )
+    if observation_relationship:
+        if (
+            relationship_state_id is None
+            or source_event_id is None
+            or row.relationship_state_id != relationship_state_id
+            or actor_id is None or target_id is None or actor_id == target_id
+            or row.dedupe_key != observation_dedupe_key(source_event_id, relationship_state_id)
+        ):
+            raise ProjectionCommandError("payload_invalid")
     return (
         world_id,
         source_event_id,

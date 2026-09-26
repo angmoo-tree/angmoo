@@ -21,10 +21,10 @@ def test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph():
     manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
     assert RUNTIME_MIGRATION_HEAD == manifest.source_revision
     assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION
-    # The embedded v19 marker remains at its frozen v16-v19 SQLite lineage.
-    # The Alembic compatibility graph has an additive successor revision.
-    assert scripts.get_heads() == ["20260923_0097"]
-    assert scripts.get_revision("20260923_0097").down_revision == RUNTIME_MIGRATION_HEAD
+    assert scripts.get_heads() == ["20260924_0098"]
+    assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == "20260923_0097"
+    # The released v19 marker retains its older lineage.
+    assert load_sqlite_manifest(19).source_revision == "20260918_0096"
 
 
 @pytest.mark.parametrize("replacement", [None, "20260825_0083", "20990101_9999"])

@@ -1,3 +1,4 @@
+import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { expect, test } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
@@ -4435,3 +4436,5 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
 import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
 
 recommendationHistoryTests(true);
+
+personalizedActivityTests(true);

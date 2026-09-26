@@ -316,6 +316,21 @@
     {
       "markers": {
         "driver_or_url": [
+          26,
+          30,
+          45,
+          51
+        ]
+      },
+      "owner": "ER2",
+      "path": "backend/alembic/versions/20260924_0098_observation_outbox_identity.py",
+      "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
+      "source_sha256": "fa4438dd8b0439e8655d2e93cc9838c687b7486cd76e03562ce61e72f45eef8a",
+      "transition_pr": "ER2 PR G"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
           42
         ]
       },
@@ -595,30 +610,37 @@
     {
       "markers": {
         "driver_or_url": [
-          23,
-          29
+          24,
+          30,
+          417,
+          426
         ],
         "jsonb": [
-          23,
-          29
+          24,
+          30
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/models/social.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "74cfa9f0b21d9487e2302fc93620f5d1ea02a6c3b6d416f8cae378615e3f1512",
+      "source_sha256": "af378a2e19d3796c7720ab1ceee3f47af9787d876abeb02b2a01b32435cd14b7",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
+        "driver_or_url": [
+          20,
+          27,
+          28
+        ],
         "row_lock": [
-          44
+          70
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/repository/events.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "6d82f5d6172422c1f97710246d2241349f4a71e5542d552aa74cf47b48682952",
+      "source_sha256": "2078d3a6f8eb4986b80f723ad012ae583b4a6319517d04d7af2dfa82c61d7424",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1125,7 +1147,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/service/world_feed.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "4c2c97c0fae0afc6832a7e77edc011c8b232dbfe1426cd06604ce099d79959be",
+      "source_sha256": "f95088ddc1cfe12044c0fc7ad32c2512c9615690a1ee0738a602de79f21046b0",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1288,6 +1310,19 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          226,
+          228
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "5051b083eb25fdb4b40f2eb48abd155f1e41ef1c791fb50b73b20d2d418b0263",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "row_lock": [
           16
         ]
@@ -1316,15 +1351,15 @@
           108,
           109,
           110,
-          337,
           338,
-          339
+          339,
+          340
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "ab3f5c4f01b40e91892e1e52136bcf4fe117e1b1e392c05ceddd9d87811a049c",
+      "source_sha256": "fb3309798d07a48233aca442e9587365da88e36a70b60b8d9c381531cca0b843",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1467,10 +1502,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 98,
+  "entry_count": 100,
   "marker_counts": {
     "advisory_lock": 11,
-    "driver_or_url": 57,
+    "driver_or_url": 60,
     "jsonb": 12,
     "pgvector": 5,
     "row_lock": 43,

@@ -1,3 +1,4 @@
+import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { execFile } from "node:child_process";
@@ -2900,3 +2901,5 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
 import { memoryBatchFixture, verifyMemoryBatchControls } from "./memory-batch-fixture";
 
 recommendationHistoryTests(false, async (page) => { await installBackendFixture(page); });
+
+personalizedActivityTests(false, async (page) => { await installBackendFixture(page); });

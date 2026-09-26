@@ -18,6 +18,9 @@ from app.runtime.social.world_feed_queries import WorldFeedQueries
 
 
 class FeedLane(SocialLane):
+    def save_preparation(self):
+        self.ctx.db.commit()
+
     def profile(self, *, neutral_weights=True):
         profile = load_ready_search_profile(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
             world_character_id=self.actor.id)
@@ -31,11 +34,12 @@ class FeedLane(SocialLane):
             for key in ("like", "comment", "repost", "follow")})
 
     async def load(self, state):
+        self.reconcile_deliveries()
         preferences = self.profile(neutral_weights=False).action_profile
         profile = self.profile()
         cycle = f"v2:{state['identity']['activity_id']}:feed"
         claim = claim_cycle_keywords(self.ctx.db, profile=profile, cycle_key=cycle, run_id=self.ctx.run_id)
-        self.ctx.db.commit()
+        self.save_preparation()
         if claim.duplicate_cycle:
             return {"candidates": [], "lane_data": {"duplicate_cycle": True}}
         search = search_world_feed_candidates(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
@@ -43,7 +47,7 @@ class FeedLane(SocialLane):
             now=self.ctx.run_started_at, search_index=self.ctx.social_search_index, search_state=self.ctx.social_search_state)
         claims = claim_feed_observations(self.ctx.db, profile=profile, candidates=search.candidates,
             cycle_key=cycle, run_id=self.ctx.run_id, now=datetime.now(UTC))
-        self.ctx.db.commit()
+        self.save_preparation()
         candidates, data = [], {}
         from app.runtime.activity_proposals.composition import proposal_eligibility
         for candidate in claims.candidates:
@@ -68,7 +72,15 @@ class FeedLane(SocialLane):
             candidates=tuple(WorldFeedCandidateRead.model_validate(c) for c in data["candidates"]),
             observations=tuple(self.ctx.db.get(WorldCharacterFeedObservation, i) for i in data["observation_ids"]),
             claim_conflict_count=0)
-        delivery = FeedDelivery(self.ctx.db, profile=self.profile(), cycle_key=data["cycle_key"], claims=claims)
+        version_two = state.get("identity", {}).get("contract_version") == 2
+        def validate_claims():
+            from app.domains.social.service.world_feed import renew_owned_feed_claims
+            renew_owned_feed_claims(self.ctx.db, claim_tokens=data["claim_tokens"],
+                run_id=self.ctx.run_id, now=datetime.now(UTC))
+            self.ctx.db.commit()
+        delivery = FeedDelivery(self.ctx.db, profile=self.profile(), cycle_key=data["cycle_key"], claims=claims,
+            validate=validate_claims if version_two else None,
+            validate_completion=validate_claims if version_two else None, retain_until_observed=version_two)
         if delivery.row.state in {"uncertain", "dispatched"}:
             raise ValueError("feed_delivery_requires_reconciliation")
         return delivery
@@ -76,7 +88,7 @@ class FeedLane(SocialLane):
     async def guard(self, state):
         await super().guard(state)
         data = state.get("lane_data", {}).get("_feed")
-        if data and state.get("stage") in {"TargetSelector", "ActionPlanner", "Writer", "Execute"}:
+        if data and state.get("stage") in {"TargetSelector", "DecisionDraft", "ActionPlanner", "ValidateDraft", "Writer", "Execute"}:
             for identifier, token in data["claim_tokens"].items():
                 row = self.ctx.db.get(WorldCharacterFeedObservation, identifier, populate_existing=True)
                 if row is None or row.claim_token != token or row.run_id != self.ctx.run_id:
@@ -124,6 +136,39 @@ class FeedLane(SocialLane):
                 logging.getLogger(__name__).warning("v2_feed_observation_source_unavailable")
         self.ctx.db.commit()
 
+    def reconcile_deliveries(self):
+        from sqlalchemy import select, update
+        from app.domains.social.models.topics import RecommendationDelivery
+        from app.domains.social.contracts.observations import SocialObservationError
+        from app.runtime.social.observations import observe_source
+        rows = self.ctx.db.scalars(select(RecommendationDelivery).where(
+            RecommendationDelivery.world_id == self.actor.world_id,
+            RecommendationDelivery.world_character_id == self.actor.id,
+            RecommendationDelivery.state == "delivered",
+            RecommendationDelivery.trace["_activity_observation"].as_string() == "pending",
+        ).order_by(RecommendationDelivery.updated_at, RecommendationDelivery.id).limit(200)).all()
+        for row in rows:
+            outcomes = {}
+            for post_id in row.post_ids:
+                try:
+                    with self.ctx.db.begin_nested():
+                        observe_source(self.ctx.db, world_id=self.actor.world_id,
+                            observer_world_character_id=self.actor.id, source_social_event_id=None,
+                            source_post_id=post_id, lane="feed", observed_at=row.updated_at)
+                    outcomes[post_id] = {"status": "observed"}
+                except SocialObservationError as exc:
+                    # Eligibility failure is a recorded terminal non-application,
+                    # not an endless retry or an invented successful observation.
+                    outcomes[post_id] = {"status": "not_applied", "reason": exc.reason_code}
+            # Readers use updated_at as the delivery time. Settling an old
+            # receipt must not make its posts look newly delivered today.
+            self.ctx.db.execute(update(RecommendationDelivery).where(
+                RecommendationDelivery.id == row.id).values(
+                    trace={**row.trace, "_activity_observation": "settled",
+                        "_activity_observation_results": outcomes},
+                    updated_at=row.updated_at).execution_options(synchronize_session="fetch"))
+            self.ctx.db.commit()
+
     async def finalize(self, state):
         self.observe_delivered()
         result = await super().finalize(state)
@@ -131,7 +176,7 @@ class FeedLane(SocialLane):
         if data:
             decisions = state.get("decision", {}).get("decisions", [])
             action = next((d for d in decisions if d["action"] != "no_action"), None)
-            reason = "writer_failed" if state.get("failure") else None if action else "no_candidate" if not data["candidates"] else "model_abstained"
+            reason = "writer_invalid" if state.get("failure") else None if action else "no_candidate" if not data["candidates"] else "model_abstained"
             summary = {"engine": "personalized_graph_v2", "run_id": self.ctx.run_id,
                 "raw_candidate_count": data["raw_candidate_count"], "claimed_candidate_count": len(data["candidates"]),
                 "selected_action": action["action"] if action else None,

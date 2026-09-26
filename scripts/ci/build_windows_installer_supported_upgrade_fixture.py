@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -628,24 +628,34 @@ def _seed_supported_predecessor(
                     build_sqlite_v14_metadata,
                     build_sqlite_v15_metadata,
                     build_sqlite_v16_metadata,
+                    build_sqlite_v19_metadata,
                 )
                 from app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding import TABLES as EMBEDDING_V12_TABLES
-                for name in reversed(ACTIVITY_V19_TABLES):
-                    Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
+                if source_version < 19:
+                    for name in reversed(ACTIVITY_V19_TABLES):
+                        Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
                 if source_version < 18:
                     Base.metadata.tables["relationship_review_requests"].drop(sql_connection, checkfirst=True)
                 if source_version < 17:
                     for name in reversed(RELATIONSHIP_V17_TABLES):
                         Base.metadata.tables[name].drop(sql_connection, checkfirst=True)
-                # Rebuild only tables whose historical columns or constraints
-                # differ. A v17/v18 predecessor keeps its actual relationship
-                # schema, while v15 keeps the original Feed mode constraint.
-                if source_version < 17:
+                # Every predecessor has the pre-v20 outbox identity. Earlier
+                # versions also need their historical relationship columns.
+                if source_version < 20:
                     sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
                     try:
-                        historical_v16 = build_sqlite_v16_metadata()
-                        for name in ("relationship_states", "graph_projection_outbox"):
-                            historical = historical_v16.tables[name]
+                        historical_metadata = (
+                            build_sqlite_v16_metadata()
+                            if source_version < 17
+                            else build_sqlite_v19_metadata()
+                        )
+                        historical_tables = (
+                            ("relationship_states", "graph_projection_outbox")
+                            if source_version < 17
+                            else ("graph_projection_outbox",)
+                        )
+                        for name in historical_tables:
+                            historical = historical_metadata.tables[name]
                             previous = f"{name}_current_fixture"
                             sql_connection.exec_driver_sql(f'ALTER TABLE "{name}" RENAME TO "{previous}"')
                             sql_connection.execute(CreateTable(historical))

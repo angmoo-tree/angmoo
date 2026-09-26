@@ -8,7 +8,8 @@ from app.domains.world_characters.activity_models import ActivityEnginePolicy, A
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.schemas.activity_state import ActivityEngine
 
-CONTRACT_VERSION = 1
+CONTRACT_VERSION = 2
+SUPPORTED_CONTRACT_VERSIONS = frozenset({1, 2})
 DEFAULT_ACTIVITY_ENGINE: ActivityEngine = "personalized_graph_v2"
 
 
@@ -52,12 +53,16 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
     """Existing runs keep their engine even if policy changes during execution."""
     row = db.get(ActivityGraphRun, activity_id)
     if row is not None:
-        if (row.world_id, row.world_character_id, row.contract_version) != (actor.world_id, actor.id, CONTRACT_VERSION):
+        if ((row.world_id, row.world_character_id) != (actor.world_id, actor.id)
+                or row.contract_version not in SUPPORTED_CONTRACT_VERSIONS
+                or (row.engine == "current" and row.contract_version != 1)):
             raise ValueError("activity_run_scope_or_version_invalid")
         return row
+    engine = resolve_engine(db, actor)["engine"]
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
-        world_character_id=actor.id, engine=resolve_engine(db, actor)["engine"],
-        contract_version=CONTRACT_VERSION, status="running", stage="LoadContext", started_at=datetime.now(UTC))
+        world_character_id=actor.id, engine=engine,
+        contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
+        status="running", stage="LoadContext", started_at=datetime.now(UTC))
     db.add(row)
     db.flush()
     return row

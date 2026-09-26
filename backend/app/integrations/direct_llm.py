@@ -18,7 +18,10 @@ from app.core.redaction import (
     redact_exact_secrets,
     redact_secret_text,
 )
-from app.providers.contracts import ProviderRequest, ProviderToolCall, ProviderToolDefinition
+from app.providers.contracts import (
+    JsonRetryDecision, ProviderRequest, ProviderToolCall, ProviderToolDefinition,
+    StructuredOutputValidationError,
+)
 from app.providers.gemini import build_generate_content_config, genai, types
 from app.providers.registry import get_provider_adapter, normalize_provider_name
 
@@ -46,6 +49,8 @@ class DirectLlmJsonError(DirectLlmError):
         validation_summary: list[dict[str, str]] | None = None,
         json_error_diagnostics: list[dict[str, Any]] | None = None,
         last_payload: dict[str, Any] | None = None,
+        validation_code: str | None = None,
+        field_path: str | None = None,
     ) -> None:
         super().__init__(message)
         self.failure_class = failure_class
@@ -54,6 +59,8 @@ class DirectLlmJsonError(DirectLlmError):
         self.validation_summary = validation_summary
         self.json_error_diagnostics = json_error_diagnostics
         self.last_payload = last_payload
+        self.validation_code = validation_code
+        self.field_path = field_path
 
 
 class DirectLlmDeferred(DirectLlmError):
@@ -102,6 +109,14 @@ class RunLlmTracker:
     provider_call_order_in_run: int = 0
     calls: list[dict[str, Any]] = field(default_factory=list)
     rate_limit_waits: list[dict[str, Any]] = field(default_factory=list)
+    observer: Callable[[str, dict[str, Any]], None] | None = field(default=None, repr=False, compare=False)
+
+    def _notify(self, event: str, payload: dict[str, Any]) -> None:
+        if self.observer is not None:
+            try:
+                self.observer(event, payload)
+            except Exception:
+                pass  # Diagnostics must not affect the provider call.
 
     def next_call_order(self) -> int:
         if self.call_order_in_run >= self.max_calls:
@@ -137,6 +152,7 @@ class RunLlmTracker:
                 "recorded_at": datetime.now(UTC).isoformat(),
             }
         )
+        self._notify("rate_wait", self.rate_limit_waits[-1])
 
     def record_call(
         self,
@@ -187,6 +203,7 @@ class RunLlmTracker:
         if finish_reason:
             payload["finish_reason"] = str(finish_reason)[:64]
         self.calls.append(payload)
+        self._notify("call", payload)
 
     def annotate_last_json_postprocess_error(
         self, *, context: DirectLlmCallContext, diagnostic: dict[str, Any]
@@ -199,6 +216,7 @@ class RunLlmTracker:
             if call.get("agent_run_id") != context.agent_run_id:
                 continue
             call["json_postprocess_error"] = diagnostic
+            self._notify("json_postprocess_error", call)
             return
 
     def record_embedding_call(
@@ -230,6 +248,7 @@ class RunLlmTracker:
         if provider_error_hint:
             payload["provider_error_hint"] = provider_error_hint
         self.calls.append(payload)
+        self._notify("call", payload)
 
     def summary(self) -> dict[str, Any]:
         total_prompt_tokens = 0
@@ -744,6 +763,8 @@ async def generate_text(
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None,
     tools: tuple[ProviderToolDefinition, ...] = (),
     require_tool_call: bool = False,
+    sdk_attempts: int | None = None,
+    on_request_start: Callable[[int], None] | None = None,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
@@ -753,7 +774,9 @@ async def generate_text(
     if tools and not adapter.capabilities.tool_calls:
         raise DirectLlmError("native_tool_calls_unsupported")
 
-    async def _invoke() -> Any:
+    async def _invoke(call_order: int) -> Any:
+        if on_request_start is not None:
+            on_request_start(call_order)
         request = ProviderRequest(
             api_key=api_key,
             model=context.model,
@@ -767,7 +790,7 @@ async def generate_text(
             image_parts=tuple(user_image_parts or ()),
             tools=tools,
             require_tool_call=require_tool_call,
-            sdk_attempts=1 if tools else None,
+            sdk_attempts=1 if tools else sdk_attempts,
         )
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
@@ -780,18 +803,18 @@ async def generate_text(
             call_type="generate_content",
             on_rate_limit_wait=on_rate_limit_wait,
         )
-        provider_call_order = tracker.next_provider_call_order()
         call_order = tracker.next_call_order()
+        provider_call_order = tracker.next_provider_call_order()
         started = time.perf_counter()
         try:
             async with credential_semaphore:
                 if semaphore is None:
                     async with asyncio.timeout(timeout_seconds):
-                        response = await _invoke()
+                        response = await _invoke(call_order)
                 else:
                     async with semaphore:
                         async with asyncio.timeout(timeout_seconds):
-                            response = await _invoke()
+                            response = await _invoke(call_order)
             usage = response.usage.as_direct_llm_usage()
             result = DirectLlmResponse(
                 text=response.text,
@@ -929,15 +952,15 @@ def _json_shape_hint(
         return "markdown_fence"
     if not stripped.startswith(("{", "[")):
         return "natural_text_only"
+    if isinstance(exc, TypeError) and stripped.startswith("[") and stripped.endswith("]"):
+        return "wrong_root_type"
     if isinstance(exc, json.JSONDecodeError):
         message = exc.msg.lower()
         if "extra data" in message:
             return "extra_text"
-        if (
-            "unterminated string" in message
-            or "invalid control character" in message
-            or "invalid \\escape" in message
-        ):
+        if "unterminated string" in message:
+            return "truncated_or_unclosed"
+        if "invalid control character" in message or "invalid \\escape" in message:
             return "bad_escape"
         if stripped.startswith("{") and not stripped.endswith("}"):
             return "truncated_or_unclosed"
@@ -975,6 +998,9 @@ def _json_error_diagnostic(
             parsed_present=parsed_present,
         ),
     }
+    if isinstance(exc, StructuredOutputValidationError):
+        diagnostic["validation_code"] = exc.validation_code
+        diagnostic["field_path"] = exc.field_path
     if preview_tail:
         diagnostic["preview_tail"] = preview_tail
     return diagnostic
@@ -1031,67 +1057,145 @@ async def generate_json(
     on_response: Callable[[], None] | None = None,
     should_retry_json_error: Callable[
         [BaseException, dict[str, Any] | None, dict[str, Any], int], bool
-    ]
-    | None = None,
+    ] | None = None,
+    retry_max_output_tokens: int | None = None,
+    json_retry_policy: Callable[
+        [BaseException, dict[str, Any] | None, dict[str, Any], int], JsonRetryDecision | None
+    ] | None = None,
+    retry_input_char_limit: int | None = None,
+    sdk_attempts: int | None = None,
+    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
 ) -> Any:
+    if json_retry_policy is not None and (
+        should_retry_json_error is not None or retry_max_output_tokens is not None
+    ):
+        raise ValueError("json_retry_options_conflict")
+
     last_error_type = "unknown"
     last_validation_summary: list[dict[str, str]] | None = None
     json_error_diagnostics: list[dict[str, Any]] = []
     last_payload: dict[str, Any] | None = None
+    retry_decision: JsonRetryDecision | None = None
+
     for attempt in range(2):
+        # Guard, feedback validation, and input-budget checks are workflow errors,
+        # never malformed output from the previous provider response.
+        if attempt and before_json_retry is not None:
+            await before_json_retry(attempt + 1)
+        if attempt and json_retry_policy is not None and retry_decision is not None:
+            suffix = "\n\n" + retry_decision.feedback
+            output_tokens = retry_decision.max_output_tokens
+            retry_reason = retry_decision.reason_code
+        elif attempt:
+            suffix = (
+                "\n\nThe previous attempt failed validation. "
+                f"Return one valid JSON object only. error_type={last_error_type}"
+            )
+            output_tokens = retry_max_output_tokens or max_output_tokens
+            retry_reason = "legacy_json_retry"
+        else:
+            suffix = ""
+            output_tokens = max_output_tokens
+            retry_reason = None
+        actual_user_prompt = user_prompt + suffix
+        if attempt and retry_input_char_limit is not None and (
+            len(system_prompt) + len(actual_user_prompt) > retry_input_char_limit
+        ):
+            raise ValueError("activity_input_budget_exceeded")
+        input_sha256 = hashlib.sha256(
+            (system_prompt + "\n" + actual_user_prompt).encode()
+        ).hexdigest()
+        def request_started(call_order: int) -> None:
+            tracker._notify("json_attempt_input", {
+                "node": context.node, "lane": context.lane,
+                "json_attempt": attempt + 1, "input_sha256": input_sha256,
+                "max_output_tokens": output_tokens, "retry_reason": retry_reason,
+                "call_order_in_run": call_order,
+            })
+
         response: DirectLlmResponse | None = None
         payload_coerced = False
         last_payload = None
+        response = await generate_text(
+            api_key=api_key,
+            context=context,
+            tracker=tracker,
+            system_prompt=system_prompt,
+            user_prompt=actual_user_prompt,
+            max_output_tokens=output_tokens,
+            timeout_seconds=timeout_seconds,
+            response_schema=response_schema,
+            response_mime_type="application/json",
+            thinking_level=thinking_level,
+            user_image_parts=user_image_parts,
+            on_rate_limit_wait=on_rate_limit_wait,
+            sdk_attempts=sdk_attempts,
+            on_request_start=request_started,
+        )
+        if on_response is not None:
+            on_response()
         try:
-            response = await generate_text(
-                api_key=api_key,
-                context=context,
-                tracker=tracker,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt
-                if attempt == 0
-                else (
-                    f"{user_prompt}\n\nThe previous attempt failed validation. "
-                    f"Return one valid JSON object only. error_type={last_error_type}"
-                ),
-                max_output_tokens=max_output_tokens,
-                timeout_seconds=timeout_seconds,
-                response_schema=response_schema,
-                response_mime_type="application/json",
-                thinking_level=thinking_level,
-                user_image_parts=user_image_parts,
-                on_rate_limit_wait=on_rate_limit_wait,
-            )
-            if on_response is not None:
-                on_response()
             payload = _coerce_json_payload(response)
             payload_coerced = True
             last_payload = payload
-            return validator(payload) if validator is not None else payload
-        except (json.JSONDecodeError, TypeError, ValueError) as exc:
+            result = validator(payload) if validator is not None else payload
+            tracker._notify("json_attempt", {
+                "node": context.node, "lane": context.lane,
+                "json_attempt": attempt + 1, "status": "valid",
+                "max_output_tokens": output_tokens,
+                "finish_reason": response.finish_reason,
+                "input_sha256": input_sha256, "retry_reason": retry_reason,
+                "call_order_in_run": tracker.call_order_in_run,
+            })
+            return result
+        except Exception as exc:
+            if isinstance(exc, DirectLlmError):
+                raise
             last_error_type = type(exc).__name__
-            last_validation_summary = _validation_summary(
-                exc, exact_secret=api_key
-            )
+            last_validation_summary = _validation_summary(exc, exact_secret=api_key)
             diagnostic = _json_error_diagnostic(
-                response=response,
-                exc=exc,
-                attempt=attempt + 1,
-                schema_validation=payload_coerced,
-                exact_secret=api_key,
+                response=response, exc=exc, attempt=attempt + 1,
+                schema_validation=payload_coerced, exact_secret=api_key,
             )
             json_error_diagnostics.append(diagnostic)
             tracker.annotate_last_json_postprocess_error(
-                context=context,
-                diagnostic=diagnostic,
+                context=context, diagnostic=diagnostic,
             )
-            should_retry = (
-                should_retry_json_error(exc, last_payload, diagnostic, attempt + 1)
-                if should_retry_json_error is not None
-                else True
-            )
-            if attempt == 0 and should_retry:
-                continue
+            if attempt == 0:
+                if json_retry_policy is not None:
+                    retry_decision = json_retry_policy(
+                        exc, last_payload, diagnostic, attempt + 1
+                    )
+                    if retry_decision is not None:
+                        if (not isinstance(retry_decision, JsonRetryDecision)
+                                or not re.fullmatch(r"[a-z][a-z0-9_]{0,63}",
+                                                     retry_decision.reason_code)
+                                or not isinstance(retry_decision.feedback, str)
+                                or not 0 < len(retry_decision.feedback) <= 512
+                                or retry_decision.max_output_tokens <= 0):
+                            raise ValueError("json_retry_decision_invalid")
+                else:
+                    should_retry = (
+                        should_retry_json_error(
+                            exc, last_payload, diagnostic, attempt + 1
+                        ) if should_retry_json_error is not None else True
+                    )
+                    if should_retry:
+                        retry_decision = JsonRetryDecision(
+                            "legacy_json_retry",
+                            retry_max_output_tokens or max_output_tokens, "",
+                        )
+                if retry_decision is not None:
+                    tracker._notify("json_attempt", {
+                        "node": context.node, "lane": context.lane,
+                        "json_attempt": 1, "status": "retry_scheduled",
+                        "max_output_tokens": max_output_tokens,
+                        "finish_reason": diagnostic.get("finish_reason"),
+                        "retry_reason": retry_decision.reason_code,
+                        "input_sha256": input_sha256,
+                        "call_order_in_run": tracker.call_order_in_run,
+                    })
+                    continue
             raise DirectLlmJsonError(
                 "direct LLM JSON parse failed",
                 failure_class="json_parse_failed",
@@ -1100,52 +1204,7 @@ async def generate_json(
                 validation_summary=last_validation_summary,
                 json_error_diagnostics=json_error_diagnostics,
                 last_payload=last_payload,
+                validation_code=diagnostic.get("validation_code"),
+                field_path=diagnostic.get("field_path"),
             ) from exc
-        except Exception as exc:
-            if isinstance(exc, DirectLlmJsonError):
-                raise
-            last_error_type = type(exc).__name__
-            last_validation_summary = _validation_summary(
-                exc, exact_secret=api_key
-            )
-            if not isinstance(exc, DirectLlmError):
-                diagnostic = _json_error_diagnostic(
-                    response=response,
-                    exc=exc,
-                    attempt=attempt + 1,
-                    schema_validation=payload_coerced,
-                    exact_secret=api_key,
-                )
-                json_error_diagnostics.append(diagnostic)
-                tracker.annotate_last_json_postprocess_error(
-                    context=context,
-                    diagnostic=diagnostic,
-                )
-                should_retry = (
-                    should_retry_json_error(
-                        exc, last_payload, diagnostic, attempt + 1
-                    )
-                    if should_retry_json_error is not None
-                    else True
-                )
-                if attempt == 0 and should_retry:
-                    continue
-                raise DirectLlmJsonError(
-                    "direct LLM JSON parse failed",
-                    failure_class="json_parse_failed",
-                    parse_error_type=last_error_type,
-                    attempt_count=attempt + 1,
-                    validation_summary=last_validation_summary,
-                    json_error_diagnostics=json_error_diagnostics,
-                    last_payload=last_payload,
-                ) from exc
-            raise
-    raise DirectLlmJsonError(
-        "direct LLM JSON parse failed",
-        failure_class="json_parse_failed",
-        parse_error_type=last_error_type,
-        attempt_count=2,
-        validation_summary=last_validation_summary,
-        json_error_diagnostics=json_error_diagnostics,
-        last_payload=last_payload,
-    )
+    raise RuntimeError("unreachable_json_retry_loop")

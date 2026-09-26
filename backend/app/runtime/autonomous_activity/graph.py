@@ -2,6 +2,8 @@
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
+from time import monotonic
+from uuid import uuid4
 
 from langgraph.graph import END, START, StateGraph
 
@@ -33,25 +35,54 @@ class LanePorts:
     guard: Node
     resolve_routine_query: Node | None = None
     on_error: Callable[[Exception], Awaitable[dict]] | None = None
+    observe: Callable[..., None] | None = None
 
 
-def build_lane(lane: str, ports: LanePorts):
+def build_lane(lane: str, ports: LanePorts, *, combined=False):
     builder = StateGraph(LaneState)
+
+    def trace(event_type, name, **details):
+        if ports.observe is not None:
+            try:
+                ports.observe(event_type, name, **details)
+            except Exception:
+                pass  # Diagnostics cannot change graph behavior.
 
     def guarded(name: str, callback: Node):
         async def invoke(state):
-            await ports.guard({**state, "stage": name})
-            if name == "Execute" and state.get("failure"):
-                return {"executions": []}
+            started = monotonic()
+            stage_attempt_id = uuid4().hex
+            trace("node_started", name, state=state, stage_attempt_id=stage_attempt_id)
             try:
-                return await callback(state)
-            except Exception as exc:
+                await ports.guard({**state, "stage": name})
+            except BaseException as exc:
+                trace("node_failed", name, state=state, phase="guard", exc=exc,
+                      stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                raise
+            if name == "Execute" and state.get("failure"):
+                result = {"executions": []}
+                trace("node_completed", name, state=state, result=result,
+                      stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                return result
+            try:
+                result = await callback(state)
+            except BaseException as exc:
+                from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
+                if isinstance(exc, ActivityRetryGuardError):
+                    trace("node_failed", name, state=state, phase="retry_guard", exc=exc.original,
+                          stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                    raise exc.original from exc
+                trace("node_failed", name, state=state, phase="callback", exc=exc,
+                      stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
                 from app.integrations.direct_llm import DirectLlmError, DirectLlmDeferred
-                if name != "Writer" or isinstance(exc, DirectLlmDeferred) or not isinstance(exc, (ValueError, DirectLlmError)):
+                if name not in {"Writer", "ValidateDraft"} or isinstance(exc, DirectLlmDeferred) or not isinstance(exc, (ValueError, DirectLlmError)):
                     raise
                 # A normal Planner already interpreted experience. Keep its
                 # settlement independent of failed public expression.
-                return {"failure": {"stage": name, "reason": type(exc).__name__}, "drafts": []}
+                result = {"failure": {"stage": name, "reason": type(exc).__name__}, "drafts": []}
+            trace("node_completed", name, state=state, result=result,
+                  stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+            return result
         return invoke
 
     async def select(state):
@@ -74,24 +105,34 @@ def build_lane(lane: str, ports: LanePorts):
     builder.add_node("LoadCandidates", guarded("LoadCandidates", ports.load_candidates))
     builder.add_node("TargetSelector", guarded("TargetSelector", select))
     builder.add_node("ResolveQuery", guarded("ResolveQuery", queries))
+    planner = "DecisionDraft" if combined else "ActionPlanner"
+    writer = "ValidateDraft" if combined else "Writer"
     for name, callback in (
         ("RecallSelected", ports.recall), ("BuildDecisionContext", ports.build_context),
-        ("ActionPlanner", ports.plan), ("ValidateDecision", ports.validate),
-        ("Writer", ports.write), ("Execute", ports.execute),
+        (planner, ports.plan), ("ValidateDecision", ports.validate),
+        (writer, ports.write), ("Execute", ports.execute),
         ("Settle", ports.settle), ("PathResult", ports.finalize),
     ):
         builder.add_node(name, guarded(name, callback))
     builder.add_edge(START, "LoadCandidates")
     builder.add_conditional_edges("LoadCandidates", lambda s: (
-        "PathResult" if not s.get("candidates") else "ResolveQuery" if lane == "routine" else "TargetSelector"
+        "PathResult" if not s.get("candidates") or s.get("preparation_error") else
+        ("ResolveQuery" if s.get("selections") else "PathResult") if combined and lane != "routine" else
+        "ResolveQuery" if lane == "routine" else "TargetSelector"
     ), ["PathResult", "ResolveQuery", "TargetSelector"])
     builder.add_conditional_edges("TargetSelector", lambda s: "ResolveQuery" if s.get("selections") else "PathResult", ["ResolveQuery", "PathResult"])
     builder.add_edge("ResolveQuery", "RecallSelected")
     builder.add_edge("RecallSelected", "BuildDecisionContext")
-    builder.add_edge("BuildDecisionContext", "ActionPlanner")
-    builder.add_edge("ActionPlanner", "ValidateDecision")
-    builder.add_conditional_edges("ValidateDecision", lambda s: "Writer" if s.get("assignments") else "Execute", ["Writer", "Execute"])
-    builder.add_edge("Writer", "Execute")
+    if combined:
+        from app.runtime.autonomous_activity.generation_contracts import generation_mode
+        builder.add_node("ChooseGenerationMode", guarded("ChooseGenerationMode", generation_mode))
+        builder.add_edge("BuildDecisionContext", "ChooseGenerationMode")
+        builder.add_edge("ChooseGenerationMode", planner)
+    else:
+        builder.add_edge("BuildDecisionContext", planner)
+    builder.add_edge(planner, "ValidateDecision")
+    builder.add_conditional_edges("ValidateDecision", lambda s: writer if s.get("assignments") else "Execute", [writer, "Execute"])
+    builder.add_edge(writer, "Execute")
     builder.add_edge("Execute", "Settle")
     builder.add_edge("Settle", "PathResult")
     builder.add_edge("PathResult", END)
@@ -100,28 +141,111 @@ def build_lane(lane: str, ports: LanePorts):
 
 
 def build_autonomous_graph(*, lanes: dict[str, LanePorts], load_context: Node,
-                           refresh: Node, finalize: Node, checkpointer: Any):
+                           refresh: Node, finalize: Node, checkpointer: Any,
+                           observe: Callable[..., None] | None = None,
+                           prepare: Node | None = None, choose_selection_mode: Node | None = None,
+                           combined_select: Node | None = None):
+    combined = combined_select is not None
     builder = StateGraph(ParentState)
-    builder.add_node("LoadContext", load_context)
+
+    def parent(name, callback):
+        async def invoke(state):
+            started = monotonic()
+            stage_attempt_id = uuid4().hex
+            if observe is not None:
+                try:
+                    observe("node_started", name, state=state, stage_attempt_id=stage_attempt_id)
+                except Exception:
+                    pass
+            try:
+                result = await callback(state)
+            except BaseException as exc:
+                if observe is not None:
+                    try:
+                        observe("node_failed", name, state=state, phase="callback", exc=exc,
+                                stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                    except Exception:
+                        pass
+                raise
+            if observe is not None:
+                try:
+                    observe("node_completed", name, state=state, result=result,
+                            stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
+                except Exception:
+                    pass
+            return result
+        return invoke
+
+    builder.add_node("LoadContext", parent("LoadContext", load_context))
     for lane in ("inbox", "routine", "feed"):
-        graph = build_lane(lane, lanes[lane])
+        graph = build_lane(lane, lanes[lane], combined=combined)
 
         async def invoke(state, config, child=graph, path=lane, port=lanes[lane]):
             # Private lane channels never bleed into another lane's state.
+            started = monotonic()
+            stage_attempt_id = uuid4().hex
+            if observe is not None:
+                try:
+                    observe("node_started", f"{path.capitalize()}ActivityGraph", state=state,
+                            stage_attempt_id=stage_attempt_id)
+                except Exception:
+                    pass
             try:
-                result = await child.ainvoke({"identity": state["identity"], "shared_context": state["shared_context"]}, config)
-            except Exception as exc:
-                if port.on_error is None:
+                prepared = state.get("prepared_lanes", {}).get(path, {}) if combined else {}
+                extra_context = prepared.get("shared_context", {}).get("action_preferences")
+                shared = dict(state["shared_context"])
+                if extra_context is not None:
+                    shared["action_preferences"] = extra_context
+                result = await child.ainvoke({**prepared, "identity": state["identity"], "shared_context": shared}, config)
+            except BaseException as exc:
+                if observe is not None:
+                    try:
+                        observe("node_failed", f"{path.capitalize()}ActivityGraph", state=state,
+                                phase="child", exc=exc, stage_attempt_id=stage_attempt_id,
+                                duration_ms=int((monotonic() - started) * 1000))
+                    except Exception:
+                        pass
+                if not isinstance(exc, Exception) or port.on_error is None:
                     raise
-                return {f"{path}_result": await port.on_error(exc)}
-            return {f"{path}_result": result.get("result", {})}
+                failure = await port.on_error(exc)
+                if combined and "selections" in prepared:
+                    failure = {"selected_ids": [s["target_id"] for s in prepared["selections"]], **failure}
+                recovered = {f"{path}_result": failure}
+                if observe is not None:
+                    try:
+                        observe("node_completed", f"{path.capitalize()}ActivityGraph", state=state,
+                                result=recovered, stage_attempt_id=stage_attempt_id,
+                                duration_ms=int((monotonic() - started) * 1000))
+                    except Exception:
+                        pass
+                return recovered
+            completed = {f"{path}_result": result.get("result", {})}
+            if observe is not None:
+                try:
+                    observe("node_completed", f"{path.capitalize()}ActivityGraph", state=state,
+                            result=completed, stage_attempt_id=stage_attempt_id,
+                            duration_ms=int((monotonic() - started) * 1000))
+                except Exception:
+                    pass
+            return completed
 
         builder.add_node(f"{lane.capitalize()}ActivityGraph", invoke)
-    builder.add_node("RefreshAfterInbox", refresh)
-    builder.add_node("RefreshAfterRoutine", refresh)
-    builder.add_node("Finalize", finalize)
-    sequence = [START, "LoadContext", "InboxActivityGraph", "RefreshAfterInbox", "RoutineActivityGraph",
-                "RefreshAfterRoutine", "FeedActivityGraph", "Finalize", END]
+    builder.add_node("RefreshAfterInbox", parent("RefreshAfterInbox", refresh))
+    builder.add_node("RefreshAfterRoutine", parent("RefreshAfterRoutine", refresh))
+    builder.add_node("Finalize", parent("Finalize", finalize))
+    if combined:
+        if prepare is None or choose_selection_mode is None:
+            raise ValueError("combined_selection_ports_missing")
+        builder.add_node("PrepareCandidates", parent("PrepareCandidates", prepare))
+        builder.add_node("ChooseSelectionMode", parent("ChooseSelectionMode", choose_selection_mode))
+        builder.add_node("CombinedTargetSelector", parent("CombinedTargetSelector", combined_select))
+        builder.add_node("RefreshAfterFeed", parent("RefreshAfterFeed", refresh))
+        sequence = [START, "LoadContext", "PrepareCandidates", "ChooseSelectionMode", "CombinedTargetSelector",
+                    "InboxActivityGraph", "RefreshAfterInbox", "FeedActivityGraph", "RefreshAfterFeed",
+                    "RoutineActivityGraph", "Finalize", END]
+    else:
+        sequence = [START, "LoadContext", "InboxActivityGraph", "RefreshAfterInbox", "RoutineActivityGraph",
+                    "RefreshAfterRoutine", "FeedActivityGraph", "Finalize", END]
     for left, right in zip(sequence, sequence[1:]):
         builder.add_edge(left, right)
     return builder.compile(checkpointer=checkpointer, name="AutonomousActivityGraphV2")

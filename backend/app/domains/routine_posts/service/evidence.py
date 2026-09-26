@@ -1,13 +1,16 @@
 """Bound public context and validate generation against server-owned evidence."""
 from __future__ import annotations
 from copy import deepcopy
+from datetime import datetime
 from typing import Any
 from app.domains.routine_posts import schemas
 from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
 from app.domains.routine_posts.contracts.context import RoutinePostContext
 from app.domains.routine_posts.contracts.generation import RoutineGeneration
 from app.domains.routine_posts.utils.text import _clip
+from app.domains.routine_posts.service.temporal_context import build_temporal_context, world_local_iso
 from app.domains.routines import service as activity_state_contracts
+from app.domains.routines.service import aware_utc
 from app.providers.gemini import build_gemini_developer_response_schema
 
 
@@ -21,9 +24,21 @@ GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA = (
 )
 
 
-def _common_context(context: RoutinePostContext) -> dict[str, object]:
+def build_routine_prompt_context(
+    context: RoutinePostContext, *, as_of_utc: datetime,
+) -> dict[str, object]:
     return {
         "contract_version": ROUTINE_CONTRACT_VERSION,
+        "temporal_context": build_temporal_context(
+            as_of_utc=as_of_utc,
+            timezone_name=context.world.timezone,
+            plan_local_date=context.plan.local_date,
+            plan_timezone=context.plan.timezone_name,
+            activity_daypart=context.item.daypart,
+            window_start=context.item.scheduled_start_at,
+            window_end=context.item.scheduled_end_at,
+            scheduled_tick=context.due_tick.scheduled_for,
+        ),
         "world": {
             "id": context.world.id,
             "name": _clip(context.world.name, 120),
@@ -64,6 +79,10 @@ def _common_context(context: RoutinePostContext) -> dict[str, object]:
                 "result_snapshot": context.previous_beat.result_snapshot or {},
                 "post": {
                     "id": context.previous_post.id,
+                    "created_at": aware_utc(context.previous_post.created_at).isoformat(),
+                    "created_at_local": world_local_iso(
+                        context.previous_post.created_at, context.world.timezone
+                    ),
                     "title": _clip(context.previous_post.title, 160),
                     "body": _clip(context.previous_post.body, 1_200),
                     "topic_signature": _clip(
@@ -85,6 +104,11 @@ def _common_context(context: RoutinePostContext) -> dict[str, object]:
             for event in context.source_events
         ],
     }
+
+
+# The frozen split-evidence map names this binding; runtime callers use the
+# public builder and pass their checkpointed decision instant explicitly.
+_common_context = build_routine_prompt_context
 
 
 def allowed_continuity_facts(context: RoutinePostContext) -> list[str]:

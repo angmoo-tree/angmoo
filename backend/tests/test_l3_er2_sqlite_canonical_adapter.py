@@ -151,8 +151,12 @@ def test_file_backed_baseline_records_lineage_pragmas_and_schema_digest(
         if index.get("dialect_options", {}).get("sqlite_where") is not None
     ]
     # P8-L-D adds the resolved World-role tuple and unresolved legacy-pair
-    # uniqueness guards to the existing canonical partial-index set.
-    assert len(partial_indexes) == 15
+    # uniqueness guards. Schema v20 also separates observation identities from
+    # other source-event projections with two canonical partial indexes.
+    assert len(partial_indexes) == 17
+    assert {"uq_graph_projection_outbox_observation", "uq_graph_projection_outbox_source_event"} <= {
+        index["name"] for index in partial_indexes
+    }
     lore_columns = {
         column["name"]: str(column["type"])
         for column in inspector.get_columns("character_lore_chunks")
