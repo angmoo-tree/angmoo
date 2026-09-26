@@ -13024,6 +13024,44 @@
         }
       ],
       "migration_sources": []
+    },
+    {
+      "id": "local-creator-compatibility-4bb9420e",
+      "implementation_commit": "b1d0c0ccba262314c1c12b3bcf82a2bb95ff7e5f",
+      "reason": "Complete routed card import, explicit legacy adoption, read-only GET, atomic image defaults and profile concurrency, private deletion, and frozen predecessor projection. Update exact product assertions without changing immutable baselines.",
+      "review": "docs/character-card-import.md and workspace IC-0 through IC-19 execution report",
+      "source_blobs": {
+        "backend/tests/test_post_refactor_contract_changes.py": "d3e079f54a1964bc7cd984b21318362db285f08f",
+        "scripts/ci/post_refactor_contract_changes.py": "b389d30940262fc281d915e959c1f4289cfaf3e2"
+      },
+      "contracts": [],
+      "orm_tables": [],
+      "definitions": [],
+      "assertions": [
+        {
+          "node": "tests/test_post_refactor_contract_changes.py::test_assertion_chain_checks_every_transition_and_exact_final_state",
+          "before": [
+            "assert changes.assertions('test.py::test_change', Counter(['v9', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v10', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', final, final, records) == final",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "after": [
+            "assert changes.assertions('test.py::test_change', Counter(['v9', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v10', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', final, final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v9']), final, records) == final",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ]
+        }
+      ],
+      "frontend_files": [],
+      "migration_sources": []
     }
   ]
 }
