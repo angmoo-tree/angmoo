@@ -8,7 +8,7 @@ from app.domains.world_characters.activity_models import ActivityEnginePolicy, A
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.schemas.activity_state import ActivityEngine
 
-CONTRACT_VERSION = 1
+CONTRACT_VERSION = 2
 SUPPORTED_CONTRACT_VERSIONS = frozenset({1, 2})
 DEFAULT_ACTIVITY_ENGINE: ActivityEngine = "personalized_graph_v2"
 

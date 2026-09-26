@@ -70,6 +70,8 @@ def test_contract_version_transition_and_rollback_do_not_rebind_existing_runs(mo
     from app.domains.world_characters.service import activity_engines
     with Session(_engine(), expire_on_commit=False) as db:
         _, actor, _ = _approved(db)
+        assert activity_engines.CONTRACT_VERSION == 2
+        monkeypatch.setattr(activity_engines, "CONTRACT_VERSION", 1)
         assert bind_run(db, actor=actor, activity_id="old").contract_version == 1
         monkeypatch.setattr(activity_engines, "CONTRACT_VERSION", 2)
         assert bind_run(db, actor=actor, activity_id="new").contract_version == 2
