@@ -17563,6 +17563,1829 @@
       "test_suppressions": {
         "tests/test_p8_l_d_installer_upgrade_contract.py": {}
       }
+    },
+    {
+      "commit": "ab38040e1d940c9c1424f7443d4afcc4aad142fd",
+      "feature_id": "AR-SNS-V2-STABILIZATION",
+      "reason": "Record previously unrecorded V2 observation and recovery introductions.",
+      "tracked_files": {
+        "backend/app/runtime/autonomous_activity/output_recovery.py": "fcd4e1f361a002c57eef29e0d01664aa0359d8fb",
+        "backend/app/runtime/diagnostics/sns_observation.py": "9a16a9a1ac7f96cc865ba8221212b34b60171da5",
+        "backend/app/runtime/diagnostics/sns_observation_report.py": "56038092fce5962c8f2bb8568957a97cc1cdc8bc",
+        "backend/scripts/sns_observation.py": "c97235260044d73cc7f3c5c6ce14b2b5df702d38",
+        "backend/tests/runtime/test_activity_output_recovery.py": "2f95adeb1cb43d22b0bdffd5ea0d5c1d6f9d0b3e",
+        "backend/tests/runtime/test_sns_observation.py": "2ea9dfc977890530cfb66f4e20be0bec23163875"
+      },
+      "test_nodes": [
+        "tests/runtime/test_activity_memory_revalidation.py::test_followup_seen_by_hydration_is_not_new_at_guard",
+        "tests/runtime/test_activity_memory_revalidation.py::test_same_snapshot_validates_distinct_sns_packet_budgets",
+        "tests/runtime/test_activity_memory_revalidation.py::test_snapshot_detects_new_edge_and_summary_but_ignores_unrelated_item",
+        "tests/runtime/test_activity_memory_revalidation.py::test_snapshot_rejects_wrong_scope_or_policy",
+        "tests/runtime/test_activity_output_recovery.py::test_retry_guard_failure_preserves_original_error_and_does_not_send_again",
+        "tests/runtime/test_activity_output_recovery.py::test_retry_policy_is_limited_to_unusable_truncated_output",
+        "tests/runtime/test_activity_output_recovery.py::test_retry_uses_larger_cap_and_guard_before_second_provider_request",
+        "tests/runtime/test_activity_output_recovery.py::test_stop_error_or_complete_max_tokens_do_not_retry[MAX_TOKENS-{\"selected\":\"p\",\"reason\":\"ok\"}-1]",
+        "tests/runtime/test_activity_output_recovery.py::test_stop_error_or_complete_max_tokens_do_not_retry[STOP-{\"selected\":-1]",
+        "tests/runtime/test_activity_provider.py::test_provider_receipt_matches_final_trimmed_input_and_keeps_original_packet",
+        "tests/runtime/test_activity_provider.py::test_selector_limit_schema_and_validator_agree[feed-1-5-1]",
+        "tests/runtime/test_activity_provider.py::test_selector_limit_schema_and_validator_agree[inbox-3-2-2]",
+        "tests/runtime/test_activity_provider.py::test_selector_limit_schema_and_validator_agree[inbox-3-5-3]",
+        "tests/runtime/test_autonomous_activity_graph.py::test_retry_guard_failure_at_writer_does_not_soft_settle_stale_plan",
+        "tests/runtime/test_sns_observation.py::test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat",
+        "tests/runtime/test_sns_observation.py::test_event_write_failure_is_counted_without_failing_activity",
+        "tests/runtime/test_sns_observation.py::test_export_joins_confirmed_actions_state_and_relationship_receipts",
+        "tests/runtime/test_sns_observation.py::test_full_queue_is_counted_and_subsequent_event_can_be_recorded",
+        "tests/runtime/test_sns_observation.py::test_guard_failure_has_node_phase_and_keeps_original_exception",
+        "tests/runtime/test_sns_observation.py::test_heartbeat_records_idle_scheduler_without_private_activity",
+        "tests/runtime/test_sns_observation.py::test_new_session_health_does_not_inherit_prior_session_error",
+        "tests/runtime/test_sns_observation.py::test_parent_lane_failure_is_linked_to_one_root_error",
+        "tests/runtime/test_sns_observation.py::test_restart_keeps_session_and_tail_only_accepts_existing_activity",
+        "tests/runtime/test_sns_observation.py::test_scheduler_failure_does_not_suppress_heartbeat",
+        "tests/runtime/test_sns_observation.py::test_scope_stop_and_recorder_failure_do_not_change_activity",
+        "tests/runtime/test_sns_observation.py::test_session_captures_validation_failure_without_payload_and_exports_read_only",
+        "tests/runtime/test_sns_observation.py::test_single_writer_per_data_root_and_rebind_after_close",
+        "tests/runtime/test_sns_observation.py::test_tail_stop_and_v1_reader_do_not_claim_complete_recording"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_activity_memory_revalidation.py": {
+          "test_existing_bounded_followups_are_not_concurrent_changes_but_new_edges_are": [
+            "pytest.raises(ValueError, match='activity_memory_followup_changed')",
+            "pytest.raises(ValueError, match='activity_memory_changed')"
+          ],
+          "test_followup_seen_by_hydration_is_not_new_at_guard": [
+            "assert 1 <= len(records) < 6",
+            "assert packets['packets']",
+            "assert packets['omitted_packets'] or len(records) < 6"
+          ],
+          "test_snapshot_detects_new_edge_and_summary_but_ignores_unrelated_item": [
+            "pytest.raises(ValueError, match='activity_memory_followup_changed')",
+            "pytest.raises(ValueError, match='activity_memory_changed')"
+          ],
+          "test_snapshot_rejects_wrong_scope_or_policy": [
+            "pytest.raises(ValueError, match='activity_memory_validation_unavailable')"
+          ],
+          "test_same_snapshot_validates_distinct_sns_packet_budgets": [
+            "assert full['packets'] and full['packets'][0]['units']",
+            "assert compact['packets'] and compact != full"
+          ]
+        },
+        "tests/runtime/test_activity_output_recovery.py": {
+          "test_retry_policy_is_limited_to_unusable_truncated_output": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 3, 13)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ],
+          "_context": [],
+          "test_retry_uses_larger_cap_and_guard_before_second_provider_request": [
+            "assert result.selected == 'p'",
+            "assert seen == [('provider', 4096), ('guard', 2), ('provider', 8192)]"
+          ],
+          "test_retry_guard_failure_preserves_original_error_and_does_not_send_again": [
+            "pytest.raises(ValueError, match='activity_source_changed')",
+            "assert seen == ['provider']"
+          ],
+          "test_stop_error_or_complete_max_tokens_do_not_retry": [
+            "assert len(seen) == expected",
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert asyncio.run(run()).selected == 'p'"
+          ]
+        },
+        "tests/runtime/test_activity_provider.py": {
+          "test_invalid_optional_state_keeps_valid_like_but_invalid_target_fails": [
+            "assert result['decisions'][0]['action'] == 'like'",
+            "assert result['state_status'] == 'invalid'",
+            "assert result['state_update'] is None",
+            "pytest.raises(ValueError, match='decision_target_invalid')"
+          ],
+          "test_no_action_can_update_state_only_from_present_source": [
+            "assert parse_action(payload, [candidate])['state_status'] == 'valid'",
+            "assert parse_action(payload, [candidate])['state_status'] == 'invalid'"
+          ],
+          "test_missing_state_is_invalid_auxiliary_but_explicit_null_is_keep": [
+            "assert parse_action(payload, [candidate])['state_status'] == 'invalid'",
+            "assert parse_action({**payload, 'state_update': None}, [candidate])['state_status'] == 'valid'"
+          ],
+          "test_budget_removes_whole_optional_records_without_mutating_shared_input": [
+            "assert len(captured['context']['today_activity']['records']) == 1",
+            "assert captured['required_source'] == payload['required_source']",
+            "assert captured['context']['input_omissions']['today_activity'] == 1",
+            "assert len(payload['context']['today_activity']['records']) == 2",
+            "pytest.raises(ValueError, match='activity_input_budget_exceeded')"
+          ],
+          "test_selector_limit_schema_and_validator_agree": [
+            "assert captured['payload']['selection_limit'] == expected",
+            "assert captured['schema']['properties']['selections']['maxItems'] == expected",
+            "assert captured['max_tokens'] == 4096",
+            "assert captured['recover_truncation'] is True",
+            "assert result['selections'][0]['target_id'] == 'p0'",
+            "assert resolve_query(Selection.model_validate(result['selections'][0]), Candidate.model_validate(candidates[0]), lane=lane).origin == 'natural'",
+            "pytest.raises(ValueError, match='selection_target_invalid')"
+          ],
+          "test_provider_receipt_matches_final_trimmed_input_and_keeps_original_packet": [
+            "assert sent['context']['memories']['first']['packets'][0]['situation'] == 'x' * 63000",
+            "assert sent['context']['memories']['second']['packets'] == [{'ref': 'memory-1', 'already_in_context': True}]",
+            "assert sent['context']['memories']['third']['packets'] == []",
+            "assert receipt['memory_packet_refs'] == ['memory-1', 'memory-1']",
+            "assert receipt['omissions']['memory_packets'] == 1",
+            "assert memories['second']['packets'] == [{'ref': 'memory-1', 'already_in_context': True}]"
+          ]
+        },
+        "tests/runtime/test_autonomous_activity_graph.py": {
+          "lane_ports": [
+            "assert state['identity']['world_id'] == 'world'",
+            "assert len(state['queries']) == 1",
+            "assert state['decision_context']['memory']['selected']['text'] == 'already replied'"
+          ],
+          "test_durable_child_resume_does_not_repeat_completed_ai_or_recall": [],
+          "_resume": [
+            "assert result['result']['status'] == 'completed'",
+            "assert not any((call == 'routine:select' for call in calls))",
+            "pytest.raises(RuntimeError, match='simulated_process_exit')",
+            "assert calls.count(f'{name}:recall') == 1",
+            "assert calls.count(f'{name}:plan') == 1",
+            "assert calls.count(f'{name}:execute') == 1"
+          ],
+          "test_reopen_after_each_completed_checkpoint_preserves_prior_results": [
+            "assert result['result']['status'] == 'completed'",
+            "pytest.raises(RuntimeError, match='checkpoint_boundary_exit')",
+            "assert calls.count('inbox:' + step) == 1"
+          ],
+          "test_retry_guard_failure_at_writer_does_not_soft_settle_stale_plan": [
+            "pytest.raises(ValueError, match='activity_memory_changed')",
+            "assert 'inbox:settle' not in calls",
+            "assert ('node_failed', 'Writer', 'retry_guard') in events"
+          ]
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert coverage['heartbeat_gap_seconds'] == []",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_activity_memory_revalidation.py": {},
+        "tests/runtime/test_activity_output_recovery.py": {},
+        "tests/runtime/test_activity_provider.py": {},
+        "tests/runtime/test_autonomous_activity_graph.py": {},
+        "tests/runtime/test_sns_observation.py": {}
+      }
+    },
+    {
+      "commit": "9bfa939a5e1fc64757c521af3418772be46618a7",
+      "feature_id": "AR-SNS-V2-OUTBOX-IDENTITY",
+      "reason": "Record relationship observation outbox identity introductions.",
+      "tracked_files": {
+        "backend/alembic/versions/20260924_0098_observation_outbox_identity.py": "6640e29a3da9b822274ef856aed3be0e8a19365a",
+        "backend/app/domains/relationships/policies/observation_outbox.py": "7f2807035abe1f39ae13007bfd173cd6d77d1f65",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v20.json": "cbdbb8ff8ca5d4a89838ec55606634ab24272bff",
+        "backend/app/runtime/migrations/sqlite_versions/observation_outbox_v20.py": "d1a1587dc07e12cb8bf98ca5177e76bc3420149c",
+        "backend/tests/migrations/test_observation_outbox_v20.py": "56af2b5a40cb45f17b34b8a7d59958fbaaf45304",
+        "backend/tests/relationships/test_observation_concurrency.py": "5bd3dbba7e2bbf5801e232f2aa692e7b0ac714b9",
+        "backend/tests/relationships/test_observation_outbox_identity.py": "7df0b5ebf0a9a9ab316272f669670270d1512903"
+      },
+      "test_nodes": [
+        "tests/migrations/test_observation_outbox_v20.py::test_alembic_offline_revision_refuses_unverified_sql",
+        "tests/migrations/test_observation_outbox_v20.py::test_alembic_online_sqlite_env_prepares_foreign_keys",
+        "tests/migrations/test_observation_outbox_v20.py::test_alembic_sqlite_revision_uses_frozen_upgrade",
+        "tests/migrations/test_observation_outbox_v20.py::test_coordinator_preserves_source_generation_and_promotes_v20",
+        "tests/migrations/test_observation_outbox_v20.py::test_coordinator_rejects_invalid_legacy_before_promotion",
+        "tests/migrations/test_observation_outbox_v20.py::test_failed_staging_upgrade_leaves_v19_active_and_is_retryable",
+        "tests/migrations/test_observation_outbox_v20.py::test_frozen_v19_still_rejects_second_observation_event_key",
+        "tests/migrations/test_observation_outbox_v20.py::test_invalid_legacy_observation_stops_before_rebuild",
+        "tests/migrations/test_observation_outbox_v20.py::test_v19_to_v20_backfills_only_verified_relationship_id",
+        "tests/relationships/test_observation_concurrency.py::test_concurrent_observations_on_separate_sqlite_connections[False]",
+        "tests/relationships/test_observation_concurrency.py::test_concurrent_observations_on_separate_sqlite_connections[True]",
+        "tests/relationships/test_observation_concurrency.py::test_feed_delivery_settlement_keeps_two_observer_directions",
+        "tests/relationships/test_observation_outbox_identity.py::test_changed_payload_is_never_reused_as_a_valid_observation",
+        "tests/relationships/test_observation_outbox_identity.py::test_observation_natural_key_and_required_columns",
+        "tests/relationships/test_observation_outbox_identity.py::test_observation_writes_rollback_with_caller_transaction",
+        "tests/relationships/test_observation_outbox_identity.py::test_other_event_uniqueness_and_snapshot_null_source_are_preserved",
+        "tests/relationships/test_observation_outbox_identity.py::test_outbox_insert_failure_rolls_back_flushed_state_and_receipt",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_keeps_existing_outbox_lifecycle[cancelled]",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_keeps_existing_outbox_lifecycle[dead]",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_keeps_existing_outbox_lifecycle[pending]",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_keeps_existing_outbox_lifecycle[processing]",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_keeps_existing_outbox_lifecycle[succeeded]",
+        "tests/relationships/test_observation_outbox_identity.py::test_replay_restores_missing_outbox_without_reapplying_receipt",
+        "tests/relationships/test_observation_outbox_identity.py::test_repository_only_suppresses_matching_dedupe_conflict",
+        "tests/relationships/test_projection_commands.py::test_hidden_observation_source_keeps_rebuild_relationship_direction",
+        "tests/relationships/test_projection_commands.py::test_observation_projection_rejects_inconsistent_identity[column-payload_invalid]",
+        "tests/relationships/test_projection_commands.py::test_observation_projection_rejects_inconsistent_identity[dedupe-payload_invalid]",
+        "tests/relationships/test_projection_commands.py::test_observation_projection_rejects_inconsistent_identity[projection-type-payload_invalid]",
+        "tests/relationships/test_projection_commands.py::test_observation_projection_rejects_inconsistent_identity[wrong-event-author-relationship_direction_mismatch]",
+        "tests/relationships/test_social_event_runtime.py::test_two_observers_can_observe_one_source_event",
+        "tests/runtime/test_autonomous_activity_graph.py::test_feed_path_result_storage_failure_reuses_completed_actions"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_observation_outbox_v20.py": {
+          "_seed_v19": [
+            "assert sqlite_schema_contract_digest(connection) == manifest.schema_digest",
+            "assert row is not None"
+          ],
+          "_outbox_row": [],
+          "test_frozen_v19_still_rejects_second_observation_event_key": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_v19_to_v20_backfills_only_verified_relationship_id": [
+            "assert old['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert before.observation_count == before.backfill_count == 1",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert new == {**old, 'relationship_state_id': state_id}",
+            "assert connection.exec_driver_sql('SELECT COUNT(*) FROM graph_projection_outbox').scalar_one() == 2"
+          ],
+          "test_invalid_legacy_observation_stops_before_rebuild": [
+            "pytest.raises(SqliteMigrationDeltaError, match='observation_outbox_legacy_hash_invalid')",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None"
+          ],
+          "test_coordinator_rejects_invalid_legacy_before_promotion": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='observation_outbox_legacy_hash_invalid')",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('SELECT schema_version FROM angmoo_schema_version').scalar_one() == 19"
+          ],
+          "test_coordinator_preserves_source_generation_and_promotes_v20": [
+            "assert result.migrated is True",
+            "assert result.source_version == 19 and result.target_version == 20",
+            "assert result.database_path != database",
+            "assert _outbox_row(old, row_id)['relationship_state_id'] is None",
+            "assert _outbox_row(new, row_id)['relationship_state_id'] == state_id",
+            "assert new.exec_driver_sql('SELECT schema_version, source_revision FROM angmoo_schema_version').one() == (20, '20260924_0098')"
+          ],
+          "test_failed_staging_upgrade_leaves_v19_active_and_is_retryable": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_step_failed')",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] is None",
+            "assert connection.exec_driver_sql('SELECT schema_version FROM angmoo_schema_version').scalar_one() == 19",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id"
+          ],
+          "test_alembic_sqlite_revision_uses_frozen_upgrade": [
+            "assert spec is not None and spec.loader is not None",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id"
+          ],
+          "test_alembic_offline_revision_refuses_unverified_sql": [
+            "assert spec is not None and spec.loader is not None",
+            "pytest.raises(RuntimeError, match='observation_outbox_online_migration_required')"
+          ],
+          "test_alembic_online_sqlite_env_prepares_foreign_keys": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert connection.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one() == '20260924_0098'",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= indexes"
+          ]
+        },
+        "tests/relationships/test_observation_concurrency.py": {
+          "_engine": [],
+          "_add_second_observer": [],
+          "test_concurrent_observations_on_separate_sqlite_connections": [
+            "assert len(observation_rows) == expected",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1 + expected",
+            "assert len({result.receipt_id for result in results}) == expected",
+            "assert len({result.relationship_state_id for result in results}) == expected",
+            "assert any((result.replayed for result in results))"
+          ],
+          "test_feed_delivery_settlement_keeps_two_observer_directions": [
+            "assert first is not None",
+            "assert len(rows) == 2",
+            "assert len({row.relationship_state_id for row in rows}) == 2",
+            "assert all((row.relationship_state_id for row in rows))",
+            "assert {row.payload['actor_world_character_id'] for row in rows} == {fixture.target_world_character.id, second_id}",
+            "pytest.raises(ObservationOutboxIntegrityError)"
+          ]
+        },
+        "tests/relationships/test_observation_outbox_identity.py": {
+          "_observe": [
+            "assert row is not None"
+          ],
+          "test_replay_keeps_existing_outbox_lifecycle": [
+            "assert replay.replayed is True and replay.receipt_id == original.receipt_id",
+            "assert before == (row.id, row.status, row.attempt_count, row.lease_owner, row.last_error_class, row.created_at, row.updated_at)"
+          ],
+          "test_observation_natural_key_and_required_columns": [
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_other_event_uniqueness_and_snapshot_null_source_are_preserved": [
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 3",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_replay_restores_missing_outbox_without_reapplying_receipt": [
+            "assert state is not None",
+            "assert replay.replayed is True",
+            "assert replay.receipt_id == original.receipt_id",
+            "assert (state.version, state.interaction_count, state.familiarity) == before",
+            "assert replacement is not None and replacement.id != old_id",
+            "assert replacement.relationship_state_id == state.id"
+          ],
+          "test_changed_payload_is_never_reused_as_a_valid_observation": [
+            "pytest.raises(ObservationOutboxIntegrityError, match='observation_outbox_payload_mismatch')",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 2"
+          ],
+          "test_repository_only_suppresses_matching_dedupe_conflict": [
+            "assert reused.id == row.id",
+            "assert reused.id != values['id']",
+            "pytest.raises(IntegrityError)",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 2"
+          ],
+          "test_outbox_insert_failure_rolls_back_flushed_state_and_receipt": [
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 1",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 1",
+            "pytest.raises(RuntimeError, match='injected_outbox_insert_failure')"
+          ],
+          "test_observation_writes_rollback_with_caller_transaction": [
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 1",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 1"
+          ]
+        },
+        "tests/relationships/test_projection_commands.py": {
+          "_signature": [],
+          "test_rehydrates_relationship_snapshot_from_postgres": [
+            "assert isinstance(command, RelationshipStateProjectionCommand)",
+            "assert command.event.world_id == fixture.world.id",
+            "assert command.event.actor_world_character_id == fixture.actor_world_character.id",
+            "assert command.event.target_world_character_id == fixture.target_world_character.id",
+            "assert command.relationship_state_id == fixture.relationship.id",
+            "assert command.relationship_version == fixture.relationship.version",
+            "assert command.interaction_count == fixture.relationship.interaction_count"
+          ],
+          "test_observation_projection_rejects_inconsistent_identity": [
+            "assert exc_info.value.error_class == error_class",
+            "assert row is not None",
+            "pytest.raises(ProjectionCommandError)"
+          ],
+          "test_hidden_observation_source_keeps_rebuild_relationship_direction": [
+            "assert row is not None",
+            "assert isinstance(ordinary, SourceExclusionProjectionCommand)",
+            "assert isinstance(rebuilt, RelationshipStateProjectionCommand)",
+            "assert rebuilt.relationship_state_id == result.relationship_state_id",
+            "assert rebuilt.actor_world_character_id == fixture.target_world_character.id",
+            "assert rebuilt.target_world_character_id == fixture.actor_world_character.id"
+          ],
+          "test_rejects_untrusted_outbox_before_graph_call": [
+            "assert exc_info.value.error_class == error_class",
+            "assert row is not None",
+            "pytest.raises(ProjectionCommandError)"
+          ],
+          "test_source_exclusion_command_keeps_postgres_audit_event": [
+            "assert changed == 1",
+            "assert isinstance(command, SourceExclusionProjectionCommand)",
+            "assert command.reason == 'source_hidden'",
+            "assert event is not None",
+            "assert event.retrieval_status == 'excluded'",
+            "assert exclusion is not None"
+          ],
+          "test_world_replay_restores_relationship_before_source_exclusion": [
+            "assert isinstance(worker_command, SourceExclusionProjectionCommand)",
+            "assert isinstance(replay_relationship, RelationshipStateProjectionCommand)",
+            "assert replay_relationship.relationship_state_id == fixture.relationship.id",
+            "assert replay_relationship.relationship_version == fixture.relationship.version",
+            "assert isinstance(replay_exclusion, SourceExclusionProjectionCommand)",
+            "assert exclusion is not None"
+          ]
+        },
+        "tests/relationships/test_social_event_runtime.py": {
+          "_engine": [],
+          "_user": [],
+          "_character": [],
+          "_seed": [],
+          "_post": [],
+          "_record_post_event": [],
+          "test_observation_is_directional_idempotent_and_independent_from_follow_up": [
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0",
+            "assert relationship_state is not None",
+            "assert relationship_change is not None",
+            "assert observed.replayed is False",
+            "assert relationship_state.actor_world_character_id == fixture.target_world_character.id",
+            "assert relationship_state.target_world_character_id == fixture.actor_world_character.id",
+            "assert relationship_state.familiarity == 1",
+            "assert relationship_state.affinity == 0",
+            "assert relationship_state.trust == 0",
+            "assert relationship_state.tension == 0",
+            "assert relationship_change.delta_familiarity == 1",
+            "assert [replay.lane for replay in lane_replays] == ['routine', 'inbox', 'feed']",
+            "assert all((replay.replayed for replay in lane_replays))",
+            "assert {replay.receipt_id for replay in lane_replays} == {observed.receipt_id}",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert outbox is not None",
+            "assert outbox.payload_version == 'relationship-observation-v1'",
+            "assert isinstance(command, RelationshipStateProjectionCommand)",
+            "assert command.event.actor_world_character_id == fixture.actor_world_character.id",
+            "assert command.actor_world_character_id == fixture.target_world_character.id",
+            "assert command.target_world_character_id == fixture.actor_world_character.id",
+            "pytest.raises(RuntimeError, match='follow-up failure')",
+            "assert db.get(models.RelationshipStateChange, observed.receipt_id)",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1"
+          ],
+          "test_two_observers_can_observe_one_source_event": [
+            "assert completed.total_count == completed.applied_count == 2",
+            "assert {command.relationship_state_id for command in store.commands} == {first.relationship_state_id, second.relationship_state_id}",
+            "assert processed.succeeded == 1",
+            "assert [command.relationship_state_id for command in worker_store.commands] == [second.relationship_state_id]",
+            "assert first_outbox is not None",
+            "assert second.relationship_state_id != first.relationship_state_id",
+            "assert second.receipt_id != first.receipt_id",
+            "assert len(outboxes) == 2",
+            "assert {row.relationship_state_id for row in outboxes} == {first.relationship_state_id, second.relationship_state_id}",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert isinstance(command, RelationshipStateProjectionCommand)",
+            "assert command.relationship_state_id == row.relationship_state_id",
+            "assert command.target_world_character_id == fixture.actor_world_character.id"
+          ],
+          "test_observation_revalidates_hidden_source_before_any_relationship_write": [
+            "pytest.raises(SocialObservationError)",
+            "assert exc_info.value.reason_code == 'evidence_source_hidden'",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 0",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0"
+          ],
+          "test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once": [
+            "assert result.reused is False",
+            "assert replay.reused is True",
+            "assert replay.event.id == result.event.id",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 1",
+            "assert state is not None",
+            "assert state.actor_world_character_id == fixture.actor_world_character.id",
+            "assert state.target_world_character_id == fixture.target_world_character.id",
+            "assert (state.familiarity, state.affinity, state.trust, state.tension) == (2, 1, 0, 0)",
+            "assert state.interaction_count == 1",
+            "assert db.scalar(select(models.RelationshipState.id).where(models.RelationshipState.actor_world_character_id == fixture.target_world_character.id, models.RelationshipState.target_world_character_id == fixture.actor_world_character.id)) is None",
+            "assert evidence is not None",
+            "assert evidence.source_object_id == reply.id",
+            "assert evidence.content_sha256 is not None"
+          ],
+          "test_reverse_reply_creates_separate_directional_relationship": [
+            "assert len(states) == 2",
+            "assert reverse.relationship_state is not None",
+            "assert reverse.relationship_state.actor_world_character_id == fixture.target_world_character.id",
+            "assert reverse.relationship_state.target_world_character_id == fixture.actor_world_character.id",
+            "assert (reverse.relationship_state.familiarity, reverse.relationship_state.affinity, reverse.relationship_state.trust) == (2, 2, 1)"
+          ],
+          "test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction": [
+            "assert applied.event.event_type == 'reply_created'",
+            "assert notification.read_at.replace(tzinfo=UTC) == occurred_at",
+            "assert notification.handled_at.replace(tzinfo=UTC) == occurred_at",
+            "assert notification.handling_outcome == 'reply'",
+            "assert execution.social_event_id == applied.event.id",
+            "assert actor_state is not None",
+            "assert reverse_state is None"
+          ],
+          "test_inbox_llm_no_action_marks_notification_without_event_or_relationship": [
+            "assert notification.read_at.replace(tzinfo=UTC) == occurred_at",
+            "assert notification.handled_at.replace(tzinfo=UTC) == occurred_at",
+            "assert notification.handling_outcome == 'LLM_DECIDED_NO_ACTION'",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0"
+          ],
+          "test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta": [
+            "assert state is not None",
+            "assert state.familiarity == 8",
+            "assert state.interaction_count == 5",
+            "assert [change.applied for change in changes] == [True, True, True, True, False]",
+            "assert changes[-1].not_applied_reason == 'daily_delta_cap'",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 5",
+            "assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 5",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 5",
+            "assert result.relationship_change is not None"
+          ],
+          "test_transaction_rollback_removes_event_evidence_relationship_and_outbox": [
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0",
+            "assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 0",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0",
+            "assert db.get(models.Post, root.id) is not None",
+            "assert db.get(models.Post, reply.id) is not None"
+          ],
+          "test_self_target_and_cross_world_target_are_rejected": [
+            "pytest.raises(social_event_runtime.SocialEventRuntimeError, match='self_target_forbidden')",
+            "pytest.raises(social_event_runtime.SocialEventRuntimeError, match='cross_world_reference')",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0"
+          ],
+          "test_source_deletion_retains_audit_rows_and_emits_one_exclusion": [
+            "assert [row.source_event_id for row in before_delete] == [result.event.id]",
+            "assert result.relationship_state is not None",
+            "assert owner is not None",
+            "assert deleted_reply is not None",
+            "assert deleted_reply.deleted_at is not None",
+            "assert repeated == 0",
+            "assert event_row is not None",
+            "assert event_row.retrieval_status == 'excluded'",
+            "assert event_row.invalidation_reason == 'source_deleted'",
+            "assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 1",
+            "assert relationship is not None",
+            "assert (relationship.familiarity, relationship.affinity, relationship.interaction_count) == before",
+            "assert [row.projection_type for row in outboxes] == ['relationship_state', 'source_exclusion']",
+            "assert exclusion.payload == {'world_id': fixture.world.id, 'source_event_id': result.event.id, 'reason': 'source_deleted'}",
+            "assert exclusion.payload_version == 'source-exclusion-v1'",
+            "assert diagnostics.recent_events[0].retrieval_status == 'excluded'",
+            "assert diagnostics.recent_events[0].evidence[0].source_status == 'excluded'",
+            "assert diagnostics.recent_events[0].evidence[0].exclusion_reason == 'source_deleted'",
+            "assert after_delete == []"
+          ],
+          "test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals": [
+            "assert actor_user is not None",
+            "assert target_user is not None",
+            "assert world_a.recent_events == []",
+            "assert world_a.outgoing_relationships == []",
+            "assert world_a.incoming_relationships == []",
+            "assert world_a.open_proposals == []",
+            "assert world_a_prompt == []",
+            "assert {row.id for row in world_b.recent_events} == {ordinary.event.id, proposal_event.id}",
+            "assert len(world_b.outgoing_relationships) == 1",
+            "assert world_b.outgoing_relationships[0].actor_world_character_id == actor_world_character.id",
+            "assert [row.id for row in world_b.open_proposals] == [proposal.id]",
+            "assert [row.source_event_id for row in world_b_prompt] == [ordinary.event.id]"
+          ],
+          "test_read_revalidates_membership_and_block_before_exposing_evidence": [
+            "assert owner is not None",
+            "assert membership is not None",
+            "assert diagnostics.recent_events[0].evidence[0].exclusion_reason == 'membership_inactive'",
+            "assert diagnostics.recent_events[0].evidence[0].exclusion_reason == 'blocked'",
+            "pytest.raises(social_event_runtime.SocialEventRuntimeError, match='world_character_blocked')"
+          ]
+        },
+        "tests/runtime/test_autonomous_activity_graph.py": {
+          "lane_ports": [
+            "assert state['identity']['world_id'] == 'world'",
+            "assert len(state['queries']) == 1",
+            "assert state['decision_context']['memory']['selected']['text'] == 'already replied'"
+          ],
+          "test_durable_child_resume_does_not_repeat_completed_ai_or_recall": [],
+          "test_feed_path_result_storage_failure_reuses_completed_actions": [
+            "assert result['result']['status'] == 'completed'",
+            "assert calls.count('feed:path_result') == 2",
+            "pytest.raises(ObservationOutboxIntegrityError)",
+            "assert calls.count('feed:' + step) == 1"
+          ],
+          "_resume": [
+            "assert result['result']['status'] == 'completed'",
+            "assert not any((call == 'routine:select' for call in calls))",
+            "pytest.raises(RuntimeError, match='simulated_process_exit')",
+            "assert calls.count(f'{name}:recall') == 1",
+            "assert calls.count(f'{name}:plan') == 1",
+            "assert calls.count(f'{name}:execute') == 1"
+          ],
+          "test_reopen_after_each_completed_checkpoint_preserves_prior_results": [
+            "assert result['result']['status'] == 'completed'",
+            "pytest.raises(RuntimeError, match='checkpoint_boundary_exit')",
+            "assert calls.count('inbox:' + step) == 1"
+          ],
+          "test_retry_guard_failure_at_writer_does_not_soft_settle_stale_plan": [
+            "pytest.raises(ValueError, match='activity_memory_changed')",
+            "assert 'inbox:settle' not in calls",
+            "assert ('node_failed', 'Writer', 'retry_guard') in events"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_observation_outbox_v20.py": {},
+        "tests/relationships/test_observation_concurrency.py": {},
+        "tests/relationships/test_observation_outbox_identity.py": {},
+        "tests/relationships/test_projection_commands.py": {},
+        "tests/relationships/test_social_event_runtime.py": {},
+        "tests/runtime/test_autonomous_activity_graph.py": {}
+      }
+    },
+    {
+      "commit": "8d3ee3e48c440a45ca406767dc6e60ac9e00f267",
+      "feature_id": "AR-SNS-V2-FEED-RECLAIM",
+      "reason": "Record Feed observation reclaim regression introduction.",
+      "tracked_files": {
+        "backend/tests/social/test_feed_observation_reclaim.py": "647b04273e6349f998f3c5cabdc8a5da1afd0745"
+      },
+      "test_nodes": [
+        "tests/runtime/test_personalized_feed_lane.py::test_v2_feed_duplicate_cycle_does_not_reenter_candidate_load",
+        "tests/runtime/test_personalized_feed_lane.py::test_v2_feed_reclaims_expired_observation_and_delivers_candidate",
+        "tests/social/test_feed_observation_reclaim.py::test_claim_state_and_expiry_boundary_preserve_existing_policy",
+        "tests/social/test_feed_observation_reclaim.py::test_expired_committed_feed_claim_is_reclaimed_after_sqlite_reload",
+        "tests/social/test_feed_observation_reclaim.py::test_mixed_session_datetime_representations_do_not_change_unrelated_claim",
+        "tests/social/test_feed_observation_reclaim.py::test_only_one_file_sqlite_contender_acquires_expired_claim",
+        "tests/social/test_feed_observation_reclaim.py::test_sql_write_failure_propagates_without_committing_existing_claim",
+        "tests/social/test_feed_observation_reclaim.py::test_stale_reader_loses_conditional_update_to_other_connection",
+        "tests/social/test_feed_observation_reclaim.py::test_utc_offset_and_naive_utc_inputs_reclaim_same_expired_row"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_personalized_feed_lane.py": {
+          "test_one_feed_candidate_skips_selector_and_delivers_before_planning": [
+            "assert calls == ['plan']",
+            "assert len(result['queries']) == 1",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert delivery.state == 'delivered' and delivery.post_ids == [post.id]"
+          ],
+          "test_v2_feed_reclaims_expired_observation_and_delivers_candidate": [
+            "assert previous.lease_expires_at.tzinfo is None",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['lane_data']['_feed']['observation_ids'] == [previous.id]",
+            "assert previous.claim_token != 'previous-token'",
+            "assert previous.run_id == ctx.run_id",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1"
+          ],
+          "test_v2_feed_duplicate_cycle_does_not_reenter_candidate_load": [
+            "assert result['lane_data']['duplicate_cycle'] is True",
+            "assert result['candidates'] == []",
+            "assert calls == []",
+            "assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 0"
+          ]
+        },
+        "tests/social/test_feed_observation_reclaim.py": {
+          "_claimed_candidate": [
+            "assert [candidate.post_id for candidate in search.candidates] == [post_id]",
+            "assert len(original.observations) == 1"
+          ],
+          "_claim": [],
+          "test_expired_committed_feed_claim_is_reclaimed_after_sqlite_reload": [
+            "assert loaded is not None",
+            "assert loaded.lease_expires_at.tzinfo is None",
+            "assert reclaimed.claim_conflict_count == 0",
+            "assert len(reclaimed.observations) == 1",
+            "assert reclaimed.observations[0] is loaded",
+            "assert loaded.id == observation_id",
+            "assert loaded.claim_token != previous_token",
+            "assert loaded.run_id == 'new-run'",
+            "assert loaded.cycle_key == 'cycle-new-run'",
+            "assert loaded.lease_expires_at == (NOW + OBSERVATION_LEASE).replace(tzinfo=None)",
+            "assert saved is not None",
+            "assert saved.run_id == 'new-run'",
+            "assert saved.claim_token != previous_token",
+            "assert saved.lease_expires_at == (NOW + OBSERVATION_LEASE).replace(tzinfo=None)"
+          ],
+          "test_claim_state_and_expiry_boundary_preserve_existing_policy": [
+            "assert result.claim_conflict_count == (0 if should_claim else 1)",
+            "assert len(result.observations) == int(should_claim)",
+            "assert len(result.candidates) == int(should_claim)",
+            "assert saved.status == ('claimed' if should_claim else status)",
+            "assert saved.run_id == (f'run-{index}' if should_claim else 'previous-run')",
+            "assert saved.claim_token != f'previous-token-{index}'",
+            "assert saved.claim_token == f'previous-token-{index}'",
+            "assert saved.lease_expires_at == (NOW + offset).replace(tzinfo=None)",
+            "assert saved.observed_at == (NOW.replace(tzinfo=None) if status == 'observed' else None)"
+          ],
+          "test_utc_offset_and_naive_utc_inputs_reclaim_same_expired_row": [
+            "assert result.claim_conflict_count == 0",
+            "assert result.observations[0].claim_token != previous_token",
+            "assert saved.claim_token == previous_token",
+            "assert saved.run_id == 'previous-run'",
+            "assert saved.lease_expires_at == (NOW - timedelta(hours=1) + OBSERVATION_LEASE).replace(tzinfo=None)"
+          ],
+          "test_mixed_session_datetime_representations_do_not_change_unrelated_claim": [
+            "assert loaded.lease_expires_at.tzinfo is None",
+            "assert unrelated.lease_expires_at.tzinfo is not None",
+            "assert result.observations == (loaded,)",
+            "assert unrelated.claim_token == 'unrelated-token'",
+            "assert unrelated.run_id == 'unrelated-run'"
+          ],
+          "test_sql_write_failure_propagates_without_committing_existing_claim": [
+            "assert saved.claim_token == previous_token",
+            "assert saved.run_id == 'previous-run'",
+            "pytest.raises(RuntimeError, match='synthetic claim write failure')"
+          ],
+          "test_stale_reader_loses_conditional_update_to_other_connection": [
+            "assert old_row.run_id == 'previous-run'",
+            "assert len(won.observations) == 1",
+            "assert lost.observations == ()",
+            "assert lost.claim_conflict_count == 1",
+            "assert saved.run_id == 'winner'",
+            "assert saved.claim_token == winning_token"
+          ],
+          "test_only_one_file_sqlite_contender_acquires_expired_claim": [
+            "assert [outcome for outcome, _ in outcomes].count('acquired') == 1",
+            "assert [outcome for outcome, _ in outcomes].count('conflict') + [outcome for outcome, _ in outcomes].count('locked') == 1",
+            "assert saved.run_id == winner",
+            "assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 1",
+            "assert 'locked' in str(exc).lower()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_personalized_feed_lane.py": {},
+        "tests/social/test_feed_observation_reclaim.py": {}
+      }
+    },
+    {
+      "commit": "02004120c34968e7b9cca60fb385c5ec9921b6c9",
+      "feature_id": "AR-SNS-V2-PLANNER-CONTRACT",
+      "reason": "Record ActionPlanner output and retry contract introductions.",
+      "tracked_files": {
+        "backend/app/runtime/autonomous_activity/planner_contract.py": "edeb4acb5a439dd4839aa10570a95c3bf6ecf685",
+        "backend/tests/integrations/test_direct_llm_planner_retry.py": "abe2555cdc63092585cdf424a860ef7a60e39012",
+        "backend/tests/runtime/test_activity_planner_contract.py": "b65e1a90079edfb35331ff379717924880d983a8"
+      },
+      "test_nodes": [
+        "tests/integrations/test_direct_llm_planner_retry.py::test_delivery_failure_is_not_reclassified_as_bad_json",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_retry_guard_or_input_limit_stops_before_second_request",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_retry_options_conflict_is_rejected_before_provider_request",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_sdk_attempt_option_reaches_provider_request_and_budget_blocks_send",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_second_failure_stops_even_when_type_changes",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_stop_missing_brief_regenerates_once_with_safe_feedback_and_distinct_receipts",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_truncated_unterminated_string_retries_at_larger_limit",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_unrelated_stop_errors_are_not_regenerated",
+        "tests/integrations/test_direct_llm_planner_retry.py::test_valid_max_tokens_result_does_not_retry_and_two_brief_failures_keep_code",
+        "tests/runtime/test_activity_output_recovery.py::test_planner_policy_recovers_only_observed_failures",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[   -comment]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[   -follow]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[   -like]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[   -repost]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[-comment]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[-follow]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[-like]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[-repost]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[None-comment]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[None-follow]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[None-like]",
+        "tests/runtime/test_activity_planner_contract.py::test_actual_actions_require_nonblank_brief_with_safe_path[None-repost]",
+        "tests/runtime/test_activity_planner_contract.py::test_brief_length_and_optional_state_contract",
+        "tests/runtime/test_activity_planner_contract.py::test_no_action_and_subset_decisions_remain_valid",
+        "tests/runtime/test_activity_planner_contract.py::test_other_invalid_decisions_are_rejected_with_distinct_codes",
+        "tests/runtime/test_activity_planner_contract.py::test_transport_schema_keeps_target_bound_and_conditional_brief_in_sdk",
+        "tests/runtime/test_personalized_feed_lane.py::test_feed_planner_failed_retry_keeps_delivery_but_has_no_public_effect[guard_change]",
+        "tests/runtime/test_personalized_feed_lane.py::test_feed_planner_failed_retry_keeps_delivery_but_has_no_public_effect[invalid_again]",
+        "tests/runtime/test_personalized_feed_lane.py::test_feed_planner_retry_executes_only_valid_second_decision",
+        "tests/runtime/test_personalized_parent.py::test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification",
+        "tests/runtime/test_sns_observation.py::test_export_separates_recovered_planner_output_from_final_failure"
+      ],
+      "test_assertions": {
+        "tests/integrations/test_direct_llm_planner_retry.py": {
+          "_context": [],
+          "_candidate": [],
+          "_payload": [],
+          "_run": [],
+          "test_stop_missing_brief_regenerates_once_with_safe_feedback_and_distinct_receipts": [
+            "assert result['decisions'][0]['brief'] == 'Notice care'",
+            "assert [call['max_output_tokens'] for call in sent] == [4096, 4096]",
+            "assert [call['sdk_attempts'] for call in sent] == [1, 1]",
+            "assert guard_calls == [2]",
+            "assert 'action_brief_missing at decisions.0.brief' in sent[1]['user_prompt']",
+            "assert 'Notice care' not in sent[1]['user_prompt']",
+            "assert [row['json_attempt'] for row in inputs] == [1, 2]",
+            "assert inputs[0]['input_sha256'] != inputs[1]['input_sha256']",
+            "assert inputs[1]['input_sha256'] == hashlib.sha256(('system\\n' + sent[1]['user_prompt']).encode()).hexdigest()",
+            "assert tracker.summary()['call_count'] == 2",
+            "assert tracker.calls[0]['json_postprocess_error']['validation_code'] == 'action_brief_missing'"
+          ],
+          "test_truncated_unterminated_string_retries_at_larger_limit": [
+            "assert asyncio.run(execute())['decisions'][0]['brief'] == 'Recognize detail'",
+            "assert [call['max_output_tokens'] for call in sent] == [4096, 8192]",
+            "assert first['json_postprocess_error']['shape_hint'] == 'truncated_or_unclosed'",
+            "assert [row['status'] for kind, row in events if kind == 'json_attempt'] == ['retry_scheduled', 'valid']"
+          ],
+          "test_second_failure_stops_even_when_type_changes": [
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert caught.value.attempt_count == 2",
+            "assert caught.value.json_error_diagnostics[0]['validation_code'] == 'action_brief_missing'",
+            "assert len(sent) == 2"
+          ],
+          "test_retry_guard_or_input_limit_stops_before_second_request": [
+            "pytest.raises(ValueError, match='activity_source_changed')",
+            "assert len(sent) == 1",
+            "pytest.raises(ValueError, match='activity_input_budget_exceeded')",
+            "assert len(sent) == 1"
+          ],
+          "test_unrelated_stop_errors_are_not_regenerated": [
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert len(sent) == 1"
+          ],
+          "test_valid_max_tokens_result_does_not_retry_and_two_brief_failures_keep_code": [
+            "assert asyncio.run(execute())['decisions'][0]['brief'] == 'Useful observation'",
+            "assert len(sent) == 1",
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert caught.value.attempt_count == 2",
+            "assert (caught.value.validation_code, caught.value.field_path) == ('action_brief_missing', 'decisions.0.brief')",
+            "assert len(sent) == 2"
+          ],
+          "test_retry_options_conflict_is_rejected_before_provider_request": [
+            "pytest.raises(ValueError, match='json_retry_options_conflict')",
+            "assert sent == []"
+          ],
+          "test_delivery_failure_is_not_reclassified_as_bad_json": [
+            "pytest.raises(ValueError, match='feed_delivery_failed')",
+            "assert len(sent) == 1"
+          ],
+          "test_sdk_attempt_option_reaches_provider_request_and_budget_blocks_send": [
+            "assert result == {'ok': True}",
+            "assert adapter.requests[0].sdk_attempts == 1",
+            "pytest.raises(direct_llm.DirectLlmMaxCallsExceeded)",
+            "assert len(adapter.requests) == 1",
+            "assert tracker.provider_call_order_in_run == 1",
+            "assert adapter.requests[-1].sdk_attempts is None",
+            "pytest.raises(direct_llm.DirectLlmMaxCallsExceeded)",
+            "assert len(adapter.requests) == 3",
+            "assert limited.provider_call_order_in_run == 1",
+            "assert len([kind for kind, _ in events if kind == 'json_attempt_input']) == 1"
+          ]
+        },
+        "tests/runtime/test_activity_output_recovery.py": {
+          "test_retry_policy_is_limited_to_unusable_truncated_output": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 5, 15)",
+            "assert retry_truncated_json(ValueError(), None, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, {**truncated, 'finish_reason': 'STOP'}, 1)",
+            "assert not retry_truncated_json(ValueError(), {'selected': 'wrong'}, truncated, 1)",
+            "assert not retry_truncated_json(ValueError(), None, truncated, 2)",
+            "pytest.raises(Exception)",
+            "assert retry_truncated_json(missing.value, {'selected': 'p'}, truncated, 1)"
+          ],
+          "test_planner_policy_recovers_only_observed_failures": [
+            "assert exc is not None",
+            "assert retry_truncated_json(exc, None, truncated, 1)",
+            "assert (decision.reason_code, decision.max_output_tokens) == ('planner_output_truncated', 8192)",
+            "assert (stopped.reason_code, stopped.max_output_tokens) == ('action_brief_missing', 4096)",
+            "assert 'decisions.0.brief' in stopped.feedback",
+            "assert planner_json_retry(exc, None, {'finish_reason': 'STOP'}, 1) is None",
+            "assert planner_json_retry(ValueError('private message'), None, truncated, 1) is None",
+            "assert planner_json_retry(StructuredOutputValidationError('decision_target_invalid', 'decisions.0.target_id'), {}, {'finish_reason': 'STOP'}, 1) is None",
+            "assert planner_json_retry(brief, {}, {'finish_reason': 'STOP'}, 2) is None"
+          ],
+          "_context": [],
+          "test_retry_uses_larger_cap_and_guard_before_second_provider_request": [
+            "assert result.selected == 'p'",
+            "assert seen == [('provider', 4096), ('guard', 2), ('provider', 8192)]"
+          ],
+          "test_retry_guard_failure_preserves_original_error_and_does_not_send_again": [
+            "pytest.raises(ValueError, match='activity_source_changed')",
+            "assert seen == ['provider']"
+          ],
+          "test_stop_error_or_complete_max_tokens_do_not_retry": [
+            "assert len(seen) == expected",
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert asyncio.run(run()).selected == 'p'"
+          ]
+        },
+        "tests/runtime/test_activity_planner_contract.py": {
+          "_candidate": [],
+          "_decision": [],
+          "test_actual_actions_require_nonblank_brief_with_safe_path": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert caught.value.validation_code == 'action_brief_missing'",
+            "assert caught.value.field_path == 'decisions.0.brief'",
+            "assert str(caught.value) == 'action_brief_missing'"
+          ],
+          "test_no_action_and_subset_decisions_remain_valid": [
+            "assert parse_action({'decisions': [_decision('no_action')]}, [_candidate()])['decisions'][0]['brief'] == ''",
+            "assert parse_action({'decisions': [_decision('no_action', '')]}, [_candidate()])['decisions'][0]['action'] == 'no_action'",
+            "assert parse_action({'decisions': []}, [_candidate()])['decisions'] == []"
+          ],
+          "test_brief_length_and_optional_state_contract": [
+            "assert result['decisions'][0]['brief'] == text",
+            "assert result['state_status'] == 'invalid'",
+            "assert result['state_update'] is None",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_other_invalid_decisions_are_rejected_with_distinct_codes": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert (target.value.validation_code, target.value.field_path) == ('decision_target_invalid', 'decisions.0.target_id')",
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert duplicate.value.validation_code == 'decision_target_invalid'",
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert forbidden.value.validation_code == 'decision_action_not_allowed'"
+          ],
+          "test_transport_schema_keeps_target_bound_and_conditional_brief_in_sdk": [
+            "assert decisions['maxItems'] == 1",
+            "assert item['properties']['target_id']['enum'] == ['post-1']",
+            "assert item['properties']['brief']['maxLength'] == 280",
+            "assert item['anyOf'] == [{'properties': {'action': {'type': 'string', 'enum': ['no_action']}}, 'required': ['action']}, {'properties': {'action': {'type': 'string', 'enum': list(ACTIVE_ACTIONS)}}, 'required': ['action', 'brief']}]",
+            "assert 'interaction_intent' in item['properties']",
+            "assert 'relationship_metrics' in schema['properties']",
+            "assert sent['properties']['decisions']['items']['anyOf'] == item['anyOf']"
+          ]
+        },
+        "tests/runtime/test_personalized_feed_lane.py": {
+          "test_feed_planner_retry_executes_only_valid_second_decision": [
+            "assert len(calls) == 2",
+            "assert [call['max_output_tokens'] for call in calls] == [4096, 4096]",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert db.scalar(select(RecommendationDelivery)).state == 'delivered'",
+            "assert tracker.summary()['call_count'] == 2"
+          ],
+          "test_feed_planner_failed_retry_keeps_delivery_but_has_no_public_effect": [
+            "pytest.raises((ValueError, direct_llm.DirectLlmJsonError))",
+            "assert db.scalar(select(func.count(PostLike.id))) == 0",
+            "assert db.scalar(select(RecommendationDelivery)).state == 'delivered'",
+            "assert 'activity_source_changed' in str(caught.value)",
+            "assert len(calls) == 1",
+            "assert isinstance(caught.value, direct_llm.DirectLlmJsonError)",
+            "assert caught.value.attempt_count == 2",
+            "assert len(calls) == 2"
+          ],
+          "test_one_feed_candidate_skips_selector_and_delivers_before_planning": [
+            "assert calls == ['plan']",
+            "assert len(result['queries']) == 1",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert delivery.state == 'delivered' and delivery.post_ids == [post.id]"
+          ],
+          "test_v2_feed_reclaims_expired_observation_and_delivers_candidate": [
+            "assert previous.lease_expires_at.tzinfo is None",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['lane_data']['_feed']['observation_ids'] == [previous.id]",
+            "assert previous.claim_token != 'previous-token'",
+            "assert previous.run_id == ctx.run_id",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1"
+          ],
+          "test_v2_feed_duplicate_cycle_does_not_reenter_candidate_load": [
+            "assert result['lane_data']['duplicate_cycle'] is True",
+            "assert result['candidates'] == []",
+            "assert calls == []",
+            "assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 0"
+          ]
+        },
+        "tests/runtime/test_personalized_parent.py": {
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect": [
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert repeated == result"
+          ],
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == {'inbox', 'routine'}",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ],
+          "test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification": [
+            "assert result['status'] == 'failed'",
+            "assert result['paths']['inbox']['status'] == 'failed'",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert notification.handled_at is None"
+          ]
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None",
+            "assert list(csv.DictReader(source))[0]['validation_code'] == 'unknown'"
+          ],
+          "test_export_separates_recovered_planner_output_from_final_failure": [
+            "assert coverage['planner_output_failures'] == 2",
+            "assert coverage['planner_retries_scheduled'] == 1",
+            "assert coverage['planner_recovered_activities'] == 1",
+            "assert coverage['planner_final_failures'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert 'action_brief_missing' in csv_text and 'decisions.0.brief' in csv_text",
+            "assert 'recovered activities: 1; final path failures: 1' in report",
+            "assert 'a' * 64 in calls",
+            "assert recovered and failed",
+            "assert 'SECRET_PRIVATE' not in (output / filename).read_text(encoding='utf-8')"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True",
+            "assert coverage['planner_output_failures'] == 0"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/integrations/test_direct_llm_planner_retry.py": {},
+        "tests/runtime/test_activity_output_recovery.py": {},
+        "tests/runtime/test_activity_planner_contract.py": {},
+        "tests/runtime/test_personalized_feed_lane.py": {},
+        "tests/runtime/test_personalized_parent.py": {},
+        "tests/runtime/test_sns_observation.py": {}
+      }
+    },
+    {
+      "commit": "78aad157ae1530b30238eed78e3d4b5eac9c3c33",
+      "feature_id": "AR-SNS-FOUR-CALL",
+      "reason": "Record four-call activity source and regression introductions.",
+      "tracked_files": {
+        "backend/app/runtime/autonomous_activity/combined_lanes.py": "1f62aa39e263481944977fb2bcd4c457310be03a",
+        "backend/app/runtime/autonomous_activity/combined_provider.py": "73b659941a7a926e92e26f77e567cb6954819a51",
+        "backend/app/runtime/autonomous_activity/combined_selection.py": "af3c8f1eee4e5c2b0872bc06550e0c2754ca0315",
+        "backend/app/runtime/autonomous_activity/generation_contracts.py": "ea01723b78020114b1aaf4b12d2cf4f8800bae5a",
+        "backend/scripts/evaluate_four_call_activity.py": "bd02de400acbdca6d442e134e5183883d0dc0931",
+        "backend/tests/runtime/test_activity_combined_contracts.py": "eb7deacc34ddc0a91ee355eb27ad1e86b8f43b77",
+        "backend/tests/runtime/test_activity_combined_delivery.py": "511a3a2c37debd9f2bac9854ad9f53024de6274c",
+        "backend/tests/runtime/test_activity_combined_failures.py": "dc14351da40b116bcdf733b4c4f6bd55db723649",
+        "backend/tests/runtime/test_activity_combined_graph.py": "1503f039f46a6ba6ef0d23d51d78516a35bd1a4f",
+        "backend/tests/runtime/test_activity_combined_selection.py": "67677eb314424cd9ab7414a244ad9eeaf0a39254",
+        "backend/tests/runtime/test_activity_inputs.py": "48dc06aac538f8bfa49d7c3ee02c88599bf8f02f",
+        "browser-tests/personalized-activity-fixture.ts": "cabe34573cbe0286f575fd2bbf1be4fbb39b4bd7",
+        "docs/architecture/sns-four-call-transition-results.md": "4babfc4e0fad07e0fe1303ea7aeaeee258b6d269"
+      },
+      "test_nodes": [
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_social_calls_transport_once_and_retains_all_decision_fields",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies0]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies1]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies2]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies3]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies4]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_rejects_changed_identity_count_length_or_proposal[replies5]",
+        "tests/runtime/test_activity_combined_contracts.py::test_combined_writer_uses_code_owned_task_and_keeps_thought",
+        "tests/runtime/test_activity_combined_contracts.py::test_recovery_reservation_survives_new_ledger_and_preserves_metadata",
+        "tests/runtime/test_activity_combined_contracts.py::test_valid_decision_survives_invalid_draft_but_invalid_decision_does_not",
+        "tests/runtime/test_activity_combined_delivery.py::test_default_rollback_still_reconciles_older_version_two_delivery",
+        "tests/runtime/test_activity_combined_delivery.py::test_delivery_completion_cannot_overwrite_a_replaced_claim",
+        "tests/runtime/test_activity_combined_delivery.py::test_failed_preparation_rolls_back_cursor_and_claim_together",
+        "tests/runtime/test_activity_combined_delivery.py::test_feed_claims_and_snapshot_recover_after_commit_before_parent_checkpoint",
+        "tests/runtime/test_activity_combined_delivery.py::test_pending_delivery_survives_retention_then_reconciles_once[False]",
+        "tests/runtime/test_activity_combined_delivery.py::test_pending_delivery_survives_retention_then_reconciles_once[True]",
+        "tests/runtime/test_activity_combined_delivery.py::test_writer_only_repair_preserves_decision_and_durable_budget",
+        "tests/runtime/test_activity_combined_failures.py::test_preselected_run_rechecks_scope_and_claim_before_any_generation[autonomy_off]",
+        "tests/runtime/test_activity_combined_failures.py::test_preselected_run_rechecks_scope_and_claim_before_any_generation[execution_lease_lost]",
+        "tests/runtime/test_activity_combined_failures.py::test_preselected_run_rechecks_scope_and_claim_before_any_generation[feed_claim_replaced]",
+        "tests/runtime/test_activity_combined_failures.py::test_stale_preselected_feed_finishes_without_reselection_and_routine_continues",
+        "tests/runtime/test_activity_combined_graph.py::test_combined_order_uses_frozen_selection_and_fresh_later_context[False]",
+        "tests/runtime/test_activity_combined_graph.py::test_combined_order_uses_frozen_selection_and_fresh_later_context[True]",
+        "tests/runtime/test_activity_combined_selection.py::test_invalid_inbox_selection_does_not_discard_valid_feed",
+        "tests/runtime/test_activity_combined_selection.py::test_selection_bypass_and_shared_call_counts[counts0-expected0]",
+        "tests/runtime/test_activity_combined_selection.py::test_selection_bypass_and_shared_call_counts[counts1-expected1]",
+        "tests/runtime/test_activity_combined_selection.py::test_selection_bypass_and_shared_call_counts[counts2-expected2]",
+        "tests/runtime/test_activity_combined_selection.py::test_selection_bypass_and_shared_call_counts[counts3-expected3]",
+        "tests/runtime/test_activity_combined_selection.py::test_selection_bypass_and_shared_call_counts[counts4-expected4]",
+        "tests/runtime/test_activity_inputs.py::test_shared_input_keeps_latest_records_and_counts_omissions[0]",
+        "tests/runtime/test_activity_inputs.py::test_shared_input_keeps_latest_records_and_counts_omissions[12]",
+        "tests/runtime/test_activity_inputs.py::test_shared_input_keeps_latest_records_and_counts_omissions[13]",
+        "tests/runtime/test_activity_inputs.py::test_shared_input_keeps_latest_records_and_counts_omissions[1]",
+        "tests/runtime/test_activity_inputs.py::test_shared_input_keeps_latest_records_and_counts_omissions[20]",
+        "tests/runtime/test_activity_inputs.py::test_transmitted_budget_drops_oldest_whole_record[False]",
+        "tests/runtime/test_activity_inputs.py::test_transmitted_budget_drops_oldest_whole_record[True]",
+        "tests/runtime/test_personalized_parent.py::test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification_combined",
+        "tests/runtime/test_personalized_parent.py::test_parent_preserves_completed_paths_and_resumes_busy_settlement_combined",
+        "tests/runtime/test_personalized_parent.py::test_parent_real_adapters_respect_slot_and_commit_single_feed_effect_combined",
+        "tests/runtime/test_personalized_routine_lane.py::test_combined_routine_publishes_and_reuses_canonical_result",
+        "tests/runtime/test_sns_observation.py::test_export_distinguishes_writer_repair_from_planner_retry",
+        "tests/social/test_feed_observation_reclaim.py::test_same_token_renewal_after_expiry_never_steals_replaced_owner",
+        "tests/world_characters/test_activity_state.py::test_contract_version_transition_and_rollback_do_not_rebind_existing_runs"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_activity_combined_contracts.py": {
+          "test_valid_decision_survives_invalid_draft_but_invalid_decision_does_not": [
+            "assert parse_envelope(value, lambda v: parse_action(v, candidates))['decisions'][0]['action'] == 'like'",
+            "pytest.raises(ValueError, match='decision_target_invalid')"
+          ],
+          "assignment": [],
+          "test_combined_writer_rejects_changed_identity_count_length_or_proposal": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_combined_writer_uses_code_owned_task_and_keeps_thought": [
+            "assert result['reply_task_results'][0]['task_id'] == 'canonical-p'",
+            "assert result['reply_task_results'][0]['body'] == '힘내세요!'",
+            "assert result['reply_task_results'][0]['_activity_thought']"
+          ],
+          "test_recovery_reservation_survives_new_ledger_and_preserves_metadata": [
+            "pytest.raises(ValueError, match='recovery_exhausted')",
+            "pytest.raises(ValueError, match='recovery_exhausted')",
+            "assert row.result['paths']['inbox']['status'] == 'completed'"
+          ],
+          "test_combined_social_calls_transport_once_and_retains_all_decision_fields": [
+            "assert len(calls) == 1",
+            "assert calls[0]['max_output_tokens'] == 8192",
+            "assert result['state_status'] == 'valid'",
+            "assert 'relationship_metrics' in result and 'judged_at' in result",
+            "assert result['provisional_draft'] == {'replies': []}",
+            "assert set(kwargs['response_schema']['properties']) == {'decision', 'draft'}",
+            "assert 'body' in item['required']",
+            "assert item['properties']['body']['type'] == 'string'",
+            "assert item['properties']['target_id']['enum'] == ['p']"
+          ]
+        },
+        "tests/runtime/test_activity_combined_delivery.py": {
+          "fixture": [],
+          "test_feed_claims_and_snapshot_recover_after_commit_before_parent_checkpoint": [
+            "assert prepared['candidates'][0]['target_id'] == post.id",
+            "assert run.result['feed_preparation'] == prepared",
+            "assert await lane.load(state) == prepared",
+            "assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 1"
+          ],
+          "test_failed_preparation_rolls_back_cursor_and_claim_together": [
+            "pytest.raises(RuntimeError)",
+            "assert db.get(WorldCharacterFeedCursor, lane.actor.id) is None",
+            "assert not (run.result or {}).get('feed_preparation')",
+            "assert (await lane.load(state))['candidates']"
+          ],
+          "test_writer_only_repair_preserves_decision_and_durable_budget": [
+            "assert state['decision'] == before",
+            "assert len(requests) == 1",
+            "assert '\"assignments\"' in requests[0]['user_prompt']",
+            "assert 'decision' not in requests[0]['response_schema']['properties']",
+            "assert result['drafts'][0]['body'] == '힘내세요!'",
+            "assert result['writer_input_receipts'][0]['writer_recovery'] is True",
+            "assert len(run.result['recovery_reservations']) == 1",
+            "pytest.raises(ValueError, match='recovery_exhausted')",
+            "assert len(requests) == 1"
+          ],
+          "test_pending_delivery_survives_retention_then_reconciles_once": [
+            "assert db.get(RecommendationDelivery, identifier) is not None",
+            "assert saved.updated_at.replace(tzinfo=UTC) == delivered_at",
+            "assert saved.trace['_activity_observation'] == 'settled'",
+            "assert result['status'] == ('not_applied' if deleted else 'observed')",
+            "assert saved.trace == trace",
+            "assert result['reason'] == 'evidence_source_deleted'"
+          ],
+          "test_default_rollback_still_reconciles_older_version_two_delivery": [
+            "assert delivery.row.trace['_activity_observation'] == 'pending'",
+            "assert delivery.row.trace['_activity_observation_results'][post.id]['status'] == 'observed'"
+          ],
+          "test_delivery_completion_cannot_overwrite_a_replaced_claim": [
+            "pytest.raises(ValueError, match='feed_claim_changed')",
+            "assert observation.status == 'claimed'",
+            "assert observation.claim_token == 'replacement-token'",
+            "assert delivery.row.state == 'dispatched'"
+          ]
+        },
+        "tests/runtime/test_activity_combined_failures.py": {
+          "test_stale_preselected_feed_finishes_without_reselection_and_routine_continues": [
+            "assert result['paths']['feed']['status'] == 'no_action'",
+            "assert result['paths']['feed']['reason'] == 'feed_target_stale'",
+            "assert result['paths']['feed']['selected_ids'] == [post.id]",
+            "assert result['paths']['feed']['feed_summary']['reason_code'] == 'target_stale'",
+            "assert cursor.last_cycle_summary['termination_reason'] == 'feed_target_stale'",
+            "assert observation.status == 'retryable_failed'",
+            "assert observation.observed_at is None",
+            "assert observation.reason_code == 'target_stale'",
+            "assert 'routine' in result['paths']",
+            "assert result['execution_order'] == ['inbox', 'feed', 'routine']",
+            "assert result['publish_result']['public_action_count'] == 0",
+            "assert await execution.run_personalized_activity(ctx, actor=actor, run=run) == result",
+            "assert len(calls) == 3"
+          ],
+          "test_preselected_run_rechecks_scope_and_claim_before_any_generation": [
+            "assert result['paths']['feed']['reason'] == 'feed_claim_changed'",
+            "assert result['paths']['feed']['status'] == 'no_action'",
+            "assert 'routine' in result['paths']",
+            "pytest.raises(execution.ActivityScopeChangedError)",
+            "assert run.status == 'aborted'",
+            "assert 'inbox' in run.result['paths']",
+            "assert 'routine' not in run.result['paths']"
+          ]
+        },
+        "tests/runtime/test_activity_combined_graph.py": {
+          "test_combined_order_uses_frozen_selection_and_fresh_later_context": [
+            "assert contexts == {'inbox': [], 'feed': ['inbox'], 'routine': ['inbox', 'feed']}",
+            "assert calls.count('combined:select') == 1 and calls.count('prepare') == 1",
+            "assert not any((c in calls for c in ('inbox:select', 'feed:select', 'routine:select')))",
+            "assert [c for c in calls if c.endswith(':execute')] == ['inbox:execute', 'feed:execute', 'routine:execute']",
+            "assert calls.count('feed:plan') == 1",
+            "assert len(result['result']['paths']) == 3",
+            "pytest.raises(RuntimeError, match='simulated_process_exit')"
+          ]
+        },
+        "tests/runtime/test_activity_combined_selection.py": {
+          "test_selection_bypass_and_shared_call_counts": [
+            "assert calls == expected",
+            "assert len(result['prepared_lanes'][lane]['selections']) == (1 if count else 0)",
+            "assert set(kwargs['payload']['lanes']) == {'inbox', 'feed'}"
+          ],
+          "test_invalid_inbox_selection_does_not_discard_valid_feed": [
+            "assert result['prepared_lanes']['inbox']['preparation_error']['reason'] == 'selection_invalid'",
+            "assert result['prepared_lanes']['feed']['selections'][0]['target_id'] == '0'"
+          ]
+        },
+        "tests/runtime/test_activity_inputs.py": {
+          "test_shared_input_keeps_latest_records_and_counts_omissions": [
+            "assert value['today_activity']['records'] == original[:12]",
+            "assert value['today_activity'].get('omitted_records', 0) == max(0, count - 12)",
+            "assert len(original) == count"
+          ],
+          "test_transmitted_budget_drops_oldest_whole_record": [
+            "assert len(records) == 2",
+            "assert sent['today_activity']['records'] == [records[0]]",
+            "assert sent['today_activity']['omitted_records'] == 8",
+            "assert receipt['omissions']['today_activity'] == 1"
+          ]
+        },
+        "tests/runtime/test_personalized_parent.py": {
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect": [
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert repeated == result"
+          ],
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == ({'inbox'} if version == 2 else {'inbox', 'routine'})",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ],
+          "test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification": [
+            "assert result['status'] == 'failed'",
+            "assert result['paths']['inbox']['status'] == 'failed'",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert notification.handled_at is None"
+          ],
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect_combined": [],
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement_combined": [],
+          "test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification_combined": []
+        },
+        "tests/runtime/test_personalized_routine_lane.py": {
+          "test_routine_nodes_publish_state_and_restore_only_canonical_references": [
+            "assert calls == (['RoutineDecisionDraft'] if combined else ['RoutineActionPlanner', 'RoutineWriter'])",
+            "assert result['result']['public_action_count'] == 1",
+            "assert result['result']['settlement']['state'] == 'updated'",
+            "assert current['mood'] == 'hopeful'",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "assert kwargs['payload']['beat_identity'] == {'episode_id': lane.prepared.context.episode.id, 'beat_id': lane.prepared.beat.id, 'sequence_no': lane.prepared.beat.sequence_no}",
+            "assert schema['properties']['episode_id']['enum'] == [lane.prepared.context.episode.id]"
+          ],
+          "test_combined_routine_publishes_and_reuses_canonical_result": []
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None",
+            "assert list(csv.DictReader(source))[0]['validation_code'] == 'unknown'"
+          ],
+          "test_export_separates_recovered_planner_output_from_final_failure": [
+            "assert coverage['planner_output_failures'] == 2",
+            "assert coverage['planner_retries_scheduled'] == 1",
+            "assert coverage['planner_recovered_activities'] == 1",
+            "assert coverage['planner_final_failures'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert 'action_brief_missing' in csv_text and 'decisions.0.brief' in csv_text",
+            "assert 'recovered activities: 1; final path failures: 1' in report",
+            "assert 'a' * 64 in calls",
+            "assert recovered and failed",
+            "assert 'SECRET_PRIVATE' not in (output / filename).read_text(encoding='utf-8')"
+          ],
+          "test_export_distinguishes_writer_repair_from_planner_retry": [
+            "assert coverage['combined_draft_validation_failures'] == 1",
+            "assert coverage['writer_recovered_paths'] == 1",
+            "assert coverage['planner_retries_scheduled'] == 0",
+            "assert coverage['planner_final_failures'] == 0",
+            "assert 'combined_draft_body_invalid' in calls and 'PRIVATE' not in calls"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True",
+            "assert coverage['planner_output_failures'] == 0"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        },
+        "tests/social/test_feed_observation_reclaim.py": {
+          "test_same_token_renewal_after_expiry_never_steals_replaced_owner": [
+            "assert db.get(WorldCharacterFeedObservation, observation_id).claim_token == token",
+            "pytest.raises(ValueError, match='feed_claim_changed')",
+            "assert replacement.observations",
+            "pytest.raises(ValueError, match='feed_claim_changed')"
+          ],
+          "_claimed_candidate": [
+            "assert [candidate.post_id for candidate in search.candidates] == [post_id]",
+            "assert len(original.observations) == 1"
+          ],
+          "_claim": [],
+          "test_expired_committed_feed_claim_is_reclaimed_after_sqlite_reload": [
+            "assert loaded is not None",
+            "assert loaded.lease_expires_at.tzinfo is None",
+            "assert reclaimed.claim_conflict_count == 0",
+            "assert len(reclaimed.observations) == 1",
+            "assert reclaimed.observations[0] is loaded",
+            "assert loaded.id == observation_id",
+            "assert loaded.claim_token != previous_token",
+            "assert loaded.run_id == 'new-run'",
+            "assert loaded.cycle_key == 'cycle-new-run'",
+            "assert loaded.lease_expires_at == (NOW + OBSERVATION_LEASE).replace(tzinfo=None)",
+            "assert saved is not None",
+            "assert saved.run_id == 'new-run'",
+            "assert saved.claim_token != previous_token",
+            "assert saved.lease_expires_at == (NOW + OBSERVATION_LEASE).replace(tzinfo=None)"
+          ],
+          "test_claim_state_and_expiry_boundary_preserve_existing_policy": [
+            "assert result.claim_conflict_count == (0 if should_claim else 1)",
+            "assert len(result.observations) == int(should_claim)",
+            "assert len(result.candidates) == int(should_claim)",
+            "assert saved.status == ('claimed' if should_claim else status)",
+            "assert saved.run_id == (f'run-{index}' if should_claim else 'previous-run')",
+            "assert saved.claim_token != f'previous-token-{index}'",
+            "assert saved.claim_token == f'previous-token-{index}'",
+            "assert saved.lease_expires_at == (NOW + offset).replace(tzinfo=None)",
+            "assert saved.observed_at == (NOW.replace(tzinfo=None) if status == 'observed' else None)"
+          ],
+          "test_utc_offset_and_naive_utc_inputs_reclaim_same_expired_row": [
+            "assert result.claim_conflict_count == 0",
+            "assert result.observations[0].claim_token != previous_token",
+            "assert saved.claim_token == previous_token",
+            "assert saved.run_id == 'previous-run'",
+            "assert saved.lease_expires_at == (NOW - timedelta(hours=1) + OBSERVATION_LEASE).replace(tzinfo=None)"
+          ],
+          "test_mixed_session_datetime_representations_do_not_change_unrelated_claim": [
+            "assert loaded.lease_expires_at.tzinfo is None",
+            "assert unrelated.lease_expires_at.tzinfo is not None",
+            "assert result.observations == (loaded,)",
+            "assert unrelated.claim_token == 'unrelated-token'",
+            "assert unrelated.run_id == 'unrelated-run'"
+          ],
+          "test_sql_write_failure_propagates_without_committing_existing_claim": [
+            "assert saved.claim_token == previous_token",
+            "assert saved.run_id == 'previous-run'",
+            "pytest.raises(RuntimeError, match='synthetic claim write failure')"
+          ],
+          "test_stale_reader_loses_conditional_update_to_other_connection": [
+            "assert old_row.run_id == 'previous-run'",
+            "assert len(won.observations) == 1",
+            "assert lost.observations == ()",
+            "assert lost.claim_conflict_count == 1",
+            "assert saved.run_id == 'winner'",
+            "assert saved.claim_token == winning_token"
+          ],
+          "test_only_one_file_sqlite_contender_acquires_expired_claim": [
+            "assert [outcome for outcome, _ in outcomes].count('acquired') == 1",
+            "assert [outcome for outcome, _ in outcomes].count('conflict') + [outcome for outcome, _ in outcomes].count('locked') == 1",
+            "assert saved.run_id == winner",
+            "assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 1",
+            "assert 'locked' in str(exc).lower()"
+          ]
+        },
+        "tests/world_characters/test_activity_state.py": {
+          "test_state_receipts_cas_time_and_duplicate_experience": [
+            "assert not read_state(db, world_id=actor.world_id, actor_id=actor.id)['known']",
+            "assert settle_state(db, **args, decision_key='d1', expected_version=0, proposal=proposal) == 'updated'",
+            "assert settle_state(db, **args, decision_key='d1', expected_version=0, proposal=proposal) == 'updated'",
+            "assert settle_state(db, **args, decision_key='d2', expected_version=1, proposal=proposal) == 'already_interpreted'",
+            "assert settle_state(db, **args, decision_key='d3', expected_version=0, proposal=proposal) == 'conflict_not_applied'",
+            "assert settle_state(db, **args, decision_key='d4', expected_version=1, proposal=None) == 'kept'",
+            "assert state['version'] == 2",
+            "assert state['changed_at'] == now.isoformat()",
+            "assert state['confirmed_at'] == (now + timedelta(hours=2)).isoformat()",
+            "assert state['mood'] == 'hopeful'",
+            "pytest.raises(ValueError, match='scope_invalid')"
+          ],
+          "test_policy_inheritance_and_claim_frozen_across_global_transition": [
+            "assert resolve_engine(db, actor) == {'engine': 'personalized_graph_v2', 'source': 'default', 'version': 0}",
+            "assert bind_run(db, actor=actor, activity_id='first').engine == first.engine == 'current'",
+            "assert bind_run(db, actor=actor, activity_id='second').engine == 'personalized_graph_v2'",
+            "assert resolve_engine(db, actor)['source'] == 'character'",
+            "assert bind_run(db, actor=actor, activity_id='second').engine == 'personalized_graph_v2'",
+            "assert resolve_engine(db, actor)['engine'] == 'personalized_graph_v2'"
+          ],
+          "test_world_and_character_overrides_preserve_explicit_v1_after_default_switch": [
+            "assert resolve_engine(db, actor)['source'] == 'world'",
+            "assert resolve_engine(db, actor)['engine'] == 'current'",
+            "assert resolve_engine(db, actor)['source'] == 'world'",
+            "assert resolve_engine(db, actor)['engine'] == 'current'",
+            "assert resolve_engine(db, actor) == {'engine': 'personalized_graph_v2', 'source': 'default', 'version': 0}"
+          ],
+          "test_contract_version_transition_and_rollback_do_not_rebind_existing_runs": [
+            "assert bind_run(db, actor=actor, activity_id='old').contract_version == 1",
+            "assert bind_run(db, actor=actor, activity_id='new').contract_version == 2",
+            "assert bind_run(db, actor=actor, activity_id='old').contract_version == 1",
+            "assert bind_run(db, actor=actor, activity_id='new').contract_version == 2",
+            "assert bind_run(db, actor=actor, activity_id='rollback').contract_version == 1",
+            "assert bind_run(db, actor=actor, activity_id='legacy').contract_version == 1",
+            "pytest.raises(ValueError, match='scope_or_version_invalid')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_activity_combined_contracts.py": {},
+        "tests/runtime/test_activity_combined_delivery.py": {},
+        "tests/runtime/test_activity_combined_failures.py": {},
+        "tests/runtime/test_activity_combined_graph.py": {},
+        "tests/runtime/test_activity_combined_selection.py": {},
+        "tests/runtime/test_activity_inputs.py": {},
+        "tests/runtime/test_personalized_parent.py": {},
+        "tests/runtime/test_personalized_routine_lane.py": {},
+        "tests/runtime/test_sns_observation.py": {},
+        "tests/social/test_feed_observation_reclaim.py": {},
+        "tests/world_characters/test_activity_state.py": {}
+      }
+    },
+    {
+      "commit": "9ddeb8b50c5ff976455b33d54711dfe8a8a4edf4",
+      "feature_id": "AR-SNS-ROUTINE-TIME",
+      "reason": "Record World-local Routine time context and temporal regression cases.",
+      "tracked_files": {
+        "backend/app/domains/routine_posts/service/temporal_context.py": "8255598e9164a0c1f221a2ae03892fc8440fa112",
+        "backend/scripts/prepare_routine_temporal_eval.py": "3d239617bd4cf7ca035d4e42324780cc2a6015c0",
+        "backend/tests/routine_posts/fixtures/temporal_quality_cases.json": "e9bd1e0fef4301375f2e024bed7bd1dd82eb9a2c",
+        "backend/tests/routine_posts/test_temporal_context.py": "27a5b693a77228595122c1f66a1734e0a1b8f343"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_generation.py::test_prior_post_and_stale_state_keep_their_time_evidence_without_changing_present",
+        "tests/routine_posts/test_temporal_context.py::test_current_world_date_and_plan_timezone_remain_distinct",
+        "tests/routine_posts/test_temporal_context.py::test_daylight_saving_uses_existing_daypart_boundaries[day0-elapsed0]",
+        "tests/routine_posts/test_temporal_context.py::test_daylight_saving_uses_existing_daypart_boundaries[day1-elapsed1]",
+        "tests/routine_posts/test_temporal_context.py::test_morning_generation_uses_world_clock_and_existing_window",
+        "tests/routine_posts/test_temporal_context.py::test_persisted_utc_naive_instants_are_normalized_but_reference_must_be_aware",
+        "tests/routine_posts/test_temporal_context.py::test_window_is_start_inclusive_and_end_exclusive[11-59-59-morning-True]",
+        "tests/routine_posts/test_temporal_context.py::test_window_is_start_inclusive_and_end_exclusive[12-0-0-afternoon-False]",
+        "tests/routine_posts/test_temporal_context.py::test_window_is_start_inclusive_and_end_exclusive[5-59-59-dawn-False]",
+        "tests/routine_posts/test_temporal_context.py::test_window_is_start_inclusive_and_end_exclusive[6-0-0-morning-True]",
+        "tests/runtime/test_activity_combined_contracts.py::test_added_routine_time_context_uses_existing_split_boundary"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_generation.py": {
+          "test_generation_keeps_two_calls_validation_fence_and_error_identity": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert ('thought' in kwargs['response_schema'].get('properties', {})) == thought_enabled",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == expected_plan",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert writer_input['temporal_context'] == json.loads(calls[0]['user_prompt'])['temporal_context']",
+            "assert writer_input['temporal_context']['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert writer_input['temporal_context']['activity_window']['contains_reference_time'] is True",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "assert 'temporal_context' in json.loads(call['user_prompt'])",
+            "assert 'prior posts' in call['system_prompt'].lower()",
+            "assert result.draft._activity_thought.text == '즐거운 마음으로 시작하고 싶다.'",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'",
+            "assert snapshot.snapshot_id in call['system_prompt']",
+            "assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call['system_prompt']"
+          ],
+          "test_prior_post_and_stale_state_keep_their_time_evidence_without_changing_present": [
+            "assert prompt['state_before']['action_note'] == '오늘 밤 내일의 훈련을 준비한다'",
+            "assert prompt['previous_success']['post']['body'] == '오늘 밤 내일을 준비한다'",
+            "assert prompt['previous_success']['post']['created_at_local'] == '2026-08-10T09:48:00+09:00'",
+            "assert prompt['temporal_context']['local_datetime'] == '2026-08-10T10:05:00+09:00'",
+            "assert prompt['temporal_context']['current_daypart'] == 'morning'"
+          ]
+        },
+        "tests/routine_posts/test_temporal_context.py": {
+          "_input": [],
+          "test_morning_generation_uses_world_clock_and_existing_window": [
+            "assert result == {'version': 1, 'as_of_utc': '2026-09-26T02:15:00+00:00', 'timezone': 'Asia/Seoul', 'local_datetime': '2026-09-26T11:15:00+09:00', 'local_date': '2026-09-26', 'current_daypart': 'morning', 'activity_window': {'plan_local_date': '2026-09-26', 'plan_timezone': 'Asia/Seoul', 'daypart': 'morning', 'starts_at_local': '2026-09-26T06:00:00+09:00', 'ends_at_local': '2026-09-26T12:00:00+09:00', 'scheduled_tick_local': '2026-09-26T06:00:00+09:00', 'contains_reference_time': True}}"
+          ],
+          "test_window_is_start_inclusive_and_end_exclusive": [
+            "assert result['current_daypart'] == daypart",
+            "assert result['activity_window']['contains_reference_time'] is within"
+          ],
+          "test_daylight_saving_uses_existing_daypart_boundaries": [
+            "assert end - start == elapsed",
+            "assert result['activity_window']['contains_reference_time'] is True",
+            "assert datetime.fromisoformat(result['activity_window']['starts_at_local']).astimezone(UTC) == start",
+            "assert datetime.fromisoformat(result['activity_window']['ends_at_local']).astimezone(UTC) == end"
+          ],
+          "test_current_world_date_and_plan_timezone_remain_distinct": [
+            "assert result['local_date'] == '2026-09-26'",
+            "assert result['current_daypart'] == 'morning'",
+            "assert result['activity_window']['plan_local_date'] == '2026-09-25'",
+            "assert result['activity_window']['plan_timezone'] == 'UTC'",
+            "assert result['activity_window']['contains_reference_time'] is False"
+          ],
+          "test_persisted_utc_naive_instants_are_normalized_but_reference_must_be_aware": [
+            "assert _input(reference=reference, persisted_naive=True) == _input(reference=reference)",
+            "assert world_local_iso(datetime(2026, 9, 26, 0, 48), 'Asia/Seoul') == '2026-09-26T09:48:00+09:00'",
+            "pytest.raises(ValueError, match='routine_reference_time_requires_timezone')"
+          ]
+        },
+        "tests/runtime/test_activity_combined_contracts.py": {
+          "test_valid_decision_survives_invalid_draft_but_invalid_decision_does_not": [
+            "assert parse_envelope(value, lambda v: parse_action(v, candidates))['decisions'][0]['action'] == 'like'",
+            "pytest.raises(ValueError, match='decision_target_invalid')"
+          ],
+          "assignment": [],
+          "test_combined_writer_rejects_changed_identity_count_length_or_proposal": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_combined_writer_uses_code_owned_task_and_keeps_thought": [
+            "assert result['reply_task_results'][0]['task_id'] == 'canonical-p'",
+            "assert result['reply_task_results'][0]['body'] == '힘내세요!'",
+            "assert result['reply_task_results'][0]['_activity_thought']"
+          ],
+          "test_recovery_reservation_survives_new_ledger_and_preserves_metadata": [
+            "pytest.raises(ValueError, match='recovery_exhausted')",
+            "pytest.raises(ValueError, match='recovery_exhausted')",
+            "assert row.result['paths']['inbox']['status'] == 'completed'"
+          ],
+          "test_combined_social_calls_transport_once_and_retains_all_decision_fields": [
+            "assert len(calls) == 1",
+            "assert calls[0]['max_output_tokens'] == 8192",
+            "assert result['state_status'] == 'valid'",
+            "assert 'relationship_metrics' in result and 'judged_at' in result",
+            "assert result['provisional_draft'] == {'replies': []}",
+            "assert set(kwargs['response_schema']['properties']) == {'decision', 'draft'}",
+            "assert 'body' in item['required']",
+            "assert item['properties']['body']['type'] == 'string'",
+            "assert item['properties']['target_id']['enum'] == ['p']"
+          ],
+          "test_added_routine_time_context_uses_existing_split_boundary": [
+            "assert asyncio.run(generation_mode(baseline)) == {'generation_mode': 'combined'}",
+            "assert asyncio.run(generation_mode(with_time)) == {'generation_mode': 'split'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_generation.py": {},
+        "tests/routine_posts/test_temporal_context.py": {},
+        "tests/runtime/test_activity_combined_contracts.py": {}
+      }
     }
   ]
 }
