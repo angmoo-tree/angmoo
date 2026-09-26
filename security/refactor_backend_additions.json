@@ -19661,6 +19661,203 @@
         "tests/world_characters/test_creator_preparation_bounds.py": {},
         "tests/world_packages/test_world_icon_extension.py": {}
       }
+    },
+    {
+      "commit": "a4331b9e195688e29eebb5aef941701dafcff67c",
+      "feature_id": "AR-CREATOR-COMPATIBILITY",
+      "reason": "구초안 복구와 실제 HTTP 및 동시성 삭제 회귀와 v20 업그레이드 검증 추가",
+      "tracked_files": {
+        "backend/app/runtime/creator_privacy.py": "0bc1afdef85f7f10513b5d65409cd78acd53a253"
+      },
+      "test_nodes": [
+        "tests/test_creator_card_registration.py::test_private_card_and_receipt_removed_with_existing_deletion_transaction[False]",
+        "tests/test_creator_card_registration.py::test_private_card_and_receipt_removed_with_existing_deletion_transaction[True]",
+        "tests/test_local_creator_v2.py::test_expired_draft_get_is_read_only",
+        "tests/test_local_creator_v2.py::test_http_keyless_register_replay_and_detail_use_real_persistence",
+        "tests/test_local_creator_v2.py::test_legacy_draft_explicit_adoption_preserves_fields_and_never_attaches_key",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[20]"
+      ],
+      "test_assertions": {
+        "tests/test_creator_card_registration.py": {
+          "card_bytes": [],
+          "test_card_final_edits_are_only_registered_persona_and_source_stays_private": [
+            "assert imported['draft'].speech_style == 'Original: Hello 대화 상대'",
+            "assert 'scenario_manual_merge' in imported['review']",
+            "pytest.raises(AgentCreationDraftNotFoundError)",
+            "assert stored.personality == 'Edited persona' and stored.speech_style == 'Edited voice'",
+            "assert 'RAW_' not in stored.persona_summary",
+            "assert preparation['character']['personality'] == sns['persona']['personality'] == chat.personality == 'Edited persona'",
+            "assert preparation['character']['speech_style'] == sns['persona']['speech_style'] == chat.speech_style == 'Edited voice'",
+            "assert 'RAW_' not in json.dumps(preparation) + json.dumps(sns) + str(chat)",
+            "assert source.source_bytes == card_bytes() and source.character_id == stored.id",
+            "assert drafts.get_draft(session, owner, draft.id, workflows=workflows).status == 'completed'",
+            "assert card_import.read_source(session, owner, draft.id)['document']['data']['name'] == 'Original'",
+            "pytest.raises(AgentCreationDraftHandleConflictError)"
+          ],
+          "test_card_failed_commit_rolls_back_original_source_and_revision": [
+            "pytest.raises(RuntimeError, match='synthetic')",
+            "assert session.get(models.AgentCreationDraft, draft.id).revision == first['draft'].revision",
+            "assert card_import.read_source(session, owner, draft.id)['document']['data']['name'] == 'Original'"
+          ],
+          "test_copy_new_world_creates_new_identity_without_key_or_raw_source": [
+            "assert registered.character.id != saved.character.id",
+            "assert row.personality == 'Curious' and row.credential is None and (not row.activity_setting.auto_enabled)",
+            "assert session.scalar(select(models.CharacterCardSource).where(models.CharacterCardSource.character_id == row.id)) is None",
+            "pytest.raises(AgentCreationDraftValidationError)"
+          ],
+          "test_keyless_draft_never_enters_legacy_ai_enhancement": [
+            "pytest.raises(AgentCreationDraftValidationError)"
+          ],
+          "test_canonical_backup_retains_registered_private_card_bytes": [
+            "assert row == (card_bytes(), character_id)",
+            "assert restored.execute('PRAGMA integrity_check').fetchone() == ('ok',)",
+            "assert restored.execute('PRAGMA foreign_key_check').fetchall() == []"
+          ],
+          "test_foreign_media_and_stale_card_replacement_cannot_change_draft": [
+            "pytest.raises(AgentCreationDraftHandleConflictError)",
+            "assert card_import.read_source(session, owner, draft.id)['document']['data']['name'] == 'Original'",
+            "pytest.raises(AgentCreationDraftValidationError)",
+            "assert session.get(models.AgentCreationDraft, draft.id).avatar_temp_url is None"
+          ],
+          "test_private_card_and_receipt_removed_with_existing_deletion_transaction": [
+            "assert session.scalar(select(models.CharacterCardSource.id)) is None",
+            "assert session.get(models.CharacterRegistrationReceipt, draft.id) is None",
+            "assert session.get(models.AgentCreationDraft, draft.id) is None",
+            "assert session.get(CharacterWorldBinding, result.character.id) is None",
+            "assert (session.get(OwnerDefaultWorld, owner.id) is None) is account",
+            "assert session.get(models.CharacterRegistrationReceipt, draft.id) is not None",
+            "assert card_import.read_source(session, owner, draft.id)['document']['data']['name'] == 'Original'"
+          ]
+        },
+        "tests/test_local_creator_v2.py": {
+          "db": [],
+          "test_default_and_same_profile_identity": [
+            "assert world.name == 'SNS'",
+            "assert world.readiness_status == 'publish_ready'",
+            "assert ensure_default_space(session, owner_id=owner.id).id == world.id",
+            "assert first.profile.display_name == '사용자'",
+            "assert first.profile.avatar_url is None",
+            "assert service.ensure(world_id=world.id, current_user_id=owner.id).character_id == first.character_id",
+            "assert (changed.character_id, changed.world_character_id) == (first.character_id, first.world_character_id)",
+            "assert changed.profile.handle == 'haru'",
+            "assert changed.profile.background == first.profile.background"
+          ],
+          "test_keyless_registration_is_atomic_off_and_replayed": [
+            "assert draft.contract_version == 2",
+            "assert session.get(AgentCreationDraft, draft.id).encrypted_api_key is None",
+            "assert first.id == again.id",
+            "assert binding.world_id == row.world_id == draft.target_world_id",
+            "assert row.autonomous_enabled is False",
+            "assert first.credential is None",
+            "assert first.activity_setting.auto_enabled is False",
+            "assert session.get(CharacterRegistrationReceipt, draft.id).character_id == first.id"
+          ],
+          "test_upgrade_preserves_legacy_draft_and_matches_fresh": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert tuple(row) == ('preserved-ciphertext', 1, 1)",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(21).schema_digest",
+            "assert not list(connection.exec_driver_sql('PRAGMA foreign_key_check'))"
+          ],
+          "test_registration_detail_is_readable_without_credential": [
+            "assert result.credential is None",
+            "assert result.settings.auto_enabled is False",
+            "assert result.character.name == '검증 앵무'"
+          ],
+          "test_stale_edit_and_profile_revision_preserve_current_values": [
+            "pytest.raises(AgentCreationDraftHandleConflictError)",
+            "assert session.get(AgentCreationDraft, draft.id).name == '먼저 저장'",
+            "pytest.raises(OwnerControlledIdentityConflictError)",
+            "assert identity.get(world_id=draft.target_world_id, current_user_id=owner.id).profile.display_name == '하루'"
+          ],
+          "test_registration_failure_rolls_back_character_and_membership": [
+            "pytest.raises(RuntimeError)",
+            "assert session.scalar(select(Character).where(Character.name == '롤백')) is None",
+            "assert session.scalar(select(WorldCharacter)) is None",
+            "assert session.get(CharacterRegistrationReceipt, draft.id) is None",
+            "assert session.get(AgentCreationDraft, draft.id).status == 'editing'"
+          ],
+          "test_default_space_cannot_be_archived": [
+            "pytest.raises(WorldDefinitionValidationError)",
+            "assert world.status == 'published'"
+          ],
+          "test_two_independent_sessions_register_one_draft_once": [
+            "assert identities[0] == identities[1]",
+            "assert session.scalar(select(func.count()).select_from(CharacterRegistrationReceipt)) == 1",
+            "assert session.scalar(select(func.count()).select_from(WorldCharacter)) == 1"
+          ],
+          "test_two_independent_sessions_ensure_same_space_and_profile": [
+            "assert identities[0] == identities[1]"
+          ],
+          "test_legacy_draft_explicit_adoption_preserves_fields_and_never_attaches_key": [
+            "pytest.raises(AgentCreationDraftValidationError, match='이전 초안')",
+            "assert result.name == '보존 초안' and result.contract_version == 2",
+            "assert legacy.encrypted_api_key == 'preserved-private-ciphertext'",
+            "assert registered.credential is None",
+            "assert registered.settings.auto_enabled is False",
+            "assert session.get(CharacterWorldBinding, registered.character.id).world_id == result.target_world_id"
+          ],
+          "test_expired_draft_get_is_read_only": [
+            "pytest.raises(AgentCreationDraftExpiredError)",
+            "assert session.get(AgentCreationDraft, 'expired-read') is not None",
+            "assert not session.deleted and (not session.dirty)"
+          ],
+          "test_http_keyless_register_replay_and_detail_use_real_persistence": [
+            "assert created.status_code == 201, created.text",
+            "assert saved.status_code == 200, saved.text",
+            "assert done.status_code == 200, done.text",
+            "assert repeated.status_code == 200, repeated.text",
+            "assert repeated.json()['character']['id'] == done.json()['character']['id']",
+            "assert done.json()['credential'] is None",
+            "assert done.json()['settings']['auto_enabled'] is False",
+            "assert imported.status_code == 200, imported.text",
+            "assert source.status_code == 200 and source.headers['cache-control'] == 'private, no-store'",
+            "assert source.json()['document']['name'] == '카드'"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 21",
+            "assert fixture['target_table_count'] == 137",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_creator_card_registration.py": {},
+        "tests/test_local_creator_v2.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
     }
   ]
 }

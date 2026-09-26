@@ -353,6 +353,7 @@ export type AgentCreationDraftUpdateInput = Partial<
   > & {
   image_style?: AgentCreationDraftImageStyle;
   revision?: number;
+  status?: "cancelled";
   avatar_temp_url?: string | null;
   banner_temp_url?: string | null;
 };

@@ -4,6 +4,22 @@ const staticShell = process.env.ANGMOO_CREATOR_STATIC === "1";
 const owner = { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
   feed_content_filter: "all", is_admin: false, display_name_updated_at: null, display_name_change_available_at: null };
 
+test("explicit draft cancellation returns to creation and survives reload", async ({ page }) => {
+  const { writes } = await fixture(page);
+  await page.goto("/agents/new?worldId=world-test");
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await page.getByRole("button", { name: "이 초안 취소", exact: true }).click();
+  await page.getByRole("button", { name: "계속 편집", exact: true }).click();
+  expect(writes.some(item => item.body?.status === "cancelled")).toBe(false);
+  await page.getByRole("button", { name: "이 초안 취소", exact: true }).click();
+  await page.getByRole("button", { name: "초안 취소 확인", exact: true }).click();
+  await expect(page.getByLabel("만드는 방법")).toBeVisible();
+  expect(writes.some(item => item.body?.status === "cancelled")).toBe(true);
+  await page.reload();
+  await expect(page.getByLabel("만드는 방법")).toBeVisible();
+  expect(writes.filter(item => item.path.endsWith("/complete"))).toHaveLength(0);
+});
+
 async function fixture(page: Page) {
   const writes: { path: string; body: any }[] = [];
   let draft: any = null;

@@ -56,6 +56,7 @@ function CreationGuide() {
   const [created, setCreated] = useState<AgentDetailRead | null>(null);
   const [restoring, setRestoring] = useState(true);
   const [legacyDraft, setLegacyDraft] = useState<AgentCreationDraftRead | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const requestEpoch = useRef(0);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ function CreationGuide() {
         if (id) {
           const value = await getAgentDraft(id);
           if (!cancelled && epoch === requestEpoch.current) {
+            if (value.status === "cancelled") { sessionStorage.removeItem(storageKey); return; }
             if (!currentId && value.contract_version === 1) { setLegacyDraft(value); return; }
             if (value.contract_version !== 2 || (target && value.target_world_id !== target)) throw new Error("이 초안의 대상 World를 확인해주세요.");
             setDraft(value);
@@ -228,5 +230,20 @@ function CreationGuide() {
         <Button type="button" variant="ghost" disabled={busy} onClick={() => router.push(returnRoute)}>나중에 하기</Button>
       </div>
     </form>
+    {draft?.status === "editing" && <div className="space-y-3">
+      {!confirmCancel ? <Button variant="ghost" disabled={busy} onClick={() => setConfirmCancel(true)}>이 초안 취소</Button>
+        : <div role="alert" className="space-y-3"><p>이 초안의 등록을 취소하고 가져온 카드 원본과 임시 이미지를 정리합니다. 이미 저장한 World는 유지됩니다.</p>
+          <Button disabled={busy} onClick={() => void perform(async () => {
+            const final = await updateAgentDraft(draft.id, { revision: draft.revision, status: "cancelled" });
+            setConfirmCancel(false);
+            if (final.status === "completed") {
+              setDraft(final); setStep(4); setError("등록이 먼저 완료되었습니다. 등록 결과를 확인해주세요."); return;
+            }
+            sessionStorage.removeItem(storageKey); setDraft(null); setSource(null); setPendingFile(null);
+            setReview([]); setRawOnly([]); setStep(0);
+          })}>초안 취소 확인</Button>
+          <Button variant="secondary" disabled={busy} onClick={() => setConfirmCancel(false)}>계속 편집</Button>
+        </div>}
+    </div>}
   </section>;
 }

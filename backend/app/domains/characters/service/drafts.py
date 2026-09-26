@@ -83,10 +83,14 @@ def update_draft(
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
+    if data.status == "cancelled":
+        if data.model_fields_set - {"status", "revision"}:
+            raise AgentCreationDraftValidationError("취소와 내용 수정은 함께 요청할 수 없습니다.")
+        return cancel_draft(db, draft, data.revision, workflows=workflows)
     if draft.contract_version >= 2:
         claim_edit(db, draft, data.revision)
     try:
-        for field, value in data.model_dump(exclude_unset=True, exclude={"revision"}).items():
+        for field, value in data.model_dump(exclude_unset=True, exclude={"revision", "status"}).items():
             if field == "handle":
                 if value is None or not str(value).strip():
                     draft.handle = None
@@ -124,6 +128,43 @@ def update_draft(
     except Exception:
         db.rollback()
         raise
+    return _draft_read(draft)
+
+
+def cancel_draft(db: Session, draft, revision: int | None, *, workflows):
+    """The same CAS as registration decides which final state wins."""
+    if draft.contract_version < 2:
+        raise AgentCreationDraftValidationError("이전 초안은 먼저 새 등록 방식으로 이어가주세요.")
+    if draft.status in {"completed", "cancelled"}:
+        return _draft_read(draft)
+    try:
+        claimed = db.execute(update(models.AgentCreationDraft).where(
+            models.AgentCreationDraft.id == draft.id,
+            models.AgentCreationDraft.revision == revision,
+            models.AgentCreationDraft.status == "editing",
+        ).values(status="cancelled", revision=models.AgentCreationDraft.revision + 1)
+            .execution_options(synchronize_session="fetch"))
+        if claimed.rowcount != 1:
+            db.rollback()
+            db.refresh(draft)
+            if draft.status in {"completed", "cancelled"}:
+                return _draft_read(draft)
+            raise AgentCreationDraftHandleConflictError("draft_revision_conflict")
+        db.execute(delete(models.CharacterCardSource).where(
+            models.CharacterCardSource.draft_id == draft.id,
+            models.CharacterCardSource.character_id.is_(None)))
+        draft.avatar_temp_url = draft.banner_temp_url = None
+        db.commit()
+        db.refresh(draft)
+    except Exception:
+        db.rollback()
+        raise
+    # Never remove files before the cancellation transaction commits. If the
+    # filesystem is unavailable, the existing expiry cleanup retries later.
+    try:
+        workflows.delete_draft_media(draft.id)
+    except OSError:
+        logger.warning("cancelled draft media cleanup pending: draft_id=%s", draft.id)
     return _draft_read(draft)
 
 
@@ -254,7 +295,7 @@ def _cleanup_expired_drafts(db: Session,
             if draft.contract_version >= 2:
                 claimed = db.execute(update(models.AgentCreationDraft).where(
                     models.AgentCreationDraft.id == draft.id,
-                    models.AgentCreationDraft.status == "editing",
+                    models.AgentCreationDraft.status.in_(["editing", "cancelled"]),
                     models.AgentCreationDraft.expires_at <= now,
                 ).values(status="expiring").execution_options(synchronize_session="fetch"))
                 if claimed.rowcount != 1:

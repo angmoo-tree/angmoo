@@ -274,3 +274,74 @@ def test_http_keyless_register_replay_and_detail_use_real_persistence(db):
         source = client.get(f"/api/v1/agents/drafts/{card_draft['id']}/card-source")
         assert source.status_code == 200 and source.headers["cache-control"] == "private, no-store"
         assert source.json()["document"]["name"] == "카드"
+        cancelled = client.patch(f"/api/v1/agents/drafts/{card_draft['id']}", json={
+            "revision": imported.json()["draft"]["revision"], "status": "cancelled"})
+        assert cancelled.status_code == 200 and cancelled.json()["status"] == "cancelled"
+        assert client.get(f"/api/v1/agents/drafts/{card_draft['id']}/card-source").status_code == 404
+        cannot_register = client.post(f"/api/v1/agents/drafts/{card_draft['id']}/complete", json={
+            "revision": cancelled.json()["revision"]})
+        assert cannot_register.status_code == 409
+        preserved = client.patch(f"/api/v1/agents/drafts/{draft['id']}", json={**payload, "status": "cancelled"})
+        assert preserved.status_code == 200 and preserved.json()["status"] == "completed"
+        assert session.get(CharacterRegistrationReceipt, draft["id"]).character_id == done.json()["character"]["id"]
+
+
+def test_cancel_and_register_race_preserves_one_final_state(db):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from app.domains.characters.exceptions import AgentCreationDraftHandleConflictError
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(
+        revision=draft.revision, name="취소 경합", personality="침착함"), workflows=workflows)
+    draft_id, owner_id, revision = draft.id, owner.id, edited.revision
+    session.commit()
+    barrier = Barrier(2)
+    def request(cancel):
+        with Session(session.get_bind()) as worker:
+            actor = worker.get(User, owner_id)
+            barrier.wait(timeout=10)
+            if cancel:
+                return drafts.update_draft(worker, actor, draft_id,
+                    AgentCreationDraftUpdate(revision=revision, status="cancelled"), workflows=workflows).status
+            try:
+                drafts.complete_draft(worker, actor, draft_id,
+                    AgentCreationDraftComplete(revision=revision), workflows=workflows)
+                return "completed"
+            except AgentCreationDraftHandleConflictError:
+                return "registration_rejected"
+    with ThreadPoolExecutor(2) as pool:
+        cancelled, registered = list(pool.map(request, [True, False]))
+    session.expire_all()
+    final = session.get(AgentCreationDraft, draft_id)
+    receipt = session.get(CharacterRegistrationReceipt, draft_id)
+    if final.status == "completed":
+        assert (cancelled, registered) == ("completed", "completed")
+        assert receipt is not None and session.get(Character, receipt.character_id) is not None
+    else:
+        assert (final.status, cancelled, registered) == ("cancelled", "cancelled", "registration_rejected")
+        assert receipt is None
+        assert session.scalar(select(Character).where(Character.name == "취소 경합")) is None
+
+
+def test_cancel_commit_failure_preserves_card_and_media(db, monkeypatch):
+    from app.domains.characters.service.card_import import import_card
+    from app.domains.characters.models import CharacterCardSource
+    import json
+    session, owner = db
+    deleted = []
+    workflows = replace(build_creator_workflows(), delete_draft_media=deleted.append)
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    card = json.dumps({"name":"보존", "description":"배경", "personality":"친절함",
+        "scenario":"", "first_mes":"", "mes_example":""}).encode()
+    imported = import_card(session, owner, draft.id, revision=draft.revision, content=card, workflows=workflows)
+    def fail_commit():
+        raise RuntimeError("commit failed")
+    monkeypatch.setattr(session, "commit", fail_commit)
+    with pytest.raises(RuntimeError, match="commit failed"):
+        drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(
+            revision=imported["draft"].revision, status="cancelled"), workflows=workflows)
+    assert not deleted
+    assert session.get(AgentCreationDraft, draft.id).status == "editing"
+    assert session.scalar(select(CharacterCardSource).where(CharacterCardSource.draft_id == draft.id)) is not None

@@ -170,6 +170,7 @@ class AgentCreationDraftCreate(BaseModel):
 
 class AgentCreationDraftUpdate(BaseModel):
     revision: int | None = Field(default=None, ge=1)
+    status: Literal["cancelled"] | None = None
     @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
     @classmethod
     def normalize_persona(cls, value):
