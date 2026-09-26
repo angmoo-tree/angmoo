@@ -1,0 +1,202 @@
+import asyncio
+from datetime import UTC, datetime
+from dataclasses import replace
+
+import pytest
+from sqlalchemy import create_engine, event, select
+from sqlalchemy.orm import Session
+
+from app.runtime.persistence.model_registration import register_models
+from app.runtime.persistence.sqlite_schema import build_sqlite_v20_metadata, create_schema_version_table, sqlite_schema_contract_digest
+from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
+from app.runtime.migrations.sqlite_versions import creator_v21
+from app.domains.identity.models import User, InstallationIdentity
+from app.domains.characters.models import Character, AgentCreationDraft, CharacterRegistrationReceipt
+from app.domains.characters.schemas import AgentCreationDraftCreate, AgentCreationDraftUpdate, AgentCreationDraftComplete
+from app.domains.characters.service import drafts
+from app.domains.world_characters.models import WorldCharacter, CharacterWorldBinding
+from app.domains.world_characters.schemas.identity import MyProfilePatch
+from app.domains.world_characters.service.owner_identity import OwnerControlledIdentityService
+from app.domains.worlds.service.default_space import ensure_default_space
+from app.runtime.characters.creator import build_creator_workflows
+
+
+@pytest.fixture
+def db(tmp_path):
+    metadata = register_models()
+    engine = create_engine(f"sqlite:///{tmp_path / 'isolated.sqlite3'}")
+    event.listen(engine, "connect", lambda con, _: con.execute("PRAGMA foreign_keys=ON"))
+    metadata.create_all(engine)
+    with Session(engine) as session:
+        owner = User(id="test-owner", display_name="Owner")
+        session.add(owner)
+        session.flush()
+        session.add(InstallationIdentity(singleton_key="local-installation", installation_id="test-installation",
+            owner_user_id=owner.id, bootstrap_state="claimed", local_label="Test", claimed_at=datetime.now(UTC)))
+        session.commit()
+        yield session, owner
+    engine.dispose()
+
+
+def test_default_and_same_profile_identity(db):
+    session, owner = db
+    world = ensure_default_space(session, owner_id=owner.id)
+    assert world.name == "SNS"
+    assert world.readiness_status == "publish_ready"
+    assert ensure_default_space(session, owner_id=owner.id).id == world.id
+    service = OwnerControlledIdentityService(session)
+    first = service.ensure(world_id=world.id, current_user_id=owner.id)
+    assert first.profile.display_name == "사용자"
+    assert first.profile.avatar_url is None
+    assert service.ensure(world_id=world.id, current_user_id=owner.id).character_id == first.character_id
+    changed = service.patch(world_id=world.id, current_user_id=owner.id,
+        data=MyProfilePatch(version=first.version, display_name="하루", handle="haru", intro=""))
+    assert (changed.character_id, changed.world_character_id) == (first.character_id, first.world_character_id)
+    assert changed.profile.handle == "haru"
+    assert changed.profile.background == first.profile.background
+
+
+def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):
+    session, owner = db
+    async def forbidden(**kwargs):
+        raise AssertionError("Registration must not call AI")
+    workflows = replace(build_creator_workflows(), run_llm=forbidden)
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    assert draft.contract_version == 2
+    assert session.get(AgentCreationDraft, draft.id).encrypted_api_key is None
+    changed = drafts.update_draft(session, owner, draft.id,
+        AgentCreationDraftUpdate(revision=draft.revision, name="하루", personality="호기심 많은 기자"), workflows=workflows)
+    # Detail presentation is independent of the atomic persistence contract.
+    monkeypatch.setattr("app.runtime.characters.management.get_agent", lambda db, user, cid: db.get(Character, cid))
+    data = AgentCreationDraftComplete(revision=changed.revision)
+    first = drafts.complete_draft(session, owner, draft.id, data, workflows=workflows)
+    again = drafts.complete_draft(session, owner, draft.id, data, workflows=workflows)
+    assert first.id == again.id
+    binding = session.get(CharacterWorldBinding, first.id)
+    row = session.scalar(select(WorldCharacter).where(WorldCharacter.character_id == first.id))
+    assert binding.world_id == row.world_id == draft.target_world_id
+    assert row.autonomous_enabled is False
+    assert first.credential is None
+    assert first.activity_setting.auto_enabled is False
+    assert session.get(CharacterRegistrationReceipt, draft.id).character_id == first.id
+
+
+def test_upgrade_preserves_legacy_draft_and_matches_fresh(tmp_path):
+    register_models()
+    engine = create_engine(f"sqlite:///{tmp_path / 'upgrade.sqlite3'}")
+    with engine.begin() as connection:
+        legacy = build_sqlite_v20_metadata()
+        legacy.create_all(connection)
+        create_schema_version_table(connection)
+        assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest
+        connection.exec_driver_sql("INSERT INTO users (id, display_name) VALUES ('legacy-owner', '보존 사용자')")
+        connection.execute(legacy.tables["agent_creation_drafts"].insert().values(id="legacy-draft", user_id="legacy-owner", provider="google", model="gemini-3.1-flash-lite", encrypted_api_key="preserved-ciphertext", expires_at=datetime(2026, 10, 1)))
+        before = creator_v21.capture_delta(connection)
+        creator_v21.upgrade(connection)
+        creator_v21.verify_delta(connection, before)
+        row = connection.exec_driver_sql("SELECT encrypted_api_key, contract_version, revision FROM agent_creation_drafts WHERE id='legacy-draft'").one()
+        assert tuple(row) == ("preserved-ciphertext", 1, 1)
+        assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(21).schema_digest
+        assert not list(connection.exec_driver_sql("PRAGMA foreign_key_check"))
+    engine.dispose()
+
+
+def test_registration_detail_is_readable_without_credential(db):
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    edited = drafts.update_draft(session, owner, draft.id,
+        AgentCreationDraftUpdate(revision=1, name="검증 앵무", personality="차분하고 꼼꼼하다"), workflows=workflows)
+    result = drafts.complete_draft(session, owner, draft.id, AgentCreationDraftComplete(revision=edited.revision), workflows=workflows)
+    assert result.credential is None
+    assert result.settings.auto_enabled is False
+    assert result.character.name == "검증 앵무"
+
+
+def test_stale_edit_and_profile_revision_preserve_current_values(db):
+    from app.domains.characters.exceptions import AgentCreationDraftHandleConflictError
+    from app.domains.world_characters.contracts.owner_identity import OwnerControlledIdentityConflictError
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(revision=1, name="먼저 저장"), workflows=workflows)
+    with pytest.raises(AgentCreationDraftHandleConflictError):
+        drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(revision=1, name="오래된 요청"), workflows=workflows)
+    assert session.get(AgentCreationDraft, draft.id).name == "먼저 저장"
+    identity = OwnerControlledIdentityService(session)
+    first = identity.ensure(world_id=draft.target_world_id, current_user_id=owner.id)
+    identity.patch(world_id=draft.target_world_id, current_user_id=owner.id, data=MyProfilePatch(version=first.version, display_name="하루"))
+    with pytest.raises(OwnerControlledIdentityConflictError):
+        identity.patch(world_id=draft.target_world_id, current_user_id=owner.id, data=MyProfilePatch(version=first.version, display_name="이전"))
+    assert identity.get(world_id=draft.target_world_id, current_user_id=owner.id).profile.display_name == "하루"
+
+
+def test_registration_failure_rolls_back_character_and_membership(db, monkeypatch):
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(revision=1, name="롤백", personality="차분함"), workflows=workflows)
+    def fail(*args, **kwargs):
+        raise RuntimeError("injected activity setting write failure")
+    monkeypatch.setattr("app.runtime.characters.registration.ensure_setting", fail)
+    with pytest.raises(RuntimeError):
+        drafts.complete_draft(session, owner, draft.id, AgentCreationDraftComplete(revision=edited.revision), workflows=workflows)
+    assert session.scalar(select(Character).where(Character.name == "롤백")) is None
+    assert session.scalar(select(WorldCharacter)) is None
+    assert session.get(CharacterRegistrationReceipt, draft.id) is None
+    assert session.get(AgentCreationDraft, draft.id).status == "editing"
+
+
+def test_default_space_cannot_be_archived(db):
+    from app.domains.worlds.service.creator import archive_world
+    from app.domains.worlds.schemas import WorldMutationRequest
+    from app.domains.worlds.exceptions import WorldDefinitionValidationError
+    session, owner = db
+    world = ensure_default_space(session, owner_id=owner.id)
+    with pytest.raises(WorldDefinitionValidationError):
+        archive_world(session, world_id=world.id, user=owner, data=WorldMutationRequest(row_version=world.row_version))
+    assert world.status == "published"
+
+
+def test_two_independent_sessions_register_one_draft_once(db):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from sqlalchemy import func
+    session, owner = db
+    workflows = build_creator_workflows()
+    draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
+    edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(
+        revision=1, name="동시 등록", personality="침착함"), workflows=workflows)
+    draft_id, owner_id, revision = draft.id, owner.id, edited.revision
+    session.commit()
+    barrier = Barrier(2)
+    def submit(_):
+        with Session(session.get_bind()) as worker:
+            actor = worker.get(User, owner_id)
+            barrier.wait(timeout=10)
+            return drafts.complete_draft(worker, actor, draft_id,
+                AgentCreationDraftComplete(revision=revision), workflows=workflows).character.id
+    with ThreadPoolExecutor(2) as pool:
+        identities = list(pool.map(submit, range(2)))
+    assert identities[0] == identities[1]
+    session.expire_all()
+    assert session.scalar(select(func.count()).select_from(CharacterRegistrationReceipt)) == 1
+    assert session.scalar(select(func.count()).select_from(WorldCharacter)) == 1
+
+
+def test_two_independent_sessions_ensure_same_space_and_profile(db):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    session, owner = db
+    owner_id = owner.id
+    session.commit()
+    barrier = Barrier(2)
+    def ensure(_):
+        with Session(session.get_bind()) as worker:
+            barrier.wait(timeout=10)
+            world = ensure_default_space(worker, owner_id=owner_id)
+            profile = OwnerControlledIdentityService(worker).ensure(world_id=world.id, current_user_id=owner_id)
+            return world.id, profile.character_id, profile.world_character_id
+    with ThreadPoolExecutor(2) as pool:
+        identities = list(pool.map(ensure, range(2)))
+    assert identities[0] == identities[1]

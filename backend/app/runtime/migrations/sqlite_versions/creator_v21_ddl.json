@@ -1,0 +1,29 @@
+{
+  "worlds": {
+    "ddl": "\nCREATE TABLE worlds (\n\tid VARCHAR(64) NOT NULL, \n\tslug VARCHAR(96) NOT NULL, \n\towner_user_id VARCHAR(64) NOT NULL, \n\tname VARCHAR(120) NOT NULL, \n\ttagline VARCHAR(160) NOT NULL, \n\tsetting_description TEXT NOT NULL, \n\tdaily_life_description TEXT NOT NULL, \n\tgenre_tags JSON NOT NULL, \n\ttone_tags JSON NOT NULL, \n\tbanner_media_id VARCHAR(500), \n\ticon_media_id VARCHAR(500), \n\tbanner_alt_text VARCHAR(160) NOT NULL, \n\ttimezone VARCHAR(64) NOT NULL, \n\tlanguage VARCHAR(16) NOT NULL, \n\tvisibility VARCHAR(20) NOT NULL, \n\tjoin_policy VARCHAR(24) NOT NULL, \n\tstatus VARCHAR(20) NOT NULL, \n\tdefinition_version INTEGER NOT NULL, \n\trow_version INTEGER NOT NULL, \n\tcontract_version VARCHAR(40) NOT NULL, \n\tcontract_hash VARCHAR(64) NOT NULL, \n\treadiness_status VARCHAR(20) NOT NULL, \n\tadditional_generation_guidance TEXT NOT NULL, \n\tcreate_idempotency_key VARCHAR(128) NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tarchived_at DATETIME, \n\tPRIMARY KEY (id), \n\tUNIQUE (slug), \n\tCONSTRAINT uq_worlds_owner_create_request UNIQUE (owner_user_id, create_idempotency_key), \n\tCONSTRAINT ck_worlds_visibility CHECK (visibility IN ('private','unlisted','public')), \n\tCONSTRAINT ck_worlds_definition_version CHECK (definition_version >= 1), \n\tCONSTRAINT ck_worlds_status CHECK (status IN ('draft','published','archived')), \n\tCONSTRAINT ck_worlds_join_policy CHECK (join_policy IN ('open','approval_required','invite_only','private')), \n\tFOREIGN KEY(owner_user_id) REFERENCES users (id), \n\tCONSTRAINT ck_worlds_row_version CHECK (row_version >= 1), \n\tCONSTRAINT ck_worlds_readiness_status CHECK (readiness_status IN ('not_ready','publish_ready','stale'))\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_worlds_owner_status ON worlds (owner_user_id, status)",
+      "CREATE INDEX ix_worlds_visibility_status ON worlds (visibility, status)"
+    ]
+  },
+  "agent_creation_drafts": {
+    "ddl": "\nCREATE TABLE agent_creation_drafts (\n\tid VARCHAR(64) NOT NULL, \n\tuser_id VARCHAR(64) NOT NULL, \n\tprovider VARCHAR(40) NOT NULL, \n\tmodel VARCHAR(120) NOT NULL, \n\tencrypted_api_key TEXT, \n\tcontract_version INTEGER DEFAULT '1' NOT NULL, \n\trevision INTEGER DEFAULT '1' NOT NULL, \n\ttarget_world_id VARCHAR(64), \n\tsource_kind VARCHAR(16) DEFAULT 'direct' NOT NULL, \n\tstatus VARCHAR(16) DEFAULT 'editing' NOT NULL, \n\tkey_fingerprint VARCHAR(64), \n\tname VARCHAR(80) NOT NULL, \n\thandle VARCHAR(40), \n\tone_liner TEXT NOT NULL, \n\tpersonality TEXT NOT NULL, \n\tspeech_style TEXT NOT NULL, \n\tworldview TEXT NOT NULL, \n\ttopic_preferences TEXT NOT NULL, \n\tsafety_rules TEXT NOT NULL, \n\timage_style VARCHAR(40) NOT NULL, \n\tappearance_prompt TEXT NOT NULL, \n\tavatar_temp_url VARCHAR(500), \n\tbanner_temp_url VARCHAR(500), \n\tpersona_enhance_available_at DATETIME, \n\tmedia_generation_available_at DATETIME, \n\texpires_at DATETIME NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tthinking_level VARCHAR(8) DEFAULT 'high' NOT NULL, \n\tPRIMARY KEY (id), \n\tFOREIGN KEY(target_world_id) REFERENCES worlds (id), \n\tFOREIGN KEY(user_id) REFERENCES users (id)\n)\n\n",
+    "indexes": []
+  },
+  "owner_default_worlds": {
+    "ddl": "\nCREATE TABLE owner_default_worlds (\n\towner_id VARCHAR(64) NOT NULL, \n\tworld_id VARCHAR(64) NOT NULL, \n\tPRIMARY KEY (owner_id), \n\tUNIQUE (world_id), \n\tFOREIGN KEY(world_id) REFERENCES worlds (id), \n\tFOREIGN KEY(owner_id) REFERENCES users (id)\n)\n\n",
+    "indexes": []
+  },
+  "character_world_bindings": {
+    "ddl": "\nCREATE TABLE character_world_bindings (\n\tcharacter_id VARCHAR(64) NOT NULL, \n\tworld_id VARCHAR(64) NOT NULL, \n\tPRIMARY KEY (character_id), \n\tFOREIGN KEY(world_id) REFERENCES worlds (id), \n\tFOREIGN KEY(character_id) REFERENCES characters (id)\n)\n\n",
+    "indexes": []
+  },
+  "character_card_sources": {
+    "ddl": "\nCREATE TABLE character_card_sources (\n\tid VARCHAR(64) NOT NULL, \n\towner_id VARCHAR(64) NOT NULL, \n\tdraft_id VARCHAR(64) NOT NULL, \n\tcharacter_id VARCHAR(64), \n\tsource_bytes BLOB NOT NULL, \n\tsource_sha256 VARCHAR(64) NOT NULL, \n\tsource_format VARCHAR(8) NOT NULL, \n\tparser_version VARCHAR(40) NOT NULL, \n\tcard_version INTEGER NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id), \n\tUNIQUE (draft_id), \n\tFOREIGN KEY(draft_id) REFERENCES agent_creation_drafts (id), \n\tFOREIGN KEY(character_id) REFERENCES characters (id), \n\tFOREIGN KEY(owner_id) REFERENCES users (id)\n)\n\n",
+    "indexes": []
+  },
+  "character_registration_receipts": {
+    "ddl": "\nCREATE TABLE character_registration_receipts (\n\tdraft_id VARCHAR(64) NOT NULL, \n\trequest_digest VARCHAR(64) NOT NULL, \n\tcharacter_id VARCHAR(64) NOT NULL, \n\tworld_character_id VARCHAR(64) NOT NULL, \n\tcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (draft_id), \n\tUNIQUE (character_id), \n\tUNIQUE (world_character_id), \n\tFOREIGN KEY(world_character_id) REFERENCES world_characters (id), \n\tFOREIGN KEY(character_id) REFERENCES characters (id), \n\tFOREIGN KEY(draft_id) REFERENCES agent_creation_drafts (id)\n)\n\n",
+    "indexes": []
+  }
+}

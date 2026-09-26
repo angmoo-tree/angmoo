@@ -309,6 +309,11 @@ export type AgentCreationDraftImageStyle = "기본" | "애니메풍" | "리얼�
 
 export type AgentCreationDraftRead = {
   id: string;
+  revision: number;
+  contract_version: number;
+  target_world_id: string | null;
+  source_kind: string;
+  status: string;
   provider: string;
   model: string;
   thinking_level: string;
@@ -345,8 +350,9 @@ export type AgentCreationDraftUpdateInput = Partial<
     | "safety_rules"
     | "appearance_prompt"
   >
-> & {
+  > & {
   image_style?: AgentCreationDraftImageStyle;
+  revision?: number;
   avatar_temp_url?: string | null;
   banner_temp_url?: string | null;
 };

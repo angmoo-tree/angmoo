@@ -164,7 +164,8 @@ def test_split_router_preserves_all_fourteen_world_and_resident_endpoints() -> N
     resident = {(route.path, method) for route in resident_router.routes for method in route.methods}
     creator_routes = {(route.path, method) for route in creator_router.routes for method in route.methods}
     assert len(resident) == 4
-    assert len(creator_routes) == 10
+    assert len(creator_routes) == 13
+    assert {('/worlds/default-space/ensure', 'POST'), ('/worlds/{world_id}/icon', 'POST'), ('/worlds/{world_id}/icon', 'DELETE')} <= creator_routes
     assert resident.isdisjoint(creator_routes)
     for routers in (main.PUBLIC_ROUTERS, public.PUBLIC_ROUTERS):
         assert routers.count(resident_router) == 1

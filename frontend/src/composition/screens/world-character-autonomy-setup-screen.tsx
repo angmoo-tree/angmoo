@@ -3,6 +3,7 @@
 import { getWorldFeedStatus, type WorldFeedCycleStatusRead } from "@/features/social/api/feed-status";
 import { FeedStatusPanel } from "@/features/social/components/feed-status";
 import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
+import { ActivityCredentialForm } from "@/features/characters/components/activity-credential-form";
 import Link from "next/link";
 import { Card } from "@/components/ui/surfaces";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -671,6 +672,10 @@ export function WorldCharacterAutonomySetupClient({
                   </dd>
                 </div>
               </dl>
+              <ActivityCredentialForm characterId={characterId} hasCredential={preflight.credential_ready} onSaved={async () => {
+                setAgent(await getAgent(characterId));
+                if (entry) setPreflight(await preflightWorldCharacterSetup(entry.id, true));
+              }} />
               {!preflight.credential_ready ? (
                 <p className="mt-4 rounded-2xl bg-error-container p-4 text-on-error-container">
                   {reasonMessage(preflight.safe_reason_code) ?? "사용할 수 있는 캐릭터 키가 없습니다."}{" "}

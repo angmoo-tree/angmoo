@@ -193,13 +193,13 @@ def test_device_home_surface_is_owner_scoped_filtered_and_deterministic() -> Non
     assert [item["world_id"] for item in payload["items"]] == [
         "home-new",
         "home-old",
+        "private",
     ]
     assert all(item["launchable"] is True for item in payload["items"])
     assert all(item["launch_block_reason"] is None for item in payload["items"])
     serialized = response.text.lower()
     for forbidden in (
         "foreign",
-        "private",
         "draft",
         "archived",
         "owner-a@example.test",
@@ -228,7 +228,7 @@ def test_creator_studio_surface_includes_only_owner_managed_worlds() -> None:
     assert blocked == {
         "home-new": None,
         "home-old": None,
-        "private": "world_private",
+        "private": None,
         "draft": "world_not_published",
         "archived": "world_archived",
     }
@@ -275,7 +275,9 @@ def test_surface_read_is_bounded_cursor_safe_and_write_free() -> None:
     )
     assert second.status_code == 200
     assert [item["world_id"] for item in second.json()["items"]] == ["home-old"]
-    assert second.json()["next_cursor"] is None
+    third = client.get("/api/v1/worlds/mine", params={"surface": "device_home", "limit": 1, "cursor": second.json()["next_cursor"]})
+    assert [item["world_id"] for item in third.json()["items"]] == ["private"]
+    assert third.json()["next_cursor"] is None
     assert writes == []
 
     invalid = client.get(
@@ -305,7 +307,8 @@ def test_world_app_read_fails_closed_for_foreign_and_blocked_worlds() -> None:
     client, engine, principal = _fixture()
     _seed(engine, principal)
 
-    for world_id in ("foreign", "private", "draft", "archived", "missing"):
+    assert client.get("/api/v1/worlds/mine/private").status_code == 200
+    for world_id in ("foreign", "draft", "archived", "missing"):
         response = client.get(f"/api/v1/worlds/mine/{world_id}")
         assert response.status_code == 404
         assert response.json() == {"detail": "world_app_unavailable"}
@@ -372,11 +375,11 @@ def test_internal_world_lookup_preserves_internal_read_contract() -> None:
         launchable = get_device_home_world(db, owner_user_id=owner.id, world_id="home-new")
         assert launchable is not None and launchable.launchable
         private = get_device_home_world(db, owner_user_id=owner.id, world_id="private")
-        assert private is not None and private.launch_block_reason == "world_private"
+        assert private is not None and private.launchable and private.launch_block_reason is None
         assert get_device_home_world(db, owner_user_id=owner.id, world_id="missing") is None
         foreign = get_device_home_world(db, owner_user_id=outsider.id, world_id="foreign")
         assert foreign is not None and foreign.world_id == "foreign"
-    assert client.get("/api/v1/worlds/mine/private").status_code == 404
+    assert client.get("/api/v1/worlds/mine/private").status_code == 200
     principal["user"] = outsider
     assert client.get("/api/v1/worlds/mine/foreign").json() == {"detail": "local_owner_required"}
 

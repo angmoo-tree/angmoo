@@ -2,7 +2,7 @@ export type SocialOwnerActor = {
   world_character_id: string;
   world_id: string;
   profile: {
-    avatar_url: string;
+    avatar_url: string | null;
     display_name: string;
   };
 };

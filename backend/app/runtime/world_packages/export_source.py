@@ -258,7 +258,10 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                 alt_text=world.banner_alt_text,
             ),
         )
+        media_candidates.append(WorldPackageMediaCandidate(candidate_key="world:icon", slot="world_icon",
+            source_url=world.icon_media_id, source_entity_id=world.id, alt_text=f"{world.name} 아이콘"))
         fingerprint = canonical_sha256(
+            # Final database settings and owned display images only; card source bytes are private.
             {
                 "world": portable_world,
                 "characters": characters,

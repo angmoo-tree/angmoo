@@ -69,6 +69,7 @@ class World(Base):
         JSON_DOCUMENT, nullable=False, default=list
     )
     banner_media_id: Mapped[str | None] = mapped_column(String(500))
+    icon_media_id: Mapped[str | None] = mapped_column(String(500))
     banner_alt_text: Mapped[str] = mapped_column(String(160), nullable=False, default="")
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, default="Asia/Seoul"
@@ -102,6 +103,12 @@ class World(Base):
         nullable=False,
     )
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class OwnerDefaultWorld(Base):
+    __tablename__ = "owner_default_worlds"
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    world_id: Mapped[str] = mapped_column(ForeignKey("worlds.id"), nullable=False, unique=True)
 
 
 class WorldMembership(Base):

@@ -19,6 +19,7 @@ import styles from "./device-home.module.css";
 
 type DeviceHomeProps = {
   authStatus: DeviceHomeAuthStatus;
+  ensureDefaultSpace?: () => Promise<unknown>;
 };
 
 const FIXED_VISUALS = {
@@ -48,7 +49,7 @@ const WORLD_LAUNCH_TONE_CLASSES = {
   waiting: styles.worldLaunchBadgeWaiting,
 } as const;
 
-export function DeviceHome({ authStatus }: DeviceHomeProps) {
+export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) {
   const [worldRequestRevision, setWorldRequestRevision] = useState(0);
   const [worldRead, setWorldRead] = useState<{
     error: string | null;
@@ -64,7 +65,8 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
       return;
     }
     const controller = new AbortController();
-    getLocalWorldSurface("device_home", { signal: controller.signal })
+    (ensureDefaultSpace ? ensureDefaultSpace() : Promise.resolve())
+      .then(() => getLocalWorldSurface("device_home", { signal: controller.signal }))
       .then((surface) => {
         setWorldRead({
           error: null,
@@ -84,7 +86,7 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
         });
       });
     return () => controller.abort();
-  }, [authStatus, worldRequestRevision]);
+  }, [authStatus, worldRequestRevision, ensureDefaultSpace]);
 
 
   const worldEntries = worlds.map((world) => (
@@ -93,6 +95,7 @@ export function DeviceHome({ authStatus }: DeviceHomeProps) {
 
   return (
     <>
+      <AppIcon href="/agents/new" label="캐릭터 추가" description="직접 만들거나 실리태번 캐릭터 카드 가져오기" visual={<Plus size={32} />} visualBackground="var(--color-brand-soft)" />
       {DEVICE_HOME_FIXED_APPS.map((app) => (
         <AppIcon
           key={app.id}
@@ -173,7 +176,7 @@ function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
 }
 
 function WorldVisual({ world }: { world: WorldSurfaceItem }) {
-  const bannerUrl = safeSameOriginMediaUrl(world.banner_media_id);
+  const bannerUrl = safeSameOriginMediaUrl(world.icon_media_id);
   const resolvedBannerUrl = useRuntimeMediaUrl(bannerUrl);
   if (resolvedBannerUrl) {
     return (

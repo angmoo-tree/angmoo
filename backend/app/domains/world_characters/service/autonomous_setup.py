@@ -191,6 +191,18 @@ def enter_world(
                 db.commit()
         return _entry_read(existing, reused=True)
 
+    binding = db.get(models.CharacterWorldBinding, character.id)
+    if binding is not None and binding.world_id != world_id:
+        raise WorldCharacterSetupValidationError("character_single_world_binding")
+    other_world = db.scalar(select(models.WorldCharacter.id).where(
+        models.WorldCharacter.character_id == character.id,
+        models.WorldCharacter.world_id != world_id,
+    ).limit(1))
+    if other_world is not None:
+        raise WorldCharacterSetupValidationError("character_settings_copy_required")
+    if binding is None:
+        db.add(models.CharacterWorldBinding(character_id=character.id, world_id=world_id))
+
     local_profile: dict[str, str] = {
         "entry_idempotency_key": data.idempotency_key,
     }

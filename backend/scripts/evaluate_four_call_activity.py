@@ -81,7 +81,7 @@ def resolve_credential(root):
     return credential(root, row[0])
 
 
-async def evaluate(case, index, version, cred, budget):
+async def evaluate(case, index, version, cred, budget, *, character_settings=None):
     case_id, text, remembered = case
     started = monotonic()
     tracker = EvaluationTracker(budget)
@@ -90,13 +90,20 @@ async def evaluate(case, index, version, cred, budget):
     async def error(exc): raise exc
     with Session(_engine(), expire_on_commit=False) as db:
         fixture = _seed(db)
+        if character_settings is not None:
+            from app.domains.characters.service.profile import _build_persona_summary
+            for key, value in character_settings.items():
+                setattr(fixture.character, key, value)
+            fixture.character.persona_summary = _build_persona_summary(fixture.character)
+            db.flush()
         ctx = _resident_context(db, fixture, run_id=f"evaluation-{case_id}-{version}",
             now=_utc(datetime(2026, 8, 10, 10, 5)))
         ctx = replace(ctx, credential=cred)
         initialize_from_last_success(db, actor=fixture.world_character)
         db.commit()
         shared = shared_input(ctx, fixture.world_character, fixture.world)
-        shared["persona"] = PERSONAS[index % len(PERSONAS)]
+        if character_settings is None:
+            shared["persona"] = PERSONAS[index % len(PERSONAS)]
         classes = (CombinedInboxLane, CombinedFeedLane, CombinedRoutineLane) if version == 2 else (InboxLane, FeedLane, RoutineLane)
         options = {"ledger": EvaluationRecovery()} if version == 2 else {}
         adapters = {lane: cls(ctx, actor=fixture.world_character, tracker=tracker, hybrid_service=None, guard=guard,

@@ -257,12 +257,19 @@ def _validate_payloads(
         WORLD_PACKAGE_PRODUCER_VERSION
     ):
         _fail(WorldPackageReasonCode.APP_VERSION_UNSUPPORTED)
-    WorldPackagePolicy.validate_required_extensions(manifest.required_extensions)
+    from app.domains.world_packages.contracts.world_icon import WORLD_ICON_EXTENSION, world_icon_reference
+    WorldPackagePolicy.validate_required_extensions(manifest.required_extensions, supported_extensions=frozenset({WORLD_ICON_EXTENSION}))
 
     world = _model(
         PortableWorldDefinition,
         _read_json_entry(payloads["content/world.json"]),
     )
+    try:
+        icon_reference = world_icon_reference(world)
+    except ValueError:
+        _fail(WorldPackageReasonCode.REFERENCE_INVALID)
+    if bool(icon_reference) != (WORLD_ICON_EXTENSION in manifest.required_extensions):
+        _fail(WorldPackageReasonCode.CONTRACT_UNSUPPORTED)
     characters = _model(
         CharactersDocumentV2 if manifest.format_version == 2 else CharactersDocument,
         _read_entry(payloads["content/characters.json"], max_bytes=WorldPackagePolicy.MAX_CHARACTERS_JSON_BYTES if manifest.format_version == 2 else WorldPackagePolicy.MAX_JSON_ENTRY_BYTES),
@@ -456,10 +463,12 @@ def _validate_references(
     ):
         _fail(WorldPackageReasonCode.REFERENCE_INVALID)
 
+    from app.domains.world_packages.contracts.world_icon import world_icon_reference
     referenced_assets = {
         reference
         for reference in (
             world.banner_asset_ref,
+            world_icon_reference(world),
             *(
                 item.avatar_asset_ref
                 for item in characters.characters

@@ -317,8 +317,8 @@
     "notice_decision": "The audited visual files come from first-party history already shared by hosted and Local before the Local GPL transition. UI-A copies no post-common hosted code, asset, icon, or font, so it adds no bundled Apache notice. Any later post-common hosted-only transplant requires a separate license-policy and notice decision before copying."
   },
   "raw_color_scan": {
-    "baseline_files": 37,
-    "baseline_occurrences": 1392,
+    "baseline_files": 36,
+    "baseline_occurrences": 1230,
     "baseline_status": "reviewed_ui_b",
     "extensions": [
       ".css",
@@ -487,7 +487,7 @@
     ],
     "frontend/src/features/social/types/social-write-contract.ts": [
       "ManualSocialWritePostRead",
-      "avatar_url: string;",
+      "avatar_url: string | null;",
       "like_count: number;",
       "reply_count: number;"
     ],
@@ -896,9 +896,9 @@
     "token_source": "frontend/src/styles/semantic-tokens.css"
   },
   "screenshot_inventory": {
-    "baseline_call_count": 14,
+    "baseline_call_count": 15,
     "committed_baseline_count": 11,
-    "current_status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots.",
+    "current_status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",
@@ -921,7 +921,7 @@
       "max_diff_pixels": 25,
       "threshold": 0.1
     },
-    "expected_screenshot_call_count": 14,
+    "expected_screenshot_call_count": 15,
     "expected_snapshots": [
       "browser-tests/snapshots/ui-b/semantic-foundation-phone.png",
       "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",

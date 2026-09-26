@@ -175,7 +175,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
           <h2 className="text-xl font-black text-[#101828]">Package 내보내기</h2>
           <p className="mt-2 text-sm font-medium leading-6 text-[#667085]">
             자율 캐릭터와 관리된 미디어만 포함합니다. owner-controlled 프로필,
-            세션, credential, P2~P4 실행 기록과 관계 projection은 제외합니다.
+            세션, credential, P2~P4 실행 기록과 관계 projection은 제외합니다. 캐릭터는 최종 편집한 설정과 표시 이미지를 공유하며, 가져온 카드 원본은 포함하지 않습니다.
           </p>
         </div>
       </div>

@@ -90,7 +90,9 @@ class DeterministicWorldPackageZipArchive:
         entries = [self._entry(path, content, is_v2=is_v2) for path, content in payloads.items()]
         entries.sort(key=lambda item: item.path)
         manifest_type = WorldPackageManifestV2 if is_v2 else WorldPackageManifest
+        from app.domains.world_packages.contracts.world_icon import WORLD_ICON_EXTENSION, world_icon_reference
         manifest = manifest_type(
+            required_extensions=[WORLD_ICON_EXTENSION] if world_icon_reference(world) else [],
             format="angmoo-world-package",
             format_version=2 if is_v2 else 1,
             schema_version="world-package-v2" if is_v2 else "world-package-v1",

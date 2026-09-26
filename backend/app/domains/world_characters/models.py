@@ -30,6 +30,13 @@ from app.models import Base
 JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
+class CharacterWorldBinding(Base):
+    """New registrations have one home; legacy memberships are not rewritten."""
+    __tablename__ = "character_world_bindings"
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), primary_key=True)
+    world_id: Mapped[str] = mapped_column(ForeignKey("worlds.id"), nullable=False)
+
+
 class WorldCharacter(Base):
     __tablename__ = "world_characters"
     __table_args__ = (

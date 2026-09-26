@@ -14,6 +14,8 @@ import type { WorldCharacterPublicProfile } from "@/features/characters/types/wo
 import { ProfileStatus, ProfileError } from "@/features/characters/components/world-character-directory";
 import { WorldCharacterProfileCard } from "@/features/characters/components/world-character-profile-card";
 import styles from "@/features/characters/components/world-character-profile.module.css";
+import { Button } from "@/components/ui/button";
+import { LocalMyProfileEditor } from "@/composition/screens/my-profile-editor";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -38,6 +40,7 @@ export function WorldCharacterProfile({
   const [chatStarting, setChatStarting] = useState(false);
   const chatStartInFlightRef = useRef(false);
   const [attempt, setAttempt] = useState(0);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -134,7 +137,7 @@ export function WorldCharacterProfile({
       worldId={worldId}
       worldCharacterId={worldCharacterId}
       onBack={goBack}
-      chatAction={chatEntry ? (
+      chatAction={chatEntry?.requester?.world_character_id === worldCharacterId ? <Button variant="secondary" onClick={() => setEditing(!editing)}>내 프로필 편집</Button> : chatEntry ? (
             <button
               aria-label={`${profile.display_name}와 채팅 시작`}
               className={styles.letterButton}
@@ -153,7 +156,7 @@ export function WorldCharacterProfile({
               )}
             </button>
           ) : null}
-      chatNotice={<>{chatEntry && chatEntry.create_or_get_capability === "unavailable" ? (
+      chatNotice={<>{chatEntry && chatEntry.requester?.world_character_id !== worldCharacterId && chatEntry.create_or_get_capability === "unavailable" ? (
           <div className={styles.chatNotice} role="status">
             <MessageCircle aria-hidden="true" size={18} />
             <span>{chatEntryMessage(chatEntry.disabled_reason)}</span>
@@ -165,6 +168,7 @@ export function WorldCharacterProfile({
           </div>
         ) : null}</>}
     >
+      {editing && <LocalMyProfileEditor worldId={worldId} onSaved={retry} />}
       <WorldCharacterSocialProfileActivity
         activeTab={activeSocialTab}
         onTabChange={selectSocialTab}

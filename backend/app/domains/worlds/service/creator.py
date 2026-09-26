@@ -395,6 +395,7 @@ def seed_world(
     membership_reason: str = "world_created",
     planned_slug: str | None = None,
     banner_media_id: str | None = None,
+    icon_media_id: str | None = None,
     banner_alt_text: str = "",
     allow_system_roles: bool = False,
 ) -> WorldSeedOutcome:
@@ -429,6 +430,7 @@ def seed_world(
         genre_tags=data.genre_tags,
         tone_tags=data.tone_tags,
         banner_media_id=banner_media_id,
+        icon_media_id=icon_media_id,
         banner_alt_text=banner_alt_text,
         timezone=data.timezone,
         language=data.language,
@@ -632,6 +634,7 @@ def archive_world(
     user: UserIdentity,
     data: schemas.WorldMutationRequest,
 ) -> schemas.WorldCreatorContextRead:
+    from app.domains.worlds.service.default_space import is_default_space
     world, membership = require_owner_access(
         db,
         world_id=world_id,
@@ -640,6 +643,9 @@ def archive_world(
     )
     if world.row_version != data.row_version:
         raise WorldRowVersionConflictError(world_id)
+    if is_default_space(db, world_id):
+        db.rollback()
+        raise WorldDefinitionValidationError("default_space_cannot_be_archived")
     world.status = "archived"
     world.readiness_status = "not_ready"
     world.archived_at = datetime.now(timezone.utc)
@@ -655,6 +661,7 @@ def upload_world_banner(
     world_id: str,
     user: UserIdentity,
     data: schemas.WorldBannerUpload,
+    media_type: str = "banner",
 ) -> schemas.WorldCreatorContextRead:
     world, membership = require_creator_access(
         db,
@@ -664,18 +671,21 @@ def upload_world_banner(
     )
     if world.row_version != data.row_version:
         raise WorldRowVersionConflictError(world_id)
-    old_media = world.banner_media_id
+    media_field = "icon_media_id" if media_type == "icon" else "banner_media_id"
+    old_media = getattr(world, media_field)
     try:
         new_media = world_banner_storage.save_world_banner(
             world_id=world.id,
             content_type=data.content_type,
             data_base64=data.data_base64,
+            media_type=media_type,
         )
         schemas.validate_managed_world_banner(new_media)
     except (world_banner_storage.InvalidWorldBannerMediaError, ValueError) as exc:
         raise WorldBannerValidationError(str(exc)) from exc
-    world.banner_media_id = new_media
-    world.banner_alt_text = data.alt_text
+    setattr(world, media_field, new_media)
+    if media_type == "banner":
+        world.banner_alt_text = data.alt_text
     world.row_version += 1
     try:
         db.commit()
@@ -694,6 +704,7 @@ def remove_world_banner(
     world_id: str,
     user: UserIdentity,
     data: schemas.WorldMutationRequest,
+    media_type: str = "banner",
 ) -> schemas.WorldCreatorContextRead:
     world, membership = require_creator_access(
         db,
@@ -703,9 +714,11 @@ def remove_world_banner(
     )
     if world.row_version != data.row_version:
         raise WorldRowVersionConflictError(world_id)
-    old_media = world.banner_media_id
-    world.banner_media_id = None
-    world.banner_alt_text = ""
+    media_field = "icon_media_id" if media_type == "icon" else "banner_media_id"
+    old_media = getattr(world, media_field)
+    setattr(world, media_field, None)
+    if media_type == "banner":
+        world.banner_alt_text = ""
     world.row_version += 1
     db.commit()
     if old_media:

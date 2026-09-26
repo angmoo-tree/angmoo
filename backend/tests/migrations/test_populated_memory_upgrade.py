@@ -30,8 +30,14 @@ TABLES = ('users','characters','worlds','world_memberships','world_characters',
 
 def _rows(path):
     with sqlite3.connect(f'{path.as_uri()}?mode=ro', uri=True) as connection:
-        return {name: connection.execute(f'SELECT * FROM "{name}" ORDER BY id').fetchall()
-                for name in TABLES}
+        result = {}
+        for name in TABLES:
+            # Compare every historical column; v21 adds a separately checked icon.
+            columns = [row[1] for row in connection.execute(f'PRAGMA table_info("{name}")')
+                       if not (name == 'worlds' and row[1] == 'icon_media_id')]
+            projection = ','.join(f'"{column}"' for column in columns)
+            result[name] = connection.execute(f'SELECT {projection} FROM "{name}" ORDER BY id').fetchall()
+        return result
 
 
 def _seed(root):
@@ -53,6 +59,8 @@ def _seed(root):
                 (1,8,manifest.source_revision,manifest.source_migration_count,
                  sqlite_schema_digest(connection),encode_utc_timestamp(NOW)),
             )
+        with engine.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
         with Session(engine) as session:
             scope = _seed_world(session)
             session.add_all([
@@ -81,6 +89,8 @@ def _seed(root):
                     source_digest=hashlib.sha256(b'synthetic-source').hexdigest()),
             ])
             session.commit()
+        with engine.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
     finally:
         engine.dispose()
     EmbeddedGenerationController(root/'canonical',artifact_relative_path='angmoo.sqlite3').promote(
@@ -123,6 +133,7 @@ def test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change(t
         assert _rows(target) == before
         with sqlite3.connect(target) as connection:
             assert connection.execute('PRAGMA foreign_key_check').fetchall() == []
+            assert connection.execute('SELECT count(*) FROM worlds WHERE icon_media_id IS NOT NULL').fetchone()[0] == 0
             for name in MEMORY_BATCH_TABLES:
                 assert connection.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0] == 0
             # Upgrading preserves old memories and pending candidates without

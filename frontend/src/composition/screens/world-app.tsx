@@ -16,10 +16,11 @@ import { WorldCharacterProfile } from "@/composition/screens/world-character-pro
 import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
-import { PRODUCT_ROUTES, relationshipGraphRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
+import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { getLocalWorldApp, getOwnerControlledActor, WorldAppApiError } from "@/features/worlds/api/world-app-client";
+import { ensureMyProfile, WorldApiError } from "@/features/worlds/api/worlds";
 import { WORLD_APP_SECTIONS, worldAppSectionRoute, type WorldAppSection, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
 import { WorldAppShell } from "@/composition/shells/world-app-shell";
 import styles from "./world-app.module.css";
@@ -47,12 +48,6 @@ const SECTION_ICONS: Record<WorldAppSectionId, ReactNode> = {
   relationships: <Network size={19} strokeWidth={2.2} />,
 };
 
-const NO_SPECIFIC_ROLE_KEY = "no_specific_role";
-
-function worldRoleLabel(roleKey: string | null) {
-  return !roleKey || roleKey === NO_SPECIFIC_ROLE_KEY ? "역할 없음" : roleKey;
-}
-
 export function WorldApp({
   authStatus,
   chatThreadId,
@@ -68,17 +63,20 @@ export function WorldApp({
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
+    setLoading(true);
+    setError(null);
     const controller = new AbortController();
     void Promise.all([
       getLocalWorldApp(worldId, { signal: controller.signal }),
-      getOwnerControlledActor(worldId, { signal: controller.signal }),
+      getOwnerControlledActor(worldId, { signal: controller.signal }).then((actor) => actor ?? ensureMyProfile(worldId)),
     ])
       .then(([read, identity]) => {
+        if (controller.signal.aborted) return;
         setWorld(read.world);
         setOwnerActor(identity);
       })
       .catch((reason: unknown) => {
-        if (reason instanceof DOMException && reason.name === "AbortError") return;
+        if (controller.signal.aborted) return;
         setWorld(null);
         setError(reason instanceof Error ? reason : new Error("world_app_unavailable"));
       })
@@ -120,18 +118,19 @@ export function WorldApp({
     );
   }
   if (error || !world) {
+    const recovery = error instanceof WorldApiError && error.status === 409 && error.message.includes("preserved_identity_selection_required");
     const unavailable = error instanceof WorldAppApiError && [403, 404].includes(error.status);
     return (
       <WorldGate
         activeSection={activeSection}
-        title={unavailable ? "이 World 앱을 열 수 없어요" : "World 앱을 불러오지 못했어요"}
+        title={recovery ? "이어서 사용할 내 프로필을 선택해주세요" : unavailable ? "이 World 앱을 열 수 없어요" : "World 앱을 불러오지 못했어요"}
         description={
-          unavailable
-            ? "권한이 없거나 World가 보관·비공개 상태로 바뀌었습니다. 다른 World로 자동 이동하지 않습니다."
+          recovery ? "보존된 프로필이 있습니다. World 관리에서 하나를 선택하면 기존 글·대화·관계를 그대로 이어갑니다." : unavailable
+            ? "권한이 없거나 World가 보관 상태로 바뀌었습니다. 다른 World로 자동 이동하지 않습니다."
             : "runtime 상태를 확인한 뒤 다시 시도해주세요."
         }
-        href={unavailable ? PRODUCT_ROUTES.deviceHome : PRODUCT_ROUTES.settings}
-        linkLabel={unavailable ? "Device Home으로 돌아가기" : "설정 열기"}
+        href={recovery ? studioWorldRoute(worldId) : unavailable ? PRODUCT_ROUTES.deviceHome : PRODUCT_ROUTES.settings}
+        linkLabel={recovery ? "내 프로필 복구" : unavailable ? "Device Home으로 돌아가기" : "설정 열기"}
         worldId={worldId}
       />
     );
@@ -221,13 +220,13 @@ function WorldSection({
           <p>아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.</p>
         </div>
         <div className={styles.scopeNotice}>
-          <strong>이 World에서 내가 조종하는 앵무</strong>
+          <strong>이 World의 내 프로필</strong>
           {ownerActor ? (
             <p>
-              {ownerActor.profile.display_name} · 자동 활동 OFF · {worldRoleLabel(ownerActor.profile.role_key)}
+              {ownerActor.profile.display_name} · @{ownerActor.profile.handle}
             </p>
           ) : (
-            <p>Creator Studio에서 사용자 조종 앵무를 만들 수 있습니다.</p>
+            <p>World 관리에서 내 프로필을 확인할 수 있습니다.</p>
           )}
         </div>
       </section>

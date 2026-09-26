@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 20
-SOURCE_ALEMBIC_REVISION = "20260924_0098"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 97
-EXPECTED_CANONICAL_TABLE_COUNT = 133
+SQLITE_SCHEMA_VERSION = 21
+SOURCE_ALEMBIC_REVISION = "20260927_0099"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 98
+EXPECTED_CANONICAL_TABLE_COUNT = 137
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 ACTIVITY_V19_TABLES = (
@@ -315,6 +315,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_creator_v21(metadata)
     _remove_activity_schema(metadata)
     _restore_pre_v20_outbox_identity(metadata)
     _remove_relationship_personalization_schema(metadata)
@@ -647,6 +648,35 @@ def _restore_pre_v20_outbox_identity(metadata: MetaData) -> None:
 
 def build_sqlite_v19_metadata() -> MetaData:
     """Last released outbox identity, isolated from the v20 model."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v20_metadata()
     _restore_pre_v20_outbox_identity(metadata)
+    return metadata
+
+
+CREATOR_V21_TABLES = ("owner_default_worlds", "character_world_bindings",
+                      "character_card_sources", "character_registration_receipts")
+CREATOR_V21_DRAFT_COLUMNS = ("contract_version", "revision", "target_world_id", "source_kind", "status")
+
+
+def _remove_creator_v21(metadata: MetaData) -> None:
+    for name in CREATOR_V21_TABLES:
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    world = metadata.tables.get("worlds")
+    if world is not None and "icon_media_id" in world.c:
+        world._columns.remove(world.c.icon_media_id)
+    draft = metadata.tables.get("agent_creation_drafts")
+    if draft is not None:
+        for constraint in tuple(draft.constraints):
+            if any(c.name in CREATOR_V21_DRAFT_COLUMNS for c in constraint.columns):
+                draft.constraints.remove(constraint)
+        for name in CREATOR_V21_DRAFT_COLUMNS:
+            if name in draft.c:
+                draft._columns.remove(draft.c[name])
+        draft.c.encrypted_api_key.nullable = False
+
+
+def build_sqlite_v20_metadata() -> MetaData:
+    metadata = build_sqlite_baseline_metadata()
+    _remove_creator_v21(metadata)
     return metadata

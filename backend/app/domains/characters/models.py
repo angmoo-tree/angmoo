@@ -9,6 +9,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Integer,
+    LargeBinary,
     ForeignKey,
     String,
     Text,
@@ -119,7 +120,12 @@ class AgentCreationDraft(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
     provider: Mapped[str] = mapped_column(String(40), nullable=False, default="google")
     model: Mapped[str] = mapped_column(String(120), nullable=False)
-    encrypted_api_key: Mapped[str] = mapped_column(Text, nullable=False)
+    encrypted_api_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    contract_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    target_world_id: Mapped[Optional[str]] = mapped_column(ForeignKey("worlds.id"))
+    source_kind: Mapped[str] = mapped_column(String(16), nullable=False, default="direct", server_default="direct")
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="editing", server_default="editing")
     key_fingerprint: Mapped[Optional[str]] = mapped_column(String(64))
     name: Mapped[str] = mapped_column(String(80), nullable=False, default="")
     handle: Mapped[Optional[str]] = mapped_column(String(40))
@@ -155,6 +161,30 @@ class AgentCreationDraft(Base):
     thinking_level: Mapped[str] = mapped_column(
         String(8), nullable=False, default="high", server_default="high"
     )
+
+
+class CharacterCardSource(Base):
+    """Private interchange source, included in SQLite backup but not public DTOs."""
+    __tablename__ = "character_card_sources"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    draft_id: Mapped[str] = mapped_column(ForeignKey("agent_creation_drafts.id"), nullable=False, unique=True)
+    character_id: Mapped[Optional[str]] = mapped_column(ForeignKey("characters.id"))
+    source_bytes: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    source_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    source_format: Mapped[str] = mapped_column(String(8), nullable=False)
+    parser_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    card_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class CharacterRegistrationReceipt(Base):
+    __tablename__ = "character_registration_receipts"
+    draft_id: Mapped[str] = mapped_column(ForeignKey("agent_creation_drafts.id"), primary_key=True)
+    request_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False, unique=True)
+    world_character_id: Mapped[str] = mapped_column(ForeignKey("world_characters.id"), nullable=False, unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 class ProfileImageQuotaReservation(Base):

@@ -180,7 +180,7 @@
       "maxWidthPx: 436"
     ],
     "frontend/src/composition/screens/device-home-screen.tsx": [
-      "<DeviceHome authStatus={status} />",
+      "<DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace} />",
       "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
       "getProductRuntimeState"
     ],

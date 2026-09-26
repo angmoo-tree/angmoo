@@ -14,6 +14,7 @@ export type DeviceHomeFixedApp = {
 export type WorldSurface = "device_home" | "creator_studio";
 
 export type WorldSurfaceItem = {
+  icon_media_id?: string | null;
   world_id: string;
   name: string;
   tagline: string;

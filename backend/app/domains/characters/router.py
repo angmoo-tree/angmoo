@@ -132,6 +132,50 @@ from app.domains.characters.dependencies import get_tendency_analysis_runner
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
+
+@router.post("/drafts/{draft_id}/card")
+def import_character_card(draft_id: str, data: schemas.CharacterCardUpload,
+                          db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user),
+                          workflows: CreatorWorkflows = Depends(get_creator_workflows)):
+    import base64
+    import binascii
+    from app.domains.characters.service.card_import import import_card
+    from app.integrations.character_cards.parser import CardParseError
+    try:
+        content = base64.b64decode(data.data_base64, validate=True)
+        return import_card(db, user, draft_id, revision=data.revision, content=content, workflows=workflows)
+    except errors.AgentCreationDraftNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Draft not found") from exc
+    except errors.AgentCreationDraftHandleConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except (CardParseError, binascii.Error, errors.AgentCreationDraftValidationError, MediaValidationError) as exc:
+        raise HTTPException(status_code=422, detail="카드를 읽을 수 없습니다. 형식·크기와 편집 상태를 확인해주세요.") from exc
+
+
+@router.post("/drafts/{draft_id}/copy-settings", response_model=schemas.AgentCreationDraftRead)
+def copy_character_settings(draft_id: str, data: schemas.CharacterSettingsCopy,
+                            db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user),
+                            workflows: CreatorWorkflows = Depends(get_creator_workflows)):
+    from app.domains.characters.service.settings_copy import copy_settings
+    try:
+        return copy_settings(db, user, draft_id, data, workflows=workflows)
+    except (errors.AgentCreationDraftNotFoundError, errors.AgentNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail="설정을 찾을 수 없습니다.") from exc
+    except errors.AgentCreationDraftHandleConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except (errors.AgentCreationDraftValidationError, MediaValidationError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/drafts/{draft_id}/card-source")
+def read_character_card_source(draft_id: str, db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user)):
+    from app.domains.characters.service.card_import import read_source
+    from fastapi.responses import JSONResponse
+    try:
+        return JSONResponse(read_source(db, user, draft_id), headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
+    except errors.AgentCreationDraftNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Card source not found") from exc
+
 def _raise_demo_account_locked(exc: Exception) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
@@ -150,16 +194,7 @@ def create_agent(
     user: CharacterOwner = Depends(get_current_user),
     workflows: CharacterManagementWorkflows = Depends(get_character_management_workflows),
 ) -> schemas.AgentDetailRead:
-    try:
-        return character_service.create_agent(db, user, data, workflows=workflows)
-    except errors.AgentHandleConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except errors.AgentHandleInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except errors.AgentActiveHoursInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except errors.PromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    raise HTTPException(status_code=409, detail="새 캐릭터는 World 소속을 지정한 생성 초안으로 등록해주세요.")
 
 @router.get("/{character_id}", response_model=schemas.AgentDetailRead)
 def get_agent(
@@ -268,6 +303,8 @@ async def create_agent_draft(
 ) -> schemas.AgentCreationDraftRead:
     try:
         return await draft_lifecycle.create_draft(db, user, data, workflows=workflows)
+    except errors.AgentCreationDraftValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except errors.CredentialSyncError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     except AgentSlotUnavailableError as exc:
@@ -336,6 +373,8 @@ def complete_agent_draft(
             db, user, draft_id, data or schemas.AgentCreationDraftComplete(),
             workflows=workflows
         )
+    except errors.AgentCreationDraftHandleConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
     except errors.AgentCreationDraftValidationError as exc:
@@ -397,6 +436,8 @@ def upload_agent_draft_media(
 ) -> schemas.AgentCreationDraftRead:
     try:
         return media_service.upload_draft_media(db, user, draft_id, data, workflows=workflows)
+    except errors.AgentCreationDraftHandleConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Draft not found') from exc
     except MediaValidationError as exc:

@@ -161,12 +161,15 @@ AgentProfileImageBucket = Literal[
 ]
 
 class AgentCreationDraftCreate(BaseModel):
+    execution_mode: Literal["llm", "local"] = "llm"
+    target_world_id: str | None = Field(default=None, max_length=64)
     provider: str = Field(default="google", max_length=40)
     model: AgentGoogleModel = "gemini-3.1-flash-lite"
     thinking_level: ThinkingLevel = "high"
-    api_key: str = Field(min_length=1, max_length=4000)
+    api_key: str | None = Field(default=None, min_length=1, max_length=4000)
 
 class AgentCreationDraftUpdate(BaseModel):
+    revision: int | None = Field(default=None, ge=1)
     @field_validator(*PERSONA_LIMITS, mode="before", check_fields=False)
     @classmethod
     def normalize_persona(cls, value):
@@ -192,10 +195,21 @@ class AgentCreationDraftUpdate(BaseModel):
         return validate_profile_media_reference(value)
 
 class AgentCreationDraftMediaUpload(BaseModel):
+    revision: int | None = Field(default=None, ge=1)
     media_type: AgentDraftMediaKind
     filename: str = Field(min_length=1, max_length=240)
     content_type: str = Field(min_length=1, max_length=80)
     data_base64: str = Field(min_length=1, max_length=8_000_000)
+
+
+class CharacterCardUpload(BaseModel):
+    revision: int = Field(ge=1)
+    data_base64: str = Field(min_length=1, max_length=28_000_000)
+
+
+class CharacterSettingsCopy(BaseModel):
+    revision: int = Field(ge=1)
+    character_id: str = Field(min_length=1, max_length=64)
 
 class AgentCreationDraftGenerateMediaCreate(BaseModel):
     image_style: AgentDraftImageStyle = "기본"
@@ -204,6 +218,7 @@ class AgentCreationDraftGenerateMediaCreate(BaseModel):
     delivery: AgentDraftMediaDelivery = "server"
 
 class AgentCreationDraftComplete(BaseModel):
+    revision: int | None = Field(default=None, ge=1)
     activity_interval_minutes: int | None = Field(default=None, ge=30, le=1440)
     active_hours_start: str | None = Field(default=None, max_length=5)
     active_hours_end: str | None = Field(default=None, max_length=5)
@@ -256,6 +271,11 @@ class AgentCreationDraftRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    revision: int = 1
+    contract_version: int = 1
+    target_world_id: str | None = None
+    source_kind: str = "direct"
+    status: str = "editing"
     provider: str
     model: str
     thinking_level: str = "high"

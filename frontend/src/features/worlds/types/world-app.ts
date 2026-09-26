@@ -35,7 +35,9 @@ export type OwnerControlledActorRead = {
   version: number;
   profile: {
     display_name: string;
-    avatar_url: string;
+    handle: string;
+    banner_url: string | null;
+    avatar_url: string | null;
     intro: string;
     role_key: string | null;
     preferred_address: string;

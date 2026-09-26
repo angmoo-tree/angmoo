@@ -145,9 +145,15 @@ class ExportWorldPackage:
         resolved = self._assets.resolve_export_assets(
             candidates=snapshot.media_candidates
         )
+        from app.domains.world_packages.contracts.world_icon import WORLD_ICON_EXTENSION
+        extensions = dict(snapshot.world.extensions)
+        icon = resolved.reference_for("world:icon")
+        if icon:
+            extensions[WORLD_ICON_EXTENSION] = {"asset_ref": icon}
         world = snapshot.world.model_copy(
             update={
                 "banner_asset_ref": resolved.reference_for("world:banner"),
+                "extensions": extensions,
             }
         )
         characters = CharactersDocumentV2(

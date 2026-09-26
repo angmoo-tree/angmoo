@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import create_engine, func, select
@@ -112,10 +113,12 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
     monkeypatch,
 ) -> None:
     engine = create_engine("sqlite:///:memory:")
-    _create_tables(engine)
+    from app.runtime.persistence.model_registration import register_models
+    from app.domains.identity.models import InstallationIdentity
+    register_models().create_all(engine)
 
     async def fake_run_draft_llm(*_: object, **__: object) -> str:
-        return '{"ok": true}'
+        raise AssertionError('Keyless registration must not call AI')
 
     monkeypatch.setattr(draft_service, "_run_draft_llm", fake_run_draft_llm)
     monkeypatch.setattr(
@@ -131,6 +134,8 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
 
     with Session(engine) as db:
         user = _add_user(db)
+        db.add(InstallationIdentity(singleton_key="local-installation", installation_id="test", owner_user_id=user.id, bootstrap_state="claimed", local_label="Test", claimed_at=datetime.now(UTC)))
+        db.commit()
         for index in range(3):
             _create_agent(db, user, execution_mode="llm", index=index)
 
@@ -140,15 +145,15 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
                 user,
                 schemas.AgentCreationDraftCreate(
                     model="gemini-3.1-flash-lite",
-                    api_key="test-api-key",
                 ),
             )
         )
-        draft_service.update_draft(
+        edited = draft_service.update_draft(
             db,
             user,
             draft.id,
             schemas.AgentCreationDraftUpdate(
+                revision=draft.revision,
                 name="llm bird 3",
                 handle="llm_bird_3",
                 one_liner="fourth LLM bird",
@@ -164,12 +169,12 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
             db,
             user,
             draft.id,
-            schemas.AgentCreationDraftComplete(),
+            schemas.AgentCreationDraftComplete(revision=edited.revision),
         )
 
         assert completed.character.handle == "llm_bird_3"
         assert _count_by_mode(db, "llm") == 4
-        assert db.get(models.AgentCreationDraft, draft.id) is None
+        assert db.get(models.AgentCreationDraft, draft.id).status == "completed"
 
 
 def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> None:

@@ -315,6 +315,7 @@ def glossary_read(item: models.WorldGlossaryTerm) -> schemas.WorldGlossaryTermRe
 def world_read(db: Session, world: models.World) -> schemas.WorldRead:
     places, roles, dayparts, rules, glossary = load_definition_parts(db, world)
     return schemas.WorldRead(
+        icon_media_id=world.icon_media_id,
         id=world.id,
         slug=world.slug,
         name=world.name,

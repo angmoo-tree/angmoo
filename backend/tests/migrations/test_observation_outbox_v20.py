@@ -48,6 +48,10 @@ def _seed_v19(path: Path) -> tuple[str, str]:
             (1, 19, manifest.source_revision, manifest.source_migration_count,
              sqlite_schema_digest(connection), "2026-09-24T00:00:00Z"),
         )
+    # The shared ORM seeder needs the new nullable column only while constructing
+    # the fixture. Remove it before exercising the immutable historical schema.
+    with engine.begin() as connection:
+        connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="legacy-observation")
         result = observe_source(
@@ -70,6 +74,8 @@ def _seed_v19(path: Path) -> tuple[str, str]:
         db.commit()
         outbox_id = row.id
     with engine.begin() as connection:
+        connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
+        assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(19).schema_digest
         connection.execute(text(
             "UPDATE graph_projection_outbox SET relationship_state_id = NULL WHERE id = :id"
         ), {"id": outbox_id})
@@ -176,7 +182,7 @@ def test_coordinator_preserves_source_generation_and_promotes_v20(tmp_path: Path
         StaticRuntimeDataPath(tmp_path), fallback_generation="observed-v19"
     ).upgrade()
     assert result.migrated is True
-    assert result.source_version == 19 and result.target_version == 20
+    assert result.source_version == 19 and result.target_version == 21
     assert result.database_path != database
     old_engine = create_engine(f"sqlite:///{database.as_posix()}")
     new_engine = create_engine(f"sqlite:///{result.database_path.as_posix()}")
@@ -185,7 +191,7 @@ def test_coordinator_preserves_source_generation_and_promotes_v20(tmp_path: Path
         assert _outbox_row(new, row_id)["relationship_state_id"] == state_id
         assert new.exec_driver_sql(
             "SELECT schema_version, source_revision FROM angmoo_schema_version"
-        ).one() == (20, "20260924_0098")
+        ).one() == (21, "20260927_0099")
     old_engine.dispose()
     new_engine.dispose()
 
@@ -286,7 +292,7 @@ def test_alembic_online_sqlite_env_prepares_foreign_keys(tmp_path: Path) -> None
     with engine.connect() as connection:
         assert connection.exec_driver_sql(
             "SELECT version_num FROM alembic_version"
-        ).scalar_one() == "20260924_0098"
+        ).scalar_one() == "20260927_0099"
         assert _outbox_row(connection, row_id)["relationship_state_id"] == state_id
         assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
         indexes = {row[1] for row in connection.exec_driver_sql(

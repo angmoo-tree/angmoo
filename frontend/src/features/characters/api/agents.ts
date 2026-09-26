@@ -110,18 +110,35 @@ export function revokeAgentLocalKey(characterId: string) {
 }
 
 export function createAgentDraft(data: {
-  provider: string;
-  model: GoogleGeminiModel;
-  api_key: string;
+  execution_mode?: "llm" | "local";
+  target_world_id?: string;
+  provider?: string;
+  model?: GoogleGeminiModel;
+  api_key?: string;
 }) {
   return apiRequest<AgentCreationDraftRead>("/agents/drafts", {
     method: "POST",
-    body: generationProfilePayload(data, "model"),
+    body: data,
   });
 }
 
 export function getAgentDraft(draftId: string) {
   return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}`);
+}
+
+export function importAgentCard(draftId: string, revision: number, data_base64: string) {
+  return apiRequest<{ draft: AgentCreationDraftRead; card_version: number; review: string[]; raw_only: string[] }>(
+    `/agents/drafts/${draftId}/card`, { method: "POST", body: { revision, data_base64 } });
+}
+
+export function getAgentCardSource(draftId: string) {
+  return apiRequest<{ document: unknown; sha256: string }>(`/agents/drafts/${draftId}/card-source`);
+}
+
+export function copyAgentSettings(draftId: string, revision: number, character_id: string) {
+  return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}/copy-settings`, {
+    method: "POST", body: { revision, character_id },
+  });
 }
 
 export function updateAgentDraft(
@@ -143,7 +160,7 @@ export function enhanceAgentDraftPersona(draftId: string) {
 
 export function uploadAgentDraftMedia(
   draftId: string,
-  data: AgentProfileMediaUploadInput,
+  data: AgentProfileMediaUploadInput & { revision?: number },
 ) {
   return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}/media`, {
     method: "POST",
@@ -252,6 +269,7 @@ export function discardAgentProfileMediaCandidate(
 export async function completeAgentDraft(
   draftId: string,
   data?: {
+    revision?: number;
     activity_interval_minutes?: number;
     active_hours_start?: string;
     active_hours_end?: string;

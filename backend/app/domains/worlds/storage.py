@@ -26,17 +26,20 @@ def save_world_banner(
     world_id: str,
     content_type: str,
     data_base64: str,
+    media_type: str = "banner",
 ) -> str:
     normalized_content_type = content_type.strip().lower()
     content = _decode_banner_media(
         content_type=normalized_content_type,
         data_base64=data_base64,
     )
-    encoded = _encode_banner_webp(content)
+    if media_type not in {"banner", "icon"}:
+        raise InvalidWorldBannerMediaError("unsupported_world_media")
+    encoded = images.encode_profile_media_webp(media_type="avatar" if media_type == "icon" else "banner", content=content)
 
     world_dir = settings.media_root_path / "worlds" / world_id
     world_dir.mkdir(parents=True, exist_ok=True)
-    filename = f"banner-{uuid4().hex}.webp"
+    filename = f"{media_type}-{uuid4().hex}.webp"
     path = world_dir / filename
     path.write_bytes(encoded)
     return f"{settings.media_url_path}/worlds/{world_id}/{filename}"

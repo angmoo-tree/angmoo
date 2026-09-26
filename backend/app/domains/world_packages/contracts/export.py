@@ -22,6 +22,7 @@ WORLD_PACKAGE_MIN_READER_VERSION = "0.4.0-2"
 EXPORT_TOKEN_TTL_SECONDS = 5 * 60
 
 WorldPackageAssetSlot = Literal[
+    "world_icon",
     "world_banner",
     "character_avatar",
     "character_banner",

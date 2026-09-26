@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from typing import Any
 
 from app.domains.identity.contracts import CredentialMaterial
@@ -14,7 +15,8 @@ from app.integrations import direct_llm
 from app.providers.gemini import build_gemini_developer_response_schema
 
 
-PROFILE_MAX_OUTPUT_TOKENS = 2048
+# Reasoning models share the budget between thoughts and the completed JSON.
+PROFILE_MAX_OUTPUT_TOKENS = 4096
 REPERTOIRE_MAX_OUTPUT_TOKENS = 12288
 
 
@@ -86,6 +88,23 @@ GEMINI_REPERTOIRE_RESPONSE_SCHEMAS = {
     dayparts: build_gemini_repertoire_response_schema(dayparts)
     for dayparts in REPERTOIRE_DAYPART_BATCHES
 }
+
+
+def _scoped_repertoire_schema(dayparts, generation_input):
+    """Only offer place identifiers this Character can use in each daypart."""
+    schema = deepcopy(GEMINI_REPERTOIRE_RESPONSE_SCHEMAS[dayparts])
+    role_key = generation_input.get("world_character", {}).get("role_key")
+    for daypart in dayparts:
+        items = deepcopy(schema["properties"][daypart]["items"])
+        allowed = [place["key"] for place in generation_input.get("world", {}).get("places", [])
+            if (not place.get("available_dayparts") or daypart in place["available_dayparts"])
+            and (not place.get("access_role_keys") or role_key in place["access_role_keys"])]
+        if allowed:
+            items["properties"]["place"]["enum"] = allowed
+        else:
+            items["properties"].pop("place", None)
+        schema["properties"][daypart]["items"] = items
+    return schema
 
 
 class DirectLlmWorldCharacterSetupProvider:
@@ -165,7 +184,7 @@ class DirectLlmWorldCharacterSetupProvider:
                     tracker=tracker,
                     system_prompt=_REPERTOIRE_SYSTEM_PROMPT,
                     user_prompt=_data_prompt(batch_prompt),
-                    response_schema=GEMINI_REPERTOIRE_RESPONSE_SCHEMAS[dayparts],
+                    response_schema=_scoped_repertoire_schema(dayparts, generation_input),
                     validator=validate_transport,
                     max_output_tokens=REPERTOIRE_MAX_OUTPUT_TOKENS,
                     thinking_level=material.thinking_level,
@@ -290,7 +309,9 @@ The response schema uses short wire aliases:
 - seed=concrete activity_seed for varied SNS writing, 1..500 characters. Include
   what the Character is doing and a useful scene, tension, discovery, or result.
 - social=social_mode: solo, open_to_interaction, or cooperative.
-- place=optional same-World place_key, 1..64 characters.
+- place=optional same-World place_key, 1..64 characters. Use only the enumerated
+  identifiers for that daypart. If place is absent from the schema, omit it;
+  a place mentioned in descriptive text is not a registered place identifier.
 
 Within each daypart, use at least five distinct activity kinds and no one kind more
 than three times. Vary the underlying situation, not only the wording.

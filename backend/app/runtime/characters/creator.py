@@ -705,6 +705,7 @@ def _generate_draft_media_file(
 
 def build_creator_workflows() -> CreatorWorkflows:
     """Bind external work; lifecycle decisions and draft ORM stay in Characters."""
+    from app.runtime.characters.registration import resolve_target, register_draft, validate_copy_target
     return CreatorWorkflows(
         run_llm=_run_draft_llm,
         decrypt_api_key=_decrypt_draft_api_key,
@@ -713,6 +714,9 @@ def build_creator_workflows() -> CreatorWorkflows:
         promote_media=profile_media.promote_draft_profile_media,
         create_character=agent_service.create_agent,
         read_character=agent_service.get_agent,
+        resolve_target=resolve_target,
+        register_draft=register_draft,
+        validate_copy_target=validate_copy_target,
     )
 
 
