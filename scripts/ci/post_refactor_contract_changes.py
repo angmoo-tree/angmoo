@@ -242,7 +242,10 @@ def assertions(node: str, required: Counter, found: Counter, records: list[dict]
         return required
     # A later introduction snapshot may already contain the final reviewed state.
     states = [transitions[0][0], *(after for _, after in transitions)]
-    if required not in states:
+    # Older frozen snapshots may precede additive assertions in the exact
+    # reviewed preimage. Every frozen predicate and its multiplicity must be
+    # contained in one complete state, and the final state remains exact below.
+    if not any(required <= state for state in states):
         raise ValueError(f"product assertion before/after differs: {node}")
     final = states[-1]
     if required != final and found != final:

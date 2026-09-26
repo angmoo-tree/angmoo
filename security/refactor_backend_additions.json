@@ -19858,6 +19858,124 @@
         "tests/test_local_creator_v2.py": {},
         "tests/test_p8_l_d_installer_upgrade_contract.py": {}
       }
+    },
+    {
+      "commit": "86767bc2dfc0b092625f4f9cacd8e0be8125c4e0",
+      "feature_id": "AR-CREATOR-CANCEL",
+      "reason": "Explicit draft cancellation and registration race preserve completed identity and private source",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_local_creator_v2.py::test_cancel_and_register_race_preserves_one_final_state",
+        "tests/test_local_creator_v2.py::test_cancel_commit_failure_preserves_card_and_media"
+      ],
+      "test_assertions": {
+        "tests/test_local_creator_v2.py": {
+          "db": [],
+          "test_default_and_same_profile_identity": [
+            "assert world.name == 'SNS'",
+            "assert world.readiness_status == 'publish_ready'",
+            "assert ensure_default_space(session, owner_id=owner.id).id == world.id",
+            "assert first.profile.display_name == '사용자'",
+            "assert first.profile.avatar_url is None",
+            "assert service.ensure(world_id=world.id, current_user_id=owner.id).character_id == first.character_id",
+            "assert (changed.character_id, changed.world_character_id) == (first.character_id, first.world_character_id)",
+            "assert changed.profile.handle == 'haru'",
+            "assert changed.profile.background == first.profile.background"
+          ],
+          "test_keyless_registration_is_atomic_off_and_replayed": [
+            "assert draft.contract_version == 2",
+            "assert session.get(AgentCreationDraft, draft.id).encrypted_api_key is None",
+            "assert first.id == again.id",
+            "assert binding.world_id == row.world_id == draft.target_world_id",
+            "assert row.autonomous_enabled is False",
+            "assert first.credential is None",
+            "assert first.activity_setting.auto_enabled is False",
+            "assert session.get(CharacterRegistrationReceipt, draft.id).character_id == first.id"
+          ],
+          "test_upgrade_preserves_legacy_draft_and_matches_fresh": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(20).schema_digest",
+            "assert tuple(row) == ('preserved-ciphertext', 1, 1)",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(21).schema_digest",
+            "assert not list(connection.exec_driver_sql('PRAGMA foreign_key_check'))"
+          ],
+          "test_registration_detail_is_readable_without_credential": [
+            "assert result.credential is None",
+            "assert result.settings.auto_enabled is False",
+            "assert result.character.name == '검증 앵무'"
+          ],
+          "test_stale_edit_and_profile_revision_preserve_current_values": [
+            "pytest.raises(AgentCreationDraftHandleConflictError)",
+            "assert session.get(AgentCreationDraft, draft.id).name == '먼저 저장'",
+            "pytest.raises(OwnerControlledIdentityConflictError)",
+            "assert identity.get(world_id=draft.target_world_id, current_user_id=owner.id).profile.display_name == '하루'"
+          ],
+          "test_registration_failure_rolls_back_character_and_membership": [
+            "pytest.raises(RuntimeError)",
+            "assert session.scalar(select(Character).where(Character.name == '롤백')) is None",
+            "assert session.scalar(select(WorldCharacter)) is None",
+            "assert session.get(CharacterRegistrationReceipt, draft.id) is None",
+            "assert session.get(AgentCreationDraft, draft.id).status == 'editing'"
+          ],
+          "test_default_space_cannot_be_archived": [
+            "pytest.raises(WorldDefinitionValidationError)",
+            "assert world.status == 'published'"
+          ],
+          "test_two_independent_sessions_register_one_draft_once": [
+            "assert identities[0] == identities[1]",
+            "assert session.scalar(select(func.count()).select_from(CharacterRegistrationReceipt)) == 1",
+            "assert session.scalar(select(func.count()).select_from(WorldCharacter)) == 1"
+          ],
+          "test_two_independent_sessions_ensure_same_space_and_profile": [
+            "assert identities[0] == identities[1]"
+          ],
+          "test_legacy_draft_explicit_adoption_preserves_fields_and_never_attaches_key": [
+            "pytest.raises(AgentCreationDraftValidationError, match='이전 초안')",
+            "assert result.name == '보존 초안' and result.contract_version == 2",
+            "assert legacy.encrypted_api_key == 'preserved-private-ciphertext'",
+            "assert registered.credential is None",
+            "assert registered.settings.auto_enabled is False",
+            "assert session.get(CharacterWorldBinding, registered.character.id).world_id == result.target_world_id"
+          ],
+          "test_expired_draft_get_is_read_only": [
+            "pytest.raises(AgentCreationDraftExpiredError)",
+            "assert session.get(AgentCreationDraft, 'expired-read') is not None",
+            "assert not session.deleted and (not session.dirty)"
+          ],
+          "test_http_keyless_register_replay_and_detail_use_real_persistence": [
+            "assert created.status_code == 201, created.text",
+            "assert saved.status_code == 200, saved.text",
+            "assert done.status_code == 200, done.text",
+            "assert repeated.status_code == 200, repeated.text",
+            "assert repeated.json()['character']['id'] == done.json()['character']['id']",
+            "assert done.json()['credential'] is None",
+            "assert done.json()['settings']['auto_enabled'] is False",
+            "assert imported.status_code == 200, imported.text",
+            "assert source.status_code == 200 and source.headers['cache-control'] == 'private, no-store'",
+            "assert source.json()['document']['name'] == '카드'",
+            "assert cancelled.status_code == 200 and cancelled.json()['status'] == 'cancelled'",
+            "assert client.get(f\"/api/v1/agents/drafts/{card_draft['id']}/card-source\").status_code == 404",
+            "assert cannot_register.status_code == 409",
+            "assert preserved.status_code == 200 and preserved.json()['status'] == 'completed'",
+            "assert session.get(CharacterRegistrationReceipt, draft['id']).character_id == done.json()['character']['id']"
+          ],
+          "test_cancel_and_register_race_preserves_one_final_state": [
+            "assert (cancelled, registered) == ('completed', 'completed')",
+            "assert receipt is not None and session.get(Character, receipt.character_id) is not None",
+            "assert (final.status, cancelled, registered) == ('cancelled', 'cancelled', 'registration_rejected')",
+            "assert receipt is None",
+            "assert session.scalar(select(Character).where(Character.name == '취소 경합')) is None"
+          ],
+          "test_cancel_commit_failure_preserves_card_and_media": [
+            "pytest.raises(RuntimeError, match='commit failed')",
+            "assert not deleted",
+            "assert session.get(AgentCreationDraft, draft.id).status == 'editing'",
+            "assert session.scalar(select(CharacterCardSource).where(CharacterCardSource.draft_id == draft.id)) is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_local_creator_v2.py": {}
+      }
     }
   ]
 }
