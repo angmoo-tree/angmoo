@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", tuple(range(1, 19)))
+@pytest.mark.parametrize("source_version", tuple(range(1, 20)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -108,7 +108,7 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         assert ("social_recommendation_catalogs" in memory_tables) == (source_version >= 15)
         assert ("relationship_experience_receipts" in memory_tables) == (source_version >= 17)
         assert ("relationship_review_requests" in memory_tables) == (source_version >= 18)
-        assert "activity_graph_runs" not in memory_tables
+        assert ("activity_graph_runs" in memory_tables) == (source_version >= 19)
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "
@@ -141,7 +141,7 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 19
+    assert fixture["target_data_version"] == 20
     assert fixture["target_table_count"] == 133
     if source_version == 8:
         assert fixture["generation"] == (

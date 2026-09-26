@@ -39,6 +39,8 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV18FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV19FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -105,6 +107,7 @@ foreach ($required in @(
     $SupportedV16FixtureArchive,
     $SupportedV17FixtureArchive,
     $SupportedV18FixtureArchive,
+    $SupportedV19FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -431,6 +434,16 @@ try {
             ([int]$supportedContract.ladybug_source_data_version)
 
         $supportedManifest = Restore-IsolatedFixture $SupportedV18FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV19FixtureArchive
         $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
             ConvertFrom-Json
         Invoke-Installer 0
