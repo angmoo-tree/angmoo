@@ -28,6 +28,8 @@ from app.domains.world_packages.schemas.manifest import (  # noqa: E402
 )
 from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2
 from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2
+from app.domains.world_packages.schemas.content_v3 import CharactersDocumentV3
+from app.domains.world_packages.schemas.manifest_v3 import WorldPackageManifestV3
 
 
 SchemaModel: TypeAlias = type[BaseModel]
@@ -57,6 +59,10 @@ def expected_outputs(*, include_v2: bool = False) -> dict[Path, str]:
     for name, model in (("manifest.schema.json", WorldPackageManifestV2), ("characters.schema.json", CharactersDocumentV2)):
         outputs[OUTPUT_ROOT.parent / "v2" / name] = render(model, name).replace(
             "https://angmoo.dev/schemas/world-package/v1/", "https://angmoo.dev/schemas/world-package/v2/"
+        )
+    for name, model in (("manifest.schema.json", WorldPackageManifestV3), ("characters.schema.json", CharactersDocumentV3)):
+        outputs[OUTPUT_ROOT.parent / "v3" / name] = render(model, name).replace(
+            "https://angmoo.dev/schemas/world-package/v1/", "https://angmoo.dev/schemas/world-package/v3/"
         )
     return outputs
 

@@ -18,7 +18,7 @@ def copy_settings(db, user, draft_id, data: schemas.CharacterSettingsCopy, *, wo
     created_files = []
     try:
         claim_edit(db, draft, data.revision)
-        for field in ("name", "one_liner", "personality", "speech_style", "worldview",
+        for field in ("name", "one_liner", "personality", "speech_style", "worldview", "character_background",
                       "topic_preferences", "safety_rules"):
             setattr(draft, field, getattr(source, field) or "")
         draft.handle = None

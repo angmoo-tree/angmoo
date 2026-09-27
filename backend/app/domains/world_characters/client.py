@@ -126,7 +126,7 @@ class DirectLlmWorldCharacterSetupProvider:
                 api_key=material.reveal(),
                 context=context,
                 tracker=tracker,
-                system_prompt=_PROFILE_SYSTEM_PROMPT,
+                system_prompt=_PROFILE_SYSTEM_PROMPT + "\n" + _BACKGROUND_CONTEXT_SYSTEM_ADDENDUM,
                 user_prompt=_data_prompt(generation_input),
                 response_schema=GEMINI_PROFILE_RESPONSE_SCHEMA,
                 validator=world_character_contracts.validate_community_profile,
@@ -182,7 +182,7 @@ class DirectLlmWorldCharacterSetupProvider:
                     api_key=material.reveal(),
                     context=context,
                     tracker=tracker,
-                    system_prompt=_REPERTOIRE_SYSTEM_PROMPT,
+                    system_prompt=_REPERTOIRE_SYSTEM_PROMPT + "\n" + _BACKGROUND_CONTEXT_SYSTEM_ADDENDUM,
                     user_prompt=_data_prompt(batch_prompt),
                     response_schema=_scoped_repertoire_schema(dayparts, generation_input),
                     validator=validate_transport,
@@ -319,4 +319,13 @@ Do not add details that the later SNS writer can safely derive from Character, W
 or current context. Omit place only when no supplied place applies. The backend
 independently enforces every bound, exact 4x10 count, World reference, safety rule,
 activity-kind diversity, and duplicate rule before saving.
+""".strip()
+
+
+_BACKGROUND_CONTEXT_SYSTEM_ADDENDUM = """
+The character description may contain traits, dialogue, and fictional backstory.
+For origin, upbringing, and past affiliation, explicit character_background takes
+precedence over a conflicting description; do not combine incompatible origins.
+A card scenario or fictional past is setting, not evidence that an event happened
+in the current World or actual conversation. Never call it an experienced memory.
 """.strip()

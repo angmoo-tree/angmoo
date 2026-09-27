@@ -2,6 +2,7 @@
 
 import json
 from app.core.context_text import neutralize_context_text
+from app.domains.characters.policies.prompt_persona import PERSONA_INTERPRETATION
 from app.domains.social.schemas import feed as schemas
 from app.domains.social.contracts.world_feed import ReadySearchProfile
 from app.domains.social.constants import FEED_REACTION_CONTRACT_VERSION
@@ -52,6 +53,9 @@ def build_reaction_prompts(
                 "name": _clip(profile.character.name, 80),
                 "persona_summary": _clip(profile.character.persona_summary, 1500),
                 "speech_style": _clip(profile.character.speech_style, 800),
+                "description": neutralize_context_text(getattr(profile.character, "worldview", "") or ""),
+                "character_background": neutralize_context_text(getattr(profile.character, "character_background", "") or ""),
+                "persona_interpretation": PERSONA_INTERPRETATION,
                 "world_local_profile": _clip(json.dumps(profile.world_character.local_profile or {}, ensure_ascii=False), 4000),
                 "community_summary": _clip(profile.profile.visible_summary, 280),
                 "action_profile": _action_notes(profile),
@@ -112,6 +116,9 @@ def build_comment_prompts(
                 "name": _clip(profile.character.name, 80),
                 "persona_summary": _clip(profile.character.persona_summary, 1500),
                 "speech_style": _clip(profile.character.speech_style, 800),
+                "description": neutralize_context_text(getattr(profile.character, "worldview", "") or ""),
+                "character_background": neutralize_context_text(getattr(profile.character, "character_background", "") or ""),
+                "persona_interpretation": PERSONA_INTERPRETATION,
                 "world_local_profile": profile.world_character.local_profile or {},
             },
             "target": candidate.model_dump(mode="json"),

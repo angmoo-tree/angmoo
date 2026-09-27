@@ -58,6 +58,39 @@ def test_budget_removes_whole_optional_records_without_mutating_shared_input(mon
     asyncio.run(scenario())
 
 
+def test_budget_keeps_full_description_and_background_tail(monkeypatch):
+    import asyncio, json
+    from types import SimpleNamespace
+    from app.runtime.autonomous_activity import provider as module
+
+    monkeypatch.setattr(module, "_api_key", lambda _: "test")
+    monkeypatch.setattr(module, "_llm_context", lambda *args, **kwargs: None)
+    captured = []
+
+    async def generate(**kwargs):
+        captured.append(json.loads(kwargs["user_prompt"]))
+        return {}
+
+    monkeypatch.setattr(module, "generate_json", generate)
+    actor = module.ActivityProvider(SimpleNamespace(generation_thinking_level=None,
+        on_rate_limit_wait=None), None)
+    description = "d" * 7980 + "description-tail"
+    background = "b" * 7980 + "background-tail"
+    payload = {"context": {
+        "persona": {"description": description, "character_background": background,
+                    "speech_style": "", "personality": ""},
+        "today_activity": {"records": [{"body": "older " + "x" * 51000}]},
+        "memories": {},
+    }}
+    asyncio.run(actor.call(node="test", lane="feed", system="rules", payload=payload,
+        schema={}, validator=lambda value: value, max_tokens=100))
+    sent = captured[0]["context"]
+    assert sent["persona"]["description"].endswith("description-tail")
+    assert sent["persona"]["character_background"].endswith("background-tail")
+    assert sent["today_activity"]["records"] == []
+    assert payload["context"]["today_activity"]["records"]
+
+
 @pytest.mark.parametrize("lane,limit,count,expected", [
     ("inbox", 3, 5, 3), ("feed", 1, 5, 1), ("inbox", 3, 2, 2),
 ])

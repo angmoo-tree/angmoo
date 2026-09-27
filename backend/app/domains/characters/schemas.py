@@ -29,6 +29,7 @@ class CharacterRead(BaseModel):
     personality: str = ""
     speech_style: str = ""
     worldview: str = ""
+    character_background: str = ""
     topic_preferences: str = ""
     safety_rules: str = ""
     status: str = "inactive"
@@ -72,6 +73,7 @@ class AgentCreate(BaseModel):
     personality: str = Field(default="", max_length=PERSONA_LIMITS["personality"])
     speech_style: str = Field(default="", max_length=PERSONA_LIMITS["speech_style"])
     worldview: str = Field(default="", max_length=PERSONA_LIMITS["worldview"])
+    character_background: str = Field(default="", max_length=PERSONA_LIMITS["character_background"])
     topic_preferences: str = Field(default="", max_length=PERSONA_LIMITS["topic_preferences"])
     safety_rules: str = Field(default="", max_length=PERSONA_LIMITS["safety_rules"])
     provider: str = Field(default="google", max_length=40)
@@ -93,8 +95,8 @@ class AgentCreate(BaseModel):
     def validate_execution_mode_credentials(self) -> "AgentCreate":
         if self.execution_mode == "llm" and not self.api_key:
             raise ValueError("LLM mode requires an API key.")
-        if self.execution_mode == "llm" and not self.personality.strip():
-            raise ValueError("LLM mode requires personality.")
+        if self.execution_mode == "llm" and not self.worldview.strip():
+            raise ValueError("LLM mode requires character description.")
         if self.execution_mode == "local" and self.api_key is not None:
             raise ValueError("Local mode does not accept an LLM API key.")
         if (self.active_hours_start is None) != (self.active_hours_end is None):
@@ -132,9 +134,10 @@ class AgentPersonaUpdate(BaseModel):
         return normalize_persona_text(value) if isinstance(value, str) else value
 
 
-    personality: str = Field(min_length=1, max_length=PERSONA_LIMITS["personality"])
+    personality: str = Field(default="", max_length=PERSONA_LIMITS["personality"])
     speech_style: str = Field(default="", max_length=PERSONA_LIMITS["speech_style"])
     worldview: str = Field(default="", max_length=PERSONA_LIMITS["worldview"])
+    character_background: str | None = Field(default=None, max_length=PERSONA_LIMITS["character_background"])
     topic_preferences: str = Field(default="", max_length=PERSONA_LIMITS["topic_preferences"])
     safety_rules: str = Field(default="", max_length=PERSONA_LIMITS["safety_rules"])
 
@@ -183,6 +186,7 @@ class AgentCreationDraftUpdate(BaseModel):
     personality: str | None = Field(default=None, max_length=PERSONA_LIMITS["personality"])
     speech_style: str | None = Field(default=None, max_length=PERSONA_LIMITS["speech_style"])
     worldview: str | None = Field(default=None, max_length=PERSONA_LIMITS["worldview"])
+    character_background: str | None = Field(default=None, max_length=PERSONA_LIMITS["character_background"])
     topic_preferences: str | None = Field(default=None, max_length=PERSONA_LIMITS["topic_preferences"])
     safety_rules: str | None = Field(default=None, max_length=PERSONA_LIMITS["safety_rules"])
     image_style: AgentDraftImageStyle | None = None
@@ -292,6 +296,7 @@ class AgentCreationDraftRead(UtcInstantResponseModel):
     personality: str
     speech_style: str
     worldview: str
+    character_background: str = ""
     topic_preferences: str
     safety_rules: str
     image_style: str

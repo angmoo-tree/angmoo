@@ -55,6 +55,7 @@ async def create_draft(
         personality="",
         speech_style="",
         worldview="",
+        character_background="",
         topic_preferences="",
         safety_rules="",
         image_style="기본",

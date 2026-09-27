@@ -16,6 +16,9 @@ class ImageCharacter(SocialCharacter, Protocol):
     def worldview(self) -> str: ...
 
     @property
+    def character_background(self) -> str: ...
+
+    @property
     def topic_preferences(self) -> str: ...
 
     @property

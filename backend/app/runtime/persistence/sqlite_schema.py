@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 21
-SOURCE_ALEMBIC_REVISION = "20260927_0099"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 98
+SQLITE_SCHEMA_VERSION = 22
+SOURCE_ALEMBIC_REVISION = "20260927_0100"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 99
 EXPECTED_CANONICAL_TABLE_COUNT = 137
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -315,6 +315,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_character_background(metadata)
     _remove_creator_v21(metadata)
     _remove_activity_schema(metadata)
     _restore_pre_v20_outbox_identity(metadata)
@@ -677,6 +678,20 @@ def _remove_creator_v21(metadata: MetaData) -> None:
 
 
 def build_sqlite_v20_metadata() -> MetaData:
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v21_metadata()
     _remove_creator_v21(metadata)
     return metadata
+
+
+def build_sqlite_v21_metadata() -> MetaData:
+    """Frozen pre-character-background schema for installed v21 databases."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_character_background(metadata)
+    return metadata
+
+
+def _remove_character_background(metadata: MetaData) -> None:
+    for name in ("characters", "agent_creation_drafts"):
+        table = metadata.tables.get(name)
+        if table is not None and "character_background" in table.c:
+            table._columns.remove(table.c.character_background)

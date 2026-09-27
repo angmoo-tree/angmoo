@@ -16,6 +16,7 @@ from app.domains.routines import models
 from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
 from app.domains.social.schemas import community as schemas
 from app.domains.routines.service.first_greeting import _build_first_greeting_writer_prompt
+from app.domains.characters.policies.prompt_persona import model_persona, PERSONA_INTERPRETATION
 from app.domains.routines.constants import FIRST_GREETING_WRITER_OUTPUT_TOKENS
 from app.integrations.direct_llm import RunLlmTracker, DirectLlmCallContext, generate_json
 from app.runtime.social import image_generation as post_image_generation
@@ -53,16 +54,8 @@ async def _run_first_greeting_writer(
 
     user_prompt = {
         "owner_topic": topic.strip(),
-        "character": {
-            "name": character.name,
-            "handle": character.handle,
-            "one_liner": character.one_liner,
-            "personality": character.personality,
-            "speech_style": character.speech_style,
-            "worldview": character.worldview,
-            "topic_preferences": character.topic_preferences,
-            "safety_rules": character.safety_rules,
-        },
+        "character": {"handle": character.handle, **model_persona(character)},
+        "persona_interpretation": PERSONA_INTERPRETATION,
         "community_tendency": {
             "summary": setting.tendency_summary,
             "action_ranges": setting.tendency_action_ranges,

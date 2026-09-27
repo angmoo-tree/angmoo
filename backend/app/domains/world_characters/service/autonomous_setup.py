@@ -476,6 +476,24 @@ def _resolve_material(db: Session, scope: SetupScope) -> CredentialMaterial:
     return material
 
 
+def _existing_or_current_character_hash(db: Session, scope: SetupScope) -> str:
+    """Reuse an unchanged v1 preparation; all newly generated input uses v2."""
+    current = world_character_contracts.character_contract_hash(scope.character)
+    if getattr(scope.character, "character_background", ""):
+        return current
+    legacy = world_character_contracts.legacy_character_contract_hash(scope.character)
+    existing = _matching_profile(
+        db, world_character_id=scope.world_character.id,
+        character_hash=legacy, world_hash=scope.world.contract_hash,
+    )
+    return legacy if existing is not None else current
+
+
+def _hash_version(character: Any, character_hash: str) -> int:
+    legacy = world_character_contracts.legacy_character_contract_hash(character)
+    return 1 if not getattr(character, "character_background", "") and character_hash == legacy else 2
+
+
 def preflight_setup(
     db: Session,
     *,
@@ -490,7 +508,7 @@ def preflight_setup(
         material = _resolve_material(db, scope)
     except WorldCharacterSetupValidationError as exc:
         reason = exc.reason_code
-    character_hash = world_character_contracts.character_contract_hash(scope.character)
+    character_hash = _existing_or_current_character_hash(db, scope)
     reused = _ready_pair(
         db,
         world_character_id=scope.world_character.id,
@@ -552,7 +570,7 @@ async def generate_setup(
                 "setup_in_progress" if replay.status == "running" else "idempotency_replay"
             )
     material = _resolve_material(db, scope)
-    character_hash = world_character_contracts.character_contract_hash(scope.character)
+    character_hash = _existing_or_current_character_hash(db, scope) if not data.regenerate else world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
     if not data.regenerate and _ready_pair(
         db,
@@ -565,10 +583,11 @@ async def generate_setup(
     generation_context = build_world_generation_context(
         db, scope.world
     )
-    generation_input = world_character_contracts.build_world_character_generation_input(
+    generation_input = world_character_contracts.build_world_character_generation_input_for_version(
         character=scope.character,
         world_character=scope.world_character,
         world_context=generation_context,
+        version=_hash_version(scope.character, character_hash),
         previous_candidate_signatures=_recent_candidate_signatures(
             db, world_character_id
         ),
@@ -690,7 +709,7 @@ async def retry_setup(
 
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
     material = _resolve_material(db, scope)
-    character_hash = world_character_contracts.character_contract_hash(scope.character)
+    character_hash = _existing_or_current_character_hash(db, scope)
     world_hash = scope.world.contract_hash
     profile = _matching_profile(
         db,
@@ -703,10 +722,11 @@ async def retry_setup(
     generation_context = build_world_generation_context(
         db, scope.world
     )
-    generation_input = world_character_contracts.build_world_character_generation_input(
+    generation_input = world_character_contracts.build_world_character_generation_input_for_version(
         character=scope.character,
         world_character=scope.world_character,
         world_context=generation_context,
+        version=_hash_version(scope.character, character_hash),
         previous_candidate_signatures=_recent_candidate_signatures(
             db, world_character_id
         ),
@@ -875,7 +895,7 @@ def approve_setup(
     )) is not None:
         raise WorldCharacterSetupConflictError("setup_in_progress")
 
-    character_hash = world_character_contracts.character_contract_hash(scope.character)
+    character_hash = world_character_contracts.character_hash_for_record(scope.character, profile)
     world_hash = scope.world.contract_hash
     if (
         profile.character_contract_hash != character_hash
@@ -1093,6 +1113,8 @@ def get_setup(
     repertoire = _latest_repertoire(db, world_character_id, profile_id=profile.id) if profile else None
     active = get_approved_pair(db, world_character_id)
     active_profile, active_repertoire = active if active is not None else (None, None)
+    if profile is not None:
+        character_hash = world_character_contracts.character_hash_for_record(scope.character, profile)
     active_candidates = _candidate_rows(db, active_repertoire.id) if active_repertoire else []
     running = db.scalar(
         select(models.WorldCharacterSetupAttempt.id).where(
@@ -1163,7 +1185,7 @@ def get_setup(
         can_approve=can_approve,
         can_regenerate=running is None,
         can_reject=bool(profile is not None and profile.status in {"draft", "stale"} and running is None),
-        persona_changed=bool(active_profile and active_profile.character_contract_hash != character_hash),
+        persona_changed=bool(active_profile and active_profile.character_contract_hash != world_character_contracts.character_hash_for_record(scope.character, active_profile)),
         active_profile=_profile_read(active_profile) if active_profile else None,
         active_repertoire=_repertoire_read(active_repertoire, active_candidates) if active_repertoire else None,
         safe_reason_code=(
@@ -1364,7 +1386,9 @@ def _reload_and_assert_hashes(
         lock_for_update=True,
     )
     if (
-        world_character_contracts.character_contract_hash(current.character)
+        world_character_contracts.character_contract_hash_for_version(
+            current.character, _hash_version(scope.character, character_hash)
+        )
         != character_hash
         or current.world.contract_hash != world_hash
     ):
@@ -1387,7 +1411,7 @@ def _save_profile_draft(
         status="draft",
         **payload.model_dump(mode="python"),
         schema_version=1,
-        generator_version=world_character_contracts.WORLD_CHARACTER_GENERATOR_VERSION,
+        generator_version=world_character_contracts.CURRENT_WORLD_CHARACTER_GENERATOR_VERSION,
         character_contract_hash=character_hash,
         world_contract_hash=world_hash,
         provider=material.provider,
@@ -1415,7 +1439,7 @@ def _save_repertoire_draft(
         world_character_id=scope.world_character.id,
         status="draft",
         schema_version=world_character_contracts.REPERTOIRE_SCHEMA_VERSION,
-        generator_version=world_character_contracts.WORLD_CHARACTER_GENERATOR_VERSION,
+        generator_version=profile.generator_version,
         character_contract_hash=character_hash,
         world_contract_hash=world_hash,
         community_profile_id=profile.id,

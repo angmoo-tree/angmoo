@@ -15,14 +15,14 @@ import type { AgentCreationDraftRead, AgentDetailRead } from "@/features/charact
 // ADAPTED: existing creation steps, PersonaField and ProfileMediaUploader.
 // Registration persists the edited settings; preparation is a separate user action.
 const STEPS = ["만드는 방법", "기본 정보", "페르소나", "프로필", "확인"];
-const TEXT_FIELDS = ["name", "handle", "one_liner", "personality", "speech_style", "worldview", "topic_preferences", "safety_rules"] as const;
+const TEXT_FIELDS = ["name", "handle", "one_liner", "worldview", "personality", "speech_style", "character_background", "topic_preferences", "safety_rules"] as const;
 const PERSONA_FIELDS = [
-  ["personality", "성격"], ["speech_style", "말투·대화 예시"], ["worldview", "캐릭터 배경·설정"],
+  ["worldview", "캐릭터 설명"], ["personality", "성격"], ["speech_style", "말투·대화 예시"], ["character_background", "캐릭터 배경·세계관"],
   ["topic_preferences", "관심 주제"], ["safety_rules", "피해야 할 행동·표현"],
 ] as const;
 
 function reviewLabel(code: string) {
-  if (code === "personality_required_review_description") return "성격이 비어 있습니다. 캐릭터 설명을 참고해 직접 보완해주세요.";
+  if (code === "description_required_review") return "캐릭터 설명이 비어 있습니다. 등록 전에 짧은 설명을 작성해주세요.";
   if (code === "scenario_manual_merge") return "상황 설정은 자동 반영하지 않습니다. 원문에서 필요한 내용을 배경·설정에 옮겨주세요.";
   if (code === "v3_common_fields_only") return "V3 카드의 공통 항목만 반영합니다. 추가 기능은 원문에서 확인해주세요.";
   const key = code.replace(/_(length_limit|dynamic_text_review)$/, "");
@@ -208,16 +208,23 @@ function CreationGuide() {
         <Field label="핸들" helperText="비워두면 자동으로 정합니다.">{(props) => <Input {...props} value={draft.handle ?? ""} maxLength={40} onChange={(e) => edit("handle", e.target.value)} />}</Field>
         <PersonaField label="한 줄 소개" limit={PERSONA_LIMITS.one_liner} value={draft.one_liner} onChange={(value) => edit("one_liner", value)} />
       </>}
-      {draft && step === 2 && PERSONA_FIELDS.map(([key, label]) => <PersonaField key={key} label={label} limit={PERSONA_LIMITS[key]} required={key === "personality" && draft.source_kind !== "external"} value={draft[key]} onChange={(value) => edit(key, value)} />)}
+      {draft && step === 2 && <>
+        <PersonaField label="캐릭터 설명" limit={PERSONA_LIMITS.worldview} required={draft.source_kind !== "external"} value={draft.worldview} onChange={(value) => edit("worldview", value)} />
+        <p className="text-sm text-muted-foreground">성격·말투·배경을 설명에 함께 적어도 됩니다. 더 나누어 관리하고 싶으면 아래 선택 항목을 사용하세요.</p>
+        <details open={Boolean(draft.personality || draft.speech_style || draft.character_background || draft.topic_preferences || draft.safety_rules)}>
+          <summary className="cursor-pointer font-semibold">선택 상세 설정</summary>
+          <div className="mt-4 space-y-4">{PERSONA_FIELDS.filter(([key]) => key !== "worldview").map(([key, label]) => <PersonaField key={key} label={label} limit={PERSONA_LIMITS[key]} value={draft[key] ?? ""} onChange={(value) => edit(key, value)} />)}</div>
+        </details>
+      </>}
       {draft && step === 3 && <>
         <ProfileMediaUploader name={draft.name || "새 앵무"} avatarUrl={draft.avatar_temp_url ?? ""} bannerUrl={draft.banner_temp_url ?? ""} disabled={busy}
           onUpload={async (data) => { setBusy(true); try { const result = await uploadAgentDraftMedia(draft.id, { ...data, revision: draft.revision }); setDraft(result); } finally { setBusy(false); } }} />
         {(["avatar", "banner"] as const).map((kind) => draft[`${kind}_temp_url`] && <Button type="button" variant="secondary" key={kind} onClick={() => void perform(async () => setDraft(await updateAgentDraft(draft.id, { revision: draft.revision, [`${kind}_temp_url`]: null })))}>{kind === "avatar" ? "아바타" : "배너"} 제거</Button>)}
       </>}
-      {draft && step === 4 && <><h2 className="text-xl font-bold">{draft.name}</h2><p>{draft.one_liner}</p><p className="whitespace-pre-wrap">{draft.personality}</p><p>편집한 설정과 표시 이미지를 저장합니다. 모델·키·활동 준비·자동 실행은 등록에 포함되지 않습니다.</p></>}
+      {draft && step === 4 && <><h2 className="text-xl font-bold">{draft.name}</h2><p>{draft.one_liner}</p>{PERSONA_FIELDS.filter(([key]) => Boolean(draft[key])).map(([key, label]) => <div key={key}><h3 className="font-semibold">{label}</h3><p className="whitespace-pre-wrap">{draft[key]}</p></div>)}<p>편집한 설정과 표시 이미지를 저장합니다. 모델·키·활동 준비·자동 실행은 등록에 포함되지 않습니다.</p></>}
       </fieldset>
       {draft?.source_kind === "card" && <details><summary>카드 원본과 반영 범위 확인</summary>
-        <p>설명·성격·대화 예시는 입력란에서 수정할 수 있습니다. 성격이 비어 있다면 설명을 참고해 보완해주세요. 상황 설정과 지원하지 않는 동적 문구는 직접 확인합니다.</p>
+        <p>설명·성격·대화 예시는 입력란에서 수정할 수 있습니다. 설명이 비어 있다면 등록 전에 작성해주세요. 상황 설정과 지원하지 않는 동적 문구는 직접 확인합니다.</p>
         {review.length > 0 && <ul className="list-disc space-y-2 pl-5">{review.map((code) => <li key={code}>{reviewLabel(code)}</li>)}</ul>}
         <p>첫 인사·로어북·특수 지침 등은 원본에만 보존하며 자동으로 실행하지 않습니다. 원본 전용 항목: {rawOnly.join(", ") || "원본 확인"}</p>
         <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(async () => setSource((await getAgentCardSource(draft.id)).document))}>원문 보기</Button>

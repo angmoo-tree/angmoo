@@ -168,7 +168,10 @@ def _system_prompt(request: CharacterResponseGeneratorRequest) -> str:
             f"One-liner: {profile.one_liner}",
             f"Personality: {profile.personality}",
             f"Speech style: {profile.speech_style}",
-            f"Worldview: {profile.worldview}",
+            f"Character description: {profile.worldview}",
+            f"Character background: {profile.character_background}",
+            "Read description and optional details together. Explicit background clarifies conflicting origin or past settings; actual World facts, conversations and memories take precedence.",
+            "A fictional card backstory is a premise, not an experienced memory in this World. Do not recall it as an actual event unless the supplied conversation or memory evidence confirms it.",
             f"Topic preferences: {profile.topic_preferences}",
             f"Safety rules: {profile.safety_rules}",
         ]

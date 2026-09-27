@@ -20,6 +20,7 @@ def test_agent_google_models_are_allowed_in_agent_model_schemas():
     ):
         create = character_schemas.AgentCreate(
             name="Gemma Bird",
+            worldview="A curious bird",
             personality="curious",
             model=model,
             api_key="test-key",
@@ -48,6 +49,7 @@ def test_agent_model_schemas_reject_removed_or_message_only_models(model):
     with pytest.raises(ValidationError):
         character_schemas.AgentCreate(
             name="Gemma Bird",
+            worldview="A curious bird",
             personality="curious",
             model=model,
             api_key="test-key",

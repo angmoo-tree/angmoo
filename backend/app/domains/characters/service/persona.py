@@ -8,6 +8,7 @@ PERSONA_PROMPT_SAFETY_FIELDS = (
     "personality",
     "speech_style",
     "worldview",
+    "character_background",
     "topic_preferences",
     "safety_rules",
 )

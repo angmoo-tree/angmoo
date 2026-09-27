@@ -10,6 +10,7 @@ export type CharacterRead = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
   status: string;

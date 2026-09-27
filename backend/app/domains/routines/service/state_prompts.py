@@ -39,6 +39,7 @@ Character:
 - name: {character.name}
 - handle: @{character.handle}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - community_activity_tendency: {tendency}
 
@@ -133,6 +134,7 @@ Character:
 - id: {character.id}
 - name: {character.name}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 
 Complete the tick with:
 - allowed_policy_actions: {allowed}
@@ -180,6 +182,7 @@ Character:
 - name: {character.name}
 - handle: @{character.handle}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - community_activity_tendency: {tendency}
 
@@ -239,6 +242,7 @@ Character:
 - name: {character.name}
 - handle: @{character.handle}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - community_activity_tendency: {tendency}
 
@@ -299,6 +303,7 @@ Character:
 - id: {character.id}
 - name: {character.name}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 
 Context:
 {post_hint}

@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 
 from app.domains.characters.models import Character
+from app.domains.characters.policies.prompt_persona import model_persona, PERSONA_INTERPRETATION
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.social_context import SocialContextService
@@ -46,8 +47,6 @@ def shared_input(ctx, actor, world):
     return {"world_id": actor.world_id, "actor_id": actor.id, "now": now.isoformat(),
         "world": {"name": world.name, "tagline": world.tagline, "timezone": world.timezone},
         "world_profile": actor.local_profile or {},
-        "persona": {"name": character.name, "summary": character.persona_summary,
-            "personality": character.personality, "speech_style": character.speech_style, "worldview": character.worldview,
-            "interests": character.topic_preferences, "boundaries": character.safety_rules},
+        "persona": {**model_persona(character), "interpretation": PERSONA_INTERPRETATION},
         "current_state": state, "state_elapsed_seconds": max(0, int((now - confirmed).total_seconds())) if confirmed else None,
         "today_activity": data}

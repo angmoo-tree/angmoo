@@ -129,6 +129,7 @@ class WorldPackageImportPreviewRead(WorldPackageExportSchema):
     world_name: str
     world_tagline: str
     character_names: list[str]
+    character_settings: list[dict[str, str]] = Field(default_factory=list)
     role_count: int
     place_count: int
     rule_count: int
@@ -165,6 +166,7 @@ class WorldPackageImportPreviewRead(WorldPackageExportSchema):
             world_name=value.world_name,
             world_tagline=value.world_tagline,
             character_names=list(value.character_names),
+            character_settings=list(value.character_settings),
             role_count=value.role_count,
             place_count=value.place_count,
             rule_count=value.rule_count,

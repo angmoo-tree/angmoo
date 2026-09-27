@@ -21,7 +21,7 @@ from app.domains.social.service.recommendation_topics import ensure_catalog, rep
 from app.domains.social.contracts.recommendation import TopicPreparationError
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.service.approved_setup import get_approved_pair
-from app.domains.world_characters.service.setup_validation import character_contract_hash
+from app.domains.world_characters.service.setup_validation import character_hash_for_record
 from app.domains.worlds.models import World, WorldMembership
 from app.domains.worlds.service.generation_context import build_world_generation_context
 from app.integrations import direct_llm
@@ -72,7 +72,7 @@ def load_scope(db: Session, *, world_id: str, owner_id: str, world_character_id:
         source = {"profile_id": profile.id, "visible_summary": profile.visible_summary,
                   "core_interests": profile.core_interests, "adjacent_interests": profile.adjacent_interests,
                   "search_keywords": profile.search_keywords, "local_profile": wc.local_profile,
-                  "character_hash": character_contract_hash(character), "world_hash": world.contract_hash}
+                  "character_hash": character_hash_for_record(character, profile), "world_hash": world.contract_hash}
     return PreparationScope(world_id, world_character_id, source)
 
 

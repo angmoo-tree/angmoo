@@ -14,6 +14,7 @@ class CharacterGenerationRecord(Protocol):
     personality: str | None
     speech_style: str | None
     worldview: str | None
+    character_background: str | None
     topic_preferences: str | None
     safety_rules: str | None
     persona_summary: str | None

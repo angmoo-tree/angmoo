@@ -106,6 +106,11 @@ class StageWorldPackage:
                 character_names=tuple(
                     item.display_name for item in package.characters.characters
                 ),
+                character_settings=tuple({
+                    "name": item.display_name,
+                    "description": item.worldview,
+                    "character_background": getattr(item, "character_background", ""),
+                } for item in package.characters.characters),
                 role_count=len(package.world.roles),
                 place_count=len(package.world.places),
                 rule_count=len(package.world.rules),

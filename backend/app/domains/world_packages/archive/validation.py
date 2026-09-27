@@ -16,7 +16,9 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, BadZipFile, ZipFile, ZipInfo
 from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2, upgrade_character
+from app.domains.world_packages.schemas.content_v3 import CharactersDocumentV3
 from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2
+from app.domains.world_packages.schemas.manifest_v3 import WorldPackageManifestV3
 
 from app.domains.world_packages.utils.canonical import (
     canonical_json_bytes,
@@ -225,10 +227,10 @@ def _validate_payloads(
     )
     if manifest_payload.get("format") != "angmoo-world-package":
         _fail(WorldPackageReasonCode.FORMAT_UNSUPPORTED)
-    if manifest_payload.get("format_version") not in {1, 2}:
+    if manifest_payload.get("format_version") not in {1, 2, 3}:
         _fail(WorldPackageReasonCode.FORMAT_UNSUPPORTED)
     try:
-        manifest_type = WorldPackageManifestV2 if manifest_payload["format_version"] == 2 else WorldPackageManifest
+        manifest_type = {1: WorldPackageManifest, 2: WorldPackageManifestV2, 3: WorldPackageManifestV3}[manifest_payload["format_version"]]
         manifest = manifest_type.model_validate(manifest_payload)
     except ValidationError as exc:
         raise WorldPackageContractError(WorldPackageReasonCode.ARCHIVE_INVALID) from exc
@@ -271,8 +273,8 @@ def _validate_payloads(
     if bool(icon_reference) != (WORLD_ICON_EXTENSION in manifest.required_extensions):
         _fail(WorldPackageReasonCode.CONTRACT_UNSUPPORTED)
     characters = _model(
-        CharactersDocumentV2 if manifest.format_version == 2 else CharactersDocument,
-        _read_entry(payloads["content/characters.json"], max_bytes=WorldPackagePolicy.MAX_CHARACTERS_JSON_BYTES if manifest.format_version == 2 else WorldPackagePolicy.MAX_JSON_ENTRY_BYTES),
+        {1: CharactersDocument, 2: CharactersDocumentV2, 3: CharactersDocumentV3}[manifest.format_version],
+        _read_entry(payloads["content/characters.json"], max_bytes=WorldPackagePolicy.MAX_CHARACTERS_JSON_BYTES if manifest.format_version >= 2 else WorldPackagePolicy.MAX_JSON_ENTRY_BYTES),
     )
     # Frozen v1 list items have no individual text budget. Validate their
     # lossless joined representation before preview, not after approval/seed.
@@ -395,7 +397,7 @@ def _model(model: Any, payload: bytes) -> Any:
     try:
         return model.model_validate(_strict_json(payload))
     except ValidationError as exc:
-        if model is CharactersDocumentV2:
+        if model in {CharactersDocumentV2, CharactersDocumentV3}:
             raise persona_validation_error(exc) from exc
         raise WorldPackageContractError(WorldPackageReasonCode.ARCHIVE_INVALID) from exc
 

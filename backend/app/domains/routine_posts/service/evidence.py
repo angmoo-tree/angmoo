@@ -9,6 +9,7 @@ from app.domains.routine_posts.contracts.context import RoutinePostContext
 from app.domains.routine_posts.contracts.generation import RoutineGeneration
 from app.domains.routine_posts.utils.text import _clip
 from app.domains.routine_posts.service.temporal_context import build_temporal_context, world_local_iso
+from app.domains.characters.policies.prompt_persona import model_persona, PERSONA_INTERPRETATION
 from app.domains.routines import service as activity_state_contracts
 from app.domains.routines.service import aware_utc
 from app.providers.gemini import build_gemini_developer_response_schema
@@ -53,6 +54,8 @@ def build_routine_prompt_context(
         "character": {
             "id": context.character.id,
             "name": _clip(context.character.name, 80),
+            "persona": model_persona(context.character),
+            "persona_interpretation": PERSONA_INTERPRETATION,
             "persona_summary": _clip(context.character.persona_summary, 1_500),
             "speech_style": _clip(context.character.speech_style, 800),
             "world_local_profile": context.world_character.local_profile or {},
@@ -129,6 +132,8 @@ def allowed_detail_keys(context: RoutinePostContext) -> list[str]:
         "world.daily_life_description",
         "world.tone_tags",
         "character.name",
+        "character.persona.description",
+        "character.persona.character_background",
         "character.persona_summary",
         "character.speech_style",
         "character.world_local_profile",

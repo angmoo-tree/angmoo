@@ -61,7 +61,7 @@ async function fixture(page: Page) {
       expect(body.api_key).toBeUndefined();
       draft = { id: "draft", revision: 1, contract_version: 2, target_world_id: body.target_world_id ?? "sns",
         source_kind: body.execution_mode === "local" ? "external" : "direct", status: "editing", provider: "google", model: "gemini-3.1-flash-lite",
-        name: "", handle: null, one_liner: "", personality: "", speech_style: "", worldview: "", topic_preferences: "", safety_rules: "",
+        name: "", handle: null, one_liner: "", personality: "", speech_style: "", worldview: "", character_background: "", topic_preferences: "", safety_rules: "",
         avatar_temp_url: null, banner_temp_url: null, expires_at: "2026-10-10T00:00:00Z" };
       return reply(draft);
     }
@@ -72,14 +72,16 @@ async function fixture(page: Page) {
     if (path === "/agents/drafts/draft/card") {
       expect(body.revision).toBe(draft.revision);
       draft = { ...draft, revision: draft.revision + 1, source_kind: "card", name: "Seraphina", personality: "", worldview: "원본 설명" };
-      return reply({ draft, card_version: 3, review: ["personality_required_review_description", "v3_common_fields_only"], raw_only: ["system_prompt"] });
+      return reply({ draft, card_version: 3, review: ["v3_common_fields_only"], raw_only: ["system_prompt"] });
     }
     if (path === "/agents/drafts/draft/copy-settings") {
       expect(body.character_id).toBe("source"); draft = { ...draft, revision: draft.revision + 1, source_kind: "copy", name: "복사 원본", personality: "차분함" }; return reply(draft);
     }
     if (path === "/agents/drafts/draft/card-source") return reply({ document: { data: { name: "Seraphina", system_prompt: "원본 전용 지침" } } });
     if (path === "/agents/drafts/draft/complete") {
-      expect(body.revision).toBe(draft.revision); draft.status = "completed";
+      expect(body.revision).toBe(draft.revision);
+      if (draft.source_kind !== "external") expect(draft.worldview.trim()).not.toBe("");
+      draft.status = "completed";
       return reply({ character: { id: "registered", name: draft.name, execution_mode: "llm" } });
     }
     return reply({ detail: `unexpected:${method}:${path}` }, 404);
@@ -97,12 +99,15 @@ for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436
     await page.getByRole("button", { name: "저장하고 다음" }).click();
     await page.getByRole("textbox", { name: "이름", exact: true }).fill("테스트 앵무");
     await page.getByRole("button", { name: "저장하고 다음" }).click();
-    await page.getByRole("textbox", { name: "성격", exact: true }).fill("차분하고 다정합니다.");
+    await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill("차분하고 다정하며 서점에서 일합니다.");
+    await expect(page.getByText("선택 상세 설정", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "저장하고 다음" }).click();
     await page.getByRole("button", { name: "저장하고 다음" }).click();
     await page.getByRole("button", { name: "자율활동 OFF로 등록" }).click();
     await expect(page.getByRole("heading", { name: "테스트 앵무 등록 완료" })).toBeVisible();
     expect(state.getDraft().target_world_id).toBe("sns");
+    expect(state.getDraft().personality).toBe("");
+    expect(state.getDraft().character_background).toBe("");
     expect(state.writes.some(row => /generate|enhance|credential|setup|activate/.test(row.path))).toBe(false);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
@@ -118,11 +123,16 @@ test("card review, manual correction, refresh and World target", async ({ page }
   await page.getByRole("button", { name: "원문 보기" }).click();
   await expect(page.getByText(/원본 전용 지침/)).toBeVisible();
   await page.getByRole("button", { name: "저장하고 다음" }).click();
-  await page.getByRole("textbox", { name: "성격", exact: true }).fill("사용자가 수정한 성격");
+  await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue("원본 설명");
+  await page.getByText("선택 상세 설정", { exact: true }).click();
+  await page.getByRole("textbox", { name: "캐릭터 배경·세계관", exact: true }).fill("별도 배경");
   await page.getByRole("button", { name: "초안 저장" }).click();
-  await expect.poll(() => state.getDraft().personality).toBe("사용자가 수정한 성격");
+  await expect.poll(() => state.getDraft().character_background).toBe("별도 배경");
   await page.reload();
   await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue("Seraphina");
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await expect(page.getByRole("textbox", { name: "캐릭터 배경·세계관", exact: true })).toHaveValue("별도 배경");
+  await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue("원본 설명");
   expect(state.getDraft().target_world_id).toBe("world-test");
   expect(state.writes.some(row => /generate|enhance/.test(row.path))).toBe(false);
 });

@@ -30,6 +30,7 @@ class AutonomousCharacterSeedData:
     topic_preferences: tuple[str, ...]
     safety_rules: tuple[str, ...]
     persona_summary: str
+    character_background: str = ""
     planned_handle: str | None = None
     avatar_url: str | None = None
     banner_url: str | None = None

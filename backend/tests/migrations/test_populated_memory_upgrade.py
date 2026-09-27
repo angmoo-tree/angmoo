@@ -34,7 +34,8 @@ def _rows(path):
         for name in TABLES:
             # Compare every historical column; v21 adds a separately checked icon.
             columns = [row[1] for row in connection.execute(f'PRAGMA table_info("{name}")')
-                       if not (name == 'worlds' and row[1] == 'icon_media_id')]
+                       if not (name == 'worlds' and row[1] == 'icon_media_id')
+                       and not (name == 'characters' and row[1] == 'character_background')]
             projection = ','.join(f'"{column}"' for column in columns)
             result[name] = connection.execute(f'SELECT {projection} FROM "{name}" ORDER BY id').fetchall()
         return result
@@ -61,6 +62,7 @@ def _seed(root):
             )
         with engine.begin() as connection:
             connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
+            connection.exec_driver_sql("ALTER TABLE characters ADD COLUMN character_background TEXT NOT NULL DEFAULT ''")
         with Session(engine) as session:
             scope = _seed_world(session)
             session.add_all([
@@ -90,6 +92,7 @@ def _seed(root):
             ])
             session.commit()
         with engine.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE characters DROP COLUMN character_background")
             connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
     finally:
         engine.dispose()

@@ -29,6 +29,7 @@ from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
 )
 from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
+from app.domains.world_characters.service import setup_validation as setup_contracts
 from app.runtime.world_characters import cleanup as setup_cleanup
 
 
@@ -435,6 +436,53 @@ def test_ready_same_hash_pair_is_reused_without_provider_calls() -> None:
         assert reused.autonomy_ready is True
         assert provider.profile_calls == 0
         assert provider.repertoire_calls == 0
+
+
+def test_approved_v1_preparation_is_reused_until_separate_background_changes() -> None:
+    engine = _engine()
+    with Session(engine, expire_on_commit=False) as db:
+        owner, world_character = _seed(db)
+        generated = _generate(db, owner=owner, provider=FakeProvider())
+        assert generated.profile is not None and generated.repertoire is not None
+        profile = db.get(models.WorldCommunityProfile, generated.profile.id)
+        repertoire = db.get(models.WorldActivityRepertoire, generated.repertoire.id)
+        character = db.get(models.Character, world_character.character_id)
+        legacy_hash = setup_contracts.legacy_character_contract_hash(character)
+        for record in (profile, repertoire):
+            record.character_contract_hash = legacy_hash
+            record.generator_version = "p2-world-character-generator-v1"
+        db.commit()
+
+        approved = world_character_setup.approve_setup(
+            db, world_character_id=world_character.id, user=owner,
+            data=schemas.WorldCharacterSetupApproveCreate(
+                idempotency_key="approve-legacy-preparation",
+                profile_id=profile.id, repertoire_id=repertoire.id,
+            ),
+        )
+        assert approved.autonomy_ready is True
+        provider = FakeProvider()
+        reused = _generate(db, owner=owner, provider=provider,
+            idempotency_key="reuse-legacy-preparation")
+        assert reused.reused is True
+        assert provider.profile_calls == provider.repertoire_calls == 0
+        from app.runtime.social.topic_preparation import load_scope
+        topic_scope = load_scope(db, world_id=world_character.world_id,
+            owner_id=owner.id, world_character_id=world_character.id)
+        assert topic_scope.source["character_hash"] == legacy_hash
+
+        character.character_background = "An independently authored earlier life"
+        db.commit()
+        current = world_character_setup.get_setup(
+            db, world_character_id=world_character.id, user=owner)
+        assert current.persona_changed is True
+        refreshed = _generate(db, owner=owner, provider=provider,
+            idempotency_key="generate-background-preparation")
+        assert refreshed.profile is not None
+        assert refreshed.profile.generator_version == "p2-world-character-generator-v2"
+        assert provider.profile_calls == provider.repertoire_calls == 1
+        assert profile.character_contract_hash == legacy_hash
+        assert profile.generator_version == "p2-world-character-generator-v1"
 
 
 def test_owner_controlled_identity_is_rejected_before_provider_or_writes() -> None:

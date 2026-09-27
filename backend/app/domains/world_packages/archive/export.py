@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from io import BytesIO
 from app.domains.world_packages.schemas.manifest_v2 import WorldPackageManifestV2, WorldPackageEntryV2
+from app.domains.world_packages.schemas.manifest_v3 import WorldPackageManifestV3
 import hashlib
 from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
@@ -86,16 +87,16 @@ class DeterministicWorldPackageZipArchive:
         elif license_text is not None:
             raise WorldPackageContractError(WorldPackageReasonCode.ARCHIVE_INVALID)
 
-        is_v2 = characters.schema_version == "characters-content-v2"
-        entries = [self._entry(path, content, is_v2=is_v2) for path, content in payloads.items()]
+        version = {"characters-content-v1": 1, "characters-content-v2": 2, "characters-content-v3": 3}[characters.schema_version]
+        entries = [self._entry(path, content, is_v2=version >= 2) for path, content in payloads.items()]
         entries.sort(key=lambda item: item.path)
-        manifest_type = WorldPackageManifestV2 if is_v2 else WorldPackageManifest
+        manifest_type = {1: WorldPackageManifest, 2: WorldPackageManifestV2, 3: WorldPackageManifestV3}[version]
         from app.domains.world_packages.contracts.world_icon import WORLD_ICON_EXTENSION, world_icon_reference
         manifest = manifest_type(
             required_extensions=[WORLD_ICON_EXTENSION] if world_icon_reference(world) else [],
             format="angmoo-world-package",
-            format_version=2 if is_v2 else 1,
-            schema_version="world-package-v2" if is_v2 else "world-package-v1",
+            format_version=version,
+            schema_version=f"world-package-v{version}",
             package_id=identity.package_id,
             package_version=package_version,
             created_at=identity.created_at,

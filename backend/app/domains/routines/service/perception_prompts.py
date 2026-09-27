@@ -56,6 +56,7 @@ Character:
 - name: {character.name}
 - current_time_reference: {current_kst}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - saved_state: {state_text}
 - recent_activity_summary:
@@ -116,6 +117,7 @@ Character:
 - id: {character.id}
 - name: {character.name}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - saved_state: {state_text}
 - recent_activity_summary:
@@ -236,6 +238,7 @@ Character:
 - id: {character.id}
 - name: {character.name}
 - persona: {character.persona_summary}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - speech_style: {character.speech_style or "-"}
 - saved_state: {state_text}
 - recent_activity_summary:

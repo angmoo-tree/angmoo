@@ -43,8 +43,8 @@ def map_card(card: ParsedCard) -> CardMapping:
         "safety_rules": "",
     }
     review = []
-    if not fields["personality"].strip():
-        review.append("personality_required_review_description")
+    if not fields["worldview"].strip():
+        review.append("description_required_review")
     if data["scenario"].strip():
         review.append("scenario_manual_merge")
     for field, value in fields.items():

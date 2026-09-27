@@ -65,7 +65,7 @@ def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):
     assert draft.contract_version == 2
     assert session.get(AgentCreationDraft, draft.id).encrypted_api_key is None
     changed = drafts.update_draft(session, owner, draft.id,
-        AgentCreationDraftUpdate(revision=draft.revision, name="하루", personality="호기심 많은 기자"), workflows=workflows)
+        AgentCreationDraftUpdate(revision=draft.revision, name="하루", worldview="호기심 많은 기자", personality="호기심 많은 기자"), workflows=workflows)
     # Detail presentation is independent of the atomic persistence contract.
     monkeypatch.setattr("app.runtime.characters.management.get_agent", lambda db, user, cid: db.get(Character, cid))
     data = AgentCreationDraftComplete(revision=changed.revision)
@@ -106,7 +106,7 @@ def test_registration_detail_is_readable_without_credential(db):
     workflows = build_creator_workflows()
     draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
     edited = drafts.update_draft(session, owner, draft.id,
-        AgentCreationDraftUpdate(revision=1, name="검증 앵무", personality="차분하고 꼼꼼하다"), workflows=workflows)
+        AgentCreationDraftUpdate(revision=1, name="검증 앵무", worldview="차분하고 꼼꼼한 앵무", personality="차분하고 꼼꼼하다"), workflows=workflows)
     result = drafts.complete_draft(session, owner, draft.id, AgentCreationDraftComplete(revision=edited.revision), workflows=workflows)
     assert result.credential is None
     assert result.settings.auto_enabled is False
@@ -135,7 +135,7 @@ def test_registration_failure_rolls_back_character_and_membership(db, monkeypatc
     session, owner = db
     workflows = build_creator_workflows()
     draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
-    edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(revision=1, name="롤백", personality="차분함"), workflows=workflows)
+    edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(revision=1, name="롤백", worldview="차분한 앵무", personality="차분함"), workflows=workflows)
     def fail(*args, **kwargs):
         raise RuntimeError("injected activity setting write failure")
     monkeypatch.setattr("app.runtime.characters.registration.ensure_setting", fail)
@@ -166,7 +166,7 @@ def test_two_independent_sessions_register_one_draft_once(db):
     workflows = build_creator_workflows()
     draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
     edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(
-        revision=1, name="동시 등록", personality="침착함"), workflows=workflows)
+        revision=1, name="동시 등록", worldview="침착한 앵무", personality="침착함"), workflows=workflows)
     draft_id, owner_id, revision = draft.id, owner.id, edited.revision
     session.commit()
     barrier = Barrier(2)
@@ -218,8 +218,13 @@ def test_legacy_draft_explicit_adoption_preserves_fields_and_never_attaches_key(
         AgentCreationDraftAdopt(revision=legacy.revision), workflows=workflows)
     assert result.name == "보존 초안" and result.contract_version == 2
     assert legacy.encrypted_api_key == "preserved-private-ciphertext"
+    with pytest.raises(AgentCreationDraftValidationError, match="캐릭터 설명"):
+        drafts.complete_draft(session, owner, legacy.id,
+            AgentCreationDraftComplete(revision=result.revision), workflows=workflows)
+    completed = drafts.update_draft(session, owner, legacy.id,
+        AgentCreationDraftUpdate(revision=result.revision, worldview="친절한 보존 앵무"), workflows=workflows)
     registered = drafts.complete_draft(session, owner, legacy.id,
-        AgentCreationDraftComplete(revision=result.revision), workflows=workflows)
+        AgentCreationDraftComplete(revision=completed.revision), workflows=workflows)
     assert registered.credential is None
     assert registered.settings.auto_enabled is False
     assert session.get(CharacterWorldBinding, registered.character.id).world_id == result.target_world_id
@@ -254,7 +259,7 @@ def test_http_keyless_register_replay_and_detail_use_real_persistence(db):
         assert created.status_code == 201, created.text
         draft = created.json()
         saved = client.patch(f"/api/v1/agents/drafts/{draft['id']}", json={
-            "revision": draft["revision"], "name": "HTTP 앵무", "personality": "다정하고 신중함"})
+            "revision": draft["revision"], "name": "HTTP 앵무", "worldview": "다정하고 신중한 앵무", "personality": "다정하고 신중함"})
         assert saved.status_code == 200, saved.text
         payload = {"revision": saved.json()["revision"]}
         done = client.post(f"/api/v1/agents/drafts/{draft['id']}/complete", json=payload)
@@ -294,7 +299,7 @@ def test_cancel_and_register_race_preserves_one_final_state(db):
     workflows = build_creator_workflows()
     draft = asyncio.run(drafts.create_draft(session, owner, AgentCreationDraftCreate(), workflows=workflows))
     edited = drafts.update_draft(session, owner, draft.id, AgentCreationDraftUpdate(
-        revision=draft.revision, name="취소 경합", personality="침착함"), workflows=workflows)
+        revision=draft.revision, name="취소 경합", worldview="침착한 앵무", personality="침착함"), workflows=workflows)
     draft_id, owner_id, revision = draft.id, owner.id, edited.revision
     session.commit()
     barrier = Barrier(2)

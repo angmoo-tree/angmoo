@@ -31,6 +31,7 @@ class ChatCharacter(Protocol):
     personality: str
     speech_style: str
     worldview: str
+    character_background: str
     topic_preferences: str
     safety_rules: str
     persona_summary: str

@@ -51,11 +51,11 @@ def register_draft(db, user, draft, data):
         raise AgentCreationDraftHandleConflictError("draft_revision_conflict")
     if data.activity_interval_minutes is not None or data.active_hours_start is not None or data.promotion_usage_allowed:
         raise AgentCreationDraftValidationError("실행 설정은 등록 후 활동 준비에서 지정해주세요.")
-    if not draft.name.strip() or (draft.source_kind != "external" and not draft.personality.strip()):
-        raise AgentCreationDraftValidationError("이름과 성격을 입력해주세요.")
+    if not draft.name.strip() or (draft.source_kind != "external" and not draft.worldview.strip()):
+        raise AgentCreationDraftValidationError("이름과 캐릭터 설명을 입력해주세요.")
     try:
         schemas.AgentCreationDraftUpdate(**{key: getattr(draft, key) for key in (
-            "name", "one_liner", "personality", "speech_style", "worldview", "topic_preferences", "safety_rules")})
+            "name", "one_liner", "personality", "speech_style", "worldview", "character_background", "topic_preferences", "safety_rules")})
     except ValueError as exc:
         raise AgentCreationDraftValidationError("항목별 길이를 확인해주세요.") from exc
     if name_policy.is_blocked_name(draft.name):
@@ -79,7 +79,8 @@ def register_draft(db, user, draft, data):
             raise AgentCreationDraftHandleConflictError("registration_conflict")
         character = models.Character(id=character_id, owner_id=user.id, name=draft.name.strip(), handle=handle,
             one_liner=draft.one_liner, personality=draft.personality, speech_style=draft.speech_style,
-            worldview=draft.worldview, topic_preferences=draft.topic_preferences, safety_rules=draft.safety_rules,
+            worldview=draft.worldview, character_background=draft.character_background,
+            topic_preferences=draft.topic_preferences, safety_rules=draft.safety_rules,
             status="inactive", execution_mode="local" if draft.source_kind == "external" else "llm", persona_summary="")
         character.persona_summary = profile._build_persona_summary(character)
         for kind in ("avatar", "banner"):

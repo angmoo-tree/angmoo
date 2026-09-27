@@ -263,6 +263,9 @@ def update_persona(
     except errors.PromptInjectionDetectedError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
+    except errors.AgentPersonaValidationError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
 @router.put("/{character_id}/promotion-usage", response_model=schemas.AgentDetailRead)
 def update_promotion_usage(
     character_id: str,

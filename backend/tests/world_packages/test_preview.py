@@ -279,6 +279,8 @@ def test_valid_package_reaches_preview_ready_without_canonical_writes(
     assert prepared.preview.state is WorldPackageImportState.PREVIEW_READY
     assert prepared.preview.trust_state is WorldPackageTrustState.CHECKSUM_VERIFIED_UNSIGNED
     assert prepared.preview.character_names == ("망고",)
+    assert prepared.preview.character_settings[0]["description"]
+    assert prepared.preview.character_settings[0]["character_background"] == ""
     assert prepared.preview.collision_plan.planned_world_slug
     assert prepared.preview.excluded_runtime_records == 0
     assert (canonical / "sentinel").read_text(encoding="utf-8") == "unchanged"

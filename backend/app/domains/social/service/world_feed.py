@@ -93,7 +93,7 @@ def load_ready_search_profile(
         profile = references.ready_profile(world_character.id)
         if profile is None:
             raise WorldFeedReadinessError("world_community_profile_not_ready")
-        character_hash = references.character_hash(character)
+        character_hash = references.character_hash_for_record(character, profile)
         if (world_character.character_contract_hash != character_hash
             or world_character.world_contract_hash != world.contract_hash
             or profile.character_contract_hash != character_hash
@@ -156,7 +156,7 @@ def feed_readiness(db: Session, *, references: WorldFeedReferences, world_charac
     except WorldFeedReadinessError as exc:
         return FeedReadinessRead(state="unsupported" if exc.reason_code == "feed_runtime_mode_not_enabled" else "blocked",
                                  reason_code=exc.reason_code, checked_at=checked_at)
-    changed = references.character_hash(profile.character) != profile.profile.character_contract_hash
+    changed = references.character_hash_for_record(profile.character, profile.profile) != profile.profile.character_contract_hash
     disabled = profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled
     return FeedReadinessRead(state="disabled" if disabled else "ready",
         reason_code=("imported_locked" if profile.imported_world_runtime_locked else "autonomy_disabled") if disabled else None,

@@ -189,6 +189,23 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
         <Value label="예정 slug" value={preview.collision_plan.planned_world_slug} />
       </dl>
 
+      {preview.character_settings?.length ? (
+        <details className="mt-5 rounded-[20px] border border-border p-5">
+          <summary className="cursor-pointer font-black text-foreground">가져올 캐릭터 설정 확인</summary>
+          <div className="mt-4 space-y-5">
+            {preview.character_settings.map((character, index) => (
+              <div className="space-y-2" key={`${character.name}-${index}`}>
+                <h4 className="font-bold text-foreground">{character.name}</h4>
+                <p className="text-sm font-semibold text-muted-foreground">캐릭터 설명</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.description || "설명 없음"}</p>
+                <p className="text-sm font-semibold text-muted-foreground">캐릭터 배경·세계관</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.character_background || "별도 설정 없음"}</p>
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
+
       <div className="mt-5 grid gap-5 md:grid-cols-2">
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
           <h3 className="font-black text-[#101828]">라이선스·출처</h3>

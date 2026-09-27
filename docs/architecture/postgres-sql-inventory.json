@@ -364,7 +364,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/character_lore/service/documents.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1fa5eace2826ca86f1b0f160cb7d2c93804605223e39ba3c5943b4790af87f5e",
+      "source_sha256": "611023887249d484a75ae7ee6f38d1d7537486baca42e7327dd39284f6606b8f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1147,7 +1147,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/service/world_feed.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f95088ddc1cfe12044c0fc7ad32c2512c9615690a1ee0738a602de79f21046b0",
+      "source_sha256": "9f481fb0acf78786927b3121bd9fabb78ce0e83629c0e72028d1b7b2062ca7d2",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1184,14 +1184,14 @@
           324,
           395,
           438,
-          961,
-          973
+          981,
+          993
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7d48f3dd139a1e76660dc6b311d959f04efd4c988fb32f3eb2873803023155fa",
+      "source_sha256": "1f8164bd91e03eda3d474295846abf8fc75f37632b0cb9b434fcdde9c52f7313",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1351,15 +1351,15 @@
           108,
           109,
           110,
-          339,
           340,
-          341
+          341,
+          342
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "3f8232f6d429caa6866186149c6adfcb8d0f98f462cf36e22575c8dd412f9183",
+      "source_sha256": "4fe621c31f2caa4cbd08cb12251117cdd8a601f949503c369e467d7b207cd0b3",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

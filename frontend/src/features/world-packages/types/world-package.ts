@@ -58,6 +58,7 @@ export type WorldPackageImportPreview = {
   world_name: string;
   world_tagline: string;
   character_names: string[];
+  character_settings?: Array<{ name: string; description: string; character_background: string }>;
   role_count: number;
   place_count: number;
   rule_count: number;

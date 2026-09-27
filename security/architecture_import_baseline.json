@@ -1,7 +1,7 @@
 {
-  "edge_count": 5095,
-  "external_import_count": 3744,
-  "module_count": 1276,
+  "edge_count": 5111,
+  "external_import_count": 3753,
+  "module_count": 1281,
   "modules": [
     {
       "external_imports": [],
@@ -1048,6 +1048,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.characters.policies.prompt_persona",
+      "path": "backend/app/domains/characters/policies/prompt_persona.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.characters.repository",
@@ -1437,6 +1448,7 @@
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.characters.schemas"
       ],
       "module": "app.domains.characters.service.profile",
@@ -2615,6 +2627,7 @@
       ],
       "imports": [
         "app.core.prompt_safety",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.chat.contracts.context",
         "app.domains.chat.exceptions",
         "app.domains.chat.models",
@@ -6918,6 +6931,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.routine_posts.constants",
         "app.domains.routine_posts.contracts.context",
         "app.domains.routine_posts.contracts.generation",
@@ -11133,6 +11147,7 @@
       ],
       "imports": [
         "app.core.context_text",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.social.constants",
         "app.domains.social.contracts.world_feed",
         "app.domains.social.schemas.feed"
@@ -11259,6 +11274,7 @@
       ],
       "imports": [
         "app.core.image_generation",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.social.constants",
         "app.domains.social.contracts.image_generation"
       ],
@@ -12682,6 +12698,7 @@
         "unicodedata"
       ],
       "imports": [
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.world_characters.contracts.setup",
         "app.domains.world_characters.exceptions",
         "app.domains.world_characters.models",
@@ -12766,6 +12783,7 @@
         "app.domains.world_packages.schemas.content",
         "app.domains.world_packages.schemas.manifest",
         "app.domains.world_packages.schemas.manifest_v2",
+        "app.domains.world_packages.schemas.manifest_v3",
         "app.domains.world_packages.utils.canonical"
       ],
       "module": "app.domains.world_packages.archive.export",
@@ -12797,8 +12815,10 @@
         "app.domains.world_packages.policies.license",
         "app.domains.world_packages.schemas.content",
         "app.domains.world_packages.schemas.content_v2",
+        "app.domains.world_packages.schemas.content_v3",
         "app.domains.world_packages.schemas.manifest",
         "app.domains.world_packages.schemas.manifest_v2",
+        "app.domains.world_packages.schemas.manifest_v3",
         "app.domains.world_packages.storage.staging",
         "app.domains.world_packages.utils.canonical",
         "app.domains.worlds.contracts",
@@ -13127,6 +13147,19 @@
     },
     {
       "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.policies.persona",
+        "app.domains.world_packages.schemas.content_v2"
+      ],
+      "module": "app.domains.world_packages.schemas.content_v3",
+      "path": "backend/app/domains/world_packages/schemas/content_v3.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -13170,6 +13203,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_packages.schemas.manifest_v2"
+      ],
+      "module": "app.domains.world_packages.schemas.manifest_v3",
+      "path": "backend/app/domains/world_packages/schemas/manifest_v3.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_packages.schemas.v1",
@@ -13181,6 +13225,13 @@
       "imports": [],
       "module": "app.domains.world_packages.schemas.v2",
       "path": "backend/app/domains/world_packages/schemas/v2/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.world_packages.schemas.v3",
+      "path": "backend/app/domains/world_packages/schemas/v3/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -13225,7 +13276,7 @@
         "app.domains.world_packages.policies.archive",
         "app.domains.world_packages.policies.license",
         "app.domains.world_packages.schemas.content",
-        "app.domains.world_packages.schemas.content_v2",
+        "app.domains.world_packages.schemas.content_v3",
         "app.domains.world_packages.schemas.manifest"
       ],
       "module": "app.domains.world_packages.service.export",
@@ -14740,6 +14791,7 @@
       "imports": [
         "app.config",
         "app.domains.characters.models",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.relationships.contracts.graph_recall",
         "app.domains.relationships.service.graph_recall",
         "app.domains.relationships.service.social_context",
@@ -17013,6 +17065,19 @@
     {
       "external_imports": [
         "__future__",
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.character_background_v22",
+      "path": "backend/app/runtime/migrations/sqlite_versions/character_background_v22.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "dataclasses",
         "sqlalchemy",
@@ -17063,6 +17128,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.runtime.migrations.sqlite_versions.character_background_v22",
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.creator_v21",
         "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
@@ -18020,6 +18086,7 @@
         "app.core.redaction",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.policies.prompt_persona",
         "app.domains.identity.contracts",
         "app.domains.identity.exceptions",
         "app.domains.identity.models",
@@ -19700,7 +19767,7 @@
         "app.domains.world_packages.contracts.seed",
         "app.domains.world_packages.exceptions",
         "app.domains.world_packages.schemas.content",
-        "app.domains.world_packages.schemas.content_v2",
+        "app.domains.world_packages.schemas.content_v3",
         "app.domains.world_packages.service.export_projection",
         "app.domains.world_packages.utils.canonical",
         "app.domains.worlds.contracts",

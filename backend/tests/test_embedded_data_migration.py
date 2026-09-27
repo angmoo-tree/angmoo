@@ -407,6 +407,9 @@ def _seed_v2_roleless(
                     for index in historical.indexes:
                         connection.execute(CreateIndex(index))
                 connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
+                # v22 adds this column to the still-surviving Character table.
+                # A reconstructed v2 predecessor must not retain it.
+                connection.exec_driver_sql('ALTER TABLE characters DROP COLUMN character_background')
                 for name in reversed(ACTIVITY_V19_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):

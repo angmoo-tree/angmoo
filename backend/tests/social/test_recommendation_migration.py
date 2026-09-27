@@ -51,8 +51,9 @@ def test_populated_v14_to_v16_matches_fresh_and_keeps_switches():
     with engine.begin() as connection:
         create_schema_version_table(connection)
         assert sqlite_schema_contract_digest(connection) == load_manifest(14).schema_digest
-        # Permit the current shared ORM seeder, then restore the exact v14 table.
+        # Permit the current shared ORM seeder, then restore the exact v14 tables.
         connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
+        connection.exec_driver_sql("ALTER TABLE characters ADD COLUMN character_background TEXT NOT NULL DEFAULT ''")
     with Session(engine) as db:
         owner = _user("migrate")
         db.add(owner); db.flush()
@@ -63,6 +64,7 @@ def test_populated_v14_to_v16_matches_fresh_and_keeps_switches():
         db.commit()
     with engine.begin() as connection:
         connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
+        connection.exec_driver_sql("ALTER TABLE characters DROP COLUMN character_background")
         assert sqlite_schema_contract_digest(connection) == load_manifest(14).schema_digest
         before = capture_delta(connection)
         upgrade(connection)

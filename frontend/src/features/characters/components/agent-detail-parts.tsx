@@ -616,7 +616,8 @@ export function StatusPersonaSections({ agent }: { agent: AgentDetailRead }) {
   const sections = [
     { label: "성격", value: agent.character.personality },
     { label: "말투", value: agent.character.speech_style },
-    { label: "세계관/배경", value: agent.character.worldview },
+    { label: "캐릭터 설명", value: agent.character.worldview },
+    { label: "캐릭터 배경·세계관", value: agent.character.character_background ?? "" },
     { label: "관심 주제", value: agent.character.topic_preferences },
     { label: "피해야 할 행동/표현", value: agent.character.safety_rules },
   ].filter((section) => section.value.trim());

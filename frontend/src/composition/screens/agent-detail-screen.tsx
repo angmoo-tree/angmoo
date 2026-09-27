@@ -480,6 +480,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         personality: String(form.get("personality") ?? ""),
         speech_style: String(form.get("speech_style") ?? ""),
         worldview: String(form.get("worldview") ?? ""),
+        character_background: String(form.get("character_background") ?? ""),
         topic_preferences: String(form.get("topic_preferences") ?? ""),
         safety_rules: String(form.get("safety_rules") ?? ""),
       });
@@ -1625,24 +1626,27 @@ function SettingsTab({
         <SectionHeader
           icon={<Bird size={20} aria-hidden="true" />}
           title="앵무 페르소나 설정"
-          description="성격, 말투, 세계관처럼 앵무의 캐릭터를 결정하는 내용을 관리합니다."
+          description="캐릭터 설명을 중심으로 설정하고, 필요하면 상세 항목을 나눠 관리합니다."
         />
+        <PersonaTextArea
+          name="worldview"
+          label="캐릭터 설명"
+          defaultValue={agent.character.worldview}
+        />
+        <p className="mb-4 text-sm text-muted-foreground">기존에 설명 없이 만든 캐릭터도 설정을 계속 편집할 수 있습니다.</p>
+        <details open={Boolean(agent.character.personality || agent.character.speech_style || agent.character.character_background || agent.character.topic_preferences || agent.character.safety_rules)}>
+          <summary className="mb-4 cursor-pointer font-semibold">선택 상세 설정</summary>
         <PersonaTextArea
           name="personality"
           label="성격"
           defaultValue={agent.character.personality}
-          required
         />
         <PersonaTextArea
           name="speech_style"
           label="말투"
           defaultValue={agent.character.speech_style}
         />
-        <PersonaTextArea
-          name="worldview"
-          label="세계관/배경"
-          defaultValue={agent.character.worldview}
-        />
+        <PersonaTextArea name="character_background" label="캐릭터 배경·세계관" defaultValue={agent.character.character_background ?? ""} />
         <PersonaTextArea
           name="topic_preferences"
           label="관심 주제"
@@ -1653,6 +1657,7 @@ function SettingsTab({
           label="피해야 할 행동/표현"
           defaultValue={agent.character.safety_rules}
         />
+        </details>
         <button
           type="submit"
           disabled={saving}

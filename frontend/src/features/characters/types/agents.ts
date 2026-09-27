@@ -265,6 +265,7 @@ export type AgentCreateInput = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
   provider: string;
@@ -288,6 +289,7 @@ export type AgentPersonaInput = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
 };
@@ -324,6 +326,7 @@ export type AgentCreationDraftRead = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
   image_style: string;
@@ -346,6 +349,7 @@ export type AgentCreationDraftUpdateInput = Partial<
     | "personality"
     | "speech_style"
     | "worldview"
+    | "character_background"
     | "topic_preferences"
     | "safety_rules"
     | "appearance_prompt"

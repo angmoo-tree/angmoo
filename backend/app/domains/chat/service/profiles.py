@@ -64,6 +64,7 @@ def _response_profile(character: ChatCharacter) -> CharacterResponseProfile:
         personality=character.personality,
         speech_style=character.speech_style,
         worldview=character.worldview,
+        character_background=getattr(character, "character_background", ""),
         topic_preferences=character.topic_preferences,
         safety_rules=character.safety_rules,
     )

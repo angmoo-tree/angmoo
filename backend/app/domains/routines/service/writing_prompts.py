@@ -116,6 +116,7 @@ Character persona:
 - personality: {character.personality or "-"}
 - speech_style: {character.speech_style or "-"}
 - worldview/background: {character.worldview or "-"}
+- character_background: {getattr(character, "character_background", "") or "-"}
 - topic_preferences: {character.topic_preferences or "-"}
 - safety_rules: {character.safety_rules or "-"}{memory_context_section}{lore_context_section}
 

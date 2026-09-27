@@ -72,6 +72,7 @@ class Character(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    character_background: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
     owner: Mapped["User"] = relationship(
         back_populates="characters", foreign_keys=[owner_id]
@@ -161,6 +162,7 @@ class AgentCreationDraft(Base):
     thinking_level: Mapped[str] = mapped_column(
         String(8), nullable=False, default="high", server_default="high"
     )
+    character_background: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
 
 class CharacterCardSource(Base):

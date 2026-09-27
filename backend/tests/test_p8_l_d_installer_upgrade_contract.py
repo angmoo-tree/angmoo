@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", tuple(range(1, 21)))
+@pytest.mark.parametrize("source_version", tuple(range(1, 22)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -141,7 +141,7 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 21
+    assert fixture["target_data_version"] == 22
     assert fixture["target_table_count"] == 137
     if source_version == 8:
         assert fixture["generation"] == (
