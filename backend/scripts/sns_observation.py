@@ -1,7 +1,9 @@
 """Start, inspect and export a bounded local SNS V2 observation session.
 
 Run this against the same resolved data root as the embedded backend. The
-command never starts autonomous activity or calls an AI provider.
+command never starts autonomous activity or calls an AI provider. New sessions
+write diagnostic schema 3; export also reads historical schema 1 and 2.
+Request evidence and SQLite write attempts are separate from recording coverage.
 """
 
 from __future__ import annotations

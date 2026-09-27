@@ -111,6 +111,131 @@ def test_session_captures_validation_failure_without_payload_and_exports_read_on
     assert (destination / "report.md").is_file()
 
 
+def test_schema3_exports_bounded_request_and_sqlite_evidence(data_root, tmp_path):
+    now = datetime.now(UTC)
+    _insert_run(data_root, activity_id="activity-schema3", started_at=now)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    assert manifest["schema_version"] == 3
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="activity-schema3", agent_run_id="lease-schema3",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        config = {"node": "RoutineDecisionDraft", "lane": "routine", "call_order_in_run": 1,
+            "provider_call_order_in_run": 1, "capture_boundary": "sdk_input", "model": "gemini-test",
+            "schema_field": "responseJsonSchema", "schema_status": "redacted",
+            "schema_sha256_ordered_v1": "a" * 64, "schema_bytes": 128,
+            "schema_redacted_count": 1,
+            "schema_snapshot": {"type": "object", "properties": {"body": {"type": "string"}}},
+            "system_sha256": "b" * 64, "system_chars": 20,
+            "user_sha256": "c" * 64, "user_chars": 30}
+        attempt.tracker_event("request_config", config)
+        attempt.tracker_event("request_config", config)  # Content-addressed deduplication.
+        attempt.tracker_event("call", {"node": "RoutineDecisionDraft", "lane": "routine",
+            "call_order_in_run": 1, "provider_call_order_in_run": 1, "status": "error",
+            "provider_error": {"provider_http_status": 400, "provider_status": "INVALID_ARGUMENT",
+                "provider_detail_status": "absent", "details_present": False}})
+        attempt.tracker_event("sqlite_write", {"unit": "S1", "lane": "inbox", "node": "Settle",
+            "result": "committed", "attempt": 2, "sqlite_code": 5,
+            "business_key_hash": "d" * 64})
+        observer.queue.join()
+    finally:
+        observer.close()
+    destination = tmp_path / "schema3-export"
+    coverage = export_session(data_root, manifest["session_id"], destination=destination)
+    assert coverage["request_evidence_complete"] is True
+    assert coverage["artifact_missing_count"] == 0
+    assert coverage["sqlite_write_event_count"] == 1
+    artifacts = list((destination / "artifacts" / "schemas").glob("*.json"))
+    assert len(artifacts) == 1
+    assert "private-user-body" not in artifacts[0].read_text(encoding="utf-8")
+    calls = (destination / "calls.jsonl").read_text(encoding="utf-8")
+    assert '"provider_detail_status":"absent"' in calls
+    assert '"unit":"S1"' in (destination / "sqlite-writes.jsonl").read_text(encoding="utf-8")
+
+
+def test_schema3_rejects_corrupt_artifact_during_export(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="activity-corrupt", agent_run_id="lease-corrupt",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        attempt.tracker_event("request_config", {"node": "RoutineDecisionDraft", "lane": "routine",
+            "call_order_in_run": 1, "schema_status": "redacted",
+            "schema_snapshot": {"type": "object"}})
+        observer.queue.join()
+    finally:
+        observer.close()
+    artifact = next((data_root / "diagnostics" / "sns" / manifest["session_id"] /
+                     "artifacts" / "schemas").glob("*.json"))
+    artifact.write_text("{}", encoding="utf-8")
+    result = export_session(data_root, manifest["session_id"], destination=tmp_path / "corrupt")
+    assert result["artifact_missing_count"] == 1
+    assert result["request_evidence_complete"] is False
+
+
+def test_schema3_large_artifact_is_reported_as_truncated_without_stopping_activity(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="activity-large", agent_run_id="lease-large",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        attempt.tracker_event("request_config", {"node": "RoutineDecisionDraft", "lane": "routine",
+            "call_order_in_run": 1, "schema_status": "redacted",
+            "schema_snapshot": {"very_large_safe_structure": "x" * (65 * 1024)}})
+        observer.queue.join()
+    finally:
+        observer.close()
+    result = export_session(data_root, manifest["session_id"], destination=tmp_path / "large")
+    assert result["artifact_truncated_count"] == 1
+    assert result["request_evidence_complete"] is False
+    assert result["dropped_events"] == 0
+
+
+def test_schema3_export_rejects_artifact_path_outside_session(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="activity-path", agent_run_id="lease-path",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        attempt.tracker_event("request_config", {"node": "RoutineDecisionDraft", "lane": "routine",
+            "call_order_in_run": 1, "schema_status": "redacted",
+            "schema_snapshot": {"type": "object"}})
+        observer.queue.join()
+    finally:
+        observer.close()
+    session_dir = data_root / "diagnostics" / "sns" / manifest["session_id"]
+    for path in session_dir.glob("events-*.jsonl"):
+        lines = []
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            event = json.loads(raw)
+            if event.get("event_type") == "request_config":
+                event["details"]["artifact_relpath"] = "../../outside-secret.json"
+            lines.append(json.dumps(event))
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    result = export_session(data_root, manifest["session_id"], destination=tmp_path / "path")
+    assert result["artifact_missing_count"] == 1
+    assert not (tmp_path / "path" / "outside-secret.json").exists()
+
+
+@pytest.mark.parametrize("schema_version", [1, 2])
+def test_legacy_session_reports_request_evidence_not_recorded(data_root, tmp_path, schema_version):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    source = data_root / "diagnostics" / "sns" / manifest["session_id"] / "manifest.json"
+    legacy = dict(manifest, schema_version=schema_version,
+                  event_schema_version=schema_version)
+    source.write_text(json.dumps(legacy), encoding="utf-8")
+    result = export_session(data_root, manifest["session_id"], destination=tmp_path / "legacy")
+    assert result["request_evidence_complete"] == "not_recorded_in_schema_version"
+
+
 def test_export_separates_recovered_planner_output_from_final_failure(data_root, tmp_path):
     now = datetime.now(UTC)
     _insert_run(data_root, activity_id="recovered-activity", started_at=now)

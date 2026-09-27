@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from contextlib import closing
 import csv
 from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 import json
 from pathlib import Path
 import shutil
@@ -107,7 +108,9 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
                 "source_revision": source_revision or "unknown",
                 "database_relative_path": db_path.relative_to(data_root).as_posix(),
                 "initial_slots": slots, "event_schema_version": SCHEMA_VERSION,
-                "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024}
+                "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024,
+                "artifact_limit_bytes": 64 * 1024,
+                "artifact_session_limit_bytes": 16 * 1024 * 1024}
     directory = session_path(data_root, session_id)
     directory.mkdir(parents=True, exist_ok=False)
     probe = directory / ".write-probe"
@@ -170,7 +173,7 @@ def _events(directory: Path, session_id: str) -> tuple[list[dict], int]:
             for line in source:
                 try:
                     event = json.loads(line)
-                    if event.get("session_id") == session_id and event.get("schema_version") in {1, 2}:
+                    if event.get("session_id") == session_id and event.get("schema_version") in {1, 2, 3}:
                         events.append(event)
                     else:
                         damaged += 1
@@ -298,6 +301,59 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         if item.get("caused_by_event_id"):
             continue  # A lane/parent/activity wrapper of the original failure.
         errors.append(item)
+    request_events = [item for item in events if item.get("event_type") == "request_config"]
+    sqlite_events = [item for item in events if item.get("event_type") == "sqlite_write"]
+    artifact_missing = 0
+    artifact_truncated = 0
+    redactions = 0
+    artifact_valid: dict[str, bytes] = {}
+    for item in request_events:
+        details = item.get("details") or {}
+        redactions += int(details.get("schema_redacted_count") or 0)
+        artifact_status = details.get("artifact_status")
+        if artifact_status == "truncated":
+            artifact_truncated += 1
+        if artifact_status != "stored":
+            if details.get("schema_status") not in {"absent", "unavailable"} and artifact_status != "truncated":
+                artifact_missing += 1
+            continue
+        relative = details.get("artifact_relpath")
+        digest_hex = details.get("artifact_sha256")
+        if (not isinstance(relative, str) or not isinstance(digest_hex, str)
+            or relative != f"artifacts/schemas/{digest_hex}.json"
+            or len(digest_hex) != 64 or any(c not in "0123456789abcdef" for c in digest_hex)):
+            artifact_missing += 1
+            continue
+        path = directory / relative
+        try:
+            if (path.is_symlink() or not path.is_file()
+                or not path.resolve(strict=True).is_relative_to(directory.resolve())
+                or path.stat().st_size > 64 * 1024):
+                artifact_missing += 1
+                continue
+            data = path.read_bytes()
+        except (OSError, ValueError):
+            artifact_missing += 1
+            continue
+        if len(data) != details.get("artifact_bytes") or sha256(data).hexdigest() != digest_hex:
+            artifact_missing += 1
+            continue
+        artifact_valid[relative] = data
+    call_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                  (item.get("details") or {}).get("call_order")) for item in call_events
+                 if item.get("event_type") == "llm_call"}
+    request_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                     (item.get("details") or {}).get("call_order")) for item in request_events}
+    request_evidence_complete = (call_keys <= request_keys and artifact_missing == 0
+        and artifact_truncated == 0) if manifest["schema_version"] >= 3 else "not_recorded_in_schema_version"
+    failures_by_node = {(item.get("activity_id"), item.get("agent_run_id"), item.get("node")): item
+        for item in call_events if item.get("event_type") == "llm_call"
+        and (item.get("details") or {}).get("status") == "error"}
+    for item in errors:
+        call = failures_by_node.get((item.get("activity_id"), item.get("agent_run_id"), item.get("node")))
+        if call is not None:
+            item["provider_call_event_id"] = call.get("event_id")
+            item["provider_error"] = (call.get("details") or {}).get("provider_error")
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for item in errors:
         details = item.get("details") or {}
@@ -387,7 +443,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                  "pending_events": pending, "control_event_count": sum(item.get("event_type") in control_types for item in events),
                  "scheduler_run_count": len(scheduler_runs),
                  "scheduler_statuses": dict(Counter(row["status"] for row in scheduler_runs)),
-                 "complete_recording": manifest["schema_version"] == 2 and tail_elapsed
+                 "request_evidence_complete": request_evidence_complete,
+                 "artifact_missing_count": artifact_missing,
+                 "artifact_truncated_count": artifact_truncated,
+                 "diagnostic_redaction_count": redactions,
+                 "request_evidence_count": len(request_events),
+                 "sqlite_write_event_count": len(sqlite_events),
+                 "complete_recording": manifest["schema_version"] in {2, 3} and tail_elapsed
                      and not stopped_early and flush_complete is True and bool(ticks)
                      and not gaps and not damaged and not dropped and pending == 0,
                 "observed_any_activity": bool(runs),
@@ -399,6 +461,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     _jsonl(destination / "scheduler.jsonl", scheduler_runs)
     _jsonl(destination / "errors.jsonl", errors)
     _jsonl(destination / "calls.jsonl", call_events)
+    _jsonl(destination / "request-evidence.jsonl", request_events)
+    _jsonl(destination / "sqlite-writes.jsonl", sqlite_events)
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
     _atomic_json(destination / "coverage.json", coverage)
@@ -406,6 +470,10 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     events_dir.mkdir(exist_ok=True)
     for path in directory.glob("events-*.jsonl"):
         shutil.copyfile(path, events_dir / path.name)
+    for relative, data in artifact_valid.items():
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
     with (destination / "errors.csv").open("w", encoding="utf-8", newline="") as output:
         columns = ("lane", "node", "error", "validation_code", "field_path", "field_type",
                    "count", "activity_count", "first_at", "last_at")
@@ -418,6 +486,11 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
              f"recorded errors: {len(errors)}; diagnostic events: {len(events)}.",
              f"Recording complete: {'yes' if coverage['complete_recording'] else 'no/unknown'}; "
              f"dropped: {dropped}; damaged lines: {damaged}.", "", "## Lane outcomes", ""]
+    lines.extend(["", "## Request and SQLite diagnostics", "",
+        f"- Request evidence complete: {request_evidence_complete}; request records: {len(request_events)}; "
+        f"missing artifacts: {artifact_missing}; truncated artifacts: {artifact_truncated}.",
+        f"- SQLite write events: {len(sqlite_events)}. Count storage retries separately from provider calls.",
+        "- Generic provider errors without BadRequest fields leave the rejected argument unconfirmed."])
     for lane, statuses in lane_counts.items():
         lines.append(f"- {lane}: {dict(statuses) if statuses else 'NOT_OBSERVED'}")
     lines.extend(["", "## Scheduler attempts", "",

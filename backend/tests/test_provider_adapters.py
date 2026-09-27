@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
@@ -14,6 +15,7 @@ from app.providers.contracts import (
 )
 from app.providers.fake import FakeProviderAdapter
 from app.providers.gemini import GeminiAdapter, _finish_reason_from_response
+from app.providers import gemini
 from app.providers.registry import get_model_spec, normalize_provider_name
 
 
@@ -130,3 +132,61 @@ def test_gemini_finish_reason_missing_and_unknown_are_not_success(reason, expect
     response = SimpleNamespace(candidates=[SimpleNamespace(finish_reason=reason)])
     assert _finish_reason_from_response(response) == expected
     assert _finish_reason_from_response(SimpleNamespace(candidates=[])) is None
+
+
+@pytest.mark.parametrize("source_count", [0, 1, 2, 3, 5, 6])
+def test_gemini_request_evidence_matches_sdk_input_without_prompt_or_enum_values(monkeypatch, source_count):
+    received = []
+    evidence = []
+
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+
+        class models:
+            @staticmethod
+            def generate_content(**kwargs):
+                received.append(kwargs)
+                return SimpleNamespace(text="ok", parsed={"ok": True},
+                    usage_metadata=None, candidates=[])
+
+    monkeypatch.setattr(gemini.genai, "Client", Client)
+    secret = "private-prompt-body"
+    schema = {"type": "object", "properties": {"source": {
+        "type": "string", "enum": [f"private-source-{index}" for index in range(source_count)]}},
+        "required": ["source"]}
+    request = replace(_request(), system_prompt=secret, user_prompt=secret,
+        response_schema=schema, response_mime_type="application/json",
+        diagnostic_callback=evidence.append)
+    gemini._generate_content_sync(request)
+    assert len(received) == len(evidence) == 1
+    actual = received[0]["config"].model_dump(by_alias=True, exclude_none=True)
+    assert actual["responseJsonSchema"] == schema
+    assert evidence[0]["schema_field"] == "responseJsonSchema"
+    assert evidence[0]["schema_counts"]["enum_values"] == source_count
+    assert evidence[0]["system_chars"] == len(secret)
+    assert secret not in str(evidence)
+    assert "private-source-0" not in str(evidence)
+
+
+def test_gemini_diagnostic_callback_failure_does_not_change_sdk_call(monkeypatch):
+    calls = []
+
+    class Client:
+        def __init__(self, **kwargs):
+            pass
+
+        class models:
+            @staticmethod
+            def generate_content(**kwargs):
+                calls.append(kwargs)
+                return SimpleNamespace(text="ok", parsed=None, usage_metadata=None, candidates=[])
+
+    monkeypatch.setattr(gemini.genai, "Client", Client)
+    def broken(_evidence):
+        raise OSError("diagnostic disk full")
+    gemini._generate_content_sync(replace(_request(), diagnostic_callback=broken))
+    gemini._generate_content_sync(_request())
+    assert len(calls) == 2
+    assert calls[0]["config"] == calls[1]["config"]
+    assert calls[0]["contents"] == calls[1]["contents"]

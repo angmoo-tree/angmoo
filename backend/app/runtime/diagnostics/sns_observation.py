@@ -24,11 +24,13 @@ from uuid import uuid4
 
 
 logger = logging.getLogger(__name__)
-SCHEMA_VERSION = 2
-SUPPORTED_SCHEMA_VERSIONS = frozenset({1, 2})
+SCHEMA_VERSION = 3
+SUPPORTED_SCHEMA_VERSIONS = frozenset({1, 2, 3})
 EVENT_LIMIT = 8192
 FILE_LIMIT = 4 * 1024 * 1024
 SESSION_LIMIT = 64 * 1024 * 1024
+ARTIFACT_LIMIT = 64 * 1024
+ARTIFACT_SESSION_LIMIT = 16 * 1024 * 1024
 _CODE = re.compile(r"[A-Za-z0-9_./:@-]{1,160}\Z")
 _FIELD_PATH = re.compile(r"decisions\.\d+\.(?:target_id|action|interaction_intent|comment_purpose|proposal|proposal_response|brief)\Z")
 _PLANNER_VALIDATION_CODES = frozenset({
@@ -275,7 +277,8 @@ class SNSAttempt:
 
     def emit(self, event_type: str, *, lane: str | None = None, node: str | None = None,
              classification: str | None = None, details: dict | None = None,
-             exc: BaseException | None = None, caused_by_event_id: str | None = None) -> str | None:
+             exc: BaseException | None = None, caused_by_event_id: str | None = None,
+             artifact: dict | None = None) -> str | None:
         try:
             current = active_session(self.recorder.data_root)
             if (current is None or current["session_id"] != self.manifest["session_id"]
@@ -284,7 +287,7 @@ class SNSAttempt:
         except (OSError, ValueError, KeyError):
             return None
         event_id = uuid4().hex
-        payload = {"schema_version": SCHEMA_VERSION, "session_id": self.manifest["session_id"],
+        payload = {"schema_version": self.manifest["schema_version"], "session_id": self.manifest["session_id"],
                    "event_id": event_id, "process_instance_id": self.recorder.process_instance_id,
                    "occurred_at": datetime.now(UTC).isoformat(), "activity_id": self.activity_id,
                    "agent_run_id": self.agent_run_id, "attempt_id": self.attempt_id,
@@ -293,7 +296,7 @@ class SNSAttempt:
                    "classification": classification, "caused_by_event_id": caused_by_event_id,
                    "details": {**(details or {}), **(_safe_error(exc) if exc is not None else {})}}
         try:
-            if not self.recorder.enqueue(self.manifest["session_id"], payload):
+            if not self.recorder.enqueue(self.manifest["session_id"], payload, artifact=artifact):
                 return None
         except Exception:
             self.recorder.dropped += 1
@@ -317,6 +320,48 @@ class SNSAttempt:
                   exc=exc, caused_by_event_id=caused_by)
 
     def tracker_event(self, kind: str, payload: dict) -> None:
+        if kind == "request_config":
+            if self.manifest["schema_version"] < 3:
+                return
+            snapshot = payload.get("schema_snapshot")
+            artifact = {"kind": "schemas", "snapshot": snapshot} if snapshot is not None else None
+            self.emit("request_config", lane=code(payload.get("lane")), node=code(payload.get("node")),
+                details={"capture_boundary": code(payload.get("capture_boundary")),
+                    "call_order": numbers(payload.get("call_order_in_run")),
+                    "provider_call_order": numbers(payload.get("provider_call_order_in_run")),
+                    "json_attempt": numbers(payload.get("json_attempt")),
+                    "model": code(payload.get("model")),
+                    "config_keys": [code(item) for item in (payload.get("config_keys") or [])[:16]],
+                    "schema_field": code(payload.get("schema_field")),
+                    "schema_status": code(payload.get("schema_status")),
+                    "complete_sdk_schema": payload.get("complete_sdk_schema") is True,
+                    "schema_sha256_ordered_v1": code(payload.get("schema_sha256_ordered_v1")),
+                    "schema_bytes": numbers(payload.get("schema_bytes")),
+                    "schema_counts": payload.get("schema_counts"),
+                    "schema_redacted_count": numbers(payload.get("schema_redacted_count")),
+                    "max_output_tokens": numbers(payload.get("max_output_tokens")),
+                    "response_mime_type": code(payload.get("response_mime_type")),
+                    "thinking_config": {key: code(value) if isinstance(value, str) else numbers(value)
+                        for key, value in (payload.get("thinking_config") or {}).items()
+                        if key in {"thinkingLevel", "thinkingBudget", "includeThoughts"}},
+                    "timeout_ms": numbers(payload.get("timeout_ms")),
+                    "sdk_retry_attempts": numbers(payload.get("sdk_retry_attempts")),
+                    "sdk_retry_status": code(payload.get("sdk_retry_status")),
+                    "system_sha256": code(payload.get("system_sha256")),
+                    "system_chars": numbers(payload.get("system_chars")),
+                    "user_sha256": code(payload.get("user_sha256")),
+                    "user_chars": numbers(payload.get("user_chars"))}, artifact=artifact)
+            return
+        if kind == "sqlite_write":
+            if self.manifest["schema_version"] >= 3:
+                self.emit("sqlite_write", lane=code(payload.get("lane")), node=code(payload.get("node")),
+                    details={key: code(value) if key in {"unit", "result", "sqlite_name", "business_key_hash", "db_kind"}
+                        else numbers(value) for key, value in payload.items()
+                        if key in {"unit", "result", "sqlite_name", "business_key_hash", "db_kind",
+                            "sqlite_code", "sqlite_primary_code", "attempt", "max_attempts",
+                            "attempt_ms", "total_ms", "acquire_ms", "transaction_ms",
+                            "retry_delay_ms"}})
+            return
         if kind == "input_manifest":
             self.emit("input_manifest", lane=code(payload.get("lane")), node=code(payload.get("node")), details={
                 "input_chars": numbers(payload.get("input_chars")),
@@ -365,6 +410,22 @@ class SNSAttempt:
                    "input_sha256": code(payload.get("input_sha256")),
                    "retry_reason": code(payload.get("retry_reason")),
                    "wait_seconds": numbers(payload.get("wait_seconds")), "wait_reason": code(payload.get("reason"))}
+        provider_error = payload.get("provider_error")
+        if isinstance(provider_error, dict):
+            details["provider_error"] = {
+                "provider_http_status": numbers(provider_error.get("provider_http_status")),
+                "provider_status": code(provider_error.get("provider_status")),
+                "provider_detail_status": code(provider_error.get("provider_detail_status")),
+                "details_present": provider_error.get("details_present") is True,
+                "field_violations": [{"field": item.get("field") if isinstance(item.get("field"), str)
+                                      and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.\[\]-]{0,255}", item["field"]) else None,
+                                      "description_sha256": code(item.get("description_sha256"))}
+                    for item in provider_error.get("field_violations", [])[:16] if isinstance(item, dict)],
+                "error_reasons": [{"reason": code(item.get("reason")), "domain": code(item.get("domain"))}
+                    for item in provider_error.get("error_reasons", [])[:8] if isinstance(item, dict)],
+                "diagnostic_excluded_count": numbers(provider_error.get("diagnostic_excluded_count")),
+                "diagnostic_truncated": provider_error.get("diagnostic_truncated") is True,
+            }
         usage = payload.get("usage")
         details["usage"] = {key: numbers(usage.get(key)) for key in ("prompt_token_count", "candidates_token_count",
                             "thoughts_token_count", "total_token_count")} if isinstance(usage, dict) else None
@@ -427,7 +488,7 @@ class SNSObserver:
         self.now = now or (lambda: datetime.now(UTC))
         self.monotonic_clock = monotonic_clock or monotonic
         self.scheduler_reader = scheduler_reader or _scheduler_snapshot
-        self.queue: Queue[tuple[str, dict] | None] = Queue(maxsize=512)
+        self.queue: Queue[tuple[str, dict, bytes | None] | None] = Queue(maxsize=512)
         self.closed = Event()
         self._admission = Lock()
         self._cutoff_sessions: set[str] = set()
@@ -435,6 +496,8 @@ class SNSObserver:
         self._counts: dict[str, dict[str, int]] = {}
         self._sequence: dict[str, int] = {}
         self._total: dict[str, int] = {}
+        self._artifact_total: dict[str, int] = {}
+        self._queued_artifact_bytes = 0
         self.dropped = 0
         self.last_saved_at: str | None = None
         self.last_loop_at: str | None = None
@@ -456,7 +519,7 @@ class SNSObserver:
 
     def _control(self, manifest: dict, event_type: str, *, reason: str | None = None,
                  details: dict | None = None) -> None:
-        event = {"schema_version": SCHEMA_VERSION, "session_id": manifest["session_id"],
+        event = {"schema_version": manifest["schema_version"], "session_id": manifest["session_id"],
             "event_id": uuid4().hex, "process_instance_id": self.process_instance_id,
             "occurred_at": self.now().isoformat(), "event_type": event_type,
             "activity_id": None, "actor_id": None, "world_id": manifest["world_id"],
@@ -483,7 +546,7 @@ class SNSObserver:
                               "activity_started_at": began.isoformat()})
         return attempt
 
-    def enqueue(self, session_id: str, payload: dict) -> bool:
+    def enqueue(self, session_id: str, payload: dict, *, artifact: dict | None = None) -> bool:
         with self._admission:
             if self.closed.is_set() or session_id in self._cutoff_sessions:
                 return False
@@ -497,10 +560,17 @@ class SNSObserver:
                     or occurred is None or occurred >= deadline(current)):
                 return False
             try:
+                artifact_bytes = (json.dumps(artifact, ensure_ascii=False, separators=(",", ":"))
+                    .encode("utf-8") if artifact is not None else None)
+                if artifact_bytes is not None and (len(artifact_bytes) > ARTIFACT_LIMIT
+                    or self._queued_artifact_bytes + len(artifact_bytes) > 4 * 1024 * 1024):
+                    artifact_bytes = None
+                    payload["details"]["artifact_status"] = "truncated"
                 encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
                 if len(encoded.encode("utf-8")) > EVENT_LIMIT:
                     payload = {**payload, "details": {"truncated": True}}
-                self.queue.put_nowait((session_id, payload))
+                self.queue.put_nowait((session_id, payload, artifact_bytes))
+                self._queued_artifact_bytes += len(artifact_bytes or b"")
                 self._counter(session_id)["admitted"] += 1
                 return True
             except (Full, TypeError, ValueError):
@@ -515,7 +585,7 @@ class SNSObserver:
         directory = session_path(self.data_root, session_id)
         count = self._counter(session_id)
         _atomic_json(directory / f"recorder-health-{self.process_instance_id}.json", {
-            "schema_version": SCHEMA_VERSION, "session_id": session_id,
+            "schema_version": read_session(self.data_root, session_id)["schema_version"], "session_id": session_id,
             "process_instance_id": self.process_instance_id,
             "heartbeat_at": self.now().isoformat(), "last_loop_at": self.last_loop_at,
             "last_saved_at": self.last_saved_at, "last_error_stage": self.last_error_stage,
@@ -544,7 +614,8 @@ class SNSObserver:
                 path = directory / f"events-{self.process_instance_id}-{index:04d}.jsonl"
             used = self._total.get(session_id)
             if used is None:
-                used = sum(p.stat().st_size for p in directory.glob("events-*.jsonl"))
+                used = sum(p.stat().st_size for p in directory.glob("events-*.jsonl")) + sum(
+                    p.stat().st_size for p in (directory / "artifacts" / "schemas").glob("*.json"))
             if used + len(encoded) > SESSION_LIMIT:
                 self.last_error_stage = "session_limit"
                 return False
@@ -557,6 +628,41 @@ class SNSObserver:
             self.last_error_stage = "event_write"
             logger.warning("sns_observation_write_failed")
             return False
+
+    def _write_artifact(self, session_id: str, event: dict, encoded: bytes) -> None:
+        try:
+            directory = session_path(self.data_root, session_id)
+            artifact = json.loads(encoded)
+            if artifact.get("kind") != "schemas":
+                raise ValueError("sns_observation_artifact_kind_invalid")
+            digest_hex = sha256(encoded).hexdigest()
+            relative = f"artifacts/schemas/{digest_hex}.json"
+            destination = directory / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            used = self._artifact_total.get(session_id)
+            if used is None:
+                used = sum(path.stat().st_size for path in destination.parent.glob("*.json"))
+            if not destination.exists():
+                overall = self._total.get(session_id)
+                if overall is None:
+                    overall = used + sum(path.stat().st_size for path in directory.glob("events-*.jsonl"))
+                if used + len(encoded) > ARTIFACT_SESSION_LIMIT or overall + len(encoded) > SESSION_LIMIT:
+                    event["details"]["artifact_status"] = "truncated"
+                    return
+                temporary = destination.with_name(destination.name + "." + uuid4().hex + ".tmp")
+                try:
+                    temporary.write_bytes(encoded)
+                    os.replace(temporary, destination)
+                finally:
+                    temporary.unlink(missing_ok=True)
+                self._artifact_total[session_id] = used + len(encoded)
+                self._total[session_id] = overall + len(encoded)
+            event["details"].update({"artifact_status": "stored", "artifact_relpath": relative,
+                                     "artifact_sha256": digest_hex, "artifact_bytes": len(encoded)})
+        except (OSError, ValueError, TypeError, KeyError):
+            event["details"]["artifact_status"] = "missing"
+            self.last_error_stage = "artifact_write"
+            logger.warning("sns_observation_artifact_write_failed")
 
     def _attach(self, manifest: dict) -> None:
         previous = self._active
@@ -584,7 +690,7 @@ class SNSObserver:
             "clock_shift_seconds": round(wall_elapsed - elapsed_seconds, 3)
                 if abs(wall_elapsed - elapsed_seconds) > 150 else None,
             "last_saved_at": self.last_saved_at}
-        self._write_event(session_id, {"schema_version": SCHEMA_VERSION, "session_id": session_id,
+        self._write_event(session_id, {"schema_version": manifest["schema_version"], "session_id": session_id,
             "event_id": uuid4().hex, "process_instance_id": self.process_instance_id,
             "occurred_at": occurred.isoformat(), "event_type": "heartbeat",
             "activity_id": None, "actor_id": None, "world_id": manifest["world_id"],
@@ -649,7 +755,11 @@ class SNSObserver:
                     continue
                 try:
                     if item is not None:
-                        session_id, event = item
+                        session_id, event, artifact_bytes = item
+                        if artifact_bytes is not None:
+                            self._write_artifact(session_id, event, artifact_bytes)
+                            with self._admission:
+                                self._queued_artifact_bytes -= len(artifact_bytes)
                         counter = self._counter(session_id)
                         if self._write_event(session_id, event):
                             counter["written"] += 1
