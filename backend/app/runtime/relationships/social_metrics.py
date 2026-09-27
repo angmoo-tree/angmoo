@@ -2,9 +2,13 @@
 
 from dataclasses import replace
 from datetime import UTC, datetime
+from collections.abc import Mapping
+import logging
 from sqlalchemy import select
 
 from app.domains.social.models.posts import Post
+from app.domains.world_characters.models import WorldCharacter
+from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.domains.relationships.models.personalization import RelationshipExperienceReceipt
 from app.domains.relationships.contracts.metric_interpretation import parse_metric_interpretations
 from app.domains.relationships.service.personalized_metrics import ExperiencedSource, interpreted_policy, stage_experience
@@ -31,10 +35,63 @@ def source_prompt(manifest):
     return [{"target_ref": row["target_ref"], "source_ref": row["post_id"], "text": row["excerpt"]} for row in manifest]
 
 
-def stage_sources(db, *, actor, manifest, raw, decision_key, now):
+def stage_sources(db, *, actor, manifest, raw, decision_key, now,
+                  observed_post_ids=(), observation_lane=None, write_observer=None,
+                  scope_validator=None, observe_post=None):
+    """Commit one SNS experience/observation unit, retrying from fresh rows.
+
+    Legacy callers already relied on this function's commit.  Close their
+    preceding unit explicitly so the immediate helper cannot roll it back.
+    Chat uses the separate flush-only staging path in experience_metrics.
+    """
+    if not manifest and not observed_post_ids:
+        return
+    actor_id, world_id = actor.id, actor.world_id
+    if db.in_transaction():
+        db.commit()
+    parsed = parse_metric_interpretations(raw)
+    frozen_manifest = tuple(dict(row) for row in manifest)
+    frozen_observed = (dict(observed_post_ids) if isinstance(observed_post_ids, Mapping)
+        else {ref: None for ref in observed_post_ids})
+
+    def operation():
+        if scope_validator is not None:
+            scope_validator()
+        current_actor = db.get(WorldCharacter, actor_id, populate_existing=True)
+        if (current_actor is None or current_actor.world_id != world_id
+                or current_actor.status != "active" or current_actor.control_mode != "autonomous"):
+            raise ValueError("relationship_subject_scope_changed")
+        current_manifest = []
+        for row in frozen_manifest:
+            post = db.get(Post, row["post_id"], populate_existing=True)
+            if (post is not None and post.world_id == world_id
+                    and post.author_world_character_id == row["target_ref"]
+                    and post.deleted_at is None and post.report_hidden_at is None
+                    and post.visibility == "public" and post_revision(post) == row["revision"]):
+                current_manifest.append(row)
+        current_observed = []
+        if observation_lane is not None:
+            if observe_post is None:
+                raise ValueError("relationship_observation_writer_missing")
+            for ref, revision in sorted(frozen_observed.items()):
+                post = db.get(Post, ref, populate_existing=True)
+                if (post is not None and post.world_id == world_id
+                        and post.deleted_at is None and post.report_hidden_at is None
+                        and post.visibility == "public"
+                        and (revision is None or post_revision(post) == revision)):
+                    observe_post(ref)
+                    current_observed.append(ref)
+        _stage_sources_in_transaction(db, actor=current_actor, manifest=current_manifest,
+            parsed=parsed, decision_key=decision_key, now=now)
+        return tuple(current_observed) if observation_lane is not None else tuple(
+            row["post_id"] for row in current_manifest)
+
+    return run_sqlite_session_immediate(db, operation, require_clean=True, observer=write_observer)
+
+
+def _stage_sources_in_transaction(db, *, actor, manifest, parsed, decision_key, now):
     if not manifest:
         return
-    parsed = parse_metric_interpretations(raw)
     by_post = {row["post_id"]: row for row in manifest}
     changes = {}
     for proposed in parsed.interpretations:
@@ -61,7 +118,6 @@ def stage_sources(db, *, actor, manifest, raw, decision_key, now):
                     interpretation=changes.get(row["post_id"]), metadata_status=parsed.status)
         except ValueError:
             continue  # Deleted/changed or invalid optional metadata cannot erase the action.
-    db.commit()
 
 
 def settle_activity(ctx):
@@ -75,8 +131,10 @@ def settle_activity(ctx):
             return
         if interpreted_policy(ctx.db, actor.world_id) is not None:
             apply_pending_metrics(ctx.db, world_id=actor.world_id, actor_id=actor.id, source_kind="post")
-    except Exception:
+    except Exception as exc:
         ctx.db.rollback()  # Already committed applications remain pending for replay.
+        logging.getLogger(__name__).warning(
+            "relationship_pending_apply_deferred error_type=%s", type(exc).__name__)
 
 
 async def invoke_graph(graph, ctx, *args, **kwargs):

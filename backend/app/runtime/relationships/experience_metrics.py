@@ -4,6 +4,7 @@ from dataclasses import replace
 from datetime import UTC, datetime
 from hashlib import sha256
 from sqlalchemy import select
+from app.core.sqlite_concurrency import run_sqlite_session_immediate
 
 from app.domains.chat.models import ChatResponseRequest, MessageMessage, MessageThread
 from app.domains.world_characters.models import WorldCharacter
@@ -95,7 +96,24 @@ def stage_chat_metrics(db, *, request_id, raw, now):
         decision_key=request_id, interpretation=interpretation, metadata_status=parsed.status if not parsed.interpretations or interpretation else "invalid")
 
 
-def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None, decision_key=None, source_keys=None, limit=100):
+def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None,
+                          decision_key=None, source_keys=None, limit=100, write_observer=None):
+    """Apply a bounded pending batch in one immediate writer unit.
+
+    The Chat answer/staging transaction must have completed before entering
+    here.  Legacy callers of this public function already owned a commit.
+    """
+    if db.in_transaction():
+        db.commit()
+    frozen_keys = None if source_keys is None else tuple(source_keys)
+    return run_sqlite_session_immediate(db, lambda: _apply_pending_in_transaction(db,
+        world_id=world_id, actor_id=actor_id, source_kind=source_kind,
+        decision_key=decision_key, source_keys=frozen_keys, limit=limit),
+        require_clean=True, observer=write_observer)
+
+
+def _apply_pending_in_transaction(db, *, world_id, actor_id, source_kind,
+                                  decision_key, source_keys, limit):
     query = select(RelationshipMetricApplication.id).join(RelationshipExperienceReceipt,
         RelationshipExperienceReceipt.id == RelationshipMetricApplication.experience_id).where(
         RelationshipMetricApplication.status == "pending", RelationshipExperienceReceipt.world_id == world_id)
@@ -115,7 +133,7 @@ def apply_pending_metrics(db, *, world_id, actor_id=None, source_kind=None, deci
         except ValueError:
             row = db.get(RelationshipMetricApplication, identifier)
             row.status = "superseded"
-    db.commit()
+    return len(ids)
 
 
 class RelationshipChatLifecycle:

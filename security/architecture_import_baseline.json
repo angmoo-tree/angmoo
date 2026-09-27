@@ -1,7 +1,7 @@
 {
-  "edge_count": 5111,
-  "external_import_count": 3753,
-  "module_count": 1281,
+  "edge_count": 5122,
+  "external_import_count": 3764,
+  "module_count": 1282,
   "modules": [
     {
       "external_imports": [],
@@ -13889,6 +13889,7 @@
         "app.config",
         "app.core.redaction",
         "app.providers.contracts",
+        "app.providers.diagnostics",
         "app.providers.gemini",
         "app.providers.registry"
       ],
@@ -14396,6 +14397,19 @@
     {
       "external_imports": [
         "__future__",
+        "hashlib",
+        "json",
+        "re",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.providers.diagnostics",
+      "path": "backend/app/providers/diagnostics.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "json"
       ],
       "imports": [
@@ -14412,6 +14426,7 @@
         "asyncio",
         "google",
         "google.genai",
+        "hashlib",
         "httpx",
         "math",
         "pydantic",
@@ -14420,7 +14435,8 @@
       ],
       "imports": [
         "app.core.redaction",
-        "app.providers.contracts"
+        "app.providers.contracts",
+        "app.providers.diagnostics"
       ],
       "module": "app.providers.gemini",
       "path": "backend/app/providers/gemini.py",
@@ -14656,6 +14672,7 @@
         "sqlite3"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.routines.models",
         "app.domains.social.exceptions",
         "app.domains.world_characters.activity_models",
@@ -14914,17 +14931,21 @@
     {
       "external_imports": [
         "dataclasses",
-        "datetime"
+        "datetime",
+        "hashlib"
       ],
       "imports": [
         "app.contracts.activity_thought",
         "app.contracts.activity_thought_output",
+        "app.core.sqlite_concurrency",
         "app.domains.relationships.policies.interpretation_prompt",
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
         "app.domains.routine_posts.service.temporal_context",
+        "app.domains.routines.models.plans",
         "app.domains.routines.service.joint_activity",
+        "app.domains.social.models.posts",
         "app.domains.world_characters.schemas.activity_state",
         "app.domains.world_characters.service.activity_state",
         "app.providers.gemini",
@@ -14987,11 +15008,13 @@
         "dataclasses",
         "datetime",
         "functools",
+        "hashlib",
         "json",
         "sqlalchemy"
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.core.sqlite_concurrency",
         "app.domains.routines.models",
         "app.domains.routines.policies.writer_tasks",
         "app.domains.social.models.posts",
@@ -15308,6 +15331,8 @@
         "app.domains.world_characters.contracts.runtime_modes",
         "app.domains.world_characters.models",
         "app.domains.worlds.exceptions",
+        "app.domains.worlds.service",
+        "app.domains.worlds.service.character_entry",
         "app.domains.worlds.service.creator",
         "app.domains.worlds.service.default_space",
         "app.integrations.media.files",
@@ -15720,6 +15745,7 @@
         "contextlib",
         "csv",
         "datetime",
+        "hashlib",
         "json",
         "pathlib",
         "shutil",
@@ -17641,6 +17667,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.chat.models",
         "app.domains.relationships.contracts.metric_interpretation",
         "app.domains.relationships.models.personalization",
@@ -17818,11 +17845,14 @@
     },
     {
       "external_imports": [
+        "collections.abc",
         "dataclasses",
         "datetime",
+        "logging",
         "sqlalchemy"
       ],
       "imports": [
+        "app.core.sqlite_concurrency",
         "app.domains.relationships.contracts.metric_interpretation",
         "app.domains.relationships.models.personalization",
         "app.domains.relationships.service.personalized_metrics",

@@ -1,6 +1,7 @@
 """Shared selected-target stages; domain adapters own candidate and completion rules."""
 from dataclasses import asdict
 from datetime import UTC, datetime
+from hashlib import sha256
 import json
 
 from app.contracts.activity_thought import parse_activity_thought
@@ -22,11 +23,13 @@ def plain(value):
 
 
 class SocialLane:
-    def __init__(self, ctx, *, actor, lane, tracker, hybrid_service, guard, action_executor=None):
+    def __init__(self, ctx, *, actor, lane, tracker, hybrid_service, guard,
+                 claim_validator=None, action_executor=None):
         self.ctx, self.actor, self.lane, self.tracker = ctx, actor, lane, tracker
         self.provider = ActivityProvider(ctx, tracker)
         self.retriever = SelectedRecall(hybrid_service, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id)
         self.scope_guard = guard
+        self.claim_validator = claim_validator
         self.action_executor = action_executor
 
     def ports(self):
@@ -158,6 +161,10 @@ class SocialLane:
     async def settle(self, state):
         decision = state["decision"]
         key = identity_key(state["identity"]["activity_id"], self.lane, "decision")
+        def write_event(unit):
+            return lambda facts: self.tracker._notify("sqlite_write", {
+                "lane": self.lane, "node": "Settle", "unit": unit,
+                "db_kind": "canonical", "business_key_hash": sha256(key.encode()).hexdigest(), **facts})
         # Only explicit final decisions were interpreted; omitted selected Inbox
         # conversations remain pending and receive no inferred relationship delta.
         decided = {d["target_id"] for d in decision["decisions"]}
@@ -172,26 +179,41 @@ class SocialLane:
         manifest = [{**r, "created_at": datetime.fromisoformat(r["created_at"]) if isinstance(r["created_at"], str) else r["created_at"]} for r in manifest]
         now = datetime.fromisoformat(decision["judged_at"])
         from app.runtime.social.observations import observe_source
-        for ref in valid:
-            post = self.ctx.db.get(Post, ref, populate_existing=True)
-            if post and post.world_id == self.actor.world_id and not post.deleted_at and not post.report_hidden_at:
-                observe_source(self.ctx.db, world_id=self.actor.world_id, observer_world_character_id=self.actor.id,
-                    source_social_event_id=None, source_post_id=ref, lane=self.lane, observed_at=now)
-        self.ctx.db.commit()
-        stage_sources(self.ctx.db, actor=self.actor, manifest=manifest,
-            raw=decision.get("relationship_metrics"), decision_key=key, now=now)
+        def observe_post(ref):
+            observe_source(self.ctx.db, world_id=self.actor.world_id,
+                observer_world_character_id=self.actor.id, source_social_event_id=None,
+                source_post_id=ref, lane=self.lane, observed_at=now)
+        valid = set(stage_sources(self.ctx.db, actor=self.actor, manifest=manifest,
+            raw=decision.get("relationship_metrics"), decision_key=key, now=now,
+            observed_post_ids={ref: revisions[ref] for ref in valid}, observation_lane=self.lane,
+            write_observer=write_event("S1"), scope_validator=self.claim_validator,
+            observe_post=observe_post) or ())
         apply_pending_metrics(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
-            source_kind="post", decision_key=key, source_keys=valid)
+            source_kind="post", decision_key=key, source_keys=valid, write_observer=write_event("S2"))
         evidence_keys = {ref: identity_key("post", ref, revisions[ref]) for ref in valid}
         outcome = "invalid"
         if decision["state_status"] != "invalid":
             proposal = StateUpdate.model_validate(decision["state_update"]) if decision["state_update"] else None
-            outcome = settle_state(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
-                activity_id=state["identity"]["activity_id"], decision_key=key,
-                expected_version=state["shared_context"]["current_state"]["version"],
-                proposal=proposal, judged_at=now, source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision["state_source_refs"]],
-                valid_source_keys=set(evidence_keys.values()), context_reassessment=not decision["state_source_refs"])
-            self.ctx.db.commit()
+            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            if self.ctx.db.in_transaction():
+                self.ctx.db.commit()
+            def settle_current_state():
+                if self.claim_validator is not None:
+                    self.claim_validator()
+                current_evidence = {ref: token for ref, token in evidence_keys.items()
+                    if (post := self.ctx.db.get(Post, ref, populate_existing=True)) is not None
+                    and post.world_id == self.actor.world_id and post.deleted_at is None
+                    and post.report_hidden_at is None and post.visibility == "public"
+                    and post_revision(post) == revisions[ref]}
+                return settle_state(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
+                    activity_id=state["identity"]["activity_id"], decision_key=key,
+                    expected_version=state["shared_context"]["current_state"]["version"],
+                    proposal=proposal, judged_at=now,
+                    source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision["state_source_refs"]],
+                    valid_source_keys=set(current_evidence.values()),
+                    context_reassessment=not decision["state_source_refs"])
+            outcome = run_sqlite_session_immediate(self.ctx.db, settle_current_state,
+                require_clean=True, observer=write_event("S3"))
         return {"settlement": {"state": outcome, "decision_key": key}}
 
     async def finalize(self, state):
