@@ -206,13 +206,13 @@ export function WorldCharacterAutonomySetupClient({
         setWorld(nextWorld);
         if (nextEntry) {
           setEntry(nextEntry);
-          setRoleKey(nextEntry.role_key ?? "");
-          const [nextSetup, nextPreflight] = await Promise.all([
-            getWorldCharacterSetup(nextEntry.id),
-            preflightWorldCharacterSetup(nextEntry.id, true),
-          ]);
+          setRoleKey(nextEntry.role_key ?? NO_SPECIFIC_ROLE_KEY);
+          const nextSetup = await getWorldCharacterSetup(nextEntry.id);
           if (!active) return;
           setSetup(nextSetup);
+          if (nextEntry.role_key === null) return;
+          const nextPreflight = await preflightWorldCharacterSetup(nextEntry.id, true);
+          if (!active) return;
           setPreflight(nextPreflight);
           return;
         }
@@ -363,11 +363,13 @@ export function WorldCharacterAutonomySetupClient({
       setEntry(nextEntry);
       await refreshSetup(nextEntry.id);
       setNotice(
-        "역할을 변경했습니다. 기존 활동 준비 결과가 있다면 새 역할에 맞게 다시 생성·승인해 주세요.",
+        entry.role_key === null
+          ? "기본 역할을 연결했습니다. 활동 준비를 계속할 수 있습니다."
+          : "역할을 변경했습니다. 기존 활동 준비 결과가 있다면 새 역할에 맞게 다시 생성·승인해 주세요.",
       );
     } catch (nextError) {
       setError(errorMessage(nextError));
-      setRoleKey(entry.role_key ?? "");
+      setRoleKey(entry.role_key ?? NO_SPECIFIC_ROLE_KEY);
     } finally {
       setPending(null);
     }
@@ -612,41 +614,44 @@ export function WorldCharacterAutonomySetupClient({
           </section>
         ) : null}
 
+        {entry && setup && (entry.role_key !== NO_SPECIFIC_ROLE_KEY || allowedRoles.length > 0) ? (
+          <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
+            <label className="block text-sm font-bold" htmlFor="existing-world-role">
+              이 World에서의 역할
+            </label>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <select
+                id="existing-world-role"
+                value={roleKey}
+                onChange={(event) => setRoleKey(event.target.value)}
+                className="min-w-56 flex-1 rounded-2xl border border-outline-variant bg-white px-4 py-3"
+              >
+                <option value="">역할을 선택하세요</option>
+                <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
+                {allowedRoles.map((role) => (
+                  <option key={role.key} value={role.key}>{role.name}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => void handleRoleUpdate()}
+                disabled={pending !== null || !roleKey || roleKey === entry.role_key}
+                className="rounded-full bg-primary px-5 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {pending === "role-update" ? "저장 중…" : "역할 저장"}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-on-surface-variant">
+              {entry.role_key === null
+                ? "등록 때 기본 역할이 연결되지 않았습니다. ‘역할 없음’을 저장하면 활동 준비를 계속할 수 있습니다."
+                : "역할을 바꾸면 기존 활동 준비 결과를 새 역할 기준으로 다시 확인해야 합니다."}
+            </p>
+          </section>
+        ) : null}
+
         {entry && preflight && setup ? (
           <>
             <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-              <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
-                <label className="block text-sm font-bold" htmlFor="existing-world-role">
-                  이 World에서의 역할
-                </label>
-                <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <select
-                    id="existing-world-role"
-                    value={roleKey}
-                    onChange={(event) => setRoleKey(event.target.value)}
-                    className="min-w-56 flex-1 rounded-2xl border border-outline-variant bg-white px-4 py-3"
-                  >
-                    <option value="">역할을 선택하세요</option>
-                    <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
-                    {allowedRoles.map((role) => (
-                      <option key={role.key} value={role.key}>{role.name}</option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => void handleRoleUpdate()}
-                    disabled={
-                      pending !== null || !roleKey || roleKey === entry.role_key
-                    }
-                    className="rounded-full bg-primary px-5 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {pending === "role-update" ? "저장 중…" : "역할 저장"}
-                  </button>
-                </div>
-                <p className="mt-2 text-xs text-on-surface-variant">
-                  역할을 바꾸면 기존 활동 준비 결과를 새 역할 기준으로 다시 확인해야 합니다.
-                </p>
-              </div>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-black">2. 생성 전 확인</h2>

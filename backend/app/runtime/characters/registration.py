@@ -13,9 +13,11 @@ from app.domains.characters.service import profile, persona
 from app.domains.characters.service.creator import _ensure_draft_persona_prompt_safety
 from app.domains.world_characters.models import CharacterActiveWorld, CharacterWorldBinding, WorldCharacter
 from app.domains.world_characters.contracts.runtime_modes import AUTONOMOUS_ACTIVITY_RUNTIME_MODE, AUTONOMOUS_FEED_RUNTIME_MODE
+from app.domains.worlds.exceptions import ReservedWorldRoleConflictError, WorldServiceError
+from app.domains.worlds.service import ensure_no_specific_role
+from app.domains.worlds.service.character_entry import refresh_entry_world_contract
 from app.domains.worlds.service.creator import require_creator_access
 from app.domains.worlds.service.default_space import ensure_default_space
-from app.domains.worlds.exceptions import WorldServiceError
 from app.domains.routines.service.activity_settings import ensure_setting
 from app.policies import name_policy
 
@@ -95,8 +97,13 @@ def register_draft(db, user, draft, data):
                 setattr(character, f"{kind}_url", url)
         db.add(character)
         db.flush()
+        try:
+            role = ensure_no_specific_role(db, world_id=world.id)
+        except ReservedWorldRoleConflictError as exc:
+            raise AgentCreationDraftValidationError("world_reference_invalid") from exc
+        refresh_entry_world_contract(db, world)
         row = WorldCharacter(id=world_character_id, world_id=world.id, character_id=character.id,
-            membership_id=membership.id, role_key=None, status="active", control_mode="autonomous",
+            membership_id=membership.id, role_key=role.role_key, status="active", control_mode="autonomous",
             autonomous_enabled=False, activity_runtime_mode=AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
             feed_runtime_mode=AUTONOMOUS_FEED_RUNTIME_MODE, local_profile={}, version=1)
         db.add(row)

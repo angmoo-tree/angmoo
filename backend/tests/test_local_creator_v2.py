@@ -15,8 +15,10 @@ from app.domains.characters.models import Character, AgentCreationDraft, Charact
 from app.domains.characters.schemas import AgentCreationDraftCreate, AgentCreationDraftUpdate, AgentCreationDraftComplete
 from app.domains.characters.service import drafts
 from app.domains.world_characters.models import WorldCharacter, CharacterWorldBinding
+from app.domains.world_characters.service.autonomous_setup import preflight_setup
 from app.domains.world_characters.schemas.identity import MyProfilePatch
 from app.domains.world_characters.service.owner_identity import OwnerControlledIdentityService
+from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY
 from app.domains.worlds.service.default_space import ensure_default_space
 from app.runtime.characters.creator import build_creator_workflows
 
@@ -75,6 +77,9 @@ def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):
     binding = session.get(CharacterWorldBinding, first.id)
     row = session.scalar(select(WorldCharacter).where(WorldCharacter.character_id == first.id))
     assert binding.world_id == row.world_id == draft.target_world_id
+    assert row.role_key == NO_SPECIFIC_ROLE_KEY
+    preflight = preflight_setup(session, world_character_id=row.id, user=owner)
+    assert preflight.safe_reason_code == "credential_required"
     assert row.autonomous_enabled is False
     assert first.credential is None
     assert first.activity_setting.auto_enabled is False
