@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import copy
 from pathlib import Path
 import sys
 
@@ -16,6 +17,22 @@ SPEC.loader.exec_module(checker)
 
 def test_current_local_oss_workflow_policy_passes() -> None:
     assert checker.check_repo(REPO_ROOT) == []
+
+
+def test_core_reports_reject_database_or_directory_uploads() -> None:
+    path = REPO_ROOT / ".github/workflows/ci.yml"
+    text = path.read_text(encoding="utf-8")
+    document = checker.yaml.load(text, Loader=checker._UniqueKeyLoader)
+    assert checker.check_report_uploads(document, "ci.yml", text) == []
+    for unsafe_path in ("browser-tests/.ci/canonical.sqlite3", "browser-tests/.ci/"):
+        changed = copy.deepcopy(document)
+        uploads = [step for step in changed["jobs"]["frontend"]["steps"]
+                   if str(step.get("uses", "")).startswith("actions/upload-artifact@")]
+        assert len(uploads) == 1
+        uploads[0]["with"]["path"] += "\n" + unsafe_path
+        assert checker.check_report_uploads(changed, "ci.yml", text) == [
+            "raw artifact upload is limited to the installer or exact Core test reports"
+        ]
 
 
 def test_required_checks_use_embedded_data_migration() -> None:

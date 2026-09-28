@@ -33,6 +33,14 @@ from app.domains.world_characters.service import setup_validation as setup_contr
 from app.runtime.world_characters import cleanup as setup_cleanup
 
 
+@pytest.fixture(autouse=True)
+def legacy_setup_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    # This module exercises the retained profile/repertoire preparation path.
+    # The new default is covered independently by test_daily_preparation.py.
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 ACTIVITIES = (
     "catalog crystal samples",

@@ -42,6 +42,13 @@ from app.domains.world_characters.service import setup_validation as world_chara
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 
 
+@pytest.fixture(autouse=True)
+def legacy_candidate_plan_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Preserve the old candidate-plan API contract without changing the default.
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 @dataclass(frozen=True)
 class ReadyCharacter:
     user: models.User

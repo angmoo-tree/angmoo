@@ -98,7 +98,7 @@
     },
     {
       "path": "backend/app/config.py",
-      "sha256": "e9d8ae2ce3913d0a9f85b876accbde7195ba4c9a47b3d5d153bff689a29ff5f7"
+      "sha256": "3b638b8c5407f412285da4402edad2920ca420b9487715d185e5f49edb8bab45"
     },
     {
       "path": "backend/app/contracts/activity_output.py",

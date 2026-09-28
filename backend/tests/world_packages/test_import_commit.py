@@ -21,6 +21,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from PIL import Image
 import pytest
+
+
+
+
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -115,6 +119,13 @@ IMPORTED_OUTCOMES = (
     "summarize a respectful greeting and farewell sequence for visitors",
     "assemble a concise weather log for the harbor archive",
 )
+
+
+@pytest.fixture(autouse=True)
+def legacy_package_activation_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Package v1's P5/P7 replay remains available alongside daily preparation.
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
 
 
 class _DeterministicImportedSetupProvider:

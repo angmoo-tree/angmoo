@@ -134,7 +134,7 @@ export function createAgentDraft(data: {
 }) {
   return apiRequest<AgentCreationDraftRead>("/agents/drafts", {
     method: "POST",
-    body: data,
+    body: generationProfilePayload(data, "model"),
   });
 }
 

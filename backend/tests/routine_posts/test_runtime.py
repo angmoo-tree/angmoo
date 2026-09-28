@@ -19,6 +19,10 @@ from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 
 import pytest
+
+
+
+
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -57,6 +61,13 @@ from app.domains.routine_posts.service.evidence import (
 )
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
+
+
+@pytest.fixture(autouse=True)
+def legacy_routine_readiness_contract(monkeypatch: pytest.MonkeyPatch) -> None:
+    # These fixtures deliberately seed approved community profiles/repertoires.
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
 
 
 @pytest.mark.parametrize(

@@ -215,18 +215,40 @@ def run_smoke(
         token = str(auth["token"])
     if token is None:
         raise SmokeError("local session bootstrap did not issue a token")
-    status, agent = _request(
+    status, draft = _request(
         backend_url,
-        "/api/v1/agents",
+        "/api/v1/agents/drafts",
         method="POST",
         token=token,
+        payload={"execution_mode": "local"},
+    )
+    _expect(status, 201, "local character draft create")
+    if draft.get("key_fingerprint") is not None or not draft.get("target_world_id"):
+        raise SmokeError("keyless draft did not resolve its World")
+    draft_id = str(draft["id"])
+    status, draft = _request(
+        backend_url,
+        f"/api/v1/agents/drafts/{draft_id}",
+        method="PATCH",
+        token=token,
         payload={
-            "execution_mode": "local",
+            "revision": draft["revision"],
             "name": marker,
             "handle": f"m4-{uuid4().hex[:10]}",
+            "worldview": "Synthetic local quickstart character for persistence checks.",
         },
     )
-    _expect(status, 201, "local agent create")
+    _expect(status, 200, "local character draft edit")
+    status, agent = _request(
+        backend_url,
+        f"/api/v1/agents/drafts/{draft_id}/complete",
+        method="POST",
+        token=token,
+        payload={"revision": draft["revision"]},
+    )
+    _expect(status, 200, "local agent create")
+    if agent.get("credential") is not None or agent.get("settings", {}).get("auto_enabled") is not False:
+        raise SmokeError("registration must stay keyless with autonomous activity OFF")
     character_id = str(agent["character"]["id"])
 
     write_base = frontend_url or backend_url
