@@ -262,6 +262,11 @@
       "module": "app.domains.routines.router",
       "endpoint": "get_daily_activity_plan"
     },
+    "GET /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation": {
+      "access": "owner-only",
+      "module": "app.domains.routines.router",
+      "endpoint": "read_daily_preparation"
+    },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
       "access": "owner-only",
       "module": "app.domains.relationships.router",
@@ -821,6 +826,11 @@
       "access": "owner-only",
       "module": "app.domains.routines.router",
       "endpoint": "prepare_daily_activity_plan"
+    },
+    "POST /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation": {
+      "access": "owner-only",
+      "module": "app.domains.routines.router",
+      "endpoint": "request_daily_preparation"
     },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",

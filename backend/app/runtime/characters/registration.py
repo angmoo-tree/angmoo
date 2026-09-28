@@ -111,6 +111,10 @@ def register_draft(db, user, draft, data):
         db.add(CharacterWorldBinding(character_id=character.id, world_id=world.id))
         db.add(CharacterActiveWorld(character_id=character.id, world_character_id=row.id,
             selected_at=datetime.now(UTC), idempotency_key=f"register:{draft.id}", version=1))
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED:
+            from app.domains.social.service.recommendation_topics import mark_new_subject
+            mark_new_subject(db, world_id=world.id, world_character_id=row.id)
         ensure_setting(db, character.id, commit=False)
         from app.domains.characters.repository.image_settings import ensure_image_generation_setting
         ensure_image_generation_setting(db, character.id, commit=False)

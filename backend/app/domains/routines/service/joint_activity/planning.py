@@ -130,7 +130,7 @@ def slot_available(
     )
     if (
         item is None
-        or item.origin_type != "repertoire"
+        or item.origin_type not in {"repertoire", "daily_generation"}
         or item.joint_activity_id is not None
         or item.is_user_pinned
         or item.status != "planned"
@@ -219,7 +219,7 @@ def _materialize_existing_plan(
         .with_for_update()
     )
     if (
-        base_item.origin_type != "repertoire"
+        base_item.origin_type not in {"repertoire", "daily_generation"}
         or base_item.joint_activity_id is not None
         or base_item.is_user_pinned
         or base_item.status != "planned"

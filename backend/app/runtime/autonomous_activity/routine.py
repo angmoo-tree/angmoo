@@ -68,6 +68,16 @@ class RoutineLane:
         return {}
 
     async def load(self, state):
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED:
+            from types import SimpleNamespace
+            from app.runtime.daily_preparation import read_preparation
+            status = read_preparation(self.ctx.db, character_id=self.ctx.character.id,
+                world_id=self.actor.world_id, user=SimpleNamespace(id=self.ctx.user_id), now=self.ctx.run_started_at)
+            if status.plan_state != "ready":
+                return {"candidates": [], "lane_data": {"skipped": {
+                    "status": "deferred", "reason": status.reason_code or "daily_plan_pending",
+                    "public_action_count": 0}}}
         from app.runtime.autonomous_activity.routine_resume import freeze_prepared
         prepared = prepare_routine_activity(self.ctx, tracker=self.tracker, observe_inputs=False)
         if isinstance(prepared, dict):

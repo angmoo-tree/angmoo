@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import Field, field_validator
 
-from app.domains.characters.policies.persona import normalize_persona_text
+from app.domains.characters.contracts import normalize_persona_text
 from app.domains.world_packages.schemas.content_v2 import (
     AutonomousCharacterTemplateV2, CharactersDocumentV2, upgrade_character,
 )

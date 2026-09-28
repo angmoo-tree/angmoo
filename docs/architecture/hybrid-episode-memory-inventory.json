@@ -89,8 +89,16 @@
       "sha256": "cc8fe4516285be53e3687100b5ba5ca317b024dff70d70ca350ae2495d90c4dc"
     },
     {
+      "path": "backend/alembic/versions/20260927_0100_character_background.py",
+      "sha256": "a00b8797205c23322a8c2ee805eeaa8c9932ab670cd9b52c5c9d530907bb3b31"
+    },
+    {
+      "path": "backend/alembic/versions/20260928_0101_daily_preparation.py",
+      "sha256": "0a1b7fbe605da41bc455cdb86b8bb14429d3af282820d84df56f154abb1663bc"
+    },
+    {
       "path": "backend/app/config.py",
-      "sha256": "12ddcd8ab8ede53ebdf0fbf955a0b924f7629e4e5c624f0e0e965b0d8fe2d4ae"
+      "sha256": "e9d8ae2ce3913d0a9f85b876accbde7195ba4c9a47b3d5d153bff689a29ff5f7"
     },
     {
       "path": "backend/app/contracts/activity_output.py",
@@ -118,11 +126,11 @@
     },
     {
       "path": "backend/app/domains/chat/contracts/character_response_generator.py",
-      "sha256": "d3812915397269f77e9df800756812330f28b6713b11d888961cfca4143734b4"
+      "sha256": "22bc2aa95f33fd91cf82318a8e775c5d385c0628ebfd5652adacef60e6e65c5c"
     },
     {
       "path": "backend/app/domains/chat/contracts/context.py",
-      "sha256": "47085089745bb2a17af9aa7cd3dee2036059d7faacad179e56d8c894a03fc349"
+      "sha256": "87fa51e2b11bf53ccee28bcbc7f663245fbea5bff9092ad2620c04a6889b8c7b"
     },
     {
       "path": "backend/app/domains/chat/contracts/evidence_bundle.py",
@@ -366,7 +374,7 @@
     },
     {
       "path": "backend/app/domains/chat/service/messages.py",
-      "sha256": "4a5412de42b89991cb8ff3ddcefa0958d1c5738fecdbd73cf8439d425a2e1c2a"
+      "sha256": "91d87dfda45a7f4cdf0f259cad93deee4b5a2e621551cabff718d207a8e629fd"
     },
     {
       "path": "backend/app/domains/chat/service/planner_diagnostics.py",
@@ -374,7 +382,7 @@
     },
     {
       "path": "backend/app/domains/chat/service/profiles.py",
-      "sha256": "ea37b52aab510880acf36e3facbb85142cfb817d4612f2fa159733c78af71199"
+      "sha256": "b76f183caa1961fd7d05cbb967ee547c877c9fa42a15c1ddd43e47a89d2506e6"
     },
     {
       "path": "backend/app/domains/chat/service/response_steps.py",
@@ -878,7 +886,7 @@
     },
     {
       "path": "backend/app/domains/routine_posts/service/context.py",
-      "sha256": "9a6fd4ea45e0d4c240c18e57124adbaaffdef829a0b1b09775b3dae71c49025a"
+      "sha256": "fa0ea63d56309f218b26e9bcd1477287c64a11e107699f14de79f7dd5cdeb61a"
     },
     {
       "path": "backend/app/domains/routine_posts/service/event_context.py",
@@ -886,7 +894,7 @@
     },
     {
       "path": "backend/app/domains/routine_posts/service/evidence.py",
-      "sha256": "b2d1f832b73e531d7e994799e7229a6cd979bc84aed143299e92e2af23065abd"
+      "sha256": "c3f9370c5fab6a21d8049d00370c1930056bba6b0f4971f475019b36b80636ba"
     },
     {
       "path": "backend/app/domains/routine_posts/service/generation.py",
@@ -906,7 +914,7 @@
     },
     {
       "path": "backend/app/domains/runtime/constants.py",
-      "sha256": "1d67e79626fedd03274b82a80ca4584fe99ddd7cea29484566742b07409dcc08"
+      "sha256": "682efa91f52ad26fa15ef45aba27b81348a1b062853c10e178e7dc48f835c8f1"
     },
     {
       "path": "backend/app/domains/social/__init__.py",
@@ -946,7 +954,7 @@
     },
     {
       "path": "backend/app/domains/social/contracts/image_generation.py",
-      "sha256": "b68712cc40bc457daae9c7a70ab0e07b02c7a5652d0af062e30df4e799cfcca4"
+      "sha256": "92665f8b402308b57abf3637bba4e23306417416f83d8924e25a0a2d05b63452"
     },
     {
       "path": "backend/app/domains/social/contracts/image_jobs.py",
@@ -1026,7 +1034,7 @@
     },
     {
       "path": "backend/app/domains/social/contracts/world_feed.py",
-      "sha256": "46201e9158ed9420c2af07001803e0d076e323e8d1d16ff300b2280b0b3818e0"
+      "sha256": "779564f6d5c97664fdb1eb902d13665236689a544a8388646785de117194c0aa"
     },
     {
       "path": "backend/app/domains/social/contracts/write_execution.py",
@@ -1086,7 +1094,7 @@
     },
     {
       "path": "backend/app/domains/social/policies/world_feed.py",
-      "sha256": "b18623d86c29d4c47123ae276ac862811d7acaefcc25a798a6d58ecbfeb36391"
+      "sha256": "fa111ae157f034390a00f29e3f63298a6bec64c6577e2bd9a7066f4bbd712932"
     },
     {
       "path": "backend/app/domains/social/recommendation_router.py",
@@ -1294,7 +1302,7 @@
     },
     {
       "path": "backend/app/domains/social/service/feed_reaction_prompts.py",
-      "sha256": "51ab47f634c268a73bc923feca11a4e9c063704fd92ba7e3dd79924f7201cfd9"
+      "sha256": "460faab86686cba1a65a55cecc221059f589c7128be533e949b53fe4bf0beb7d"
     },
     {
       "path": "backend/app/domains/social/service/feed_reaction_validation.py",
@@ -1322,7 +1330,7 @@
     },
     {
       "path": "backend/app/domains/social/service/image_prompts.py",
-      "sha256": "91220c11d2b07b5e0fa306bbadcfa362016acd23769d65ed750d4d317a99e33c"
+      "sha256": "ca15aaf3f4a9153f3b0ee896db69a22e172affa5957739bcbcae7d3e346865c0"
     },
     {
       "path": "backend/app/domains/social/service/image_quota.py",
@@ -1386,7 +1394,7 @@
     },
     {
       "path": "backend/app/domains/social/service/recommendation_topics.py",
-      "sha256": "a394c703dbc0f8bdc31ab21f07f2cc7ba4be3079e062d836f311427c24fdc86b"
+      "sha256": "6a02187d15a2d6d2f2495dadcd7c01382405ac9b907df2945aca2e547809c269"
     },
     {
       "path": "backend/app/domains/social/service/resident_affordances.py",
@@ -1438,7 +1446,7 @@
     },
     {
       "path": "backend/app/domains/social/service/world_feed.py",
-      "sha256": "f95088ddc1cfe12044c0fc7ad32c2512c9615690a1ee0738a602de79f21046b0"
+      "sha256": "e472337775390e77a80ad164af70ba3cfe12c0f2e708f31d7bab16e9f0765ccc"
     },
     {
       "path": "backend/app/domains/social/service/world_profile.py",
@@ -1482,7 +1490,7 @@
     },
     {
       "path": "backend/app/integrations/llm/character_response_generator.py",
-      "sha256": "8f44d9b13edc1dec672740a6e9f3ae759c8a4e81ce4d8f2a803b5126ecd7e54f"
+      "sha256": "f393a8587c8bfe851414b54354f7ca3899c5ea82832c7b1a2fabd12e9cf132d6"
     },
     {
       "path": "backend/app/integrations/llm/episode_selection.py",
@@ -1729,12 +1737,20 @@
       "sha256": "9320fc7ec509087f8cb46925719ab72a8ccbc233d9b60c3d5c6cca497df518b4"
     },
     {
+      "path": "backend/app/runtime/migrations/sqlite_versions/character_background_v22.py",
+      "sha256": "4cf222c453c0e286229d22ffbac9af26f23050306c1b9c1406b2521a9ab7c86f"
+    },
+    {
       "path": "backend/app/runtime/migrations/sqlite_versions/contracts.py",
       "sha256": "0b2c190eafed9900fcbe85b1f3a750952c7fce49c05fd87af5a5b4b1b31a4177"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/creator_v21.py",
       "sha256": "2530d8a34d401a99ced012549868c7cc10b068b44af3c53903b19fd4fd3f4070"
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/daily_preparation_v23.py",
+      "sha256": "452d2165c349d648bff0bd97fd03b9e71bc24bdf8379bba866cc0ed4ecd2a799"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v1.json",
@@ -1793,6 +1809,14 @@
       "sha256": "85ee8fb4fee4286dcb8d7d56d5666d8c67f74ef16756703bca3ae8c37511f193"
     },
     {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v22.json",
+      "sha256": "a12e87a70ff634a3f9afe16e0d1b78f21319ebc9b893f3d8b28cba9c7a98bcc5"
+    },
+    {
+      "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v23.json",
+      "sha256": "5119e2c505d7dfe39316b7159030bc6b8f4674f968c7850a6c0fd9c6463996d2"
+    },
+    {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v3.json",
       "sha256": "df50e0bbd5d3ce7091434c5dec8ea69616863deb11a97ab9e81ddfaca4d4cb15"
     },
@@ -1826,7 +1850,7 @@
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-      "sha256": "b0c8eb2f495b1b7fbbd6463ad6a8ef7715ada703f84f8a49dd5ffe9d63cfa1ba"
+      "sha256": "bc9065b0ebe51a462b2517a4b58be8add7b030f3cd586e798a393e6af2361327"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/relationship_v17_ddl.py",
@@ -1874,7 +1898,7 @@
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/v2_to_v3_no_specific_role.py",
-      "sha256": "26889dca6777ed4658a7cecfc153e546e6ad25adb07485a5a1b5414ba4fc262c"
+      "sha256": "3ca70bf32140f7389d737a723e6d44e078afc9ec59402af4a3ea411f8ce0bbca"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/v3_to_v4_world_scoped_chat.py",
@@ -1910,7 +1934,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/model_registration.py",
-      "sha256": "932df089f694c02f5dd9192a9e6f0c45d6d18830935ced8bceab19b8489e7c71"
+      "sha256": "48a04c371aaeb5a42ed670fa3dbf0094f3f0a8c4d728509f4d32406b0c57e783"
     },
     {
       "path": "backend/app/runtime/persistence/runtime_data_path.py",
@@ -1950,7 +1974,7 @@
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
-      "sha256": "3f8232f6d429caa6866186149c6adfcb8d0f98f462cf36e22575c8dd412f9183"
+      "sha256": "e2a323b056b9629af962e766bbe42b8db29cd7a826cb855e30d5f8982f95e06c"
     },
     {
       "path": "backend/app/runtime/persistence/sqlite_unit_of_work.py",
@@ -1990,7 +2014,7 @@
     },
     {
       "path": "backend/app/runtime/resident/first_greeting.py",
-      "sha256": "acdad6e12b617dd93d09c0476ce12c8d7fec83bd8f5d79bfce42bf5c7076e765"
+      "sha256": "34e7e395fabcb19e1846cdd9435441297b4d3198668b069f389c79ea643220f8"
     },
     {
       "path": "backend/app/runtime/resident/gateway_results.py",
@@ -2022,7 +2046,7 @@
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
-      "sha256": "2740337cb2a49f60c9d5e70879b4415105b1b72d5f0f2df2ccf8827d6b1af7e0"
+      "sha256": "f286cd10b2f6c74d2964b880ed2676a25f851dfe71b704cced70dfaab34870ca"
     },
     {
       "path": "backend/app/runtime/resident/slot_references.py",
@@ -2190,7 +2214,7 @@
     },
     {
       "path": "backend/app/runtime/social/topic_preparation.py",
-      "sha256": "da23b83b79cd3d76d1e58a11f8b5d398e86bdaeffca8501482765afec6885b88"
+      "sha256": "c5828585dc5de55e1fb07caa208a7552b2838479675ea3007ebacc16783d6195"
     },
     {
       "path": "backend/app/runtime/social/topic_scope.py",
@@ -2202,7 +2226,7 @@
     },
     {
       "path": "backend/app/runtime/social/world_feed_queries.py",
-      "sha256": "607257ee212945160198cf5d88d346daad55210a92e15d6dc7554e4dd0e60105"
+      "sha256": "5348824cdfa74dbebe83d2639870bbeff2d770cf764657bd2701fbb4f04138ab"
     },
     {
       "path": "backend/app/runtime/social/world_feed_search.py",
@@ -2214,11 +2238,11 @@
     },
     {
       "path": "backend/security/public_route_security_inventory.json",
-      "sha256": "f7d77ad96c1b39d16c7a3669700ea7b1a565a2b9a4918a7255cb26e6c9c930bc"
+      "sha256": "8f2b53fdec9e33f6b5a9c8b397a3a44ce654414087c5daa5eb679dd54efea55a"
     },
     {
       "path": "backend/security/route_security_inventory.json",
-      "sha256": "45e5c8b06f83c693b4a2864be9748e145ae301fe2b32f84598782189e4299e7c"
+      "sha256": "2e0f1216d70c0e522170cf89cc6738bd8122d8aee9c9950b617bc44c58023db5"
     },
     {
       "path": "backend/tests/chat/test_canonical_memory_subject.py",
@@ -2434,7 +2458,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "1e75119fd43fb15be31a42db2ae74ea59c7e49d1cfe8b9c389c2d5bb7adcca1c"
+      "sha256": "c357b1c00115db961d42c2bd380f65641155925da5f9f847acde56b2fb0cad54"
     },
     {
       "path": "backend/tests/memory/test_embedding_settings.py",
@@ -2538,7 +2562,7 @@
     },
     {
       "path": "backend/tests/memory/test_hybrid_episode_inventory.py",
-      "sha256": "14267c025e4e61b2d199b82bdd30855f625c3faf73722efb1db11bf3b1cf454f"
+      "sha256": "bca5e12a4a2b76eabf55a0b09b184066ebbe9d56510600d3e6106aa3deef50bb"
     },
     {
       "path": "backend/tests/memory/test_hybrid_native_pipeline.py",
@@ -2562,7 +2586,7 @@
     },
     {
       "path": "backend/tests/memory/test_manual_relationship_followup.py",
-      "sha256": "29436915da9f45c5e31be033c7f287ec9802d5d07025afff6bc53b42bfed4768"
+      "sha256": "8ab86d121b479493f56670eaafd67ffee85cb51295ad9c31215102107d468105"
     },
     {
       "path": "backend/tests/memory/test_p8_l_f_memory_domain.py",
@@ -2650,11 +2674,19 @@
     },
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
-      "sha256": "e7f90da730454419809414183e7d5a42c405d3a88d92535c2141dcad376190e4"
+      "sha256": "addd5eb97d7041d10961fa4708a2dcf20ef8c03bf6c77b9e9c2af0b3846ee512"
+    },
+    {
+      "path": "backend/tests/migrations/test_character_background_v22.py",
+      "sha256": "19160035d828713667ed551acea2aa390f5f075b21eb902a472784446c6e5473"
     },
     {
       "path": "backend/tests/migrations/test_consolidation_schema_parity.py",
       "sha256": "47fa0cc4e15ad5693cbd12b4b66e19d93cab59bedcae7e176687b6e431a515c6"
+    },
+    {
+      "path": "backend/tests/migrations/test_daily_preparation_v23.py",
+      "sha256": "b3df32740cbf8920348c2716fae2a899120097718364d558dd5fb858514eed0b"
     },
     {
       "path": "backend/tests/migrations/test_episode_schema_parity.py",
@@ -2662,11 +2694,11 @@
     },
     {
       "path": "backend/tests/migrations/test_observation_outbox_v20.py",
-      "sha256": "e6f0675384efbcd38ac96195dc1ef4d4b23ab2d576a6bd49abcb5a94a9e249b0"
+      "sha256": "43ec2cc8ccaf0c2845f0f8f262cf954091f0a010248885f0bde1c4263a952e87"
     },
     {
       "path": "backend/tests/migrations/test_populated_memory_upgrade.py",
-      "sha256": "f73f5d0dfb7f39aa5d4f885c72eda7d2af616f98ee97db3bde465e7c9774d1bb"
+      "sha256": "15ade76badbc70555784d6f1e1fc153fbc7f709118c0cfd8aab6b62c96156b3d"
     },
     {
       "path": "backend/tests/routines/test_activity_thought_output.py",
@@ -2831,10 +2863,10 @@
     "sha256": "3529d4d33a9d7fa75d556423f9a85a2749130259ed54f0b2cbe43ce06903b213"
   },
   "schema": {
-    "canonical_table_count": 137,
-    "embedded_schema_version": 21,
-    "schema_digest": "0c49fc4ea0c3b6e3962ecab008aeec935f93fc7a84f372663c8f34410c79c98c",
-    "source_revision": "20260927_0099"
+    "canonical_table_count": 138,
+    "embedded_schema_version": 23,
+    "schema_digest": "de472c4015b2cee5f8749af2e177b2b59635069d1827ecca4cdee4a190b341d6",
+    "source_revision": "20260928_0101"
   },
   "schema_version": 1,
   "separate_gates": [

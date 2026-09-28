@@ -28,6 +28,8 @@ class FeedLane(SocialLane):
             raise ValueError("activity_autonomy_disabled")
         if not neutral_weights:
             return profile
+        if profile.explicit_actions is not None:
+            return profile
         # In V2 learned preferences inform the model; only explicit permissions,
         # scope and existing reactions remove affordances.
         return replace(profile, action_profile={key: {**(profile.action_profile.get(key) or {}), "weight": 1}
@@ -35,8 +37,14 @@ class FeedLane(SocialLane):
 
     async def load(self, state):
         self.reconcile_deliveries()
-        preferences = self.profile(neutral_weights=False).action_profile
-        profile = self.profile()
+        from app.domains.social.exceptions import WorldFeedReadinessError
+        try:
+            preferences = self.profile(neutral_weights=False).action_profile
+            profile = self.profile()
+        except WorldFeedReadinessError as exc:
+            if exc.reason_code != "recommendation_topics_required":
+                raise
+            return {"candidates": [], "lane_data": {"deferred_reason": exc.reason_code}}
         cycle = f"v2:{state['identity']['activity_id']}:feed"
         claim = claim_cycle_keywords(self.ctx.db, profile=profile, cycle_key=cycle, run_id=self.ctx.run_id)
         self.save_preparation()
@@ -61,8 +69,10 @@ class FeedLane(SocialLane):
             "candidates": [c.model_dump(mode="json") for c in claims.candidates],
             "observation_ids": [o.id for o in claims.observations], "claim_tokens": {o.id: o.claim_token for o in claims.observations},
             "raw_candidate_count": search.raw_candidate_count, "query_latency_ms": search.query_latency_ms}
-        return {"candidates": candidates, "lane_data": data,
-            "shared_context": {**state["shared_context"], "action_preferences": preferences}}
+        shared = dict(state["shared_context"])
+        if profile.explicit_actions is None:
+            shared["action_preferences"] = preferences
+        return {"candidates": candidates, "lane_data": data, "shared_context": shared}
 
     def delivery(self, state):
         data = state["lane_data"].get("_feed")
@@ -172,6 +182,9 @@ class FeedLane(SocialLane):
     async def finalize(self, state):
         self.observe_delivered()
         result = await super().finalize(state)
+        if state.get("lane_data", {}).get("deferred_reason"):
+            result["result"].update(status="deferred", reason=state["lane_data"]["deferred_reason"])
+            return result
         data = state.get("lane_data", {}).get("_feed")
         if data:
             decisions = state.get("decision", {}).get("decisions", [])

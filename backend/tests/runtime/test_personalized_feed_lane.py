@@ -230,3 +230,59 @@ def test_v2_feed_duplicate_cycle_does_not_reenter_candidate_load(monkeypatch):
             assert db.scalar(select(func.count(WorldCharacterFeedObservation.id))) == 0
 
     asyncio.run(scenario())
+
+
+def test_daily_policy_feed_without_approved_profile_uses_topics_and_preserves_like_effect(monkeypatch):
+    from app.config import settings
+    from app.domains.social.service.recommendation_topics import replace_source_topics, enroll_native_post
+    from app.domains.world_characters.models import WorldCommunityProfile
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", True)
+    async def scenario():
+        with Session(_engine(), expire_on_commit=False) as db:
+            ctx, post = _seed(db, with_candidate=True)
+            actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
+            actor.activity_runtime_mode = "routine_resident_v1"
+            actor.feed_runtime_mode = "topic_recommendation_v1"
+            old = db.scalar(select(WorldCommunityProfile).where(WorldCommunityProfile.world_character_id == actor.id))
+            old.status = "failed"
+            old.avoid_topics = [post.title, "alchemy"]
+            replace_source_topics(db, world_id=actor.world_id, world_character_id=actor.id,
+                                 topics=[("독서", "common")])
+            enroll_native_post(db, post); db.commit()
+            async def guard(_): return {}
+            lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
+            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            async def plan(**kwargs):
+                assert "action_preferences" not in kwargs["context"]
+                assert set(kwargs["candidates"][0]["allowed_actions"]) <= {"like", "comment"}
+                kwargs["delivery"].dispatched(); kwargs["delivery"].delivered()
+                return {**parse_action({"decisions":[{"target_id":post.id, "action":"like", "brief":"관심을 표현"}]}, kwargs["candidates"]),
+                        "judged_at":datetime.now(UTC).isoformat()}
+            monkeypatch.setattr(lane.provider, "plan", plan)
+            result = await build_lane("feed", lane.ports()).ainvoke({"identity":{"activity_id":ctx.run_id, "contract_version":2},
+                "shared_context":{"current_state":read_state(db, world_id=actor.world_id, actor_id=actor.id)}})
+            assert result["result"]["public_action_count"] == 1
+            assert db.scalar(select(func.count(PostLike.id))) == 1
+            assert db.scalar(select(RecommendationDelivery)).state == "delivered"
+            assert "action_preferences" not in result["shared_context"]
+    asyncio.run(scenario())
+
+
+def test_missing_topics_defer_feed_without_provider_or_delivery(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", True)
+    async def scenario():
+        with Session(_engine(), expire_on_commit=False) as db:
+            ctx, post = _seed(db, with_candidate=True)
+            actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
+            actor.activity_runtime_mode = "routine_resident_v1"
+            actor.feed_runtime_mode = "topic_recommendation_v1"; db.commit()
+            async def guard(_): return {}
+            lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
+            result = await build_lane("feed", lane.ports()).ainvoke({"identity":{"activity_id":ctx.run_id,"contract_version":2},"shared_context":{}})
+            assert result["result"]["status"] == "deferred"
+            assert result["result"]["reason"] == "recommendation_topics_required"
+            assert result["result"]["public_action_count"] == 0
+            assert lane.tracker.calls == []
+            assert db.scalar(select(RecommendationDelivery)) is None
+    asyncio.run(scenario())

@@ -115,7 +115,7 @@ export type AgentActivityLogRead = {
 
 export type AgentActivityProfileReadinessRead = {
   ready: boolean;
-  source: "legacy_tendency" | "world_community_profile";
+  source: "legacy_tendency" | "world_community_profile" | "daily_preparation";
   reason_code: string | null;
   world_id: string | null;
   world_character_id: string | null;

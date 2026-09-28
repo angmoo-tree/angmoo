@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from model_fixture_support import models as registered_models
 from app.domains.characters import models, schemas
 from app.domains.characters.exceptions import AgentPersonaValidationError, AgentCreationDraftValidationError
-from app.domains.characters.policies.prompt_persona import model_persona, legacy_persona_summary
+from app.domains.characters.service.prompt_persona import model_persona, legacy_persona_summary
 from app.domains.characters.service import profile
 from app.domains.characters.service.card_mapping import map_card
 from app.integrations.character_cards.parser import parse_card

@@ -2,7 +2,7 @@
 
 import json
 from app.core.context_text import neutralize_context_text
-from app.domains.characters.policies.prompt_persona import PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 from app.domains.social.schemas import feed as schemas
 from app.domains.social.contracts.world_feed import ReadySearchProfile
 from app.domains.social.constants import FEED_REACTION_CONTRACT_VERSION

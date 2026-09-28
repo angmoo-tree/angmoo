@@ -33,8 +33,10 @@ class CombinedSelection:
             candidates = prepared.get("candidates", [])
             if len(candidates) > 1 and not prepared.get("preparation_error"):
                 choices[lane] = {"candidates": candidate_previews(candidates),
-                    "selection_limit": min(INBOX_TARGET_LIMIT if lane == "inbox" else 1, len(candidates)),
-                    "action_preferences": prepared.get("shared_context", {}).get("action_preferences", {})}
+                    "selection_limit": min(INBOX_TARGET_LIMIT if lane == "inbox" else 1, len(candidates))}
+                preferences = prepared.get("shared_context", {}).get("action_preferences")
+                if preferences is not None:
+                    choices[lane]["action_preferences"] = preferences
         return {"context": state["shared_context"], "lanes": choices}
 
     async def mode(self, state):

@@ -346,7 +346,7 @@ class AgentImageGenerationSettingRead(UtcInstantResponseModel):
 
 class AgentActivityProfileReadinessRead(BaseModel):
     ready: bool
-    source: Literal["legacy_tendency", "world_community_profile"]
+    source: Literal["legacy_tendency", "world_community_profile", "daily_preparation"]
     reason_code: str | None = None
     world_id: str | None = None
     world_character_id: str | None = None

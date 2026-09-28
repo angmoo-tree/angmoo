@@ -34,7 +34,7 @@ def restore_prepared(ctx, frozen, tracker):
         "profile": WorldCommunityProfile, "plan": DailyActivityPlan, "item": DailyActivityPlanItem,
         "episode": ActivityEpisode, "previous_beat": ActivityBeat, "previous_post": Post}
     records = {key: ctx.db.get(model, frozen["refs"][key], populate_existing=True) if frozen["refs"][key] else None for key, model in models.items()}
-    if any(records[name] is None for name in models if not name.startswith("previous")):
+    if any(records[name] is None for name in models if not name.startswith("previous") and (name != "profile" or frozen["refs"].get("profile"))):
         raise ValueError("routine_resume_source_missing")
     actor, world = records["world_character"], records["world"]
     beat = ctx.db.get(ActivityBeat, frozen["beat_id"], populate_existing=True)

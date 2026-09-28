@@ -153,3 +153,48 @@ def test_parent_preserves_completed_paths_and_resumes_busy_settlement_combined(m
 
 def test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification_combined(monkeypatch, tmp_path):
     test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification(monkeypatch, tmp_path, version=2)
+
+
+def test_daily_plan_failure_defers_only_routine_and_preserves_feed_effect(monkeypatch, tmp_path):
+    from zoneinfo import ZoneInfo
+    from app.config import settings
+    from app.domains.worlds.models import WorldRole
+    from app.domains.social.service.recommendation_topics import replace_source_topics, enroll_native_post
+    from app.domains.routines.models.preparation import ActivityPreparationJob
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", True)
+    async def scenario():
+        with Session(_engine(), expire_on_commit=False) as db:
+            ctx, post = _seed(db, with_candidate=True)
+            actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
+            actor.activity_runtime_mode = "routine_resident_v1"
+            actor.feed_runtime_mode = "topic_recommendation_v1"
+            db.add(WorldRole(id="daily-role", world_id=actor.world_id, role_key="student", name="학생"))
+            replace_source_topics(db, world_id=actor.world_id, world_character_id=actor.id, topics=[("독서", "common")])
+            enroll_native_post(db, post)
+            db.add(ActivityPreparationJob(id="failed-preparation", world_id=actor.world_id, world_character_id=actor.id,
+                local_date=ctx.run_started_at.astimezone(ZoneInfo("Asia/Seoul")).date(), timezone_name="Asia/Seoul",
+                mode="daily", request_id="automatic-failed", state="failed", input_digest="a"*64,
+                input_snapshot={}, attempt_count=4, json_retry_count=0, reason_code="preparation_attempts_exhausted"))
+            db.add(AgentSlot(agent_id=ctx.agent_id, status="running", locked_by_run_id=ctx.run_id,
+                assigned_character_id=ctx.character.id, assigned_user_id=ctx.user_id,
+                lease_expires_at=datetime.now(UTC)+timedelta(minutes=10)))
+            set_engine(db, engine="personalized_graph_v2", expected_version=0)
+            run = bind_run(db, actor=actor, activity_id=ctx.run_id); run.contract_version=2; db.commit()
+            calls=[]
+            async def plan(self, **kwargs):
+                calls.append(kwargs["lane"])
+                kwargs["delivery"].dispatched(); kwargs["delivery"].delivered()
+                return {**parse_action({"decisions":[{"target_id":post.id,"action":"like","brief":"반가운 글"}]}, kwargs["candidates"]),
+                    "judged_at":datetime.now(UTC).isoformat(), "provisional_draft":{"replies":[]}}
+            monkeypatch.setattr(ActivityProvider, "plan", plan)
+            binding=ActivityRuntimeBinding(None,tmp_path); register(binding)
+            try:
+                result=await run_personalized_activity(ctx,actor=actor,run=run)
+                assert result["paths"]["feed"]["status"] == "completed", result
+                assert result["paths"]["routine"]["status"] == "deferred", result
+                assert result["publish_result"]["public_action_count"] == 1
+                assert calls == ["feed"]
+                assert await run_personalized_activity(ctx,actor=actor,run=run) == result
+                assert calls == ["feed"]
+            finally: unregister(binding)
+    asyncio.run(scenario())

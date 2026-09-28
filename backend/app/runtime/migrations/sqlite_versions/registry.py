@@ -117,8 +117,10 @@ from app.runtime.migrations.sqlite_versions import v18_to_v19_activity_graph as 
 from app.runtime.migrations.sqlite_versions import observation_outbox_v20 as observation_outbox
 from app.runtime.migrations.sqlite_versions import creator_v21
 from app.runtime.migrations.sqlite_versions import character_background_v22
+from app.runtime.migrations.sqlite_versions import daily_preparation_v23
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    22: daily_preparation_v23.upgrade,
     21: character_background_v22.upgrade,
     20: creator_v21.upgrade,
     19: observation_outbox.upgrade,
@@ -143,6 +145,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    22: SqliteMigrationContract(source_version=22, target_version=23, name="daily_preparation", mutable_identity_tables=daily_preparation_v23.MUTABLE_IDENTITY_TABLES, capture=daily_preparation_v23.capture_delta, verify=daily_preparation_v23.verify_delta),
     21: SqliteMigrationContract(source_version=21, target_version=22, name="character_background", mutable_identity_tables=character_background_v22.MUTABLE_IDENTITY_TABLES, capture=character_background_v22.capture_delta, verify=character_background_v22.verify_delta),
     20: SqliteMigrationContract(source_version=20, target_version=21, name="local_creator", mutable_identity_tables=creator_v21.MUTABLE_IDENTITY_TABLES, capture=creator_v21.capture_delta, verify=creator_v21.verify_delta),
     19: SqliteMigrationContract(source_version=19, target_version=20, name="observation_outbox_identity", mutable_identity_tables=observation_outbox.MUTABLE_IDENTITY_TABLES, capture=observation_outbox.capture_delta, verify=observation_outbox.verify_delta),

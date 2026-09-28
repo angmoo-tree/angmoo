@@ -856,7 +856,8 @@
     "frontend/src/features/characters/stores/character-dashboard-session.ts": "frontend/src/features/characters/stores/agent-session.ts",
     "frontend/src/features/world-packages/utils/browser-delivery.ts": "frontend/src/features/world-packages/api/browser-delivery.ts",
     "frontend/src/utils/post-card-navigation.ts": "frontend/src/lib/navigation/post-card-navigation.ts",
-    "frontend/src/utils/scroll-viewport.ts": "frontend/src/lib/dom/scroll-viewport.ts"
+    "frontend/src/utils/scroll-viewport.ts": "frontend/src/lib/dom/scroll-viewport.ts",
+    "backend/app/domains/characters/policies/prompt_persona.py": "backend/app/domains/characters/service/prompt_persona.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",

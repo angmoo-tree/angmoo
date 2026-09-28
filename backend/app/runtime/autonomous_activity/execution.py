@@ -104,8 +104,21 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         ctx.db.commit()
         return {}
 
+    preparation_status = {}
+
     async def load(state):
         await guard(state)
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED and not state.get("shared_context"):
+            from types import SimpleNamespace
+            from app.runtime.daily_preparation import ensure_preparation
+            # Startup/manual execution and scheduler midnight share the same claim.
+            prepared = await ensure_preparation(ctx.db, character_id=ctx.character.id, world_id=actor.world_id,
+                                     user=SimpleNamespace(id=ctx.user_id))
+            preparation_status.update(prepared.model_dump(mode="json"))
+            if attempt:
+                attempt.emit("daily_preparation", details=preparation_status)
+            ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
         ctx.db.commit()
         return {"shared_context": plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))}
@@ -118,7 +131,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             "status": "failed" if any(r.get("status") == "failed" for r in results.values()) else "completed" if count else "observed",
             "summary": "Personalized Inbox, Routine and Feed graph completed.",
             "publish_result": {"public_action_count": count}, "paths": results,
-            "llm_usage_summary": tracker.summary(), "llm_rate_limit_waits": tracker.rate_limit_waits}
+            "llm_usage_summary": tracker.summary(), "llm_rate_limit_waits": tracker.rate_limit_waits,
+            "daily_preparation": preparation_status}
         row = ctx.db.get(ActivityGraphRun, run.activity_id)
         result = {**(row.result or {}), **result}
         row.status, row.stage, row.result, row.finished_at = result["status"], "Finalize", plain(result), datetime.now(UTC)

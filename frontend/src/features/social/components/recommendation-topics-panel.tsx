@@ -9,7 +9,7 @@ import { RecommendationHistory } from "@/features/social/components/recommendati
 import { connectRecommendationKey, readRecommendationTopics, regenerateRecommendationTopics, type RecommendationTopics } from "@/features/social/api/recommendation-topics";
 
 export type TopicCharacterChoice = { id: string; name: string };
-const labels = { pending: "주제 준비 필요", running: "주제 만드는 중", ready: "준비됨", failed: "주제 생성 실패 · 이전 결과 유지", stale: "저장된 설정으로 갱신 필요" };
+const labels = { pending: "주제 준비 필요", running: "주제 만드는 중", ready: "준비됨", failed: "주제 생성 실패 · 이전 결과 유지", stale: "설정 변경됨 · 기존 주제 사용 중" };
 
 // LOCAL: existing semantic form/button primitives; shared by Next and static screens.
 export function RecommendationTopicsPanel({ worldId, characterId, characters = [] }: {
@@ -47,7 +47,7 @@ export function RecommendationTopicsPanel({ worldId, characterId, characters = [
         : await regenerateRecommendationTopics(worldId, request.current, characterId);
       if (activeScope.current === scope) setData(result);
     } catch {
-      if (activeScope.current === scope) setError("처리하지 못했습니다. 일과 생성용 Google API 키와 승인된 프로필을 확인한 뒤 다시 시도해 주세요.");
+      if (activeScope.current === scope) setError("처리하지 못했습니다. 활동용 Google API 키와 캐릭터 설정을 확인한 뒤 다시 시도해 주세요.");
     } finally {
       request.current = null;
       if (activeScope.current === scope) setBusy(false);

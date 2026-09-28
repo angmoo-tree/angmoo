@@ -44,6 +44,7 @@ class DailyActivityPlan(Base):
             name="ck_daily_activity_plans_revision_count",
         ),
         CheckConstraint("version >= 1", name="ck_daily_activity_plans_version"),
+        CheckConstraint("generation_source IN ('repertoire','daily_generation') AND (generation_source != 'repertoire' OR repertoire_id IS NOT NULL)", name="ck_daily_activity_plans_source"),
         ForeignKeyConstraint(
             ["world_character_id", "world_id"],
             ["world_characters.id", "world_characters.world_id"],
@@ -73,9 +74,11 @@ class DailyActivityPlan(Base):
     local_date: Mapped[date] = mapped_column(Date, nullable=False)
     timezone_name: Mapped[str] = mapped_column(String(64), nullable=False)
     timezone_contract_version: Mapped[str] = mapped_column(String(40), nullable=False)
-    repertoire_id: Mapped[str] = mapped_column(
-        ForeignKey("world_activity_repertoires.id"), nullable=False
+    repertoire_id: Mapped[str | None] = mapped_column(
+        ForeignKey("world_activity_repertoires.id"), nullable=True
     )
+    generation_source: Mapped[str] = mapped_column(String(24), nullable=False, default="repertoire", server_default="repertoire")
+    preparation_contract_version: Mapped[str] = mapped_column(String(40), nullable=False, default="repertoire-v1", server_default="repertoire-v1")
     world_definition_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     character_definition_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     repertoire_contract_version: Mapped[str] = mapped_column(
@@ -230,7 +233,7 @@ class DailyActivityPlanItem(Base):
             name="fk_daily_activity_plan_items_joint_scope",
         ),
         CheckConstraint(
-            "origin_type IN ('repertoire','joint_activity')",
+            "origin_type IN ('repertoire','joint_activity','daily_generation')",
             name="ck_daily_activity_plan_items_origin",
         ),
         Index(

@@ -134,17 +134,18 @@ class ReadySearchProfile:
     world_character: FeedWorldCharacter
     membership: FeedMembership
     character: FeedCharacter
-    profile: FeedCommunityProfile
+    profile: FeedCommunityProfile | None
     keywords: tuple[str, ...]
     avoid_topics: tuple[str, ...]
     action_profile: dict[str, object]
     imported_world_runtime_locked: bool
+    explicit_actions: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
 class KeywordClaim:
     cursor_offset: int
-    keywords: tuple[str, str]
+    keywords: tuple[str, ...]
     duplicate_cycle: bool
     previous_summary: dict[str, object] | None
 

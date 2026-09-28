@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 22
-SOURCE_ALEMBIC_REVISION = "20260927_0100"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 99
-EXPECTED_CANONICAL_TABLE_COUNT = 137
+SQLITE_SCHEMA_VERSION = 23
+SOURCE_ALEMBIC_REVISION = "20260928_0101"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 100
+EXPECTED_CANONICAL_TABLE_COUNT = 138
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 ACTIVITY_V19_TABLES = (
@@ -315,6 +315,7 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_daily_preparation(metadata)
     _remove_character_background(metadata)
     _remove_creator_v21(metadata)
     _remove_activity_schema(metadata)
@@ -685,9 +686,37 @@ def build_sqlite_v20_metadata() -> MetaData:
 
 def build_sqlite_v21_metadata() -> MetaData:
     """Frozen pre-character-background schema for installed v21 databases."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v22_metadata()
     _remove_character_background(metadata)
     return metadata
+
+
+def build_sqlite_v22_metadata() -> MetaData:
+    """Frozen schema before date-scoped direct generation."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_daily_preparation(metadata)
+    return metadata
+
+
+def _remove_daily_preparation(metadata: MetaData) -> None:
+    from sqlalchemy import CheckConstraint
+    if "activity_preparation_jobs" in metadata.tables:
+        metadata.remove(metadata.tables["activity_preparation_jobs"])
+    plan = metadata.tables.get("daily_activity_plans")
+    if plan is not None:
+        for constraint in list(plan.constraints):
+            if constraint.name == "ck_daily_activity_plans_source":
+                plan.constraints.remove(constraint)
+        for key in ("generation_source", "preparation_contract_version"):
+            if key in plan.c:
+                plan._columns.remove(plan.c[key])
+        plan.c.repertoire_id.nullable = False
+    item = metadata.tables.get("daily_activity_plan_items")
+    if item is not None:
+        for constraint in list(item.constraints):
+            if constraint.name == "ck_daily_activity_plan_items_origin":
+                item.constraints.remove(constraint)
+        item.append_constraint(CheckConstraint("origin_type IN ('repertoire','joint_activity')", name="ck_daily_activity_plan_items_origin"))
 
 
 def _remove_character_background(metadata: MetaData) -> None:

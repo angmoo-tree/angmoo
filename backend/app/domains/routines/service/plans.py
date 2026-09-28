@@ -102,6 +102,16 @@ def _ready_repertoire(
     return repertoire, candidates
 
 
+def load_preparation_scope(references: PlanReferences, *, character_id: str, world_id: str, user: PlanOwner) -> PlanScope:
+    """Authorize direct preparation without requiring its outputs in advance."""
+    scope = _load_scope(references, character_id=character_id, world_id=world_id, user=user)
+    if scope.world.status != "published" or scope.world.readiness_status != "publish_ready":
+        raise DailyActivityPlanValidationError("world_not_ready")
+    if scope.world_character.status not in {"pending", "inactive", "active"}:
+        raise DailyActivityPlanValidationError("world_character_ineligible")
+    return scope
+
+
 def prepare_activity_plan(
     db: Session,
     *,
@@ -342,7 +352,8 @@ def update_activity_runtime_mode(
         user=user,
         lock_for_update=True,
     )
-    if data.activity_runtime_mode == "routine_resident_v1":
+    from app.config import settings
+    if data.activity_runtime_mode == "routine_resident_v1" and not settings.DAILY_PREPARATION_ENABLED:
         repertoire, _candidates = _ready_repertoire(references, scope=scope)
         credential = references.get_credential(repertoire.credential_id)
         if (
@@ -560,6 +571,8 @@ def _plan_read(
         timezone_name=plan.timezone_name,
         timezone_contract_version=plan.timezone_contract_version,
         repertoire_id=plan.repertoire_id,
+        generation_source=plan.generation_source,
+        preparation_contract_version=plan.preparation_contract_version,
         world_definition_hash=plan.world_definition_hash,
         character_definition_hash=plan.character_definition_hash,
         repertoire_contract_version=plan.repertoire_contract_version,

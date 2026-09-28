@@ -29,7 +29,7 @@ export type DailyActivityPlanItemRead = {
   selected_candidate_id: string | null;
   candidate_signature: string | null;
   candidate_ordinal: number | null;
-  origin_type: "repertoire" | "joint_activity";
+  origin_type: "repertoire" | "joint_activity" | "daily_generation";
   supersedes_plan_item_id: string | null;
   is_user_pinned: boolean;
   activity_kind: string;
@@ -53,7 +53,9 @@ export type DailyActivityPlanRead = {
   local_date: string;
   timezone_name: string;
   timezone_contract_version: string;
-  repertoire_id: string;
+  repertoire_id: string | null;
+  generation_source?: "repertoire" | "daily_generation";
+  preparation_contract_version?: string;
   world_definition_hash: string;
   character_definition_hash: string;
   repertoire_contract_version: string;
@@ -268,4 +270,34 @@ export function updateActivityRuntimeMode(
       body: { activity_runtime_mode: activityRuntimeMode },
     },
   );
+}
+
+
+export type DailyPreparationRead = {
+  world_character_id: string;
+  local_date: string;
+  plan_state: "pending" | "running" | "waiting" | "ready" | "failed" | "needs_user_action";
+  topic_state: "pending" | "ready" | "needs_user_action";
+  request_id: string | null;
+  attempt_count: number;
+  reason_code: string | null;
+  plan_id: string | null;
+  plan_version: number | null;
+  request_state: string | null;
+  request_reason_code: string | null;
+  next_retry_at: string | null;
+};
+
+function preparationPath(characterId: string, worldId: string) {
+  return `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/daily-preparation`;
+}
+
+export function getDailyPreparation(characterId: string, worldId: string, signal?: AbortSignal) {
+  return apiRequest<DailyPreparationRead>(preparationPath(characterId, worldId), { signal });
+}
+
+export function regenerateDailyPreparation(characterId: string, worldId: string, requestId: string, expectedVersion?: number) {
+  return apiRequest<DailyPreparationRead>(preparationPath(characterId, worldId), {
+    method: "POST", body: { request_id: requestId, expected_version: expectedVersion },
+  });
 }

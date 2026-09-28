@@ -68,6 +68,39 @@ def _insert_run(root: Path, *, activity_id: str, started_at: datetime, status: s
              "ActionPlanner", json.dumps({"paths": {}}), started_at.isoformat(), None))
 
 
+def test_preparation_export_scopes_world_actor_time_and_omits_private_source(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    selected = data_root / "canonical" / "generations" / "test" / "angmoo.sqlite3"
+    with sqlite3.connect(selected) as db:
+        db.execute("""CREATE TABLE activity_preparation_jobs (
+            id TEXT, world_id TEXT, world_character_id TEXT, local_date TEXT,
+            mode TEXT, state TEXT, request_id TEXT, attempt_count INTEGER,
+            json_retry_count INTEGER, reason_code TEXT, plan_id TEXT, plan_version INTEGER,
+            created_at TEXT, updated_at TEXT, source_snapshot TEXT)""")
+        for name, world, actor, when in (
+            ("in-scope", "world-1", "actor-1", now + timedelta(seconds=1)),
+            ("other-world", "world-2", "actor-1", now),
+            ("other-actor", "world-1", "actor-2", now),
+            ("past", "world-1", "actor-1", now - timedelta(days=1)),
+            ("future", "world-1", "actor-1", now + timedelta(days=1)),
+        ):
+            db.execute("INSERT INTO activity_preparation_jobs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (name, world, actor, now.date().isoformat(), "initial", "failed", name, 4, 1,
+                 "preparation_attempts_exhausted", None, None, when.isoformat(), when.isoformat(),
+                 "private-persona-and-key-never-export"))
+        before = list(db.iterdump())
+    destination = tmp_path / "preparation-report"
+    export_session(data_root, manifest["session_id"], destination=destination, now=now+timedelta(minutes=1))
+    body = (destination / "preparations.jsonl").read_text(encoding="utf-8")
+    rows = [json.loads(line) for line in body.splitlines()]
+    assert [row["id"] for row in rows] == ["in-scope"]
+    assert rows[0]["attempt_count"] == 4
+    assert "private-persona" not in body and "source_snapshot" not in body
+    with sqlite3.connect(selected) as db:
+        assert list(db.iterdump()) == before
+
+
 def test_session_captures_validation_failure_without_payload_and_exports_read_only(data_root, tmp_path):
     now = datetime.now(UTC)
     _insert_run(data_root, activity_id="activity-1", started_at=now - timedelta(minutes=1))

@@ -23,6 +23,7 @@ def register_models() -> MetaData:
     import app.domains.relationships.models.manual_review  # noqa: F401
     import app.domains.relationships.models.personalization  # noqa: F401 - explicit ORM registration
     import app.domains.routines.models.plans  # noqa: F401 - explicit ORM registration
+    import app.domains.routines.models.preparation  # noqa: F401 - explicit ORM registration
     import app.domains.routines.models.resident  # noqa: F401 - explicit ORM registration
     import app.domains.runtime.models  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.feed  # noqa: F401 - explicit ORM registration

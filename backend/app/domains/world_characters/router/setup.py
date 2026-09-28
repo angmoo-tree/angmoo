@@ -56,6 +56,7 @@ def preflight_autonomy_setup(
     user = Depends(get_current_user),
 ) -> schemas.WorldCharacterSetupPreflightRead:
     try:
+        _require_legacy_setup()
         preflight = world_character_setup.preflight_regeneration if regenerate else world_character_setup.preflight_setup
         return preflight(db, world_character_id=world_character_id, user=user)
     except wc_errors.WorldCharacterSetupError as exc:
@@ -73,6 +74,7 @@ async def generate_autonomy_setup(
     user = Depends(get_current_user),
 ) -> schemas.WorldCharacterSetupRead:
     try:
+        _require_legacy_setup()
         return await world_character_setup.generate_setup(
             db,
             world_character_id=world_character_id,
@@ -94,6 +96,7 @@ async def retry_autonomy_setup(
     user = Depends(get_current_user),
 ) -> schemas.WorldCharacterSetupRead:
     try:
+        _require_legacy_setup()
         return await world_character_setup.retry_setup(
             db,
             world_character_id=world_character_id,
@@ -116,6 +119,7 @@ def approve_autonomy_setup(
     topics = Depends(recommendation_workflows),
 ) -> schemas.WorldCharacterSetupRead:
     try:
+        _require_legacy_setup()
         result = world_character_setup.approve_setup(
             db,
             world_character_id=world_character_id,
@@ -147,3 +151,9 @@ def reject_autonomy_setup(
         )
     except wc_errors.WorldCharacterSetupError as exc:
         _raise_setup_error(exc)
+
+
+def _require_legacy_setup():
+    from app.config import settings
+    if settings.DAILY_PREPARATION_ENABLED:
+        raise HTTPException(status_code=409, detail="use_daily_preparation")

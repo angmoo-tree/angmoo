@@ -18,7 +18,7 @@ from app.domains.world_characters.exceptions import WorldCharacterContractError
 from app.domains.world_characters.schemas import setup as schemas
 from app.domains.world_characters import models
 from app.domains.world_characters.models import WorldCharacter
-from app.domains.characters.policies.prompt_persona import PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 
 
 CHARACTER_CONTRACT_VERSION = "p2-character-contract-v1"

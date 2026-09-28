@@ -267,6 +267,7 @@ def _entry_read(
         role_key=world_character.role_key,
         status=world_character.status,
         autonomous_enabled=world_character.autonomous_enabled,
+        activity_runtime_mode=world_character.activity_runtime_mode,
         version=world_character.version,
         reused=reused,
     )
@@ -1107,6 +1108,17 @@ def get_setup(
     reused: bool = False,
 ) -> schemas.WorldCharacterSetupRead:
     scope = _load_scope(db, world_character_id=world_character_id, user=user)
+    from app.config import settings
+    if settings.DAILY_PREPARATION_ENABLED:
+        role = world_entry.find_autonomous_entry_role(db, world_id=scope.world.id, role_key=scope.world_character.role_key)
+        return schemas.WorldCharacterSetupRead(
+            world_character_id=world_character_id, world_id=scope.world.id, character_id=scope.character.id,
+            preparation_contract="daily-plan-v1", state="ready",
+            autonomy_ready=bool(role and scope.world_character.status == "active"),
+            autonomous_enabled=scope.world_character.autonomous_enabled,
+            current_character_contract_hash=world_character_contracts.character_contract_hash(scope.character),
+            current_world_contract_hash=scope.world.contract_hash,
+            safe_reason_code=None if role else "world_reference_invalid")
     character_hash = world_character_contracts.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
     profile = _latest_profile(db, world_character_id)

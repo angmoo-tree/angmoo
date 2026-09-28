@@ -41,6 +41,7 @@ test.describe("real card upload through Next and isolated contributor backend", 
       env: {
         ...process.env,
         ANGMOO_CONTRIBUTOR_DATA_ROOT: dataRoot,
+        DAILY_PREPARATION_ENABLED: "true",
         ANGMOO_FRONTEND_ORIGIN: base,
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -136,6 +137,28 @@ test.describe("real card upload through Next and isolated contributor backend", 
         const sourceAfterReject = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/card-source`);
         expect((await sourceAfterReject.json()).sha256).toBe(record!.sha256.toLowerCase());
       }
+
+      const completed = await page.request.post(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/complete`, {
+        headers: frontOrigin, data: { revision: result.draft.revision },
+      });
+      expect(completed.status(), await completed.text()).toBe(200);
+      const character = (await completed.json()).character;
+      const worlds = await page.request.post(base + "/api/backend/worlds/default-space/ensure", { headers: frontOrigin, data: {} });
+      expect(worlds.status(), await worlds.text()).toBe(200);
+      const world = await worlds.json();
+      const prepared = await page.request.get(base + `/api/backend/characters/${character.id}/worlds/${world.id}/daily-preparation`);
+      expect(prepared.status(), await prepared.text()).toBe(200);
+      expect((await prepared.json()).plan_state).toBe("pending");
+      expect((await prepared.json()).topic_state).toBe("pending");
+      expect((await completed.json()).settings.auto_enabled).toBe(false);
+      const withoutKey = await page.request.post(base + `/api/backend/characters/${character.id}/worlds/${world.id}/daily-preparation`, {
+        headers: frontOrigin, data: { request_id: `missing-key-${name}` },
+      });
+      expect(withoutKey.status(), await withoutKey.text()).toBe(409);
+      expect(await withoutKey.json()).toEqual({ detail: "preparation_credential_unavailable" });
+      const afterFailedPrepare = await page.request.get(base + `/api/backend/characters/${character.id}/worlds/${world.id}/daily-preparation`);
+      expect((await afterFailedPrepare.json()).request_id).toBeNull();
+      expect((await afterFailedPrepare.json()).plan_state).toBe("pending");
 
       await page.evaluate(() => sessionStorage.removeItem("angmoo.creation.v2:default"));
     }

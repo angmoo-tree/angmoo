@@ -62,6 +62,9 @@ def prepare_daily_activity_plan(
     user: PlanOwner = Depends(get_current_user),
     references: PlanReferences = Depends(get_plan_references),
 ) -> schemas.DailyActivityPlanRead:
+    from app.config import settings
+    if settings.DAILY_PREPARATION_ENABLED:
+        raise HTTPException(status_code=409, detail="use_daily_preparation")
     try:
         return routines.prepare_activity_plan(
             db,
@@ -99,3 +102,40 @@ def update_world_character_activity_runtime_mode(
         )
     except exceptions.DailyActivityPlanError as exc:
         _raise_plan_error(exc)
+
+
+from app.domains.routines.dependencies import get_daily_preparation
+from app.domains.routines.schemas.daily_generation import DailyPreparationRead, DailyPreparationRequest
+from app.domains.routines.service.daily_preparation import PreparationConflict
+
+
+def _require_daily_preparation():
+    from app.config import settings
+    if not settings.DAILY_PREPARATION_ENABLED:
+        raise HTTPException(status_code=409, detail="daily_preparation_rollout_withheld")
+
+
+@router.get("/{character_id}/worlds/{world_id}/daily-preparation", response_model=DailyPreparationRead)
+def read_daily_preparation(character_id: str, world_id: str, db: Session = Depends(get_db),
+                           user: PlanOwner = Depends(get_current_user), runtime=Depends(get_daily_preparation)):
+    _require_daily_preparation()
+    try:
+        return runtime.read(db, character_id=character_id, world_id=world_id, user=user)
+    except exceptions.DailyActivityPlanError as exc:
+        _raise_plan_error(exc)
+    except PreparationConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/{character_id}/worlds/{world_id}/daily-preparation", response_model=DailyPreparationRead)
+async def request_daily_preparation(character_id: str, world_id: str, data: DailyPreparationRequest,
+                                    db: Session = Depends(get_db), user: PlanOwner = Depends(get_current_user),
+                                    runtime=Depends(get_daily_preparation)):
+    _require_daily_preparation()
+    try:
+        return await runtime.ensure(db, character_id=character_id, world_id=world_id, user=user,
+                                    request_id=data.request_id, expected_version=data.expected_version)
+    except exceptions.DailyActivityPlanError as exc:
+        _raise_plan_error(exc)
+    except PreparationConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc

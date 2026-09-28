@@ -5,6 +5,8 @@ import { FeedStatusPanel } from "@/features/social/components/feed-status";
 import { PersonalizedActivityPanel } from "@/features/characters/components/personalized-activity-panel";
 import { ActivityCredentialForm } from "@/features/characters/components/activity-credential-form";
 import Link from "next/link";
+import { DailyPreparationPanel } from "@/features/characters/components/daily-preparation-panel";
+import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 import { Card } from "@/components/ui/surfaces";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -210,7 +212,7 @@ export function WorldCharacterAutonomySetupClient({
           const nextSetup = await getWorldCharacterSetup(nextEntry.id);
           if (!active) return;
           setSetup(nextSetup);
-          if (nextEntry.role_key === null) return;
+          if (nextEntry.role_key === null || nextSetup.preparation_contract === "daily-plan-v1") return;
           const nextPreflight = await preflightWorldCharacterSetup(nextEntry.id, true);
           if (!active) return;
           setPreflight(nextPreflight);
@@ -532,6 +534,12 @@ export function WorldCharacterAutonomySetupClient({
         {error ?? "캐릭터 또는 World를 불러올 수 없습니다."}
       </div>
     );
+  }
+
+  if (setup?.preparation_contract === "daily-plan-v1" && entry) {
+    return <DailyPreparationPanel key={`${worldId}:${characterId}`} initialAgent={agent} initialRuntimeMode={entry.activity_runtime_mode} worldId={worldId} actorId={entry.id} worldName={world.name} timezone={world.timezone}>
+      <RecommendationTopicsPanel worldId={worldId} characterId={entry.id} />
+    </DailyPreparationPanel>;
   }
 
   return (

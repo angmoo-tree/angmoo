@@ -390,14 +390,16 @@ def _seed_v2_roleless(
                 from app.runtime.persistence.sqlite_schema import ACTIVITY_V19_TABLES, EPISODE_V13_TABLES, CONSOLIDATION_V14_TABLES, RECOMMENDATION_V15_TABLES, build_sqlite_v14_metadata
                 from sqlalchemy.schema import CreateTable, CreateIndex
                 from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
-                from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata
+                from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata, build_sqlite_v22_metadata
+                Base.metadata.tables["activity_preparation_jobs"].drop(connection, checkfirst=True)
                 for name in reversed(CREATOR_V21_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 # Reconstruct the predecessor before applying its older deltas.
                 # Do not let current creator columns or nullable credentials leak into v2.
                 connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
-                for name in ("worlds", "agent_creation_drafts"):
-                    historical = build_sqlite_v20_metadata().tables[name]
+                for name in ("daily_activity_plans", "daily_activity_plan_items", "worlds", "agent_creation_drafts"):
+                    predecessor = build_sqlite_v22_metadata() if name.startswith("daily_activity_plan") else build_sqlite_v20_metadata()
+                    historical = predecessor.tables[name]
                     old = name + "_creator_fixture"
                     connection.exec_driver_sql(f"ALTER TABLE {name} RENAME TO {old}")
                     connection.execute(CreateTable(historical))

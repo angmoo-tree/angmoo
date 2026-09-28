@@ -149,6 +149,9 @@ class SocialLane:
             if previous is not None:
                 results.append({"target_id": decision["target_id"], "status": "reused", "execution_id": previous.id})
                 continue
+            from app.config import settings
+            if settings.DAILY_PREPARATION_ENABLED and state.get("identity", {}).get("contract_version") == 2 and decision["action"] in {"repost", "follow", "unfollow"}:
+                raise ValueError("activity_action_disabled")
             action = {"action_type": "reply" if decision["action"] == "comment" else decision["action"],
                 "post_id": data["post_id"], "notification_id": data.get("notification_id"),
                 "interaction_intent": decision.get("interaction_intent"), "comment_purpose": decision.get("comment_purpose"),

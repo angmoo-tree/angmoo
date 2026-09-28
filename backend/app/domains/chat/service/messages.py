@@ -10,7 +10,7 @@ from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core import prompt_safety
-from app.domains.characters.policies.prompt_persona import PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 from app.domains.chat import models, schemas
 from app.domains.chat.contracts.context import (
     ChatCharacter,

@@ -16,7 +16,7 @@ from app.domains.routines import models
 from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
 from app.domains.social.schemas import community as schemas
 from app.domains.routines.service.first_greeting import _build_first_greeting_writer_prompt
-from app.domains.characters.policies.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
 from app.domains.routines.constants import FIRST_GREETING_WRITER_OUTPUT_TOKENS
 from app.integrations.direct_llm import RunLlmTracker, DirectLlmCallContext, generate_json
 from app.runtime.social import image_generation as post_image_generation

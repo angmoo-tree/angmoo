@@ -209,8 +209,10 @@ def _canonical_rows(db, manifest: dict, included: set[str]) -> tuple[list[dict],
                      "engine": row["engine"], "status": row["status"], "stage": row["stage"],
                      "started_at": row["started_at"], "finished_at": row["finished_at"],
                      "paths": {lane: {"status": item.get("status"), "public_action_count": item.get("public_action_count", 0),
-                               "recall_status": item.get("recall_status")}
+                               "recall_status": item.get("recall_status"),
+                               "deferred_reason": (item.get("routine_result") or {}).get("reason")}
                                for lane, item in paths.items() if isinstance(item, dict)},
+                     "daily_preparation": {k: v for k, v in (result.get("daily_preparation") or {}).items() if k in {"plan_state", "topic_state", "request_id", "attempt_count", "reason_code", "plan_id", "plan_version", "request_state", "request_reason_code", "local_date"}},
                      "public_action_count": (result.get("publish_result") or {}).get("public_action_count")})
     actor_by_activity = {row["activity_id"]: row["actor_id"] for row in runs}
     for activity_id in sorted(actor_by_activity):
@@ -264,6 +266,18 @@ def _scheduler_rows(db, manifest: dict) -> list[dict]:
     return rows
 
 
+def _preparation_rows(db, manifest):
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='activity_preparation_jobs'").fetchone():
+        return []
+    actors = manifest["actor_ids"]
+    if not actors:
+        return []
+    placeholders = ",".join("?" for _ in actors)
+    rows = db.execute(f"SELECT id, world_character_id, local_date, mode, state, request_id, attempt_count, json_retry_count, reason_code, plan_id, plan_version, created_at, updated_at FROM activity_preparation_jobs WHERE world_id=? AND world_character_id IN ({placeholders}) ORDER BY created_at DESC LIMIT 3000", (manifest["world_id"], *actors)).fetchall()
+    return [dict(row) for row in rows if utc(row["updated_at"]) is not None
+            and utc(manifest["started_at"]) <= utc(row["updated_at"]) < deadline(manifest)]
+
+
 def export_session(data_root: Path, session_id: str, *, destination: Path,
                    explicit_db: Path | None = None, now: datetime | None = None) -> dict:
     manifest = read_session(data_root, session_id)
@@ -290,6 +304,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     with closing(_open_readonly(db_path)) as db:
         runs, effects = _canonical_rows(db, manifest, included)
         scheduler_runs = _scheduler_rows(db, manifest)
+        preparations = _preparation_rows(db, manifest)
     errors: list[dict] = []
     call_events = []
     for item in events:
@@ -458,6 +473,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "database_path": str(db_path)}
     _atomic_json(destination / "manifest.json", manifest)
     _jsonl(destination / "runs.jsonl", runs)
+    _jsonl(destination / "preparations.jsonl", preparations)
     _jsonl(destination / "scheduler.jsonl", scheduler_runs)
     _jsonl(destination / "errors.jsonl", errors)
     _jsonl(destination / "calls.jsonl", call_events)

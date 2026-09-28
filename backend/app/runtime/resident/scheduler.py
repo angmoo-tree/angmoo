@@ -146,6 +146,10 @@ async def _tick_once(
                 transition.completed,
                 transition.skipped,
             )
+        if config.DAILY_PREPARATION_ENABLED:
+            from app.runtime.daily_preparation import prepare_due_dates
+            db.commit()
+            await prepare_due_dates(db, limit=config.resident_tick_max_runs)
         return await agent_runs.tick_resident_slots(
             db,
             schemas.ResidentSlotTickCreate(

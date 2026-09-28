@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.domains.characters import models, schemas
 from app.domains.characters.exceptions import CharacterHandleConflictError, InvalidCharacterHandleError, AgentPersonaValidationError
 from app.domains.characters.contracts import CharacterOwner
-from app.domains.characters.policies.prompt_persona import legacy_persona_summary
+from app.domains.characters.service.prompt_persona import legacy_persona_summary
 
 HANDLE_RE = re.compile(r"^[a-z0-9_]{2,40}$")
 

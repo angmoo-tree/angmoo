@@ -20,6 +20,9 @@ class InboxLane(SocialLane):
             proposal = proposal_for_notification(self.ctx.db, recipient_character_id=self.ctx.character.id, source_post_id=post.id)
             proposal_input = None if proposal is None else {"proposal_id": proposal.id, "activity_seed": proposal.activity_seed, "place_key": proposal.place_key, "target_daypart": proposal.target_daypart, "date_policy": proposal.date_policy, "target_date": str(proposal.target_date) if proposal.target_date else None}
             allowed = ["comment" if a == "reply" else a for a in group["affordance"]["available_actions"]]
+            from app.config import settings
+            if settings.DAILY_PREPARATION_ENABLED:
+                allowed = [a for a in allowed if a not in {"repost", "follow", "unfollow"}]
             revisions = {p.id: post_revision(p) for p in posts}
             if group["parent"] is not None:
                 revisions[group["parent"].id] = post_revision(group["parent"])

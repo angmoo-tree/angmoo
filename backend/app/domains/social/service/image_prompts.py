@@ -2,7 +2,7 @@
 from __future__ import annotations
 from typing import Any
 from app.domains.social.contracts.image_generation import ImageCharacter
-from app.domains.characters.policies.prompt_persona import PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 from app.domains.social.constants import IMAGE_PROMPT_MAX_LENGTH, LOCAL_API_PROMPT_SAFETY_SUFFIX, KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX, IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL
 from app.core.image_generation import (POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN, POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL, POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT, POLLINATIONS_IMAGE_MODEL_SANA, POLLINATIONS_IMAGE_MODEL_ZIMAGE, REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA, REPLICATE_IMAGE_MODEL_PRUNA_EDIT)
 

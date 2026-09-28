@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 
 from app.domains.characters.models import Character
-from app.domains.characters.policies.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.social_context import SocialContextService

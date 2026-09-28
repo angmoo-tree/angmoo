@@ -63,8 +63,9 @@ def test_historical_revision_blobs_and_graph_remain_unchanged():
     assert actual_graph["20260924_0098"] == "20260923_0097"
     assert actual_graph["20260927_0099"] == "20260924_0098"
     assert actual_graph["20260927_0100"] == "20260927_0099"
-    assert len(actual_graph) == 99
-    assert script.get_heads() == ["20260927_0100"]
+    assert actual_graph["20260928_0101"] == "20260927_0100"
+    assert len(actual_graph) == 100
+    assert script.get_heads() == ["20260928_0101"]
     assert not list((BACKEND / "app/alembic").rglob("*.py"))
 
 
@@ -80,7 +81,7 @@ def test_alembic_heads_from_outside_backend(tmp_path):
         timeout=30,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert result.stdout.strip() == "20260927_0100 (head)"
+    assert result.stdout.strip() == "20260928_0101 (head)"
 
 
 def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_path):
@@ -113,7 +114,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
             "relationship_review_requests", "world_character_activity_states",
             "world_character_state_receipts", "activity_engine_policies",
             "activity_graph_runs", "owner_default_worlds", "character_world_bindings",
-            "character_card_sources", "character_registration_receipts",
+            "character_card_sources", "character_registration_receipts", "activity_preparation_jobs",
         }
         config = Config(str(backend / "alembic.ini"))
         script = ScriptDirectory.from_config(config)
@@ -152,7 +153,7 @@ def test_alembic_env_registers_canonical_metadata_on_real_memory_connection(tmp_
     assert result.returncode == 0, result.stdout + result.stderr
     result_data = json.loads(result.stdout)
     expected_count = len(json.loads(CHECKPOINT.read_text(encoding="utf-8"))["contracts"]["orm_tables"])
-    assert result_data == {"registered_tables": expected_count + 35, "revision_bodies_run": 0}
+    assert result_data == {"registered_tables": expected_count + 36, "revision_bodies_run": 0}
     assert not list(tmp_path.rglob("*.sqlite3"))
 
 
