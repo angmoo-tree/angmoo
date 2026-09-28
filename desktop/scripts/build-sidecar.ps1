@@ -26,6 +26,10 @@ $sqliteManifestRoot = Join-Path $backendRoot "app\runtime\migrations\sqlite_vers
 $ladybugManifestRoot = Join-Path $backendRoot "app\runtime\migrations\ladybug_versions\manifests"
 $sqliteManifestData = "$sqliteManifestRoot;app/runtime/migrations/sqlite_versions/manifests"
 $ladybugManifestData = "$ladybugManifestRoot;app/runtime/migrations/ladybug_versions/manifests"
+# Frozen migrations load adjacent JSON at runtime; Python import analysis only
+# collects their modules. Include the schema deltas in both sidecar layouts.
+$sqliteDeltaRoot = Join-Path $backendRoot "app\runtime\migrations\sqlite_versions"
+$sqliteDeltaData = "$sqliteDeltaRoot\*.json;app/runtime/migrations/sqlite_versions"
 $loggingConfig = Join-Path $backendRoot "logging.ini"
 if (-not (Test-Path -LiteralPath $loggingConfig -PathType Leaf)) {
     throw "Angmoo logging configuration resource is missing"
@@ -59,6 +63,7 @@ $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
     --collect-all ladybug `
     --add-data $sqliteManifestData `
     --add-data $ladybugManifestData `
+    --add-data $sqliteDeltaData `
     --add-data $loggingConfigData `
     --add-data $vec1ResourceData `
     --hidden-import sqlalchemy.dialects.sqlite `

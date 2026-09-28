@@ -239,6 +239,16 @@ function Invoke-Installer([int]$ExpectedExit) {
         throw 'windows_installer_supported_upgrade_timeout'
     }
     if ($process.ExitCode -ne $ExpectedExit) {
+        # This script is restricted to sentinel-verified synthetic runner data.
+        # Preserve only the stable failure code before fixture cleanup; never
+        # dump the result body, paths, database contents, or credentials.
+        $resultPath = Join-Path $productRoot 'runtime\installer-data-upgrade-result.json'
+        if (Test-Path -LiteralPath $resultPath -PathType Leaf) {
+            $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
+            if ($result.code -cmatch '^[a-z0-9_]{1,100}$') {
+                Write-Output "windows_installer_supported_upgrade_failure_code:$($result.code)"
+            }
+        }
         throw "windows_installer_supported_upgrade_exit_mismatch:$($process.ExitCode):$ExpectedExit"
     }
 }

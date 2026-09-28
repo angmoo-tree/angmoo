@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR = REPOSITORY_ROOT / "scripts" / "ci" / "build_desktop_release_metadata.py"
@@ -41,6 +44,34 @@ def test_installer_contract_checker_passes() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "desktop-installer-contract: PASS" in result.stdout
+
+
+@pytest.mark.parametrize("missing_resource_contract", (
+    "--add-data $sqliteDeltaData",
+    "$sqliteDeltaRoot\\*.json;app/runtime/migrations/sqlite_versions",
+    '$sqliteDeltaRoot = Join-Path $backendRoot "app\\runtime\\migrations\\sqlite_versions"',
+))
+def test_installer_contract_rejects_missing_frozen_migration_resources(
+    monkeypatch: pytest.MonkeyPatch,
+    missing_resource_contract: str,
+) -> None:
+    spec = importlib.util.spec_from_file_location("installer_resource_contract", CONTRACT)
+    assert spec is not None and spec.loader is not None
+    contract = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(contract)
+    build = REPOSITORY_ROOT / "desktop/scripts/build-sidecar.ps1"
+    read_text = Path.read_text
+
+    def omit_resource(path: Path, *args, **kwargs):
+        text = read_text(path, *args, **kwargs)
+        if path == build:
+            assert missing_resource_contract in text
+            return text.replace(missing_resource_contract, "")
+        return text
+
+    monkeypatch.setattr(Path, "read_text", omit_resource)
+    with pytest.raises(SystemExit, match="packaged embedded migration manifest missing"):
+        contract.main()
 
 
 def test_release_metadata_has_checksums_sbom_provenance_and_notices(
