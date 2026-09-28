@@ -1,6 +1,6 @@
 """Behavioral coverage for the enum-preserving, energy-free Routine contract."""
 from dataclasses import asdict, replace
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 from types import SimpleNamespace
@@ -33,6 +33,7 @@ from app.runtime.autonomous_activity.provider import ActivityProvider
 from app.runtime.autonomous_activity.routine_resume import freeze_prepared, restore_prepared
 from app.runtime.routine_posts.original_post import completed_replies
 from routine_posts.test_runtime import _engine, _seed, _resident_context, _utc
+from tests.routines.test_daily_preparation import preparation_scope, output as daily_output
 
 
 @pytest.fixture(autouse=True)
@@ -316,3 +317,45 @@ def test_copy_guard_queries_all_successes_instead_of_recent_twelve():
         with pytest.raises(ValueError, match="routine_reuses_published_reply"):
             check_original(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id,
                 title=oldest.title, body=oldest.body)
+
+
+def test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply():
+    from app.runtime.routine_posts.original_post import reply_prompt_context
+    replies = [{"post_id": "present", "title": "제목", "body": "이미 쓴 답글", "purpose": "already_published_reply"},
+               {"post_id": "omitted", "title": "오래된 제목", "body": "입력 목록 밖 답글", "purpose": "already_published_reply"}]
+    today = {"records": [{"record_key": "post:present", "source_post_id": "present", "title": "제목", "body": "이미 쓴 답글"}]}
+    result = reply_prompt_context(replies, today)
+    assert result[0]["content_ref"] == "today_activity.records:post:present"
+    assert "body" not in result[0] and "title" not in result[0]
+    assert result[1] == replies[1]
+    assert replies[0]["body"] == "이미 쓴 답글" and today["records"][0]["body"] == "이미 쓴 답글"
+
+
+def test_daily_runtime_and_repertoire_factory_select_energy_free_state(preparation_scope, monkeypatch):
+    from app.domains.routines.schemas.daily_generation import InitialPreparationOutput
+    from tests.routines.test_daily_activity_runtime import _engine as plan_engine, _seed as plan_seed, _prepare
+    db, world, ready, runtime = preparation_scope
+    calls = []
+    async def generate(**kwargs):
+        calls.append(kwargs["initial"])
+        kwargs["reserve"]()
+        return InitialPreparationOutput(daily_plan=daily_output(), recommendation_topics=[dict(name="기록", scope="common")]), SimpleNamespace(calls=[])
+    status = asyncio.run(runtime.ensure_preparation(db, character_id=ready.character.id, world_id=world.id,
+        user=ready.user, request_id="new-state-plan", now=datetime.now(UTC), generator=generate))
+    assert status.plan_state == "ready" and calls == [True], status
+    db.expire_all()
+    episodes = list(db.scalars(select(ActivityEpisode)))
+    assert episodes and all(e.current_state_schema_version == 2 for e in episodes)
+    assert all(set(e.current_state_snapshot) == {"mood", "mood_intensity", "action_note"} for e in episodes)
+
+    # Compatibility candidate preparation can also create a new-policy plan;
+    # legacy regression modules opting out must not change this real factory.
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+    engine = plan_engine()
+    with Session(engine, expire_on_commit=False) as plan_db:
+        _, fixture, _ = plan_seed(plan_db)
+        plan = _prepare(plan_db, fixture, now=_utc(datetime(2026, 8, 10, 10)))
+        states = [item.episode for item in plan.items if item.episode is not None]
+        assert states and all(e.current_state_schema_version == 2 for e in states)
+        assert all("energy" not in e.current_state_snapshot for e in states)
+    engine.dispose()

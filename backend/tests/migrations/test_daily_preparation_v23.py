@@ -22,6 +22,7 @@ def test_populated_v22_to_v23_preserves_history(tmp_path):
     with engine.begin() as c:
         c.exec_driver_sql("PRAGMA foreign_keys=OFF")
         c.exec_driver_sql("DROP TABLE activity_preparation_jobs")
+        c.exec_driver_sql("ALTER TABLE activity_beats DROP COLUMN state_schema_version")
         for name in migration.REBUILT_TABLES:
             table = old_meta.tables[name]
             columns = ','.join(table.c.keys())

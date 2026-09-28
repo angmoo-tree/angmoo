@@ -14,7 +14,7 @@ from app.domains.routine_posts.service.evidence import (
 from app.contracts.routine_output import ENUM_OUTPUT, saved_policy
 from app.domains.routine_posts.contracts.request_context import RoutineRequestContext
 from app.domains.routine_posts.service.original_post import ORIGINAL_POST_INSTRUCTIONS
-from app.runtime.routine_posts.original_post import completed_replies, check_original
+from app.runtime.routine_posts.original_post import completed_replies, check_original, reply_prompt_context
 from app.domains.routine_posts.service.temporal_context import ROUTINE_TEMPORAL_INSTRUCTIONS
 from app.domains.world_characters.schemas.activity_state import StateUpdate
 from app.domains.world_characters.service.activity_state import settle_state
@@ -130,7 +130,9 @@ class RoutineLane:
                 relations[row["target_ref"]] = relation.prompt_view() if relation else {}
         reference = datetime.fromisoformat(state["shared_context"]["now"])
         return {**refreshed, "decision_context": plain({**state["shared_context"], "routine": build_routine_prompt_context(self.prepared.context, as_of_utc=reference),
-            "completed_social_replies": completed_replies(self.ctx, world_id=self.actor.world_id, actor_id=self.actor.id),
+            "completed_social_replies": reply_prompt_context(
+                completed_replies(self.ctx, world_id=self.actor.world_id, actor_id=self.actor.id),
+                state["shared_context"].get("today_activity", {})),
             "input_purpose": {"routine.previous_success": "last_original_routine_scene", "today_activity": "completed_interaction_history", "source_manifest": "observed_evidence", "completed_social_replies": "already_published_replies"},
             "memories": context_memories(refreshed.get("memories", state["memories"])), "source_manifest": manifest,
             "metric_sources": source_prompt(manifest), "relationships": relations})}
