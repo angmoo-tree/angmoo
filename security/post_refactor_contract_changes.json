@@ -14733,6 +14733,29 @@
         "backend/tests/world_characters/test_persona_continuity.py": "53acf6765d4c9f287ab81005289e2b023659672f",
         "docs/architecture/postgres-sql-inventory.json": "99527c5832acba92d8cb922b885c25e7ee11aceb"
       }
+    },
+    {
+      "id": "routine-output-state-version-20260929",
+      "implementation_commit": "01b3b91f115478ca55accd73b4bffe04515726d8",
+      "reason": "User-approved IC-0 through IC-19 in the 2026-09-29 Routine plan and issue #345 require each ActivityBeat to retain its state contract across legacy/new runs, resume and energy-free episode transitions. Add only activity_beats.state_schema_version; do not alter public HTTP contracts or historical snapshots.",
+      "review": "The exact ORM preimage is main 51be7d5a7597f1ad80a9f012c09984a817a03b4c. Both normal Alembic 20260929_0102 and embedded SQLite 23-to-24 append a NOT NULL state version default 1. Embedded delta validation checks every prior column value and row count. Targeted new contract, populated migration, CAS competition, atomic rollback and legacy readers pass locally; full regression is recorded separately. Frozen checkpoint contracts, assertion inventories and all earlier change records remain unchanged.",
+      "source_blobs": {
+        "backend/app/domains/routines/models/plans.py": "6d9285394c6d25b63a782700823f71b329b133f7",
+        "backend/alembic/versions/20260929_0102_routine_state_version.py": "6a1bbb5c473e0446c6f478212d77742f44c9a389",
+        "backend/app/runtime/migrations/sqlite_versions/routine_state_v24.py": "19837a305293625b5ddcafdd13d52be129d16664",
+        "backend/tests/routine_posts/test_output_contract_v2.py": "2c7060bb3019fdb4d72917c01e6d6707958a5c46"
+      },
+      "migration_sources": [
+        "backend/alembic/versions/20260929_0102_routine_state_version.py",
+        "backend/app/runtime/migrations/sqlite_versions/routine_state_v24.py"
+      ],
+      "orm_tables": [
+        {
+          "key": "activity_beats",
+          "before": "71e317e9dba9a2cb73654687eea95a91856d3cabf7f9842fc7acd11880399381",
+          "after": "61ddf4ef8124705c0cb309227d61d8d3aba0d91ab4fa9b11485e97b0fff520c8"
+        }
+      ]
     }
   ]
 }
