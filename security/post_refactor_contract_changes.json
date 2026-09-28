@@ -14915,6 +14915,39 @@
           ]
         }
       ]
+    },
+    {
+      "id": "routine-v24-hybrid-live-inventory-20260929",
+      "implementation_commit": "2562d4e11c56b73b363756608ce7389060d3bd51",
+      "reason": "The user-approved Routine state migration advances the live SQLite schema from 23 to 24; synchronize the current Memory closure inventory and its exact live-version expectation.",
+      "review": "Only the live version expectation changes. Frozen predecessor bytes, hash check, Memory defaults, bounds, source ownership, and negative drift cases remain preserved. The three inventory tests passed; no test deletion, assertion suppression, or historical baseline regeneration.",
+      "source_blobs": {
+        "backend/tests/memory/test_hybrid_episode_inventory.py": "c7f56dd252240b895a3a36a9dcadbfff83092977",
+        "docs/architecture/hybrid-episode-memory-inventory.json": "dc593a934ab164d14bc16f364f0daa3632b960cd"
+      },
+      "assertions": [
+        {
+          "node": "tests/memory/test_hybrid_episode_inventory.py::test_current_inventory_preserves_predecessor_and_runtime_contract",
+          "before": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 23",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ],
+          "after": [
+            "assert value['predecessor']['sha256'] == module.PREDECESSOR_SHA256",
+            "assert value['schema']['embedded_schema_version'] == 24",
+            "assert value['bounds']['chat_new_turns'] == 50",
+            "assert value['bounds']['thought_characters'] == 280",
+            "assert value['defaults']['MEMORY_RECALL_REPRESENTATION'] == 'episode_v1'",
+            "assert 'backend/app/runtime/contributor_backend.py' in paths",
+            "assert 'backend/app/domains/memory/repository/consolidation_requests.py' in paths"
+          ]
+        }
+      ]
     }
   ]
 }
