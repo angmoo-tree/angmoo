@@ -21605,6 +21605,30 @@
         "tests/runtime/test_sns_observation.py": {},
         "tests/test_agent_promotion_usage.py": {}
       }
+    },
+    {
+      "commit": "51a6e8a99278a9ace16784858e3d9c82349edce6",
+      "feature_id": "AR-PUBLISH",
+      "reason": "Exact committed regression verifies the one additive synthetic fixture exception, mutated value and other path rejection; existing assertions and immutable checkpoint remain unchanged.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_additive_exception_matches_existing_assertion_and_is_exact"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_additive_exception_matches_existing_assertion_and_is_exact": [
+            "assert scanner_spec is not None and scanner_spec.loader is not None",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert list(scanner.scan_text(entry['path'], entry['value'], allowlist=allowlist)) == []",
+            "assert {f.rule for f in scanner.scan_text(entry['path'], entry['value'] + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {f.rule for f in scanner.scan_text('security/another-additions.json', entry['value'], allowlist=allowlist)} == {'google-api-key'}",
+            "assert checker.validate(fixture)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
     }
   ]
 }
