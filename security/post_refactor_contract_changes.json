@@ -14756,6 +14756,165 @@
           "after": "61ddf4ef8124705c0cb309227d61d8d3aba0d91ab4fa9b11485e97b0fff520c8"
         }
       ]
+    },
+    {
+      "id": "routine-v24-diagnostics-and-regression-contracts-20260929",
+      "implementation_commit": "4d0216a35d0c3cb11e2bde081e13916ad302ce3c",
+      "reason": "Complete the approved beat-state migration by advancing the runtime diagnostic revision and exact latest-schema regression oracles. Preserve historical Alembic graph/manifest checks, bind legacy five-key claim regressions to their own output policy, and add energy-free real preparation coverage and nonduplicated reply context.",
+      "review": "Locally reproduced an omitted RUNTIME_MIGRATION_HEAD update and stale 23/0101 latest-schema oracles. Related 67 cases pass with the legitimate v24/0102 upgrade, while all frozen previous migrations/digests stay unchanged. No skips, fewer assertions or weakened version checks. Three legacy claim modules explicitly use the preserved legacy output; the production default stays enum_preserved_v1 and new real daily/repertoire preparation is checked at version 2. Keep original v23 fresh-schema assertion and additionally test latest fresh schema.",
+      "source_blobs": {
+        "backend/app/domains/runtime/constants.py": "33936a043e5a68f58934397ff2c1af6527d2425a",
+        "backend/tests/migrations/test_alembic_layout.py": "3b149aa874d83afa1a8fc8316aa1d763729cb14a",
+        "backend/tests/migrations/test_observation_outbox_v20.py": "852e7d79cff57ff6189d93bdc9e1e8867a27b1e3",
+        "backend/tests/runtime/test_current_schema_diagnostics.py": "62ac2524d7526222687b25e19c6e7fd3d194b290",
+        "backend/tests/persistence/test_model_registration.py": "07c762214e4173bcccd945d3101297d9a2287d73",
+        "backend/tests/migrations/test_daily_preparation_v23.py": "1bb6efd8194cd52037b56451e4345566f40376e7",
+        "backend/tests/memory/test_manual_relationship_followup.py": "8289abcfe8bcf769c1b877d704f642736faf1a06",
+        "backend/tests/routines/test_daily_activity_runtime.py": "3362cab185dc566116b6f952ead153ca3891ace4",
+        "backend/tests/routines/test_execution_composition.py": "80ffecd97371c490615e74878431ecac72dd8c0a",
+        "backend/tests/routines/test_guarded_claim_recovery.py": "cf177644df26100d0b47dd096d39d4c95a222c24",
+        "backend/tests/routine_posts/test_output_contract_v2.py": "77b77612fa6c5c002a610f2aa8a110ed4b6efe6c"
+      },
+      "definitions": [
+        {
+          "source": "backend/app/domains/runtime/constants.py",
+          "symbol": "RUNTIME_MIGRATION_HEAD",
+          "before_ast": "Assign(targets=[Name(id='RUNTIME_MIGRATION_HEAD', ctx=Store())], value=Constant(value='20260928_0101'))",
+          "after_ast": "Assign(targets=[Name(id='RUNTIME_MIGRATION_HEAD', ctx=Store())], value=Constant(value='20260929_0102'))"
+        },
+        {
+          "source": "backend/tests/persistence/test_model_registration.py",
+          "symbol": "test_canonical_database_opens_without_importing_an_app",
+          "before_ast": "FunctionDef(name='test_canonical_database_opens_without_importing_an_app', args=arguments(args=[arg(arg='tmp_path')]), body=[Assign(targets=[Name(id='result', ctx=Store())], value=Call(func=Name(id='run_cold', ctx=Load()), args=[Constant(value=\"\\nfrom pathlib import Path\\nimport sys\\nfrom app.runtime.persistence import SqliteCanonicalDatabase, StaticRuntimeDataPath\\nimport app.database as defaults\\ndatabase = SqliteCanonicalDatabase(StaticRuntimeDataPath(Path(sys.argv[1])))\\ntry:\\n    first = database.open()\\n    engine = database.engine\\n    second = database.open()\\n    assert database.engine is engine\\n    assert first.schema_version == second.schema_version == 23\\n    assert first.canonical_table_count == second.canonical_table_count == 138\\n    assert first.schema_digest_matches and second.schema_digest_matches\\n    assert first.foreign_keys and first.synchronous == 'FULL'\\n    assert 'app.main' not in sys.modules and 'app.public_main' not in sys.modules\\n    assert defaults._default_engine is None\\nfinally:\\n    database.close()\\n\"), Name(id='tmp_path', ctx=Load())])), Assert(test=Compare(left=Name(id='result', ctx=Load()), ops=[Eq()], comparators=[Constant(value='')]))])",
+          "after_ast": "FunctionDef(name='test_canonical_database_opens_without_importing_an_app', args=arguments(args=[arg(arg='tmp_path')]), body=[Assign(targets=[Name(id='result', ctx=Store())], value=Call(func=Name(id='run_cold', ctx=Load()), args=[Constant(value=\"\\nfrom pathlib import Path\\nimport sys\\nfrom app.runtime.persistence import SqliteCanonicalDatabase, StaticRuntimeDataPath\\nimport app.database as defaults\\ndatabase = SqliteCanonicalDatabase(StaticRuntimeDataPath(Path(sys.argv[1])))\\ntry:\\n    first = database.open()\\n    engine = database.engine\\n    second = database.open()\\n    assert database.engine is engine\\n    assert first.schema_version == second.schema_version == 24\\n    assert first.canonical_table_count == second.canonical_table_count == 138\\n    assert first.schema_digest_matches and second.schema_digest_matches\\n    assert first.foreign_keys and first.synchronous == 'FULL'\\n    assert 'app.main' not in sys.modules and 'app.public_main' not in sys.modules\\n    assert defaults._default_engine is None\\nfinally:\\n    database.close()\\n\"), Name(id='tmp_path', ctx=Load())])), Assert(test=Compare(left=Name(id='result', ctx=Load()), ops=[Eq()], comparators=[Constant(value='')]))])"
+        }
+      ],
+      "assertions": [
+        {
+          "node": "tests/migrations/test_alembic_layout.py::test_historical_revision_blobs_and_graph_remain_unchanged",
+          "before": [
+            "assert len(historical) == 88",
+            "assert {key: actual_graph[key] for key in expected_graph} == expected_graph",
+            "assert actual_graph['20260909_0090'] == '20260904_0089'",
+            "assert actual_graph['20260910_0091'] == '20260909_0090'",
+            "assert actual_graph['20260914_0092'] == '20260910_0091'",
+            "assert actual_graph['20260916_0093'] == '20260914_0092'",
+            "assert actual_graph['20260917_0094'] == '20260916_0093'",
+            "assert actual_graph['20260918_0095'] == '20260917_0094'",
+            "assert actual_graph['20260918_0096'] == '20260918_0095'",
+            "assert actual_graph['20260923_0097'] == '20260918_0096'",
+            "assert actual_graph['20260924_0098'] == '20260923_0097'",
+            "assert actual_graph['20260927_0099'] == '20260924_0098'",
+            "assert actual_graph['20260927_0100'] == '20260927_0099'",
+            "assert actual_graph['20260928_0101'] == '20260927_0100'",
+            "assert len(actual_graph) == 100",
+            "assert script.get_heads() == ['20260928_0101']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ],
+          "after": [
+            "assert len(historical) == 88",
+            "assert {key: actual_graph[key] for key in expected_graph} == expected_graph",
+            "assert actual_graph['20260909_0090'] == '20260904_0089'",
+            "assert actual_graph['20260910_0091'] == '20260909_0090'",
+            "assert actual_graph['20260914_0092'] == '20260910_0091'",
+            "assert actual_graph['20260916_0093'] == '20260914_0092'",
+            "assert actual_graph['20260917_0094'] == '20260916_0093'",
+            "assert actual_graph['20260918_0095'] == '20260917_0094'",
+            "assert actual_graph['20260918_0096'] == '20260918_0095'",
+            "assert actual_graph['20260923_0097'] == '20260918_0096'",
+            "assert actual_graph['20260924_0098'] == '20260923_0097'",
+            "assert actual_graph['20260927_0099'] == '20260924_0098'",
+            "assert actual_graph['20260927_0100'] == '20260927_0099'",
+            "assert actual_graph['20260928_0101'] == '20260927_0100'",
+            "assert actual_graph['20260929_0102'] == '20260928_0101'",
+            "assert len(actual_graph) == 101",
+            "assert script.get_heads() == ['20260929_0102']",
+            "assert not list((BACKEND / 'app/alembic').rglob('*.py'))",
+            "assert actual_blob == expected_blob, old_path"
+          ]
+        },
+        {
+          "node": "tests/migrations/test_alembic_layout.py::test_alembic_heads_from_outside_backend",
+          "before": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260928_0101 (head)'"
+          ],
+          "after": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert result.stdout.strip() == '20260929_0102 (head)'"
+          ]
+        },
+        {
+          "node": "tests/migrations/test_observation_outbox_v20.py::test_coordinator_preserves_source_generation_and_promotes_v20",
+          "before": [
+            "assert result.migrated is True",
+            "assert result.source_version == 19 and result.target_version == 23",
+            "assert result.database_path != database",
+            "assert _outbox_row(old, row_id)['relationship_state_id'] is None",
+            "assert _outbox_row(new, row_id)['relationship_state_id'] == state_id",
+            "assert new.exec_driver_sql('SELECT schema_version, source_revision FROM angmoo_schema_version').one() == (23, '20260928_0101')"
+          ],
+          "after": [
+            "assert result.migrated is True",
+            "assert result.source_version == 19 and result.target_version == 24",
+            "assert result.database_path != database",
+            "assert _outbox_row(old, row_id)['relationship_state_id'] is None",
+            "assert _outbox_row(new, row_id)['relationship_state_id'] == state_id",
+            "assert new.exec_driver_sql('SELECT schema_version, source_revision FROM angmoo_schema_version').one() == (24, '20260929_0102')"
+          ]
+        },
+        {
+          "node": "tests/migrations/test_observation_outbox_v20.py::test_alembic_online_sqlite_env_prepares_foreign_keys",
+          "before": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert connection.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one() == '20260928_0101'",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= indexes"
+          ],
+          "after": [
+            "assert result.returncode == 0, result.stdout + result.stderr",
+            "assert connection.exec_driver_sql('SELECT version_num FROM alembic_version').scalar_one() == '20260929_0102'",
+            "assert _outbox_row(connection, row_id)['relationship_state_id'] == state_id",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert {'uq_graph_projection_outbox_observation', 'uq_graph_projection_outbox_source_event'} <= indexes"
+          ]
+        },
+        {
+          "node": "tests/runtime/test_current_schema_diagnostics.py::test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph",
+          "before": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260928_0101']",
+            "assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == '20260927_0100'",
+            "assert load_sqlite_manifest(19).source_revision == '20260918_0096'"
+          ],
+          "after": [
+            "assert RUNTIME_MIGRATION_HEAD == manifest.source_revision",
+            "assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION",
+            "assert scripts.get_heads() == ['20260929_0102']",
+            "assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == '20260928_0101'",
+            "assert load_sqlite_manifest(19).source_revision == '20260918_0096'"
+          ]
+        },
+        {
+          "node": "tests/memory/test_manual_relationship_followup.py::test_v18_migration_preserves_v17_manifest_and_fresh_parity",
+          "before": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(23).schema_digest"
+          ],
+          "after": [
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(17).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(18).schema_digest",
+            "assert not c.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(23).schema_digest",
+            "assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(SQLITE_SCHEMA_VERSION).schema_digest"
+          ]
+        }
+      ]
     }
   ]
 }
