@@ -10,6 +10,7 @@ from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core import prompt_safety
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 from app.domains.chat import models, schemas
 from app.domains.chat.contracts.context import (
     ChatCharacter,
@@ -364,8 +365,10 @@ class MessageService:
                 f"Personality: {character.personality}",
                 f"Speech style: {character.speech_style}",
                 f"Worldview: {character.worldview}",
+                f"Character background: {getattr(character, 'character_background', '')}",
                 f"Topic preferences: {character.topic_preferences}",
                 f"Safety rules: {character.safety_rules}",
+                PERSONA_INTERPRETATION,
             ]
         )
 

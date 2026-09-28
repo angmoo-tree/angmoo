@@ -21,8 +21,8 @@ import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 import { useAuth } from "@/hooks/use-auth";
-import { listOwnerControlledIdentities, selectOwnerControlledIdentity, replaceOwnerControlledIdentity, createOwnerControlledIdentity, createWorld, getOwnerControlledIdentity, getWorldCreatorContext, publishWorld, removeWorldBanner, requestValidationFields, updateWorld, updateOwnerControlledIdentity, uploadWorldBanner, validateWorld, WorldApiError } from "@/features/worlds/api/worlds";
-import type { WorldCreatorContext, OwnerControlledIdentityRead, OwnerControlledProfileWrite, WorldDaypart, WorldDefinition, WorldGlossaryTermInput, WorldPlaceInput, WorldRoleInput, WorldRuleInput, WorldValidationIssue } from "@/features/worlds/types/worlds";
+import { createWorld, getWorldCreatorContext, publishWorld, removeWorldBanner, requestValidationFields, updateWorld, uploadWorldBanner, validateWorld, WorldApiError } from "@/features/worlds/api/worlds";
+import type { WorldCreatorContext, WorldDaypart, WorldDefinition, WorldPlaceInput, WorldRoleInput, WorldValidationIssue } from "@/features/worlds/types/worlds";
 
 const DAYPARTS: { key: WorldDaypart; label: string; hours: string }[] = [
   { key: "dawn", label: "새벽", hours: "00:00~06:00" },
@@ -169,7 +169,7 @@ function fileAsBase64(file: File) {
   });
 }
 
-export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: string; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode }) {
+export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile }: { worldId?: string; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode; renderMyProfile: (worldId: string) => ReactNode }) {
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const idempotencyKey = useRef(newIdempotencyKey());
@@ -182,6 +182,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
   const worldBannerUrl = useRuntimeMediaUrl(
     safeSameOriginMediaUrl(context?.world.banner_media_id),
   );
+  const worldIconUrl = useRuntimeMediaUrl(safeSameOriginMediaUrl(context?.world.icon_media_id));
 
   const returnPath = worldId
     ? studioWorldRoute(worldId)
@@ -223,9 +224,10 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
   }
 
   async function persist() {
+    const editable = { name: definition.name, tagline: definition.tagline, setting_description: definition.setting_description, daily_life_description: definition.daily_life_description, genre_tags: definition.genre_tags, tone_tags: definition.tone_tags, timezone: definition.timezone, language: definition.language, places: definition.places, roles: definition.roles, additional_generation_guidance: definition.additional_generation_guidance };
     const saved = context
       ? await updateWorld(context.world.id, {
-          ...definition,
+          ...editable,
           row_version: context.world.row_version,
         })
       : await createWorld({
@@ -296,7 +298,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
     }
   }
 
-  async function handleBanner(file: File | null) {
+  async function handleBanner(file: File | null, kind: "banner" | "icon" = "banner") {
     if (!file || !context) return;
     setPending("banner");
     setError(null);
@@ -306,9 +308,9 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
         content_type: file.type,
         data_base64: await fileAsBase64(file),
         alt_text: `${definition.name || "World"} 배너`,
-      });
+      }, kind);
       setContext(next);
-      setNotice("배너를 저장했습니다. 배너 변경은 World 계약 hash를 바꾸지 않습니다.");
+      setNotice("이미지를 저장했습니다.");
     } catch (nextError) {
       setError(errorMessage(nextError));
     } finally {
@@ -316,7 +318,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
     }
   }
 
-  async function handleRemoveBanner() {
+  async function handleRemoveBanner(kind: "banner" | "icon" = "banner") {
     if (!context) return;
     setPending("banner");
     setError(null);
@@ -324,6 +326,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
       const next = await removeWorldBanner(
         context.world.id,
         context.world.row_version,
+        kind,
       );
       setContext(next);
       setNotice("배너를 제거했습니다.");
@@ -432,40 +435,33 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
                 <Field label="언어" issue={issueByField.get("language")}>
                   <input className={inputClass} value={definition.language} maxLength={16} onChange={(event) => change("language", event.target.value)} />
                 </Field>
-                <Field label="공개 범위">
-                  <select className={inputClass} value={definition.visibility} onChange={(event) => change("visibility", event.target.value as WorldDefinition["visibility"])}>
-                    <option value="private">private</option>
-                    <option value="unlisted">unlisted</option>
-                    <option value="public">public</option>
-                  </select>
-                </Field>
-                <Field label="참여 정책">
-                  <select className={inputClass} value={definition.join_policy} onChange={(event) => change("join_policy", event.target.value as WorldDefinition["join_policy"])}>
-                    <option value="approval_required">approval required</option>
-                    <option value="open">open</option>
-                    <option value="invite_only">invite only</option>
-                    <option value="private">private</option>
-                  </select>
-                </Field>
               </div>
             </Panel>
 
             <OptionalSettings definition={definition} change={change} />
+            {context && <details><summary>보존된 이전 World 설정 보기</summary><pre className="overflow-auto whitespace-pre-wrap">{JSON.stringify({ visibility: context.world.visibility, join_policy: context.world.join_policy, daypart_profiles: context.world.daypart_profiles, rules: context.world.rules, glossary: context.world.glossary }, null, 2)}</pre></details>}
+            {context && <Panel title="캐릭터 추가" description="World는 저장됐습니다. 지금 캐릭터를 추가하거나 나중에 관리 화면에서 이어갈 수 있습니다.">
+              <button type="button" className={secondaryButtonClass} onClick={() => router.push(`/agents/new?worldId=${encodeURIComponent(context.world.id)}&returnTo=${encodeURIComponent(studioWorldRoute(context.world.id))}`)}>직접 만들기 · 캐릭터 카드 가져오기</button>
+              <button type="button" className={secondaryButtonClass} onClick={() => router.push(PRODUCT_ROUTES.studio)}>나중에 하기</button>
+            </Panel>}
 
             {context ? (
               <>
                 {renderWorldTools(context.world.id, definition.roles)}
                 <div id="owner-controlled-identity" className="scroll-mt-6">
-                  <OwnerControlledIdentityPanel
-                    roles={definition.roles}
-                    worldId={context.world.id}
-                  />
+                  {renderMyProfile(context.world.id)}
                 </div>
               </>
             ) : null}
 
-            <Panel title="배너 이미지 (선택)" description="초안을 저장한 뒤 업로드할 수 있습니다. 이미지 변경은 캐릭터 일과 생성 계약 hash를 바꾸지 않습니다.">
+            <Panel title="World 아이콘·배너 (선택)" description="앱 안에서 사용할 정사각형 아이콘과 넓은 배너입니다. 저장 후에도 변경할 수 있습니다.">
               <div className="flex flex-wrap items-center gap-3">
+                <label className={secondaryButtonClass}>아이콘 선택<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => void handleBanner(event.target.files?.[0] ?? null, "icon")} /></label>
+                {worldIconUrl && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={worldIconUrl} alt={`${definition.name} 아이콘`} className="size-20 rounded-2xl object-cover" />
+                )}
+                {context?.world.icon_media_id && <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner("icon")}>아이콘 제거</button>}
                 <label className={secondaryButtonClass}>
                   {pending === "banner" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
                   배너 선택
@@ -509,168 +505,6 @@ export function WorldCreatorClient({ worldId, renderWorldTools }: { worldId?: st
   );
 }
 
-const EMPTY_OWNER_PROFILE: OwnerControlledProfileWrite = {
-  display_name: "",
-  avatar_url: "",
-  intro: "",
-  role_key: null,
-  preferred_address: "",
-  interests: [],
-  background: "",
-};
-
-function OwnerControlledIdentityPanel({
-  roles,
-  worldId,
-}: {
-  roles: WorldRoleInput[];
-  worldId: string;
-}) {
-  const [identities, setIdentities] = useState<OwnerControlledIdentityRead[]>([]);
-  const [creatingNew, setCreatingNew] = useState(false);
-  const [identity, setIdentity] = useState<OwnerControlledIdentityRead | null>(null);
-  const [profile, setProfile] = useState<OwnerControlledProfileWrite>(
-    EMPTY_OWNER_PROFILE,
-  );
-  const [interestsText, setInterestsText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void listOwnerControlledIdentities(worldId).then((rows) => { if (active) setIdentities(rows); }).catch(() => {});
-    void getOwnerControlledIdentity(worldId)
-      .then((next) => {
-        if (!active) return;
-        setIdentity(next);
-        setProfile(next.profile);
-        setInterestsText(next.profile.interests.join(", "));
-      })
-      .catch((reason: unknown) => {
-        if (
-          active &&
-          reason instanceof WorldApiError &&
-          reason.status !== 404
-        ) {
-          setMessage(errorMessage(reason));
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [worldId]);
-
-  function patchProfile<K extends keyof OwnerControlledProfileWrite>(
-    key: K,
-    value: OwnerControlledProfileWrite[K],
-  ) {
-    setProfile((current) => ({ ...current, [key]: value }));
-    setMessage(null);
-  }
-
-  async function saveIdentity() {
-    setSaving(true);
-    setMessage(null);
-    const payload = {
-      ...profile,
-      interests: parseCommaList(interestsText, 12),
-    };
-    try {
-      const next = creatingNew ? await replaceOwnerControlledIdentity(worldId, payload) : identity
-        ? await updateOwnerControlledIdentity(worldId, payload)
-        : await createOwnerControlledIdentity(worldId, payload);
-      setIdentity(next);
-      setCreatingNew(false);
-      setIdentities(await listOwnerControlledIdentities(worldId));
-      setProfile(next.profile);
-      setInterestsText(next.profile.interests.join(", "));
-      setMessage(identity ? "사용자 조종 앵무를 수정했습니다." : "사용자 조종 앵무를 만들었습니다.");
-    } catch (reason) {
-      setMessage(errorMessage(reason));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Panel
-      title="내가 조종하는 앵무"
-      description="이 World에서 Local Owner가 직접 말하고 행동할 identity입니다. 자동 활동·BYOK·AI 호출은 연결되지 않습니다."
-    >
-      {loading ? (
-        <p className="text-sm font-bold text-[#667085]">identity를 확인하는 중입니다.</p>
-      ) : (
-        <>
-          {identity ? (
-            <div className="flex flex-wrap gap-2 text-xs font-extrabold">
-              <Badge>owner controlled</Badge>
-              <Badge>자동 활동 OFF</Badge>
-              <Badge>v{identity.version}</Badge>
-            </div>
-          ) : (
-            <p className="rounded-[18px] bg-[#f2f4f7] px-4 py-3 text-sm font-bold text-[#475467]">
-              아직 이 World에서 사용자가 조종할 앵무가 없습니다.
-            </p>
-          )}
-          <Field label="보존된 내 앵무 선택" hint="다른 인물을 선택해도 기존 대화와 그 인물을 향한 관계는 보존됩니다.">
-            <select className={inputClass} disabled={saving} value={creatingNew ? "new" : identity?.world_character_id ?? ""} onChange={async (event) => {
-              const id = event.target.value;
-              if (id === "new") { setCreatingNew(true); setProfile(EMPTY_OWNER_PROFILE); setInterestsText(""); return; }
-              setSaving(true);
-              try {
-                const next = await selectOwnerControlledIdentity(worldId, id);
-                setIdentity(next); setCreatingNew(false); setProfile(next.profile); setInterestsText(next.profile.interests.join(", "));
-                setIdentities(await listOwnerControlledIdentities(worldId));
-                setMessage("이 인물로 활동합니다. 이전 관계는 보존했습니다.");
-              } catch (reason) { setMessage(errorMessage(reason)); }
-              finally { setSaving(false); }
-            }}>
-              {!identity ? <option value="">먼저 앵무를 만들어 주세요</option> : null}
-              {identities.map((row) => <option key={row.world_character_id} value={row.world_character_id}>{row.profile.display_name}</option>)}
-              {identity ? <option value="new">다른 내 앵무 새로 만들기</option> : null}
-            </select>
-          </Field>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="표시 이름" counter={`${profile.display_name.length}/80`}>
-              <input className={inputClass} maxLength={80} value={profile.display_name} onChange={(event) => patchProfile("display_name", event.target.value)} placeholder="예: 진구의 앵무" />
-            </Field>
-            <Field label="World 역할">
-              <select className={inputClass} value={profile.role_key ?? ""} onChange={(event) => patchProfile("role_key", event.target.value || null)}>
-                <option value="">역할 없음</option>
-                {roles.map((role) => <option key={role.key} value={role.key}>{role.name || role.key}</option>)}
-              </select>
-            </Field>
-            <Field label="불리고 싶은 이름" counter={`${profile.preferred_address.length}/80`}>
-              <input className={inputClass} maxLength={80} value={profile.preferred_address} onChange={(event) => patchProfile("preferred_address", event.target.value)} />
-            </Field>
-            <Field label="관심사" hint="쉼표로 구분 · 최대 12개">
-              <input className={inputClass} value={interestsText} onChange={(event) => setInterestsText(event.target.value)} placeholder="마법약, 친구, 산책" />
-            </Field>
-          </div>
-          <Field label="한 줄 소개" counter={`${profile.intro.length}/280`}>
-            <textarea className={textareaClass} maxLength={280} value={profile.intro} onChange={(event) => patchProfile("intro", event.target.value)} />
-          </Field>
-          <Field label="World 안의 배경" counter={`${profile.background.length}/500`}>
-            <textarea className={textareaClass} maxLength={500} value={profile.background} onChange={(event) => patchProfile("background", event.target.value)} />
-          </Field>
-          <Field label="아바타 URL" hint="필수 · http 또는 https 이미지 주소">
-            <input className={inputClass} maxLength={500} value={profile.avatar_url} onChange={(event) => patchProfile("avatar_url", event.target.value)} />
-          </Field>
-          {message ? <p className="text-sm font-bold text-[#475467]">{message}</p> : null}
-          <button type="button" className={secondaryButtonClass} disabled={saving || !profile.display_name.trim() || !profile.avatar_url.trim() || !profile.intro.trim()} onClick={() => void saveIdentity()}>
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            {creatingNew ? "새 인물로 만들고 선택" : identity ? "조종 앵무 수정" : "조종 앵무 만들기"}
-          </button>
-        </>
-      )}
-    </Panel>
-  );
-}
-
 function OptionalSettings({
   definition,
   change,
@@ -689,24 +523,6 @@ function OptionalSettings({
         <OptionalSection title="역할·직업" count={definition.roles.length} onAdd={() => change("roles", [...definition.roles, emptyRole()])}>
           {definition.roles.map((item, index) => (
             <RoleEditor key={index} item={item} onChange={(next) => change("roles", replaceAt(definition.roles, index, next))} onRemove={() => change("roles", removeAt(definition.roles, index))} />
-          ))}
-        </OptionalSection>
-        <OptionalSection title="4개 시간대 환경" count={definition.daypart_profiles.length} onAdd={() => {
-          const missing = DAYPARTS.find((entry) => !definition.daypart_profiles.some((item) => item.daypart === entry.key));
-          if (missing) change("daypart_profiles", [...definition.daypart_profiles, { daypart: missing.key, description: "", available_features: [], restricted_features: [] }]);
-        }}>
-          {definition.daypart_profiles.map((item, index) => (
-            <DaypartEditor key={item.daypart} item={item} onChange={(next) => change("daypart_profiles", replaceAt(definition.daypart_profiles, index, next))} onRemove={() => change("daypart_profiles", removeAt(definition.daypart_profiles, index))} />
-          ))}
-        </OptionalSection>
-        <OptionalSection title="허용·금지 규칙" count={definition.rules.length} onAdd={() => change("rules", [...definition.rules, emptyRule()])}>
-          {definition.rules.map((item, index) => (
-            <RuleEditor key={index} item={item} onChange={(next) => change("rules", replaceAt(definition.rules, index, next))} onRemove={() => change("rules", removeAt(definition.rules, index))} />
-          ))}
-        </OptionalSection>
-        <OptionalSection title="고유 용어" count={definition.glossary.length} onAdd={() => change("glossary", [...definition.glossary, emptyGlossary()])}>
-          {definition.glossary.map((item, index) => (
-            <GlossaryEditor key={index} item={item} onChange={(next) => change("glossary", replaceAt(definition.glossary, index, next))} onRemove={() => change("glossary", removeAt(definition.glossary, index))} />
           ))}
         </OptionalSection>
         <details className={detailsClass}>
@@ -736,18 +552,6 @@ function PlaceEditor({ item, onChange, onRemove }: { item: WorldPlaceInput; onCh
 
 function RoleEditor({ item, onChange, onRemove }: { item: WorldRoleInput; onChange: (item: WorldRoleInput) => void; onRemove: () => void }) {
   return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label="이름" value={item.name} onChange={(value) => onChange({ ...item, name: value })} /></div><MiniInput label="설명" value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label="책임 (쉼표)" values={item.responsibilities} maxItems={12} onChange={(values) => onChange({ ...item, responsibilities: values })} /><CommaListMiniInput label="가능 활동 범위 (쉼표)" values={item.allowed_activity_scope} maxItems={12} onChange={(values) => onChange({ ...item, allowed_activity_scope: values })} /><label className="flex items-center gap-2 text-xs font-bold text-[#475467]"><input type="checkbox" checked={item.autonomous_allowed} onChange={(event) => onChange({ ...item, autonomous_allowed: event.target.checked })} /> 자율활동 허용</label></EditorCard>;
-}
-
-function DaypartEditor({ item, onChange, onRemove }: { item: WorldDefinition["daypart_profiles"][number]; onChange: (item: WorldDefinition["daypart_profiles"][number]) => void; onRemove: () => void }) {
-  return <EditorCard onRemove={onRemove}><select className={inputClass} value={item.daypart} onChange={(event) => onChange({ ...item, daypart: event.target.value as WorldDaypart })}>{DAYPARTS.map((entry) => <option key={entry.key} value={entry.key}>{entry.label} · {entry.hours}</option>)}</select><MiniInput label="환경 설명" value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label="가능 요소 (쉼표)" values={item.available_features} maxItems={12} onChange={(values) => onChange({ ...item, available_features: values })} /><CommaListMiniInput label="제한 요소 (쉼표)" values={item.restricted_features} maxItems={12} onChange={(values) => onChange({ ...item, restricted_features: values })} /></EditorCard>;
-}
-
-function RuleEditor({ item, onChange, onRemove }: { item: WorldRuleInput; onChange: (item: WorldRuleInput) => void; onRemove: () => void }) {
-  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><label className="text-xs font-bold text-[#475467]">종류<select className={`${inputClass} mt-1`} value={item.rule_kind} onChange={(event) => onChange({ ...item, rule_kind: event.target.value as "allow" | "forbid" })}><option value="allow">allow</option><option value="forbid">forbid</option></select></label></div><MiniInput label="설명" value={item.description} onChange={(value) => onChange({ ...item, description: value })} /></EditorCard>;
-}
-
-function GlossaryEditor({ item, onChange, onRemove }: { item: WorldGlossaryTermInput; onChange: (item: WorldGlossaryTermInput) => void; onRemove: () => void }) {
-  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label="용어" value={item.term} onChange={(value) => onChange({ ...item, term: value })} /></div><MiniInput label="의미" value={item.meaning} onChange={(value) => onChange({ ...item, meaning: value })} /></EditorCard>;
 }
 
 function EditorCard({ onRemove, children }: { onRemove: () => void; children: ReactNode }) {
@@ -811,9 +615,6 @@ function replaceAt<T>(values: T[], index: number, value: T) { return values.map(
 function removeAt<T>(values: T[], index: number) { return values.filter((_, itemIndex) => itemIndex !== index); }
 function emptyPlace(): WorldPlaceInput { return { key: "", name: "", description: "", available_dayparts: [], access_role_keys: [] }; }
 function emptyRole(): WorldRoleInput { return { key: "", name: "", description: "", responsibilities: [], allowed_activity_scope: [], autonomous_allowed: true }; }
-function emptyRule(): WorldRuleInput { return { key: "", rule_kind: "forbid", description: "" }; }
-function emptyGlossary(): WorldGlossaryTermInput { return { key: "", term: "", meaning: "" }; }
-
 const inputClass = "h-12 w-full rounded-[16px] border border-[#dfe3e8] bg-white px-4 text-sm font-semibold text-[#101828] outline-none transition focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2] disabled:bg-[#f2f4f7]";
 const textareaClass = "min-h-24 w-full resize-y rounded-[18px] border border-[#dfe3e8] bg-white px-4 py-3 text-sm font-semibold leading-6 text-[#101828] outline-none transition focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]";
 const largeTextareaClass = `${textareaClass} min-h-44`;

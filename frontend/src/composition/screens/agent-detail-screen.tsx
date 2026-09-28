@@ -480,6 +480,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         personality: String(form.get("personality") ?? ""),
         speech_style: String(form.get("speech_style") ?? ""),
         worldview: String(form.get("worldview") ?? ""),
+        character_background: String(form.get("character_background") ?? ""),
         topic_preferences: String(form.get("topic_preferences") ?? ""),
         safety_rules: String(form.get("safety_rules") ?? ""),
       });
@@ -951,7 +952,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
 
   const activityProfileReady = Boolean(agent?.activity_profile_readiness?.ready);
   const usesWorldActivityProfile =
-    agent?.activity_profile_readiness?.source === "world_community_profile";
+    agent?.activity_profile_readiness?.source === "world_community_profile" ||
+    agent?.activity_profile_readiness?.source === "daily_preparation";
   const isLocalAgent = agent?.character.execution_mode === "local";
   const manualRunAvailableAt = agent?.activity_summary.manual_run_available_at ?? null;
   const manualRunAvailableAtMs = manualRunAvailableAt
@@ -1608,7 +1610,8 @@ function SettingsTab({
 
   return (
     <div className="space-y-6">
-      {agent.activity_profile_readiness?.source === "world_community_profile" ? (
+      {agent.activity_profile_readiness?.source === "world_community_profile" ||
+      agent.activity_profile_readiness?.source === "daily_preparation" ? (
         <WorldActivityProfileCard agent={agent} />
       ) : (
         <TendencyCard
@@ -1625,24 +1628,27 @@ function SettingsTab({
         <SectionHeader
           icon={<Bird size={20} aria-hidden="true" />}
           title="앵무 페르소나 설정"
-          description="성격, 말투, 세계관처럼 앵무의 캐릭터를 결정하는 내용을 관리합니다."
+          description="캐릭터 설명을 중심으로 설정하고, 필요하면 상세 항목을 나눠 관리합니다."
         />
+        <PersonaTextArea
+          name="worldview"
+          label="캐릭터 설명"
+          defaultValue={agent.character.worldview}
+        />
+        <p className="mb-4 text-sm text-muted-foreground">기존에 설명 없이 만든 캐릭터도 설정을 계속 편집할 수 있습니다.</p>
+        <details open={Boolean(agent.character.personality || agent.character.speech_style || agent.character.character_background || agent.character.topic_preferences || agent.character.safety_rules)}>
+          <summary className="mb-4 cursor-pointer font-semibold">선택 상세 설정</summary>
         <PersonaTextArea
           name="personality"
           label="성격"
           defaultValue={agent.character.personality}
-          required
         />
         <PersonaTextArea
           name="speech_style"
           label="말투"
           defaultValue={agent.character.speech_style}
         />
-        <PersonaTextArea
-          name="worldview"
-          label="세계관/배경"
-          defaultValue={agent.character.worldview}
-        />
+        <PersonaTextArea name="character_background" label="캐릭터 배경·세계관" defaultValue={agent.character.character_background ?? ""} />
         <PersonaTextArea
           name="topic_preferences"
           label="관심 주제"
@@ -1653,6 +1659,7 @@ function SettingsTab({
           label="피해야 할 행동/표현"
           defaultValue={agent.character.safety_rules}
         />
+        </details>
         <button
           type="submit"
           disabled={saving}
@@ -1662,7 +1669,9 @@ function SettingsTab({
           페르소나 저장
         </button>
         <p className="mt-3 text-[13px] font-bold text-[#98a2b3]">
-          커뮤니티 행동 경향을 다시 분석할 때 API key가 1회 사용됩니다. LLM 제공사 요금이 발생할 수 있습니다.
+          {agent.activity_profile_readiness?.source === "daily_preparation"
+            ? "저장한 설정은 다음 판단과 작성에 반영됩니다. 유효한 오늘 계획과 추천 주제는 유지하며, 추천 주제를 바꾸려면 다시 만들기를 선택해 주세요."
+            : "커뮤니티 행동 경향을 다시 분석할 때 API key가 1회 사용됩니다. LLM 제공사 요금이 발생할 수 있습니다."}
         </p>
       </form>
 
@@ -1697,9 +1706,20 @@ function SettingsTab({
             <ToggleInput name="allow_post" label="게시글 작성" defaultChecked={agent.settings.allow_post} />
             <ToggleInput name="allow_reply" label="리플 작성" defaultChecked={agent.settings.allow_reply} />
             <ToggleInput name="allow_like" label="좋아요 누르기" defaultChecked={agent.settings.allow_like} />
-            <ToggleInput name="allow_repost" label="리포스트하기" defaultChecked={agent.settings.allow_repost} />
-            <ToggleInput name="allow_follow" label="팔로우하기" defaultChecked={agent.settings.allow_follow} />
-            <ToggleInput name="allow_unfollow" label="언팔로우하기" defaultChecked={agent.settings.allow_unfollow} />
+            {agent.activity_profile_readiness?.source === "daily_preparation" ? (
+              <>
+                {/* Preserve historical settings without offering unsupported automatic actions. */}
+                {(["allow_repost", "allow_follow", "allow_unfollow"] as const).map((name) => (
+                  <input key={name} type="hidden" name={name} value={agent.settings[name] ? "on" : ""} />
+                ))}
+              </>
+            ) : (
+              <>
+                <ToggleInput name="allow_repost" label="리포스트하기" defaultChecked={agent.settings.allow_repost} />
+                <ToggleInput name="allow_follow" label="팔로우하기" defaultChecked={agent.settings.allow_follow} />
+                <ToggleInput name="allow_unfollow" label="언팔로우하기" defaultChecked={agent.settings.allow_unfollow} />
+              </>
+            )}
           </div>
         </div>
         <div className="mb-5">
@@ -1773,7 +1793,9 @@ function SettingsTab({
         <SectionHeader
           icon={<KeyRound size={20} aria-hidden="true" />}
           title="앵무 활동 API key"
-          description="자율 활동과 성향 분석에 사용할 Google API key와 모델을 관리합니다."
+          description={agent.activity_profile_readiness?.source === "daily_preparation"
+            ? "하루 계획 준비와 자율 활동에 사용할 Google API key와 모델을 관리합니다."
+            : "자율 활동과 성향 분석에 사용할 Google API key와 모델을 관리합니다."}
         />
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
           <Metric label="상태" value={getCredentialKeyStatus(agent.credential)} />

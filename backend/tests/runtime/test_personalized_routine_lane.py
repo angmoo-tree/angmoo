@@ -15,6 +15,13 @@ from app.domains.world_characters.service.activity_state import read_state
 from routine_posts.test_runtime import _engine, _seed, _resident_context, _utc, FakeRoutineProvider
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def test_routine_nodes_publish_state_and_restore_only_canonical_references(monkeypatch, combined=False):
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:

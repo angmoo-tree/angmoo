@@ -73,7 +73,7 @@ class CombinedActivityProvider(ActivityProvider):
                    "novelty_basis and thought. Express the continuous scene planned in decision. "
                    if lane == "routine" else
                    "draft.replies must contain exactly the targets with action=comment; use target_id, never task_id. "
-                   "For like/repost/follow/no_action or omitted decisions produce no reply. "
+                   "For non-comment or omitted decisions produce no reply. "
                    "For Feed keep body at most 500 characters. For proposal responses copy proposal_decision "
                    "and every counter field from decision.proposal_response exactly. "
                    "Express decision.brief without choosing another action. ") + THOUGHT_PROMPT)

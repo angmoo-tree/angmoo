@@ -37,6 +37,22 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
 
+export function ensureDefaultSpace() {
+  return apiRequest<WorldRead>("/worlds/default-space/ensure", { method: "POST" });
+}
+
+export function ensureMyProfile(worldId: string) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/ensure"), { method: "POST" });
+}
+
+export function patchMyProfile(worldId: string, data: { version: number; display_name?: string; handle?: string; intro?: string; avatar_url?: string | null; banner_url?: string | null }) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile"), { method: "PATCH", body: data });
+}
+
+export function uploadMyProfileMedia(worldId: string, data: { version: number; media_type: "avatar" | "banner"; content_type: string; data_base64: string }) {
+  return apiRequest<OwnerControlledIdentityRead>(worldPath(worldId, "/my-profile/media"), { method: "POST", body: data });
+}
+
 export class WorldApiError extends Error {
   constructor(
     message: string,
@@ -165,15 +181,16 @@ export function uploadWorldBanner(
     data_base64: string;
     alt_text: string;
   },
+  mediaType: "banner" | "icon" = "banner",
 ) {
-  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/banner"), {
+  return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "POST",
     body: data,
   });
 }
 
-export function removeWorldBanner(worldId: string, rowVersion: number) {
-  return apiRequest<WorldCreatorContext>(worldPath(worldId, "/banner"), {
+export function removeWorldBanner(worldId: string, rowVersion: number, mediaType: "banner" | "icon" = "banner") {
+  return apiRequest<WorldCreatorContext>(worldPath(worldId, `/${mediaType}`), {
     method: "DELETE",
     body: { row_version: rowVersion },
   });

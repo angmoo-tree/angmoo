@@ -29,6 +29,7 @@ class WorldSurfaceItem:
     updated_at: datetime
     launchable: bool
     launch_block_reason: WorldLaunchBlockReason | None
+    icon_media_id: str | None = None
 
 
 @dataclass(frozen=True)

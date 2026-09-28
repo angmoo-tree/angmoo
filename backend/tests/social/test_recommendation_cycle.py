@@ -14,6 +14,13 @@ from app.domains.social.service.recommendation_topics import enroll_native_post
 from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def _seed(db, *, with_candidate):
     ctx, target = _legacy_seed(db, with_candidate=with_candidate)
     profile = db.get(models.WorldCommunityProfile, "community-profile-actor")

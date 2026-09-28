@@ -12,6 +12,8 @@ from app.database import get_db
 from app.domains.world_characters.schemas.identity import (
     OwnerControlledIdentityRead,
     OwnerControlledProfileWrite,
+    MyProfilePatch,
+    MyProfileMediaUpload,
     StudioCharacterCandidateListRead,
     StudioCharacterCandidateRead,
     StudioWorldCharacterListRead,
@@ -38,6 +40,42 @@ from app.domains.worlds import service as world_service
 
 
 router = APIRouter(prefix="/worlds", tags=["world-characters"])
+
+
+@router.post("/{world_id}/my-profile/ensure", response_model=OwnerControlledIdentityRead)
+def ensure_my_profile(world_id: str, request: Request, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return identity_read(OwnerControlledIdentityService(db).ensure(world_id=world_id, current_user_id=current_user.id))
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+
+
+@router.patch("/{world_id}/my-profile", response_model=OwnerControlledIdentityRead)
+def patch_my_profile(world_id: str, data: MyProfilePatch, request: Request,
+                     db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return identity_read(OwnerControlledIdentityService(db).patch(
+            world_id=world_id, current_user_id=current_user.id, data=data))
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/{world_id}/my-profile/media", response_model=OwnerControlledIdentityRead)
+def upload_my_profile_media(world_id: str, data: MyProfileMediaUpload, request: Request,
+                            db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    from app.domains.media.contracts import InvalidProfileMediaError
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return identity_read(OwnerControlledIdentityService(db).upload_media(
+            world_id=world_id, current_user_id=current_user.id, data=data))
+    except OwnerControlledIdentityError as exc:
+        _raise_identity_error(exc)
+    except (ValueError, InvalidProfileMediaError) as exc:
+        raise HTTPException(status_code=422, detail="이미지 형식과 크기를 확인해주세요.") from exc
 
 
 def _raise_studio_surface_error(exc: world_service.WorldServiceError) -> None:

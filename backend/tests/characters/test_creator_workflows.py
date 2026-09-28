@@ -51,23 +51,19 @@ def _draft(identifier, expires_at):
 
 
 def test_create_verifies_before_insert_and_keeps_original_cipher_scope(engine):
+    # Product contract v2 supersedes the historical key-verification behavior.
     owner = SimpleNamespace(id="owner")
     calls = []
     with Session(engine) as db:
         event.listen(db, "after_commit", lambda current: calls.append(("commit", current)))
-        async def verify(**kwargs):
-            assert kwargs["db"] is db and kwargs["user"] is owner
-            assert list(db.query(models.AgentCreationDraft)) == []
-            assert calls == []
-            calls.append(("verify", kwargs["draft_id"]))
-            return '{"ok": true}'
-        data = schemas.AgentCreationDraftCreate(api_key="test-credential")
-        result = asyncio.run(drafts.create_draft(db, owner, data, workflows=_workflows(run_llm=verify)))
+        data = schemas.AgentCreationDraftCreate()
+        result = asyncio.run(drafts.create_draft(db, owner, data, workflows=_workflows(resolve_target=lambda *_: "target-world")))
         stored = db.get(models.AgentCreationDraft, result.id)
-        assert [name for name, _ in calls] == ["verify", "commit"]
+        assert [name for name, _ in calls] == ["commit"]
         assert stored.user_id == owner.id
-        assert stored.encrypted_api_key != data.api_key
-        assert security.decrypt_secret(stored.encrypted_api_key, scope=security.SecretScope(owner_id=owner.id, character_id="", provider=data.provider, purpose="creation_draft")) == data.api_key
+        assert stored.encrypted_api_key is None
+        assert stored.target_world_id == "target-world"
+        assert stored.contract_version == 2
         with pytest.raises(exceptions.AgentCreationDraftNotFoundError):
             drafts.get_draft(db, SimpleNamespace(id="foreign"), result.id, workflows=_workflows())
         assert drafts.get_draft(db, owner, result.id, workflows=_workflows()).id == result.id

@@ -42,6 +42,16 @@ def normalize_topic(value: str) -> str:
     return re.sub(r"\s+", "", unicodedata.normalize("NFKC", value).casefold())
 
 
+
+def character_topics_usable(db: Session, *, world_id: str, source_key: str) -> bool:
+    rows = list(db.scalars(select(RecommendationTopic).join(RecommendationTopicSource).where(
+        RecommendationTopicSource.world_id == world_id, RecommendationTopicSource.source_key == source_key)))
+    keys = [(row.scope_key, normalize_topic(row.name)) for row in rows]
+    return (1 <= len(rows) <= MAX_CHARACTER_TOPICS and len(set(keys)) == len(keys)
+        and all(2 <= len(key[1]) <= 120 and row.world_id in {None, world_id}
+                for row, key in zip(rows, keys)))
+
+
 def body_digest(title: str, body: str) -> str:
     return hashlib.sha256((title + "\0" + body).encode("utf-8")).hexdigest()
 

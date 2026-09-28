@@ -208,6 +208,8 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "runtime/memory_embedding_provider.py": {"query"},
         "runtime/memory/vector_projection.py": {"sync_item"},
         "domains/chat/service/generation.py": {"stream_world_response"},
+        # Authorized WORLD_CHARACTER_SETUP_LLM material is revealed only at transport.
+        "domains/routines/client.py": {"generate_daily_preparation"},
     }
     observed: dict[str, set[str]] = {}
 

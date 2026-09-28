@@ -23,6 +23,12 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     if (url.pathname.endsWith("/auth/me")) return send({ id: "local-owner", email: null, display_name: "Local Owner",
       display_name_updated_at: null, display_name_change_available_at: null, profile_setup_completed: true, feed_content_filter: "all" });
     if (url.pathname.endsWith("/runtime/status")) return send({ schema_version: "local-runtime-status-v1", installation_state: "ready" });
+    if (url.pathname === `/api/backend/worlds/${worldId}/owner-character`) return send({
+      schema_version: "owner-controlled-world-character-v1", world_id: worldId,
+      world_character_id: "owner-bird", character_id: "owner-bird", control_mode: "owner_controlled",
+      autonomous_enabled: false, status: "active", version: 1,
+      profile: { display_name: "Owner", handle: "owner", avatar_url: null, intro: "", role_key: null },
+    });
     if (url.pathname.endsWith(`/worlds/mine/${worldId}`)) return send({ schema_version: "local-world-app-v1", surface: "world_app",
       world: { world_id: worldId, name: "RT World", tagline: "", banner_media_id: null, banner_alt_text: null, status: "published",
         visibility: "private", readiness_status: "publish_ready", membership_role: "owner", updated_at: "2026-09-12T12:00:00Z", launchable: true, launch_block_reason: null } });

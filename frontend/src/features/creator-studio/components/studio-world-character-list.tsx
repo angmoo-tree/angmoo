@@ -315,9 +315,9 @@ export function StudioWorldCharacterList({
           <Button
             compact
             variant="secondary"
-            onClick={() => setCandidateOpen((value) => !value)}
+            onClick={() => router.push(`${createHref}&mode=copy`)}
           >
-            <Link2 className="size-4" /> 기존 캐릭터 연결
+            <Link2 className="size-4" /> 기존 캐릭터 설정 복사
           </Button>
           <Button
             compact

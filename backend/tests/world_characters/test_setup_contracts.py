@@ -28,6 +28,27 @@ def _character(**overrides):
     return SimpleNamespace(**values)
 
 
+def test_description_and_background_are_distinct_in_new_generation_input():
+    character = _character(personality="", speech_style="", character_background="먼 왕국 출신")
+    old_hash = contracts.legacy_character_contract_hash(character)
+    new_hash = contracts.character_contract_hash(character)
+    assert old_hash != new_hash
+    changed = _character(personality="", speech_style="", character_background="다른 왕국 출신")
+    assert contracts.legacy_character_contract_hash(changed) == old_hash
+    assert contracts.character_contract_hash(changed) != new_hash
+    payload = contracts.build_world_character_generation_input(
+        character=character, world_character=_world_character(), world_context=_world_context()
+    )
+    assert payload["character"]["worldview"] == character.worldview
+    assert payload["character"]["character_background"] == "먼 왕국 출신"
+    assert "description" in payload["persona_interpretation"]
+    legacy = contracts.build_world_character_generation_input_for_version(
+        character=character, world_character=_world_character(), world_context=_world_context(), version=1
+    )
+    assert "character_background" not in legacy["character"]
+    assert "persona_interpretation" not in legacy
+
+
 def _world_character(**overrides):
     values = {
         "id": "world-character-a",

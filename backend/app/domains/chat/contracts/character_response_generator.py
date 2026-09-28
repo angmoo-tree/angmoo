@@ -44,6 +44,7 @@ class CharacterResponseProfile:
     worldview: str
     topic_preferences: str
     safety_rules: str
+    character_background: str = ""
 
 
 @dataclass(frozen=True, slots=True)

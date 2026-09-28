@@ -53,27 +53,29 @@ def _allowed_actions(
     followed: set[str],
 ) -> list[feed_schemas.FeedAction]:
     allowed: list[feed_schemas.FeedAction] = []
+    def enabled(action):
+        return action in actor.explicit_actions if actor.explicit_actions is not None else _action_weight(actor.action_profile, action) > 0
     if (
         "like" in policy_actions
-        and _action_weight(actor.action_profile, "like") > 0
+        and enabled("like")
         and post.id not in liked
     ):
         allowed.append("like")
     if (
         ("comment" in policy_actions or "reply" in policy_actions)
-        and _action_weight(actor.action_profile, "comment") > 0
+        and enabled("comment")
         and post.id not in commented
     ):
         allowed.append("comment")
     if (
         "repost" in policy_actions
-        and _action_weight(actor.action_profile, "repost") > 0
+        and enabled("repost")
         and post.id not in reposted
     ):
         allowed.append("repost")
     if (
         "follow" in policy_actions
-        and _action_weight(actor.action_profile, "follow") > 0
+        and enabled("follow")
         and post.author_character_id not in followed
     ):
         allowed.append("follow")

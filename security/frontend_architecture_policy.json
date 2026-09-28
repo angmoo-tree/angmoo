@@ -149,9 +149,8 @@
       "worldAppSectionRoute"
     ],
     "frontend/src/composition/screens/world-app.tsx": [
-      "const NO_SPECIFIC_ROLE_KEY = \"no_specific_role\";",
-      "return !roleKey || roleKey === NO_SPECIFIC_ROLE_KEY ? \"역할 없음\" : roleKey;",
-      "worldRoleLabel(ownerActor.profile.role_key)"
+      "ensureMyProfile(worldId)",
+      "내 프로필"
     ],
     "frontend/src/components/ui/device-frame.module.css": [
       "--device-bezel-width: 3px",
@@ -180,7 +179,7 @@
       "maxWidthPx: 436"
     ],
     "frontend/src/composition/screens/device-home-screen.tsx": [
-      "<DeviceHome authStatus={status} />",
+      "<DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace} />",
       "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
       "getProductRuntimeState"
     ],

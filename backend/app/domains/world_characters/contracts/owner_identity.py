@@ -14,12 +14,14 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class OwnerControlledProfile:
     display_name: str
-    avatar_url: str
+    avatar_url: str | None
     intro: str
     role_key: str | None
     preferred_address: str
     interests: tuple[str, ...]
     background: str
+    handle: str = ""
+    banner_url: str | None = None
 
 
 @dataclass(frozen=True)

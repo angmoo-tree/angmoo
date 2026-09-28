@@ -384,6 +384,7 @@ class WorldGlossaryTermRead(WorldGlossaryTermInput):
 
 
 class WorldRead(WorldSchema):
+    icon_media_id: str | None = None
     id: str
     slug: str
     name: str

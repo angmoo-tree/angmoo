@@ -1,7 +1,7 @@
 """Read-only SQLAlchemy snapshot adapter for deterministic package export."""
 
 from __future__ import annotations
-from app.domains.world_packages.schemas.content_v2 import AutonomousCharacterTemplateV2
+from app.domains.world_packages.schemas.content_v3 import AutonomousCharacterTemplateV3
 
 from app.domains.world_packages.service.export_projection import _portable_key, _portable_map, _text_list, _portable_local_profile
 
@@ -146,7 +146,7 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                 )
             character_ref = f"characters/char-{ordinal:04d}"
             characters.append(
-                AutonomousCharacterTemplateV2(
+                AutonomousCharacterTemplateV3(
                     ref=character_ref,
                     display_name=character.name,
                     handle_hint=character.handle,
@@ -154,6 +154,7 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                     personality=character.personality,
                     speech_style=character.speech_style,
                     worldview=character.worldview,
+                    character_background=character.character_background,
                     topic_preferences=character.topic_preferences,
                     safety_rules=character.safety_rules,
                     persona_summary=character.persona_summary,
@@ -258,7 +259,10 @@ class SqlAlchemyWorldPackageSourceSnapshot:
                 alt_text=world.banner_alt_text,
             ),
         )
+        media_candidates.append(WorldPackageMediaCandidate(candidate_key="world:icon", slot="world_icon",
+            source_url=world.icon_media_id, source_entity_id=world.id, alt_text=f"{world.name} 아이콘"))
         fingerprint = canonical_sha256(
+            # Final database settings and owned display images only; card source bytes are private.
             {
                 "world": portable_world,
                 "characters": characters,

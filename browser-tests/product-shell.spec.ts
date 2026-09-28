@@ -213,6 +213,21 @@ async function installBackendFixture(
     if (url.pathname === "/api/backend/agents" && method === "GET") {
       return json(route, fixture.agents ?? []);
     }
+    if (url.pathname === "/api/backend/worlds/default-space/ensure" && method === "POST") {
+      // Home now ensures the keyless SNS space before reading the owner list.
+      return json(route, { id: "default-sns", name: "SNS", timezone: "Asia/Seoul" });
+    }
+    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character$/);
+    if (ownerMatch && method === "GET") {
+      const worldId = decodeURIComponent(ownerMatch[1]);
+      return fixture.worldReads?.[worldId]
+        ? json(route, uiDOwnerActor(worldId))
+        : json(route, { detail: "world_not_found" }, 404);
+    }
+    const manualFeedMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/manual-social\/feed$/);
+    if (manualFeedMatch && method === "GET" && fixture.worldReads?.[manualFeedMatch[1]]) {
+      return json(route, uiDManualFeed([], manualFeedMatch[1]));
+    }
     if (url.pathname === "/api/backend/worlds/mine") {
       const surface = url.searchParams.get("surface");
       if (surface === "device_home") {
@@ -490,7 +505,7 @@ test("canonical Home keeps the phone shell at 390px and handles zero World", asy
   const frame = await page.locator('[data-product-shell="device"]').boundingBox();
   expect(frame).not.toBeNull();
   expect(frame!.width).toBeLessThanOrEqual(390);
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -595,7 +610,7 @@ test("wide browser keeps one phone device and exposes multiple launchable Worlds
   await expect(page.getByRole("link", { name: "설정 열기" })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Creator Studio 열기" })).toBeFocused();
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -642,7 +657,9 @@ test("Creator Studio is a wide owner workspace and preserves private and draft W
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
   await expect(page.getByText("비공개 작업실", { exact: true })).toHaveCount(0);
-  expect(audit.writes).toEqual([]);
+  // Next dev replays mount effects during this client-side navigation. The
+  // idempotent bootstrap may repeat; no character/provider mutation is allowed.
+  expect(audit.writes).toEqual(Array(3).fill("POST /api/backend/worlds/default-space/ensure"));
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -658,10 +675,8 @@ test("World App keeps the requested World boundary and never falls back", async 
   await page.getByRole("link", { name: "Feed" }).click();
   await expect(page).toHaveURL(new RegExp(`/worlds/${WORLD_ALPHA.world_id}/feed$`));
   await expect(worldApp).toHaveAttribute("data-world-id", WORLD_ALPHA.world_id);
-  await expect(
-    page.getByRole("heading", { name: "이 World에서 내가 조종할 앵무가 필요해요" }),
-  ).toBeVisible();
-  await expect(page.getByText("Creator Studio에서 owner-controlled 앵무를 만든 뒤")).toBeVisible();
+  await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "이 World에서 내가 조종할 앵무가 필요해요" })).toHaveCount(0);
 
   await page.goto("/worlds/world-foreign");
   await expect(page.getByRole("heading", { name: "이 World 앱을 열 수 없어요" })).toBeVisible();
@@ -671,6 +686,39 @@ test("World App keeps the requested World boundary and never falls back", async 
   await expect(page.locator('[data-device-scroll-owner="true"]')).toHaveCount(1);
   await expect(page.getByRole("navigation", { name: "World 앱 기능" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Device Home", exact: true })).toBeVisible();
+  expect(audit.writes).toEqual([]);
+  expect(audit.providerCalls).toEqual([]);
+});
+
+test("World entry creates a missing profile only after verifying its launchable owner scope", async ({ page }) => {
+  const worldId = WORLD_ALPHA.world_id;
+  const audit = await installBackendFixture(page, { worldReads: { [worldId]: WORLD_ALPHA } });
+  let releaseWorld: (() => void) | undefined;
+  let ownerRead = false;
+  let profileCreates = 0;
+  await page.route("**/api/backend/**", async route => {
+    const pathname = new URL(route.request().url()).pathname;
+    if (pathname === `/api/backend/worlds/mine/${worldId}`) {
+      await new Promise<void>(resolve => { releaseWorld = resolve; });
+      return json(route, { schema_version: "local-world-app-v1", surface: "world_app", world: WORLD_ALPHA });
+    }
+    if (pathname === `/api/backend/worlds/${worldId}/owner-character`) {
+      ownerRead = true;
+      return json(route, { detail: "owner_character_not_found" }, 404);
+    }
+    if (pathname === `/api/backend/worlds/${worldId}/my-profile/ensure`) {
+      expect(route.request().method()).toBe("POST");
+      profileCreates++;
+      return json(route, uiDOwnerActor(worldId));
+    }
+    return route.fallback();
+  });
+  await page.goto(`/worlds/${worldId}/feed`);
+  await expect.poll(() => ownerRead && !!releaseWorld).toBe(true);
+  expect(profileCreates).toBe(0);
+  releaseWorld!();
+  await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
+  expect(profileCreates).toBe(1);
   expect(audit.writes).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
 });
@@ -2255,7 +2303,7 @@ test("runtime outage is presented as degraded without blocking Device Home", asy
 
   await expect(page.getByText("일부 기능 제한", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -2625,7 +2673,7 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   expect(
     audit.reads.filter((read) => read === "GET /api/backend/runtime/status"),
   ).toHaveLength(5);
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(Array(6).fill("POST /api/backend/worlds/default-space/ensure"));
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -2648,7 +2696,7 @@ test("PWA is standalone, cache-free, and shares the canonical Home", async ({ pa
   });
   expect(registration).toBe(`${new URL(page.url()).origin}/`);
   await expect(page.locator('main[data-product-surface="device-home"]')).toBeVisible();
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
 

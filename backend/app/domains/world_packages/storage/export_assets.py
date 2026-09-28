@@ -147,7 +147,7 @@ class ManagedMediaPackageAssets:
         ):
             raise WorldPackageContractError(WorldPackageReasonCode.PATH_UNSAFE)
         expected_group = (
-            "worlds" if candidate.slot == "world_banner" else "characters"
+            "worlds" if candidate.slot in {"world_banner", "world_icon"} else "characters"
         )
         if portable.parts[0] == "world-package-imports":
             if (

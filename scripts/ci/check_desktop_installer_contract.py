@@ -190,6 +190,9 @@ def main() -> int:
         "ladybug_versions/manifests",
         "--add-data $sqliteManifestData",
         "--add-data $ladybugManifestData",
+        '$sqliteDeltaRoot = Join-Path $backendRoot "app/runtime/migrations/sqlite_versions"',
+        "$sqliteDeltaRoot/*.json;app/runtime/migrations/sqlite_versions",
+        "--add-data $sqliteDeltaData",
     ):
         _require(
             required in sidecar_build.replace("\\", "/"),

@@ -19,6 +19,9 @@ class OwnerControlledIdentityNotFoundError(OwnerControlledIdentityError):
 class OwnerControlledIdentityConflictError(OwnerControlledIdentityError):
     reason_code = "owner_controlled_identity_exists"
 
+class OwnerProfileSelectionRequiredError(OwnerControlledIdentityConflictError):
+    reason_code = "preserved_identity_selection_required"
+
 class OwnerControlledRoleInvalidError(OwnerControlledIdentityError):
     reason_code = "owner_controlled_role_invalid"
 

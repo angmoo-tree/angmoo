@@ -103,7 +103,46 @@ def test_create_agent_records_promotion_usage_consent() -> None:
         assert character.promotion_usage_policy_version == "2026-06-25"
 
 
-def test_complete_draft_records_promotion_usage_consent(monkeypatch) -> None:
+def test_complete_draft_records_promotion_usage_consent() -> None:
+    """Keyless registration retains its receipt; consent is an explicit later edit."""
+    from app.runtime.persistence.model_registration import register_models
+    from app.domains.identity.models import InstallationIdentity
+    from app.domains.worlds.service.default_space import ensure_default_space
+
+    engine = create_engine("sqlite:///:memory:")
+    register_models().create_all(engine)
+    with Session(engine) as db:
+        user = _add_user(db)
+        db.add(InstallationIdentity(singleton_key="local-installation", installation_id="fixture",
+            owner_user_id=user.id, bootstrap_state="claimed", claimed_at=datetime.now(UTC)))
+        db.commit()
+        world = ensure_default_space(db, owner_id=user.id)
+        draft = models.AgentCreationDraft(id="draft-consent", user_id=user.id, contract_version=2,
+            target_world_id=world.id, provider="google", model="gemini-3.1-flash-lite",
+            name="Draft Agent", worldview="A quiet and kind test character.",
+            expires_at=datetime.now(UTC) + timedelta(hours=1))
+        db.add(draft)
+        db.commit()
+        with pytest.raises(draft_service.AgentCreationDraftValidationError, match="등록 후"):
+            draft_service.complete_draft(db, user, draft.id,
+                schemas.AgentCreationDraftComplete(revision=draft.revision, promotion_usage_allowed=True))
+        detail = draft_service.complete_draft(db, user, draft.id,
+            schemas.AgentCreationDraftComplete(revision=draft.revision))
+        assert detail.promotion_usage.promotion_usage_allowed is False
+        detail = agent_service.update_promotion_usage(db, user, detail.character.id,
+            schemas.AgentPromotionUsageUpdate(promotion_usage_allowed=True))
+        character = db.get(models.Character, detail.character.id)
+        assert character is not None
+        assert detail.promotion_usage.promotion_usage_allowed is True
+        assert character.promotion_usage_allowed is True
+        assert character.promotion_usage_agreed_at is not None
+        assert character.promotion_usage_revoked_at is None
+        assert character.promotion_usage_policy_version == "2026-06-25"
+        retained = db.get(models.AgentCreationDraft, draft.id)
+        assert retained is not None and retained.status == "completed"
+
+
+def test_complete_legacy_draft_requires_adoption_without_consuming_consent(monkeypatch) -> None:
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
 
@@ -139,20 +178,14 @@ def test_complete_draft_records_promotion_usage_consent(monkeypatch) -> None:
         )
         db.commit()
 
-        detail = draft_service.complete_draft(
-            db,
-            user,
-            "draft-1",
-            schemas.AgentCreationDraftComplete(promotion_usage_allowed=True),
-        )
-
-        character = db.get(models.Character, detail.character.id)
-        assert character is not None
-        assert character.promotion_usage_allowed is True
-        assert character.promotion_usage_agreed_at is not None
-        assert character.promotion_usage_revoked_at is None
-        assert character.promotion_usage_policy_version == "2026-06-25"
-        assert db.scalar(select(models.AgentCreationDraft)) is None
+        # V1 drafts require explicit adoption under the existing keyless creator
+        # contract. Consent updates on registered characters are covered below.
+        with pytest.raises(draft_service.AgentCreationDraftValidationError, match="이전 초안"):
+            draft_service.complete_draft(db, user, "draft-1",
+                schemas.AgentCreationDraftComplete(promotion_usage_allowed=True))
+        assert db.scalar(select(models.Character)) is None
+        retained = db.get(models.AgentCreationDraft, "draft-1")
+        assert retained is not None and retained.encrypted_api_key == "encrypted"
 
 
 def test_update_promotion_usage_tracks_revocation_and_regrant() -> None:

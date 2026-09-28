@@ -64,6 +64,7 @@ export type WorldDefinition = {
 };
 
 export type WorldRead = WorldDefinition & {
+  icon_media_id?: string | null;
   id: string;
   slug: string;
   banner_media_id: string | null;
@@ -124,7 +125,7 @@ export type OwnerControlledIdentityRead = {
   status: string;
   autonomous_enabled: false;
   version: number;
-  profile: OwnerControlledProfileWrite;
+  profile: Omit<OwnerControlledProfileWrite, "avatar_url"> & { avatar_url: string | null; handle: string; banner_url: string | null };
 };
 
 export type WorldGenerationContext = Omit<

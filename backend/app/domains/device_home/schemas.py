@@ -19,6 +19,7 @@ class DeviceHomeSchema(BaseModel):
 
 
 class WorldSurfaceItemRead(DeviceHomeSchema):
+    icon_media_id: str | None = None
     world_id: str
     name: str
     tagline: str

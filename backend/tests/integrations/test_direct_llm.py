@@ -605,7 +605,8 @@ def test_google_provider_error_details_extracts_quota_and_retry_info() -> None:
     assert provider_error is not None
     assert provider_error["provider_http_status"] == 429
     assert provider_error["provider_status"] == "RESOURCE_EXHAUSTED"
-    assert provider_error["provider_message"] == "Resource exhausted for key [REDACTED_GEMINI_API_KEY]"
+    assert "provider_message" not in provider_error  # Free-form SDK text may quote a key or prompt.
+    assert provider_error["provider_detail_status"] == "redacted"
     assert provider_error["quota_metric"] == "generativelanguage.googleapis.com/generate_content_requests"
     assert provider_error["quota_id"] == "GenerateRequestsPerMinutePerProject"
     assert provider_error["quota_dimensions"] == {
@@ -637,6 +638,62 @@ def test_google_provider_error_details_handles_plain_429() -> None:
     assert provider_error["details_present"] is False
     assert "quota_metric" not in provider_error
     assert "quota_id" not in provider_error
+
+
+def test_structured_400_merges_empty_sdk_details_with_response_and_redacts_text() -> None:
+    class Response:
+        def json(self):
+            return {"error": {"code": 400, "status": "INVALID_ARGUMENT",
+                "message": "Request contains an invalid argument.", "details": [
+                    {"@type": "type.googleapis.com/google.rpc.BadRequest",
+                     "fieldViolations": [{"field": "generationConfig.responseJsonSchema.properties.body",
+                                          "description": "Secret prompt: private-user-body"}]},
+                    {"@type": "type.googleapis.com/google.rpc.ErrorInfo",
+                     "reason": "INVALID_JSON_SCHEMA", "domain": "generativelanguage.googleapis.com"}]}}
+
+    class Error(Exception):
+        code = 400
+        status = "INVALID_ARGUMENT"
+        details = {"error": {"details": []}}
+        response = Response()
+
+    result = direct_llm.provider_error_details(Error("private-user-body"))
+    assert result is not None
+    assert result["provider_detail_status"] == "present"
+    assert result["field_violations"][0]["field"].endswith("properties.body")
+    assert result["field_violations"][0]["description_sha256"]
+    assert result["error_reasons"][0]["reason"] == "INVALID_JSON_SCHEMA"
+    assert "private-user-body" not in str(result)
+
+
+def test_structured_400_without_details_preserves_unknown_cause() -> None:
+    class Error(Exception):
+        code = 400
+        status = "INVALID_ARGUMENT"
+        message = "Request contains an invalid argument."
+        details = {}
+
+    result = direct_llm.provider_error_details(Error())
+    assert result is not None
+    assert result["provider_detail_status"] == "absent"
+    assert result["field_violations"] == []
+
+
+def test_structured_400_unreadable_response_marks_detail_unavailable() -> None:
+    class Response:
+        def json(self):
+            raise OSError("response body unavailable")
+
+    class Error(Exception):
+        code = 400
+        status = "INVALID_ARGUMENT"
+        details = None
+        response = Response()
+
+    result = direct_llm.provider_error_details(Error("untrusted provider text"))
+    assert result is not None
+    assert result["provider_detail_status"] == "unavailable"
+    assert "untrusted provider text" not in str(result)
 
 
 def test_direct_llm_provider_error_is_tracked_and_raised(monkeypatch) -> None:

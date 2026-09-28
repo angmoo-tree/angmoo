@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 
 class StructuredOutputValidationError(ValueError):
@@ -83,6 +83,7 @@ class ProviderRequest:
     tools: tuple[ProviderToolDefinition, ...] = ()
     # Scoped to this request; existing optional tool consumers retain their mode.
     require_tool_call: bool = False
+    diagnostic_callback: Callable[[dict[str, Any]], None] | None = field(default=None, repr=False, compare=False)
 
 
 @dataclass(frozen=True)

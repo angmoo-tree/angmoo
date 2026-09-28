@@ -14,6 +14,22 @@ export function listAgents() {
   return apiRequest<AgentDetailRead[]>("/agents");
 }
 
+export function adoptLegacyAgentDraft(id: string, revision: number, targetWorldId?: string) {
+  return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${encodeURIComponent(id)}/adopt`, {
+    method: "POST", body: { revision, target_world_id: targetWorldId },
+  });
+}
+
+export async function findExistingWorldCharacter(worldId: string, characterId: string) {
+  const result = await apiRequest<{ schema_version: string; world_id: string; items: { character_id: string; world_character_id: string }[] }>(
+    `/worlds/${encodeURIComponent(worldId)}/characters?surface=studio`,
+  );
+  if (result.schema_version !== "studio-world-character-list-v1" || result.world_id !== worldId || !Array.isArray(result.items)) {
+    throw new Error("World의 캐릭터 목록을 확인하지 못했습니다.");
+  }
+  return result.items.find((item) => item.character_id === characterId)?.world_character_id;
+}
+
 export function getAgent(characterId: string) {
   return apiRequest<AgentDetailRead>(`/agents/${characterId}`);
 }
@@ -110,9 +126,11 @@ export function revokeAgentLocalKey(characterId: string) {
 }
 
 export function createAgentDraft(data: {
-  provider: string;
-  model: GoogleGeminiModel;
-  api_key: string;
+  execution_mode?: "llm" | "local";
+  target_world_id?: string;
+  provider?: string;
+  model?: GoogleGeminiModel;
+  api_key?: string;
 }) {
   return apiRequest<AgentCreationDraftRead>("/agents/drafts", {
     method: "POST",
@@ -122,6 +140,21 @@ export function createAgentDraft(data: {
 
 export function getAgentDraft(draftId: string) {
   return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}`);
+}
+
+export function importAgentCard(draftId: string, revision: number, data_base64: string) {
+  return apiRequest<{ draft: AgentCreationDraftRead; card_version: number; review: string[]; raw_only: string[] }>(
+    `/agents/drafts/${draftId}/card`, { method: "POST", body: { revision, data_base64 } });
+}
+
+export function getAgentCardSource(draftId: string) {
+  return apiRequest<{ document: unknown; sha256: string }>(`/agents/drafts/${draftId}/card-source`);
+}
+
+export function copyAgentSettings(draftId: string, revision: number, character_id: string) {
+  return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}/copy-settings`, {
+    method: "POST", body: { revision, character_id },
+  });
 }
 
 export function updateAgentDraft(
@@ -143,7 +176,7 @@ export function enhanceAgentDraftPersona(draftId: string) {
 
 export function uploadAgentDraftMedia(
   draftId: string,
-  data: AgentProfileMediaUploadInput,
+  data: AgentProfileMediaUploadInput & { revision?: number },
 ) {
   return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}/media`, {
     method: "POST",
@@ -252,6 +285,7 @@ export function discardAgentProfileMediaCandidate(
 export async function completeAgentDraft(
   draftId: string,
   data?: {
+    revision?: number;
     activity_interval_minutes?: number;
     active_hours_start?: string;
     active_hours_end?: string;

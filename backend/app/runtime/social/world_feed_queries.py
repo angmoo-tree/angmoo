@@ -14,6 +14,7 @@ from app.domains.social.models.feed import WorldCharacterBlock
 from app.domains.social.models.topics import RecommendationPost
 from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,
+    character_hash_for_record,
 )
 
 
@@ -39,6 +40,9 @@ class WorldFeedQueries:
 
     def character_hash(self, character):
         return character_contract_hash(character)
+
+    def character_hash_for_record(self, character, record):
+        return character_hash_for_record(character, record)
 
     def feed_status(self, world_character_id: str):
         from app.runtime.social.feed_status import read_feed_status

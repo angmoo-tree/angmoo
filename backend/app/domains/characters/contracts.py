@@ -30,6 +30,7 @@ class AutonomousCharacterSeedData:
     topic_preferences: tuple[str, ...]
     safety_rules: tuple[str, ...]
     persona_summary: str
+    character_background: str = ""
     planned_handle: str | None = None
     avatar_url: str | None = None
     banner_url: str | None = None
@@ -95,6 +96,9 @@ class CreatorWorkflows:
         [Session, CharacterOwner, schemas.AgentCreate], schemas.AgentDetailRead
     ]
     read_character: Callable[[Session, CharacterOwner, str], schemas.AgentDetailRead]
+    resolve_target: Callable[[Session, CharacterOwner, str | None], str] | None = None
+    register_draft: Callable[..., schemas.AgentDetailRead] | None = None
+    validate_copy_target: Callable[[Session, str, str], None] | None = None
 
 
 class MediaActivityLog(Protocol):

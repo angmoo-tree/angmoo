@@ -115,7 +115,7 @@ export type AgentActivityLogRead = {
 
 export type AgentActivityProfileReadinessRead = {
   ready: boolean;
-  source: "legacy_tendency" | "world_community_profile";
+  source: "legacy_tendency" | "world_community_profile" | "daily_preparation";
   reason_code: string | null;
   world_id: string | null;
   world_character_id: string | null;
@@ -265,6 +265,7 @@ export type AgentCreateInput = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
   provider: string;
@@ -288,6 +289,7 @@ export type AgentPersonaInput = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
 };
@@ -309,6 +311,11 @@ export type AgentCreationDraftImageStyle = "기본" | "애니메풍" | "리얼�
 
 export type AgentCreationDraftRead = {
   id: string;
+  revision: number;
+  contract_version: number;
+  target_world_id: string | null;
+  source_kind: string;
+  status: string;
   provider: string;
   model: string;
   thinking_level: string;
@@ -319,6 +326,7 @@ export type AgentCreationDraftRead = {
   personality: string;
   speech_style: string;
   worldview: string;
+  character_background?: string;
   topic_preferences: string;
   safety_rules: string;
   image_style: string;
@@ -341,12 +349,15 @@ export type AgentCreationDraftUpdateInput = Partial<
     | "personality"
     | "speech_style"
     | "worldview"
+    | "character_background"
     | "topic_preferences"
     | "safety_rules"
     | "appearance_prompt"
   >
-> & {
+  > & {
   image_style?: AgentCreationDraftImageStyle;
+  revision?: number;
+  status?: "cancelled";
   avatar_temp_url?: string | null;
   banner_temp_url?: string | null;
 };

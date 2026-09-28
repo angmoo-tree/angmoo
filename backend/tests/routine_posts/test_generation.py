@@ -142,7 +142,11 @@ def test_prior_post_and_stale_state_keep_their_time_evidence_without_changing_pr
             previous_post=SimpleNamespace(id="earlier-post", title="오늘 훈련 완료",
                 body="오늘 밤 내일을 준비한다", topic_signature="훈련 정리",
                 created_at=_utc(datetime(2026, 8, 10, 9, 48)).replace(tzinfo=None)))
+        context.character.worldview = "설명 " + "d" * 7900 + "description-tail"
+        context.character.character_background = "배경 " + "b" * 7900 + "background-tail"
         prompt = build_routine_prompt_context(context, as_of_utc=now)
+        assert prompt["character"]["persona"]["description"].endswith("description-tail")
+        assert prompt["character"]["persona"]["character_background"].endswith("background-tail")
         assert prompt["state_before"]["action_note"] == "오늘 밤 내일의 훈련을 준비한다"
         assert prompt["previous_success"]["post"]["body"] == "오늘 밤 내일을 준비한다"
         assert prompt["previous_success"]["post"]["created_at_local"] == "2026-08-10T09:48:00+09:00"

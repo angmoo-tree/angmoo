@@ -50,26 +50,23 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             "generation_model": identity["generation_model"],
             "thinking_level": identity["thinking_level"]})
 
-    async def guard(state):
-        stored_identity = state.get("identity", identity)
-        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level")):
-            raise ActivityScopeChangedError("activity_identity_or_model_changed")
-        ctx.db.expire_all()
-        active = ctx.db.get(CharacterActiveWorld, ctx.character.id)
-        current_actor = ctx.db.get(WorldCharacter, actor.id)
-        world = ctx.db.get(World, actor.world_id)
-        membership = ctx.db.get(WorldMembership, actor.membership_id)
+    def validate_claim():
+        """Read-only claim fence; also runs inside each fresh writer boundary."""
+        active = ctx.db.get(CharacterActiveWorld, ctx.character.id, populate_existing=True)
+        current_actor = ctx.db.get(WorldCharacter, actor.id, populate_existing=True)
+        world = ctx.db.get(World, actor.world_id, populate_existing=True)
+        membership = ctx.db.get(WorldMembership, actor.membership_id, populate_existing=True)
         if (active is None or active.world_character_id != actor.id or current_actor is None
             or current_actor.world_id != identity["world_id"] or current_actor.control_mode != "autonomous"
             or current_actor.status != "active" or not current_actor.autonomous_enabled
             or world is None or world.status != "published" or world.readiness_status != "publish_ready"
             or membership is None or membership.status != "active" or membership.user_id != ctx.user_id):
             raise ActivityScopeChangedError("activity_scope_changed")
-        row = ctx.db.get(ActivityGraphRun, run.activity_id)
+        row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
         if row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]:
             raise ActivityScopeChangedError("activity_contract_changed")
         from app.domains.routines.models import AgentRun, AgentSlot
-        from app.domains.world_characters.service.activity_state import read_state, utc
+        from app.domains.world_characters.service.activity_state import utc
         slot = ctx.db.get(AgentSlot, ctx.agent_id, populate_existing=True)
         canonical = ctx.db.get(AgentRun, lease_run_id, populate_existing=True)
         now = datetime.now(UTC)
@@ -78,7 +75,16 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             or slot.assigned_user_id != ctx.user_id or slot.lease_expires_at is None
             or utc(slot.lease_expires_at) <= now):
             raise ActivityScopeChangedError("activity_claim_lost")
+        return row, slot, now
+
+    async def guard(state):
+        stored_identity = state.get("identity", identity)
+        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level")):
+            raise ActivityScopeChangedError("activity_identity_or_model_changed")
+        ctx.db.expire_all()
+        row, slot, now = validate_claim()
         if state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
+            from app.domains.world_characters.service.activity_state import read_state
             from app.runtime.autonomous_activity.revalidation import assert_memories_current
             if any(value.get("packets") and target not in state.get("memory_validations", {})
                    for target, value in state.get("memories", {}).items()):
@@ -98,8 +104,21 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         ctx.db.commit()
         return {}
 
+    preparation_status = {}
+
     async def load(state):
         await guard(state)
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED and not state.get("shared_context"):
+            from types import SimpleNamespace
+            from app.runtime.daily_preparation import ensure_preparation
+            # Startup/manual execution and scheduler midnight share the same claim.
+            prepared = await ensure_preparation(ctx.db, character_id=ctx.character.id, world_id=actor.world_id,
+                                     user=SimpleNamespace(id=ctx.user_id))
+            preparation_status.update(prepared.model_dump(mode="json"))
+            if attempt:
+                attempt.emit("daily_preparation", details=preparation_status)
+            ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
         ctx.db.commit()
         return {"shared_context": plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))}
@@ -112,7 +131,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             "status": "failed" if any(r.get("status") == "failed" for r in results.values()) else "completed" if count else "observed",
             "summary": "Personalized Inbox, Routine and Feed graph completed.",
             "publish_result": {"public_action_count": count}, "paths": results,
-            "llm_usage_summary": tracker.summary(), "llm_rate_limit_waits": tracker.rate_limit_waits}
+            "llm_usage_summary": tracker.summary(), "llm_rate_limit_waits": tracker.rate_limit_waits,
+            "daily_preparation": preparation_status}
         row = ctx.db.get(ActivityGraphRun, run.activity_id)
         result = {**(row.result or {}), **result}
         row.status, row.stage, row.result, row.finished_at = result["status"], "Finalize", plain(result), datetime.now(UTC)
@@ -131,7 +151,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         from app.runtime.autonomous_activity.combined_provider import RecoveryLedger
         classes = (("inbox", CombinedInboxLane), ("routine", CombinedRoutineLane), ("feed", CombinedFeedLane))
         version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id)}
-    adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service, guard=guard,
+    adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service,
+                      guard=guard, claim_validator=validate_claim,
                       **version_options,
                       **({"lane": path, "action_executor": action_executor} if path != "routine" else {}))
         for path, cls in classes}
@@ -205,15 +226,29 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             final = await graph.ainvoke(None if checkpoint.values else {"identity": identity}, config)
         except BaseException as exc:
             ctx.db.rollback()
-            row = ctx.db.get(ActivityGraphRun, run.activity_id)
-            row.status = "aborted" if isinstance(exc, ActivityScopeChangedError) else "interrupted" if not isinstance(exc, Exception) else "waiting"
-            if row.status == "aborted":
-                row.finished_at = datetime.now(UTC)
-            row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
-            ctx.db.commit()
+            status = "aborted" if isinstance(exc, ActivityScopeChangedError) else "interrupted" if not isinstance(exc, Exception) else "waiting"
+            stage = None
+            persisted = False
+            try:
+                from app.core.sqlite_concurrency import run_sqlite_session_immediate
+                def save_failure_status():
+                    row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
+                    if row is None:
+                        raise ValueError("activity_run_missing_for_failure_status")
+                    row.status = status
+                    if status == "aborted":
+                        row.finished_at = datetime.now(UTC)
+                    row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
+                    return row.stage
+                stage = run_sqlite_session_immediate(ctx.db, save_failure_status, require_clean=True)
+                persisted = True
+            except Exception as persist_exc:
+                ctx.db.rollback()
+                import logging
+                logging.getLogger(__name__).warning("activity_status_persist_failed type=%s", type(persist_exc).__name__)
             if attempt:
-                attempt.emit("activity_interrupted", classification=row.status,
-                    details={"stage": row.stage, "status": row.status}, exc=exc,
+                attempt.emit("activity_interrupted", classification=status if persisted else "status_persist_failed",
+                    details={"stage": stage, "status": status if persisted else "status_persist_failed"}, exc=exc,
                     caused_by_event_id=attempt.last_error_event_id)
             raise
         from app.runtime.autonomous_activity.checkpoints import prune_completed

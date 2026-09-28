@@ -217,6 +217,7 @@ class WorldCharacterEntryRead(WorldCharacterSetupSchema):
     role_key: str | None = None
     status: str
     autonomous_enabled: bool
+    activity_runtime_mode: Literal["legacy_resident_v1", "routine_resident_v1"]
     version: int
     reused: bool = False
 
@@ -318,6 +319,7 @@ class WorldCharacterSetupRead(WorldCharacterSetupSchema):
     world_id: str
     character_id: str
     state: WorldSetupState
+    preparation_contract: Literal["repertoire-v1", "daily-plan-v1"] = "repertoire-v1"
     autonomy_ready: bool
     autonomous_enabled: bool
     reused: bool = False

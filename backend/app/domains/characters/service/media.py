@@ -114,18 +114,27 @@ def upload_draft_media(
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
     draft = draft_lifecycle._get_owned_draft(db, user, draft_id, workflows=workflows)
-    url = profile_media.save_draft_profile_media(
-        draft_id=draft.id,
-        media_type=data.media_type,
-        content_type=data.content_type,
-        data_base64=data.data_base64,
-    )
-    if data.media_type == "avatar":
-        draft.avatar_temp_url = url
-    else:
-        draft.banner_temp_url = url
-    db.commit()
-    db.refresh(draft)
+    if draft.contract_version >= 2:
+        draft_lifecycle.claim_edit(db, draft, data.revision)
+    url = None
+    try:
+        url = profile_media.save_draft_profile_media(
+            draft_id=draft.id,
+            media_type=data.media_type,
+            content_type=data.content_type,
+            data_base64=data.data_base64,
+        )
+        if data.media_type == "avatar":
+            draft.avatar_temp_url = url
+        else:
+            draft.banner_temp_url = url
+        db.commit()
+        db.refresh(draft)
+    except Exception:
+        db.rollback()
+        if url is not None:
+            media_files.media_url_to_path(url).unlink(missing_ok=True)
+        raise
     return _draft_read(draft)
 
 
@@ -158,6 +167,8 @@ def apply_draft_media_candidate(
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
     draft = draft_lifecycle._get_owned_draft(db, user, draft_id, workflows=workflows)
+    if draft.contract_version >= 2:
+        raise errors.AgentCreationDraftValidationError("이미지 생성은 등록 후 프로필에서 진행해주세요.")
     candidate = _get_owned_profile_image_candidate(
         db,
         user=user,

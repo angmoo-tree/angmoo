@@ -41,6 +41,12 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$SupportedV19FixtureArchive,
     [Parameter(Mandatory = $true)]
+    [string]$SupportedV20FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV21FixtureArchive,
+    [Parameter(Mandatory = $true)]
+    [string]$SupportedV22FixtureArchive,
+    [Parameter(Mandatory = $true)]
     [string]$ConflictFixtureArchive,
     [Parameter(Mandatory = $true)]
     [string]$Python,
@@ -108,6 +114,9 @@ foreach ($required in @(
     $SupportedV17FixtureArchive,
     $SupportedV18FixtureArchive,
     $SupportedV19FixtureArchive,
+    $SupportedV20FixtureArchive,
+    $SupportedV21FixtureArchive,
+    $SupportedV22FixtureArchive,
     $ConflictFixtureArchive,
     $Python,
     $Verifier
@@ -230,6 +239,16 @@ function Invoke-Installer([int]$ExpectedExit) {
         throw 'windows_installer_supported_upgrade_timeout'
     }
     if ($process.ExitCode -ne $ExpectedExit) {
+        # This script is restricted to sentinel-verified synthetic runner data.
+        # Preserve only the stable failure code before fixture cleanup; never
+        # dump the result body, paths, database contents, or credentials.
+        $resultPath = Join-Path $productRoot 'runtime\installer-data-upgrade-result.json'
+        if (Test-Path -LiteralPath $resultPath -PathType Leaf) {
+            $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
+            if ($result.code -cmatch '^[a-z0-9_]{1,100}$') {
+                Write-Output "windows_installer_supported_upgrade_failure_code:$($result.code)"
+            }
+        }
         throw "windows_installer_supported_upgrade_exit_mismatch:$($process.ExitCode):$ExpectedExit"
     }
 }
@@ -444,6 +463,36 @@ try {
             ([int]$supportedContract.ladybug_source_data_version)
 
         $supportedManifest = Restore-IsolatedFixture $SupportedV19FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV20FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV21FixtureArchive
+        $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
+            ConvertFrom-Json
+        Invoke-Installer 0
+        Invoke-Verifier `
+            $supportedManifest `
+            'upgraded' `
+            ([int]$supportedContract.source_data_version) `
+            ([int]$supportedContract.ladybug_source_data_version)
+
+        $supportedManifest = Restore-IsolatedFixture $SupportedV22FixtureArchive
         $supportedContract = Get-Content -LiteralPath $supportedManifest -Raw |
             ConvertFrom-Json
         Invoke-Installer 0

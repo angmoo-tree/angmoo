@@ -1518,12 +1518,13 @@ test("static local creation stays available beyond the former hosted count cap",
   await expect(page.getByText("한도 도달")).toHaveCount(0);
   await expect(page.getByText("3/3")).toHaveCount(0);
 
-  const llmMode = page.getByRole("button", { name: /서버 LLM 앵무/ });
-  const localMode = page.getByRole("button", { name: /외부 연결 앵무/ });
+  const llmMode = page.getByRole("option", { name: "새 캐릭터 직접 만들기" });
+  const localMode = page.getByRole("option", { name: "외부 실행기 연결용 캐릭터" });
   await expect(llmMode).toBeEnabled();
   await expect(localMode).toBeEnabled();
-  await localMode.click();
-  await expect(page.getByRole("heading", { name: "외부 연결 앵무 만들기" })).toBeVisible();
+  await page.getByLabel("만드는 방법", { exact: true }).selectOption("external");
+  await expect(page.getByLabel("만드는 방법", { exact: true })).toHaveValue("external");
+  await expect(page.getByRole("button", { name: "저장하고 다음" })).toBeEnabled();
   expect(pageErrors).toEqual([]);
 });
 
@@ -1573,6 +1574,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
   }, fixtureRoute);
 
   let createRequestCount = 0;
+  let draft: Record<string, unknown> | null = null;
   const agentRequests: string[] = [];
   await page.route("http://127.0.0.1:8080/api/v1/**", async (route) => {
     const url = new URL(route.request().url());
@@ -1587,7 +1589,27 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
       });
       return;
     }
-    if (url.pathname === "/api/v1/agents" && route.request().method() === "POST") {
+    if (url.pathname === "/api/v1/agents/drafts" && route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      expect(body.api_key).toBeUndefined();
+      draft = { id: "static-return-draft", revision: 1, contract_version: 2,
+        target_world_id: "world-static-probe", source_kind: "direct", status: "editing",
+        name: "", handle: null, one_liner: "", worldview: "", personality: "", speech_style: "",
+        character_background: "", topic_preferences: "", safety_rules: "",
+        avatar_temp_url: null, banner_temp_url: null };
+      await route.fulfill({ contentType: "application/json", json: draft });
+      return;
+    }
+    if (url.pathname === "/api/v1/agents/drafts/static-return-draft" && route.request().method() === "PATCH") {
+      const body = route.request().postDataJSON();
+      expect(body.revision).toBe(draft!.revision);
+      draft = { ...draft, ...body, revision: Number(draft!.revision) + 1 };
+      await route.fulfill({ contentType: "application/json", json: draft });
+      return;
+    }
+    if (url.pathname === "/api/v1/agents/drafts/static-return-draft/complete" && route.request().method() === "POST") {
+      expect(route.request().postDataJSON().revision).toBe(draft!.revision);
+      expect(draft!.worldview).toBe("관찰력이 뛰어나고 책임감이 강한 히어로 지망생.");
       createRequestCount += 1;
       await route.fulfill({
         contentType: "application/json",
@@ -1608,25 +1630,20 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
   });
 
   await page.goto(fixtureRoute);
-  await page.getByLabel("API key").fill("static-fixture-api-key");
-  await page.getByRole("button", { name: "입력 계속하기" }).click();
-  await page.getByLabel("이름", { exact: true }).fill("미도리야 이즈쿠");
-  await page.getByRole("textbox", { name: /^핸들 / }).fill("midoriya_izuku");
-  await page
-    .getByPlaceholder("조금 소심하지만, 먼저 움직이고 싶은 히어로 지망생입니다!")
-    .fill("계승한 힘을 바르게 쓰려는 히어로 지망생");
-  await page.getByRole("button", { name: "다음" }).click();
-  await page.getByLabel("성격").fill("관찰력이 뛰어나고 책임감이 강하다.");
-  await page.getByRole("button", { name: "다음" }).click();
-  await page.getByRole("button", { name: "최종 확인" }).click();
-  await page.getByRole("button", { name: "앵무 만들기" }).click();
+  await expect(page.getByLabel("API key")).toHaveCount(0);
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await page.getByRole("textbox", { name: "이름", exact: true }).fill("미도리야 이즈쿠");
+  await page.getByRole("textbox", { name: "핸들", exact: true }).fill("midoriya_izuku");
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill("관찰력이 뛰어나고 책임감이 강한 히어로 지망생.");
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await page.getByRole("button", { name: "저장하고 다음" }).click();
+  await page.getByRole("button", { name: "자율활동 OFF로 등록" }).click();
+  await expect(page.getByRole("heading", { name: "미도리야 이즈쿠 등록 완료" })).toBeVisible();
+  await page.getByRole("button", { name: "나중에 하기" }).click();
 
   await expect(
-    page.locator('[data-world-fixture-return-status="failed"]'),
-  ).toBeVisible();
-  await expect(page.getByText("캐릭터 생성은 완료되었습니다.")).toBeVisible();
-  await expect(
-    page.getByText(/캐릭터는 정상적으로 생성됐지만 Creator Studio를 열지 못했습니다/),
+    page.getByRole("alert").filter({ hasText: "캐릭터는 등록되었습니다. 돌아갈 화면을 열지 못했습니다. 다시 시도해주세요." }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "제품 창 경로를 열지 못했습니다." }),
@@ -1644,11 +1661,8 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
     )
     .toEqual({ kind: "phone", route: fixtureRoute });
 
-  await page.getByRole("button", { name: "Creator Studio로 다시 돌아가기" }).click();
+  await page.getByRole("button", { name: "나중에 하기" }).click();
 
-  await expect(
-    page.locator('[data-world-fixture-return-status="opened"]'),
-  ).toBeVisible();
   expect(createRequestCount).toBe(1);
   await expect
     .poll(() =>
@@ -1688,7 +1702,7 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
     )
     .toEqual({ kind: "phone", route: fixtureRoute });
 
-  await page.getByRole("button", { name: "생성된 앵무 보기" }).click();
+  await page.getByRole("button", { name: "활동 준비", exact: true }).click();
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -1698,8 +1712,8 @@ test("Tauri Phone retries Creator Studio return without creating a duplicate Cha
         return desktop.__ANGMOO_DESKTOP_WINDOW__;
       }),
     )
-    .toEqual({ kind: "phone", route: "/agents/char-new-1" });
-  await expect(page).toHaveURL(/\/agents\/char-new-1$/);
+    .toEqual({ kind: "phone", route: "/characters/char-new-1/worlds/world-static-probe/autonomy-setup" });
+  await expect(page).toHaveURL(/\/characters\/char-new-1\/worlds\/world-static-probe\/autonomy-setup$/);
   expect(createRequestCount).toBe(1);
 });
 
@@ -4312,6 +4326,10 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
     );
     const pathname = new URL(route.request().url()).pathname;
     apiRequests.push(pathname);
+    if (pathname === "/api/v1/worlds/default-space/ensure" && route.request().method() === "POST") {
+      await route.fulfill({ contentType: "application/json", json: { world_id: "world-media-probe", name: "SNS" } });
+      return;
+    }
     if (pathname === "/api/v1/auth/me") {
       await route.fulfill({
         contentType: "application/json",
@@ -4341,6 +4359,7 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
               name: "Media World",
               tagline: "Authenticated media probe",
               banner_media_id: "/media/probe.png",
+              icon_media_id: "/media/probe.png",
               banner_alt_text: "",
               status: "published",
               visibility: "public",
@@ -4393,6 +4412,7 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
   await expect(page.locator('img[src^="blob:"]')).toBeVisible();
   expect(apiRequests.filter((path) => path === "/api/v1/runtime/status")).toHaveLength(1);
   expect(apiRequests.filter((path) => path === "/api/v1/worlds/mine")).toHaveLength(1);
+  expect(apiRequests.filter((path) => path === "/api/v1/worlds/default-space/ensure")).toHaveLength(1);
   expect(mediaRequests).toHaveLength(1);
 });
 

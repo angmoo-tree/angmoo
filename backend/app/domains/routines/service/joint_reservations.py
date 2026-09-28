@@ -147,7 +147,7 @@ def _materialize_existing_plan(
         .with_for_update()
     )
     if (
-        base_item.origin_type != "repertoire"
+        base_item.origin_type not in {"repertoire", "daily_generation"}
         or base_item.joint_activity_id is not None
         or base_item.is_user_pinned
         or base_item.status != "planned"
@@ -377,3 +377,10 @@ __all__ = [
     "materialize_reservation_for_new_plan",
     "reservation_for",
 ]
+
+
+def reserved_daily_direction(joint):
+    """Canonical fixed direction supplied to daily generation; does not reserve."""
+    snapshot = _joint_snapshot(joint)
+    return {"daypart": joint.target_daypart, **{key: snapshot[key] for key in (
+        "activity_kind", "title", "activity_seed", "social_mode", "place_key")}}

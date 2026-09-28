@@ -49,13 +49,15 @@ def assemble_routine_post_context(
     ):
         raise RoutineContextUnavailable("NO_ROUTINE_CONTEXT")
 
-    repertoire = references.get_repertoire(plan.repertoire_id)
+    from app.config import settings
+    direct_context = settings.DAILY_PREPARATION_ENABLED or getattr(plan, "generation_source", None) == "daily_generation"
+    repertoire = references.get_repertoire(plan.repertoire_id) if plan.repertoire_id and not direct_context else None
     profile = (
         references.get_profile(repertoire.community_profile_id)
         if repertoire is not None
         else None
     )
-    if repertoire is None or profile is None or profile.status != "ready":
+    if not direct_context and (repertoire is None or profile is None or profile.status != "ready"):
         raise RoutineContextUnavailable("NO_ROUTINE_CONTEXT")
 
     previous_beat = (

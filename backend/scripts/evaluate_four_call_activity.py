@@ -81,7 +81,7 @@ def resolve_credential(root):
     return credential(root, row[0])
 
 
-async def evaluate(case, index, version, cred, budget):
+async def evaluate(case, index, version, cred, budget, *, character_settings=None, daily_plan=None, community_profile=None, plan_source="daily_generation", routine_only=False):
     case_id, text, remembered = case
     started = monotonic()
     tracker = EvaluationTracker(budget)
@@ -90,13 +90,37 @@ async def evaluate(case, index, version, cred, budget):
     async def error(exc): raise exc
     with Session(_engine(), expire_on_commit=False) as db:
         fixture = _seed(db)
+        if character_settings is not None:
+            from app.domains.characters.service.profile import _build_persona_summary
+            for key, value in character_settings.items():
+                setattr(fixture.character, key, value)
+            fixture.character.persona_summary = _build_persona_summary(fixture.character)
+            db.flush()
+        if community_profile is not None:
+            from app.domains.world_characters.models import WorldCommunityProfile
+            profile = db.scalar(__import__('sqlalchemy').select(WorldCommunityProfile).where(WorldCommunityProfile.world_character_id == fixture.world_character.id))
+            for key, value in community_profile.items():
+                if hasattr(profile, key): setattr(profile, key, value)
+        if daily_plan is not None:
+            from app.domains.worlds.models import WorldRole
+            db.add(WorldRole(id="evaluation-role", world_id=fixture.world.id, role_key="student", name="학생"))
+            from app.domains.routines.service.daily_preparation import current_items
+            by_part = {item.daypart: item for item in daily_plan.items}
+            for item in current_items(db, fixture.plan.id):
+                for key, value in by_part[item.daypart].model_dump().items(): setattr(item, key, value)
+                from app.domains.routines.models.plans import ActivityEpisode
+                ep = db.scalar(__import__('sqlalchemy').select(ActivityEpisode).where(ActivityEpisode.plan_item_id == item.id))
+                if ep: ep.effective_activity_snapshot = by_part[item.daypart].model_dump(exclude={"daypart"})
+            fixture.plan.generation_source = plan_source
+            fixture.plan.preparation_contract_version = "daily-plan-v1"
         ctx = _resident_context(db, fixture, run_id=f"evaluation-{case_id}-{version}",
             now=_utc(datetime(2026, 8, 10, 10, 5)))
         ctx = replace(ctx, credential=cred)
         initialize_from_last_success(db, actor=fixture.world_character)
         db.commit()
         shared = shared_input(ctx, fixture.world_character, fixture.world)
-        shared["persona"] = PERSONAS[index % len(PERSONAS)]
+        if character_settings is None:
+            shared["persona"] = PERSONAS[index % len(PERSONAS)]
         classes = (CombinedInboxLane, CombinedFeedLane, CombinedRoutineLane) if version == 2 else (InboxLane, FeedLane, RoutineLane)
         options = {"ledger": EvaluationRecovery()} if version == 2 else {}
         adapters = {lane: cls(ctx, actor=fixture.world_character, tracker=tracker, hybrid_service=None, guard=guard,
@@ -115,16 +139,16 @@ async def evaluate(case, index, version, cred, budget):
                 "lane_data": {c["target_id"]: {"post_id": c["target_id"]} for c in candidates}}
             adapters[lane].delivery = lambda _: None
         try:
-            if version == 2:
+            if version == 2 and not routine_only:
                 selection = CombinedSelection(adapters, {lane: SimpleNamespace(guard=guard, on_error=error) for lane in ("inbox", "feed")})
                 state = {"identity": prepared["inbox"]["identity"], "shared_context": shared, "prepared_lanes": prepared}
                 state.update(await selection.mode(state))
                 prepared = (await selection.select(state))["prepared_lanes"]
-            else:
+            elif not routine_only:
                 for lane in ("inbox", "feed"):
                     prepared[lane].update(await adapters[lane].select(prepared[lane]))
             output["selection"] = {lane: {"selections": item.get("selections"), "error": item.get("preparation_error")} for lane, item in prepared.items()}
-            order = ("inbox", "feed", "routine") if version == 2 else ("inbox", "routine", "feed")
+            order = ("routine",) if routine_only else ("inbox", "feed", "routine") if version == 2 else ("inbox", "routine", "feed")
             for lane in order:
                 adapter = adapters[lane]
                 state = prepared.get(lane, {"identity": {"activity_id": ctx.run_id}, "shared_context": shared})

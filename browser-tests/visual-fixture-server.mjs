@@ -41,11 +41,18 @@ const server = createServer((request, response) => {
   if (origin === nextProductOrigin || origin === staticProductOrigin) {
     response.setHeader("access-control-allow-credentials", "true");
     response.setHeader("access-control-allow-headers", "content-type,x-angmoo-launcher-token");
-    response.setHeader("access-control-allow-methods", "GET,HEAD,OPTIONS");
+    response.setHeader("access-control-allow-methods", "GET,HEAD,OPTIONS,POST");
   }
   if (request.method === "OPTIONS") {
     response.writeHead(204);
     response.end();
+    return;
+  }
+  const url = new URL(request.url ?? "/", `http://127.0.0.1:${port}`);
+  // Only the idempotent, provider-free Home bootstrap is simulated as a write.
+  // Every other mutation remains forbidden by the visual fixture server.
+  if (request.method === "POST" && url.pathname === "/api/v1/worlds/default-space/ensure") {
+    sendJson(response, { id: "default-sns", name: "SNS", timezone: "Asia/Seoul" });
     return;
   }
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -53,7 +60,6 @@ const server = createServer((request, response) => {
     return;
   }
 
-  const url = new URL(request.url ?? "/", `http://127.0.0.1:${port}`);
   if (url.pathname === "/health") {
     sendJson(response, { schema_version: fixture.schema_version, status: "ready" });
     return;

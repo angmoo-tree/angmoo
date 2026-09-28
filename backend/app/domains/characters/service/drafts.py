@@ -3,12 +3,11 @@
 Filesystem/LLM/Character runtime work is supplied by app composition. Cleanup
 retains its existing per-draft commit/rollback policy and media-before-DB order.
 """
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 import logging
 from uuid import uuid4
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 from sqlalchemy.orm import Session
-from app.core import security
 from app.domains.characters.policies.persona import PERSONA_LIMITS
 from app.domains.characters import models, schemas
 from app.domains.characters.contracts import CharacterOwner, CreatorWorkflows
@@ -34,47 +33,34 @@ async def create_draft(
 ) -> schemas.AgentCreationDraftRead:
     _cleanup_expired_drafts(db, workflows=workflows)
     draft_id = f"draft-{uuid4().hex[:12]}"
-    await workflows.run_llm(
-        db=db,
-        user=user,
-        draft_id=draft_id,
-        provider=data.provider,
-        model=data.model,
-        thinking_level=data.thinking_level,
-        api_key=data.api_key,
-        message='Return exactly this JSON: {"ok": true}',
-        extra_system_prompt=(
-            "You are verifying an Angmoo user-provided LLM credential. "
-            'Return only {"ok": true}. Do not call tools.'
-        ),
-    )
+    if workflows.resolve_target is None:
+        raise AgentCreationDraftValidationError("creation_target_resolver_required")
+    target_world_id = workflows.resolve_target(db, user, data.target_world_id)
     draft = models.AgentCreationDraft(
         id=draft_id,
         user_id=user.id,
         provider=data.provider,
         model=data.model,
         thinking_level=data.thinking_level,
-        encrypted_api_key=security.encrypt_secret(
-            data.api_key,
-            scope=security.SecretScope(
-                owner_id=user.id,
-                character_id="",
-                provider=data.provider,
-                purpose="creation_draft",
-            ),
-        ),
-        key_fingerprint=security.fingerprint_secret(data.api_key),
+        encrypted_api_key=None,
+        key_fingerprint=None,
+        contract_version=2,
+        revision=1,
+        target_world_id=target_world_id,
+        source_kind="external" if data.execution_mode == "local" else "direct",
+        status="editing",
         name="",
         handle=None,
         one_liner="",
         personality="",
         speech_style="",
         worldview="",
+        character_background="",
         topic_preferences="",
         safety_rules="",
         image_style="기본",
         appearance_prompt="",
-        expires_at=datetime.now(UTC) + DRAFT_TTL,
+        expires_at=datetime.now(UTC) + timedelta(days=7),
     )
     db.add(draft)
     db.commit()
@@ -98,31 +84,101 @@ def update_draft(
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
-    for field, value in data.model_dump(exclude_unset=True).items():
-        if field == "handle":
-            if value is None or not str(value).strip():
-                draft.handle = None
-                continue
-            if name_policy.is_blocked_name(str(value)):
-                raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
-            try:
-                draft.handle = character_profile.validate_character_handle_for_create(
-                    db, str(value)
-                )
-            except character_profile.CharacterHandleConflictError as exc:
-                raise AgentCreationDraftHandleConflictError(str(exc)) from exc
-            except character_profile.InvalidCharacterHandleError as exc:
-                raise AgentCreationDraftValidationError(str(exc)) from exc
-        elif value is None and field in {"avatar_temp_url", "banner_temp_url"}:
-            setattr(draft, field, None)
-        elif value is not None:
-            cleaned = _clean_text(value)
-            if field in persona.PERSONA_PROMPT_SAFETY_FIELDS:
-                _ensure_draft_prompt_safety(cleaned, field_name=field)
-            setattr(draft, field, cleaned)
-    db.commit()
-    db.refresh(draft)
+    if data.status == "cancelled":
+        if data.model_fields_set - {"status", "revision"}:
+            raise AgentCreationDraftValidationError("취소와 내용 수정은 함께 요청할 수 없습니다.")
+        return cancel_draft(db, draft, data.revision, workflows=workflows)
+    if draft.contract_version >= 2:
+        claim_edit(db, draft, data.revision)
+    try:
+        for field, value in data.model_dump(exclude_unset=True, exclude={"revision", "status"}).items():
+            if field == "handle":
+                if value is None or not str(value).strip():
+                    draft.handle = None
+                    continue
+                if name_policy.is_blocked_name(str(value)):
+                    raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
+                try:
+                    draft.handle = character_profile.validate_character_handle_for_create(
+                        db, str(value)
+                    )
+                except character_profile.CharacterHandleConflictError as exc:
+                    raise AgentCreationDraftHandleConflictError(str(exc)) from exc
+                except character_profile.InvalidCharacterHandleError as exc:
+                    raise AgentCreationDraftValidationError(str(exc)) from exc
+            elif value is None and field in {"avatar_temp_url", "banner_temp_url"}:
+                setattr(draft, field, None)
+            elif value is not None:
+                cleaned = _clean_text(value)
+                if field in {"avatar_temp_url", "banner_temp_url"}:
+                    from app.config import settings
+                    from app.integrations.media.files import media_url_to_path
+                    try:
+                        path = media_url_to_path(cleaned).resolve()
+                        path.relative_to((settings.media_root_path / "drafts" / draft.id).resolve())
+                        if not path.is_file():
+                            raise ValueError("media_missing")
+                    except ValueError as exc:
+                        db.rollback()
+                        raise AgentCreationDraftValidationError("draft_media_not_owned") from exc
+                if field in persona.PERSONA_PROMPT_SAFETY_FIELDS:
+                    _ensure_draft_prompt_safety(cleaned, field_name=field)
+                setattr(draft, field, cleaned)
+        db.commit()
+        db.refresh(draft)
+    except Exception:
+        db.rollback()
+        raise
     return _draft_read(draft)
+
+
+def cancel_draft(db: Session, draft, revision: int | None, *, workflows):
+    """The same CAS as registration decides which final state wins."""
+    if draft.contract_version < 2:
+        raise AgentCreationDraftValidationError("이전 초안은 먼저 새 등록 방식으로 이어가주세요.")
+    if draft.status in {"completed", "cancelled"}:
+        return _draft_read(draft)
+    try:
+        claimed = db.execute(update(models.AgentCreationDraft).where(
+            models.AgentCreationDraft.id == draft.id,
+            models.AgentCreationDraft.revision == revision,
+            models.AgentCreationDraft.status == "editing",
+        ).values(status="cancelled", revision=models.AgentCreationDraft.revision + 1)
+            .execution_options(synchronize_session="fetch"))
+        if claimed.rowcount != 1:
+            db.rollback()
+            db.refresh(draft)
+            if draft.status in {"completed", "cancelled"}:
+                return _draft_read(draft)
+            raise AgentCreationDraftHandleConflictError("draft_revision_conflict")
+        db.execute(delete(models.CharacterCardSource).where(
+            models.CharacterCardSource.draft_id == draft.id,
+            models.CharacterCardSource.character_id.is_(None)))
+        draft.avatar_temp_url = draft.banner_temp_url = None
+        db.commit()
+        db.refresh(draft)
+    except Exception:
+        db.rollback()
+        raise
+    # Never remove files before the cancellation transaction commits. If the
+    # filesystem is unavailable, the existing expiry cleanup retries later.
+    try:
+        workflows.delete_draft_media(draft.id)
+    except OSError:
+        logger.warning("cancelled draft media cleanup pending: draft_id=%s", draft.id)
+    return _draft_read(draft)
+
+
+def claim_edit(db: Session, draft, revision: int | None) -> None:
+    result = db.execute(update(models.AgentCreationDraft).where(
+        models.AgentCreationDraft.id == draft.id,
+        models.AgentCreationDraft.revision == revision,
+        models.AgentCreationDraft.status == "editing",
+    ).values(revision=models.AgentCreationDraft.revision + 1,
+             expires_at=datetime.now(UTC) + timedelta(days=7)).execution_options(synchronize_session="fetch"))
+    if result.rowcount != 1:
+        db.rollback()
+        raise AgentCreationDraftHandleConflictError("draft_revision_conflict")
 
 
 async def enhance_persona(
@@ -130,6 +186,8 @@ async def enhance_persona(
     *, workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftRead:
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
+    if draft.contract_version >= 2:
+        raise AgentCreationDraftValidationError("AI 설정은 등록 후 활동 준비에서 진행해주세요.")
     _ensure_not_in_cooldown(draft.persona_enhance_available_at)
     api_key = workflows.decrypt_api_key(draft)
     raw_text = await workflows.run_llm(
@@ -172,83 +230,50 @@ def complete_draft(
 ) -> schemas.AgentDetailRead:
     data = data or schemas.AgentCreationDraftComplete()
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
-    name = draft.name.strip()
-    handle = draft.handle.strip() if draft.handle else None
-    if not name:
-        raise AgentCreationDraftValidationError("이름을 입력해주세요.")
-    if name_policy.is_blocked_name(name):
-        raise AgentCreationDraftValidationError("사용할 수 없는 닉네임입니다.")
-    if handle and name_policy.is_blocked_name(handle):
-        raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
-    if not draft.personality.strip():
-        raise AgentCreationDraftValidationError("성격을 입력해주세요.")
-    _ensure_draft_persona_prompt_safety(
-        {
-            "personality": draft.personality,
-            "speech_style": draft.speech_style,
-            "worldview": draft.worldview,
-            "topic_preferences": draft.topic_preferences,
-            "safety_rules": draft.safety_rules,
-        }
-    )
-    api_key = workflows.decrypt_api_key(draft)
-    create_data = schemas.AgentCreate(
-        name=name,
-        handle=handle,
-        one_liner=draft.one_liner.strip(),
-        personality=draft.personality.strip(),
-        speech_style=draft.speech_style.strip(),
-        worldview=draft.worldview.strip(),
-        topic_preferences=draft.topic_preferences.strip(),
-        safety_rules=draft.safety_rules.strip(),
-        provider=draft.provider,
-        model=draft.model,
-        thinking_level=draft.thinking_level,  # type: ignore[arg-type]
-        api_key=api_key,
-        activity_interval_minutes=data.activity_interval_minutes,
-        active_hours_start=data.active_hours_start,
-        active_hours_end=data.active_hours_end,
-        promotion_usage_allowed=data.promotion_usage_allowed,
-    )
-    detail = workflows.create_character(db, user, create_data)
-    character = db.get(models.Character, detail.character.id)
-    if character is not None:
-        if draft.avatar_temp_url:
-            character.avatar_url = workflows.promote_media(
-                character_id=character.id,
-                media_type="avatar",
-                draft_media_url=draft.avatar_temp_url,
-            )
-        if draft.banner_temp_url:
-            character.banner_url = workflows.promote_media(
-                character_id=character.id,
-                media_type="banner",
-                draft_media_url=draft.banner_temp_url,
-            )
+    if draft.contract_version >= 2:
+        if workflows.register_draft is None:
+            raise AgentCreationDraftValidationError("registration_workflow_required")
+        return workflows.register_draft(db, user, draft, data)
+    raise AgentCreationDraftValidationError("이전 초안은 새 등록 방식으로 이어간 뒤 완료해주세요.")
+
+
+def adopt_legacy_draft(db, user, draft_id, data: schemas.AgentCreationDraftAdopt, *, workflows):
+    draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
+    if workflows.resolve_target is None:
+        raise AgentCreationDraftValidationError("creation_target_resolver_required")
+    target = workflows.resolve_target(db, user, data.target_world_id)
+    if draft.contract_version >= 2:
+        if draft.target_world_id != target:
+            raise AgentCreationDraftHandleConflictError("draft_target_conflict")
+        return _draft_read(draft)
+    try:
+        claim_edit(db, draft, data.revision)
+        draft.contract_version = 2
+        draft.target_world_id = target
+        draft.source_kind = "direct"
+        # Keep legacy encrypted material in its private row, but never attach it
+        # to the newly registered character. Preparation requires explicit setup.
         db.commit()
-    _delete_profile_image_candidates_for_draft(db, draft, workflows=workflows)
-    workflows.delete_draft_media(draft.id)
-    db.delete(draft)
-    db.commit()
-    return workflows.read_character(db, user, detail.character.id)
+        db.refresh(draft)
+    except Exception:
+        db.rollback()
+        raise
+    return _draft_read(draft)
 
 
 def _get_owned_draft(
     db: Session, user: CharacterOwner, draft_id: str,
     *, workflows: CreatorWorkflows,
 ) -> models.AgentCreationDraft:
-    _cleanup_expired_drafts(db, workflows=workflows)
     draft = db.get(models.AgentCreationDraft, draft_id)
     if draft is None or draft.user_id != user.id:
         raise AgentCreationDraftNotFoundError(draft_id)
     expires_at = draft.expires_at
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=UTC)
-    if expires_at <= datetime.now(UTC):
-        _delete_profile_image_candidates_for_draft(db, draft, workflows=workflows)
-        workflows.delete_draft_media(draft.id)
-        db.delete(draft)
-        db.commit()
+    if draft.status != "completed" and expires_at <= datetime.now(UTC):
+        # Ownership reads never mutate data or delete media. Explicit lifecycle
+        # cleanup retains responsibility for expired, unregistered drafts.
         raise AgentCreationDraftExpiredError(draft_id)
     return draft
 
@@ -260,7 +285,7 @@ def _cleanup_expired_drafts(db: Session,
     expired = list(
         db.scalars(
             select(models.AgentCreationDraft)
-            .where(models.AgentCreationDraft.expires_at <= now)
+            .where(models.AgentCreationDraft.expires_at <= now, models.AgentCreationDraft.status != "completed")
             .limit(20)
         )
     )
@@ -268,6 +293,17 @@ def _cleanup_expired_drafts(db: Session,
         return
     for draft in expired:
         try:
+            if draft.contract_version >= 2:
+                claimed = db.execute(update(models.AgentCreationDraft).where(
+                    models.AgentCreationDraft.id == draft.id,
+                    models.AgentCreationDraft.status.in_(["editing", "cancelled"]),
+                    models.AgentCreationDraft.expires_at <= now,
+                ).values(status="expiring").execution_options(synchronize_session="fetch"))
+                if claimed.rowcount != 1:
+                    db.rollback()
+                    continue
+            if draft.contract_version >= 2:
+                db.execute(delete(models.CharacterCardSource).where(models.CharacterCardSource.draft_id == draft.id, models.CharacterCardSource.character_id.is_(None)))
             _delete_profile_image_candidates_for_draft(db, draft, workflows=workflows)
             workflows.delete_draft_media(draft.id)
             db.delete(draft)

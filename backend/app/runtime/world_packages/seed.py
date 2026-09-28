@@ -136,6 +136,7 @@ class SqlAlchemyWorldPackageDestinationSeed:
                 if world_data.banner_asset_ref is not None
                 else None
             ),
+            icon_media_id=asset_urls.get(world_data.extensions.get("angmoo.world-icon.v1", {}).get("asset_ref")),
             banner_alt_text=world_data.banner_alt_text,
             allow_system_roles=True,
         )
@@ -172,6 +173,7 @@ class SqlAlchemyWorldPackageDestinationSeed:
                     personality=item.personality,
                     speech_style=item.speech_style,
                     worldview=item.worldview,
+                    character_background=getattr(item, "character_background", ""),
                     topic_preferences=(item.topic_preferences,) if isinstance(item.topic_preferences, str) else tuple(item.topic_preferences),
                     safety_rules=(item.safety_rules,) if isinstance(item.safety_rules, str) else tuple(item.safety_rules),
                     persona_summary=item.persona_summary,
@@ -213,6 +215,8 @@ class SqlAlchemyWorldPackageDestinationSeed:
                     access_scope=tuple(item.access_scope),
                 ),
             )
+            from app.domains.world_characters.models import CharacterWorldBinding
+            self._db.add(CharacterWorldBinding(character_id=character_id, world_id=world_outcome.world.id))
             mappings.append(
                 WorldPackageImportIdMapping(
                     source_ref=f"world-characters/{_local_ref(item.character_ref)}",
@@ -222,6 +226,7 @@ class SqlAlchemyWorldPackageDestinationSeed:
             )
 
         mappings.extend(
+            # The package creates new identities; it never adopts an existing social history.
             WorldPackageImportIdMapping(
                 source_ref=item.source_ref,
                 entity_kind="asset",

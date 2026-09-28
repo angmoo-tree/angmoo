@@ -18,10 +18,13 @@ from app.domains.world_characters.exceptions import WorldCharacterContractError
 from app.domains.world_characters.schemas import setup as schemas
 from app.domains.world_characters import models
 from app.domains.world_characters.models import WorldCharacter
+from app.domains.characters.service.prompt_persona import PERSONA_INTERPRETATION
 
 
 CHARACTER_CONTRACT_VERSION = "p2-character-contract-v1"
 WORLD_CHARACTER_GENERATOR_VERSION = "p2-world-character-generator-v1"
+CURRENT_CHARACTER_CONTRACT_VERSION = "p2-character-contract-v2"
+CURRENT_WORLD_CHARACTER_GENERATOR_VERSION = "p2-world-character-generator-v2"
 REPERTOIRE_SCHEMA_VERSION = 1
 NEAR_DUPLICATE_JACCARD_THRESHOLD = 0.88
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
@@ -46,11 +49,11 @@ def canonical_sha256(value: Any) -> str:
     return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
 
 
-def build_character_contract(character: Character) -> dict[str, Any]:
-    """Return the stable, owner-safe Character identity used by P2 generation."""
-
-    return {
-        "contract_version": CHARACTER_CONTRACT_VERSION,
+def _build_character_contract_for_version(character: Character, version: int) -> dict[str, Any]:
+    if version not in {1, 2}:
+        raise ValueError("unsupported_character_contract_version")
+    result = {
+        "contract_version": CHARACTER_CONTRACT_VERSION if version == 1 else CURRENT_CHARACTER_CONTRACT_VERSION,
         "character_id": character.id,
         "name": _canonical_text(character.name),
         "one_liner": _canonical_text(character.one_liner),
@@ -61,10 +64,44 @@ def build_character_contract(character: Character) -> dict[str, Any]:
         "safety_rules": _canonical_text(character.safety_rules),
         "persona_summary": _canonical_text(character.persona_summary),
     }
+    if version == 2:
+        result["character_background"] = _canonical_text(getattr(character, "character_background", ""))
+    return result
+
+
+def build_character_contract(character: Character) -> dict[str, Any]:
+    """Return the current owner-safe Character identity for P2 generation."""
+    return _build_character_contract_for_version(character, 2)
+
+
+def legacy_build_character_contract(character: Character) -> dict[str, Any]:
+    """Reconstruct a v1 hash input for an already persisted approval."""
+    return _build_character_contract_for_version(character, 1)
 
 
 def character_contract_hash(character: Character) -> str:
     return canonical_sha256(build_character_contract(character))
+
+
+def legacy_character_contract_hash(character: Character) -> str:
+    """Read a persisted v1 approval without changing its frozen hash input."""
+    return canonical_sha256(legacy_build_character_contract(character))
+
+
+def character_contract_hash_for_version(character: Character, version: int) -> str:
+    if version == 1:
+        return legacy_character_contract_hash(character)
+    if version == 2:
+        return character_contract_hash(character)
+    raise ValueError("unsupported_character_contract_version")
+
+
+def character_hash_for_record(character: Character, record: object) -> str:
+    """Compare a persisted v1 approval with its original, frozen contract."""
+    old = getattr(record, "generator_version", "") == "p2-world-character-generator-v1"
+    if old and not getattr(character, "character_background", ""):
+        return legacy_character_contract_hash(character)
+    return character_contract_hash(character)
 
 
 def build_world_character_generation_input(
@@ -75,14 +112,33 @@ def build_world_character_generation_input(
     previous_candidate_signatures: list[str] | None = None,
     recent_execution_signatures: list[str] | None = None,
 ) -> dict[str, Any]:
+    return build_world_character_generation_input_for_version(
+        character=character,
+        world_character=world_character,
+        world_context=world_context,
+        previous_candidate_signatures=previous_candidate_signatures,
+        recent_execution_signatures=recent_execution_signatures,
+        version=2,
+    )
+
+
+def build_world_character_generation_input_for_version(
+    *,
+    character: Character,
+    world_character: WorldCharacter,
+    world_context: schemas.WorldGenerationContextRead,
+    previous_candidate_signatures: list[str] | None = None,
+    recent_execution_signatures: list[str] | None = None,
+    version: int,
+) -> dict[str, Any]:
     """Build the sanitized input shared by the two logical provider calls."""
 
     role = next(
         (item for item in world_context.roles if item.key == world_character.role_key),
         None,
     )
-    return {
-        "character": build_character_contract(character),
+    result = {
+        "character": _build_character_contract_for_version(character, version),
         "world": world_context.model_dump(mode="json"),
         "world_character": {
             "world_character_id": world_character.id,
@@ -101,6 +157,9 @@ def build_world_character_generation_input(
             )[:40],
         },
     }
+    if version == 2:
+        result["persona_interpretation"] = PERSONA_INTERPRETATION
+    return result
 
 
 def _canonicalize_local_profile(value: Mapping[str, Any]) -> dict[str, Any]:

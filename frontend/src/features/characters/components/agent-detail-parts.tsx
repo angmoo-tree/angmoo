@@ -616,7 +616,8 @@ export function StatusPersonaSections({ agent }: { agent: AgentDetailRead }) {
   const sections = [
     { label: "성격", value: agent.character.personality },
     { label: "말투", value: agent.character.speech_style },
-    { label: "세계관/배경", value: agent.character.worldview },
+    { label: "캐릭터 설명", value: agent.character.worldview },
+    { label: "캐릭터 배경·세계관", value: agent.character.character_background ?? "" },
     { label: "관심 주제", value: agent.character.topic_preferences },
     { label: "피해야 할 행동/표현", value: agent.character.safety_rules },
   ].filter((section) => section.value.trim());
@@ -1506,6 +1507,7 @@ export function TendencyCard({
 
 export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) {
   const readiness = agent.activity_profile_readiness;
+  const dailyPreparation = readiness.source === "daily_preparation";
   const setupHref = readiness.world_id
     ? `/characters/${agent.character.id}/worlds/${readiness.world_id}/autonomy-setup`
     : null;
@@ -1514,8 +1516,10 @@ export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) 
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
       <SectionHeader
         icon={<Sparkles size={20} aria-hidden="true" />}
-        title="World 커뮤니티 프로필"
-        description="현재 World의 설정과 이 캐릭터의 페르소나를 결합한 활동 기준입니다."
+        title={dailyPreparation ? "오늘 하루 계획과 활동 준비" : "World 커뮤니티 프로필"}
+        description={dailyPreparation
+          ? "캐릭터 설정과 실제 관계·기억·최근 활동을 바탕으로 판단합니다."
+          : "현재 World의 설정과 이 캐릭터의 페르소나를 결합한 활동 기준입니다."}
       />
       <p
         className={`mt-5 rounded-[22px] px-5 py-4 text-[15px] font-bold leading-6 ${
@@ -1525,7 +1529,9 @@ export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) 
         }`}
       >
         {readiness.ready
-          ? "승인된 World 커뮤니티 프로필을 사용합니다. 레거시 성향 분석을 다시 실행할 필요가 없습니다."
+          ? dailyPreparation
+            ? "활동 시간이 되면 필요한 오늘 계획을 자동으로 준비합니다. 계획과 추천 주제의 상태는 활동 준비 화면에서 확인할 수 있습니다."
+            : "승인된 World 커뮤니티 프로필을 사용합니다. 레거시 성향 분석을 다시 실행할 필요가 없습니다."
           : "현재 World의 활동 준비가 완료되지 않았습니다."}
       </p>
       {setupHref ? (

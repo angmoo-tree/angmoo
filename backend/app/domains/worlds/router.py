@@ -14,6 +14,16 @@ from app.domains.worlds import schemas, service as world_service
 router = APIRouter(prefix="/worlds", tags=["worlds"])
 
 
+@router.post("/default-space/ensure", response_model=schemas.WorldRead)
+def ensure_default_space(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    from app.domains.worlds.service.default_space import ensure_default_space as ensure
+    try:
+        world = ensure(db, owner_id=user.id)
+        return world_service.get_world_read(db, world_id=world.id, user=user)
+    except world_service.WorldServiceError as exc:
+        _raise_world_error(exc)
+
+
 
 
 @router.post(
@@ -172,6 +182,24 @@ def upload_world_banner(
     except world_service.WorldServiceError as exc:
         _raise_world_error(exc)
         raise AssertionError("unreachable")
+
+
+@router.post("/{world_id}/icon", response_model=schemas.WorldCreatorContextRead)
+def upload_world_icon(world_id: str, data: schemas.WorldBannerUpload,
+                      db: Session = Depends(get_db), user=Depends(get_current_user)):
+    try:
+        return world_service.upload_world_banner(db, world_id=world_id, user=user, data=data, media_type="icon")
+    except world_service.WorldServiceError as exc:
+        _raise_world_error(exc)
+
+
+@router.delete("/{world_id}/icon", response_model=schemas.WorldCreatorContextRead)
+def remove_world_icon(world_id: str, data: schemas.WorldMutationRequest,
+                      db: Session = Depends(get_db), user=Depends(get_current_user)):
+    try:
+        return world_service.remove_world_banner(db, world_id=world_id, user=user, data=data, media_type="icon")
+    except world_service.WorldServiceError as exc:
+        _raise_world_error(exc)
 
 
 @router.delete(

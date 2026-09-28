@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pydantic import ValidationError
-from app.domains.world_packages.schemas.content_v2 import CharactersDocumentV2, upgrade_character
+from app.domains.world_packages.schemas.content_v3 import CharactersDocumentV3, upgrade_character_v3
 
 from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
@@ -145,15 +145,21 @@ class ExportWorldPackage:
         resolved = self._assets.resolve_export_assets(
             candidates=snapshot.media_candidates
         )
+        from app.domains.world_packages.contracts.world_icon import WORLD_ICON_EXTENSION
+        extensions = dict(snapshot.world.extensions)
+        icon = resolved.reference_for("world:icon")
+        if icon:
+            extensions[WORLD_ICON_EXTENSION] = {"asset_ref": icon}
         world = snapshot.world.model_copy(
             update={
                 "banner_asset_ref": resolved.reference_for("world:banner"),
+                "extensions": extensions,
             }
         )
-        characters = CharactersDocumentV2(
-            schema_version="characters-content-v2",
+        characters = CharactersDocumentV3(
+            schema_version="characters-content-v3",
             characters=[
-                upgrade_character(item).model_copy(
+                upgrade_character_v3(item).model_copy(
                     update={
                         "avatar_asset_ref": resolved.reference_for(
                             f"{item.ref}:avatar"

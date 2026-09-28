@@ -431,6 +431,7 @@ def _preview_payload(preview: WorldPackageImportPreview) -> dict[str, object]:
         "world_name": preview.world_name,
         "world_tagline": preview.world_tagline,
         "character_names": list(preview.character_names),
+        "character_settings": list(preview.character_settings),
         "role_count": preview.role_count,
         "place_count": preview.place_count,
         "rule_count": preview.rule_count,

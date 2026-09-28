@@ -67,7 +67,7 @@ class DailyActivityPlanItemRead(WorldActivityRuntimeSchema):
     selected_candidate_id: str | None = None
     candidate_signature: str | None = None
     candidate_ordinal: int | None = None
-    origin_type: Literal["repertoire", "joint_activity"] = "repertoire"
+    origin_type: Literal["repertoire", "joint_activity", "daily_generation"] = "repertoire"
     supersedes_plan_item_id: str | None = None
     is_user_pinned: bool = False
     activity_kind: str
@@ -91,7 +91,9 @@ class DailyActivityPlanRead(WorldActivityRuntimeSchema):
     local_date: date
     timezone_name: str
     timezone_contract_version: str
-    repertoire_id: str
+    repertoire_id: str | None
+    generation_source: str = "repertoire"
+    preparation_contract_version: str = "repertoire-v1"
     world_definition_hash: str
     character_definition_hash: str
     repertoire_contract_version: str

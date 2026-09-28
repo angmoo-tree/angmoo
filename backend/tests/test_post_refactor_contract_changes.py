@@ -94,6 +94,15 @@ def test_assertion_chain_checks_every_transition_and_exact_final_state():
     assert changes.assertions("test.py::test_change", Counter(["v9", "safety"]), final, records) == final
     assert changes.assertions("test.py::test_change", Counter(["v10", "safety"]), final, records) == final
     assert changes.assertions("test.py::test_change", final, final, records) == final
+    # A newer introduction can add safety predicates before a reviewed change.
+    # The older frozen subset still requires the complete final evidence.
+    assert changes.assertions("test.py::test_change", Counter(["v9"]), final, records) == final
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9"]), Counter(["v11"]), records)
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "v9"]), final, records)
+    with pytest.raises(ValueError, match="before/after"):
+        changes.assertions("test.py::test_change", Counter(["v9", "unknown"]), final, records)
     with pytest.raises(ValueError, match="before/after"):
         changes.assertions("test.py::test_change", Counter(["v9", "safety"]), Counter(["v11"]), records)
     broken = deepcopy(records)

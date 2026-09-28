@@ -8,7 +8,7 @@ def get_image_generation_setting(
     return db.get(models.AgentImageGenerationSetting, character_id)
 
 def ensure_image_generation_setting(
-    db: Session, character_id: str
+    db: Session, character_id: str, *, commit: bool = True
 ) -> models.AgentImageGenerationSetting:
     setting = get_image_generation_setting(db, character_id)
     if setting is not None:
@@ -30,8 +30,11 @@ def ensure_image_generation_setting(
         visual_identity_source_hash=None,
     )
     db.add(setting)
-    db.commit()
-    db.refresh(setting)
+    if commit:
+        db.commit()
+        db.refresh(setting)
+    else:
+        db.flush()
     return setting
 
 def clear_image_visual_identity(

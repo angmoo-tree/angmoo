@@ -44,6 +44,9 @@ def delete_setup_data_for_characters(
     if not world_character_ids:
         return
 
+    from app.domains.routines.models.preparation import ActivityPreparationJob
+    db.execute(delete(ActivityPreparationJob).where(ActivityPreparationJob.world_character_id.in_(world_character_ids)))
+
     affected_worlds = select(_model_WorldCharacter.world_id).where(_model_WorldCharacter.id.in_(world_character_ids))
     db.execute(update(RecommendationCatalog).where(RecommendationCatalog.world_id.in_(affected_worlds)).values(version=RecommendationCatalog.version + 1))
     db.execute(update(RecommendationCatalog).where(RecommendationCatalog.key_world_character_id.in_(world_character_ids)).values(key_world_character_id=None))

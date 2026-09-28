@@ -107,6 +107,7 @@ class WorldPackageImportPreview:
     warnings: tuple[str, ...]
     blocking_issues: tuple[str, ...]
     expires_at: datetime
+    character_settings: tuple[dict[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

@@ -86,7 +86,15 @@ def evaluate(
             reason_code="world_scope_not_ready",
             **base,
         )
+    from app.config import settings
+    if settings.DAILY_PREPARATION_ENABLED:
+        role = world_entry.find_autonomous_entry_role(db, world_id=world.id, role_key=world_character.role_key)
+        return schemas.AgentActivityProfileReadinessRead(
+            ready=role is not None and world_character.control_mode == "autonomous",
+            source="daily_preparation", world_id=world.id, world_character_id=world_character.id,
+            reason_code=None if role else "world_reference_invalid")
     repertoire = db.scalar(
+        # Historical policy below remains readable while rollout is withheld.
         select(models.WorldActivityRepertoire)
         .where(
             models.WorldActivityRepertoire.world_character_id == world_character.id,

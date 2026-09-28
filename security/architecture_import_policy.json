@@ -67,6 +67,7 @@
     ],
     "modules": [],
     "entries": [
+      "app.domains.characters.service.prompt_persona",
       "app.domains.character_lore.contracts",
       "app.domains.character_lore.schemas",
       "app.domains.character_lore.service.documents",

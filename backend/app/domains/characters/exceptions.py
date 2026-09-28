@@ -30,6 +30,10 @@ class InvalidProfileMediaError(AgentServiceError):
 class PromptInjectionDetectedError(AgentServiceError):
     pass
 
+
+class AgentPersonaValidationError(AgentServiceError):
+    pass
+
 class AgentExecutionModeError(AgentServiceError):
     pass
 

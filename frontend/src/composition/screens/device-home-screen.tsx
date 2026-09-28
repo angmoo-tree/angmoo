@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { DeviceHome } from "@/features/device-home/components/device-home";
+import { ensureDefaultSpace } from "@/features/worlds/api/worlds";
 import { getProductRuntimeState } from "@/features/runtime-status/api/runtime-status-client";
 import { RuntimeStatusSummary } from "@/features/runtime-status/components/runtime-status-summary";
 import type { ProductRuntimeState } from "@/features/runtime-status/types/runtime-status";
@@ -24,7 +25,7 @@ export function DeviceHomeScreen() {
   }, [status]);
   return (
     <DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>
-      <DeviceHome authStatus={status} />
+      <DeviceHome authStatus={status} ensureDefaultSpace={ensureDefaultSpace} />
     </DeviceHomeShell>
   );
 }

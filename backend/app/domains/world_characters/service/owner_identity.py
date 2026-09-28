@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -25,6 +25,7 @@ from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
+from app.domains.world_characters.exceptions import OwnerProfileSelectionRequiredError
 from app.domains.worlds.service import (
     WorldServiceError,
     get_active_membership,
@@ -36,6 +37,76 @@ from app.domains.worlds.service import (
 class OwnerControlledIdentityService:
     def __init__(self, db: Session) -> None:
         self._db = db
+
+    def ensure(self, *, world_id: str, current_user_id: str):
+        self._require_local_owner(current_user_id)
+        self._require_owned_world_membership(world_id, current_user_id)
+        identities = self.list_identities(world_id=world_id, current_user_id=current_user_id)
+        active = next((identity for identity in identities if identity.status == "active"), None)
+        if active is not None:
+            return active
+        if identities:
+            raise OwnerProfileSelectionRequiredError(world_id)
+        try:
+            return self.create(world_id=world_id, current_user_id=current_user_id,
+                               profile=OwnerControlledProfile("사용자", None, "", None, "", (), ""))
+        except OwnerControlledIdentityConflictError:
+            if self._find_identity(world_id, current_user_id) is None:
+                raise
+            return self.get(world_id=world_id, current_user_id=current_user_id)
+
+    def patch(self, *, world_id: str, current_user_id: str, data):
+        self.get(world_id=world_id, current_user_id=current_user_id)
+        row = self._find_identity(world_id, current_user_id)
+        character = get_character(self._db, row.character_id)
+        changes = data.model_dump(exclude_unset=True, exclude={"version"})
+        from app.domains.characters.service.profile import normalize_character_handle, _ensure_available_handle
+        from app.policies import name_policy
+        if "display_name" in changes and name_policy.is_blocked_name(changes["display_name"]):
+            raise ValueError("사용할 수 없는 이름입니다.")
+        if "handle" in changes and changes["handle"] != character.handle:
+            changes["handle"] = _ensure_available_handle(self._db,
+                normalize_character_handle(changes["handle"]), current_character_id=character.id, allow_suffix=False)
+        from app.config import settings
+        from app.integrations.media.files import media_url_to_path
+        for field in ("avatar_url", "banner_url"):
+            value = changes.get(field)
+            if value and value != getattr(character, field):
+                path = media_url_to_path(value).resolve()
+                path.relative_to((settings.media_root_path / "characters" / character.id).resolve())
+                if not path.is_file():
+                    raise ValueError("profile_media_missing")
+        updated = self._db.execute(update(WorldCharacter).where(
+            WorldCharacter.id == row.id, WorldCharacter.version == data.version,
+        ).values(version=WorldCharacter.version + 1).execution_options(synchronize_session="fetch"))
+        if updated.rowcount != 1:
+            self._db.rollback()
+            raise OwnerControlledIdentityConflictError("profile_version_conflict")
+        for key, value in changes.items():
+            setattr(character, {"display_name": "name", "intro": "one_liner"}.get(key, key), value)
+        try:
+            self._db.commit()
+        except IntegrityError as exc:
+            self._db.rollback()
+            raise OwnerControlledIdentityConflictError("profile_handle_conflict") from exc
+        return self.get(world_id=world_id, current_user_id=current_user_id)
+
+    def upload_media(self, *, world_id: str, current_user_id: str, data):
+        from app.domains.characters.service.media_storage import save_profile_media
+        from app.domains.world_characters.schemas.identity import MyProfilePatch
+        from app.integrations.media.files import media_url_to_path
+        current = self.get(world_id=world_id, current_user_id=current_user_id)
+        if current.version != data.version:
+            raise OwnerControlledIdentityConflictError("profile_version_conflict")
+        url = save_profile_media(character_id=current.character_id, media_type=data.media_type,
+            content_type=data.content_type, data_base64=data.data_base64)
+        try:
+            return self.patch(world_id=world_id, current_user_id=current_user_id,
+                data=MyProfilePatch(version=data.version, **{f"{data.media_type}_url": url}))
+        except Exception:
+            self._db.rollback()
+            media_url_to_path(url).unlink(missing_ok=True)
+            raise
 
     def get(
         self,
@@ -308,6 +379,8 @@ def _snapshot(
         version=world_character.version,
         profile=OwnerControlledProfile(
             display_name=character.name,
+            handle=character.handle,
+            banner_url=character.banner_url,
             avatar_url=character.avatar_url,
             intro=character.one_liner,
             role_key=world_character.role_key,

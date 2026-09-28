@@ -8,8 +8,9 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.domains.characters import models, schemas
-from app.domains.characters.exceptions import CharacterHandleConflictError, InvalidCharacterHandleError
+from app.domains.characters.exceptions import CharacterHandleConflictError, InvalidCharacterHandleError, AgentPersonaValidationError
 from app.domains.characters.contracts import CharacterOwner
+from app.domains.characters.service.prompt_persona import legacy_persona_summary
 
 HANDLE_RE = re.compile(r"^[a-z0-9_]{2,40}$")
 
@@ -108,6 +109,7 @@ def create_character(
         personality=data.personality.strip(),
         speech_style=data.speech_style.strip(),
         worldview=data.worldview.strip(),
+        character_background=data.character_background.strip(),
         topic_preferences=data.topic_preferences.strip(),
         safety_rules=data.safety_rules.strip(),
         status="inactive",
@@ -159,9 +161,13 @@ def update_character_profile(
 def update_character_persona(
     db: Session, character: models.Character, data: schemas.AgentPersonaUpdate
 ) -> models.Character:
+    if character.worldview.strip() and not data.worldview.strip():
+        raise AgentPersonaValidationError("캐릭터 설명을 비울 수 없습니다.")
     character.personality = data.personality.strip()
     character.speech_style = data.speech_style.strip()
     character.worldview = data.worldview.strip()
+    if "character_background" in data.model_fields_set:
+        character.character_background = (data.character_background or "").strip()
     character.topic_preferences = data.topic_preferences.strip()
     character.safety_rules = data.safety_rules.strip()
     character.persona_summary = _build_persona_summary(character)
@@ -171,28 +177,7 @@ def update_character_persona(
 
 
 def _build_persona_summary(character: models.Character) -> str:
-    return "\n".join(
-        part
-        for part in [
-            character.one_liner.strip(),
-            f"성격: {character.personality.strip()}"
-            if character.personality.strip()
-            else "",
-            f"말투: {character.speech_style.strip()}"
-            if character.speech_style.strip()
-            else "",
-            f"세계관: {character.worldview.strip()}"
-            if character.worldview.strip()
-            else "",
-            f"관심 주제: {character.topic_preferences.strip()}"
-            if character.topic_preferences.strip()
-            else "",
-            f"피해야 할 행동: {character.safety_rules.strip()}"
-            if character.safety_rules.strip()
-            else "",
-        ]
-        if part
-    )
+    return legacy_persona_summary(character)
 
 
 def _raise_handle_conflict_from_integrity(exc: IntegrityError, handle: str) -> None:

@@ -83,6 +83,15 @@ def load_ready_search_profile(
     ):
         raise WorldFeedReadinessError("world_scope_not_ready")
     if world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED and world_character.activity_runtime_mode == "routine_resident_v1":
+            from app.domains.social.service.recommendation_topics import character_topics_usable
+            if not character_topics_usable(db, world_id=world.id, source_key=world_character.id):
+                raise WorldFeedReadinessError("recommendation_topics_required")
+            return ReadySearchProfile(world=world, world_character=world_character,
+                membership=membership, character=character, profile=None, keywords=(),
+                avoid_topics=(), action_profile={}, explicit_actions=("like", "comment"),
+                imported_world_runtime_locked=_is_imported_world_runtime_locked(db, references=references, world_character=world_character))
         pair = references.approved_pair(world_character.id)
         if pair is None:
             raise WorldFeedReadinessError("approved_setup_required")
@@ -93,7 +102,7 @@ def load_ready_search_profile(
         profile = references.ready_profile(world_character.id)
         if profile is None:
             raise WorldFeedReadinessError("world_community_profile_not_ready")
-        character_hash = references.character_hash(character)
+        character_hash = references.character_hash_for_record(character, profile)
         if (world_character.character_contract_hash != character_hash
             or world_character.world_contract_hash != world.contract_hash
             or profile.character_contract_hash != character_hash
@@ -156,7 +165,7 @@ def feed_readiness(db: Session, *, references: WorldFeedReferences, world_charac
     except WorldFeedReadinessError as exc:
         return FeedReadinessRead(state="unsupported" if exc.reason_code == "feed_runtime_mode_not_enabled" else "blocked",
                                  reason_code=exc.reason_code, checked_at=checked_at)
-    changed = references.character_hash(profile.character) != profile.profile.character_contract_hash
+    changed = profile.profile is not None and references.character_hash_for_record(profile.character, profile.profile) != profile.profile.character_contract_hash
     disabled = profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled
     return FeedReadinessRead(state="disabled" if disabled else "ready",
         reason_code=("imported_locked" if profile.imported_world_runtime_locked else "autonomy_disabled") if disabled else None,
@@ -192,16 +201,15 @@ def claim_cycle_keywords(
                 raise
     if cursor.world_id != profile.world.id:
         raise WorldFeedReadinessError("world_scope_not_ready")
-    offset = int(cursor.next_keyword_offset)
+    offset = 0 if profile.explicit_actions is not None else int(cursor.next_keyword_offset)
+    keywords = () if profile.explicit_actions is not None else (
+        profile.keywords[offset], profile.keywords[(offset + 1) % KEYWORD_COUNT]) if offset in KEYWORD_OFFSETS else ()
     if offset not in KEYWORD_OFFSETS:
         raise WorldFeedReadinessError("feed_cursor_invalid")
     if cursor.last_cycle_key == cycle_key:
         return KeywordClaim(
             cursor_offset=offset,
-            keywords=(
-                profile.keywords[offset],
-                profile.keywords[(offset + 1) % KEYWORD_COUNT],
-            ),
+            keywords=keywords,
             duplicate_cycle=True,
             previous_summary=(
                 dict(cursor.last_cycle_summary)
@@ -216,10 +224,7 @@ def claim_cycle_keywords(
     db.flush()
     return KeywordClaim(
         cursor_offset=offset,
-        keywords=(
-            profile.keywords[offset],
-            profile.keywords[(offset + 1) % KEYWORD_COUNT],
-        ),
+        keywords=keywords,
         duplicate_cycle=False,
         previous_summary=None,
     )
@@ -236,7 +241,7 @@ def search_world_feed_candidates(
     search_index: SocialSearchIndexPort | None,
     search_state: SocialSearchState,
 ) -> CandidateSearchResult:
-    if profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
+    if profile.explicit_actions is not None or profile.world_character.feed_runtime_mode == "topic_recommendation_v1":
         return references.recommendation_candidates(profile=profile, allowed_policy_actions=allowed_policy_actions, now=now)
     started = time.perf_counter()
     candidate_rows = references.candidate_rows(profile)
@@ -524,12 +529,13 @@ def revalidate_candidate_actions(
     candidate: feed_schemas.WorldFeedCandidateRead,
     allowed_policy_actions: Iterable[str],
 ) -> tuple[Post, list[feed_schemas.FeedAction]] | None:
-    if profile.world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
+    if profile.explicit_actions is not None or profile.world_character.feed_runtime_mode == AUTONOMOUS_FEED_RUNTIME_MODE:
         try:
             current = load_ready_search_profile(db, references=references, world_character_id=profile.world_character.id)
         except WorldFeedReadinessError:
             return None
-        if current.profile.id != profile.profile.id or not current.world_character.autonomous_enabled:
+        if (getattr(current.profile, "id", None) != getattr(profile.profile, "id", None)
+            or current.explicit_actions != profile.explicit_actions or not current.world_character.autonomous_enabled):
             return None
     post = repository.get_post(db, candidate.post_id)
     if (
@@ -643,7 +649,7 @@ def finalize_feed_cycle(
     )
     if cursor is None or cursor.world_id != profile.world.id:
         raise WorldFeedReadinessError("feed_cursor_invalid")
-    cursor.next_keyword_offset = 0 if profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else (
+    cursor.next_keyword_offset = 0 if profile.explicit_actions is not None or profile.world_character.feed_runtime_mode == "topic_recommendation_v1" else (
         claim.cursor_offset + KEYWORDS_PER_CYCLE
     ) % KEYWORD_COUNT
     cursor.last_cycle_summary = summary

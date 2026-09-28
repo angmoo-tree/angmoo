@@ -85,12 +85,47 @@ class OwnerControlledProfileWrite(BaseModel):
 
 class OwnerControlledProfileRead(BaseModel):
     display_name: str
-    avatar_url: str
+    avatar_url: str | None
+    handle: str = ""
+    banner_url: str | None = None
     intro: str
     role_key: str | None
     preferred_address: str
     interests: list[str]
     background: str
+
+
+class MyProfileMediaUpload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    version: int = Field(ge=1)
+    media_type: Literal["avatar", "banner"]
+    content_type: str = Field(max_length=80)
+    data_base64: str = Field(max_length=8_000_000)
+
+
+class MyProfilePatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    version: int = Field(ge=1)
+    display_name: str | None = Field(default=None, min_length=1, max_length=80)
+    handle: str | None = Field(default=None, min_length=2, max_length=40)
+    intro: str | None = Field(default=None, max_length=280)
+    avatar_url: str | None = Field(default=None, max_length=500)
+    banner_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator("avatar_url", "banner_url")
+    @classmethod
+    def validate_media(cls, value):
+        from app.domains.media.schemas import validate_profile_media_reference
+        return validate_profile_media_reference(value)
+
+    @field_validator("display_name", "handle", "intro")
+    @classmethod
+    def text_not_null(cls, value):
+        if value is None:
+            raise ValueError("text_field_cannot_be_null")
+        if not value.strip() and value != "":
+            raise ValueError("text_field_cannot_be_whitespace")
+        return value.strip()
 
 
 class OwnerControlledIdentityRead(BaseModel):

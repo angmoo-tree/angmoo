@@ -12,8 +12,12 @@ export function personalizedActivityTests(staticMode: boolean, bootstrap: (page:
       const pathname = new URL(route.request().url()).pathname;
       if (pathname === `${prefix}/agents/${characterId}`) return route.fulfill({ json: staticAgentDetail(characterId) });
       if (pathname === `${prefix}/worlds/${worldId}`) return route.fulfill({ json: { id: worldId, name: "활동 검증 공간", tagline: "합성 자료", timezone: "Asia/Seoul", roles: [] } });
-      if (pathname === `${prefix}/worlds/${worldId}/characters/${characterId}`) return route.fulfill({ json: { id: actorId, world_id: worldId, character_id: characterId, role_key: null } });
-      if (pathname === `${prefix}/world-characters/${actorId}/autonomy-setup`) return route.fulfill({ json: { state: "not_started", autonomy_ready: false } });
+      if (pathname === `${prefix}/worlds/${worldId}/characters/${characterId}`) return route.fulfill({ json: { id: actorId, world_id: worldId, character_id: characterId, role_key: null, activity_runtime_mode: "routine_resident_v1" } });
+      if (pathname === `${prefix}/world-characters/${actorId}/autonomy-setup`) return route.fulfill({ json: { state: "ready", preparation_contract: "daily-plan-v1", autonomy_ready: true } });
+      if (pathname.endsWith("/daily-preparation")) return route.fulfill({ json: { plan_state: "ready", topic_state: "ready", local_date: "2026-09-28", plan_id: "activity-plan", plan_version: 1, attempt_count: 1 } });
+      if (pathname.endsWith("/activity-plan")) return route.fulfill({ json: { id: "activity-plan", version: 1, local_date: "2026-09-28",
+        items: ["dawn", "morning", "afternoon", "evening"].map(daypart => ({ id: daypart, daypart, title: "합성 일과", activity_seed: "현재 장면 유지", status: "planned" })),
+      } });
       if (pathname.endsWith(`/world-characters/${actorId}/autonomy-setup/preflight`)) return route.fulfill({ json: { profile_max_output_tokens: 0, repertoire_max_output_tokens: 0, credential_ready: false } });
       if (pathname === `${prefix}/worlds/${worldId}/world-characters/${actorId}/activity-runtime`) return route.fulfill({ status: state.status, json: state.status === 200 ? {
         world_id: worldId, world_character_id: actorId, autonomous_enabled: false, control_mode: "autonomous",

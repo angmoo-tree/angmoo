@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from contextlib import closing
 import csv
 from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 import json
 from pathlib import Path
 import shutil
@@ -107,7 +108,9 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
                 "source_revision": source_revision or "unknown",
                 "database_relative_path": db_path.relative_to(data_root).as_posix(),
                 "initial_slots": slots, "event_schema_version": SCHEMA_VERSION,
-                "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024}
+                "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024,
+                "artifact_limit_bytes": 64 * 1024,
+                "artifact_session_limit_bytes": 16 * 1024 * 1024}
     directory = session_path(data_root, session_id)
     directory.mkdir(parents=True, exist_ok=False)
     probe = directory / ".write-probe"
@@ -170,7 +173,7 @@ def _events(directory: Path, session_id: str) -> tuple[list[dict], int]:
             for line in source:
                 try:
                     event = json.loads(line)
-                    if event.get("session_id") == session_id and event.get("schema_version") in {1, 2}:
+                    if event.get("session_id") == session_id and event.get("schema_version") in {1, 2, 3}:
                         events.append(event)
                     else:
                         damaged += 1
@@ -206,8 +209,10 @@ def _canonical_rows(db, manifest: dict, included: set[str]) -> tuple[list[dict],
                      "engine": row["engine"], "status": row["status"], "stage": row["stage"],
                      "started_at": row["started_at"], "finished_at": row["finished_at"],
                      "paths": {lane: {"status": item.get("status"), "public_action_count": item.get("public_action_count", 0),
-                               "recall_status": item.get("recall_status")}
+                               "recall_status": item.get("recall_status"),
+                               "deferred_reason": (item.get("routine_result") or {}).get("reason")}
                                for lane, item in paths.items() if isinstance(item, dict)},
+                     "daily_preparation": {k: v for k, v in (result.get("daily_preparation") or {}).items() if k in {"plan_state", "topic_state", "request_id", "attempt_count", "reason_code", "plan_id", "plan_version", "request_state", "request_reason_code", "local_date"}},
                      "public_action_count": (result.get("publish_result") or {}).get("public_action_count")})
     actor_by_activity = {row["activity_id"]: row["actor_id"] for row in runs}
     for activity_id in sorted(actor_by_activity):
@@ -261,6 +266,18 @@ def _scheduler_rows(db, manifest: dict) -> list[dict]:
     return rows
 
 
+def _preparation_rows(db, manifest):
+    if not db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='activity_preparation_jobs'").fetchone():
+        return []
+    actors = manifest["actor_ids"]
+    if not actors:
+        return []
+    placeholders = ",".join("?" for _ in actors)
+    rows = db.execute(f"SELECT id, world_character_id, local_date, mode, state, request_id, attempt_count, json_retry_count, reason_code, plan_id, plan_version, created_at, updated_at FROM activity_preparation_jobs WHERE world_id=? AND world_character_id IN ({placeholders}) ORDER BY created_at DESC LIMIT 3000", (manifest["world_id"], *actors)).fetchall()
+    return [dict(row) for row in rows if utc(row["updated_at"]) is not None
+            and utc(manifest["started_at"]) <= utc(row["updated_at"]) < deadline(manifest)]
+
+
 def export_session(data_root: Path, session_id: str, *, destination: Path,
                    explicit_db: Path | None = None, now: datetime | None = None) -> dict:
     manifest = read_session(data_root, session_id)
@@ -287,6 +304,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     with closing(_open_readonly(db_path)) as db:
         runs, effects = _canonical_rows(db, manifest, included)
         scheduler_runs = _scheduler_rows(db, manifest)
+        preparations = _preparation_rows(db, manifest)
     errors: list[dict] = []
     call_events = []
     for item in events:
@@ -298,6 +316,59 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
         if item.get("caused_by_event_id"):
             continue  # A lane/parent/activity wrapper of the original failure.
         errors.append(item)
+    request_events = [item for item in events if item.get("event_type") == "request_config"]
+    sqlite_events = [item for item in events if item.get("event_type") == "sqlite_write"]
+    artifact_missing = 0
+    artifact_truncated = 0
+    redactions = 0
+    artifact_valid: dict[str, bytes] = {}
+    for item in request_events:
+        details = item.get("details") or {}
+        redactions += int(details.get("schema_redacted_count") or 0)
+        artifact_status = details.get("artifact_status")
+        if artifact_status == "truncated":
+            artifact_truncated += 1
+        if artifact_status != "stored":
+            if details.get("schema_status") not in {"absent", "unavailable"} and artifact_status != "truncated":
+                artifact_missing += 1
+            continue
+        relative = details.get("artifact_relpath")
+        digest_hex = details.get("artifact_sha256")
+        if (not isinstance(relative, str) or not isinstance(digest_hex, str)
+            or relative != f"artifacts/schemas/{digest_hex}.json"
+            or len(digest_hex) != 64 or any(c not in "0123456789abcdef" for c in digest_hex)):
+            artifact_missing += 1
+            continue
+        path = directory / relative
+        try:
+            if (path.is_symlink() or not path.is_file()
+                or not path.resolve(strict=True).is_relative_to(directory.resolve())
+                or path.stat().st_size > 64 * 1024):
+                artifact_missing += 1
+                continue
+            data = path.read_bytes()
+        except (OSError, ValueError):
+            artifact_missing += 1
+            continue
+        if len(data) != details.get("artifact_bytes") or sha256(data).hexdigest() != digest_hex:
+            artifact_missing += 1
+            continue
+        artifact_valid[relative] = data
+    call_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                  (item.get("details") or {}).get("call_order")) for item in call_events
+                 if item.get("event_type") == "llm_call"}
+    request_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                     (item.get("details") or {}).get("call_order")) for item in request_events}
+    request_evidence_complete = (call_keys <= request_keys and artifact_missing == 0
+        and artifact_truncated == 0) if manifest["schema_version"] >= 3 else "not_recorded_in_schema_version"
+    failures_by_node = {(item.get("activity_id"), item.get("agent_run_id"), item.get("node")): item
+        for item in call_events if item.get("event_type") == "llm_call"
+        and (item.get("details") or {}).get("status") == "error"}
+    for item in errors:
+        call = failures_by_node.get((item.get("activity_id"), item.get("agent_run_id"), item.get("node")))
+        if call is not None:
+            item["provider_call_event_id"] = call.get("event_id")
+            item["provider_error"] = (call.get("details") or {}).get("provider_error")
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for item in errors:
         details = item.get("details") or {}
@@ -387,7 +458,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                  "pending_events": pending, "control_event_count": sum(item.get("event_type") in control_types for item in events),
                  "scheduler_run_count": len(scheduler_runs),
                  "scheduler_statuses": dict(Counter(row["status"] for row in scheduler_runs)),
-                 "complete_recording": manifest["schema_version"] == 2 and tail_elapsed
+                 "request_evidence_complete": request_evidence_complete,
+                 "artifact_missing_count": artifact_missing,
+                 "artifact_truncated_count": artifact_truncated,
+                 "diagnostic_redaction_count": redactions,
+                 "request_evidence_count": len(request_events),
+                 "sqlite_write_event_count": len(sqlite_events),
+                 "complete_recording": manifest["schema_version"] in {2, 3} and tail_elapsed
                      and not stopped_early and flush_complete is True and bool(ticks)
                      and not gaps and not damaged and not dropped and pending == 0,
                 "observed_any_activity": bool(runs),
@@ -396,9 +473,12 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "database_path": str(db_path)}
     _atomic_json(destination / "manifest.json", manifest)
     _jsonl(destination / "runs.jsonl", runs)
+    _jsonl(destination / "preparations.jsonl", preparations)
     _jsonl(destination / "scheduler.jsonl", scheduler_runs)
     _jsonl(destination / "errors.jsonl", errors)
     _jsonl(destination / "calls.jsonl", call_events)
+    _jsonl(destination / "request-evidence.jsonl", request_events)
+    _jsonl(destination / "sqlite-writes.jsonl", sqlite_events)
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
     _atomic_json(destination / "coverage.json", coverage)
@@ -406,6 +486,10 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     events_dir.mkdir(exist_ok=True)
     for path in directory.glob("events-*.jsonl"):
         shutil.copyfile(path, events_dir / path.name)
+    for relative, data in artifact_valid.items():
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
     with (destination / "errors.csv").open("w", encoding="utf-8", newline="") as output:
         columns = ("lane", "node", "error", "validation_code", "field_path", "field_type",
                    "count", "activity_count", "first_at", "last_at")
@@ -418,6 +502,11 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
              f"recorded errors: {len(errors)}; diagnostic events: {len(events)}.",
              f"Recording complete: {'yes' if coverage['complete_recording'] else 'no/unknown'}; "
              f"dropped: {dropped}; damaged lines: {damaged}.", "", "## Lane outcomes", ""]
+    lines.extend(["", "## Request and SQLite diagnostics", "",
+        f"- Request evidence complete: {request_evidence_complete}; request records: {len(request_events)}; "
+        f"missing artifacts: {artifact_missing}; truncated artifacts: {artifact_truncated}.",
+        f"- SQLite write events: {len(sqlite_events)}. Count storage retries separately from provider calls.",
+        "- Generic provider errors without BadRequest fields leave the rejected argument unconfirmed."])
     for lane, statuses in lane_counts.items():
         lines.append(f"- {lane}: {dict(statuses) if statuses else 'NOT_OBSERVED'}")
     lines.extend(["", "## Scheduler attempts", "",

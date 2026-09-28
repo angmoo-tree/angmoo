@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import math
 from time import monotonic
 from typing import Any
@@ -9,6 +10,7 @@ from google import genai
 from google.genai import errors, types
 import httpx
 from pydantic import BaseModel
+from app.providers.diagnostics import schema_evidence
 
 from app.core.redaction import redact_exact_secret_text
 from app.providers.contracts import (
@@ -298,6 +300,29 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
                     )
                 )
         contents = types.Content(role="user", parts=parts)
+    if request.diagnostic_callback is not None:
+        try:
+            config_values = config.model_dump(by_alias=True, exclude_none=True)
+            schema = config_values.get("responseJsonSchema", config_values.get("responseSchema"))
+            request.diagnostic_callback({
+                "capture_boundary": "sdk_input", "model": request.model,
+                "config_keys": list(config_values),
+                "schema_field": "responseJsonSchema" if "responseJsonSchema" in config_values else
+                    "responseSchema" if "responseSchema" in config_values else None,
+                "max_output_tokens": config_values.get("maxOutputTokens"),
+                "response_mime_type": config_values.get("responseMimeType"),
+                "thinking_config": config_values.get("thinkingConfig"),
+                "timeout_ms": max(1, int(request.timeout_seconds * 1000)),
+                "sdk_retry_attempts": request.sdk_attempts,
+                "sdk_retry_status": "explicit" if request.sdk_attempts is not None else "sdk_default_unverified",
+                "system_sha256": hashlib.sha256(request.system_prompt.encode()).hexdigest(),
+                "system_chars": len(request.system_prompt),
+                "user_sha256": hashlib.sha256(request.user_prompt.encode()).hexdigest(),
+                "user_chars": len(request.user_prompt),
+                **schema_evidence(schema),
+            })
+        except Exception:
+            pass  # Observation never changes SDK arguments or provider behavior.
     response = client.models.generate_content(
         model=request.model,
         contents=contents,

@@ -18,6 +18,7 @@ from app.core.redaction import (
     redact_exact_secrets,
     redact_secret_text,
 )
+from app.providers.diagnostics import safe_provider_message, structured_error_evidence
 from app.providers.contracts import (
     JsonRetryDecision, ProviderRequest, ProviderToolCall, ProviderToolDefinition,
     StructuredOutputValidationError,
@@ -572,14 +573,15 @@ def _extract_quota_failure(payload: dict[str, Any], details: Any) -> None:
                 or violation.get("dimensions")
             )
             subject_hash = _hash_provider_subject(violation.get("subject"))
-            if metric and "quota_metric" not in payload:
-                payload["quota_metric"] = _clip_error_text(metric, 240)
-            if quota_id and "quota_id" not in payload:
-                payload["quota_id"] = _clip_error_text(quota_id, 240)
+            if isinstance(metric, str) and re.fullmatch(r"[A-Za-z0-9_./-]{1,240}", metric) and "quota_metric" not in payload:
+                payload["quota_metric"] = metric
+            if isinstance(quota_id, str) and re.fullmatch(r"[A-Za-z0-9_./-]{1,240}", quota_id) and "quota_id" not in payload:
+                payload["quota_id"] = quota_id
             if isinstance(dimensions, dict) and "quota_dimensions" not in payload:
                 payload["quota_dimensions"] = {
-                    _clip_error_text(key, 80) or "unknown": _clip_error_text(value, 160)
-                    for key, value in list(dimensions.items())[:8]
+                    key: value for key, value in dimensions.items()
+                    if key in {"model", "location"} and isinstance(value, str)
+                    and re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", value)
                 }
             if subject_hash and "quota_subject_hash" not in payload:
                 payload["quota_subject_hash"] = subject_hash
@@ -608,15 +610,18 @@ def _extract_retry_delay(payload: dict[str, Any], details: Any, response: Any) -
 
 def _limit_provider_error_payload(payload: dict[str, Any]) -> dict[str, Any]:
     result = {key: value for key, value in payload.items() if value is not None}
-    encoded = json.dumps(result, ensure_ascii=False, sort_keys=True, default=str)
-    if len(encoded.encode("utf-8")) <= _PROVIDER_ERROR_MAX_JSON_BYTES:
+    def fits() -> bool:
+        return len(json.dumps(result, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")) <= _PROVIDER_ERROR_MAX_JSON_BYTES
+    if fits():
         return result
-    if isinstance(result.get("provider_message"), str):
-        result["provider_message"] = result["provider_message"][:240]
-    if isinstance(result.get("quota_dimensions"), dict):
-        result["quota_dimensions"] = dict(list(result["quota_dimensions"].items())[:4])
-    encoded = json.dumps(result, ensure_ascii=False, sort_keys=True, default=str)
-    if len(encoded.encode("utf-8")) <= _PROVIDER_ERROR_MAX_JSON_BYTES:
+    result.pop("quota_dimensions", None)
+    result.pop("provider_message", None)
+    for key in ("field_violations", "error_reasons", "detail_sources"):
+        while isinstance(result.get(key), list) and result[key] and not fits():
+            result[key].pop()
+            result["diagnostic_truncated"] = True
+            result["provider_detail_status"] = "truncated"
+    if fits():
         return result
     return {
         key: value
@@ -632,6 +637,8 @@ def _limit_provider_error_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "quota_subject_hash",
             "retry_delay_seconds",
             "details_present",
+            "provider_detail_status", "field_violations", "error_reasons",
+            "detail_sources", "diagnostic_excluded_count", "diagnostic_truncated",
         }
     }
 
@@ -640,8 +647,9 @@ def provider_error_details(exc: BaseException) -> dict[str, Any] | None:
     details = getattr(exc, "details", None)
     response = getattr(exc, "response", None)
     response_json = _response_json(response)
-    source = details if details is not None else response_json
-    container = _error_container(source)
+    sources = [("exception", details), ("response", response_json)]
+    containers = [_error_container(value) for _, value in sources]
+    container = next((value for value in containers if value.get("code") or value.get("status") or value.get("message")), {})
     code = _safe_int(getattr(exc, "code", None) or container.get("code"))
     status = getattr(exc, "status", None) or container.get("status")
     message = getattr(exc, "message", None) or container.get("message")
@@ -653,17 +661,23 @@ def provider_error_details(exc: BaseException) -> dict[str, Any] | None:
         match = re.search(r"\b([A-Z][A-Z0-9_]{3,})\b", str(exc))
         if match:
             status = match.group(1)
+    safe_message, message_redacted = safe_provider_message(message or str(exc))
+    evidence = structured_error_evidence(sources, unavailable=response is not None and response_json is None)
+    if message_redacted and evidence["provider_detail_status"] == "absent":
+        evidence["provider_detail_status"] = "redacted"
     payload: dict[str, Any] = {
         "provider_error_type": f"{type(exc).__module__}.{type(exc).__name__}",
         "provider_http_status": code,
-        "provider_status": _clip_error_text(status, 120),
-        "provider_message": _clip_error_text(message or str(exc), 500),
-        "details_present": bool(_detail_items(source)),
+        "provider_status": status if isinstance(status, str) and re.fullmatch(r"[A-Z][A-Z0-9_]{1,119}", status) else None,
+        "provider_message": safe_message,
+        "details_present": any(_detail_items(value) for _, value in sources),
+        **evidence,
     }
-    if source is not None:
-        _extract_quota_failure(payload, source)
-        _extract_retry_delay(payload, source, response)
-    elif response is not None:
+    for _, source in sources:
+        if source is not None:
+            _extract_quota_failure(payload, source)
+            _extract_retry_delay(payload, source, response)
+    if not sources or all(value is None for _, value in sources):
         _extract_retry_delay(payload, {}, response)
     if not any(
         payload.get(key)
@@ -765,6 +779,7 @@ async def generate_text(
     require_tool_call: bool = False,
     sdk_attempts: int | None = None,
     on_request_start: Callable[[int], None] | None = None,
+    json_attempt: int | None = None,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
@@ -774,7 +789,7 @@ async def generate_text(
     if tools and not adapter.capabilities.tool_calls:
         raise DirectLlmError("native_tool_calls_unsupported")
 
-    async def _invoke(call_order: int) -> Any:
+    async def _invoke(call_order: int, provider_call_order: int) -> Any:
         if on_request_start is not None:
             on_request_start(call_order)
         request = ProviderRequest(
@@ -791,6 +806,12 @@ async def generate_text(
             tools=tools,
             require_tool_call=require_tool_call,
             sdk_attempts=1 if tools else sdk_attempts,
+            diagnostic_callback=(lambda evidence: tracker._notify("request_config", {
+                **evidence, "node": context.node, "lane": context.lane,
+                "call_order_in_run": call_order,
+                "provider_call_order_in_run": provider_call_order,
+                "json_attempt": json_attempt,
+            })) if tracker.observer is not None else None,
         )
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
@@ -810,11 +831,11 @@ async def generate_text(
             async with credential_semaphore:
                 if semaphore is None:
                     async with asyncio.timeout(timeout_seconds):
-                        response = await _invoke(call_order)
+                        response = await _invoke(call_order, provider_call_order)
                 else:
                     async with semaphore:
                         async with asyncio.timeout(timeout_seconds):
-                            response = await _invoke(call_order)
+                            response = await _invoke(call_order, provider_call_order)
             usage = response.usage.as_direct_llm_usage()
             result = DirectLlmResponse(
                 text=response.text,
@@ -1131,6 +1152,7 @@ async def generate_json(
             on_rate_limit_wait=on_rate_limit_wait,
             sdk_attempts=sdk_attempts,
             on_request_start=request_started,
+            json_attempt=attempt + 1,
         )
         if on_response is not None:
             on_response()

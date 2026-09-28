@@ -74,6 +74,7 @@ export type WorldCharacterSetupRead = {
   world_id: string;
   character_id: string;
   state: WorldSetupState;
+  preparation_contract?: "repertoire-v1" | "daily-plan-v1";
   autonomy_ready: boolean;
   autonomous_enabled: boolean;
   reused: boolean;
@@ -116,6 +117,7 @@ export type WorldCharacterEntryRead = {
   role_key: string | null;
   status: string;
   autonomous_enabled: boolean;
+  activity_runtime_mode: "legacy_resident_v1" | "routine_resident_v1";
   version: number;
   reused: boolean;
 };

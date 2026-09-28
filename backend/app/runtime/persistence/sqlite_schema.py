@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 20
-SOURCE_ALEMBIC_REVISION = "20260924_0098"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 97
-EXPECTED_CANONICAL_TABLE_COUNT = 133
+SQLITE_SCHEMA_VERSION = 23
+SOURCE_ALEMBIC_REVISION = "20260928_0101"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 100
+EXPECTED_CANONICAL_TABLE_COUNT = 138
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 ACTIVITY_V19_TABLES = (
@@ -315,6 +315,9 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    _remove_daily_preparation(metadata)
+    _remove_character_background(metadata)
+    _remove_creator_v21(metadata)
     _remove_activity_schema(metadata)
     _restore_pre_v20_outbox_identity(metadata)
     _remove_relationship_personalization_schema(metadata)
@@ -647,6 +650,77 @@ def _restore_pre_v20_outbox_identity(metadata: MetaData) -> None:
 
 def build_sqlite_v19_metadata() -> MetaData:
     """Last released outbox identity, isolated from the v20 model."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v20_metadata()
     _restore_pre_v20_outbox_identity(metadata)
     return metadata
+
+
+CREATOR_V21_TABLES = ("owner_default_worlds", "character_world_bindings",
+                      "character_card_sources", "character_registration_receipts")
+CREATOR_V21_DRAFT_COLUMNS = ("contract_version", "revision", "target_world_id", "source_kind", "status")
+
+
+def _remove_creator_v21(metadata: MetaData) -> None:
+    for name in CREATOR_V21_TABLES:
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    world = metadata.tables.get("worlds")
+    if world is not None and "icon_media_id" in world.c:
+        world._columns.remove(world.c.icon_media_id)
+    draft = metadata.tables.get("agent_creation_drafts")
+    if draft is not None:
+        for constraint in tuple(draft.constraints):
+            if any(c.name in CREATOR_V21_DRAFT_COLUMNS for c in constraint.columns):
+                draft.constraints.remove(constraint)
+        for name in CREATOR_V21_DRAFT_COLUMNS:
+            if name in draft.c:
+                draft._columns.remove(draft.c[name])
+        draft.c.encrypted_api_key.nullable = False
+
+
+def build_sqlite_v20_metadata() -> MetaData:
+    metadata = build_sqlite_v21_metadata()
+    _remove_creator_v21(metadata)
+    return metadata
+
+
+def build_sqlite_v21_metadata() -> MetaData:
+    """Frozen pre-character-background schema for installed v21 databases."""
+    metadata = build_sqlite_v22_metadata()
+    _remove_character_background(metadata)
+    return metadata
+
+
+def build_sqlite_v22_metadata() -> MetaData:
+    """Frozen schema before date-scoped direct generation."""
+    metadata = build_sqlite_baseline_metadata()
+    _remove_daily_preparation(metadata)
+    return metadata
+
+
+def _remove_daily_preparation(metadata: MetaData) -> None:
+    from sqlalchemy import CheckConstraint
+    if "activity_preparation_jobs" in metadata.tables:
+        metadata.remove(metadata.tables["activity_preparation_jobs"])
+    plan = metadata.tables.get("daily_activity_plans")
+    if plan is not None:
+        for constraint in list(plan.constraints):
+            if constraint.name == "ck_daily_activity_plans_source":
+                plan.constraints.remove(constraint)
+        for key in ("generation_source", "preparation_contract_version"):
+            if key in plan.c:
+                plan._columns.remove(plan.c[key])
+        plan.c.repertoire_id.nullable = False
+    item = metadata.tables.get("daily_activity_plan_items")
+    if item is not None:
+        for constraint in list(item.constraints):
+            if constraint.name == "ck_daily_activity_plan_items_origin":
+                item.constraints.remove(constraint)
+        item.append_constraint(CheckConstraint("origin_type IN ('repertoire','joint_activity')", name="ck_daily_activity_plan_items_origin"))
+
+
+def _remove_character_background(metadata: MetaData) -> None:
+    for name in ("characters", "agent_creation_drafts"):
+        table = metadata.tables.get(name)
+        if table is not None and "character_background" in table.c:
+            table._columns.remove(table.c.character_background)

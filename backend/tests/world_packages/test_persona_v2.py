@@ -6,7 +6,8 @@ import pytest
 from pydantic import ValidationError
 from app.domains.characters.contracts import PERSONA_LIMITS
 from app.domains.characters.schemas import AgentCreationDraftUpdate, AgentProfileUpdate, AgentPersonaUpdate
-from app.domains.world_packages.schemas.content_v2 import AutonomousCharacterTemplateV2
+from app.domains.world_packages.schemas.content_v2 import AutonomousCharacterTemplateV2, upgrade_character
+from app.domains.world_packages.schemas.content_v3 import AutonomousCharacterTemplateV3
 from app.domains.world_packages.schemas.manifest import WorldPackageManifest, WorldPackageLicense
 from app.domains.world_packages.archive.validation import ZipWorldPackageImportValidator
 from app.domains.world_packages.exceptions import WorldPackageContractError, WorldPackageReasonCode
@@ -34,7 +35,7 @@ def test_profile_and_persona_apis_share_limits():
 
 def test_fifty_maximum_personas_export_import_without_loss(tmp_path):
     snapshot = _portable_snapshot()
-    values = {key: "😀" * maximum for key, maximum in PERSONA_LIMITS.items()}
+    values = {key: "😀" * maximum for key, maximum in PERSONA_LIMITS.items() if key != "character_background"}
     characters = tuple(AutonomousCharacterTemplateV2(
         ref=f"characters/bird-{index}", display_name=f"Bird {index}", handle_hint=f"bird_{index}",
         **values, persona_summary="😀" * 32000,
@@ -44,7 +45,7 @@ def test_fifty_maximum_personas_export_import_without_loss(tmp_path):
     exporter = _exporter(_FakeSource(snapshot), _FakeRegistry())
     _, archive = exporter.build(source_world_id=snapshot.source_world_id, local_owner_id="private-owner-id",
         license=WorldPackageLicense(expression="CC-BY-4.0", attribution="Fixture creator"), license_text=None)
-    assert archive.manifest.format_version == 2
+    assert archive.manifest.format_version == 3
     with ZipFile(BytesIO(archive.content)) as zip_file:
         assert 2 * 1024 * 1024 < zip_file.getinfo("content/characters.json").file_size < 32 * 1024 * 1024
         with pytest.raises(ValidationError):
@@ -52,7 +53,34 @@ def test_fifty_maximum_personas_export_import_without_loss(tmp_path):
     store, _, _ = _stage(tmp_path, archive.content)
     imported = ZipWorldPackageImportValidator(store).validate(operation_id=OPERATION_ID)
     assert len(imported.characters.characters) == 50
-    assert imported.characters.characters[0].model_dump() == characters[0].model_dump()
+    assert imported.characters.characters[0].model_dump() == {
+        **characters[0].model_dump(), "character_background": ""
+    }
+
+
+def test_v3_export_import_keeps_description_and_background_separate(tmp_path):
+    snapshot = _portable_snapshot()
+    source = snapshot.characters[0]
+    character = AutonomousCharacterTemplateV3.model_validate({
+        **upgrade_character(source).model_dump(),
+        "worldview": "서점 주인. 책 이야기에 존댓말로 답한다.",
+        "character_background": "이전에는 왕실 기록 보관소에서 일했다.",
+        "personality": "",
+        "speech_style": "",
+    })
+    snapshot = replace(snapshot, characters=(character,))
+    _, archive = _exporter(_FakeSource(snapshot), _FakeRegistry()).build(
+        source_world_id=snapshot.source_world_id, local_owner_id="private-owner-id",
+        license=WorldPackageLicense(expression="CC-BY-4.0", attribution="Fixture creator"),
+        license_text=None,
+    )
+    assert archive.manifest.format_version == 3
+    store, _, _ = _stage(tmp_path, archive.content)
+    imported = ZipWorldPackageImportValidator(store).validate(operation_id=OPERATION_ID)
+    restored = imported.characters.characters[0]
+    assert restored.worldview == character.worldview
+    assert restored.character_background == character.character_background
+    assert restored.personality == restored.speech_style == ""
 
 
 def test_invalid_legacy_persona_produces_safe_field_error():

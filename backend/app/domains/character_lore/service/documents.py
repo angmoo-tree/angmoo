@@ -359,6 +359,7 @@ def build_lore_search_query(
             f"성격: {character.personality or '-'}",
             f"말투: {character.speech_style or '-'}",
             f"세계관/배경: {character.worldview or '-'}",
+            f"캐릭터 배경·세계관: {getattr(character, 'character_background', '') or '-'}",
             f"관심 주제: {character.topic_preferences or '-'}",
             "최근 자기 root 글 topic 이력:",
             recent_topics,

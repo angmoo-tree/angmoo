@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", tuple(range(1, 20)))
+@pytest.mark.parametrize("source_version", tuple(range(1, 22)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -141,8 +141,8 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 20
-    assert fixture["target_table_count"] == 133
+    assert fixture["target_data_version"] == 23
+    assert fixture["target_table_count"] == 138
     if source_version == 8:
         assert fixture["generation"] == (
             "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"

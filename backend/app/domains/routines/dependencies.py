@@ -11,3 +11,7 @@ def get_plan_references(
 ) -> PlanReferences:
     factory: PlanReferencesFactory = request.app.state.routine_plan_references_factory
     return factory(db)
+
+
+def get_daily_preparation(request: Request):
+    return request.app.state.daily_preparation

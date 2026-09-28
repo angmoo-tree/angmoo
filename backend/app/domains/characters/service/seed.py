@@ -41,6 +41,7 @@ def seed_autonomous_character(
     persona = AgentCreationDraftUpdate(
         one_liner=data.one_liner, personality=data.personality,
         speech_style=data.speech_style, worldview=data.worldview,
+        character_background=data.character_background,
         topic_preferences=", ".join(data.topic_preferences),
         safety_rules="\n".join(data.safety_rules),
     )
@@ -66,6 +67,7 @@ def seed_autonomous_character(
         personality=persona.personality,
         speech_style=persona.speech_style,
         worldview=persona.worldview,
+        character_background=persona.character_background,
         topic_preferences=persona.topic_preferences,
         safety_rules=persona.safety_rules,
         status="active",

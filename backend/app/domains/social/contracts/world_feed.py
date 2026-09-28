@@ -134,17 +134,18 @@ class ReadySearchProfile:
     world_character: FeedWorldCharacter
     membership: FeedMembership
     character: FeedCharacter
-    profile: FeedCommunityProfile
+    profile: FeedCommunityProfile | None
     keywords: tuple[str, ...]
     avoid_topics: tuple[str, ...]
     action_profile: dict[str, object]
     imported_world_runtime_locked: bool
+    explicit_actions: tuple[str, ...] | None = None
 
 
 @dataclass(frozen=True)
 class KeywordClaim:
     cursor_offset: int
-    keywords: tuple[str, str]
+    keywords: tuple[str, ...]
     duplicate_cycle: bool
     previous_summary: dict[str, object] | None
 
@@ -176,6 +177,7 @@ class WorldFeedReferences(Protocol):
     def approved_pair(self, world_character_id: str) -> tuple[FeedCommunityProfile, FeedApprovedRepertoire] | None: ...
     def ready_profile(self, world_character_id: str) -> FeedCommunityProfile | None: ...
     def character_hash(self, character: FeedCharacter) -> str: ...
+    def character_hash_for_record(self, character: FeedCharacter, record: object) -> str: ...
     def imported_lineage(self, world_id: str) -> str | None: ...
     def candidate_rows(
         self, profile: ReadySearchProfile

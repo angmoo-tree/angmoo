@@ -59,6 +59,7 @@ class SqlAlchemyWorldSurfaceRepository:
                     w.name,
                     w.tagline,
                     w.banner_media_id,
+                    w.icon_media_id,
                     w.banner_alt_text,
                     w.status,
                     w.visibility,
@@ -99,7 +100,6 @@ class SqlAlchemyWorldSurfaceRepository:
                 [
                     "w.status = 'published'",
                     "w.readiness_status = 'publish_ready'",
-                    "w.visibility IN ('public', 'unlisted')",
                 ]
             )
         else:
@@ -127,6 +127,7 @@ class SqlAlchemyWorldSurfaceRepository:
                     w.name,
                     w.tagline,
                     w.banner_media_id,
+                    w.icon_media_id,
                     w.banner_alt_text,
                     w.status,
                     w.visibility,
@@ -160,11 +161,13 @@ def _surface_item(row) -> WorldSurfaceItem:
         status=str(row["status"]),
         visibility=str(row["visibility"]),
         readiness_status=str(row["readiness_status"]),
+        membership_role=str(row["membership_role"]),
     )
     updated_at = row["updated_at"]
     if isinstance(updated_at, str):
         updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
     return WorldSurfaceItem(
+        icon_media_id=str(row["icon_media_id"]) if row["icon_media_id"] else None,
         world_id=str(row["world_id"]),
         name=str(row["name"]),
         tagline=str(row["tagline"]),

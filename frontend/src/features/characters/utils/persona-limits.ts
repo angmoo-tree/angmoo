@@ -3,6 +3,7 @@ export const PERSONA_LIMITS = {
   personality: 6000,
   speech_style: 4000,
   worldview: 8000,
+  character_background: 8000,
   topic_preferences: 3000,
   safety_rules: 4000,
 } as const;

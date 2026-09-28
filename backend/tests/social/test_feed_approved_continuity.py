@@ -52,6 +52,13 @@ def test_invalid_scope_or_pair_remains_blocked(invalid):
         assert read_feed_status(db, world_character_id=entry.id).readiness.state == "blocked"
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def test_status_is_read_only_and_scope_bound_and_survives_compaction():
     from datetime import datetime, UTC, timedelta
     from app.domains.routines.service.run_results import _stored_gateway_result

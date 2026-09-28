@@ -137,7 +137,7 @@ class WorldPackagePolicy:
 
     @classmethod
     def _validate_entry_size(cls, entry: ArchiveEntryDescriptor, *, format_version: int = 1) -> None:
-        json_limit = cls.MAX_CHARACTERS_JSON_BYTES if format_version == 2 and entry.path == "content/characters.json" else cls.MAX_JSON_ENTRY_BYTES
+        json_limit = cls.MAX_CHARACTERS_JSON_BYTES if format_version >= 2 and entry.path == "content/characters.json" else cls.MAX_JSON_ENTRY_BYTES
         if entry.path == "manifest.json" and entry.uncompressed_bytes > cls.MAX_MANIFEST_BYTES:
             cls._fail(WorldPackageReasonCode.ARCHIVE_LIMIT_EXCEEDED)
         if entry.path.endswith(".json") and entry.uncompressed_bytes > json_limit:

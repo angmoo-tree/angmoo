@@ -41,6 +41,7 @@ def _create_draft_media_tables(engine) -> None:
         models.User.__table__,
         models.SiteOperationSetting.__table__,
         models.Character.__table__,
+        models.World.__table__,
         models.AgentCreationDraft.__table__,
         models.ProfileImageQuotaReservation.__table__,
         models.ProfileImageCandidate.__table__,

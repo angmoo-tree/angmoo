@@ -1,6 +1,7 @@
 """Routine's selected activity, one retrieval, scene planning and canonical publishing."""
 from dataclasses import asdict, replace
 from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 
 from app.contracts.activity_thought import THOUGHT_PROMPT, parse_activity_thought
 from app.domains.routine_posts import schemas
@@ -26,11 +27,12 @@ from app.runtime.routine_posts.sqlalchemy_runtime import prepare_routine_activit
 
 
 class RoutineLane:
-    def __init__(self, ctx, *, actor, tracker, hybrid_service, guard):
+    def __init__(self, ctx, *, actor, tracker, hybrid_service, guard, claim_validator=None):
         self.ctx, self.actor, self.tracker = ctx, actor, tracker
         self.provider = ActivityProvider(ctx, tracker)
         self.retriever = SelectedRecall(hybrid_service, owner_id=ctx.user_id, world_id=actor.world_id, actor_id=actor.id)
         self.scope_guard = guard
+        self.claim_validator = claim_validator
         self.prepared = None
 
     def ports(self):
@@ -66,6 +68,16 @@ class RoutineLane:
         return {}
 
     async def load(self, state):
+        from app.config import settings
+        if settings.DAILY_PREPARATION_ENABLED:
+            from types import SimpleNamespace
+            from app.runtime.daily_preparation import read_preparation
+            status = read_preparation(self.ctx.db, character_id=self.ctx.character.id,
+                world_id=self.actor.world_id, user=SimpleNamespace(id=self.ctx.user_id), now=self.ctx.run_started_at)
+            if status.plan_state != "ready":
+                return {"candidates": [], "lane_data": {"skipped": {
+                    "status": "deferred", "reason": status.reason_code or "daily_plan_pending",
+                    "public_action_count": 0}}}
         from app.runtime.autonomous_activity.routine_resume import freeze_prepared
         prepared = prepare_routine_activity(self.ctx, tracker=self.tracker, observe_inputs=False)
         if isinstance(prepared, dict):
@@ -199,11 +211,17 @@ class RoutineLane:
         from app.runtime.relationships.experience_metrics import apply_pending_metrics
         decision = state["decision"]
         key = identity_key(state["identity"]["activity_id"], "routine", "decision")
+        def write_event(unit):
+            return lambda facts: self.tracker._notify("sqlite_write", {
+                "lane": "routine", "node": "Settle", "unit": unit,
+                "db_kind": "canonical", "business_key_hash": sha256(key.encode()).hexdigest(), **facts})
         manifest = [{**r, "created_at": datetime.fromisoformat(r["created_at"])} for r in state["decision_context"].get("source_manifest", [])]
         stage_sources(self.ctx.db, actor=self.actor, manifest=manifest, raw=decision.get("relationship_metrics"),
-            decision_key=key, now=datetime.fromisoformat(decision["judged_at"]))
+            decision_key=key, now=datetime.fromisoformat(decision["judged_at"]),
+            write_observer=write_event("S1"), scope_validator=self.claim_validator)
         apply_pending_metrics(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
-            source_kind="post", decision_key=key, source_keys={r["post_id"] for r in manifest})
+            source_kind="post", decision_key=key, source_keys={r["post_id"] for r in manifest},
+            write_observer=write_event("S2"))
         if not state.get("executions"):
             return {"settlement": {"state": "not_committed"}}
         result = state["executions"][0]
@@ -215,13 +233,34 @@ class RoutineLane:
         key = identity_key(state["identity"]["activity_id"], "routine", "decision")
         evidence = "routine_beat:" + self.prepared.beat.id
         evidence_keys = {r["post_id"]: identity_key("post", r["post_id"], r["revision"]) for r in manifest}
-        outcome = settle_state(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
-            activity_id=state["identity"]["activity_id"], decision_key=key,
-            expected_version=state["shared_context"]["current_state"]["version"],
-            proposal=StateUpdate.model_validate(decision["state_update"]) if decision["state_update"] else None,
-            judged_at=datetime.fromisoformat(decision["judged_at"]), source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision.get("state_source_refs", [])] or [evidence],
-            valid_source_keys={evidence, *evidence_keys.values()})
-        self.ctx.db.commit()
+        from app.core.sqlite_concurrency import run_sqlite_session_immediate
+        proposal = StateUpdate.model_validate(decision["state_update"]) if decision["state_update"] else None
+        if self.ctx.db.in_transaction():
+            self.ctx.db.commit()
+        def settle_current_state():
+            if self.claim_validator is not None:
+                self.claim_validator()
+            from app.domains.social.models.posts import Post
+            from app.domains.routines.models.plans import ActivityBeat
+            from app.runtime.relationships.experience_metrics import post_revision
+            current_keys = {r["post_id"]: evidence_keys[r["post_id"]] for r in manifest
+                if (post := self.ctx.db.get(Post, r["post_id"], populate_existing=True)) is not None
+                and post.world_id == self.actor.world_id and post.deleted_at is None
+                and post.report_hidden_at is None and post.visibility == "public"
+                and post_revision(post) == r["revision"]}
+            current_beat = self.ctx.db.get(ActivityBeat, self.prepared.beat.id, populate_existing=True)
+            beat_evidence = {evidence} if (current_beat is not None
+                and current_beat.world_id == self.actor.world_id
+                and current_beat.world_character_id == self.actor.id
+                and current_beat.status == "succeeded") else set()
+            return settle_state(self.ctx.db, world_id=self.actor.world_id, actor_id=self.actor.id,
+                activity_id=state["identity"]["activity_id"], decision_key=key,
+                expected_version=state["shared_context"]["current_state"]["version"],
+                proposal=proposal, judged_at=datetime.fromisoformat(decision["judged_at"]),
+                source_keys=[evidence_keys.get(ref, "invalid:" + ref) for ref in decision.get("state_source_refs", [])] or [evidence],
+                valid_source_keys={*beat_evidence, *current_keys.values()})
+        outcome = run_sqlite_session_immediate(self.ctx.db, settle_current_state,
+            require_clean=True, observer=write_event("S3"))
         return {"settlement": {"state": outcome}}
 
     async def finalize(self, state):

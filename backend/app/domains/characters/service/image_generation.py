@@ -47,6 +47,8 @@ async def generate_media(
     creator_workflows: CreatorWorkflows,
 ) -> schemas.AgentCreationDraftMediaGenerationRead:
     draft = draft_lifecycle._get_owned_draft(db, user, draft_id, workflows=creator_workflows)
+    if draft.contract_version >= 2:
+        raise errors.AgentCreationDraftValidationError("이미지 생성은 등록 후 프로필에서 진행해주세요.")
     _cleanup_expired_profile_image_candidates(db, user.id)
     target_media_types = [data.media_type] if data.media_type else ["avatar", "banner"]
     if data.media_type is None:

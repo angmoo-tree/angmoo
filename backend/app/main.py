@@ -365,6 +365,9 @@ def create_app(
     configure_world_package_runtime(runtime_app)
     from app.runtime.routines.composition import configure_routines_runtime
     configure_routines_runtime(runtime_app)
+    from types import SimpleNamespace
+    from app.runtime.daily_preparation import read_preparation, ensure_preparation
+    runtime_app.state.daily_preparation = SimpleNamespace(read=read_preparation, ensure=ensure_preparation)
 
     from app.runtime.chat.message_composition import configure_chat_services
     configure_chat_services(runtime_app)

@@ -5,6 +5,17 @@ useDefault = true
 
 [[allowlists]]
 targetRules = ["generic-api-key"]
+description = "Exact World/card creation credential-form Git blob verified at c62d3bbf; public source provenance, not a credential; reviewed 2026-09-28"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)security/refactor_backend_additions\.json$''',
+  '''(^|/)security/post_refactor_contract_changes\.json$''',
+]
+regexes = ['''^\s*"frontend/src/features/characters/components/activity-credential-form\.tsx": "b8f8669e84cf60c7920a877d76d60460e19b71c0",?\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
 description = "Exact public synthetic G2 cursor compatibility vector fixture, source b5dcdd80; never a runtime credential; reviewed 2026-09-05"
 condition = "AND"
 regexTarget = "line"
