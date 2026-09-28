@@ -359,3 +359,18 @@ def test_daily_runtime_and_repertoire_factory_select_energy_free_state(preparati
         assert states and all(e.current_state_schema_version == 2 for e in states)
         assert all("energy" not in e.current_state_snapshot for e in states)
     engine.dispose()
+
+
+def test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text():
+    from app.runtime.diagnostics.sns_observation import _node_summary, _safe_error, validation_code
+    duplicate = "routine_reuses_published_reply"
+    assert validation_code(duplicate) == duplicate
+    assert validation_code("raw private content") is None
+    assert _safe_error(ValueError(duplicate))["error_code"] == duplicate
+    result = {"decision": {"routine_request": {"output_contract": ENUM_OUTPUT, "state_schema_version": 2},
+        "plan": {"considered_source_event_ids": ["event-a", "event-b"], "used_source_event_ids": ["event-b"],
+                 "scene_brief": "private scene text"}}}
+    summary = _node_summary("DecisionDraft", {}, result)
+    assert summary["routine_output_contract"] == ENUM_OUTPUT and summary["routine_state_schema_version"] == 2
+    assert summary["routine_considered_ids"] == ["event-a", "event-b"] and summary["routine_used_ids"] == ["event-b"]
+    assert "private scene text" not in str(summary)

@@ -42,6 +42,8 @@ _PLANNER_VALIDATION_CODES = frozenset({
     "combined_draft_shape", "combined_draft_target_mismatch", "combined_draft_task_id_forbidden",
     "combined_draft_body_invalid", "combined_routine_draft_missing",
     "writer_duplicate_task", "writer_task_mismatch", "writer_changed_proposal_decision",
+    "routine_reuses_published_reply", "routine_draft_invalid",
+    "routine_request_context_changed",
 })
 _SESSION = re.compile(r"sns-[0-9a-f]{32}\Z")
 
