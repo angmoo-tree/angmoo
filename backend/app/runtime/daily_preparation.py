@@ -26,6 +26,7 @@ from app.domains.routines.service.run_backoff import _runtime_error_backoff
 from app.domains.social.models.topics import RecommendationPreparation, RecommendationTopic, RecommendationTopicSource
 from app.domains.social.service.recommendation_topics import replace_source_topics
 from app.domains.world_characters.service.activity_state import read_state
+from app.domains.world_characters.service.activity_engines import routine_state_version
 from app.domains.worlds.service.generation_context import build_world_generation_context
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.runtime.social.today_activity import today_social_activity_reader
@@ -270,7 +271,8 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
                 prep.state, prep.applied_digest, prep.source_digest = "ready", topic_digest, topic_digest
                 prep.last_code = None
             plan = store.apply_plan(db, scope=scope, output=output.daily_plan, target_date=target,
-                now=current_time, source_digest=digest, expected_snapshot=before)
+                now=current_time, source_digest=digest, expected_snapshot=before,
+                state_schema_version=routine_state_version(db, scope.world_character))
             job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
             job.plan_id, job.plan_version = plan.id, plan.version
             job.applied_snapshot = store.plan_snapshot(db, plan)

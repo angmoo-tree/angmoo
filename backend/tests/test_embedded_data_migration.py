@@ -412,6 +412,9 @@ def _seed_v2_roleless(
                 # v22 adds this column to the still-surviving Character table.
                 # A reconstructed v2 predecessor must not retain it.
                 connection.exec_driver_sql('ALTER TABLE characters DROP COLUMN character_background')
+                # v24 adds an explicit beat state version. This populated
+                # predecessor must retain the exact supported v2 schema.
+                connection.exec_driver_sql('ALTER TABLE activity_beats DROP COLUMN state_schema_version')
                 for name in reversed(ACTIVITY_V19_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)
                 for name in reversed(RELATIONSHIP_V17_TABLES + ("relationship_review_requests",)):

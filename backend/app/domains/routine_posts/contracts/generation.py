@@ -8,7 +8,7 @@ from app.domains.routine_posts.contracts.context import RoutinePostContext
 
 @dataclass(frozen=True)
 class RoutineGeneration:
-    plan: schemas.RoutineBeatPlan
+    plan: schemas.RoutineBeatPlan | schemas.BoundRoutinePlan
     draft: schemas.RoutinePostDraft
     state_after: dict[str, object]
 

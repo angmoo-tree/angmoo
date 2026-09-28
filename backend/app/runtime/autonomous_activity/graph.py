@@ -79,7 +79,8 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
                     raise
                 # A normal Planner already interpreted experience. Keep its
                 # settlement independent of failed public expression.
-                result = {"failure": {"stage": name, "reason": type(exc).__name__}, "drafts": []}
+                code = str(exc) if str(exc) in {"routine_reuses_published_reply", "activity_recovery_exhausted"} else type(exc).__name__
+                result = {"failure": {"stage": name, "reason": code}, "drafts": []}
             trace("node_completed", name, state=state, result=result,
                   stage_attempt_id=stage_attempt_id, duration_ms=int((monotonic() - started) * 1000))
             return result

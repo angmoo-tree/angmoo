@@ -185,8 +185,9 @@ def assemble_routine_post_context(
         previous_beat=previous_beat,
         previous_post=previous_post,
         state_before=activity_state_contracts.validate_state_snapshot(
-            episode.current_state_snapshot
+            episode.current_state_snapshot, schema_version=episode.current_state_schema_version
         ),
+        state_schema_version=episode.current_state_schema_version,
         source_events=selected_events,
         eligible_event_count=eligible_event_count,
         overflow_reason_counts=overflow_reasons,

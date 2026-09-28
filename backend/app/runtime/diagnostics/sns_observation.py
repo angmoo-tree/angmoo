@@ -235,11 +235,17 @@ def _node_summary(name: str, state: dict, result: dict) -> dict:
                 "state_version": numbers((context.get("current_state") or {}).get("version"))}
     if name in {"ActionPlanner", "DecisionDraft"}:
         decision = result.get("decision") or {}
+        request = decision.get("routine_request") or {}
+        plan = decision.get("plan") or {}
         return {"actions": [{"target_id": identifier(d.get("target_id")), "action": code(d.get("action")),
                  "interaction_intent": code(d.get("interaction_intent")), "comment_purpose": code(d.get("comment_purpose"))}
                 for d in (decision.get("decisions") or [])[:3]], "state_status": code(decision.get("state_status")),
                 "state_update_proposed": decision.get("state_update") is not None,
-                "routine_plan_present": decision.get("plan") is not None}
+                "routine_plan_present": decision.get("plan") is not None,
+                "routine_output_contract": code(request.get("output_contract")),
+                "routine_state_schema_version": numbers(request.get("state_schema_version")),
+                "routine_considered_ids": ids(plan.get("considered_source_event_ids")),
+                "routine_used_ids": ids(plan.get("used_source_event_ids"))}
     if name == "ValidateDecision":
         return {"assignment_count": len(result.get("assignments") or []),
                 "task_ids": ids([item.get("task_id") or item.get("beat_id") for item in result.get("assignments") or []])}

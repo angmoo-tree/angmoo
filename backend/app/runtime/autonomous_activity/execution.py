@@ -44,11 +44,15 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     identity = ActivityIdentity(activity_id=run.activity_id, world_id=actor.world_id, actor_id=actor.id,
         contract_version=run.contract_version,
         cause="manual" if "manual" in ctx.session_key else "scheduled", generation_model=ctx.generation_model, thinking_level=ctx.generation_thinking_level).model_dump()
+    policy = (run.result or {}).get("routine_policy")
+    if policy is not None:
+        identity.update(routine_output_contract=policy["output_contract"], routine_state_schema_version=policy["state_schema_version"], routine_thought_policy=policy["thought_policy"])
     if attempt:
         attempt.emit("activity_identity", details={
             "cause": identity["cause"], "contract_version": identity["contract_version"],
             "generation_model": identity["generation_model"],
-            "thinking_level": identity["thinking_level"]})
+            "thinking_level": identity["thinking_level"], "routine_output_contract": identity["routine_output_contract"],
+            "routine_state_schema_version": identity["routine_state_schema_version"], "routine_thought_policy": identity["routine_thought_policy"]})
 
     def validate_claim():
         """Read-only claim fence; also runs inside each fresh writer boundary."""
@@ -65,6 +69,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
         if row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]:
             raise ActivityScopeChangedError("activity_contract_changed")
+        if (row.result or {}).get("routine_policy") != policy:
+            raise ActivityScopeChangedError("routine_policy_changed")
         from app.domains.routines.models import AgentRun, AgentSlot
         from app.domains.world_characters.service.activity_state import utc
         slot = ctx.db.get(AgentSlot, ctx.agent_id, populate_existing=True)
@@ -79,7 +85,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
 
     async def guard(state):
         stored_identity = state.get("identity", identity)
-        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level")):
+        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level", "routine_output_contract", "routine_state_schema_version", "routine_thought_policy")):
             raise ActivityScopeChangedError("activity_identity_or_model_changed")
         ctx.db.expire_all()
         row, slot, now = validate_claim()

@@ -48,20 +48,29 @@ class CombinedGeneration:
             except Exception as exc:
                 raise ActivityRetryGuardError(exc) from exc
         self.provider.request_guard = guard_request
-        if state.get("generation_mode") == "split":
+        mode = state.get("generation_mode")
+        if mode == "split" and not isinstance(self, RoutineLane):
             return await super().write(state)
-        if state.get("generation_mode") != "combined":
+        if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
         raw = state["decision"].get("provisional_draft")
         try:
+            if mode == "split":
+                return await super().write(state)
             if isinstance(self, RoutineLane):
                 drafts = [parse_routine_draft(raw)]
+                self.validate_original_draft(drafts[0])
             else:
                 drafts = parse_social_draft(raw, lane=self.lane,
                     assignments=state["assignments"])["reply_task_results"]
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
+            if mode == "split" and str(exc) != "routine_reuses_published_reply":
+                raise
+            if isinstance(self, RoutineLane):
+                self.writer_feedback = {"validation_code": "routine_reuses_published_reply" if str(exc) == "routine_reuses_published_reply" else "routine_draft_invalid",
+                    "instruction": "Write a new original Routine post from the same validated plan; the previous draft was rejected."}
             if getattr(self.tracker, "observer", None) is not None:
                 import re
                 reason = str(exc) if re.fullmatch(r"[a-z][a-z0-9_]{0,80}", str(exc)) else "combined_draft_invalid"

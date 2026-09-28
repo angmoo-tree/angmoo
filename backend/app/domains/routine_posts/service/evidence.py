@@ -7,6 +7,8 @@ from app.domains.routine_posts import schemas
 from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
 from app.domains.routine_posts.contracts.context import RoutinePostContext
 from app.domains.routine_posts.contracts.generation import RoutineGeneration
+from app.contracts.routine_output import ENUM_OUTPUT, LEGACY_OUTPUT
+from app.domains.routine_posts.contracts.request_context import RoutineRequestContext
 from app.domains.routine_posts.utils.text import _clip
 from app.domains.routine_posts.service.temporal_context import build_temporal_context, world_local_iso
 from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
@@ -166,10 +168,11 @@ def build_routine_beat_plan_response_schema(
     continuity_facts: list[str],
     considered_source_event_ids: list[str],
     detail_keys: list[str],
+    output_contract: str = LEGACY_OUTPUT,
 ) -> dict[str, object]:
     """Bind creative planner output to server-owned evidence identifiers."""
 
-    schema = deepcopy(GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA)
+    schema = deepcopy(GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA) if output_contract == LEGACY_OUTPUT else build_gemini_developer_response_schema(schemas.RoutineDecisionOutput)
     properties = schema["properties"]
     if not isinstance(properties, dict):
         raise TypeError("routine planner response properties must be an object")
@@ -206,12 +209,9 @@ def build_routine_beat_plan_response_schema(
         maximum=continuity_maximum,
     )
     considered_count = len(considered_source_event_ids)
-    constrain_string_array(
-        "considered_source_event_ids",
-        considered_source_event_ids,
-        minimum=considered_count,
-        maximum=considered_count,
-    )
+    if output_contract == LEGACY_OUTPUT:
+        constrain_string_array("considered_source_event_ids", considered_source_event_ids,
+            minimum=considered_count, maximum=considered_count)
     constrain_string_array(
         "used_source_event_ids",
         considered_source_event_ids,
@@ -244,13 +244,49 @@ def build_routine_beat_plan_response_schema(
     return schema
 
 
+def freeze_request_context(context: RoutinePostContext, beat: Any) -> RoutineRequestContext:
+    from dataclasses import asdict
+    from hashlib import sha256
+    import json
+    previous = context.previous_post
+    evidence = {"events": [asdict(event) for event in context.source_events],
+        "state_before": context.state_before,
+        "previous_post": None if previous is None else {"id": previous.id, "title": previous.title, "body": previous.body},
+        "item": {key: getattr(context.item, key) for key in ("id", "daypart", "title", "activity_seed", "scheduled_start_at", "scheduled_end_at")}}
+    digest = sha256(json.dumps(evidence, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
+    return RoutineRequestContext(context.world.id, context.world_character.id, context.episode.id,
+        beat.id, beat.sequence_no, tuple(context.considered_source_event_ids),
+        tuple(allowed_continuity_facts(context)), tuple(allowed_detail_keys(context)),
+        context.plan.version, context.episode.version, context.state_schema_version,
+        context.output_contract, beat.claim_run_id, digest)
+
+
+def bind_decision(payload: dict, *, request: RoutineRequestContext, context: RoutinePostContext, beat: Any) -> schemas.BoundRoutinePlan:
+    if request != freeze_request_context(context, beat):
+        raise ValueError("routine_request_context_changed")
+    decision = schemas.RoutineDecisionOutput.model_validate(payload)
+    return schemas.BoundRoutinePlan.model_validate({**decision.model_dump(), **request.metadata()})
+
+
 def _validate_plan(
     payload: dict[str, object],
     *,
     context: RoutinePostContext,
     beat: Any,
-) -> schemas.RoutineBeatPlan:
-    plan = schemas.RoutineBeatPlan.model_validate(payload)
+    request: RoutineRequestContext | None = None,
+) -> schemas.RoutineBeatPlan | schemas.BoundRoutinePlan:
+    if context.output_contract == ENUM_OUTPUT:
+        if request is not None:
+            # A provider response is always the strict AI-owned wire DTO.
+            # Server fields returned by a model must not enter via the
+            # checkpoint/internal BoundRoutinePlan parser.
+            plan = bind_decision(payload, request=request, context=context, beat=beat)
+        elif "beat_id" in payload:
+            plan = schemas.BoundRoutinePlan.model_validate(payload)
+        else:
+            plan = bind_decision(payload, request=request or freeze_request_context(context, beat), context=context, beat=beat)
+    else:
+        plan = schemas.RoutineBeatPlan.model_validate(payload)
     has_previous_success = (
         context.previous_beat is not None and context.previous_post is not None
     )
@@ -280,13 +316,14 @@ def _validate_plan(
 
 
 def _state_after(
-    current: dict[str, object], plan: schemas.RoutineBeatPlan
+    current: dict[str, object], plan: schemas.RoutineBeatPlan | schemas.BoundRoutinePlan
 ) -> dict[str, object]:
     changes = [effect.state_change.model_dump() for effect in plan.source_event_effects]
     return activity_state_contracts.apply_state_changes(
         current,
         changes,
         scheduled_without_source=not bool(plan.used_source_event_ids),
+        schema_version=2 if isinstance(plan, schemas.BoundRoutinePlan) else 1,
     )
 
 

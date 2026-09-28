@@ -112,3 +112,49 @@ class RoutinePostDraft(RoutinePostSchema):
     @classmethod
     def optional_signature(cls, value):
         return value.strip() if isinstance(value, str) and len(value) <= 300 else ""
+
+
+class RoutineStateChangeV2(RoutinePostSchema):
+    mood: Literal["neutral", "curious", "joyful", "hopeful", "calm", "concerned", "frustrated", "sad", "embarrassed"] | None = None
+    mood_intensity_delta: int = Field(default=0, ge=-20, le=20)
+    action_note: str | None = Field(default=None, max_length=160)
+
+
+class RoutineSourceEventEffectV2(RoutinePostSchema):
+    source_event_id: str = Field(min_length=1, max_length=64)
+    state_change: RoutineStateChangeV2 = Field(default_factory=RoutineStateChangeV2)
+
+
+class RoutineDecisionOutput(RoutinePostSchema):
+    """AI-owned choices only. All remaining choices retain their enum constraints."""
+    scene_kind: RoutineSceneKind
+    scene_brief: str = Field(min_length=1, max_length=800)
+    continuity_facts: list[str] = Field(default_factory=list, max_length=6)
+    used_source_event_ids: list[str] = Field(default_factory=list, max_length=8)
+    used_detail_keys: list[str] = Field(default_factory=list, max_length=8)
+    source_event_effects: list[RoutineSourceEventEffectV2] = Field(default_factory=list, max_length=8)
+
+    @model_validator(mode="after")
+    def validate_choices(self):
+        for values in (self.continuity_facts, self.used_source_event_ids, self.used_detail_keys):
+            if len(values) != len(set(values)):
+                raise ValueError("routine_choice_duplicate")
+        effects = [effect.source_event_id for effect in self.source_event_effects]
+        if len(effects) != len(set(effects)) or not set(effects).issubset(self.used_source_event_ids):
+            raise ValueError("routine_effect_source_invalid")
+        return self
+
+
+class BoundRoutinePlan(RoutineDecisionOutput):
+    """Internal result with metadata bound by the server, never requested from AI."""
+    episode_id: str = Field(min_length=1, max_length=64)
+    beat_id: str = Field(min_length=1, max_length=64)
+    sequence_no: int = Field(ge=1)
+    considered_source_event_ids: list[str] = Field(default_factory=list, max_length=8)
+
+    @model_validator(mode="after")
+    def validate_bound_sources(self):
+        considered = self.considered_source_event_ids
+        if len(considered) != len(set(considered)) or not set(self.used_source_event_ids).issubset(considered):
+            raise ValueError("routine_bound_sources_invalid")
+        return self

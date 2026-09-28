@@ -17,7 +17,8 @@ from app.core.ids import uuid7_string
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.domains.routines.models.preparation import ActivityPreparationJob
 from app.domains.routines.models.plans import DailyActivityPlan, DailyActivityPlanItem, ActivityEpisode
-from app.domains.routines.constants import INITIAL_STATE, TIMEZONE_CONTRACT_VERSION
+from app.domains.routines.constants import TIMEZONE_CONTRACT_VERSION
+from app.domains.routines.policies.activity_state import initial_state
 from app.domains.routines.policies.planning import daypart_windows
 from app.domains.routines.schemas.daily_generation import GeneratedDailyPlan
 from app.domains.routines.service import joint_reservations
@@ -188,7 +189,7 @@ def preserve_item(db: Session, item) -> bool:
 
 
 def apply_plan(db: Session, *, scope, output: GeneratedDailyPlan, target_date: date,
-               now: datetime, source_digest: str, expected_snapshot: dict):
+               now: datetime, source_digest: str, expected_snapshot: dict, state_schema_version: int = 1):
     """Apply validated directions; keep successful episodes and reservation rules."""
     plan = current_plan(db, scope.world_character.id, target_date)
     if plan_snapshot(db, plan) != expected_snapshot:
@@ -230,7 +231,7 @@ def apply_plan(db: Session, *, scope, output: GeneratedDailyPlan, target_date: d
             local_date=target_date, daypart=item.daypart)
         if reservation is not None and end > now:
             joint_reservations.materialize_reservation_for_new_plan(db, plan=plan, joint=reservation,
-                scheduled_start_at=start, scheduled_end_at=end, now=now)
+                scheduled_start_at=start, scheduled_end_at=end, now=now, state_schema_version=state_schema_version)
             continue
         row = DailyActivityPlanItem(id=uuid7_string(), plan_id=plan.id, world_id=plan.world_id,
             world_character_id=plan.world_character_id, **item.model_dump(), origin_type="daily_generation",
@@ -243,6 +244,6 @@ def apply_plan(db: Session, *, scope, output: GeneratedDailyPlan, target_date: d
             db.add(ActivityEpisode(id=uuid7_string(), world_id=plan.world_id,
                 world_character_id=plan.world_character_id, plan_item_id=row.id,
                 effective_activity_snapshot=item.model_dump(exclude={"daypart"}), status="planned",
-                current_state_schema_version=1, current_state_snapshot=dict(INITIAL_STATE), next_sequence_no=1, version=1))
+                current_state_schema_version=state_schema_version, current_state_snapshot=initial_state(schema_version=state_schema_version), next_sequence_no=1, version=1))
     db.flush()
     return plan

@@ -1,5 +1,6 @@
 """Joint reservations, two-participant plan materialization and revision policy."""
 from __future__ import annotations
+from app.domains.routines.policies.activity_state import initial_state
 from datetime import date, datetime
 from typing import Any
 from sqlalchemy import select
@@ -276,14 +277,8 @@ def _materialize_existing_plan(
         plan_item_id=joint_item.id,
         effective_activity_snapshot=_joint_snapshot(joint),
         status="planned",
-        current_state_schema_version=1,
-        current_state_snapshot={
-            "mood": "neutral",
-            "mood_intensity": 0,
-            "energy": 50,
-            "social_energy": 50,
-            "action_note": "",
-        },
+        current_state_schema_version=episode.current_state_schema_version,
+        current_state_snapshot=initial_state(schema_version=episode.current_state_schema_version),
         next_sequence_no=1,
         version=1,
     )
@@ -443,6 +438,7 @@ def materialize_reservation_for_new_plan(
     scheduled_start_at: datetime,
     scheduled_end_at: datetime,
     now: datetime,
+    state_schema_version: int = 1,
 ) -> tuple[models.DailyActivityPlanItem, models.ActivityEpisode]:
     if (
         joint.scheduled_local_date != plan.local_date
@@ -505,14 +501,8 @@ def materialize_reservation_for_new_plan(
         plan_item_id=item.id,
         effective_activity_snapshot=_joint_snapshot(joint),
         status="planned",
-        current_state_schema_version=1,
-        current_state_snapshot={
-            "mood": "neutral",
-            "mood_intensity": 0,
-            "energy": 50,
-            "social_energy": 50,
-            "action_note": "",
-        },
+        current_state_schema_version=state_schema_version,
+        current_state_snapshot=initial_state(schema_version=state_schema_version),
         next_sequence_no=1,
         version=1,
     )

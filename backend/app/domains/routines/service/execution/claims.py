@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -114,6 +114,7 @@ def claim_activity_beat(
     claim_expires_at: datetime,
     source_event_ids: list[str] | None = None,
     skipped_tick_count: int = 0,
+    state_schema_version: int = 1,
     now: datetime | None = None,
 ) -> RuntimeClaimResult:
     current = _aware_utc(now or datetime.now(UTC))
@@ -137,10 +138,6 @@ def claim_activity_beat(
         < _aware_utc(item.scheduled_end_at)
     ):
         raise ActivityRuntimeValidationError("beat_outside_plan_item_window")
-    state_before = activity_state_contracts.validate_state_snapshot(
-        episode.current_state_snapshot
-    )
-
     existing = db.scalar(
         select(models.ActivityBeat)
         .where(
@@ -153,6 +150,8 @@ def claim_activity_beat(
     if existing is not None:
         if existing.episode_id != episode.id or existing.world_id != episode.world_id:
             raise ActivityRuntimeValidationError("cross_world_reference")
+        if existing.state_schema_version != state_schema_version or episode.current_state_schema_version != state_schema_version:
+            raise ActivityRuntimeConflictError("activity_state_version_conflict")
         if existing.status == "claimed":
             existing_expiry = (
                 _aware_utc(existing.claim_expires_at)
@@ -178,6 +177,25 @@ def claim_activity_beat(
         db.commit()
         return RuntimeClaimResult(existing, False)
 
+    if episode.current_state_schema_version != state_schema_version:
+        if episode.current_state_schema_version != 1 or state_schema_version != 2:
+            raise ActivityRuntimeConflictError("activity_state_version_conflict")
+        inflight = db.scalar(select(models.ActivityBeat.id).where(models.ActivityBeat.episode_id == episode.id,
+            models.ActivityBeat.status.in_(("pending", "claimed"))).limit(1))
+        if inflight is not None:
+            raise ActivityRuntimeConflictError("activity_state_transition_pending")
+        projected = activity_state_contracts.project_state_v2(episode.current_state_snapshot, source_version=1)
+        changed = db.execute(update(models.ActivityEpisode).where(
+            models.ActivityEpisode.id == episode.id,
+            models.ActivityEpisode.version == episode.version,
+            models.ActivityEpisode.current_state_schema_version == 1,
+        ).values(current_state_snapshot=projected, current_state_schema_version=2,
+            version=episode.version + 1).execution_options(synchronize_session=False))
+        if changed.rowcount != 1:
+            db.rollback()
+            raise ActivityRuntimeConflictError("activity_state_transition_stale")
+        db.refresh(episode)
+    state_before = activity_state_contracts.validate_state_snapshot(episode.current_state_snapshot, schema_version=state_schema_version)
     beat = models.ActivityBeat(
         id=uuid7_string(),
         world_id=episode.world_id,
@@ -190,6 +208,7 @@ def claim_activity_beat(
         previous_successful_beat_id=episode.last_successful_beat_id,
         source_event_ids=list(dict.fromkeys(source_event_ids or [])),
         state_before_snapshot=state_before,
+        state_schema_version=state_schema_version,
         idempotency_key=idempotency_key,
         claim_run_id=claim_run_id,
         claim_expires_at=expiry,
@@ -387,12 +406,14 @@ def complete_activity_beat(
         raise ActivityRuntimeValidationError("cross_world_reference")
     if beat.previous_successful_beat_id != episode.last_successful_beat_id:
         raise ActivityRuntimeConflictError("previous_successful_beat_stale")
+    if episode.current_state_schema_version != beat.state_schema_version:
+        raise ActivityRuntimeConflictError("activity_state_version_conflict")
     if activity_state_contracts.validate_state_snapshot(
-        episode.current_state_snapshot
-    ) != activity_state_contracts.validate_state_snapshot(beat.state_before_snapshot):
+        episode.current_state_snapshot, schema_version=beat.state_schema_version
+    ) != activity_state_contracts.validate_state_snapshot(beat.state_before_snapshot, schema_version=beat.state_schema_version):
         raise ActivityRuntimeConflictError("activity_state_stale")
     next_state = activity_state_contracts.validate_state_snapshot(
-        state_after_snapshot
+        state_after_snapshot, schema_version=beat.state_schema_version
     )
     post = references.get_post(source_post_id)
     world_character = references.get_world_character(beat.world_character_id)

@@ -26,7 +26,9 @@ def freeze_prepared(prepared):
         "due_tick": asdict(context.due_tick), "state_before": context.state_before, "common_state": context.common_state,
         "source_events": [asdict(e) for e in context.source_events],
         "eligible_event_count": context.eligible_event_count, "overflow_reason_counts": context.overflow_reason_counts,
-        "prompt_comment_chars": context.prompt_comment_chars})
+        "prompt_comment_chars": context.prompt_comment_chars,
+        "output_contract": context.output_contract, "state_schema_version": context.state_schema_version,
+        "thought_policy": context.thought_policy})
 
 
 def restore_prepared(ctx, frozen, tracker):
@@ -42,13 +44,19 @@ def restore_prepared(ctx, frozen, tracker):
         raise ValueError("routine_resume_scope_changed")
     if beat.status not in {"claimed", "succeeded"} or (beat.status == "claimed" and beat.claim_run_id != ctx.run_id):
         raise ValueError("routine_resume_claim_changed")
+    from app.contracts.routine_output import RoutineOutputPolicy
+    policy = RoutineOutputPolicy(frozen.get("output_contract", "routine-output.legacy.v1"),
+        frozen.get("state_schema_version", 1), frozen.get("thought_policy", "thought_v1"))
+    if beat.state_schema_version != policy.state_schema_version:
+        raise ValueError("routine_resume_state_version_changed")
     events = tuple(RoutineInteractionInput(**{**e, "occurred_at": datetime.fromisoformat(e["occurred_at"])}) for e in frozen["source_events"])
     due = frozen["due_tick"]
     context = RoutinePostContext(**records, character=ctx.character,
         due_tick=DueTick(datetime.fromisoformat(due["scheduled_for"]), due["skipped_tick_count"]),
         state_before=frozen["state_before"], source_events=events,
         eligible_event_count=frozen["eligible_event_count"], overflow_reason_counts=frozen["overflow_reason_counts"],
-        prompt_comment_chars=frozen["prompt_comment_chars"], common_state=frozen.get("common_state"))
+        prompt_comment_chars=frozen["prompt_comment_chars"], common_state=frozen.get("common_state"),
+        output_contract=policy.output_contract, state_schema_version=policy.state_schema_version, thought_policy=policy.thought_policy)
     opening = frozen["opening_claim"]
     opening = OpeningClaim(**{**opening, "expires_at": datetime.fromisoformat(opening["expires_at"])}) if opening else None
     joint = ctx.db.get(JointActivity, frozen["joint_id"]) if frozen["joint_id"] else None

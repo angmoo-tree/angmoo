@@ -8,6 +8,10 @@ from app.domains.worlds.models import WorldMembership
 
 
 class SqlAlchemyActivityReferences:
+    def routine_state_version(self, actor_id: str) -> int:
+        from app.domains.world_characters.service.activity_engines import routine_state_version
+        from app.domains.world_characters.models import WorldCharacter
+        return routine_state_version(self._db, self._db.get(WorldCharacter, actor_id))
     def __init__(self, db: Session) -> None:
         self._db = db
 
