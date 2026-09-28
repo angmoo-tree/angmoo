@@ -21708,6 +21708,30 @@
       "test_suppressions": {
         "tests/test_l3_er6_installer_supply_chain.py": {}
       }
+    },
+    {
+      "commit": "10c692f684518facc5c5d211fff998879f75781a",
+      "feature_id": "AR-PUBLISH-SIDECAR-PARAMETERS",
+      "supplements": "AR-PUBLISH-SIDECAR-RESOURCES",
+      "reason": "Complete the immutable introduction evidence with the three exact pytest parameter IDs. Retain the original logical function record and map it to its first collected case; no test, assertion, skip, policy or frozen baseline is changed.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[--add-data $sqliteDeltaData]",
+        "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[$sqliteDeltaRoot\\\\*.json;app/runtime/migrations/sqlite_versions]",
+        "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[$sqliteDeltaRoot = Join-Path $backendRoot \"app\\\\runtime\\\\migrations\\\\sqlite_versions\"]"
+      ],
+      "test_assertions": {
+        "tests/test_l3_er6_installer_supply_chain.py": {
+          "test_installer_contract_rejects_missing_frozen_migration_resources": [
+            "assert spec is not None and spec.loader is not None",
+            "pytest.raises(SystemExit, match='packaged embedded migration manifest missing')",
+            "assert missing_resource_contract in text"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l3_er6_installer_supply_chain.py": {}
+      }
     }
   ]
 }
