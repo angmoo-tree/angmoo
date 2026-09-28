@@ -21687,6 +21687,27 @@
       "test_suppressions": {
         "tests/test_t2_secret_allowlist.py": {}
       }
+    },
+    {
+      "commit": "10c692f684518facc5c5d211fff998879f75781a",
+      "feature_id": "AR-PUBLISH-SIDECAR-RESOURCES",
+      "reason": "A mutation regression rejects a missing frozen SQLite JSON glob, its source root, or its real PyInstaller data argument while preserving every existing installer assertion.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources"
+      ],
+      "test_assertions": {
+        "tests/test_l3_er6_installer_supply_chain.py": {
+          "test_installer_contract_rejects_missing_frozen_migration_resources": [
+            "assert spec is not None and spec.loader is not None",
+            "pytest.raises(SystemExit, match='packaged embedded migration manifest missing')",
+            "assert missing_resource_contract in text"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l3_er6_installer_supply_chain.py": {}
+      }
     }
   ]
 }
