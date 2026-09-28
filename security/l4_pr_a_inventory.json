@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3797,
-      "internal_edge_count": 5195,
+      "external_import_count": 3805,
+      "internal_edge_count": 5220,
       "legacy_import_exception_count": 0,
-      "module_count": 1289,
+      "module_count": 1294,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2240,8 +2240,18 @@
           },
           {
             "imports": [
+              "app.domains.routine_posts.service.original_post",
+              "app.domains.routines.repository.public_action_executions",
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.runtime.routine_posts.original_post",
+            "path": "backend/app/runtime/routine_posts/original_post.py"
+          },
+          {
+            "imports": [
               "app.config",
               "app.contracts.activity_thought",
+              "app.contracts.routine_output",
               "app.core.unit_of_work",
               "app.domains.relationships.contracts.social_consumption",
               "app.domains.routine_posts.constants",
@@ -2269,6 +2279,7 @@
               "app.runtime.persistence.model_registration",
               "app.runtime.relationships.sqlalchemy_social_event",
               "app.runtime.routine_posts.context_references",
+              "app.runtime.routine_posts.original_post",
               "app.runtime.routines.activity_policy",
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
@@ -3201,7 +3212,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "fc08b11af55a3884be4586edb4a5aa03b5f39ac8c352a94c229973f3dad1321e"
+        "sha256": "7d8671c69224f5193af0d434b5a83039636a8e920ad15bded2aea333cb0670ac"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3381,7 +3392,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "b768d17dce5e4e18d583e3fe435b0132b3e123da89c902b5d58b49bfc76a6017"
+    "workflow_sha256": "ac4faa9345a9e0400410ca6a4aa86be30bd0f1eea14c47df4fe8f1a99606d469"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -3451,7 +3462,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "bc9065b0ebe51a462b2517a4b58be8add7b030f3cd586e798a393e6af2361327"
+        "sha256": "d909315ee7b47799b1d631d11a1dd71565c45c34b743e621b1cf5eb2e67541a7"
       },
       "steps": [
         {
