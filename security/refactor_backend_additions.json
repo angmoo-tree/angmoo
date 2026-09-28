@@ -21661,6 +21661,32 @@
       "test_suppressions": {
         "tests/test_t2_ci_policy.py": {}
       }
+    },
+    {
+      "commit": "0239d2e75f095b71dd7279f2a833de043059a76a",
+      "feature_id": "AR-PUBLISH-GITLEAKS",
+      "reason": "Exact source-backed Git blob allowlist, anchored field/line and ledger paths, other digest/path/field rejection regression; no actual secret or wide exemption.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_card_credential_form_exception_requires_exact_source_and_line"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_gitleaks_card_credential_form_exception_requires_exact_source_and_line": [
+            "assert value == 'b8f8669e84cf60c7920a877d76d60460e19b71c0'",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND' and entry['regexTarget'] == 'line'",
+            "assert len(entry['regexes']) == 1 and len(entry['paths']) == 2",
+            "assert re.fullmatch(entry['regexes'][0], line)",
+            "assert not any((re.search(pattern, 'security/other-credentials.json') for pattern in entry['paths']))",
+            "assert not re.fullmatch(entry['regexes'][0], changed)",
+            "assert any((re.search(pattern, path) for pattern in entry['paths']))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
     }
   ]
 }
