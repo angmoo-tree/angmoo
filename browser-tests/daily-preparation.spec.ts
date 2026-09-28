@@ -3,6 +3,42 @@ import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json } from "./continuity-next-fixture";
 
 const staticShell = process.env.ANGMOO_DAILY_STATIC === "1";
+test("agent settings uses daily preparation without legacy analysis and preserves hidden settings", async ({ page }) => {
+  if (staticShell) await page.addInitScript(() => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {
+    profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "daily-fixture-token-0000000000000",
+  } }));
+  else await installBackendFixture(page);
+  const characterId = "daily-settings";
+  const original = continuityAgentDetail(characterId);
+  const agent = { ...original, settings: { ...original.settings, allow_repost: true, allow_follow: true, allow_unfollow: true },
+    activity_profile_readiness: { ready: true, source: "daily_preparation", world_id: "daily-world", world_character_id: "daily-actor" } };
+  const writes: Record<string, unknown>[] = [];
+  await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
+    const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+    if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all" });
+    if (route.request().method() !== "GET") {
+      expect(path).toBe(`/agents/${characterId}/settings`);
+      writes.push(route.request().postDataJSON());
+      return json(route, agent);
+    }
+    if (path === `/agents/${characterId}`) return json(route, agent);
+    if (path.includes("recommendation-topics")) return json(route, { state: "ready", topics: [], recent_deliveries: [], recent_feed: [] });
+    if (path.includes("posts")) return json(route, { items: [], next_cursor: null });
+    if (path.includes("lore")) return json(route, []);
+    if (staticShell) return json(route, {});
+    return route.fallback();
+  });
+  await page.goto(`/agents/${characterId}?tab=settings`);
+  await expect(page.getByRole("heading", { name: "오늘 하루 계획과 활동 준비" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "성향 분석 실행" })).toHaveCount(0);
+  await expect(page.getByText("커뮤니티 성향 분석이 필요합니다.", { exact: false })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "World 활동 준비 확인" })).toHaveAttribute("href", `/characters/${characterId}/worlds/daily-world/autonomy-setup${staticShell ? "/" : ""}`);
+  await expect(page.getByRole("checkbox", { name: "리포스트하기", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "설정 저장", exact: true }).click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(writes[0]).toMatchObject({ allow_repost: true, allow_follow: true, allow_unfollow: true });
+});
+
 test("daily preparation keeps registration free and exposes explicit recovery", async ({ page }, testInfo) => {
   if (staticShell) await page.addInitScript(() => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {
     profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "daily-fixture-token-0000000000000",
