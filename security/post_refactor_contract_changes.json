@@ -14715,6 +14715,24 @@
           "after_sha256": "b27f4b70403130d6803d098ab002518a1403ac62ab7a2459483190a2b2394a90"
         }
       ]
+    },
+    {
+      "id": "publish-explicit-legacy-preparation-contracts-20260928",
+      "implementation_commit": "1742d6cfd50fe6c8a7453624406521bacf1c4ab4",
+      "reason": "CI reproduced 62 compatibility failures: consumers imported an approved-profile/40-repertoire seed but not the defining module autouse fixture, so the new daily-preparation default ran instead. Set the preserved mode explicitly in these compatibility modules and the tick-only fake-session case; keep the new production default and daily tests True.",
+      "review": "All original assertions, raises, skips, nodes and current four-call behavior remain unchanged. The only new helper has no assertions or suppressions. Related legacy and True daily cases passed together (73 and 38 passes, including 22 repeated daily cases). All 4215 collected nodes are identical. Refresh only the live installer-check source hash and two marker lines in PostgreSQL residual inventory; counters, ownership, paths and frozen evidence remain unchanged. Eight embedded inventory cases passed. Final whole CI remains mandatory.",
+      "source_blobs": {
+        "backend/tests/routines/test_activity_limits.py": "a11ee4ed98ba083696976403159a2fbec8f1d9e5",
+        "backend/tests/runtime/test_activity_combined_failures.py": "551f2c83c66ec22cb2ed5282fabb475c9d3e29ea",
+        "backend/tests/runtime/test_personalized_parent.py": "723366f28bc49e666eb51f83606b1b4817d3b0f9",
+        "backend/tests/runtime/test_personalized_routine_lane.py": "791cc10ae8d4f7e74c456c882b75b8525f983e19",
+        "backend/tests/social/test_feed_approved_continuity.py": "8aefb7c81f795c01a56333c51ab7f15b7dd16620",
+        "backend/tests/social/test_feed_normalized_execution.py": "c42cce91534c33a237f46fef704fcbc57ef566c0",
+        "backend/tests/social/test_recommendation_cycle.py": "1b1c6774463ea7603ad49e3a2428e976cc4ab07d",
+        "backend/tests/world_characters/test_activity_state.py": "12481aacf6d549c379edf103c1bfd942800d236c",
+        "backend/tests/world_characters/test_persona_continuity.py": "53acf6765d4c9f287ab81005289e2b023659672f",
+        "docs/architecture/postgres-sql-inventory.json": "99527c5832acba92d8cb922b885c25e7ee11aceb"
+      }
     }
   ]
 }
