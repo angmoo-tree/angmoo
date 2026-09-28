@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/form-controls";
 import { useAuth } from "@/hooks/use-auth";
 import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
+import { isTauriDesktopRuntime, navigateDesktopProductRoute } from "@/lib/desktop/product-window";
 import { studioWorldRoute, worldCharacterDirectoryRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { ProfileMediaUploader } from "@/features/characters/components/profile-media-uploader";
@@ -162,14 +163,25 @@ function CreationGuide() {
   }
   const returnRoute = target && query.get("returnTo") === studioWorldRoute(target) ? studioWorldRoute(target)
     : draft?.target_world_id ? worldCharacterDirectoryRoute(draft.target_world_id) : "/";
+  async function returnAfterRegistration() {
+    const href = target && created && returnRoute === studioWorldRoute(target)
+      ? `${returnRoute}?createdCharacterId=${encodeURIComponent(created.character.id)}` : returnRoute;
+    try {
+      if (isTauriDesktopRuntime()) await navigateDesktopProductRoute(href);
+      else router.push(href);
+    } catch {
+      throw new Error("캐릭터는 등록되었습니다. 돌아갈 화면을 열지 못했습니다. 다시 시도해주세요.");
+    }
+  }
 
   if (status === "unauthenticated") return <section className="space-y-4 p-6"><p>캐릭터를 등록하려면 로컬 사용자 연결이 필요합니다.</p><Button onClick={() => router.push("/login")}>사용자 연결</Button></section>;
   if (status !== "authenticated" || restoring) return <p role="status" className="p-6">생성 화면을 준비하고 있습니다.</p>;
   if (created) return <section className="space-y-5 p-6" aria-labelledby="created-heading">
     <h1 id="created-heading" className="text-2xl font-bold">{created.character.name} 등록 완료</h1>
     <p>World에 저장했습니다. 자율활동은 OFF입니다. 모델과 API 키는 활동 준비에서 설정할 수 있습니다.</p>
+    {error && <p role="alert">{error}</p>}
     <Button onClick={() => router.push(draft?.source_kind === "external" ? `/agents/${encodeURIComponent(created.character.id)}` : `/characters/${encodeURIComponent(created.character.id)}/worlds/${encodeURIComponent(draft!.target_world_id!)}/autonomy-setup`)}>{draft?.source_kind === "external" ? "외부 실행기 설정" : "활동 준비"}</Button>
-    <Button variant="secondary" onClick={() => router.push(returnRoute)}>나중에 하기</Button>
+    <Button variant="secondary" loading={busy} onClick={() => void perform(returnAfterRegistration)}>나중에 하기</Button>
   </section>;
 
   return <section className="space-y-6 p-5 md:p-9" aria-labelledby="creation-heading">

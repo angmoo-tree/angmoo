@@ -196,7 +196,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "b22c73f39e5daaf0c391d6fa7bfac5f8b0530e0d7e7eebf16017ce26c3aa00a4"
+        "sha256": "4444320baa88f52e51334ceca6d4ef0f4bda2959b7256b55ce094584030750bd"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
