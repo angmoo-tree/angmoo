@@ -21732,6 +21732,381 @@
       "test_suppressions": {
         "tests/test_l3_er6_installer_supply_chain.py": {}
       }
+    },
+    {
+      "commit": "01b3b91f115478ca55accd73b4bffe04515726d8",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {
+        "backend/alembic/versions/20260929_0102_routine_state_version.py": "6a1bbb5c473e0446c6f478212d77742f44c9a389",
+        "backend/app/contracts/routine_output.py": "f9cf44e3c557507d27469c0b3608b8c303a02d76",
+        "backend/app/domains/routine_posts/contracts/request_context.py": "d992f9a590b184595311028c0a77bf92576fc20d",
+        "backend/app/domains/routine_posts/service/original_post.py": "5a8557da4a025f17708bae278989c578211f52cc",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v24.json": "6a10f8577a5514905e55a709b5b0fa85994ec9e5",
+        "backend/app/runtime/migrations/sqlite_versions/routine_state_v24.py": "19837a305293625b5ddcafdd13d52be129d16664",
+        "backend/app/runtime/routine_posts/original_post.py": "d5879ac99cfe813fe5ff400cd49ec778ec7534b8",
+        "backend/scripts/evaluate_routine_output_contract.py": "86c65b622599efcc18253d1347854e3a2bfe7353",
+        "backend/tests/routine_posts/test_output_contract_v2.py": "2c7060bb3019fdb4d72917c01e6d6707958a5c46",
+        "docs/architecture/routine-output-contract.md": "5936b2cbd4eff8c85aca4dbc2759b3998fb081ea"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_copy_guard_queries_all_successes_instead_of_recent_twelve",
+        "tests/routine_posts/test_output_contract_v2.py::test_copy_rule_checks_both_title_and_body_without_re_ban",
+        "tests/routine_posts/test_output_contract_v2.py::test_energy_free_state_is_explicit_and_old_state_is_preserved",
+        "tests/routine_posts/test_output_contract_v2.py::test_file_sqlite_competing_transition_only_claims_once",
+        "tests/routine_posts/test_output_contract_v2.py::test_inflight_old_beat_blocks_transition_and_history_survives",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[none-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[none-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[repair-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[repair-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[twice-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[twice-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_policy_freezes_once_and_missing_run_never_upgrades",
+        "tests/routine_posts/test_output_contract_v2.py::test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[0]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[2]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[4]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[5]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[7]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[8]",
+        "tests/routine_posts/test_output_contract_v2.py::test_server_binding_rejects_changed_input_before_applying_decision",
+        "tests/routine_posts/test_output_contract_v2.py::test_sqlite_version_migration_keeps_old_snapshot_bytes",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[beat_id]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[considered_source_event_ids]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[emotion_label]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[episode_id]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[motivation_kind]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[sequence_no]"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
+    },
+    {
+      "commit": "4d0216a35d0c3cb11e2bde081e13916ad302ce3c",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply",
+        "tests/routine_posts/test_output_contract_v2.py::test_daily_runtime_and_repertoire_factory_select_energy_free_state"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply": [
+            "assert result[0]['content_ref'] == 'today_activity.records:post:present'",
+            "assert 'body' not in result[0] and 'title' not in result[0]",
+            "assert result[1] == replies[1]",
+            "assert replies[0]['body'] == '이미 쓴 답글' and today['records'][0]['body'] == '이미 쓴 답글'"
+          ],
+          "test_daily_runtime_and_repertoire_factory_select_energy_free_state": [
+            "assert status.plan_state == 'ready' and calls == [True], status",
+            "assert episodes and all((e.current_state_schema_version == 2 for e in episodes))",
+            "assert all((set(e.current_state_snapshot) == {'mood', 'mood_intensity', 'action_note'} for e in episodes))",
+            "assert states and all((e.current_state_schema_version == 2 for e in states))",
+            "assert all(('energy' not in e.current_state_snapshot for e in states))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
+    },
+    {
+      "commit": "9f004ee7dc27f0cb98164a93ec8175851d428477",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply": [
+            "assert result[0]['content_ref'] == 'today_activity.records:post:present'",
+            "assert 'body' not in result[0] and 'title' not in result[0]",
+            "assert result[1] == replies[1]",
+            "assert replies[0]['body'] == '이미 쓴 답글' and today['records'][0]['body'] == '이미 쓴 답글'"
+          ],
+          "test_daily_runtime_and_repertoire_factory_select_energy_free_state": [
+            "assert status.plan_state == 'ready' and calls == [True], status",
+            "assert episodes and all((e.current_state_schema_version == 2 for e in episodes))",
+            "assert all((set(e.current_state_snapshot) == {'mood', 'mood_intensity', 'action_note'} for e in episodes))",
+            "assert states and all((e.current_state_schema_version == 2 for e in states))",
+            "assert all(('energy' not in e.current_state_snapshot for e in states))"
+          ],
+          "test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text": [
+            "assert validation_code(duplicate) == duplicate",
+            "assert validation_code('raw private content') is None",
+            "assert _safe_error(ValueError(duplicate))['error_code'] == duplicate",
+            "assert summary['routine_output_contract'] == ENUM_OUTPUT and summary['routine_state_schema_version'] == 2",
+            "assert summary['routine_considered_ids'] == ['event-a', 'event-b'] and summary['routine_used_ids'] == ['event-b']",
+            "assert 'private scene text' not in str(summary)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
     }
   ]
 }
