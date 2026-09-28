@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
 import tomllib
 
 import pytest
@@ -22,6 +23,27 @@ SPEC.loader.exec_module(checker)
 
 def test_current_exact_allowlist_metadata_passes() -> None:
     assert checker.validate() == []
+
+
+def test_gitleaks_card_credential_form_exception_requires_exact_source_and_line() -> None:
+    config = tomllib.loads((REPO_ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    entry = next(item for item in config["allowlists"]
+                 if item["description"].startswith("Exact World/card creation credential-form Git blob"))
+    source = "frontend/src/features/characters/components/activity-credential-form.tsx"
+    value = subprocess.check_output(["git", "rev-parse", "c62d3bbf4f0ccd0dadc6712175b2204fcb7ac286:" + source],
+                                    cwd=REPO_ROOT, text=True).strip()
+    assert value == "b8f8669e84cf60c7920a877d76d60460e19b71c0"
+    assert entry["targetRules"] == ["generic-api-key"]
+    assert entry["condition"] == "AND" and entry["regexTarget"] == "line"
+    assert len(entry["regexes"]) == 1 and len(entry["paths"]) == 2
+    line = f'    "{source}": "{value}",'
+    assert re.fullmatch(entry["regexes"][0], line)
+    for changed in (line.replace(value, "0" * 40), line.replace(source, "another-credential.tsx"),
+                    line + ' "other_key": "other-value"'):
+        assert not re.fullmatch(entry["regexes"][0], changed)
+    for path in ("security/refactor_backend_additions.json", "security/post_refactor_contract_changes.json"):
+        assert any(re.search(pattern, path) for pattern in entry["paths"])
+    assert not any(re.search(pattern, "security/other-credentials.json") for pattern in entry["paths"])
 
 
 def test_additive_exception_matches_existing_assertion_and_is_exact(tmp_path: Path) -> None:

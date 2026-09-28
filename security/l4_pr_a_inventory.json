@@ -3221,7 +3221,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "a3c7e9318eb356ba3132a4c0caf58d9ab19ee53b86dca35edc4b5e04499f07bd"
+        "sha256": "4e5040ba689e986e99181a484c76d8782c06c95ce0377c3c029284b7bf362de6"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
