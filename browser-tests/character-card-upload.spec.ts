@@ -2,10 +2,11 @@ import { expect, test } from "@playwright/test";
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
-import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
+import { deflateSync } from "node:zlib";
 
 const repository = resolve(__dirname, "..");
 const workspace = resolve(repository, "..");
@@ -14,8 +15,15 @@ const manifestPath = join(originals, "manifest.json");
 const allCardsAvailable = existsSync(manifestPath) && ["Seraphina.png", "Sakana.png", "FluxTheCat.png"]
   .every((name) => existsSync(join(originals, name)));
 
-test.describe("real card upload through Next and isolated contributor backend", () => {
-  test.skip(!allCardsAvailable, "the three external card originals are not available in this checkout");
+// Required public CI uses self-contained, authored fixtures. Optional external
+// originals still run the identical byte-preservation and registration checks.
+const synthetic = createSyntheticCards();
+for (const dataset of [
+  { label: "synthetic", directory: synthetic, available: true },
+  { label: "external originals", directory: originals, available: allCardsAvailable },
+]) {
+test.describe(`${dataset.label} card upload through Next and isolated contributor backend`, () => {
+  test.skip(!dataset.available, "optional external card originals are not available in this checkout");
 
   let backend: ChildProcess | undefined;
   let frontend: ChildProcess | undefined;
@@ -43,6 +51,9 @@ test.describe("real card upload through Next and isolated contributor backend", 
         ANGMOO_CONTRIBUTOR_DATA_ROOT: dataRoot,
         DAILY_PREPARATION_ENABLED: "true",
         ANGMOO_FRONTEND_ORIGIN: base,
+        RESIDENT_TICK_SCHEDULER_ENABLED: "false",
+        POST_IMAGE_JOB_WORKER_ENABLED: "false",
+        POLLINATIONS_SERVICE_IMAGE_ENABLED: "false",
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -86,14 +97,14 @@ test.describe("real card upload through Next and isolated contributor backend", 
     });
     expect(claim.status(), await claim.text()).toBe(201);
 
-    const items = JSON.parse(readFileSync(manifestPath, "utf8")) as Array<{
+    const items = JSON.parse(readFileSync(join(dataset.directory, "manifest.json"), "utf8")) as Array<{
       name: string; bytes: number; sha256: string;
     }>;
     const cards = ["Sakana", "Seraphina", "FluxTheCat"];
     for (const name of cards) {
       const record = items.find((card) => card.name === name);
       expect(record).toBeTruthy();
-      const filePath = join(originals, name + ".png");
+      const filePath = join(dataset.directory, name + ".png");
       const original = readFileSync(filePath);
       expect(original.byteLength).toBe(record!.bytes);
       expect(createHash("sha256").update(original).digest("hex")).toBe(record!.sha256.toLowerCase());
@@ -164,6 +175,49 @@ test.describe("real card upload through Next and isolated contributor backend", 
     }
   });
 });
+}
+
+function createSyntheticCards(): string {
+  const directory = mkdtempSync(join(tmpdir(), "angmoo-synthetic-cards-"));
+  const records = [
+    { name: "Seraphina", bytes: 551_901, version: 3 },
+    { name: "Sakana", bytes: 1_433_772, version: 2 },
+    { name: "FluxTheCat", bytes: 612_357, version: 2 },
+  ].map(({ name, bytes, version }) => {
+    const document = { spec: `chara_card_v${version}`, spec_version: `${version}.0`, data: {
+      name: name === "FluxTheCat" ? "Flux the Cat" : name,
+      description: "A synthetic character for upload, preservation and registration tests.",
+      personality: "Curious", scenario: "A shared local SNS", first_mes: "Hello!", mes_example: "Hello!",
+    } };
+    const header = Buffer.alloc(13);
+    header.writeUInt32BE(1, 0); header.writeUInt32BE(1, 4);
+    header[8] = 8; header[9] = 2; // One RGB pixel, no interlace.
+    const metadata = Buffer.from(`${version === 3 ? "ccv3" : "chara"}\0${Buffer.from(JSON.stringify(document)).toString("base64")}`);
+    const parts = [Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      pngChunk("IHDR", header), pngChunk("tEXt", metadata),
+      pngChunk("IDAT", deflateSync(Buffer.from([0, 16, 32, 48])))];
+    const overhead = parts.reduce((sum, part) => sum + part.length, 0) + 24;
+    const content = Buffer.concat([...parts, pngChunk("npAD", Buffer.alloc(bytes - overhead)), pngChunk("IEND", Buffer.alloc(0))]);
+    if (content.length !== bytes) throw new Error("Synthetic card length differs");
+    writeFileSync(join(directory, name + ".png"), content);
+    return { name, bytes, sha256: createHash("sha256").update(content).digest("hex") };
+  });
+  writeFileSync(join(directory, "manifest.json"), JSON.stringify(records));
+  return directory;
+}
+
+function pngChunk(kind: string, data: Buffer): Buffer {
+  const value = Buffer.concat([Buffer.from(kind, "ascii"), data]);
+  let crc = 0xffffffff;
+  for (const byte of value) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+  }
+  const result = Buffer.alloc(data.length + 12);
+  result.writeUInt32BE(data.length, 0); value.copy(result, 4);
+  result.writeUInt32BE((crc ^ 0xffffffff) >>> 0, result.length - 4);
+  return result;
+}
 
 function captureOutput(child: ChildProcess): () => string {
   let output = "";

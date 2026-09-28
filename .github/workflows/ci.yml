@@ -133,6 +133,14 @@ jobs:
       - name: Install locked browser-test dependencies
         run: pnpm install --frozen-lockfile
         working-directory: browser-tests
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Install locked isolated upload-test backend
+        run: uv sync --frozen
+        working-directory: backend
       - name: Record browser test checkout identity
         env:
           TEST_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -166,6 +174,9 @@ jobs:
         working-directory: frontend
       - name: Verify World Package proxy capabilities
         run: pnpm test:world-package-proxy
+        working-directory: frontend
+      - name: Verify character card proxy request limits
+        run: pnpm test:character-card-proxy
         working-directory: frontend
       - name: Verify Identity request and session parity
         run: node scripts/test-identity-session.mjs
@@ -238,6 +249,16 @@ jobs:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/settings.xml
         run: pnpm test:ui-e-local-settings --reporter=github,junit
         working-directory: browser-tests
+      - name: Verify shared character creator flows in Next
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/creator-next.xml
+        run: pnpm exec playwright test --config playwright.creator.config.ts --reporter=github,junit
+        working-directory: browser-tests
+      - name: Verify synthetic card upload through the actual Next proxy
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/card-upload.xml
+        run: pnpm exec playwright test --config playwright.card-upload.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Build Local OSS profile offline
         env:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
@@ -248,6 +269,23 @@ jobs:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build:static
         working-directory: frontend
+      - name: Verify daily preparation in production Next
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/daily-next.xml
+        run: pnpm exec playwright test --config playwright.daily.config.ts --reporter=github,junit
+        working-directory: browser-tests
+      - name: Verify shared character creator flows in static
+        env:
+          ANGMOO_CREATOR_STATIC: "1"
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/creator-static.xml
+        run: pnpm exec playwright test --config playwright.creator.config.ts --reporter=github,junit
+        working-directory: browser-tests
+      - name: Verify shared daily preparation in static
+        env:
+          ANGMOO_DAILY_STATIC: "1"
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/daily-static.xml
+        run: pnpm exec playwright test --config playwright.daily.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Verify Tauri static direct-open routes
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/static.xml
@@ -288,6 +326,11 @@ jobs:
             browser-tests/.ci/static.xml
             browser-tests/.ci/lifecycle.xml
             browser-tests/.ci/visual.xml
+            browser-tests/.ci/creator-next.xml
+            browser-tests/.ci/creator-static.xml
+            browser-tests/.ci/card-upload.xml
+            browser-tests/.ci/daily-next.xml
+            browser-tests/.ci/daily-static.xml
             browser-tests/.ci/browser-test-identity.json
           include-hidden-files: true
           if-no-files-found: error

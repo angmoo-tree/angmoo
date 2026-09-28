@@ -24,6 +24,26 @@ def test_current_exact_allowlist_metadata_passes() -> None:
     assert checker.validate() == []
 
 
+def test_additive_exception_matches_existing_assertion_and_is_exact(tmp_path: Path) -> None:
+    scanner_spec = importlib.util.spec_from_file_location("angmoo_additive_scanner", REPO_ROOT / "scripts/security_secret_scan.py")
+    assert scanner_spec is not None and scanner_spec.loader is not None
+    scanner = importlib.util.module_from_spec(scanner_spec)
+    sys.modules[scanner_spec.name] = scanner
+    scanner_spec.loader.exec_module(scanner)
+
+    payload = json.loads(checker.DEFAULT_PATH.read_text(encoding="utf-8"))
+    entry = next(item for item in payload["entries"] if item["path"] == checker.ADDITIONS_PATH)
+    assert hashlib.sha256(entry["value"].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256
+    allowlist = scanner.load_allowlist(checker.DEFAULT_PATH)
+    assert list(scanner.scan_text(entry["path"], entry["value"], allowlist=allowlist)) == []
+    assert {f.rule for f in scanner.scan_text(entry["path"], entry["value"] + "1", allowlist=allowlist)} == {"google-api-key"}
+    assert {f.rule for f in scanner.scan_text("security/another-additions.json", entry["value"], allowlist=allowlist)} == {"google-api-key"}
+    entry["value"] = "different-fixture-value"
+    fixture = tmp_path / "allowlist.json"
+    fixture.write_text(json.dumps(payload), encoding="utf-8")
+    assert checker.validate(fixture)
+
+
 def test_broad_scope_and_missing_review_metadata_are_rejected(tmp_path: Path) -> None:
     payload = json.loads(checker.DEFAULT_PATH.read_text(encoding="utf-8"))
     payload["entries"][0]["scope"] = "all files"

@@ -22,12 +22,14 @@ REQUIRED_FIELDS = {
     "review_due",
     "removal_condition",
 }
-EXPECTED_COUNT = 26
+EXPECTED_COUNT = 27
 EXPECTED_LAST_REVIEWED = "2026-08-14"
 EXPECTED_REVIEW_DUE = "2026-11-14"
 CHECKPOINT_PATH = "security/refactor_backend_checkpoint.json"
 CHECKPOINT_FIXTURE_SHA256 = "6101ea509bfb6d2107fbd82e0d54fad69b0b440996f0b64fc93977eff3bb4131"
 RESTORED_HISTORY_PATH = "backend/tests/test_langgraph_resident_engine.py"
+ADDITIONS_PATH = "security/refactor_backend_additions.json"
+ADDITIONS_TEST_PATH = "tests/integrations/test_direct_llm.py"
 CHECKPOINT_EVIDENCE = {
     "rule": "google-api-key",
     "evidence_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
@@ -51,6 +53,7 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
     seen: set[tuple[str, str, str]] = set()
     checkpoint_entries = 0
     restored_history_entries = 0
+    additions_entries = 0
     for index, entry in enumerate(entries):
         label = f"entries[{index}]"
         if not isinstance(entry, dict):
@@ -87,6 +90,19 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
                 errors.append(f"{label}.rule differs from the reviewed historical fixture")
             if hashlib.sha256(str(entry.get("value", "")).encode()).hexdigest() != CHECKPOINT_FIXTURE_SHA256:
                 errors.append(f"{label}.value differs from the exact reviewed historical fixture")
+        if entry.get("path") == ADDITIONS_PATH:
+            additions_entries += 1
+            reviewed, due = "2026-09-28", "2026-12-28"
+            for field, expected in CHECKPOINT_EVIDENCE.items():
+                if entry.get(field) != expected:
+                    errors.append(f"{label}.{field} differs from reviewed additive fixture evidence")
+            if hashlib.sha256(str(entry.get("value", "")).encode()).hexdigest() != CHECKPOINT_FIXTURE_SHA256:
+                errors.append(f"{label}.value differs from the exact reviewed additive fixture")
+            additions = json.loads((ROOT / ADDITIONS_PATH).read_text(encoding="utf-8"))
+            assertions = [assertion for record in additions["records"]
+                          for assertion in record.get("test_assertions", {}).get(ADDITIONS_TEST_PATH, {}).get(CHECKPOINT_EVIDENCE["evidence_test"], [])]
+            if not any(str(entry.get("value", "")) in assertion for assertion in assertions):
+                errors.append("additive fixture exception requires the existing exact assertion evidence")
         if entry.get("last_reviewed") != reviewed:
             errors.append(f"{label}.last_reviewed differs from its recorded review date")
         if entry.get("review_due") != due:
@@ -100,6 +116,8 @@ def validate(path: Path = DEFAULT_PATH) -> list[str]:
         errors.append("allowlist must contain exactly one reviewed checkpoint fixture tuple")
     if restored_history_entries != 1:
         errors.append("allowlist must contain exactly one reviewed historical fixture tuple")
+    if additions_entries != 1:
+        errors.append("allowlist must contain exactly one reviewed additive fixture tuple")
     return errors
 
 
