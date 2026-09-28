@@ -23,6 +23,14 @@ from app.domains.routines.service.plans import prepare_activity_plan
 from app.domains.routines.schemas import DailyActivityPlanPrepareCreate
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Exercise the preserved approved-profile/repertoire contract explicitly."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def _approved(db):
     owner, entry = _seed(db)
     result = _generate(db, owner=owner, provider=FakeProvider())

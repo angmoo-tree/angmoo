@@ -13,6 +13,13 @@ from app.runtime.autonomous_activity.provider import ActivityProvider
 from social.test_feed_reaction_intent import _engine, _seed
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def test_stale_preselected_feed_finishes_without_reselection_and_routine_continues(monkeypatch, tmp_path):
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:

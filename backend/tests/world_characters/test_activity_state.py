@@ -9,6 +9,14 @@ from app.domains.world_characters.service.activity_engines import bind_run, reso
 from world_characters.test_persona_continuity import _approved, _engine
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the imported approved-pair fixture in its preserved preparation mode."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def test_state_receipts_cas_time_and_duplicate_experience():
     with Session(_engine(), expire_on_commit=False) as db:
         _, actor, _ = _approved(db)

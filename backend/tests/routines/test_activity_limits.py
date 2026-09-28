@@ -1108,6 +1108,8 @@ def test_tick_resident_slots_staggers_claimed_runs(
 def test_resident_scheduler_tick_runner_uses_configured_global_tick(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # This fake session covers the existing tick contract, not daily preparation.
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
     db = object()
     calls: list[tuple[object, routine_schemas_runs.ResidentSlotTickCreate]] = []
 

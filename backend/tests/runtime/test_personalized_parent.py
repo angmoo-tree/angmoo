@@ -12,6 +12,13 @@ from app.runtime.autonomous_activity.planner_contract import parse_action
 from social.test_feed_reaction_intent import _engine, _seed
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def test_parent_real_adapters_respect_slot_and_commit_single_feed_effect(monkeypatch, tmp_path, version=1):
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:

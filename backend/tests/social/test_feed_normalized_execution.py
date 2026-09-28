@@ -26,6 +26,13 @@ from social.test_recommendation_cycle import _seed
 from social.test_feed_decision_normalization import raw_decision
 
 
+@pytest.fixture(autouse=True)
+def _legacy_approved_preparation(monkeypatch):
+    """Keep the preserved approved-profile/repertoire fixture in its own mode."""
+    from app.config import settings
+    monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+
+
 def seed_cycle(db, *, metrics):
     ctx, target = _seed(db, with_candidate=True)
     actor = db.get(models.WorldCharacter, "world-character-actor")
