@@ -960,6 +960,8 @@ UI-F product PNG 10장은 Device Home compact·desktop-centered, global Feed med
 
 fixture clock·locale·timezone·color scheme·DPR·reduced motion을 고정하고 remote request, write request, provider-shaped request는 즉시 실패시킨다. first-party `/icon.svg` 외 remote font·image·credential·실사용 데이터는 사용하지 않는다. product behavior suite는 nested global reply keyboard link와 capability에 없는 fake like·repost·follow·share action `0`을 별도로 검증한다.
 
+2026-09-28 World·캐릭터 통합 계약에서 Home은 기본 SNS 공간을 먼저 확보한다. 따라서 현재 시각 fixture는 `POST /worlds/default-space/ensure` 하나만 저장 없이 합성 응답으로 모사한다. Home 진입·새로고침별 요청 횟수와 Next/static의 실제 경로를 정확히 검사하며, 그 밖의 쓰기·provider 호출·외부 네트워크는 계속 금지한다. Home의 캐릭터 추가 아이콘에 따른 의도한 시각 변경은 같은 고정 container에서 두 runtime을 비교하고, 해당 PNG만 검토한 뒤 갱신한다. 과거 시각 기록을 덮어쓰거나 다른 화면의 pixel 허용치를 늘리지 않는다.
+
 UI-F local technical Gate는 360×800·390×844·436×880 Phone, 1440×1000 centered Phone, 1440×900 Studio·Graph에서 horizontal overflow `0`, focus-visible, 200% text reflow, reduced motion을 확인한다. canonical pixel PASS는 Windows display scale 사용자 확인을 대신하지 않는다. UI-F merge 뒤 동일 exact SHA의 Windows 100%·125%·150%, Host Tauri dev, installer 사용자 Gate는 계속 별도다.
 
 ---

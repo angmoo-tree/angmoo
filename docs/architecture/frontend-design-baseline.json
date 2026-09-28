@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "6a54fafcabf24417fb76279498915083f51b70cdcfea2c18ee92f759a9e942e3"
+      "sha256": "8ae945e90d91e299f55623e65e02f03aed624cb1392e7d1e5f4d70cd685fec0e"
     },
     {
       "classifications": [
@@ -180,11 +180,11 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "bd9db3565fc6fcf274192515521babefb289e671d31730589a95a57ac277fe67"
+        "sha256": "a60e1d87fe240f22260112abf492dfe6e985e127506459cac62bf5912d5d78c8"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
-        "sha256": "9fdc3b91a525a176b1641224ac8557ee613baf5932b00c8635334b4e81bab697"
+        "sha256": "3efa9660f83711dc211ecd4d0991c34d442f5c2731a8b8a12b8da3eab1ad4a73"
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
@@ -1387,15 +1387,15 @@
         "present": true,
         "sha256": "6b8a45d720fc7894def577d87688ea0b45afc3861125c7b45e1b1e8c88256745"
       },
+      "projects": [
+        "next-production",
+        "static-export"
+      ],
       "production_preview_script": {
         "path": "frontend/scripts/serve-production.mjs",
         "present": true,
         "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2"
       },
-      "projects": [
-        "next-production",
-        "static-export"
-      ],
       "reviewed_viewports": [
         {
           "height": 800,
@@ -1443,17 +1443,17 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "4d02516f58596669511fe6292d165df171e5be68f21c50107478d669652977f0"
+          "sha256": "adf0e3a9ebf319549a6474f5f1832789ce58295e989e55f04f483b9026214320"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "e5f5330a6e61f7a3537050b9809d7570742f6fe2fd83142f1f43382f03da8db2"
+          "sha256": "aacdc919e9104dec05db604e230364546ccf88458a04380bc7acfcd0b9e0bc86"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "2833a645d8950ff1c8bde0396e7a946a6e845d1c66b68e9257f6d558df5d59c6"
+          "sha256": "d6f8a689fb70f9518da879dc29edd07129d4d358bad6d623791bf9d0675d6771"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
@@ -1480,7 +1480,7 @@
         {
           "path": "browser-tests/product-surfaces.visual.spec.ts",
           "present": true,
-          "sha256": "9fdc3b91a525a176b1641224ac8557ee613baf5932b00c8635334b4e81bab697"
+          "sha256": "3efa9660f83711dc211ecd4d0991c34d442f5c2731a8b8a12b8da3eab1ad4a73"
         },
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",

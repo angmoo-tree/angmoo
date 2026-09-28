@@ -93,10 +93,12 @@ async function settleVisualSurface(page: Page): Promise<void> {
     .toBeLessThanOrEqual(1);
 }
 
-function expectReadOnlyFixture(audit: NetworkAudit): void {
+function expectReadOnlyFixture(audit: NetworkAudit, bootstrapCount = 0, staticMode = false): void {
   expect(audit.blocked).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
-  expect(audit.writes).toEqual([]);
+  expect(audit.writes).toEqual(Array(bootstrapCount).fill(
+    `POST /api/${staticMode ? "v1" : "backend"}/worlds/default-space/ensure`,
+  ));
 }
 
 async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
@@ -146,7 +148,7 @@ test("UI-F captures compact and centered Device Home parity", async ({ page }, t
   await settleVisualSurface(page);
   await expect(page).toHaveScreenshot(["ui-f", "device-home-centered-1440x1000.png"]);
 
-  expectReadOnlyFixture(audit);
+  expectReadOnlyFixture(audit, 2, testInfo.project.name === "static-export");
 });
 
 test("UI-F captures the global social media stream at the standard Phone size", async ({
@@ -284,7 +286,7 @@ test("UI-F captures runtime-offline truth without hiding launchability", async (
   await settleVisualSurface(page);
   await expect(page).toHaveScreenshot(["ui-f", "device-home-runtime-offline-390x844.png"]);
 
-  expectReadOnlyFixture(audit);
+  expectReadOnlyFixture(audit, 1, testInfo.project.name === "static-export");
 });
 
 test("UI-F product surfaces keep focus, reduced motion, and 200 percent text reflow", async ({

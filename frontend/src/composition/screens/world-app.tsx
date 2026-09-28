@@ -68,9 +68,16 @@ function WorldAppContent({
   useEffect(() => {
     if (authStatus !== "authenticated") return;
     const controller = new AbortController();
+    const worldRead = getLocalWorldApp(worldId, { signal: controller.signal });
     void Promise.all([
-      getLocalWorldApp(worldId, { signal: controller.signal }),
-      getOwnerControlledActor(worldId, { signal: controller.signal }).then((actor) => actor ?? ensureMyProfile(worldId)),
+      worldRead,
+      getOwnerControlledActor(worldId, { signal: controller.signal }).then(async (actor) => {
+        if (actor) return actor;
+        // Reads may overlap, but a new identity requires a verified launchable
+        // owner World. A rejected or abandoned route must not start a write.
+        await worldRead;
+        return controller.signal.aborted ? null : ensureMyProfile(worldId);
+      }),
     ])
       .then(([read, identity]) => {
         if (controller.signal.aborted) return;

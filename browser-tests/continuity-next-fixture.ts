@@ -87,6 +87,13 @@ async function installBackendFixture(
     if (url.pathname === "/api/backend/agents" && method === "GET") {
       return json(route, fixture.agents ?? []);
     }
+    const ownerMatch = url.pathname.match(/^\/api\/backend\/worlds\/([^/]+)\/owner-character$/);
+    if (ownerMatch && method === "GET") {
+      const worldId = decodeURIComponent(ownerMatch[1]);
+      return fixture.worldReads?.[worldId]
+        ? json(route, uiDOwnerActor(worldId))
+        : json(route, { detail: "world_not_found" }, 404);
+    }
     if (url.pathname === "/api/backend/worlds/mine") {
       const surface = url.searchParams.get("surface");
       if (surface === "device_home") {
