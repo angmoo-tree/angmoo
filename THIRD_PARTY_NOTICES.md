@@ -56,7 +56,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-core 2.46.4` — MIT
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
-- `pyjwt 2.13.0` — MIT
+- `pyjwt 2.14.0` — MIT
 - `pyopenssl 26.4.0` — Apache License, Version 2.0
 - `pypdf 6.16.1` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
