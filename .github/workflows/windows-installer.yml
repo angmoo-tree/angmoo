@@ -458,7 +458,9 @@ jobs:
     name: windows-installer-supported-upgrade
     needs: release-candidate
     runs-on: windows-latest
-    timeout-minutes: 20
+    # v1-v24 each runs real NSIS, followed by the idempotent re-install check.
+    # Twenty minutes ended after v24 passed but before that final check.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
