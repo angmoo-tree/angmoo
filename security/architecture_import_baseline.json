@@ -1,7 +1,7 @@
 {
-  "edge_count": 5266,
-  "external_import_count": 3814,
-  "module_count": 1302,
+  "edge_count": 5269,
+  "external_import_count": 3818,
+  "module_count": 1303,
   "modules": [
     {
       "external_imports": [],
@@ -14898,11 +14898,10 @@
       "external_imports": [
         "dataclasses",
         "datetime",
-        "logging",
+        "hashlib",
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.social.contracts.observations",
         "app.domains.social.contracts.world_feed",
         "app.domains.social.exceptions",
         "app.domains.social.models.feed",
@@ -14916,7 +14915,7 @@
         "app.runtime.autonomous_activity.feed_effects",
         "app.runtime.autonomous_activity.social_lane",
         "app.runtime.relationships.experience_metrics",
-        "app.runtime.social.observations",
+        "app.runtime.social.feed_observations",
         "app.runtime.social.world_feed_queries"
       ],
       "module": "app.runtime.autonomous_activity.feed",
@@ -19401,6 +19400,23 @@
       ],
       "module": "app.runtime.social.feed_history_notes",
       "path": "backend/app/runtime/social/feed_history_notes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.social.contracts.observations",
+        "app.domains.social.models.topics",
+        "app.runtime.social.observations"
+      ],
+      "module": "app.runtime.social.feed_observations",
+      "path": "backend/app/runtime/social/feed_observations.py",
       "wildcard_imports": []
     },
     {

@@ -22702,6 +22702,247 @@
         "tests/runtime/test_sns_observation.py": {},
         "tests/runtime/test_social_name_binding_recovery.py": {}
       }
+    },
+    {
+      "commit": "eb8473cc0b3aff0eead24fb6196b1f711642c45b",
+      "feature_id": "AR-DAILY-JOINT-FEED",
+      "reason": "Ordinary generation, fixed-plan and proposal identity preservation, and atomic Feed delivery regression",
+      "tracked_files": {
+        "backend/app/runtime/social/feed_observations.py": "a74e4903e9121dc527479f06d2bed67b92448d05",
+        "backend/scripts/evaluate_daily_joint_feed.py": "4a94b3a19439b54c8c240edc1eba3ea9eea709b0",
+        "backend/tests/routines/test_ordinary_daily_generation.py": "96873646687049ab873ba1d18ceb2367e18c7bc8",
+        "backend/tests/runtime/test_feed_observation_writer.py": "d3b3a3f3c5530a00d5daeeb18fa25d0d6bffbd82",
+        "backend/tests/runtime/test_joint_daily_integration.py": "dfca55f83d2d8e9b8d00cd6ce25f9edef2de424f",
+        "backend/tests/runtime/test_joint_proposal_inbox.py": "d8712a089f4459e433f9542465885da7bffb1708",
+        "docs/verification/daily-joint-feed-20260929.md": "ca4ad52bf55b435dc8c8b4bfc1584f9b32171ecc"
+      },
+      "test_nodes": [
+        "tests/routines/test_ordinary_daily_generation.py::test_all_preserved_initial_uses_topics_only_and_keeps_plan_unchanged",
+        "tests/routines/test_ordinary_daily_generation.py::test_legacy_waiting_job_reuses_its_original_schema_digest_and_source",
+        "tests/routines/test_ordinary_daily_generation.py::test_new_plan_cannot_overwrite_changed_preserved_window",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[0]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[1]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[2]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[3]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[4]",
+        "tests/routines/test_ordinary_daily_generation.py::test_provider_schema_and_validator_use_the_same_daypart_partition",
+        "tests/routines/test_ordinary_daily_generation.py::test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader[activity_kind-joint_activity]",
+        "tests/routines/test_ordinary_daily_generation.py::test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader[social_mode-joint]",
+        "tests/runtime/test_feed_observation_writer.py::test_normal_observer_settles_and_replay_preserves_delivery",
+        "tests/runtime/test_feed_observation_writer.py::test_pending_scan_stops_after_first_exhausted_writer",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[io]",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[locked]",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[program]",
+        "tests/runtime/test_feed_observation_writer.py::test_settled_replay_still_rejects_corrupt_outbox",
+        "tests/runtime/test_feed_observation_writer.py::test_short_lock_retries_and_long_lock_remains_pending_until_recovery",
+        "tests/runtime/test_feed_observation_writer.py::test_three_sessions_observe_each_delivery_once",
+        "tests/runtime/test_feed_observation_writer.py::test_unavailable_source_records_reason_without_aborting_valid_observations",
+        "tests/runtime/test_joint_daily_integration.py::test_acceptance_during_generation_fences_apply_and_keeps_both_reserved_plans",
+        "tests/runtime/test_joint_daily_integration.py::test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[0-False]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[0-True]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[1-False]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[2-False]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_or_changed_proposal_cannot_be_dispatched_from_new_snapshot",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_proposal_is_not_presented_as_an_open_invitation[expired]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_proposal_is_not_presented_as_an_open_invitation[rejected]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_counter_original_survives_later_comment_and_failed_or_unselected_run",
+        "tests/runtime/test_joint_proposal_inbox.py::test_notification_cap_leaves_proposal_beyond_page_pending_then_visible",
+        "tests/runtime/test_joint_proposal_inbox.py::test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding[None]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding[accept]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms[False]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_ordinary_daily_generation.py": {
+          "time_for_test": [],
+          "new_output": [],
+          "save_plan": [],
+          "topics_ready": [],
+          "test_only_unpreserved_slots_are_generated_and_all_originals_survive": [
+            "assert result.plan_state == 'ready', result",
+            "assert len(calls) == (0 if preserved == 4 else 1)",
+            "assert result.plan_version == (1 if preserved == 4 else 2)",
+            "assert len(final) == 4",
+            "assert source['generated_dayparts'] == list(DAYPARTS[preserved:])",
+            "assert job.input_snapshot['generation_contract'] == GENERATION_CONTRACT",
+            "assert job.state == 'ready'",
+            "assert (row.id, row.title, row.version, row.scheduled_start_at, row.scheduled_end_at) == original[row.daypart]"
+          ],
+          "test_all_preserved_initial_uses_topics_only_and_keeps_plan_unchanged": [
+            "assert result.topic_state == 'ready' and result.plan_version == 1, result",
+            "assert len(seen) == 1 and set(seen[0]) == {'persona', 'world'}",
+            "assert store.plan_snapshot(db, db.get(type(plan), plan.id)) == before",
+            "assert job.mode == 'initial' and job.attempt_count == 1 and (job.state == 'ready')",
+            "assert job.input_snapshot['generated_dayparts'] == []"
+          ],
+          "test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader": [
+            "pytest.raises(ValidationError)",
+            "assert InitialPreparationOutput(daily_plan=raw, recommendation_topics=[{'name': '책 이야기', 'scope': 'common'}])",
+            "assert array['minItems'] == array['maxItems'] == 2",
+            "assert props['daypart']['enum'] == ['afternoon', 'evening']",
+            "assert 'joint_activity' not in props['activity_kind']['enum']",
+            "assert 'joint' not in props['social_mode']['enum']"
+          ],
+          "test_provider_schema_and_validator_use_the_same_daypart_partition": [
+            "assert len(value.daily_plan.items) == 1",
+            "assert 'fixed_items are' in kwargs['system_prompt']",
+            "assert 'recommendation_topics' not in kwargs['response_schema']['properties']",
+            "assert kwargs['response_schema']['properties']['daily_plan']['properties']['items']['maxItems'] == 1",
+            "assert kwargs['validator'](good)",
+            "pytest.raises(store.PreparationConflict, match='dayparts_mismatch')"
+          ],
+          "test_legacy_waiting_job_reuses_its_original_schema_digest_and_source": [
+            "assert db.get(ActivityPreparationJob, job.id).state == 'waiting'",
+            "assert result.plan_state == 'ready' and len(seen) == 1, result",
+            "assert db.get(ActivityPreparationJob, job.id).input_digest == digest",
+            "assert 'generation_contract' not in kwargs['source']"
+          ],
+          "test_new_plan_cannot_overwrite_changed_preserved_window": [
+            "assert result.plan_version == 1 and result.request_state == 'failed'",
+            "assert result.request_reason_code == 'preparation_source_changed'"
+          ]
+        },
+        "tests/runtime/test_feed_observation_writer.py": {
+          "fixture": [],
+          "lane": [],
+          "assert_settled": [
+            "assert row.trace['_activity_observation'] == 'settled'",
+            "assert row.trace['_activity_observation_results'][identity[5]] == {'status': 'observed'}",
+            "assert row.trace['retained'] == 'yes'",
+            "assert row.updated_at == datetime(2026, 9, 29, 9, 17, 16)",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id)).where(models.RelationshipStateChange.actor_world_character_id == identity[1], models.RelationshipStateChange.social_event_id == identity[4])) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id)).where(models.GraphProjectionOutbox.relationship_state_id.in_(select(models.RelationshipState.id).where(models.RelationshipState.actor_world_character_id == identity[1])), models.GraphProjectionOutbox.payload_version == 'relationship-observation-v1')) == 1"
+          ],
+          "test_normal_observer_settles_and_replay_preserves_delivery": [
+            "assert db.get(models.WorldCharacter, identity[1]).local_profile == {'flushed_owner_work': True}"
+          ],
+          "test_short_lock_retries_and_long_lock_remains_pending_until_recovery": [
+            "assert any((facts['result'] == 'busy' for _, facts in events))",
+            "assert all((facts['sqlite_primary_code'] == 5 for _, facts in events if facts['result'] == 'busy'))",
+            "assert all(('business_key_hash' in facts and 'post_id' not in facts for _, facts in events))",
+            "assert events[-1][1]['result'] == 'committed'",
+            "pytest.raises(SqliteBusyRetryExhausted)",
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation'] == 'pending'",
+            "assert busy.wait(timeout=5)"
+          ],
+          "test_second_source_failure_rolls_back_first_receipt_and_settlement": [
+            "pytest.raises(RuntimeError if failure == 'program' else OperationalError, match='synthetic-storage-failure')",
+            "assert failures == [failure]",
+            "assert events == []",
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation'] == 'pending'",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id)).where(models.RelationshipStateChange.actor_world_character_id == identity[1])) == 0"
+          ],
+          "test_unavailable_source_records_reason_without_aborting_valid_observations": [
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation_results']['deleted-source']['status'] == 'not_applied'"
+          ],
+          "test_three_sessions_observe_each_delivery_once": [],
+          "test_settled_replay_still_rejects_corrupt_outbox": [
+            "pytest.raises(ObservationOutboxIntegrityError)"
+          ],
+          "test_pending_scan_stops_after_first_exhausted_writer": [
+            "assert sum((facts['result'] == 'exhausted' for _, facts in events)) == 1",
+            "assert len({facts['business_key_hash'] for _, facts in events}) == 1",
+            "pytest.raises(SqliteBusyRetryExhausted)",
+            "assert all((row.trace['_activity_observation'] == 'pending' for row in db.scalars(select(RecommendationDelivery))))",
+            "assert all((row.trace['_activity_observation'] == 'settled' for row in db.scalars(select(RecommendationDelivery))))"
+          ]
+        },
+        "tests/runtime/test_joint_daily_integration.py": {
+          "database": [],
+          "pair": [],
+          "save_plan": [],
+          "context": [],
+          "adapter": [],
+          "generate_and_write": [],
+          "test_v2_original_proposal_acceptance_and_both_daily_plans": [
+            "assert feed_execution['status'] == 'succeeded'",
+            "assert proposal.status == 'proposed' and db.scalar(select(func.count(models.JointActivity.id))) == 0",
+            "assert state['assignments'][0]['target_post_id'] == original.id",
+            "assert state['drafts'][0]['proposal_response']['proposal_id'] == proposal.id",
+            "assert state['executions'][0]['status'] == 'succeeded', state['executions']",
+            "assert joint.source_acceptance_event_id and proposal.status == 'accepted'",
+            "assert len(participants) == 2",
+            "assert sum((row.linked_daily_activity_plan_item_id is not None for row in participants)) == (2 if existing == 2 else 0)",
+            "assert db.scalar(select(models.Notification).where(models.Notification.source_post_id == later.id)).handled_at is None",
+            "assert db.scalar(select(models.SocialEvent).where(models.SocialEvent.id == joint.source_acceptance_event_id)).event_type == 'joint_accepted'",
+            "assert asyncio.run(inbox.execute(state))['executions'][0]['status'] == 'reused'",
+            "assert db.scalar(select(func.count(models.JointActivity.id))) == 1",
+            "assert db.get(models.JointActivity, joint.id).status == 'ready'",
+            "assert all((row.linked_daily_activity_plan_item_id and row.linked_activity_episode_id for row in db.scalars(select(models.JointActivityParticipant))))",
+            "assert requests == ['FeedDecisionDraft', 'InboxTargetSelector', 'InboxDecisionDraft']",
+            "assert db.scalar(select(func.count(models.SocialEvent.id)).where(models.SocialEvent.event_type == 'joint_started')) == 0",
+            "assert 'evening' not in source['generated_dayparts']",
+            "assert len(rows) == 4",
+            "assert sum((row.joint_activity_id == joint.id for row in rows)) == 1",
+            "assert len(api_plan.items) == 4",
+            "assert sum((item.joint_activity_id == joint.id for item in api_plan.items)) == 1"
+          ],
+          "test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation": [
+            "assert 'dawn' in source['generated_dayparts'] and source['confirmed_reservations'] == []",
+            "assert len(rows) == 4 and all((row.joint_activity_id is None for row in rows))",
+            "assert next((row for row in rows if row.daypart == 'dawn')).status == 'skipped'",
+            "assert all((row.linked_daily_activity_plan_item_id is None for row in db.scalars(select(models.JointActivityParticipant))))",
+            "assert db.scalar(select(func.count(models.SocialEvent.id)).where(models.SocialEvent.event_type == 'joint_started')) == 0"
+          ],
+          "test_acceptance_during_generation_fences_apply_and_keeps_both_reserved_plans": [
+            "assert len(calls) == 1 and result.request_reason_code == 'preparation_source_changed'",
+            "assert joint.status == 'ready'",
+            "assert db.scalar(select(func.count(models.JointActivityParticipant.world_character_id))) == 2",
+            "assert len(rows) == 4 and sum((row.joint_activity_id == joint.id for row in rows)) == 1"
+          ]
+        },
+        "tests/runtime/test_joint_proposal_inbox.py": {
+          "fixture": [],
+          "notify": [],
+          "lane": [],
+          "test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms": [
+            "assert len(state['candidates']) == 2",
+            "assert proposal['source_ids'] == [value.proposal_comment.id]",
+            "assert ordinary['source_ids'] == [later.id]",
+            "assert proposal['activity_proposal']['proposal_id'] == value.proposal.id",
+            "assert state['lane_data'][proposal['target_id']]['post_id'] == value.proposal_comment.id",
+            "assert state['lane_data'][proposal['target_id']]['notification_ids'] == [notifications[value.proposal_comment.id].id]",
+            "assert state['lane_data'][ordinary['target_id']]['notification_ids'] == [notifications[later.id].id]",
+            "assert len({alarm for data in state['lane_data'].values() for alarm in data['notification_ids']}) == 2",
+            "assert notifications[later.id].handled_at is not None",
+            "assert notifications[value.proposal_comment.id].handled_at is None"
+          ],
+          "test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding": [
+            "assert response['proposal_id'] == 'accepted-original-id' and response['decision'] == decision",
+            "assert response is None"
+          ],
+          "test_counter_original_survives_later_comment_and_failed_or_unselected_run": [
+            "assert len(state['candidates']) == 3",
+            "assert original['activity_proposal']['proposal_id'] == changed.child_proposal.id",
+            "assert original['source_ids'] == [counter.id]",
+            "assert state['lane_data'][original['target_id']]['notification_ids'] == [original_alarm.id]",
+            "assert all((alarm.handled_at is None for alarm in (original_alarm, later_alarm, branch_alarm)))",
+            "assert db.scalar(select(models.JointActivity)) is None"
+          ],
+          "test_closed_proposal_is_not_presented_as_an_open_invitation": [
+            "assert all((candidate['activity_proposal'] is None for candidate in result['candidates']))",
+            "assert alarm.handled_at is None"
+          ],
+          "test_notification_cap_leaves_proposal_beyond_page_pending_then_visible": [
+            "assert all((row['activity_proposal'] is None for row in first['candidates']))",
+            "assert sum((len(row['notification_ids']) for row in first['lane_data'].values())) == 10",
+            "assert proposal_alarm.handled_at is None",
+            "assert second['candidates'][0]['activity_proposal']['proposal_id'] == value.proposal.id",
+            "assert all((row.handled_at for row in earlier)) and proposal_alarm.handled_at is None"
+          ],
+          "test_closed_or_changed_proposal_cannot_be_dispatched_from_new_snapshot": [
+            "pytest.raises(ValueError, match='activity_proposal_changed')",
+            "assert alarm.handled_at is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_ordinary_daily_generation.py": {},
+        "tests/runtime/test_feed_observation_writer.py": {},
+        "tests/runtime/test_joint_daily_integration.py": {},
+        "tests/runtime/test_joint_proposal_inbox.py": {}
+      }
     }
   ]
 }

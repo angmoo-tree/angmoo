@@ -144,3 +144,13 @@ Sakana의 최초 실패는 `accept`인데 `counter_target_daypart/date_policy/ta
 ## 9. 커밋·검증 식별
 
 이 문서·제품 코드·회귀 테스트·명시적 opt-in 평가 도구를 현재 브랜치에 지정 stage하여 로컬 커밋한다. 최종 SHA와 테스트 수는 작업 종료 시 실행 계획 §10 및 증거 폴더의 `completion.json`에 기록한다. 이 문서를 포함한 커밋은 `git log -1 -- docs/verification/daily-joint-feed-20260929.md`로 확인할 수 있다.
+
+## 10. 공개 전 이력·검증 자료 보완
+
+위 결과는 로컬 구현 당시의 기록이다. 2026-09-29 후속 공개 단계에서는 동일 제품 코드에 DCO trailer를 보완하면서 미공개 커밋 SHA가 변경됐다. 구현 전 `003d3876d50f6be0b2fd0e8e20a90ebac894feb8`은 `f7b7499d4e14cd933b8f8c7eec3fab1f18af9778`, 구현 완료 `480d3bca8cfdd47c71ca5fffda4f3a339d939cd6`은 `eb8473cc0b3aff0eead24fb6196b1f711642c45b`에 대응한다. 두 이력의 제품 소스·테스트는 같으며, source/test 도입 근거와 제품 변경 manifest는 새 선행 커밋을 정확하게 참조한다. 원래 이력은 로컬 backup ref와 bundle에 보존했다.
+
+이 단계에서 Feed 저장 모듈이 누락된 현재 import inventory를 정상 생성기로 갱신했다. 최신 목록은 `modules=1303`, `internal_edges=5269`, `external_imports=3818`, `legacy_exact_edges=0`이다. 위 §6의 이전 목록 수치는 당시 기록으로 남긴다. 고정 checkpoint는 갱신하지 않는다.
+
+이번 PR은 앞선 Routine 출력 책임 분리·에너지 제거·답글 복제 방지와 World 프로필 이름의 요청용 치환까지 함께 포함한다. 이름·상태·실행 버전과 이전 자료 읽기 경계, embedded schema v24/v25 및 설치 업그레이드를 최종 후보 CI에서 검증한다. 로컬 회귀 155건과 과거 승인된 실제 AI 평가를 새 원격 CI의 결과로 표시하지 않는다. 공개·CI 작업에는 추가 실제 AI 호출이 없고, 사용자 Docker 관찰의 소스·DB·컨테이너를 변경하지 않는다.
+
+관련 구현 문서는 [요청용 이름 치환](../operations/persona-name-binding.md), [이슈 #345](https://github.com/angmoo-tree/angmoo/issues/345)에서 확인할 수 있다. 위 workspace 계획·증거 경로는 원래 로컬 재현 자료의 위치이며 공개 저장소에 해당 자료를 포함한다는 의미가 아니다. 최종 PR·CI 결과와 main 병합 대기 상태는 PR 본문에 별도로 기록한다.
