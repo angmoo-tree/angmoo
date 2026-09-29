@@ -192,9 +192,16 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                 raise exc
             ctx.db.rollback()
             if lane == "feed":
-                adapters[lane].observe_delivered()
-                if identity["contract_version"] == 2:
-                    adapters[lane].reconcile_deliveries()
+                original_error_id = attempt.last_error_event_id if attempt else None
+                try:
+                    adapters[lane].observe_delivered()
+                    if identity["contract_version"] == 2:
+                        adapters[lane].reconcile_deliveries()
+                except Exception as cleanup_error:
+                    if attempt:
+                        attempt.emit("feed_observation_cleanup_error", lane="feed", classification="failed",
+                            exc=cleanup_error, caused_by_event_id=original_error_id)
+                    raise cleanup_error from exc
             import re
             reason = str(exc) if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,100}", str(exc)) else type(exc).__name__
             if lane == "routine":

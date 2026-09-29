@@ -252,7 +252,14 @@ def parse_writer_output(value, *, lane: str, assignments: list[dict]):
         if any(row.get(k) != (fixed.get(k) if fixed else None) for k in fields):
             raise ValueError("writer_changed_proposal_decision")
         row["_activity_thought"] = asdict(parse_activity_thought(row.pop("thought", None)))
-    return _apply_reply_writer_output({}, assignments, output,
+    # Old checkpoints have the same frozen proposal inside source, but did not
+    # copy it to the legacy Writer task field. Never resolve a different live
+    # proposal here, or convert an ordinary reply into a proposal response.
+    writer_tasks = [{**task, "activity_proposal": task.get("activity_proposal")
+        or task.get("source", {}).get("activity_proposal")}
+        if task.get("proposal_response") is not None else {**task, "activity_proposal": None}
+        for task in assignments]
+    return _apply_reply_writer_output({}, writer_tasks, output,
         repair_attempted=False, writer_node=f"{lane.title()}Writer")[0]
 
 

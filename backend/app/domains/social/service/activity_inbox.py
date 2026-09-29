@@ -38,3 +38,28 @@ def pending_conversations(db, *, actor, allowed_actions, limit=10):
         entry["notifications"].append(row)
         entry["affordance"] = affordance
     return list(groups.values())
+
+
+def separate_source_conversations(db, *, actor, groups, source_post_ids, allowed_actions):
+    """Keep designated originals independent without rereading more alarms.
+
+    The runtime identifies open proposals. This social owner retains branch
+    grouping and computes the affordance for each actual notification target.
+    Every notification in the bounded input belongs to exactly one group.
+    """
+    result = []
+    for group in groups:
+        posts = {post.id: post for post in group["posts"]}
+        partitions = {}
+        for notification in group["notifications"]:
+            post_id = notification.source_post_id or notification.post_id
+            key = post_id if post_id in source_post_ids else None
+            entry = partitions.setdefault(key, {**group, "posts": [], "notifications": []})
+            post = posts[post_id]
+            if all(row.id != post_id for row in entry["posts"]):
+                entry["posts"].append(post)
+            entry["notifications"].append(notification)
+            entry["affordance"] = resident_inbox_action_affordance(db, notification=notification,
+                character_id=actor.character_id, allowed_actions=allowed_actions)
+        result.extend(partitions.values())
+    return sorted(result, key=lambda group: (group["notifications"][0].created_at, group["notifications"][0].id))

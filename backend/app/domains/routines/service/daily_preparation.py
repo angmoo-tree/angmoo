@@ -20,7 +20,7 @@ from app.domains.routines.models.plans import DailyActivityPlan, DailyActivityPl
 from app.domains.routines.constants import TIMEZONE_CONTRACT_VERSION
 from app.domains.routines.policies.activity_state import initial_state
 from app.domains.routines.policies.planning import daypart_windows
-from app.domains.routines.schemas.daily_generation import GeneratedDailyPlan
+from app.domains.routines.schemas.daily_generation import GeneratedDailyPlan, OrdinaryGeneratedPlan, DAYPARTS
 from app.domains.routines.service import joint_reservations
 
 CONTRACT = "daily-plan-v1"
@@ -136,6 +136,7 @@ def claim(db: Session, *, wc_id: str, world_id: str, target_date: date, timezone
              version=job.version + 1)).rowcount
     if changed != 1:
         raise PreparationConflict("preparation_claim_conflict")
+    db.refresh(job)  # Return the accepted CAS state even with expire_on_commit=False.
     return job, token
 
 
@@ -153,7 +154,7 @@ def reserve_attempt(db: Session, job_id: str, token: str, *, json_retry=False):
 
 @_write
 def finish_failure(db: Session, job_id: str, token: str, code: str, *, retry_at=None, usage=None):
-    job = db.get(ActivityPreparationJob, job_id)
+    job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
     if job is None or job.claim_token != token or job.state != "running":
         return
     job.state = "waiting" if retry_at and job.attempt_count < 4 else "failed"
@@ -176,6 +177,24 @@ def validate_plan(output: GeneratedDailyPlan, *, allowed_places: dict[str, set[s
         proposed = by_daypart[fixed["daypart"]].model_dump()
         if any(proposed[key] != fixed[key] for key in proposed):
             raise PreparationConflict("daily_plan_fixed_item_changed")
+
+
+def compose_generated_plan(output: OrdinaryGeneratedPlan | None, *, generated_dayparts: list[str],
+                           fixed_items: list[dict], allowed_places: dict[str, set[str]]) -> GeneratedDailyPlan:
+    """Validate new directions, then combine untouched server-held directions."""
+    items = OrdinaryGeneratedPlan.model_validate(output.model_dump()).items if output is not None else []
+    if len(items) != len(generated_dayparts) or {item.daypart for item in items} != set(generated_dayparts):
+        raise PreparationConflict("daily_generation_dayparts_mismatch")
+    fixed = {item["daypart"]: item for item in fixed_items}
+    if len(fixed) != len(fixed_items) or set(fixed) & set(generated_dayparts) or set(fixed) | set(generated_dayparts) != set(DAYPARTS):
+        raise PreparationConflict("daily_generation_partition_invalid")
+    # Historical completed/pinned data is not re-authored or revalidated as a
+    # new ordinary direction. Generated place values still require permission.
+    for item in items:
+        if item.place_key is not None and item.place_key not in allowed_places.get(item.daypart, set()):
+            raise PreparationConflict("daily_plan_place_invalid")
+    by_daypart = {**fixed, **{item.daypart: item.model_dump() for item in items}}
+    return GeneratedDailyPlan(items=[by_daypart[part] for part in DAYPARTS])
 
 
 def preserve_item(db: Session, item) -> bool:

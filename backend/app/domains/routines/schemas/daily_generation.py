@@ -6,6 +6,10 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.domains.routines.schemas.plans import ActivityDaypart
+
+GENERATION_CONTRACT = "daily-generation-v2"
+DAYPARTS = ("dawn", "morning", "afternoon", "evening")
+
 class InitialTopicDefinition(BaseModel):
     """Initial preparation transport; social service validates canonical identity."""
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
@@ -52,6 +56,55 @@ class InitialPreparationOutput(DailyPreparationOutput):
         if any(len(name) < 2 for _, name in keys) or len(set(keys)) != len(keys):
             raise ValueError("daily_preparation_topics_invalid")
         return self
+
+
+class OrdinaryGenerationItem(DailyGenerationItem):
+    """New provider output excludes server-owned confirmed reservations."""
+    activity_kind: Literal["duty", "rest", "self_care", "hobby", "exploration", "social", "maintenance", "challenge"]
+    social_mode: Literal["solo", "open_to_interaction", "cooperative"]
+
+
+class OrdinaryGeneratedPlan(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    items: list[OrdinaryGenerationItem] = Field(min_length=1, max_length=4)
+
+    @model_validator(mode="after")
+    def unique_dayparts(self):
+        if len({item.daypart for item in self.items}) != len(self.items):
+            raise ValueError("daily_plan_dayparts_invalid")
+        return self
+
+
+class OrdinaryPreparationOutput(DailyPreparationOutput):
+    daily_plan: OrdinaryGeneratedPlan
+
+
+class OrdinaryInitialOutput(InitialPreparationOutput):
+    daily_plan: OrdinaryGeneratedPlan
+
+
+class InitialTopicsOnlyOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    recommendation_topics: list[InitialTopicDefinition] = Field(min_length=1, max_length=24)
+
+    @model_validator(mode="after")
+    def distinct_topics(self):
+        import unicodedata
+        keys = [(topic.scope, "".join(unicodedata.normalize("NFKC", topic.name).casefold().split()))
+                for topic in self.recommendation_topics]
+        if any(len(name) < 2 for _, name in keys) or len(set(keys)) != len(keys):
+            raise ValueError("daily_preparation_topics_invalid")
+        return self
+
+
+def preparation_output_type(source: dict, *, initial: bool):
+    if source.get("generation_contract") != GENERATION_CONTRACT:
+        return InitialPreparationOutput if initial else DailyPreparationOutput
+    if not source["generated_dayparts"]:
+        if not initial:
+            raise ValueError("daily_generation_not_required")
+        return InitialTopicsOnlyOutput
+    return OrdinaryInitialOutput if initial else OrdinaryPreparationOutput
 
 
 class DailyPreparationRequest(BaseModel):
