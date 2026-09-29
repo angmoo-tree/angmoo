@@ -237,7 +237,10 @@ async def regenerate(db: Session, *, world_id: str, owner_id: str, request_id: s
                 if names is not None:
                     actor, _ = owned_character(work, world_character_id, owner_id, world_id)
                     validate_name_binding(work, names, actor=actor, owner_id=owner_id)
-                    source["persona"] = render_persona(source["persona"], names)
+                    # Daily preparation has a persona; the preserved approved-
+                    # profile source keeps its own shape and provenance.
+                    if "persona" in source:
+                        source["persona"] = render_persona(source["persona"], names)
                 work.commit()  # No request snapshot read transaction across AI.
                 result = authored_topics(await generator(material, character_id, source), names)
                 if not 1 <= len(result.topics) <= (24 if world_character_id else 64):

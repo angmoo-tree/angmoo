@@ -2254,7 +2254,7 @@
     },
     {
       "path": "backend/app/runtime/social/topic_preparation.py",
-      "sha256": "d7ece7fab901a248319c0d04ee8c91fc7db0422557a61365fcbbf2e900897724"
+      "sha256": "cdd1e6c5d4b8411e46306cee3205fba3b0f2969cc8222e4b26c89a4aa7e16ddc"
     },
     {
       "path": "backend/app/runtime/social/topic_scope.py",
