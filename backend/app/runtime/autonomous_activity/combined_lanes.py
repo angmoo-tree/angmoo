@@ -48,20 +48,44 @@ class CombinedGeneration:
             except Exception as exc:
                 raise ActivityRetryGuardError(exc) from exc
         self.provider.request_guard = guard_request
-        if state.get("generation_mode") == "split":
+        mode = state.get("generation_mode")
+        if mode == "split" and not isinstance(self, RoutineLane):
             return await super().write(state)
-        if state.get("generation_mode") != "combined":
+        if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
         raw = state["decision"].get("provisional_draft")
         try:
+            if mode == "split":
+                return await super().write(state)
             if isinstance(self, RoutineLane):
+                from app.domains.characters.policies.authored_names import authored_routine_draft
+                from app.runtime.autonomous_activity.name_binding import activity_name_binding, observe_output
+                names, fields = activity_name_binding(self.ctx), {}
+                raw = authored_routine_draft(raw, names, receipt=fields)
+                observe_output(self.tracker, names, lane="routine", fields=fields)
                 drafts = [parse_routine_draft(raw)]
+                self.validate_original_draft(drafts[0])
             else:
+                from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
+                names, fields = activity_name_binding(self.ctx), {}
+                raw = social_draft_names(raw, names,
+                    assignments=state["assignments"], combined=True, lane=self.lane, receipt=fields)
+                observe_output(self.tracker, names, lane=self.lane, fields=fields)
                 drafts = parse_social_draft(raw, lane=self.lane,
                     assignments=state["assignments"])["reply_task_results"]
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
+            if mode == "split" and str(exc) != "routine_reuses_published_reply" and not str(exc).startswith("name_"):
+                raise
+            if isinstance(self, RoutineLane):
+                self.writer_feedback = {"validation_code": str(exc) if str(exc).startswith("name_") or str(exc) == "routine_reuses_published_reply" else "routine_draft_invalid",
+                    "instruction": "Write a new original Routine post from the same validated plan; the previous draft was rejected."}
+            elif str(exc).startswith("name_"):
+                state = {**state, "decision_context": {**state["decision_context"], "writer_feedback": {
+                    "validation_code": str(exc), "instruction": "Use the actual recipient from each assignment. "
+                    "Never address another character as the bound World user or copy unresolved macros from history. "
+                    "Keep the validated actions and sources unchanged."}}}
             if getattr(self.tracker, "observer", None) is not None:
                 import re
                 reason = str(exc) if re.fullmatch(r"[a-z][a-z0-9_]{0,80}", str(exc)) else "combined_draft_invalid"

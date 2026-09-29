@@ -339,8 +339,12 @@ def test_manual_plan_revision_preserves_completed_item_and_episode(preparation_s
         value = output()
         for item in value.items:
             if item.daypart == "afternoon": item.title = "수정한 오후 일과"
-        return (InitialPreparationOutput(daily_plan=value, recommendation_topics=[dict(name="독서", scope="common")])
-                if kwargs["initial"] else DailyPreparationOutput(daily_plan=value)), SimpleNamespace(calls=[])
+        from app.domains.routines.schemas.daily_generation import preparation_output_type
+        generated = kwargs["source"].get("generated_dayparts", [item.daypart for item in value.items])
+        fields = {"daily_plan": {"items": [item.model_dump() for item in value.items if item.daypart in generated]}}
+        if kwargs["initial"]:
+            fields["recommendation_topics"] = [dict(name="독서", scope="common")]
+        return preparation_output_type(kwargs["source"], initial=kwargs["initial"])(**fields), SimpleNamespace(calls=[])
     args = dict(character_id=ready.character.id, world_id=world.id, user=ready.user, generator=generate, now=at)
     first = asyncio.run(runtime.ensure_preparation(db, **args, request_id="create-plan"))
     items = service.current_items(db, first.plan_id)
@@ -364,7 +368,7 @@ def test_new_policy_rejects_unexecuted_old_checkpoint_actions(preparation_scope,
     from app.runtime.autonomous_activity.social_lane import SocialLane
     db, world, ready, runtime = preparation_scope
     lane = object.__new__(SocialLane)
-    lane.ctx = SimpleNamespace(db=db, run_id="nonexistent-run")
+    lane.ctx = SimpleNamespace(db=db, run_id="nonexistent-run", character=ready.character)
     lane.lane = "feed"
     executed = []
     lane.action_executor = lambda *a, **k: executed.append(k)

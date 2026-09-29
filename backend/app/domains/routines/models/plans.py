@@ -454,6 +454,9 @@ class ActivityBeat(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    state_schema_version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default="1"
+    )
 
 
 class ActivityEventConsumption(Base):

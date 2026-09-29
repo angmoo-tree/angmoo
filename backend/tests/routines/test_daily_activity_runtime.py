@@ -47,6 +47,7 @@ def legacy_candidate_plan_contract(monkeypatch: pytest.MonkeyPatch) -> None:
     # Preserve the old candidate-plan API contract without changing the default.
     from app.config import settings
     monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
+    monkeypatch.setattr(settings, "ROUTINE_OUTPUT_POLICY", "legacy")
 
 
 @dataclass(frozen=True)

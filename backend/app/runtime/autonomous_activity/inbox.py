@@ -2,7 +2,7 @@
 from datetime import UTC, datetime
 
 from app.domains.social.models.posts import Notification
-from app.domains.social.service.activity_inbox import pending_conversations
+from app.domains.social.service.activity_inbox import pending_conversations, separate_source_conversations
 from app.runtime.autonomous_activity.contracts import Candidate, identity_key
 from app.runtime.autonomous_activity.social_lane import SocialLane
 from app.runtime.relationships.experience_metrics import post_revision
@@ -11,14 +11,23 @@ from app.runtime.relationships.experience_metrics import post_revision
 class InboxLane(SocialLane):
     async def load(self, state):
         candidates, data = [], {}
-        for group in pending_conversations(self.ctx.db, actor=self.actor,
-                allowed_actions=self.ctx.activity_policy.allowed_actions):
+        from app.runtime.social.langgraph_actions import proposal_for_notification
+        groups = pending_conversations(self.ctx.db, actor=self.actor,
+            allowed_actions=self.ctx.activity_policy.allowed_actions)
+        proposals = {post.id: proposal_for_notification(self.ctx.db,
+            recipient_character_id=self.ctx.character.id, source_post_id=post.id)
+            for group in groups for post in group["posts"]}
+        groups = separate_source_conversations(self.ctx.db, actor=self.actor, groups=groups,
+            source_post_ids={key for key, value in proposals.items() if value is not None},
+            allowed_actions=self.ctx.activity_policy.allowed_actions)
+        for group in groups:
             posts, notifications = group["posts"], group["notifications"]
             post = posts[-1]
             key = identity_key(self.actor.id, group["counterpart_id"], group["branch_id"], *(str(n.id) for n in notifications))
-            from app.runtime.social.langgraph_actions import proposal_for_notification
-            proposal = proposal_for_notification(self.ctx.db, recipient_character_id=self.ctx.character.id, source_post_id=post.id)
-            proposal_input = None if proposal is None else {"proposal_id": proposal.id, "activity_seed": proposal.activity_seed, "place_key": proposal.place_key, "target_daypart": proposal.target_daypart, "date_policy": proposal.date_policy, "target_date": str(proposal.target_date) if proposal.target_date else None}
+            proposal = proposals.get(post.id)
+            if proposal is not None:
+                key = identity_key(key, post.id, proposal.id)
+            proposal_input = None if proposal is None else {"proposal_id": proposal.id, "version": proposal.version, "activity_seed": proposal.activity_seed, "place_key": proposal.place_key, "target_daypart": proposal.target_daypart, "date_policy": proposal.date_policy, "target_date": str(proposal.target_date) if proposal.target_date else None}
             allowed = ["comment" if a == "reply" else a for a in group["affordance"]["available_actions"]]
             from app.config import settings
             if settings.DAILY_PREPARATION_ENABLED:
@@ -34,7 +43,29 @@ class InboxLane(SocialLane):
                 waiting_since=notifications[0].created_at.isoformat()).model_dump())
             data[key] = {"post_id": post.id, "notification_id": notifications[-1].id,
                 "notification_ids": [n.id for n in notifications]}
+            if proposal is not None:
+                data[key].update(proposal_id=proposal.id, proposal_version=proposal.version)
         return {"candidates": candidates, "lane_data": data}
+
+    async def guard(self, state):
+        await super().guard(state)
+        if state.get("stage") not in {"TargetSelector", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
+            return {}
+        from app.runtime.social.langgraph_actions import proposal_for_notification
+        selected = {item["target_id"] for item in state.get("selections", [])}
+        for candidate in state.get("candidates", []):
+            if selected and candidate["target_id"] not in selected:
+                continue
+            data = state.get("lane_data", {}).get(candidate["target_id"], {})
+            if "proposal_version" not in data:
+                continue  # Frozen old checkpoints keep their accepted target identity.
+            if self.completed_action(state, candidate["target_id"]):
+                continue
+            proposal = proposal_for_notification(self.ctx.db, recipient_character_id=self.ctx.character.id,
+                source_post_id=data["post_id"])
+            if proposal is None or (proposal.id, proposal.version) != (data["proposal_id"], data["proposal_version"]):
+                raise ValueError("activity_proposal_changed")
+        return {}
 
     async def finalize(self, state):
         from app.runtime.social.langgraph_actions import mark_notification_handled_without_public_action

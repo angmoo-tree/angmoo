@@ -17,6 +17,12 @@ from app.runtime.routines.activity_references import SqlAlchemyActivityReference
 from routines.test_daily_activity_runtime import _add_social_event, _prepare, _seed, _utc
 
 
+@pytest.fixture(autouse=True)
+def legacy_state_contract(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "ROUTINE_OUTPUT_POLICY", "legacy")
+
+
 @pytest.mark.parametrize(
     "owner_controlled", [False, True], ids=["autonomous", "owner-controlled"]
 )

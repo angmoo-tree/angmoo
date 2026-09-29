@@ -164,7 +164,7 @@ def test_active_automatic_root_does_not_lose_leftover_memory(memory_session, mon
 
 
 def test_v18_migration_preserves_v17_manifest_and_fresh_parity():
-    from app.runtime.persistence.sqlite_schema import build_sqlite_v17_metadata, build_sqlite_baseline_metadata, create_schema_version_table, sqlite_schema_contract_digest
+    from app.runtime.persistence.sqlite_schema import build_sqlite_v17_metadata, build_sqlite_v23_metadata, build_sqlite_baseline_metadata, create_schema_version_table, sqlite_schema_contract_digest, SQLITE_SCHEMA_VERSION
     from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
     from app.runtime.migrations.sqlite_versions.v17_to_v18_manual_review import capture_delta, upgrade, verify_delta
     with create_engine("sqlite://").begin() as c:
@@ -175,8 +175,11 @@ def test_v18_migration_preserves_v17_manifest_and_fresh_parity():
 
         assert not c.exec_driver_sql("PRAGMA foreign_key_check").all()
     with create_engine("sqlite://").begin() as c:
-        build_sqlite_baseline_metadata().create_all(c); create_schema_version_table(c)
+        build_sqlite_v23_metadata().create_all(c); create_schema_version_table(c)
         assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(23).schema_digest
+    with create_engine("sqlite://").begin() as c:
+        build_sqlite_baseline_metadata().create_all(c); create_schema_version_table(c)
+        assert sqlite_schema_contract_digest(c) == load_sqlite_manifest(SQLITE_SCHEMA_VERSION).schema_digest
 
 
 @pytest.mark.parametrize("same_key", [True, False])

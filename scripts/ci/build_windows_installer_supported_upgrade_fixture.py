@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -631,6 +631,19 @@ def _seed_supported_predecessor(
                     build_sqlite_v19_metadata,
                 )
                 from app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding import TABLES as EMBEDDING_V12_TABLES
+                if source_version < 25:
+                    # Freeze the synthetic source schema before the v25-only
+                    # nullable request metadata. Production uses the forward
+                    # migration; its historical rows are never reconstructed.
+                    sql_connection.exec_driver_sql(
+                        'ALTER TABLE "social_recommendation_preparations" DROP COLUMN "request_snapshot"'
+                    )
+                if source_version < 24:
+                    # Only this isolated synthetic predecessor is reconstructed;
+                    # actual installed generations use the forward migration.
+                    sql_connection.exec_driver_sql(
+                        'ALTER TABLE "activity_beats" DROP COLUMN "state_schema_version"'
+                    )
                 if source_version < 23:
                     from app.runtime.persistence.sqlite_schema import build_sqlite_v22_metadata
                     Base.metadata.tables["activity_preparation_jobs"].drop(sql_connection, checkfirst=True)

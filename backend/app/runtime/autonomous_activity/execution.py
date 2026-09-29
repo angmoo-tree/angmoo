@@ -44,11 +44,20 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     identity = ActivityIdentity(activity_id=run.activity_id, world_id=actor.world_id, actor_id=actor.id,
         contract_version=run.contract_version,
         cause="manual" if "manual" in ctx.session_key else "scheduled", generation_model=ctx.generation_model, thinking_level=ctx.generation_thinking_level).model_dump()
+    policy = (run.result or {}).get("routine_policy")
+    from app.contracts.name_binding import read_name_binding
+    from app.domains.world_characters.service.name_binding import validate_name_binding
+    name_binding = read_name_binding(run.result)
+    frozen_names = (run.result or {}).get("name_binding")
+    name_policy = (run.result or {}).get("name_binding_policy")
+    if policy is not None:
+        identity.update(routine_output_contract=policy["output_contract"], routine_state_schema_version=policy["state_schema_version"], routine_thought_policy=policy["thought_policy"])
     if attempt:
         attempt.emit("activity_identity", details={
             "cause": identity["cause"], "contract_version": identity["contract_version"],
             "generation_model": identity["generation_model"],
-            "thinking_level": identity["thinking_level"]})
+            "thinking_level": identity["thinking_level"], "routine_output_contract": identity["routine_output_contract"],
+            "routine_state_schema_version": identity["routine_state_schema_version"], "routine_thought_policy": identity["routine_thought_policy"]})
 
     def validate_claim():
         """Read-only claim fence; also runs inside each fresh writer boundary."""
@@ -65,6 +74,14 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
         if row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]:
             raise ActivityScopeChangedError("activity_contract_changed")
+        if (row.result or {}).get("routine_policy") != policy:
+            raise ActivityScopeChangedError("routine_policy_changed")
+        if (row.result or {}).get("name_binding") != frozen_names:
+            raise ActivityScopeChangedError("name_binding_changed")
+        if (row.result or {}).get("name_binding_policy") != name_policy:
+            raise ActivityScopeChangedError("name_binding_changed")
+        if name_binding is not None:
+            validate_name_binding(ctx.db, name_binding, actor=current_actor, owner_id=ctx.user_id)
         from app.domains.routines.models import AgentRun, AgentSlot
         from app.domains.world_characters.service.activity_state import utc
         slot = ctx.db.get(AgentSlot, ctx.agent_id, populate_existing=True)
@@ -79,7 +96,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
 
     async def guard(state):
         stored_identity = state.get("identity", identity)
-        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level")):
+        if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level", "routine_output_contract", "routine_state_schema_version", "routine_thought_policy")):
             raise ActivityScopeChangedError("activity_identity_or_model_changed")
         ctx.db.expire_all()
         row, slot, now = validate_claim()
@@ -121,7 +138,12 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
         ctx.db.commit()
-        return {"shared_context": plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))}
+        shared = plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))
+        if attempt and name_binding is not None:
+            attempt.emit("name_binding", details={"policy_version": name_binding.policy_version,
+                "binding_digest": name_binding.digest, "profile_version": name_binding.user_profile_version,
+                "fields": shared["persona"]["name_binding"]["fields"]})
+        return {"shared_context": shared}
 
     async def finish(state):
         results = {path: state.get(f"{path}_result", {}) for path in ("inbox", "routine", "feed")}
@@ -170,9 +192,16 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                 raise exc
             ctx.db.rollback()
             if lane == "feed":
-                adapters[lane].observe_delivered()
-                if identity["contract_version"] == 2:
-                    adapters[lane].reconcile_deliveries()
+                original_error_id = attempt.last_error_event_id if attempt else None
+                try:
+                    adapters[lane].observe_delivered()
+                    if identity["contract_version"] == 2:
+                        adapters[lane].reconcile_deliveries()
+                except Exception as cleanup_error:
+                    if attempt:
+                        attempt.emit("feed_observation_cleanup_error", lane="feed", classification="failed",
+                            exc=cleanup_error, caused_by_event_id=original_error_id)
+                    raise cleanup_error from exc
             import re
             reason = str(exc) if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,100}", str(exc)) else type(exc).__name__
             if lane == "routine":

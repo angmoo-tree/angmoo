@@ -55,6 +55,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         POST_IMAGE_JOB_WORKER_ENABLED: "false",
         POLLINATIONS_SERVICE_IMAGE_ENABLED: "false",
       },
+      detached: process.platform !== "win32",
       stdio: ["ignore", "pipe", "pipe"],
     });
     backendLog = captureOutput(backend);
@@ -69,6 +70,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
           ANGMOO_API_BASE_URL: backendUrl,
           NEXT_TELEMETRY_DISABLED: "1",
         },
+        detached: process.platform !== "win32",
         stdio: ["ignore", "pipe", "pipe"],
       });
     frontendLog = captureOutput(frontend);
@@ -76,8 +78,11 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
   });
 
   test.afterAll(async () => {
-    if (frontend) await stopChild(frontend);
-    if (backend) await stopChild(backend);
+    try {
+      if (frontend) await stopChild(frontend);
+    } finally {
+      if (backend) await stopChild(backend);
+    }
     if (dataRoot) console.log(`Isolated card upload data root: ${dataRoot}`);
   });
 
@@ -119,7 +124,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       const response = await uploaded;
       expect(response.status(), `${basename(filePath)}: ${await response.text()}`).toBe(200);
       const result = await response.json() as { card_version: number; draft: {
-        id: string; name: string; source_kind: string; revision: number; avatar_temp_url: string | null;
+        id: string; name: string; worldview: string; source_kind: string; revision: number; avatar_temp_url: string | null;
       }};
       expect(result.card_version).toBe(name === "Seraphina" ? 3 : 2);
       expect(result.draft.name).toBe(name === "FluxTheCat" ? "Flux the Cat" : name);
@@ -133,7 +138,16 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       expect((await source.json()).sha256).toBe(record!.sha256.toLowerCase());
       const reloaded = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}`);
       expect(reloaded.status(), await reloaded.text()).toBe(200);
-      expect((await reloaded.json()).revision).toBe(result.draft.revision);
+      const rawDraft = await reloaded.json();
+      expect(rawDraft.revision).toBe(result.draft.revision);
+      await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+      // Textarea DOM normalizes CRLF; the stored draft and card bytes below do not.
+      await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(rawDraft.worldview.replace(/\r\n?/g, "\n"));
+      await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+      const savedDraft = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}`);
+      const saved = await savedDraft.json();
+      expect(saved.worldview).toBe(rawDraft.worldview);
+      result.draft.revision = saved.revision;
 
       if (name === "Sakana") {
         const cardUrl = base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/card`;
@@ -171,11 +185,67 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       expect((await afterFailedPrepare.json()).request_id).toBeNull();
       expect((await afterFailedPrepare.json()).plan_state).toBe("pending");
 
+      if (name === "Sakana") {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.goto(base + `/agents/${encodeURIComponent(character.id)}?tab=settings`);
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(saved.worldview.replace(/\r\n?/g, "\n"));
+        await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).not.toHaveAttribute("required", "");
+        const macroSource = "{{char}}의 동료: {{user}}. 입력 원문은 그대로 저장합니다.";
+        await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill(macroSource);
+        const savedPersona = page.waitForResponse((response) => response.request().method() === "PUT"
+          && new URL(response.url()).pathname.endsWith(`/agents/${character.id}/persona`));
+        await page.getByRole("button", { name: "페르소나 저장", exact: true }).click();
+        expect((await savedPersona).status()).toBe(200);
+        await page.reload();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(macroSource);
+
+        await page.goto(base + `/agents/new?worldId=${encodeURIComponent(world.id)}`);
+        await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+        const worldUpload = page.waitForResponse((response) => response.request().method() === "POST"
+          && /^\/api\/backend\/agents\/drafts\/[^/]+\/card$/.test(new URL(response.url()).pathname));
+        await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles(filePath);
+        expect((await worldUpload).status()).toBe(200);
+        await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(saved.worldview.replace(/\r\n?/g, "\n"));
+        await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+        await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).focus();
+        await page.keyboard.press("Tab");
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).not.toBeFocused();
+        await page.setViewportSize({ width: 1280, height: 900 });
+      }
+
       await page.evaluate(() => sessionStorage.removeItem("angmoo.creation.v2:default"));
     }
   });
 });
 }
+
+test("isolated service cleanup closes its descendant server before another build", async () => {
+  const port = await availablePort();
+  const url = `http://127.0.0.1:${port}`;
+  const descendant = `require('node:http').createServer((_, response) => response.end('ready')).listen(${port}, '127.0.0.1');`;
+  const parent = `require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], { stdio: 'inherit' }); setInterval(() => {}, 1000);`;
+  const child = spawn(process.execPath, ["-e", parent], {
+    detached: process.platform !== "win32",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const output = captureOutput(child);
+  try {
+    await ready(url, () => child, output, 15_000);
+    await stopChild(child);
+    await expect.poll(async () => {
+      try {
+        await fetch(url, { signal: AbortSignal.timeout(500) });
+        return true;
+      } catch {
+        return false;
+      }
+    }).toBe(false);
+  } finally {
+    await stopChild(child);
+  }
+});
 
 function createSyntheticCards(): string {
   const directory = mkdtempSync(join(tmpdir(), "angmoo-synthetic-cards-"));
@@ -252,11 +322,39 @@ async function availablePort(): Promise<number> {
 }
 
 async function stopChild(child: ChildProcess) {
-  if (child.exitCode !== null || child.pid === undefined) return;
-  if (process.platform === "win32") {
-    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  } else {
-    child.kill("SIGTERM");
+  const pid = child.pid;
+  if (pid === undefined) return;
+  const exited = child.exitCode !== null || child.signalCode !== null;
+  if (process.platform === "win32" && exited) return;
+  const closed = exited ? Promise.resolve() : once(child, "close");
+  const signal = (value: NodeJS.Signals) => {
+    if (process.platform === "win32") {
+      const result = spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
+      if (result.error || result.status !== 0) throw new Error("Isolated service tree shutdown failed");
+    } else {
+      try {
+        // Every owned service starts in its own group. Next forks a worker;
+        // terminating only the CLI can leave it writing dev type artifacts.
+        process.kill(-pid, value);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+      }
+    }
+  };
+  const waitClosed = async (milliseconds: number) => {
+    let timer: NodeJS.Timeout | undefined;
+    try {
+      return await Promise.race([
+        closed.then(() => true),
+        new Promise<boolean>((resolve) => { timer = setTimeout(() => resolve(false), milliseconds); }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  signal("SIGTERM");
+  if (!await waitClosed(5_000)) {
+    signal("SIGKILL");
+    if (!await waitClosed(5_000)) throw new Error("Isolated service shutdown timed out");
   }
-  await Promise.race([once(child, "exit"), new Promise((resolve) => setTimeout(resolve, 5_000))]);
 }

@@ -7,9 +7,11 @@ from app.domains.routine_posts import schemas
 from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
 from app.domains.routine_posts.contracts.context import RoutinePostContext
 from app.domains.routine_posts.contracts.generation import RoutineGeneration
+from app.contracts.routine_output import ENUM_OUTPUT, LEGACY_OUTPUT
+from app.domains.routine_posts.contracts.request_context import RoutineRequestContext
 from app.domains.routine_posts.utils.text import _clip
 from app.domains.routine_posts.service.temporal_context import build_temporal_context, world_local_iso
-from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import request_persona, request_persona_text, PERSONA_INTERPRETATION
 from app.domains.routines import service as activity_state_contracts
 from app.domains.routines.service import aware_utc
 from app.providers.gemini import build_gemini_developer_response_schema
@@ -53,11 +55,11 @@ def build_routine_prompt_context(
         },
         "character": {
             "id": context.character.id,
-            "name": _clip(context.character.name, 80),
-            "persona": model_persona(context.character),
+            "name": _clip(context.name_binding.actor_display_name if context.name_binding else context.character.name, 80),
+            "persona": request_persona(context.character, context.name_binding),
             "persona_interpretation": PERSONA_INTERPRETATION,
-            "persona_summary": _clip(context.character.persona_summary, 1_500),
-            "speech_style": _clip(context.character.speech_style, 800),
+            "persona_summary": _clip(request_persona_text(context.character, "persona_summary", context.name_binding, limit=32000), 1_500),
+            "speech_style": _clip(request_persona_text(context.character, "speech_style", context.name_binding, limit=4000), 800),
             "world_local_profile": context.world_character.local_profile or {},
             **({"community_profile": {
                 "visible_summary": _clip(context.profile.visible_summary, 280),
@@ -68,11 +70,11 @@ def build_routine_prompt_context(
         "activity": {
             "daypart": context.item.daypart,
             "activity_kind": context.item.activity_kind,
-            "title": context.item.title,
-            "activity_seed": context.item.activity_seed,
+            "title": request_persona_text(context.item, "title", context.name_binding),
+            "activity_seed": request_persona_text(context.item, "activity_seed", context.name_binding),
             "social_mode": context.item.social_mode,
             "place_key": context.item.place_key,
-            "effective_snapshot": context.episode.effective_activity_snapshot,
+            "effective_snapshot": _request_activity_snapshot(context),
         },
         "state_before": context.state_before,
         "previous_success": (
@@ -107,6 +109,14 @@ def build_routine_prompt_context(
             for event in context.source_events
         ],
     }
+
+
+def _request_activity_snapshot(context):
+    value = dict(context.episode.effective_activity_snapshot or {})
+    for key in ("title", "activity_seed"):
+        if isinstance(value.get(key), str):
+            value[key] = request_persona_text(value, key, context.name_binding)
+    return value
 
 
 # The frozen split-evidence map names this binding; runtime callers use the
@@ -166,10 +176,11 @@ def build_routine_beat_plan_response_schema(
     continuity_facts: list[str],
     considered_source_event_ids: list[str],
     detail_keys: list[str],
+    output_contract: str = LEGACY_OUTPUT,
 ) -> dict[str, object]:
     """Bind creative planner output to server-owned evidence identifiers."""
 
-    schema = deepcopy(GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA)
+    schema = deepcopy(GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA) if output_contract == LEGACY_OUTPUT else build_gemini_developer_response_schema(schemas.RoutineDecisionOutput)
     properties = schema["properties"]
     if not isinstance(properties, dict):
         raise TypeError("routine planner response properties must be an object")
@@ -206,12 +217,9 @@ def build_routine_beat_plan_response_schema(
         maximum=continuity_maximum,
     )
     considered_count = len(considered_source_event_ids)
-    constrain_string_array(
-        "considered_source_event_ids",
-        considered_source_event_ids,
-        minimum=considered_count,
-        maximum=considered_count,
-    )
+    if output_contract == LEGACY_OUTPUT:
+        constrain_string_array("considered_source_event_ids", considered_source_event_ids,
+            minimum=considered_count, maximum=considered_count)
     constrain_string_array(
         "used_source_event_ids",
         considered_source_event_ids,
@@ -244,13 +252,49 @@ def build_routine_beat_plan_response_schema(
     return schema
 
 
+def freeze_request_context(context: RoutinePostContext, beat: Any) -> RoutineRequestContext:
+    from dataclasses import asdict
+    from hashlib import sha256
+    import json
+    previous = context.previous_post
+    evidence = {"events": [asdict(event) for event in context.source_events],
+        "state_before": context.state_before,
+        "previous_post": None if previous is None else {"id": previous.id, "title": previous.title, "body": previous.body},
+        "item": {key: getattr(context.item, key) for key in ("id", "daypart", "title", "activity_seed", "scheduled_start_at", "scheduled_end_at")}}
+    digest = sha256(json.dumps(evidence, ensure_ascii=False, sort_keys=True, default=str).encode()).hexdigest()
+    return RoutineRequestContext(context.world.id, context.world_character.id, context.episode.id,
+        beat.id, beat.sequence_no, tuple(context.considered_source_event_ids),
+        tuple(allowed_continuity_facts(context)), tuple(allowed_detail_keys(context)),
+        context.plan.version, context.episode.version, context.state_schema_version,
+        context.output_contract, beat.claim_run_id, digest)
+
+
+def bind_decision(payload: dict, *, request: RoutineRequestContext, context: RoutinePostContext, beat: Any) -> schemas.BoundRoutinePlan:
+    if request != freeze_request_context(context, beat):
+        raise ValueError("routine_request_context_changed")
+    decision = schemas.RoutineDecisionOutput.model_validate(payload)
+    return schemas.BoundRoutinePlan.model_validate({**decision.model_dump(), **request.metadata()})
+
+
 def _validate_plan(
     payload: dict[str, object],
     *,
     context: RoutinePostContext,
     beat: Any,
-) -> schemas.RoutineBeatPlan:
-    plan = schemas.RoutineBeatPlan.model_validate(payload)
+    request: RoutineRequestContext | None = None,
+) -> schemas.RoutineBeatPlan | schemas.BoundRoutinePlan:
+    if context.output_contract == ENUM_OUTPUT:
+        if request is not None:
+            # A provider response is always the strict AI-owned wire DTO.
+            # Server fields returned by a model must not enter via the
+            # checkpoint/internal BoundRoutinePlan parser.
+            plan = bind_decision(payload, request=request, context=context, beat=beat)
+        elif "beat_id" in payload:
+            plan = schemas.BoundRoutinePlan.model_validate(payload)
+        else:
+            plan = bind_decision(payload, request=request or freeze_request_context(context, beat), context=context, beat=beat)
+    else:
+        plan = schemas.RoutineBeatPlan.model_validate(payload)
     has_previous_success = (
         context.previous_beat is not None and context.previous_post is not None
     )
@@ -280,13 +324,14 @@ def _validate_plan(
 
 
 def _state_after(
-    current: dict[str, object], plan: schemas.RoutineBeatPlan
+    current: dict[str, object], plan: schemas.RoutineBeatPlan | schemas.BoundRoutinePlan
 ) -> dict[str, object]:
     changes = [effect.state_change.model_dump() for effect in plan.source_event_effects]
     return activity_state_contracts.apply_state_changes(
         current,
         changes,
         scheduled_without_source=not bool(plan.used_source_event_ids),
+        schema_version=2 if isinstance(plan, schemas.BoundRoutinePlan) else 1,
     )
 
 

@@ -37,7 +37,7 @@ def initialize_from_last_success(db, *, actor):
 
 
 def common_state_for_routine(db, *, context):
-    """V1/V2 share three fields only; routine energy remains routine-owned."""
+    """Share mood/intensity/note; preserve the episode's explicit state version."""
     existing = db.get(CharacterActivityState, context.world_character.id)
     if existing is None:
         return context

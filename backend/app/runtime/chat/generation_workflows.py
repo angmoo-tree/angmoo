@@ -36,6 +36,7 @@ from app.integrations.llm import (
     DirectLlmGraphRetrievalPlannerProvider,
 )
 from app.runtime.chat.evidence_reads import today_reader as today_reader
+from app.runtime.chat import name_binding
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
 from app.runtime.chat.response_graph import LangGraphResponseExecutor
 from app.integrations.llm.supervisor_selection import DirectLlmSupervisorSelectionProvider
@@ -49,6 +50,16 @@ from app.runtime.chat.today_sns_activity import (
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
+
+
+def capture_names(db: Session, *, owner_id: str, world_id: str, actor_id: str, requester_id: str) -> dict:
+    """Capture generation admission identity through the existing runtime collaborator."""
+    return name_binding.capture(db, owner_id=owner_id, world_id=world_id,
+        actor_id=actor_id, requester_id=requester_id)
+
+
+def assert_names_current(db: Session, metadata: dict, *, owner_id: str, world_id: str, actor_id: str) -> None:
+    name_binding.assert_current(db, metadata, owner_id=owner_id, world_id=world_id, actor_id=actor_id)
 
 
 class SqlAlchemyResponseWorkflowUnitOfWork:

@@ -1259,6 +1259,7 @@ def build_feed_cue_workflows() -> FeedCueWorkflows:
     )
 
 def build_first_greeting_workflows() -> FirstGreetingWorkflows:
+    from app.runtime.resident.first_greeting import capture_greeting_names, validate_greeting_names
     return FirstGreetingWorkflows(
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
@@ -1283,6 +1284,8 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         get_post=social_posts_service.get_post,
         deferred_error=DirectLlmDeferred,
         social_service_error=social_errors.CommunityServiceError,
+        capture_names=capture_greeting_names,
+        validate_names=validate_greeting_names,
     )
 
 def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[character_schemas.AgentDetailRead]:

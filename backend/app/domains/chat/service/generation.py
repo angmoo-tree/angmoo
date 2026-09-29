@@ -138,6 +138,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
+                request_metadata=self._request_names(db, user, thread),
             )
         )
         db.commit()
@@ -222,6 +223,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
+                request_metadata=self._request_names(db, user, thread),
             )
         )
         db.commit()
@@ -278,6 +280,10 @@ class GenerationService:
             db, thread, include_messages=False, lock_scope=True
         )
         return thread
+
+    def _request_names(self, db, user, thread):
+        return self.workflows.capture_names(db, owner_id=user.id, world_id=thread.world_id,
+            actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id)
 
     def _recover_if_expired(self, db: Session, record):
         now = datetime.now(UTC)
@@ -555,9 +561,14 @@ class GenerationService:
             character_labels=character_labels,
             today_sns_snapshot=today_sns_snapshot,
             graph_projection_enabled=runtime_settings.graph_projection_enabled,
+            name_binding_validator=lambda: self._validate_request_names(db, user, thread, record),
         )
         async for event in workflow.run(command):
             yield event
+
+    def _validate_request_names(self, db, user, thread, record):
+        self.workflows.assert_names_current(db, record.node_state, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
 
 
 def _recent_context(

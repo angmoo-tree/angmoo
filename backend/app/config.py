@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Angmoo"
     CHAT_HYBRID_FTS_POLICY: Literal["legacy_strict_v1", "group_or_v1"] = "group_or_v1"
     ACTIVITY_THOUGHT_POLICY: Literal["legacy", "thought_v1"] = "thought_v1"
+    ROUTINE_OUTPUT_POLICY: Literal["legacy", "enum_preserved_v1"] = "enum_preserved_v1"
     DAILY_PREPARATION_ENABLED: bool = True
     MEMORY_RECALL_REPRESENTATION: Literal["legacy", "episode_v1"] = "episode_v1"
     MEMORY_GENERATION_POLICY: Literal["legacy", "episode_v1"] = "episode_v1"

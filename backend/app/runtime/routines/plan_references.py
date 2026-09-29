@@ -19,6 +19,10 @@ class SqlAlchemyPlanReferences:
     def __init__(self, db: Session) -> None:
         self._db = db
 
+    def routine_state_version(self, actor_id: str) -> int:
+        from app.domains.world_characters.service.activity_engines import routine_state_version
+        return routine_state_version(self._db, self._db.get(WorldCharacter, actor_id))
+
     def get_character(self, character_id: str) -> Character | None:
         return self._db.get(Character, character_id)
 

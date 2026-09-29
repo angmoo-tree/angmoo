@@ -178,6 +178,8 @@ def _retryable_provider_error(exc: BaseException) -> bool:
     )
 
 def _failure_code(exc: BaseException) -> str:
+    if isinstance(exc, ValueError) and str(exc) == "routine_reuses_published_reply":
+        return "routine_reuses_published_reply"
     if isinstance(exc, DirectLlmJsonError):
         return "provider_response_invalid"
     if isinstance(exc, DirectLlmDeferred):
@@ -284,7 +286,7 @@ def observe_prepared_sources(resident_context, *, context, beat, world_character
     db.commit()
 
 
-def prepare_routine_activity(resident_context, *, interaction_source=None, tracker=None, observe_inputs=True):
+def prepare_routine_activity(resident_context, *, interaction_source=None, tracker=None, observe_inputs=True, output_policy=None):
     db = resident_context.db
     tracker = tracker or RunLlmTracker(max_calls=3)
     world_character = routine_world_character_for_character(
@@ -387,6 +389,7 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
             claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
             source_event_ids=context.considered_source_event_ids,
             skipped_tick_count=context.due_tick.skipped_tick_count,
+            state_schema_version=output_policy.state_schema_version if output_policy is not None else 1,
             now=resident_context.run_started_at,
         )
     except activity_errors.ActivityRuntimeError as exc:
@@ -394,6 +397,11 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
     beat = claim.row
     if not isinstance(beat, _model_ActivityBeat):
         raise TypeError("activity beat claim returned an invalid row")
+    from dataclasses import replace
+    from app.contracts.routine_output import RoutineOutputPolicy
+    policy = output_policy or RoutineOutputPolicy(thought_policy=settings.ACTIVITY_THOUGHT_POLICY)
+    context = replace(context, state_before=dict(beat.state_before_snapshot), state_schema_version=beat.state_schema_version,
+        output_contract=policy.output_contract, thought_policy=policy.thought_policy)
     claimed_manual_source_ids: list[str] = []
     try:
         for event in context.source_events:
@@ -612,6 +620,9 @@ def publish_routine_activity(resident_context, *, prepared, generation):
             "publish_result": {"public_action_count": 0, **(existing.result or {}), "reused": True}}
     result_snapshot: dict[str, object] = {
         "routine_contract_version": ROUTINE_CONTRACT_VERSION,
+        "routine_output_contract": context.output_contract,
+        "state_schema_version": context.state_schema_version,
+        "thought_policy": context.thought_policy,
         "planner_output_hash": _planner_hash(generation),
         "considered_source_event_ids": generation.plan.considered_source_event_ids,
         "used_source_event_ids": generation.plan.used_source_event_ids,
@@ -628,6 +639,9 @@ def publish_routine_activity(resident_context, *, prepared, generation):
     }
 
     try:
+        from app.runtime.routine_posts.original_post import check_original
+        check_original(resident_context, world_id=context.world.id, actor_id=world_character.id,
+            title=generation.draft.title, body=generation.draft.body)
         with unit_of_work.deferred_commits():
             execution = public_action_executions.create_public_action_execution(
                 db,
@@ -746,7 +760,7 @@ def publish_routine_activity(resident_context, *, prepared, generation):
                     "opening_post_id": post.opening_post_id,
                 },
             )
-            if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
+            if context.thought_policy == "thought_v1":
                 from app.contracts.activity_thought import ActivityThought
                 from app.runtime.social.subjective_composition import record_activity_thought
                 record_activity_thought(

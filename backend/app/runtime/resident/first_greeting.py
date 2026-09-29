@@ -16,11 +16,36 @@ from app.domains.routines import models
 from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
 from app.domains.social.schemas import community as schemas
 from app.domains.routines.service.first_greeting import _build_first_greeting_writer_prompt
-from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import request_persona, PERSONA_INTERPRETATION
 from app.domains.routines.constants import FIRST_GREETING_WRITER_OUTPUT_TOKENS
 from app.integrations.direct_llm import RunLlmTracker, DirectLlmCallContext, generate_json
 from app.runtime.social import image_generation as post_image_generation
 from app.domains.social.service import image_attachment
+
+
+def capture_greeting_names(db, owner_id, character_id):
+    from app.domains.world_characters.service.action_scope import active_world_character
+    from app.domains.world_characters.service.name_binding import resolve_name_binding
+    from app.domains.world_characters.exceptions import WorldCharacterSocialScopeError
+    try:
+        actor = active_world_character(db, character_id=character_id)
+    except WorldCharacterSocialScopeError as exc:
+        if str(exc) == "active_world_required":
+            return None  # A non-World legacy greeting has no World user to bind.
+        raise
+    return resolve_name_binding(db, actor=actor, owner_id=owner_id)
+
+
+def validate_greeting_names(db, names):
+    from app.domains.world_characters.service.action_scope import active_world_character
+    from app.domains.world_characters.models import WorldCharacter
+    from app.domains.world_characters.service.name_binding import validate_name_binding
+    from app.contracts.name_binding import NameBindingError
+    bound_actor = db.get(WorldCharacter, names.actor_world_character_id, populate_existing=True)
+    if bound_actor is None:
+        raise NameBindingError("name_binding_scope_invalid")
+    actor = active_world_character(db, character_id=bound_actor.character_id)
+    validate_name_binding(db, names, actor=actor, owner_id=names.owner_id)
 
 def resolve_first_greeting_key(
     credential: identity_models.LlmCredential | None, *, user: identity_models.User, character: character_models.Character
@@ -48,13 +73,18 @@ async def _run_first_greeting_writer(
     run_id: str,
     tracker: RunLlmTracker,
     topic: str,
+    name_binding=None,
 ) -> _FirstGreetingWriterPayload:
     def _validator(payload: dict[str, Any]) -> _FirstGreetingWriterPayload:
+        from app.domains.characters.policies.authored_names import authored_fields
+        payload = authored_fields(payload, name_binding,
+            fields=("post_title", "post_body", "topic_signature", "persona_basis", "tendency_basis"),
+            limits={"post_title": 160, "post_body": 4000, "topic_signature": 300, "persona_basis": 500, "tendency_basis": 500})
         return _FirstGreetingWriterPayload.model_validate(payload)
 
     user_prompt = {
         "owner_topic": topic.strip(),
-        "character": {"handle": character.handle, **model_persona(character)},
+        "character": {"handle": character.handle, **request_persona(character, name_binding)},
         "persona_interpretation": PERSONA_INTERPRETATION,
         "community_tendency": {
             "summary": setting.tendency_summary,

@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 23
-SOURCE_ALEMBIC_REVISION = "20260928_0101"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 100
+SQLITE_SCHEMA_VERSION = 25
+SOURCE_ALEMBIC_REVISION = "20260929_0103"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 102
 EXPECTED_CANONICAL_TABLE_COUNT = 138
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -691,15 +691,34 @@ def build_sqlite_v21_metadata() -> MetaData:
     return metadata
 
 
+def build_sqlite_v23_metadata() -> MetaData:
+    """Frozen pre-Routine-state-version schema; all old snapshots remain unchanged."""
+    metadata = build_sqlite_v24_metadata()
+    table = metadata.tables["activity_beats"]
+    table._columns.remove(table.c.state_schema_version)
+    return metadata
+
+
+def build_sqlite_v24_metadata() -> MetaData:
+    """Frozen schema before explicit Topic requests acquired a name snapshot."""
+    metadata = build_sqlite_baseline_metadata()
+    table = metadata.tables["social_recommendation_preparations"]
+    table._columns.remove(table.c.request_snapshot)
+    return metadata
+
+
 def build_sqlite_v22_metadata() -> MetaData:
     """Frozen schema before date-scoped direct generation."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v23_metadata()
     _remove_daily_preparation(metadata)
     return metadata
 
 
 def _remove_daily_preparation(metadata: MetaData) -> None:
     from sqlalchemy import CheckConstraint
+    beat = metadata.tables.get("activity_beats")
+    if beat is not None and "state_schema_version" in beat.c:
+        beat._columns.remove(beat.c.state_schema_version)
     if "activity_preparation_jobs" in metadata.tables:
         metadata.remove(metadata.tables["activity_preparation_jobs"])
     plan = metadata.tables.get("daily_activity_plans")

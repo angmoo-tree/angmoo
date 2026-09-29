@@ -13,7 +13,8 @@ from app.core.ids import uuid7_string
 from app.domains.routines import models, schemas
 from app.domains.routines.contracts.clock import Clock
 from app.domains.routines.contracts.plans import PlanOwner, PlanReferences, PlanScope
-from app.domains.routines.constants import DAYPARTS, SELECTION_CONTRACT_VERSION, TIMEZONE_CONTRACT_VERSION, INITIAL_STATE
+from app.domains.routines.constants import DAYPARTS, SELECTION_CONTRACT_VERSION, TIMEZONE_CONTRACT_VERSION
+from app.domains.routines.policies.activity_state import initial_state
 from app.domains.routines.exceptions import DailyActivityPlanNotFoundError, DailyActivityPlanForbiddenError, DailyActivityPlanConflictError, DailyActivityPlanValidationError
 from app.domains.routines.policies.planning import daypart_windows, local_activity_date, _select_candidate, _snapshot
 from app.domains.routines.repository.plans import _selection_history
@@ -224,6 +225,7 @@ def prepare_activity_plan(
                     scheduled_start_at=start_at,
                     scheduled_end_at=end_at,
                     now=current,
+                    state_schema_version=references.routine_state_version(scope.world_character.id),
                 )
             except sqlalchemy_joint_reservations.JointActivityReservationError as exc:
                 db.rollback()
@@ -261,8 +263,8 @@ def prepare_activity_plan(
                     plan_item_id=item.id,
                     effective_activity_snapshot=_snapshot(candidate),
                     status="planned",
-                    current_state_schema_version=1,
-                    current_state_snapshot=dict(INITIAL_STATE),
+                    current_state_schema_version=references.routine_state_version(scope.world_character.id),
+                    current_state_snapshot=initial_state(schema_version=references.routine_state_version(scope.world_character.id)),
                     next_sequence_no=1,
                     version=1,
                 )

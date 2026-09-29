@@ -10,6 +10,7 @@ from app.domains.routines.contracts.activity_management import ActivityOwner, Te
 from app.domains.routines.contracts.autonomy_management import AutonomyCredential
 from app.domains.routines.contracts.manual_activity import ImportedWorldGuard
 from app.domains.routines.contracts.feed_cues import FeedCuePolicy
+from app.contracts.name_binding import NameBindingSnapshot
 
 ResultT = TypeVar("ResultT")
 ResultT_co = TypeVar("ResultT_co", covariant=True)
@@ -37,7 +38,7 @@ class GreetingKey(Protocol):
     def __call__(self, credential: AutonomyCredential | None, *, user: ActivityOwner, character: TendencyPersona) -> str: ...
 
 class GreetingWriter(Protocol):
-    def __call__(self, *, api_key: str, character: TendencyPersona, setting: models.AgentActivitySetting, credential: AutonomyCredential | None, run_id: str, tracker: GreetingTracker, topic: str) -> Awaitable[_FirstGreetingWriterPayload]: ...
+    def __call__(self, *, api_key: str, character: TendencyPersona, setting: models.AgentActivitySetting, credential: AutonomyCredential | None, run_id: str, tracker: GreetingTracker, topic: str, name_binding: Any | None = None) -> Awaitable[_FirstGreetingWriterPayload]: ...
 
 class GreetingPost(Protocol):
     def __call__(self, db: Session, user: ActivityOwner, data: GreetingPostInput, *, log_manual_activity: bool) -> GreetingPostValue: ...
@@ -69,3 +70,5 @@ class FirstGreetingWorkflows(Generic[ResultT]):
     get_post: Callable[[Session, str], GreetingPostValue]
     deferred_error: type[Exception]
     social_service_error: type[Exception]
+    capture_names: Callable[[Session, str, str], NameBindingSnapshot | None]
+    validate_names: Callable[[Session, NameBindingSnapshot], None]

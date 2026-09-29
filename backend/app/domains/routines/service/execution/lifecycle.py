@@ -107,6 +107,7 @@ def close_elapsed_dayparts(
                     episode.current_state_snapshot,
                     [],
                     daypart_ended=True,
+                    schema_version=episode.current_state_schema_version,
                 )
             )
             episode.status = "completed"

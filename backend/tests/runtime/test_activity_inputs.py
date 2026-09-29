@@ -7,6 +7,8 @@ import json
 import pytest
 
 from app.runtime.autonomous_activity import inputs, provider
+from app.contracts.name_binding import NameBindingSnapshot
+from app.domains.world_characters.activity_models import ActivityGraphRun
 
 
 @pytest.mark.parametrize("count", [0, 1, 12, 13, 20])
@@ -21,7 +23,12 @@ def test_shared_input_keeps_latest_records_and_counts_omissions(monkeypatch, cou
     monkeypatch.setattr(inputs, "today_social_activity_reader", lambda _: SimpleNamespace(
         read=lambda **kwargs: Today(original)))
     monkeypatch.setattr(inputs, "read_state", lambda *args, **kwargs: {"confirmed_at": None})
-    ctx = SimpleNamespace(db=None, user_id="owner", character=SimpleNamespace(
+    names = NameBindingSnapshot("owner", "world", "actor", "A")
+    run = SimpleNamespace(result={"name_binding": names.to_dict()})
+    def get_run(model, identity):
+        assert model is ActivityGraphRun and identity == "run"
+        return run
+    ctx = SimpleNamespace(db=SimpleNamespace(get=get_run), run_id="run", user_id="owner", character=SimpleNamespace(
         name="A", persona_summary="", personality="", speech_style="", worldview="",
         topic_preferences=[], safety_rules=[]))
     value = inputs.shared_input(ctx, SimpleNamespace(id="actor", world_id="world", local_profile={}),
@@ -29,6 +36,7 @@ def test_shared_input_keeps_latest_records_and_counts_omissions(monkeypatch, cou
     assert value["today_activity"]["records"] == original[:12]
     assert value["today_activity"].get("omitted_records", 0) == max(0, count - 12)
     assert len(original) == count
+    assert value["persona"]["name_binding"]["binding_digest"] == names.digest
 
 
 @pytest.mark.parametrize("nested", [True, False])

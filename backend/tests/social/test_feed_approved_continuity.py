@@ -186,6 +186,8 @@ def test_topic_regeneration_does_not_rewrite_approved_provenance(monkeypatch):
         monkeypatch.setattr(topics, "find_world_character_credential", lambda *a, **k: SimpleNamespace(id="fixture"))
         monkeypatch.setattr(topics.CredentialResolver, "resolve_llm_credential", lambda *a, **k: SimpleNamespace(provider="google", credential_id="fixture", fingerprint="fixture-fingerprint"))
         async def generator(*args):
+            assert args[2]["profile_id"] == approved.profile.id
+            assert "persona" not in args[2]
             return TopicGenerationResult(topics=[TopicDefinition(name="새로운 관심", scope="world")])
         result = asyncio.run(topics.regenerate(db, world_id=entry.world_id, owner_id=owner.id,
             world_character_id=entry.id, request_id="topic-feed-test", generator=generator))

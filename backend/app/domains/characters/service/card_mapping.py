@@ -1,13 +1,12 @@
 """Map supported card fields into editable Character fields; raw is never a prompt."""
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 
 from app.domains.characters.policies.persona import PERSONA_LIMITS
 from app.integrations.character_cards.parser import ParsedCard
 
-_DYNAMIC = re.compile(r"\{\{[^{}]*\}\}|<(?:char|bot|user)>", re.IGNORECASE)
+from app.domains.characters.policies.name_macros import name_macro_review
 _RAW_ONLY = ("first_mes", "alternate_greetings", "character_book", "system_prompt",
              "post_history_instructions", "extensions", "assets", "creator_notes", "tags")
 
@@ -51,7 +50,10 @@ def map_card(card: ParsedCard) -> CardMapping:
         if len(value) > ({"name": 80} | PERSONA_LIMITS).get(field, 8000):
             # Keep the full value visible for editing; never silently truncate.
             review.append(f"{field}_length_limit")
-        if _DYNAMIC.search(value):
+        macros = name_macro_review(value)
+        if macros["supported"]:
+            review.append(f"{field}_name_binding")
+        if macros["unsupported"]:
             review.append(f"{field}_dynamic_text_review")
     if card.version == 3:
         review.append("v3_common_fields_only")

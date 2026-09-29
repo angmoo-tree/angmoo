@@ -53,6 +53,10 @@ class RoutinePostContext:
     overflow_reason_counts: dict[str, int]
     prompt_comment_chars: int
     common_state: dict[str, object] | None = None
+    output_contract: str = "routine-output.legacy.v1"
+    state_schema_version: int = 1
+    thought_policy: str = "thought_v1"
+    name_binding: Any | None = None
 
     @property
     def considered_source_event_ids(self) -> list[str]:

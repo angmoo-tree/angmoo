@@ -13,6 +13,14 @@ SUPPORTED_CONTRACT_VERSIONS = frozenset({1, 2})
 DEFAULT_ACTIVITY_ENGINE: ActivityEngine = "personalized_graph_v2"
 
 
+def routine_state_version(db: Session, actor: WorldCharacter) -> int:
+    from app.config import settings
+    from app.contracts.routine_output import select_policy
+    engine = resolve_engine(db, actor)["engine"]
+    return select_policy(engine=engine, sns_version=2 if engine == "personalized_graph_v2" else 1,
+        output_policy=settings.ROUTINE_OUTPUT_POLICY, thought_policy=settings.ACTIVITY_THOUGHT_POLICY).state_schema_version
+
+
 def resolve_engine(db: Session, actor: WorldCharacter) -> dict:
     for key, source in ((f"character:{actor.id}", "character"), (f"world:{actor.world_id}", "world"), ("global", "global")):
         row = db.get(ActivityEnginePolicy, key, populate_existing=True)
@@ -59,10 +67,18 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
             raise ValueError("activity_run_scope_or_version_invalid")
         return row
     engine = resolve_engine(db, actor)["engine"]
+    from dataclasses import asdict
+    from app.config import settings
+    from app.contracts.routine_output import select_policy
+    policy = select_policy(engine=engine, sns_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
+        output_policy=settings.ROUTINE_OUTPUT_POLICY, thought_policy=settings.ACTIVITY_THOUGHT_POLICY)
+    from app.domains.world_characters.service.name_binding import resolve_name_binding
+    binding = resolve_name_binding(db, actor=actor, owner_id=actor.owner_user_id)
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
         world_character_id=actor.id, engine=engine,
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
-        status="running", stage="LoadContext", started_at=datetime.now(UTC))
+        status="running", stage="LoadContext", started_at=datetime.now(UTC),
+        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version, "name_binding": binding.to_dict()})
     db.add(row)
     db.flush()
     return row

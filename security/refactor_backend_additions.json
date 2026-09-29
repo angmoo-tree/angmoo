@@ -21732,6 +21732,1271 @@
       "test_suppressions": {
         "tests/test_l3_er6_installer_supply_chain.py": {}
       }
+    },
+    {
+      "commit": "01b3b91f115478ca55accd73b4bffe04515726d8",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {
+        "backend/alembic/versions/20260929_0102_routine_state_version.py": "6a1bbb5c473e0446c6f478212d77742f44c9a389",
+        "backend/app/contracts/routine_output.py": "f9cf44e3c557507d27469c0b3608b8c303a02d76",
+        "backend/app/domains/routine_posts/contracts/request_context.py": "d992f9a590b184595311028c0a77bf92576fc20d",
+        "backend/app/domains/routine_posts/service/original_post.py": "5a8557da4a025f17708bae278989c578211f52cc",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v24.json": "6a10f8577a5514905e55a709b5b0fa85994ec9e5",
+        "backend/app/runtime/migrations/sqlite_versions/routine_state_v24.py": "19837a305293625b5ddcafdd13d52be129d16664",
+        "backend/app/runtime/routine_posts/original_post.py": "d5879ac99cfe813fe5ff400cd49ec778ec7534b8",
+        "backend/scripts/evaluate_routine_output_contract.py": "86c65b622599efcc18253d1347854e3a2bfe7353",
+        "backend/tests/routine_posts/test_output_contract_v2.py": "2c7060bb3019fdb4d72917c01e6d6707958a5c46",
+        "docs/architecture/routine-output-contract.md": "5936b2cbd4eff8c85aca4dbc2759b3998fb081ea"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_copy_guard_queries_all_successes_instead_of_recent_twelve",
+        "tests/routine_posts/test_output_contract_v2.py::test_copy_rule_checks_both_title_and_body_without_re_ban",
+        "tests/routine_posts/test_output_contract_v2.py::test_energy_free_state_is_explicit_and_old_state_is_preserved",
+        "tests/routine_posts/test_output_contract_v2.py::test_file_sqlite_competing_transition_only_claims_once",
+        "tests/routine_posts/test_output_contract_v2.py::test_inflight_old_beat_blocks_transition_and_history_survives",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[none-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[none-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[repair-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[repair-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[twice-combined]",
+        "tests/routine_posts/test_output_contract_v2.py::test_new_runtime_one_call_repair_bound_and_canonical_reuse[twice-split]",
+        "tests/routine_posts/test_output_contract_v2.py::test_policy_freezes_once_and_missing_run_never_upgrades",
+        "tests/routine_posts/test_output_contract_v2.py::test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[0]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[2]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[4]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[5]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[7]",
+        "tests/routine_posts/test_output_contract_v2.py::test_remaining_enums_and_bounds_are_identical[8]",
+        "tests/routine_posts/test_output_contract_v2.py::test_server_binding_rejects_changed_input_before_applying_decision",
+        "tests/routine_posts/test_output_contract_v2.py::test_sqlite_version_migration_keeps_old_snapshot_bytes",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[beat_id]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[considered_source_event_ids]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[emotion_label]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[episode_id]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[motivation_kind]",
+        "tests/routine_posts/test_output_contract_v2.py::test_wire_model_rejects_server_or_removed_fields[sequence_no]"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
+    },
+    {
+      "commit": "4d0216a35d0c3cb11e2bde081e13916ad302ce3c",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply",
+        "tests/routine_posts/test_output_contract_v2.py::test_daily_runtime_and_repertoire_factory_select_energy_free_state"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply": [
+            "assert result[0]['content_ref'] == 'today_activity.records:post:present'",
+            "assert 'body' not in result[0] and 'title' not in result[0]",
+            "assert result[1] == replies[1]",
+            "assert replies[0]['body'] == '이미 쓴 답글' and today['records'][0]['body'] == '이미 쓴 답글'"
+          ],
+          "test_daily_runtime_and_repertoire_factory_select_energy_free_state": [
+            "assert status.plan_state == 'ready' and calls == [True], status",
+            "assert episodes and all((e.current_state_schema_version == 2 for e in episodes))",
+            "assert all((set(e.current_state_snapshot) == {'mood', 'mood_intensity', 'action_note'} for e in episodes))",
+            "assert states and all((e.current_state_schema_version == 2 for e in states))",
+            "assert all(('energy' not in e.current_state_snapshot for e in states))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
+    },
+    {
+      "commit": "9f004ee7dc27f0cb98164a93ec8175851d428477",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/routine_posts/test_output_contract_v2.py::test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply": [
+            "assert result[0]['content_ref'] == 'today_activity.records:post:present'",
+            "assert 'body' not in result[0] and 'title' not in result[0]",
+            "assert result[1] == replies[1]",
+            "assert replies[0]['body'] == '이미 쓴 답글' and today['records'][0]['body'] == '이미 쓴 답글'"
+          ],
+          "test_daily_runtime_and_repertoire_factory_select_energy_free_state": [
+            "assert status.plan_state == 'ready' and calls == [True], status",
+            "assert episodes and all((e.current_state_schema_version == 2 for e in episodes))",
+            "assert all((set(e.current_state_snapshot) == {'mood', 'mood_intensity', 'action_note'} for e in episodes))",
+            "assert states and all((e.current_state_schema_version == 2 for e in states))",
+            "assert all(('energy' not in e.current_state_snapshot for e in states))"
+          ],
+          "test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text": [
+            "assert validation_code(duplicate) == duplicate",
+            "assert validation_code('raw private content') is None",
+            "assert _safe_error(ValueError(duplicate))['error_code'] == duplicate",
+            "assert summary['routine_output_contract'] == ENUM_OUTPUT and summary['routine_state_schema_version'] == 2",
+            "assert summary['routine_considered_ids'] == ['event-a', 'event-b'] and summary['routine_used_ids'] == ['event-b']",
+            "assert 'private scene text' not in str(summary)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_output_contract_v2.py": {}
+      }
+    },
+    {
+      "commit": "c72b33032c198c90794ef4efaba51ab906b231f6",
+      "feature_id": "K05",
+      "reason": "User-approved issue 345 Routine enum-preserving contract, state v2 migration and original-post regressions; exact first-introduction source and test evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[22]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[23]"
+      ],
+      "test_assertions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 24",
+            "assert fixture['target_table_count'] == 138",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
+    },
+    {
+      "commit": "6a48914c4721457f4ac4764d8c192ef684647637",
+      "feature_id": "AR-NAME-BINDING",
+      "reason": "Exact first-introduction evidence for scoped persona names, migration v25 and regression tests. Frozen baselines and existing lineages remain unchanged.",
+      "tracked_files": {
+        "backend/alembic/versions/20260929_0103_topic_request_names.py": "e80145ee94242558a21467b5d3ab6ee5b14e5592",
+        "backend/app/contracts/name_binding.py": "69e22ca4171df60f01d8495eee506372f5fd2ae8",
+        "backend/app/domains/characters/policies/authored_names.py": "71f7b51b1dca55239cad1023e728220aa46193bd",
+        "backend/app/domains/characters/policies/name_macros.py": "014e7daa227c1cb59430538cb67305f96fa52d77",
+        "backend/app/domains/world_characters/service/name_binding.py": "6cf347c0f395e2cffeb16bea4c79bb9bef7dc6bd",
+        "backend/app/runtime/autonomous_activity/name_binding.py": "831e03cad3013a2ab99c885d7fef82f24dac4f2f",
+        "backend/app/runtime/chat/name_binding.py": "d2f1be4c5458a1a7db1b5ae13cc4ad38ee1f607a",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v25.json": "2d5def551deb65fdd8982740570ed06eea8ce770",
+        "backend/app/runtime/migrations/sqlite_versions/topic_request_v25.py": "49de3093f9a4d649bc6822e188188f057659cf0a",
+        "backend/app/runtime/preparation_names.py": "08b208f69766a5ed6b7b15526c0796d7b7087a2c",
+        "backend/scripts/evaluate_name_binding.py": "003b125388922285351a2a128dbc992d0de48c68",
+        "backend/tests/characters/name_binding_fixture.py": "53908eeeda35132907b2df3c5e7cf4c0f4ffcdc9",
+        "backend/tests/characters/test_name_binding.py": "2391005688b93cab913999af99d64e6469a12289",
+        "backend/tests/characters/test_name_binding_scopes.py": "0c56d88dff6cf365758abc184c10f166477fa698",
+        "backend/tests/chat/test_response_name_binding.py": "b17833d759419760f71cb08cabecbcd930ed65f1",
+        "backend/tests/migrations/test_topic_request_v25.py": "9dd1aa9c2530799b2cd948f806b1d59d867d9aac",
+        "backend/tests/routines/test_preparation_name_binding.py": "e1fe281d9e2a911cd16befc83f9a11b283afac2b",
+        "backend/tests/runtime/test_social_name_binding_recovery.py": "b0c25abc2f19da15aa80c071dcdf5e0a4a86ad70",
+        "docs/operations/persona-name-binding.md": "b96bbab8bb65a17b2487fbb15c5f80eba11918df"
+      },
+      "test_nodes": [
+        "tests/characters/test_name_binding.py::test_absent_user_is_distinct_from_saved_default_user_and_char_still_works",
+        "tests/characters/test_name_binding.py::test_inserted_names_are_literal_even_with_macro_syntax_and_backslashes",
+        "tests/characters/test_name_binding.py::test_new_output_fields_keep_ids_and_literals_and_validate_final_lengths",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution['{{user}}'-'\\ubbfc\\uc2dd']",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[<username> <script> {{char}}-<username> <script> Sakana]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[\\\\{{user}} + {{char}}-\\\\{{user}} + Sakana]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[```text\\n{{user}}\\n``` {{char}}-```text\\n{{user}}\\n``` Sakana]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[`{{user}}` + {{user}}-`{{user}}` + \\ubbfc\\uc2dd]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[{{ USER }} / {{ Char }} / <user> / <BOT> / <char>-\\ubbfc\\uc2dd / Sakana / \\ubbfc\\uc2dd / Sakana / Sakana]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[{{getvar::x}} {{user-{{getvar::x}} {{user]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[{{random::{{user}}}} {{user}}-{{random::{{user}}}} \\ubbfc\\uc2dd]",
+        "tests/characters/test_name_binding.py::test_one_pass_names_without_grammar_or_template_execution[{{user}}\\ub294 {{char}}\\ub97c \\uc548\\ub2e4.-\\ubbfc\\uc2dd\\ub294 Sakana\\ub97c \\uc548\\ub2e4.]",
+        "tests/characters/test_name_binding.py::test_other_reply_recipient_uses_id_even_if_names_match",
+        "tests/characters/test_name_binding.py::test_persona_allowlist_keeps_raw_settings_and_past_records_untouched",
+        "tests/characters/test_name_binding.py::test_policy_is_persisted_and_explicit_damage_does_not_downgrade",
+        "tests/characters/test_name_binding.py::test_rendered_limits_are_checked_without_truncating_or_changing_source",
+        "tests/characters/test_name_binding.py::test_review_distinguishes_supported_names_and_unsupported_nested_syntax",
+        "tests/characters/test_name_binding_scopes.py::test_resolution_does_not_create_a_missing_profile_or_change_persona",
+        "tests/characters/test_name_binding_scopes.py::test_world_identity_freezes_per_activity_and_next_activity_uses_rename",
+        "tests/chat/test_response_name_binding.py::test_chat_resolves_before_first_delta_and_stream_storage_memory_match[False]",
+        "tests/chat/test_response_name_binding.py::test_chat_resolves_before_first_delta_and_stream_storage_memory_match[True]",
+        "tests/migrations/test_topic_request_v25.py::test_populated_v24_upgrade_preserves_all_old_topic_bytes_and_legacy_policy",
+        "tests/routine_posts/test_output_contract_v2.py::test_routine_provider_names_and_rendered_duplicate_use_one_shared_repair[False]",
+        "tests/routine_posts/test_output_contract_v2.py::test_routine_provider_names_and_rendered_duplicate_use_one_shared_repair[True]",
+        "tests/routines/test_preparation_name_binding.py::test_daily_expired_claim_keeps_original_name_namespace",
+        "tests/routines/test_preparation_name_binding.py::test_daily_names_use_accepted_snapshot_and_next_date_uses_new_name",
+        "tests/routines/test_preparation_name_binding.py::test_invalid_preparation_snapshot_stops_before_ai_and_records_failure",
+        "tests/routines/test_preparation_name_binding.py::test_topic_regeneration_keeps_request_names_and_raw_persona",
+        "tests/runtime/test_personalized_parent.py::test_parent_sends_resolved_self_persona_and_unmodified_candidate_history",
+        "tests/runtime/test_sns_observation.py::test_name_binding_recorder_keeps_only_counts_policy_and_content_hashes",
+        "tests/runtime/test_social_name_binding_recovery.py::test_other_recipient_macro_uses_one_writer_and_never_guesses_owner[False-feed-CombinedFeedLane]",
+        "tests/runtime/test_social_name_binding_recovery.py::test_other_recipient_macro_uses_one_writer_and_never_guesses_owner[False-inbox-CombinedInboxLane]",
+        "tests/runtime/test_social_name_binding_recovery.py::test_other_recipient_macro_uses_one_writer_and_never_guesses_owner[True-feed-CombinedFeedLane]",
+        "tests/runtime/test_social_name_binding_recovery.py::test_other_recipient_macro_uses_one_writer_and_never_guesses_owner[True-inbox-CombinedInboxLane]"
+      ],
+      "test_assertions": {
+        "tests/characters/name_binding_fixture.py": {
+          "create_profile": [],
+          "rename_profile": []
+        },
+        "tests/characters/test_name_binding.py": {
+          "binding": [],
+          "test_one_pass_names_without_grammar_or_template_execution": [
+            "assert render_names(source, binding()).text == expected"
+          ],
+          "test_inserted_names_are_literal_even_with_macro_syntax_and_backslashes": [
+            "assert render_names('{{user}} {{char}}', names, output=True).text == '민수{{char}}$\\\\ 고양이{{user}}'",
+            "assert render_names('민수{{char}}$\\\\ 고양이{{user}}', names, output=True).text == '민수{{char}}$\\\\ 고양이{{user}}'"
+          ],
+          "test_policy_is_persisted_and_explicit_damage_does_not_downgrade": [
+            "assert read_name_binding({}) is None",
+            "assert read_name_binding({'name_binding': names.to_dict()}) == names",
+            "pytest.raises(NameBindingError, match='missing')",
+            "pytest.raises(NameBindingError)"
+          ],
+          "test_absent_user_is_distinct_from_saved_default_user_and_char_still_works": [
+            "assert render_names('{{char}}', absent).text == 'Sakana'",
+            "pytest.raises(NameBindingError, match='missing')",
+            "assert render_names('{{user}}', binding(user_display_name='사용자')).text == '사용자'"
+          ],
+          "test_persona_allowlist_keeps_raw_settings_and_past_records_untouched": [
+            "assert persona['description'] == '민식의 친구 Sakana'",
+            "assert persona['speech_style'] == '대화 상대: 반가워'",
+            "assert persona['topic_preferences'] == '민식와 게임'",
+            "assert source == original",
+            "assert model_persona(source)['description'] == original['worldview']"
+          ],
+          "test_rendered_limits_are_checked_without_truncating_or_changing_source": [
+            "pytest.raises(NameBindingError, match='rendered_limit')",
+            "pytest.raises(NameBindingError, match='rendered_limit')"
+          ],
+          "test_other_reply_recipient_uses_id_even_if_names_match": [
+            "pytest.raises(NameBindingError, match='addressee_ambiguous')",
+            "assert final['replies'][0] == {'target_id': 'post', 'body': 'Seraphina, 고마워'}"
+          ],
+          "test_new_output_fields_keep_ids_and_literals_and_validate_final_lengths": [
+            "assert final['body'] == '민식, 좋아! `{{user}}`'",
+            "assert final['thought'] == 'Sakana는 즐거웠다'",
+            "assert final['source_id'] == final['quoted_record'].split()[0] == '{{user}}'",
+            "assert value['body'].startswith('{{user}}')",
+            "pytest.raises(NameBindingError, match='unsupported')",
+            "pytest.raises(NameBindingError, match='rendered_limit')"
+          ],
+          "test_review_distinguishes_supported_names_and_unsupported_nested_syntax": [
+            "assert name_macro_review('{{user}} {{ CHAR }} `{{user}}` {{random::{{user}}}}') == {'supported': 2, 'unsupported': 1, 'protected': 1}"
+          ]
+        },
+        "tests/characters/test_name_binding_scopes.py": {
+          "test_world_identity_freezes_per_activity_and_next_activity_uses_rename": [
+            "assert old.user_world_character_id == profile.world_character_id",
+            "assert request_persona(ready.character, old)['description'].endswith('민식의 친구')",
+            "assert read_name_binding(same.result) == old",
+            "assert read_name_binding(next_run.result).user_display_name == 'Alex🌟'",
+            "assert second.user_display_name == '민수' and second.user_world_character_id == second_profile.world_character_id",
+            "assert old.world_id != second.world_id and ready.character.worldview == '{{char}}는 {{user}}의 친구'",
+            "pytest.raises(NameBindingError, match='scope_invalid')"
+          ],
+          "test_resolution_does_not_create_a_missing_profile_or_change_persona": [
+            "assert snapshot.user_display_name is None",
+            "assert db.scalar(select(func.count(Character.id))) == before",
+            "assert ready.character.worldview == original"
+          ]
+        },
+        "tests/chat/test_response_name_binding.py": {
+          "test_chat_resolves_before_first_delta_and_stream_storage_memory_match": [
+            "assert read_name_binding(final.node_state) == binding",
+            "assert final.state is ResponseRequestState.COMMITTED",
+            "assert message.content == deltas == '민식, 반가워. `{{user}}`는 코드 예시야.'",
+            "assert len(memory.sources) == 1",
+            "assert memory.sources[0].assistant_message_id == message.id",
+            "assert not deltas and final.state is ResponseRequestState.FAILED and (not memory.sources)",
+            "assert '민식' in request.profile.worldview and '민수' not in request.profile.worldview",
+            "assert request.profile.speech_style == '대화 상대: 반가워'"
+          ]
+        },
+        "tests/migrations/test_topic_request_v25.py": {
+          "test_populated_v24_upgrade_preserves_all_old_topic_bytes_and_legacy_policy": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(24).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(25).schema_digest",
+            "assert tuple(final[:-1]) == tuple(original) and final[-1] is None",
+            "assert connection.exec_driver_sql('PRAGMA integrity_check').scalar_one() == 'ok'",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ]
+        },
+        "tests/routine_posts/test_output_contract_v2.py": {
+          "new_contract": [],
+          "test_remaining_enums_and_bounds_are_identical": [
+            "assert old['properties']['source_event_effects']['items']['properties']['source_event_id'] == new['properties']['source_event_effects']['items']['properties']['source_event_id']",
+            "assert 'episode_id' not in new['properties'] and 'considered_source_event_ids' not in new['properties']",
+            "assert 'motivation_kind' not in new['properties']",
+            "assert set(effect) == {'source_event_id', 'state_change'}",
+            "assert set(effect['state_change']['properties']) == {'mood', 'mood_intensity_delta', 'action_note'}",
+            "assert old['properties'][key] == new['properties'][key]",
+            "assert old['properties']['source_event_effects'][bound] == new['properties']['source_event_effects'][bound]"
+          ],
+          "test_wire_model_rejects_server_or_removed_fields": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_energy_free_state_is_explicit_and_old_state_is_preserved": [
+            "assert set(new) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old == original",
+            "assert initial_state(schema_version=2) == new",
+            "assert apply_state_changes(new, [{'mood': 'joyful', 'mood_intensity_delta': 20}], schema_version=2)['mood_intensity'] == 20",
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)",
+            "assert validate_state_snapshot(old) == old"
+          ],
+          "test_policy_freezes_once_and_missing_run_never_upgrades": [
+            "assert saved_policy(run.result).output_contract == ENUM_OUTPUT",
+            "assert bind_run(db, actor=fixture.world_character, activity_id='frozen-run').result == run.result",
+            "assert saved_policy(None).output_contract == LEGACY_OUTPUT",
+            "assert saved_policy(bind_run(db, actor=fixture.world_character, activity_id='old-new-run').result).state_schema_version == 1"
+          ],
+          "_reply": [],
+          "test_new_runtime_one_call_repair_bound_and_canonical_reuse": [
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert len((run.result or {}).get('recovery_reservations', [])) == (duplicate != 'none')",
+            "assert result['result']['public_action_count'] == 1",
+            "assert beat.state_schema_version == 2",
+            "assert 'energy' not in beat.state_after_snapshot",
+            "assert beat.result_snapshot['routine_output_contract'] == ENUM_OUTPUT",
+            "assert len(source.inputs) == 1 and source.rejected == ()",
+            "assert unit.thought_reference.startswith('social:')",
+            "assert any(('오전 훈련 중 균형' in member.text for member in unit.members))",
+            "assert episode_view.current_state_schema_version == 2",
+            "assert 'energy' not in episode_view.current_state_snapshot",
+            "assert replay['executions'][0]['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert len(calls) == expected + (duplicate != 'none')",
+            "assert 'NEW root SNS post' in kwargs['system']",
+            "assert result['failure']['reason'] == 'routine_reuses_published_reply'",
+            "assert result['result']['public_action_count'] == 0",
+            "assert db.get(Post, 'reply') is not None",
+            "assert 'episode_id' not in schema['properties']",
+            "assert 'energy' not in kwargs['payload']['routine']['state_before']",
+            "assert kwargs['payload']['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_copy_rule_checks_both_title_and_body_without_re_ban": [
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_routine_provider_names_and_rendered_duplicate_use_one_shared_repair": [
+            "assert result['result']['public_action_count'] == 1, result.get('failure')",
+            "assert len(calls) == 1 + duplicate_after_names",
+            "assert post.title == '민식의 기록' and '{{user}}' not in post.body",
+            "assert fixture.character.worldview == '{{char}}는 {{user}}의 친구'",
+            "assert routine['character']['persona']['description'] == context['persona']['description']",
+            "assert '민식' in routine['character']['persona_summary']",
+            "assert '민식' in routine['character']['speech_style']",
+            "assert context['historical_note'] == '{{user}}의 과거 기록'",
+            "assert payload['writer_feedback']['validation_code'] == 'routine_reuses_published_reply'"
+          ],
+          "test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard": [
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id='other-world', actor_id=fixture.world_character.id) == []",
+            "assert completed_replies(ctx, world_id=fixture.world.id, actor_id='other-actor') == []",
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 1"
+          ],
+          "test_sqlite_version_migration_keeps_old_snapshot_bytes": [
+            "assert connection.exec_driver_sql('SELECT state_schema_version, state_before_snapshot FROM activity_beats').one() == (1, '{\"energy\":50}')"
+          ],
+          "_claim": [],
+          "test_inflight_old_beat_blocks_transition_and_history_survives": [
+            "pytest.raises(ActivityRuntimeConflictError, match='activity_state_transition_pending')",
+            "assert fixture.morning_episode.current_state_schema_version == 1",
+            "assert new.state_schema_version == fixture.morning_episode.current_state_schema_version == 2",
+            "assert set(new.state_before_snapshot) == {'mood', 'mood_intensity', 'action_note'}",
+            "assert old.state_schema_version == 1 and old.state_before_snapshot == snapshot"
+          ],
+          "test_file_sqlite_competing_transition_only_claims_once": [
+            "assert sorted(outcomes) == ['claimed', 'conflict']",
+            "assert db.scalar(select(func.count()).select_from(ActivityBeat)) == 1",
+            "assert db.get(ActivityEpisode, episode_id).current_state_schema_version == 2"
+          ],
+          "test_server_binding_rejects_changed_input_before_applying_decision": [
+            "assert bound.considered_source_event_ids == bound.used_source_event_ids == ['event-a']",
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='routine_request_context_changed')"
+          ],
+          "test_copy_guard_queries_all_successes_instead_of_recent_twelve": [
+            "assert len(completed_replies(ctx, world_id=fixture.world.id, actor_id=fixture.world_character.id)) == 14",
+            "pytest.raises(ValueError, match='routine_reuses_published_reply')"
+          ],
+          "test_completed_reply_prompt_references_existing_text_without_losing_omitted_reply": [
+            "assert result[0]['content_ref'] == 'today_activity.records:post:present'",
+            "assert 'body' not in result[0] and 'title' not in result[0]",
+            "assert result[1] == replies[1]",
+            "assert replies[0]['body'] == '이미 쓴 답글' and today['records'][0]['body'] == '이미 쓴 답글'"
+          ],
+          "test_daily_runtime_and_repertoire_factory_select_energy_free_state": [
+            "assert status.plan_state == 'ready' and calls == [True], status",
+            "assert episodes and all((e.current_state_schema_version == 2 for e in episodes))",
+            "assert all((set(e.current_state_snapshot) == {'mood', 'mood_intensity', 'action_note'} for e in episodes))",
+            "assert states and all((e.current_state_schema_version == 2 for e in states))",
+            "assert all(('energy' not in e.current_state_snapshot for e in states))"
+          ],
+          "test_routine_diagnostic_codes_and_provenance_do_not_expose_generated_text": [
+            "assert validation_code(duplicate) == duplicate",
+            "assert validation_code('raw private content') is None",
+            "assert _safe_error(ValueError(duplicate))['error_code'] == duplicate",
+            "assert summary['routine_output_contract'] == ENUM_OUTPUT and summary['routine_state_schema_version'] == 2",
+            "assert summary['routine_considered_ids'] == ['event-a', 'event-b'] and summary['routine_used_ids'] == ['event-b']",
+            "assert 'private scene text' not in str(summary)"
+          ]
+        },
+        "tests/routines/test_preparation_name_binding.py": {
+          "test_daily_names_use_accepted_snapshot_and_next_date_uses_new_name": [
+            "assert first.plan_state == 'ready', first",
+            "assert '민식' in inputs[0]['persona']['description'] and '{{user}}' not in inputs[0]['persona']['description']",
+            "assert inputs[0]['persona']['speech_style'] == '대화 상대: 반가워'",
+            "assert read_name_binding(job.input_snapshot).user_display_name == '민식'",
+            "assert all((item['title'] == '민식와 휴식' for item in job.applied_snapshot['items']))",
+            "assert ready.character.worldview == '{{char}}는 {{user}}와 게임을 즐긴다.'",
+            "assert reused.plan_id == first.plan_id and len(inputs) == 1",
+            "assert next_date.plan_state == 'ready', next_date",
+            "assert '민수' in inputs[1]['persona']['description'] and 'recommendation_topics' not in inputs[1]"
+          ],
+          "test_invalid_preparation_snapshot_stops_before_ai_and_records_failure": [
+            "assert result.plan_state == 'failed' and result.reason_code == 'name_binding_missing'",
+            "assert job.state == 'failed' and job.attempt_count == 0 and (job.lease_expires_at is None)"
+          ],
+          "test_topic_regeneration_keeps_request_names_and_raw_persona": [
+            "assert result['state'] == 'ready', result",
+            "assert seen[0]['persona']['description'].startswith('민식의 동료')",
+            "assert result['topics'][0]['name'] == '민식의 게임'",
+            "assert read_name_binding(record.request_snapshot).user_display_name == '민식'",
+            "assert record.request_snapshot['source']['persona']['description'].startswith('{{user}}')",
+            "assert repeated['topics'] == result['topics'] and len(seen) == 1",
+            "assert recovered['state'] == 'ready' and len(seen) == 2",
+            "assert seen[1]['persona']['description'].startswith('민식의 동료')",
+            "assert read_name_binding(record.request_snapshot).user_display_name == '민식'"
+          ],
+          "test_daily_expired_claim_keeps_original_name_namespace": [
+            "assert first.id == second.id and first_token != second_token",
+            "assert read_name_binding(second.input_snapshot).user_display_name == '민식'",
+            "assert second.input_snapshot == source"
+          ]
+        },
+        "tests/runtime/test_personalized_parent.py": {
+          "_legacy_approved_preparation": [],
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect": [
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert repeated == result"
+          ],
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement": [
+            "pytest.raises(OperationalError)",
+            "assert run.status == 'waiting'",
+            "assert set(run.result['paths']) == ({'inbox'} if version == 2 else {'inbox', 'routine'})",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['plan', 'settle', 'settle']",
+            "assert run.status == 'completed'",
+            "assert 'state_status' in activity_status(db, actor=actor)['runs'][0]['paths']['feed']"
+          ],
+          "test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification": [
+            "assert result['status'] == 'failed'",
+            "assert result['paths']['inbox']['status'] == 'failed'",
+            "assert result['paths']['feed']['status'] == 'completed'",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(PostLike.id))) == 1",
+            "assert notification.handled_at is None"
+          ],
+          "test_parent_real_adapters_respect_slot_and_commit_single_feed_effect_combined": [],
+          "test_parent_sends_resolved_self_persona_and_unmodified_candidate_history": [
+            "assert '민식' in kwargs['context']['persona']['description']",
+            "assert '{{user}}' in kwargs['candidates'][0]['text']",
+            "assert result['publish_result']['public_action_count'] == 1, result['paths']",
+            "assert calls == ['feed']",
+            "assert post.body == '{{user}}의 과거 기록' and ctx.character.worldview.startswith('{{char}}')"
+          ],
+          "test_parent_preserves_completed_paths_and_resumes_busy_settlement_combined": [],
+          "test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification_combined": [],
+          "test_daily_plan_failure_defers_only_routine_and_preserves_feed_effect": [
+            "assert result['paths']['feed']['status'] == 'completed', result",
+            "assert result['paths']['routine']['status'] == 'deferred', result",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert calls == ['feed']",
+            "assert await run_personalized_activity(ctx, actor=actor, run=run) == result",
+            "assert calls == ['feed']"
+          ]
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_preparation_export_scopes_world_actor_time_and_omits_private_source": [
+            "assert [row['id'] for row in rows] == ['in-scope']",
+            "assert rows[0]['attempt_count'] == 4",
+            "assert 'private-persona' not in body and 'source_snapshot' not in body",
+            "assert list(db.iterdump()) == before"
+          ],
+          "test_name_binding_recorder_keeps_only_counts_policy_and_content_hashes": [
+            "assert 'private-user-name' not in source and 'private-key' not in source",
+            "assert 'private-output-body' not in source",
+            "assert event['details']['fields']['replies.0.body']['replacements'] == 2",
+            "assert event['details']['binding_digest'] == 'a' * 64"
+          ],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None",
+            "assert list(csv.DictReader(source))[0]['validation_code'] == 'unknown'"
+          ],
+          "test_schema3_exports_bounded_request_and_sqlite_evidence": [
+            "assert manifest['schema_version'] == 3",
+            "assert coverage['request_evidence_complete'] is True",
+            "assert coverage['artifact_missing_count'] == 0",
+            "assert coverage['sqlite_write_event_count'] == 1",
+            "assert len(artifacts) == 1",
+            "assert 'private-user-body' not in artifacts[0].read_text(encoding='utf-8')",
+            "assert '\"provider_detail_status\":\"absent\"' in calls",
+            "assert '\"unit\":\"S1\"' in (destination / 'sqlite-writes.jsonl').read_text(encoding='utf-8')",
+            "assert attempt is not None"
+          ],
+          "test_schema3_rejects_corrupt_artifact_during_export": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert attempt is not None"
+          ],
+          "test_schema3_large_artifact_is_reported_as_truncated_without_stopping_activity": [
+            "assert result['artifact_truncated_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert result['dropped_events'] == 0",
+            "assert attempt is not None"
+          ],
+          "test_schema3_export_rejects_artifact_path_outside_session": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert not (tmp_path / 'path' / 'outside-secret.json').exists()",
+            "assert attempt is not None"
+          ],
+          "test_legacy_session_reports_request_evidence_not_recorded": [
+            "assert result['request_evidence_complete'] == 'not_recorded_in_schema_version'"
+          ],
+          "test_export_separates_recovered_planner_output_from_final_failure": [
+            "assert coverage['planner_output_failures'] == 2",
+            "assert coverage['planner_retries_scheduled'] == 1",
+            "assert coverage['planner_recovered_activities'] == 1",
+            "assert coverage['planner_final_failures'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert 'action_brief_missing' in csv_text and 'decisions.0.brief' in csv_text",
+            "assert 'recovered activities: 1; final path failures: 1' in report",
+            "assert 'a' * 64 in calls",
+            "assert recovered and failed",
+            "assert 'SECRET_PRIVATE' not in (output / filename).read_text(encoding='utf-8')"
+          ],
+          "test_export_distinguishes_writer_repair_from_planner_retry": [
+            "assert coverage['combined_draft_validation_failures'] == 1",
+            "assert coverage['writer_recovered_paths'] == 1",
+            "assert coverage['planner_retries_scheduled'] == 0",
+            "assert coverage['planner_final_failures'] == 0",
+            "assert 'combined_draft_body_invalid' in calls and 'PRIVATE' not in calls"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True",
+            "assert coverage['planner_output_failures'] == 0"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        },
+        "tests/runtime/test_social_name_binding_recovery.py": {
+          "test_other_recipient_macro_uses_one_writer_and_never_guesses_owner": [
+            "assert len(requests) == len(reservations) == 1",
+            "assert lane.provider.repairing is False",
+            "assert state['decision']['provisional_draft']['replies'][0]['body'] == '{{user}}, 고마워요'",
+            "assert not reservations",
+            "assert kwargs['node'] == lane_name.title() + 'Writer'",
+            "assert kwargs['payload']['assignments'] == [assignment]",
+            "assert feedback['validation_code'] == 'name_macro_addressee_ambiguous'",
+            "assert kwargs['json_retry_policy'] is None",
+            "assert result['drafts'][0]['body'] == 'Seraphina, 고마워요'",
+            "assert result['drafts'][0]['post_id'] == 'post'",
+            "assert result['writer_input_receipts'][0]['writer_recovery'] is True",
+            "pytest.raises(NameBindingError, match='name_macro_addressee_ambiguous')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/name_binding_fixture.py": {},
+        "tests/characters/test_name_binding.py": {},
+        "tests/characters/test_name_binding_scopes.py": {},
+        "tests/chat/test_response_name_binding.py": {},
+        "tests/migrations/test_topic_request_v25.py": {},
+        "tests/routine_posts/test_output_contract_v2.py": {},
+        "tests/routines/test_preparation_name_binding.py": {},
+        "tests/runtime/test_personalized_parent.py": {},
+        "tests/runtime/test_sns_observation.py": {},
+        "tests/runtime/test_social_name_binding_recovery.py": {}
+      }
+    },
+    {
+      "commit": "eb8473cc0b3aff0eead24fb6196b1f711642c45b",
+      "feature_id": "AR-DAILY-JOINT-FEED",
+      "reason": "Ordinary generation, fixed-plan and proposal identity preservation, and atomic Feed delivery regression",
+      "tracked_files": {
+        "backend/app/runtime/social/feed_observations.py": "a74e4903e9121dc527479f06d2bed67b92448d05",
+        "backend/scripts/evaluate_daily_joint_feed.py": "4a94b3a19439b54c8c240edc1eba3ea9eea709b0",
+        "backend/tests/routines/test_ordinary_daily_generation.py": "96873646687049ab873ba1d18ceb2367e18c7bc8",
+        "backend/tests/runtime/test_feed_observation_writer.py": "d3b3a3f3c5530a00d5daeeb18fa25d0d6bffbd82",
+        "backend/tests/runtime/test_joint_daily_integration.py": "dfca55f83d2d8e9b8d00cd6ce25f9edef2de424f",
+        "backend/tests/runtime/test_joint_proposal_inbox.py": "d8712a089f4459e433f9542465885da7bffb1708",
+        "docs/verification/daily-joint-feed-20260929.md": "ca4ad52bf55b435dc8c8b4bfc1584f9b32171ecc"
+      },
+      "test_nodes": [
+        "tests/routines/test_ordinary_daily_generation.py::test_all_preserved_initial_uses_topics_only_and_keeps_plan_unchanged",
+        "tests/routines/test_ordinary_daily_generation.py::test_legacy_waiting_job_reuses_its_original_schema_digest_and_source",
+        "tests/routines/test_ordinary_daily_generation.py::test_new_plan_cannot_overwrite_changed_preserved_window",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[0]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[1]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[2]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[3]",
+        "tests/routines/test_ordinary_daily_generation.py::test_only_unpreserved_slots_are_generated_and_all_originals_survive[4]",
+        "tests/routines/test_ordinary_daily_generation.py::test_provider_schema_and_validator_use_the_same_daypart_partition",
+        "tests/routines/test_ordinary_daily_generation.py::test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader[activity_kind-joint_activity]",
+        "tests/routines/test_ordinary_daily_generation.py::test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader[social_mode-joint]",
+        "tests/runtime/test_feed_observation_writer.py::test_normal_observer_settles_and_replay_preserves_delivery",
+        "tests/runtime/test_feed_observation_writer.py::test_pending_scan_stops_after_first_exhausted_writer",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[io]",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[locked]",
+        "tests/runtime/test_feed_observation_writer.py::test_second_source_failure_rolls_back_first_receipt_and_settlement[program]",
+        "tests/runtime/test_feed_observation_writer.py::test_settled_replay_still_rejects_corrupt_outbox",
+        "tests/runtime/test_feed_observation_writer.py::test_short_lock_retries_and_long_lock_remains_pending_until_recovery",
+        "tests/runtime/test_feed_observation_writer.py::test_three_sessions_observe_each_delivery_once",
+        "tests/runtime/test_feed_observation_writer.py::test_unavailable_source_records_reason_without_aborting_valid_observations",
+        "tests/runtime/test_joint_daily_integration.py::test_acceptance_during_generation_fences_apply_and_keeps_both_reserved_plans",
+        "tests/runtime/test_joint_daily_integration.py::test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[0-False]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[0-True]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[1-False]",
+        "tests/runtime/test_joint_daily_integration.py::test_v2_original_proposal_acceptance_and_both_daily_plans[2-False]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_or_changed_proposal_cannot_be_dispatched_from_new_snapshot",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_proposal_is_not_presented_as_an_open_invitation[expired]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_closed_proposal_is_not_presented_as_an_open_invitation[rejected]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_counter_original_survives_later_comment_and_failed_or_unselected_run",
+        "tests/runtime/test_joint_proposal_inbox.py::test_notification_cap_leaves_proposal_beyond_page_pending_then_visible",
+        "tests/runtime/test_joint_proposal_inbox.py::test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding[None]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding[accept]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms[False]",
+        "tests/runtime/test_joint_proposal_inbox.py::test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_ordinary_daily_generation.py": {
+          "time_for_test": [],
+          "new_output": [],
+          "save_plan": [],
+          "topics_ready": [],
+          "test_only_unpreserved_slots_are_generated_and_all_originals_survive": [
+            "assert result.plan_state == 'ready', result",
+            "assert len(calls) == (0 if preserved == 4 else 1)",
+            "assert result.plan_version == (1 if preserved == 4 else 2)",
+            "assert len(final) == 4",
+            "assert source['generated_dayparts'] == list(DAYPARTS[preserved:])",
+            "assert job.input_snapshot['generation_contract'] == GENERATION_CONTRACT",
+            "assert job.state == 'ready'",
+            "assert (row.id, row.title, row.version, row.scheduled_start_at, row.scheduled_end_at) == original[row.daypart]"
+          ],
+          "test_all_preserved_initial_uses_topics_only_and_keeps_plan_unchanged": [
+            "assert result.topic_state == 'ready' and result.plan_version == 1, result",
+            "assert len(seen) == 1 and set(seen[0]) == {'persona', 'world'}",
+            "assert store.plan_snapshot(db, db.get(type(plan), plan.id)) == before",
+            "assert job.mode == 'initial' and job.attempt_count == 1 and (job.state == 'ready')",
+            "assert job.input_snapshot['generated_dayparts'] == []"
+          ],
+          "test_reserved_enum_is_rejected_in_new_request_and_retained_in_legacy_reader": [
+            "pytest.raises(ValidationError)",
+            "assert InitialPreparationOutput(daily_plan=raw, recommendation_topics=[{'name': '책 이야기', 'scope': 'common'}])",
+            "assert array['minItems'] == array['maxItems'] == 2",
+            "assert props['daypart']['enum'] == ['afternoon', 'evening']",
+            "assert 'joint_activity' not in props['activity_kind']['enum']",
+            "assert 'joint' not in props['social_mode']['enum']"
+          ],
+          "test_provider_schema_and_validator_use_the_same_daypart_partition": [
+            "assert len(value.daily_plan.items) == 1",
+            "assert 'fixed_items are' in kwargs['system_prompt']",
+            "assert 'recommendation_topics' not in kwargs['response_schema']['properties']",
+            "assert kwargs['response_schema']['properties']['daily_plan']['properties']['items']['maxItems'] == 1",
+            "assert kwargs['validator'](good)",
+            "pytest.raises(store.PreparationConflict, match='dayparts_mismatch')"
+          ],
+          "test_legacy_waiting_job_reuses_its_original_schema_digest_and_source": [
+            "assert db.get(ActivityPreparationJob, job.id).state == 'waiting'",
+            "assert result.plan_state == 'ready' and len(seen) == 1, result",
+            "assert db.get(ActivityPreparationJob, job.id).input_digest == digest",
+            "assert 'generation_contract' not in kwargs['source']"
+          ],
+          "test_new_plan_cannot_overwrite_changed_preserved_window": [
+            "assert result.plan_version == 1 and result.request_state == 'failed'",
+            "assert result.request_reason_code == 'preparation_source_changed'"
+          ]
+        },
+        "tests/runtime/test_feed_observation_writer.py": {
+          "fixture": [],
+          "lane": [],
+          "assert_settled": [
+            "assert row.trace['_activity_observation'] == 'settled'",
+            "assert row.trace['_activity_observation_results'][identity[5]] == {'status': 'observed'}",
+            "assert row.trace['retained'] == 'yes'",
+            "assert row.updated_at == datetime(2026, 9, 29, 9, 17, 16)",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id)).where(models.RelationshipStateChange.actor_world_character_id == identity[1], models.RelationshipStateChange.social_event_id == identity[4])) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id)).where(models.GraphProjectionOutbox.relationship_state_id.in_(select(models.RelationshipState.id).where(models.RelationshipState.actor_world_character_id == identity[1])), models.GraphProjectionOutbox.payload_version == 'relationship-observation-v1')) == 1"
+          ],
+          "test_normal_observer_settles_and_replay_preserves_delivery": [
+            "assert db.get(models.WorldCharacter, identity[1]).local_profile == {'flushed_owner_work': True}"
+          ],
+          "test_short_lock_retries_and_long_lock_remains_pending_until_recovery": [
+            "assert any((facts['result'] == 'busy' for _, facts in events))",
+            "assert all((facts['sqlite_primary_code'] == 5 for _, facts in events if facts['result'] == 'busy'))",
+            "assert all(('business_key_hash' in facts and 'post_id' not in facts for _, facts in events))",
+            "assert events[-1][1]['result'] == 'committed'",
+            "pytest.raises(SqliteBusyRetryExhausted)",
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation'] == 'pending'",
+            "assert busy.wait(timeout=5)"
+          ],
+          "test_second_source_failure_rolls_back_first_receipt_and_settlement": [
+            "pytest.raises(RuntimeError if failure == 'program' else OperationalError, match='synthetic-storage-failure')",
+            "assert failures == [failure]",
+            "assert events == []",
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation'] == 'pending'",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id)).where(models.RelationshipStateChange.actor_world_character_id == identity[1])) == 0"
+          ],
+          "test_unavailable_source_records_reason_without_aborting_valid_observations": [
+            "assert db.get(RecommendationDelivery, identity[3]).trace['_activity_observation_results']['deleted-source']['status'] == 'not_applied'"
+          ],
+          "test_three_sessions_observe_each_delivery_once": [],
+          "test_settled_replay_still_rejects_corrupt_outbox": [
+            "pytest.raises(ObservationOutboxIntegrityError)"
+          ],
+          "test_pending_scan_stops_after_first_exhausted_writer": [
+            "assert sum((facts['result'] == 'exhausted' for _, facts in events)) == 1",
+            "assert len({facts['business_key_hash'] for _, facts in events}) == 1",
+            "pytest.raises(SqliteBusyRetryExhausted)",
+            "assert all((row.trace['_activity_observation'] == 'pending' for row in db.scalars(select(RecommendationDelivery))))",
+            "assert all((row.trace['_activity_observation'] == 'settled' for row in db.scalars(select(RecommendationDelivery))))"
+          ]
+        },
+        "tests/runtime/test_joint_daily_integration.py": {
+          "database": [],
+          "pair": [],
+          "save_plan": [],
+          "context": [],
+          "adapter": [],
+          "generate_and_write": [],
+          "test_v2_original_proposal_acceptance_and_both_daily_plans": [
+            "assert feed_execution['status'] == 'succeeded'",
+            "assert proposal.status == 'proposed' and db.scalar(select(func.count(models.JointActivity.id))) == 0",
+            "assert state['assignments'][0]['target_post_id'] == original.id",
+            "assert state['drafts'][0]['proposal_response']['proposal_id'] == proposal.id",
+            "assert state['executions'][0]['status'] == 'succeeded', state['executions']",
+            "assert joint.source_acceptance_event_id and proposal.status == 'accepted'",
+            "assert len(participants) == 2",
+            "assert sum((row.linked_daily_activity_plan_item_id is not None for row in participants)) == (2 if existing == 2 else 0)",
+            "assert db.scalar(select(models.Notification).where(models.Notification.source_post_id == later.id)).handled_at is None",
+            "assert db.scalar(select(models.SocialEvent).where(models.SocialEvent.id == joint.source_acceptance_event_id)).event_type == 'joint_accepted'",
+            "assert asyncio.run(inbox.execute(state))['executions'][0]['status'] == 'reused'",
+            "assert db.scalar(select(func.count(models.JointActivity.id))) == 1",
+            "assert db.get(models.JointActivity, joint.id).status == 'ready'",
+            "assert all((row.linked_daily_activity_plan_item_id and row.linked_activity_episode_id for row in db.scalars(select(models.JointActivityParticipant))))",
+            "assert requests == ['FeedDecisionDraft', 'InboxTargetSelector', 'InboxDecisionDraft']",
+            "assert db.scalar(select(func.count(models.SocialEvent.id)).where(models.SocialEvent.event_type == 'joint_started')) == 0",
+            "assert 'evening' not in source['generated_dayparts']",
+            "assert len(rows) == 4",
+            "assert sum((row.joint_activity_id == joint.id for row in rows)) == 1",
+            "assert len(api_plan.items) == 4",
+            "assert sum((item.joint_activity_id == joint.id for item in api_plan.items)) == 1"
+          ],
+          "test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation": [
+            "assert 'dawn' in source['generated_dayparts'] and source['confirmed_reservations'] == []",
+            "assert len(rows) == 4 and all((row.joint_activity_id is None for row in rows))",
+            "assert next((row for row in rows if row.daypart == 'dawn')).status == 'skipped'",
+            "assert all((row.linked_daily_activity_plan_item_id is None for row in db.scalars(select(models.JointActivityParticipant))))",
+            "assert db.scalar(select(func.count(models.SocialEvent.id)).where(models.SocialEvent.event_type == 'joint_started')) == 0"
+          ],
+          "test_acceptance_during_generation_fences_apply_and_keeps_both_reserved_plans": [
+            "assert len(calls) == 1 and result.request_reason_code == 'preparation_source_changed'",
+            "assert joint.status == 'ready'",
+            "assert db.scalar(select(func.count(models.JointActivityParticipant.world_character_id))) == 2",
+            "assert len(rows) == 4 and sum((row.joint_activity_id == joint.id for row in rows)) == 1"
+          ]
+        },
+        "tests/runtime/test_joint_proposal_inbox.py": {
+          "fixture": [],
+          "notify": [],
+          "lane": [],
+          "test_proposal_and_later_ordinary_comment_have_disjoint_targets_and_alarms": [
+            "assert len(state['candidates']) == 2",
+            "assert proposal['source_ids'] == [value.proposal_comment.id]",
+            "assert ordinary['source_ids'] == [later.id]",
+            "assert proposal['activity_proposal']['proposal_id'] == value.proposal.id",
+            "assert state['lane_data'][proposal['target_id']]['post_id'] == value.proposal_comment.id",
+            "assert state['lane_data'][proposal['target_id']]['notification_ids'] == [notifications[value.proposal_comment.id].id]",
+            "assert state['lane_data'][ordinary['target_id']]['notification_ids'] == [notifications[later.id].id]",
+            "assert len({alarm for data in state['lane_data'].values() for alarm in data['notification_ids']}) == 2",
+            "assert notifications[later.id].handled_at is not None",
+            "assert notifications[value.proposal_comment.id].handled_at is None"
+          ],
+          "test_old_writer_checkpoint_uses_only_its_frozen_proposal_when_responding": [
+            "assert response['proposal_id'] == 'accepted-original-id' and response['decision'] == decision",
+            "assert response is None"
+          ],
+          "test_counter_original_survives_later_comment_and_failed_or_unselected_run": [
+            "assert len(state['candidates']) == 3",
+            "assert original['activity_proposal']['proposal_id'] == changed.child_proposal.id",
+            "assert original['source_ids'] == [counter.id]",
+            "assert state['lane_data'][original['target_id']]['notification_ids'] == [original_alarm.id]",
+            "assert all((alarm.handled_at is None for alarm in (original_alarm, later_alarm, branch_alarm)))",
+            "assert db.scalar(select(models.JointActivity)) is None"
+          ],
+          "test_closed_proposal_is_not_presented_as_an_open_invitation": [
+            "assert all((candidate['activity_proposal'] is None for candidate in result['candidates']))",
+            "assert alarm.handled_at is None"
+          ],
+          "test_notification_cap_leaves_proposal_beyond_page_pending_then_visible": [
+            "assert all((row['activity_proposal'] is None for row in first['candidates']))",
+            "assert sum((len(row['notification_ids']) for row in first['lane_data'].values())) == 10",
+            "assert proposal_alarm.handled_at is None",
+            "assert second['candidates'][0]['activity_proposal']['proposal_id'] == value.proposal.id",
+            "assert all((row.handled_at for row in earlier)) and proposal_alarm.handled_at is None"
+          ],
+          "test_closed_or_changed_proposal_cannot_be_dispatched_from_new_snapshot": [
+            "pytest.raises(ValueError, match='activity_proposal_changed')",
+            "assert alarm.handled_at is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_ordinary_daily_generation.py": {},
+        "tests/runtime/test_feed_observation_writer.py": {},
+        "tests/runtime/test_joint_daily_integration.py": {},
+        "tests/runtime/test_joint_proposal_inbox.py": {}
+      }
+    },
+    {
+      "commit": "e059640a4c2dc6d94aa2436e8cb13f4fb8f9d5e1",
+      "feature_id": "AR-INSTALLER-V25",
+      "reason": "Freeze supported v1-v24 predecessor schemas and add real hosted v24 upgrade coverage; retain all prior assertions.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[24]"
+      ],
+      "test_assertions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 25",
+            "assert fixture['target_table_count'] == 138",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert 'request_snapshot' not in topic_columns",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
     }
   ]
 }

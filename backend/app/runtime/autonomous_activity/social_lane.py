@@ -45,6 +45,8 @@ class SocialLane:
             for candidate in state.get("candidates", []):
                 if selected and candidate["target_id"] not in selected:
                     continue
+                if state.get("stage") == "Execute" and self.completed_action(state, candidate["target_id"]):
+                    continue  # Reuse committed effects; scope authorization still ran.
                 current_relation = self.relationship(candidate.get("counterpart_id"))
                 previous_relation = candidate.get("relationship", {})
                 if any(current_relation.get(k) != previous_relation.get(k) for k in ("content_hash", "status")):
@@ -54,6 +56,22 @@ class SocialLane:
                     if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
                         raise ValueError("activity_source_changed")
         return {}
+
+    def completed_action(self, state, target_id):
+        """Use the same durable identity for execution and its replay guard."""
+        decision = next((row for row in state.get("decision", {}).get("decisions", [])
+                         if row["target_id"] == target_id), None)
+        if decision is None or decision["action"] == "no_action":
+            return None
+        from sqlalchemy import select
+        from app.domains.routines.models import AgentPublicActionExecution
+        return self.ctx.db.scalar(select(AgentPublicActionExecution).where(
+            AgentPublicActionExecution.run_id == self.ctx.run_id,
+            AgentPublicActionExecution.character_id == self.ctx.character.id,
+            AgentPublicActionExecution.scope == self.lane,
+            AgentPublicActionExecution.action_type == ("reply" if decision["action"] == "comment" else decision["action"]),
+            AgentPublicActionExecution.target_post_id == state["lane_data"][target_id]["post_id"],
+            AgentPublicActionExecution.status == "succeeded"))
 
     def selected(self, state):
         ids = {s["target_id"] for s in state.get("selections", [])}
@@ -102,6 +120,8 @@ class SocialLane:
         decision = await self.provider.plan(lane=self.lane, context=state["decision_context"],
             candidates=self.selected(state), delivery=self.delivery(state),
             on_input_receipt=receipt.update, before_json_retry=before_retry)
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding, decision_names
+        decision = decision_names(decision, activity_name_binding(self.ctx), candidates=self.selected(state))
         return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):
@@ -118,6 +138,8 @@ class SocialLane:
                 "target_post_id": post_id, "scope": self.lane, "action_index": index,
                 "brief": decision["brief"], "interaction_intent": decision["interaction_intent"],
                 "comment_purpose": decision["comment_purpose"], "source": candidates[decision["target_id"]],
+                "activity_proposal": candidates[decision["target_id"]].get("activity_proposal")
+                    if decision.get("proposal_response") is not None else None,
                 "thought": decision.get("thought"), "proposal_response": decision.get("proposal_response"), "proposal": decision.get("proposal")})
         return {"assignments": assignments}
 
@@ -126,6 +148,11 @@ class SocialLane:
         receipts = []
         writing = await self.provider.write(lane=self.lane, context=state["decision_context"],
             assignments=state["assignments"], on_input_receipt=receipts.append)
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
+        names, fields = activity_name_binding(self.ctx), {}
+        writing = social_draft_names(writing, names,
+            assignments=state["assignments"], lane=self.lane, receipt=fields)
+        observe_output(self.tracker, names, lane=self.lane, fields=fields)
         return {"drafts": writing.get("reply_task_results", []), "writer_input_receipts": receipts}
 
     async def execute(self, state):
@@ -137,15 +164,7 @@ class SocialLane:
                 results.append({"target_id": decision["target_id"], "status": "no_action"})
                 continue
             data = state["lane_data"][decision["target_id"]]
-            from sqlalchemy import select
-            from app.domains.routines.models import AgentPublicActionExecution
-            action_type = "reply" if decision["action"] == "comment" else decision["action"]
-            previous = self.ctx.db.scalar(select(AgentPublicActionExecution).where(
-                AgentPublicActionExecution.run_id == self.ctx.run_id,
-                AgentPublicActionExecution.scope == self.lane,
-                AgentPublicActionExecution.action_type == action_type,
-                AgentPublicActionExecution.target_post_id == data["post_id"],
-                AgentPublicActionExecution.status == "succeeded"))
+            previous = self.completed_action(state, decision["target_id"])
             if previous is not None:
                 results.append({"target_id": decision["target_id"], "status": "reused", "execution_id": previous.id})
                 continue

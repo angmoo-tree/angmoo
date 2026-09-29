@@ -26,8 +26,9 @@ function reviewLabel(code: string) {
   if (code === "description_required_review") return "캐릭터 설명이 비어 있습니다. 등록 전에 짧은 설명을 작성해주세요.";
   if (code === "scenario_manual_merge") return "상황 설정은 자동 반영하지 않습니다. 원문에서 필요한 내용을 배경·설정에 옮겨주세요.";
   if (code === "v3_common_fields_only") return "V3 카드의 공통 항목만 반영합니다. 추가 기능은 원문에서 확인해주세요.";
-  const key = code.replace(/_(length_limit|dynamic_text_review)$/, "");
+  const key = code.replace(/_(length_limit|dynamic_text_review|name_binding)$/, "");
   const label = PERSONA_FIELDS.find(([field]) => field === key)?.[1] ?? (key === "name" ? "이름" : key);
+  if (code.endsWith("_name_binding")) return `${label}: 이름 표기는 활동할 때 현재 World의 이름으로 적용됩니다. 원본 설정은 유지됩니다.`;
   return code.endsWith("_length_limit") ? `${label}: 입력 길이 제한에 맞게 편집해주세요. 원문은 보존됩니다.`
     : `${label}: 자동 처리하지 않는 동적 문구가 있습니다. 확인 후 수정해주세요.`;
 }

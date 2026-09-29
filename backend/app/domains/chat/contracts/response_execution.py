@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Protocol, TypedDict
+from typing import Callable, Protocol, TypedDict
 
 from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseContextMessage,
@@ -64,6 +64,7 @@ class ResponseWorkflowCommand:
     lease_seconds: int = 180
     recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
     social_snapshot: SocialContextSnapshot | None = None
+    name_binding_validator: Callable[[], None] | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.recall_mode, ChatRecallMode):

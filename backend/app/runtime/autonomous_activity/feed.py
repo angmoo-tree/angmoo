@@ -1,6 +1,7 @@
 """C recommendation discovery and durable delivery, followed by selected recall."""
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
+from hashlib import sha256
 
 from app.domains.social.contracts.world_feed import KeywordClaim, ObservationClaimResult
 from app.domains.social.models.feed import WorldCharacterFeedObservation
@@ -123,61 +124,50 @@ class FeedLane(SocialLane):
         from app.runtime.autonomous_activity.feed_effects import execute
         return {"executions": execute(self, state)}
 
+    def completed_action(self, state, target_id):
+        from app.runtime.autonomous_activity.feed_effects import committed
+        decision = next((row for row in state.get("decision", {}).get("decisions", [])
+                         if row["target_id"] == target_id), None)
+        return committed(self, state, decision) if decision and decision["action"] != "no_action" else None
+
     def observe_delivered(self):
-        from sqlalchemy import select
-        from app.domains.social.models.topics import RecommendationDelivery
-        from app.domains.social.contracts.observations import SocialObservationError
-        from app.runtime.social.observations import observe_source
-        row = self.ctx.db.scalar(select(RecommendationDelivery).where(
-            RecommendationDelivery.world_character_id == self.actor.id,
-            RecommendationDelivery.cycle_key == f"v2:{self.ctx.run_id}:feed",
-            RecommendationDelivery.state == "delivered"))
-        if row is None:
-            return
-        for identifier in row.post_ids:
-            try:
-                with self.ctx.db.begin_nested():
-                    observe_source(self.ctx.db, world_id=self.actor.world_id,
-                        observer_world_character_id=self.actor.id,
-                        source_social_event_id=None, source_post_id=identifier,
-                        lane="feed", observed_at=row.updated_at)
-            except SocialObservationError:
-                import logging
-                logging.getLogger(__name__).warning("v2_feed_observation_source_unavailable")
-        self.ctx.db.commit()
+        from app.runtime.social.feed_observations import settle_delivery
+        world_id, actor_id = self.actor.world_id, self.actor.id
+        cycle_key = f"v2:{self.ctx.run_id}:feed"
+        # This lane owns the preceding boundary. Commit also preserves writes
+        # already flushed by its caller, which Session.dirty cannot identify.
+        if self.ctx.db.in_transaction():
+            self.ctx.db.commit()
+        settle_delivery(self.ctx.db, world_id=world_id, actor_id=actor_id,
+            cycle_key=cycle_key, verify_replay=True, observer=self.observation_diagnostics(cycle_key, "ObserveDelivered"))
+
+    def observation_diagnostics(self, key, node):
+        tracker = getattr(self, "tracker", None)
+        if tracker is None:
+            return None
+        return lambda facts: tracker._notify("sqlite_write", {
+            "lane": "feed", "node": node, "unit": "feed_delivery_observation",
+            "db_kind": "canonical", "business_key_hash": sha256(key.encode()).hexdigest(), **facts})
 
     def reconcile_deliveries(self):
-        from sqlalchemy import select, update
+        from sqlalchemy import select
         from app.domains.social.models.topics import RecommendationDelivery
-        from app.domains.social.contracts.observations import SocialObservationError
-        from app.runtime.social.observations import observe_source
-        rows = self.ctx.db.scalars(select(RecommendationDelivery).where(
-            RecommendationDelivery.world_id == self.actor.world_id,
-            RecommendationDelivery.world_character_id == self.actor.id,
+        from app.runtime.social.feed_observations import settle_delivery
+        world_id, actor_id = self.actor.world_id, self.actor.id
+        if self.ctx.db.in_transaction():
+            self.ctx.db.commit()
+        identifiers = self.ctx.db.scalars(select(RecommendationDelivery.id).where(
+            RecommendationDelivery.world_id == world_id,
+            RecommendationDelivery.world_character_id == actor_id,
             RecommendationDelivery.state == "delivered",
             RecommendationDelivery.trace["_activity_observation"].as_string() == "pending",
         ).order_by(RecommendationDelivery.updated_at, RecommendationDelivery.id).limit(200)).all()
-        for row in rows:
-            outcomes = {}
-            for post_id in row.post_ids:
-                try:
-                    with self.ctx.db.begin_nested():
-                        observe_source(self.ctx.db, world_id=self.actor.world_id,
-                            observer_world_character_id=self.actor.id, source_social_event_id=None,
-                            source_post_id=post_id, lane="feed", observed_at=row.updated_at)
-                    outcomes[post_id] = {"status": "observed"}
-                except SocialObservationError as exc:
-                    # Eligibility failure is a recorded terminal non-application,
-                    # not an endless retry or an invented successful observation.
-                    outcomes[post_id] = {"status": "not_applied", "reason": exc.reason_code}
-            # Readers use updated_at as the delivery time. Settling an old
-            # receipt must not make its posts look newly delivered today.
-            self.ctx.db.execute(update(RecommendationDelivery).where(
-                RecommendationDelivery.id == row.id).values(
-                    trace={**row.trace, "_activity_observation": "settled",
-                        "_activity_observation_results": outcomes},
-                    updated_at=row.updated_at).execution_options(synchronize_session="fetch"))
-            self.ctx.db.commit()
+        self.ctx.db.commit()  # Close this owned ID scan before any writer read.
+        for identifier in identifiers:
+            # An exhausted/error unit propagates immediately: do not multiply
+            # the bounded writer budget by the whole pending batch.
+            settle_delivery(self.ctx.db, world_id=world_id, actor_id=actor_id, delivery_id=identifier,
+                observer=self.observation_diagnostics(identifier, "ReconcileDeliveries"))
 
     async def finalize(self, state):
         self.observe_delivered()

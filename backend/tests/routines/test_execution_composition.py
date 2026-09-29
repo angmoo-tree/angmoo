@@ -13,6 +13,12 @@ from app.runtime.routines.activity_references import SqlAlchemyActivityReference
 from routines.test_daily_activity_runtime import _prepare, _seed, _utc
 
 
+@pytest.fixture(autouse=True)
+def legacy_state_contract(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "ROUTINE_OUTPUT_POLICY", "legacy")
+
+
 @pytest.mark.parametrize("outcome", ["commit", "rollback"])
 def test_pending_post_and_beat_completion_share_caller_transaction(tmp_path, outcome):
     engine = create_engine(f"sqlite:///{tmp_path / 'execution-composition.sqlite3'}")

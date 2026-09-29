@@ -30,6 +30,9 @@ class ActivityIdentity(BaseModel):
     cause: Literal["manual", "scheduled", "recovery"]
     generation_model: str | None = None
     thinking_level: str | None = None
+    routine_output_contract: str | None = None
+    routine_state_schema_version: int | None = None
+    routine_thought_policy: str | None = None
 
 
 class Candidate(BaseModel):
