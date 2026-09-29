@@ -154,3 +154,5 @@ Sakana의 최초 실패는 `accept`인데 `counter_target_daypart/date_policy/ta
 이번 PR은 앞선 Routine 출력 책임 분리·에너지 제거·답글 복제 방지와 World 프로필 이름의 요청용 치환까지 함께 포함한다. 이름·상태·실행 버전과 이전 자료 읽기 경계, embedded schema v24/v25 및 설치 업그레이드를 최종 후보 CI에서 검증한다. 로컬 회귀 155건과 과거 승인된 실제 AI 평가를 새 원격 CI의 결과로 표시하지 않는다. 공개·CI 작업에는 추가 실제 AI 호출이 없고, 사용자 Docker 관찰의 소스·DB·컨테이너를 변경하지 않는다.
 
 관련 구현 문서는 [요청용 이름 치환](../operations/persona-name-binding.md), [이슈 #345](https://github.com/angmoo-tree/angmoo/issues/345)에서 확인할 수 있다. 위 workspace 계획·증거 경로는 원래 로컬 재현 자료의 위치이며 공개 저장소에 해당 자료를 포함한다는 의미가 아니다. 최종 PR·CI 결과와 main 병합 대기 상태는 PR 본문에 별도로 기록한다.
+
+공개 전 설치 검증에서는 v25의 새 `request_snapshot` 열이 합성 이전 버전 fixture에 남아 v23 재현의 schema digest가 어긋나는 누락을 실제 테스트로 확인했다. fixture builder만 해당 열을 제거해 이전 manifest와 일치시키고, 지원하는 v24도 hosted NSIS 업그레이드 입력에 추가했다. 실제 사용자 자료는 기존 forward migration으로 처리하며 재구성하지 않는다. 기존 테스트 단언은 유지하고 이전 버전 열 부재와 v24 상태 열 존재 검사를 추가했다. `tests/test_p8_l_d_installer_upgrade_contract.py` 및 `tests/migrations/test_topic_request_v25.py`는 **26 passed**, desktop installer 안전 계약·CI 정책·v1~v24 matrix 정합성·PowerShell 문법·workflow YAML 검사도 통과했다. 실제 hosted installer 설치·실패 복구 결과는 최종 head CI에서 별도로 확인한다.

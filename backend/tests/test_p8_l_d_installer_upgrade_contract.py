@@ -29,7 +29,7 @@ def _script_module(name: str, relative: str) -> ModuleType:
     return module
 
 
-@pytest.mark.parametrize("source_version", tuple(range(1, 24)))
+@pytest.mark.parametrize("source_version", tuple(range(1, 25)))
 def test_supported_installer_builder_freezes_every_readable_predecessor(
     tmp_path: Path,
     source_version: int,
@@ -109,6 +109,16 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
         assert ("relationship_experience_receipts" in memory_tables) == (source_version >= 17)
         assert ("relationship_review_requests" in memory_tables) == (source_version >= 18)
         assert ("activity_graph_runs" in memory_tables) == (source_version >= 19)
+        topic_columns = {
+            row[1] for row in source.execute(
+                "PRAGMA table_info(social_recommendation_preparations)"
+            )
+        }
+        assert "request_snapshot" not in topic_columns
+        beat_columns = {
+            row[1] for row in source.execute("PRAGMA table_info(activity_beats)")
+        }
+        assert ("state_schema_version" in beat_columns) == (source_version >= 24)
         roleless_count = int(
             source.execute(
                 "SELECT count(*) FROM world_characters "
