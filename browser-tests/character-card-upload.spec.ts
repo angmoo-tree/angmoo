@@ -55,6 +55,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         POST_IMAGE_JOB_WORKER_ENABLED: "false",
         POLLINATIONS_SERVICE_IMAGE_ENABLED: "false",
       },
+      detached: process.platform !== "win32",
       stdio: ["ignore", "pipe", "pipe"],
     });
     backendLog = captureOutput(backend);
@@ -69,6 +70,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
           ANGMOO_API_BASE_URL: backendUrl,
           NEXT_TELEMETRY_DISABLED: "1",
         },
+        detached: process.platform !== "win32",
         stdio: ["ignore", "pipe", "pipe"],
       });
     frontendLog = captureOutput(frontend);
@@ -76,8 +78,11 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
   });
 
   test.afterAll(async () => {
-    if (frontend) await stopChild(frontend);
-    if (backend) await stopChild(backend);
+    try {
+      if (frontend) await stopChild(frontend);
+    } finally {
+      if (backend) await stopChild(backend);
+    }
     if (dataRoot) console.log(`Isolated card upload data root: ${dataRoot}`);
   });
 
@@ -216,6 +221,32 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
 });
 }
 
+test("isolated service cleanup closes its descendant server before another build", async () => {
+  const port = await availablePort();
+  const url = `http://127.0.0.1:${port}`;
+  const descendant = `require('node:http').createServer((_, response) => response.end('ready')).listen(${port}, '127.0.0.1');`;
+  const parent = `require('node:child_process').spawn(process.execPath, ['-e', ${JSON.stringify(descendant)}], { stdio: 'inherit' }); setInterval(() => {}, 1000);`;
+  const child = spawn(process.execPath, ["-e", parent], {
+    detached: process.platform !== "win32",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const output = captureOutput(child);
+  try {
+    await ready(url, () => child, output, 15_000);
+    await stopChild(child);
+    await expect.poll(async () => {
+      try {
+        await fetch(url, { signal: AbortSignal.timeout(500) });
+        return true;
+      } catch {
+        return false;
+      }
+    }).toBe(false);
+  } finally {
+    await stopChild(child);
+  }
+});
+
 function createSyntheticCards(): string {
   const directory = mkdtempSync(join(tmpdir(), "angmoo-synthetic-cards-"));
   const records = [
@@ -291,11 +322,39 @@ async function availablePort(): Promise<number> {
 }
 
 async function stopChild(child: ChildProcess) {
-  if (child.exitCode !== null || child.pid === undefined) return;
-  if (process.platform === "win32") {
-    spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
-  } else {
-    child.kill("SIGTERM");
+  const pid = child.pid;
+  if (pid === undefined) return;
+  const exited = child.exitCode !== null || child.signalCode !== null;
+  if (process.platform === "win32" && exited) return;
+  const closed = exited ? Promise.resolve() : once(child, "close");
+  const signal = (value: NodeJS.Signals) => {
+    if (process.platform === "win32") {
+      const result = spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
+      if (result.error || result.status !== 0) throw new Error("Isolated service tree shutdown failed");
+    } else {
+      try {
+        // Every owned service starts in its own group. Next forks a worker;
+        // terminating only the CLI can leave it writing dev type artifacts.
+        process.kill(-pid, value);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "ESRCH") throw error;
+      }
+    }
+  };
+  const waitClosed = async (milliseconds: number) => {
+    let timer: NodeJS.Timeout | undefined;
+    try {
+      return await Promise.race([
+        closed.then(() => true),
+        new Promise<boolean>((resolve) => { timer = setTimeout(() => resolve(false), milliseconds); }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  signal("SIGTERM");
+  if (!await waitClosed(5_000)) {
+    signal("SIGKILL");
+    if (!await waitClosed(5_000)) throw new Error("Isolated service shutdown timed out");
   }
-  await Promise.race([once(child, "exit"), new Promise((resolve) => setTimeout(resolve, 5_000))]);
 }

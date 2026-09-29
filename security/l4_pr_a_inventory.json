@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3805,
-      "internal_edge_count": 5220,
+      "external_import_count": 3818,
+      "internal_edge_count": 5269,
       "legacy_import_exception_count": 0,
-      "module_count": 1294,
+      "module_count": 1303,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2465,6 +2465,16 @@
           },
           {
             "imports": [
+              "app.core.sqlite_concurrency",
+              "app.domains.social.contracts.observations",
+              "app.domains.social.models.topics",
+              "app.runtime.social.observations"
+            ],
+            "module": "app.runtime.social.feed_observations",
+            "path": "backend/app/runtime/social/feed_observations.py"
+          },
+          {
+            "imports": [
               "app.config",
               "app.contracts.activity_thought",
               "app.contracts.activity_thought_output",
@@ -2789,6 +2799,7 @@
           {
             "imports": [
               "app.config",
+              "app.contracts.name_binding",
               "app.domains.characters.models",
               "app.domains.characters.service.prompt_persona",
               "app.domains.identity.contracts",
@@ -2802,12 +2813,14 @@
               "app.domains.social.service.recommendation_topics",
               "app.domains.world_characters.models",
               "app.domains.world_characters.service.approved_setup",
+              "app.domains.world_characters.service.name_binding",
               "app.domains.world_characters.service.preparation_lock",
               "app.domains.world_characters.service.setup_validation",
               "app.domains.worlds.models",
               "app.domains.worlds.service.generation_context",
               "app.integrations.direct_llm",
               "app.providers.gemini",
+              "app.runtime.preparation_names",
               "app.runtime.social.recommendation_history",
               "app.runtime.social.status_composition"
             ],
@@ -3392,7 +3405,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "ac4faa9345a9e0400410ca6a4aa86be30bd0f1eea14c47df4fe8f1a99606d469"
+    "workflow_sha256": "c1ad09d0ca832186f3c62a8515652069192d858b9491f84d62df5c6b77ef7eb1"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
@@ -3462,7 +3475,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "d909315ee7b47799b1d631d11a1dd71565c45c34b743e621b1cf5eb2e67541a7"
+        "sha256": "9647a058b740f7da83226d1a2df9eb6613f5470afcb72f9926284a6e56339d01"
       },
       "steps": [
         {

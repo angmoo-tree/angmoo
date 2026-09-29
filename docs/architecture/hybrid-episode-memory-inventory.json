@@ -1258,7 +1258,7 @@
     },
     {
       "path": "backend/app/domains/social/service/activity_inbox.py",
-      "sha256": "8769a237ffdf86f6835909e314a0326898cd3ad7d1eed6e7f4be7b6837188717"
+      "sha256": "144648b4e85772bba74322036ff3d27af6a0212a5526e5e88f69125785194f46"
     },
     {
       "path": "backend/app/domains/social/service/activity_results.py",
@@ -2149,6 +2149,10 @@
       "sha256": "34a5b8a0fa3e25b9620d4e4af31273cee8344ea6b9b88f846de4b21f9121c359"
     },
     {
+      "path": "backend/app/runtime/social/feed_observations.py",
+      "sha256": "1b39231e4a74644bb16b779f6cbf2865d67c3a10d5f53d020948e84badb47a6a"
+    },
+    {
       "path": "backend/app/runtime/social/feed_reaction_provider.py",
       "sha256": "9a610181d3a159f107c2e8b06654c5d61a6286669e0e24e5722076eb759f2390"
     },
@@ -2250,7 +2254,7 @@
     },
     {
       "path": "backend/app/runtime/social/topic_preparation.py",
-      "sha256": "a57fa1e154e7f9def2d5ffae94fe007568a768d18c54423bbff0ef272259790f"
+      "sha256": "d7ece7fab901a248319c0d04ee8c91fc7db0422557a61365fcbbf2e900897724"
     },
     {
       "path": "backend/app/runtime/social/topic_scope.py",
