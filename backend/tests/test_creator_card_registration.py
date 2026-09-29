@@ -51,7 +51,7 @@ def test_card_final_edits_are_only_registered_persona_and_source_stays_private(d
     world = session.get(World, actor.world_id)
     preparation = build_world_character_generation_input(character=stored, world_character=actor,
         world_context=build_world_generation_context(session, world))
-    sns = shared_input(SimpleNamespace(db=session, user_id=owner.id, character=stored), actor, world)
+    sns = shared_input(SimpleNamespace(db=session, user_id=owner.id, character=stored, run_id="legacy-fixture"), actor, world)
     chat = _response_profile(stored)
     assert preparation["character"]["personality"] == sns["persona"]["personality"] == chat.personality == "Edited persona"
     assert preparation["character"]["speech_style"] == sns["persona"]["speech_style"] == chat.speech_style == "Edited voice"

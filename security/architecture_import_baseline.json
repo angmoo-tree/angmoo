@@ -1,7 +1,7 @@
 {
-  "edge_count": 5220,
-  "external_import_count": 3805,
-  "module_count": 1294,
+  "edge_count": 5266,
+  "external_import_count": 3814,
+  "module_count": 1302,
   "modules": [
     {
       "external_imports": [],
@@ -338,6 +338,17 @@
       ],
       "module": "app.contracts.decision_observation",
       "path": "backend/app/contracts/decision_observation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "hashlib",
+        "json"
+      ],
+      "imports": [],
+      "module": "app.contracts.name_binding",
+      "path": "backend/app/contracts/name_binding.py",
       "wildcard_imports": []
     },
     {
@@ -1049,6 +1060,29 @@
     },
     {
       "external_imports": [
+        "hashlib"
+      ],
+      "imports": [
+        "app.domains.characters.policies.name_macros"
+      ],
+      "module": "app.domains.characters.policies.authored_names",
+      "path": "backend/app/domains/characters/policies/authored_names.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "re"
+      ],
+      "imports": [
+        "app.contracts.name_binding"
+      ],
+      "module": "app.domains.characters.policies.name_macros",
+      "path": "backend/app/domains/characters/policies/name_macros.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "unicodedata"
       ],
       "imports": [],
@@ -1192,10 +1226,10 @@
     {
       "external_imports": [
         "__future__",
-        "dataclasses",
-        "re"
+        "dataclasses"
       ],
       "imports": [
+        "app.domains.characters.policies.name_macros",
         "app.domains.characters.policies.persona",
         "app.integrations.character_cards.parser"
       ],
@@ -1471,7 +1505,11 @@
         "collections.abc",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.characters.policies.authored_names",
+        "app.domains.characters.policies.name_macros",
+        "app.domains.characters.policies.persona"
+      ],
       "module": "app.domains.characters.service.prompt_persona",
       "path": "backend/app/domains/characters/service/prompt_persona.py",
       "wildcard_imports": []
@@ -2718,13 +2756,16 @@
         "collections.abc",
         "dataclasses",
         "datetime",
+        "hashlib",
         "logging",
         "typing",
         "uuid"
       ],
       "imports": [
+        "app.contracts.name_binding",
         "app.contracts.retrieval_observation",
         "app.contracts.search_diagnostics",
+        "app.domains.characters.service.prompt_persona",
         "app.domains.chat.contracts.character_response_generator",
         "app.domains.chat.contracts.generation_lifecycle",
         "app.domains.chat.contracts.graph_failure",
@@ -7277,6 +7318,7 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.name_binding",
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.autonomy_management",
         "app.domains.routines.contracts.feed_cues",
@@ -12546,7 +12588,8 @@
         "app.contracts.routine_output",
         "app.domains.world_characters.activity_models",
         "app.domains.world_characters.models",
-        "app.domains.world_characters.schemas.activity_state"
+        "app.domains.world_characters.schemas.activity_state",
+        "app.domains.world_characters.service.name_binding"
       ],
       "module": "app.domains.world_characters.service.activity_engines",
       "path": "backend/app/domains/world_characters/service/activity_engines.py",
@@ -12689,6 +12732,21 @@
       ],
       "module": "app.domains.world_characters.service.membership",
       "path": "backend/app/domains/world_characters/service/membership.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.contracts.name_binding",
+        "app.domains.characters.service.profile",
+        "app.domains.world_characters.contracts.owner_identity",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.owner_identity"
+      ],
+      "module": "app.domains.world_characters.service.name_binding",
+      "path": "backend/app/domains/world_characters/service/name_binding.py",
       "wildcard_imports": []
     },
     {
@@ -14725,6 +14783,7 @@
         "re"
       ],
       "imports": [
+        "app.domains.characters.policies.authored_names",
         "app.domains.social.contracts.world_feed",
         "app.domains.social.models.posts",
         "app.domains.social.schemas.feed",
@@ -14735,6 +14794,7 @@
         "app.runtime.autonomous_activity.feed",
         "app.runtime.autonomous_activity.generation_contracts",
         "app.runtime.autonomous_activity.inbox",
+        "app.runtime.autonomous_activity.name_binding",
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.routine",
         "app.runtime.autonomous_activity.social_lane",
@@ -14803,12 +14863,14 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.name_binding",
         "app.core.sqlite_concurrency",
         "app.domains.routines.models",
         "app.domains.social.exceptions",
         "app.domains.world_characters.activity_models",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_state",
+        "app.domains.world_characters.service.name_binding",
         "app.domains.worlds.models",
         "app.integrations.direct_llm",
         "app.runtime.autonomous_activity.binding",
@@ -14949,11 +15011,23 @@
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_state",
         "app.runtime.autonomous_activity.contracts",
+        "app.runtime.autonomous_activity.name_binding",
         "app.runtime.graph_projection.relationship_graph_read",
         "app.runtime.social.today_activity"
       ],
       "module": "app.runtime.autonomous_activity.inputs",
       "path": "backend/app/runtime/autonomous_activity/inputs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.contracts.name_binding",
+        "app.domains.characters.policies.authored_names",
+        "app.domains.world_characters.activity_models"
+      ],
+      "module": "app.runtime.autonomous_activity.name_binding",
+      "path": "backend/app/runtime/autonomous_activity/name_binding.py",
       "wildcard_imports": []
     },
     {
@@ -15075,6 +15149,8 @@
         "app.contracts.activity_thought_output",
         "app.contracts.routine_output",
         "app.core.sqlite_concurrency",
+        "app.domains.characters.policies.authored_names",
+        "app.domains.characters.service.prompt_persona",
         "app.domains.relationships.policies.interpretation_prompt",
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.contracts.request_context",
@@ -15092,6 +15168,7 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
+        "app.runtime.autonomous_activity.name_binding",
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.planner_contract",
         "app.runtime.autonomous_activity.provider",
@@ -15167,6 +15244,7 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
+        "app.runtime.autonomous_activity.name_binding",
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.provider",
         "app.runtime.autonomous_activity.recall",
@@ -15596,6 +15674,7 @@
         "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
+        "app.runtime.chat.name_binding",
         "app.runtime.chat.scope_queries"
       ],
       "module": "app.runtime.chat.message_composition",
@@ -15614,6 +15693,17 @@
       ],
       "module": "app.runtime.chat.model_bindings",
       "path": "backend/app/runtime/chat/model_bindings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.contracts.name_binding",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.name_binding"
+      ],
+      "module": "app.runtime.chat.name_binding",
+      "path": "backend/app/runtime/chat/name_binding.py",
       "wildcard_imports": []
     },
     {
@@ -15828,6 +15918,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.contracts.name_binding",
         "app.core.ids",
         "app.domains.characters.models",
         "app.domains.characters.service.prompt_persona",
@@ -15852,9 +15943,11 @@
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_engines",
         "app.domains.world_characters.service.activity_state",
+        "app.domains.world_characters.service.name_binding",
         "app.domains.world_characters.service.preparation_lock",
         "app.domains.worlds.service.character_entry",
         "app.domains.worlds.service.generation_context",
+        "app.runtime.preparation_names",
         "app.runtime.routines.plan_references",
         "app.runtime.social.today_activity",
         "app.runtime.social.topic_preparation"
@@ -17366,6 +17459,7 @@
         "app.runtime.migrations.sqlite_versions.daily_preparation_v23",
         "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
         "app.runtime.migrations.sqlite_versions.routine_state_v24",
+        "app.runtime.migrations.sqlite_versions.topic_request_v25",
         "app.runtime.migrations.sqlite_versions.v10_to_v11_chat_diagnostics",
         "app.runtime.migrations.sqlite_versions.v11_to_v12_memory_embedding",
         "app.runtime.migrations.sqlite_versions.v12_to_v13_episode_memory",
@@ -17407,6 +17501,18 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.routine_state_v24",
       "path": "backend/app/runtime/migrations/sqlite_versions/routine_state_v24.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.topic_request_v25",
+      "path": "backend/app/runtime/migrations/sqlite_versions/topic_request_v25.py",
       "wildcard_imports": []
     },
     {
@@ -17850,6 +17956,15 @@
       "imports": [],
       "module": "app.runtime.persistence.sqlite_unit_of_work",
       "path": "backend/app/runtime/persistence/sqlite_unit_of_work.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.policies.authored_names"
+      ],
+      "module": "app.runtime.preparation_names",
+      "path": "backend/app/runtime/preparation_names.py",
       "wildcard_imports": []
     },
     {
@@ -18334,9 +18449,11 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.name_binding",
         "app.core.redaction",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
+        "app.domains.characters.policies.authored_names",
         "app.domains.characters.service.prompt_persona",
         "app.domains.identity.contracts",
         "app.domains.identity.exceptions",
@@ -18348,6 +18465,10 @@
         "app.domains.routines.service.first_greeting",
         "app.domains.social.schemas.community",
         "app.domains.social.service.image_attachment",
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.action_scope",
+        "app.domains.world_characters.service.name_binding",
         "app.integrations.direct_llm",
         "app.runtime.social.image_generation"
       ],
@@ -19758,6 +19879,7 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.name_binding",
         "app.domains.characters.models",
         "app.domains.characters.service.prompt_persona",
         "app.domains.identity.contracts",
@@ -19771,12 +19893,14 @@
         "app.domains.social.service.recommendation_topics",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.approved_setup",
+        "app.domains.world_characters.service.name_binding",
         "app.domains.world_characters.service.preparation_lock",
         "app.domains.world_characters.service.setup_validation",
         "app.domains.worlds.models",
         "app.domains.worlds.service.generation_context",
         "app.integrations.direct_llm",
         "app.providers.gemini",
+        "app.runtime.preparation_names",
         "app.runtime.social.recommendation_history",
         "app.runtime.social.status_composition"
       ],

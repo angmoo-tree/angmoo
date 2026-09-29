@@ -11,7 +11,7 @@ from app.contracts.routine_output import ENUM_OUTPUT, LEGACY_OUTPUT
 from app.domains.routine_posts.contracts.request_context import RoutineRequestContext
 from app.domains.routine_posts.utils.text import _clip
 from app.domains.routine_posts.service.temporal_context import build_temporal_context, world_local_iso
-from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import request_persona, request_persona_text, PERSONA_INTERPRETATION
 from app.domains.routines import service as activity_state_contracts
 from app.domains.routines.service import aware_utc
 from app.providers.gemini import build_gemini_developer_response_schema
@@ -55,11 +55,11 @@ def build_routine_prompt_context(
         },
         "character": {
             "id": context.character.id,
-            "name": _clip(context.character.name, 80),
-            "persona": model_persona(context.character),
+            "name": _clip(context.name_binding.actor_display_name if context.name_binding else context.character.name, 80),
+            "persona": request_persona(context.character, context.name_binding),
             "persona_interpretation": PERSONA_INTERPRETATION,
-            "persona_summary": _clip(context.character.persona_summary, 1_500),
-            "speech_style": _clip(context.character.speech_style, 800),
+            "persona_summary": _clip(request_persona_text(context.character, "persona_summary", context.name_binding, limit=32000), 1_500),
+            "speech_style": _clip(request_persona_text(context.character, "speech_style", context.name_binding, limit=4000), 800),
             "world_local_profile": context.world_character.local_profile or {},
             **({"community_profile": {
                 "visible_summary": _clip(context.profile.visible_summary, 280),
@@ -70,11 +70,11 @@ def build_routine_prompt_context(
         "activity": {
             "daypart": context.item.daypart,
             "activity_kind": context.item.activity_kind,
-            "title": context.item.title,
-            "activity_seed": context.item.activity_seed,
+            "title": request_persona_text(context.item, "title", context.name_binding),
+            "activity_seed": request_persona_text(context.item, "activity_seed", context.name_binding),
             "social_mode": context.item.social_mode,
             "place_key": context.item.place_key,
-            "effective_snapshot": context.episode.effective_activity_snapshot,
+            "effective_snapshot": _request_activity_snapshot(context),
         },
         "state_before": context.state_before,
         "previous_success": (
@@ -109,6 +109,14 @@ def build_routine_prompt_context(
             for event in context.source_events
         ],
     }
+
+
+def _request_activity_snapshot(context):
+    value = dict(context.episode.effective_activity_snapshot or {})
+    for key in ("title", "activity_seed"):
+        if isinstance(value.get(key), str):
+            value[key] = request_persona_text(value, key, context.name_binding)
+    return value
 
 
 # The frozen split-evidence map names this binding; runtime callers use the

@@ -101,6 +101,35 @@ def test_preparation_export_scopes_world_actor_time_and_omits_private_source(dat
         assert list(db.iterdump()) == before
 
 
+def test_name_binding_recorder_keeps_only_counts_policy_and_content_hashes(data_root):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root)
+    try:
+        attempt = observer.begin(activity_id="name-test", agent_run_id="lease-test",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        attempt.tracker_event("name_binding_output", {
+            "lane": "feed", "policy_version": "persona-name-binding-v1",
+            "binding_digest": "a" * 64, "profile_version": 7,
+            "user_display_name": "private-user-name", "api_key": "private-key",
+            "fields": {"replies.0.body": {"replacements": 2, "protected": 1,
+                "unsupported": 0, "applied": True, "before_sha256": "b" * 64,
+                "final_sha256": "c" * 64, "body": "private-output-body"},
+                "private-user-name": {"body": "private-output-body"}},
+        })
+        observer.queue.join()
+    finally:
+        observer.close()
+    source = "\n".join(path.read_text(encoding="utf-8") for path in
+        (data_root / "diagnostics/sns" / manifest["session_id"]).glob("events-*.jsonl"))
+    assert "private-user-name" not in source and "private-key" not in source
+    assert "private-output-body" not in source
+    event = next(json.loads(line) for line in source.splitlines()
+        if json.loads(line).get("event_type") == "name_binding_output")
+    assert event["details"]["fields"]["replies.0.body"]["replacements"] == 2
+    assert event["details"]["binding_digest"] == "a" * 64
+
+
 def test_session_captures_validation_failure_without_payload_and_exports_read_only(data_root, tmp_path):
     now = datetime.now(UTC)
     _insert_run(data_root, activity_id="activity-1", started_at=now - timedelta(minutes=1))

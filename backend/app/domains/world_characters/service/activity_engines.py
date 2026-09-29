@@ -72,10 +72,13 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
     from app.contracts.routine_output import select_policy
     policy = select_policy(engine=engine, sns_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
         output_policy=settings.ROUTINE_OUTPUT_POLICY, thought_policy=settings.ACTIVITY_THOUGHT_POLICY)
+    from app.domains.world_characters.service.name_binding import resolve_name_binding
+    binding = resolve_name_binding(db, actor=actor, owner_id=actor.owner_user_id)
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
         world_character_id=actor.id, engine=engine,
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
-        status="running", stage="LoadContext", started_at=datetime.now(UTC), result={"routine_policy": asdict(policy)})
+        status="running", stage="LoadContext", started_at=datetime.now(UTC),
+        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version, "name_binding": binding.to_dict()})
     db.add(row)
     db.flush()
     return row

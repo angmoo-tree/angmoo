@@ -141,7 +141,7 @@ def test_supported_installer_builder_freezes_every_readable_predecessor(
             ]
     finally:
         source.close()
-    assert fixture["target_data_version"] == 24
+    assert fixture["target_data_version"] == 25
     assert fixture["target_table_count"] == 138
     if source_version == 8:
         assert fixture["generation"] == (

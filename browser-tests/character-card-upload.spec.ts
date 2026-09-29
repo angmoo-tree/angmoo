@@ -119,7 +119,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       const response = await uploaded;
       expect(response.status(), `${basename(filePath)}: ${await response.text()}`).toBe(200);
       const result = await response.json() as { card_version: number; draft: {
-        id: string; name: string; source_kind: string; revision: number; avatar_temp_url: string | null;
+        id: string; name: string; worldview: string; source_kind: string; revision: number; avatar_temp_url: string | null;
       }};
       expect(result.card_version).toBe(name === "Seraphina" ? 3 : 2);
       expect(result.draft.name).toBe(name === "FluxTheCat" ? "Flux the Cat" : name);
@@ -133,7 +133,16 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       expect((await source.json()).sha256).toBe(record!.sha256.toLowerCase());
       const reloaded = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}`);
       expect(reloaded.status(), await reloaded.text()).toBe(200);
-      expect((await reloaded.json()).revision).toBe(result.draft.revision);
+      const rawDraft = await reloaded.json();
+      expect(rawDraft.revision).toBe(result.draft.revision);
+      await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+      // Textarea DOM normalizes CRLF; the stored draft and card bytes below do not.
+      await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(rawDraft.worldview.replace(/\r\n?/g, "\n"));
+      await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+      const savedDraft = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}`);
+      const saved = await savedDraft.json();
+      expect(saved.worldview).toBe(rawDraft.worldview);
+      result.draft.revision = saved.revision;
 
       if (name === "Sakana") {
         const cardUrl = base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/card`;
@@ -170,6 +179,36 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       const afterFailedPrepare = await page.request.get(base + `/api/backend/characters/${character.id}/worlds/${world.id}/daily-preparation`);
       expect((await afterFailedPrepare.json()).request_id).toBeNull();
       expect((await afterFailedPrepare.json()).plan_state).toBe("pending");
+
+      if (name === "Sakana") {
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.goto(base + `/agents/${encodeURIComponent(character.id)}?tab=settings`);
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(saved.worldview.replace(/\r\n?/g, "\n"));
+        await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).not.toHaveAttribute("required", "");
+        const macroSource = "{{char}}의 동료: {{user}}. 입력 원문은 그대로 저장합니다.";
+        await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).fill(macroSource);
+        const savedPersona = page.waitForResponse((response) => response.request().method() === "PUT"
+          && new URL(response.url()).pathname.endsWith(`/agents/${character.id}/persona`));
+        await page.getByRole("button", { name: "페르소나 저장", exact: true }).click();
+        expect((await savedPersona).status()).toBe(200);
+        await page.reload();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(macroSource);
+
+        await page.goto(base + `/agents/new?worldId=${encodeURIComponent(world.id)}`);
+        await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+        const worldUpload = page.waitForResponse((response) => response.request().method() === "POST"
+          && /^\/api\/backend\/agents\/drafts\/[^/]+\/card$/.test(new URL(response.url()).pathname));
+        await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles(filePath);
+        expect((await worldUpload).status()).toBe(200);
+        await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue(saved.worldview.replace(/\r\n?/g, "\n"));
+        await expect(page.getByText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로", { exact: false })).toBeVisible();
+        await page.getByRole("textbox", { name: "캐릭터 설명", exact: true }).focus();
+        await page.keyboard.press("Tab");
+        await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).not.toBeFocused();
+        await page.setViewportSize({ width: 1280, height: 900 });
+      }
 
       await page.evaluate(() => sessionStorage.removeItem("angmoo.creation.v2:default"));
     }

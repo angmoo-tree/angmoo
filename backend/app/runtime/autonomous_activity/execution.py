@@ -45,6 +45,11 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         contract_version=run.contract_version,
         cause="manual" if "manual" in ctx.session_key else "scheduled", generation_model=ctx.generation_model, thinking_level=ctx.generation_thinking_level).model_dump()
     policy = (run.result or {}).get("routine_policy")
+    from app.contracts.name_binding import read_name_binding
+    from app.domains.world_characters.service.name_binding import validate_name_binding
+    name_binding = read_name_binding(run.result)
+    frozen_names = (run.result or {}).get("name_binding")
+    name_policy = (run.result or {}).get("name_binding_policy")
     if policy is not None:
         identity.update(routine_output_contract=policy["output_contract"], routine_state_schema_version=policy["state_schema_version"], routine_thought_policy=policy["thought_policy"])
     if attempt:
@@ -71,6 +76,12 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("activity_contract_changed")
         if (row.result or {}).get("routine_policy") != policy:
             raise ActivityScopeChangedError("routine_policy_changed")
+        if (row.result or {}).get("name_binding") != frozen_names:
+            raise ActivityScopeChangedError("name_binding_changed")
+        if (row.result or {}).get("name_binding_policy") != name_policy:
+            raise ActivityScopeChangedError("name_binding_changed")
+        if name_binding is not None:
+            validate_name_binding(ctx.db, name_binding, actor=current_actor, owner_id=ctx.user_id)
         from app.domains.routines.models import AgentRun, AgentSlot
         from app.domains.world_characters.service.activity_state import utc
         slot = ctx.db.get(AgentSlot, ctx.agent_id, populate_existing=True)
@@ -127,7 +138,12 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
         ctx.db.commit()
-        return {"shared_context": plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))}
+        shared = plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))
+        if attempt and name_binding is not None:
+            attempt.emit("name_binding", details={"policy_version": name_binding.policy_version,
+                "binding_digest": name_binding.digest, "profile_version": name_binding.user_profile_version,
+                "fields": shared["persona"]["name_binding"]["fields"]})
+        return {"shared_context": shared}
 
     async def finish(state):
         results = {path: state.get(f"{path}_result", {}) for path in ("inbox", "routine", "feed")}

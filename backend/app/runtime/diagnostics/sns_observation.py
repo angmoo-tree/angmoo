@@ -33,6 +33,7 @@ ARTIFACT_LIMIT = 64 * 1024
 ARTIFACT_SESSION_LIMIT = 16 * 1024 * 1024
 _CODE = re.compile(r"[A-Za-z0-9_./:@-]{1,160}\Z")
 _FIELD_PATH = re.compile(r"decisions\.\d+\.(?:target_id|action|interaction_intent|comment_purpose|proposal|proposal_response|brief)\Z")
+_NAME_FIELD_PATH = re.compile(r"(?:(?:replies|reply_task_results)\.\d+\.)?(?:title|body|topic_signature|novelty_basis)\Z")
 _PLANNER_VALIDATION_CODES = frozenset({
     "action_brief_missing", "decision_target_invalid", "decision_action_not_allowed",
     "non_comment_proposal_invalid", "comment_intent_missing", "proposal_not_eligible",
@@ -44,6 +45,8 @@ _PLANNER_VALIDATION_CODES = frozenset({
     "writer_duplicate_task", "writer_task_mismatch", "writer_changed_proposal_decision",
     "routine_reuses_published_reply", "routine_draft_invalid",
     "routine_request_context_changed",
+    "name_binding_missing", "name_binding_invalid", "name_binding_scope_invalid", "name_binding_requester_mismatch",
+    "name_macro_addressee_ambiguous", "name_macro_unsupported", "name_macro_rendered_limit", "name_macro_text_invalid",
 })
 _SESSION = re.compile(r"sns-[0-9a-f]{32}\Z")
 
@@ -369,6 +372,19 @@ class SNSAttempt:
                             "sqlite_code", "sqlite_primary_code", "attempt", "max_attempts",
                             "attempt_ms", "total_ms", "acquire_ms", "transaction_ms",
                             "retry_delay_ms"}})
+            return
+        if kind == "name_binding_output":
+            self.emit("name_binding_output", lane=code(payload.get("lane")), details={
+                "policy_version": code(payload.get("policy_version")),
+                "binding_digest": code(payload.get("binding_digest")),
+                "profile_version": numbers(payload.get("profile_version")),
+                "fields": {key: {
+                    **{name: numbers(value.get(name)) for name in ("replacements", "protected", "unsupported")},
+                    "applied": value.get("applied") is True,
+                    "before_sha256": code(value.get("before_sha256")), "final_sha256": code(value.get("final_sha256"))}
+                    for key, value in (payload.get("fields") or {}).items()
+                    if isinstance(key, str) and _NAME_FIELD_PATH.fullmatch(key) and isinstance(value, dict)},
+            })
             return
         if kind == "input_manifest":
             self.emit("input_manifest", lane=code(payload.get("lane")), node=code(payload.get("node")), details={

@@ -198,6 +198,7 @@ class CreateResponseRequest:
     deadline_at: datetime
     selected_thinking_level: str = "high"
     retry_of_request_id: str | None = None
+    request_metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

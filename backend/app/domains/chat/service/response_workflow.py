@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from hashlib import sha256
 from app.domains.chat.service.social_context_inspector import social_context_inspector as _social_context_inspector
 from app.domains.chat.contracts.graph_failure import graph_failure_diagnostic
 from app.domains.chat.graph_retry_policy import graph_failure_allows_user_retry
@@ -144,6 +145,24 @@ class ResponseGenerationWorkflowService:
         progress = None
         lease_token = f"lease-{uuid4().hex}"
         try:
+            from app.contracts.name_binding import read_name_binding, NameBindingError
+            from app.domains.characters.service.prompt_persona import request_persona
+            name_binding = read_name_binding(record.node_state)
+            if name_binding is not None:
+                if (name_binding.owner_id, name_binding.world_id, name_binding.actor_world_character_id,
+                    name_binding.user_world_character_id) != (command.preflight.owner_id, command.preflight.world_id,
+                    command.preflight.responding_world_character_id, command.preflight.requester_world_character_id):
+                    raise NameBindingError("name_binding_scope_invalid")
+                if command.name_binding_validator:
+                    command.name_binding_validator()
+                persona = request_persona(command.profile, name_binding)
+                command = replace(command, profile=replace(command.profile,
+                    name=persona["name"], worldview=persona["description"],
+                    **{key: persona[key] for key in ("one_liner", "personality", "speech_style",
+                        "character_background", "topic_preferences", "safety_rules")}))
+                observe("name_binding", policy_version=name_binding.policy_version,
+                    binding_digest=name_binding.digest, profile_version=name_binding.user_profile_version,
+                    fields=persona["name_binding"]["fields"])
             if self._recall_mode is not ChatRecallMode.LEGACY:
                 if self._social_context_provider is None:
                     raise RetrievalContractError("chat_social_context_provider_required")
@@ -205,6 +224,21 @@ class ResponseGenerationWorkflowService:
             route = routing.intent.route
             bundle = state["bundle"]
             response = state["response"]
+            if name_binding is not None:
+                from app.domains.characters.service.prompt_persona import render_names, authored_thought
+                if command.name_binding_validator:
+                    command.name_binding_validator()
+                thought = response.activity_thought
+                if thought is not None and thought.text is not None:
+                    thought = replace(thought, text=authored_thought(thought.text, name_binding))
+                rendered = render_names(response.text, name_binding, output=True,
+                    recipient_id=command.preflight.requester_world_character_id, limit=16000)
+                response = replace(response, text=rendered.text, activity_thought=thought)
+                observe("name_binding_output", policy_version=name_binding.policy_version,
+                    binding_digest=name_binding.digest,
+                    before_sha256=sha256(state["response"].text.encode()).hexdigest(),
+                    final_sha256=sha256(response.text.encode()).hexdigest(),
+                    applied=rendered.replacements > 0, **rendered.receipt())
             workflow_recipe = state["workflow_recipe"]
             record = self._transition(
                 record,
@@ -244,6 +278,8 @@ class ResponseGenerationWorkflowService:
                     command.today_sns_snapshot
                 )
             record = self._transition(record, ResponseRequestState.COMMITTING)
+            if command.name_binding_validator:
+                command.name_binding_validator()
             if command.social_snapshot is not None:
                 self._social_context_provider.assert_current(command.social_snapshot)
             sequence = record.last_emitted_sequence + 1
@@ -552,6 +588,9 @@ class ResponseGenerationWorkflowService:
 def _classify_failure(
     exc: Exception,
 ) -> tuple[str, bool, ResponseTerminalReason]:
+    from app.contracts.name_binding import NameBindingError
+    if isinstance(exc, NameBindingError):
+        return str(exc), True, ResponseTerminalReason.CONTRACT_INVALID
     if isinstance(exc, (TodaySnsSnapshotChangedError, SocialContextChangedError)):
         return "source_context_changed", True, ResponseTerminalReason.RETRIEVAL_FAILURE
     if isinstance(exc, CharacterResponseGeneratorError):

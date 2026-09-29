@@ -11,9 +11,9 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 24
-SOURCE_ALEMBIC_REVISION = "20260929_0102"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 101
+SQLITE_SCHEMA_VERSION = 25
+SOURCE_ALEMBIC_REVISION = "20260929_0103"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 102
 EXPECTED_CANONICAL_TABLE_COUNT = 138
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
@@ -693,9 +693,17 @@ def build_sqlite_v21_metadata() -> MetaData:
 
 def build_sqlite_v23_metadata() -> MetaData:
     """Frozen pre-Routine-state-version schema; all old snapshots remain unchanged."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v24_metadata()
     table = metadata.tables["activity_beats"]
     table._columns.remove(table.c.state_schema_version)
+    return metadata
+
+
+def build_sqlite_v24_metadata() -> MetaData:
+    """Frozen schema before explicit Topic requests acquired a name snapshot."""
+    metadata = build_sqlite_baseline_metadata()
+    table = metadata.tables["social_recommendation_preparations"]
+    table._columns.remove(table.c.request_snapshot)
     return metadata
 
 

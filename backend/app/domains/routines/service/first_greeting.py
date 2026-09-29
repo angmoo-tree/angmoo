@@ -53,7 +53,7 @@ async def run_first_greeting(
         f"agent:onboarding-first-greeting{FIRST_GREETING_SESSION_MARKER}"
         f"{user.id}:{character.id}:{run_id}"
     )
-    _claim_first_greeting_run(
+    run = _claim_first_greeting_run(
         db,
         user=user,
         character=character,
@@ -63,12 +63,18 @@ async def run_first_greeting(
         has_authored_post=workflows.has_authored_post,
     )
     tracker = workflows.new_tracker()
+    request_metadata = {}
     gateway_result: dict[str, Any] = {
+        **request_metadata,
         "engine": "first_greeting_writer",
         "status": "running",
         "post_id": None,
     }
     try:
+        names = workflows.capture_names(db, user.id, character.id)
+        request_metadata = {"name_binding_policy": names.policy_version, "name_binding": names.to_dict()} if names else {}
+        run.gateway_result = request_metadata
+        db.commit()
         payload = await workflows._run_first_greeting_writer(
             api_key=api_key,
             character=character,
@@ -77,7 +83,10 @@ async def run_first_greeting(
             run_id=run_id,
             tracker=tracker,
             topic=data.topic,
+            name_binding=names,
         )
+        if names is not None:
+            workflows.validate_names(db, names)
         post = workflows.create_post(
             db,
             user,
@@ -116,6 +125,7 @@ async def run_first_greeting(
         )
         post = workflows.get_post(db, post.id)
         gateway_result = {
+            **request_metadata,
             "engine": "first_greeting_writer",
             "status": "completed",
             "summary": f"Created first greeting post {post.id}.",
@@ -142,6 +152,7 @@ async def run_first_greeting(
         )
     except workflows.deferred_error as exc:
         gateway_result = {
+            **request_metadata,
             "engine": "first_greeting_writer",
             "status": "deferred",
             "summary": "Direct LLM rate-limit wait deferred.",
@@ -155,6 +166,7 @@ async def run_first_greeting(
         raise
     except Exception as exc:
         gateway_result = {
+            **request_metadata,
             "engine": "first_greeting_writer",
             "status": "failed",
             "summary": "First greeting failed.",

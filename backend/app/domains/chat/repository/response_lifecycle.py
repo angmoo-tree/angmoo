@@ -88,6 +88,7 @@ class SqlAlchemyResponseLifecycleRepository:
             deadline_at=command.deadline_at,
             state=ResponseRequestState.ACCEPTED.value,
             last_emitted_sequence=-1,
+            node_state_json=_json_payload(command.request_metadata) or "{}",
         )
         try:
             with self._session.begin_nested():

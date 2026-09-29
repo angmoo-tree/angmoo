@@ -117,7 +117,7 @@ def claim(db: Session, *, wc_id: str, world_id: str, target_date: date, timezone
             input_snapshot=source, attempt_count=0, json_retry_count=0)
         db.add(job)
         db.flush()
-    if job.attempt_count and job.input_digest != input_digest:
+    if job.input_digest != input_digest:
         job.state, job.reason_code = "failed", "preparation_source_changed"
     if job.state in {"ready", "failed", "needs_user_action", "cancelled"}:
         return job, None
@@ -133,7 +133,7 @@ def claim(db: Session, *, wc_id: str, world_id: str, target_date: date, timezone
     changed = db.execute(update(ActivityPreparationJob).where(
         ActivityPreparationJob.id == job.id, ActivityPreparationJob.version == job.version,
     ).values(state="running", claim_token=token, lease_expires_at=now + timedelta(minutes=8),
-             input_snapshot=source, input_digest=input_digest, version=job.version + 1)).rowcount
+             version=job.version + 1)).rowcount
     if changed != 1:
         raise PreparationConflict("preparation_claim_conflict")
     return job, token

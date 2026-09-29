@@ -196,6 +196,64 @@ def test_copy_rule_checks_both_title_and_body_without_re_ban():
     validate_original_post(title="Re: hello", body="new", completed_replies=replies)
 
 
+@pytest.mark.parametrize("duplicate_after_names", [False, True])
+def test_routine_provider_names_and_rendered_duplicate_use_one_shared_repair(monkeypatch, duplicate_after_names):
+    from tests.characters.name_binding_fixture import create_profile
+    async def scenario():
+        with Session(_engine(), expire_on_commit=False) as db:
+            fixture = _seed(db)
+            create_profile(db, fixture.world, fixture.user.id)
+            fixture.character.worldview = "{{char}}는 {{user}}의 친구"
+            fixture.character.persona_summary = "{{user}}와 지내는 {{char}}"
+            fixture.character.speech_style = "{{user}}에게 정중히 말한다"
+            db.commit()
+            ctx = _resident_context(db, fixture, run_id="bound-routine", now=_utc(datetime(2026, 8, 10, 10, 5)))
+            run = bind_run(db, actor=fixture.world_character, activity_id=ctx.run_id)
+            db.commit()
+            if duplicate_after_names:
+                reply = _reply(db, fixture, ctx)
+                reply.title, reply.body = "민식의 기록", "민식의 친구로 오늘을 보낸다."
+                db.commit()
+            shared = shared_input(ctx, fixture.world_character, fixture.world)
+            shared["now"] = ctx.run_started_at.isoformat()
+            shared["historical_note"] = "{{user}}의 과거 기록"
+            calls = []
+            async def guard(state):
+                return {}
+            lane = CombinedRoutineLane(ctx, actor=fixture.world_character, tracker=RunLlmTracker(max_calls=8),
+                hybrid_service=None, guard=guard, ledger=RecoveryLedger(db, ctx.run_id))
+            async def call(_provider, **kwargs):
+                calls.append(kwargs["node"])
+                payload = kwargs["payload"]
+                context = payload.get("context", payload)
+                routine = context["routine"]
+                assert routine["character"]["persona"]["description"] == context["persona"]["description"]
+                assert "민식" in routine["character"]["persona_summary"]
+                assert "민식" in routine["character"]["speech_style"]
+                assert context["historical_note"] == "{{user}}의 과거 기록"
+                draft = {"title": "{{user}}의 기록", "body": "{{user}}의 친구로 오늘을 보낸다.",
+                    "novelty_basis": "현재 장면", "thought": "{{char}}는 즐거웠다."}
+                if len(calls) > 1:
+                    assert payload["writer_feedback"]["validation_code"] == "routine_reuses_published_reply"
+                    draft["body"] = "창가에서 새 장면을 기록했다."
+                if kwargs["node"] == "RoutineDecisionDraft":
+                    decision = {"scene_kind": "start", "scene_brief": "{{user}}와 오늘 장면을 시작한다.",
+                        "continuity_facts": [], "used_source_event_ids": [], "used_detail_keys": ["activity.title"],
+                        "source_event_effects": [], "state_update": None, "state_source_refs": [], "relationship_metrics": None}
+                    return kwargs["validator"]({"decision": decision, "draft": draft})
+                return kwargs["validator"](draft)
+            monkeypatch.setattr(ActivityProvider, "call", call)
+            result = await build_lane("routine", lane.ports(), combined=True).ainvoke({
+                "identity": {"activity_id": ctx.run_id}, "shared_context": shared, "generation_mode": "combined"})
+            assert result["result"]["public_action_count"] == 1, result.get("failure")
+            assert len(calls) == 1 + duplicate_after_names
+            beat = db.scalar(select(ActivityBeat).where(ActivityBeat.status == "succeeded"))
+            post = db.get(Post, beat.source_post_id)
+            assert post.title == "민식의 기록" and "{{user}}" not in post.body
+            assert fixture.character.worldview == "{{char}}는 {{user}}의 친구"
+    asyncio.run(scenario())
+
+
 def test_receipt_scope_failure_and_recent_list_do_not_control_copy_guard():
     with Session(_engine(), expire_on_commit=False) as db:
         fixture = _seed(db)

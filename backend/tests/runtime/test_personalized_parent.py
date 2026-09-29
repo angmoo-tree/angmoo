@@ -154,6 +154,49 @@ def test_parent_real_adapters_respect_slot_and_commit_single_feed_effect_combine
     test_parent_real_adapters_respect_slot_and_commit_single_feed_effect(monkeypatch, tmp_path, version=2)
 
 
+def test_parent_sends_resolved_self_persona_and_unmodified_candidate_history(monkeypatch, tmp_path):
+    from app.domains.worlds.models import World
+    from tests.characters.name_binding_fixture import create_profile
+    async def scenario():
+        with Session(_engine(), expire_on_commit=False) as db:
+            ctx, post = _seed(db, with_candidate=True)
+            actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
+            create_profile(db, db.get(World, actor.world_id), ctx.user_id)
+            ctx.character.worldview = "{{char}}는 {{user}}의 동료"
+            # This legacy fixture has an approved profile; keep its source hash
+            # current so name delivery, rather than stale preparation, is tested.
+            from app.domains.world_characters.service.setup_validation import character_contract_hash
+            from app.domains.world_characters.models import WorldCommunityProfile
+            actor.character_contract_hash = character_contract_hash(ctx.character)
+            profile = db.query(WorldCommunityProfile).filter_by(world_character_id=actor.id).one()
+            profile.character_contract_hash = actor.character_contract_hash
+            post.body = "{{user}}의 과거 기록"
+            db.add(AgentSlot(agent_id=ctx.agent_id, status="running", locked_by_run_id=ctx.run_id,
+                assigned_character_id=ctx.character.id, assigned_user_id=ctx.user_id,
+                lease_expires_at=datetime.now(UTC) + timedelta(minutes=10)))
+            set_engine(db, engine="personalized_graph_v2", expected_version=0)
+            run = bind_run(db, actor=actor, activity_id=ctx.run_id); run.contract_version = 2
+            db.commit()
+            calls = []
+            async def plan(self, **kwargs):
+                calls.append(kwargs["lane"])
+                assert "민식" in kwargs["context"]["persona"]["description"]
+                assert "{{user}}" in kwargs["candidates"][0]["text"]
+                kwargs["delivery"].dispatched(); kwargs["delivery"].delivered()
+                return {**parse_action({"decisions": [{"target_id": post.id, "action": "like", "brief": "Useful discovery"}]}, kwargs["candidates"]),
+                    "judged_at": datetime.now(UTC).isoformat(), "provisional_draft": {"replies": []}}
+            monkeypatch.setattr(ActivityProvider, "plan", plan)
+            binding = ActivityRuntimeBinding(None, tmp_path); register(binding)
+            try:
+                result = await run_personalized_activity(ctx, actor=actor, run=run)
+                assert result["publish_result"]["public_action_count"] == 1, result["paths"]
+                assert calls == ["feed"]
+                assert post.body == "{{user}}의 과거 기록" and ctx.character.worldview.startswith("{{char}}")
+            finally:
+                unregister(binding)
+    asyncio.run(scenario())
+
+
 def test_parent_preserves_completed_paths_and_resumes_busy_settlement_combined(monkeypatch, tmp_path):
     test_parent_preserves_completed_paths_and_resumes_busy_settlement(monkeypatch, tmp_path, version=2)
 

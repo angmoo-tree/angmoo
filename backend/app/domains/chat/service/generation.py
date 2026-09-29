@@ -32,7 +32,7 @@ from app.domains.chat.contracts import (
     build_request_scope_hash,
 )
 from app.domains.chat.contracts.context import ChatUser
-from app.domains.chat.contracts.execution import GenerationWorkflows
+from app.domains.chat.contracts.execution import GenerationWorkflows, ChatNameBindings
 from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
@@ -66,10 +66,12 @@ class GenerationService:
         thread_service: ThreadService,
         settings_service: MessageSettingsService,
         workflows: GenerationWorkflows,
+        name_bindings: ChatNameBindings,
     ) -> None:
         self.thread_service = thread_service
         self.settings_service = settings_service
         self.workflows = workflows
+        self.name_bindings = name_bindings
 
     def accept_world_message(
         self,
@@ -138,6 +140,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
+                request_metadata=self._request_names(db, user, thread),
             )
         )
         db.commit()
@@ -222,6 +225,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
+                request_metadata=self._request_names(db, user, thread),
             )
         )
         db.commit()
@@ -278,6 +282,10 @@ class GenerationService:
             db, thread, include_messages=False, lock_scope=True
         )
         return thread
+
+    def _request_names(self, db, user, thread):
+        return self.name_bindings.capture(db, owner_id=user.id, world_id=thread.world_id,
+            actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id)
 
     def _recover_if_expired(self, db: Session, record):
         now = datetime.now(UTC)
@@ -555,9 +563,14 @@ class GenerationService:
             character_labels=character_labels,
             today_sns_snapshot=today_sns_snapshot,
             graph_projection_enabled=runtime_settings.graph_projection_enabled,
+            name_binding_validator=lambda: self._validate_request_names(db, user, thread, record),
         )
         async for event in workflow.run(command):
             yield event
+
+    def _validate_request_names(self, db, user, thread, record):
+        self.name_bindings.assert_current(db, record.node_state, owner_id=user.id,
+            world_id=thread.world_id, actor_id=thread.responding_world_character_id)
 
 
 def _recent_context(

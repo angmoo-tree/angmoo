@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from app.domains.characters.policies.name_macros import render_names
+from app.domains.characters.policies.authored_names import authored_thought
 
 
 PERSONA_INPUT_VERSION = "character-persona-input-v1"
@@ -60,3 +62,36 @@ def model_persona(source: object) -> dict[str, Any]:
     if summary and summary != legacy_persona_summary(source):
         result["legacy_persona_summary_extra"] = summary
     return result
+
+
+def request_persona(source: object, binding) -> dict[str, Any]:
+    """A new model-facing copy; edit/export APIs continue to use model_persona."""
+    return render_persona(model_persona(source), binding)
+
+
+def render_persona(value: dict, binding) -> dict[str, Any]:
+    """Render an already assembled persona, with an explicit field allowlist."""
+    from app.domains.characters.policies.name_macros import render_names, NAME_INPUT_GUIDANCE
+    from app.domains.characters.policies.persona import PERSONA_LIMITS, PERSONA_SUMMARY_LIMIT
+    persona = dict(value)
+    if binding is None:
+        return persona
+    limits = {**PERSONA_LIMITS, "description": PERSONA_LIMITS["worldview"],
+              "legacy_persona_summary_extra": PERSONA_SUMMARY_LIMIT}
+    receipts = {}
+    for key in ("one_liner", "description", "personality", "speech_style", "character_background",
+                "topic_preferences", "safety_rules", "legacy_persona_summary_extra"):
+        if key in persona:
+            rendered = render_names(persona[key], binding, limit=limits[key])
+            persona[key] = rendered.text
+            receipts[key] = rendered.receipt()
+    persona["name"] = binding.actor_display_name
+    persona["name_binding"] = {"policy_version": binding.policy_version,
+        "binding_digest": binding.digest, "fields": receipts, "instruction": NAME_INPUT_GUIDANCE}
+    return persona
+
+
+def request_persona_text(source: object, field: str, binding, *, limit: int | None = None) -> str:
+    from app.domains.characters.policies.name_macros import render_names
+    value = _value(source, field)
+    return render_names(value, binding, limit=limit).text if binding is not None else value

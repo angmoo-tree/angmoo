@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 
 from app.domains.characters.models import Character
-from app.domains.characters.service.prompt_persona import model_persona, PERSONA_INTERPRETATION
+from app.domains.characters.service.prompt_persona import request_persona, PERSONA_INTERPRETATION
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.social_context import SocialContextService
@@ -42,11 +42,13 @@ def shared_input(ctx, actor, world):
         data["records"] = records[:TODAY_LIMIT]
         data["omitted_records"] = len(records) - TODAY_LIMIT
     character = ctx.character
+    from app.runtime.autonomous_activity.name_binding import activity_name_binding
+    name_binding = activity_name_binding(ctx)
     state = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)
     confirmed = datetime.fromisoformat(state["confirmed_at"]) if state["confirmed_at"] else None
     return {"world_id": actor.world_id, "actor_id": actor.id, "now": now.isoformat(),
         "world": {"name": world.name, "tagline": world.tagline, "timezone": world.timezone},
         "world_profile": actor.local_profile or {},
-        "persona": {**model_persona(character), "interpretation": PERSONA_INTERPRETATION},
+        "persona": {**request_persona(character, name_binding), "interpretation": PERSONA_INTERPRETATION},
         "current_state": state, "state_elapsed_seconds": max(0, int((now - confirmed).total_seconds())) if confirmed else None,
         "today_activity": data}

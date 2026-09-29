@@ -206,11 +206,28 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
                                                        owner_id=user.id, character_id=character_id)
     request_id = request_id or (status.request_id if status.plan_state in {"waiting", "running"} else None) or f"automatic:{target.isoformat()}"
     from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
+    from app.domains.world_characters.service.name_binding import resolve_name_binding, validate_name_binding
+    from app.contracts.name_binding import read_name_binding, NameBindingError
+    from app.domains.characters.service.prompt_persona import render_persona
+    new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
+    source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict()}
     job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
         timezone=scope.world.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
         request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
     job_id, wc_id = job.id, scope.world_character.id
     if token is None:
+        return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
+    # The claim keeps its accepted raw source and names across retries/restarts.
+    source = dict(job.input_snapshot)
+    try:
+        names = read_name_binding(source)
+        request_source = dict(source)
+        if names is not None:
+            validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
+            request_source["persona"] = render_persona(source["persona"], names)
+    except NameBindingError as exc:
+        db.rollback()
+        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, str(exc)))
         return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
     # Topic's own request generation also fences initial application. No Topic is
     # written until both outputs pass validation and this claim still belongs to us.
@@ -230,13 +247,15 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
             raise store.PreparationConflict("preparation_scope_changed")
         if _source(db, current_scope, current_time)[1] != digest:
             raise store.PreparationConflict("preparation_source_changed")
+        if names is not None:
+            validate_name_binding(db, names, actor=current_scope.world_character, owner_id=user.id)
         if evaluation_reserve:
             evaluation_reserve()
         store.reserve_attempt(db, job_id, token)
 
     tracker = None
     try:
-        output, tracker = await generator(material=material, character_id=character_id, source=source,
+        output, tracker = await generator(material=material, character_id=character_id, source=request_source,
             initial=initial, reserve=reserve,
             reserve_json_retry=lambda: store.reserve_attempt(db, job_id, token, json_retry=True))
         current_time = now if fixed_clock else datetime.now(UTC)
@@ -255,7 +274,11 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
             fresh, current_digest, _, current_allowed = _source(db, scope, current_time)
             if current_digest != digest:
                 raise store.PreparationConflict("preparation_source_changed")
-            store.validate_plan(output.daily_plan, allowed_places=current_allowed, fixed_items=source["fixed_items"])
+            if names is not None:
+                validate_name_binding(db, names, actor=scope.world_character, owner_id=user.id)
+            from app.runtime.preparation_names import authored_preparation
+            output_value = authored_preparation(output, names)
+            store.validate_plan(output_value.daily_plan, allowed_places=current_allowed, fixed_items=source["fixed_items"])
             claimed = db.execute(update(ActivityPreparationJob).where(
                 ActivityPreparationJob.id == job_id, ActivityPreparationJob.claim_token == token,
                 ActivityPreparationJob.state == "running", ActivityPreparationJob.lease_expires_at > current_time,
@@ -267,10 +290,10 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
                 if not prep or prep.request_id != initial_prep_request or prep.applied_digest != initial_prep_digest or prep.state == "running":
                     raise store.PreparationConflict("preparation_topics_changed")
                 replace_source_topics(db, world_id=world_id, world_character_id=wc_id,
-                    topics=[(t.name, t.scope) for t in output.recommendation_topics])
+                    topics=[(t.name, t.scope) for t in output_value.recommendation_topics])
                 prep.state, prep.applied_digest, prep.source_digest = "ready", topic_digest, topic_digest
                 prep.last_code = None
-            plan = store.apply_plan(db, scope=scope, output=output.daily_plan, target_date=target,
+            plan = store.apply_plan(db, scope=scope, output=output_value.daily_plan, target_date=target,
                 now=current_time, source_digest=digest, expected_snapshot=before,
                 state_schema_version=routine_state_version(db, scope.world_character))
             job = db.get(ActivityPreparationJob, job_id, populate_existing=True)
@@ -281,9 +304,9 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     except Exception as exc:
         db.rollback()
         backoff = _runtime_error_backoff(exc, now=now, db=db, character_id=character_id, credential_id=material.credential_id)
-        code = str(exc) if isinstance(exc, store.PreparationConflict) else backoff.kind if backoff else "preparation_generation_failed"
-        store.finish_failure(db, job_id, token, code, retry_at=backoff.retry_at if backoff else None,
-            usage=getattr(exc, "preparation_usage", None))
+        code = str(exc) if isinstance(exc, (store.PreparationConflict, NameBindingError)) else backoff.kind if backoff else "preparation_generation_failed"
+        store.write_preparation(db, lambda: store.finish_failure(db, job_id, token, code,
+            retry_at=backoff.retry_at if backoff else None, usage=getattr(exc, "preparation_usage", None)))
     return read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
 
 

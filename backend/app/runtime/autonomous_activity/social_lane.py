@@ -102,6 +102,8 @@ class SocialLane:
         decision = await self.provider.plan(lane=self.lane, context=state["decision_context"],
             candidates=self.selected(state), delivery=self.delivery(state),
             on_input_receipt=receipt.update, before_json_retry=before_retry)
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding, decision_names
+        decision = decision_names(decision, activity_name_binding(self.ctx), candidates=self.selected(state))
         return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):
@@ -126,6 +128,11 @@ class SocialLane:
         receipts = []
         writing = await self.provider.write(lane=self.lane, context=state["decision_context"],
             assignments=state["assignments"], on_input_receipt=receipts.append)
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
+        names, fields = activity_name_binding(self.ctx), {}
+        writing = social_draft_names(writing, names,
+            assignments=state["assignments"], lane=self.lane, receipt=fields)
+        observe_output(self.tracker, names, lane=self.lane, fields=fields)
         return {"drafts": writing.get("reply_task_results", []), "writer_input_receipts": receipts}
 
     async def execute(self, state):

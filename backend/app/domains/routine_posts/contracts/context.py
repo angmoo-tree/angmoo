@@ -56,6 +56,7 @@ class RoutinePostContext:
     output_contract: str = "routine-output.legacy.v1"
     state_schema_version: int = 1
     thought_policy: str = "thought_v1"
+    name_binding: Any | None = None
 
     @property
     def considered_source_event_ids(self) -> list[str]:

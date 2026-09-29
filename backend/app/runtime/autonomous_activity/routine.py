@@ -56,6 +56,9 @@ class RoutineLane:
         if state.get("lane_data", {}).get("prepared") and self.prepared is None:
             from app.runtime.autonomous_activity.routine_resume import restore_prepared
             self.prepared = restore_prepared(self.ctx, state["lane_data"]["prepared"], self.tracker)
+        if self.prepared is not None:
+            from app.runtime.autonomous_activity.name_binding import activity_name_binding
+            self.prepared.context = replace(self.prepared.context, name_binding=activity_name_binding(self.ctx))
         if self.prepared is not None and state.get("stage") not in {"Settle", "PathResult"}:
             beat = self.ctx.db.get(type(self.prepared.beat), self.prepared.beat.id, populate_existing=True)
             if beat.status == "claimed" and beat.claim_run_id == self.ctx.run_id:
@@ -92,6 +95,8 @@ class RoutineLane:
         if isinstance(prepared, dict):
             return {"candidates": [], "lane_data": {"skipped": prepared}}
         prepared.context = common_state_for_routine(self.ctx.db, context=prepared.context)
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding
+        prepared.context = replace(prepared.context, name_binding=activity_name_binding(self.ctx))
         prepared.common_state_managed = True
         self.prepared = prepared
         context = prepared.context
@@ -103,7 +108,9 @@ class RoutineLane:
     async def query(self, state):
         context = self.prepared.context
         previous = context.previous_post
-        query = routine_query(title=context.item.title, activity_seed=context.item.activity_seed,
+        from app.domains.characters.service.prompt_persona import request_persona_text
+        query = routine_query(title=request_persona_text(context.item, "title", context.name_binding),
+            activity_seed=request_persona_text(context.item, "activity_seed", context.name_binding),
             previous=None if previous is None else {"topic_signature": previous.topic_signature,
                 "title": previous.title, "body": previous.body})
         return {"queries": [{**query.model_dump(), "target_id": context.item.id}]}
@@ -155,6 +162,19 @@ class RoutineLane:
         schema = with_metric_schema(schema)
         def validate(payload):
             value = dict(payload)
+            from app.domains.characters.policies.authored_names import authored_fields
+            from app.runtime.autonomous_activity.name_binding import activity_name_binding, decision_names
+            binding = activity_name_binding(self.ctx)
+            value = authored_fields(value, binding, fields=("scene_brief",), limits={"scene_brief": 800})
+            if isinstance(value.get("state_update"), dict):
+                value = decision_names(value, binding)
+            for key in ("state_change",):
+                if isinstance(value.get(key), dict):
+                    value[key] = authored_fields(value[key], binding, fields=("action_note",), limits={"action_note": 160})
+            if isinstance(value.get("source_event_effects"), list):
+                value["source_event_effects"] = [{**row, "state_change": authored_fields(row["state_change"], binding,
+                    fields=("action_note",), limits={"action_note": 160})} if isinstance(row.get("state_change"), dict) else row
+                    for row in value["source_event_effects"]]
             state_field = {"state_update": value.pop("state_update")} if "state_update" in value else {}
             aux = parse_action({"decisions": [], **state_field,
                 "relationship_metrics": value.pop("relationship_metrics", None),
@@ -200,6 +220,11 @@ class RoutineLane:
         from app.contracts.activity_thought_output import thought_response_schema, extract_activity_thought
         schema = thought_response_schema(build_gemini_developer_response_schema(schemas.RoutinePostDraft), include_thought=True)
         def validate(payload):
+            from app.domains.characters.policies.authored_names import authored_routine_draft
+            from app.runtime.autonomous_activity.name_binding import activity_name_binding, observe_output
+            names, fields = activity_name_binding(self.ctx), {}
+            payload = authored_routine_draft(payload, names, receipt=fields)
+            observe_output(self.tracker, names, lane="routine", fields=fields)
             value, thought = extract_activity_thought(payload, include_thought=True)
             draft = schemas.RoutinePostDraft.model_validate(value)
             return {**draft.model_dump(mode="json"), "_thought": asdict(thought)}

@@ -104,6 +104,7 @@ class RecommendationPreparation(Base):
     request_id: Mapped[str | None] = mapped_column(String(64))
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_code: Mapped[str | None] = mapped_column(String(64))
+    request_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 class RecommendationDelivery(Base):

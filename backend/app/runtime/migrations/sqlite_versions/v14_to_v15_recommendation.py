@@ -1,6 +1,6 @@
 """Add recommendation metadata without classifying or enrolling existing content."""
 from sqlalchemy import Connection, text
-from app.runtime.persistence.sqlite_schema import build_sqlite_baseline_metadata
+from app.runtime.persistence.sqlite_schema import build_sqlite_v15_metadata as build_sqlite_baseline_metadata
 
 TABLES = (
     "social_recommendation_catalogs", "social_recommendation_topics",
