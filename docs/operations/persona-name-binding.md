@@ -29,7 +29,7 @@
 | 명시적 캐릭터 Topic 재생성 | `backend/app/runtime/social/topic_preparation.py` |
 | 살아 있는 첫 인사 경로 | `backend/app/runtime/resident/first_greeting.py` 및 기존 routines workflow |
 
-순수 정책은 DB·provider를 읽지 않는다. 여러 도메인을 조립하는 runtime이 활성 World 정체성을 조회하고, 각 업무의 기존 저장·검증 경계가 결과를 적용한다. Chat은 도메인이 WorldCharacter 내부를 가져오는 대신 계약에 선언된 `ChatNameBindings` 협력자를 runtime에서 주입한다.
+순수 정책은 DB·provider를 읽지 않는다. 여러 도메인을 조립하는 runtime이 활성 World 정체성을 조회하고, 각 업무의 기존 저장·검증 경계가 결과를 적용한다. Chat은 도메인이 WorldCharacter 내부를 가져오는 대신 기존 `GenerationWorkflows` 협력자의 `capture_names`·`assert_names_current` 계약을 사용한다. 서비스 조립의 기존 세 협력자 구성을 유지하며, 이름 연결 때문에 별도 생성자 의존성을 늘리지 않는다.
 
 ## 원본과 출력의 경계
 

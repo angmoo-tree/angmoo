@@ -150,7 +150,7 @@
     },
     {
       "path": "backend/app/domains/chat/contracts/execution.py",
-      "sha256": "7ac40c4aaa851c1d9ddcd2aca44d8d7d3c5aeb5785c91563da2f3d9e26feb35f"
+      "sha256": "c0c702d73b47bb59ab3ec480a9859db549788be9b7c60cbc6fb033a3596d6338"
     },
     {
       "path": "backend/app/domains/chat/contracts/generation_lifecycle.py",
@@ -370,7 +370,7 @@
     },
     {
       "path": "backend/app/domains/chat/service/generation.py",
-      "sha256": "fa416065bc803b238cee0fce04822d664103da0297829b5f3d882f2c6f33619f"
+      "sha256": "8ff0309eb651288f2a776a5de881a56b8b7303b44b945f5ca637f8002a756431"
     },
     {
       "path": "backend/app/domains/chat/service/graph_retrieval.py",
@@ -1550,7 +1550,7 @@
     },
     {
       "path": "backend/app/runtime/chat/generation_workflows.py",
-      "sha256": "2669fd42e1fa83a2361a89691d3406b01138805294e32403459c74b8960e9bb1"
+      "sha256": "baf80fc1f410eab47d3a30912880b643fd7d69325ba5f6ea9807d8de5db91f6d"
     },
     {
       "path": "backend/app/runtime/chat/memory_producer.py",
@@ -1558,7 +1558,7 @@
     },
     {
       "path": "backend/app/runtime/chat/message_composition.py",
-      "sha256": "0df00bf8aa5bfa4a885c1e790a3716b1092eaddec9ca731904947b3df1fd3bf6"
+      "sha256": "f1320b9ef6ea43ca5018fc014868a2f6d59081a687cdd7c7fd7e5b0d44421c41"
     },
     {
       "path": "backend/app/runtime/chat/model_bindings.py",

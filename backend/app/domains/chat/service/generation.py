@@ -32,7 +32,7 @@ from app.domains.chat.contracts import (
     build_request_scope_hash,
 )
 from app.domains.chat.contracts.context import ChatUser
-from app.domains.chat.contracts.execution import GenerationWorkflows, ChatNameBindings
+from app.domains.chat.contracts.execution import GenerationWorkflows
 from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
@@ -66,12 +66,10 @@ class GenerationService:
         thread_service: ThreadService,
         settings_service: MessageSettingsService,
         workflows: GenerationWorkflows,
-        name_bindings: ChatNameBindings,
     ) -> None:
         self.thread_service = thread_service
         self.settings_service = settings_service
         self.workflows = workflows
-        self.name_bindings = name_bindings
 
     def accept_world_message(
         self,
@@ -284,7 +282,7 @@ class GenerationService:
         return thread
 
     def _request_names(self, db, user, thread):
-        return self.name_bindings.capture(db, owner_id=user.id, world_id=thread.world_id,
+        return self.workflows.capture_names(db, owner_id=user.id, world_id=thread.world_id,
             actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id)
 
     def _recover_if_expired(self, db: Session, record):
@@ -569,7 +567,7 @@ class GenerationService:
             yield event
 
     def _validate_request_names(self, db, user, thread, record):
-        self.name_bindings.assert_current(db, record.node_state, owner_id=user.id,
+        self.workflows.assert_names_current(db, record.node_state, owner_id=user.id,
             world_id=thread.world_id, actor_id=thread.responding_world_character_id)
 
 

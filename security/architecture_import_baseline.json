@@ -15632,6 +15632,7 @@
         "app.integrations.llm.supervisor_selection",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.memory_producer",
+        "app.runtime.chat.name_binding",
         "app.runtime.chat.response_graph",
         "app.runtime.chat.retrieval_policy",
         "app.runtime.chat.retrieval_tools",
@@ -15674,7 +15675,6 @@
         "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.name_binding",
         "app.runtime.chat.scope_queries"
       ],
       "module": "app.runtime.chat.message_composition",
