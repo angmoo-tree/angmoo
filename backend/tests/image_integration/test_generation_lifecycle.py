@@ -28,8 +28,8 @@ class Provider:
         self.after_submit = None
         self.error = None
     def prompt_validation(self):
-        # This injected fake exercises worker contracts, not NovelAI exactness.
-        return {"exact_verified": True, "state": "synthetic_only"}
+        # This injected fake exercises worker contracts, not server equivalence.
+        return {"exact_verified": False, "generation_available": True, "state": "synthetic_only"}
     async def discover(self, model):
         return CATALOG[f"{self.provider}:{model}"]["payload"]["endpoints"][0]
     async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None):

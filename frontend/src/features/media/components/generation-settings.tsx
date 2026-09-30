@@ -45,6 +45,7 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
   const connection = !key && profile && JSON.stringify(profile.options) === JSON.stringify(value.options) ? profile.connection : null;
   const referenceSupported = value.provider === "comfyui" ? Boolean(connection?.reference_supported) : model?.reference_supported;
   const promptUnverified = value.provider === "novelai" && model?.prompt_validation?.exact_verified === false;
+  const promptUnavailable = value.provider === "novelai" && model?.prompt_validation?.generation_available === false;
   const setOption = (name: string, next: unknown) => {
     const options = { ...value.options, [name]: next };
     if (free && ["width", "height"].includes(name)) {
@@ -85,10 +86,10 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
       <p className={styles.note}>{saved.reference_state.status === "available" ? "저장된 설정의 참조 출처입니다. 실제 생성에는 생성 활성화와 입력 검증도 필요합니다." : saved.reference_state.status === "forced_off" ? saved.reference_state.reason === "opus_free" ? "Opus 전용 Anlas 사용 안 함 모드에서는 참조를 보내지 않습니다." : "선택한 모델은 참조 이미지를 지원하지 않습니다." : saved.reference_state.status === "off" ? "참조 사용이 꺼져 있습니다." : saved.reference_state.status === "invalid" ? "참조 이미지를 확인할 수 없습니다. 이미지를 교체하거나 설정을 확인해 주세요." : saved.reference_state.generation_path === "unavailable" ? "참조 선호는 ON이지만 사용할 이미지와 텍스트 경로가 없습니다." : "참조 선호는 ON이지만 사용할 이미지가 없어 텍스트 경로를 사용합니다."}</p>
       {saved.reference_state.scene_only ? <p className={styles.note}>저장된 참조 사진과 외형·스타일이 없어 이번 게시글의 장면만으로 생성합니다.</p> : null}
       {saved.reference_state.generation_path === "unavailable" ? <InlineError>{saved.reference_state.status === "invalid" ? "참조 이미지를 확인해야 생성할 수 있습니다." : "참조 이미지나 검증된 텍스트 workflow가 필요합니다."}</InlineError> : null}</div> : null}
-    {promptUnverified ? <p role="status" className={styles.note}>NovelAI V4.5 Full의 정확한 프롬프트 길이 검증이 아직 확인되지 않아 생성이 비활성화되어 있습니다. 설정은 저장할 수 있습니다.</p> : null}
-    <label className={styles.toggle}><input type="checkbox" disabled={busy || (!value.auto_enabled && promptUnverified)} checked={value.auto_enabled} onChange={e => setValue({ ...value, auto_enabled: e.target.checked })} />새 Routine 게시글 자동 이미지 생성 허용</label>
+    {promptUnavailable ? <p role="status" className={styles.note}>NovelAI 입력 검사에 필요한 파일을 확인할 수 없어 생성이 비활성화되어 있습니다. 설정은 저장할 수 있습니다.</p> : promptUnverified ? <p role="status" className={styles.note}>프롬프트 길이는 로컬 예비 검사로 확인합니다. 실제 서비스와의 정확한 일치는 미확인입니다. 계정·비용 조건과 입력 검사를 통과하면 생성할 수 있습니다.</p> : null}
+    <label className={styles.toggle}><input type="checkbox" disabled={busy || (!value.auto_enabled && promptUnavailable)} checked={value.auto_enabled} onChange={e => setValue({ ...value, auto_enabled: e.target.checked })} />새 Routine 게시글 자동 이미지 생성 허용</label>
     <p className={styles.note}>연결·입력·키와 두 상한이 확인되어야 활성화됩니다. 참조 선택과 자동 생성 허용은 별개입니다. 기준 시간대: {catalog.quota_timezone}.</p>
-    <p role="status">연결 상태: {promptUnverified ? "프롬프트 검증 미확인 · 생성 비활성화" : connection?.ready ? free ? connection.opus_verified ? "Opus 혜택 확인됨" : "Opus 혜택 미확인" : connection.credential_validation === "not_verified" ? "모델 경로 확인 · 키 인증은 첫 생성에서 확인" : "확인됨" : "미확인"}</p>
+    <p role="status">연결 상태: {promptUnavailable ? "입력 검사 준비 필요 · 생성 비활성화" : connection?.ready ? free ? connection.opus_verified ? "Opus 혜택 확인됨" : "Opus 혜택 미확인" : connection.credential_validation === "not_verified" ? "모델 경로 확인 · 키 인증은 첫 생성에서 확인" : "확인됨" : "미확인"}</p>
     <div className={styles.actions}><Button disabled={busy || uploading} onClick={() => void save(true)}>연결·입력 확인 및 저장</Button><Button variant="secondary" disabled={busy || uploading} onClick={() => void save()}>설정 저장</Button><Button variant="ghost" disabled={busy || !saved?.has_api_key} onClick={() => void save(false, true)}>이미지 키 삭제</Button></div>
     {notice ? <p role="status">{notice}</p> : null}{error ? <InlineError>{error}</InlineError> : null}
   </section>;

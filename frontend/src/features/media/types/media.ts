@@ -1,5 +1,5 @@
 export type Provider = "novelai" | "comfyui" | "nanogpt" | "openrouter";
-export type PromptValidation = { state: string; exact_verified: boolean; reason?: string };
+export type PromptValidation = { state: string; exact_verified: boolean; generation_available: boolean; resource_verified?: boolean; local_token_budget?: number; server_equivalence?: string; reason?: string };
 export type ReferenceState = { preferred: boolean; applied: boolean; source: "override" | "card" | "profile" | "none"; status: "off" | "forced_off" | "available" | "missing" | "invalid"; reason: string | null; generation_path: "reference" | "text" | "unavailable" | "unconfigured"; scene_only: boolean };
 export type Asset = { id: string; url: string; revision: number; width: number; height: number; byte_size: number; state: string };
 export type Parameter = { type: string; values?: string[]; min?: number; max?: number };

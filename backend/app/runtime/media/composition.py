@@ -29,7 +29,7 @@ from app.integrations.comfy_images import ComfyImageClient
 from app.integrations.image_api import ImageApiClient
 from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options, validate_reference_metadata
 from app.integrations.llm.image_interpretation import GeminiImageInterpreter
-from app.integrations.novelai_images import NovelImageClient
+from app.integrations.novelai_images import NovelImageClient, validate_t5_prompt
 from app.runtime.media import binding
 
 
@@ -86,13 +86,18 @@ class MediaRuntime:
         from app.domains.characters.service.generation_settings import write_settings
         if data.provider == "novelai" and data.auto_enabled:
             self._require_novel_validation()
+            prefix = ", ".join(value.strip() for value in (data.style, data.appearance) if value.strip())
+            if prefix:
+                validate_t5_prompt(prefix)
+            if data.negative:
+                validate_t5_prompt(data.negative)
         saved = write_settings(db, user, character_id, data, assets=self.assets, limits=self.limits, validated_connection=validated_connection)
         return self._generation_view(db, user, character_id, saved)
 
     def _require_novel_validation(self):
         status = self._novel_validation()
-        if not status["exact_verified"]:
-            raise ImagePreparationError("novelai_prompt_validation_unverified")
+        if not status.get("generation_available", False):
+            raise ImagePreparationError("novelai_tokenizer_unavailable")
 
     def _novel_validation(self):
         return (self.clients.get("novelai") or NovelImageClient()).prompt_validation()
@@ -132,7 +137,7 @@ class MediaRuntime:
             "source": reference.source, "status": status, "reason": reason, "generation_path": path,
             "scene_only": path == "text" and not saved["appearance"].strip() and not saved["style"].strip()},
             "prompt_validation": validation,
-            "effective_auto_enabled": saved["auto_enabled"] and (validation is None or validation["exact_verified"])}
+            "effective_auto_enabled": saved["auto_enabled"] and (validation is None or validation["generation_available"])}
 
     def usage(self, db, owner_id):
         from app.domains.social.service.generation_usage import read_usage
@@ -165,7 +170,7 @@ class MediaRuntime:
             models.append({"provider": provider, "id": model, "reference_supported": reference,
                 "parameters": endpoint_parameters(provider, endpoint) if endpoint else {},
                 "pricing": endpoint.get("pricing") if endpoint else None,
-                "availability": "prompt_validation_unverified" if provider == "novelai" and not self._novel_validation()["exact_verified"] else "requires_connection_check",
+                "availability": "local_validation_unavailable" if provider == "novelai" and not self._novel_validation()["generation_available"] else "requires_connection_check",
                 "prompt_validation": self._novel_validation() if provider == "novelai" else None,
                 "negative_supported": provider == "novelai"})
         return {"models": models, "captured_at": source.get("captured_at"), "quota_timezone": str(APP_TIMEZONE),
@@ -300,6 +305,10 @@ class MediaRuntime:
                 options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
             else:
                 negative = row.negative_prompt if row.generation_provider == "novelai" else None
+            if row.generation_provider == "novelai":
+                validate_t5_prompt(positive)
+                if negative:
+                    validate_t5_prompt(negative)
             request = GenerationRequest(row.generation_provider, row.generation_model, positive, negative,
                 options, reference, profile["connection"].get("endpoint"))
             return request, credential, row.generation_revision, row.generation_daily_limit, None
@@ -351,6 +360,9 @@ class MediaRuntime:
         request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
         if request.provider == "novelai":
             self._require_novel_validation()
+            validate_t5_prompt(request.positive)
+            if request.negative:
+                validate_t5_prompt(request.negative)
         material = None
         if intent.credential_id:
             credential = db.get(MediaCredential, intent.credential_id)
@@ -400,11 +412,17 @@ class MediaRuntime:
         if data.provider == "novelai":
             from app.domains.media.generation_contracts import NovelOptions
             options = NovelOptions.model_validate(data.options)
+            self._require_novel_validation()
+            prefix = ", ".join(value.strip() for value in (data.style, data.appearance) if value.strip())
+            if prefix:
+                validate_t5_prompt(prefix)
+            if data.negative:
+                validate_t5_prompt(data.negative)
             benefit = await self.clients["novelai"].subscription(key)
             if options.mode == "opus_free" and not benefit["opus_verified"]:
                 raise ImagePreparationError("opus_benefit_unverified")
             validation = self._novel_validation()
-            return {**benefit, "ready": validation["exact_verified"], "prompt_validation": validation,
+            return {**benefit, "ready": validation["generation_available"], "prompt_validation": validation,
                 "reference_supported": options.mode != "opus_free"}
         endpoint = await self.clients[data.provider].discover(data.model)
         validate_api_options(data.provider, endpoint, data.options)

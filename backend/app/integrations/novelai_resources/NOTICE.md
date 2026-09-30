@@ -16,12 +16,20 @@ NovelAI's server-side weighting/parser and exact token accounting still require
 the deferred real-provider validation. No SillyTavern implementation or NovelAI
 frontend implementation is included.
 
-Exact V4.5 Full prompt validation is UNVERIFIED. The approximate local check is
-not authorization to submit a request. Production settings admission, queued-job
-preparation and the NovelAI adapter block generation with
-`novelai_prompt_validation_unverified` until a versioned exact model validation
-resource/parser and its independent fixtures are established. There is no
-user-controlled or environment override for this gate.
+Exact V4.5 Full server equivalence is UNVERIFIED. Since 2026-10-01 the pinned
+local tokenizer is used for conservative preflight, not an unconditional
+generation block. Independently written `v4.5-t5-weight-spans-v1` recognizes
+the documented `{}`, `[]` and numerical `::` control operators, encodes the
+delimited text spans separately and reserves one EOS token. The raw positive
+and negative prompts are still sent unchanged. Unknown pieces or a local count above 512 are rejected
+without truncation, translation, a generation submission or an admission-time
+attempt reservation. This may reject some prompts the server would accept;
+it is not a proof of exact server token accounting.
+
+Resource integrity, account/cost mode, quotas and provider error handling remain
+mandatory. A normal prompt can reach the real API while `exact_verified` stays
+false. Successful subscription checks or generation do not certify the exact
+tokenizer/parser or 512-token boundary. No switch can claim exact verification.
 
 Public sources checked 2026-09-30:
 - https://docs.novelai.net/en/image/models/ documents approximately 512 T5
@@ -32,5 +40,6 @@ Public sources checked 2026-09-30:
   tokenization around special tokens and normalization. It does not establish
   the exact deployed V4.5 parser/tokenizer combination.
 
-Serializer tests use an explicitly injected synthetic verified capability to
-test wire fields in isolation. They do not certify production exactness.
+Production-path tests use synthetic HTTP responses with the real local tokenizer,
+without a synthetic exactness override. They cover wire fields, cost/account
+checks, admission and attachment, but do not certify real-provider behavior.

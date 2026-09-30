@@ -1,6 +1,7 @@
-"""V4.5 Full only: account verification, local T5 limits and precise reference."""
+"""V4.5 Full: account checks, conservative local preflight and precise reference."""
 import base64
 import hashlib
+import re
 import secrets
 from datetime import datetime, timezone
 from io import BytesIO
@@ -13,14 +14,28 @@ from app.integrations.media.images import validate_generated_media_content
 
 MODEL = "nai-diffusion-4-5-full"
 TOKENIZER_HASH = "d60acb128cf7b7f2536e8f38a5b18a05535c9e14c7a355904270e15b0945ea86"
+PREFLIGHT_VERSION = "v4.5-t5-weight-spans-v1"
+WEIGHT_MARKUP = re.compile(r"(?:[+-]?(?:\d+(?:\.\d*)?|\.\d+))?::|[{}\[\]]")
 
 
 def validate_t5_prompt(text):
+    """Check the pinned local resource; return an estimate, not a server count.
+
+    Documented weight operators delimit text spans for this local estimate.
+    The original prompt is sent unchanged. This neither truncates nor certifies
+    the deployed V4.5 parser/tokenizer. Live comparison remains separate.
+    """
     path = Path(__file__).with_name("novelai_resources") / "t5.spiece.model"
     if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != TOKENIZER_HASH:
         raise ImagePreparationError("novelai_tokenizer_unavailable")
     tokenizer = sentencepiece.SentencePieceProcessor(model_file=str(path))
-    ids = tokenizer.encode(text)
+    # Independently implement only the documented {}, [] and numerical ::
+    # operators for preflight. Encoding each span avoids merging words across
+    # weight boundaries. We do not evaluate weights or rewrite the API prompt.
+    spans = [span for span in WEIGHT_MARKUP.split(text) if span.strip()]
+    if not spans:
+        raise ImagePreparationError("novelai_prompt_empty")
+    ids = [token for span in spans for token in tokenizer.encode(span)]
     if tokenizer.unk_id() in ids:
         raise ImagePreparationError("novelai_prompt_contains_unsupported_text")
     # Reserve EOS; never truncate or silently translate the user's text.
@@ -51,12 +66,15 @@ class NovelImageClient:
     def prompt_validation():
         path = Path(__file__).with_name("novelai_resources") / "t5.spiece.model"
         resource_verified = path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == TOKENIZER_HASH
-        # T5 family + approximate 512 budget are documented; the exact V4.5
-        # parser/tokenizer revision and special-token accounting are not pinned.
-        # Account/route checks cannot promote this to an exact validation proof.
-        return {"model": MODEL, "state": "unverified", "exact_verified": False,
+        # Resource integrity authorizes local preflight, not a claim of exact
+        # server equivalence. A valid key can exercise the actual API without
+        # changing that evidence status or introducing an override switch.
+        return {"model": MODEL, "state": "local_preflight" if resource_verified else "unavailable",
+            "exact_verified": False, "generation_available": resource_verified,
             "resource_verified": resource_verified, "resource_sha256": TOKENIZER_HASH,
-            "reason": "novelai_prompt_validation_unverified"}
+            "preflight_version": PREFLIGHT_VERSION,
+            "local_token_budget": 512, "server_equivalence": "unverified",
+            "reason": "novelai_prompt_validation_unverified" if resource_verified else "novelai_tokenizer_unavailable"}
 
     async def subscription(self, key):
         response = await self.http.request("GET", "https://api.novelai.net/user/subscription", key=key, timeout=15)
@@ -71,8 +89,6 @@ class NovelImageClient:
         if request.model != MODEL or request.provider != "novelai":
             raise ImagePreparationError("novelai_model_not_supported")
         options = NovelOptions.model_validate(request.options)
-        if not self.prompt_validation()["exact_verified"]:
-            raise ImagePreparationError("novelai_prompt_validation_unverified")
         validate_t5_prompt(request.positive)
         if request.negative:
             validate_t5_prompt(request.negative)

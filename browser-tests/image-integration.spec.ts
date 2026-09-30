@@ -156,25 +156,50 @@ test("completed generation refreshes its World feed once and displays authentica
   expect(feedReads).toBe(2);expect(jobReads).toBe(2);expect(generationWrites).toBe(0);
 });
 
-test("NovelAI unverified prompt validation prevents activation while preserving editable settings",async({page},info)=>{
+test("NovelAI missing local validation resource prevents activation while preserving editable settings",async({page},info)=>{
   const staticShell=info.project.name==="static";
   const audit=await fixtures(page,staticShell);
   await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
     const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
-    if(path==="/media/catalog")return json(route,{models:models.map(model=>({...model,...(model.provider==="novelai"?{availability:"prompt_validation_unverified",prompt_validation:{state:"unverified",exact_verified:false,reason:"novelai_prompt_validation_unverified"}}:{})})),quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
+    if(path==="/media/catalog")return json(route,{models:models.map(model=>({...model,...(model.provider==="novelai"?{availability:"local_validation_unavailable",prompt_validation:{state:"unavailable",exact_verified:false,generation_available:false,reason:"novelai_tokenizer_unavailable"}}:{})})),quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
     return route.fallback();
   });
   await page.goto(`/agents/${character}?tab=settings`);
   const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});
   await expect(panel.getByRole("checkbox",{name:"새 Routine 게시글 자동 이미지 생성 허용"})).toBeDisabled();
-  await expect(panel.getByText(/정확한 프롬프트 길이 검증이 아직 확인되지/)).toBeVisible();
-  await expect(panel.getByText("연결 상태: 프롬프트 검증 미확인 · 생성 비활성화")).toBeVisible();
+  await expect(panel.getByText(/입력 검사에 필요한 파일을 확인할 수 없어/)).toBeVisible();
+  await expect(panel.getByText("연결 상태: 입력 검사 준비 필요 · 생성 비활성화")).toBeVisible();
   await panel.getByLabel("외형 (선택)").fill("검증 이후 사용할 외형");
   await panel.getByRole("button",{name:"설정 저장",exact:true}).click();
   await expect.poll(()=>audit.writes.length).toBe(1);
   expect(audit.writes[0].auto_enabled).toBe(false);
   expect(audit.writes[0].appearance).toBe("검증 이후 사용할 외형");
-  await panel.getByText(/정확한 프롬프트 길이 검증이 아직 확인되지/).scrollIntoViewIfNeeded();
+  await panel.getByText(/입력 검사에 필요한 파일을 확인할 수 없어/).scrollIntoViewIfNeeded();
+});
+
+test("NovelAI local preflight permits activation without falsely certifying exact server validation",async({page},info)=>{
+  const staticShell=info.project.name==="static";
+  const audit=await fixtures(page,staticShell);
+  await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    if(path==="/media/catalog")return json(route,{models:models.map(model=>({...model,...(model.provider==="novelai"?{prompt_validation:{state:"local_preflight",exact_verified:false,generation_available:true,resource_verified:true}}:{})})),quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
+    return route.fallback();
+  });
+  await page.goto(`/agents/${character}?tab=settings`);
+  const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});
+  const enabled=panel.getByRole("checkbox",{name:"새 Routine 게시글 자동 이미지 생성 허용"});
+  await expect(enabled).toBeEnabled();
+  await expect(panel.getByText(/실제 서비스와의 정확한 일치는 미확인/)).toBeVisible();
+  await panel.getByLabel("이미지 API 키",{exact:true}).fill("synthetic-only-key");
+  await panel.getByLabel("캐릭터 일일 생성 시도 상한",{exact:true}).fill("2");
+  await enabled.check();
+  await panel.getByRole("button",{name:"연결·입력 확인 및 저장",exact:true}).click();
+  await expect(panel.getByText("연결 상태: Opus 혜택 확인됨")).toBeVisible();
+  expect(audit.writes).toHaveLength(1);
+  expect(audit.writes[0].auto_enabled).toBe(true);
+  expect(audit.writes[0].reference_enabled).toBe(false);
+  await expect(enabled).toBeChecked();
+  await expect(panel.getByText(/실제 서비스와의 정확한 일치는 미확인/)).toBeVisible();
 });
 
 test("saved reference state shows actual source preference and the available generation path",async({page},info)=>{

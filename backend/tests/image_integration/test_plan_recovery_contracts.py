@@ -203,19 +203,23 @@ def test_model_specific_option_case_and_profiles_are_not_interchangeable():
 
 
 def test_novel_exact_validation_is_unverified_and_blocks_before_any_http():
-    http = Http(lambda *_: pytest.fail("unverified validation must precede any I/O"))
+    # Retain the original review node; invalid local input is what blocks I/O.
+    http = Http(lambda *_: pytest.fail("invalid prompt must precede any I/O"))
     client = NovelImageClient(http)
     assert client.prompt_validation()["resource_verified"]
     assert not client.prompt_validation()["exact_verified"]
-    request = GenerationRequest("novelai", "nai-diffusion-4-5-full", "blue sky", "blur", NovelOptions().model_dump(), EffectiveReference(False))
-    with pytest.raises(ImagePreparationError, match="prompt_validation_unverified"):
+    assert client.prompt_validation()["generation_available"]
+    request = GenerationRequest("novelai", "nai-diffusion-4-5-full", "한국어 장면", "blur", NovelOptions().model_dump(), EffectiveReference(False))
+    with pytest.raises(ImagePreparationError, match="unsupported_text"):
         asyncio.run(client.generate(request, "synthetic", None))
     assert http.calls == []
 
 
-def test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate(tmp_path):
+def test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate(tmp_path, monkeypatch):
+    # The resource-integrity gate remains mandatory, unlike exactness status.
     sessions, media, provider = configured(tmp_path, "novelai", "nai-diffusion-4-5-full")
     job_id = admit(sessions, media)
+    monkeypatch.setattr("app.integrations.novelai_images.TOKENIZER_HASH", "missing-version")
     media.clients["novelai"] = NovelImageClient(Http(lambda *_: pytest.fail("no API")))
     with sessions() as db:
         from app.domains.identity.models import User
@@ -223,12 +227,12 @@ def test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate(tm
         current = media.read_generation(db, user, CHARACTER)
         assert current["prompt_validation"]["exact_verified"] is False
         assert current["effective_auto_enabled"] is False and current["auto_enabled"] is True
-        with pytest.raises(ImagePreparationError, match="prompt_validation_unverified"):
+        with pytest.raises(ImagePreparationError, match="tokenizer_unavailable"):
             media.write_generation(db, user, CHARACTER, GenerationSettingsWrite(expected_revision=current["revision"],
                 provider="novelai", model="nai-diffusion-4-5-full", auto_enabled=True, daily_limit=4))
     asyncio.run(media.worker.process(job_id))
     with sessions() as db:
-        assert db.get(PostImageGenerationJob, job_id).failure_class == "novelai_prompt_validation_unverified"
+        assert db.get(PostImageGenerationJob, job_id).failure_class == "novelai_tokenizer_unavailable"
         assert db.scalar(select(ImageGenerationAttempt)).status == "released"
     assert provider.calls == 0
 
