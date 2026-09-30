@@ -7,6 +7,21 @@ from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.chat.contracts.image_evidence import ChatImageEvidence, visible_context
 
 
+def configure_chat_image_services(app):
+    """Bind app-owned image collaborators after the base Chat services exist."""
+    from app.domains.chat.service.generation import GenerationService
+    from app.domains.chat.service.evidence import EvidenceService
+    from app.runtime.chat import generation_workflows, evidence_reads
+
+    images = ChatImageAttachments(app.state.media_runtime)
+    threads = app.state.chat_thread_service
+    settings = app.state.chat_settings_service
+    app.state.chat_generation_service = GenerationService(
+        threads, settings, generation_workflows, images=images)
+    app.state.chat_evidence_service = EvidenceService(
+        threads, evidence_reads, image_reader=images.asset_current)
+
+
 class ChatImageAttachments:
     def __init__(self, media):
         self.media = media

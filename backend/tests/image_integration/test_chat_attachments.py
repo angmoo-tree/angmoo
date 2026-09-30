@@ -15,6 +15,36 @@ from image_integration.chat_support import synthetic_chat
 from image_integration.test_interpretation import FakeInterpreter, pixels
 
 
+def test_both_factories_bind_app_owned_images_without_mutating_base_chat_services(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    from app.main import create_app
+    from app.domains.chat.service.evidence import EvidenceService
+    from app.runtime.chat import message_composition
+    from app.runtime.media import composition
+
+    chat = synthetic_chat(tmp_path, FakeInterpreter())
+    original_generation = message_composition.generation_service
+    original_evidence = message_composition.evidence_service
+    runtimes = [composition.MediaRuntime(chat.sessions,
+        SimpleNamespace(media_root_path=tmp_path / profile), interpreter=FakeInterpreter())
+        for profile in ("full", "public")]
+    pending = iter(runtimes)
+    monkeypatch.setattr(composition, "MediaRuntime", lambda *_args, **_kwargs: next(pending))
+    try:
+        applications = [create_app(profile=profile) for profile in ("full", "public")]
+        for app, media in zip(applications, runtimes, strict=True):
+            assert app.state.chat_generation_service.images.media is media
+            assert app.state.chat_generation_service.thread_service is app.state.chat_thread_service
+            assert type(app.state.chat_evidence_service) is EvidenceService
+            assert app.state.chat_evidence_service.image_reader.__self__.media is media
+        assert applications[0].state.chat_generation_service is not applications[1].state.chat_generation_service
+        assert message_composition.generation_service is original_generation
+        assert message_composition.evidence_service is original_evidence
+        assert original_generation.images is None and original_evidence.image_reader is None
+    finally:
+        chat.source.close()
+
+
 def upload(chat, *, scope=None):
     with chat.sessions() as db:
         row = chat.media.assets.upload(db, owner_id=chat.owner.id, scope_kind="thread",

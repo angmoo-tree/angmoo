@@ -383,6 +383,8 @@ def create_app(
     runtime_app.state.media_worker_enabled = composition is not None
     from app.runtime.chat.message_composition import configure_chat_services
     configure_chat_services(runtime_app)
+    from app.runtime.chat.image_attachments import configure_chat_image_services
+    configure_chat_image_services(runtime_app)
     from app.runtime.diagnostics.http import configure_runtime_diagnostics
     configure_runtime_diagnostics(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows

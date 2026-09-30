@@ -3195,7 +3195,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
-          "sha256": "6d19797699eb8c01863db6c49c38a7412729ac8a0cd7582b4bcfe3f29081773d"
+          "sha256": "a061d3a1cc4de566973f04a9b464263da3426a957c8fe8d09258973c06551359"
         }
       ],
       "planned_feature_allowlist": [
@@ -3250,7 +3250,7 @@
     "oracle_artifacts": [
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "4444320baa88f52e51334ceca6d4ef0f4bda2959b7256b55ce094584030750bd"
+        "sha256": "8a36000a3d4156e707b2c8caf907e066e0f94e721932fc04dc68baa1ecff11d4"
       },
       {
         "path": "docs/architecture/l3-er-postgres-neo4j-parity-oracle.json",
@@ -3264,7 +3264,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "7d8671c69224f5193af0d434b5a83039636a8e920ad15bded2aea333cb0670ac"
+        "sha256": "7b47472373d21fc83cf0ba6b5f55ba271567ece3c4032fa3def820f0d1ed3132"
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
@@ -3444,7 +3444,7 @@
       "windows-installer"
     ],
     "workflow": ".github/workflows/windows-installer.yml",
-    "workflow_sha256": "2b13ad4da39323208e5c07b9c818f95f51879a1e9e1ed7d7975077dd79683839"
+    "workflow_sha256": "9d2df30783df457a1fdf0d08ebac429a768e77b689ce00a6cf9c7e66250bcac6"
   },
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "runtime": {
