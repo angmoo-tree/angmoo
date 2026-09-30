@@ -693,13 +693,16 @@ test("World App keeps the requested World boundary and never falls back", async 
 test("World entry creates a missing profile only after verifying its launchable owner scope", async ({ page }) => {
   const worldId = WORLD_ALPHA.world_id;
   const audit = await installBackendFixture(page, { worldReads: { [worldId]: WORLD_ALPHA } });
-  let releaseWorld: (() => void) | undefined;
+  const pendingWorldReads: Array<() => void> = [];
+  let worldReleased = false;
   let ownerRead = false;
   let profileCreates = 0;
   await page.route("**/api/backend/**", async route => {
     const pathname = new URL(route.request().url()).pathname;
     if (pathname === `/api/backend/worlds/mine/${worldId}`) {
-      await new Promise<void>(resolve => { releaseWorld = resolve; });
+      // React development mode may repeat a read before the first request is
+      // aborted. Release every pending read and all later reads at the gate.
+      if (!worldReleased) await new Promise<void>(resolve => { pendingWorldReads.push(resolve); });
       return json(route, { schema_version: "local-world-app-v1", surface: "world_app", world: WORLD_ALPHA });
     }
     if (pathname === `/api/backend/worlds/${worldId}/owner-character`) {
@@ -714,9 +717,10 @@ test("World entry creates a missing profile only after verifying its launchable 
     return route.fallback();
   });
   await page.goto(`/worlds/${worldId}/feed`);
-  await expect.poll(() => ownerRead && !!releaseWorld).toBe(true);
+  await expect.poll(() => ownerRead && pendingWorldReads.length > 0).toBe(true);
   expect(profileCreates).toBe(0);
-  releaseWorld!();
+  worldReleased = true;
+  pendingWorldReads.forEach(resolve => resolve());
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   expect(profileCreates).toBe(1);
   expect(audit.writes).toEqual([]);
