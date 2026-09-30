@@ -3,6 +3,7 @@
 import { MessageCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import {
+  type ComponentType,
   type FormEvent,
   type ReactNode,
   useCallback,
@@ -30,7 +31,7 @@ type Props = {
   postId?: string;
   worldId: string;
   renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void }) => ReactNode;
-  renderImageStatus?: (postId: string) => ReactNode;
+  imageStatus?: ComponentType<{ worldId: string; postId: string; onCompleted: () => void }>;
 };
 
 type PendingPost = {
@@ -176,7 +177,7 @@ function aggregateManualPostActions(
   return actions;
 }
 
-export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, renderImageStatus }: Props) {
+export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, imageStatus: ImageStatus }: Props) {
   const routeKey = `${worldId}:${postId ?? "feed"}`;
   const [loadState, setLoadState] = useState<FeedLoadState>({
     key: routeKey,
@@ -485,7 +486,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post)}
-              />{renderImageStatus?.(post.id)}</div>
+              />{!post.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={post.id} onCompleted={() => void loadFeed()} /> : null}</div>
             );
           })}
         </div>
@@ -509,7 +510,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
             post={presentManualPost(detailRoot)}
             variant="detail"
           />
-          {renderImageStatus?.(detailRoot.id)}
+          {!detailRoot.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={detailRoot.id} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
             <h3 id="world-reply-heading">대꾸 {detailRoot.reply_count}</h3>
             {detailReplies.length > 0 ? (

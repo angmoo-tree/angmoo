@@ -126,3 +126,30 @@ test("manual SNS submission preserves title body and selected asset without reco
   expect(audit.writes[1]).toEqual({title:"사용자 사진 제목",body:"사용자가 쓴 본문",attachment_asset_id:"draft-1"});
   await expect(page.getByRole("img",{name:"선택한 첨부 이미지 미리보기"})).toHaveCount(0);
 });
+
+test("completed generation refreshes its World feed once and displays authenticated pixels without resubmission",async({page},info)=>{
+  const staticShell=info.project.name==="static";
+  await fixtures(page,staticShell);
+  let feedReads=0,jobReads=0,generationWrites=0;
+  const post=uiDManualPost({id:"image-progress-post",title:"생성 장면",body:"새 사진이 붙는 글"});
+  await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    const request=route.request();const path=new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    if(path.includes("/image-generation")&&request.method()!=="GET")generationWrites++;
+    if(path.endsWith("/manual-social/feed")){
+      feedReads++;
+      const media=jobReads>=2?[{id:7,media_type:"image",url:"/api/v1/media/assets/generated-one/content",alt_text:"새로 생성된 사진",source_kind:"generated",model:"z-image-turbo",prompt_hash:"a".repeat(64),byte_size:80,width:1,height:1,created_at:"2026-09-30T00:00:00Z"}]:[];
+      return json(route,uiDManualFeed([{...post,media}]));
+    }
+    if(path.endsWith("/image-generation")){
+      expect(path).toBe(`/media/worlds/${uiDWorld().world_id}/posts/${post.id}/image-generation`);
+      jobReads++;
+      return json(route,{job_id:7,status:jobReads===1?"queued":"succeeded",reason:null,attempt_count:1,model:"z-image-turbo",reference_source:null,cancellable:jobReads===1,retryable:false});
+    }
+    return route.fallback();
+  });
+  await page.goto(`/worlds/${uiDWorld().world_id}/feed`);
+  await expect(page.getByText("이미지 생성 대기",{exact:true})).toBeVisible();
+  await expect(page.getByRole("img",{name:"새로 생성된 사진"})).toBeVisible();
+  await expect(page.getByLabel("게시글 이미지 생성 상태")).toHaveCount(0);
+  expect(feedReads).toBe(2);expect(jobReads).toBe(2);expect(generationWrites).toBe(0);
+});
