@@ -49,6 +49,8 @@ class ChatImageAttachments:
             analysis = self.media.interpretation.admit(db, owner_id, row.asset_id, retry_failed=True)
         except ImagePreparationError as exc:
             raise MessageValidationError(str(exc)) from exc
+        if row.interpretation_id != analysis.id:
+            row.snapshot_json = None
         row.interpretation_id = analysis.id
 
     def assert_current(self, db, owner_id, thread_id, message_id, evidence):

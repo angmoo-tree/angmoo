@@ -160,6 +160,30 @@ def test_chat_does_not_replace_reserved_analysis_after_settings_change(tmp_path)
         chat.source.close()
 
 
+def test_chat_retry_binding_uses_new_cache_without_reusing_old_snapshot(tmp_path):
+    fake = FakeInterpreter()
+    chat = synthetic_chat(tmp_path, fake)
+    try:
+        asset = upload(chat)
+        accepted = chat.generation.accept_world_message(chat.db, chat.owner, chat.world_id, chat.thread_id,
+            WorldChatMessageCreate(content="같은 사진", attachment_asset_id=asset, idempotency_key="image-cache-renewal-001"))
+        asyncio.run(stream(chat, accepted.response_request.request_id))
+        attachment = chat.db.get(MessageAttachment, accepted.user_message.id)
+        old_id = attachment.interpretation_id
+        assert attachment.snapshot_json and fake.calls == 1
+        chat.db.get(InterpretationSetting, chat.owner.id).thinking_level = "high"
+        chat.db.commit()
+        chat.generation.images.reserve_retry(chat.db, chat.owner.id, chat.thread_id, accepted.user_message.id)
+        assert attachment.interpretation_id != old_id and attachment.snapshot_json is None
+        assert chat.db.get(ImageInterpretation, old_id).status == "succeeded"
+        chat.db.commit()
+        value = asyncio.run(chat.generation.images.observation(chat.db, chat.owner.id, chat.thread_id, accepted.user_message.id))
+        assert value["interpretation_id"] == attachment.interpretation_id and value["asset_id"] == asset
+        assert fake.calls == 2
+    finally:
+        chat.source.close()
+
+
 @pytest.mark.parametrize("field,value", [("width", 7), ("height", 7), ("width", 16385), ("byte_size", 31457281), ("content_type", "image/gif")])
 def test_reference_endpoint_pixel_mime_and_byte_boundaries(field, value):
     endpoint = CATALOG["nanogpt:krea-v2/turbo"]["payload"]["endpoints"][0]
