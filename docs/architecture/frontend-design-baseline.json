@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "c567a6c17c5765fb8b44a051e74f6d6827555b303f4b19c741450f1ad9a3e8d6"
+      "sha256": "eba73c59c05e22fc0170b106198b8d832c9f8c568761c3bdd742d0cc18a9e657"
     },
     {
       "classifications": [
@@ -110,7 +110,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-status.tsx",
-      "sha256": "1359da30c9615a3108af51f9c7aae87a527b40d265c69337bc4c263f1bb0a8d0"
+      "sha256": "153db5329fb2b95927d316a0975aff0dba2b52c10806a442e72d30635f476a2e"
     },
     {
       "classifications": [
@@ -222,7 +222,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "a60e1d87fe240f22260112abf492dfe6e985e127506459cac62bf5912d5d78c8"
+        "sha256": "be47a405a541675df17ca3cdef90fb4af07c97fa84a8d786caa92a926c0fb336"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -238,7 +238,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "4444320baa88f52e51334ceca6d4ef0f4bda2959b7256b55ce094584030750bd"
+        "sha256": "8a36000a3d4156e707b2c8caf907e066e0f94e721932fc04dc68baa1ecff11d4"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",

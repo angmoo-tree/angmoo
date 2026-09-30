@@ -159,3 +159,42 @@ def test_world_package_snapshot_excludes_private_image_settings_assets_and_crede
             assert db.get(MediaAsset,asset.id) is not None
     finally:
         engine.dispose()
+
+
+def test_generation_status_and_mutation_verify_world_before_job_access(tmp_path, monkeypatch):
+    from copy import deepcopy
+    from app.domains.worlds.models import World
+    from app.domains.social.models.posts import Post
+    client, engine, principal = _fixture()
+    owner, outsider, _ = _seed(engine, principal)
+    sessions = sessionmaker(engine)
+    fake = FakeInterpreter()
+    media = MediaRuntime(sessions, SimpleNamespace(media_root_path=tmp_path), interpreter=fake)
+    client.app.state.media_runtime = media
+    client.app.include_router(router, prefix="/api/v1")
+    try:
+        with sessions() as db:
+            original = db.get(World, "world-a")
+            values = {column.name: deepcopy(getattr(original, column.name)) for column in World.__table__.columns}
+            values.update(id="world-b", slug="world-b", create_idempotency_key="world-b")
+            db.add(World(**values))
+            db.add(Post(id="image-status-post", title="Synthetic", body="Synthetic body",
+                        author_name="Synthetic owner", world_id="world-a",
+                        author_world_character_id="wc-requester", author_character_id="requester-character"))
+            db.commit()
+        path = "/api/v1/media/worlds/world-a/posts/image-status-post/image-generation"
+        correct = client.get(path)
+        assert correct.status_code == 200 and correct.json() is None
+        assert client.get("/api/v1/posts/image-status-post/image-generation").status_code == 404
+        mismatch = path.replace("world-a", "world-b")
+        invalid = client.get(mismatch)
+        assert invalid.status_code == 422 and invalid.json()["detail"] == "image_post_world_mismatch"
+        monkeypatch.setattr(media.worker, "cancel", lambda *_: pytest.fail("mismatched World reached mutation"))
+        assert client.post(mismatch + "/cancel", headers=FRONTEND_HEADERS).status_code == 422
+        principal["user"] = outsider
+        assert client.get(path).status_code == 422
+        assert client.post(path + "/cancel", headers=FRONTEND_HEADERS).status_code == 422
+        assert fake.calls == 0
+    finally:
+        client.close()
+        engine.dispose()

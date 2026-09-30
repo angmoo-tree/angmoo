@@ -252,7 +252,7 @@ function WorldSection({
         postId={postId}
         worldId={worldId}
         renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} />}
-        renderImageStatus={postId => <GenerationStatus postId={postId} />}
+        renderImageStatus={postId => <GenerationStatus worldId={worldId} postId={postId} />}
       />
     );
   }

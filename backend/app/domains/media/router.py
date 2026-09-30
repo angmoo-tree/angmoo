@@ -145,16 +145,18 @@ def comfy_sample(kind: str, user=Depends(get_current_user)):
     return json.loads((Path(__file__).parent / "samples" / f"comfy-{kind}.json").read_text("utf-8"))
 
 
-@router.get("/posts/{post_id}/image-generation")
-def read_job(post_id: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    worker = runtime(request).worker
-    return guarded(lambda: worker.view_for_post(db, user.id, post_id), db)
+@router.get("/media/worlds/{world_id}/posts/{post_id}/image-generation")
+def read_job(world_id: str, post_id: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    media = runtime(request)
+    guarded(lambda: media.authorize_post_world(db, user.id, world_id, post_id), db)
+    return guarded(lambda: media.worker.view_for_post(db, user.id, post_id), db)
 
 
-@router.post("/posts/{post_id}/image-generation/{action}", dependencies=[Depends(require_local_frontend_request)])
-def change_job(post_id: str, action: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
+@router.post("/media/worlds/{world_id}/posts/{post_id}/image-generation/{action}", dependencies=[Depends(require_local_frontend_request)])
+def change_job(world_id: str, post_id: str, action: str, request: Request, db: Session = Depends(get_db), user=Depends(get_current_user)):
     ensure_demo_user_mutable(user)
     media = runtime(request)
+    guarded(lambda: media.authorize_post_world(db, user.id, world_id, post_id), db)
     if action == "cancel":
         value = guarded(lambda: media.worker.cancel(db, user.id, post_id), db)
     elif action == "retry":

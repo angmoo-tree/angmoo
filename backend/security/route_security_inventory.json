@@ -382,7 +382,7 @@
       "module": "app.domains.social.router",
       "endpoint": "get_post"
     },
-    "GET /api/v1/posts/{post_id}/image-generation": {
+    "GET /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation": {
       "access": "owner-only",
       "module": "app.domains.media.router",
       "endpoint": "read_job"
@@ -937,7 +937,7 @@
       "module": "app.domains.social.router",
       "endpoint": "create_comment"
     },
-    "POST /api/v1/posts/{post_id}/image-generation/{action}": {
+    "POST /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation/{action}": {
       "access": "owner-only",
       "module": "app.domains.media.router",
       "endpoint": "change_job"

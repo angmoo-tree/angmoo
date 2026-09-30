@@ -2075,6 +2075,8 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   await page.keyboard.press("Tab");
   await expect(bodyInput).toBeFocused();
   await page.keyboard.press("Tab");
+  await expect(page.getByLabel("첨부 이미지 선택")).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(submitPost).toBeFocused();
 
   await submitPost.click();

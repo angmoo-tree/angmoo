@@ -7,20 +7,20 @@ import type { GenerationJob } from "../types/media";
 import styles from "./media-settings.module.css";
 
 const labels: Record<string, string> = { queued: "이미지 생성 대기", running: "이미지 생성 중", result_ready: "이미지 저장 중", succeeded: "이미지 생성 완료", failed: "이미지 생성 실패", outcome_unknown: "생성 결과 확인 필요", cancelled: "이미지 생성 취소", skipped: "이미지 생성 생략", blocked: "이미지 생성 준비 필요" };
-export function GenerationStatus({ postId }: { postId: string }) {
+export function GenerationStatus({ worldId, postId }: { worldId: string; postId: string }) {
   const [job, setJob] = useState<GenerationJob | null>(null);
   const [busy, setBusy] = useState(false); const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const controller = new AbortController(); let timer: ReturnType<typeof setTimeout> | undefined;
     async function read() {
-      try { const next = await getGenerationJob(postId, controller.signal); if (!controller.signal.aborted) { setJob(next); if (next && ["queued", "running", "result_ready"].includes(next.status)) timer = setTimeout(() => void read(), 3000); } }
+      try { const next = await getGenerationJob(worldId, postId, controller.signal); if (!controller.signal.aborted) { setJob(next); if (next && ["queued", "running", "result_ready"].includes(next.status)) timer = setTimeout(() => void read(), 3000); } }
       catch { /* Feed remains usable when optional generation status is unavailable. */ }
     }
     void read(); return () => { controller.abort(); if (timer) clearTimeout(timer); };
-  }, [postId, busy]);
+  }, [worldId, postId, busy]);
   async function change(action: "cancel" | "retry") {
     setBusy(true); setError(null);
-    try { setJob(await changeGenerationJob(postId, action)); }
+    try { setJob(await changeGenerationJob(worldId, postId, action)); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "이미지 작업을 변경하지 못했습니다."); }
     finally { setBusy(false); }
   }

@@ -4,8 +4,9 @@ import type { Asset, Catalog, GenerationSettings, GenerationWrite, Interpretatio
 export const getCatalog = (signal?: AbortSignal) => apiRequest<Catalog>("/media/catalog", { signal });
 export const getUsage = (signal?: AbortSignal) => apiRequest<UsageSettings>("/media/usage-settings", { signal });
 export const saveUsage = (data: { expected_revision: number; daily_limit: number }) => apiRequest<UsageSettings>("/media/usage-settings", { method: "PUT", body: data });
-export const getGenerationJob = (postId: string, signal?: AbortSignal) => apiRequest<GenerationJob | null>(`/posts/${encodeURIComponent(postId)}/image-generation`, { signal });
-export const changeGenerationJob = (postId: string, action: "cancel" | "retry") => apiRequest<GenerationJob>(`/posts/${encodeURIComponent(postId)}/image-generation/${action}`, { method: "POST" });
+const generationJobPath = (worldId: string, postId: string) => `/media/worlds/${encodeURIComponent(worldId)}/posts/${encodeURIComponent(postId)}/image-generation`;
+export const getGenerationJob = (worldId: string, postId: string, signal?: AbortSignal) => apiRequest<GenerationJob | null>(generationJobPath(worldId, postId), { signal });
+export const changeGenerationJob = (worldId: string, postId: string, action: "cancel" | "retry") => apiRequest<GenerationJob>(`${generationJobPath(worldId, postId)}/${action}`, { method: "POST" });
 export const getGeneration = (id: string, signal?: AbortSignal) => apiRequest<GenerationSettings>(`/agents/${encodeURIComponent(id)}/generation-settings`, { signal });
 export const saveGeneration = (id: string, data: GenerationWrite, check = false) => apiRequest<GenerationSettings>(`/agents/${encodeURIComponent(id)}/generation-settings${check ? "/check" : ""}`, { method: check ? "POST" : "PUT", body: data });
 export const getInterpretation = (signal?: AbortSignal) => apiRequest<InterpretationSettings>("/media/interpretation-settings", { signal });

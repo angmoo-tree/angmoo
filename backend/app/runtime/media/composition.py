@@ -96,6 +96,14 @@ class MediaRuntime:
         character = db.get(Character, post.author_character_id) if post.author_character_id else None
         return bool(character and character.owner_id == owner_id and not character.deleted_at)
 
+    @staticmethod
+    def authorize_post_world(db, owner_id, world_id, post_id):
+        from app.domains.social.models.posts import Post
+        authorize_scope(db, owner_id, "world", world_id)
+        post = db.get(Post, post_id)
+        if post is None or post.deleted_at or post.world_id != world_id:
+            raise ImagePreparationError("image_post_world_mismatch")
+
     def catalog(self):
         from app.domains.media.generation_contracts import MODEL_CATALOG
         from app.integrations import image_api
