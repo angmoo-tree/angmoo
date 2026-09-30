@@ -479,4 +479,6 @@ Import inventory는 현재 파일과 의존 관계의 사실이고 import policy
 
 SNS/Chat·Credentials·World 소유권을 연결하는 SQL과 lifecycle 구성은 `runtime/media`, `runtime/chat/image_attachments.py`, `runtime/social/composition.py`에 둔다. domain에서 다른 domain의 내부 Session/service 구현을 역참조하지 않는다. 모든 ORM은 단일 Base이며 SQLite v26의 새 9개 table과 3개 기존 table delta는 독립된 frozen forward migration과 manifest로 검증한다. 과거 manifest를 재생성하지 않는다. 네트워크 await 전에 읽기 transaction을 끝내고, 물리 요청 직전 및 결과 첨부 직전에 현재 권한·revision·한도를 다시 검사한다.
 
+앱 factory는 기존 `configure_chat_services`로 기본 Chat 서비스를 연결한 다음 `configure_chat_image_services`에서 그 앱의 media runtime을 받는 Generation·Evidence 서비스를 조립한다. 기본 서비스의 전역 객체를 바꾸지 않으며 full/public 두 앱 사이에 이미지 collaborator를 공유하지 않는다.
+
 비공개 픽셀은 `MEDIA_ROOT/private-image-assets`에 저장하며 인증된 content endpoint로만 읽는다. 백업은 SQLite, 이 디렉터리와 암호화 secret을 함께 보존해야 한다. World Package는 portable DTO projection을 사용하며 이 설정·키·업로드·분석을 포함하지 않는다. 실제 생성 서비스/ComfyUI 실행 검증은 키 없는 계약 검사와 구분한다.

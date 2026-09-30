@@ -1,5 +1,5 @@
 {
-  "edge_count": 5396,
+  "edge_count": 5400,
   "external_import_count": 3923,
   "module_count": 1332,
   "modules": [
@@ -14833,6 +14833,7 @@
         "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.chat.image_attachments",
         "app.runtime.chat.message_composition",
         "app.runtime.component_workers",
         "app.runtime.configuration",
@@ -16011,8 +16012,12 @@
         "app.domains.chat.contracts.image_evidence",
         "app.domains.chat.exceptions",
         "app.domains.chat.models",
+        "app.domains.chat.service.evidence",
+        "app.domains.chat.service.generation",
         "app.domains.media.contracts",
-        "app.domains.media.generation_contracts"
+        "app.domains.media.generation_contracts",
+        "app.runtime.chat.evidence_reads",
+        "app.runtime.chat.generation_workflows"
       ],
       "module": "app.runtime.chat.image_attachments",
       "path": "backend/app/runtime/chat/image_attachments.py",
@@ -16048,7 +16053,6 @@
         "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.image_attachments",
         "app.runtime.chat.scope_queries"
       ],
       "module": "app.runtime.chat.message_composition",

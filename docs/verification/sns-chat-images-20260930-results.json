@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "source_commit": "db1542e2d8774196d13eeabc8bba55e270056051",
+  "backend": {
+    "source_commit": "db1542e2d8774196d13eeabc8bba55e270056051",
+    "execution": "complete partitions plus targeted repairs; not a single uninterrupted full-suite run",
+    "collected": 4428,
+    "unique_passed": 4379,
+    "unique_skipped": 49,
+    "remaining_failures": [],
+    "missing_evidence": [],
+    "stale_nodes": [],
+    "skip_reasons": {
+      "real Vec1 extension build not supplied": 21,
+      "SECURITY_CONCURRENCY_DATABASE_URL is required": 19,
+      "explicit performance run": 6,
+      "P7_GRAPH_POSTGRES_DATABASE_URL is required": 1,
+      "L2_SCHEDULER_POSTGRES_DATABASE_URL is required": 1,
+      "hosted lifespan is not part of the public runtime profile": 1
+    },
+    "executions": [
+      {
+        "report": "final-domains.xml",
+        "sha256": "863838f76110d9fa2220706e15b782c54b7ff15116affa6e20c0beb2319f9446",
+        "passed": 2944,
+        "failed": 1,
+        "skipped": 30
+      },
+      {
+        "report": "final-runtime.xml",
+        "sha256": "da6eb6c7f64f67b03b33d77174931814009aab2138e2e942e2414725101806a5",
+        "passed": 294,
+        "failed": 14,
+        "skipped": 0
+      },
+      {
+        "report": "final-root.xml",
+        "sha256": "115410da0a898d579f95f8288b98e98ec76c987f1a741c545aa3b2e63f06f35b",
+        "passed": 1114,
+        "failed": 3,
+        "skipped": 19
+      },
+      {
+        "report": "world-scope-final.xml",
+        "sha256": "da932107f7154fa0c6c3a6a7c246797b6f303ddd4ad155aa5073478f9da11289",
+        "passed": 23,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "factory-last.xml",
+        "sha256": "5acedca435bae11cc63b5d8fd8afcb68670eaa0c6cac18e083ee8b289746bcc3",
+        "passed": 51,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "final-scene.xml",
+        "sha256": "d371fcd7269f8c11548c4a011cbc371d219d9f7b35e2c91935f271f8fa0a8662",
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "chat-composition.xml",
+        "sha256": "96a2e501f12251c6cb97b305496210f7e24b08349e2766c4f23be0e4e75718f1",
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "closure-regressions.xml",
+        "sha256": "cb9accb2ea9d806d03a16e018a3c9de241d1809ad5d4c74907d6eac362dfc657",
+        "passed": 104,
+        "failed": 1,
+        "skipped": 0
+      },
+      {
+        "report": "image-closure.xml",
+        "sha256": "9b5cd9848914cce0c01d19b16eea90ef6f50ecc4983ae440f1701ba30613b283",
+        "passed": 110,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "inventory-closure.xml",
+        "sha256": "f9a83e371d27ef9dcdc821a0bfddd9b9901427dd9c1090bf3c8eb8a942b3957f",
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "image_integration": {
+    "passed": 110,
+    "report": "image-closure.xml"
+  },
+  "ui": {
+    "image_next_static": {
+      "passed": 20
+    },
+    "existing_static": {
+      "passed": 75
+    },
+    "existing_next_development": {
+      "passed": 35,
+      "skipped": 10
+    },
+    "final_changed_social_next": {
+      "passed": 2
+    },
+    "final_changed_social_static": {
+      "passed": 2
+    }
+  },
+  "preservation": {
+    "protected_lineages": 4428,
+    "current_nodes": 4428,
+    "inventory_items": 37,
+    "result": "passed",
+    "checker": "original check_refactor_preservation.main --contracts --nodes",
+    "optimization": "cache exact immutable Git blobs only, verify object ID and length; no changed validator or omitted node"
+  },
+  "recognition": {
+    "model": "gemini-3.1-flash-lite",
+    "thinking_level": "medium",
+    "physical_requests": 5,
+    "sdk_attempts": 1,
+    "elapsed_seconds": 16.032,
+    "results": [
+      "R01 PASS",
+      "R02 PASS",
+      "R03 PASS",
+      "R04 PASS",
+      "R05 PASS"
+    ],
+    "source_fixture": "public synthetic pixels and OCR; temporary DBs; original credential source read only",
+    "source_mutations": 0,
+    "generation_requests": 0,
+    "returned_usage_measured_calls": 3,
+    "returned_usage_missing_calls": 2,
+    "execution_snapshot": "Performed with the uncommitted implementation later included in 13ef6247; an exact runtime source hash was not separately recorded; not a live retest of final HEAD"
+  },
+  "excluded": [
+    "F01-F06 live paid generation and ComfyUI local/API nodes",
+    "remaining F07-F11 quality, environment and restore checks",
+    "fixed Linux pixel baseline",
+    "USER CHECK",
+    "CI",
+    "push",
+    "PR",
+    "main merge",
+    "deployment",
+    "installation"
+  ],
+  "report_hashes": {
+    "browser-completion.log": "c5d87794058334b07a6da35a4d7a5fe74c8401975cc3e2b8f3da908624ef1f9c",
+    "social-next-completion.log": "4bc5679bd953d05fa96b5dfc0c001978f4c598a5d03c667b72bf8a59c7e3e679",
+    "social-static-completion.log": "768a27ddcb2b9af1daffb43978a7a90355ca78121766ec1e54ddbb575b4df84f",
+    "preservation-closure.log": "9ba0afdc71d1f193c6fe1d8326ad84e5b29ca0a282e23291a3e5bbb0ec6e963d",
+    "gemini-live.json": "abd36f7dfb07b957103e7ecc8eee86d3636bb4af6835fe9fbe688b023bd8e330"
+  }
+}
