@@ -103,6 +103,8 @@ class RoutineBeatPlan(RoutinePostSchema):
 
 
 class RoutinePostDraft(RoutinePostSchema):
+    _image_prompt: str = PrivateAttr(default="")
+    _image_error: str | None = PrivateAttr(default=None)
     title: str = Field(min_length=1, max_length=160)
     body: str = Field(min_length=1, max_length=4000)
     topic_signature: str = Field(default="", max_length=300)

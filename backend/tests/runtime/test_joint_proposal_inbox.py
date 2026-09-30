@@ -38,7 +38,7 @@ def lane(db, value):
     adapter = CombinedInboxLane.__new__(CombinedInboxLane)
     adapter.actor = value.acceptor.world_character
     adapter.lane = "inbox"
-    adapter.ctx = SimpleNamespace(db=db, run_id="inbox-test-run", character=value.acceptor.character,
+    adapter.ctx = SimpleNamespace(db=db, user_id=value.acceptor.character.owner_id, run_id="inbox-test-run", character=value.acceptor.character,
         activity_policy=SimpleNamespace(allowed_actions={"reply", "like"}))
     adapter.relationship = lambda _: {}
     async def guard(_):

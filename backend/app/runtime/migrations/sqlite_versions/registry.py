@@ -120,8 +120,10 @@ from app.runtime.migrations.sqlite_versions import character_background_v22
 from app.runtime.migrations.sqlite_versions import daily_preparation_v23
 from app.runtime.migrations.sqlite_versions import routine_state_v24
 from app.runtime.migrations.sqlite_versions import topic_request_v25
+from app.runtime.migrations.sqlite_versions import images_v26
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    25: images_v26.upgrade,
     24: topic_request_v25.upgrade,
     23: routine_state_v24.upgrade,
     22: daily_preparation_v23.upgrade,
@@ -149,6 +151,7 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    25: SqliteMigrationContract(source_version=25, target_version=26, name="sns_chat_images", mutable_identity_tables=images_v26.MUTABLE_IDENTITY_TABLES, capture=images_v26.capture_delta, verify=images_v26.verify_delta),
     24: SqliteMigrationContract(source_version=24, target_version=25, name="topic_request_names", mutable_identity_tables=topic_request_v25.MUTABLE_IDENTITY_TABLES, capture=topic_request_v25.capture_delta, verify=topic_request_v25.verify_delta),
     23: SqliteMigrationContract(source_version=23, target_version=24, name="routine_state_version", mutable_identity_tables=routine_state_v24.MUTABLE_IDENTITY_TABLES, capture=routine_state_v24.capture_delta, verify=routine_state_v24.verify_delta),
     22: SqliteMigrationContract(source_version=22, target_version=23, name="daily_preparation", mutable_identity_tables=daily_preparation_v23.MUTABLE_IDENTITY_TABLES, capture=daily_preparation_v23.capture_delta, verify=daily_preparation_v23.verify_delta),

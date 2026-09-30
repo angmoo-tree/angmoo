@@ -67,6 +67,13 @@ class ProviderUsage:
 
 
 @dataclass(frozen=True)
+class ProviderImagePart:
+    mime_type: str
+    data: bytes | None = field(default=None, repr=False)
+    url: str | None = field(default=None, repr=False)
+
+
+@dataclass(frozen=True)
 class ProviderRequest:
     api_key: str = field(repr=False)
     model: str

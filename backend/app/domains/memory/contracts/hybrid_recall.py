@@ -44,8 +44,12 @@ class HybridRecallRequest:
     axis_limit: int = 50
     result_limit: int = 10
     episode_source_kinds: tuple[RecallDocumentKind, ...] = ()
+    image_base_text: str | None = None
+    image_hint: str | None = None
 
     def __post_init__(self):
+        if self.image_hint is not None and (not isinstance(self.image_hint, str) or len(self.image_hint) > 120 or not self.image_base_text or len(self.search_text) > 1000):
+            raise ValueError("hybrid_image_hint_invalid")
         if (not self.request_id or not self.call_id or not _HASH.fullmatch(self.envelope_hash)
                 or not isinstance(self.search_text, str) or not self.search_text.strip()
                 or len(self.search_text) > 4000 or not self.profile or not self.kinds

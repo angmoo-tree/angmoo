@@ -58,6 +58,14 @@ def validate_profile_media_content(content_type: str, content: bytes) -> None:
     _assert_decodable_image(content)
 
 
+def validate_generated_media_content(content_type: str, content: bytes, *, max_bytes: int) -> None:
+    """Validate a bounded provider result without changing profile upload limits."""
+    if not content or len(content) > max_bytes:
+        raise InvalidProfileMediaError("Image result is empty or too large")
+    _assert_image_signature(content_type, content)
+    _assert_decodable_image(content)
+
+
 def encode_profile_media_webp(*, media_type: str, content: bytes) -> bytes:
     if media_type not in MEDIA_TARGET_SIZES:
         raise InvalidProfileMediaError("Unsupported media type")

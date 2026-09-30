@@ -8,6 +8,7 @@ def next_queued_image_job(db: Session) -> models.PostImageGenerationJob | None:
     statement = (
         select(models.PostImageGenerationJob)
         .where(models.PostImageGenerationJob.status == "queued")
+        .where(models.PostImageGenerationJob.intent_id.is_(None))
         .order_by(models.PostImageGenerationJob.created_at.asc())
         .limit(1)
     )
@@ -23,6 +24,7 @@ def stale_processing_image_jobs(
         db.scalars(
             select(models.PostImageGenerationJob)
             .where(models.PostImageGenerationJob.status == "processing")
+            .where(models.PostImageGenerationJob.intent_id.is_(None))
             .where(models.PostImageGenerationJob.started_at < stale_before)
         )
     )

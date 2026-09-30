@@ -27,6 +27,8 @@ dependencies = [
     "uvicorn>=0.52.1",
     "websockets>=16.0",
     "langgraph-checkpoint-sqlite>=3.0,<4",
+    "httpx>=0.28.1,<1",
+    "sentencepiece>=0.2.1",
 ]
 
 [dependency-groups]

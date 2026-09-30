@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "c78df67a4c6d15fb314b98d884388564a6e1d7c1c878ba48cf139f04ca54d9c0"
+      "sha256": "346dffc81909521907f76930deda264e34eb534182825664083a6c46b45c1913"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -47,6 +47,7 @@
         "fastapi>=0.141.1",
         "google-auth[requests]>=2.40.0",
         "google-genai>=2.17.0",
+        "httpx>=0.28.1,<1",
         "ladybug==0.19.1",
         "langchain-core>=1.0.0",
         "langgraph-checkpoint-sqlite>=3.0,<4",
@@ -58,6 +59,7 @@
         "pypdf>=6.16.1",
         "python-docx>=1.2.0",
         "python-multipart>=0.0.30",
+        "sentencepiece>=0.2.1",
         "sqlalchemy>=2.0.51",
         "tzdata>=2026.2",
         "uvicorn>=0.52.1",
@@ -292,7 +294,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "c78df67a4c6d15fb314b98d884388564a6e1d7c1c878ba48cf139f04ca54d9c0",
+      "source_sha256": "346dffc81909521907f76930deda264e34eb534182825664083a6c46b45c1913",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -42,6 +42,23 @@ from app.domains.relationships.contracts.graph_recall import GraphRecallStatus
 class EvidenceBundleAssembler:
     """Freeze only revalidated typed retrieval outputs into provider-safe prose."""
 
+    def with_image(self, bundle, image):
+        if image is None:
+            return bundle
+        item = EvidenceItem(opaque_reference=opaque_evidence_reference("image", image.asset_hash),
+            kind=EvidenceKind.CURRENT_IMAGE, text=image.context, occurred_at=None, axes=(RetrievalAxis.IMAGE,),
+            locator=EvidenceLocator(kind=EvidenceLocatorKind.IMAGE_ASSET, source_id=image.asset_id,
+                source_type="actual_image_analysis", source_revision=f"{image.asset_revision}:{image.asset_hash}"))
+        candidates, size = [item], len(item.text)
+        for existing in bundle.items:
+            if len(candidates) < MAX_EVIDENCE_ITEMS and size + len(existing.text) <= MAX_EVIDENCE_BUNDLE_CHARS:
+                candidates.append(existing)
+                size += len(existing.text)
+        return self._bundle(request_id=bundle.request_id, request_scope_hash=bundle.request_scope_hash,
+            route=bundle.route, outcome=bundle.retrieval_outcome, candidates=tuple(candidates),
+            partial_axes=bundle.partial_axes, degraded_reason=bundle.degraded_reason,
+            clarification_slot=bundle.clarification_slot, preserve_rank_order=True)
+
     def current_context(
         self,
         *,

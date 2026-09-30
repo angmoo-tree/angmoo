@@ -30,6 +30,7 @@ import { type MessageGoogleGeminiModel } from "@/features/chat/types/chat-contra
 import type { WorldChatGenerationRequestRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
 
 import styles from "./world-chat.module.css";
+import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 type WorldChatProps = {
   threadId?: string;
@@ -177,6 +178,7 @@ function WorldChatThread({
   worldId,
   renderMemorySummary,
   renderEvidenceInspector,
+  renderImagePicker,
 }: {
   threadId: string;
   worldId: string;
@@ -186,10 +188,13 @@ function WorldChatThread({
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [draft, setDraft] = useState("");
+  const [attachment, setAttachment] = useState<{ id: string; url: string; allowed: boolean } | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendFailure, setSendFailure] = useState<{
     content: string;
     idempotencyKey: string;
+    assetId?: string;
   } | null>(null);
   const [modelSelection, setModelSelection] = useState<ModelSelection>("default");
   const [modelUpdating, setModelUpdating] = useState(false);
@@ -498,19 +503,21 @@ function WorldChatThread({
   );
 
   const submitMessage = useCallback(
-    async (content: string, idempotencyKey: string) => {
+    async (content: string, idempotencyKey: string, assetId?: string) => {
       setSending(true);
       setSendFailure(null);
       try {
         const accepted = await sendWorldChatMessage(worldId, threadId, {
           content,
           idempotency_key: idempotencyKey,
+          ...(assetId ? { attachment_asset_id: assetId } : {}),
         });
         appendUserMessage(accepted.user_message);
         setDraft("");
+        setAttachment(null);
         await hydrateRequest(accepted.response_request, new AbortController().signal);
       } catch {
-        setSendFailure({ content, idempotencyKey });
+        setSendFailure({ content, idempotencyKey, assetId });
       } finally {
         setSending(false);
       }
@@ -523,14 +530,14 @@ function WorldChatThread({
       event.preventDefault();
       const content = draft.trim();
       if (
-        !content ||
+        (!content && !attachment) || imageBusy || (attachment && !attachment.allowed) ||
         sending ||
         modelUpdating ||
         (generation && generation.phase !== "failed")
       ) return;
-      void submitMessage(content, newIdempotencyKey("message"));
+      void submitMessage(content, newIdempotencyKey("message"), attachment?.id);
     },
-    [draft, generation, modelUpdating, sending, submitMessage],
+    [draft, attachment, imageBusy, generation, modelUpdating, sending, submitMessage],
   );
 
   const retryResponse = useCallback(async () => {
@@ -739,6 +746,7 @@ function WorldChatThread({
                     ? message.content
                     : "이 응답은 완료되지 않았어요."}
                 </p>
+                {message.attachment ? <ChatAttachment url={message.attachment.url} /> : null}
                 {message.status === "ok" && evidence ? (
                   <button
                     className={styles.evidenceButton}
@@ -790,6 +798,7 @@ function WorldChatThread({
         worldId,
       })}
 
+      {renderImagePicker?.({ threadId, value: attachment, disabled: sending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy })}
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
           {thread.responding.display_name}에게 보낼 메시지
@@ -806,7 +815,7 @@ function WorldChatThread({
         <button
           aria-label="메시지 보내기"
           disabled={
-            !draft.trim() ||
+            (!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) ||
             sending ||
             modelUpdating ||
             (!!generation && generation.phase !== "failed")
@@ -829,6 +838,7 @@ function WorldChatThread({
               void submitMessage(
                 sendFailure.content,
                 sendFailure.idempotencyKey,
+                sendFailure.assetId,
               )
             }
             type="button"
@@ -839,6 +849,13 @@ function WorldChatThread({
       ) : null}
     </section>
   );
+}
+
+function ChatAttachment({ url }: { url: string }) {
+  const source = useRuntimeMediaUrl(url);
+  // Authenticated attachment bytes are displayed through a revocable blob URL.
+  // eslint-disable-next-line @next/next/no-img-element
+  return source ? <img src={source} alt="대화에 첨부한 이미지" className={styles.attachmentImage} /> : <p>첨부 이미지를 불러오는 중…</p>;
 }
 
 function TypingPresence({ name }: { name: string }) {

@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "8ae945e90d91e299f55623e65e02f03aed624cb1392e7d1e5f4d70cd685fec0e"
+      "sha256": "c567a6c17c5765fb8b44a051e74f6d6827555b303f4b19c741450f1ad9a3e8d6"
     },
     {
       "classifications": [
@@ -102,6 +102,48 @@
       "classifications": [
         "LOCAL"
       ],
+      "path": "frontend/src/features/media/components/generation-settings.tsx",
+      "sha256": "dc39e1b172b2dc2241bbfb51a2c07c8108c80d63bac67909192d6b5bbe1ad8c6"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/generation-status.tsx",
+      "sha256": "1359da30c9615a3108af51f9c7aae87a527b40d265c69337bc4c263f1bb0a8d0"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/image-picker.tsx",
+      "sha256": "19aa23a21e28aff8096addc1f7f76964ec883d01bfade4a18aa98521e46987b7"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/interpretation-settings.tsx",
+      "sha256": "f6ce2f67104da1c41485aff03dc2b74bec6556c79a3d87e04a65db5fa3f41d7a"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/media-settings.module.css",
+      "sha256": "41ad0b4e0a4d316ed4a621c8da2c5516192d5e21470d93912bcacf63a58c7ba0"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/usage-settings.tsx",
+      "sha256": "644abeb83ce1478c4b4a23be153995b7162f6e3505a282c48bb3a25b470d4ed5"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
       "sha256": "03102defb82af92362a2d9c96bfebfaa8f0322194cd68c8e7666f95c00fe6a92"
     },
@@ -131,7 +173,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "363c1e3b14cc6b7fcebbc8e299541ad3717d579b9d62cc88e3f2139eb8230c17"
+      "sha256": "6d19797699eb8c01863db6c49c38a7412729ac8a0cd7582b4bcfe3f29081773d"
     },
     {
       "classifications": [
@@ -1387,15 +1429,15 @@
         "present": true,
         "sha256": "6b8a45d720fc7894def577d87688ea0b45afc3861125c7b45e1b1e8c88256745"
       },
-      "projects": [
-        "next-production",
-        "static-export"
-      ],
       "production_preview_script": {
         "path": "frontend/scripts/serve-production.mjs",
         "present": true,
         "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2"
       },
+      "projects": [
+        "next-production",
+        "static-export"
+      ],
       "reviewed_viewports": [
         {
           "height": 800,

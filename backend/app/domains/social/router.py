@@ -746,6 +746,7 @@ def write_owner_post(
                 idempotency_key=idempotency_key.strip(),
                 title=data.title,
                 body=data.body,
+                attachment_asset_id=data.attachment_asset_id,
             ),
         )
     except (SocialWriteError, OwnerControlledIdentityError) as exc:

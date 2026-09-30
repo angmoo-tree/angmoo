@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3818,
-      "internal_edge_count": 5269,
+      "external_import_count": 3923,
+      "internal_edge_count": 5396,
       "legacy_import_exception_count": 0,
-      "module_count": 1303,
+      "module_count": 1332,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1004,6 +1004,13 @@
             "imports": [
               "app.models"
             ],
+            "module": "app.domains.social.models.image_intents",
+            "path": "backend/app/domains/social/models/image_intents.py"
+          },
+          {
+            "imports": [
+              "app.models"
+            ],
             "module": "app.domains.social.models.manual_writes",
             "path": "backend/app/domains/social/models/manual_writes.py"
           },
@@ -1582,6 +1589,14 @@
           },
           {
             "imports": [
+              "app.domains.media.contracts",
+              "app.domains.social.models.image_intents"
+            ],
+            "module": "app.domains.social.service.generation_usage",
+            "path": "backend/app/domains/social/service/generation_usage.py"
+          },
+          {
+            "imports": [
               "app.core.image_generation",
               "app.domains.social.contracts.image_generation",
               "app.domains.social.repository.media",
@@ -1631,6 +1646,16 @@
             ],
             "module": "app.domains.social.service.image_identity",
             "path": "backend/app/domains/social/service/image_identity.py"
+          },
+          {
+            "imports": [
+              "app.domains.media.contracts",
+              "app.domains.social.models.image_intents",
+              "app.domains.social.models.posts",
+              "app.domains.social.service.generation_usage"
+            ],
+            "module": "app.domains.social.service.image_intent_generation",
+            "path": "backend/app/domains/social/service/image_intent_generation.py"
           },
           {
             "imports": [
@@ -1709,7 +1734,8 @@
               "app.domains.social.models.posts",
               "app.domains.social.repository.event_evidence",
               "app.domains.social.repository.manual_feed",
-              "app.domains.social.schemas.manual"
+              "app.domains.social.schemas.manual",
+              "app.domains.social.service.post_attachments"
             ],
             "module": "app.domains.social.service.manual_feed",
             "path": "backend/app/domains/social/service/manual_feed.py"
@@ -1753,6 +1779,15 @@
             ],
             "module": "app.domains.social.service.notifications",
             "path": "backend/app/domains/social/service/notifications.py"
+          },
+          {
+            "imports": [
+              "app.domains.media.contracts",
+              "app.domains.social.contracts.writes",
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.service.post_attachments",
+            "path": "backend/app/domains/social/service/post_attachments.py"
           },
           {
             "imports": [
@@ -1875,6 +1910,7 @@
               "app.domains.social.repository.manual_writes",
               "app.domains.social.schemas.community",
               "app.domains.social.service.manual_writes",
+              "app.domains.social.service.post_attachments",
               "app.domains.social.service.timeline",
               "app.domains.social.utils.source_writes"
             ],
@@ -2276,6 +2312,8 @@
               "app.domains.world_characters.models",
               "app.integrations.direct_llm",
               "app.runtime.character_activity_state",
+              "app.runtime.media.binding",
+              "app.runtime.media.composition",
               "app.runtime.persistence.model_registration",
               "app.runtime.relationships.sqlalchemy_social_event",
               "app.runtime.routine_posts.context_references",
@@ -2378,6 +2416,7 @@
           },
           {
             "imports": [
+              "app.domains.social.service.post_attachments",
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.manual_feed_references",
@@ -3156,7 +3195,7 @@
             "react"
           ],
           "path": "frontend/src/features/social/components/world-social-feed.tsx",
-          "sha256": "363c1e3b14cc6b7fcebbc8e299541ad3717d579b9d62cc88e3f2139eb8230c17"
+          "sha256": "6d19797699eb8c01863db6c49c38a7412729ac8a0cd7582b4bcfe3f29081773d"
         }
       ],
       "planned_feature_allowlist": [
@@ -3475,7 +3514,7 @@
       ],
       "registry": {
         "path": "backend/app/runtime/migrations/sqlite_versions/registry.py",
-        "sha256": "9647a058b740f7da83226d1a2df9eb6613f5470afcb72f9926284a6e56339d01"
+        "sha256": "e3a03b88e724b84d4c38ca8c29ece73280b9880e2b299bb7c83896e5cf5111d0"
       },
       "steps": [
         {

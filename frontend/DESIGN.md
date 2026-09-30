@@ -1253,3 +1253,9 @@ child 창 닫기·화면 이동은 종료로 처리하지 않고, 내부 provide
 > **그러나 hosted 서비스의 account·quota·auth·global SNS 의미는 계승 대상이 아니다. Local의 World scope·owner identity·다중 autonomy·runtime 상태·Tauri window 계약이 항상 우선한다.**
 
 > **Local에만 있는 Device Home·World App·Creator Studio·Relationship Graph는 별개의 임시 디자인으로 남기지 않고, 같은 token·type·navigation·state 문법으로 만든다. 앞으로 L5~P10의 frontend도 이 문서를 읽고 같은 시스템에 합류한다.**
+
+## 공통 이미지 설정·첨부 (2026-09-30)
+
+새 Media 화면은 LOCAL 작성으로 분류하고 기존 화면에 조합한다. 기존 semantic form/control/status 토큰을 사용하고 API 키는 저장 여부만 표시하며 input/localStorage에 되돌리지 않는다. Provider 모델/비용 모드의 참조 강제 OFF와 검증 여부, 생성·인식 사용량의 예약/시도, 오류/결과 미확정/로컬 첨부 복구를 구분한다. 참조 선호를 자동 생성 활성화로 표시하지 않는다.
+
+첨부는 한 장의 인증된 미리보기와 제거 버튼을 제공한다. 인식이 불가능한 Chat 첨부는 미리보기를 유지한 채 전송을 막으며 본문을 지우지 않는다. 사용자가 사진을 제거하면 원래 본문을 전송할 수 있다. SNS 작성은 제목과 본문 조건을 유지한다. 44px control, keyboard focus, reduced motion, 360/390/436/1440 폭과 확대 상태를 검증한다. Windows 브라우저 결과를 고정 Linux 환경의 pixel baseline 통과로 기록하지 않는다.

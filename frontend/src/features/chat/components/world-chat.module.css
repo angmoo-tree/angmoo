@@ -656,3 +656,4 @@
 .statusActions a:hover {
   border-color: var(--color-border-interactive);
 }
+.attachmentImage { display: block; max-width: 100%; width: auto; height: auto; max-height: 480px; object-fit: contain; }

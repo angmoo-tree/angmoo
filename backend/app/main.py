@@ -171,8 +171,14 @@ def create_lifespan(
                 await memory_runtime.start()
             if memory_hybrid_runtime is not None:
                 await memory_hybrid_runtime.start()
+            media_runtime = getattr(runtime_app.state, "media_runtime", None)
+            if media_runtime is not None and getattr(runtime_app.state, "media_worker_enabled", False):
+                await media_runtime.start()
         except BaseException:
             try:
+                media_runtime = getattr(runtime_app.state, "media_runtime", None)
+                if media_runtime is not None:
+                    await media_runtime.stop()
                 if memory_hybrid_runtime is not None:
                     await memory_hybrid_runtime.stop()
                 if memory_runtime is not None:
@@ -198,6 +204,9 @@ def create_lifespan(
             yield
         finally:
             try:
+                media_runtime = getattr(runtime_app.state, "media_runtime", None)
+                if media_runtime is not None:
+                    await media_runtime.stop()
                 if memory_hybrid_runtime is not None:
                     await memory_hybrid_runtime.stop()
                 if memory_runtime is not None:
@@ -369,6 +378,9 @@ def create_app(
     from app.runtime.daily_preparation import read_preparation, ensure_preparation
     runtime_app.state.daily_preparation = SimpleNamespace(read=read_preparation, ensure=ensure_preparation)
 
+    from app.runtime.media.composition import MediaRuntime
+    runtime_app.state.media_runtime = MediaRuntime(composition.session_factory if composition else SessionLocal, runtime_settings)
+    runtime_app.state.media_worker_enabled = composition is not None
     from app.runtime.chat.message_composition import configure_chat_services
     configure_chat_services(runtime_app)
     from app.runtime.diagnostics.http import configure_runtime_diagnostics

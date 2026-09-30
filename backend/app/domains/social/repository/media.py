@@ -184,6 +184,7 @@ def count_active_post_image_jobs_for_character_between(
         db.scalar(
             select(func.count(models.PostImageGenerationJob.id))
             .where(models.PostImageGenerationJob.character_id == character_id)
+            .where(models.PostImageGenerationJob.intent_id.is_(None))
             .where(models.PostImageGenerationJob.status.in_(("queued", "processing")))
             .where(models.PostImageGenerationJob.created_at >= start_at)
             .where(models.PostImageGenerationJob.created_at < end_at)

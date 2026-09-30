@@ -61,7 +61,8 @@ class CombinedActivityProvider(ActivityProvider):
         if planning and self.mode == "combined":
             lane = node.removesuffix("ActionPlanner").lower()
             original_validator = kwargs["validator"]
-            kwargs["schema"] = envelope_schema(kwargs["schema"], lane)
+            image_enabled = lane == "routine" and getattr(self, "image_enabled", False)
+            kwargs["schema"] = envelope_schema(kwargs["schema"], lane, image_enabled)
             kwargs["validator"] = lambda value: parse_envelope(value, original_validator)
             kwargs["node"] = lane.title() + "DecisionDraft"
             kwargs["lane"] = lane + "_decision_draft"
@@ -79,6 +80,9 @@ class CombinedActivityProvider(ActivityProvider):
                    "and every counter field from decision.proposal_response exactly. "
                    "Express decision.brief without choosing another action. ") + THOUGHT_PROMPT)
             kwargs["max_tokens"] = COMBINED_OUTPUT_TOKENS
+            if image_enabled:
+                from app.domains.routine_posts.service.image_output import IMAGE_INSTRUCTIONS
+                kwargs["system"] += IMAGE_INSTRUCTIONS
             kwargs["recover_truncation"] = False
             kwargs["json_retry_policy"] = combined_retry
         if self.repairing:

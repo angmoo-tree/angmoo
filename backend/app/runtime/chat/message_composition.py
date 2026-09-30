@@ -29,5 +29,10 @@ def configure_chat_services(app: FastAPI) -> None:
     app.state.chat_thread_service = thread_service
     app.state.chat_settings_service = settings_service
     app.state.chat_message_service = message_service
-    app.state.chat_generation_service = generation_service
-    app.state.chat_evidence_service = evidence_service
+    from app.runtime.chat.image_attachments import ChatImageAttachments
+    media = getattr(app.state, "media_runtime", None)
+    images = ChatImageAttachments(media) if media else None
+    app.state.chat_generation_service = (GenerationService(thread_service, settings_service, generation_workflows,
+        images=images) if images else generation_service)
+    app.state.chat_evidence_service = (EvidenceService(thread_service, evidence_reads,
+        image_reader=images.asset_current) if images else evidence_service)

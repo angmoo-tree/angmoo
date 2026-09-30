@@ -26,6 +26,7 @@ from app.domains.identity.router.local import router as local_identity_router
 from app.domains.world_characters.router.profile import router as world_character_router
 from app.domains.world_characters.router.activity import router as activity_runtime_router
 from app.domains.world_packages.router import router as world_package_router
+from app.domains.media.router import router as media_router
 
 
 class HostedRouterConfigurationError(RuntimeError):
@@ -33,6 +34,7 @@ class HostedRouterConfigurationError(RuntimeError):
 
 
 PUBLIC_ROUTERS = (
+    media_router,
     recommendation_router,
     local_identity_router,
     device_home_router,

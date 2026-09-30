@@ -391,6 +391,8 @@ def _seed_v2_roleless(
                 from sqlalchemy.schema import CreateTable, CreateIndex
                 from app.runtime.persistence.sqlite_schema import RELATIONSHIP_V17_TABLES, build_sqlite_v16_metadata
                 from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata, build_sqlite_v22_metadata
+                from image_schema_fixture_support import freeze_pre_image_schema
+                freeze_pre_image_schema(connection)
                 Base.metadata.tables["activity_preparation_jobs"].drop(connection, checkfirst=True)
                 for name in reversed(CREATOR_V21_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)

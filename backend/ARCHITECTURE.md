@@ -470,3 +470,13 @@ Import inventory는 현재 파일과 의존 관계의 사실이고 import policy
 - [Tauri sidecar lifecycle](../docs/architecture/l3-er5-tauri-sidecar-lifecycle.md)
 
 이 문서는 구조·역할·연결·변경 예시를 설명합니다. 세부 API 필드, 모델별 예산 숫자, release 상태는 해당 코드와 상세 계약에서 관리해 중복된 기준이 생기지 않게 합니다.
+
+## SNS·Chat 이미지 소유권 (2026-09-30)
+
+`domains/media`가 비공개 asset·공통 인식 설정·분석 캐시·분석 시도를 소유한다. `domains/identity/service/media_credentials.py`는 기존 암호화 scope 규칙으로 목적별 키를 저장하고, `domains/characters/service/generation_settings.py`가 캐릭터별 Provider/model/options/reference 선호와 revision을 소유한다. Provider adapter는 같은 Backend의 `integrations`에 있으며 별도 서버를 추가하지 않는다.
+
+`domains/social/service/image_intent_generation.py`는 신규 Routine 글의 frozen intent, 사용량 예약, claim/lease, 실제 제출·receipt·결과 spool·첨부를 담당한다. 기존 `image_generation.py`의 기존 기능은 보존하되 신규 Provider 선택 시 중복 실행을 차단한다. Routine의 마지막 작성 단계는 장면 한 항목만 추가하며 외형·스타일·모델·비용 옵션과 허용 판단은 코드가 결합한다.
+
+SNS/Chat·Credentials·World 소유권을 연결하는 SQL과 lifecycle 구성은 `runtime/media`, `runtime/chat/image_attachments.py`, `runtime/social/composition.py`에 둔다. domain에서 다른 domain의 내부 Session/service 구현을 역참조하지 않는다. 모든 ORM은 단일 Base이며 SQLite v26의 새 9개 table과 3개 기존 table delta는 독립된 frozen forward migration과 manifest로 검증한다. 과거 manifest를 재생성하지 않는다. 네트워크 await 전에 읽기 transaction을 끝내고, 물리 요청 직전 및 결과 첨부 직전에 현재 권한·revision·한도를 다시 검사한다.
+
+비공개 픽셀은 `MEDIA_ROOT/private-image-assets`에 저장하며 인증된 content endpoint로만 읽는다. 백업은 SQLite, 이 디렉터리와 암호화 secret을 함께 보존해야 한다. World Package는 portable DTO projection을 사용하며 이 설정·키·업로드·분석을 포함하지 않는다. 실제 생성 서비스/ComfyUI 실행 검증은 키 없는 계약 검사와 구분한다.

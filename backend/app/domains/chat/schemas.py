@@ -74,6 +74,13 @@ class MessageMessageCreate(BaseModel):
     content: str = Field(min_length=1, max_length=2000)
 
 
+class MessageAttachmentRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    asset_id: str
+    url: str
+    analysis_state: Literal["recognized", "pending"]
+
+
 class MessageMessageRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -81,6 +88,7 @@ class MessageMessageRead(BaseModel):
     thread_id: str
     role: Literal["user", "assistant"]
     content: str
+    attachment: MessageAttachmentRead | None = None
     model: str | None = None
     status: Literal["ok", "error"]
     error_code: str | None = None
@@ -213,8 +221,16 @@ class WorldChatThreadModelUpdate(BaseModel):
 
 
 class WorldChatMessageCreate(BaseModel):
-    content: str = Field(min_length=1, max_length=4000)
+    model_config = ConfigDict(extra="forbid")
+    content: str = Field(default="", max_length=4000)
+    attachment_asset_id: str | None = Field(default=None, min_length=1, max_length=64)
     idempotency_key: str = Field(min_length=16, max_length=160)
+
+    @model_validator(mode="after")
+    def require_content(self):
+        if not self.content.strip() and not self.attachment_asset_id:
+            raise ValueError("text_or_image_required")
+        return self
 
 
 class WorldChatRetryCreate(BaseModel):
@@ -258,6 +274,7 @@ class WorldChatEvidenceItemRead(BaseModel):
         "graph_relationship",
         "graph_event",
         "today_sns_activity",
+        "current_image_analysis",
         "episode_memory",
     ]
     label: str

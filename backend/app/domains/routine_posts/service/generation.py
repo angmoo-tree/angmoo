@@ -19,8 +19,9 @@ from app.integrations.direct_llm import DirectLlmError, RunLlmTracker, generate_
 
 
 class DirectRoutinePostProvider:
-    def __init__(self, *, thought_enabled: bool = False):
+    def __init__(self, *, thought_enabled: bool = False, image_enabled: bool = False):
         self._thought_enabled = thought_enabled
+        self._image_enabled = image_enabled
 
     async def generate(
         self, *, resident_context, routine_context, beat, tracker,
@@ -166,6 +167,16 @@ Return only the requested structured JSON.""" + "\n" + ROUTINE_TEMPORAL_INSTRUCT
         )
 
         writer_schema = GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA
+        if self._image_enabled:
+            from copy import deepcopy
+            writer_schema = deepcopy(writer_schema)
+            writer_schema["properties"]["image_prompt"] = {"type": "string", "maxLength": 1800}
+            writer_schema.setdefault("required", []).append("image_prompt")
+            writer_system += (
+                "\nReturn image_prompt as one concise English visual scene for this FINAL title/body. "
+                "Describe visible action, place and composition; stable appearance/style are configured separately. "
+                "Use an empty string when this post has no suitable image scene. Do not return provider settings."
+            )
         if self._thought_enabled:
             writer_system, writer_user = without_legacy_self_view_prompt(writer_system, writer_user)
             writer_system += "\n" + THOUGHT_PROMPT
@@ -175,11 +186,18 @@ Return only the requested structured JSON.""" + "\n" + ROUTINE_TEMPORAL_INSTRUCT
             writer_user += reader(None if previous is None else previous.id)
 
         def validate_draft(payload: dict[str, object]) -> schemas.RoutinePostDraft:
+            payload = dict(payload)
+            image = payload.pop("image_prompt", "") if self._image_enabled else ""
             thought = None
             if self._thought_enabled:
                 payload, thought = extract_activity_thought(payload, include_thought=True)
             result = schemas.RoutinePostDraft.model_validate(payload)
             result._activity_thought = thought
+            if self._image_enabled:
+                if isinstance(image, str) and len(image) <= 1800:
+                    result._image_prompt = image.strip()
+                else:
+                    result._image_error = "routine_image_scene_invalid"
             return result
 
         try:

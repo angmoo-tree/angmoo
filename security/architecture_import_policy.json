@@ -543,7 +543,10 @@
       "app.domains.social.service.agent_tool_state",
       "app.domains.social.service.complete_tick",
       "app.domains.social.service.manual_inbox",
-      "app.domains.social.service.search_documents"
+      "app.domains.social.service.search_documents",
+      "app.domains.identity.exceptions",
+      "app.domains.identity.service.http_auth",
+      "app.domains.identity.service.media_credentials"
     ],
     "bridges": [
       {

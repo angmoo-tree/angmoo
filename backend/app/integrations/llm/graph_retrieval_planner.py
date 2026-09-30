@@ -169,6 +169,7 @@ def _graph_planner_prompt(request: GraphPlannerRequest) -> str:
         return json.dumps({
             "requirements": [q.payload() for q in request.graph_queries],
             "user_message": request.user_message,
+            **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
             "aggregation": {"kind": request.aggregation_kind, "target": request.aggregation_target},
             "max_hops_hint": request.max_hops_hint,
             "repair_diagnostic": request.repair_diagnostic,
@@ -208,6 +209,7 @@ def _graph_planner_prompt(request: GraphPlannerRequest) -> str:
         },
         "graph_catalog": _GRAPH_CATALOG,
         "user_message": request.user_message,
+        **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
     }
     if request.repair_diagnostic is not None:
         payload["repair"] = {

@@ -158,7 +158,7 @@ function assertWorldScopedFeed(
 
 export function createOwnerManualPost(
   worldId: string,
-  data: { title: string; body: string },
+  data: { title: string; body: string; attachment_asset_id?: string },
   idempotencyKey: string,
   ownerWorldCharacterId: string,
 ): Promise<ManualSocialWriteRead> {

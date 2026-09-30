@@ -13,9 +13,9 @@ export function useRuntimeMediaUrl(sourceUrl: string | null | undefined) {
   const resolvedSource = source ? resolveRuntimeMediaUrl(source) : "";
   const runtime = getRuntimeConfig();
   const requiresAuthenticatedFetch = Boolean(
-    runtime?.launchToken &&
+    source.startsWith("/api/v1/media/assets/") || (runtime?.launchToken &&
       (resolvedSource === `${runtime.apiBaseUrl}/media` ||
-        resolvedSource.startsWith(`${runtime.apiBaseUrl}/media/`)),
+        resolvedSource.startsWith(`${runtime.apiBaseUrl}/media/`))),
   );
   const [objectUrl, setObjectUrl] = useState<{
     source: string;

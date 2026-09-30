@@ -492,3 +492,9 @@ Next와 static이 공유하는 제품 화면이다. Chat의 thread key와 근거
 `browser-tests/refactor-lifecycle.spec.ts`는 실제 정적 화면에서 scope 전환 중 늦은
 응답, child close 명령, host 재시작 후 종료 UI의 초기화를 검사한다. 이 fixture 검증은
 실제 provider 호출이나 설치 데이터의 기억 정리 성공을 의미하지 않는다.
+
+## SNS·Chat 이미지 화면 (2026-09-30)
+
+`features/media`는 이미지 설정·사용량·선택/미리보기·생성 상태와 자신의 transport/types를 소유한다. Chat와 Social이 Media feature를 직접 import하지 않도록 `composition/screens/world-chat-screen.tsx`와 `world-app.tsx`가 이미지 picker/status를 view slot으로 연결한다. Chat/Social API는 각 소유자가 `attachment_asset_id`를 전달하며 원래 글/메시지 본문을 유지한다.
+
+비공개 이미지 URL은 `useRuntimeMediaUrl`에서 현재 runtime의 인증된 요청으로 blob을 가져온다. Next production과 static export는 동일 컴포넌트와 계약을 사용한다. 인식 불가 안내·미리보기 유지·사용자의 명시적 첨부 제거, 저장된 모델별 참조 OFF와 설정 revision 충돌은 실제 Backend 상태에 따라 표시한다. 원래 채팅/SNS 기능과 기존 이미지 Provider 데이터는 새 화면 추가만으로 제거하지 않는다.

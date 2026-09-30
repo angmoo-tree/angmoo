@@ -34,13 +34,14 @@ class SocialLane:
 
     def ports(self):
         return LanePorts(self.load, self.select, self.recall, self.context, self.plan,
-            self.validate, self.write, self.execute, self.settle, self.finalize, self.guard)
+            self.validate, self.write, self.execute, self.settle, self.finalize, self.guard,
+            prepare_recall=self.prepare_recall)
 
     async def guard(self, state):
         await self.scope_guard(state)
         # Committed effects can change affordances, so do not recheck old target
         # snapshots after Execute. Settlement validates its own source receipts.
-        if state.get("stage") in {"TargetSelector", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
+        if state.get("stage") in {"TargetSelector", "PrepareImageRecall", "RecallSelected", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
             selected = {s["target_id"] for s in state.get("selections", [])}
             for candidate in state.get("candidates", []):
                 if selected and candidate["target_id"] not in selected:
@@ -49,6 +50,9 @@ class SocialLane:
                     continue  # Reuse committed effects; scope authorization still ran.
                 current_relation = self.relationship(candidate.get("counterpart_id"))
                 previous_relation = candidate.get("relationship", {})
+                from app.runtime.media.social_context import assert_current
+                frozen_images = state.get("image_recall_snapshots", {}).get(candidate["target_id"], {}).get("images", candidate.get("images", []))
+                assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
                 if any(current_relation.get(k) != previous_relation.get(k) for k in ("content_hash", "status")):
                     raise ValueError("activity_relationship_changed")
                 for identifier, revision in candidate["source_revisions"].items():
@@ -90,9 +94,26 @@ class SocialLane:
     def delivery(self, state):
         return None
 
+    async def prepare_recall(self, state):
+        from app.runtime.media.social_context import prepare_selected, freeze_query
+        snapshots = dict(state.get("image_recall_snapshots", {}))
+        by_id = {candidate["target_id"]: candidate for candidate in self.selected(state)}
+        queries = []
+        for query in state["queries"]:
+            target = query["target_id"]
+            if target not in snapshots:
+                images = await prepare_selected(self.ctx.db, self.ctx.user_id, by_id[target])
+                snapshots[target] = freeze_query(query, images)
+            queries.append(snapshots[target]["final_query"])
+        await self.guard({**state, "image_recall_snapshots": snapshots, "stage": "RecallSelected"})
+        return {"image_recall_snapshots": snapshots}
+
     async def recall(self, state):
+        snapshots = state.get("image_recall_snapshots", {})
+        queries = [{**snapshots[q["target_id"]]["final_query"], "image_base_text": snapshots[q["target_id"]]["base_query"]["query"],
+            "image_hint": snapshots[q["target_id"]]["image_hint"]} if q["target_id"] in snapshots else q for q in state["queries"]]
         return split_validation(await self.retriever.selected(activity_id=state["identity"]["activity_id"],
-            targets=self.selected(state), queries=state["queries"]))
+            targets=self.selected(state), queries=queries))
 
     async def context(self, state):
         refreshed = {}
@@ -107,6 +128,7 @@ class SocialLane:
         manifest = prepare_sources(self.ctx.db, actor=self.actor,
             post_ids=[ref for c in candidates for ref in c["source_ids"]])
         return {**refreshed, "decision_context": plain({**state["shared_context"],
+            "images": {target: value["images"] for target, value in state.get("image_recall_snapshots", {}).items()},
             "memories": context_memories(refreshed.get("memories", state["memories"])),
             "metric_sources": source_prompt(manifest), "source_manifest": manifest})}
 

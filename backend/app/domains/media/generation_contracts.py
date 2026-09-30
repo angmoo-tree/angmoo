@@ -83,6 +83,7 @@ class EffectiveReference:
     asset_id: str | None = None
     digest: str | None = None
     reason: str | None = None
+    revision: int | None = None
 
 
 @dataclass(frozen=True)

@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -618,6 +618,29 @@ def _seed_supported_predecessor(
                 )
                 from app.models import Base
                 from sqlalchemy.schema import CreateIndex, CreateTable
+
+                # Reconstruct only the isolated fixture's frozen predecessor;
+                # production generations use the copy-on-write forward migration.
+                from app.runtime.persistence.sqlite_schema import build_sqlite_v25_metadata
+                from app.runtime.migrations.sqlite_versions.images_v26 import NEW_TABLES, REBUILT_TABLES
+                if source_version < 26:
+                    historical_metadata = build_sqlite_v25_metadata()
+                    sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = ON")
+                    try:
+                        for name in sorted(REBUILT_TABLES):
+                            historical = historical_metadata.tables[name]
+                            previous = name + "_image_fixture"
+                            sql_connection.exec_driver_sql(f'ALTER TABLE "{name}" RENAME TO "{previous}"')
+                            sql_connection.execute(CreateTable(historical))
+                            columns = ", ".join(c.name for c in historical.columns)
+                            sql_connection.exec_driver_sql(f'INSERT INTO "{name}" ({columns}) SELECT {columns} FROM "{previous}"')
+                            sql_connection.exec_driver_sql(f'DROP TABLE "{previous}"')
+                            for index in historical.indexes:
+                                sql_connection.execute(CreateIndex(index))
+                        for name in sorted(NEW_TABLES):
+                            sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
+                    finally:
+                        sql_connection.exec_driver_sql("PRAGMA legacy_alter_table = OFF")
 
                 from app.runtime.persistence.sqlite_schema import (
                     ACTIVITY_V19_TABLES,

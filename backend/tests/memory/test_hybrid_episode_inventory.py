@@ -21,7 +21,7 @@ def test_current_inventory_preserves_predecessor_and_runtime_contract():
     assert value["predecessor"]["sha256"] == module.PREDECESSOR_SHA256
     # Durable Topic request names advance the live schema to 25;
     # the immutable predecessor digest above still protects historical evidence.
-    assert value["schema"]["embedded_schema_version"] == 25
+    assert value["schema"]["embedded_schema_version"] == 26
     assert value["bounds"]["chat_new_turns"] == 50
     assert value["bounds"]["thought_characters"] == 280
     assert value["defaults"]["MEMORY_RECALL_REPRESENTATION"] == "episode_v1"

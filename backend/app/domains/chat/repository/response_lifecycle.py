@@ -738,6 +738,7 @@ def _validate_evidence_inspector_snapshot(
                 "canonical_source",
                 "graph_relationship",
                 "memory_item",
+                "image_asset",
             }
             or (
                 locator.get("source_revision") is not None
@@ -747,6 +748,13 @@ def _validate_evidence_inspector_snapshot(
                     or len(locator["source_revision"]) > 128
                 )
             )
+        ):
+            raise GenerationContractError("response_evidence_inspector_invalid")
+
+        if locator is not None and locator.get("kind") == "image_asset" and (
+            item.get("kind") != "current_image_analysis" or item.get("axes") != ["image"]
+            or locator.get("source_type") != "actual_image_analysis"
+            or not locator.get("source_revision")
         ):
             raise GenerationContractError("response_evidence_inspector_invalid")
 

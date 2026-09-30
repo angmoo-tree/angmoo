@@ -21,6 +21,7 @@ class OwnerManualPostWrite(BaseModel):
 
     title: str = Field(min_length=1, max_length=160)
     body: str = Field(min_length=1, max_length=4000)
+    attachment_asset_id: str | None = Field(default=None, min_length=1, max_length=64)
 
     @field_validator("title", "body")
     @classmethod
@@ -52,6 +53,7 @@ class ManualSocialWritePostRead(BaseModel):
     reply_to_post_id: str | None
     created_at: datetime
     can_owner_reply: bool = False
+    media: list[dict] = Field(default_factory=list, max_length=1)
     author_profile_capability: Literal["available", "unavailable"] = "available"
 
 

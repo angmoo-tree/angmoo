@@ -4,6 +4,7 @@ import { MessageCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import {
   type FormEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -28,12 +29,15 @@ type Props = {
   ownerActor: SocialOwnerActor | null;
   postId?: string;
   worldId: string;
+  renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void }) => ReactNode;
+  renderImageStatus?: (postId: string) => ReactNode;
 };
 
 type PendingPost = {
   idempotencyKey: string;
   title: string;
   body: string;
+  assetId?: string;
 };
 
 type PendingReply = {
@@ -145,6 +149,7 @@ function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
     timeLabel: formatDate(post.created_at),
     title: post.post_type === "reply" ? "" : post.title,
     body: post.body,
+    media: post.media,
   };
 }
 
@@ -171,7 +176,7 @@ function aggregateManualPostActions(
   return actions;
 }
 
-export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
+export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, renderImageStatus }: Props) {
   const routeKey = `${worldId}:${postId ?? "feed"}`;
   const [loadState, setLoadState] = useState<FeedLoadState>({
     key: routeKey,
@@ -182,6 +187,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
   const [notice, setNotice] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [attachment, setAttachment] = useState<{ id: string; url: string; allowed: boolean } | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
   const [replyBody, setReplyBody] = useState("");
   const pendingPostRef = useRef<PendingPost | null>(null);
   const pendingRepliesRef = useRef(new Map<string, PendingReply>());
@@ -263,15 +270,16 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
     if (!ownerActor) return;
     const nextTitle = title.trim();
     const nextBody = body.trim();
-    if (!nextTitle || !nextBody || busy) return;
+    if (!nextTitle || !nextBody || busy || imageBusy) return;
     const previous = pendingPostRef.current;
     const pending =
-      previous?.title === nextTitle && previous.body === nextBody
+      previous?.title === nextTitle && previous.body === nextBody && previous.assetId === attachment?.id
         ? previous
         : {
             idempotencyKey: newIdempotencyKey("post"),
             title: nextTitle,
             body: nextBody,
+            assetId: attachment?.id,
           };
     pendingPostRef.current = pending;
     setBusy(true);
@@ -280,13 +288,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
     try {
       const result = await createOwnerManualPost(
         worldId,
-        { title: pending.title, body: pending.body },
+        { title: pending.title, body: pending.body, ...(pending.assetId ? { attachment_asset_id: pending.assetId } : {}) },
         pending.idempotencyKey,
         ownerActor.world_character_id,
       );
       pendingPostRef.current = null;
       setTitle("");
       setBody("");
+      setAttachment(null);
       setNotice(
         result.replayed
           ? "같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요."
@@ -425,8 +434,9 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
               value={body}
             />
             <div className={styles.composerSubmit}>
+              {renderImagePicker?.({ value: attachment, disabled: busy, onChange: setAttachment, onBusyChange: setImageBusy })}
               <Button
-                disabled={!title.trim() || !body.trim()}
+                disabled={!title.trim() || !body.trim() || imageBusy}
                 loading={busy}
                 loadingLabel="저장 중"
                 type="submit"
@@ -469,13 +479,13 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
                 ? worldCharacterProfileRoute(worldId, post.author_world_character_id)
                 : undefined;
             return (
-              <SocialPostRow
+              <div key={post.id}><SocialPostRow
                 actions={aggregateManualPostActions(post, detailHref)}
                 authorHref={authorHref}
                 href={detailHref}
                 key={post.id}
                 post={presentManualPost(post)}
-              />
+              />{renderImageStatus?.(post.id)}</div>
             );
           })}
         </div>
@@ -499,6 +509,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId }: Props) {
             post={presentManualPost(detailRoot)}
             variant="detail"
           />
+          {renderImageStatus?.(detailRoot.id)}
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
             <h3 id="world-reply-heading">대꾸 {detailRoot.reply_count}</h3>
             {detailReplies.length > 0 ? (

@@ -289,7 +289,7 @@ class SqliteMemoryRecallIndex:
             raise ValueError("fts_policy_requires_bounded_result")
         if not 1 <= query.limit <= 50:
             raise ValueError("Memory recall limit must be between 1 and 50")
-        normalized = normalize_search_text(query.text, max_chars=1_000)
+        normalized = normalize_search_text(query.image_base_text or query.text, max_chars=1_000)
         if not normalized or not query.kinds:
             observe("search", method="fts5", executed=False, reason="empty_search_text", returned=0)
             return ()

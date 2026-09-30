@@ -30,6 +30,8 @@ def _create_tables(engine) -> None:
     models.UserMessagePreference.__table__.create(engine)
     models.MessageThread.__table__.create(engine)
     models.MessageMessage.__table__.create(engine)
+    from app.domains.chat.models import MessageAttachment
+    MessageAttachment.__table__.create(engine)
 
 
 def _user(user_id: str) -> models.User:

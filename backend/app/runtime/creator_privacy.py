@@ -8,6 +8,8 @@ from app.domains.worlds.models import OwnerDefaultWorld
 
 
 def delete_creator_private_data(db, *, character_ids, owner_id=None):
+    from app.runtime.media.privacy import scrub
+    scrub(db, character_ids=character_ids, owner_id=owner_id)
     draft_ids = list(db.scalars(select(CharacterRegistrationReceipt.draft_id).where(
         CharacterRegistrationReceipt.character_id.in_(character_ids))))
     source_condition = (CharacterCardSource.owner_id == owner_id if owner_id is not None

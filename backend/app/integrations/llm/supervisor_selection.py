@@ -136,6 +136,7 @@ def selection_prompt(request):
         "today_sns_activity": request.today_sns_context,
         "social_context": None if request.social_snapshot is None else request.social_snapshot.prompt_view(),
         "user_message": request.user_message,
+        **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
         "repair_validation_code": request.repair_diagnostic,
     }, ensure_ascii=False)
 

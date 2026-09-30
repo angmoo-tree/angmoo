@@ -35,6 +35,9 @@ if (-not (Test-Path -LiteralPath $loggingConfig -PathType Leaf)) {
     throw "Angmoo logging configuration resource is missing"
 }
 $loggingConfigData = "$loggingConfig;."
+$novelResources = "$(Join-Path $backendRoot 'app\integrations\novelai_resources');app/integrations/novelai_resources"
+$imageCatalogData = "$(Join-Path $backendRoot 'app\integrations\image_catalog.json');app/integrations"
+$comfySampleData = "$(Join-Path $backendRoot 'app\domains\media\samples');app/domains/media/samples"
 $distRoot = Join-Path $WorkRoot "dist"
 $buildRoot = Join-Path $WorkRoot "build"
 $specRoot = Join-Path $WorkRoot "spec"
@@ -65,6 +68,9 @@ $vec1ResourceData = "$vec1ResourceRoot;app/runtime/resources/vec1"
     --add-data $ladybugManifestData `
     --add-data $sqliteDeltaData `
     --add-data $loggingConfigData `
+    --add-data $novelResources `
+    --add-data $imageCatalogData `
+    --add-data $comfySampleData `
     --add-data $vec1ResourceData `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `

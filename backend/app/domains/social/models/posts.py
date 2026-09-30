@@ -117,8 +117,11 @@ class PostMedia(Base):
     media_type: Mapped[str] = mapped_column(String(20), nullable=False, default="image")
     url: Mapped[str] = mapped_column(String(500), nullable=False)
     alt_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    model: Mapped[str] = mapped_column(String(120), nullable=False)
-    prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    model: Mapped[str | None] = mapped_column(String(120))
+    prompt_hash: Mapped[str | None] = mapped_column(String(64))
+    asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id"), unique=True)
+    source_kind: Mapped[str] = mapped_column(String(20), nullable=False, default="legacy", server_default="legacy")
+    generation_intent_id: Mapped[str | None] = mapped_column(ForeignKey("post_image_intents.id"))
     byte_size: Mapped[int] = mapped_column(Integer, nullable=False)
     width: Mapped[int] = mapped_column(Integer, nullable=False)
     height: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -135,8 +138,13 @@ class PostImageGenerationJob(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     post_id: Mapped[str] = mapped_column(
-        ForeignKey("posts.id"), nullable=False, unique=True, index=True
+        ForeignKey("posts.id"), nullable=False, index=True
     )
+    intent_id: Mapped[str | None] = mapped_column(ForeignKey("post_image_intents.id"), unique=True)
+    lease_token: Mapped[str | None] = mapped_column(String(64))
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    provider_receipt: Mapped[str | None] = mapped_column(String(160))
+    result_asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id"))
     character_id: Mapped[str] = mapped_column(
         ForeignKey("characters.id"), nullable=False, index=True
     )

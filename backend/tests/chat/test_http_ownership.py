@@ -30,7 +30,16 @@ def test_both_factories_register_the_same_actual_chat_services(module_name):
         "evidence_service",
     ):
         getter = getattr(dependencies, "get_" + name)
-        assert getter(request) is getattr(message_composition, name)
+        service = getter(request)
+        if name in {"generation_service", "evidence_service"}:
+            assert service is getattr(app.state, "chat_" + name)
+            assert type(service) is type(getattr(message_composition, name))
+            assert service.thread_service is message_composition.thread_service
+        else:
+            assert service is getattr(message_composition, name)
+    assert app.state.chat_generation_service.settings_service is message_composition.settings_service
+    assert app.state.chat_generation_service.workflows is message_composition.generation_workflows
+    assert app.state.chat_generation_service.images.media is app.state.media_runtime
     assert dependencies.get_current_user is get_current_user
     assert dependencies.get_db is get_db
     assert world_chat.get_current_user is get_current_user

@@ -195,6 +195,48 @@
       "hosted_source": null,
       "local_target": null,
       "scope": "remote font, unreviewed hosted asset, and sibling-repository runtime dependency"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/generation-settings.tsx",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/generation-status.tsx",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/image-picker.tsx",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/interpretation-settings.tsx",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/usage-settings.tsx",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
+    },
+    {
+      "classification": "LOCAL",
+      "hosted_blob_oid": null,
+      "hosted_source": null,
+      "local_target": "frontend/src/features/media/components/media-settings.module.css",
+      "scope": "Locally authored SNS and Chat image settings, upload, usage and durable state using semantic primitives"
     }
   ],
   "browser_harness": {

@@ -1,0 +1,195 @@
+{
+  "workflow": {
+    "prompt": {
+      "1": {
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": {
+          "ckpt_name": "choose-installed-model.safetensors"
+        }
+      },
+      "2": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "",
+          "clip": [
+            "1",
+            1
+          ]
+        }
+      },
+      "3": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": "",
+          "clip": [
+            "1",
+            1
+          ]
+        }
+      },
+      "4": {
+        "class_type": "KSampler",
+        "inputs": {
+          "model": [
+            "1",
+            0
+          ],
+          "positive": [
+            "2",
+            0
+          ],
+          "negative": [
+            "3",
+            0
+          ],
+          "latent_image": [
+            "5",
+            0
+          ],
+          "seed": 0,
+          "steps": 20,
+          "cfg": 7.0,
+          "sampler_name": "euler",
+          "scheduler": "normal",
+          "denoise": 1.0
+        }
+      },
+      "5": {
+        "class_type": "VAEEncode",
+        "inputs": {
+          "pixels": [
+            "9",
+            0
+          ],
+          "vae": [
+            "1",
+            2
+          ]
+        }
+      },
+      "6": {
+        "class_type": "VAEDecode",
+        "inputs": {
+          "samples": [
+            "4",
+            0
+          ],
+          "vae": [
+            "1",
+            2
+          ]
+        }
+      },
+      "7": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "images": [
+            "6",
+            0
+          ],
+          "filename_prefix": "Angmoo"
+        }
+      },
+      "8": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "uploaded-by-angmoo.png"
+        }
+      },
+      "9": {
+        "class_type": "ImageScale",
+        "inputs": {
+          "image": [
+            "8",
+            0
+          ],
+          "upscale_method": "lanczos",
+          "width": 512,
+          "height": 512,
+          "crop": "disabled"
+        }
+      }
+    },
+    "bindings": {
+      "positive": {
+        "node_id": "2",
+        "input_name": "text"
+      },
+      "negative": {
+        "node_id": "3",
+        "input_name": "text"
+      },
+      "width": {
+        "node_id": "9",
+        "input_name": "width"
+      },
+      "height": {
+        "node_id": "9",
+        "input_name": "height"
+      },
+      "model": {
+        "node_id": "1",
+        "input_name": "ckpt_name"
+      },
+      "steps": {
+        "node_id": "4",
+        "input_name": "steps"
+      },
+      "cfg": {
+        "node_id": "4",
+        "input_name": "cfg"
+      },
+      "seed": {
+        "node_id": "4",
+        "input_name": "seed"
+      },
+      "sampler": {
+        "node_id": "4",
+        "input_name": "sampler_name"
+      },
+      "scheduler": {
+        "node_id": "4",
+        "input_name": "scheduler"
+      },
+      "denoise": {
+        "node_id": "4",
+        "input_name": "denoise"
+      },
+      "reference": {
+        "node_id": "8",
+        "input_name": "image"
+      }
+    },
+    "output_node": "7",
+    "reference_required": true
+  },
+  "values": {
+    "width": 512,
+    "height": 512,
+    "model": "choose-installed-model.safetensors",
+    "steps": 20,
+    "cfg": 7.0,
+    "seed": 0,
+    "sampler": "euler",
+    "scheduler": "normal",
+    "denoise": 1.0
+  },
+  "dependencies": {
+    "nodes": [
+      "CLIPTextEncode",
+      "CheckpointLoaderSimple",
+      "ImageScale",
+      "KSampler",
+      "LoadImage",
+      "SaveImage",
+      "VAEDecode",
+      "VAEEncode"
+    ],
+    "models": [
+      "사용자가 서버에 준비한 호환 checkpoint"
+    ],
+    "reference_method": "image-to-image",
+    "source": "Angmoo independently authored API graph",
+    "docs": "https://docs.comfy.org/development/comfyui-server/comms_routes"
+  }
+}

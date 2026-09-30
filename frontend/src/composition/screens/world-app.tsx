@@ -16,6 +16,8 @@ import { WorldCharacterProfile } from "@/composition/screens/world-character-pro
 import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
+import { ImagePicker } from "@/features/media/components/image-picker";
+import { GenerationStatus } from "@/features/media/components/generation-status";
 import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -249,6 +251,8 @@ function WorldSection({
         ownerActor={ownerActor}
         postId={postId}
         worldId={worldId}
+        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} />}
+        renderImageStatus={postId => <GenerationStatus postId={postId} />}
       />
     );
   }

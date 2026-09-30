@@ -34,6 +34,7 @@ export type MessageMessageRead = {
   thread_id: string;
   role: "user" | "assistant";
   content: string;
+  attachment?: { asset_id: string; url: string; analysis_state: "pending" | "recognized" } | null;
   model: string | null;
   status: "ok" | "error";
   error_code: string | null;

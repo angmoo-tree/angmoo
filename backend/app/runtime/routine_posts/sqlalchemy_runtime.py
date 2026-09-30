@@ -556,9 +556,11 @@ async def _run_routine_post_runtime(
     opening_claim = prepared.opening_claim
     claimed_manual_source_ids = prepared.claimed_manual_source_ids
     execution_signature, tracker = prepared.execution_signature, prepared.tracker
+    from app.runtime.media.composition import image_output_enabled
     try:
         generation = validate_routine_generation(
-            await (provider or DirectRoutinePostProvider(thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1")).generate(
+            await (provider or DirectRoutinePostProvider(thought_enabled=settings.ACTIVITY_THOUGHT_POLICY == "thought_v1",
+                image_enabled=image_output_enabled(db, resident_context.character.id))).generate(
                 resident_context=resident_context,
                 routine_context=context,
                 beat=beat,
@@ -683,6 +685,11 @@ def publish_routine_activity(resident_context, *, prepared, generation):
             post.joint_activity_id = context.item.joint_activity_id
             post.activity_episode_id = context.episode.id
             post.activity_beat_id = beat.id
+            from app.runtime.media.binding import current as current_media_runtime
+            media_runtime = current_media_runtime()
+            if media_runtime is not None:
+                media_runtime.admit_post(db, post=post, owner_id=resident_context.user_id,
+                    character_id=resident_context.character.id, draft=generation.draft)
             event_result = social_event_runtime.record_successful_social_event(
                 db,
                 world_id=context.world.id,

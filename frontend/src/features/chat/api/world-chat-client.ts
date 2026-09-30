@@ -127,7 +127,7 @@ export async function updateWorldChatThreadModel(
 export async function sendWorldChatMessage(
   worldId: string,
   threadId: string,
-  data: { content: string; idempotency_key: string },
+  data: { content: string; idempotency_key: string; attachment_asset_id?: string },
 ): Promise<WorldChatMessageAcceptRead> {
   const payload = await requestWorldChatApi<WorldChatMessageAcceptRead>(
     worldChatApiPath(

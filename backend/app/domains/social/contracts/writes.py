@@ -43,6 +43,7 @@ class OwnerPostCommand:
     idempotency_key: str
     title: str
     body: str
+    attachment_asset_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,7 @@ class SocialPostSnapshot:
     reply_to_post_id: str | None
     created_at: datetime
     can_owner_reply: bool = False
+    media: tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)

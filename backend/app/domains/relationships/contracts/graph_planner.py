@@ -72,8 +72,11 @@ class GraphPlannerRequest:
     max_hops_hint: int = 3
     repair_diagnostic: str | None = None
     graph_queries: tuple[GraphQueryRequirement, ...] = ()
+    image_context: str | None = None
 
     def __post_init__(self) -> None:
+        if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):
+            raise GraphPlanContractError("graph_image_context_invalid")
         if not self.request_id or len(self.request_id) > 128:
             raise GraphPlanContractError("graph_planner_request_id_invalid")
         if not self.envelope_version or len(self.envelope_version) > 64:

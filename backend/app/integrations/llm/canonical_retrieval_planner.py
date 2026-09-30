@@ -193,6 +193,7 @@ def _canonical_planner_prompt(request: CanonicalPlannerRequest) -> str:
         },
         "canonical_catalog": _CANONICAL_CATALOG,
         "user_message": request.user_message,
+        **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
     }
     if request.repair_diagnostic is not None:
         diagnostic = canonical_planner_diagnostic(

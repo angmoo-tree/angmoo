@@ -9,6 +9,8 @@ def register_models() -> MetaData:
     import app.domains.characters.models  # noqa: F401 - explicit ORM registration
     import app.domains.chat.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
+    import app.domains.identity.models_media  # noqa: F401
+    import app.domains.media.models  # noqa: F401
     import app.domains.local_bot.models  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.consolidation_request  # noqa: F401
     import app.domains.memory.models.batch  # noqa: F401 - explicit ORM registration
@@ -30,6 +32,7 @@ def register_models() -> MetaData:
     import app.domains.social.models.topics  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.manual_writes  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.posts  # noqa: F401 - explicit ORM registration
+    import app.domains.social.models.image_intents  # noqa: F401
     import app.domains.social.models.subjective_context  # noqa: F401 - explicit ORM registration
     import app.domains.social.models.activity_thought  # noqa: F401 - explicit ORM registration
     import app.domains.tree.models  # noqa: F401 - explicit ORM registration

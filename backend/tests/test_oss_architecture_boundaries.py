@@ -210,6 +210,9 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "domains/chat/service/generation.py": {"stream_world_response"},
         # Authorized WORLD_CHARACTER_SETUP_LLM material is revealed only at transport.
         "domains/routines/client.py": {"generate_daily_preparation"},
+        # Scoped media material is revealed only for the selected physical transport.
+        "domains/media/service/interpretation.py": {"_execute"},
+        "runtime/media/composition.py": {"validate_connection", "_prepare"},
     }
     observed: dict[str, set[str]] = {}
 

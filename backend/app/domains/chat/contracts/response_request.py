@@ -58,6 +58,7 @@ class RetrievalOutcome(StrEnum):
 class RetrievalAxis(StrEnum):
     CANONICAL = "canonical"
     GRAPH = "graph"
+    IMAGE = "image"
 
 
 class DegradedReason(StrEnum):

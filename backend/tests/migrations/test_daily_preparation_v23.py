@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.schema import CreateTable, CreateIndex
 from app.runtime.persistence.model_registration import register_models
-from app.runtime.persistence.sqlite_schema import build_sqlite_baseline_metadata, build_sqlite_v22_metadata, create_schema_version_table, sqlite_schema_contract_digest
+from app.runtime.persistence.sqlite_schema import build_sqlite_v25_metadata, build_sqlite_v22_metadata, create_schema_version_table, sqlite_schema_contract_digest
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.migrations.sqlite_versions import daily_preparation_v23 as migration
 from tests.routines.test_daily_activity_runtime import _seed, _prepare, _utc
@@ -13,7 +13,7 @@ from tests.routines.test_daily_activity_runtime import _seed, _prepare, _utc
 def test_populated_v22_to_v23_preserves_history(tmp_path):
     engine = create_engine(f"sqlite:///{tmp_path / 'historical.sqlite3'}")
     register_models()
-    build_sqlite_baseline_metadata().create_all(engine)
+    build_sqlite_v25_metadata().create_all(engine)
     with Session(engine) as db:
         _, ready, _ = _seed(db)
         old = _prepare(db, ready, now=_utc(datetime(2026, 9, 28, 10)))

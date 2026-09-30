@@ -13,6 +13,7 @@ from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseProfile,
 )
 from app.domains.chat.contracts.evidence_bundle import EvidenceBundle
+from app.domains.chat.contracts.image_evidence import ChatImageEvidence
 from app.domains.chat.contracts.generation_lifecycle import GenerationContractError
 from app.domains.chat.contracts.response_request import ResponseRequestRecord
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
@@ -65,8 +66,11 @@ class ResponseWorkflowCommand:
     recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
     social_snapshot: SocialContextSnapshot | None = None
     name_binding_validator: Callable[[], None] | None = None
+    image_evidence: ChatImageEvidence | None = None
 
     def __post_init__(self) -> None:
+        if self.image_evidence is not None and (self.image_evidence.owner_id != self.preflight.owner_id or self.image_evidence.thread_id != self.preflight.thread_id):
+            raise RetrievalContractError("chat_image_evidence_scope_mismatch")
         if not isinstance(self.recall_mode, ChatRecallMode):
             raise RetrievalContractError("chat_recall_mode_invalid")
         if self.social_snapshot is not None and (
