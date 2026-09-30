@@ -17,7 +17,7 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.models_media import MediaCredential
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service import media_credentials
-from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions
+from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, select_comfy_workflow, MODEL_CATALOG
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.service.assets import AssetService, normalize_pixels
 from app.domains.media.models import MediaAsset
@@ -26,7 +26,8 @@ from app.domains.routines.service.tick_schedule import APP_TIMEZONE
 from app.domains.social.service.image_intent_generation import GenerationWorker, admit, source_revision
 from app.domains.worlds.models import World
 from app.integrations.comfy_images import ComfyImageClient
-from app.integrations.image_api import ImageApiClient, endpoint_parameters, validate_api_options
+from app.integrations.image_api import ImageApiClient
+from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options, validate_reference_metadata
 from app.integrations.llm.image_interpretation import GeminiImageInterpreter
 from app.integrations.novelai_images import NovelImageClient
 from app.runtime.media import binding
@@ -78,12 +79,60 @@ class MediaRuntime:
     def read_generation(self, db, user, character_id):
         authorize_scope(db, user.id, "character", character_id)
         from app.domains.characters.service.generation_settings import read_settings
-        return read_settings(db, user, character_id, limits=self.limits)
+        return self._generation_view(db, user, character_id, read_settings(db, user, character_id, limits=self.limits))
 
     def write_generation(self, db, user, character_id, data, *, validated_connection=None):
         authorize_scope(db, user.id, "character", character_id)
         from app.domains.characters.service.generation_settings import write_settings
-        return write_settings(db, user, character_id, data, assets=self.assets, limits=self.limits, validated_connection=validated_connection)
+        if data.provider == "novelai" and data.auto_enabled:
+            self._require_novel_validation()
+        saved = write_settings(db, user, character_id, data, assets=self.assets, limits=self.limits, validated_connection=validated_connection)
+        return self._generation_view(db, user, character_id, saved)
+
+    def _require_novel_validation(self):
+        status = self._novel_validation()
+        if not status["exact_verified"]:
+            raise ImagePreparationError("novelai_prompt_validation_unverified")
+
+    def _novel_validation(self):
+        return (self.clients.get("novelai") or NovelImageClient()).prompt_validation()
+
+    def _generation_view(self, db, user, character_id, saved):
+        profile = saved["active_profile"]
+        preferred = bool(profile.get("reference_enabled"))
+        effective = bool(profile.get("reference_effective"))
+        options = profile.get("options", {})
+        forced = saved["provider"] == "novelai" and options.get("mode") == "opus_free"
+        unsupported = saved["provider"] in {"nanogpt", "openrouter"} and not MODEL_CATALOG.get(f"{saved['provider']}:{saved['model']}", (None, None, False))[2]
+        status, reason = ("forced_off", "opus_free") if forced else ("forced_off", "reference_not_supported") if unsupported else ("off", "user_disabled") if not preferred else ("missing", "source_missing")
+        reference = EffectiveReference(preferred)
+        if effective and not forced and not unsupported:
+            try:
+                reference = self._reference(db, user.id, db.get(Character, character_id),
+                    db.get(AgentImageGenerationSetting, character_id), True, materialize=False)
+                if reference.source != "none":
+                    status, reason = "available", None
+            except (ImagePreparationError, InvalidProfileMediaError, OSError, ValueError):
+                status, reason = "invalid", "reference_source_invalid"
+        has_reference = status == "available"
+        path = "reference" if has_reference else "text"
+        if saved["provider"] == "comfyui":
+            try:
+                workflow = select_comfy_workflow(ComfyOptions.model_validate(options), has_reference=has_reference)
+                path = "reference" if has_reference and "reference" in workflow.bindings else "text"
+            except (ImagePreparationError, ValueError):
+                path = "unavailable"
+                reason = "comfy_reference_or_text_path_required"
+        if status == "invalid":
+            path = "unavailable"
+        if not saved["provider"]:
+            path = "unconfigured"
+        validation = self._novel_validation() if saved["provider"] == "novelai" else None
+        return {**saved, "reference_state": {"preferred": preferred, "applied": has_reference,
+            "source": reference.source, "status": status, "reason": reason, "generation_path": path,
+            "scene_only": path == "text" and not saved["appearance"].strip() and not saved["style"].strip()},
+            "prompt_validation": validation,
+            "effective_auto_enabled": saved["auto_enabled"] and (validation is None or validation["exact_verified"])}
 
     def usage(self, db, owner_id):
         from app.domains.social.service.generation_usage import read_usage
@@ -116,7 +165,9 @@ class MediaRuntime:
             models.append({"provider": provider, "id": model, "reference_supported": reference,
                 "parameters": endpoint_parameters(provider, endpoint) if endpoint else {},
                 "pricing": endpoint.get("pricing") if endpoint else None,
-                "availability": "requires_connection_check", "negative_supported": provider == "novelai"})
+                "availability": "prompt_validation_unverified" if provider == "novelai" and not self._novel_validation()["exact_verified"] else "requires_connection_check",
+                "prompt_validation": self._novel_validation() if provider == "novelai" else None,
+                "negative_supported": provider == "novelai"})
         return {"models": models, "captured_at": source.get("captured_at"), "quota_timezone": str(APP_TIMEZONE),
             "max_images": 1, "upload_limit_bytes": 10 * 1024 * 1024}
 
@@ -152,7 +203,7 @@ class MediaRuntime:
         await self.interpretation.close()
         binding.unregister(self)
 
-    def _reference(self, db, owner_id, character, setting, preferred):
+    def _reference(self, db, owner_id, character, setting, preferred, *, materialize=True):
         # Forced OFF does not even inspect card/profile files.
         if not preferred:
             return EffectiveReference(False, reason="disabled")
@@ -164,9 +215,11 @@ class MediaRuntime:
         card = db.scalar(select(CharacterCardSource).where(CharacterCardSource.owner_id == owner_id,
             CharacterCardSource.character_id == character.id, CharacterCardSource.source_format == "png").order_by(CharacterCardSource.created_at.desc()))
         if card is not None:
-            asset = self._reference_asset(db, owner_id, character.id, "image/png", card.source_bytes)
-            setting.card_asset_id = asset.id
-            return EffectiveReference(True, "card", asset.id, asset.content_hash, revision=asset.revision)
+            reference = self._reference_asset(db, owner_id, character.id, "image/png", card.source_bytes,
+                source="card", materialize=materialize)
+            if materialize:
+                setting.card_asset_id = reference.asset_id
+            return reference
         if character.avatar_url:
             prefix = getattr(self.settings, "media_url_path", "/media").rstrip("/") + "/"
             url = character.avatar_url
@@ -184,30 +237,37 @@ class MediaRuntime:
             content = path.read_bytes()
             with Image.open(BytesIO(content)) as image:
                 mime = Image.MIME.get(image.format)
-            asset = self._reference_asset(db, owner_id, character.id, mime, content)
-            return EffectiveReference(True, "profile", asset.id, asset.content_hash, revision=asset.revision)
+            return self._reference_asset(db, owner_id, character.id, mime, content,
+                source="profile", materialize=materialize)
         return EffectiveReference(True, reason="source_missing")
 
-    def _reference_asset(self, db, owner_id, character_id, mime, content):
+    def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize):
         pixels, _, _ = normalize_pixels(mime, content, max_bytes=10 * 1024 * 1024)
         digest = hashlib.sha256(pixels).hexdigest()
         row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == "character",
             MediaAsset.scope_id == character_id, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
         if row:
             self.assets.read(db, owner_id=owner_id, asset_id=row.id, digest=digest)
-            return row
-        return self.assets.upload(db, owner_id=owner_id, scope_kind="character", scope_id=character_id,
-            content_type="image/png", content=pixels, draft=False)
+        elif materialize:
+            row = self.assets.upload(db, owner_id=owner_id, scope_kind="character", scope_id=character_id,
+                content_type="image/png", content=pixels, draft=False)
+        return EffectiveReference(True, source, row.id if row else None, digest, revision=row.revision if row else None)
 
     def prepare_intent(self, db, owner_id, character_id, scene, scene_error):
         from app.domains.media.generation_contracts import compose_positive
         row = db.get(AgentImageGenerationSetting, character_id)
         if row is None or not row.generation_auto_enabled:
             return None
+        if not scene_error and isinstance(scene, str) and not scene.strip():
+            return None
         credential = None
         try:
             if scene_error:
                 raise ImagePreparationError(scene_error)
+            if not isinstance(scene, str):
+                raise ImagePreparationError("scene_invalid")
+            if row.generation_provider == "novelai":
+                self._require_novel_validation()
             positive = compose_positive(style=row.style_prompt, appearance=row.appearance_prompt, scene=scene)
             character = db.get(Character, character_id)
             if character is None or character.owner_id != owner_id or character.deleted_at:
@@ -224,11 +284,20 @@ class MediaRuntime:
             options = profile["options"]
             preferred = bool(profile.get("reference_effective"))
             reference = self._reference(db, owner_id, character, row, preferred)
+            if row.generation_provider in {"nanogpt", "openrouter"}:
+                endpoint = profile["connection"].get("endpoint")
+                if not endpoint:
+                    raise ImagePreparationError("model_capabilities_unverified")
+                validate_api_options(row.generation_provider, endpoint, options)
+                if reference.asset_id:
+                    asset = self.assets.owned(db, owner_id=owner_id, asset_id=reference.asset_id)
+                    validate_reference_metadata(endpoint, width=asset.width, height=asset.height,
+                        byte_size=asset.byte_size, content_type=asset.content_type)
             if row.generation_provider == "comfyui":
                 comfy = ComfyOptions.model_validate(options)
-                if comfy.workflow and comfy.workflow.reference_required and not reference.asset_id and not comfy.text_workflow:
-                    raise ImagePreparationError("comfy_reference_or_text_path_required")
-                negative = row.negative_prompt if comfy.workflow and "negative" in comfy.workflow.bindings else None
+                workflow = select_comfy_workflow(comfy, has_reference=bool(reference.asset_id))
+                negative = row.negative_prompt if "negative" in workflow.bindings else None
+                options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
             else:
                 negative = row.negative_prompt if row.generation_provider == "novelai" else None
             request = GenerationRequest(row.generation_provider, row.generation_model, positive, negative,
@@ -280,6 +349,8 @@ class MediaRuntime:
             raise ImagePreparationError("generation_settings_changed")
         value = json.loads(intent.request_json)
         request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        if request.provider == "novelai":
+            self._require_novel_validation()
         material = None
         if intent.credential_id:
             credential = db.get(MediaCredential, intent.credential_id)
@@ -304,7 +375,7 @@ class MediaRuntime:
         if request.provider in {"nanogpt", "openrouter"}:
             # Discovery is not a generation call. Never silently switch the frozen route.
             endpoint = await client.discover(request.model)
-            if endpoint.get("provider_tag") != (request.endpoint or {}).get("provider_tag") or endpoint_parameters(request.provider, endpoint) != endpoint_parameters(request.provider, request.endpoint or {}):
+            if endpoint.get("provider_tag") != (request.endpoint or {}).get("provider_tag") or endpoint_parameters(request.provider, endpoint) != endpoint_parameters(request.provider, request.endpoint or {}) or endpoint.get("input_reference_constraints") != (request.endpoint or {}).get("input_reference_constraints"):
                 raise ImagePreparationError("model_capabilities_changed")
         return await client.generate(request, execution.key, execution.reference, on_submit=on_submit)
 
@@ -332,7 +403,9 @@ class MediaRuntime:
             benefit = await self.clients["novelai"].subscription(key)
             if options.mode == "opus_free" and not benefit["opus_verified"]:
                 raise ImagePreparationError("opus_benefit_unverified")
-            return {**benefit, "ready": True, "reference_supported": options.mode != "opus_free"}
+            validation = self._novel_validation()
+            return {**benefit, "ready": validation["exact_verified"], "prompt_validation": validation,
+                "reference_supported": options.mode != "opus_free"}
         endpoint = await self.clients[data.provider].discover(data.model)
         validate_api_options(data.provider, endpoint, data.options)
         return {"ready": True, "credential_validation": "not_verified", "endpoint": endpoint,

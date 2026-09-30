@@ -1,7 +1,7 @@
 {
-  "edge_count": 5400,
-  "external_import_count": 3923,
-  "module_count": 1332,
+  "edge_count": 5404,
+  "external_import_count": 3929,
+  "module_count": 1333,
   "modules": [
     {
       "external_imports": [],
@@ -2615,6 +2615,7 @@
         "asyncio",
         "collections.abc",
         "datetime",
+        "json",
         "logging",
         "sqlalchemy",
         "sqlalchemy.orm",
@@ -3941,6 +3942,16 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.media.generation_contracts"
+      ],
+      "module": "app.domains.media.api_image_policy",
+      "path": "backend/app/domains/media/api_image_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.media.api_image_policy",
         "app.domains.media.generation_contracts"
       ],
       "module": "app.domains.media.contracts",
@@ -11638,6 +11649,8 @@
     {
       "external_imports": [
         "asyncio",
+        "base64",
+        "collections",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -11646,6 +11659,7 @@
         "os",
         "pathlib",
         "sqlalchemy",
+        "sqlalchemy.exc",
         "uuid"
       ],
       "imports": [
@@ -14390,11 +14404,14 @@
     },
     {
       "external_imports": [
+        "PIL",
         "base64",
         "httpx",
+        "io",
         "urllib.parse"
       ],
       "imports": [
+        "app.domains.media.api_image_policy",
         "app.domains.media.contracts",
         "app.domains.media.generation_contracts",
         "app.integrations.media.images"
@@ -16844,6 +16861,7 @@
         "app.domains.identity.exceptions",
         "app.domains.identity.models_media",
         "app.domains.identity.service.media_credentials",
+        "app.domains.media.api_image_policy",
         "app.domains.media.contracts",
         "app.domains.media.generation_contracts",
         "app.domains.media.models",

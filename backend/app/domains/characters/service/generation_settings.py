@@ -7,6 +7,7 @@ from app.domains.identity.service import media_credentials
 from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service.demo_access import ensure_demo_user_mutable
 from app.domains.media.contracts import MODEL_CATALOG, NovelOptions, ApiImageOptions, ComfyOptions, ImagePreparationError, initial_reference
+from app.domains.media.contracts import validate_api_options
 
 
 def profile_key(provider, model, options):
@@ -53,6 +54,12 @@ def write_settings(db, user, character_id, data, *, assets, limits, validated_co
     connection = validated_connection or (previous or {}).get("connection")
     if provider == "comfyui" and previous and options != previous.get("options"):
         connection = validated_connection
+    if provider in {"nanogpt", "openrouter"}:
+        endpoint = connection.get("endpoint") if connection else None
+        if not endpoint and (options or data.auto_enabled):
+            raise ImagePreparationError("model_capabilities_unverified")
+        if endpoint:
+            validate_api_options(provider, endpoint, options)
     if data.api_key is not None or data.clear_api_key:
         media_credentials.save_credential(db, owner_id=user.id, character_id=character_id,
             provider=provider, purpose=CredentialPurpose.USER_IMAGE,

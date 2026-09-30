@@ -1,7 +1,10 @@
 """Dedicated NanoGPT/OpenRouter image API, with per-endpoint admission."""
 import base64
+from io import BytesIO
 from urllib.parse import quote
 import httpx
+from PIL import Image, UnidentifiedImageError
+from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options, validate_reference_metadata
 from app.domains.media.generation_contracts import GenerationRequest, ImageResult, ImagePreparationError, ImageSubmissionError, MODEL_CATALOG
 from app.integrations.media.images import validate_generated_media_content
 from app.domains.media.contracts import InvalidProfileMediaError
@@ -36,41 +39,6 @@ class ImageHttp:
                 await client.aclose()
 
 
-def endpoint_parameters(provider, endpoint):
-    source = endpoint.get("supported_parameters", {})
-    if provider == "openrouter":
-        return source
-    result = {}
-    for field, external in (("resolution", "resolutions"), ("aspect_ratio", "aspect_ratio")):
-        if isinstance(source.get(external), list):
-            result[field] = {"type": "enum", "values": source[external]}
-    for field in ("quality", "background", "seed", "output_compression"):
-        descriptor = source.get(field)
-        if isinstance(descriptor, dict):
-            result[field] = descriptor
-    if source.get("max_input_images", 0):
-        result["input_references"] = {"type": "range", "min": 0, "max": source["max_input_images"]}
-    return result
-
-
-def validate_api_options(provider, endpoint, options):
-    descriptors = endpoint_parameters(provider, endpoint)
-    for field, value in options.items():
-        if value is None:
-            continue
-        spec = descriptors.get(field)
-        if not isinstance(spec, dict):
-            raise ImagePreparationError(f"option_unsupported:{field}")
-        kind = spec.get("type")
-        if kind == "enum" and value not in spec.get("values", []):
-            raise ImagePreparationError(f"option_value_invalid:{field}")
-        if kind == "range" and (not isinstance(value, int) or isinstance(value, bool) or not spec.get("min", 0) <= value <= spec.get("max", 0)):
-            raise ImagePreparationError(f"option_value_invalid:{field}")
-        if kind not in {"enum", "range", "boolean"}:
-            raise ImagePreparationError(f"option_descriptor_unknown:{field}")
-    return {field: value for field, value in options.items() if value is not None}
-
-
 class ImageApiClient:
     def __init__(self, provider, http=None):
         if provider not in API_ROOTS:
@@ -103,6 +71,16 @@ class ImageApiClient:
             support = endpoint_parameters(self.provider, endpoint).get("input_references", {})
             if not MODEL_CATALOG[f"{self.provider}:{request.model}"][2] or support.get("max", 0) < 1:
                 raise ImagePreparationError("reference_not_supported")
+            try:
+                with Image.open(BytesIO(reference)) as decoded:
+                    mime = Image.MIME.get(decoded.format)
+                    if mime != "image/png" or getattr(decoded, "n_frames", 1) != 1:
+                        raise ImagePreparationError("reference_format_invalid")
+                    validate_reference_metadata(endpoint, width=decoded.width, height=decoded.height,
+                        byte_size=len(reference), content_type=mime)
+                    decoded.verify()
+            except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
+                raise ImagePreparationError("reference_pixels_invalid") from exc
             payload["input_references"] = [{"type": "image_url", "image_url": {"url": "data:image/png;base64," + base64.b64encode(reference).decode()}}]
         if self.provider == "openrouter":
             tag = endpoint.get("provider_tag")

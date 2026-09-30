@@ -47,6 +47,17 @@ class NovelImageClient:
     def __init__(self, http=None):
         self.http = http or ImageHttp()
 
+    @staticmethod
+    def prompt_validation():
+        path = Path(__file__).with_name("novelai_resources") / "t5.spiece.model"
+        resource_verified = path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == TOKENIZER_HASH
+        # T5 family + approximate 512 budget are documented; the exact V4.5
+        # parser/tokenizer revision and special-token accounting are not pinned.
+        # Account/route checks cannot promote this to an exact validation proof.
+        return {"model": MODEL, "state": "unverified", "exact_verified": False,
+            "resource_verified": resource_verified, "resource_sha256": TOKENIZER_HASH,
+            "reason": "novelai_prompt_validation_unverified"}
+
     async def subscription(self, key):
         response = await self.http.request("GET", "https://api.novelai.net/user/subscription", key=key, timeout=15)
         payload = response.json()
@@ -60,6 +71,8 @@ class NovelImageClient:
         if request.model != MODEL or request.provider != "novelai":
             raise ImagePreparationError("novelai_model_not_supported")
         options = NovelOptions.model_validate(request.options)
+        if not self.prompt_validation()["exact_verified"]:
+            raise ImagePreparationError("novelai_prompt_validation_unverified")
         validate_t5_prompt(request.positive)
         if request.negative:
             validate_t5_prompt(request.negative)

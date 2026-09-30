@@ -75,7 +75,10 @@ def test_profiles_reject_foreign_options_and_empty_routes(provider, model, suppo
 
 
 @pytest.mark.parametrize("tier,active,expires,valid", [(3, True, 9999999999, True), (1, True, 9999999999, False), (2, True, 9999999999, False), (3, False, 9999999999, False), (3, True, 1, False)])
-def test_novel_opus_authorization_is_checked_without_paid_fallback(tier, active, expires, valid):
+def test_novel_opus_authorization_is_checked_without_paid_fallback(tier, active, expires, valid, monkeypatch):
+    # Isolate serializer/account rules behind a synthetic verified capability.
+    # A separate regression asserts production's unverified gate blocks all I/O.
+    monkeypatch.setattr(NovelImageClient, "prompt_validation", staticmethod(lambda: {"exact_verified": True}))
     http = Http(lambda method, *_: httpx.Response(200, json={"tier": tier, "active": active, "expiresAt": expires}) if method == "GET" else httpx.Response(200, json={"images": [{"image": base64.b64encode(png()).decode()}]}))
     request = GenerationRequest("novelai", "nai-diffusion-4-5-full", "blue sky", "blur", NovelOptions().model_dump(), EffectiveReference(False))
     if not valid:
@@ -92,7 +95,8 @@ def test_novel_opus_authorization_is_checked_without_paid_fallback(tier, active,
         assert params["negative_prompt"] == "blur"
 
 
-def test_novel_paid_reference_and_zip_pixels_do_not_extract_paths():
+def test_novel_paid_reference_and_zip_pixels_do_not_extract_paths(monkeypatch):
+    monkeypatch.setattr(NovelImageClient, "prompt_validation", staticmethod(lambda: {"exact_verified": True}))
     output = BytesIO()
     with ZipFile(output, "w") as archive:
         archive.writestr("../../not-a-local-file.png", png())

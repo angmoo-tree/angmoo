@@ -27,6 +27,9 @@ class Provider:
         self.provider, self.model, self.calls = provider, model, 0
         self.after_submit = None
         self.error = None
+    def prompt_validation(self):
+        # This injected fake exercises worker contracts, not NovelAI exactness.
+        return {"exact_verified": True, "state": "synthetic_only"}
     async def discover(self, model):
         return CATALOG[f"{self.provider}:{model}"]["payload"]["endpoints"][0]
     async def generate(self, request, key, reference, *, on_submit=None, on_receipt=None, receipt=None):
@@ -71,6 +74,8 @@ def admit(sessions, media, scene="reading at a desk"):
         intent = media.admit_post(db, post=db.get(Post, POST), owner_id=OWNER, character_id=CHARACTER,
             draft=SimpleNamespace(_image_prompt=scene, _image_error=None))
         db.commit()
+        if intent is None:
+            return None
         job = db.scalar(select(PostImageGenerationJob).where(PostImageGenerationJob.intent_id == intent.id))
         return job.id if job else None
 
@@ -156,7 +161,7 @@ def test_empty_scene_keeps_post_without_submitting_and_settings_do_not_backfill(
         assert db.scalar(select(PostImageGenerationJob)) is None
     assert admit(sessions, media, " ") is None
     with sessions() as db:
-        assert db.scalar(select(ImageIntent)).state == "blocked"
+        assert db.scalar(select(ImageIntent)) is None
         assert db.get(Post, POST).body and fake.calls == 0
 
 

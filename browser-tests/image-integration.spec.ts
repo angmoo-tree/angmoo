@@ -3,6 +3,8 @@ import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed } from "./continuity-next-fixture";
 import { readFileSync } from "node:fs";
 
+test.use({screenshot:"on"});
+
 const character="image-fixture-bird";
 const models=[
   ["novelai","nai-diffusion-4-5-full",true], ["nanogpt","krea-v2/turbo",true],
@@ -152,4 +154,114 @@ test("completed generation refreshes its World feed once and displays authentica
   await expect(page.getByRole("img",{name:"새로 생성된 사진"})).toBeVisible();
   await expect(page.getByLabel("게시글 이미지 생성 상태")).toHaveCount(0);
   expect(feedReads).toBe(2);expect(jobReads).toBe(2);expect(generationWrites).toBe(0);
+});
+
+test("NovelAI unverified prompt validation prevents activation while preserving editable settings",async({page},info)=>{
+  const staticShell=info.project.name==="static";
+  const audit=await fixtures(page,staticShell);
+  await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    if(path==="/media/catalog")return json(route,{models:models.map(model=>({...model,...(model.provider==="novelai"?{availability:"prompt_validation_unverified",prompt_validation:{state:"unverified",exact_verified:false,reason:"novelai_prompt_validation_unverified"}}:{})})),quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
+    return route.fallback();
+  });
+  await page.goto(`/agents/${character}?tab=settings`);
+  const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});
+  await expect(panel.getByRole("checkbox",{name:"새 Routine 게시글 자동 이미지 생성 허용"})).toBeDisabled();
+  await expect(panel.getByText(/정확한 프롬프트 길이 검증이 아직 확인되지/)).toBeVisible();
+  await expect(panel.getByText("연결 상태: 프롬프트 검증 미확인 · 생성 비활성화")).toBeVisible();
+  await panel.getByLabel("외형 (선택)").fill("검증 이후 사용할 외형");
+  await panel.getByRole("button",{name:"설정 저장",exact:true}).click();
+  await expect.poll(()=>audit.writes.length).toBe(1);
+  expect(audit.writes[0].auto_enabled).toBe(false);
+  expect(audit.writes[0].appearance).toBe("검증 이후 사용할 외형");
+  await panel.getByText(/정확한 프롬프트 길이 검증이 아직 확인되지/).scrollIntoViewIfNeeded();
+});
+
+test("saved reference state shows actual source preference and the available generation path",async({page},info)=>{
+  const staticShell=info.project.name==="static";
+  const audit=await fixtures(page,staticShell);
+  let state={preferred:true,applied:false,source:"none",status:"missing",reason:"source_missing",generation_path:"text",scene_only:true};
+  await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    if(path.endsWith("/generation-settings")&&route.request().method()==="GET")return json(route,{...audit.getSettings(),provider:"nanogpt",model:"krea-v2/turbo",active_profile:{reference_enabled:true,options:{}},reference_state:state});
+    return route.fallback();
+  });
+  await page.goto(`/agents/${character}?tab=settings`);
+  const status=page.getByLabel("저장된 참조 적용 상태");
+  await expect(status).toContainText("저장된 참조 선호: ON · 실제 출처: 없음");
+  await expect(status).toContainText("이번 게시글의 장면만으로 생성");
+  for(const [source,label] of [["profile","프로필 이미지"],["card","캐릭터 카드 이미지"],["override","사용자 지정 이미지"]]){
+    state={...state,source,applied:true,status:"available",reason:"",generation_path:"reference",scene_only:false};
+    await page.reload();await expect(status).toContainText(`실제 출처: ${label}`);
+    await expect(status).not.toContainText("이번 게시글의 장면만으로 생성");
+  }
+  state={...state,source:"none",applied:false,status:"missing",reason:"comfy_reference_or_text_path_required",generation_path:"unavailable"};
+  await page.reload();await expect(status).toContainText("사용할 이미지와 텍스트 경로가 없습니다");
+  await expect(status.getByRole("alert")).toContainText("검증된 텍스트 workflow가 필요합니다");
+  expect(audit.writes).toHaveLength(0);
+});
+
+function recoveryChat(content:string,state:"waiting"|"failed"){
+  const role={world_character_id:"wc-image",character_id:character,display_name:"이미지 친구",handle:"image_friend",avatar_url:null,banner_url:null,role_key:null,control_mode:"autonomous",profile_capability:"available"};
+  const user={id:41,thread_id:"thread-image",role:"user",content,attachment:{asset_id:"original-photo",url:"/api/v1/media/assets/original-photo/content",analysis_state:"pending"},model:null,status:"ok",error_code:null,created_at:"2026-09-30T00:00:00Z"};
+  const request={protocol_version:"chat-generation-stream.v1",request_id:"image-failed",request_scope_hash:"a".repeat(64),generation_id:"image-generation",attempt_number:1,response_slot_id:"image-slot",state:state==="waiting"?"accepted":"failed",route:null,retryable:state==="failed",failure_class:state==="failed"?"image_interpretation_unavailable":null,last_accepted_sequence:-1,user_message:user,assistant_message:null,response_metadata:{},image_analysis_state:state,can_retry_without_image:state==="failed"&&Boolean(content)};
+  const thread={id:"thread-image",world_id:uiDWorld().world_id,requester:{...role,world_character_id:"wc-owner",control_mode:"owner_controlled"},responding:role,selected_model:"gemini-3.1-flash-lite",selected_thinking_level:"high",default_model:"gemini-3.1-flash-lite",default_thinking_level:"high",model_binding_mode:"default",last_message_at:user.created_at,created_at:user.created_at,latest_message:user,messages:[user],evidence_summaries:[]};
+  return {user,request,thread};
+}
+
+for(const content of ["", "사진 없이도 이 질문에 답해 줘."]){
+  test(`accepted analysis failure offers explicit text recovery only with original text ${Boolean(content)}`,async({page},info)=>{
+    const staticShell=info.project.name==="static";
+    await fixtures(page,staticShell);
+    const data=recoveryChat(content,"failed");
+    const writes:Record<string,unknown>[]=[];
+    let completed=false;
+    const retried={...data.request,request_id:"image-text-only",generation_id:"image-text-generation",attempt_number:2,state:"accepted",failure_class:null,retryable:false,image_analysis_state:"excluded",can_retry_without_image:false};
+    const assistant={...data.user,id:42,role:"assistant",content:"사진 없이 원문에 답한 응답",attachment:null};
+    await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+      const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+      if(path.endsWith("/requests/latest"))return json(route,{response_request:data.request});
+      if(path.endsWith("/thread-image"))return json(route,{...data.thread,messages:completed?[data.user,assistant]:[data.user]});
+      if(path.endsWith("/requests/image-text-only"))return json(route,{...retried,state:"committed",last_accepted_sequence:2,assistant_message:assistant});
+      if(path.endsWith("/retry")){
+        writes.push(route.request().postDataJSON());
+        return json(route,{outcome:"accepted",user_message:data.user,response_request:retried});
+      }
+      if(path.endsWith("/image-text-only/events")){
+        completed=true;
+        const events=[{sequence:0,type:"accepted",payload:{}},{sequence:1,type:"delta",payload:{text:assistant.content}},{sequence:2,type:"completed",payload:{}}].map(event=>({protocol_version:retried.protocol_version,request_id:retried.request_id,request_scope_hash:retried.request_scope_hash,generation_id:retried.generation_id,attempt_number:retried.attempt_number,...event}));
+        return route.fulfill({contentType:"application/x-ndjson",body:events.map(event=>JSON.stringify(event)).join("\n")+"\n"});
+      }
+      return route.fallback();
+    });
+    await page.goto(`/worlds/${uiDWorld().world_id}/chat/thread-image`);
+    await expect(page.getByText("사진을 인식하지 못했어요.", {exact:true})).toBeVisible();
+    const recovery=page.getByRole("button",{name:"사진 없이 이 텍스트로 진행"});
+    if(!content){await expect(recovery).toHaveCount(0);expect(writes).toHaveLength(0);return;}
+    await expect(recovery).toBeVisible();expect(writes).toHaveLength(0);
+    await recovery.click();await expect(page.getByText(assistant.content,{exact:true})).toBeVisible();
+    await expect(page.locator("[data-response-slot='image-slot']")).toHaveCount(0);
+    expect(writes).toHaveLength(1);expect(writes[0]).toMatchObject({failed_request_id:"image-failed",exclude_attachment:true});
+    await expect(page.getByText(content,{exact:true})).toHaveCount(1);
+    await expect(page.getByRole("img",{name:"대화에 첨부한 이미지"})).toBeVisible();
+  });
+}
+
+test("accepted image analysis shows waiting separately before any stream result",async({page},info)=>{
+  const staticShell=info.project.name==="static";
+  await fixtures(page,staticShell);const data=recoveryChat("사진을 봐 줘.","waiting");
+  let release:(()=>void)|undefined;
+  const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    const path=new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/,"");
+    if(path.endsWith("/requests/latest"))return json(route,{response_request:data.request});
+    if(path.endsWith("/thread-image"))return json(route,data.thread);
+    if(path.endsWith("/events")){await gate;return route.fulfill({status:204});}
+    return route.fallback();
+  });
+  try{
+    await page.goto(`/worlds/${uiDWorld().world_id}/chat/thread-image`);
+    await expect(page.getByText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.",{exact:true})).toBeVisible();
+    await expect(page.getByRole("button",{name:"사진 없이 이 텍스트로 진행"})).toHaveCount(0);
+  }finally{release?.();}
 });

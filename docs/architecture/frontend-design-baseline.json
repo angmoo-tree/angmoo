@@ -103,14 +103,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-settings.tsx",
-      "sha256": "dc39e1b172b2dc2241bbfb51a2c07c8108c80d63bac67909192d6b5bbe1ad8c6"
+      "sha256": "2d1156b834d7e4ece8e020355d40ac02552faef370ad3ea5f4d72d53fe7482de"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-status.tsx",
-      "sha256": "4827caae6165195a908ae38c3b7ef7c3bfdd85bcf552250733b1c56a5956e95c"
+      "sha256": "eaf8d9daa7ffda0664ca018ba85c52bd0ecae544fb3d2f792fb537bc668c7eb8"
     },
     {
       "classifications": [

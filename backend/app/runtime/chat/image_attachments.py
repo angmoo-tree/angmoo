@@ -30,6 +30,27 @@ class ChatImageAttachments:
         row = db.get(MessageAttachment, message_id)
         return row.asset_id if row else None
 
+    def state(self, db, message, record):
+        if record.node_state.get("_image_excluded"):
+            return "excluded"
+        row = db.get(MessageAttachment, message.id)
+        if row is None:
+            return "none"
+        if record.node_state.get("failure_class") == "image_interpretation_unavailable":
+            return "failed"
+        return "recognized" if row.snapshot_json else "waiting"
+
+    def reserve_retry(self, db, owner_id, thread_id, message_id):
+        row = db.get(MessageAttachment, message_id)
+        if row is None:
+            return
+        self.media.assets.owned(db, owner_id=owner_id, asset_id=row.asset_id, scope_kind="thread", scope_id=thread_id)
+        try:
+            analysis = self.media.interpretation.admit(db, owner_id, row.asset_id, retry_failed=True)
+        except ImagePreparationError as exc:
+            raise MessageValidationError(str(exc)) from exc
+        row.interpretation_id = analysis.id
+
     def assert_current(self, db, owner_id, thread_id, message_id, evidence):
         if evidence is None:
             return
@@ -63,11 +84,12 @@ class ChatImageAttachments:
     def accept(self, db, owner_id, thread_id, message_id, asset_id):
         asset = self.media.assets.owned(db, owner_id=owner_id, asset_id=asset_id,
             scope_kind="thread", scope_id=thread_id)
-        state = self.media.interpretation.preflight(db, owner_id, asset_id)
-        if not state["allowed"]:
-            raise MessageValidationError(state["reason"])
+        try:
+            analysis = self.media.interpretation.admit(db, owner_id, asset_id, retry_failed=True)
+        except ImagePreparationError as exc:
+            raise MessageValidationError(str(exc)) from exc
         self.media.assets.attach(db, owner_id=owner_id, asset_id=asset.id, scope_kind="thread", scope_id=thread_id)
-        db.add(MessageAttachment(message_id=message_id, asset_id=asset.id))
+        db.add(MessageAttachment(message_id=message_id, asset_id=asset.id, interpretation_id=analysis.id))
         db.flush()
 
     async def observation(self, db, owner_id, thread_id, message_id):
@@ -81,9 +103,9 @@ class ChatImageAttachments:
             if value.get("asset_revision") != asset.revision or value.get("asset_hash") != asset.content_hash:
                 raise ImagePreparationError("chat_image_changed")
             return value
-        asset_id = asset.id
+        asset_id, admitted_id = asset.id, row.interpretation_id
         db.rollback()
-        analysis = await self.media.interpretation.interpret(db, owner_id, asset_id, retry_failed=True)
+        analysis = await self.media.interpretation.interpret(db, owner_id, asset_id, admitted_id=admitted_id)
         asset = self.media.assets.owned(db, owner_id=owner_id, asset_id=asset_id,
             scope_kind="thread", scope_id=thread_id)
         value = {"source": "actual_image_analysis", "asset_id": asset.id, "asset_revision": asset.revision,

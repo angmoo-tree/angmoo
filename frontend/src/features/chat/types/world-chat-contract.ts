@@ -119,6 +119,8 @@ export type WorldChatGenerationRequestRead = {
   user_message: MessageMessageRead;
   assistant_message: MessageMessageRead | null;
   response_metadata: Record<string, unknown>;
+  image_analysis_state?: "none" | "waiting" | "recognized" | "failed" | "excluded";
+  can_retry_without_image?: boolean;
 };
 
 export type WorldChatMessageAcceptRead = {

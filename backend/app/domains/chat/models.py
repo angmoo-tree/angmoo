@@ -287,7 +287,7 @@ class MessageAttachment(Base):
 
     @property
     def analysis_state(self):
-        return "recognized" if self.interpretation_id else "pending"
+        return "recognized" if self.snapshot_json else "pending"
 
 
 class ChatResponseRequest(Base):

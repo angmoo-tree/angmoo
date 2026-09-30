@@ -234,8 +234,10 @@ class WorldChatMessageCreate(BaseModel):
 
 
 class WorldChatRetryCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     failed_request_id: str = Field(min_length=1, max_length=64)
     idempotency_key: str = Field(min_length=16, max_length=160)
+    exclude_attachment: StrictBool = False
 
 
 class WorldChatGenerationRequestRead(BaseModel):
@@ -255,6 +257,8 @@ class WorldChatGenerationRequestRead(BaseModel):
     user_message: MessageMessageRead
     assistant_message: MessageMessageRead | None = None
     response_metadata: dict[str, Any] = Field(default_factory=dict)
+    image_analysis_state: Literal["none", "waiting", "recognized", "failed", "excluded"] = "none"
+    can_retry_without_image: bool = False
 
 
 class WorldChatEvidenceSummaryRead(BaseModel):

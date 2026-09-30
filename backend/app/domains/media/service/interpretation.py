@@ -121,7 +121,7 @@ class InterpretationService:
             asset = self.assets.owned(db, owner_id=owner_id, asset_id=asset_id)
             shared = db.scalar(select(ImageInterpretation).where(
                 ImageInterpretation.cache_key == cache_key(asset, setting.model, setting.thinking_level),
-                ImageInterpretation.status.in_(("running", "outcome_unknown"))))
+                ImageInterpretation.status.in_(("queued", "running", "outcome_unknown"))))
             if shared is not None and self._result_path(shared.id).is_file():
                 return {"allowed": True, "reason": "received_result", "interpretation_id": shared.id}
             if shared is not None and shared.lease_until is not None and shared.lease_until.replace(tzinfo=timezone.utc) > self.clock():
@@ -141,21 +141,23 @@ class InterpretationService:
             reason = "interpretation_daily_limit_reached"
         return {"allowed": reason is None, "reason": reason, "settings_path": "/settings"}
 
-    async def interpret(self, db, owner_id, asset_id, *, retry_failed=False):
+    def admit(self, db, owner_id, asset_id, *, retry_failed=False):
+        """Reserve/share a job inside the caller's transaction; never call AI."""
+        if cached := self.cached(db, owner_id, asset_id):
+            return cached
+        # Lock one owner setting before cache/job/quota reads; all callers use this path.
+        if db.execute(update(InterpretationSetting).where(InterpretationSetting.owner_id == owner_id)
+            .values(revision=InterpretationSetting.revision)).rowcount != 1:
+            raise ImagePreparationError("interpretation_disabled")
         if cached := self.cached(db, owner_id, asset_id):
             return cached
         state = self.preflight(db, owner_id, asset_id)
         if not state["allowed"]:
             raise ImagePreparationError(state["reason"])
-        # Lock one owner setting before cache/job/quota reads; all callers use this path.
-        db.execute(update(InterpretationSetting).where(InterpretationSetting.owner_id == owner_id).values(revision=InterpretationSetting.revision))
         asset = self.assets.owned(db, owner_id=owner_id, asset_id=asset_id)
         setting = db.get(InterpretationSetting, owner_id, populate_existing=True)
         key = cache_key(asset, setting.model, setting.thinking_level)
         row = db.scalar(select(ImageInterpretation).where(ImageInterpretation.cache_key == key))
-        if row is not None and self._result_path(row.id).is_file():
-            self._persist_received(db, row, json.loads(self._result_path(row.id).read_text("utf-8")))
-            return row
         if row is None or (row.status == "failed" and retry_failed):
             state = self.preflight(db, owner_id, asset_id)
             if not state["allowed"]:
@@ -165,25 +167,45 @@ class InterpretationService:
                 row = ImageInterpretation(id=uuid4().hex, cache_key=key, asset_id=asset.id, owner_id=owner_id,
                 scope_key=f"{asset.scope_kind}:{asset.scope_id}", asset_revision=asset.revision,
                 model=setting.model, thinking_level=setting.thinking_level, credential_revision=credential.revision,
-                status="running", lease_token=uuid4().hex, lease_until=self.clock()+timedelta(seconds=90))
+                status="queued", lease_token=None, lease_until=self.clock()+timedelta(minutes=5))
                 db.add(row)
             else:
-                row.status, row.error_code = "running", None
+                row.status, row.error_code = "queued", None
                 row.credential_revision = credential.revision
-                row.lease_token, row.lease_until = uuid4().hex, self.clock()+timedelta(seconds=90)
+                row.lease_token, row.lease_until = None, self.clock()+timedelta(minutes=5)
             db.flush()
             db.add(InterpretationAttempt(id=uuid4().hex, interpretation_id=row.id, owner_id=owner_id,
                 quota_day=self.quota_day(self.clock()), status="reserved"))
             db.flush()
-            identity = row.id
-            db.commit()
+        elif row.status == "failed":
+            raise ImagePreparationError(row.error_code or "interpretation_failed")
+        return row
+
+    async def interpret(self, db, owner_id, asset_id, *, retry_failed=False, admitted_id=None):
+        if admitted_id is None:
+            row = self.admit(db, owner_id, asset_id, retry_failed=retry_failed)
+        else:
+            row = db.get(ImageInterpretation, admitted_id)
+            asset = self.assets.owned(db, owner_id=owner_id, asset_id=asset_id)
+            setting = db.get(InterpretationSetting, owner_id, populate_existing=True)
+            model = setting.model if setting else "gemini-3.1-flash-lite"
+            thinking = setting.thinking_level if setting else "medium"
+            if row is None or row.owner_id != owner_id or row.asset_id != asset_id or row.cache_key != cache_key(asset, model, thinking):
+                raise ImagePreparationError("interpretation_admission_changed")
+            if row.status == "failed":
+                raise ImagePreparationError(row.error_code or "interpretation_failed")
+        if row.status == "succeeded":
+            return row
+        if self._result_path(row.id).is_file():
+            self._persist_received(db, row, json.loads(self._result_path(row.id).read_text("utf-8")))
+            return row
+        identity, queued = row.id, row.status == "queued"
+        db.commit()
+        if queued:
             task = asyncio.create_task(self._execute(identity))
             self.tasks.add(task)
             task.add_done_callback(self.tasks.discard)
             await asyncio.shield(task)
-        else:
-            identity = row.id
-            db.commit()
         # Another process can own the same durable job. Consumer cancellation is local.
         for _ in range(1800):
             db.expire_all()
@@ -194,7 +216,7 @@ class InterpretationService:
             if row.status == "running" and self._result_path(identity).is_file():
                 self._persist_received(db, row, json.loads(self._result_path(identity).read_text("utf-8")))
                 return row
-            if row.status != "running":
+            if row.status not in {"queued", "running"}:
                 raise ImagePreparationError(row.error_code or "interpretation_failed")
             if row.lease_until is None or row.lease_until.replace(tzinfo=timezone.utc) < self.clock():
                 raise ImagePreparationError("interpretation_outcome_unknown")
@@ -204,11 +226,19 @@ class InterpretationService:
 
     async def _execute(self, identity):
         with self.sessions() as db:
+            token = uuid4().hex
+            claim = db.execute(update(ImageInterpretation).where(ImageInterpretation.id == identity,
+                ImageInterpretation.status == "queued").values(status="running", lease_token=token,
+                lease_until=self.clock()+timedelta(seconds=90)))
+            if claim.rowcount != 1:
+                db.rollback()
+                return
             row = db.get(ImageInterpretation, identity)
-            token = row.lease_token
             attempt = db.scalar(select(InterpretationAttempt).where(InterpretationAttempt.interpretation_id == identity,
                 InterpretationAttempt.status == "reserved"))
             try:
+                if attempt is None or attempt.quota_day != self.quota_day(self.clock()):
+                    raise ImagePreparationError("interpretation_reservation_expired")
                 material, asset, content = self._validate_current(db, row)
                 model, thinking = row.model, row.thinking_level
                 attempt_id = attempt.id
@@ -244,17 +274,18 @@ class InterpretationService:
             except Exception as exc:
                 db.rollback()
                 row = db.get(ImageInterpretation, identity)
-                attempt = db.get(InterpretationAttempt, attempt.id)
+                attempt = db.get(InterpretationAttempt, attempt.id) if attempt else None
                 if self._result_path(identity).is_file() and not isinstance(exc, ImagePreparationError):
                     # Local database failure: retain the lease and received result for recovery.
                     row.error_code = "interpretation_local_persistence_pending"
                     db.commit()
                     return
-                submitted = attempt.status == "submitted"
+                submitted = attempt is not None and attempt.status == "submitted"
                 unknown = isinstance(exc, (TimeoutError, ConnectionError)) or getattr(exc, "outcome_unknown", False) or getattr(exc, "failure_class", None) in {"timeout", "transport_failed", "provider_unavailable"}
                 row.status = "outcome_unknown" if unknown else "failed"
                 row.error_code = str(exc) if isinstance(exc, ImagePreparationError) else "interpretation_provider_failed"
-                attempt.status = "outcome_unknown" if unknown else "failed" if submitted else "released"
+                if attempt:
+                    attempt.status = "outcome_unknown" if unknown else "failed" if submitted else "released"
                 self._result_path(identity).unlink(missing_ok=True)
             row.lease_token, row.lease_until = None, None
             db.commit()
@@ -268,7 +299,7 @@ class InterpretationService:
 
     def recover_elapsed(self):
         with self.sessions() as db:
-            rows = list(db.scalars(select(ImageInterpretation).where(ImageInterpretation.status == "running",
+            rows = list(db.scalars(select(ImageInterpretation).where(ImageInterpretation.status.in_(("queued", "running")),
                 ImageInterpretation.lease_until < self.clock())))
             for row in rows:
                 target = self._result_path(row.id)

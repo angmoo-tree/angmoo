@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import asyncio
+import json
 
 from app.domains.chat.service.diagnostic_capture import capture
 
@@ -175,7 +176,9 @@ class GenerationService:
             )
         )
         if existing is not None:
-            if existing.retry_of_request_id != data.failed_request_id:
+            original = db.get(models.ChatResponseRequest, existing.retry_of_request_id)
+            inherited_exclusion = bool(original and json.loads(original.node_state_json).get("_image_excluded"))
+            if existing.retry_of_request_id != data.failed_request_id or bool(json.loads(existing.node_state_json).get("_image_excluded")) != (data.exclude_attachment or inherited_exclusion):
                 raise MessageValidationError("retry_idempotency_conflict")
             message = db.get(models.MessageMessage, existing.user_message_id)
             if message is None:
@@ -213,6 +216,15 @@ class GenerationService:
         )
         if later_user_message is not None:
             raise MessageValidationError("latest_retryable_response_required")
+        prior_metadata = json.loads(prior.node_state_json)
+        exclude_image = data.exclude_attachment or bool(prior_metadata.get("_image_excluded"))
+        if data.exclude_attachment and not prior_metadata.get("_image_excluded"):
+            if (prior_metadata.get("failure_class") != "image_interpretation_unavailable"
+                or not message.content.strip() or self.images is None
+                or self.images.existing_asset(db, message.id) is None):
+                raise MessageValidationError("image_text_only_recovery_unavailable")
+        if self.images and not exclude_image:
+            self.images.reserve_retry(db, user.id, thread.id, message.id)
         selected_model = self.thread_service.resolve_world_thread_response_model(
             db, user, thread
         )
@@ -231,7 +243,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
-                request_metadata=self._request_names(db, user, thread),
+                request_metadata={**self._request_names(db, user, thread), "_image_excluded": exclude_image},
             )
         )
         db.commit()
@@ -320,6 +332,7 @@ class GenerationService:
             if record.committed_assistant_message_id is None
             else db.get(models.MessageMessage, record.committed_assistant_message_id)
         )
+        image_state = self.images.state(db, user_message, record) if self.images else "none"
         return schemas.WorldChatGenerationRequestRead(
             request_id=record.request_id,
             request_scope_hash=record.request_scope_hash,
@@ -334,6 +347,8 @@ class GenerationService:
                 None if record.terminal_reason is None else record.terminal_reason.value
             ),
             last_accepted_sequence=record.last_emitted_sequence,
+            image_analysis_state=image_state,
+            can_retry_without_image=image_state == "failed" and bool(user_message.content.strip()) and record.retryable,
             user_message=schemas.MessageMessageRead.model_validate(user_message),
             assistant_message=None
             if assistant is None
@@ -526,7 +541,7 @@ class GenerationService:
             _secret=base_material.reveal(),
         )
         image_observation = None
-        if self.images is not None:
+        if self.images is not None and not record.node_state.get("_image_excluded"):
             try:
                 remaining = max(0.1, (record.deadline_at - datetime.now(UTC)).total_seconds())
                 async with asyncio.timeout(remaining):

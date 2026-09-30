@@ -19,7 +19,7 @@ from app.runtime.chat.image_attachments import ChatImageAttachments
 from app.runtime.media.composition import MediaRuntime
 
 
-def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=RetrievalRoute.CURRENT_CONTEXT):
+def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=RetrievalRoute.CURRENT_CONTEXT, expect_image=True):
     source = response_session.__wrapped__()
     db = next(source)
     sessions = sessionmaker(db.bind)
@@ -37,12 +37,12 @@ def synthetic_chat(folder, interpreter, *, key="synthetic-only", route=Retrieval
     class Router(_Router):
         async def route(self, command, **kwargs):
             events.append("router")
-            assert command.image_context
+            assert bool(command.image_context) == expect_image
             return await super().route(command, **kwargs)
     class Generator(_Generator):
         async def generate(self, request):
             events.append("crg")
-            assert any(item.kind.value == "current_image_analysis" for item in request.evidence.items)
+            assert any(item.kind.value == "current_image_analysis" for item in request.evidence.items) == expect_image
             return await super().generate(request)
     router, generator = Router(route), Generator()
     class Workflows:

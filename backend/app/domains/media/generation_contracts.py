@@ -76,6 +76,17 @@ class ComfyOptions(StrictInput):
     # Set only by the service after object_info validation, never from user input.
 
 
+def select_comfy_workflow(options: ComfyOptions, *, has_reference: bool) -> ComfyWorkflow:
+    workflow = options.workflow
+    if workflow is None:
+        raise ImagePreparationError("comfy_workflow_required")
+    if workflow.reference_required and not has_reference:
+        workflow = options.text_workflow
+    if workflow is None or (workflow.reference_required and not has_reference):
+        raise ImagePreparationError("comfy_reference_or_text_path_required")
+    return workflow
+
+
 @dataclass(frozen=True)
 class EffectiveReference:
     preferred: bool
