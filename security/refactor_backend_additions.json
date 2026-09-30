@@ -24220,6 +24220,18 @@
       "test_suppressions": {
         "tests/image_integration/test_novelai_readiness.py": {}
       }
+    },
+    {
+      "commit": "9db2cffeec7678b4d342eaf57ec387d4e1664010",
+      "feature_id": "AR-NOVELAI-PREFLIGHT-RESULTS",
+      "reason": "Exact first introduction of the NovelAI API readiness verification document and JSON. This preserves actual local test evidence and source commit, unverified server equivalence, zero actual API requests and unchanged main/remote constraints. No source/checker baseline regeneration.",
+      "tracked_files": {
+        "docs/verification/novelai-test-readiness-20261001-results.json": "984e2942139b971ab677e851ac9ee619218c5dc7",
+        "docs/verification/novelai-test-readiness-20261001.md": "b0d3785d7f02f4ac1011b5d4441e734ad84b15fb"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
