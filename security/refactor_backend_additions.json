@@ -24129,6 +24129,97 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "60fc2b81c33e232bbf0d40f6dd68506125124f1f",
+      "feature_id": "AR-NOVELAI-PREFLIGHT-READINESS",
+      "reason": "User requested readiness for actual NovelAI API testing. Exact first-introduction commit for fifteen new offline checks using the production adapter/tokenizer, no exactness override. Resource integrity, prompt boundaries, documented weights, account modes, reservation, attachment and no-resubmission outcomes. Exact server equivalence remains unverified; preserve frozen evidence and original checkers.",
+      "tracked_files": {
+        "backend/tests/image_integration/test_novelai_readiness.py": "16f718e39fbb0bdc1dbac48570fafa4d67f4b0de"
+      },
+      "test_nodes": [
+        "tests/image_integration/test_novelai_readiness.py::test_connection_check_does_not_mark_invalid_fixed_inputs_ready[appearance]",
+        "tests/image_integration/test_novelai_readiness.py::test_connection_check_does_not_mark_invalid_fixed_inputs_ready[negative]",
+        "tests/image_integration/test_novelai_readiness.py::test_enabling_validates_fixed_prompt_inputs_before_settings_save[negative]",
+        "tests/image_integration/test_novelai_readiness.py::test_enabling_validates_fixed_prompt_inputs_before_settings_save[style]",
+        "tests/image_integration/test_novelai_readiness.py::test_invalid_scene_is_blocked_before_reservation_or_http[\\ud55c\\uad6d\\uc5b4 \\uc7a5\\uba74-novelai_prompt_contains_unsupported_text]",
+        "tests/image_integration/test_novelai_readiness.py::test_invalid_scene_is_blocked_before_reservation_or_http[a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a -novelai_t5_prompt_limit]",
+        "tests/image_integration/test_novelai_readiness.py::test_pinned_local_token_budget_boundary_includes_eos[510-True]",
+        "tests/image_integration/test_novelai_readiness.py::test_pinned_local_token_budget_boundary_includes_eos[511-True]",
+        "tests/image_integration/test_novelai_readiness.py::test_pinned_local_token_budget_boundary_includes_eos[512-False]",
+        "tests/image_integration/test_novelai_readiness.py::test_production_novelai_connects_enables_and_attaches_without_exactness_override[allow_anlas-True]",
+        "tests/image_integration/test_novelai_readiness.py::test_production_novelai_connects_enables_and_attaches_without_exactness_override[opus_free-False]",
+        "tests/image_integration/test_novelai_readiness.py::test_provider_rejection_and_unknown_outcome_preserve_post_and_do_not_auto_resubmit[400-failed]",
+        "tests/image_integration/test_novelai_readiness.py::test_provider_rejection_and_unknown_outcome_preserve_post_and_do_not_auto_resubmit[500-outcome_unknown]",
+        "tests/image_integration/test_novelai_readiness.py::test_weight_controls_do_not_consume_text_budget_or_hide_unsupported_content",
+        "tests/image_integration/test_novelai_readiness.py::test_weighted_prompt_is_sent_without_rewriting_or_claiming_exact_count"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_novelai_readiness.py": {
+          "test_production_novelai_connects_enables_and_attaches_without_exactness_override": [
+            "assert len(submissions) == 1",
+            "assert body['input'] == 'ink, short hair, reading at a desk'",
+            "assert body['parameters']['negative_prompt'] == 'blur'",
+            "assert body['parameters']['n_samples'] == 1",
+            "assert not any(('reference' in name for name in body['parameters']))",
+            "assert media.clients['novelai'].prompt_validation()['exact_verified'] is False",
+            "assert connection['ready'] and connection['opus_verified']",
+            "assert connection['prompt_validation']['exact_verified'] is False",
+            "assert saved['auto_enabled'] and saved['effective_auto_enabled']",
+            "assert saved['prompt_validation']['generation_available']",
+            "assert db.get(PostImageGenerationJob, identity).status == 'succeeded'",
+            "assert db.scalar(select(func.count()).select_from(PostMedia)) == 1",
+            "assert db.scalar(select(ImageIntent)).state == 'attached'",
+            "assert db.scalar(select(func.count()).select_from(ImageGenerationAttempt)) == 1",
+            "assert db.get(Post, POST).body"
+          ],
+          "test_weighted_prompt_is_sent_without_rewriting_or_claiming_exact_count": [
+            "assert asyncio.run(client.generate(request, 'synthetic-only', None)).content == png()",
+            "assert body['input'] == positive",
+            "assert body['parameters']['v4_prompt']['caption']['base_caption'] == positive",
+            "assert body['parameters']['v4_negative_prompt']['caption']['base_caption'] == negative",
+            "assert client.prompt_validation()['state'] == 'local_preflight'",
+            "assert client.prompt_validation()['exact_verified'] is False"
+          ],
+          "test_pinned_local_token_budget_boundary_includes_eos": [
+            "assert validate_t5_prompt('hello ' * count) == count + 1",
+            "pytest.raises(ImagePreparationError, match='novelai_t5_prompt_limit')"
+          ],
+          "test_invalid_scene_is_blocked_before_reservation_or_http": [
+            "assert admit(sessions, media, scene) is None",
+            "assert http.calls == []",
+            "assert db.scalar(select(ImageIntent)).reason == reason",
+            "assert db.scalar(select(func.count()).select_from(ImageGenerationAttempt)) == 0",
+            "assert db.get(Post, POST).body"
+          ],
+          "test_enabling_validates_fixed_prompt_inputs_before_settings_save": [
+            "pytest.raises(ImagePreparationError, match='unsupported_text')",
+            "assert media.read_generation(db, owner, CHARACTER)['revision'] == saved['revision']"
+          ],
+          "test_provider_rejection_and_unknown_outcome_preserve_post_and_do_not_auto_resubmit": [
+            "assert len(calls) == 1 and calls[0].method == 'POST'",
+            "assert job.status == status and job.failure_class == f'provider_http_{code}'",
+            "assert db.get(Post, POST).body",
+            "assert db.scalar(select(func.count()).select_from(PostMedia)) == 0",
+            "pytest.raises(ImagePreparationError, match='image_outcome_unknown_no_resubmit')"
+          ],
+          "test_connection_check_does_not_mark_invalid_fixed_inputs_ready": [
+            "assert http.calls == []",
+            "pytest.raises(ImagePreparationError, match='unsupported_text')"
+          ],
+          "test_weight_controls_do_not_consume_text_budget_or_hide_unsupported_content": [
+            "assert validate_t5_prompt('{{{hello}}}') == 2",
+            "assert validate_t5_prompt('-1.5::hello ::') == 2",
+            "assert validate_t5_prompt('[[hello]]' * 511) == 512",
+            "pytest.raises(ImagePreparationError, match='prompt_limit')",
+            "pytest.raises(ImagePreparationError, match='unsupported_text')",
+            "pytest.raises(ImagePreparationError, match='prompt_empty')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_novelai_readiness.py": {}
+      }
     }
   ]
 }

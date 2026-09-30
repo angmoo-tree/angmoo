@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-01",
+  "branch": "feat/sns-chat-image-integration",
+  "base_commit": "09f1f77d34f89187680281c1abb94191e2c75df1",
+  "source_commit": "c8c7e3736a990c0a816067ec16fa32a2fadb233b",
+  "main_commit_unchanged": "1390ca4ddc275d3219b39b389c5368475e013b4c",
+  "product_state": "ready_for_real_api_testing_after_valid_key_account_cost_limits_and_local_preflight",
+  "prompt_validation": {
+    "state": "local_preflight",
+    "generation_available": true,
+    "exact_verified": false,
+    "server_equivalence": "unverified",
+    "preflight_version": "v4.5-t5-weight-spans-v1",
+    "local_token_budget_including_eos": 512
+  },
+  "local_tests": {
+    "image_suite": {"passed": 155, "failed": 0, "evidence": "artifacts/novelai-test-readiness-20261001/image-suite-final.xml"},
+    "targeted_subset_not_additive": {"passed": 66, "failed": 0, "evidence": "artifacts/novelai-test-readiness-20261001/targeted.xml"},
+    "next_and_static_browser": {"passed": 32, "failed": 0, "evidence": "artifacts/novelai-test-readiness-20261001/browser-results.json"},
+    "original_seven_review_checks_unchanged": true,
+    "typecheck": "passed",
+    "lint": "passed",
+    "next_build": "passed",
+    "static_build": "passed",
+    "backend_architecture": "passed",
+    "frontend_architecture": "passed",
+    "frontend_design": "passed",
+    "original_full_preservation": {"status": "passed", "protected_lineages": 4473, "current_nodes": 4473, "items": 37, "source_commit": "c8c7e3736a990c0a816067ec16fa32a2fadb233b", "evidence": "artifacts/novelai-test-readiness-20261001/preservation.log"}
+  },
+  "evidence_history": {
+    "initial_image_run": {"passed": 143, "failed": 9, "evidence": "artifacts/novelai-test-readiness-20261001/image-suite.xml"},
+    "initial_browser_launch": "reporter argument error, preserved separately, successful corrected rerun"
+  },
+  "real_generation_api_calls": 0,
+  "real_recognition_api_calls": 0,
+  "user_keys_read": 0,
+  "exact_server_tokenizer_verified": false,
+  "actual_anlas_verified": false,
+  "actual_reference_quality_verified": false,
+  "full_backend_suite_rerun": false,
+  "ci_push_pr_main_merge_docker_installed_data_changes": false
+}
