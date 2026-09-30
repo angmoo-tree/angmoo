@@ -23815,6 +23815,308 @@
       "test_suppressions": {
         "tests/image_integration/test_chat_attachments.py": {}
       }
+    },
+    {
+      "commit": "7e8b8bbae7d1b21fb24ae35258109ae46cd8bca7",
+      "feature_id": "AR-SNS-CHAT-IMAGES-INITIAL-RESULTS",
+      "reason": "User-approved fixes for six reproduced image bugs and three contract gaps; exact first-introduction commit, original seven review assertions and additional failure/reservation/validation/recovery checks. NovelAI exact validation remains guarded/unverified. No checkpoint regeneration or remote CI.",
+      "tracked_files": {
+        "docs/verification/sns-chat-images-20260930-results.json": "36c0f779727dbefaec2a6888a2317bb31c69d770"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "769aa60bff2842ee4ceb47d1aa21937c9636a2ff",
+      "feature_id": "AR-SNS-CHAT-IMAGES-REVIEW-FIXES",
+      "reason": "User-approved fixes for six reproduced image bugs and three contract gaps; exact first-introduction commit, original seven review assertions and additional failure/reservation/validation/recovery checks. NovelAI exact validation remains guarded/unverified. No checkpoint regeneration or remote CI.",
+      "tracked_files": {
+        "backend/app/domains/media/api_image_policy.py": "b52107841656d17761222bf4df4b8392335af913",
+        "backend/tests/image_integration/test_plan_recovery_contracts.py": "a40475c60acddc9c212755fac465dd540e145c31",
+        "backend/tests/image_integration/test_plan_review_regressions.py": "3af90569944bbdee6292dc210ba7c3227f153f59"
+      },
+      "test_nodes": [
+        "tests/image_integration/test_plan_recovery_contracts.py::test_admission_is_shared_reserved_and_rolled_back_without_ai",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_chat_analysis_failure_exposes_explicit_text_recovery_without_mutating_original[\\uc0ac\\uc9c4 \\uc5c6\\uc774\\ub3c4 \\uc774 \\uc9c8\\ubb38\\uc5d0 \\ub2f5\\ud574 \\uc918.]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_chat_analysis_failure_exposes_explicit_text_recovery_without_mutating_original[]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_chat_does_not_replace_reserved_analysis_after_settings_change",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_competing_chat_and_sns_scopes_atomically_reserve_last_analysis",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_invalid_scene_is_distinct_from_normal_empty_scene[-image_prompt_invalid_type]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_invalid_scene_is_distinct_from_normal_empty_scene[None-None]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_invalid_scene_is_distinct_from_normal_empty_scene[scene1-None]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_invalid_scene_is_distinct_from_normal_empty_scene[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-None]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_model_specific_option_case_and_profiles_are_not_interchangeable",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_novel_exact_validation_is_unverified_and_blocks_before_any_http",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_received_journal_recovers_disk_error_without_resubmit[json.tmp]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_received_journal_recovers_disk_error_without_resubmit[pixels.tmp]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_received_result_lost_with_process_never_allows_new_submission",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_endpoint_pixel_mime_and_byte_boundaries[byte_size-31457281]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_endpoint_pixel_mime_and_byte_boundaries[content_type-image/gif]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_endpoint_pixel_mime_and_byte_boundaries[height-7]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_endpoint_pixel_mime_and_byte_boundaries[width-16385]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_endpoint_pixel_mime_and_byte_boundaries[width-7]",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reference_settings_resolve_actual_source_without_creating_assets",
+        "tests/image_integration/test_plan_recovery_contracts.py::test_reserved_job_is_consumed_once_and_cache_reuses_off",
+        "tests/image_integration/test_plan_review_regressions.py::test_chat_acceptance_reserves_analysis_budget_before_returning",
+        "tests/image_integration/test_plan_review_regressions.py::test_known_failed_comfy_job_retry_can_submit_a_new_attempt",
+        "tests/image_integration/test_plan_review_regressions.py::test_nanogpt_reference_obeys_recorded_endpoint_pixel_constraints",
+        "tests/image_integration/test_plan_review_regressions.py::test_saved_ready_nanogpt_profile_rejects_unsupported_resolution",
+        "tests/image_integration/test_plan_review_regressions.py::test_successful_generation_with_local_manifest_error_cannot_resubmit",
+        "tests/image_integration/test_plan_review_regressions.py::test_text_workflow_applies_its_supported_negative_prompt",
+        "tests/image_integration/test_plan_review_regressions.py::test_valid_empty_routine_scene_means_no_image_intent"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_plan_recovery_contracts.py": {
+          "test_received_journal_recovers_disk_error_without_resubmit": [
+            "assert provider.calls == 1",
+            "assert db.get(PostImageGenerationJob, identity).status == 'result_pending'",
+            "assert db.scalar(select(ImageGenerationAttempt)).status == 'result_received'",
+            "assert db.get(PostImageGenerationJob, identity).status == 'succeeded'",
+            "assert db.scalar(select(PostMedia)) is not None"
+          ],
+          "test_received_result_lost_with_process_never_allows_new_submission": [
+            "assert provider.calls == 1",
+            "assert row.status == 'outcome_unknown' and (not media.worker.view(row)['retryable'])",
+            "pytest.raises(ImagePreparationError, match='no_resubmit')"
+          ],
+          "test_invalid_scene_is_distinct_from_normal_empty_scene": [
+            "assert provider.calls == 0",
+            "assert intent.state == 'blocked' and intent.reason",
+            "assert db.scalar(select(PostImageGenerationJob)) is None",
+            "assert db.get(Post, POST).body"
+          ],
+          "test_admission_is_shared_reserved_and_rolled_back_without_ai": [
+            "assert admitted.status == 'queued'",
+            "assert service.admit(db, 'owner', identity).id == admitted.id",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 0",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 0",
+            "assert db.scalar(select(func.count()).select_from(ImageInterpretation)) == 0"
+          ],
+          "test_competing_chat_and_sns_scopes_atomically_reserve_last_analysis": [
+            "assert fake.calls == 0",
+            "assert sorted(pool.map(reserve, identities)) == ['blocked', 'reserved']",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert str(error) == 'interpretation_daily_limit_reached'"
+          ],
+          "test_reserved_job_is_consumed_once_and_cache_reuses_off": [
+            "assert fake.calls == 1",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert service.admit(db, 'owner', identity).id == shared_id",
+            "assert [row.id for row in results] == [shared_id, shared_id]"
+          ],
+          "test_chat_does_not_replace_reserved_analysis_after_settings_change": [
+            "assert events[-1].event_type.value == 'failed'",
+            "assert chat.db.get(MessageAttachment, accepted.user_message.id).interpretation_id == reservation",
+            "assert chat.db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 0"
+          ],
+          "test_reference_endpoint_pixel_mime_and_byte_boundaries": [
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_model_specific_option_case_and_profiles_are_not_interchangeable": [
+            "assert validate_api_options('nanogpt', nano, {'resolution': '1k'}) == {'resolution': '1k'}",
+            "assert validate_api_options('openrouter', router, {'resolution': '1K'}) == {'resolution': '1K'}",
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_novel_exact_validation_is_unverified_and_blocks_before_any_http": [
+            "assert client.prompt_validation()['resource_verified']",
+            "assert not client.prompt_validation()['exact_verified']",
+            "pytest.raises(ImagePreparationError, match='prompt_validation_unverified')",
+            "assert http.calls == []"
+          ],
+          "test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate": [
+            "assert provider.calls == 0",
+            "assert current['prompt_validation']['exact_verified'] is False",
+            "assert current['effective_auto_enabled'] is False and current['auto_enabled'] is True",
+            "pytest.raises(ImagePreparationError, match='prompt_validation_unverified')",
+            "assert db.get(PostImageGenerationJob, job_id).failure_class == 'novelai_prompt_validation_unverified'",
+            "assert db.scalar(select(ImageGenerationAttempt)).status == 'released'"
+          ],
+          "test_reference_settings_resolve_actual_source_without_creating_assets": [
+            "assert provider.calls == 0",
+            "assert initial['reference_state']['preferred'] and initial['reference_state']['status'] == 'missing'",
+            "assert media.read_generation(db, user, CHARACTER)['reference_state']['source'] == 'profile'",
+            "assert state['source'] == 'card' and state['applied']",
+            "assert db.scalar(select(func.count()).select_from(MediaAsset)) == count",
+            "assert db.get(AgentImageGenerationSetting, CHARACTER).card_asset_id is None",
+            "assert media.read_generation(db, user, CHARACTER)['reference_state']['source'] == 'override'",
+            "assert invalid['status'] == 'invalid' and invalid['generation_path'] == 'unavailable'",
+            "assert not invalid['applied'] and (not invalid['scene_only'])"
+          ],
+          "test_chat_analysis_failure_exposes_explicit_text_recovery_without_mutating_original": [
+            "assert accepted.response_request.image_analysis_state == 'waiting'",
+            "assert accepted.user_message.attachment.analysis_state == 'pending'",
+            "assert failed.image_analysis_state == 'failed' and failed.can_retry_without_image == bool(body)",
+            "assert retried.response_request.image_analysis_state == 'excluded'",
+            "assert retried.response_request.response_slot_id == failed.response_slot_id",
+            "assert retried.user_message.id == failed.user_message.id",
+            "assert chat.generation.retry_world_response(chat.db, chat.owner, chat.world_id, chat.thread_id, request).outcome == 'replayed'",
+            "pytest.raises(MessageValidationError, match='idempotency_conflict')",
+            "assert events[-1].event_type.value == 'completed'",
+            "assert chat.generation.get_world_response_request(chat.db, chat.owner, chat.world_id, chat.thread_id, retried.response_request.request_id).image_analysis_state == 'excluded'",
+            "assert chat.commands[-1].preflight.user_message == body and chat.commands[-1].image_evidence is None",
+            "assert chat.db.get(MessageMessage, failed.user_message.id).content == body",
+            "assert chat.db.get(MessageAttachment, failed.user_message.id).asset_id == asset",
+            "assert chat.db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 1",
+            "pytest.raises(MessageValidationError, match='text_only_recovery_unavailable')"
+          ]
+        },
+        "tests/image_integration/test_plan_review_regressions.py": {
+          "isolated_review": [],
+          "test_successful_generation_with_local_manifest_error_cannot_resubmit": [
+            "assert provider.calls == 1, {**observed, 'calls_after_retry': provider.calls}"
+          ],
+          "test_known_failed_comfy_job_retry_can_submit_a_new_attempt": [
+            "assert first.status == 'failed' and first.provider_receipt == 'failed-comfy-receipt'",
+            "assert final.status == 'succeeded', {'status': final.status, 'reason': final.failure_class, 'calls': provider.calls}"
+          ],
+          "test_text_workflow_applies_its_supported_negative_prompt": [
+            "assert calls[0][binding['node_id']]['inputs'][binding['input_name']] == 'blur', {'prepared_negative': request.negative}"
+          ],
+          "test_chat_acceptance_reserves_analysis_budget_before_returning": [
+            "assert attempts == 1, {'reserved_attempts_at_acceptance': attempts}"
+          ],
+          "test_nanogpt_reference_obeys_recorded_endpoint_pixel_constraints": [
+            "assert endpoint['input_reference_constraints']['route']['min_width'] == 8",
+            "pytest.raises(ImagePreparationError)",
+            "assert not http.calls"
+          ],
+          "test_saved_ready_nanogpt_profile_rejects_unsupported_resolution": [
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_valid_empty_routine_scene_means_no_image_intent": [
+            "assert admit(sessions, media, '') is None",
+            "assert provider.calls == 0",
+            "assert intent is None, {'state': intent.state, 'reason': intent.reason}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_plan_recovery_contracts.py": {},
+        "tests/image_integration/test_plan_review_regressions.py": {}
+      }
+    },
+    {
+      "commit": "e56200b859016ba3c4a63cfc48fdf01263861110",
+      "feature_id": "AR-SNS-CHAT-IMAGES-RETRY-CACHE",
+      "reason": "User-approved fixes for six reproduced image bugs and three contract gaps; exact first-introduction commit, original seven review assertions and additional failure/reservation/validation/recovery checks. NovelAI exact validation remains guarded/unverified. No checkpoint regeneration or remote CI.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/image_integration/test_plan_recovery_contracts.py::test_chat_retry_binding_uses_new_cache_without_reusing_old_snapshot"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_plan_recovery_contracts.py": {
+          "test_received_journal_recovers_disk_error_without_resubmit": [
+            "assert provider.calls == 1",
+            "assert db.get(PostImageGenerationJob, identity).status == 'result_pending'",
+            "assert db.scalar(select(ImageGenerationAttempt)).status == 'result_received'",
+            "assert db.get(PostImageGenerationJob, identity).status == 'succeeded'",
+            "assert db.scalar(select(PostMedia)) is not None"
+          ],
+          "test_received_result_lost_with_process_never_allows_new_submission": [
+            "assert provider.calls == 1",
+            "assert row.status == 'outcome_unknown' and (not media.worker.view(row)['retryable'])",
+            "pytest.raises(ImagePreparationError, match='no_resubmit')"
+          ],
+          "test_invalid_scene_is_distinct_from_normal_empty_scene": [
+            "assert provider.calls == 0",
+            "assert intent.state == 'blocked' and intent.reason",
+            "assert db.scalar(select(PostImageGenerationJob)) is None",
+            "assert db.get(Post, POST).body"
+          ],
+          "test_admission_is_shared_reserved_and_rolled_back_without_ai": [
+            "assert admitted.status == 'queued'",
+            "assert service.admit(db, 'owner', identity).id == admitted.id",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 0",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 0",
+            "assert db.scalar(select(func.count()).select_from(ImageInterpretation)) == 0"
+          ],
+          "test_competing_chat_and_sns_scopes_atomically_reserve_last_analysis": [
+            "assert fake.calls == 0",
+            "assert sorted(pool.map(reserve, identities)) == ['blocked', 'reserved']",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert str(error) == 'interpretation_daily_limit_reached'"
+          ],
+          "test_reserved_job_is_consumed_once_and_cache_reuses_off": [
+            "assert fake.calls == 1",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert service.admit(db, 'owner', identity).id == shared_id",
+            "assert [row.id for row in results] == [shared_id, shared_id]"
+          ],
+          "test_chat_does_not_replace_reserved_analysis_after_settings_change": [
+            "assert events[-1].event_type.value == 'failed'",
+            "assert chat.db.get(MessageAttachment, accepted.user_message.id).interpretation_id == reservation",
+            "assert chat.db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 0"
+          ],
+          "test_chat_retry_binding_uses_new_cache_without_reusing_old_snapshot": [
+            "assert attachment.snapshot_json and fake.calls == 1",
+            "assert attachment.interpretation_id != old_id and attachment.snapshot_json is None",
+            "assert chat.db.get(ImageInterpretation, old_id).status == 'succeeded'",
+            "assert value['interpretation_id'] == attachment.interpretation_id and value['asset_id'] == asset",
+            "assert fake.calls == 2"
+          ],
+          "test_reference_endpoint_pixel_mime_and_byte_boundaries": [
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_model_specific_option_case_and_profiles_are_not_interchangeable": [
+            "assert validate_api_options('nanogpt', nano, {'resolution': '1k'}) == {'resolution': '1k'}",
+            "assert validate_api_options('openrouter', router, {'resolution': '1K'}) == {'resolution': '1K'}",
+            "pytest.raises(ImagePreparationError)"
+          ],
+          "test_novel_exact_validation_is_unverified_and_blocks_before_any_http": [
+            "assert client.prompt_validation()['resource_verified']",
+            "assert not client.prompt_validation()['exact_verified']",
+            "pytest.raises(ImagePreparationError, match='prompt_validation_unverified')",
+            "assert http.calls == []"
+          ],
+          "test_novel_settings_and_existing_queued_job_do_not_bypass_unverified_gate": [
+            "assert provider.calls == 0",
+            "assert current['prompt_validation']['exact_verified'] is False",
+            "assert current['effective_auto_enabled'] is False and current['auto_enabled'] is True",
+            "pytest.raises(ImagePreparationError, match='prompt_validation_unverified')",
+            "assert db.get(PostImageGenerationJob, job_id).failure_class == 'novelai_prompt_validation_unverified'",
+            "assert db.scalar(select(ImageGenerationAttempt)).status == 'released'"
+          ],
+          "test_reference_settings_resolve_actual_source_without_creating_assets": [
+            "assert provider.calls == 0",
+            "assert initial['reference_state']['preferred'] and initial['reference_state']['status'] == 'missing'",
+            "assert media.read_generation(db, user, CHARACTER)['reference_state']['source'] == 'profile'",
+            "assert state['source'] == 'card' and state['applied']",
+            "assert db.scalar(select(func.count()).select_from(MediaAsset)) == count",
+            "assert db.get(AgentImageGenerationSetting, CHARACTER).card_asset_id is None",
+            "assert media.read_generation(db, user, CHARACTER)['reference_state']['source'] == 'override'",
+            "assert invalid['status'] == 'invalid' and invalid['generation_path'] == 'unavailable'",
+            "assert not invalid['applied'] and (not invalid['scene_only'])"
+          ],
+          "test_chat_analysis_failure_exposes_explicit_text_recovery_without_mutating_original": [
+            "assert accepted.response_request.image_analysis_state == 'waiting'",
+            "assert accepted.user_message.attachment.analysis_state == 'pending'",
+            "assert failed.image_analysis_state == 'failed' and failed.can_retry_without_image == bool(body)",
+            "assert retried.response_request.image_analysis_state == 'excluded'",
+            "assert retried.response_request.response_slot_id == failed.response_slot_id",
+            "assert retried.user_message.id == failed.user_message.id",
+            "assert chat.generation.retry_world_response(chat.db, chat.owner, chat.world_id, chat.thread_id, request).outcome == 'replayed'",
+            "pytest.raises(MessageValidationError, match='idempotency_conflict')",
+            "assert events[-1].event_type.value == 'completed'",
+            "assert chat.generation.get_world_response_request(chat.db, chat.owner, chat.world_id, chat.thread_id, retried.response_request.request_id).image_analysis_state == 'excluded'",
+            "assert chat.commands[-1].preflight.user_message == body and chat.commands[-1].image_evidence is None",
+            "assert chat.db.get(MessageMessage, failed.user_message.id).content == body",
+            "assert chat.db.get(MessageAttachment, failed.user_message.id).asset_id == asset",
+            "assert chat.db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert fake.calls == 1",
+            "pytest.raises(MessageValidationError, match='text_only_recovery_unavailable')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_plan_recovery_contracts.py": {}
+      }
     }
   ]
 }

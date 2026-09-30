@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-30",
+  "repository": "D:/project_code/angmoo-workspace/angmoo-tree-angmoo",
+  "branch": "feat/sns-chat-image-integration",
+  "reviewed_source": "4ed3e8f96d471f42c7616044a322c18904c5c155",
+  "final_product_source": "55d184ca5efdce1ff9f72c3583d119cea56abce1",
+  "main_unchanged": "1390ca4ddc275d3219b39b389c5368475e013b4c",
+  "status": "eight findings fixed; NovelAI exact validation guarded and unresolved",
+  "p00_p12_full_completion": false,
+  "findings": [
+    {
+      "id": "REV01",
+      "title": "생성 성공 후 로컬 결과 manifest 저장 실패가 새 생성 재시도로 이어짐",
+      "contracts": [
+        "C12",
+        "P06",
+        "T11"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": "test_successful_generation_with_local_manifest_error_cannot_resubmit",
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV02",
+      "title": "ComfyUI 확정 실행 실패 뒤 재시도는 예약 누락으로 실패",
+      "contracts": [
+        "C05",
+        "C12",
+        "P05",
+        "P06",
+        "T07",
+        "T10"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": "test_known_failed_comfy_job_retry_can_submit_a_new_attempt",
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV03",
+      "title": "ComfyUI 텍스트 경로의 부정 프롬프트 지원을 기본 workflow 기준으로 잘못 계산",
+      "contracts": [
+        "C02",
+        "C05",
+        "P05",
+        "T06",
+        "T31"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": "test_text_workflow_applies_its_supported_negative_prompt",
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV04",
+      "title": "Chat 이미지 접수에 공통 인식 job/사용량 예약이 없음",
+      "contracts": [
+        "C11",
+        "C12",
+        "P09",
+        "T29"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": "test_chat_acceptance_reserves_analysis_budget_before_returning",
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV05",
+      "title": "모델별 endpoint 입력 제약과 설정 저장 검증이 완전하지 않음",
+      "contracts": [
+        "C06",
+        "P01",
+        "P04",
+        "P05",
+        "T08"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": null,
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV06",
+      "title": "정상적인 빈 image_prompt가 이미지 준비 오류로 기록됨",
+      "contracts": [
+        "C01",
+        "P06",
+        "T01"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": "test_valid_empty_routine_scene_means_no_image_intent",
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV07",
+      "title": "NovelAI 전용 정확한 tokenizer 검증 완료 근거가 없음",
+      "contracts": [
+        "P01",
+        "P05"
+      ],
+      "status": "guarded_exactness_unresolved",
+      "original_test": null,
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV08",
+      "title": "설정 응답·화면의 실제 참조 출처/적용 상태가 누락됨",
+      "contracts": [
+        "C03",
+        "P04",
+        "P10",
+        "T25",
+        "T30"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": null,
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    },
+    {
+      "id": "REV09",
+      "title": "Chat 접수 이후 인식 실패의 전용 상태와 텍스트만 보내기 선택이 없음",
+      "contracts": [
+        "C11",
+        "P09",
+        "P10",
+        "T20"
+      ],
+      "status": "fixed_and_locally_verified",
+      "original_test": null,
+      "source_commits": [
+        "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "55d184ca5efdce1ff9f72c3583d119cea56abce1"
+      ]
+    }
+  ],
+  "original_review_7_assertions_preserved": true,
+  "tests": {
+    "image_suite": {
+      "report": "image-suite-complete.xml",
+      "sha256": "1d4b91c6c14ea172ce5e0b029b4cabb9871dc47d200dc59db89a436a62d83f74",
+      "tests": 140,
+      "passed": 140,
+      "failed": 0,
+      "skipped": 0,
+      "skip_reasons": [],
+      "execution_context": "at final committed product source 55d184ca"
+    },
+    "related_regressions": {
+      "report": "related-regressions.xml",
+      "sha256": "443054bc497ed784e0fb47cba2a1a93b490a52110293415d4be2c215cb2f83b4",
+      "tests": 877,
+      "passed": 871,
+      "failed": 0,
+      "skipped": 6,
+      "skip_reasons": [
+        "explicit performance run"
+      ],
+      "execution_context": "during fix before source commit; later change is supported-contract import plus retry cache binding, independently reverified in final 140-test suite"
+    },
+    "first_fix_regressions": {
+      "report": "review-fixes-final.xml",
+      "sha256": "d12bbdb19ef44f96a68e0378fafd66f284721772ac19b1bf4b0d4bcba8d25feb",
+      "tests": 29,
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "skip_reasons": [],
+      "execution_context": "29 tests at first fix source 69e8de76; superseded for current count by final suite including cache-binding case"
+    },
+    "cache_binding_boundaries": {
+      "report": "chat-cache-binding.xml",
+      "sha256": "0ebde3a694e0a5e5ec7d4c767bf2fc47768889b3a12f2f9f7ddd2254df2b575a",
+      "tests": 23,
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "skip_reasons": [],
+      "execution_context": "23 boundary tests before committing unchanged bytes in 55d184ca"
+    }
+  },
+  "browser": {
+    "report": "browser-verified-results.json",
+    "sha256": "087a7012ea1f7f9c99607f78b27215e9cd5f66a364f57362f5c767ac4cd50f32",
+    "stats": {
+      "startTime": "2026-09-30T13:14:32.897Z",
+      "duration": 46573.854,
+      "expected": 30,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "execution_context": "Next/static fixture servers and production builds; committed response fetch, refreshed thread and failed bubble disappearance included; frontend bytes later committed unchanged in 69e8de76"
+  },
+  "structure_regressions": {
+    "report": "structure-regressions.xml",
+    "sha256": "f60e928adaa3e5c53bc171ab5a88b1c97ee8c3f370ac0fa6e4b1beee2ae9a64c",
+    "tests": 105,
+    "passed": 105,
+    "failed": 0,
+    "skipped": 0,
+    "scope": [
+      "test_l4_pr_a_inventory.py",
+      "test_chat_forwarder_retirement.py",
+      "test_public_factory_retirement.py"
+    ],
+    "execution_context": "started during source 69e8de76 and completed after cache-binding fix 55d184ca; no production factory edits in the cache-binding commit"
+  },
+  "preservation": {
+    "status": "passed",
+    "report": "preservation-final.log",
+    "sha256": "8a3c6b8c7675219bd2074d6af2f500e67f9029bc7e8400f992035dabbd1286e1",
+    "product_source_commit": "55d184ca5efdce1ff9f72c3583d119cea56abce1",
+    "protected_lineages": 4458,
+    "current_nodes": 4458,
+    "items": 37,
+    "original_checker_unchanged": true,
+    "historical_baselines_unchanged": true,
+    "implementation": "Original main --contracts --nodes; immutable Git blob cache validates object identity and prewarms exact original read-only Git metadata CLI results. Current-file and every assertion/contract/lineage check remain unchanged. HEAD pinned during the check."
+  },
+  "static_checks": [
+    "frontend typecheck",
+    "frontend lint",
+    "Next build",
+    "static build",
+    "backend architecture",
+    "frontend architecture",
+    "frontend design contract",
+    "current import inventory",
+    "L4 current inventory",
+    "frontend frozen preservation (324 files)"
+  ],
+  "novelai": {
+    "exact_verified": false,
+    "generation_enabled": false,
+    "failure_code": "novelai_prompt_validation_unverified",
+    "gate_locations": [
+      "catalog/settings/UI",
+      "automatic intent preparation",
+      "existing queued job execution",
+      "actual adapter before any HTTP"
+    ],
+    "wire_tests": "synthetic verified capability for serializer and Opus tests only; production default gate separately proves HTTP 0",
+    "remaining": "Exact V4.5 parser/tokenizer/resource revision, weights/special-token accounting and boundary fixture proof; then live F01-F02"
+  },
+  "proof_records": {
+    "historical_results_source": {
+      "first_introduction_commit": "4ed3e8f96d471f42c7616044a322c18904c5c155",
+      "historical_json_unchanged": true
+    },
+    "exact_product_deltas": {
+      "69e8de76": {
+        "definitions": 46,
+        "assertions": 2,
+        "api_contracts": 4,
+        "orm_tables": 0
+      },
+      "55d184ca": {
+        "definitions": 2,
+        "assertions": 0,
+        "api_contracts": 0,
+        "orm_tables": 0
+      }
+    },
+    "new_introductions": [
+      {
+        "commit": "4ed3e8f96d471f42c7616044a322c18904c5c155",
+        "feature_id": "AR-SNS-CHAT-IMAGES-INITIAL-RESULTS",
+        "sources": 1,
+        "nodes": 0
+      },
+      {
+        "commit": "69e8de7603ebc290aa66cca43e377bae3b5709c4",
+        "feature_id": "AR-SNS-CHAT-IMAGES-REVIEW-FIXES",
+        "sources": 3,
+        "nodes": 29
+      },
+      {
+        "commit": "55d184ca5efdce1ff9f72c3583d119cea56abce1",
+        "feature_id": "AR-SNS-CHAT-IMAGES-RETRY-CACHE",
+        "sources": 0,
+        "nodes": 1
+      }
+    ],
+    "original_history_records_preserved": 306,
+    "total_introduction_records": 309
+  },
+  "live_generation_requests": 0,
+  "live_recognition_requests": 0,
+  "docker_started": false,
+  "installed_data_accessed": false,
+  "remote_mutations": [],
+  "untracked_artifacts_preserved": true,
+  "remaining_followups": [
+    "NovelAI exact validation proof",
+    "F01-F11",
+    "USER CHECK",
+    "fixed Linux pixel baseline",
+    "CI/PR/push/merge/deployment/installation excluded"
+  ],
+  "report_hashes": {
+    "image-suite-first.xml": "2ea7cdb5431e0a2e65ce5ed2fcd09831ada20e9ac3bef51f9965bf5b3d36c359",
+    "review-regressions-first.xml": "d4aff5ced7f94c247690b7b8d34cb0fa7c070edda1f8dc9cf5a4669e36971dbd",
+    "expanded-regressions-first.xml": "98ffde384a77ce15844b37cd94f31fb22c70a5f3759226b5bae096dbe4a6b391",
+    "browser-run.log": "966cb0c6836434333328e3d6d6deb9ee16c4ce83b4321b569fd4638166b15b5b",
+    "browser-final-run.log": "1338c1a82d1d64a04e43a623fe3431550c5565c62bfa2c19ed8a7306f1cf8676",
+    "browser-verified-run.log": "825fb5ac8d8705f94d88f5c59fa466bcd7479999401ab0a8c0ec828b49a7fd10",
+    "introduction-capture.log": "cdf16ffdbcbabc54b8eb1efe7beba8c55eb71c6151f9e940710c427cc83b28e9",
+    "introduction-capture-final.log": "cdf16ffdbcbabc54b8eb1efe7beba8c55eb71c6151f9e940710c427cc83b28e9",
+    "introduction-capture-corrected.log": "b4f503f61dc7ac9b19b13d6635278f4ff67fa6db31dd4a7576b6b554131604d4",
+    "cache-introduction-capture.log": "4501444f3ff9f0371a812709d8ee1084e8770ffc69e66cd6661ce7c49096b3e9",
+    "preservation-final.log": "8a3c6b8c7675219bd2074d6af2f500e67f9029bc7e8400f992035dabbd1286e1"
+  },
+  "original_review_source_sha256": "ad258496d86a7f263e2892b334ead9f13a1a58b15ccbc0b183efdd8bce10430c",
+  "artifact_root": "D:/project_code/angmoo-workspace/angmoo-tree-angmoo/artifacts/image-integration-fixes"
+}

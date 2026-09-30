@@ -2,6 +2,10 @@
 
 사용자가 지정한 workspace 계획 P00–P12의 로컬 구현 기록이다. 시작 main `1390ca4ddc275d3219b39b389c5368475e013b4c`, 브랜치 `feat/sns-chat-image-integration`, 이슈 https://github.com/angmoo-tree/angmoo/issues/348. PR·push·CI·main 병합·배포·설치 앱 변경은 수행하지 않는다. 도커 없이 임시 SQLite와 테스트 전용 서버에서 검증한다.
 
+## 현행 판정 정정
+
+초기 P00–P12의 누락 없는 전체 완료 판정은 재검토 9건 때문에 철회한다. 동작 문제 6건과 참조 상태·Chat 복구 2건은 수정했고 NovelAI의 정확한 길이 검증은 미입증으로 생성을 차단한다. 현재 source `55d184ca5efdce1ff9f72c3583d119cea56abce1`의 상세 결과는 [후속 수정 기록](./sns-chat-image-review-fixes-20260930.md)과 [후속 JSON](./sns-chat-image-review-fixes-20260930-results.json)을 따른다. 아래 테스트 수·실 인식·전체 보존 결과는 초기 실행의 역사 증거다. 이번 수정의 전체 backend 실행 또는 새 HEAD의 실제 API 검사로 해석하지 않는다.
+
 ## 구현 계약
 
 - 네 Provider의 자동 생성은 신규 Routine 글·사용자 활성화·연결·사용량 상한·장면 검증을 모두 통과할 때만 접수한다. 마지막 작성은 image_prompt 장면 하나를 추가하며 기존 4회 LLM 흐름을 유지한다.
@@ -9,9 +13,9 @@
 - immutable asset·analysis·intent revision, 원자적 예약, claim/lease, 제출 직전/결과 직전 검증, receipt·결과 spool을 사용한다. 결과 미확정 자동 재생성·무료 실패 시 유료 전환·다른 Provider 대체·과거 글 일괄 생성·다음 날 자동 backlog는 허용하지 않는다.
 - 업로드한 SNS/Chat 이미지와 인식 키는 private 소유권을 갖는다. SNS의 이미지 단서는 같은 대상 recall에만 결합한다. Chat 분석은 Router/Planner/CRG 전에 끝나며 별도 image evidence로 전달한다. 본문은 이미지 분석으로 덮어쓰지 않는다.
 
-## 확인한 증거
+## 초기 실행에서 확인한 증거
 
-신규 이미지 통합 suite의 최종 실행은 source commit `db1542e2d8774196d13eeabc8bba55e270056051`에서 **110 tests PASS**였다. 마지막 SNS 호출의 scene/잘못된 scene/잘못된 본문/OFF 검사와 두 앱 프로필의 이미지 서비스 격리 검사까지 포함한다. 참조 우선순위·OFF/no read·revision 변경, 네 생성 Provider의 fake physical-call count, 실제 serializer, durable 결과 복구, quota 동시 예약/날짜, v25 populated 업그레이드와 중간 DDL 실패 보존, 공통 Gemini SDK 입력, selected SNS/FTS budget, 실제 Chat LangGraph orchestration, 수동 SNS HTTP 첨부/재전송, private read/World Package exclusion, draft expiry/삭제를 포함한다. 텍스트 LLM 및 생성 transport는 fake이며 paid 생성 실제 품질은 검증하지 않는다.
+초기 이미지 통합 suite의 최종 실행은 source commit `db1542e2d8774196d13eeabc8bba55e270056051`에서 **110 tests PASS**였다. 마지막 SNS 호출의 scene/잘못된 scene/잘못된 본문/OFF 검사와 두 앱 프로필의 이미지 서비스 격리 검사까지 포함한다. 참조 우선순위·OFF/no read·revision 변경, 네 생성 Provider의 fake physical-call count, 실제 serializer, durable 결과 복구, quota 동시 예약/날짜, v25 populated 업그레이드와 중간 DDL 실패 보존, 공통 Gemini SDK 입력, selected SNS/FTS budget, 실제 Chat LangGraph orchestration, 수동 SNS HTTP 첨부/재전송, private read/World Package exclusion, draft expiry/삭제를 포함한다. 텍스트 LLM 및 생성 transport는 fake이며 paid 생성 실제 품질은 검증하지 않는다.
 
 기존 모든 v1–v25 합성 predecessor 보존 검사는 41 tests PASS. 과거 frozen manifest/DB 원본은 바꾸지 않았고 새로운 v26이 추가되었다. installer의 합성 predecessor 작성과 정적 matrix를 v25까지 확장했으며 실제 NSIS 설치나 hosted workflow는 실행하지 않았다.
 
