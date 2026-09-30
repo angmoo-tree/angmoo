@@ -24117,6 +24117,18 @@
       "test_suppressions": {
         "tests/image_integration/test_plan_recovery_contracts.py": {}
       }
+    },
+    {
+      "commit": "8ec0ea496cd0f892ae93d690abff9daa9bdc3da2",
+      "feature_id": "AR-SNS-CHAT-IMAGES-REVIEW-RECORD",
+      "reason": "Exact first-introduction source blobs of the final review correction and evidence record. Documentation-only commit; no new or changed product code/test nodes. All prior records retained unchanged.",
+      "tracked_files": {
+        "docs/verification/sns-chat-image-review-fixes-20260930-results.json": "e813b4130710794cab384c45142882dc66cd2351",
+        "docs/verification/sns-chat-image-review-fixes-20260930.md": "b26c642dd9154aa2f9ec272c3a028dea21204ac3"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
