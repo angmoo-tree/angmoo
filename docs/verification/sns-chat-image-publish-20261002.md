@@ -20,6 +20,8 @@ MIME 판독, 불일치 거절, bytes·해상도·픽셀·프레임 제한, Pillo
 
 현재 import inventory는 실제 소스에서 다시 생성했다. 역사적 source/behavior baseline을 덮어쓰지 않는다. MIME·카드 변경에서 누락된 최초 도입 자료와 정확한 전후 계약은 append-only metadata로 보완한다. 카드 중복을 실패로 기대하던 검사는 합의한 첫 정의 선택 정책과 JSON 중복 키 거절로 분리하고 선택 실패 시 fallback 금지 검사를 유지한다.
 
+CI와 같은 사전 검사에서 L4의 현재 inventory가 오래된 import 수와 static parity test hash를 기록한 점도 확인했다. 원래 generator로 현재 module 1334, 내부 edge 5407, 외부 import 3933 및 실제 static test hash를 갱신했다. 순환과 legacy 예외는 모두 0이다. policy의 baseline commit, 동결 parity oracle·Memory predecessor와 원래 generator/검사 조건은 변경하지 않았다. 격리 contributor diagnostics는 SQLite·LadybugDB 및 v26 migration ready, scheduler stopped, Provider 호출 0을 확인했다.
+
 ## Hosted CI 연결
 
 원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
