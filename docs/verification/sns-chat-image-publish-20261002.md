@@ -26,6 +26,8 @@ CI와 같은 사전 검사에서 L4의 현재 inventory가 오래된 import 수�
 
 전체 Backend의 L0 runtime 검사에서도 새 공통 module의 inventory 등록 누락을 재현했다. `app.core.image_bytes`의 중립 검사 책임을 기존 core 목록에 명시했다. core가 domain/integration/runtime을 import하지 못하는 원래 조건과 Docker 서비스·host publication·storage·release/supply-chain 계약은 유지한다.
 
+ER0의 현재 runtime/SQL inventory에는 `main.py`·Chat model hash와 패치 전 dependency 버전이 남아 있었다. 원래 generator로 해당 현재 값만 갱신했고 기존 89개 migration, 24개 graph query, 44개 route 및 동결 parity corpus는 유지한다. 원래 8개 검사는 수정된 현재 소스의 전체 scan과 count·omission·hash·new-source 거절을 포함해 통과했다. 현재 PostgreSQL marker 목록은 역사적 schema/호환값/재도입 guard를 설명하는 것이며 PostgreSQL runtime을 추가하지 않는다.
+
 ## Hosted CI 연결
 
 원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
