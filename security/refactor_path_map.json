@@ -137211,7 +137211,8 @@
     "backend/tests/test_langgraph_resident_engine.py::test_writer_split_call_budget_allows_json_retry_worst_case": "backend/tests/integrations/test_direct_llm.py::test_writer_split_call_budget_allows_json_retry_worst_case",
     "backend/tests/test_langgraph_resident_engine.py::test_direct_llm_rate_limiter_waits_instead_of_failing": "backend/tests/integrations/test_direct_llm.py::test_direct_llm_rate_limiter_waits_instead_of_failing",
     "backend/tests/test_langgraph_resident_engine.py::test_writing_composition_stream_params_omit_sampling_parameters": "backend/tests/routines/test_writing_parameters.py::test_writing_composition_stream_params_omit_sampling_parameters",
-    "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback"
+    "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback",
+    "backend/tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "backend/tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected"
   },
   "retired_model_facades": {
     "app.models.auth": "app.domains.identity.models",
