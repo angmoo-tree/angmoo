@@ -24,6 +24,8 @@ CI와 같은 사전 검사에서 L4의 현재 inventory가 오래된 import 수�
 
 현재 Hybrid/episode inventory도 기존 v25 기록에 머물러 있어, 이미지 계약·실제 source hash·v26 schema 147개 table과 revision `20260930_0104`를 원래 generator로 반영했다. 이전 파일은 모두 유지했고 새 이미지/migration 소스만 추가했다. bounds, defaults, embedding, 기능 계약, 별도 Gate, 동결 Memory predecessor와 generator는 변경하지 않았으며 원래 P8-L-R 검사가 통과했다.
 
+전체 Backend의 L0 runtime 검사에서도 새 공통 module의 inventory 등록 누락을 재현했다. `app.core.image_bytes`의 중립 검사 책임을 기존 core 목록에 명시했다. core가 domain/integration/runtime을 import하지 못하는 원래 조건과 Docker 서비스·host publication·storage·release/supply-chain 계약은 유지한다.
+
 ## Hosted CI 연결
 
 원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
