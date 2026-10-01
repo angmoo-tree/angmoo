@@ -55,10 +55,10 @@ const names=Object.keys(after.api).filter(name=>typeof after.api[name]==="functi
 const migratedApiSource=execFileSync("git",["show",
  "cc82a68c42ca3e0868aed9c33e6b7579e5cea63e:frontend/src/features/characters/api/agents.ts"],{cwd:root,encoding:"utf8"});
 const preservedNames=[...migratedApiSource.matchAll(/export (?:async )?function (\w+)/g)].map(match=>match[1]);
-const addedNames=["adoptLegacyAgentDraft","findExistingWorldCharacter","importAgentCard","getAgentCardSource","copyAgentSettings"];
+const addedNames=["adoptLegacyAgentDraft","findExistingWorldCharacter","importAgentCard","getAgentCardSource","getAgentCardMetadata","copyAgentSettings"];
 assert.equal(preservedNames.length,45,"The immutable pre-extraction contract contains 45 endpoints");
 assert.deepEqual([...names].sort(),[...preservedNames,...addedNames].sort(),
- "All original endpoints and the five explicit World/card additions remain exported");
+ "All original endpoints and the six explicit World/card additions remain exported");
 function args(name, newProfiles=false){
  if(name==="uploadAgentLoreSource")return ["character/id",new File(["lore fixture"],"fixture.txt"),{replaceExisting:true}];
  if(name==="giveAgentFeedCue")return ["character/id","fixture topic",{manualRun:true}];
@@ -89,6 +89,7 @@ for(const [name,callArgs,method,suffix,body] of [
  ["adoptLegacyAgentDraft",["draft/id",2,"world/id"],"POST","/agents/drafts/draft%2Fid/adopt",{revision:2,target_world_id:"world/id"}],
  ["importAgentCard",["draft-id",2,"synthetic-base64"],"POST","/agents/drafts/draft-id/card",{revision:2,data_base64:"synthetic-base64"}],
  ["getAgentCardSource",["draft-id"],"GET","/agents/drafts/draft-id/card-source",null],
+ ["getAgentCardMetadata",["draft/id"],"GET","/agents/drafts/draft%2Fid/card-source?include_document=false",null],
  ["copyAgentSettings",["draft-id",2,"character/id"],"POST","/agents/drafts/draft-id/copy-settings",{revision:2,character_id:"character/id"}],
  ["findExistingWorldCharacter",["world/id","character/id"],"GET","/worlds/world%2Fid/characters?surface=studio",null],
 ]) {
@@ -130,4 +131,4 @@ for(const h of [before,after]){
 assert.deepEqual(plain(after.session.getAgentAutonomyMutationStates()),plain(before.session.getAgentAutonomyMutationStates()));
 assert.deepEqual(after.window.sessionStorage.dump(),before.window.sessionStorage.dump());
 assert.deepEqual(plain(after.events),plain(before.events));
-console.log("Character parity passed: 45 preserved and 5 additive endpoint requests, 3 failure paths, onboarding/autonomy storage and ordered events.");
+console.log("Character parity passed: 45 preserved and 6 additive endpoint requests, 3 failure paths, onboarding/autonomy storage and ordered events.");

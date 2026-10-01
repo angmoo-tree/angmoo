@@ -30,6 +30,10 @@ ER0의 현재 runtime/SQL inventory에는 `main.py`·Chat model hash와 패치 �
 
 ## Hosted CI 연결
 
+첫 PR CI에서 기존 캐릭터 request 검사의 명시 export 목록이 새 `getAgentCardMetadata`를 포함하지 않아 실패했다. 동결된 45개 endpoint·failure·session 검사는 그대로 두고 여섯 번째 추가 API의 encoded draft ID, metadata 전용 query, GET과 빈 body를 확인하도록 보완했다. Frontend session·state·Social·error parity도 함께 실행한다.
+
+같은 PR의 보존 검사에서는 Pillow가 생성한 PNG bytes를 자동 parameter ID로 사용해 Windows와 Linux의 압축 결과 차이가 test node 이름으로 전파되는 문제가 확인됐다. MIME 불일치·손상 PNG·미지원 GIF의 기존 값과 assertion을 그대로 유지하고 세 parameter에 명시적인 의미별 ID를 부여한다. 이전 정확한 node에서 새 ID로 일대일 lineage를 기록하며 이전 introduction evidence나 동결 node 수를 덮어쓰지 않는다. 이는 제품 이미지 bytes를 통일하는 변경이 아니다.
+
 원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
 
 Gitleaks 8.30.1의 현재 tree/949개 커밋 검사에서 17개의 비밀 오탐이 확인됐다. 공개 source Git blob 8개는 각 도입 커밋의 `commit:path`로, T5 checksum은 번들 bytes의 SHA-256으로 확인했다. 나머지는 두 합성 idempotency 식별자와 두 SQLAlchemy lease 만료 계산식이다. `generic-api-key`의 정확한 경로와 전체 line 조건만 추가한다. 다른 field·값·경로·추가 credential literal·폴더 단위 예외는 허용하지 않는다. 관련 회귀 검사로 값 변경과 다른 파일이 허용되지 않음을 확인한다. 기존 실제 비밀 탐지와 과거 fixture 예외는 유지한다.

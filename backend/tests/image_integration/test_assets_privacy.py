@@ -20,7 +20,8 @@ from chat.test_p8_l_d_world_chat_api import _fixture, _seed, FRONTEND_HEADERS
 from image_integration.test_interpretation import pixels, FakeInterpreter
 
 
-@pytest.mark.parametrize("mime,content", [("image/jpeg",pixels()),("image/png",b"fake"),("image/gif",b"GIF89a")])
+@pytest.mark.parametrize("mime,content", [("image/jpeg",pixels()),("image/png",b"fake"),("image/gif",b"GIF89a")],
+                         ids=["mismatched-png-as-jpeg", "invalid-png-bytes", "unsupported-gif"])
 def test_spoofed_and_unsupported_image_types_are_rejected(mime,content):
     with pytest.raises(InvalidProfileMediaError): normalize_pixels(mime,content,max_bytes=10*1024*1024)
 
