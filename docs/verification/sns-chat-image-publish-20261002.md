@@ -22,6 +22,8 @@ MIME 판독, 불일치 거절, bytes·해상도·픽셀·프레임 제한, Pillo
 
 CI와 같은 사전 검사에서 L4의 현재 inventory가 오래된 import 수와 static parity test hash를 기록한 점도 확인했다. 원래 generator로 현재 module 1334, 내부 edge 5407, 외부 import 3933 및 실제 static test hash를 갱신했다. 순환과 legacy 예외는 모두 0이다. policy의 baseline commit, 동결 parity oracle·Memory predecessor와 원래 generator/검사 조건은 변경하지 않았다. 격리 contributor diagnostics는 SQLite·LadybugDB 및 v26 migration ready, scheduler stopped, Provider 호출 0을 확인했다.
 
+현재 Hybrid/episode inventory도 기존 v25 기록에 머물러 있어, 이미지 계약·실제 source hash·v26 schema 147개 table과 revision `20260930_0104`를 원래 generator로 반영했다. 이전 파일은 모두 유지했고 새 이미지/migration 소스만 추가했다. bounds, defaults, embedding, 기능 계약, 별도 Gate, 동결 Memory predecessor와 generator는 변경하지 않았으며 원래 P8-L-R 검사가 통과했다.
+
 ## Hosted CI 연결
 
 원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
