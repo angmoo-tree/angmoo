@@ -1,0 +1,41 @@
+# SNS·Chat 이미지 통합 브랜치 게시 준비와 검증 기록
+
+## 게시 범위
+
+이 기록의 시작 원본은 `feat/sns-chat-image-integration`의 `1d1c961069f2522d19c1438efe8cf6ae55a97258`, 기준 main은 `1390ca4ddc275d3219b39b389c5368475e013b4c`이다. 이미지 생성·인식, SNS·Chat 첨부, MIME 판독과 PNG·JPEG·WebP 형식 보존, ComfyUI Partner 인증, 캐릭터 카드 중복 메타데이터 호환을 게시한다. 원본 작업 폴더의 Gemini 응답·SNS 관측 관련 미커밋 6개와 별도 보존 기간 개선 계획은 포함하지 않는다.
+
+원본은 그대로 보존하고 독립 후보 clone에서 준비했다. 사용자 Docker, 설치 데이터, API 키와 유료 Provider는 이번 검증에 사용하지 않았다. 기존 실서비스 결과는 당시 실행 SHA의 증거이며 이번 후보에서 다시 실행했다는 의미가 아니다.
+
+## DCO와 역사적 출처
+
+최초 18개 커밋 중 7개에는 작성자 Signed-off-by가 없었다. 공개 전 작성자 본인의 sign-off를 추가하면서 부모가 바뀌는 후속 커밋을 함께 재구성했다. 원본 커밋 bundle과 미커밋 파일의 사본·hash, 18개 old/new 대응표는 로컬 진단 자료로 보존했다.
+
+재구성된 초기 후보는 `4a91b383c133adb2805a529e75f1d4603ba6f2eb`이다. 원본 HEAD와 이 후보의 tree 차이는 `security/refactor_backend_additions.json`의 `commit`, `security/post_refactor_contract_changes.json`의 `implementation_commit` 출처 참조뿐이다. 각 역사적 metadata 도입 시점부터 같은 대응표를 적용했다. 제품 소스, 동결 main, PR258/PR263/PR290 checkpoint, 기존 검사 조건, 과거 실서비스 보고서의 실행 SHA는 바꾸지 않았다. 기존 DCO 검사 결과는 원본 7 FAIL, 재구성 후보 PASS다.
+
+## 게시 준비에서 확인한 구조 문제와 수정
+
+형식 보존 구현이 도입한 공통 이미지 검사는 도메인 오류 타입을 상속했다. 미디어 도메인이 그 integration을 호출하면서 `app.domains.media → app.integrations.media → app.domains.media` 패키지 순환이 생겼다. 도메인·설정·소유권에 의존하지 않는 `app.core.image_bytes`로 bytes 검사와 결과 타입을 옮겼다. 도메인과 기존 integration 경계에서 이전 공개 오류 타입으로 변환한다.
+
+MIME 판독, 불일치 거절, bytes·해상도·픽셀·프레임 제한, Pillow verify와 실제 decode 검사는 유지한다. geometry 실패가 decode로 잘못 변환되지 않도록 중립 오류는 `Exception`을 상속한다. 추가 회귀 검사는 core geometry 단계, domain의 `asset_geometry_invalid`, 기존 integration의 `image_geometry_invalid`를 함께 확인한다. API·DB schema는 이 분리 때문에 변경하지 않는다.
+
+현재 import inventory는 실제 소스에서 다시 생성했다. 역사적 source/behavior baseline을 덮어쓰지 않는다. MIME·카드 변경에서 누락된 최초 도입 자료와 정확한 전후 계약은 append-only metadata로 보완한다. 카드 중복을 실패로 기대하던 검사는 합의한 첫 정의 선택 정책과 JSON 중복 키 거절로 분리하고 선택 실패 시 fallback 금지 검사를 유지한다.
+
+## Hosted CI 연결
+
+기존 frontend job에 `playwright.image-integration.config.ts`를 연결한다. Next와 static의 동일 SNS·Chat 이미지 흐름 40개 검사를 실행하고 JUnit·실패 screenshot·trace를 artifact로 남긴다. 합성 fixture와 fake Provider를 사용하며 유료 API 키, 과거 로컬 DB·게시글·개인 캐릭터 카드에 의존하지 않는다. 기존 검사와 required context는 제거하지 않는다.
+
+## 로컬 확인 범위
+
+구조 분리 이후 이미지·미디어·캐릭터 HTTP 경계 회귀 검사는 **319 PASS**다. 분리 이전에도 Next/static 빌드, lint, typecheck, 카드 proxy 검사가 통과했고 이미지 browser **40 PASS**였다. 카드 browser는 외부 원본 fixture가 없는 경우를 명시적으로 구분한다. Backend 전체, 정확한 출처·계약·node 보존, clean clone 확인은 게시 gate로 별도 수행하며 아직 실행 중인 검사를 PASS로 취급하지 않는다.
+
+PR CI와 병합 후 main push CI는 각 SHA·run을 별도로 기록한다. 최종 PR·merge SHA와 main CI는 workspace 실행 receipt에 남기며 main에 결과만 직접 push하지 않는다.
+
+## 남은 실서비스·사용자 확인
+
+- NovelAI Opus 무차감 NA01/F01은 이번 사용자의 Anlas 소비 테스트 선택으로 실행하지 않았다.
+- NovelAI 모델 전용 tokenizer/parser와 정확한 길이 계산 동등성, 캐릭터 일관성·이미지 품질, 자연 SNS 활동과 개인 환경 USER CHECK는 별도다.
+- 실제 Routine contract-v2는 게시글·장면을 함께 만드는 1회 호출이다. 예전 4회 유지 계획이나 준비 호출 포함 사용량과 혼동하지 않는다.
+- 최초 실서비스 17건의 12 PASS/5 NanoGPT FAIL 및 후속 NanoGPT 5 PASS·Next 표시 5 PASS는 이전 검증 문서의 해당 실행 범위다.
+- 이슈 #348은 `Refs #348`로 참조한다. 남은 항목을 통합 CI PASS로 확대하거나 자동 종료하지 않는다.
+
+로컬 raw evidence, DB, 키 JSON, 개인 이미지·카드·대화·화면은 공개하지 않는다. 이 문서의 요약과 저장소에 추적된 합성 회귀 fixture만 clone 가능한 자료다.

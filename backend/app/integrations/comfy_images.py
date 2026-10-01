@@ -7,7 +7,8 @@ import time
 from urllib.parse import urlsplit
 from app.domains.media.generation_contracts import ComfyWorkflow, ImagePreparationError, ImageSubmissionError, ImageResult
 from app.integrations.image_api import ImageHttp
-from app.integrations.media.images import validate_generated_media_content, inspect_image_bytes, ImageBytesError
+from app.integrations.media.images import validate_generated_media_content
+from app.core.image_bytes import inspect_image_bytes, ImageBytesError
 
 BINDING_FIELDS = {"positive", "negative", "width", "height", "steps", "cfg", "sampler", "scheduler", "seed", "denoise", "model", "vae", "clip_skip", "reference"}
 

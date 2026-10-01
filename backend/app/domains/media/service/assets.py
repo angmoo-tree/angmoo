@@ -12,7 +12,7 @@ from sqlalchemy import select
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.media.models import MediaAsset
 from app.domains.media.service.pixel_validation import validate_pixels
-from app.integrations.media.images import ImageInspection
+from app.core.image_bytes import ImageInspection
 
 
 class AssetService:

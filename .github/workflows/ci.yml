@@ -269,6 +269,11 @@ jobs:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build:static
         working-directory: frontend
+      - name: Verify shared SNS and Chat image flows in Next and static
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/image-integration.xml
+        run: pnpm exec playwright test --config playwright.image-integration.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Verify daily preparation in production Next
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/daily-next.xml
@@ -329,6 +334,8 @@ jobs:
             browser-tests/.ci/creator-next.xml
             browser-tests/.ci/creator-static.xml
             browser-tests/.ci/card-upload.xml
+            browser-tests/.ci/image-integration.xml
+            artifacts/image-integration/browser/
             browser-tests/.ci/daily-next.xml
             browser-tests/.ci/daily-static.xml
             browser-tests/.ci/browser-test-identity.json

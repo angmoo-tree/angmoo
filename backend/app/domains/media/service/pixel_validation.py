@@ -1,6 +1,6 @@
 """Validate owned attachment pixels before decoding or persisting them."""
 from app.domains.media.contracts import InvalidProfileMediaError
-from app.integrations.media.images import ImageBytesError, inspect_image_bytes
+from app.core.image_bytes import ImageBytesError, inspect_image_bytes
 
 
 def validate_pixels(content_type, content, *, max_bytes):

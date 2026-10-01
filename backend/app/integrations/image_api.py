@@ -6,7 +6,7 @@ import httpx
 from PIL import Image
 from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options, validate_reference_metadata
 from app.domains.media.generation_contracts import GenerationRequest, ImageResult, ImagePreparationError, ImageSubmissionError, MODEL_CATALOG
-from app.integrations.media.images import ImageBytesError, inspect_image_bytes
+from app.core.image_bytes import ImageBytesError, inspect_image_bytes
 
 API_ROOTS = {"nanogpt": "https://api.nano-gpt.com/api/v1/images", "openrouter": "https://openrouter.ai/api/v1/images"}
 MAX_RESULT_BYTES = 12 * 1024 * 1024
