@@ -412,3 +412,16 @@ regexes = [
   '''^\s*\.values\(status="running",\ lease_token=token,\ lease_until=now\ \+\ timedelta\(minutes=5\)\)\)\s*$''',
   '''^\s*status="running",\ lease_token=token,\ lease_until=now\ \+\ timedelta\(minutes=5\),\ started_at=now\)\)\s*$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact synthetic literals in image leak-review negative tests; no credential value; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)backend/tests/test_image_gitleaks_review\.py$''',
+]
+regexes = [
+  '''^\s*line = 'WorldChatMessageCreate\(content="keep this message", attachment_asset_id=asset, idempotency_key="synthetic-cancel-001"\)\)'\s*$''',
+  '''^\s*line = '\.values\(status="running", lease_token=token, lease_until=now \+ timedelta\(minutes=5\)\)\)'\s*$''',
+]
