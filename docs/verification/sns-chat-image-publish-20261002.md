@@ -30,6 +30,8 @@ ER0의 현재 runtime/SQL inventory에는 `main.py`·Chat model hash와 패치 �
 
 ## Hosted CI 연결
 
+캐릭터 생성 browser fixture의 카드 원문 응답도 이전 형태여서 metadata 복구 시 review/raw_only가 누락되는 실패를 재현했다. fixture를 실제 `CharacterCardSourceRead` 타입의 전체 응답에 맞추고 `include_document=false`에서는 document를 null로 반환한다. 기존 편집·World·새로고침 검사에 metadata 조회가 발생하고 원문을 다시 요청하지 않는 확인을 추가한다. 제품 UI에서 잘못된 mock을 묵인하거나 기존 실패 기대값을 지우는 변경은 하지 않는다.
+
 첫 PR CI에서 기존 캐릭터 request 검사의 명시 export 목록이 새 `getAgentCardMetadata`를 포함하지 않아 실패했다. 동결된 45개 endpoint·failure·session 검사는 그대로 두고 여섯 번째 추가 API의 encoded draft ID, metadata 전용 query, GET과 빈 body를 확인하도록 보완했다. Frontend session·state·Social·error parity도 함께 실행한다.
 
 같은 PR의 보존 검사에서는 Pillow가 생성한 PNG bytes를 자동 parameter ID로 사용해 Windows와 Linux의 압축 결과 차이가 test node 이름으로 전파되는 문제가 확인됐다. MIME 불일치·손상 PNG·미지원 GIF의 기존 값과 assertion을 그대로 유지하고 세 parameter에 명시적인 의미별 ID를 부여한다. 이전 정확한 node에서 새 ID로 일대일 lineage를 기록하며 이전 introduction evidence나 동결 node 수를 덮어쓰지 않는다. 이는 제품 이미지 bytes를 통일하는 변경이 아니다.
@@ -46,7 +48,7 @@ Gitleaks 8.30.1의 현재 tree/949개 커밋 검사에서 17개의 비밀 오탐
 
 전체 Backend 실행은 `f72f0e4694e404ad63dd2125e49514b709d2b225`에서 시작해 **4,603 PASS / 31 SKIP / 4 FAIL**로 끝났다. 실행 중 현재 inventory를 보완했으므로 이를 최종 단일 SHA의 전체 PASS로 기록하지 않는다. 세 실패는 새 core module 등록과 현재 runtime/SQL source·dependency 목록 누락이 원인이었다. 나머지는 child transport 단계에 도달하기 전 5초 대기가 만료된 경우다. 원래 timeout과 테스트 조건은 변경하지 않았고, 해당 cancel/deadline 검사 두 건은 별도 재실행에서 통과했다. 최종 inventory 수정 후 실패 파일들과 Gitleaks 회귀를 함께 실행한 **23개 검사가 모두 PASS**다. 실패 결과와 재실행을 따로 보존하며 최종 고정 head의 전체 Backend 판정은 Hosted CI에서 확인한다.
 
-원본 object·개인 카드·키 파일이 없는 clean clone의 `f3c0db69e06118d397a2b8337da3ba18e98796bf`에서 원래 DCO, import inventory, Frontend 보존, Backend 계약·node 보존 검사를 모두 통과했다. Backend 보존 검사의 보호 lineage와 현재 node는 **4,645개로 일치**했고 전후 계약 기록 37개를 검증했다. 이후 변경은 검토한 현재 runtime/SQL inventory와 이 요약이며, gate가 읽는 source·test·lock·출처 기록·동결 checkpoint의 변경 여부를 공개 전에 별도로 확인한다. 검증한 SHA와 이후 변경 영향 확인을 서로 다른 근거로 기록한다.
+원본 object·개인 카드·키 파일이 없는 clean clone의 `f3c0db69e06118d397a2b8337da3ba18e98796bf`에서 원래 DCO, import inventory, Frontend 보존, Backend 계약·node 보존 검사를 모두 통과했다. Backend 보존 검사의 보호 lineage와 현재 node는 **4,645개로 일치**했고 기능 보존 항목 37개를 검증했다. 첫 게시 직전 현재 runtime/SQL inventory·요약 변경과 gate 입력의 동일성을 별도로 확인했다. 뒤의 Hosted 수정은 위에 기록한 parameter ID·Frontend 검증 fixture와 정확한 출처에 한정한다. 검증한 SHA와 이후 변경 영향 확인을 서로 다른 근거로 기록한다.
 
 PR CI와 병합 후 main push CI는 각 SHA·run을 별도로 기록한다. 최종 PR·merge SHA와 main CI는 workspace 실행 receipt에 남기며 main에 결과만 직접 push하지 않는다.
 
