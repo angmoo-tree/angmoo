@@ -20,6 +20,7 @@ function initial(saved: GenerationSettings): GenerationWrite {
 export function GenerationSettingsPanel({ characterId }: { characterId: string }) {
   const [saved, setSaved] = useState<GenerationSettings | null>(null); const [value, setValue] = useState<GenerationWrite | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null); const [key, setKey] = useState("");
+  const [partnerKey, setPartnerKey] = useState("");
   const [busy, setBusy] = useState(false); const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null); const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => { const operation = new AbortController(); Promise.all([getGeneration(characterId, operation.signal), getCatalog(operation.signal)]).then(([settings, models]) => { setSaved(settings); setValue(initial(settings)); setCatalog(models); }).catch(reason => { if (!operation.signal.aborted) setError(reason instanceof Error ? reason.message : "이미지 설정을 불러오지 못했습니다."); }); return () => operation.abort(); }, [characterId]);
@@ -30,11 +31,11 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
     setValue({ ...value, provider, model, auto_enabled: false, reference_enabled: provider === "comfyui" && (!profile || profile.reference_initialized === false) ? null : profile?.reference_enabled ?? (supported && mode !== "opus_free"),
       reference_asset_id: profile ? profile.reference_asset_id ?? null : value.reference_asset_id,
       options: profile?.options ?? (provider === "novelai" ? { ...novelDefaults, mode: mode || "opus_free" } : provider === "comfyui" ? { base_url: "http://127.0.0.1:8188", values: {} } : {}) });
-    setKey(""); setNotice(null);
+    setKey(""); setPartnerKey(""); setNotice(null);
   }
   async function save(check = false, clear = false) {
     if (!value) return; setBusy(true); setError(null); setNotice(null);
-    try { const next = await saveGeneration(characterId, { ...value, ...(key ? { api_key: key } : {}), ...(clear ? { clear_api_key: true, auto_enabled: false } : {}) }, check); setSaved(next); setValue(initial(next)); setKey(""); setNotice(check ? "연결과 입력을 확인하고 저장했습니다. 이미지 생성 요청은 보내지 않았습니다." : "이미지 설정을 저장했습니다."); }
+    try { const next = await saveGeneration(characterId, { ...value, ...(key ? { api_key: key } : {}), ...(partnerKey ? { partner_api_key: partnerKey } : {}), ...(clear ? { clear_api_key: true, auto_enabled: false } : {}) }, check); setSaved(next); setValue(initial(next)); setKey(""); setPartnerKey(""); setNotice(check ? "연결과 입력을 확인하고 저장했습니다. 이미지 생성 요청은 보내지 않았습니다." : "이미지 설정을 저장했습니다."); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "이미지 설정을 저장하지 못했습니다."); }
     finally { setBusy(false); }
   }
@@ -42,7 +43,7 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
   const model = catalog.models.find(m => m.provider === value.provider && m.id === value.model);
   const free = value.provider === "novelai" && value.options.mode === "opus_free";
   const profile = saved?.profiles[`${value.provider}:${value.model}:${value.options.mode ?? ""}`];
-  const connection = !key && profile && JSON.stringify(profile.options) === JSON.stringify(value.options) ? profile.connection : null;
+  const connection = !key && !partnerKey && profile && JSON.stringify(profile.options) === JSON.stringify(value.options) ? profile.connection : null;
   const referenceSupported = value.provider === "comfyui" ? Boolean(connection?.reference_supported) : model?.reference_supported;
   const promptUnverified = value.provider === "novelai" && model?.prompt_validation?.exact_verified === false;
   const promptUnavailable = value.provider === "novelai" && model?.prompt_validation?.generation_available === false;
@@ -81,6 +82,12 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
     <ImagePicker scopeKind="character" scopeId={characterId} value={value.reference_asset_id ? { id: value.reference_asset_id, url: `/api/v1/media/assets/${value.reference_asset_id}/content`, allowed: true } : null} onChange={asset => setValue({ ...value, reference_asset_id: asset?.id ?? null })} disabled={busy} onBusyChange={setUploading} />
     {value.provider === "novelai" && !free && value.reference_enabled ? <div className={styles.row}><label>참조 종류<select value={String(value.options.reference_type)} onChange={e => setOption("reference_type", e.target.value)}>{["character", "style", "character&style"].map(item => <option key={item}>{item}</option>)}</select></label>{["reference_strength", "reference_fidelity"].map(name => <label key={name}>{name === "reference_strength" ? "Strength" : "Fidelity"}<input type="number" min={0} max={1} step={.05} value={Number(value.options[name])} onChange={e => setOption(name, Number(e.target.value))} /></label>)}</div> : null}
     <label>이미지 API 키{value.provider === "comfyui" ? " (서버 인증이 있을 때만)" : ""}<input type="password" autoComplete="off" value={key} onChange={e => setKey(e.target.value)} placeholder={saved?.has_api_key ? "선택된 서비스에 저장된 키가 있습니다" : "API 키를 입력해 주세요"} /></label>
+    {value.provider === "comfyui" ? <>
+      <label className={styles.toggle}><input type="checkbox" checked={Boolean(value.options.partner_auth)} disabled={busy} onChange={e => setOption("partner_auth", e.target.checked)} />Comfy Partner 계정 인증 사용</label>
+      <label>Comfy 계정 API 키<input type="password" autoComplete="off" value={partnerKey} onChange={e => setPartnerKey(e.target.value)} placeholder={saved?.has_partner_api_key ? "Comfy 계정 키가 저장되어 있습니다" : "Partner 노드를 사용할 계정 키"} /></label>
+      <p className={styles.note}>Partner 노드의 Comfy Credits를 사용합니다. 서버 접속 키와 별도로 저장하며 workflow에는 키를 넣지 않습니다.</p>
+      <Button type="button" variant="ghost" disabled={busy || !saved?.has_partner_api_key} onClick={async () => { if (!value) return; setBusy(true); try { const next = await saveGeneration(characterId, { ...value, auto_enabled: false, clear_partner_api_key: true }); setSaved(next); setValue(initial(next)); setPartnerKey(""); setNotice("Comfy 계정 키를 삭제했습니다."); } catch (reason) { setError(reason instanceof Error ? reason.message : "계정 키를 삭제하지 못했습니다."); } finally { setBusy(false); } }}>Comfy 계정 키 삭제</Button>
+    </> : null}
     <div className={styles.row}><label>캐릭터 일일 생성 시도 상한<input type="number" min={1} max={10000} value={value.daily_limit ?? ""} onChange={e => setValue({ ...value, daily_limit: e.target.value ? Number(e.target.value) : null })} /></label><label>설치 전체 일일 생성 시도 상한<input type="number" min={1} max={10000} value={value.installation_daily_limit ?? ""} onChange={e => setValue({ ...value, installation_daily_limit: e.target.value ? Number(e.target.value) : null })} /></label></div>
     {saved?.reference_state ? <div aria-label="저장된 참조 적용 상태"><p role="status">저장된 참조 선호: {saved.reference_state.preferred ? "ON" : "OFF"} · 실제 출처: {{ override: "사용자 지정 이미지", card: "캐릭터 카드 이미지", profile: "프로필 이미지", none: "없음" }[saved.reference_state.source]}</p>
       <p className={styles.note}>{saved.reference_state.status === "available" ? "저장된 설정의 참조 출처입니다. 실제 생성에는 생성 활성화와 입력 검증도 필요합니다." : saved.reference_state.status === "forced_off" ? saved.reference_state.reason === "opus_free" ? "Opus 전용 Anlas 사용 안 함 모드에서는 참조를 보내지 않습니다." : "선택한 모델은 참조 이미지를 지원하지 않습니다." : saved.reference_state.status === "off" ? "참조 사용이 꺼져 있습니다." : saved.reference_state.status === "invalid" ? "참조 이미지를 확인할 수 없습니다. 이미지를 교체하거나 설정을 확인해 주세요." : saved.reference_state.generation_path === "unavailable" ? "참조 선호는 ON이지만 사용할 이미지와 텍스트 경로가 없습니다." : "참조 선호는 ON이지만 사용할 이미지가 없어 텍스트 경로를 사용합니다."}</p>

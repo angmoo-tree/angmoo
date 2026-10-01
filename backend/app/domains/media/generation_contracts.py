@@ -70,6 +70,7 @@ class ComfyWorkflow(StrictInput):
 
 class ComfyOptions(StrictInput):
     base_url: str = Field(default="http://127.0.0.1:8188", max_length=500)
+    partner_auth: bool = False
     workflow: ComfyWorkflow | None = None
     text_workflow: ComfyWorkflow | None = None
     values: dict[str, str | int | float] = Field(default_factory=dict)
@@ -106,6 +107,8 @@ class GenerationRequest:
     options: dict[str, Any]
     reference: EffectiveReference
     endpoint: dict[str, Any] | None = None
+    partner_credential_id: str | None = None
+    partner_credential_revision: int | None = None
 
 
 @dataclass(frozen=True)
@@ -121,11 +124,12 @@ class ImagePreparationError(ValueError):
 
 
 class ImageSubmissionError(RuntimeError):
-    def __init__(self, code: str, *, outcome_unknown: bool = False, receipt: str | None = None):
+    def __init__(self, code: str, *, outcome_unknown: bool = False, receipt: str | None = None, stage: str | None = None):
         super().__init__(code)
         self.code = code
         self.outcome_unknown = outcome_unknown
         self.receipt = receipt
+        self.stage = stage
 
 
 def compose_positive(*, style: str, appearance: str, scene: str) -> str:

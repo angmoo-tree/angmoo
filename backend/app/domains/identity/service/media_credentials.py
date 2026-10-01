@@ -17,10 +17,12 @@ def find_credential(db: Session, *, owner_id: str, character_id: str, provider: 
 
 def save_credential(db: Session, *, owner_id: str, character_id: str, provider: str,
                     purpose: CredentialPurpose, secret: str | None, expected_revision: int | None = None) -> MediaCredential:
-    if purpose not in (CredentialPurpose.USER_IMAGE, CredentialPurpose.IMAGE_INTERPRETATION):
+    if purpose not in (CredentialPurpose.USER_IMAGE, CredentialPurpose.COMFY_PARTNER_IMAGE, CredentialPurpose.IMAGE_INTERPRETATION):
         raise CredentialResolutionError("media_credential_purpose_invalid")
     if purpose == CredentialPurpose.IMAGE_INTERPRETATION and (character_id or provider != "gemini"):
         raise CredentialResolutionError("interpretation_credential_scope_invalid")
+    if purpose == CredentialPurpose.COMFY_PARTNER_IMAGE and (not character_id or provider != "comfyui"):
+        raise CredentialResolutionError("comfy_partner_credential_scope_invalid")
     if purpose == CredentialPurpose.USER_IMAGE and (not character_id or provider not in {"novelai", "comfyui", "nanogpt", "openrouter"}):
         raise CredentialResolutionError("generation_credential_scope_invalid")
     row = find_credential(db, owner_id=owner_id, character_id=character_id, provider=provider, purpose=purpose)

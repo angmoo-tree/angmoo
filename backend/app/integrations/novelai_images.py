@@ -77,7 +77,7 @@ class NovelImageClient:
             "reason": "novelai_prompt_validation_unverified" if resource_verified else "novelai_tokenizer_unavailable"}
 
     async def subscription(self, key):
-        response = await self.http.request("GET", "https://api.novelai.net/user/subscription", key=key, timeout=15)
+        response = await self.http.request("GET", "https://image.novelai.net/user/subscription", key=key, timeout=15)
         payload = response.json()
         expiry = payload.get("expiresAt")
         now = datetime.now(timezone.utc).timestamp()

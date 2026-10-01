@@ -32,6 +32,27 @@ class Http:
         return self.responder(method, url, kwargs)
 
 
+def test_image_http_materializes_compressed_response_once():
+    import gzip
+    content = json.dumps({"active": False, "trainingStepsLeft": {"purchasedTrainingSteps": 87}}).encode()
+    async def check():
+        transport = httpx.MockTransport(lambda request: httpx.Response(200,
+            headers={"content-type": "application/json", "content-encoding": "gzip"}, content=gzip.compress(content)))
+        async with httpx.AsyncClient(transport=transport) as client:
+            result = await ImageHttp(client).request("GET", "https://image.novelai.net/user/subscription")
+        assert result.content == content
+        assert result.json()["trainingStepsLeft"]["purchasedTrainingSteps"] == 87
+        assert "content-encoding" not in result.headers
+        assert int(result.headers["content-length"]) == len(content)
+    asyncio.run(check())
+
+
+def test_novel_subscription_uses_image_api_host():
+    http = Http(lambda *_: httpx.Response(200, json={"active": False, "tier": 0}))
+    assert not asyncio.run(NovelImageClient(http).subscription("synthetic"))["opus_verified"]
+    assert http.calls[0][0:2] == ("GET", "https://image.novelai.net/user/subscription")
+
+
 CATALOG = json.loads(Path(image_api.__file__).with_name("image_catalog.json").read_text("utf-8"))["models"]
 API_MODELS = [(p, m, ref) for p, m, ref in MODEL_CATALOG.values() if p in {"nanogpt", "openrouter"}]
 

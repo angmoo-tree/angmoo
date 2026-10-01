@@ -20,6 +20,8 @@ class GenerationSettingsWrite(StrictInput):
     options: dict = Field(default_factory=dict)
     api_key: SecretStr | None = None
     clear_api_key: bool = False
+    partner_api_key: SecretStr | None = None
+    clear_partner_api_key: bool = False
 
 
 class InterpretationSettingsWrite(StrictInput):

@@ -19,7 +19,7 @@ from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service import media_credentials
 from app.domains.media.generation_contracts import EffectiveReference, GenerationRequest, ImagePreparationError, ComfyOptions, select_comfy_workflow, MODEL_CATALOG
 from app.domains.media.contracts import InvalidProfileMediaError
-from app.domains.media.service.assets import AssetService, normalize_pixels
+from app.domains.media.service.assets import AssetService, prepare_asset_image
 from app.domains.media.models import MediaAsset
 from app.domains.media.service.interpretation import InterpretationService
 from app.domains.routines.service.tick_schedule import APP_TIMEZONE
@@ -27,7 +27,7 @@ from app.domains.social.service.image_intent_generation import GenerationWorker,
 from app.domains.worlds.models import World
 from app.integrations.comfy_images import ComfyImageClient
 from app.integrations.image_api import ImageApiClient
-from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options, validate_reference_metadata
+from app.domains.media.api_image_policy import endpoint_parameters, validate_api_options
 from app.integrations.llm.image_interpretation import GeminiImageInterpreter
 from app.integrations.novelai_images import NovelImageClient, validate_t5_prompt
 from app.runtime.media import binding
@@ -61,6 +61,7 @@ class PreparedExecution:
     key: str | None
     reference: bytes | None
     receipt: str | None
+    partner_key: str | None = None
 
 
 class MediaRuntime:
@@ -247,7 +248,8 @@ class MediaRuntime:
         return EffectiveReference(True, reason="source_missing")
 
     def _reference_asset(self, db, owner_id, character_id, mime, content, *, source, materialize):
-        pixels, _, _ = normalize_pixels(mime, content, max_bytes=10 * 1024 * 1024)
+        prepared = prepare_asset_image(mime, content, max_bytes=10 * 1024 * 1024)
+        pixels = prepared.content
         digest = hashlib.sha256(pixels).hexdigest()
         row = db.scalar(select(MediaAsset).where(MediaAsset.owner_id == owner_id, MediaAsset.scope_kind == "character",
             MediaAsset.scope_id == character_id, MediaAsset.state == "ready", MediaAsset.content_hash == digest))
@@ -255,7 +257,7 @@ class MediaRuntime:
             self.assets.read(db, owner_id=owner_id, asset_id=row.id, digest=digest)
         elif materialize:
             row = self.assets.upload(db, owner_id=owner_id, scope_kind="character", scope_id=character_id,
-                content_type="image/png", content=pixels, draft=False)
+                content_type=prepared.info.content_type, content=pixels, draft=False)
         return EffectiveReference(True, source, row.id if row else None, digest, revision=row.revision if row else None)
 
     def prepare_intent(self, db, owner_id, character_id, scene, scene_error):
@@ -295,11 +297,17 @@ class MediaRuntime:
                     raise ImagePreparationError("model_capabilities_unverified")
                 validate_api_options(row.generation_provider, endpoint, options)
                 if reference.asset_id:
-                    asset = self.assets.owned(db, owner_id=owner_id, asset_id=reference.asset_id)
-                    validate_reference_metadata(endpoint, width=asset.width, height=asset.height,
-                        byte_size=asset.byte_size, content_type=asset.content_type)
+                    from app.integrations.image_api import prepare_api_reference
+                    _, pixels = self.assets.read(db, owner_id=owner_id, asset_id=reference.asset_id, digest=reference.digest)
+                    prepare_api_reference(endpoint, pixels)
             if row.generation_provider == "comfyui":
                 comfy = ComfyOptions.model_validate(options)
+                partner = media_credentials.find_credential(db, owner_id=owner_id, character_id=character_id,
+                    provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE) if comfy.partner_auth else None
+                if comfy.partner_auth and not (partner and partner.enabled):
+                    raise ImagePreparationError("comfy_partner_key_required")
+                if partner and partner.revision != profile.get("partner_credential_revision"):
+                    raise ImagePreparationError("comfy_partner_key_changed")
                 workflow = select_comfy_workflow(comfy, has_reference=bool(reference.asset_id))
                 negative = row.negative_prompt if "negative" in workflow.bindings else None
                 options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
@@ -310,7 +318,9 @@ class MediaRuntime:
                 if negative:
                     validate_t5_prompt(negative)
             request = GenerationRequest(row.generation_provider, row.generation_model, positive, negative,
-                options, reference, profile["connection"].get("endpoint"))
+                options, reference, profile["connection"].get("endpoint"),
+                partner_credential_id=partner.id if row.generation_provider == "comfyui" and partner else None,
+                partner_credential_revision=partner.revision if row.generation_provider == "comfyui" and partner else None)
             return request, credential, row.generation_revision, row.generation_daily_limit, None
         except Exception as exc:
             code = str(exc) if isinstance(exc, ImagePreparationError) else "reference_preparation_failed"
@@ -375,14 +385,21 @@ class MediaRuntime:
             asset, reference = self.assets.read(db, owner_id=job.user_id, asset_id=request.reference.asset_id, digest=request.reference.digest)
             if asset.scope_kind != "character" or asset.scope_id != job.character_id or asset.revision != request.reference.revision:
                 raise ImagePreparationError("generation_reference_changed")
-        return PreparedExecution(request, material.reveal() if material else None, reference, job.provider_receipt)
+        partner_key = None
+        if request.provider == "comfyui" and request.options.get("partner_auth"):
+            partner = db.get(MediaCredential, request.partner_credential_id) if request.partner_credential_id else None
+            partner_key = media_credentials.resolve_credential(partner, owner_id=job.user_id,
+                character_id=job.character_id, provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE,
+                revision=request.partner_credential_revision).reveal()
+        return PreparedExecution(request, material.reveal() if material else None, reference, job.provider_receipt, partner_key)
 
     async def submit(self, execution, *, on_receipt, on_submit=None):
         request = execution.request
         if request.provider == "comfyui":
             client = self.clients.get("comfyui") or ComfyImageClient(request.options["base_url"])
             return await client.generate(request, execution.key, execution.reference, on_receipt=on_receipt,
-                receipt=execution.receipt, on_submit=on_submit)
+                receipt=execution.receipt, on_submit=on_submit,
+                **({"partner_key": execution.partner_key} if request.options.get("partner_auth") else {}))
         client = self.clients[request.provider]
         if request.provider in {"nanogpt", "openrouter"}:
             # Discovery is not a generation call. Never silently switch the frozen route.
@@ -399,6 +416,15 @@ class MediaRuntime:
         if key is None and credential and not data.clear_api_key:
             key = media_credentials.resolve_credential(credential, owner_id=user.id, character_id=character_id,
                 provider=data.provider, purpose=CredentialPurpose.USER_IMAGE).reveal()
+        if data.provider == "comfyui" and data.options.get("partner_auth"):
+            partner = media_credentials.find_credential(db, owner_id=user.id, character_id=character_id,
+                provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE)
+            partner_key = data.partner_api_key.get_secret_value() if data.partner_api_key else None
+            if partner_key is None and partner and not data.clear_partner_api_key:
+                partner_key = media_credentials.resolve_credential(partner, owner_id=user.id,
+                    character_id=character_id, provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE).reveal()
+            if not partner_key:
+                raise ImagePreparationError("comfy_partner_key_required")
         # Read-only connection checks end the read transaction before awaiting the network.
         db.rollback()
         if data.provider == "comfyui":

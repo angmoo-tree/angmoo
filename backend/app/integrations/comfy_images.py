@@ -7,7 +7,7 @@ import time
 from urllib.parse import urlsplit
 from app.domains.media.generation_contracts import ComfyWorkflow, ImagePreparationError, ImageSubmissionError, ImageResult
 from app.integrations.image_api import ImageHttp
-from app.integrations.media.images import validate_generated_media_content
+from app.integrations.media.images import validate_generated_media_content, inspect_image_bytes, ImageBytesError
 
 BINDING_FIELDS = {"positive", "negative", "width", "height", "steps", "cfg", "sampler", "scheduler", "seed", "denoise", "model", "vae", "clip_skip", "reference"}
 
@@ -150,13 +150,22 @@ class ComfyImageClient:
             validate_workflow(options.text_workflow, info, validation_values)
             if options.text_workflow.reference_required:
                 raise ImagePreparationError("comfy_text_workflow_requires_reference")
+        for graph in (options.workflow, options.text_workflow):
+            if graph is None:
+                continue
+            partner = any(info[node["class_type"]].get("api_node") or info[node["class_type"]].get("is_api_node")
+                for node in graph.prompt.values())
+            if partner != options.partner_auth:
+                raise ImagePreparationError("comfy_partner_auth_required" if partner else "comfy_partner_workflow_required")
         if set(options.values) - set(workflow.bindings) or (options.text_workflow and set(options.values) - set(options.text_workflow.bindings)):
             raise ImagePreparationError("comfy_value_unbound")
         return info
 
-    async def generate(self, request, key, reference, *, on_receipt, receipt=None, timeout=120.0, on_submit=None):
+    async def generate(self, request, key, reference, *, on_receipt, receipt=None, timeout=120.0, on_submit=None, partner_key=None):
         from app.domains.media.generation_contracts import ComfyOptions
         options = ComfyOptions.model_validate(request.options)
+        if options.partner_auth and not partner_key:
+            raise ImagePreparationError("comfy_partner_key_required")
         workflow = options.workflow
         if workflow is None:
             raise ImagePreparationError("comfy_workflow_required")
@@ -174,8 +183,12 @@ class ComfyImageClient:
                 import secrets
                 values["seed"] = secrets.randbits(32)
             if reference is not None and "reference" in workflow.bindings:
+                try:
+                    reference_info = inspect_image_bytes(reference, max_bytes=10 * 1024 * 1024)
+                except ImageBytesError as exc:
+                    raise ImagePreparationError("reference_pixels_invalid") from exc
                 upload = await self.http.request("POST", self.base + "/upload/image", key=key,
-                    files={"image": ("angmoo-reference.png", reference, "image/png")}, data={"type": "input", "overwrite": "false"})
+                    files={"image": (f"angmoo-reference.{reference_info.extension}", reference, reference_info.content_type)}, data={"type": "input", "overwrite": "false"})
                 payload = upload.json()
                 filename, folder = payload.get("name"), payload.get("subfolder", "")
                 if not isinstance(filename, str) or not filename or len(filename) > 255 or filename in {".", ".."} or "/" in filename or "\\" in filename or ":" in filename or not isinstance(folder, str) or len(folder) > 255 or folder.startswith("/") or "\\" in folder or ":" in folder or ".." in folder.split("/"):
@@ -184,7 +197,10 @@ class ComfyImageClient:
             graph = inject_workflow(workflow, info, values)
             if on_submit:
                 await on_submit()
-            response = await self.http.request("POST", self.base + "/prompt", key=key, json={"prompt": graph})
+            payload = {"prompt": graph}
+            if options.partner_auth:
+                payload["extra_data"] = {"api_key_comfy_org": partner_key}
+            response = await self.http.request("POST", self.base + "/prompt", key=key, json=payload)
             payload = response.json()
             receipt = payload.get("prompt_id")
             if payload.get("node_errors") or not isinstance(receipt, str) or not receipt or len(receipt) > 160:

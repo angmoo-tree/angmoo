@@ -99,12 +99,20 @@ test("common recognition is separate, defaults medium, and usage distinguishes r
   expect(await page.evaluate(()=>Object.values(localStorage).join(""))).not.toContain("fake-browser-only");
 });
 
-test("reference uploads preserve previews and removing a draft makes no analysis request",async({page},info)=>{
+for (const [extension,mime] of [["png","image/png"],["jpg","image/jpeg"],["webp","image/webp"]]) {
+test(`${extension} reference uploads preserve previews and removing a draft makes no analysis request`,async({page},info)=>{
   const audit=await fixtures(page,info.project.name==="static");await page.goto(`/agents/${character}?tab=settings`);const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});
-  await panel.getByLabel("첨부 이미지 선택").setInputFiles({name:"fixture.png",mimeType:"image/png",buffer:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=","base64")});
+  await page.route(info.project.name==="static"?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
+    if(new URL(route.request().url()).pathname.endsWith("/content"))return route.fulfill({contentType:mime,body:readFileSync(`../backend/tests/image_integration/fixtures/pixels.${extension}`)});
+    return route.fallback();
+  });
+  await panel.getByLabel("첨부 이미지 선택").setInputFiles({name:`fixture.${extension}`,mimeType:mime,buffer:readFileSync(`../backend/tests/image_integration/fixtures/pixels.${extension}`)});
   await expect(panel.getByRole("img",{name:"선택한 첨부 이미지 미리보기"})).toBeVisible();expect(audit.writes.length).toBe(1);
+  expect(audit.writes[0].content_type).toBe(mime);
+  await expect.poll(()=>panel.getByRole("img").evaluate((element)=>(element as HTMLImageElement).naturalWidth)).toBe(18);
   await panel.getByRole("button",{name:"사진 제거"}).click();await expect(panel.getByRole("img")).toHaveCount(0);
 });
+}
 
 
 const syntheticFile={name:"fixture.png",mimeType:"image/png",buffer:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=","base64")};
@@ -129,9 +137,17 @@ test("manual SNS submission preserves title body and selected asset without reco
   await expect(page.getByRole("img",{name:"선택한 첨부 이미지 미리보기"})).toHaveCount(0);
 });
 
-test("completed generation refreshes its World feed once and displays authenticated pixels without resubmission",async({page},info)=>{
+for (const [extension,mime] of [["png","image/png"],["jpg","image/jpeg"],["webp","image/webp"]]) {
+test(`completed ${extension} generation displays original authenticated pixels without resubmission`,async({page},info)=>{
   const staticShell=info.project.name==="static";
   await fixtures(page,staticShell);
+  await page.addInitScript(()=>{
+    const audit={types:[] as string[],created:[] as string[],revoked:[] as string[]};
+    Object.assign(window,{__imageFormatAudit:audit});
+    const create=URL.createObjectURL.bind(URL), revoke=URL.revokeObjectURL.bind(URL);
+    URL.createObjectURL=(value)=>{const url=create(value);if(value instanceof Blob){audit.types.push(value.type);audit.created.push(url);}return url;};
+    URL.revokeObjectURL=(url)=>{audit.revoked.push(url);revoke(url);};
+  });
   let feedReads=0,jobReads=0,generationWrites=0;
   const post=uiDManualPost({id:"image-progress-post",title:"생성 장면",body:"새 사진이 붙는 글"});
   await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
@@ -139,7 +155,7 @@ test("completed generation refreshes its World feed once and displays authentica
     if(path.includes("/image-generation")&&request.method()!=="GET")generationWrites++;
     if(path.endsWith("/manual-social/feed")){
       feedReads++;
-      const media=jobReads>=2?[{id:7,media_type:"image",url:"/api/v1/media/assets/generated-one/content",alt_text:"새로 생성된 사진",source_kind:"generated",model:"z-image-turbo",prompt_hash:"a".repeat(64),byte_size:80,width:1,height:1,created_at:"2026-09-30T00:00:00Z"}]:[];
+      const media=jobReads>=2?[{id:7,media_type:"image",url:"/api/v1/media/assets/generated-one/content",alt_text:"새로 생성된 사진",source_kind:"generated",model:"z-image-turbo",prompt_hash:"a".repeat(64),byte_size:80,width:18,height:24,created_at:"2026-09-30T00:00:00Z"}]:[];
       return json(route,uiDManualFeed([{...post,media}]));
     }
     if(path.endsWith("/image-generation")){
@@ -147,6 +163,7 @@ test("completed generation refreshes its World feed once and displays authentica
       jobReads++;
       return json(route,{job_id:7,status:jobReads===1?"queued":"succeeded",reason:null,attempt_count:1,model:"z-image-turbo",reference_source:null,cancellable:jobReads===1,retryable:false});
     }
+    if(path==="/media/assets/generated-one/content")return route.fulfill({contentType:mime,body:readFileSync(`../backend/tests/image_integration/fixtures/pixels.${extension}`)});
     return route.fallback();
   });
   await page.goto(`/worlds/${uiDWorld().world_id}/feed`);
@@ -154,7 +171,22 @@ test("completed generation refreshes its World feed once and displays authentica
   await expect(page.getByRole("img",{name:"새로 생성된 사진"})).toBeVisible();
   await expect(page.getByLabel("게시글 이미지 생성 상태")).toHaveCount(0);
   expect(feedReads).toBe(2);expect(jobReads).toBe(2);expect(generationWrites).toBe(0);
+  const image=page.getByRole("img",{name:"새로 생성된 사진"});
+  await expect.poll(()=>image.evaluate((element)=>[ (element as HTMLImageElement).naturalWidth,(element as HTMLImageElement).naturalHeight ])).toEqual([18,24]);
+  expect(await page.evaluate(()=>Reflect.get(window,"__imageFormatAudit").types)).toContain(mime);
+  await page.reload();await expect(image).toBeVisible();
+  await expect.poll(()=>image.evaluate((element)=>(element as HTMLImageElement).naturalWidth)).toBe(18);
+  const previousBlob=await image.getAttribute("src");
+  await page.getByRole("link",{name:"Device Home",exact:true}).click();
+  if(staticShell) {
+    // Static navigation unloads the document; its blob URLs expire with it.
+    await expect.poll(()=>page.evaluate(async url=>{try{await fetch(url!);return false;}catch{return true;}},previousBlob)).toBe(true);
+  } else {
+    await expect.poll(()=>page.evaluate(()=>Reflect.get(window,"__imageFormatAudit").revoked.length)).toBeGreaterThan(0);
+  }
+  expect(generationWrites).toBe(0);
 });
+}
 
 test("NovelAI missing local validation resource prevents activation while preserving editable settings",async({page},info)=>{
   const staticShell=info.project.name==="static";
