@@ -335,7 +335,8 @@ jobs:
             browser-tests/.ci/creator-static.xml
             browser-tests/.ci/card-upload.xml
             browser-tests/.ci/image-integration.xml
-            artifacts/image-integration/browser/
+            artifacts/image-integration/browser/**/test-failed-*.png
+            artifacts/image-integration/browser/**/trace.zip
             browser-tests/.ci/daily-next.xml
             browser-tests/.ci/daily-static.xml
             browser-tests/.ci/browser-test-identity.json

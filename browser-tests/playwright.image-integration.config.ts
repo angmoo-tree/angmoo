@@ -3,7 +3,7 @@ export default defineConfig({
   testDir: ".", testMatch: "image-integration.spec.ts", workers: 1, fullyParallel: false, retries: 0,
   timeout: 60_000, expect: { timeout: 15_000 }, reporter: "list",
   outputDir: "../artifacts/image-integration/browser",
-  use: { ...devices["Desktop Chrome"], trace: "retain-on-failure" },
+  use: { ...devices["Desktop Chrome"], trace: "retain-on-failure", screenshot: "only-on-failure" },
   projects: [
     { name: "next", use: { baseURL: "http://127.0.0.1:3351" } },
     { name: "static", use: { baseURL: "http://127.0.0.1:3352" } },
