@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (78)
+## Python packages (79)
 
 - `aiosqlite 0.22.1` — OSI Approved :: MIT License
 - `alembic 1.19.0` — MIT
@@ -56,9 +56,9 @@ Package authors retain all rights granted by their respective licenses.
 - `pydantic-core 2.46.4` — MIT
 - `pydantic-settings 2.14.2` — MIT
 - `pygments 2.20.0` — BSD-2-Clause
-- `pyjwt 2.14.0` — MIT
+- `pyjwt 2.15.0` — MIT
 - `pyopenssl 26.4.0` — Apache License, Version 2.0
-- `pypdf 6.16.1` — BSD-3-Clause
+- `pypdf 6.19.0` — BSD-3-Clause
 - `pytest 9.1.1` — MIT
 - `python-dateutil 2.9.0.post0` — Dual License
 - `python-docx 1.2.0` — MIT
@@ -68,6 +68,7 @@ Package authors retain all rights granted by their respective licenses.
 - `pyyaml 6.0.3` — MIT
 - `requests 2.34.2` — Apache-2.0
 - `requests-toolbelt 1.0.0` — Apache 2.0
+- `sentencepiece 0.2.2` — Apache-2.0
 - `six 1.17.0` — MIT
 - `sniffio 1.3.1` — MIT OR Apache-2.0
 - `sqlalchemy 2.0.51` — MIT
@@ -77,7 +78,7 @@ Package authors retain all rights granted by their respective licenses.
 - `typing-extensions 4.16.0` — PSF-2.0
 - `typing-inspection 0.4.2` — MIT
 - `tzdata 2026.2` — Apache-2.0
-- `urllib3 2.7.0` — MIT
+- `urllib3 2.8.0` — MIT
 - `uuid-utils 0.16.0` — BSD-3-Clause
 - `uvicorn 0.52.1` — BSD-3-Clause
 - `websockets 16.0` — BSD-3-Clause
@@ -108,7 +109,7 @@ Package authors retain all rights granted by their respective licenses.
 - `@jridgewell/resolve-uri 3.1.2` — MIT
 - `@jridgewell/sourcemap-codec 1.5.5` — MIT
 - `@jridgewell/trace-mapping 0.3.31` — MIT
-- `@next/env 16.3.3` — MIT
+- `@next/env 16.3.6` — MIT
 - `@swc/helpers 0.5.23` — Apache-2.0
 - `@types/node 20.19.40` — MIT
 - `baseline-browser-mapping 2.11.14` — Apache-2.0
@@ -129,7 +130,7 @@ Package authors retain all rights granted by their respective licenses.
 - `lucide-react 1.29.0` — ISC
 - `ms 2.1.3` — MIT
 - `nanoid 3.3.18` — MIT
-- `next 16.3.3` — MIT
+- `next 16.3.6` — MIT
 - `node-releases 2.0.53` — MIT
 - `picocolors 1.1.1` — ISC
 - `postcss 8.5.23` — MIT

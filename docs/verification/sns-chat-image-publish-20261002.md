@@ -32,6 +32,10 @@ PR CI와 병합 후 main push CI는 각 SHA·run을 별도로 기록한다. 최�
 
 ## 남은 실서비스·사용자 확인
 
+게시 전 의존성 감사에서 Python lock의 PyJWT 2.14.0·pypdf 6.16.1·urllib3 2.7.0과 Next 16.3.3의 알려진 취약점이 확인됐다. [PyJWT 공식 공지](https://github.com/jpadilla/pyjwt/security/advisories/GHSA-42vr-xj54-vc7v), [pypdf 공식 release](https://github.com/py-pdf/pypdf/releases/tag/6.19.0), [urllib3 공식 release](https://github.com/urllib3/urllib3/releases/tag/2.8.0), [Next 공식 공지](https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j)에 따라 PyJWT **2.15.0**, pypdf **6.19.0**, urllib3 **2.8.0**, Next와 대응 ESLint config **16.3.6**으로 정상 업데이트했다.
+
+Python lock에서 바뀐 패키지는 앞의 3개뿐이며 PyJWT·urllib3는 기존 OCI SDK의 간접 의존성이다. 기존 Next OpenGraph 구현은 고정 SVG를 사용한다. 공지의 공격 조건과 현재 앱의 실제 노출을 구분하면서 패치 버전으로 갱신했다. `sentencepiece 0.2.2`는 이번 업데이트 전에 이미 이미지 브랜치 lock에 있었고 NOTICE 누락만 보완했다. 기존 취약점 감사 조건을 낮추거나 ignore하지 않았으며 갱신된 lock의 uv audit, frontend production audit와 license/NOTICE 검사가 통과했다. 이후 전체 Backend와 Next/static 검사를 다시 수행한다. 갱신 전 중단된 전체 Backend 실행은 완료 PASS로 기록하지 않는다.
+
 - NovelAI Opus 무차감 NA01/F01은 이번 사용자의 Anlas 소비 테스트 선택으로 실행하지 않았다.
 - NovelAI 모델 전용 tokenizer/parser와 정확한 길이 계산 동등성, 캐릭터 일관성·이미지 품질, 자연 SNS 활동과 개인 환경 USER CHECK는 별도다.
 - 실제 Routine contract-v2는 게시글·장면을 함께 만드는 1회 호출이다. 예전 4회 유지 계획이나 준비 호출 포함 사용량과 혼동하지 않는다.
