@@ -24232,6 +24232,595 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "26ee07e7c9d07be0c0923a7327c3950fa878aae5",
+      "feature_id": "AR-IMAGE-FORMAT-AND-PARTNER",
+      "reason": "PNG/JPEG/WebP byte-identified format preservation, MIME omission handling, Partner authentication and paid retry guards; earlier source evidence was omitted.",
+      "tracked_files": {
+        "backend/tests/image_integration/fixtures/pixels.jpg": "a85ce88cee1e54b3825f58493e9303a576467c67",
+        "backend/tests/image_integration/fixtures/pixels.png": "8a33d204f1f7bddb42188d6f4ac6b19d45fe7a1a",
+        "backend/tests/image_integration/fixtures/pixels.webp": "f21f4bf9cf2daaca5f23ed11ab2de3197b1b9d03",
+        "backend/tests/image_integration/test_comfy_partner.py": "cc49eafbea26fbb3e7eaeb0b0d11d67d78324dd3",
+        "backend/tests/image_integration/test_image_formats.py": "51fa816cedbed201078221d804f052ddbf0e7912",
+        "backend/tests/image_integration/test_retest_guard.py": "0ec460baf26565dcc965812780596a7a197e0246",
+        "docs/verification/nanogpt-mime-format-retest-20261001.md": "763d7e66a78f3d229adf7d75f7b851b7b3265ac0",
+        "docs/verification/nanogpt-response-diagnosis-20261001.md": "bcd73e577d319f53c3587d9487c0515a9ce4fe0d",
+        "docs/verification/sns-image-live-unified-20261001.md": "bc7aec9c487ce804cd67d07ce2ecfd96032ba9e4",
+        "frontend/scripts/nanogpt-retest-ui.mjs": "efa12581f93c015ac992d554669878eaee48539c",
+        "scripts/diagnostics/nanogpt_retest_support.py": "506a0721de19be5c134031987cefb402ab22c050",
+        "scripts/diagnostics/run_nanogpt_mime_retest.py": "0e66641845e6b48e7bd3466ee6530f8e959c8b30",
+        "scripts/diagnostics/serve_nanogpt_mime_retest.py": "afc6ffd11d663038c1d201387b65cb5ff02876f2"
+      },
+      "test_nodes": [
+        "tests/image_integration/test_comfy_partner.py::test_delete_credential_preserves_validated_reference_preference_while_off[clear_api_key]",
+        "tests/image_integration/test_comfy_partner.py::test_delete_credential_preserves_validated_reference_preference_while_off[clear_partner_api_key]",
+        "tests/image_integration/test_comfy_partner.py::test_missing_account_key_fails_before_any_network_or_submission",
+        "tests/image_integration/test_comfy_partner.py::test_nonpartner_does_not_receive_account_key",
+        "tests/image_integration/test_comfy_partner.py::test_partner_body_uses_account_key_and_headers_use_server_key_once",
+        "tests/image_integration/test_comfy_partner.py::test_partner_credential_envelope_snapshot_reload_delete_and_revision",
+        "tests/image_integration/test_comfy_partner.py::test_partner_detection_requires_matching_auth_mode[False]",
+        "tests/image_integration/test_comfy_partner.py::test_partner_detection_requires_matching_auth_mode[True]",
+        "tests/image_integration/test_image_formats.py::test_animation_and_geometry_remain_bounded[PNG]",
+        "tests/image_integration/test_image_formats.py::test_animation_and_geometry_remain_bounded[WEBP]",
+        "tests/image_integration/test_image_formats.py::test_authenticated_http_content_matches_bytes_and_keeps_owner_scope[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_authenticated_http_content_matches_bytes_and_keeps_owner_scope[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_authenticated_http_content_matches_bytes_and_keeps_owner_scope[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_card_text_is_removed_without_rewriting_original_source",
+        "tests/image_integration/test_image_formats.py::test_cleanup_does_not_follow_opaque_symlink",
+        "tests/image_integration/test_image_formats.py::test_comfy_multipart_and_novel_send_only_png_keep_original[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_comfy_multipart_and_novel_send_only_png_keep_original[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_comfy_multipart_and_novel_send_only_png_keep_original[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_draft_expiry_orphans_references_integrity_and_backup_fixture[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_draft_expiry_orphans_references_integrity_and_backup_fixture[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_draft_expiry_orphans_references_integrity_and_backup_fixture[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_metadata_cleanup_preserves_alpha_and_valid_color_profile[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_metadata_cleanup_preserves_alpha_and_valid_color_profile[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_owned_storage_and_content_read_keep_format_and_unnecessary_encoding_out[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_owned_storage_and_content_read_keep_format_and_unnecessary_encoding_out[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_owned_storage_and_content_read_keep_format_and_unnecessary_encoding_out[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body0-envelope]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body1-envelope]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body2-envelope]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body3-cardinality]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body4-cardinality]",
+        "tests/image_integration/test_image_formats.py::test_parser_validates_envelope_and_exact_cardinality[body5-envelope]",
+        "tests/image_integration/test_image_formats.py::test_png_only_transfer_conversion_validates_final_bytes_without_changing_asset",
+        "tests/image_integration/test_image_formats.py::test_privacy_and_exif_cleanup_keep_format_and_apply_rotation_once[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_privacy_and_exif_cleanup_keep_format_and_apply_rotation_once[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_privacy_and_exif_cleanup_keep_format_and_apply_rotation_once[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_profile_and_override_reference_keep_format_and_priority[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_profile_and_override_reference_keep_format_and_priority[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_profile_and_override_reference_keep_format_and_priority[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-JPEG-image/jpeg-jpg-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-JPEG-image/jpeg-jpg-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-PNG-image/png-png-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-PNG-image/png-png-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-WEBP-image/webp-webp-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[-WEBP-image/webp-webp-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-JPEG-image/jpeg-jpg-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-JPEG-image/jpeg-jpg-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-PNG-image/png-png-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-PNG-image/png-png-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-WEBP-image/webp-webp-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[None-WEBP-image/webp-webp-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-JPEG-image/jpeg-jpg-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-JPEG-image/jpeg-jpg-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-PNG-image/png-png-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-PNG-image/png-png-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-WEBP-image/webp-webp-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[absent-WEBP-image/webp-webp-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-JPEG-image/jpeg-jpg-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-JPEG-image/jpeg-jpg-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-PNG-image/png-png-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-PNG-image/png-png-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-WEBP-image/webp-webp-nanogpt-krea-v2/turbo]",
+        "tests/image_integration/test_image_formats.py::test_provider_detects_missing_mime_without_reencoding[correct-WEBP-image/webp-webp-openrouter-krea/krea-2-medium-turbo]",
+        "tests/image_integration/test_image_formats.py::test_reference_payload_uses_verified_actual_mime[JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_reference_payload_uses_verified_actual_mime[PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_reference_payload_uses_verified_actual_mime[WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item0-base64]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item1-base64]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item2-base64]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item3-base64]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item4-mime]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item5-mime]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item6-mime]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item7-format]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item8-format]",
+        "tests/image_integration/test_image_formats.py::test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract[item9-format]",
+        "tests/image_integration/test_image_formats.py::test_strict_base64_length_and_decoded_limit_are_independent",
+        "tests/image_integration/test_image_formats.py::test_truncated_pixels_fail_actual_decoding[JPEG]",
+        "tests/image_integration/test_image_formats.py::test_truncated_pixels_fail_actual_decoding[WEBP]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[asset-JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[asset-PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[asset-WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[attachment-JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[attachment-PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[attachment-WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[db-JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[db-PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[db-WEBP-image/webp-webp]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[spool-JPEG-image/jpeg-jpg]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[spool-PNG-image/png-png]",
+        "tests/image_integration/test_image_formats.py::test_worker_received_format_recovers_without_another_provider_call[spool-WEBP-image/webp-webp]",
+        "tests/image_integration/test_providers.py::test_image_http_materializes_compressed_response_once",
+        "tests/image_integration/test_providers.py::test_novel_subscription_uses_image_api_host",
+        "tests/image_integration/test_retest_guard.py::test_cleanup_resume_accepts_disabled_empty_credential_rows_without_revalidating_profiles",
+        "tests/image_integration/test_retest_guard.py::test_default_dry_run_opens_no_key_network_or_data_root[run_nanogpt_mime_retest]",
+        "tests/image_integration/test_retest_guard.py::test_default_dry_run_opens_no_key_network_or_data_root[serve_nanogpt_mime_retest]",
+        "tests/image_integration/test_retest_guard.py::test_durable_before_send_and_resume_do_not_permit_a_second_case_post",
+        "tests/image_integration/test_retest_guard.py::test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving[changes0]",
+        "tests/image_integration/test_retest_guard.py::test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving[changes1]",
+        "tests/image_integration/test_retest_guard.py::test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving[changes2]",
+        "tests/image_integration/test_retest_guard.py::test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving[changes3]",
+        "tests/image_integration/test_retest_guard.py::test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving[changes4]",
+        "tests/image_integration/test_retest_guard.py::test_maximum_text_requests_counts_setup_retries_and_restart",
+        "tests/image_integration/test_retest_guard.py::test_private_candidate_is_bounded_and_public_shape_contains_no_payload_or_credentials[JPEG]",
+        "tests/image_integration/test_retest_guard.py::test_private_candidate_is_bounded_and_public_shape_contains_no_payload_or_credentials[PNG]",
+        "tests/image_integration/test_retest_guard.py::test_private_candidate_is_bounded_and_public_shape_contains_no_payload_or_credentials[WEBP]",
+        "tests/image_integration/test_retest_guard.py::test_url_only_candidate_is_not_fetched_or_promoted_to_success"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_retest_guard.py": {
+          "make_guard": [],
+          "generation": [],
+          "test_durable_before_send_and_resume_do_not_permit_a_second_case_post": [
+            "assert index == 0 and json.loads(guard.counter.read_text())['requests'][0]['status'] == 'reserved_before_send'",
+            "pytest.raises(RuntimeError, match='duplicate')",
+            "assert json.loads(guard.counter.read_text())['image_submissions'] == 1"
+          ],
+          "test_foreign_models_options_batches_and_reference_modes_are_denied_before_reserving": [
+            "pytest.raises(RuntimeError)",
+            "assert json.loads(guard.counter.read_text())['image_submissions'] == 0"
+          ],
+          "test_maximum_text_requests_counts_setup_retries_and_restart": [
+            "pytest.raises(RuntimeError, match='text_budget')",
+            "pytest.raises(RuntimeError, match='submission_denied')",
+            "assert json.loads(guard.counter.read_text())['text_requests'] == 10"
+          ],
+          "test_private_candidate_is_bounded_and_public_shape_contains_no_payload_or_credentials": [
+            "assert shape['stage'] == 'validated' and shape['format'] == format and shape['candidate_retained']",
+            "assert next((guard.private / 'received-candidates').glob('*.candidate')).read_bytes() == content",
+            "assert value not in public and 'synthetic secret' not in public and ('private-unrecognized' not in public)",
+            "assert not (guard.evidence / 'received-candidates').exists()"
+          ],
+          "test_url_only_candidate_is_not_fetched_or_promoted_to_success": [
+            "assert shape['stage'] == 'base64' and (not shape['candidate_retained'])",
+            "assert 'private' not in (guard.evidence / 'response-shapes.json').read_text()"
+          ],
+          "test_default_dry_run_opens_no_key_network_or_data_root": [
+            "assert record['key_reads'] == record['network_calls'] == 0 and (not list(tmp_path.iterdir()))"
+          ],
+          "test_cleanup_resume_accepts_disabled_empty_credential_rows_without_revalidating_profiles": [
+            "assert record['image_credential_rows'] == record['text_credential_rows'] == 1",
+            "assert record['image_secrets_remaining'] == record['text_secrets_remaining'] == 0",
+            "assert not any((method in {'PUT', 'DELETE'} for method, _ in calls))",
+            "assert method in {'GET', 'POST'}",
+            "assert path.endswith('/deactivate')"
+          ]
+        },
+        "tests/image_integration/test_comfy_partner.py": {
+          "transport": [],
+          "test_partner_detection_requires_matching_auth_mode": [
+            "assert asyncio.run(call) == INFO",
+            "pytest.raises(ImagePreparationError, match='comfy_partner_auth_required')"
+          ],
+          "test_partner_body_uses_account_key_and_headers_use_server_key_once": [
+            "assert len(posts) == 1 and receipts == ['partner-receipt']",
+            "assert posts[0][2]['key'] == 'synthetic-server-key'",
+            "assert posts[0][2]['json']['extra_data'] == {'api_key_comfy_org': 'synthetic-account-key'}",
+            "assert 'synthetic-account-key' not in json.dumps(posts[0][2]['json']['prompt'])",
+            "assert all((method == 'GET' and 'extra_data' not in kwargs for method, _, kwargs in http.calls))"
+          ],
+          "test_missing_account_key_fails_before_any_network_or_submission": [
+            "pytest.raises(ImagePreparationError, match='comfy_partner_key_required')",
+            "assert http.calls == []"
+          ],
+          "test_nonpartner_does_not_receive_account_key": [
+            "assert all(('must-not-send' not in json.dumps(kwargs) for _, _, kwargs in http.calls))"
+          ],
+          "test_partner_credential_envelope_snapshot_reload_delete_and_revision": [
+            "assert saved['has_api_key'] and saved['has_partner_api_key']",
+            "assert 'synthetic' not in json.dumps(media.read_generation(db, user, CHARACTER))",
+            "assert len(rows) == 2 and len({row.purpose for row in rows}) == 2",
+            "assert all((row.encrypted_secret not in {'synthetic-server-key', 'synthetic-account-key'} for row in rows))",
+            "assert execution.key == 'synthetic-server-key' and execution.partner_key == 'synthetic-account-key'",
+            "assert 'synthetic' not in repr(execution)",
+            "pytest.raises(Exception, match='generation_source_or_key_changed')",
+            "assert saved['has_api_key'] and (not saved['has_partner_api_key'])"
+          ],
+          "test_delete_credential_preserves_validated_reference_preference_while_off": [
+            "assert not reloaded['auto_enabled']",
+            "assert reloaded['active_profile']['reference_enabled'] is True",
+            "assert reloaded['active_profile']['options'] == options",
+            "assert reloaded['active_profile']['connection'] is None",
+            "assert not reloaded['has_partner_api_key' if clear_field == 'clear_partner_api_key' else 'has_api_key']",
+            "pytest.raises(ImagePreparationError)"
+          ]
+        },
+        "tests/image_integration/test_providers.py": {
+          "test_image_http_materializes_compressed_response_once": [
+            "assert result.content == content",
+            "assert result.json()['trainingStepsLeft']['purchasedTrainingSteps'] == 87",
+            "assert 'content-encoding' not in result.headers",
+            "assert int(result.headers['content-length']) == len(content)"
+          ],
+          "test_novel_subscription_uses_image_api_host": [
+            "assert not asyncio.run(NovelImageClient(http).subscription('synthetic'))['opus_verified']",
+            "assert http.calls[0][0:2] == ('GET', 'https://image.novelai.net/user/subscription')"
+          ]
+        },
+        "tests/image_integration/test_image_formats.py": {
+          "encoded": [],
+          "request": [],
+          "test_provider_detects_missing_mime_without_reencoding": [
+            "assert result.content == content and result.content_type == mime",
+            "assert len(http.calls) == 1"
+          ],
+          "test_owned_storage_and_content_read_keep_format_and_unnecessary_encoding_out": [
+            "assert asset.storage_key.endswith('.' + extension) and asset.content_type == mime",
+            "assert (asset.width, asset.height, asset.byte_size) == (18, 24, len(content))",
+            "assert asset.content_hash == hashlib.sha256(content).hexdigest()",
+            "assert actual == content and row.content_type == mime",
+            "assert image.format == format"
+          ],
+          "test_worker_received_format_recovers_without_another_provider_call": [
+            "assert db.get(PostImageGenerationJob, identity).status == ('result_ready' if fault == 'attachment' else 'result_pending')",
+            "assert db.scalar(select(PostMedia)) is None",
+            "assert job.status == 'succeeded' and fake.calls == 1",
+            "assert db.scalar(select(func.count()).select_from(PostMedia).where(PostMedia.post_id == POST)) == 1",
+            "assert asset.content_type == mime and asset.storage_key.endswith('.' + extension)",
+            "assert media.assets.read(db, owner_id=OWNER, asset_id=asset.id)[1] == content"
+          ],
+          "test_safe_parser_stage_rejects_wrong_mime_base64_and_unobserved_contract": [
+            "pytest.raises(ImageSubmissionError)",
+            "assert str(failure.value) == 'provider_image_invalid' and failure.value.stage == stage",
+            "assert 'secret' not in str(failure.value)"
+          ],
+          "test_parser_validates_envelope_and_exact_cardinality": [
+            "pytest.raises(ImageSubmissionError)",
+            "assert failure.value.stage == stage"
+          ],
+          "test_strict_base64_length_and_decoded_limit_are_independent": [
+            "pytest.raises(ImageSubmissionError)",
+            "assert failure.value.stage == 'json'",
+            "pytest.raises(ImageSubmissionError)",
+            "assert failure.value.stage == stage"
+          ],
+          "test_truncated_pixels_fail_actual_decoding": [
+            "pytest.raises(ImageBytesError)",
+            "assert failure.value.stage == 'decode'"
+          ],
+          "test_animation_and_geometry_remain_bounded": [
+            "pytest.raises(ImageBytesError)",
+            "assert failure.value.stage == 'frames'",
+            "pytest.raises(ImageBytesError)",
+            "assert failure.value.stage == 'geometry'"
+          ],
+          "test_privacy_and_exif_cleanup_keep_format_and_apply_rotation_once": [
+            "assert result.normalized and result.info.format == format and ((result.info.width, result.info.height) == (20, 30))",
+            "assert not again.normalized and again.content == result.content",
+            "assert not image.getexif()"
+          ],
+          "test_metadata_cleanup_preserves_alpha_and_valid_color_profile": [
+            "assert image.info['icc_profile'] == icc and image.convert('RGBA').getpixel((0, 0))[3] == 90",
+            "assert not image.getexif()"
+          ],
+          "test_card_text_is_removed_without_rewriting_original_source": [
+            "assert image.info['chara'] == 'private card data'",
+            "assert not image.text"
+          ],
+          "test_reference_payload_uses_verified_actual_mime": [
+            "assert prefix == f'data:{mime};base64' and base64.b64decode(body) == content"
+          ],
+          "test_png_only_transfer_conversion_validates_final_bytes_without_changing_asset": [
+            "assert info.content_type == 'image/png' and original == encoded('JPEG')",
+            "pytest.raises(ImagePreparationError, match='reference_bytes_invalid')",
+            "pytest.raises(ImagePreparationError, match='reference_width_invalid')",
+            "pytest.raises(ImagePreparationError, match='reference_format_invalid')"
+          ],
+          "test_draft_expiry_orphans_references_integrity_and_backup_fixture": [
+            "assert restored.read(db, owner_id=OWNER, asset_id=ready.id)[1] == content",
+            "assert not media.assets.path(expired).exists() and (not orphan.exists())",
+            "assert arbitrary.exists() and fresh.exists() and media.assets.path(ready).exists()",
+            "pytest.raises(InvalidProfileMediaError, match='asset_content_changed')"
+          ],
+          "test_authenticated_http_content_matches_bytes_and_keeps_owner_scope": [
+            "assert response.status_code == 200 and response.content == content",
+            "assert response.headers['content-type'] == mime",
+            "assert response.headers['cache-control'] == 'private, no-store' and response.headers['x-content-type-options'] == 'nosniff'",
+            "assert client.get(asset['url']).status_code == 422"
+          ],
+          "test_profile_and_override_reference_keep_format_and_priority": [
+            "assert ref.source == 'profile' and actual == content and (asset.content_type == mime)",
+            "assert media._reference(db, OWNER, character, setting, True).source == 'override'",
+            "assert profile.read_bytes() == content",
+            "assert media._reference(db, OWNER, character, setting, False).asset_id is None"
+          ],
+          "test_comfy_multipart_and_novel_send_only_png_keep_original": [
+            "assert upload == ('angmoo-reference.' + extension, content, mime)",
+            "assert inspect_image_bytes(converted, max_bytes=10 * 1024 * 1024).content_type == 'image/png'",
+            "assert content == encoded(format)"
+          ],
+          "test_cleanup_does_not_follow_opaque_symlink": [
+            "assert link.is_symlink() and target.exists()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_retest_guard.py": {},
+        "tests/image_integration/test_comfy_partner.py": {},
+        "tests/image_integration/test_providers.py": {},
+        "tests/image_integration/test_image_formats.py": {
+          "test_cleanup_does_not_follow_opaque_symlink": [
+            "pytest.skip('host does not permit symlink creation')"
+          ]
+        }
+      }
+    },
+    {
+      "commit": "018ba26be4934bb986ea9bc7437740c1d65c71d3",
+      "feature_id": "AR-CARD-FIRST-METADATA",
+      "reason": "Approved first ccv3 or first chara selection, no fallback on invalid selection, original preservation and duplicate notice; earlier source evidence was omitted.",
+      "tracked_files": {
+        "backend/tests/test_card_metadata_compatibility.py": "9be8ed1fd07fd22e7ae4f740faa3ac08ded48ff8",
+        "browser-tests/card-metadata-fixture.ts": "48d9874c635553607dff61c62585cc79278806f6",
+        "docs/verification/character-card-metadata-20261001.md": "5c10278996a84cd363e780cc2a6db7eb5b403837"
+      },
+      "test_nodes": [
+        "tests/integrations/test_character_cards.py::test_both_keywords_and_duplicates_prefer_first_v3",
+        "tests/integrations/test_character_cards.py::test_complete_container_must_end_correctly[\\x00\\x00\\x00\\x01IENDx\\x8f\\xc4\\xb6\\xef]",
+        "tests/integrations/test_character_cards.py::test_complete_container_must_end_correctly[]",
+        "tests/integrations/test_character_cards.py::test_complete_container_must_end_correctly[trailing]",
+        "tests/integrations/test_character_cards.py::test_duplicate_metadata_selects_first_and_preserves_source[False-ccv3-3]",
+        "tests/integrations/test_character_cards.py::test_duplicate_metadata_selects_first_and_preserves_source[False-chara-2]",
+        "tests/integrations/test_character_cards.py::test_duplicate_metadata_selects_first_and_preserves_source[True-ccv3-3]",
+        "tests/integrations/test_character_cards.py::test_duplicate_metadata_selects_first_and_preserves_source[True-chara-2]",
+        "tests/integrations/test_character_cards.py::test_duplicate_order_is_physical_not_recency_or_validity",
+        "tests/integrations/test_character_cards.py::test_image_limits_are_inclusive[MAX_DIMENSION-5]",
+        "tests/integrations/test_character_cards.py::test_image_limits_are_inclusive[MAX_PIXELS-15]",
+        "tests/integrations/test_character_cards.py::test_invalid_common_definition_has_safe_error[document0-unsupported_version]",
+        "tests/integrations/test_character_cards.py::test_invalid_common_definition_has_safe_error[document1-unsupported_version]",
+        "tests/integrations/test_character_cards.py::test_invalid_common_definition_has_safe_error[document2-data_object_required]",
+        "tests/integrations/test_character_cards.py::test_invalid_common_definition_has_safe_error[document3-name_required]",
+        "tests/integrations/test_character_cards.py::test_invalid_common_definition_has_safe_error[document4-common_field_type]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[ccv3-3-!]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[ccv3-3-bm90IGpzb24=]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[ccv3-3-eyJzcGVjIjogImNoYXJhX2NhcmRfdjIiLCAic3BlY192ZXJzaW9uIjogIjIuMCIsICJkYXRhIjogeyJuYW1lIjogIiAiLCAiZGVzY3JpcHRpb24iOiAie3tjaGFyfX3ripQg6riw7J6QIiwgInBlcnNvbmFsaXR5IjogIiIsICJzY2VuYXJpbyI6ICLtlZnqtZAiLCAiZmlyc3RfbWVzIjogIuyViOuFlSIsICJtZXNfZXhhbXBsZSI6ICJ7e2NoYXJ9fTog7JWI64WVIHt7dXNlcn19In19]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[ccv3-3-eyJzcGVjIjogImNoYXJhX2NhcmRfdjkifQ==]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[chara-2-!]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[chara-2-bm90IGpzb24=]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[chara-2-eyJzcGVjIjogImNoYXJhX2NhcmRfdjIiLCAic3BlY192ZXJzaW9uIjogIjIuMCIsICJkYXRhIjogeyJuYW1lIjogIiAiLCAiZGVzY3JpcHRpb24iOiAie3tjaGFyfX3ripQg6riw7J6QIiwgInBlcnNvbmFsaXR5IjogIiIsICJzY2VuYXJpbyI6ICLtlZnqtZAiLCAiZmlyc3RfbWVzIjogIuyViOuFlSIsICJtZXNfZXhhbXBsZSI6ICJ7e2NoYXJ9fTog7JWI64WVIHt7dXNlcn19In19]",
+        "tests/integrations/test_character_cards.py::test_invalid_preferred_definition_never_falls_back[chara-2-eyJzcGVjIjogImNoYXJhX2NhcmRfdjkifQ==]",
+        "tests/integrations/test_character_cards.py::test_json_byte_limit_inclusive_and_decoded_limit_checked[False]",
+        "tests/integrations/test_character_cards.py::test_json_byte_limit_inclusive_and_decoded_limit_checked[True]",
+        "tests/integrations/test_character_cards.py::test_json_complexity_limit_inclusive[MAX_DEPTH-3]",
+        "tests/integrations/test_character_cards.py::test_json_complexity_limit_inclusive[MAX_NODES-10]",
+        "tests/integrations/test_character_cards.py::test_nonfinite_json_numbers_rejected[-Infinity]",
+        "tests/integrations/test_character_cards.py::test_nonfinite_json_numbers_rejected[1e9999]",
+        "tests/integrations/test_character_cards.py::test_nonfinite_json_numbers_rejected[Infinity]",
+        "tests/integrations/test_character_cards.py::test_nonfinite_json_numbers_rejected[NaN]",
+        "tests/integrations/test_character_cards.py::test_png_limits_count_all_definitions[MAX_CHUNKS]",
+        "tests/integrations/test_character_cards.py::test_png_limits_count_all_definitions[MAX_TEXT_BYTES]",
+        "tests/integrations/test_character_cards.py::test_png_limits_count_all_definitions[MAX_TOTAL_TEXT_BYTES]",
+        "tests/integrations/test_character_cards.py::test_selected_base64_is_bounded_before_decode",
+        "tests/integrations/test_character_cards.py::test_unused_payload_is_not_decoded_but_its_crc_is_checked[!]",
+        "tests/integrations/test_character_cards.py::test_unused_payload_is_not_decoded_but_its_crc_is_checked[bm90IGpzb24=]",
+        "tests/integrations/test_character_cards.py::test_v2_in_ccv3_rejected_without_fallback",
+        "tests/test_card_metadata_compatibility.py::test_duplicate_registration_uses_edited_persona_without_raw_instructions",
+        "tests/test_card_metadata_compatibility.py::test_http_errors_preserve_imported_source_and_revision[crc-\\uce74\\ub4dc PNG \\ub370\\uc774\\ud130\\uac00 \\uc190\\uc0c1\\ub418\\uc5b4 \\uc77d\\uc744 \\uc218 \\uc5c6\\uc2b5\\ub2c8\\ub2e4.]",
+        "tests/test_card_metadata_compatibility.py::test_http_errors_preserve_imported_source_and_revision[json-\\uce74\\ub4dc\\uc5d0 \\uc800\\uc7a5\\ub41c \\uce90\\ub9ad\\ud130 \\uc815\\ubcf4\\ub97c \\uc77d\\uc744 \\uc218 \\uc5c6\\uc2b5\\ub2c8\\ub2e4.]",
+        "tests/test_card_metadata_compatibility.py::test_http_errors_preserve_imported_source_and_revision[metadata-\\uc774 PNG\\uc5d0 \\uce90\\ub9ad\\ud130 \\uce74\\ub4dc \\uc815\\ubcf4\\uac00 \\uc5c6\\uc2b5\\ub2c8\\ub2e4.]",
+        "tests/test_card_metadata_compatibility.py::test_http_errors_preserve_imported_source_and_revision[version-\\uc9c0\\uc6d0\\ud558\\ub294 \\uce90\\ub9ad\\ud130 \\uce74\\ub4dc \\ud615\\uc2dd\\uc774 \\uc544\\ub2d9\\ub2c8\\ub2e4.]",
+        "tests/test_card_metadata_compatibility.py::test_http_expired_foreign_and_stale_edits_keep_status",
+        "tests/test_card_metadata_compatibility.py::test_http_metadata_and_private_source_round_trip",
+        "tests/test_card_metadata_compatibility.py::test_optional_user_original_import_edit_register[main_elias-da06fb375f61_spec_v2.png-Elias Finch-6520-c29ac8b9a9210af235de2e1f8081aa72a6d5f4c22c167a043dc19bf12466e23f]",
+        "tests/test_card_metadata_compatibility.py::test_optional_user_original_import_edit_register[main_overprotective-father-raymond-610a34d02145_spec_v2.png-Raymond-6847-d9507f310ae2c228ad23bc4e8af0f74513cbc6bdbff4173b1f58241911798bca]",
+        "tests/test_card_metadata_compatibility.py::test_optional_user_original_import_edit_register[main_red-69957f8d_spec_v2.png-Red-3362-815c2e52205e73430cab1ae42aeef092a3e9400cecbe05c7790584d65e328b1b]",
+        "tests/test_card_metadata_compatibility.py::test_partial_display_write_failure_is_compensated",
+        "tests/test_card_metadata_compatibility.py::test_png_commit_failure_removes_only_new_display_file"
+      ],
+      "test_assertions": {
+        "tests/test_card_metadata_compatibility.py": {
+          "synthetic_card": [],
+          "duplicate_png": [],
+          "isolated_media": [],
+          "context": [],
+          "http": [],
+          "test_http_metadata_and_private_source_round_trip": [
+            "assert response.status_code == 200",
+            "assert result['draft']['name'] == 'Original'",
+            "assert result['metadata_selection']['multiple_definitions'] is True",
+            "assert result['metadata_selection']['same_keyword_count'] == 2",
+            "assert full.status_code == summary.status_code == 200",
+            "assert full.json()['document']['data']['name'] == 'Original'",
+            "assert summary.json()['document'] is None",
+            "assert summary.json()['metadata_selection'] == result['metadata_selection']",
+            "assert summary.json()['review'] == result['review']",
+            "assert summary.json()['raw_only'] == result['raw_only']",
+            "assert summary.json()['sha256'] == hashlib.sha256(content).hexdigest()",
+            "assert summary.headers['cache-control'] == 'private, no-store'",
+            "assert summary.headers['x-content-type-options'] == 'nosniff'",
+            "assert source.source_bytes == content",
+            "assert client.get(path).status_code == 200",
+            "assert source.parser_version == 'angmoo-card-import-v1' and source.source_bytes == content",
+            "assert client.get(path).status_code == client.get(path + '?include_document=false').status_code == 404",
+            "assert 'source_bytes' not in public_fields and 'metadata_selection' not in public_fields"
+          ],
+          "test_http_errors_preserve_imported_source_and_revision": [
+            "assert result.status_code == 422",
+            "assert result.json()['detail'].startswith(expected)",
+            "assert 'RAW_' not in result.text and 'source_bytes' not in result.text",
+            "assert session.get(models.AgentCreationDraft, draft.id).revision == revision",
+            "assert card_import.read_source(session, owner, draft.id)['sha256'] == hashlib.sha256(original).hexdigest()"
+          ],
+          "test_http_expired_foreign_and_stale_edits_keep_status": [
+            "assert client.post(path, json=payload).status_code == 200",
+            "assert client.post(path, json=payload).status_code == 409",
+            "assert client.post(path, json=payload).status_code == 404",
+            "assert client.post(path, json=payload).status_code == 410",
+            "assert client.get(path + '-source?include_document=false').status_code == 404"
+          ],
+          "test_png_commit_failure_removes_only_new_display_file": [
+            "pytest.raises(RuntimeError, match='synthetic')",
+            "assert row.revision == revision and row.avatar_temp_url == avatar",
+            "assert set(settings.media_root_path.rglob('*.webp')) == existing",
+            "assert source.source_bytes == original"
+          ],
+          "test_partial_display_write_failure_is_compensated": [
+            "pytest.raises(OSError, match='synthetic')",
+            "assert session.get(models.AgentCreationDraft, draft.id).revision == 1",
+            "assert session.scalar(select(models.CharacterCardSource)) is None",
+            "assert list(settings.media_root_path.rglob('*.webp')) == []"
+          ],
+          "test_duplicate_registration_uses_edited_persona_without_raw_instructions": [
+            "assert row.name == 'Edited' and row.worldview == 'Edited description'",
+            "assert row.personality == '' and row.speech_style == 'Edited voice'",
+            "assert 'RAW_' not in row.persona_summary",
+            "assert row.credential is None and result.settings.auto_enabled is False",
+            "assert card_import.read_source(session, owner, draft.id)['document']['data']['name'] == 'Original'",
+            "assert session.scalar(select(models.CharacterCardSource)).source_bytes == original"
+          ],
+          "test_optional_user_original_import_edit_register": [
+            "assert hashlib.sha256(content).hexdigest() == source_hash",
+            "assert result['draft'].name == name",
+            "assert len(result['draft'].worldview) == worldview_length",
+            "assert result['metadata_selection']['same_keyword_count'] == 2",
+            "assert 'worldview_length_limit' not in result['review']",
+            "assert summary['metadata_selection'] == result['metadata_selection'] and summary['document'] is None",
+            "assert registered.character.name == name + ' edited'",
+            "assert source.source_bytes == content and source.parser_version == PARSER_VERSION",
+            "assert source.character_id == registered.character.id",
+            "assert hashlib.sha256(path.read_bytes()).hexdigest() == source_hash"
+          ]
+        },
+        "tests/integrations/test_character_cards.py": {
+          "test_duplicate_json_keys_rejected": [
+            "pytest.raises(CardParseError, match='duplicate_json_key')"
+          ],
+          "test_duplicate_metadata_selects_first_and_preserves_source": [
+            "assert result.document == first",
+            "assert result.source_sha256 == hashlib.sha256(raw).hexdigest()",
+            "assert result.parser_version == 'angmoo-card-import-v2'",
+            "assert selection.keyword == keyword.decode()",
+            "assert selection.selected_occurrence == 0",
+            "assert selection.same_keyword_count == 2",
+            "assert selection.multiple_definitions is True",
+            "assert selection.selected_json_sha256 == hashlib.sha256(first_json).hexdigest()"
+          ],
+          "test_duplicate_order_is_physical_not_recency_or_validity": [
+            "assert parse_card(png(*entries)).data['name'] == 'First'",
+            "assert parse_card(png(*reversed(entries))).data['name'] == 'Second'"
+          ],
+          "test_invalid_preferred_definition_never_falls_back": [
+            "pytest.raises(CardParseError)"
+          ],
+          "test_unused_payload_is_not_decoded_but_its_crc_is_checked": [
+            "assert parse_card(raw).document == card()",
+            "pytest.raises(CardParseError, match='crc')"
+          ],
+          "test_both_keywords_and_duplicates_prefer_first_v3": [
+            "assert selected.data['name'] == 'C'",
+            "assert selected.metadata_selection.keyword == 'ccv3'",
+            "assert selected.metadata_selection.same_keyword_count == 2",
+            "assert single_per_key.metadata_selection.multiple_definitions is False",
+            "assert parse_card(encoded(card())).metadata_selection is None"
+          ],
+          "test_complete_container_must_end_correctly": [
+            "pytest.raises(CardParseError)"
+          ],
+          "test_nonfinite_json_numbers_rejected": [
+            "pytest.raises(CardParseError, match='invalid_json_number')"
+          ],
+          "test_png_limits_count_all_definitions": [
+            "assert parse_card(raw).metadata_selection.same_keyword_count == 2",
+            "pytest.raises(CardParseError)"
+          ],
+          "test_selected_base64_is_bounded_before_decode": [
+            "assert parse_card(raw).document == card()",
+            "pytest.raises(CardParseError, match='json_too_large')"
+          ],
+          "test_json_byte_limit_inclusive_and_decoded_limit_checked": [
+            "assert parse_card(raw).document == card()",
+            "pytest.raises(CardParseError, match='json_too_large')"
+          ],
+          "test_json_complexity_limit_inclusive": [
+            "assert parse_card(value).version == 2",
+            "pytest.raises(CardParseError, match='complexity')"
+          ],
+          "test_image_limits_are_inclusive": [
+            "assert parse_card(raw).source_format == 'png'",
+            "pytest.raises(CardParseError, match='image_too_large')"
+          ],
+          "test_invalid_common_definition_has_safe_error": [
+            "pytest.raises(CardParseError, match=error)"
+          ],
+          "test_v2_in_ccv3_rejected_without_fallback": [
+            "pytest.raises(CardParseError, match='metadata_version_mismatch')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_card_metadata_compatibility.py": {
+          "test_optional_user_original_import_edit_register": [
+            "pytest.skip('optional user originals are not provided')"
+          ]
+        },
+        "tests/integrations/test_character_cards.py": {}
+      }
+    },
+    {
+      "commit": "91797f90f554cf8721b5e0385f94f0883d0646ce",
+      "feature_id": "AR-IMAGE-PUBLISH-BOUNDARIES",
+      "reason": "Publish preparation: remove domain/integration cycle using a neutral byte inspector, preserve boundary errors and add hosted Next/static image coverage.",
+      "tracked_files": {
+        "backend/app/core/image_bytes.py": "a2be71a22be59941b7bd0a911943a1130581accf",
+        "backend/tests/image_integration/test_image_inspection_boundaries.py": "2954a7fd9393a305e5d27682c98f970dd0a271aa",
+        "docs/verification/sns-chat-image-publish-20261002.md": "cd7c62ac52c6a5f86cdb751a22296e34fc8c8ee5"
+      },
+      "test_nodes": [
+        "tests/image_integration/test_image_inspection_boundaries.py::test_geometry_error_is_translated_at_the_existing_domain_boundaries"
+      ],
+      "test_assertions": {
+        "tests/image_integration/test_image_inspection_boundaries.py": {
+          "test_geometry_error_is_translated_at_the_existing_domain_boundaries": [
+            "pytest.raises(ImageBytesError)",
+            "assert inspection.value.stage == 'geometry'",
+            "assert not isinstance(inspection.value, InvalidProfileMediaError)",
+            "pytest.raises(InvalidProfileMediaError, match='^asset_geometry_invalid$')",
+            "pytest.raises(InvalidProfileMediaError, match='^image_geometry_invalid$')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/image_integration/test_image_inspection_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "18e719d9cb972208efc6401c70b30d2a3c9526d3",
+      "feature_id": "AR-IMAGE-CI-FAILURE-REPORTS",
+      "reason": "Allow only the named synthetic image JUnit, failure screenshots and trace files in the existing exact artifact policy; directory/DB/log rejection remains enforced.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/]",
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/image-integration/browser/**/*.sqlite3]",
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/image-integration/browser/**/response.json]",
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/image-integration/browser/**/stdout.txt]",
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/image-integration/browser/**]",
+        "tests/test_ci_report_artifacts.py::test_image_failure_reports_reject_extra_files_and_directories[artifacts/image-integration/browser/]"
+      ],
+      "test_assertions": {
+        "tests/test_ci_report_artifacts.py": {
+          "test_image_failure_reports_reject_extra_files_and_directories": [
+            "assert errors(step, job='frontend') == []",
+            "assert errors(step, job='frontend') == ['raw artifact upload is limited to the installer or exact Core test reports']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_ci_report_artifacts.py": {}
+      }
     }
   ]
 }

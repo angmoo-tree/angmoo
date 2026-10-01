@@ -2100,7 +2100,8 @@
     "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-False-writer_error]",
     "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[True-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-True-writer_error]",
     "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits": "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits[medium-False]",
-    "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources": "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[--add-data $sqliteDeltaData]"
+    "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources": "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[--add-data $sqliteDeltaData]",
+    "tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected"
   },
   "details": {
     "AR-B1": {
