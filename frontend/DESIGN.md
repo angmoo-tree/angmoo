@@ -624,7 +624,7 @@ divider
 - author 18px extra-bold
 - body 18px/28px
 - 긴 본문은 정해진 line clamp 뒤 bright `brand-accent`의 `더보기`
-- image는 원본 비율을 보존하되 single hero media의 기본 frame은 4:3 후보
+- image는 원본 비율을 보존한다. 2026-10-01 형식 보존 계약에 따라 1장은 자연 비율과 전체 내용으로 표시하고, 여러 장의 grid 배치는 유지한다.
 - mention은 brand accent와 accessible link style
 - keyboard focus에서 전체 row navigation이 보임
 - 내부 link/button/text selection과 row navigation이 충돌하지 않음

@@ -155,7 +155,11 @@
 
 .composerSubmit {
   display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-end;
   justify-content: flex-end;
+  gap: var(--spacing-compact);
 }
 
 .manualFeed > [data-ui-primitive="toast"],

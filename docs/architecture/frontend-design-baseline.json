@@ -131,7 +131,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/media-settings.module.css",
-      "sha256": "41ad0b4e0a4d316ed4a621c8da2c5516192d5e21470d93912bcacf63a58c7ba0"
+      "sha256": "ae11d41874b9c439aecfe8f3648aeae486018b6dacaafaafce3174148be3096e"
     },
     {
       "classifications": [
@@ -1500,7 +1500,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
           "present": true,
-          "sha256": "88e93be64b59a06bc69df3c0fa7c5499476cf71f312435d42d8275c07e4b413e"
+          "sha256": "d07754cdca6922e2136feecead3e9a91f86e787eb3b53a1a6388d6e261a6a452"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
@@ -1515,7 +1515,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
-          "sha256": "a605ae1fc5a1a79794c2ee186e023f1f24de708bb7860c3a0e6fc4116dc6b419"
+          "sha256": "47df531788b8a502f834d04ed6c0204d9ebb9e40cb5a603fbe00a4fdbd0e4b2e"
         }
       ],
       "specs": [

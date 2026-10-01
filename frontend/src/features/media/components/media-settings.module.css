@@ -8,7 +8,8 @@
 .toggle input { width: 22px; height: 22px; }
 .actions { display: flex; gap: .75rem; flex-wrap: wrap; }
 .note { color: var(--color-text-secondary); font-size: .875rem; }
-.picker { display: grid; gap: .75rem; width: 100%; }
-.fileLabel { display: grid; gap: .5rem; min-height: 44px; color: var(--color-text-strong); }
+.picker { display: grid; gap: .75rem; width: 100%; min-width: 0; }
+.fileLabel { display: grid; gap: .5rem; min-width: 0; min-height: 44px; color: var(--color-text-strong); }
+.fileLabel input { width: 100%; max-width: 100%; min-width: 0; }
 .preview { display: block; max-width: 100%; width: auto; height: auto; max-height: 360px; object-fit: contain; border: 1px solid var(--color-border-default); border-radius: var(--radius-control); }
 .binding { padding: .75rem 0; border-bottom: 1px solid var(--color-border-default); }

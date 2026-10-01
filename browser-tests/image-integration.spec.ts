@@ -128,6 +128,21 @@ test("chat preview stays selected when recognition is unavailable until explicit
 });
 test("manual SNS submission preserves title body and selected asset without recognition",async({page},info)=>{
   const audit=await fixtures(page,info.project.name==="static");await page.goto(`/worlds/${uiDWorld().world_id}/feed`);
+  for (const width of [360, 390, 436]) {
+    await page.setViewportSize({width,height:880});
+    const composer=page.locator("#world-owner-composer");
+    await expect(composer).toBeVisible();
+    const composerBox=await composer.boundingBox();
+    expect(composerBox).not.toBeNull();
+    for (const control of [page.getByLabel("제목",{exact:true}),page.getByLabel("내용",{exact:true}),page.getByLabel("첨부 이미지 선택"),page.getByRole("button",{name:"게시하기",exact:true})]) {
+      await expect(control).toBeVisible();
+      const box=await control.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(composerBox!.x-1);
+      expect(box!.x+box!.width).toBeLessThanOrEqual(composerBox!.x+composerBox!.width+1);
+    }
+    expect((await page.getByRole("button",{name:"게시하기",exact:true}).boundingBox())!.height).toBeLessThanOrEqual(60);
+  }
   await page.getByLabel("제목",{exact:true}).fill("사용자 사진 제목");await page.getByLabel("내용",{exact:true}).fill("사용자가 쓴 본문");
   await page.getByLabel("첨부 이미지 선택").setInputFiles(syntheticFile);
   await expect(page.getByRole("img",{name:"선택한 첨부 이미지 미리보기"})).toBeVisible();

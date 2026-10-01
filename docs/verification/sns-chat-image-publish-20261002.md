@@ -4,7 +4,7 @@
 
 이 기록의 시작 원본은 `feat/sns-chat-image-integration`의 `1d1c961069f2522d19c1438efe8cf6ae55a97258`, 기준 main은 `1390ca4ddc275d3219b39b389c5368475e013b4c`이다. 이미지 생성·인식, SNS·Chat 첨부, MIME 판독과 PNG·JPEG·WebP 형식 보존, ComfyUI Partner 인증, 캐릭터 카드 중복 메타데이터 호환을 게시한다. 원본 작업 폴더의 Gemini 응답·SNS 관측 관련 미커밋 6개와 별도 보존 기간 개선 계획은 포함하지 않는다.
 
-원본은 그대로 보존하고 독립 후보 clone에서 준비했다. 사용자 Docker, 설치 데이터, API 키와 유료 Provider는 이번 검증에 사용하지 않았다. 기존 실서비스 결과는 당시 실행 SHA의 증거이며 이번 후보에서 다시 실행했다는 의미가 아니다.
+원본은 그대로 보존하고 독립 후보 clone에서 준비했다. 사용자 Docker, 설치 데이터, API 키와 유료 Provider는 이번 검증에 사용하지 않았다. 시각 검사 재현에는 CI와 동일한 digest의 작업 전용 Playwright container와 합성 fixture만 사용했다. 사용자 volume·port를 연결하지 않았고 해당 container만 종료·제거한다. 기존 실서비스 결과는 당시 실행 SHA의 증거이며 이번 후보에서 다시 실행했다는 의미가 아니다.
 
 ## DCO와 역사적 출처
 
@@ -29,6 +29,10 @@ CI와 같은 사전 검사에서 L4의 현재 inventory가 오래된 import 수�
 ER0의 현재 runtime/SQL inventory에는 `main.py`·Chat model hash와 패치 전 dependency 버전이 남아 있었다. 원래 generator로 해당 현재 값만 갱신했고 기존 89개 migration, 24개 graph query, 44개 route 및 동결 parity corpus는 유지한다. 원래 8개 검사는 수정된 현재 소스의 전체 scan과 count·omission·hash·new-source 거절을 포함해 통과했다. 현재 PostgreSQL marker 목록은 역사적 schema/호환값/재도입 guard를 설명하는 것이며 PostgreSQL runtime을 추가하지 않는다.
 
 ## Hosted CI 연결
+
+고정 Linux 시각 환경에서 전체 피드와 World 작성란의 차이를 재현했다. 전체 피드는 1장 이미지를 원본 비율로 보존하는 계약에 따른 변경이다. World 작성란은 새 첨부 입력의 intrinsic 최소 너비 때문에 grid가 넓어지고 게시 버튼이 잘리는 실제 문제였다. Media가 file input의 너비를 제한하고 Social이 첨부와 submit을 세로로 배치하도록 각 소유 CSS에서 수정했다. 같은 작성 컴포넌트의 360·390·436px 입력·버튼 경계 검사를 기존 이미지 browser 사례에 추가했고 title/body·asset 전달과 인식 요청 없음도 유지했다.
+
+잘림 수정 후 실제 화면을 검토하고 Next/static이 byte 단위로 동일한 전체 피드·World 작성란 PNG 두 장만 갱신했다. 다른 기준 이미지, snapshot call, fixture, pixel 허용치 25·threshold 0.1, Provider·외부 요청 제한은 그대로다. 현재 design inventory의 변경은 Media CSS hash와 두 PNG hash 세 값뿐이며, 동결 checkpoint를 재생성하지 않고 정확한 전후 asset 출처를 append-only로 기록했다. 같은 pinned Playwright container에서 전체 시각 **36 PASS**, 이미지 기능 **40 PASS**를 확인했다. 이는 개인 Windows 배율·설치 화면 USER CHECK와 별도다.
 
 캐릭터 생성 browser fixture의 카드 원문 응답도 이전 형태여서 metadata 복구 시 review/raw_only가 누락되는 실패를 재현했다. fixture를 실제 `CharacterCardSourceRead` 타입의 전체 응답에 맞추고 `include_document=false`에서는 document를 null로 반환한다. 기존 편집·World·새로고침 검사에 metadata 조회가 발생하고 원문을 다시 요청하지 않는 확인을 추가한다. 제품 UI에서 잘못된 mock을 묵인하거나 기존 실패 기대값을 지우는 변경은 하지 않는다.
 
