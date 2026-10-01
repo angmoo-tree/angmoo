@@ -24821,6 +24821,64 @@
       "test_suppressions": {
         "tests/test_ci_report_artifacts.py": {}
       }
+    },
+    {
+      "commit": "a44ce1869d3d516687606f2efb68ecbd9e28b2b6",
+      "feature_id": "AR-IMAGE-GITLEAKS-REVIEW",
+      "reason": "Exact public image provenance, bundled tokenizer checksum, synthetic idempotency values and lease expressions are distinguished by anchored path and line conditions; other values, paths and extra credential fields remain outside the reviewed exceptions.",
+      "tracked_files": {
+        "backend/tests/test_image_gitleaks_review.py": "9f667106147b691def61c5eb05f2ad6981a0c1f6"
+      },
+      "test_nodes": [
+        "tests/test_image_gitleaks_review.py::test_image_review_keeps_exact_rule_path_and_line_conditions",
+        "tests/test_image_gitleaks_review.py::test_public_blob_is_allowed_only_as_the_reviewed_source_field",
+        "tests/test_image_gitleaks_review.py::test_tokenizer_exception_matches_only_the_bundled_resource_digest",
+        "tests/test_image_gitleaks_review.py::test_synthetic_idempotency_exception_does_not_cover_other_values[path]",
+        "tests/test_image_gitleaks_review.py::test_synthetic_idempotency_exception_does_not_cover_other_values[value]",
+        "tests/test_image_gitleaks_review.py::test_synthetic_idempotency_exception_does_not_cover_other_values[extra]",
+        "tests/test_image_gitleaks_review.py::test_lease_expression_exception_does_not_cover_a_credential_literal"
+      ],
+      "test_assertions": {
+        "tests/test_image_gitleaks_review.py": {
+          "reviewed_groups": [],
+          "allowed": [],
+          "fingerprint": [],
+          "test_image_review_keeps_exact_rule_path_and_line_conditions": [
+            "assert len(groups) == 4",
+            "assert all((group['targetRules'] == ['generic-api-key'] for group in groups))",
+            "assert all((group['condition'] == 'AND' and group['regexTarget'] == 'line' for group in groups))",
+            "assert all((pattern.startswith('^\\\\s*') or pattern.startswith('^TOKENIZER_HASH') for group in groups for pattern in group['regexes']))",
+            "assert all((pattern.endswith('$') for group in groups for pattern in group['regexes']))"
+          ],
+          "test_public_blob_is_allowed_only_as_the_reviewed_source_field": [
+            "assert allowed('security/refactor_backend_additions.json', line)",
+            "assert allowed('security/post_refactor_contract_changes.json', line)",
+            "assert not allowed('backend/app/integrations/image_api.py', line)",
+            "assert not allowed('security/refactor_backend_additions.json', line.replace(value, '0' * 40))",
+            "assert not allowed('security/refactor_backend_additions.json', line.replace('backend/app/integrations/image_api.py', 'api_key'))",
+            "assert not allowed('security/refactor_backend_additions.json', line + ' \"api_key\": \"unrelated-value\"')"
+          ],
+          "test_tokenizer_exception_matches_only_the_bundled_resource_digest": [
+            "assert allowed(path, line)",
+            "assert not allowed(path, line.replace(value, '0' * 64))",
+            "assert not allowed(path, line.replace('TOKENIZER_HASH', 'api_key'))",
+            "assert not allowed('backend/app/config.py', line)"
+          ],
+          "test_synthetic_idempotency_exception_does_not_cover_other_values": [
+            "assert allowed(path, line)",
+            "assert not allowed(path, line)"
+          ],
+          "test_lease_expression_exception_does_not_cover_a_credential_literal": [
+            "assert allowed(path, line)",
+            "assert not allowed(path, line.replace('minutes=5', 'minutes=10'))",
+            "assert not allowed(path, line.replace('token, lease_until', '\"unrelated-value\", lease_until'))",
+            "assert not allowed('backend/app/integrations/image_api.py', line)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_image_gitleaks_review.py": {}
+      }
     }
   ]
 }
