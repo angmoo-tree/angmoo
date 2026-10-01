@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type APIResponse, type Response } from "@playwright/test";
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
@@ -18,10 +18,21 @@ const allCardsAvailable = existsSync(manifestPath) && ["Seraphina.png", "Sakana.
 // Required public CI uses self-contained, authored fixtures. Optional external
 // originals still run the identical byte-preservation and registration checks.
 const synthetic = createSyntheticCards();
-for (const dataset of [
+type CardRecord = { name: string; bytes: number; sha256: string; file?: string; characterName?: string; version?: number; worldviewLength?: number };
+type CardDataset = { label: string; directory: string; available: boolean; duplicate?: boolean; records?: CardRecord[] };
+const userDirectory = process.env.ANGMOO_CARD_ORIGINAL_DIR ?? "";
+const userRecords: CardRecord[] = [
+  { name: "Red", file: "main_red-69957f8d_spec_v2.png", bytes: 1680504, sha256: "815c2e52205e73430cab1ae42aeef092a3e9400cecbe05c7790584d65e328b1b", worldviewLength: 3362 },
+  { name: "Raymond", file: "main_overprotective-father-raymond-610a34d02145_spec_v2.png", bytes: 2071527, sha256: "d9507f310ae2c228ad23bc4e8af0f74513cbc6bdbff4173b1f58241911798bca", worldviewLength: 6847 },
+  { name: "Elias Finch", file: "main_elias-da06fb375f61_spec_v2.png", bytes: 3885093, sha256: "c29ac8b9a9210af235de2e1f8081aa72a6d5f4c22c167a043dc19bf12466e23f", worldviewLength: 6520 },
+];
+const datasets: CardDataset[] = [
   { label: "synthetic", directory: synthetic, available: true },
+  { label: "synthetic duplicates", directory: createSyntheticCards(true), available: true, duplicate: true },
+  { label: "user duplicate originals", directory: userDirectory, available: Boolean(userDirectory) && userRecords.every((item) => existsSync(join(userDirectory, item.file!))), duplicate: true, records: userRecords },
   { label: "external originals", directory: originals, available: allCardsAvailable },
-]) {
+];
+for (const dataset of datasets) {
 test.describe(`${dataset.label} card upload through Next and isolated contributor backend`, () => {
   test.skip(!dataset.available, "optional external card originals are not available in this checkout");
 
@@ -30,12 +41,14 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
   let backendLog = () => "";
   let frontendLog = () => "";
   let base = "";
+  let backendBase = "";
   let dataRoot = "";
 
   test.beforeAll(async () => {
     const backendPort = await availablePort();
     const frontendPort = await availablePort();
     const backendUrl = `http://127.0.0.1:${backendPort}`;
+    backendBase = backendUrl;
     base = `http://127.0.0.1:${frontendPort}`;
     dataRoot = mkdtempSync(join(tmpdir(), "angmoo-card-upload-"));
 
@@ -74,6 +87,7 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         stdio: ["ignore", "pipe", "pipe"],
       });
     frontendLog = captureOutput(frontend);
+    console.log(`Owned card test services: backend=${backend.pid}:${backendPort}, frontend=${frontend.pid}:${frontendPort}`);
     await ready(base + "/", () => frontend!, frontendLog, 120_000);
   });
 
@@ -83,10 +97,16 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
     } finally {
       if (backend) await stopChild(backend);
     }
+    for (const address of [base, backendBase]) {
+      await expect.poll(async () => {
+        try { await fetch(address, { signal: AbortSignal.timeout(500) }); return true; }
+        catch { return false; }
+      }).toBe(false);
+    }
     if (dataRoot) console.log(`Isolated card upload data root: ${dataRoot}`);
   });
 
-  test("Sakana, Seraphina and Flux pass the browser upload and preserve their original bytes", async ({ page }) => {
+  test("cards pass upload, metadata restore and registration without changing originals", async ({ page }) => {
     const frontOrigin = { Origin: base, "Sec-Fetch-Site": "same-origin" };
     const bootstrap = await page.request.get(base + "/api/backend/auth/local/bootstrap");
     expect(bootstrap.status(), await bootstrap.text()).toBe(200);
@@ -102,14 +122,10 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
     });
     expect(claim.status(), await claim.text()).toBe(201);
 
-    const items = JSON.parse(readFileSync(join(dataset.directory, "manifest.json"), "utf8")) as Array<{
-      name: string; bytes: number; sha256: string;
-    }>;
-    const cards = ["Sakana", "Seraphina", "FluxTheCat"];
-    for (const name of cards) {
-      const record = items.find((card) => card.name === name);
-      expect(record).toBeTruthy();
-      const filePath = join(dataset.directory, name + ".png");
+    const items: CardRecord[] = dataset.records ?? JSON.parse(readFileSync(join(dataset.directory, "manifest.json"), "utf8"));
+    for (const record of items) {
+      const name = record.name;
+      const filePath = join(dataset.directory, record.file ?? name + ".png");
       const original = readFileSync(filePath);
       expect(original.byteLength).toBe(record!.bytes);
       expect(createHash("sha256").update(original).digest("hex")).toBe(record!.sha256.toLowerCase());
@@ -123,19 +139,53 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
       await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles(filePath);
       const response = await uploaded;
       expect(response.status(), `${basename(filePath)}: ${await response.text()}`).toBe(200);
-      const result = await response.json() as { card_version: number; draft: {
+      const result = await response.json() as { card_version: number; metadata_selection: { multiple_definitions: boolean; same_keyword_count: number }; draft: {
         id: string; name: string; worldview: string; source_kind: string; revision: number; avatar_temp_url: string | null;
       }};
-      expect(result.card_version).toBe(name === "Seraphina" ? 3 : 2);
-      expect(result.draft.name).toBe(name === "FluxTheCat" ? "Flux the Cat" : name);
+      expect(result.card_version).toBe(record.version ?? (name === "Seraphina" ? 3 : 2));
+      expect(result.draft.name).toBe(record.characterName ?? (name === "FluxTheCat" ? "Flux the Cat" : name));
+      if (record.worldviewLength) expect(result.draft.worldview.length).toBe(record.worldviewLength);
       expect(result.draft.source_kind).toBe("card");
       expect(result.draft.revision).toBe(2);
       expect(result.draft.avatar_temp_url).toBeTruthy();
       await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue(result.draft.name);
+      if (dataset.duplicate) {
+        expect(result.metadata_selection.same_keyword_count).toBe(2);
+        expect(result.metadata_selection.multiple_definitions).toBe(true);
+        const notice = page.getByRole("status").filter({ hasText: "같은 형식의 캐릭터 정의가 여러 개" });
+        await expect(notice).toBeVisible();
+        const restored = page.waitForResponse((item) => item.url().includes("/card-source?include_document=false"));
+        await page.reload();
+        const summary = await restored;
+        expect(summary.status()).toBe(200);
+        expect((await summary.json()).document).toBeNull();
+        await expect(notice).toBeVisible();
+        await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue(result.draft.name);
+        // Existing replace confirmation still protects edits; duplicates need no extra approval.
+        await page.getByRole("textbox", { name: "이름", exact: true }).fill(result.draft.name + " edited");
+        await page.getByRole("button", { name: "이전", exact: true }).click();
+        await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles(filePath);
+        await expect(page.getByText("현재 편집 내용을 이 카드의 설정으로 교체할까요?", { exact: true })).toBeVisible();
+        await page.getByRole("button", { name: "취소", exact: true }).click();
+        await expect(page.getByRole("button", { name: "교체하기", exact: true })).toHaveCount(0);
+        await page.getByLabel("만드는 방법", { exact: true }).selectOption("direct");
+        await expect(notice).toHaveCount(0);
+        await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+        await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue(result.draft.name + " edited");
+        await page.getByRole("button", { name: "이전", exact: true }).click();
+        await page.getByLabel("만드는 방법", { exact: true }).selectOption("card");
+        await expect(notice).toBeVisible();
+        await page.getByRole("button", { name: "나중에 하기", exact: true }).click();
+        await page.goto(base + "/agents/new");
+        // Unsaved edits are not silently applied to the stored original draft.
+        await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue(result.draft.name);
+        await expect(notice).toBeVisible();
+      }
 
       const source = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/card-source`);
       expect(source.status(), await source.text()).toBe(200);
       expect((await source.json()).sha256).toBe(record!.sha256.toLowerCase());
+      expect(source.headers()["cache-control"]).toBe("private, no-store");
       const reloaded = await page.request.get(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}`);
       expect(reloaded.status(), await reloaded.text()).toBe(200);
       const rawDraft = await reloaded.json();
@@ -163,11 +213,32 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
         expect((await sourceAfterReject.json()).sha256).toBe(record!.sha256.toLowerCase());
       }
 
-      const completed = await page.request.post(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/complete`, {
-        headers: frontOrigin, data: { revision: result.draft.revision },
-      });
+      let completed: APIResponse | Response;
+      if (dataset.duplicate) {
+        const avatarResponse = page.waitForResponse((item) => new URL(item.url()).pathname.endsWith(`/agents/drafts/${result.draft.id}/media/avatar`));
+        await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+        const media = await avatarResponse;
+        expect(media.status()).toBe(200);
+        expect(media.headers()["content-type"]).toContain("image/webp");
+        const avatar = page.getByRole("img", { name: `${result.draft.name} 프로필 이미지`, exact: true });
+        await expect(avatar).toBeVisible();
+        const image = avatar.locator("img");
+        await expect(image).toBeVisible();
+        await expect.poll(() => image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0)).toBe(true);
+        await page.getByRole("button", { name: "저장하고 다음", exact: true }).click();
+        const registration = page.waitForResponse((item) => item.request().method() === "POST"
+          && new URL(item.url()).pathname.endsWith(`/agents/drafts/${result.draft.id}/complete`));
+        await page.getByRole("button", { name: "자율활동 OFF로 등록", exact: true }).click();
+        completed = await registration;
+        await expect(page.getByRole("heading", { name: `${result.draft.name} 등록 완료`, exact: true })).toBeVisible();
+      } else {
+        completed = await page.request.post(base + `/api/backend/agents/drafts/${encodeURIComponent(result.draft.id)}/complete`, {
+          headers: frontOrigin, data: { revision: result.draft.revision },
+        });
+      }
       expect(completed.status(), await completed.text()).toBe(200);
       const character = (await completed.json()).character;
+      expect(createHash("sha256").update(readFileSync(filePath)).digest("hex")).toBe(record.sha256.toLowerCase());
       const worlds = await page.request.post(base + "/api/backend/worlds/default-space/ensure", { headers: frontOrigin, data: {} });
       expect(worlds.status(), await worlds.text()).toBe(200);
       const world = await worlds.json();
@@ -247,7 +318,7 @@ test("isolated service cleanup closes its descendant server before another build
   }
 });
 
-function createSyntheticCards(): string {
+function createSyntheticCards(duplicate = false): string {
   const directory = mkdtempSync(join(tmpdir(), "angmoo-synthetic-cards-"));
   const records = [
     { name: "Seraphina", bytes: 551_901, version: 3 },
@@ -266,6 +337,10 @@ function createSyntheticCards(): string {
     const parts = [Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
       pngChunk("IHDR", header), pngChunk("tEXt", metadata),
       pngChunk("IDAT", deflateSync(Buffer.from([0, 16, 32, 48])))];
+    if (duplicate) {
+      const other = { ...document, data: { ...document.data, name: "Unused alternative", description: "Must never replace or merge the first definition." } };
+      parts.push(pngChunk("tEXt", Buffer.from(`${version === 3 ? "CCV3" : "CHARA"}\0${Buffer.from(JSON.stringify(other)).toString("base64")}`)));
+    }
     const overhead = parts.reduce((sum, part) => sum + part.length, 0) + 24;
     const content = Buffer.concat([...parts, pngChunk("npAD", Buffer.alloc(bytes - overhead)), pngChunk("IEND", Buffer.alloc(0))]);
     if (content.length !== bytes) throw new Error("Synthetic card length differs");
@@ -326,11 +401,21 @@ async function stopChild(child: ChildProcess) {
   if (pid === undefined) return;
   const exited = child.exitCode !== null || child.signalCode !== null;
   if (process.platform === "win32" && exited) return;
-  const closed = exited ? Promise.resolve() : once(child, "close");
+  // On Windows an inherited pipe can delay 'close' after the owned tree exits.
+  const closed = exited ? Promise.resolve() : once(child, "exit");
   const signal = (value: NodeJS.Signals) => {
     if (process.platform === "win32") {
       const result = spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
-      if (result.error || result.status !== 0) throw new Error("Isolated service tree shutdown failed");
+      if (result.error || result.status !== 0) {
+        // Windows can remove the process before Node receives its exit event.
+        // Accept that race only after an OS liveness check confirms this PID is gone.
+        try { process.kill(pid, 0); }
+        catch (error) {
+          if ((error as NodeJS.ErrnoException).code === "ESRCH") return;
+          throw error;
+        }
+        throw new Error("Isolated service tree shutdown failed");
+      }
     } else {
       try {
         // Every owned service starts in its own group. Next forks a worker;
@@ -355,6 +440,10 @@ async function stopChild(child: ChildProcess) {
   signal("SIGTERM");
   if (!await waitClosed(5_000)) {
     signal("SIGKILL");
-    if (!await waitClosed(5_000)) throw new Error("Isolated service shutdown timed out");
+    if (!await waitClosed(5_000)) {
+      try { process.kill(pid, 0); }
+      catch (error) { if ((error as NodeJS.ErrnoException).code === "ESRCH") return; throw error; }
+      throw new Error("Isolated service shutdown timed out");
+    }
   }
 }

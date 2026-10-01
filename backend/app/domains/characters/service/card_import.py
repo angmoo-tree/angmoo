@@ -14,6 +14,17 @@ from app.integrations.media.images import encode_profile_media_webp
 from app.integrations.media.files import media_url_to_path
 
 
+def _selection_summary(parsed):
+    selection = parsed.metadata_selection
+    if selection is None:
+        return None
+    return {"policy": selection.policy, "keyword": selection.keyword,
+            "selected_occurrence": selection.selected_occurrence,
+            "same_keyword_count": selection.same_keyword_count,
+            "multiple_definitions": selection.multiple_definitions,
+            "selected_json_sha256": selection.selected_json_sha256}
+
+
 def import_card(db, user, draft_id, *, revision, content, workflows):
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
     if draft.contract_version != 2:
@@ -50,10 +61,11 @@ def import_card(db, user, draft_id, *, revision, content, workflows):
             created_file.unlink(missing_ok=True)
         raise
     return {"draft": _draft_read(draft), "card_version": parsed.version,
-            "review": list(mapping.review), "raw_only": list(mapping.raw_only)}
+            "review": list(mapping.review), "raw_only": list(mapping.raw_only),
+            "metadata_selection": _selection_summary(parsed)}
 
 
-def read_source(db, user, draft_id):
+def read_source(db, user, draft_id, *, include_document=True):
     source = db.scalar(select(models.CharacterCardSource).where(
         models.CharacterCardSource.draft_id == draft_id, models.CharacterCardSource.owner_id == user.id))
     if source is None:
@@ -62,5 +74,9 @@ def read_source(db, user, draft_id):
     if source.character_id is None and (draft is None or draft.expires_at.replace(tzinfo=UTC) <= datetime.now(UTC)):
         raise AgentCreationDraftNotFoundError(draft_id)
     parsed = parse_card(source.source_bytes)
-    return {"document": parsed.document, "sha256": source.source_sha256,
-            "version": source.card_version, "source_format": source.source_format}
+    mapping = map_card(parsed)
+    return {"document": parsed.document if include_document else None,
+            "sha256": source.source_sha256, "version": source.card_version,
+            "source_format": source.source_format,
+            "metadata_selection": _selection_summary(parsed),
+            "review": list(mapping.review), "raw_only": list(mapping.raw_only)}

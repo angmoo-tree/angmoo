@@ -64,6 +64,11 @@ function forwardedResponseHeaders(upstream: Response) {
   const headers = new Headers({
     "content-type": upstream.headers.get("content-type") ?? "application/json",
   });
+  // Keep private-source response protections across the existing Next proxy.
+  for (const name of ["cache-control", "x-content-type-options"]) {
+    const value = upstream.headers.get(name);
+    if (value !== null) headers.set(name, value);
+  }
   const getSetCookie = (
     upstream.headers as Headers & { getSetCookie?: () => string[] }
   ).getSetCookie;

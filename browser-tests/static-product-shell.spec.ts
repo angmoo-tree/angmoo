@@ -2,6 +2,9 @@ import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { expect, test } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
+import { cardMetadataTests } from "./card-metadata-fixture";
+
+cardMetadataTests();
 
 const ROUTES = [
   "/",

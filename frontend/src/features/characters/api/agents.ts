@@ -3,6 +3,7 @@ import { apiRequest } from "@/features/characters/api/request";
 import type { GoogleGeminiModel, PollinationsImageModel } from "@/features/characters/config/model-options";
 import { notifyAgentsChanged } from "@/features/characters/stores/agent-session";
 import type { AgentActivityMaintenanceRead, AgentActivitySettingRead, AgentCreateInput, AgentCreationDraftImageStyle, AgentCreationDraftMediaGenerationRead, AgentCreationDraftRead, AgentCreationDraftUpdateInput, AgentDetailRead, AgentFeedCueRead, AgentFirstGreetingRead, AgentImageGenerationSettingRead, AgentImageSeedUploadInput, AgentLocalConnectionRead, AgentLocalKeyCreateRead, AgentPersonaInput, AgentProfileImageUsageRead, AgentProfileInput, AgentProfileMediaGenerationRead, AgentProfileMediaUploadInput, AgentRunRead, AgentSettingsInput, CharacterLoreSourceRead, CharacterLoreStatusRead, CredentialRead } from "@/features/characters/types/agents";
+import type { CharacterCardImportRead, CharacterCardSourceRead } from "@/features/characters/types/agents";
 
 export function getAgentActivityMaintenance() {
   return apiRequest<AgentActivityMaintenanceRead>("/maintenance/agent-activity", {
@@ -143,12 +144,16 @@ export function getAgentDraft(draftId: string) {
 }
 
 export function importAgentCard(draftId: string, revision: number, data_base64: string) {
-  return apiRequest<{ draft: AgentCreationDraftRead; card_version: number; review: string[]; raw_only: string[] }>(
+  return apiRequest<CharacterCardImportRead>(
     `/agents/drafts/${draftId}/card`, { method: "POST", body: { revision, data_base64 } });
 }
 
 export function getAgentCardSource(draftId: string) {
-  return apiRequest<{ document: unknown; sha256: string }>(`/agents/drafts/${draftId}/card-source`);
+  return apiRequest<CharacterCardSourceRead>(`/agents/drafts/${encodeURIComponent(draftId)}/card-source`);
+}
+
+export function getAgentCardMetadata(draftId: string) {
+  return apiRequest<CharacterCardSourceRead>(`/agents/drafts/${encodeURIComponent(draftId)}/card-source?include_document=false`);
 }
 
 export function copyAgentSettings(draftId: string, revision: number, character_id: string) {

@@ -10,6 +10,7 @@ import binascii
 import hashlib
 import io
 import json
+import math
 import struct
 import zlib
 from dataclasses import dataclass
@@ -27,12 +28,27 @@ MAX_CHUNKS = 4096
 MAX_PIXELS = 16_000_000
 MAX_DIMENSION = 8192
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-PARSER_VERSION = "angmoo-card-import-v1"
+PARSER_VERSION = "angmoo-card-import-v2"
 COMMON_FIELDS = ("name", "description", "personality", "scenario", "first_mes", "mes_example")
 
 
 class CardParseError(ValueError):
     """Safe error code only; never echoes card content or filesystem paths."""
+
+
+@dataclass(frozen=True)
+class MetadataSelection:
+    """Technical selection facts; unused definitions remain in the original PNG."""
+
+    keyword: str
+    same_keyword_count: int
+    selected_json_sha256: str
+    policy: str = "sillytavern-first-match-v1"
+    selected_occurrence: int = 0
+
+    @property
+    def multiple_definitions(self) -> bool:
+        return self.same_keyword_count > 1
 
 
 @dataclass(frozen=True)
@@ -43,6 +59,7 @@ class ParsedCard:
     document: dict[str, Any]
     data: dict[str, Any]
     parser_version: str = PARSER_VERSION
+    metadata_selection: MetadataSelection | None = None
 
 
 def _object(pairs):
@@ -81,12 +98,15 @@ def _json(content: bytes) -> dict[str, Any]:
             stack.extend((child, depth + 1) for child in value.values())
         elif isinstance(value, list):
             stack.extend((child, depth + 1) for child in value)
+        elif isinstance(value, float) and not math.isfinite(value):
+            raise CardParseError("card_invalid_json_number")
     return document
 
 
-def _png_metadata(content: bytes) -> tuple[bytes, str]:
+def _png_metadata(content: bytes) -> tuple[bytes, MetadataSelection]:
     offset, chunks, total_text = 8, 0, 0
-    texts = {}
+    texts: dict[bytes, bytes] = {}
+    counts: dict[bytes, int] = {}
     ended = False
     while offset < len(content):
         chunks += 1
@@ -113,9 +133,8 @@ def _png_metadata(content: bytes) -> tuple[bytes, str]:
                 raise CardParseError("card_invalid_png_text")
             key = keyword.lower()
             if key in {b"chara", b"ccv3"}:
-                if key in texts:
-                    raise CardParseError("card_duplicate_metadata")
-                texts[key] = encoded
+                counts[key] = counts.get(key, 0) + 1
+                texts.setdefault(key, encoded)
         offset = end
         if kind == b"IEND":
             if size or end != len(content):
@@ -127,10 +146,21 @@ def _png_metadata(content: bytes) -> tuple[bytes, str]:
     selected = b"ccv3" if b"ccv3" in texts else b"chara"
     if selected not in texts:
         raise CardParseError("card_metadata_missing")
+    if len(texts[selected]) > 4 * ((MAX_JSON_BYTES + 2) // 3):
+        raise CardParseError("card_json_too_large")
     try:
         decoded = base64.b64decode(texts[selected], validate=True)
     except (binascii.Error, ValueError):
         raise CardParseError("card_invalid_base64") from None
+    if len(decoded) > MAX_JSON_BYTES:
+        raise CardParseError("card_json_too_large")
+    return decoded, MetadataSelection(
+        keyword=selected.decode("ascii"), same_keyword_count=counts[selected],
+        selected_json_sha256=hashlib.sha256(decoded).hexdigest(),
+    )
+
+
+def _verify_png_image(content: bytes) -> None:
     # Validate the actual image, after bounded container checks, without changing metadata.
     try:
         with Image.open(io.BytesIO(content)) as picture:
@@ -144,16 +174,15 @@ def _png_metadata(content: bytes) -> tuple[bytes, str]:
         raise
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
         raise CardParseError("card_invalid_image") from None
-    return decoded, selected.decode("ascii")
 
 
 def parse_card(content: bytes) -> ParsedCard:
     if not content or len(content) > MAX_FILE_BYTES:
         raise CardParseError("card_file_size_limit")
     is_png = content.startswith(PNG_SIGNATURE)
-    selected = None
+    selection = None
     if is_png:
-        json_bytes, selected = _png_metadata(content)
+        json_bytes, selection = _png_metadata(content)
     else:
         json_bytes = content
     document = _json(json_bytes)
@@ -162,7 +191,7 @@ def parse_card(content: bytes) -> ParsedCard:
         version, data = 1, document
         if not all(field in data for field in COMMON_FIELDS):
             raise CardParseError("card_v1_fields_missing")
-    elif spec in {"chara_card_v2", "chara_card_v3"}:
+    elif isinstance(spec, str) and spec in {"chara_card_v2", "chara_card_v3"}:
         version = 2 if spec == "chara_card_v2" else 3
         if document.get("spec_version") != f"{version}.0":
             raise CardParseError("card_unsupported_version")
@@ -171,12 +200,15 @@ def parse_card(content: bytes) -> ParsedCard:
             raise CardParseError("card_data_object_required")
     else:
         raise CardParseError("card_unsupported_version")
-    if selected == "ccv3" and version != 3:
+    if selection is not None and selection.keyword == "ccv3" and version != 3:
         raise CardParseError("card_metadata_version_mismatch")
     for field in COMMON_FIELDS:
         if not isinstance(data.get(field), str):
             raise CardParseError("card_common_field_type")
     if not data["name"].strip():
         raise CardParseError("card_name_required")
+    if is_png:
+        _verify_png_image(content)
     return ParsedCard(version, "png" if is_png else "json",
-                      hashlib.sha256(content).hexdigest(), document, data)
+                      hashlib.sha256(content).hexdigest(), document, data,
+                      metadata_selection=selection)

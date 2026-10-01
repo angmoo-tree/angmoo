@@ -8,7 +8,7 @@ from app.domains.routines.schemas import (
     AgentSlotRead,
 )
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from app.providers.generation_profiles import ThinkingLevel
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -308,6 +308,33 @@ class AgentCreationDraftRead(UtcInstantResponseModel):
     expires_at: datetime
     created_at: datetime
     updated_at: datetime
+
+class CharacterCardMetadataSelectionRead(BaseModel):
+    policy: Literal["sillytavern-first-match-v1"]
+    keyword: Literal["chara", "ccv3"]
+    selected_occurrence: Literal[0]
+    same_keyword_count: int = Field(ge=1, le=4096)
+    multiple_definitions: bool
+    selected_json_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class CharacterCardImportRead(BaseModel):
+    draft: AgentCreationDraftRead
+    card_version: int
+    review: list[str]
+    raw_only: list[str]
+    metadata_selection: CharacterCardMetadataSelectionRead | None = None
+
+
+class CharacterCardSourceRead(BaseModel):
+    document: dict[str, Any] | None
+    sha256: str
+    version: int
+    source_format: Literal["png", "json"]
+    metadata_selection: CharacterCardMetadataSelectionRead | None = None
+    review: list[str]
+    raw_only: list[str]
+
 
 class AgentPromotionUsageRead(UtcInstantResponseModel):
     promotion_usage_allowed: bool

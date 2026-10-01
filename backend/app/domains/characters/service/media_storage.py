@@ -140,7 +140,12 @@ def save_draft_profile_media_bytes(
     draft_dir.mkdir(parents=True, exist_ok=True)
     filename = f"{media_type}-{uuid4().hex}.webp"
     path = draft_dir / filename
-    path.write_bytes(encoded)
+    try:
+        path.write_bytes(encoded)
+    except OSError:
+        # The caller has no URL to compensate until this function returns.
+        path.unlink(missing_ok=True)
+        raise
 
     return f"{settings.media_url_path}/drafts/{draft_id}/{filename}"
 
