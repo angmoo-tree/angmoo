@@ -30,6 +30,8 @@ ER0의 현재 runtime/SQL inventory에는 `main.py`·Chat model hash와 패치 �
 
 ## Hosted CI 연결
 
+최종 후보의 전체 Backend job은 검사 실패가 보고되기 전에 40분 제한으로 83%에서 취소됐다. 직전 head의 같은 전체 suite는 4,614 PASS/31 SKIP와 2,201.72초를 기록했지만 이번 run은 완료 JUnit이 없어 PASS로 세지 않는다. 모든 test·assertion·skip 조건·제품 deadline은 그대로 두고 CI job의 실행 예산을 60분으로 확보했다. `--durations=25`를 추가해 완료 시 오래 걸린 setup/test를 기록하며, 전체 suite와 완료 JUnit·route/license 후속 검사를 유지한다. 실제 느린 실행에 필요한 유한한 runner 예산을 조정한 것으로 실패를 무시하거나 testcase를 줄이지 않는다.
+
 고정 Linux 시각 환경에서 전체 피드와 World 작성란의 차이를 재현했다. 전체 피드는 1장 이미지를 원본 비율로 보존하는 계약에 따른 변경이다. World 작성란은 새 첨부 입력의 intrinsic 최소 너비 때문에 grid가 넓어지고 게시 버튼이 잘리는 실제 문제였다. Media가 file input의 너비를 제한하고 Social이 첨부와 submit을 세로로 배치하도록 각 소유 CSS에서 수정했다. 같은 작성 컴포넌트의 360·390·436px 입력·버튼 경계 검사를 기존 이미지 browser 사례에 추가했고 title/body·asset 전달과 인식 요청 없음도 유지했다.
 
 잘림 수정 후 실제 화면을 검토하고 Next/static이 byte 단위로 동일한 전체 피드·World 작성란 PNG 두 장만 갱신했다. 다른 기준 이미지, snapshot call, fixture, pixel 허용치 25·threshold 0.1, Provider·외부 요청 제한은 그대로다. 현재 design inventory의 변경은 Media CSS hash와 두 PNG hash 세 값뿐이며, 동결 checkpoint를 재생성하지 않고 정확한 전후 asset 출처를 append-only로 기록했다. 같은 pinned Playwright container에서 전체 시각 **36 PASS**, 이미지 기능 **40 PASS**를 확인했다. 이는 개인 Windows 배율·설치 화면 USER CHECK와 별도다.
