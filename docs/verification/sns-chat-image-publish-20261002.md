@@ -38,7 +38,11 @@ Gitleaks 8.30.1의 현재 tree/949개 커밋 검사에서 17개의 비밀 오탐
 
 ## 로컬 확인 범위
 
-구조 분리 이후 이미지·미디어·캐릭터 HTTP 경계 회귀 검사는 **319 PASS**다. 분리 이전에도 Next/static 빌드, lint, typecheck, 카드 proxy 검사가 통과했고 이미지 browser **40 PASS**였다. 카드 browser는 외부 원본 fixture가 없는 경우를 명시적으로 구분한다. Backend 전체, 정확한 출처·계약·node 보존, clean clone 확인은 게시 gate로 별도 수행하며 아직 실행 중인 검사를 PASS로 취급하지 않는다.
+구조 분리 이후 이미지·미디어·캐릭터 HTTP 경계 회귀 검사는 **319 PASS**다. 의존성 패치 후 lint, typecheck, 카드 proxy, Next/static 빌드와 이미지 browser **40 PASS**를 다시 확인했다. 카드 browser는 **4 PASS / 1 SKIP**이며 SKIP은 개인 원본 fixture가 없는 선택적 검사다. 합성 카드·공유 화면 검사는 실행했다.
+
+전체 Backend 실행은 `f72f0e4694e404ad63dd2125e49514b709d2b225`에서 시작해 **4,603 PASS / 31 SKIP / 4 FAIL**로 끝났다. 실행 중 현재 inventory를 보완했으므로 이를 최종 단일 SHA의 전체 PASS로 기록하지 않는다. 세 실패는 새 core module 등록과 현재 runtime/SQL source·dependency 목록 누락이 원인이었다. 나머지는 child transport 단계에 도달하기 전 5초 대기가 만료된 경우다. 원래 timeout과 테스트 조건은 변경하지 않았고, 해당 cancel/deadline 검사 두 건은 별도 재실행에서 통과했다. 최종 inventory 수정 후 실패 파일들과 Gitleaks 회귀를 함께 실행한 **23개 검사가 모두 PASS**다. 실패 결과와 재실행을 따로 보존하며 최종 고정 head의 전체 Backend 판정은 Hosted CI에서 확인한다.
+
+원본 object·개인 카드·키 파일이 없는 clean clone의 `f3c0db69e06118d397a2b8337da3ba18e98796bf`에서 원래 DCO, import inventory, Frontend 보존, Backend 계약·node 보존 검사를 모두 통과했다. Backend 보존 검사의 보호 lineage와 현재 node는 **4,645개로 일치**했고 전후 계약 기록 37개를 검증했다. 이후 변경은 검토한 현재 runtime/SQL inventory와 이 요약이며, gate가 읽는 source·test·lock·출처 기록·동결 checkpoint의 변경 여부를 공개 전에 별도로 확인한다. 검증한 SHA와 이후 변경 영향 확인을 서로 다른 근거로 기록한다.
 
 PR CI와 병합 후 main push CI는 각 SHA·run을 별도로 기록한다. 최종 PR·merge SHA와 main CI는 workspace 실행 receipt에 남기며 main에 결과만 직접 push하지 않는다.
 
@@ -46,7 +50,7 @@ PR CI와 병합 후 main push CI는 각 SHA·run을 별도로 기록한다. 최�
 
 게시 전 의존성 감사에서 Python lock의 PyJWT 2.14.0·pypdf 6.16.1·urllib3 2.7.0과 Next 16.3.3의 알려진 취약점이 확인됐다. [PyJWT 공식 공지](https://github.com/jpadilla/pyjwt/security/advisories/GHSA-42vr-xj54-vc7v), [pypdf 공식 release](https://github.com/py-pdf/pypdf/releases/tag/6.19.0), [urllib3 공식 release](https://github.com/urllib3/urllib3/releases/tag/2.8.0), [Next 공식 공지](https://github.com/vercel/next.js/security/advisories/GHSA-vcvr-r3jv-pc5j)에 따라 PyJWT **2.15.0**, pypdf **6.19.0**, urllib3 **2.8.0**, Next와 대응 ESLint config **16.3.6**으로 정상 업데이트했다.
 
-Python lock에서 바뀐 패키지는 앞의 3개뿐이며 PyJWT·urllib3는 기존 OCI SDK의 간접 의존성이다. 기존 Next OpenGraph 구현은 고정 SVG를 사용한다. 공지의 공격 조건과 현재 앱의 실제 노출을 구분하면서 패치 버전으로 갱신했다. `sentencepiece 0.2.2`는 이번 업데이트 전에 이미 이미지 브랜치 lock에 있었고 NOTICE 누락만 보완했다. 기존 취약점 감사 조건을 낮추거나 ignore하지 않았으며 갱신된 lock의 uv audit, frontend production audit와 license/NOTICE 검사가 통과했다. 이후 전체 Backend와 Next/static 검사를 다시 수행한다. 갱신 전 중단된 전체 Backend 실행은 완료 PASS로 기록하지 않는다.
+Python lock에서 바뀐 패키지는 앞의 3개뿐이며 PyJWT·urllib3는 기존 OCI SDK의 간접 의존성이다. 기존 Next OpenGraph 구현은 고정 SVG를 사용한다. 공지의 공격 조건과 현재 앱의 실제 노출을 구분하면서 패치 버전으로 갱신했다. `sentencepiece 0.2.2`는 이번 업데이트 전에 이미 이미지 브랜치 lock에 있었고 NOTICE 누락만 보완했다. 기존 취약점 감사 조건을 낮추거나 ignore하지 않았으며 갱신된 lock의 uv audit, frontend production audit와 license/NOTICE 검사가 통과했다. 패치 후 Backend와 Next/static 결과는 위에 구분해 기록했다. 갱신 전 중단된 전체 Backend 실행은 완료 PASS로 기록하지 않는다.
 
 - NovelAI Opus 무차감 NA01/F01은 이번 사용자의 Anlas 소비 테스트 선택으로 실행하지 않았다.
 - NovelAI 모델 전용 tokenizer/parser와 정확한 길이 계산 동등성, 캐릭터 일관성·이미지 품질, 자연 SNS 활동과 개인 환경 USER CHECK는 별도다.
