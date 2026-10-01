@@ -22,6 +22,10 @@ MIME 판독, 불일치 거절, bytes·해상도·픽셀·프레임 제한, Pillo
 
 ## Hosted CI 연결
 
+원래 보존 검사는 이름을 바꾼 카드 테스트의 수집 node뿐 아니라 assertion helper lineage도 요구한다. 두 연결을 모두 명시하고 정확한 전후 기대값 기록으로 확인한다. 원래 보존 검사 조건과 immutable checkpoint는 유지한다.
+
+Gitleaks 8.30.1의 현재 tree/949개 커밋 검사에서 17개의 비밀 오탐이 확인됐다. 공개 source Git blob 8개는 각 도입 커밋의 `commit:path`로, T5 checksum은 번들 bytes의 SHA-256으로 확인했다. 나머지는 두 합성 idempotency 식별자와 두 SQLAlchemy lease 만료 계산식이다. `generic-api-key`의 정확한 경로와 전체 line 조건만 추가한다. 다른 field·값·경로·추가 credential literal·폴더 단위 예외는 허용하지 않는다. 관련 회귀 검사로 값 변경과 다른 파일이 허용되지 않음을 확인한다. 기존 실제 비밀 탐지와 과거 fixture 예외는 유지한다.
+
 기존 frontend job에 `playwright.image-integration.config.ts`를 연결한다. Next와 static의 동일 SNS·Chat 이미지 흐름 40개 검사를 실행하고 JUnit·실패 screenshot·trace를 artifact로 남긴다. 합성 fixture와 fake Provider를 사용하며 유료 API 키, 과거 로컬 DB·게시글·개인 캐릭터 카드에 의존하지 않는다. 기존 검사와 required context는 제거하지 않는다.
 
 ## 로컬 확인 범위
