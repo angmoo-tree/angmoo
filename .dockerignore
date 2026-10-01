@@ -48,3 +48,6 @@
 **/playwright-report/**
 **/test-results
 **/test-results/**
+
+# Local verification evidence is not an application build input.
+/artifacts/
