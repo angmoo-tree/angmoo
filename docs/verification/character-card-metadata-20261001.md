@@ -92,4 +92,12 @@ pnpm --dir browser-tests exec playwright test --config playwright.static.config.
 
 ## 検証境界
 
-사용자의 실제 Docker 화면에서 가져오기와 Windows native/설치형 배율은 별도 USER CHECK다. local source·commit만으로 실행 중인 Docker image가 변경되지 않는다. 이번 작업은 Docker build/restart, 설치·사용자 DB migration, 실제 AI 호출·과금, PR·CI workflow·push·main 병합을 수행하지 않았다. 개별 `scripts/ci/` 검사는 로컬 정합성 도구 실행이며 CI workflow 실행이 아니다.
+사용자의 실제 Docker 화면에서 가져오기와 Windows native/설치형 배율은 별도 USER CHECK다. local commit이 Docker image를 재빌드하는 것은 아니지만, 개발용 watch가 활성화돼 있으면 컨테이너 파일은 동기화될 수 있다. 이번 작업에서 agent는 Docker build/restart, 설치·사용자 DB migration, 실제 AI 호출·과금, PR·CI workflow·push·main 병합을 수행하지 않았다. 개별 `scripts/ci/` 검사는 로컬 정합성 도구 실행이며 CI workflow 실행이 아니다.
+
+## Docker watch 확인 후 정정
+
+사용자가 현재 실행 명령을 `docker compose -f compose.yml -f compose.dev.yml up --build --watch`로 알려준 뒤 실제 실행 구성을 다시 확인했다. 기존 완료 보고의 ‘소스 mount가 없으므로 코드 미반영’ 판정은 watch를 확인하지 않은 잘못된 추론이었다. 컨테이너 ID·image·mount가 그대로라는 사실만으로 컨테이너 내부 파일이 그대로라고 판정할 수 없다.
+
+실행 컨테이너의 Compose label은 이 저장소의 두 compose 파일과 작업 경로를 가리킨다. `compose.dev.yml`은 backend/app → `/workspace/backend/app`, frontend/src → `/app/src`를 `action: sync`로 동기화한다. backend dev 실행은 `--reload`, frontend는 Next dev를 사용한다. 의존성·Dockerfile 변경에는 별도의 rebuild 규칙이 있다.
+
+현재 컨테이너 안의 변경된 제품 파일 9개(parser/router/schemas/card_import/media_storage 및 frontend 생성 화면/API/types/중계)의 SHA-256이 로컬 파일과 모두 일치했다. backend 로그에서도 수정 파일 감지 → Reloading → server process 시작 → Application startup complete를 확인했고 두 서비스는 healthy였다. 따라서 현재 개발 Docker 컨테이너의 수정 코드 반영은 확인됐다. 이미지 자체 재빌드 완료나 사용자 화면에서 세 카드 모두 성공했다는 검증으로 확대하지 않는다. 사용자 데이터·키를 읽거나 추가 재빌드/재시작을 수행하지 않았다.
