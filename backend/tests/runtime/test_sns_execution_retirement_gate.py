@@ -65,3 +65,33 @@ def test_retirement_rejects_global_local_relative_and_dynamic_old_imports(eviden
     root, record, reader = evidence
     path = root/"backend/app/runtime/gateway.py"; path.parent.mkdir(parents=True, exist_ok=True); path.write_text(source)
     with pytest.raises(ValueError, match="import"): gate.validate([record], root=root, reader=reader)
+
+
+@pytest.mark.parametrize("damage", ["none", "unproven", "remaining_source", "changed_owner"])
+def test_committed_source_requires_exact_closed_retirement(evidence, monkeypatch, damage):
+    root, record, reader = evidence
+    monkeypatch.syspath_prepend(str(ROOT / "scripts/ci"))
+    spec = importlib.util.spec_from_file_location("sns_preservation_owned", ROOT / "scripts/ci/check_refactor_preservation.py")
+    preservation = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(preservation)
+    arbitrary = "backend/app/current_unrecorded.py"
+    def committed_reader(*args, **kwargs):
+        if args[0] == "log":
+            return (SOURCE + "\n" + arbitrary + "\n").encode()
+        return reader(*args, **kwargs)
+    monkeypatch.setattr(preservation, "git_bytes", committed_reader)
+    if damage == "remaining_source":
+        path = root / SOURCE
+        path.parent.mkdir(parents=True)
+        path.write_text(BEFORE)
+    elif damage == "changed_owner":
+        (root / OWNER).write_text("def shared(value): return None\n")
+    if damage in {"remaining_source", "changed_owner"}:
+        with pytest.raises(ValueError):
+            preservation.unrecorded_committed_sources({"commit": "d"*40}, [], {}, root,
+                                                      approved_changes=[record])
+    else:
+        errors = preservation.unrecorded_committed_sources({"commit": "d"*40}, [], {}, root,
+            approved_changes=[] if damage == "unproven" else [record])
+        assert errors == ["committed source lacks append-only introduction evidence: " + path
+                          for path in sorted({arbitrary, SOURCE} if damage == "unproven" else {arbitrary})]

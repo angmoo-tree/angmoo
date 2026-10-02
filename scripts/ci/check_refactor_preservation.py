@@ -943,7 +943,8 @@ def addition_errors(additions: dict, checkpoint: dict, root: Path = ROOT) -> lis
     return errors
 
 
-def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_targets: dict[str, str], root: Path = ROOT) -> list[str]:
+def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_targets: dict[str, str], root: Path = ROOT,
+                                *, approved_changes: list[dict] | None = None) -> list[str]:
     """A later commit may not omit the source evidence introduced before it.
 
     New uncommitted work is reviewable before capture. Once committed, append its
@@ -951,6 +952,13 @@ def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_t
     """
     introduced = set(filter(None, git_bytes("log", "--format=", "--name-only", "--diff-filter=A", f"{checkpoint['commit']}..HEAD", root=root).decode().splitlines()))
     known = set(file_targets.values()).union(*(set(snapshot["tracked_files"]) for snapshot in snapshots))
+    # A formerly introduced engine can leave the source set only after the
+    # closed SNS proof verifies its committed deletion, every moved/retired
+    # binding, current behavior tests and the entire product import closure.
+    # An unrecorded arbitrary deletion remains an introduction failure.
+    _, retired_modules = sns_execution_retirement.validate(
+        approved_changes or [], root=root, reader=git_bytes)
+    known.update(retired_modules)
     # The two metadata documents describe/protect themselves and are introduced
     # by this first support change, not by the frozen source checkpoint.
     metadata = {CHECKPOINT.relative_to(ROOT).as_posix(), ADDITIONS.relative_to(ROOT).as_posix()}
@@ -1035,7 +1043,8 @@ def main() -> int:
                                         public_retirement=public_retirement)
         errors.extend(check_sources(sources, moves["files"]))
         errors.extend(check_split_evidence(moves, [baseline, *snapshots], approved_changes=approved_changes))
-        errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets))
+        errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets,
+                                                  approved_changes=approved_changes))
         symbol_snapshots = [[f"backend/{path}::{function}" for path, functions in snapshot.get("test_assertions", {}).items() for function in functions]
                             for snapshot in snapshots]
         symbols = mapped_targets(sorted(set().union(*(set(nodes) for nodes in symbol_snapshots))),

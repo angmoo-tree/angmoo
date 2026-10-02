@@ -24080,7 +24080,6 @@
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/joint_activity.py",
           "backend/app/domains/routines/service/joint_activity/planning.py",
-          "backend/app/domains/routines/service/scheduling.py",
           "backend/app/domains/routines/service/joint_activity/eligibility.py",
           "backend/app/runtime/routines/joint_references.py",
           "backend/app/domains/routines/service/joint_activity/execution.py",
@@ -24854,7 +24853,6 @@
           "backend/app/domains/routines/contracts/lifecycle.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/policies/planning.py",
-          "backend/app/domains/routines/service/scheduling.py",
           "backend/app/domains/routines/contracts/plans.py",
           "backend/app/domains/routines/service/plans.py",
           "backend/app/domains/routines/repository/plans.py",
@@ -26077,7 +26075,6 @@
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/service/joint_scheduling.py",
-          "backend/app/domains/routines/service/scheduling.py",
           "backend/app/runtime/routines/activity_references.py",
           "backend/app/domains/routines/utils/clock.py"
         ]
@@ -26317,7 +26314,6 @@
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/joint_activity.py",
           "backend/app/domains/routines/service/joint_activity/planning.py",
-          "backend/app/domains/routines/service/scheduling.py",
           "backend/app/domains/routines/service/joint_activity/eligibility.py",
           "backend/app/runtime/routines/joint_references.py",
           "backend/app/domains/routines/service/joint_activity/execution.py",
@@ -83248,8 +83244,7 @@
           "backend/app/domains/social/contracts/feed_execution.py",
           "backend/app/domains/social/service/feed_reaction_prompts.py",
           "backend/app/domains/social/service/feed_reaction_validation.py",
-          "backend/app/runtime/autonomous_activity/llm_context.py",
-          "backend/app/runtime/resident/history.py"
+          "backend/app/runtime/autonomous_activity/llm_context.py"
         ]
       },
       "split_symbols": [
@@ -83590,8 +83585,7 @@
           "backend/app/domains/social/exceptions.py",
           "backend/app/domains/social/contracts/feed_execution.py",
           "backend/app/domains/social/service/feed_reaction_validation.py",
-          "backend/app/runtime/autonomous_activity/llm_context.py",
-          "backend/app/runtime/resident/history.py"
+          "backend/app/runtime/autonomous_activity/llm_context.py"
         ]
       },
       "split_symbols": [
