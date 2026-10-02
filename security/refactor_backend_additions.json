@@ -24890,6 +24890,941 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "f8b92db9fc99710e17646dc5b532d7edb427d9e8",
+      "feature_id": "AR-RETENTION",
+      "reason": "User-approved checkpoint and canonical generation retention introduces new contracts and recovery regressions for issue 358.",
+      "tracked_files": {
+        "backend/app/domains/world_characters/contracts/checkpoint_retention.py": "26b6a55c6f9080604e2fa19d22e15cd67d5acb5f",
+        "backend/app/domains/world_characters/service/checkpoint_retention.py": "b5909f9ccb57d1af6e2485f31e611a6d08e51659",
+        "backend/app/runtime/autonomous_activity/checkpoint_maintenance.py": "87e4825dea903dd0c1af98988a60b6c2f6f5c770",
+        "backend/app/runtime/migrations/canonical_retention.py": "8b95b6092208fd09be9b1ae372ec69b3c1f42ace",
+        "backend/tests/migrations/test_canonical_retention.py": "421638e11c1e57590100d786a150691ff94b2c33",
+        "backend/tests/retention_support.py": "76494aec7a93b8269b11b5b0c0d966267e832c12",
+        "backend/tests/runtime/test_checkpoint_maintenance.py": "7f6afac69fd62b44bf2f2927319eb6705a782edf",
+        "backend/tests/runtime/test_checkpoint_retention.py": "ea9df5669330d8a9287edd8ec00e047c56d41f2a",
+        "backend/tests/runtime/test_retention_lifecycle.py": "94c8779cd54dcbe526051380a4af3b567f64e6c3",
+        "docs/operations/embedded-retention.md": "90cf518f60c916d4950e5e902d8c13aa400b5639"
+      },
+      "test_nodes": [
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_digest]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_ownership]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_previous]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[duplicate_markers]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[path_traversal]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[unknown_file]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[unknown_marker_schema]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[unreadable_pin]",
+        "tests/migrations/test_canonical_retention.py::test_clean_creation_marked_but_existing_marker_recovery_is_not_backfilled",
+        "tests/migrations/test_canonical_retention.py::test_diagnostics_or_default_coordinator_never_delete_obsolete",
+        "tests/migrations/test_canonical_retention.py::test_live_generation_pin_and_unconfirmed_staging_are_protected",
+        "tests/migrations/test_canonical_retention.py::test_os_lock_excludes_other_serving_process_and_dead_pin_is_confirmed",
+        "tests/migrations/test_canonical_retention.py::test_partial_removal_intent_retries_without_new_copy_or_promotion",
+        "tests/migrations/test_canonical_retention.py::test_real_historical_upgrade_chain_21_legacy_generations_and_ten_restarts",
+        "tests/migrations/test_canonical_retention.py::test_reparse_generation_is_refused_and_wal_lifetime_is_whole_directory",
+        "tests/migrations/test_canonical_retention.py::test_upgrade_failure_preserves_source_and_unconfirmed_final[finalize]",
+        "tests/migrations/test_canonical_retention.py::test_upgrade_failure_preserves_source_and_unconfirmed_final[post_validate]",
+        "tests/migrations/test_canonical_retention.py::test_upgrade_failure_preserves_source_and_unconfirmed_final[promote]",
+        "tests/migrations/test_canonical_retention.py::test_upgrade_failure_preserves_source_and_unconfirmed_final[source_changed]",
+        "tests/runtime/test_checkpoint_maintenance.py::test_100_activities_over_virtual_days_limits_detail_blobs",
+        "tests/runtime/test_checkpoint_maintenance.py::test_busy_cancellation_backup_lock_and_reload_release",
+        "tests/runtime/test_checkpoint_maintenance.py::test_protected_candidate_cursor_advances_past_full_batch",
+        "tests/runtime/test_checkpoint_maintenance.py::test_recovery_lease_different_id_and_pending_effect_protect",
+        "tests/runtime/test_checkpoint_maintenance.py::test_start_budget_finishes_active_delete_and_defers_next_target",
+        "tests/runtime/test_checkpoint_maintenance.py::test_startup_idle_periodic_and_two_root_isolation",
+        "tests/runtime/test_checkpoint_maintenance.py::test_three_characters_progress_with_normal_and_large_cleanup",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[bad_paths]",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[legacy]",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[policy_unknown]",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[result_missing]",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[timestamp_missing]",
+        "tests/runtime/test_checkpoint_retention.py::test_ambiguous_or_legacy_is_preserved[unconfirmed]",
+        "tests/runtime/test_checkpoint_retention.py::test_completed_same_id_ten_reads_need_no_binding_lease_or_provider",
+        "tests/runtime/test_checkpoint_retention.py::test_creation_marks_once_and_setting_changes_never_backfill",
+        "tests/runtime/test_checkpoint_retention.py::test_finalize_commit_survives_last_checkpoint_failure",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[aborted]",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[failed]",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[interrupted]",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[outcome_unknown]",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[running]",
+        "tests/runtime/test_checkpoint_retention.py::test_incomplete_or_failed_is_preserved[waiting]",
+        "tests/runtime/test_checkpoint_retention.py::test_mark_failure_is_idempotent_and_never_reexecutes_business",
+        "tests/runtime/test_checkpoint_retention.py::test_sdk_deletes_all_namespaces_and_writes_but_preserves_legacy",
+        "tests/runtime/test_checkpoint_retention.py::test_terminal_bad_scope_or_result_never_constructs_graph[contract]",
+        "tests/runtime/test_checkpoint_retention.py::test_terminal_bad_scope_or_result_never_constructs_graph[owner]",
+        "tests/runtime/test_checkpoint_retention.py::test_terminal_bad_scope_or_result_never_constructs_graph[paths]",
+        "tests/runtime/test_checkpoint_retention.py::test_terminal_bad_scope_or_result_never_constructs_graph[receipt]",
+        "tests/runtime/test_checkpoint_retention.py::test_terminal_bad_scope_or_result_never_constructs_graph[world]",
+        "tests/runtime/test_checkpoint_retention.py::test_utc_retention_boundary[-1-False]",
+        "tests/runtime/test_checkpoint_retention.py::test_utc_retention_boundary[86399-False]",
+        "tests/runtime/test_checkpoint_retention.py::test_utc_retention_boundary[86400-True]",
+        "tests/runtime/test_checkpoint_retention.py::test_utc_retention_boundary[86401-True]",
+        "tests/runtime/test_retention_lifecycle.py::test_composition_failure_releases_preopen_pin_and_owner",
+        "tests/runtime/test_retention_lifecycle.py::test_contributor_serving_owner_pin_lifetime_and_diagnostics_authority",
+        "tests/runtime/test_retention_lifecycle.py::test_lifespan_starts_retention_before_workers_and_always_releases[None]",
+        "tests/runtime/test_retention_lifecycle.py::test_lifespan_starts_retention_before_workers_and_always_releases[component]",
+        "tests/runtime/test_retention_lifecycle.py::test_lifespan_starts_retention_before_workers_and_always_releases[memory]",
+        "tests/runtime/test_retention_lifecycle.py::test_lifespan_starts_retention_before_workers_and_always_releases[recovery]",
+        "tests/runtime/test_retention_lifecycle.py::test_lifespan_starts_retention_before_workers_and_always_releases[security]",
+        "tests/runtime/test_retention_lifecycle.py::test_received_image_and_attachment_recovery_protect_then_release_checkpoint",
+        "tests/runtime/test_retention_lifecycle.py::test_same_root_generation_and_checkpoint_failures_preserve_completed_result",
+        "tests/runtime/test_retention_lifecycle.py::test_sidecar_pre_server_failures_release_use_and_serving_ownership[None]",
+        "tests/runtime/test_retention_lifecycle.py::test_sidecar_pre_server_failures_release_use_and_serving_ownership[identity]",
+        "tests/runtime/test_retention_lifecycle.py::test_sidecar_pre_server_failures_release_use_and_serving_ownership[listener]",
+        "tests/runtime/test_retention_lifecycle.py::test_sidecar_pre_server_failures_release_use_and_serving_ownership[server_config]",
+        "tests/runtime/test_retention_lifecycle.py::test_unconfirmed_worker_shutdown_keeps_generation_pin",
+        "tests/runtime/test_sns_observation.py::test_response_evidence_missing_and_historical_sessions_are_distinguished",
+        "tests/runtime/test_sns_observation.py::test_sdk_response_metadata_survives_empty_json_failure_and_safe_export[False]",
+        "tests/runtime/test_sns_observation.py::test_sdk_response_metadata_survives_empty_json_failure_and_safe_export[True]",
+        "tests/test_provider_adapters.py::test_gemini_empty_response_evidence_retains_block_code_without_feedback_text[None]",
+        "tests/test_provider_adapters.py::test_gemini_empty_response_evidence_retains_block_code_without_feedback_text[PROHIBITED_CONTENT]",
+        "tests/test_provider_adapters.py::test_gemini_empty_response_evidence_retains_block_code_without_feedback_text[SAFETY]",
+        "tests/test_provider_adapters.py::test_gemini_response_evidence_bounds_candidates_and_rejects_unknown_enum_text",
+        "tests/test_provider_adapters.py::test_gemini_response_evidence_retains_candidate_finishes_and_content_counts[MAX_TOKENS]",
+        "tests/test_provider_adapters.py::test_gemini_response_evidence_retains_candidate_finishes_and_content_counts[SAFETY]",
+        "tests/test_provider_adapters.py::test_gemini_response_evidence_retains_candidate_finishes_and_content_counts[STOP]"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_canonical_retention.py": {
+          "clean": [],
+          "snapshot": [],
+          "new_copy": [],
+          "prune": [],
+          "test_clean_creation_marked_but_existing_marker_recovery_is_not_backfilled": [
+            "assert retention._read(ownership, retention.GenerationOwnership).promotion_confirmed",
+            "assert not ownership.exists() and (not repeated.canonical.migrated)",
+            "assert repeated.canonical.database_path.read_bytes() == before"
+          ],
+          "test_real_historical_upgrade_chain_21_legacy_generations_and_ten_restarts": [
+            "assert {p.relative_to(controller.root).as_posix() for p in managed} == {current['relative_path'], previous['relative_path']}",
+            "assert snapshot(tmp_path / 'canonical') == before",
+            "assert snapshot(tmp_path / 'media') == media_before and snapshot(tmp_path / 'secrets') == secret_before",
+            "assert result.canonical.target_version == version and result.canonical.migrated",
+            "assert not result.canonical.migrated",
+            "assert not (directory / retention.OWNERSHIP_FILE).exists()",
+            "assert hashlib.sha256((directory / 'angmoo.sqlite3').read_bytes()).hexdigest() == hashes[directory.name]",
+            "assert db.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert db.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] > 0"
+          ],
+          "test_live_generation_pin_and_unconfirmed_staging_are_protected": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.exists() and orphan.exists() and staging.exists()",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.parent.exists() and orphan.exists() and staging.exists()"
+          ],
+          "test_ambiguous_references_or_inventory_never_delete": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.read_bytes() == before"
+          ],
+          "test_partial_removal_intent_retries_without_new_copy_or_promotion": [
+            "assert prune(tmp_path, owner)['deferred'] >= 1",
+            "assert not first.canonical.database_path.exists() and target.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json'))",
+            "assert not result.canonical.migrated and (not target.exists())",
+            "assert (tmp_path / 'canonical' / 'current-generation.json').read_bytes() == before_marker",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json')) == []"
+          ],
+          "test_diagnostics_or_default_coordinator_never_delete_obsolete": [
+            "assert result.retention == {'unauthorized': 1} and first.canonical.database_path.exists()",
+            "assert snapshot(tmp_path / 'canonical') == before"
+          ],
+          "test_os_lock_excludes_other_serving_process_and_dead_pin_is_confirmed": [
+            "assert subprocess.run([sys.executable, '-c', source, str(tmp_path)], timeout=30).returncode == 0",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))",
+            "assert result.returncode != 0 and 'embedded_upgrade_locked' in result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []"
+          ],
+          "test_reparse_generation_is_refused_and_wal_lifetime_is_whole_directory": [
+            "assert result.returncode == 0, result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not target.exists() and (outside / 'angmoo.sqlite3').read_bytes() == b'protected outside'",
+            "assert junction.exists()"
+          ],
+          "test_upgrade_failure_preserves_source_and_unconfirmed_final": [
+            "pytest.raises((OSError, migration.SqliteCanonicalUpgradeError))",
+            "assert source.exists()",
+            "assert source.read_bytes() == before",
+            "assert not retention._read(ownership, retention.GenerationOwnership).promotion_confirmed"
+          ]
+        },
+        "tests/runtime/test_checkpoint_maintenance.py": {
+          "test_startup_idle_periodic_and_two_root_isolation": [
+            "assert tasks[0].last_cycle['pruned'] == 1",
+            "assert tasks[1].last_cycle['pruned'] == 1",
+            "assert done",
+            "assert db.get(ActivityGraphRun, 'same-id').result[RETENTION_KEY]['state'] == 'retained'",
+            "assert task._task is None"
+          ],
+          "test_protected_candidate_cursor_advances_past_full_batch": [
+            "assert sum((item.get('pruned', 0) for item in outcomes)) == 1",
+            "assert all((row.result[RETENTION_KEY]['state'] == 'retained' for row in db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.activity_id.like('protected-%')))))"
+          ],
+          "test_recovery_lease_different_id_and_pending_effect_protect": [
+            "assert protection_reason(db, row, now=NOW) == 'live_actor_lease'",
+            "assert protection_reason(db, row, now=NOW) == 'pending_public_effect'"
+          ],
+          "test_busy_cancellation_backup_lock_and_reload_release": [
+            "assert not running.done()",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert backup_checkpoint(tmp_path, tmp_path / 'completed-backup.sqlite3')",
+            "assert await task.cycle() == {'locked': 1}",
+            "pytest.raises(EmbeddedGenerationError)",
+            "assert (await task.cycle()).get('deferred', 0) + task.last_cycle.get('cycle_deferred', 0) >= 1",
+            "assert monotonic() - started < 1"
+          ],
+          "test_100_activities_over_virtual_days_limits_detail_blobs": [
+            "assert metrics['24-hour']['checkpoint_rows'] == metrics['24-hour']['write_rows'] == 1",
+            "assert metrics['30-day-baseline']['checkpoint_rows'] == metrics['30-day-baseline']['write_rows'] == 201",
+            "assert metrics['24-hour']['detail_blob_bytes'] < metrics['30-day-baseline']['detail_blob_bytes'] / 100",
+            "assert db.get(ActivityGraphRun, 'failed-preserved').status == 'failed'",
+            "assert len(db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.status == 'observed')).all()) == 100"
+          ],
+          "test_start_budget_finishes_active_delete_and_defers_next_target": [
+            "assert outcome['pruned'] == 1 and outcome['max_delete_ms'] == 6000",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert db.get(ActivityGraphRun, 'one').result[RETENTION_KEY]['state'] == 'pruned'",
+            "assert db.get(ActivityGraphRun, 'two').result[RETENTION_KEY]['state'] == 'retained'"
+          ],
+          "_overlap_workload": [
+            "assert all((value == list(range(1, 9)) for value in progress.values()))",
+            "assert provider_calls == {'A': 1, 'B': 1, 'C': 1}",
+            "assert value['step'] == 8",
+            "assert results[-1]['pruned'] == 21",
+            "assert len(db.scalars(select(PostLike)).all()) == 3",
+            "assert len(db.scalars(select(AgentPublicActionExecution)).all()) == 3",
+            "assert all((db.get(ActivityGraphRun, lane[3]).status == 'completed' for lane in lanes))",
+            "assert slot.locked_by_run_id == activity_id",
+            "assert slot.lease_expires_at.replace(tzinfo=NOW.tzinfo) > NOW"
+          ],
+          "test_three_characters_progress_with_normal_and_large_cleanup": [
+            "assert enabled['max_write_seconds'] < max(0.5, baseline['max_write_seconds'] * 3)",
+            "assert enabled['p95_write_seconds'] < baseline['p95_write_seconds'] * 3 + 0.05",
+            "assert enabled['max_tick_gap_seconds'] < max(1, baseline['max_tick_gap_seconds'] * 3)",
+            "assert enabled['duration_seconds'] < baseline['duration_seconds'] * 3 + 1.5"
+          ]
+        },
+        "tests/runtime/test_checkpoint_retention.py": {
+          "test_utc_retention_boundary": [
+            "assert eligible(row, now=NOW) is expected"
+          ],
+          "test_incomplete_or_failed_is_preserved": [
+            "assert not eligible(completed(db, ids, status=state), now=NOW)"
+          ],
+          "test_ambiguous_or_legacy_is_preserved": [
+            "assert not eligible(row, now=NOW)"
+          ],
+          "test_creation_marks_once_and_setting_changes_never_backfill": [
+            "assert RETENTION_KEY not in legacy.result",
+            "assert RETENTION_KEY not in bind_run(db, actor=actor, activity_id='unmarked').result",
+            "assert RETENTION_KEY in bind_run(db, actor=actor, activity_id='new').result"
+          ],
+          "test_sdk_deletes_all_namespaces_and_writes_but_preserves_legacy": [
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert [item async for item in saver.alist({'configurable': {'thread_id': 'activity:expired'}})] == []",
+            "assert len(kept) == 3 and all((item.pending_writes for item in kept))",
+            "assert RETENTION_KEY not in db.get(ActivityGraphRun, 'legacy').result",
+            "assert db.get(ActivityGraphRun, 'expired').result[RETENTION_KEY]['state'] == 'pruned'"
+          ],
+          "test_mark_failure_is_idempotent_and_never_reexecutes_business": [
+            "assert (await task.cycle())['deferred'] == 1",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert row.result[RETENTION_KEY]['state'] == 'claimed'",
+            "assert business_result(row.result) == original",
+            "assert business_result(db.get(ActivityGraphRun, 'old').result) == original"
+          ],
+          "_real_run": [],
+          "test_completed_same_id_ten_reads_need_no_binding_lease_or_provider": [
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert run.finished_at == finished and calls == ['plan']",
+            "assert len(db.scalars(select(AgentPublicActionExecution)).all()) == 1",
+            "assert await run_personalized_activity(ctx, actor=actor, run=run) == first"
+          ],
+          "test_finalize_commit_survives_last_checkpoint_failure": [
+            "pytest.raises(OSError, match='injected final')",
+            "assert run.status == 'completed' and (not run.result[RETENTION_KEY]['graph_complete'])",
+            "assert final['publish_result']['public_action_count'] == 1 and calls == ['plan']",
+            "assert not eligible(run, now=NOW + timedelta(days=600))"
+          ],
+          "test_terminal_bad_scope_or_result_never_constructs_graph": [
+            "pytest.raises(ValueError)",
+            "assert calls == ['plan']"
+          ]
+        },
+        "tests/runtime/test_retention_lifecycle.py": {
+          "test_lifespan_starts_retention_before_workers_and_always_releases": [
+            "assert task._task is None",
+            "assert calls[-1] == 'dispose'",
+            "assert task._task is None",
+            "assert task._task is not None",
+            "pytest.raises(ValueError, match='injected_')",
+            "assert db.get(ActivityGraphRun, 'old').result[RETENTION_KEY]['state'] == 'pruned'"
+          ],
+          "test_contributor_serving_owner_pin_lifetime_and_diagnostics_authority": [
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []",
+            "assert len(pins) == 1",
+            "pytest.raises(EmbeddedGenerationError)",
+            "assert authorities == [None]",
+            "assert (tmp_path / 'canonical' / relative / 'angmoo.sqlite3').exists()",
+            "assert len(list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))) == 1",
+            "assert not (tmp_path / 'canonical' / relative).exists()",
+            "assert again.state.runtime_config.generation == 'C'"
+          ],
+          "test_sidecar_pre_server_failures_release_use_and_serving_ownership": [
+            "assert not (root / 'runtime' / 'sidecar.owner.json').exists()",
+            "assert list((root / 'runtime' / 'canonical-uses').glob('*.json')) == []",
+            "pytest.raises(ValueError, match='injected sidecar preparation')",
+            "assert desktop_sidecar.main() == 0",
+            "assert closed == [True]"
+          ],
+          "test_unconfirmed_worker_shutdown_keeps_generation_pin": [
+            "pytest.raises(RuntimeError, match='shutdown unconfirmed')",
+            "assert composition.engine._angmoo_generation_use_pin is composition.generation_use_pin",
+            "assert prune(tmp_path, owner).get('removed', 0) == 0 and original.exists()",
+            "assert prune(tmp_path, owner)['removed'] == 1"
+          ],
+          "test_composition_failure_releases_preopen_pin_and_owner": [
+            "pytest.raises(RuntimeError, match='injected composition')",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []"
+          ],
+          "test_received_image_and_attachment_recovery_protect_then_release_checkpoint": [
+            "assert provider.calls == 1",
+            "assert actor is not None and post.world_id == actor.world_id",
+            "assert protection_reason(db, row, now=NOW) == 'image_recovery_pending'",
+            "assert db.get(PostImageGenerationJob, identity).status == 'result_ready'",
+            "assert protection_reason(db, db.get(ActivityGraphRun, 'image-activity'), now=NOW) == 'image_recovery_pending'",
+            "assert db.scalar(select(PostMedia)) is None",
+            "assert db.get(PostImageGenerationJob, identity).status == 'succeeded'",
+            "assert db.scalar(select(PostMedia)) is not None",
+            "assert protection_reason(db, db.get(ActivityGraphRun, 'image-activity'), now=NOW) is None",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert db.scalar(select(PostMedia)) is not None and provider.calls == 1"
+          ],
+          "test_same_root_generation_and_checkpoint_failures_preserve_completed_result": [
+            "assert app.state.runtime_config.generation == 'C' and original_database.exists()",
+            "assert asyncio.run(task.cycle())['deferred'] == 1",
+            "assert asyncio.run(task.cycle())['pruned'] == 1",
+            "assert not original_database.parent.exists() and app.state.runtime_config.generation == 'C'",
+            "assert calls == ['model']",
+            "assert reused == answer and calls == ['model']"
+          ]
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_sdk_response_metadata_survives_empty_json_failure_and_safe_export": [
+            "assert len(sdk_calls) == 1",
+            "assert coverage['response_evidence_complete'] is True",
+            "assert coverage['response_evidence_count'] == 1",
+            "assert coverage['response_evidence_missing_count'] == 0",
+            "assert record['activity_id'] == 'response-test'",
+            "assert record['agent_run_id'] == 'response-lease'",
+            "assert details['call_order'] == details['provider_call_order'] == details['json_attempt'] == 1",
+            "assert details['candidate_count'] == 0",
+            "assert details['prompt_feedback_present'] is blocked",
+            "assert details['prompt_block_reason'] == ('SAFETY' if blocked else None)",
+            "assert attempt is not None",
+            "pytest.raises(DirectLlmJsonError)",
+            "assert caught.value.failure_class == 'json_parse_failed'",
+            "assert caught.value.json_error_diagnostics[0]['response_length'] == 0",
+            "assert private not in (destination / name).read_text()"
+          ],
+          "test_response_evidence_missing_and_historical_sessions_are_distinguished": [
+            "assert coverage['response_evidence_complete'] is False",
+            "assert coverage['response_evidence_missing_count'] == 1",
+            "assert old_coverage['response_evidence_complete'] == 'not_recorded_in_session'",
+            "assert attempt is not None"
+          ],
+          "test_preparation_export_scopes_world_actor_time_and_omits_private_source": [
+            "assert [row['id'] for row in rows] == ['in-scope']",
+            "assert rows[0]['attempt_count'] == 4",
+            "assert 'private-persona' not in body and 'source_snapshot' not in body",
+            "assert list(db.iterdump()) == before"
+          ],
+          "test_name_binding_recorder_keeps_only_counts_policy_and_content_hashes": [
+            "assert 'private-user-name' not in source and 'private-key' not in source",
+            "assert 'private-output-body' not in source",
+            "assert event['details']['fields']['replies.0.body']['replacements'] == 2",
+            "assert event['details']['binding_digest'] == 'a' * 64"
+          ],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None",
+            "assert list(csv.DictReader(source))[0]['validation_code'] == 'unknown'"
+          ],
+          "test_schema3_exports_bounded_request_and_sqlite_evidence": [
+            "assert manifest['schema_version'] == 3",
+            "assert coverage['request_evidence_complete'] is True",
+            "assert coverage['artifact_missing_count'] == 0",
+            "assert coverage['sqlite_write_event_count'] == 1",
+            "assert len(artifacts) == 1",
+            "assert 'private-user-body' not in artifacts[0].read_text(encoding='utf-8')",
+            "assert '\"provider_detail_status\":\"absent\"' in calls",
+            "assert '\"unit\":\"S1\"' in (destination / 'sqlite-writes.jsonl').read_text(encoding='utf-8')",
+            "assert attempt is not None"
+          ],
+          "test_schema3_rejects_corrupt_artifact_during_export": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert attempt is not None"
+          ],
+          "test_schema3_large_artifact_is_reported_as_truncated_without_stopping_activity": [
+            "assert result['artifact_truncated_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert result['dropped_events'] == 0",
+            "assert attempt is not None"
+          ],
+          "test_schema3_export_rejects_artifact_path_outside_session": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert not (tmp_path / 'path' / 'outside-secret.json').exists()",
+            "assert attempt is not None"
+          ],
+          "test_legacy_session_reports_request_evidence_not_recorded": [
+            "assert result['request_evidence_complete'] == 'not_recorded_in_schema_version'"
+          ],
+          "test_export_separates_recovered_planner_output_from_final_failure": [
+            "assert coverage['planner_output_failures'] == 2",
+            "assert coverage['planner_retries_scheduled'] == 1",
+            "assert coverage['planner_recovered_activities'] == 1",
+            "assert coverage['planner_final_failures'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert 'action_brief_missing' in csv_text and 'decisions.0.brief' in csv_text",
+            "assert 'recovered activities: 1; final path failures: 1' in report",
+            "assert 'a' * 64 in calls",
+            "assert recovered and failed",
+            "assert 'SECRET_PRIVATE' not in (output / filename).read_text(encoding='utf-8')"
+          ],
+          "test_export_distinguishes_writer_repair_from_planner_retry": [
+            "assert coverage['combined_draft_validation_failures'] == 1",
+            "assert coverage['writer_recovered_paths'] == 1",
+            "assert coverage['planner_retries_scheduled'] == 0",
+            "assert coverage['planner_final_failures'] == 0",
+            "assert 'combined_draft_body_invalid' in calls and 'PRIVATE' not in calls"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True",
+            "assert coverage['planner_output_failures'] == 0"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        },
+        "tests/test_provider_adapters.py": {
+          "_request": [],
+          "test_provider_request_repr_redacts_api_key": [
+            "assert request.api_key not in repr(request)"
+          ],
+          "test_registry_normalizes_gemini_alias_and_capabilities": [
+            "assert normalize_provider_name('Gemini') == 'google'",
+            "assert spec.provider == 'google'",
+            "assert spec.capabilities.text is True",
+            "assert spec.capabilities.structured_json is True",
+            "assert spec.capabilities.image_input is True",
+            "assert spec.capabilities.embedding is False"
+          ],
+          "test_fake_provider_success_and_embedding_are_network_free": [
+            "assert text_response.text == 'fake provider response'",
+            "assert json_response.parsed == {'status': 'ok', 'model': 'gemini-3.1-flash-lite'}",
+            "assert embedding == [0.0, 0.0, 0.0]"
+          ],
+          "test_fake_provider_invalid_json_scenario": [
+            "assert response.text == '{invalid-json'",
+            "assert response.parsed is None"
+          ],
+          "test_fake_provider_failure_scenarios": [
+            "pytest.raises(error_type)",
+            "assert isinstance(exc_info.value, ProviderError)",
+            "assert exc_info.value.retryable is retryable"
+          ],
+          "test_gemini_error_normalization_redacts_exact_secret": [
+            "assert secret not in str(error)",
+            "assert '[REDACTED]' in str(error)"
+          ],
+          "test_gemini_sdk_finish_reason_is_a_wire_code": [
+            "assert _finish_reason_from_response(response) == reason.value"
+          ],
+          "test_gemini_finish_reason_missing_and_unknown_are_not_success": [
+            "assert _finish_reason_from_response(response) == expected",
+            "assert _finish_reason_from_response(SimpleNamespace(candidates=[])) is None"
+          ],
+          "test_gemini_request_evidence_matches_sdk_input_without_prompt_or_enum_values": [
+            "assert len(received) == 1",
+            "assert [item['capture_boundary'] for item in evidence] == ['sdk_input', 'sdk_response']",
+            "assert actual['responseJsonSchema'] == schema",
+            "assert evidence[0]['schema_field'] == 'responseJsonSchema'",
+            "assert evidence[0]['schema_counts']['enum_values'] == source_count",
+            "assert evidence[0]['system_chars'] == len(secret)",
+            "assert secret not in str(evidence)",
+            "assert 'private-source-0' not in str(evidence)"
+          ],
+          "test_gemini_diagnostic_callback_failure_does_not_change_sdk_call": [
+            "assert len(calls) == 2",
+            "assert calls[0]['config'] == calls[1]['config']",
+            "assert calls[0]['contents'] == calls[1]['contents']"
+          ],
+          "test_gemini_empty_response_evidence_retains_block_code_without_feedback_text": [
+            "assert result.text == '' and result.parsed is None",
+            "assert details['capture_boundary'] == 'sdk_response'",
+            "assert details['candidate_count'] == 0",
+            "assert details['prompt_feedback_present'] is True",
+            "assert details['prompt_block_reason'] == (block_reason.value if block_reason else None)",
+            "assert details['candidate_finish_reasons'] == []",
+            "assert private not in str(evidence)"
+          ],
+          "test_gemini_response_evidence_retains_candidate_finishes_and_content_counts": [
+            "assert evidence['candidate_count'] == 1",
+            "assert evidence['candidate_finish_reasons'] == [reason.value]",
+            "assert evidence['candidate_part_counts'] == [1]",
+            "assert evidence['candidate_text_part_counts'] == [1]",
+            "assert evidence['prompt_feedback_present'] is False",
+            "assert 'private-generated-text' not in str(evidence)"
+          ],
+          "test_gemini_response_evidence_bounds_candidates_and_rejects_unknown_enum_text": [
+            "assert evidence['candidate_count'] == 12",
+            "assert evidence['candidate_metadata_truncated'] is True",
+            "assert evidence['candidate_finish_reasons'] == ['UNKNOWN'] * 8",
+            "assert evidence['prompt_block_reason'] == 'UNKNOWN'",
+            "assert 'private-' not in str(evidence)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_canonical_retention.py": {},
+        "tests/runtime/test_checkpoint_maintenance.py": {},
+        "tests/runtime/test_checkpoint_retention.py": {},
+        "tests/runtime/test_retention_lifecycle.py": {},
+        "tests/runtime/test_sns_observation.py": {},
+        "tests/test_provider_adapters.py": {}
+      }
+    },
+    {
+      "commit": "2acc91bfd71c9e1f411c415279b661eaf98aca64",
+      "feature_id": "AR-RETENTION-FAULTS",
+      "reason": "Additional crash, bounded writer and duplicate-owner regressions with current inventory and verification documentation for issue 358.",
+      "tracked_files": {
+        "docs/verification/embedded-retention-20261002.md": "b6f4f4910540c224b88a15065ea2bbc8e423d7b3"
+      },
+      "test_nodes": [
+        "tests/migrations/test_canonical_retention.py::test_previous_replacement_then_current_failure_preserves_all_generations",
+        "tests/migrations/test_canonical_retention.py::test_removal_intent_write_failure_defers_without_copy_or_startup_failure",
+        "tests/runtime/test_checkpoint_maintenance.py::test_canonical_busy_and_two_maintenance_owners_defer_safely"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_canonical_retention.py": {
+          "clean": [],
+          "snapshot": [],
+          "new_copy": [],
+          "prune": [],
+          "test_clean_creation_marked_but_existing_marker_recovery_is_not_backfilled": [
+            "assert retention._read(ownership, retention.GenerationOwnership).promotion_confirmed",
+            "assert not ownership.exists() and (not repeated.canonical.migrated)",
+            "assert repeated.canonical.database_path.read_bytes() == before"
+          ],
+          "test_real_historical_upgrade_chain_21_legacy_generations_and_ten_restarts": [
+            "assert {p.relative_to(controller.root).as_posix() for p in managed} == {current['relative_path'], previous['relative_path']}",
+            "assert snapshot(tmp_path / 'canonical') == before",
+            "assert snapshot(tmp_path / 'media') == media_before and snapshot(tmp_path / 'secrets') == secret_before",
+            "assert result.canonical.target_version == version and result.canonical.migrated",
+            "assert not result.canonical.migrated",
+            "assert not (directory / retention.OWNERSHIP_FILE).exists()",
+            "assert hashlib.sha256((directory / 'angmoo.sqlite3').read_bytes()).hexdigest() == hashes[directory.name]",
+            "assert db.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert db.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] > 0"
+          ],
+          "test_live_generation_pin_and_unconfirmed_staging_are_protected": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.exists() and orphan.exists() and staging.exists()",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.parent.exists() and orphan.exists() and staging.exists()"
+          ],
+          "test_ambiguous_references_or_inventory_never_delete": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.read_bytes() == before"
+          ],
+          "test_partial_removal_intent_retries_without_new_copy_or_promotion": [
+            "assert prune(tmp_path, owner)['deferred'] >= 1",
+            "assert not first.canonical.database_path.exists() and target.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json'))",
+            "assert not result.canonical.migrated and (not target.exists())",
+            "assert (tmp_path / 'canonical' / 'current-generation.json').read_bytes() == before_marker",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json')) == []"
+          ],
+          "test_diagnostics_or_default_coordinator_never_delete_obsolete": [
+            "assert result.retention == {'unauthorized': 1} and first.canonical.database_path.exists()",
+            "assert snapshot(tmp_path / 'canonical') == before"
+          ],
+          "test_os_lock_excludes_other_serving_process_and_dead_pin_is_confirmed": [
+            "assert subprocess.run([sys.executable, '-c', source, str(tmp_path)], timeout=30).returncode == 0",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))",
+            "assert result.returncode != 0 and 'embedded_upgrade_locked' in result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []"
+          ],
+          "test_reparse_generation_is_refused_and_wal_lifetime_is_whole_directory": [
+            "assert result.returncode == 0, result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not target.exists() and (outside / 'angmoo.sqlite3').read_bytes() == b'protected outside'",
+            "assert junction.exists()"
+          ],
+          "test_upgrade_failure_preserves_source_and_unconfirmed_final": [
+            "pytest.raises((OSError, migration.SqliteCanonicalUpgradeError))",
+            "assert source.exists()",
+            "assert source.read_bytes() == before",
+            "assert not retention._read(ownership, retention.GenerationOwnership).promotion_confirmed"
+          ],
+          "test_previous_replacement_then_current_failure_preserves_all_generations": [
+            "pytest.raises(OSError, match='current marker replacement')",
+            "assert json.loads(current_path.read_text())['relative_path'] == 'generations/B'",
+            "assert (tmp_path / 'canonical' / 'previous-generation.json').read_bytes() == current_path.read_bytes()",
+            "assert not retention._read(final / retention.OWNERSHIP_FILE, retention.GenerationOwnership).promotion_confirmed",
+            "assert not result.canonical.migrated and result.canonical.generation == 'B'",
+            "assert result.retention == {'protection_ambiguous': 1}",
+            "assert all((after[path] == digest for path, digest in before.items()))",
+            "assert first.canonical.database_path.exists() and final.exists()"
+          ],
+          "test_removal_intent_write_failure_defers_without_copy_or_startup_failure": [
+            "assert result.canonical.generation == 'C' and (not result.canonical.migrated)",
+            "assert result.retention['deferred'] == 1",
+            "assert first.canonical.database_path.read_bytes() == before",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json')) == []",
+            "assert not result.canonical.migrated and (not first.canonical.database_path.exists())"
+          ]
+        },
+        "tests/runtime/test_checkpoint_maintenance.py": {
+          "test_startup_idle_periodic_and_two_root_isolation": [
+            "assert tasks[0].last_cycle['pruned'] == 1",
+            "assert tasks[1].last_cycle['pruned'] == 1",
+            "assert done",
+            "assert db.get(ActivityGraphRun, 'same-id').result[RETENTION_KEY]['state'] == 'retained'",
+            "assert task._task is None"
+          ],
+          "test_protected_candidate_cursor_advances_past_full_batch": [
+            "assert sum((item.get('pruned', 0) for item in outcomes)) == 1",
+            "assert all((row.result[RETENTION_KEY]['state'] == 'retained' for row in db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.activity_id.like('protected-%')))))"
+          ],
+          "test_recovery_lease_different_id_and_pending_effect_protect": [
+            "assert protection_reason(db, row, now=NOW) == 'live_actor_lease'",
+            "assert protection_reason(db, row, now=NOW) == 'pending_public_effect'"
+          ],
+          "test_busy_cancellation_backup_lock_and_reload_release": [
+            "assert not running.done()",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert backup_checkpoint(tmp_path, tmp_path / 'completed-backup.sqlite3')",
+            "assert await task.cycle() == {'locked': 1}",
+            "pytest.raises(EmbeddedGenerationError)",
+            "assert (await task.cycle()).get('deferred', 0) + task.last_cycle.get('cycle_deferred', 0) >= 1",
+            "assert monotonic() - started < 1"
+          ],
+          "test_100_activities_over_virtual_days_limits_detail_blobs": [
+            "assert metrics['24-hour']['checkpoint_rows'] == metrics['24-hour']['write_rows'] == 1",
+            "assert metrics['30-day-baseline']['checkpoint_rows'] == metrics['30-day-baseline']['write_rows'] == 201",
+            "assert metrics['24-hour']['detail_blob_bytes'] < metrics['30-day-baseline']['detail_blob_bytes'] / 100",
+            "assert db.get(ActivityGraphRun, 'failed-preserved').status == 'failed'",
+            "assert len(db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.status == 'observed')).all()) == 100"
+          ],
+          "test_start_budget_finishes_active_delete_and_defers_next_target": [
+            "assert outcome['pruned'] == 1 and outcome['max_delete_ms'] == 6000",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert db.get(ActivityGraphRun, 'one').result[RETENTION_KEY]['state'] == 'pruned'",
+            "assert db.get(ActivityGraphRun, 'two').result[RETENTION_KEY]['state'] == 'retained'"
+          ],
+          "_overlap_workload": [
+            "assert all((value == list(range(1, 9)) for value in progress.values()))",
+            "assert provider_calls == {'A': 1, 'B': 1, 'C': 1}",
+            "assert value['step'] == 8",
+            "assert results[-1]['pruned'] == 21",
+            "assert len(db.scalars(select(PostLike)).all()) == 3",
+            "assert len(db.scalars(select(AgentPublicActionExecution)).all()) == 3",
+            "assert all((db.get(ActivityGraphRun, lane[3]).status == 'completed' for lane in lanes))",
+            "assert slot.locked_by_run_id == activity_id",
+            "assert slot.lease_expires_at.replace(tzinfo=NOW.tzinfo) > NOW"
+          ],
+          "test_three_characters_progress_with_normal_and_large_cleanup": [
+            "assert enabled['max_write_seconds'] < max(0.5, baseline['max_write_seconds'] * 3)",
+            "assert enabled['p95_write_seconds'] < baseline['p95_write_seconds'] * 3 + 0.05",
+            "assert enabled['max_tick_gap_seconds'] < max(1, baseline['max_tick_gap_seconds'] * 3)",
+            "assert enabled['duration_seconds'] < baseline['duration_seconds'] * 3 + 1.5"
+          ],
+          "test_canonical_busy_and_two_maintenance_owners_defer_safely": [
+            "assert (await running)['pruned'] == 1",
+            "assert (await second.cycle()).get('pruned', 0) == 0",
+            "assert (await task.cycle())['deferred'] == 1",
+            "assert monotonic() - began < 1",
+            "assert await second.cycle() == {'locked': 1}",
+            "assert db.get(ActivityGraphRun, 'old').result[RETENTION_KEY]['state'] == 'pruned'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_canonical_retention.py": {},
+        "tests/runtime/test_checkpoint_maintenance.py": {}
+      }
+    },
+    {
+      "commit": "c6f47ac7045a960f2bd21366cac3ae596c6ee41a",
+      "feature_id": "AR-RETENTION-CONSUMERS",
+      "reason": "Committed installer consumer-use and malformed marker regression snapshot for issue 358; preserves success, failure and ambiguous-selection boundaries.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_current_path_type]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_previous_schema_type]",
+        "tests/migrations/test_canonical_retention.py::test_ambiguous_references_or_inventory_never_delete[bad_previous_type]",
+        "tests/runtime/test_retention_lifecycle.py::test_installer_checkpoint_consumer_pins_selected_generation_without_retention_authority[False]",
+        "tests/runtime/test_retention_lifecycle.py::test_installer_checkpoint_consumer_pins_selected_generation_without_retention_authority[True]"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_canonical_retention.py": {
+          "clean": [],
+          "snapshot": [],
+          "new_copy": [],
+          "prune": [],
+          "test_clean_creation_marked_but_existing_marker_recovery_is_not_backfilled": [
+            "assert retention._read(ownership, retention.GenerationOwnership).promotion_confirmed",
+            "assert not ownership.exists() and (not repeated.canonical.migrated)",
+            "assert repeated.canonical.database_path.read_bytes() == before"
+          ],
+          "test_real_historical_upgrade_chain_21_legacy_generations_and_ten_restarts": [
+            "assert {p.relative_to(controller.root).as_posix() for p in managed} == {current['relative_path'], previous['relative_path']}",
+            "assert snapshot(tmp_path / 'canonical') == before",
+            "assert snapshot(tmp_path / 'media') == media_before and snapshot(tmp_path / 'secrets') == secret_before",
+            "assert result.canonical.target_version == version and result.canonical.migrated",
+            "assert not result.canonical.migrated",
+            "assert not (directory / retention.OWNERSHIP_FILE).exists()",
+            "assert hashlib.sha256((directory / 'angmoo.sqlite3').read_bytes()).hexdigest() == hashes[directory.name]",
+            "assert db.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert db.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] > 0"
+          ],
+          "test_live_generation_pin_and_unconfirmed_staging_are_protected": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.exists() and orphan.exists() and staging.exists()",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.parent.exists() and orphan.exists() and staging.exists()"
+          ],
+          "test_ambiguous_references_or_inventory_never_delete": [
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.read_bytes() == before"
+          ],
+          "test_partial_removal_intent_retries_without_new_copy_or_promotion": [
+            "assert prune(tmp_path, owner)['deferred'] >= 1",
+            "assert not first.canonical.database_path.exists() and target.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json'))",
+            "assert not result.canonical.migrated and (not target.exists())",
+            "assert (tmp_path / 'canonical' / 'current-generation.json').read_bytes() == before_marker",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json')) == []"
+          ],
+          "test_diagnostics_or_default_coordinator_never_delete_obsolete": [
+            "assert result.retention == {'unauthorized': 1} and first.canonical.database_path.exists()",
+            "assert snapshot(tmp_path / 'canonical') == before"
+          ],
+          "test_os_lock_excludes_other_serving_process_and_dead_pin_is_confirmed": [
+            "assert subprocess.run([sys.executable, '-c', source, str(tmp_path)], timeout=30).returncode == 0",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))",
+            "assert result.returncode != 0 and 'embedded_upgrade_locked' in result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not first.canonical.database_path.exists()",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []"
+          ],
+          "test_reparse_generation_is_refused_and_wal_lifetime_is_whole_directory": [
+            "assert result.returncode == 0, result.stderr",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert not target.exists() and (outside / 'angmoo.sqlite3').read_bytes() == b'protected outside'",
+            "assert junction.exists()"
+          ],
+          "test_upgrade_failure_preserves_source_and_unconfirmed_final": [
+            "pytest.raises((OSError, migration.SqliteCanonicalUpgradeError))",
+            "assert source.exists()",
+            "assert source.read_bytes() == before",
+            "assert not retention._read(ownership, retention.GenerationOwnership).promotion_confirmed"
+          ],
+          "test_previous_replacement_then_current_failure_preserves_all_generations": [
+            "pytest.raises(OSError, match='current marker replacement')",
+            "assert json.loads(current_path.read_text())['relative_path'] == 'generations/B'",
+            "assert (tmp_path / 'canonical' / 'previous-generation.json').read_bytes() == current_path.read_bytes()",
+            "assert not retention._read(final / retention.OWNERSHIP_FILE, retention.GenerationOwnership).promotion_confirmed",
+            "assert not result.canonical.migrated and result.canonical.generation == 'B'",
+            "assert result.retention == {'protection_ambiguous': 1}",
+            "assert all((after[path] == digest for path, digest in before.items()))",
+            "assert first.canonical.database_path.exists() and final.exists()"
+          ],
+          "test_removal_intent_write_failure_defers_without_copy_or_startup_failure": [
+            "assert result.canonical.generation == 'C' and (not result.canonical.migrated)",
+            "assert result.retention['deferred'] == 1",
+            "assert first.canonical.database_path.read_bytes() == before",
+            "assert list((tmp_path / 'runtime' / 'canonical-removals').glob('*.json')) == []",
+            "assert not result.canonical.migrated and (not first.canonical.database_path.exists())"
+          ]
+        },
+        "tests/runtime/test_retention_lifecycle.py": {
+          "test_lifespan_starts_retention_before_workers_and_always_releases": [
+            "assert task._task is None",
+            "assert calls[-1] == 'dispose'",
+            "assert task._task is None",
+            "assert task._task is not None",
+            "pytest.raises(ValueError, match='injected_')",
+            "assert db.get(ActivityGraphRun, 'old').result[RETENTION_KEY]['state'] == 'pruned'"
+          ],
+          "test_contributor_serving_owner_pin_lifetime_and_diagnostics_authority": [
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []",
+            "assert len(pins) == 1",
+            "pytest.raises(EmbeddedGenerationError)",
+            "assert authorities == [None]",
+            "assert (tmp_path / 'canonical' / relative / 'angmoo.sqlite3').exists()",
+            "assert len(list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))) == 1",
+            "assert not (tmp_path / 'canonical' / relative).exists()",
+            "assert again.state.runtime_config.generation == 'C'"
+          ],
+          "test_sidecar_pre_server_failures_release_use_and_serving_ownership": [
+            "assert not (root / 'runtime' / 'sidecar.owner.json').exists()",
+            "assert list((root / 'runtime' / 'canonical-uses').glob('*.json')) == []",
+            "pytest.raises(ValueError, match='injected sidecar preparation')",
+            "assert desktop_sidecar.main() == 0",
+            "assert closed == [True]"
+          ],
+          "test_unconfirmed_worker_shutdown_keeps_generation_pin": [
+            "pytest.raises(RuntimeError, match='shutdown unconfirmed')",
+            "assert composition.engine._angmoo_generation_use_pin is composition.generation_use_pin",
+            "assert prune(tmp_path, owner).get('removed', 0) == 0 and original.exists()",
+            "assert prune(tmp_path, owner)['removed'] == 1"
+          ],
+          "test_composition_failure_releases_preopen_pin_and_owner": [
+            "pytest.raises(RuntimeError, match='injected composition')",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []"
+          ],
+          "test_received_image_and_attachment_recovery_protect_then_release_checkpoint": [
+            "assert provider.calls == 1",
+            "assert actor is not None and post.world_id == actor.world_id",
+            "assert protection_reason(db, row, now=NOW) == 'image_recovery_pending'",
+            "assert db.get(PostImageGenerationJob, identity).status == 'result_ready'",
+            "assert protection_reason(db, db.get(ActivityGraphRun, 'image-activity'), now=NOW) == 'image_recovery_pending'",
+            "assert db.scalar(select(PostMedia)) is None",
+            "assert db.get(PostImageGenerationJob, identity).status == 'succeeded'",
+            "assert db.scalar(select(PostMedia)) is not None",
+            "assert protection_reason(db, db.get(ActivityGraphRun, 'image-activity'), now=NOW) is None",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert db.scalar(select(PostMedia)) is not None and provider.calls == 1"
+          ],
+          "test_same_root_generation_and_checkpoint_failures_preserve_completed_result": [
+            "assert app.state.runtime_config.generation == 'C' and original_database.exists()",
+            "assert asyncio.run(task.cycle())['deferred'] == 1",
+            "assert asyncio.run(task.cycle())['pruned'] == 1",
+            "assert not original_database.parent.exists() and app.state.runtime_config.generation == 'C'",
+            "assert calls == ['model']",
+            "assert reused == answer and calls == ['model']"
+          ],
+          "test_installer_checkpoint_consumer_pins_selected_generation_without_retention_authority": [
+            "assert checkpoints == [first.canonical.database_path]",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json')) == []",
+            "assert len(pins) == 1",
+            "pytest.raises(OSError, match='installer checkpoint failure')",
+            "assert operation()['status'] == 'upgraded'",
+            "assert prune(tmp_path, owner)['removed'] == 1",
+            "assert prune(tmp_path, owner).get('removed', 0) == 0",
+            "assert first.canonical.database_path.exists()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_canonical_retention.py": {},
+        "tests/runtime/test_retention_lifecycle.py": {}
+      }
     }
   ]
 }
