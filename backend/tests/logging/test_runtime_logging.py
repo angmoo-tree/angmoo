@@ -216,7 +216,14 @@ async def health():
     return {'status': 'ok'}
 composition.create_public_app = lambda **kwargs: app
 configuration.initialize_local_installation_identity = lambda factory: None
-desktop_sidecar._build_embedded_runtime_config = lambda *args, **kwargs: object()
+(root/'secrets').mkdir()
+(root/'secrets/app-secret').write_text('b' * 64, encoding='utf-8')
+runtime_config = configuration.build_embedded_runtime_config(
+    profile=configuration.RuntimeProfile.TEST, data_root=root,
+    runtime_root=root/'runtime', generation='logging-handshake',
+    desktop_launch_token=token, desktop_allowed_origin=origin,
+)
+desktop_sidecar._build_embedded_runtime_config = lambda *args, **kwargs: runtime_config
 observed = {}
 def client():
     endpoint = root/'runtime/sidecar.endpoint.json'
