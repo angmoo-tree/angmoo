@@ -312,17 +312,34 @@ async def _overlap_workload(root, *, cleanup):
             duration = monotonic() - started
             assert all(value == list(range(1, 9)) for value in progress.values())
             assert provider_calls == {"A": 1, "B": 1, "C": 1}
+            initial_cleanup = dict(task.last_cycle)
+            followup_cleanup = {}
             if cleanup:
-                assert results[-1]["pruned"] == 21
+                # A busy checkpoint/mark may defer an eligible thread while the
+                # three activities keep progressing. The next cycle must finish
+                # that same cleanup, with no repeated business execution.
+                first = results[-1]
+                assert first.get("pruned", 0) + first.get("deferred", 0) == 21
+                followup_cleanup = await task.cycle()
+                assert first.get("pruned", 0) + followup_cleanup.get("pruned", 0) == 21
             with factory() as db:
                 assert len(db.scalars(select(PostLike)).all()) == 3
                 assert len(db.scalars(select(AgentPublicActionExecution)).all()) == 3
                 assert all(db.get(ActivityGraphRun, lane[3]).status == "completed" for lane in lanes)
+                if cleanup:
+                    for identifier in [f"expired-{index:02}" for index in range(20)] + ["large-thread"]:
+                        assert db.get(ActivityGraphRun, identifier).result[RETENTION_KEY]["state"] == "pruned"
+            assert provider_calls == {"A": 1, "B": 1, "C": 1}
+            for _, _, _, identifier in lanes:
+                saved = await saver.aget_tuple({"configurable": {"thread_id": "activity:" + identifier}})
+                assert saved is not None and saved.checkpoint["channel_values"]["__root__"]["step"] == 8
+            duration = monotonic() - started
         flat = sorted(wait for values in waits.values() for wait in values)
         return {"duration_seconds": duration, "max_write_seconds": max(flat),
             "p95_write_seconds": flat[int((len(flat)-1)*.95)],
             "max_tick_gap_seconds": max(gap for values in intervals.values() for gap in values),
-            "progress": progress, "provider_calls": provider_calls, "cleanup": task.last_cycle}
+            "progress": progress, "provider_calls": provider_calls, "cleanup": initial_cleanup,
+            "followup_cleanup": followup_cleanup}
     finally:
         engine.dispose()
 
@@ -331,13 +348,43 @@ def test_three_characters_progress_with_normal_and_large_cleanup(tmp_path):
     async def scenario():
         baseline = await _overlap_workload(tmp_path / "off", cleanup=False)
         enabled = await _overlap_workload(tmp_path / "on", cleanup=True)
+        (tmp_path / "concurrent-workload-metrics.json").write_text(json.dumps({"off": baseline, "on": enabled}, indent=2))
         # The canonical writer is bounded at 250 ms, with 250 ms allowance for
         # thread scheduling. A lease renews at each node (actual lease: 10 min).
         assert enabled["max_write_seconds"] < max(.5, baseline["max_write_seconds"] * 3)
         assert enabled["p95_write_seconds"] < baseline["p95_write_seconds"] * 3 + .05
         assert enabled["max_tick_gap_seconds"] < max(1, baseline["max_tick_gap_seconds"] * 3)
         assert enabled["duration_seconds"] < baseline["duration_seconds"] * 3 + 1.5
-        (tmp_path / "concurrent-workload-metrics.json").write_text(json.dumps({"off": baseline, "on": enabled}, indent=2))
+    asyncio.run(scenario())
+
+
+def test_three_characters_sdk_busy_cleanup_finishes_without_reexecution(tmp_path, monkeypatch):
+    import sqlite3
+    from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+    original_delete = AsyncSqliteSaver.adelete_thread
+    deferred_once = False
+    attempts = {}
+
+    async def defer_one_normal_thread(saver, thread_id):
+        nonlocal deferred_once
+        attempts[thread_id] = attempts.get(thread_id, 0) + 1
+        if thread_id == "activity:expired-00" and not deferred_once:
+            deferred_once = True
+            error = sqlite3.OperationalError("database is locked")
+            error.sqlite_errorcode, error.sqlite_errorname = sqlite3.SQLITE_BUSY, "SQLITE_BUSY"
+            raise error
+        return await original_delete(saver, thread_id)
+
+    monkeypatch.setattr(AsyncSqliteSaver, "adelete_thread", defer_one_normal_thread)
+    async def scenario():
+        enabled = await _overlap_workload(tmp_path / "on", cleanup=True)
+        (tmp_path / "busy-workload-metrics.json").write_text(json.dumps(enabled, indent=2))
+        assert deferred_once
+        assert enabled["cleanup"].get("deferred", 0) >= 1
+        assert enabled["followup_cleanup"].get("pruned", 0) == enabled["cleanup"]["deferred"]
+        assert attempts["activity:expired-00"] == 2
+        assert enabled["provider_calls"] == {"A": 1, "B": 1, "C": 1}
+        assert all(values == list(range(1, 9)) for values in enabled["progress"].values())
     asyncio.run(scenario())
 
 
