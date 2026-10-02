@@ -74,6 +74,9 @@ def test_contributor_serving_owner_pin_lifetime_and_diagnostics_authority(tmp_pa
     from migrations.test_canonical_retention import new_copy
     app = create_contributor_runtime_app(data_root=tmp_path)
     try:
+        assert app.state.runtime_config.serving_retention_owner is app.state.serving_retention_owner
+        assert app.state.serving_retention_owner.permits(tmp_path)
+        assert "serving_retention_owner=" not in repr(app.state.runtime_config)
         pins = list((tmp_path / "runtime" / "canonical-uses").glob("*.json"))
         assert len(pins) == 1
         with pytest.raises(EmbeddedGenerationError):

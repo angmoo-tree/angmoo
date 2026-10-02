@@ -174,7 +174,9 @@ class GenerationUsePin:
 
     def acquire(self):
         with EmbeddedUpgradeLock(self.data_root / "runtime" / "embedded-data-migration.lock"):
-            owned_generation(self.data_root, self.relative)
+            # Pin a validated future path before the runtime can create/open
+            # its DB. This does not tag, migrate or grant deletion ownership.
+            owned_generation(self.data_root, self.relative, must_exist=False)
             self._lock.__enter__()
             try:
                 _atomic_json(self.path, self.record.model_dump(mode="json"))

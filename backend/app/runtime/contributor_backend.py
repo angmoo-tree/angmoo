@@ -94,6 +94,7 @@ def create_contributor_runtime_app(
     # every canonical SQLAlchemy model is registered in Base.metadata. This is
     # the same fail-closed ordering used by the packaged desktop sidecar.
     _register_canonical_models()
+    from dataclasses import replace
     from app.main import create_public_app as create_app
     from app.runtime.configuration import (
         RuntimeProfile,
@@ -118,7 +119,8 @@ def create_contributor_runtime_app(
             graph_database_root=upgraded.graph.database_root,
             graph_projection_enabled=not upgraded.graph.degraded,
         )
-        app = create_app(runtime_config=runtime_config, serving_retention_owner=owner)
+        runtime_config = replace(runtime_config, serving_retention_owner=owner)
+        app = create_app(runtime_config=runtime_config)
         initialize_local_installation_identity(app.state.runtime_composition.session_factory)
     except BaseException:
         if app is not None:

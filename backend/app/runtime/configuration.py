@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -27,6 +28,9 @@ from app.runtime.search import (
     EmbeddedSocialSearchProjection,
     SqliteFts5SearchIndex,
 )
+
+if TYPE_CHECKING:
+    from app.runtime.migrations.canonical_retention import ServingRetentionOwner
 
 
 class RuntimeConfigurationError(RuntimeError):
@@ -72,6 +76,11 @@ class RuntimeConfig:
     api_docs_enabled: bool = False
     signup_enabled: bool = False
     seed_demo_data: bool = False
+    # An acquired serving-process capability, never an environment preference.
+    # Diagnostics and default factories leave it absent and cannot prune DBs.
+    serving_retention_owner: ServingRetentionOwner | None = field(
+        default=None, repr=False, compare=False,
+    )
 
     def __post_init__(self) -> None:
         if not self.generation.strip():

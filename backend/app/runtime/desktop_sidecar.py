@@ -542,6 +542,7 @@ def main() -> int:
         # All preparation after acquiring ownership belongs to this process
         # lifetime, including failures before uvicorn starts its lifespan.
         from app.main import create_public_app as create_app
+        from dataclasses import replace
         from app.runtime.configuration import initialize_local_installation_identity
         import uvicorn
         from app.core.desktop_loopback import DesktopLoopbackPolicy, DesktopLoopbackSecurityMiddleware
@@ -551,7 +552,8 @@ def main() -> int:
         listener.bind(("127.0.0.1", 0))
         listener.listen(2048)
         port = int(listener.getsockname()[1])
-        runtime_app = create_app(runtime_config=runtime_config, serving_retention_owner=retention_owner)
+        runtime_config = replace(runtime_config, serving_retention_owner=retention_owner)
+        runtime_app = create_app(runtime_config=runtime_config)
         initialize_local_installation_identity(runtime_app.state.runtime_composition.session_factory)
         policy = DesktopLoopbackPolicy(token, origin)
         runtime_app.add_middleware(DesktopLoopbackSecurityMiddleware, policy=policy)

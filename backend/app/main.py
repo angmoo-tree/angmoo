@@ -215,7 +215,6 @@ def create_app(
     *,
     lifespan_handler: LifespanHandler | None = None,
     runtime_config: RuntimeConfig | None = None,
-    serving_retention_owner=None,
     prepare_media_directories: bool = True,
     profile: Literal["full", "public"] = "full",
 ) -> FastAPI:
@@ -233,6 +232,9 @@ def create_app(
     world_package_import_committer = None
     runtime_settings = settings
     runtime_lifespan = lifespan_handler
+    serving_retention_owner = (
+        runtime_config.serving_retention_owner if runtime_config is not None else None
+    )
     process_settings_snapshot: dict[str, object] | None = None
     memory_runtime = None
     disposed = False

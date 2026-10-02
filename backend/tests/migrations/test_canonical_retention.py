@@ -122,6 +122,15 @@ def test_real_historical_upgrade_chain_21_legacy_generations_and_ten_restarts(tm
 
 
 def test_live_generation_pin_and_unconfirmed_staging_are_protected(tmp_path):
+    future = retention.GenerationUsePin(tmp_path, "generations/not-created").acquire()
+    try:
+        assert future.path.is_file()
+        assert not (tmp_path / "canonical" / "generations" / "not-created").exists()
+        with pytest.raises(ValueError, match="path_invalid"):
+            retention.GenerationUsePin(tmp_path, "generations/../outside").acquire()
+    finally:
+        future.close()
+    assert not future.path.exists()
     first = clean(tmp_path)
     relative = "generations/" + first.canonical.generation
     pin = retention.GenerationUsePin(tmp_path, relative).acquire()

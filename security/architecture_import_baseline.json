@@ -1,6 +1,6 @@
 {
   "edge_count": 5435,
-  "external_import_count": 3959,
+  "external_import_count": 3962,
   "module_count": 1338,
   "modules": [
     {
@@ -16314,7 +16314,8 @@
         "enum",
         "pathlib",
         "sqlalchemy.engine",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.config",
@@ -16338,6 +16339,7 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "dataclasses",
         "importlib",
         "json",
         "os",
@@ -16432,6 +16434,7 @@
         "__future__",
         "argparse",
         "ctypes",
+        "dataclasses",
         "importlib",
         "json",
         "multiprocessing",
