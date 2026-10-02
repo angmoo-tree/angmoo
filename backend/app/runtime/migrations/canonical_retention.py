@@ -232,6 +232,14 @@ def _protected_uses(data_root: Path) -> set[str]:
 
 
 def _protected_markers(data_root: Path) -> set[str]:
+    def read_selection(controller):
+        try:
+            return controller.current()
+        except TypeError as exc:
+            # A malformed previous marker must defer retention rather than
+            # turn successful selection of the working current into a failure.
+            raise ValueError("generation_selection_record_ambiguous") from exc
+
     def validate(marker):
         from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest, SqliteVersionContractError
         if (not isinstance(marker, dict) or type(marker.get("schema_version")) is not int
@@ -252,16 +260,16 @@ def _protected_markers(data_root: Path) -> set[str]:
     for path in (controller.current_marker, controller.previous_marker):
         if path.exists() and _reparse(path):
             raise ValueError("generation_selection_record_ambiguous")
-    current = controller.current()
+    current = read_selection(controller)
     if current is None:
         raise ValueError("generation_current_marker_missing")
-    protected = {current["relative_path"]}
     validate(current)
+    protected = {current["relative_path"]}
     if controller.previous_marker.exists():
         # Validate previous with the same v1 reader without changing it.
         previous_controller = EmbeddedGenerationController(controller.root, artifact_relative_path="angmoo.sqlite3")
         previous_controller.current_marker = controller.previous_marker
-        previous = previous_controller.current()
+        previous = read_selection(previous_controller)
         if previous is None:
             raise ValueError("generation_previous_selection_ambiguous")
         validate(previous)
