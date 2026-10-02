@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { CharacterCardSourceRead } from "../frontend/src/features/characters/types/agents";
 
 const staticShell = process.env.ANGMOO_CREATOR_STATIC === "1";
 const owner = { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
@@ -22,6 +23,12 @@ test("explicit draft cancellation returns to creation and survives reload", asyn
 
 async function fixture(page: Page) {
   const writes: { path: string; body: any }[] = [];
+  let cardRawReads = 0, cardMetadataReads = 0;
+  const cardSource: CharacterCardSourceRead = {
+    document: { data: { name: "Seraphina", system_prompt: "원본 전용 지침" } },
+    sha256: "a".repeat(64), version: 3, source_format: "json", metadata_selection: null,
+    review: ["v3_common_fields_only"], raw_only: ["system_prompt"],
+  };
   let draft: any = null;
   const world = { id: "world-test", slug: "world-test", name: "검증 World", tagline: "일상을 나누는 곳",
     setting_description: "친구들과 이야기를 나누는 작은 마을의 SNS입니다.", daily_life_description: "서로의 일상을 나누고 차를 마시며 쉬는 공간입니다.",
@@ -38,7 +45,8 @@ async function fixture(page: Page) {
     profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "creator-fixture-token-0000000000000",
   } }));
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
-    const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
+    const requestUrl = new URL(route.request().url());
+    const path = requestUrl.pathname.replace(/^\/api\/(backend|v1)/, "");
     const method = route.request().method();
     const body = route.request().postDataJSON();
     const reply = (json: unknown, status = 200) => route.fulfill({ status, contentType: "application/json", json });
@@ -77,7 +85,15 @@ async function fixture(page: Page) {
     if (path === "/agents/drafts/draft/copy-settings") {
       expect(body.character_id).toBe("source"); draft = { ...draft, revision: draft.revision + 1, source_kind: "copy", name: "복사 원본", personality: "차분함" }; return reply(draft);
     }
-    if (path === "/agents/drafts/draft/card-source") return reply({ document: { data: { name: "Seraphina", system_prompt: "원본 전용 지침" } } });
+    if (path === "/agents/drafts/draft/card-source") {
+      expect(method).toBe("GET");
+      if (requestUrl.searchParams.get("include_document") === "false") {
+        cardMetadataReads += 1;
+        return reply({ ...cardSource, document: null });
+      }
+      cardRawReads += 1;
+      return reply(cardSource);
+    }
     if (path === "/agents/drafts/draft/complete") {
       expect(body.revision).toBe(draft.revision);
       if (draft.source_kind !== "external") expect(draft.worldview.trim()).not.toBe("");
@@ -86,7 +102,7 @@ async function fixture(page: Page) {
     }
     return reply({ detail: `unexpected:${method}:${path}` }, 404);
   });
-  return { writes, getDraft: () => draft };
+  return { writes, getDraft: () => draft, getCardReads: () => ({ raw: cardRawReads, metadata: cardMetadataReads }) };
 }
 
 for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436,height:880},{width:1440,height:1000}]) {
@@ -130,6 +146,8 @@ test("card review, manual correction, refresh and World target", async ({ page }
   await expect.poll(() => state.getDraft().character_background).toBe("별도 배경");
   await page.reload();
   await expect(page.getByRole("textbox", { name: "이름", exact: true })).toHaveValue("Seraphina");
+  await expect.poll(() => state.getCardReads().metadata).toBeGreaterThan(0);
+  expect(state.getCardReads().raw).toBe(1);
   await page.getByRole("button", { name: "저장하고 다음" }).click();
   await expect(page.getByRole("textbox", { name: "캐릭터 배경·세계관", exact: true })).toHaveValue("별도 배경");
   await expect(page.getByRole("textbox", { name: "캐릭터 설명", exact: true })).toHaveValue("원본 설명");

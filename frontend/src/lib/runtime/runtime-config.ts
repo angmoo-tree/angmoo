@@ -159,6 +159,9 @@ export async function runtimeFetch(
 }
 
 export function resolveRuntimeMediaUrl(path: string) {
+  if (path.startsWith("/api/v1/media/assets/")) {
+    return resolveRuntimeRequestUrl(`/api/backend${path.slice("/api/v1".length)}`);
+  }
   if (path !== "/media" && !path.startsWith("/media/")) return path;
   return resolveRuntimeRequestUrl(path);
 }

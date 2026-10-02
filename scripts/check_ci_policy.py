@@ -58,6 +58,11 @@ CORE_TEST_REPORT_PATHS = {
         "browser-tests/.ci/static.xml", "browser-tests/.ci/lifecycle.xml",
         "browser-tests/.ci/visual.xml", "browser-tests/.ci/creator-next.xml",
         "browser-tests/.ci/creator-static.xml", "browser-tests/.ci/card-upload.xml",
+        "browser-tests/.ci/image-integration.xml",
+        # This isolated suite uses only synthetic image fixtures and mocked APIs.
+        # Preserve its failure diagnostics, never its entire output directory.
+        "artifacts/image-integration/browser/**/test-failed-*.png",
+        "artifacts/image-integration/browser/**/trace.zip",
         "browser-tests/.ci/daily-next.xml", "browser-tests/.ci/daily-static.xml",
         "browser-tests/.ci/browser-test-identity.json",
     ),

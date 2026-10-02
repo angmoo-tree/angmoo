@@ -2,6 +2,9 @@ import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { expect, test } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
+import { cardMetadataTests } from "./card-metadata-fixture";
+
+cardMetadataTests();
 
 const ROUTES = [
   "/",
@@ -2956,6 +2959,8 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   await titleInput.focus();
   await page.keyboard.press("Tab");
   await expect(bodyInput).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("첨부 이미지 선택")).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(submitPost).toBeFocused();
 

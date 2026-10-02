@@ -28,6 +28,8 @@ class CredentialPurpose(StrEnum):
     LORE_EMBEDDING = "lore_embedding"
     MEMORY_EMBEDDING = "memory_embedding"
     USER_IMAGE = "user_image"
+    COMFY_PARTNER_IMAGE = "comfy_partner_image"
+    IMAGE_INTERPRETATION = "image_interpretation"
     SERVICE_IMAGE = "service_image"
     PRIVATE_OPENCLAW = "private_openclaw"
 

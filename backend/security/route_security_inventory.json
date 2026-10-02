@@ -62,6 +62,11 @@
       "module": "app.domains.local_bot.router.bot",
       "endpoint": "unfollow_profile"
     },
+    "DELETE /api/v1/media/assets/{asset_id}": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "delete_draft"
+    },
     "DELETE /api/v1/messages/threads/{thread_id}": {
       "access": "owner-only",
       "module": "app.domains.chat.router.messages",
@@ -166,6 +171,11 @@
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "get_feed_cue"
+    },
+    "GET /api/v1/agents/{character_id}/generation-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "read_generation"
     },
     "GET /api/v1/agents/{character_id}/image-settings": {
       "access": "owner-only",
@@ -312,6 +322,36 @@
       "module": "app.domains.social.router",
       "endpoint": "list_today_popular_posts"
     },
+    "GET /api/v1/media/assets/{asset_id}/content": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "content"
+    },
+    "GET /api/v1/media/assets/{asset_id}/preflight": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "preflight"
+    },
+    "GET /api/v1/media/catalog": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "catalog"
+    },
+    "GET /api/v1/media/comfy-samples/{kind}": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "comfy_sample"
+    },
+    "GET /api/v1/media/interpretation-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "read_interpretation"
+    },
+    "GET /api/v1/media/usage-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "usage"
+    },
     "GET /api/v1/messages/settings": {
       "access": "owner-only",
       "module": "app.domains.chat.router.messages",
@@ -341,6 +381,11 @@
       "access": "public",
       "module": "app.domains.social.router",
       "endpoint": "get_post"
+    },
+    "GET /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "read_job"
     },
     "GET /api/v1/posts/{post_id}/thread": {
       "access": "public",
@@ -737,6 +782,11 @@
       "module": "app.domains.characters.router",
       "endpoint": "generate_profile_media"
     },
+    "POST /api/v1/agents/{character_id}/generation-settings/check": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "check_generation"
+    },
     "POST /api/v1/agents/{character_id}/image-settings/seed": {
       "access": "owner-only",
       "module": "app.domains.characters.router",
@@ -847,15 +897,20 @@
       "module": "app.domains.characters.router",
       "endpoint": "save_character_state"
     },
+    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
+      "access": "owner-only",
+      "module": "app.domains.routines.router",
+      "endpoint": "prepare_daily_activity_plan"
+    },
     "POST /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation": {
       "access": "owner-only",
       "module": "app.domains.routines.router",
       "endpoint": "request_daily_preparation"
     },
-    "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
+    "POST /api/v1/media/assets": {
       "access": "owner-only",
-      "module": "app.domains.routines.router",
-      "endpoint": "prepare_daily_activity_plan"
+      "module": "app.domains.media.router",
+      "endpoint": "upload"
     },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",
@@ -881,6 +936,11 @@
       "access": "public",
       "module": "app.domains.social.router",
       "endpoint": "create_comment"
+    },
+    "POST /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation/{action}": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "change_job"
     },
     "POST /api/v1/posts/{post_id}/likes": {
       "access": "authenticated-shared",
@@ -1097,6 +1157,11 @@
       "module": "app.domains.characters.router",
       "endpoint": "update_credential"
     },
+    "PUT /api/v1/agents/{character_id}/generation-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "save_generation"
+    },
     "PUT /api/v1/agents/{character_id}/image-settings": {
       "access": "owner-only",
       "module": "app.domains.characters.router",
@@ -1121,6 +1186,16 @@
       "access": "owner-only",
       "module": "app.domains.characters.router",
       "endpoint": "update_settings"
+    },
+    "PUT /api/v1/media/interpretation-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "save_interpretation"
+    },
+    "PUT /api/v1/media/usage-settings": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "save_usage"
     },
     "PUT /api/v1/worlds/{world_id}/chat/threads/{thread_id}/diagnostics/capture": {
       "access": "owner-only",

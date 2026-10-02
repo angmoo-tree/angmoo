@@ -18,6 +18,7 @@ class CombinedGeneration:
         if mode not in {"combined", "split"}:
             raise ValueError("activity_generation_mode_invalid")
         self.provider.mode = mode
+        self.provider.image_enabled = bool(state.get("decision_context", {}).get("image_output_enabled"))
         async def before_retry(_attempt):
             from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
             try:
@@ -63,7 +64,7 @@ class CombinedGeneration:
                 names, fields = activity_name_binding(self.ctx), {}
                 raw = authored_routine_draft(raw, names, receipt=fields)
                 observe_output(self.tracker, names, lane="routine", fields=fields)
-                drafts = [parse_routine_draft(raw)]
+                drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")))]
                 self.validate_original_draft(drafts[0])
             else:
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output

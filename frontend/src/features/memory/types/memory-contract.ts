@@ -103,7 +103,7 @@ export type WorldChatEvidenceSummaryRead = {
 
 export type WorldChatEvidenceItemRead = {
   reference: string;
-  kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity" | "episode_memory";
+  kind: "canonical_source" | "graph_relationship" | "graph_event" | "today_sns_activity" | "episode_memory" | "current_image_analysis";
   episode?: EpisodeDetailRead | null;
   label: string;
   excerpt: string | null;

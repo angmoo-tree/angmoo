@@ -1,4 +1,4 @@
-"""Bounded image decoding and WebP conversion; no owner or publication decisions."""
+"""Bounded pixel inspection and explicit conversions; no ownership decisions."""
 import base64
 from io import BytesIO
 import warnings
@@ -6,14 +6,18 @@ import warnings
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.config import settings
+from app.core.image_bytes import (
+    CONTENT_TYPES as IMAGE_CONTENT_TYPES,
+    MAX_IMAGE_DIMENSION as IMAGE_MAX_DIMENSION,
+    MAX_IMAGE_PIXELS as IMAGE_MAX_PIXELS,
+    MAX_IMAGE_FRAMES as IMAGE_MAX_FRAMES,
+    ImageBytesError,
+    inspect_image_bytes,
+)
 from app.domains.media.contracts import InvalidProfileMediaError
 
 
-CONTENT_TYPES = {
-    "image/jpeg": ("jpg", b"\xff\xd8\xff"),
-    "image/png": ("png", b"\x89PNG\r\n\x1a\n"),
-    "image/webp": ("webp", b"RIFF"),
-}
+CONTENT_TYPES = IMAGE_CONTENT_TYPES
 
 
 MEDIA_TARGET_SIZES = {
@@ -28,13 +32,13 @@ WEBP_QUALITY = 80
 SEED_IMAGE_TARGET_SIZE = (1024, 1024)
 
 
-MAX_IMAGE_DIMENSION = 4096
+MAX_IMAGE_DIMENSION = IMAGE_MAX_DIMENSION
 
 
-MAX_IMAGE_PIXELS = 16_777_216
+MAX_IMAGE_PIXELS = IMAGE_MAX_PIXELS
 
 
-MAX_IMAGE_FRAMES = 1
+MAX_IMAGE_FRAMES = IMAGE_MAX_FRAMES
 
 
 def decode_profile_media(*, content_type: str, data_base64: str) -> bytes:
@@ -56,6 +60,14 @@ def validate_profile_media_content(content_type: str, content: bytes) -> None:
         raise InvalidProfileMediaError("Image file is too large")
     _assert_image_signature(content_type, content)
     _assert_decodable_image(content)
+
+
+def validate_generated_media_content(content_type: str, content: bytes, *, max_bytes: int) -> None:
+    """Validate a bounded provider result without changing profile upload limits."""
+    try:
+        inspect_image_bytes(content, max_bytes=max_bytes, declared_mime=content_type)
+    except ImageBytesError as exc:
+        raise InvalidProfileMediaError(str(exc)) from exc
 
 
 def encode_profile_media_webp(*, media_type: str, content: bytes) -> bytes:

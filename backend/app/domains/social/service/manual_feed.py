@@ -7,6 +7,7 @@ from app.domains.social.contracts.actors import SocialCharacter
 from app.domains.social.contracts.manual_feed import ManualFeedReferences, ManualFeedWorldCharacter
 from app.domains.social.contracts.writes import SocialWriteConflictError as ManualSocialConflictError, SocialWriteForbiddenError as ManualSocialForbiddenError, SocialWriteNotFoundError as ManualSocialNotFoundError
 from app.domains.social.repository import manual_feed as queries, event_evidence as post_queries
+from app.domains.social.service.post_attachments import media_view
 
 
 def _owner_actor(
@@ -81,6 +82,7 @@ def _post_read(
         ),
         title=post.title,
         body=post.body,
+        media=[media_view(row) for row in post.media],
         post_type=post.post_type,
         reply_to_post_id=post.reply_to_post_id,
         created_at=post.created_at,

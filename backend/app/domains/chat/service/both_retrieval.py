@@ -54,6 +54,7 @@ class BothRetrievalCommand:
     resolved: ResolvedRetrievalEnvelope
     call_tracker: Mapping[str, Any]
     graph_projection_enabled: bool = True
+    image_context: str | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -373,6 +374,7 @@ class BothRetrievalWorkflowCoordinator:
         return await self._canonical.plan_and_execute(
             CanonicalRetrievalCommand(
                 user_message=command.user_message,
+                image_context=command.image_context,
                 thread_id=command.thread_id,
                 intent=command.intent,
                 resolved=command.resolved,
@@ -396,6 +398,7 @@ class BothRetrievalWorkflowCoordinator:
         return await self._graph.plan_and_execute(
             GraphRetrievalCommand(
                 user_message=command.user_message,
+                image_context=command.image_context,
                 intent=command.intent,
                 resolved=command.resolved,
                 call_tracker=command.call_tracker,

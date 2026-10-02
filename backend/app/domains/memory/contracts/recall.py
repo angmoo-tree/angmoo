@@ -88,6 +88,8 @@ class MemoryRecallSearchQuery:
     occurred_to: datetime | None = None
 
     lexical_policy: MemoryRecallLexicalPolicy = field(default=MemoryRecallLexicalPolicy.LEGACY_STRICT_V1, kw_only=True)
+    image_base_text: str | None = field(default=None, kw_only=True)
+    image_hint: str | None = field(default=None, kw_only=True)
 
 
 class MemoryRecallSearchIncomplete(RuntimeError):

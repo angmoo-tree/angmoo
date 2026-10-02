@@ -32,3 +32,14 @@ desktop/src-tauri/installer-payload.json
 .codex-temp/
 .angmoo-dev/
 backend/.ci/
+
+# Local verification evidence
+/artifacts/
+
+# Local runners for the original dated live-test environment
+/scripts/diagnostics/run_image_generation_live.py
+/scripts/diagnostics/requery_image_generation_live.py
+/scripts/diagnostics/serve_image_generation_live.py
+/scripts/diagnostics/serve_comfy_partner_live.py
+/frontend/scripts/image-live-ui.mjs
+/frontend/scripts/image-live-static-ui.mjs

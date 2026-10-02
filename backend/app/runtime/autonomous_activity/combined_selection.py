@@ -25,6 +25,8 @@ class CombinedSelection:
                     raise
                 result = await port.on_error(exc)
                 prepared[lane] = {"candidates": [], "preparation_error": result}
+        from app.runtime.media.social_context import allocate
+        allocate([candidate for value in prepared.values() for candidate in value.get("candidates", [])])
         return {"prepared_lanes": prepared}
 
     def request(self, state):

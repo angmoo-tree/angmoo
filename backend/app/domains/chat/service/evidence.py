@@ -27,9 +27,10 @@ from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 
 
 class EvidenceService:
-    def __init__(self, thread_service: ThreadService, reads: ChatEvidenceReads) -> None:
+    def __init__(self, thread_service: ThreadService, reads: ChatEvidenceReads, *, image_reader=None) -> None:
         self.thread_service = thread_service
         self.reads = reads
+        self.image_reader = image_reader
 
     def get_world_response_evidence(
         self,
@@ -76,7 +77,7 @@ class EvidenceService:
         )
         source_reader = self.reads.source_reader(db)
         items = [
-            self._chat_evidence_item(db, scope, raw, source_reader=source_reader)
+            self._chat_evidence_item(db, scope, raw, source_reader=source_reader, thread_id=thread.id)
             for raw in raw_items[:12]
             if isinstance(raw, dict)
         ]
@@ -118,6 +119,7 @@ class EvidenceService:
         raw: dict[str, Any],
         *,
         source_reader: MemorySourceEvidenceReaderPort,
+        thread_id: str | None = None,
     ) -> schemas.WorldChatEvidenceItemRead:
         kind = raw.get("kind")
         if kind not in {
@@ -126,6 +128,7 @@ class EvidenceService:
             "graph_event",
             "today_sns_activity",
             "episode_memory",
+            "current_image_analysis",
         }:
             raise MessageNotFoundError("근거 형식이 올바르지 않습니다.")
         reference = raw.get("ref")
@@ -145,6 +148,7 @@ class EvidenceService:
             "graph_event": "관계 사건",
             "today_sns_activity": "오늘 SNS 활동",
             "episode_memory": "상황 기억",
+            "current_image_analysis": "첨부 이미지의 실제 분석",
         }[kind]
         if not isinstance(locator, dict):
             return schemas.WorldChatEvidenceItemRead(
@@ -248,6 +252,10 @@ class EvidenceService:
                 and (not fresh.visible)
             ):
                 availability = "deleted"
+        elif locator_kind == "image_asset":
+            if self.image_reader is not None and thread_id and self.image_reader(db, scope.owner_id, thread_id, locator):
+                availability = "available"
+                href = None  # Pixel reads require runtime authentication; the inspector shows the verified observation.
         elif locator_kind == "memory_item":
             memory_id = locator.get("source_id")
             detail = None

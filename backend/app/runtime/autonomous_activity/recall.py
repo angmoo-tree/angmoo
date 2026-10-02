@@ -90,6 +90,9 @@ class SelectedRecall:
             scope=self.scope, search_text=text, profile=EMBEDDING_PROFILE,
             kinds=(RecallDocumentKind.MEMORY_ITEM,), result_limit=MEMORY_LIMIT,
             counterpart_world_character_id=target.get("counterpart_id"), thread_id=None)
+        if query.get("image_hint"):
+            from dataclasses import replace
+            request = replace(request, image_base_text=query["image_base_text"], image_hint=query["image_hint"])
         try:
             async with self._limit:
                 retrieved_after = datetime.now(UTC).isoformat()

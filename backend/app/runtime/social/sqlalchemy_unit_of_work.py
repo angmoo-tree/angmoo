@@ -18,10 +18,10 @@ FailureInjector = Callable[[str], None]
 class SqlAlchemySocialWriteUnitOfWork:
     """Run the source owner's operation inside the existing immediate transaction."""
 
-    def __init__(self, session: Session, *, retry_policy: SqliteRetryPolicy | None = None, failure_injector: FailureInjector | None = None) -> None:
+    def __init__(self, session: Session, *, retry_policy: SqliteRetryPolicy | None = None, failure_injector: FailureInjector | None = None, attachments=None) -> None:
         self._session = session
         self._retry_policy = retry_policy
-        self._service = SocialSourceWriteService(session, timeline=timeline_service, references=RuntimeSourceWriteReferences(session), failure_injector=failure_injector)
+        self._service = SocialSourceWriteService(session, timeline=timeline_service, references=RuntimeSourceWriteReferences(session), failure_injector=failure_injector, attachments=attachments)
 
 
     def create_owner_post(self, command: OwnerPostCommand) -> SocialWriteResult:

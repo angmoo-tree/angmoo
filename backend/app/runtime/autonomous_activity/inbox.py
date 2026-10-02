@@ -45,7 +45,10 @@ class InboxLane(SocialLane):
                 "notification_ids": [n.id for n in notifications]}
             if proposal is not None:
                 data[key].update(proposal_id=proposal.id, proposal_version=proposal.version)
-        return {"candidates": candidates, "lane_data": data}
+        from app.runtime.media.social_context import snapshots, allocate
+        for candidate in candidates:
+            candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"])
+        return {"candidates": allocate(candidates), "lane_data": data}
 
     async def guard(self, state):
         await super().guard(state)

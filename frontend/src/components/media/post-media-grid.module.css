@@ -27,8 +27,10 @@
 }
 
 .mediaGridOne .mediaFrame {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: auto;
 }
+
+.mediaGridOne .mediaImage { height: auto; object-fit: contain; }
 
 .mediaGridTwo .mediaFrame {
   grid-row: 1 / -1;

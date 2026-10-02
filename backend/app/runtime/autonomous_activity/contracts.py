@@ -49,6 +49,7 @@ class Candidate(BaseModel):
     waiting_since: str | None = None
     activity_proposal: dict[str, Any] | None = None
     proposal_eligible: bool = False
+    images: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class Selection(BaseModel):
@@ -85,6 +86,7 @@ class LaneState(TypedDict, total=False):
     queries: list[dict]
     memories: dict[str, dict]
     memory_validations: dict[str, dict]
+    image_recall_snapshots: dict[str, dict]
     decision_context: dict
     decision_input_receipt: dict
     writer_input_receipts: list[dict]

@@ -190,8 +190,10 @@ class PostMediaRead(BaseModel):
     media_type: str = "image"
     url: str
     alt_text: str = ""
-    model: str
-    prompt_hash: str
+    model: str | None = None
+    prompt_hash: str | None = None
+    asset_id: str | None = None
+    source_kind: str = "legacy"
     byte_size: int
     width: int
     height: int

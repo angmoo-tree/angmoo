@@ -10,9 +10,10 @@ from app.providers.gemini import build_gemini_developer_response_schema
 from app.runtime.autonomous_activity.provider import WriterOutput, parse_writer_output
 
 
-def draft_schema(lane):
+def draft_schema(lane, image_enabled=False):
     if lane == "routine":
-        return thought_response_schema(build_gemini_developer_response_schema(RoutinePostDraft), include_thought=True)
+        from app.domains.routine_posts.service.image_output import with_image_schema
+        return thought_response_schema(with_image_schema(build_gemini_developer_response_schema(RoutinePostDraft), image_enabled), include_thought=True)
     schema = deepcopy(build_gemini_developer_response_schema(WriterOutput))
     item = schema["properties"]["replies"]["items"]
     item["properties"].pop("task_id")
@@ -29,8 +30,8 @@ def draft_schema(lane):
     return schema
 
 
-def envelope_schema(decision_schema, lane):
-    draft = draft_schema(lane)
+def envelope_schema(decision_schema, lane, image_enabled=False):
+    draft = draft_schema(lane, image_enabled)
     if lane != "routine":
         targets = decision_schema["properties"]["decisions"]["items"]["properties"]["target_id"].get("enum")
         if targets:
@@ -72,12 +73,15 @@ def parse_social_draft(raw, *, lane, assignments):
     return parse_writer_output({"replies": replies}, lane=lane, assignments=assignments)
 
 
-def parse_routine_draft(payload):
+def parse_routine_draft(payload, image_enabled=False):
     if not isinstance(payload, dict):
         raise ValueError("combined_routine_draft_missing")
     value, thought = extract_activity_thought(payload, include_thought=True)
+    from app.domains.routine_posts.service.image_output import extract_scene
+    value, scene, error = extract_scene(value, image_enabled)
     draft = RoutinePostDraft.model_validate(value)
-    return {**draft.model_dump(mode="json"), "_thought": asdict(thought)}
+    auxiliary = {"_image_prompt": scene, "_image_error": error} if image_enabled else {}
+    return {**draft.model_dump(mode="json"), "_thought": asdict(thought), **auxiliary}
 
 
 async def generation_mode(state):

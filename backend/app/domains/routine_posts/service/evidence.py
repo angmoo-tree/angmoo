@@ -352,6 +352,8 @@ def validate_routine_generation(
     # The product thought is deliberately absent from the public draft dump.
     # Revalidation must preserve its association with this exact final draft.
     draft._activity_thought = generation.draft._activity_thought
+    draft._image_prompt = generation.draft._image_prompt
+    draft._image_error = generation.draft._image_error
     expected_state = _state_after(context.state_before, plan)
     if generation.state_after != expected_state:
         raise ValueError("routine state must be derived from validated effects")

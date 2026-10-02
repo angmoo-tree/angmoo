@@ -97,6 +97,7 @@ class RetrievalRoutingService:
         self._validate_scope_binding(command, scope)
         router_request = RetrievalRouterRequest(
             user_message=command.user_message,
+            image_context=command.image_context,
             recent_context=recent_context,
             responding_character_name=scope.responding_character_name,
             world_language=scope.world_language,

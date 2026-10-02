@@ -340,6 +340,33 @@ export type AgentCreationDraftRead = {
   updated_at: string;
 };
 
+export type CharacterCardMetadataSelection = {
+  policy: "sillytavern-first-match-v1";
+  keyword: "chara" | "ccv3";
+  selected_occurrence: 0;
+  same_keyword_count: number;
+  multiple_definitions: boolean;
+  selected_json_sha256: string;
+};
+
+export type CharacterCardImportRead = {
+  draft: AgentCreationDraftRead;
+  card_version: number;
+  review: string[];
+  raw_only: string[];
+  metadata_selection: CharacterCardMetadataSelection | null;
+};
+
+export type CharacterCardSourceRead = {
+  document: unknown | null;
+  sha256: string;
+  version: number;
+  source_format: "png" | "json";
+  metadata_selection: CharacterCardMetadataSelection | null;
+  review: string[];
+  raw_only: string[];
+};
+
 export type AgentCreationDraftUpdateInput = Partial<
   Pick<
     AgentCreationDraftRead,

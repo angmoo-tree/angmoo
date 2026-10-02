@@ -114,6 +114,7 @@ def _router_prompt(request: RetrievalRouterRequest) -> str:
         ],
         "today_sns_activity": request.today_sns_context,
         "user_message": request.user_message,
+        **({"untrusted_current_image_observation": request.image_context} if request.image_context else {}),
     }
     if request.repair_diagnostic is not None:
         payload["repair"] = {

@@ -10,8 +10,8 @@ import { studioWorldRoute, worldCharacterDirectoryRoute, worldCharacterProfileRo
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { ProfileMediaUploader } from "@/features/characters/components/profile-media-uploader";
 import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
-import { adoptLegacyAgentDraft, completeAgentDraft, copyAgentSettings, createAgentDraft, findExistingWorldCharacter, getAgentCardSource, getAgentDraft, importAgentCard, listAgents, updateAgentDraft, uploadAgentDraftMedia } from "@/features/characters/api/agents";
-import type { AgentCreationDraftRead, AgentDetailRead } from "@/features/characters/types/agents";
+import { adoptLegacyAgentDraft, completeAgentDraft, copyAgentSettings, createAgentDraft, findExistingWorldCharacter, getAgentCardMetadata, getAgentCardSource, getAgentDraft, importAgentCard, listAgents, updateAgentDraft, uploadAgentDraftMedia } from "@/features/characters/api/agents";
+import type { AgentCreationDraftRead, AgentDetailRead, CharacterCardMetadataSelection } from "@/features/characters/types/agents";
 
 // ADAPTED: existing creation steps, PersonaField and ProfileMediaUploader.
 // Registration persists the edited settings; preparation is a separate user action.
@@ -54,6 +54,8 @@ function CreationGuide() {
   const [source, setSource] = useState<unknown>(null);
   const [review, setReview] = useState<string[]>([]);
   const [rawOnly, setRawOnly] = useState<string[]>([]);
+  const [metadataSelection, setMetadataSelection] = useState<CharacterCardMetadataSelection | null>(null);
+  const [cardMetadataError, setCardMetadataError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [created, setCreated] = useState<AgentDetailRead | null>(null);
   const [restoring, setRestoring] = useState(true);
@@ -77,6 +79,17 @@ function CreationGuide() {
             setDraft(value);
             setMode(value.source_kind === "external" ? "external" : value.source_kind === "card" ? "card" : "direct");
             setStep(value.status === "completed" ? 4 : 1);
+            if (value.source_kind === "card") {
+              try {
+                const summary = await getAgentCardMetadata(value.id);
+                if (!cancelled && epoch === requestEpoch.current) {
+                  setMetadataSelection(summary.metadata_selection);
+                  setReview(summary.review); setRawOnly(summary.raw_only);
+                }
+              } catch {
+                if (!cancelled && epoch === requestEpoch.current) setCardMetadataError("카드의 선택 정보를 불러오지 못했습니다. 편집 내용은 유지됩니다.");
+              }
+            }
           }
         }
       } catch (reason) {
@@ -136,19 +149,36 @@ function CreationGuide() {
     setStep(mode === "card" ? 0 : 1);
   }
   async function readCard(file: File) {
+    const epoch = requestEpoch.current;
     if (file.size > 20 * 1024 * 1024) throw new Error("20MB 이하의 PNG 또는 JSON 카드를 선택해주세요.");
     let current = draft;
     if (!current) {
       current = await createAgentDraft({ target_world_id: target });
+      if (epoch !== requestEpoch.current) return;
       setDraft(current); sessionStorage.setItem(storageKey, current.id);
     }
     const encoded = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader(); reader.onerror = () => reject(new Error("파일을 읽지 못했습니다."));
       reader.onload = () => resolve(String(reader.result).split(",")[1]); reader.readAsDataURL(file);
     });
+    if (epoch !== requestEpoch.current) return;
     const result = await importAgentCard(current.id, current.revision, encoded);
+    if (epoch !== requestEpoch.current) return;
     setDraft(result.draft); setReview(result.review); setRawOnly(result.raw_only);
+    setMetadataSelection(result.metadata_selection); setCardMetadataError(null);
     setSource(null); setPendingFile(null); setStep(1);
+  }
+  async function reloadCardMetadata() {
+    if (!draft || draft.source_kind !== "card") return;
+    const epoch = requestEpoch.current;
+    try {
+      const summary = await getAgentCardMetadata(draft.id);
+      if (epoch !== requestEpoch.current) return;
+      setMetadataSelection(summary.metadata_selection);
+      setReview(summary.review); setRawOnly(summary.raw_only); setCardMetadataError(null);
+    } catch {
+      if (epoch === requestEpoch.current) setCardMetadataError("카드의 선택 정보를 불러오지 못했습니다. 편집 내용은 유지됩니다.");
+    }
   }
   async function finish() {
     const saved = draft?.status === "completed" ? draft : await save();
@@ -190,6 +220,14 @@ function CreationGuide() {
     <p>{target ? "이 World에서 활동할 캐릭터" : "기본 SNS 공간에서 활동할 캐릭터"}를 등록합니다. 생성과 카드 가져오기에는 AI 호출이나 API 키가 필요하지 않습니다.</p>
     <ol className="flex flex-wrap gap-3" aria-label="생성 단계">{STEPS.map((label, index) => <li key={label} aria-current={index === step ? "step" : undefined}>{index + 1}. {label}{index === step ? " · 현재" : ""}</li>)}</ol>
     {error && <p role="alert">{error}</p>}
+    {/* LOCAL: non-blocking metadata notice, shared by Next and static creation. */}
+    {draft?.source_kind === "card" && mode === "card" && metadataSelection?.multiple_definitions && <p role="status" className="rounded-xl border border-state-warning-border bg-state-warning-surface p-4 text-sm text-state-warning">
+      이 카드에는 같은 형식의 캐릭터 정의가 여러 개 있습니다. 실리태번과 같은 순서로 첫 번째 정의를 가져왔습니다. 등록 전에 이름과 설명을 확인해주세요.
+    </p>}
+    {draft?.source_kind === "card" && mode === "card" && cardMetadataError && <div className="space-y-2">
+      <p role="alert">{cardMetadataError}</p>
+      <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(reloadCardMetadata)}>카드 정보 다시 불러오기</Button>
+    </div>}
     {legacyDraft && !draft && <aside className="space-y-3" aria-label="이전 초안 복구">
       <p>이전에 저장한 ‘{legacyDraft.name || "이름 없는 앵무"}’ 초안이 있습니다. 설정과 이미지를 이어서 편집할 수 있습니다. 등록은 이 공간에 자율활동 OFF로 진행하며, 이전 키를 자동 연결하지 않습니다.</p>
       <Button disabled={busy} onClick={() => void perform(async () => {
@@ -203,7 +241,12 @@ function CreationGuide() {
     }); }}>
       <fieldset disabled={busy || draft?.status === "completed"} className="space-y-5">
       {step === 0 && <>
-        <Field label="만드는 방법">{(props) => <Select {...props} value={mode} onChange={(e) => setMode(e.target.value as typeof mode)}>
+        <Field label="만드는 방법">{(props) => <Select {...props} value={mode} onChange={(e) => {
+          const nextMode = e.target.value as typeof mode;
+          setMode(nextMode); setPendingFile(null); setSource(null);
+          if (nextMode !== "card") { setMetadataSelection(null); setCardMetadataError(null); setReview([]); setRawOnly([]); }
+          else if (draft?.source_kind === "card") void perform(reloadCardMetadata);
+        }}>
           <option value="direct" disabled={draft?.source_kind === "external"}>새 캐릭터 직접 만들기</option><option value="card" disabled={draft?.source_kind === "external"}>실리태번 캐릭터 카드 가져오기</option>{target && <option value="copy" disabled={draft?.source_kind === "external"}>기존 캐릭터 설정 복사</option>}
           <option value="external" disabled={!!draft && draft.source_kind !== "external"}>외부 실행기 연결용 캐릭터</option>
         </Select>}</Field>
@@ -236,11 +279,17 @@ function CreationGuide() {
       </>}
       {draft && step === 4 && <><h2 className="text-xl font-bold">{draft.name}</h2><p>{draft.one_liner}</p>{PERSONA_FIELDS.filter(([key]) => Boolean(draft[key])).map(([key, label]) => <div key={key}><h3 className="font-semibold">{label}</h3><p className="whitespace-pre-wrap">{draft[key]}</p></div>)}<p>편집한 설정과 표시 이미지를 저장합니다. 모델·키·활동 준비·자동 실행은 등록에 포함되지 않습니다.</p></>}
       </fieldset>
-      {draft?.source_kind === "card" && <details><summary>카드 원본과 반영 범위 확인</summary>
+      {draft?.source_kind === "card" && mode === "card" && <details><summary>카드 원본과 반영 범위 확인</summary>
         <p>설명·성격·대화 예시는 입력란에서 수정할 수 있습니다. 설명이 비어 있다면 등록 전에 작성해주세요. 상황 설정과 지원하지 않는 동적 문구는 직접 확인합니다.</p>
+        {metadataSelection && <p>반영한 정의: {metadataSelection.keyword}의 첫 번째 항목 / 같은 형식의 정의 {metadataSelection.same_keyword_count}개. 원본 PNG 전체는 그대로 보존합니다.</p>}
         {review.length > 0 && <ul className="list-disc space-y-2 pl-5">{review.map((code) => <li key={code}>{reviewLabel(code)}</li>)}</ul>}
         <p>첫 인사·로어북·특수 지침 등은 원본에만 보존하며 자동으로 실행하지 않습니다. 원본 전용 항목: {rawOnly.join(", ") || "원본 확인"}</p>
-        <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(async () => setSource((await getAgentCardSource(draft.id)).document))}>원문 보기</Button>
+        <p>원문 보기는 선택된 한 정의의 JSON을 표시합니다. 편집한 캐릭터 설정과 보관한 카드 원본은 구분됩니다.</p>
+        <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(async () => {
+          const epoch = requestEpoch.current;
+          const result = await getAgentCardSource(draft.id);
+          if (epoch === requestEpoch.current) setSource(result.document);
+        })}>원문 보기</Button>
         {source !== null && <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words">{JSON.stringify(source, null, 2)}</pre>}
       </details>}
       <div className="flex flex-wrap gap-3">
@@ -261,6 +310,7 @@ function CreationGuide() {
             }
             sessionStorage.removeItem(storageKey); setDraft(null); setSource(null); setPendingFile(null);
             setReview([]); setRawOnly([]); setStep(0);
+            setMetadataSelection(null); setCardMetadataError(null);
           })}>초안 취소 확인</Button>
           <Button variant="secondary" disabled={busy} onClick={() => setConfirmCancel(false)}>계속 편집</Button>
         </div>}

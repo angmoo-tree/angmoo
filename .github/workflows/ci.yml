@@ -20,7 +20,8 @@ env:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # The complete suite exceeded 40m at 83%; keep every test and allow completion.
+    timeout-minutes: 60
     env:
       APP_ENV: test
       APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}
@@ -94,7 +95,7 @@ jobs:
         run: uv run python ../scripts/ci/generate_p8_l_r_memory_batch_inventory.py --check
         working-directory: backend
       - name: Run backend suite
-        run: uv run python -m pytest -q tests --junitxml=.ci/backend-junit.xml
+        run: uv run python -m pytest -q tests --durations=25 --junitxml=.ci/backend-junit.xml
         working-directory: backend
       - name: Verify route and project contracts
         run: |
@@ -269,6 +270,11 @@ jobs:
           NEXT_PUBLIC_EXPERIMENTAL_IMAGE_ENABLED: "false"
         run: pnpm build:static
         working-directory: frontend
+      - name: Verify shared SNS and Chat image flows in Next and static
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/image-integration.xml
+        run: pnpm exec playwright test --config playwright.image-integration.config.ts --reporter=github,junit
+        working-directory: browser-tests
       - name: Verify daily preparation in production Next
         env:
           PLAYWRIGHT_JUNIT_OUTPUT_FILE: .ci/daily-next.xml
@@ -329,6 +335,9 @@ jobs:
             browser-tests/.ci/creator-next.xml
             browser-tests/.ci/creator-static.xml
             browser-tests/.ci/card-upload.xml
+            browser-tests/.ci/image-integration.xml
+            artifacts/image-integration/browser/**/test-failed-*.png
+            artifacts/image-integration/browser/**/trace.zip
             browser-tests/.ci/daily-next.xml
             browser-tests/.ci/daily-static.xml
             browser-tests/.ci/browser-test-identity.json

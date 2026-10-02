@@ -8,7 +8,9 @@ _SPAN = re.compile(r"\w+(?:[-:./+]\w+)*", re.UNICODE)
 _PARTICLE = r"(?:에서는|에서|으로|부터|까지|은|는|이|가|을|를|에|와|과|의|로|도|만)?(?!\w)"
 
 
-def build_groups(text: str) -> GroupedFtsQuery:
+def build_groups(text: str, *, max_groups=32) -> GroupedFtsQuery:
+    if not 1 <= max_groups <= 32:
+        raise ValueError("fts_group_limit_invalid")
     normalized = normalize_search_text(text, max_chars=4000)
     groups, seen, tokens = [], set(), set()
     size = 0
@@ -19,7 +21,7 @@ def build_groups(text: str) -> GroupedFtsQuery:
         terms = _lexical_terms(value, query_mode=True)
         # Account for escaped literals, internal AND, outer parentheses and OR.
         rendered_size = len(('(' + ' AND '.join('"' + t.replace('"', '""') + '"' for t in terms) + ')').encode())
-        if match.end() > 1000 or len(groups) >= 32 or len(tokens | set(terms)) > 128 or size + rendered_size + (4 if groups else 0) > 8192:
+        if match.end() > 1000 or len(groups) >= max_groups or len(tokens | set(terms)) > 128 or size + rendered_size + (4 if groups else 0) > 8192:
             return GroupedFtsQuery(tuple(groups), True)
         if terms:
             groups.append(FtsQueryGroup(value, terms))
@@ -27,6 +29,26 @@ def build_groups(text: str) -> GroupedFtsQuery:
             tokens.update(terms)
             size += rendered_size + (4 if len(groups) > 1 else 0)
     return GroupedFtsQuery(tuple(groups))
+
+
+def build_image_groups(base: str, hint: str) -> GroupedFtsQuery:
+    base_all, hint_all = build_groups(base), build_groups(hint)
+    # Unused groups are shared while each side keeps its reserved initial budget.
+    first_limit = min(32, 24 + max(0, 8 - len(hint_all.groups)))
+    second_limit = min(32, 8 + max(0, 24 - len(base_all.groups)))
+    first, second = build_groups(base, max_groups=first_limit), build_groups(hint, max_groups=second_limit)
+    groups, tokens, size, seen = [], set(), 0, set()
+    truncated = first.truncated or second.truncated
+    for group in (*first.groups, *second.groups):
+        if group.text in seen:
+            continue
+        rendered = len(('(' + ' AND '.join('"' + t.replace('"', '""') + '"' for t in group.tokens) + ')').encode())
+        if len(tokens | set(group.tokens)) > 128 or size + rendered + (4 if groups else 0) > 8192:
+            truncated = True
+            break
+        groups.append(group); seen.add(group.text); tokens.update(group.tokens)
+        size += rendered + (4 if len(groups) > 1 else 0)
+    return GroupedFtsQuery(tuple(groups), truncated)
 
 
 def match_groups(groups: tuple[FtsQueryGroup, ...], document: str) -> tuple[int, ...]:

@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "8ae945e90d91e299f55623e65e02f03aed624cb1392e7d1e5f4d70cd685fec0e"
+      "sha256": "278ecfb34dec78834b4dddc24a9cb1184036712d32b452bff960640ee800de50"
     },
     {
       "classifications": [
@@ -102,6 +102,48 @@
       "classifications": [
         "LOCAL"
       ],
+      "path": "frontend/src/features/media/components/generation-settings.tsx",
+      "sha256": "0f86c42407e54ebde3366e0cccd5c22690c7f90512e0511bc3de84f96c56fafb"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/generation-status.tsx",
+      "sha256": "eaf8d9daa7ffda0664ca018ba85c52bd0ecae544fb3d2f792fb537bc668c7eb8"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/image-picker.tsx",
+      "sha256": "19aa23a21e28aff8096addc1f7f76964ec883d01bfade4a18aa98521e46987b7"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/interpretation-settings.tsx",
+      "sha256": "f6ce2f67104da1c41485aff03dc2b74bec6556c79a3d87e04a65db5fa3f41d7a"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/media-settings.module.css",
+      "sha256": "ae11d41874b9c439aecfe8f3648aeae486018b6dacaafaafce3174148be3096e"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/features/media/components/usage-settings.tsx",
+      "sha256": "644abeb83ce1478c4b4a23be153995b7162f6e3505a282c48bb3a25b470d4ed5"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
       "sha256": "03102defb82af92362a2d9c96bfebfaa8f0322194cd68c8e7666f95c00fe6a92"
     },
@@ -131,7 +173,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "363c1e3b14cc6b7fcebbc8e299541ad3717d579b9d62cc88e3f2139eb8230c17"
+      "sha256": "a061d3a1cc4de566973f04a9b464263da3426a957c8fe8d09258973c06551359"
     },
     {
       "classifications": [
@@ -180,7 +222,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "a60e1d87fe240f22260112abf492dfe6e985e127506459cac62bf5912d5d78c8"
+        "sha256": "05c2d84483dde25ba7e9bb9117a2408dc99bf799eb9d1447b275663a7f808ffa"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -196,7 +238,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "4444320baa88f52e51334ceca6d4ef0f4bda2959b7256b55ce094584030750bd"
+        "sha256": "82105ea8ad6d3390cb7e37ff05342a14311bdb6cdbb27157658ff38366fff97a"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1368,7 +1410,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 16,
+      "expected_screenshot_call_count": 17,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1387,15 +1429,15 @@
         "present": true,
         "sha256": "6b8a45d720fc7894def577d87688ea0b45afc3861125c7b45e1b1e8c88256745"
       },
-      "projects": [
-        "next-production",
-        "static-export"
-      ],
       "production_preview_script": {
         "path": "frontend/scripts/serve-production.mjs",
         "present": true,
         "sha256": "74bb47df74feb8293a36e026f4de47ade6b21ee7d87c48d9f573a48de5bc21b2"
       },
+      "projects": [
+        "next-production",
+        "static-export"
+      ],
       "reviewed_viewports": [
         {
           "height": 800,
@@ -1458,7 +1500,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
           "present": true,
-          "sha256": "88e93be64b59a06bc69df3c0fa7c5499476cf71f312435d42d8275c07e4b413e"
+          "sha256": "d07754cdca6922e2136feecead3e9a91f86e787eb3b53a1a6388d6e261a6a452"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
@@ -1473,7 +1515,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
-          "sha256": "a605ae1fc5a1a79794c2ee186e023f1f24de708bb7860c3a0e6fc4116dc6b419"
+          "sha256": "47df531788b8a502f834d04ed6c0204d9ebb9e40cb5a603fbe00a4fdbd0e4b2e"
         }
       ],
       "specs": [
@@ -1489,8 +1531,8 @@
         }
       ]
     },
-    "screenshot_call_count": 16,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK.",
+    "screenshot_call_count": 17,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate.",
     "target_viewports": [
       "360x800",
       "390x844",

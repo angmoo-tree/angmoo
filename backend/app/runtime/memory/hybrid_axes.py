@@ -27,7 +27,8 @@ class FtsHybridAxis:
             result, observation = await self._workers.search(FtsWorkerRequest(MemoryRecallSearchQuery(request.scope, request.search_text,
                 request.kinds, request.axis_limit, request.counterpart_world_character_id, request.thread_id,
                 korean_spacing_fallback=True, occurred_from=request.occurred_from,
-                occurred_to=request.occurred_to, lexical_policy=self._policy), capture_details=bool(parent and parent.detailed)), deadline=deadline)
+                occurred_to=request.occurred_to, lexical_policy=self._policy,
+                image_base_text=request.image_base_text, image_hint=request.image_hint), capture_details=bool(parent and parent.detailed)), deadline=deadline)
             try:
                 for event in observation.get("events", ()):
                     observe(event["event"], **{key: value for key, value in event.items() if key != "event"})

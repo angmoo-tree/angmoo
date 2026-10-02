@@ -64,6 +64,8 @@ class RequestBodyLimitMiddleware:
 
 def request_body_limit(*, path: str, method: str) -> int:
     normalized_method = method.upper()
+    if normalized_method == "POST" and path.rstrip("/") == "/api/v1/media/assets":
+        return 14 * 1024 * 1024 + 256 * 1024
     if normalized_method == "POST" and _WORLD_MEDIA_PATH.fullmatch(path):
         return PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES
     if normalized_method == "POST" and _CARD_UPLOAD_PATH.fullmatch(path):

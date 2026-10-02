@@ -36,6 +36,7 @@ class LanePorts:
     resolve_routine_query: Node | None = None
     on_error: Callable[[Exception], Awaitable[dict]] | None = None
     observe: Callable[..., None] | None = None
+    prepare_recall: Node | None = None
 
 
 def build_lane(lane: str, ports: LanePorts, *, combined=False):
@@ -122,7 +123,12 @@ def build_lane(lane: str, ports: LanePorts, *, combined=False):
         "ResolveQuery" if lane == "routine" else "TargetSelector"
     ), ["PathResult", "ResolveQuery", "TargetSelector"])
     builder.add_conditional_edges("TargetSelector", lambda s: "ResolveQuery" if s.get("selections") else "PathResult", ["ResolveQuery", "PathResult"])
-    builder.add_edge("ResolveQuery", "RecallSelected")
+    if ports.prepare_recall is not None:
+        builder.add_node("PrepareImageRecall", guarded("PrepareImageRecall", ports.prepare_recall))
+        builder.add_edge("ResolveQuery", "PrepareImageRecall")
+        builder.add_edge("PrepareImageRecall", "RecallSelected")
+    else:
+        builder.add_edge("ResolveQuery", "RecallSelected")
     builder.add_edge("RecallSelected", "BuildDecisionContext")
     if combined:
         from app.runtime.autonomous_activity.generation_contracts import generation_mode

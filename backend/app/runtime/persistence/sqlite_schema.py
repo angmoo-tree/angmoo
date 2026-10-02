@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 25
-SOURCE_ALEMBIC_REVISION = "20260929_0103"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 102
-EXPECTED_CANONICAL_TABLE_COUNT = 138
+SQLITE_SCHEMA_VERSION = 26
+SOURCE_ALEMBIC_REVISION = "20260930_0104"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 103
+EXPECTED_CANONICAL_TABLE_COUNT = 147
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 ACTIVITY_V19_TABLES = (
@@ -315,6 +315,8 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    from app.runtime.persistence.sqlite_image_schema import remove_image_schema
+    remove_image_schema(metadata)
     _remove_daily_preparation(metadata)
     _remove_character_background(metadata)
     _remove_creator_v21(metadata)
@@ -701,9 +703,16 @@ def build_sqlite_v23_metadata() -> MetaData:
 
 def build_sqlite_v24_metadata() -> MetaData:
     """Frozen schema before explicit Topic requests acquired a name snapshot."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v25_metadata()
     table = metadata.tables["social_recommendation_preparations"]
     table._columns.remove(table.c.request_snapshot)
+    return metadata
+
+
+def build_sqlite_v25_metadata() -> MetaData:
+    from app.runtime.persistence.sqlite_image_schema import remove_image_schema
+    metadata = build_sqlite_baseline_metadata()
+    remove_image_schema(metadata)
     return metadata
 
 

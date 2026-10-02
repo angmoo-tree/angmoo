@@ -64,8 +64,11 @@ class RetrievalRouterRequest:
     today_sns_context: dict | None = None
     repair_diagnostic: str | None = None
     social_snapshot: SocialContextSnapshot | None = None
+    image_context: str | None = None
 
     def __post_init__(self) -> None:
+        if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):
+            raise RetrievalContractError("retrieval_image_context_invalid")
         message = self.user_message.strip()
         if not message or len(message) > MAX_ROUTER_MESSAGE_CHARACTERS:
             raise RetrievalContractError("retrieval_router_message_invalid")

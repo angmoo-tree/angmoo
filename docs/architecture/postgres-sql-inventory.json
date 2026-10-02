@@ -436,7 +436,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "b234eb18d15273d285dbc9a7db555445b3d5c13603f375362f5d497a823a4ec7",
+      "source_sha256": "c00a1d54d6b559f63a67491644aef165315265715fda9c30ef09633b6f48054c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1079,33 +1079,33 @@
     {
       "markers": {
         "driver_or_url": [
-          212,
-          237,
-          288
+          220,
+          245,
+          296
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/models/posts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "99ff13e196f6ccc24de0d7de0d7b09d8a5185ebf0e1fc6500d741bd5ffcef466",
+      "source_sha256": "ac615379926181de8f71467089cd188d1f1e5267ab6b578e836d8b460cde9834",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "driver_or_url": [
-          14
+          15
         ],
         "row_lock": [
-          15
+          16
         ],
         "skip_locked": [
-          15
+          16
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/image_jobs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "288ec0fc9dc972fe7ceb39a89c32e9c65a8341e4678f2f9a2666ab489422dde0",
+      "source_sha256": "c8cad0f232a667431a19e029848154ef3ec3b7c3bfaacf861224f767d05db8e7",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1134,7 +1134,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/media.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "4f2278a0226d9a54752cee6faea6e50bd7a5e641b5c255702b7e718e8521dc38",
+      "source_sha256": "97ea461ee691b696f0fb278c39724d7fe625f75a99fcfae82e4d9dbfb5189f94",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1163,6 +1163,18 @@
       "path": "backend/app/domains/social/repository/world_feed.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "cbf699a6a8bd62b75d848273aa429eb8bf33a63250cca3b6bfb2673690f44b6f",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          40
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/service/generation_usage.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "4e9e7c41ad5859a13fe223cb0ab321a7c467bb78cace60740887016634df991f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1390,15 +1402,15 @@
           108,
           109,
           110,
-          341,
-          342,
-          343
+          343,
+          344,
+          345
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0a4f957fbefd38a74caf8926247b268d84432ca3e76ff96abb4b3a24ee73e14a",
+      "source_sha256": "37c103bc9a88ba2d08fad5ce9167db8146fa575b3c9da0657cf7d852fa6bb0d3",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1464,13 +1476,13 @@
     {
       "markers": {
         "pgvector": [
-          34
+          36
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/pyproject.toml",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0c1361ce3c9fcf0fa7522e781dcc0ad462cf0a04066931e3cd00cd1513079b0f",
+      "source_sha256": "bd446c399a28459c86fd3d8200f2329ace6b21e111c1c82f90a236cad7827442",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1553,10 +1565,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 104,
+  "entry_count": 105,
   "marker_counts": {
     "advisory_lock": 11,
-    "driver_or_url": 62,
+    "driver_or_url": 63,
     "jsonb": 13,
     "pgvector": 5,
     "row_lock": 45,

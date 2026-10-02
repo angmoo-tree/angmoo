@@ -7,7 +7,7 @@ from app.core.search_text import normalize_search_text
 from app.domains.memory.contracts.fts_recall import FtsSearchBatch
 from app.domains.memory.contracts.hybrid_recall import RecallAxisStatus as Status
 from app.domains.memory.contracts.recall import RecallDocumentKind
-from app.domains.memory.policies.grouped_fts import build_groups, match_groups
+from app.domains.memory.policies.grouped_fts import build_groups, build_image_groups, match_groups
 from app.domains.memory.policies.korean_recall import spacing_groups, spacing_matches
 
 MAX_BYTES = 4 * 1024 * 1024
@@ -20,7 +20,7 @@ def render_match(groups):
 
 def search_grouped(index, query, deadline, filters, parameters, to_candidate):
     started = monotonic()
-    compiled = build_groups(query.text)
+    compiled = build_image_groups(query.image_base_text, query.image_hint) if query.image_hint and query.image_base_text else build_groups(query.text)
     match = render_match(compiled.groups)
     candidates = []
     stats = dict(groups=len(compiled.groups), tokens=len({t for g in compiled.groups for t in g.tokens}),

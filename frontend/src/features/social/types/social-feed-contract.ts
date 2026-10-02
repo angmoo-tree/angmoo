@@ -20,8 +20,8 @@ export type PostMediaRead = {
   media_type: string;
   url: string;
   alt_text: string;
-  model: string;
-  prompt_hash: string;
+  model: string | null;
+  prompt_hash: string | null;
   byte_size: number;
   width: number;
   height: number;

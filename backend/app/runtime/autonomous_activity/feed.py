@@ -71,6 +71,10 @@ class FeedLane(SocialLane):
             "observation_ids": [o.id for o in claims.observations], "claim_tokens": {o.id: o.claim_token for o in claims.observations},
             "raw_candidate_count": search.raw_candidate_count, "query_latency_ms": search.query_latency_ms}
         shared = dict(state["shared_context"])
+        from app.runtime.media.social_context import snapshots, allocate
+        for candidate in candidates:
+            candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"])
+        allocate(candidates)
         if profile.explicit_actions is None:
             shared["action_preferences"] = preferences
         return {"candidates": candidates, "lane_data": data, "shared_context": shared}

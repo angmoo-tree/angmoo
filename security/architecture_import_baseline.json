@@ -1,7 +1,7 @@
 {
-  "edge_count": 5269,
-  "external_import_count": 3818,
-  "module_count": 1303,
+  "edge_count": 5407,
+  "external_import_count": 3933,
+  "module_count": 1334,
   "modules": [
     {
       "external_imports": [],
@@ -117,6 +117,7 @@
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
         "app.domains.local_bot.router.bot",
+        "app.domains.media.router",
         "app.domains.memory.router",
         "app.domains.runtime.router",
         "app.domains.social.recommendation_router",
@@ -476,6 +477,18 @@
       "imports": [],
       "module": "app.core.ids",
       "path": "backend/app/core/ids.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "dataclasses",
+        "io",
+        "warnings"
+      ],
+      "imports": [],
+      "module": "app.core.image_bytes",
+      "path": "backend/app/core/image_bytes.py",
       "wildcard_imports": []
     },
     {
@@ -1283,6 +1296,24 @@
     },
     {
       "external_imports": [
+        "json",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.repository.image_settings",
+        "app.domains.characters.service.access",
+        "app.domains.identity.contracts",
+        "app.domains.identity.service.demo_access",
+        "app.domains.identity.service.media_credentials",
+        "app.domains.media.contracts"
+      ],
+      "module": "app.domains.characters.service.generation_settings",
+      "path": "backend/app/domains/characters/service/generation_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "logging",
         "sqlalchemy.orm",
@@ -1770,6 +1801,16 @@
     {
       "external_imports": [
         "dataclasses",
+        "json"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.contracts.image_evidence",
+      "path": "backend/app/domains/chat/contracts/image_evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
         "datetime"
       ],
       "imports": [
@@ -1852,6 +1893,7 @@
         "app.domains.chat.contracts.character_response_generator",
         "app.domains.chat.contracts.evidence_bundle",
         "app.domains.chat.contracts.generation_lifecycle",
+        "app.domains.chat.contracts.image_evidence",
         "app.domains.chat.contracts.recall_mode",
         "app.domains.chat.contracts.response_request",
         "app.domains.chat.contracts.retrieval_intent",
@@ -2582,8 +2624,10 @@
     {
       "external_imports": [
         "__future__",
+        "asyncio",
         "collections.abc",
         "datetime",
+        "json",
         "logging",
         "sqlalchemy",
         "sqlalchemy.orm",
@@ -3130,6 +3174,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.domains.identity.models_media",
+      "path": "backend/app/domains/identity/models_media.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.identity.exceptions"
@@ -3249,7 +3305,9 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.identity.service.media_credentials"
+      ],
       "module": "app.domains.identity.service",
       "path": "backend/app/domains/identity/service/__init__.py",
       "wildcard_imports": []
@@ -3391,6 +3449,18 @@
     },
     {
       "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.domains.identity.browser_session",
+        "app.domains.identity.dependencies"
+      ],
+      "module": "app.domains.identity.service.http_auth",
+      "path": "backend/app/domains/identity/service/http_auth.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "datetime",
@@ -3431,6 +3501,23 @@
       ],
       "module": "app.domains.identity.service.login_throttle",
       "path": "backend/app/domains/identity/service/login_throttle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.identity.contracts",
+        "app.domains.identity.exceptions",
+        "app.domains.identity.models_media",
+        "app.domains.identity.service.credential_resolution"
+      ],
+      "module": "app.domains.identity.service.media_credentials",
+      "path": "backend/app/domains/identity/service/media_credentials.py",
       "wildcard_imports": []
     },
     {
@@ -3866,9 +3953,79 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.media.generation_contracts"
+      ],
+      "module": "app.domains.media.api_image_policy",
+      "path": "backend/app/domains/media/api_image_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.media.api_image_policy",
+        "app.domains.media.generation_contracts"
+      ],
       "module": "app.domains.media.contracts",
       "path": "backend/app/domains/media/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.media.generation_contracts",
+      "path": "backend/app/domains/media/generation_contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.media.interpretation_contracts",
+      "path": "backend/app/domains/media/interpretation_contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.domains.media.models",
+      "path": "backend/app/domains/media/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "base64",
+        "fastapi",
+        "json",
+        "pathlib",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.database",
+        "app.domains.identity.service.demo_access",
+        "app.domains.identity.service.http_auth",
+        "app.domains.media.contracts",
+        "app.domains.media.generation_contracts",
+        "app.domains.media.service.interpretation",
+        "app.domains.media.setting_schemas"
+      ],
+      "module": "app.domains.media.router",
+      "path": "backend/app/domains/media/router.py",
       "wildcard_imports": []
     },
     {
@@ -3878,6 +4035,74 @@
       "imports": [],
       "module": "app.domains.media.schemas",
       "path": "backend/app/domains/media/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "io",
+        "pathlib",
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.image_bytes",
+        "app.domains.media.contracts",
+        "app.domains.media.models",
+        "app.domains.media.service.pixel_validation"
+      ],
+      "module": "app.domains.media.service.assets",
+      "path": "backend/app/domains/media/service/assets.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "datetime",
+        "hashlib",
+        "json",
+        "os",
+        "sqlalchemy",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.identity.contracts",
+        "app.domains.identity.exceptions",
+        "app.domains.identity.service.media_credentials",
+        "app.domains.media.contracts",
+        "app.domains.media.generation_contracts",
+        "app.domains.media.interpretation_contracts",
+        "app.domains.media.models"
+      ],
+      "module": "app.domains.media.service.interpretation",
+      "path": "backend/app/domains/media/service/interpretation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.core.image_bytes",
+        "app.domains.media.contracts"
+      ],
+      "module": "app.domains.media.service.pixel_validation",
+      "path": "backend/app/domains/media/service/pixel_validation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.media.generation_contracts"
+      ],
+      "module": "app.domains.media.setting_schemas",
+      "path": "backend/app/domains/media/setting_schemas.py",
       "wildcard_imports": []
     },
     {
@@ -7013,6 +7238,7 @@
     {
       "external_imports": [
         "__future__",
+        "copy",
         "json",
         "pydantic",
         "typing"
@@ -7030,6 +7256,15 @@
       ],
       "module": "app.domains.routine_posts.service.generation",
       "path": "backend/app/domains/routine_posts/service/generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "copy"
+      ],
+      "imports": [],
+      "module": "app.domains.routine_posts.service.image_output",
+      "path": "backend/app/domains/routine_posts/service/image_output.py",
       "wildcard_imports": []
     },
     {
@@ -10415,6 +10650,19 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.domains.social.models.image_intents",
+      "path": "backend/app/domains/social/models/image_intents.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -11319,6 +11567,19 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.media.contracts",
+        "app.domains.social.models.image_intents"
+      ],
+      "module": "app.domains.social.service.generation_usage",
+      "path": "backend/app/domains/social/service/generation_usage.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "sqlalchemy.orm",
         "typing"
@@ -11394,6 +11655,32 @@
       ],
       "module": "app.domains.social.service.image_identity",
       "path": "backend/app/domains/social/service/image_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "base64",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.media.contracts",
+        "app.domains.social.models.image_intents",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.generation_usage"
+      ],
+      "module": "app.domains.social.service.image_intent_generation",
+      "path": "backend/app/domains/social/service/image_intent_generation.py",
       "wildcard_imports": []
     },
     {
@@ -11511,7 +11798,8 @@
         "app.domains.social.models.posts",
         "app.domains.social.repository.event_evidence",
         "app.domains.social.repository.manual_feed",
-        "app.domains.social.schemas.manual"
+        "app.domains.social.schemas.manual",
+        "app.domains.social.service.post_attachments"
       ],
       "module": "app.domains.social.service.manual_feed",
       "path": "backend/app/domains/social/service/manual_feed.py",
@@ -11578,6 +11866,19 @@
       ],
       "module": "app.domains.social.service.notifications",
       "path": "backend/app/domains/social/service/notifications.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.media.contracts",
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.service.post_attachments",
+      "path": "backend/app/domains/social/service/post_attachments.py",
       "wildcard_imports": []
     },
     {
@@ -11761,6 +12062,7 @@
         "app.domains.social.repository.manual_writes",
         "app.domains.social.schemas.community",
         "app.domains.social.service.manual_writes",
+        "app.domains.social.service.post_attachments",
         "app.domains.social.service.timeline",
         "app.domains.social.utils.source_writes"
       ],
@@ -14045,6 +14347,7 @@
         "hashlib",
         "io",
         "json",
+        "math",
         "struct",
         "typing",
         "zlib"
@@ -14052,6 +14355,26 @@
       "imports": [],
       "module": "app.integrations.character_cards.parser",
       "path": "backend/app/integrations/character_cards/parser.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "copy",
+        "ipaddress",
+        "math",
+        "secrets",
+        "time",
+        "urllib.parse"
+      ],
+      "imports": [
+        "app.core.image_bytes",
+        "app.domains.media.generation_contracts",
+        "app.integrations.image_api",
+        "app.integrations.media.images"
+      ],
+      "module": "app.integrations.comfy_images",
+      "path": "backend/app/integrations/comfy_images.py",
       "wildcard_imports": []
     },
     {
@@ -14090,6 +14413,23 @@
       "imports": [],
       "module": "app.integrations.google_identity",
       "path": "backend/app/integrations/google_identity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "base64",
+        "httpx",
+        "io",
+        "urllib.parse"
+      ],
+      "imports": [
+        "app.core.image_bytes",
+        "app.domains.media.api_image_policy",
+        "app.domains.media.generation_contracts"
+      ],
+      "module": "app.integrations.image_api",
+      "path": "backend/app/integrations/image_api.py",
       "wildcard_imports": []
     },
     {
@@ -14250,6 +14590,20 @@
     },
     {
       "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.media.interpretation_contracts",
+        "app.providers.contracts",
+        "app.providers.gemini",
+        "app.providers.generation_profiles"
+      ],
+      "module": "app.integrations.llm.image_interpretation",
+      "path": "backend/app/integrations/llm/image_interpretation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "asyncio",
         "json",
@@ -14374,10 +14728,33 @@
       ],
       "imports": [
         "app.config",
+        "app.core.image_bytes",
         "app.domains.media.contracts"
       ],
       "module": "app.integrations.media.images",
       "path": "backend/app/integrations/media/images.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "base64",
+        "datetime",
+        "hashlib",
+        "io",
+        "pathlib",
+        "re",
+        "secrets",
+        "sentencepiece",
+        "zipfile"
+      ],
+      "imports": [
+        "app.domains.media.generation_contracts",
+        "app.integrations.image_api",
+        "app.integrations.media.images"
+      ],
+      "module": "app.integrations.novelai_images",
+      "path": "backend/app/integrations/novelai_images.py",
       "wildcard_imports": []
     },
     {
@@ -14487,6 +14864,7 @@
         "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.chat.image_attachments",
         "app.runtime.chat.message_composition",
         "app.runtime.component_workers",
         "app.runtime.configuration",
@@ -14498,6 +14876,7 @@
         "app.runtime.local_bot.composition",
         "app.runtime.local_bot.keys",
         "app.runtime.logging_config",
+        "app.runtime.media.composition",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.episode_prior_search",
         "app.runtime.memory.shutdown",
@@ -14677,6 +15056,7 @@
         "app.domains.identity.models",
         "app.domains.identity.service.auth",
         "app.domains.local_bot.models",
+        "app.domains.media.models",
         "app.domains.memory.models.daypart",
         "app.domains.operations.repository",
         "app.domains.relationships.models.points",
@@ -14688,6 +15068,7 @@
         "app.integrations.media.files",
         "app.runtime.creator_privacy",
         "app.runtime.extensions.resident_adapter",
+        "app.runtime.media.privacy",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
         "app.runtime.world_characters.cleanup"
@@ -14812,6 +15193,7 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.domains.routine_posts.service.image_output",
         "app.domains.routine_posts.service.original_post",
         "app.domains.world_characters.activity_models",
         "app.providers.contracts",
@@ -14833,7 +15215,8 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.provider",
-        "app.runtime.autonomous_activity.queries"
+        "app.runtime.autonomous_activity.queries",
+        "app.runtime.media.social_context"
       ],
       "module": "app.runtime.autonomous_activity.combined_selection",
       "path": "backend/app/runtime/autonomous_activity/combined_selection.py",
@@ -14914,6 +15297,7 @@
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.feed_effects",
         "app.runtime.autonomous_activity.social_lane",
+        "app.runtime.media.social_context",
         "app.runtime.relationships.experience_metrics",
         "app.runtime.social.feed_observations",
         "app.runtime.social.world_feed_queries"
@@ -14948,6 +15332,7 @@
       "imports": [
         "app.contracts.activity_thought_output",
         "app.domains.routine_posts.schemas",
+        "app.domains.routine_posts.service.image_output",
         "app.providers.contracts",
         "app.providers.gemini",
         "app.runtime.autonomous_activity.provider"
@@ -14986,6 +15371,7 @@
         "app.domains.social.service.activity_inbox",
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.social_lane",
+        "app.runtime.media.social_context",
         "app.runtime.relationships.experience_metrics",
         "app.runtime.social.langgraph_actions"
       ],
@@ -15155,6 +15541,7 @@
         "app.domains.routine_posts.contracts.request_context",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
+        "app.domains.routine_posts.service.image_output",
         "app.domains.routine_posts.service.original_post",
         "app.domains.routine_posts.service.temporal_context",
         "app.domains.routines.models.plans",
@@ -15178,6 +15565,7 @@
         "app.runtime.autonomous_activity.social_lane",
         "app.runtime.character_activity_state",
         "app.runtime.daily_preparation",
+        "app.runtime.media.composition",
         "app.runtime.relationships.experience_metrics",
         "app.runtime.relationships.social_metrics",
         "app.runtime.routine_posts.original_post",
@@ -15247,6 +15635,7 @@
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.provider",
         "app.runtime.autonomous_activity.recall",
+        "app.runtime.media.social_context",
         "app.runtime.relationships.experience_metrics",
         "app.runtime.relationships.social_metrics",
         "app.runtime.social.observations"
@@ -15453,6 +15842,7 @@
         "app.domains.local_bot.models",
         "app.domains.local_bot.schemas",
         "app.domains.local_bot.service.key_management",
+        "app.domains.media.models",
         "app.domains.memory.models.daypart",
         "app.domains.operations.service.maintenance",
         "app.domains.operations.service.settings",
@@ -15513,6 +15903,7 @@
         "app.runtime.creator_privacy",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.local_bot.keys",
+        "app.runtime.media.privacy",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
         "app.runtime.resident.autonomy_reads",
@@ -15642,6 +16033,25 @@
       ],
       "module": "app.runtime.chat.generation_workflows",
       "path": "backend/app/runtime/chat/generation_workflows.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.image_evidence",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.models",
+        "app.domains.chat.service.evidence",
+        "app.domains.chat.service.generation",
+        "app.domains.media.contracts",
+        "app.domains.media.generation_contracts",
+        "app.runtime.chat.evidence_reads",
+        "app.runtime.chat.generation_workflows"
+      ],
+      "module": "app.runtime.chat.image_attachments",
+      "path": "backend/app/runtime/chat/image_attachments.py",
       "wildcard_imports": []
     },
     {
@@ -15898,7 +16308,8 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.world_characters.models",
-        "app.domains.worlds.models"
+        "app.domains.worlds.models",
+        "app.runtime.media.privacy"
       ],
       "module": "app.runtime.creator_privacy",
       "path": "backend/app/runtime/creator_privacy.py",
@@ -16432,6 +16843,90 @@
       "imports": [],
       "module": "app.runtime.logging_config",
       "path": "backend/app/runtime/logging_config.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "threading"
+      ],
+      "imports": [],
+      "module": "app.runtime.media.binding",
+      "path": "backend/app/runtime/media/binding.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "PIL",
+        "asyncio",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "io",
+        "json",
+        "logging",
+        "pathlib",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.service.generation_settings",
+        "app.domains.chat.models",
+        "app.domains.identity.contracts",
+        "app.domains.identity.exceptions",
+        "app.domains.identity.models_media",
+        "app.domains.identity.service.media_credentials",
+        "app.domains.media.api_image_policy",
+        "app.domains.media.contracts",
+        "app.domains.media.generation_contracts",
+        "app.domains.media.models",
+        "app.domains.media.service.assets",
+        "app.domains.media.service.interpretation",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.social.models.image_intents",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.generation_usage",
+        "app.domains.social.service.image_intent_generation",
+        "app.domains.worlds.models",
+        "app.integrations.comfy_images",
+        "app.integrations.image_api",
+        "app.integrations.llm.image_interpretation",
+        "app.integrations.novelai_images",
+        "app.runtime.media.binding"
+      ],
+      "module": "app.runtime.media.composition",
+      "path": "backend/app/runtime/media/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.chat.models",
+        "app.domains.identity.models_media",
+        "app.domains.media.models",
+        "app.domains.social.models.image_intents",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.runtime.media.privacy",
+      "path": "backend/app/runtime/media/privacy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "json",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.media.generation_contracts",
+        "app.domains.social.models.image_intents",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.image_intent_generation",
+        "app.runtime.media.binding"
+      ],
+      "module": "app.runtime.media.social_context",
+      "path": "backend/app/runtime/media/social_context.py",
       "wildcard_imports": []
     },
     {
@@ -17427,6 +17922,19 @@
     },
     {
       "external_imports": [
+        "hashlib",
+        "json",
+        "pathlib"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.images_v26",
+      "path": "backend/app/runtime/migrations/sqlite_versions/images_v26.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections",
         "dataclasses",
@@ -17456,6 +17964,7 @@
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.creator_v21",
         "app.runtime.migrations.sqlite_versions.daily_preparation_v23",
+        "app.runtime.migrations.sqlite_versions.images_v26",
         "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
         "app.runtime.migrations.sqlite_versions.routine_state_v24",
         "app.runtime.migrations.sqlite_versions.topic_request_v25",
@@ -17767,7 +18276,9 @@
         "app.domains.characters.models",
         "app.domains.chat.models",
         "app.domains.identity.models",
+        "app.domains.identity.models_media",
         "app.domains.local_bot.models",
+        "app.domains.media.models",
         "app.domains.memory.models.batch",
         "app.domains.memory.models.consolidation_request",
         "app.domains.memory.models.daypart",
@@ -17786,6 +18297,7 @@
         "app.domains.runtime.models",
         "app.domains.social.models.activity_thought",
         "app.domains.social.models.feed",
+        "app.domains.social.models.image_intents",
         "app.domains.social.models.manual_writes",
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context",
@@ -17905,6 +18417,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.runtime.persistence.sqlite_image_schema",
+      "path": "backend/app/runtime/persistence/sqlite_image_schema.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.runtime.persistence.sqlite_recommendation_modes",
@@ -17941,7 +18462,8 @@
       "imports": [
         "app.domains.chat.infrastructure.world_scope_migration",
         "app.models",
-        "app.runtime.persistence.sqlite_generation_profiles"
+        "app.runtime.persistence.sqlite_generation_profiles",
+        "app.runtime.persistence.sqlite_image_schema"
       ],
       "module": "app.runtime.persistence.sqlite_schema",
       "path": "backend/app/runtime/persistence/sqlite_schema.py",
@@ -18912,6 +19434,8 @@
         "app.domains.world_characters.models",
         "app.integrations.direct_llm",
         "app.runtime.character_activity_state",
+        "app.runtime.media.binding",
+        "app.runtime.media.composition",
         "app.runtime.persistence.model_registration",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.runtime.routine_posts.context_references",
@@ -19291,6 +19815,7 @@
         "fastapi"
       ],
       "imports": [
+        "app.domains.social.service.post_attachments",
         "app.runtime.social.discovery",
         "app.runtime.social.inbox",
         "app.runtime.social.manual_feed_references",

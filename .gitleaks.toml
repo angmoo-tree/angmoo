@@ -354,3 +354,74 @@ paths = ['''(^|/)security/refactor_backend_additions\.json''']
 regexes = [
   '''^4b413397ab729e19ed3960c015f3f0063cb3f61d$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public image source Git blobs verified against append-only commit evidence; not credentials; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)security/refactor_backend_additions\.json$''',
+  '''(^|/)security/post_refactor_contract_changes\.json$''',
+]
+regexes = [
+  '''^\s*"backend/app/domains/identity/service/http_auth\.py":\ "db4a24117ccdc40bc4de2f986e929b4afada8713",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/media_credentials\.py":\ "6b857ad7a943cc40c85bdff74e9fbc73fc59a0d6",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/media_credentials\.py":\ "f358a8db9f5e7dd3dfc527a620d853965210a59e",?\s*$''',
+  '''^\s*"backend/app/domains/media/api_image_policy\.py":\ "b52107841656d17761222bf4df4b8392335af913",?\s*$''',
+  '''^\s*"backend/app/integrations/image_api\.py":\ "7b85fc40cfd7500ccd71ee821bf64a4ec85593ac",?\s*$''',
+  '''^\s*"backend/app/integrations/image_api\.py":\ "91b71de1d2736819b35205414f736de66e0cb3ba",?\s*$''',
+  '''^\s*"backend/app/integrations/image_api\.py":\ "acd4f2775f0ae3cf842902a399e9f97f7b63e58c",?\s*$''',
+  '''^\s*"scripts/diagnostics/capture_image_api_contracts\.py":\ "dd5cb376b8739cba53942a19d1ad84bc00223088",?\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact bundled T5 SentencePiece resource SHA256 verified from file bytes; not a token; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)backend/app/integrations/novelai_images\.py$''',
+]
+regexes = [
+  '''^\s*TOKENIZER_HASH = "d60acb128cf7b7f2536e8f38a5b18a05535c9e14c7a355904270e15b0945ea86"\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact synthetic Chat image recovery idempotency markers; not API credentials; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)backend/tests/image_integration/test_chat_attachments\.py$''',
+]
+regexes = [
+  '''^\s*WorldChatMessageCreate\(content="keep\ this\ message",\ attachment_asset_id=asset,\ idempotency_key="synthetic\-cancel\-001"\)\)\s*$''',
+  '''^\s*WorldChatMessageCreate\(content="keep",\ attachment_asset_id=asset,\ idempotency_key="synthetic\-revoke\-001"\)\)\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact SQLAlchemy lease expiry expressions; the scanner matched code rather than a credential literal; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)backend/app/domains/social/service/image_intent_generation\.py$''',
+]
+regexes = [
+  '''^\s*\.values\(status="running",\ lease_token=token,\ lease_until=now\ \+\ timedelta\(minutes=5\)\)\)\s*$''',
+  '''^\s*status="running",\ lease_token=token,\ lease_until=now\ \+\ timedelta\(minutes=5\),\ started_at=now\)\)\s*$''',
+]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact synthetic literals in image leak-review negative tests; no credential value; reviewed 2026-10-02"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''(^|/)backend/tests/test_image_gitleaks_review\.py$''',
+]
+regexes = [
+  '''^\s*line = 'WorldChatMessageCreate\(content="keep this message", attachment_asset_id=asset, idempotency_key="synthetic-cancel-001"\)\)'\s*$''',
+  '''^\s*line = '\.values\(status="running", lease_token=token, lease_until=now \+ timedelta\(minutes=5\)\)\)'\s*$''',
+]

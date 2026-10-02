@@ -1,6 +1,8 @@
 """Durable generation admission, replay, status and terminal failure rules."""
 
 from __future__ import annotations
+import asyncio
+import json
 
 from app.domains.chat.service.diagnostic_capture import capture
 
@@ -66,10 +68,12 @@ class GenerationService:
         thread_service: ThreadService,
         settings_service: MessageSettingsService,
         workflows: GenerationWorkflows,
+        images=None,
     ) -> None:
         self.thread_service = thread_service
         self.settings_service = settings_service
         self.workflows = workflows
+        self.images = images
 
     def accept_world_message(
         self,
@@ -81,7 +85,7 @@ class GenerationService:
     ) -> schemas.WorldChatMessageAcceptRead:
         thread = self._mutation_thread(db, user, world_id, thread_id)
         content = data.content.strip()
-        if not content:
+        if not content and not data.attachment_asset_id:
             raise MessageValidationError("메시지 내용을 입력해 주세요.")
         idempotency_key = data.idempotency_key.strip()
         if len(idempotency_key) < 16:
@@ -94,7 +98,8 @@ class GenerationService:
         )
         if existing is not None:
             message = db.get(models.MessageMessage, existing.user_message_id)
-            if message is None or message.content != content:
+            existing_asset = self.images.existing_asset(db, message.id) if self.images and message else None
+            if message is None or message.content != content or existing_asset != data.attachment_asset_id:
                 raise MessageValidationError("message_idempotency_conflict")
             return schemas.WorldChatMessageAcceptRead(
                 outcome="replayed",
@@ -112,6 +117,10 @@ class GenerationService:
         )
         db.add(message)
         db.flush()
+        if data.attachment_asset_id:
+            if self.images is None:
+                raise MessageValidationError("image_runtime_unavailable")
+            self.images.accept(db, user.id, thread.id, message.id, data.attachment_asset_id)
         thread.last_message_at = now
         request_id = f"request-{uuid4().hex}"
         generation_id = f"generation-{uuid4().hex}"
@@ -167,7 +176,9 @@ class GenerationService:
             )
         )
         if existing is not None:
-            if existing.retry_of_request_id != data.failed_request_id:
+            original = db.get(models.ChatResponseRequest, existing.retry_of_request_id)
+            inherited_exclusion = bool(original and json.loads(original.node_state_json).get("_image_excluded"))
+            if existing.retry_of_request_id != data.failed_request_id or bool(json.loads(existing.node_state_json).get("_image_excluded")) != (data.exclude_attachment or inherited_exclusion):
                 raise MessageValidationError("retry_idempotency_conflict")
             message = db.get(models.MessageMessage, existing.user_message_id)
             if message is None:
@@ -205,6 +216,15 @@ class GenerationService:
         )
         if later_user_message is not None:
             raise MessageValidationError("latest_retryable_response_required")
+        prior_metadata = json.loads(prior.node_state_json)
+        exclude_image = data.exclude_attachment or bool(prior_metadata.get("_image_excluded"))
+        if data.exclude_attachment and not prior_metadata.get("_image_excluded"):
+            if (prior_metadata.get("failure_class") != "image_interpretation_unavailable"
+                or not message.content.strip() or self.images is None
+                or self.images.existing_asset(db, message.id) is None):
+                raise MessageValidationError("image_text_only_recovery_unavailable")
+        if self.images and not exclude_image:
+            self.images.reserve_retry(db, user.id, thread.id, message.id)
         selected_model = self.thread_service.resolve_world_thread_response_model(
             db, user, thread
         )
@@ -223,7 +243,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
-                request_metadata=self._request_names(db, user, thread),
+                request_metadata={**self._request_names(db, user, thread), "_image_excluded": exclude_image},
             )
         )
         db.commit()
@@ -312,6 +332,7 @@ class GenerationService:
             if record.committed_assistant_message_id is None
             else db.get(models.MessageMessage, record.committed_assistant_message_id)
         )
+        image_state = self.images.state(db, user_message, record) if self.images else "none"
         return schemas.WorldChatGenerationRequestRead(
             request_id=record.request_id,
             request_scope_hash=record.request_scope_hash,
@@ -326,6 +347,8 @@ class GenerationService:
                 None if record.terminal_reason is None else record.terminal_reason.value
             ),
             last_accepted_sequence=record.last_emitted_sequence,
+            image_analysis_state=image_state,
+            can_retry_without_image=image_state == "failed" and bool(user_message.content.strip()) and record.retryable,
             user_message=schemas.MessageMessageRead.model_validate(user_message),
             assistant_message=None
             if assistant is None
@@ -347,6 +370,10 @@ class GenerationService:
         reason: ResponseTerminalReason,
     ) -> AsyncIterator[GenerationEvent]:
         lifecycle = SqlAlchemyResponseLifecycleRepository(db)
+        record = lifecycle.get_request(record.request_id)
+        if record.state in TERMINAL_STATES:
+            yield self._terminal_event(record)
+            return
         now = datetime.now(UTC)
         record = lifecycle.acquire_lease(
             request_id=record.request_id,
@@ -363,6 +390,9 @@ class GenerationService:
         record = SqlAlchemyResponseLifecycleRepository(db).get_request(
             record.request_id
         )
+        if record.state in TERMINAL_STATES:
+            yield self._terminal_event(record)
+            return
         failed = self._event(
             record,
             GenerationEventType.FAILED,
@@ -510,6 +540,27 @@ class GenerationService:
             purpose=base_material.purpose,
             _secret=base_material.reveal(),
         )
+        image_observation = None
+        if self.images is not None and not record.node_state.get("_image_excluded"):
+            try:
+                remaining = max(0.1, (record.deadline_at - datetime.now(UTC)).total_seconds())
+                async with asyncio.timeout(remaining):
+                    image_observation = await self.images.observation(db, user.id, thread.id, message.id)
+                self._mutation_thread(db, user, world_id, thread_id)
+                record = repository.get_request(request_id)
+                if record.state in TERMINAL_STATES:
+                    yield self._terminal_event(record)
+                    return
+                if record.state is not ResponseRequestState.ACCEPTED:
+                    raise MessageValidationError("chat_request_changed_during_analysis")
+            except Exception:
+                async for event in self._fail_before_workflow(db, record,
+                    failure_class="image_interpretation_unavailable", retryable=True,
+                    reason=ResponseTerminalReason.RETRIEVAL_FAILURE):
+                    yield event
+                return
+        message_context = self.images.message_context(message.content, image_observation) if self.images else message.content
+        image_evidence = self.images.evidence(user.id, thread.id, image_observation) if self.images else None
         execution = self.workflows.build(
             db,
             material,
@@ -521,7 +572,7 @@ class GenerationService:
         character_labels = execution.character_labels
         workflow = execution.workflow
         router_context, response_context = _recent_context(
-            db, thread.id, exclude_message_id=message.id
+            db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id
         )
         today_sns_snapshot = None
         world = get_character_entry_world(db, world_id)
@@ -553,7 +604,8 @@ class GenerationService:
                 requester_world_character_id=thread.requester_world_character_id or "",
                 responding_world_character_id=thread.responding_world_character_id
                 or "",
-                user_message=message.content,
+                user_message=message_context,
+                image_context=image_evidence.context if image_evidence else None,
             ),
             profile=profiles._response_profile(responding_character),
             router_context=router_context,
@@ -561,7 +613,8 @@ class GenerationService:
             character_labels=character_labels,
             today_sns_snapshot=today_sns_snapshot,
             graph_projection_enabled=runtime_settings.graph_projection_enabled,
-            name_binding_validator=lambda: self._validate_request_names(db, user, thread, record),
+            name_binding_validator=lambda: self._validate_request_input(db, user, thread, record, message.id, image_evidence),
+            image_evidence=image_evidence,
         )
         async for event in workflow.run(command):
             yield event
@@ -570,9 +623,15 @@ class GenerationService:
         self.workflows.assert_names_current(db, record.node_state, owner_id=user.id,
             world_id=thread.world_id, actor_id=thread.responding_world_character_id)
 
+    def _validate_request_input(self, db, user, thread, record, message_id, evidence):
+        self._mutation_thread(db, user, thread.world_id, thread.id)
+        self._validate_request_names(db, user, thread, record)
+        if self.images:
+            self.images.assert_current(db, user.id, thread.id, message_id, evidence)
+
 
 def _recent_context(
-    db: Session, thread_id: str, *, exclude_message_id: int
+    db: Session, thread_id: str, *, exclude_message_id: int, images=None, owner_id=None
 ) -> tuple[
     tuple[RetrievalRouterContextMessage, ...],
     tuple[CharacterResponseContextMessage, ...],
@@ -584,22 +643,25 @@ def _recent_context(
         limit=RESPONSE_CONTEXT_MESSAGE_LIMIT,
     )
     selected: list[models.MessageMessage] = []
+    contents = {}
     chars = 0
     for row in reversed(rows):
-        if chars + len(row.content) > RESPONSE_CONTEXT_CHAR_LIMIT:
+        content = images.previous_context(db, owner_id, thread_id, row) if images else row.content
+        if not content.strip() or chars + len(content) > RESPONSE_CONTEXT_CHAR_LIMIT:
             continue
         selected.append(row)
-        chars += len(row.content)
+        contents[row.id] = content
+        chars += len(content)
     selected.reverse()
     router = tuple(
         (
-            RetrievalRouterContextMessage(role=row.role, content=row.content)
+            RetrievalRouterContextMessage(role=row.role, content=contents[row.id])
             for row in selected
         )
     )
     response = tuple(
         (
-            CharacterResponseContextMessage(role=row.role, content=row.content)
+            CharacterResponseContextMessage(role=row.role, content=contents[row.id])
             for row in selected
         )
     )

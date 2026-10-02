@@ -166,11 +166,18 @@ def _quarantine_account_private_media(
     paths = [media_root / "characters" / character_id for character_id in character_ids]
     paths.extend(media_root / "drafts" / draft_id for draft_id in draft_ids)
     paths.append(media_root / "profile-candidates" / user_id)
+    from app.runtime.media.privacy import private_paths
+    paths.extend(private_paths(db, media_root / "private-image-assets", owner_id=user_id, character_ids=character_ids))
     return profile_media.quarantine_private_media(paths)
 
 def _ensure_account_deletion_not_busy(
     db: Session, user_id: str, character_ids: list[str]
 ) -> None:
+    from app.domains.media.models import ImageInterpretation
+    if db.scalar(select(_model_PostImageGenerationJob.id).where(_model_PostImageGenerationJob.user_id == user_id,
+        _model_PostImageGenerationJob.status == "running").limit(1)) is not None or db.scalar(select(ImageInterpretation.id).where(
+            ImageInterpretation.owner_id == user_id, ImageInterpretation.status == "running").limit(1)) is not None:
+        raise AccountDeletionBusyError("Image request is running")
     active_run_id = db.scalar(
         select(_model_AgentRun.id)
         .where(

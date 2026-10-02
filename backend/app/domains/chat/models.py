@@ -270,6 +270,24 @@ class MessageMessage(Base):
     )
 
     thread: Mapped[MessageThread] = relationship(back_populates="messages")
+    attachment: Mapped[Optional["MessageAttachment"]] = relationship(back_populates="message", uselist=False)
+
+
+class MessageAttachment(Base):
+    __tablename__ = "message_attachments"
+    message_id: Mapped[int] = mapped_column(ForeignKey("message_messages.id"), primary_key=True)
+    asset_id: Mapped[str] = mapped_column(ForeignKey("media_assets.id"), nullable=False, unique=True)
+    interpretation_id: Mapped[str | None] = mapped_column(ForeignKey("image_interpretations.id"))
+    snapshot_json: Mapped[str | None] = mapped_column(Text)
+    message: Mapped[MessageMessage] = relationship(back_populates="attachment")
+
+    @property
+    def url(self):
+        return f"/api/v1/media/assets/{self.asset_id}/content"
+
+    @property
+    def analysis_state(self):
+        return "recognized" if self.snapshot_json else "pending"
 
 
 class ChatResponseRequest(Base):

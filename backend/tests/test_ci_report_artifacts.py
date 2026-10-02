@@ -43,6 +43,21 @@ def test_artifact_paths_cannot_expand_or_become_dynamic(path):
     assert errors(step)
 
 
+@pytest.mark.parametrize("path", [
+    "artifacts/", "artifacts/image-integration/browser/",
+    "artifacts/image-integration/browser/**", "artifacts/image-integration/browser/**/*.sqlite3",
+    "artifacts/image-integration/browser/**/response.json",
+    "artifacts/image-integration/browser/**/stdout.txt",
+])
+def test_image_failure_reports_reject_extra_files_and_directories(path):
+    step = report("frontend")
+    assert errors(step, job="frontend") == []
+    step["with"]["path"] += "\n" + path
+    assert errors(step, job="frontend") == [
+        "raw artifact upload is limited to the installer or exact Core test reports"
+    ]
+
+
 @pytest.mark.parametrize("mutation", ["action", "ignore_missing", "extra_option", "condition", "job", "workflow", "duplicate"])
 def test_report_exception_keeps_action_job_and_failure_limits(mutation):
     step = deepcopy(report("backend"))

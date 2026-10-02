@@ -25,7 +25,12 @@ const upstream = createServer(async (request, response) => {
     sha256: digest.digest("hex"),
   };
   received.push(entry);
-  response.writeHead(200, { "content-type": "application/json" });
+  response.writeHead(200, { "content-type": "application/json",
+    ...(request.url.includes("/card-source") ? {
+      "cache-control": "private, no-store", "x-content-type-options": "nosniff",
+      "x-private-diagnostic": "must-not-be-forwarded",
+    } : {}),
+  });
   response.end(JSON.stringify(entry));
 });
 upstream.listen(0, "127.0.0.1");
@@ -64,6 +69,12 @@ try {
   await forwarded(cardPath, payload(1_911_730), { chunked: true });
   await rejected(cardPath, payload(cardLimit + 1), { chunked: true });
   await forwarded(cardPath + "?source=card", sakanaSized);
+  const summary = await fetch(base + "/api/backend/agents/drafts/draft-test/card-source?include_document=false");
+  assert.equal(summary.status, 200);
+  assert.equal(summary.headers.get("cache-control"), "private, no-store");
+  assert.equal(summary.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(summary.headers.get("x-private-diagnostic"), null);
+  assert.equal((await summary.json()).path, "/api/v1/agents/drafts/draft-test/card-source?include_document=false");
   const beforeTrailingSlash = received.length;
   const trailingSlash = await proxyFetch(cardPath + "/", sakanaSized, { redirect: "manual" });
   assert.ok([307, 308].includes(trailingSlash.status));

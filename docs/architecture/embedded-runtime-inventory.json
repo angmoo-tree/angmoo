@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "c78df67a4c6d15fb314b98d884388564a6e1d7c1c878ba48cf139f04ca54d9c0"
+      "sha256": "eca43dacec07864576c11d36c73de31251c311550ce7d82cc45931c0ef6c3aee"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -47,6 +47,7 @@
         "fastapi>=0.141.1",
         "google-auth[requests]>=2.40.0",
         "google-genai>=2.17.0",
+        "httpx>=0.28.1,<1",
         "ladybug==0.19.1",
         "langchain-core>=1.0.0",
         "langgraph-checkpoint-sqlite>=3.0,<4",
@@ -55,9 +56,10 @@
         "oci>=2.175.0",
         "pillow>=12.0.0",
         "pydantic-settings>=2.12.0",
-        "pypdf>=6.16.1",
+        "pypdf>=6.19.0",
         "python-docx>=1.2.0",
         "python-multipart>=0.0.30",
+        "sentencepiece>=0.2.1",
         "sqlalchemy>=2.0.51",
         "tzdata>=2026.2",
         "uvicorn>=0.52.1",
@@ -91,7 +93,7 @@
     "frontend": {
       "dependencies": {
         "lucide-react": "^1.29.0",
-        "next": "16.3.3",
+        "next": "16.3.6",
         "react": "19.2.8",
         "react-dom": "19.2.8"
       },
@@ -101,7 +103,7 @@
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
-        "eslint-config-next": "16.3.3",
+        "eslint-config-next": "16.3.6",
         "tailwindcss": "^4",
         "typescript": "^5"
       },
@@ -292,7 +294,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "c78df67a4c6d15fb314b98d884388564a6e1d7c1c878ba48cf139f04ca54d9c0",
+      "source_sha256": "eca43dacec07864576c11d36c73de31251c311550ce7d82cc45931c0ef6c3aee",
       "transition_pr": "ER4 PR J"
     },
     {

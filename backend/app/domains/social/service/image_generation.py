@@ -40,6 +40,8 @@ async def prepare_post_image(
     setting = workflows.get_image_generation_setting(db, character.id)
     if setting is None:
         return _skipped("no_image_key")
+    if getattr(setting, "generation_provider", None) is not None:
+        return _skipped("new_image_provider_selected")
     key_source = _image_key_source(setting)
     model = _image_model_for_key_source(setting, key_source, workflows=workflows, db=db)
     provider = "replicate" if image_provider.is_replicate_model(model) else "pollinations"
@@ -521,6 +523,8 @@ async def prepare_local_api_post_image(
 
 def _image_key_source(setting: ImageSetting | None) -> str:
     if setting is None:
+        return "disabled"
+    if getattr(setting, "generation_provider", None) is not None:
         return "disabled"
     mode = (getattr(setting, "image_key_mode", "") or "").strip()
     if mode in {"service", "user", "disabled"}:

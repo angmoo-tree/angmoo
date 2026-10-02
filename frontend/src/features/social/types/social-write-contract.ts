@@ -1,3 +1,4 @@
+import type { PostMediaRead } from "./social-feed-contract";
 export type SocialOwnerActor = {
   world_character_id: string;
   world_id: string;
@@ -8,6 +9,7 @@ export type SocialOwnerActor = {
 };
 
 export type ManualSocialPostRead = {
+  media?: PostMediaRead[];
   thread_root_post_id?: string | null;
   id: string;
   world_id: string;

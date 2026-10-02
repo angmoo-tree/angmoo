@@ -1,4 +1,6 @@
 "use client";
+import { InterpretationSettingsPanel } from "@/features/media/components/interpretation-settings";
+import { ImageUsageSettingsPanel } from "@/features/media/components/usage-settings";
 
 import { generationProfileValue } from "@/config/generation-profiles";
 import {
@@ -439,6 +441,8 @@ export function SettingsClient() {
           </div>
         </Card>
 
+      <ImageUsageSettingsPanel />
+      <InterpretationSettingsPanel />
         <Card as="section" className={`${styles.sectionCard} ${styles.dangerCard}`}>
           <div className={styles.sectionHeading}>
             <span className={`${styles.sectionIcon} ${styles.dangerIcon}`} aria-hidden="true">

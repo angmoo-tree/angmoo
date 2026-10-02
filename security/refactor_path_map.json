@@ -2100,7 +2100,11 @@
     "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-False-writer_error]",
     "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[True-writer_error]": "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[False-True-writer_error]",
     "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits": "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits[medium-False]",
-    "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources": "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[--add-data $sqliteDeltaData]"
+    "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources": "tests/test_l3_er6_installer_supply_chain.py::test_installer_contract_rejects_missing_frozen_migration_resources[--add-data $sqliteDeltaData]",
+    "tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected",
+    "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/gif-GIF89a]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[unsupported-gif]",
+    "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/jpeg-\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x18\\x00\\x00\\x00\\x10\\x08\\x02\\x00\\x00\\x00\\x83F(\\xc2\\x00\\x00\\x00#IDATx\\x9ccd`\\xf8\\xcf@\\r\\xc0D\\x15S\\x18F\\r\"\\x06\\x8c\\x066a0\\x1aF\\x84\\xc1\\xe0\\x0b#\\x00\\xd6?\\x01\\x1f\\xdc\\x1c\\xcd\\xeb\\x00\\x00\\x00\\x00IEND\\xaeB`\\x82]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[mismatched-png-as-jpeg]",
+    "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[image/png-fake]": "tests/image_integration/test_assets_privacy.py::test_spoofed_and_unsupported_image_types_are_rejected[invalid-png-bytes]"
   },
   "details": {
     "AR-B1": {
@@ -137210,7 +137214,8 @@
     "backend/tests/test_langgraph_resident_engine.py::test_writer_split_call_budget_allows_json_retry_worst_case": "backend/tests/integrations/test_direct_llm.py::test_writer_split_call_budget_allows_json_retry_worst_case",
     "backend/tests/test_langgraph_resident_engine.py::test_direct_llm_rate_limiter_waits_instead_of_failing": "backend/tests/integrations/test_direct_llm.py::test_direct_llm_rate_limiter_waits_instead_of_failing",
     "backend/tests/test_langgraph_resident_engine.py::test_writing_composition_stream_params_omit_sampling_parameters": "backend/tests/routines/test_writing_parameters.py::test_writing_composition_stream_params_omit_sampling_parameters",
-    "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback"
+    "backend/tests/memory/test_episode_runtime_restart.py::test_opt_in_runtime_start_shutdown_restart_and_legacy_rollback": "backend/tests/memory/test_episode_runtime_restart.py::test_default_episode_runtime_start_shutdown_restart_and_legacy_rollback",
+    "backend/tests/integrations/test_character_cards.py::test_duplicate_metadata_and_json_keys_rejected": "backend/tests/integrations/test_character_cards.py::test_duplicate_json_keys_rejected"
   },
   "retired_model_facades": {
     "app.models.auth": "app.domains.identity.models",

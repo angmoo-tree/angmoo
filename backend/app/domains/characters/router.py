@@ -150,7 +150,19 @@ def adopt_agent_draft(draft_id: str, data: schemas.AgentCreationDraftAdopt,
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/drafts/{draft_id}/card")
+def _card_parse_error_detail(code: str) -> str:
+    if code in {"card_file_size_limit", "card_json_too_large", "card_png_text_too_large", "card_image_too_large"}:
+        return "카드 파일 또는 저장된 정보가 크기 제한을 넘었습니다. 20MiB 이하의 PNG 또는 JSON을 선택해주세요."
+    if code in {"card_png_crc_mismatch", "card_truncated_png", "card_invalid_png_chunks", "card_invalid_png_header", "card_invalid_png_end", "card_invalid_png_text", "card_invalid_image"}:
+        return "카드 PNG 데이터가 손상되어 읽을 수 없습니다. 원본 파일을 다시 확인해주세요."
+    if code == "card_metadata_missing":
+        return "이 PNG에 캐릭터 카드 정보가 없습니다. 카드 PNG 또는 JSON 원본을 선택해주세요."
+    if code in {"card_unsupported_version", "card_metadata_version_mismatch"}:
+        return "지원하는 캐릭터 카드 형식이 아닙니다. V1·V2 또는 V3 공통 형식의 원본을 확인해주세요."
+    return "카드에 저장된 캐릭터 정보를 읽을 수 없습니다. 원본 카드를 확인해주세요."
+
+
+@router.post("/drafts/{draft_id}/card", response_model=schemas.CharacterCardImportRead)
 def import_character_card(draft_id: str, data: schemas.CharacterCardUpload,
                           db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user),
                           workflows: CreatorWorkflows = Depends(get_creator_workflows)):
@@ -161,12 +173,20 @@ def import_character_card(draft_id: str, data: schemas.CharacterCardUpload,
     try:
         content = base64.b64decode(data.data_base64, validate=True)
         return import_card(db, user, draft_id, revision=data.revision, content=content, workflows=workflows)
+    except errors.AgentCreationDraftExpiredError as exc:
+        raise HTTPException(status_code=410, detail="초안의 보관 기간이 지났습니다. 새 초안을 만들어주세요.") from exc
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Draft not found") from exc
     except errors.AgentCreationDraftHandleConflictError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-    except (CardParseError, binascii.Error, errors.AgentCreationDraftValidationError, MediaValidationError) as exc:
-        raise HTTPException(status_code=422, detail="카드를 읽을 수 없습니다. 형식·크기와 편집 상태를 확인해주세요.") from exc
+    except CardParseError as exc:
+        raise HTTPException(status_code=422, detail=_card_parse_error_detail(str(exc))) from exc
+    except binascii.Error as exc:
+        raise HTTPException(status_code=422, detail="전송된 카드 파일을 읽을 수 없습니다. 원본 파일을 다시 선택해주세요.") from exc
+    except errors.AgentCreationDraftValidationError as exc:
+        raise HTTPException(status_code=422, detail="현재 초안에 카드를 가져올 수 없습니다. 초안 상태를 확인해주세요.") from exc
+    except MediaValidationError as exc:
+        raise HTTPException(status_code=422, detail="카드의 표시 이미지를 준비하지 못했습니다. 원본 PNG를 확인해주세요.") from exc
 
 
 @router.post("/drafts/{draft_id}/copy-settings", response_model=schemas.AgentCreationDraftRead)
@@ -184,14 +204,19 @@ def copy_character_settings(draft_id: str, data: schemas.CharacterSettingsCopy,
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/drafts/{draft_id}/card-source")
-def read_character_card_source(draft_id: str, db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user)):
+@router.get("/drafts/{draft_id}/card-source", response_model=schemas.CharacterCardSourceRead)
+def read_character_card_source(draft_id: str, include_document: bool = True,
+                               db: Session = Depends(get_db), user: CharacterOwner = Depends(get_current_user)):
     from app.domains.characters.service.card_import import read_source
     from fastapi.responses import JSONResponse
+    from app.integrations.character_cards.parser import CardParseError
     try:
-        return JSONResponse(read_source(db, user, draft_id), headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
+        result = schemas.CharacterCardSourceRead.model_validate(read_source(db, user, draft_id, include_document=include_document))
+        return JSONResponse(result.model_dump(mode="json"), headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Card source not found") from exc
+    except CardParseError as exc:
+        raise HTTPException(status_code=422, detail=_card_parse_error_detail(str(exc))) from exc
 
 def _raise_demo_account_locked(exc: Exception) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc

@@ -51,6 +51,7 @@ class CanonicalRetrievalCommand:
     call_tracker: Mapping[str, Any]
     workflow_dependency: WorkflowDependencyBinding | None = None
     call_id: str | None = None
+    image_context: str | None = None
 
     def __post_init__(self) -> None:
         if not self.user_message.strip() or len(self.user_message) > 4_000:
@@ -306,6 +307,7 @@ class CanonicalRetrievalPlanningService:
             envelope_version=command.resolved.version,
             envelope_hash=command.resolved.envelope_hash,
             user_message=command.user_message,
+            image_context=command.image_context,
             intent=command.intent.intent,
             entities=tuple(
                 CanonicalPlannerEntity(

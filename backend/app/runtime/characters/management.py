@@ -676,6 +676,8 @@ def _quarantine_agent_private_media(
         media_root / "profile-candidates" / user_id / candidate_id
         for candidate_id in candidate_ids
     )
+    from app.runtime.media.privacy import private_paths
+    paths.extend(private_paths(db, media_root / "private-image-assets", character_ids=[character_id]))
     return media_files.quarantine_private_media(paths)
 
 def _activity_profile_readiness(
@@ -772,6 +774,15 @@ def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: s
 def _ensure_agent_deletion_not_busy(
     db: Session, *, user_id: str, character_id: str
 ) -> None:
+    from app.domains.social.models.posts import PostImageGenerationJob
+    from app.domains.media.models import ImageInterpretation
+    from app.runtime.media.privacy import _scope
+    _, assets = _scope(db, [character_id], None)
+    if db.scalar(select(PostImageGenerationJob.id).where(
+        PostImageGenerationJob.character_id == character_id,
+        PostImageGenerationJob.status == "running").limit(1)) is not None or db.scalar(select(ImageInterpretation.id).where(
+            ImageInterpretation.asset_id.in_(assets), ImageInterpretation.status == "running").limit(1)) is not None:
+        raise ActiveSlotBusyError("이미지 요청이 처리 중입니다. 잠시 뒤 다시 시도해주세요.")
     active_run_id = db.scalar(
         select(_model_AgentRun.id)
         .where(

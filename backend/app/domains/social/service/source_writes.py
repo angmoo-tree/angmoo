@@ -22,11 +22,12 @@ from app.domains.social.utils.source_writes import _request_hash
 
 
 class SocialSourceWriteService:
-    def __init__(self, session: Session, *, timeline: SocialTimelineService, references: SourceWriteReferences, failure_injector: Callable[[str], None] | None = None) -> None:
+    def __init__(self, session: Session, *, timeline: SocialTimelineService, references: SourceWriteReferences, failure_injector: Callable[[str], None] | None = None, attachments=None) -> None:
         self._session = session
         self._timeline = timeline
         self._references = references
         self._failure_injector = failure_injector
+        self._attachments = attachments
 
 
     def create_owner_post(self, command: OwnerPostCommand) -> SocialWriteResult:
@@ -38,7 +39,7 @@ class SocialSourceWriteService:
         )
         request_sha = _request_hash(
             operation="post",
-            payload={"title": command.title, "body": command.body},
+            payload={"title": command.title, "body": command.body, **({"attachment_asset_id": command.attachment_asset_id} if command.attachment_asset_id else {})},
         )
         existing = _existing_write(
             db,
@@ -67,6 +68,10 @@ class SocialSourceWriteService:
             post = db.get(models.Post, created.id)
             if post is None:
                 raise SocialWriteConflictError("manual_post_missing")
+            if command.attachment_asset_id:
+                if self._attachments is None:
+                    raise SocialWriteConflictError("image_runtime_unavailable")
+                self._attachments.attach(db, post, command.current_user_id, command.attachment_asset_id)
             self._fail("after_source_post")
             self._references.record_source_event(
                 world_id=command.world_id,
@@ -432,6 +437,7 @@ def _autonomous_reply_target(
 
 
 def _post_snapshot(references: SourceWriteReferences, post: models.Post) -> SocialPostSnapshot:
+    from app.domains.social.service.post_attachments import media_view
     if post.world_id is None or post.author_world_character_id is None:
         raise SocialWriteConflictError("world_post_scope_missing")
     author = references.get_world_character(post.author_world_character_id)
@@ -442,6 +448,7 @@ def _post_snapshot(references: SourceWriteReferences, post: models.Post) -> Soci
         author_name=post.author_name,
         title=post.title,
         body=post.body,
+        media=tuple(media_view(row) for row in post.media),
         post_type=post.post_type,
         reply_to_post_id=post.reply_to_post_id,
         created_at=post.created_at,

@@ -1,4 +1,5 @@
 "use client";
+import { GenerationSettingsPanel } from "@/features/media/components/generation-settings";
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 
 import { generationProfileLabel } from "@/config/generation-profiles";
@@ -1201,6 +1202,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         ) : (
           <div className="px-5 py-7 md:px-9">
             {activeTab === "status" ? <StatusTab agent={agent} /> : null}
+            {activeTab === "settings" ? <GenerationSettingsPanel key={characterId} characterId={characterId} /> : null}
 
             {activeTab === "settings" && agent.activity_profile_readiness.world_id && agent.activity_profile_readiness.world_character_id ? (
               <RecommendationTopicsPanel

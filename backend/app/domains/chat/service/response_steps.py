@@ -271,6 +271,7 @@ class ResponseWorkflowSteps:
         result = await self._canonical.plan_and_execute(
             CanonicalRetrievalCommand(
                 user_message=command.preflight.user_message,
+                image_context=command.preflight.image_context,
                 thread_id=record.thread_id,
                 intent=routing.intent,
                 resolved=routing.resolved,
@@ -310,6 +311,7 @@ class ResponseWorkflowSteps:
         result = await self._graph.plan_and_execute(
             GraphRetrievalCommand(
                 user_message=command.preflight.user_message,
+                image_context=command.preflight.image_context,
                 intent=routing.intent,
                 resolved=routing.resolved,
                 call_tracker=routing.call_tracker,
@@ -350,6 +352,7 @@ class ResponseWorkflowSteps:
         result = await self._both.coordinate(
             BothRetrievalCommand(
                 user_message=command.preflight.user_message,
+                image_context=command.preflight.image_context,
                 thread_id=record.thread_id,
                 intent=routing.intent,
                 resolved=routing.resolved,
@@ -413,6 +416,7 @@ class ResponseWorkflowSteps:
             command.today_sns_snapshot,
             user_message=command.preflight.user_message,
         )
+        bundle = self._evidence.with_image(bundle, command.image_evidence)
         evidence_lineage("freeze", bundle.items)
         record = self._transition(
             record,

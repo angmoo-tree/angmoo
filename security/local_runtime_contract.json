@@ -56,6 +56,13 @@
     },
     {
       "disposition": "keep",
+      "module": "app.core.image_bytes",
+      "owner_stage": "AR-IMAGE-PUBLISH-BOUNDARIES",
+      "removal_condition": null,
+      "reason": "Shared bounded byte/signature/MIME/pixel inspection for domain validation and provider transport. This leaf owns no domain error, settings, credentials, persistence, authorization or provider call; callers translate errors at their boundary."
+    },
+    {
+      "disposition": "keep",
       "module": "app.core.image_generation",
       "owner_stage": "AR-B8",
       "removal_condition": null,

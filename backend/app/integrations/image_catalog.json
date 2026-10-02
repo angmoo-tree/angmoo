@@ -1,0 +1,915 @@
+{
+  "captured_at": "2026-09-30T04:23:24.4440288Z",
+  "models": {
+    "nanogpt:krea-v2/turbo": {
+      "payload": {
+        "id": "krea-v2/turbo",
+        "endpoints": [
+          {
+            "provider_name": "Krea",
+            "provider_slug": "krea",
+            "provider_tag": null,
+            "supported_parameters": {
+              "resolutions": [
+                "1k",
+                "2k"
+              ],
+              "aspect_ratio": [
+                "1:1",
+                "4:3",
+                "3:4",
+                "3:2",
+                "2:3",
+                "16:9",
+                "9:16",
+                "2:1",
+                "1:2"
+              ],
+              "max_images": 4,
+              "max_output_images": 4,
+              "max_input_images": 1,
+              "input_image_constraints": {
+                "max_items": 1,
+                "route": {
+                  "min_width": 8,
+                  "min_height": 8,
+                  "max_width": 16384,
+                  "max_height": 16384,
+                  "max_bytes": 31457280,
+                  "formats": [
+                    "png",
+                    "jpeg",
+                    "webp"
+                  ],
+                  "source": "route-preflight",
+                  "note": "NanoGPT route-level validation before provider submission."
+                }
+              }
+            },
+            "allowed_passthrough_parameters": [],
+            "supports_streaming": false,
+            "pricing": [
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.01,
+                "currency": "USD",
+                "resolution": "1k"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.02,
+                "currency": "USD",
+                "resolution": "2k"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.01,
+                "currency": "USD",
+                "resolution": "auto"
+              }
+            ],
+            "public_pricing": {
+              "per_image": {
+                "1k": 0.01,
+                "2k": 0.02,
+                "auto": 0.01
+              },
+              "currency": "USD"
+            },
+            "input_reference_constraints": {
+              "max_items": 1,
+              "route": {
+                "min_width": 8,
+                "min_height": 8,
+                "max_width": 16384,
+                "max_height": 16384,
+                "max_bytes": 31457280,
+                "formats": [
+                  "png",
+                  "jpeg",
+                  "webp"
+                ],
+                "source": "route-preflight",
+                "note": "NanoGPT route-level validation before provider submission."
+              }
+            },
+            "capabilities": {
+              "image_generation": true,
+              "image_to_image": true,
+              "inpainting": false,
+              "nsfw": false
+            }
+          }
+        ]
+      },
+      "url": "https://api.nano-gpt.com/api/v1/images/models/krea-v2/turbo/endpoints"
+    },
+    "nanogpt:z-image-turbo": {
+      "payload": {
+        "id": "z-image-turbo",
+        "endpoints": [
+          {
+            "provider_name": "Alibaba",
+            "provider_slug": "alibaba",
+            "provider_tag": null,
+            "supported_parameters": {
+              "resolutions": [
+                "256*256",
+                "512*512",
+                "768*768",
+                "1024*1024",
+                "1280*720",
+                "720*1280",
+                "1536*1024",
+                "1024*1536",
+                "1536*1536"
+              ],
+              "max_images": 4,
+              "max_output_images": 4
+            },
+            "allowed_passthrough_parameters": [],
+            "supports_streaming": false,
+            "pricing": [
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "256*256"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "512*512"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "768*768"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "1024*1024"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "1280*720"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "720*1280"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "1536*1024"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "1024*1536"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.0119,
+                "currency": "USD",
+                "resolution": "1536*1536"
+              }
+            ],
+            "public_pricing": {
+              "per_image": {
+                "256*256": 0.0119,
+                "512*512": 0.0119,
+                "768*768": 0.0119,
+                "1024*1024": 0.0119,
+                "1280*720": 0.0119,
+                "720*1280": 0.0119,
+                "1536*1024": 0.0119,
+                "1024*1536": 0.0119,
+                "1536*1536": 0.0119
+              },
+              "currency": "USD"
+            },
+            "capabilities": {
+              "image_generation": true,
+              "image_to_image": false,
+              "inpainting": false,
+              "nsfw": false
+            }
+          }
+        ]
+      },
+      "url": "https://api.nano-gpt.com/api/v1/images/models/z-image-turbo/endpoints"
+    },
+    "nanogpt:nano-banana-2": {
+      "payload": {
+        "id": "nano-banana-2",
+        "endpoints": [
+          {
+            "provider_name": "Gemini",
+            "provider_slug": "gemini",
+            "provider_tag": null,
+            "supported_parameters": {
+              "resolutions": [
+                "1k",
+                "2k",
+                "4k"
+              ],
+              "aspect_ratio": [
+                "auto",
+                "1:1",
+                "3:2",
+                "2:3",
+                "3:4",
+                "4:3",
+                "4:5",
+                "5:4",
+                "9:16",
+                "16:9",
+                "21:9"
+              ],
+              "max_images": 4,
+              "max_output_images": 4,
+              "max_input_images": 14,
+              "input_image_constraints": {
+                "max_items": 14,
+                "route": {
+                  "min_width": 8,
+                  "min_height": 8,
+                  "max_width": 16384,
+                  "max_height": 16384,
+                  "max_bytes": 31457280,
+                  "formats": [
+                    "png",
+                    "jpeg",
+                    "webp"
+                  ],
+                  "source": "route-preflight",
+                  "note": "NanoGPT route-level validation before provider submission."
+                }
+              }
+            },
+            "allowed_passthrough_parameters": [],
+            "supports_streaming": false,
+            "pricing": [
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.08,
+                "currency": "USD",
+                "resolution": "1k"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.12,
+                "currency": "USD",
+                "resolution": "2k"
+              },
+              {
+                "billable": "output_image",
+                "unit": "image",
+                "cost_usd": 0.16,
+                "currency": "USD",
+                "resolution": "4k"
+              }
+            ],
+            "public_pricing": {
+              "per_image": {
+                "1k": 0.08,
+                "2k": 0.12,
+                "4k": 0.16
+              },
+              "currency": "USD"
+            },
+            "input_reference_constraints": {
+              "max_items": 14,
+              "route": {
+                "min_width": 8,
+                "min_height": 8,
+                "max_width": 16384,
+                "max_height": 16384,
+                "max_bytes": 31457280,
+                "formats": [
+                  "png",
+                  "jpeg",
+                  "webp"
+                ],
+                "source": "route-preflight",
+                "note": "NanoGPT route-level validation before provider submission."
+              }
+            },
+            "capabilities": {
+              "image_generation": true,
+              "image_to_image": true,
+              "inpainting": false,
+              "nsfw": false
+            }
+          }
+        ]
+      },
+      "url": "https://api.nano-gpt.com/api/v1/images/models/nano-banana-2/endpoints"
+    },
+    "openrouter:krea/krea-2-medium-turbo": {
+      "payload": {
+        "id": "krea/krea-2-medium-turbo",
+        "endpoints": [
+          {
+            "provider_name": "Krea",
+            "provider_slug": "krea",
+            "provider_tag": "krea",
+            "supported_parameters": {
+              "resolution": {
+                "type": "enum",
+                "values": [
+                  "1K"
+                ]
+              },
+              "aspect_ratio": {
+                "type": "enum",
+                "values": [
+                  "1:1",
+                  "4:3",
+                  "3:2",
+                  "16:9",
+                  "4:5",
+                  "2:3",
+                  "9:16"
+                ]
+              },
+              "input_references": {
+                "type": "range",
+                "min": 0,
+                "max": 1
+              },
+              "seed": {
+                "type": "boolean"
+              }
+            },
+            "allowed_passthrough_parameters": [
+              "image_style_references",
+              "moodboards",
+              "styles",
+              "creativity",
+              "intensity",
+              "complexity",
+              "movement",
+              "strength"
+            ],
+            "supports_streaming": false,
+            "pricing": []
+          }
+        ]
+      },
+      "url": "https://openrouter.ai/api/v1/images/models/krea/krea-2-medium-turbo/endpoints"
+    },
+    "openrouter:google/gemini-3.1-flash-image": {
+      "payload": {
+        "id": "google/gemini-3.1-flash-image",
+        "endpoints": [
+          {
+            "provider_name": "Google AI Studio",
+            "provider_slug": "google-ai-studio",
+            "provider_tag": "google-ai-studio",
+            "supported_parameters": {
+              "resolution": {
+                "type": "enum",
+                "values": [
+                  "512",
+                  "1K",
+                  "2K",
+                  "4K"
+                ]
+              },
+              "aspect_ratio": {
+                "type": "enum",
+                "values": [
+                  "1:1",
+                  "1:4",
+                  "1:8",
+                  "2:3",
+                  "3:2",
+                  "3:4",
+                  "4:1",
+                  "4:3",
+                  "4:5",
+                  "5:4",
+                  "8:1",
+                  "9:16",
+                  "16:9",
+                  "21:9"
+                ]
+              },
+              "n": {
+                "type": "range",
+                "min": 1,
+                "max": 1
+              },
+              "input_references": {
+                "type": "range",
+                "min": 0,
+                "max": 14
+              }
+            },
+            "allowed_passthrough_parameters": [
+              "cachedContent"
+            ],
+            "supports_streaming": false,
+            "pricing": [
+              {
+                "billable": "output_image",
+                "unit": "token",
+                "cost_usd": 6E-05
+              }
+            ]
+          },
+          {
+            "provider_name": "Google Vertex",
+            "provider_slug": "google-vertex/global",
+            "provider_tag": "google-vertex/global",
+            "supported_parameters": {
+              "resolution": {
+                "type": "enum",
+                "values": [
+                  "512",
+                  "1K",
+                  "2K",
+                  "4K"
+                ]
+              },
+              "aspect_ratio": {
+                "type": "enum",
+                "values": [
+                  "1:1",
+                  "1:4",
+                  "1:8",
+                  "2:3",
+                  "3:2",
+                  "3:4",
+                  "4:1",
+                  "4:3",
+                  "4:5",
+                  "5:4",
+                  "8:1",
+                  "9:16",
+                  "16:9",
+                  "21:9"
+                ]
+              },
+              "n": {
+                "type": "range",
+                "min": 1,
+                "max": 1
+              },
+              "input_references": {
+                "type": "range",
+                "min": 0,
+                "max": 14
+              }
+            },
+            "allowed_passthrough_parameters": [
+              "cachedContent"
+            ],
+            "supports_streaming": false,
+            "pricing": [
+              {
+                "billable": "output_image",
+                "unit": "token",
+                "cost_usd": 6E-05
+              }
+            ]
+          }
+        ]
+      },
+      "url": "https://openrouter.ai/api/v1/images/models/google/gemini-3.1-flash-image/endpoints"
+    },
+    "openrouter:openai/gpt-image-2.5-flare": {
+      "payload": {
+        "id": "openai/gpt-image-2.5-flare",
+        "endpoints": [
+          {
+            "provider_name": "OpenAI",
+            "provider_slug": "openai",
+            "provider_tag": "openai",
+            "supported_parameters": {
+              "aspect_ratio": {
+                "type": "enum",
+                "values": [
+                  "1:1",
+                  "3:2",
+                  "2:3",
+                  "4:3",
+                  "3:4",
+                  "16:9",
+                  "9:16",
+                  "21:9",
+                  "auto"
+                ]
+              },
+              "quality": {
+                "type": "enum",
+                "values": [
+                  "auto",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh",
+                  "max"
+                ]
+              },
+              "background": {
+                "type": "enum",
+                "values": [
+                  "auto",
+                  "transparent",
+                  "opaque"
+                ]
+              },
+              "n": {
+                "type": "range",
+                "min": 1,
+                "max": 10
+              },
+              "input_references": {
+                "type": "range",
+                "min": 0,
+                "max": 16
+              },
+              "output_compression": {
+                "type": "range",
+                "min": 0,
+                "max": 100
+              }
+            },
+            "allowed_passthrough_parameters": [
+              "moderation"
+            ],
+            "supports_streaming": true,
+            "pricing": [
+              {
+                "billable": "input_image",
+                "unit": "token",
+                "cost_usd": 8E-06
+              },
+              {
+                "billable": "input_text",
+                "unit": "token",
+                "cost_usd": 5E-06
+              },
+              {
+                "billable": "output_image",
+                "unit": "token",
+                "cost_usd": 3E-05
+              }
+            ]
+          }
+        ]
+      },
+      "url": "https://openrouter.ai/api/v1/images/models/openai/gpt-image-2.5-flare/endpoints"
+    }
+  },
+  "novelai": {
+    "definitions": {
+      "image.ImageGenerationJsonResponse": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/image.ImageJson"
+            }
+          }
+        }
+      },
+      "image.V4ExternalCaption": {
+        "type": "object",
+        "properties": {
+          "base_caption": {
+            "type": "string"
+          },
+          "char_captions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/image.V4ExternalCharacterCaption"
+            }
+          }
+        }
+      },
+      "image.ImageJson": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "description": "base64 encoded image",
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        }
+      },
+      "image.ImageGenerationRequest": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "input": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/definitions/image.RequestParameters"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "image.V4ConditionInput": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "$ref": "#/definitions/image.V4ExternalCaption"
+          },
+          "legacy_uc": {
+            "type": "boolean"
+          },
+          "use_coords": {
+            "type": "boolean"
+          },
+          "use_order": {
+            "type": "boolean"
+          }
+        }
+      },
+      "user.SubscriptionResponse": {
+        "type": "object",
+        "properties": {
+          "accountType": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "integer"
+          },
+          "isGracePeriod": {
+            "type": "boolean"
+          },
+          "isPaypal": {
+            "type": "boolean"
+          },
+          "paymentProcessor": {
+            "type": "string"
+          },
+          "paymentProcessorData": {},
+          "perks": {
+            "$ref": "#/definitions/user.SubscriptionPerks"
+          },
+          "tier": {
+            "type": "integer"
+          },
+          "trainingStepsLeft": {
+            "$ref": "#/definitions/user.TrainingStepsLeft"
+          },
+          "usage": {
+            "$ref": "#/definitions/usagelimit.Status"
+          }
+        }
+      },
+      "image.RequestParameters": {
+        "type": "object",
+        "properties": {
+          "add_original_image": {
+            "type": "boolean"
+          },
+          "cfg_rescale": {
+            "type": "number"
+          },
+          "color_correct": {
+            "type": "boolean"
+          },
+          "controlnet_condition": {
+            "description": "used by ControlNet",
+            "type": "string"
+          },
+          "controlnet_model": {
+            "type": "string"
+          },
+          "controlnet_strength": {
+            "type": "number"
+          },
+          "deliberate_euler_ancestral_bug": {
+            "description": "(Summer Sampler update) add ancestral noise even on the final step of sampling, despite the fact we're not going to run the denoiser again, default true (maintaining bug-for-bug compatibility)",
+            "type": "boolean"
+          },
+          "director_reference_descriptions": {
+            "description": "For CR: set `caption` with a `base_caption` of `\"character\"` or `\"character&style\"`",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/image.V4ConditionInput"
+            }
+          },
+          "director_reference_images": {
+            "description": "For CR: 1024x1536 or 1536x1024 or 1472x1472 with black padding to fit",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "director_reference_information_extracted": {
+            "description": "For CR: 0-1",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "director_reference_secondary_strength_values": {
+            "description": "For CR: Maps to Fidelity slider (0-1)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "director_reference_strength_values": {
+            "description": "API external name. 0-1",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "dynamic_thresholding": {
+            "type": "boolean"
+          },
+          "extra_noise_seed": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "image": {
+            "type": "string"
+          },
+          "image_format": {
+            "$ref": "#/definitions/image.ImageFormat"
+          },
+          "img2img": {
+            "description": "used by inpaint",
+            "allOf": [
+              {
+                "$ref": "#/definitions/image.Img2ImgParams"
+              }
+            ]
+          },
+          "legacy": {
+            "type": "boolean"
+          },
+          "legacy_v3_extend": {
+            "type": "boolean"
+          },
+          "mask": {
+            "type": "string"
+          },
+          "n_samples": {
+            "type": "integer"
+          },
+          "negative_prompt": {
+            "type": "string"
+          },
+          "noise": {
+            "type": "number"
+          },
+          "noise_schedule": {
+            "type": "string"
+          },
+          "params_version": {
+            "type": "integer"
+          },
+          "prefer_brownian": {
+            "type": "boolean"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "qualityToggle": {
+            "type": "boolean"
+          },
+          "reference_image": {
+            "type": "string"
+          },
+          "reference_image_multiple": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reference_information_extracted": {
+            "type": "number"
+          },
+          "reference_information_extracted_multiple": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "reference_strength": {
+            "type": "number"
+          },
+          "reference_strength_multiple": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "sampler": {
+            "type": "string"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "skip_cfg_above_sigma": {
+            "description": "(Summer Sampler update) triggers Variety Boost",
+            "type": "number"
+          },
+          "sm": {
+            "type": "boolean"
+          },
+          "sm_dyn": {
+            "type": "boolean"
+          },
+          "steps": {
+            "type": "number"
+          },
+          "straight_alpha": {
+            "type": "boolean"
+          },
+          "stream": {
+            "$ref": "#/definitions/image.StreamingType"
+          },
+          "strength": {
+            "type": "number"
+          },
+          "tag_hint_qt": {
+            "type": "integer"
+          },
+          "tag_hint_transparent_background": {
+            "description": "Pure pass-through hint for the model: the prompt is asking for a transparent\nbackground. Omegalaser does not interpret it.",
+            "type": "boolean"
+          },
+          "tag_hint_uc_preset": {
+            "type": "integer"
+          },
+          "ucPreset": {
+            "type": "integer"
+          },
+          "upscale": {
+            "$ref": "#/definitions/image.UpscaleParams"
+          },
+          "upscaled_enhance": {
+            "type": "boolean"
+          },
+          "v4_negative_prompt": {
+            "$ref": "#/definitions/image.V4ConditionInput"
+          },
+          "v4_prompt": {
+            "$ref": "#/definitions/image.V4ConditionInput"
+          },
+          "width": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "url": "https://image.novelai.net/docs/doc.json"
+  }
+}

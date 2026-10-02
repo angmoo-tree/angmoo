@@ -127,7 +127,7 @@ export async function updateWorldChatThreadModel(
 export async function sendWorldChatMessage(
   worldId: string,
   threadId: string,
-  data: { content: string; idempotency_key: string },
+  data: { content: string; idempotency_key: string; attachment_asset_id?: string },
 ): Promise<WorldChatMessageAcceptRead> {
   const payload = await requestWorldChatApi<WorldChatMessageAcceptRead>(
     worldChatApiPath(
@@ -145,7 +145,7 @@ export async function sendWorldChatMessage(
 export async function retryWorldChatResponse(
   worldId: string,
   threadId: string,
-  data: { failed_request_id: string; idempotency_key: string },
+  data: { failed_request_id: string; idempotency_key: string; exclude_attachment?: boolean },
 ): Promise<WorldChatMessageAcceptRead> {
   const payload = await requestWorldChatApi<WorldChatMessageAcceptRead>(
     worldChatApiPath(

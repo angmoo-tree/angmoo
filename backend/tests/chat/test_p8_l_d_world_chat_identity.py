@@ -14,6 +14,7 @@ from chat_service_support import messages as world_chat
 
 
 def _create_tables(engine) -> None:
+    from app.domains.chat.models import MessageAttachment
     for table in (
         models.User.__table__,
         models.InstallationIdentity.__table__,
@@ -26,6 +27,7 @@ def _create_tables(engine) -> None:
         models.UserMessagePreference.__table__,
         models.MessageThread.__table__,
         models.MessageMessage.__table__,
+        MessageAttachment.__table__,
         models.ChatResponseRequest.__table__,
     ):
         table.create(engine)

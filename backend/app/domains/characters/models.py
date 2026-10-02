@@ -246,6 +246,17 @@ class AgentImageGenerationSetting(Base):
     character_id: Mapped[str] = mapped_column(
         ForeignKey("characters.id"), primary_key=True
     )
+    generation_provider: Mapped[str | None] = mapped_column(String(20))
+    generation_model: Mapped[str | None] = mapped_column(String(120))
+    generation_profiles_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}", server_default="{}")
+    generation_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    generation_auto_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=false())
+    generation_daily_limit: Mapped[int | None] = mapped_column(Integer)
+    appearance_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    style_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    negative_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    reference_asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id"))
+    card_asset_id: Mapped[str | None] = mapped_column(ForeignKey("media_assets.id"))
     encrypted_openrouter_api_key: Mapped[str | None] = mapped_column(Text)
     encrypted_pollinations_api_key: Mapped[str | None] = mapped_column(Text)
     encrypted_replicate_api_token: Mapped[str | None] = mapped_column(Text)

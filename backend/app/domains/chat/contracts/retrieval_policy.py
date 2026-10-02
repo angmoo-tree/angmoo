@@ -20,6 +20,7 @@ class RetrievalPreflightCommand:
     request_is_active: bool = True
     idempotency_conflict: bool = False
     router_runtime_available: bool = True
+    image_context: str | None = None
 
     def __post_init__(self) -> None:
         identifiers = (
@@ -36,6 +37,8 @@ class RetrievalPreflightCommand:
             raise RetrievalContractError("retrieval_preflight_self_chat_invalid")
         if not self.user_message.strip() or len(self.user_message) > 4_000:
             raise RetrievalContractError("retrieval_preflight_message_invalid")
+        if self.image_context is not None and (not self.image_context.strip() or len(self.image_context) > 2000):
+            raise RetrievalContractError("retrieval_image_context_invalid")
         if not self.request_is_active:
             raise RetrievalContractError("retrieval_preflight_request_inactive")
         if self.idempotency_conflict:
