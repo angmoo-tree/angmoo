@@ -1,7 +1,6 @@
 """Execute a frozen V2 claim with inherited durable child checkpoints."""
 from datetime import UTC, datetime, timedelta
 from dataclasses import replace
-import sqlite3
 
 from app.domains.world_characters.activity_models import ActivityGraphRun
 from app.domains.world_characters.models import WorldCharacter, CharacterActiveWorld
@@ -25,6 +24,28 @@ class ActivityScopeChangedError(ValueError):
 
 
 async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
+    from app.domains.world_characters.contracts.checkpoint_retention import (
+        TERMINAL_STATUSES, business_result, completion,
+    )
+    latest = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
+    if latest is not None and latest.status in TERMINAL_STATUSES:
+        current_actor = ctx.db.get(WorldCharacter, actor.id, populate_existing=True)
+        member = ctx.db.get(WorldMembership, current_actor.membership_id, populate_existing=True) if current_actor else None
+        world = ctx.db.get(World, latest.world_id, populate_existing=True)
+        from app.domains.characters.models import Character
+        character = ctx.db.get(Character, ctx.character.id, populate_existing=True)
+        if (current_actor is None or current_actor.character_id != ctx.character.id
+                or current_actor.world_id != latest.world_id or world is None
+                or character is None or character.owner_id != ctx.user_id
+                or (latest.world_id, latest.world_character_id) != (actor.world_id, actor.id)
+                or member is None or member.world_id != actor.world_id
+                or member.user_id != ctx.user_id or member.status != "active"
+                or latest.engine != run.engine or latest.contract_version != run.contract_version):
+            raise ActivityScopeChangedError("activity_completed_scope_invalid")
+        completion(latest)
+        from app.runtime.autonomous_activity.checkpoint_maintenance import validate_completion_receipts
+        validate_completion_receipts(ctx.db, latest)
+        return business_result(latest.result)
     binding = current()
     if binding is None:
         raise RuntimeError("personalized_activity_runtime_unavailable")
@@ -72,6 +93,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             or membership is None or membership.status != "active" or membership.user_id != ctx.user_id):
             raise ActivityScopeChangedError("activity_scope_changed")
         row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
+        if row is not None and row.status in TERMINAL_STATUSES:
+            raise ActivityScopeChangedError("activity_already_completed")
         if row is None or row.engine != "personalized_graph_v2" or row.contract_version != identity["contract_version"]:
             raise ActivityScopeChangedError("activity_contract_changed")
         if (row.result or {}).get("routine_policy") != policy:
@@ -158,6 +181,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         row = ctx.db.get(ActivityGraphRun, run.activity_id)
         result = {**(row.result or {}), **result}
         row.status, row.stage, row.result, row.finished_at = result["status"], "Finalize", plain(result), datetime.now(UTC)
+        if row.status in TERMINAL_STATUSES:
+            completion(row)
         ctx.db.commit()
         if attempt:
             attempt.emit("activity_result", classification=result["status"], details={
@@ -249,7 +274,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             if attempt:
                 attempt.emit("activity_reused", classification="success",
                     details={"status": checkpoint.values["result"].get("status")})
-            return checkpoint.values["result"]
+            return business_result(checkpoint.values["result"])
         try:
             await guard({"stage": "Resume" if checkpoint.values else "LoadContext", "identity": checkpoint.values.get("identity", identity)})
             final = await graph.ainvoke(None if checkpoint.values else {"identity": identity}, config)
@@ -264,28 +289,40 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                     row = ctx.db.get(ActivityGraphRun, run.activity_id, populate_existing=True)
                     if row is None:
                         raise ValueError("activity_run_missing_for_failure_status")
+                    if row.status in TERMINAL_STATUSES:
+                        # Finalize committed before the last SDK checkpoint write.
+                        # Its durable completion must survive checkpoint I/O failure.
+                        completion(row)
+                        return row.stage, row.status
                     row.status = status
                     if status == "aborted":
                         row.finished_at = datetime.now(UTC)
                     row.result = {**(row.result or {}), "reason": type(exc).__name__, "stage": row.stage}
-                    return row.stage
-                stage = run_sqlite_session_immediate(ctx.db, save_failure_status, require_clean=True)
+                    return row.stage, row.status
+                stage, status = run_sqlite_session_immediate(ctx.db, save_failure_status, require_clean=True)
                 persisted = True
             except Exception as persist_exc:
                 ctx.db.rollback()
                 import logging
                 logging.getLogger(__name__).warning("activity_status_persist_failed type=%s", type(persist_exc).__name__)
             if attempt:
-                attempt.emit("activity_interrupted", classification=status if persisted else "status_persist_failed",
+                attempt.emit("activity_checkpoint_write_failed" if status in TERMINAL_STATUSES else "activity_interrupted", classification=status if persisted else "status_persist_failed",
                     details={"stage": stage, "status": status if persisted else "status_persist_failed"}, exc=exc,
                     caused_by_event_id=attempt.last_error_event_id)
             raise
-        from app.runtime.autonomous_activity.checkpoints import prune_completed
+        from app.domains.world_characters.service.checkpoint_retention import confirm_graph
         try:
-            await prune_completed(saver, ctx.db, now=datetime.now(UTC), keep_activity_id=run.activity_id)
-        except (OSError, sqlite3.OperationalError):
-            # Retention maintenance must not turn an already committed run into
-            # a retry of its public effects. A later run retries pruning.
+            terminal_snapshot = await graph.aget_state(config)
+            if (terminal_snapshot.next or terminal_snapshot.tasks
+                    or not terminal_snapshot.values.get("result")
+                    or business_result(terminal_snapshot.values["result"]) != business_result(final["result"])):
+                raise ValueError("activity_final_checkpoint_unconfirmed")
+            ctx.db.expire_all()
+            completed = ctx.db.get(ActivityGraphRun, run.activity_id)
+            confirm_graph(ctx.db, completed)
+            ctx.db.commit()
+        except Exception:
+            ctx.db.rollback()
             import logging
-            logging.getLogger(__name__).warning("activity_checkpoint_prune_deferred")
-        return final["result"]
+            logging.getLogger(__name__).warning("activity_checkpoint_confirmation_deferred")
+        return business_result(final["result"])

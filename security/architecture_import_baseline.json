@@ -1,7 +1,7 @@
 {
-  "edge_count": 5407,
-  "external_import_count": 3933,
-  "module_count": 1334,
+  "edge_count": 5435,
+  "external_import_count": 3959,
+  "module_count": 1338,
   "modules": [
     {
       "external_imports": [],
@@ -12486,6 +12486,17 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.contracts.checkpoint_retention",
+      "path": "backend/app/domains/world_characters/contracts/checkpoint_retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "typing"
       ],
       "imports": [],
@@ -12889,6 +12900,7 @@
         "app.config",
         "app.contracts.routine_output",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention",
         "app.domains.world_characters.models",
         "app.domains.world_characters.schemas.activity_state",
         "app.domains.world_characters.service.name_binding"
@@ -12974,6 +12986,21 @@
       ],
       "module": "app.domains.world_characters.service.autonomous_setup",
       "path": "backend/app/domains/world_characters/service/autonomous_setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention"
+      ],
+      "module": "app.domains.world_characters.service.checkpoint_retention",
+      "path": "backend/app/domains/world_characters/service/checkpoint_retention.py",
       "wildcard_imports": []
     },
     {
@@ -14859,6 +14886,7 @@
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
         "app.runtime.autonomous_activity.binding",
+        "app.runtime.autonomous_activity.checkpoint_maintenance",
         "app.runtime.bootstrap.demo_seed",
         "app.runtime.character_activity_access",
         "app.runtime.character_lore",
@@ -15143,15 +15171,42 @@
     },
     {
       "external_imports": [
-        "contextlib",
+        "__future__",
+        "asyncio",
+        "collections",
+        "dataclasses",
         "datetime",
-        "langgraph.checkpoint.sqlite.aio",
+        "logging",
         "pathlib",
         "sqlalchemy",
+        "time"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.routines.models",
+        "app.domains.routines.models.plans",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.checkpoint_retention",
+        "app.runtime.autonomous_activity.checkpoints",
+        "app.runtime.migrations.generation"
+      ],
+      "module": "app.runtime.autonomous_activity.checkpoint_maintenance",
+      "path": "backend/app/runtime/autonomous_activity/checkpoint_maintenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "langgraph.checkpoint.sqlite.aio",
+        "pathlib",
         "sqlite3"
       ],
       "imports": [
-        "app.domains.world_characters.activity_models"
+        "app.runtime.migrations.generation"
       ],
       "module": "app.runtime.autonomous_activity.checkpoints",
       "path": "backend/app/runtime/autonomous_activity/checkpoints.py",
@@ -15241,22 +15296,25 @@
         "datetime",
         "logging",
         "re",
-        "sqlite3",
         "types"
       ],
       "imports": [
         "app.config",
         "app.contracts.name_binding",
         "app.core.sqlite_concurrency",
+        "app.domains.characters.models",
         "app.domains.routines.models",
         "app.domains.social.exceptions",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_state",
+        "app.domains.world_characters.service.checkpoint_retention",
         "app.domains.world_characters.service.name_binding",
         "app.domains.worlds.models",
         "app.integrations.direct_llm",
         "app.runtime.autonomous_activity.binding",
+        "app.runtime.autonomous_activity.checkpoint_maintenance",
         "app.runtime.autonomous_activity.checkpoints",
         "app.runtime.autonomous_activity.combined_lanes",
         "app.runtime.autonomous_activity.combined_provider",
@@ -16268,6 +16326,7 @@
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.recall_projection",
         "app.runtime.memory.sqlite_fts5_recall",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.search"
       ],
@@ -16287,6 +16346,7 @@
         "uvicorn"
       ],
       "imports": [
+        "app.config",
         "app.core.redaction",
         "app.domains.runtime.schemas",
         "app.domains.runtime.service.status",
@@ -16294,6 +16354,7 @@
         "app.runtime.configuration",
         "app.runtime.diagnostics.status_composition",
         "app.runtime.logging_config",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_data",
         "app.runtime.persistence.runtime_data_path"
       ],
@@ -16385,12 +16446,14 @@
         "uvicorn"
       ],
       "imports": [
+        "app.config",
         "app.core.desktop_loopback",
         "app.main",
         "app.runtime.configuration",
         "app.runtime.installer_update",
         "app.runtime.logging_config",
         "app.runtime.memory.native_probe",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path"
@@ -17700,14 +17763,39 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "ctypes",
+        "datetime",
+        "json",
+        "os",
+        "pathlib",
+        "pydantic",
+        "re",
+        "stat",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.runtime.migrations.generation",
+        "app.runtime.migrations.sqlite_versions.registry"
+      ],
+      "module": "app.runtime.migrations.canonical_retention",
+      "path": "backend/app/runtime/migrations/canonical_retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "hashlib",
+        "logging",
         "pathlib"
       ],
       "imports": [
         "app.database",
         "app.domains.runtime.contracts.data_paths",
         "app.integrations.ladybug_projection",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_sqlite",
         "app.runtime.migrations.generation",
         "app.runtime.migrations.ladybug_projection",
@@ -17733,6 +17821,7 @@
       ],
       "imports": [
         "app.domains.runtime.contracts.data_paths",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.generation",
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.registry",

@@ -242,6 +242,7 @@ def _build_embedded_runtime_config(
     profile,
     desktop_launch_token: str,
     desktop_allowed_origin: str,
+    retention_owner=None,
 ):
     """Build an explicit embedded profile without mutating the environment."""
 
@@ -272,7 +273,7 @@ def _build_embedded_runtime_config(
     upgraded = EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(data_root),
         fallback_generation="er6-preview-v1",
-    ).upgrade()
+    ).upgrade(retention_owner=retention_owner)
     return build_embedded_runtime_config(
         profile=profile,
         data_root=data_root,
@@ -498,6 +499,10 @@ def main() -> int:
         launch_id=args.launch_id,
     )
     ownership.acquire()
+    from app.config import settings
+    from app.runtime.migrations.canonical_retention import ServingRetentionOwner
+    retention_owner = ServingRetentionOwner(args.data_root,
+        enabled=settings.CANONICAL_GENERATION_RETENTION_ENABLED)
     try:
         from app.runtime.migrations.local_app_data import (
             LegacyLocalAppDataMigration,
@@ -510,89 +515,78 @@ def main() -> int:
                 runtime_root=ownership.runtime_root,
                 process_alive=_process_alive,
             ).migrate_if_needed()
+        retention_owner.acquire()
         runtime_config = _build_embedded_runtime_config(
             args.data_root.resolve(),
             ownership.runtime_root,
             profile=runtime_profile,
             desktop_launch_token=token,
             desktop_allowed_origin=origin,
+            retention_owner=retention_owner,
         )
     except BaseException:
+        retention_owner.close()
         ownership.release()
         raise
 
-    # Import the public composition root only after the launcher environment is
-    # complete. Its normal route/service composition registers the canonical
-    # model metadata without creating a new runtime -> legacy models edge.
-    from app.main import create_public_app as create_app
-    from app.runtime.configuration import initialize_local_installation_identity
-
-    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listener.bind(("127.0.0.1", 0))
-    listener.listen(2048)
-    port = int(listener.getsockname()[1])
-
-    # Import after the launcher-provided environment is complete. Settings are
-    # immutable for the lifetime of this packaged process.
-    import uvicorn
-
-    from app.core.desktop_loopback import (
-        DesktopLoopbackPolicy,
-        DesktopLoopbackSecurityMiddleware,
-    )
-
-    runtime_app = create_app(runtime_config=runtime_config)
-    initialize_local_installation_identity(
-        runtime_app.state.runtime_composition.session_factory
-    )
-    policy = DesktopLoopbackPolicy(token, origin)
-    runtime_app.add_middleware(DesktopLoopbackSecurityMiddleware, policy=policy)
-    config = uvicorn.Config(
-        runtime_app,
-        host="127.0.0.1",
-        port=port,
-        log_config=None,
-        access_log=False,
-    )
-    server = uvicorn.Server(config)
-
-    @runtime_app.post("/__angmoo/desktop/prepare-shutdown", include_in_schema=False)
-    async def prepare_shutdown() -> dict:
-        return runtime_app.state.memory_shutdown.start()
-
-    @runtime_app.get("/__angmoo/desktop/shutdown-status", include_in_schema=False)
-    async def shutdown_status() -> dict:
-        return runtime_app.state.memory_shutdown.status()
-
-    @runtime_app.post("/__angmoo/desktop/skip-memory-shutdown", include_in_schema=False)
-    async def skip_memory_shutdown() -> dict:
-        return runtime_app.state.memory_shutdown.skip()
-
-    @runtime_app.post("/__angmoo/desktop/shutdown", include_in_schema=False)
-    async def shutdown() -> dict[str, str]:
-        server.should_exit = True
-        return {"status": "stopping"}
-
-    if not _process_alive(args.parent_pid):
-        listener.close()
-        ownership.release()
-        return 0
-
-    ownership.publish_endpoint(port)
-    watcher = threading.Thread(
-        target=_watch_parent,
-        args=(args.parent_pid, server),
-        name="angmoo-parent-watchdog",
-        daemon=True,
-    )
-    watcher.start()
+    listener = None
+    runtime_app = None
     try:
+        # All preparation after acquiring ownership belongs to this process
+        # lifetime, including failures before uvicorn starts its lifespan.
+        from app.main import create_public_app as create_app
+        from app.runtime.configuration import initialize_local_installation_identity
+        import uvicorn
+        from app.core.desktop_loopback import DesktopLoopbackPolicy, DesktopLoopbackSecurityMiddleware
+
+        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(2048)
+        port = int(listener.getsockname()[1])
+        runtime_app = create_app(runtime_config=runtime_config, serving_retention_owner=retention_owner)
+        initialize_local_installation_identity(runtime_app.state.runtime_composition.session_factory)
+        policy = DesktopLoopbackPolicy(token, origin)
+        runtime_app.add_middleware(DesktopLoopbackSecurityMiddleware, policy=policy)
+        config = uvicorn.Config(runtime_app, host="127.0.0.1", port=port, log_config=None, access_log=False)
+        server = uvicorn.Server(config)
+
+        @runtime_app.post("/__angmoo/desktop/prepare-shutdown", include_in_schema=False)
+        async def prepare_shutdown() -> dict:
+            return runtime_app.state.memory_shutdown.start()
+
+        @runtime_app.get("/__angmoo/desktop/shutdown-status", include_in_schema=False)
+        async def shutdown_status() -> dict:
+            return runtime_app.state.memory_shutdown.status()
+
+        @runtime_app.post("/__angmoo/desktop/skip-memory-shutdown", include_in_schema=False)
+        async def skip_memory_shutdown() -> dict:
+            return runtime_app.state.memory_shutdown.skip()
+
+        @runtime_app.post("/__angmoo/desktop/shutdown", include_in_schema=False)
+        async def shutdown() -> dict[str, str]:
+            server.should_exit = True
+            return {"status": "stopping"}
+
+        if not _process_alive(args.parent_pid):
+            return 0
+        ownership.publish_endpoint(port)
+        watcher = threading.Thread(target=_watch_parent, args=(args.parent_pid, server),
+            name="angmoo-parent-watchdog", daemon=True)
+        watcher.start()
         server.run(sockets=[listener])
         return 0
     finally:
-        listener.close()
-        ownership.release()
+        try:
+            if listener is not None:
+                listener.close()
+        finally:
+            try:
+                if runtime_app is not None:
+                    runtime_app.state.dispose_runtime()
+            finally:
+                retention_owner.close()
+                ownership.release()
 
 
 def _stable_fatal_code(exc: Exception) -> str:

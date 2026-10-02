@@ -59,7 +59,7 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _prepare_contributor_data_root(data_root: Path):
+def _prepare_contributor_data_root(data_root: Path, *, retention_owner=None):
     data_root = data_root.resolve()
     secret_path = data_root / "secrets" / "app-secret"
     if not secret_path.is_file():
@@ -82,7 +82,7 @@ def _prepare_contributor_data_root(data_root: Path):
     return EmbeddedDataUpgradeCoordinator(
         StaticRuntimeDataPath(data_root),
         fallback_generation=CONTRIBUTOR_GENERATION,
-    ).upgrade()
+    ).upgrade(retention_owner=retention_owner)
 
 
 def create_contributor_runtime_app(
@@ -102,21 +102,29 @@ def create_contributor_runtime_app(
     )
 
     data_root = data_root.resolve()
-    upgraded = _prepare_contributor_data_root(data_root)
-    runtime_config = build_embedded_runtime_config(
-        profile=RuntimeProfile.CONTRIBUTOR_EMBEDDED,
-        data_root=data_root,
-        runtime_root=data_root / "runtime",
-        generation=upgraded.canonical.generation,
-        desktop_launch_token="",
-        desktop_allowed_origin=frontend_origin,
-        graph_database_root=upgraded.graph.database_root,
-        graph_projection_enabled=not upgraded.graph.degraded,
-    )
-    app = create_app(runtime_config=runtime_config)
-    initialize_local_installation_identity(
-        app.state.runtime_composition.session_factory
-    )
+    from app.config import settings
+    from app.runtime.migrations.canonical_retention import ServingRetentionOwner
+    owner = ServingRetentionOwner(data_root, enabled=settings.CANONICAL_GENERATION_RETENTION_ENABLED).acquire()
+    app = None
+    try:
+        upgraded = _prepare_contributor_data_root(data_root, retention_owner=owner)
+        runtime_config = build_embedded_runtime_config(
+            profile=RuntimeProfile.CONTRIBUTOR_EMBEDDED,
+            data_root=data_root,
+            runtime_root=data_root / "runtime",
+            generation=upgraded.canonical.generation,
+            desktop_launch_token="",
+            desktop_allowed_origin=frontend_origin,
+            graph_database_root=upgraded.graph.database_root,
+            graph_projection_enabled=not upgraded.graph.degraded,
+        )
+        app = create_app(runtime_config=runtime_config, serving_retention_owner=owner)
+        initialize_local_installation_identity(app.state.runtime_composition.session_factory)
+    except BaseException:
+        if app is not None:
+            app.state.dispose_runtime()
+        owner.close()
+        raise
     return app
 
 

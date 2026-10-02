@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 import hashlib
 from pathlib import Path
 
@@ -35,6 +36,7 @@ from app.runtime.migrations.ladybug_versions.rebuild import LadybugRebuildError
 class EmbeddedDataUpgradeResult:
     canonical: SqliteCanonicalUpgradeResult
     graph: LadybugProjectionUpgradeResult
+    retention: dict[str, int] | None = None
 
 
 class EmbeddedDataUpgradeCoordinator:
@@ -50,7 +52,7 @@ class EmbeddedDataUpgradeCoordinator:
         self._paths = data_paths.resolve()
         self._fallback_generation = fallback_generation
 
-    def upgrade(self) -> EmbeddedDataUpgradeResult:
+    def upgrade(self, *, retention_owner=None) -> EmbeddedDataUpgradeResult:
         secret_before = _file_sha256(self._paths.secrets / "app-secret")
         media_before = _tree_fingerprint(self._paths.media)
         with EmbeddedUpgradeLock(
@@ -94,11 +96,22 @@ class EmbeddedDataUpgradeCoordinator:
                 )
             finally:
                 engine.dispose()
-        if _file_sha256(self._paths.secrets / "app-secret") != secret_before:
-            raise RuntimeError("embedded_upgrade_secret_changed")
-        if _tree_fingerprint(self._paths.media) != media_before:
-            raise RuntimeError("embedded_upgrade_media_changed")
-        return EmbeddedDataUpgradeResult(canonical=canonical, graph=graph)
+            if _file_sha256(self._paths.secrets / "app-secret") != secret_before:
+                raise RuntimeError("embedded_upgrade_secret_changed")
+            if _tree_fingerprint(self._paths.media) != media_before:
+                raise RuntimeError("embedded_upgrade_media_changed")
+            from app.runtime.migrations.canonical_retention import confirm_promotion, prune_generations
+            try:
+                confirm_promotion(self._paths.root,
+                    relative=canonical.database_path.parent.relative_to(self._paths.canonical).as_posix(),
+                    schema_version=canonical.target_version, manifest_sha256=canonical.manifest_sha256)
+                retention = prune_generations(self._paths.root, owner=retention_owner)
+            except (OSError, ValueError):
+                # Working current is already verified. Retention must not make
+                # startup fail, repeat a migration or silently gain ownership.
+                logging.getLogger(__name__).warning("canonical_retention_deferred")
+                retention = {"deferred": 1}
+        return EmbeddedDataUpgradeResult(canonical=canonical, graph=graph, retention=retention)
 
 
 def _file_sha256(path: Path) -> str:

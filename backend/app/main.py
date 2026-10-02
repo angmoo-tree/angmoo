@@ -124,111 +124,81 @@ def create_lifespan(
     @asynccontextmanager
     async def runtime_lifespan(runtime_app: FastAPI) -> AsyncIterator[None]:
         activity_runtime_binding = getattr(runtime_app.state, "activity_runtime_binding", None)
+        maintenance = getattr(runtime_app.state, "checkpoint_maintenance", None)
+        media_runtime = getattr(runtime_app.state, "media_runtime", None)
         configuration_registered = False
-        component_manager = component_manager_factory()
-        coordinator = getattr(runtime_app.state, "memory_shutdown", None)
-        if coordinator is not None and component_manager is not None:
-            coordinator.quiesce = getattr(component_manager, "quiesce_scheduler", None)
-        if extension is None:
-            validate_public_runtime_settings(runtime_settings)
-        security_validator()
-        if runtime_settings.seed_demo_data:
-            with session_factory() as db:
-                demo_seed(db)
-        startup_recovery()
-
-        if extension is not None:
-            if (
-                extension.settings_provider is not None
-                and extension.prompt_provider is not None
-            ):
-                register_hosted_configuration(
-                    extension.settings_provider,
-                    extension.prompt_provider,
-                )
-                configuration_registered = True
-            try:
+        extension_started = False
+        component_manager = None
+        binding_registered = False
+        try:
+            component_manager = component_manager_factory()
+            coordinator = getattr(runtime_app.state, "memory_shutdown", None)
+            if coordinator is not None and component_manager is not None:
+                coordinator.quiesce = getattr(component_manager, "quiesce_scheduler", None)
+            if extension is None:
+                validate_public_runtime_settings(runtime_settings)
+            security_validator()
+            if runtime_settings.seed_demo_data:
+                with session_factory() as db:
+                    demo_seed(db)
+            startup_recovery()
+            if extension is not None:
+                if extension.settings_provider is not None and extension.prompt_provider is not None:
+                    register_hosted_configuration(extension.settings_provider, extension.prompt_provider)
+                    configuration_registered = True
+                extension_started = True
                 for hook in extension.startup_hooks:
                     await hook()
-            except BaseException:
-                try:
-                    for hook in reversed(extension.shutdown_hooks):
-                        await hook()
-                finally:
-                    if configuration_registered:
-                        unregister_hosted_configuration(
-                            extension.settings_provider,
-                            extension.prompt_provider,
-                        )
-                raise
-        try:
             if activity_runtime_binding is not None:
                 from app.runtime.autonomous_activity.binding import register
                 register(activity_runtime_binding)
+                binding_registered = True
+            if maintenance is not None:
+                await maintenance.start()
             if component_manager is not None:
                 await component_manager.start()
             if memory_runtime is not None:
                 await memory_runtime.start()
             if memory_hybrid_runtime is not None:
                 await memory_hybrid_runtime.start()
-            media_runtime = getattr(runtime_app.state, "media_runtime", None)
             if media_runtime is not None and getattr(runtime_app.state, "media_worker_enabled", False):
                 await media_runtime.start()
-        except BaseException:
-            try:
-                media_runtime = getattr(runtime_app.state, "media_runtime", None)
-                if media_runtime is not None:
-                    await media_runtime.stop()
-                if memory_hybrid_runtime is not None:
-                    await memory_hybrid_runtime.stop()
-                if memory_runtime is not None:
-                    await memory_runtime.stop()
-                if component_manager is not None:
-                    await component_manager.stop()
-            finally:
-                if activity_runtime_binding is not None:
-                    from app.runtime.autonomous_activity.binding import unregister
-                    unregister(activity_runtime_binding)
-                if extension is not None:
-                    for hook in reversed(extension.shutdown_hooks):
-                        await hook()
-                if configuration_registered:
-                    unregister_hosted_configuration(
-                        extension.settings_provider,
-                        extension.prompt_provider,
-                    )
-                if runtime_disposer is not None:
-                    runtime_disposer()
-            raise
-        try:
             yield
         finally:
+            shutdown_error = None
             try:
-                media_runtime = getattr(runtime_app.state, "media_runtime", None)
-                if media_runtime is not None:
-                    await media_runtime.stop()
-                if memory_hybrid_runtime is not None:
-                    await memory_hybrid_runtime.stop()
-                if memory_runtime is not None:
-                    await memory_runtime.stop()
-                if component_manager is not None:
-                    await component_manager.stop()
+                if maintenance is not None:
+                    await maintenance.stop()
+            except BaseException as exc:
+                shutdown_error = exc
+                runtime_app.state.runtime_cleanup_incomplete = True
             finally:
-                if activity_runtime_binding is not None:
-                    from app.runtime.autonomous_activity.binding import unregister
-                    unregister(activity_runtime_binding)
-                if extension is not None:
+                try:
+                    for worker in (media_runtime, memory_hybrid_runtime, memory_runtime, component_manager):
+                        if worker is None:
+                            continue
+                        try:
+                            await worker.stop()
+                        except BaseException as exc:
+                            shutdown_error = shutdown_error or exc
+                            runtime_app.state.runtime_cleanup_incomplete = True
+                finally:
                     try:
-                        for hook in reversed(extension.shutdown_hooks):
-                            await hook()
+                        if binding_registered:
+                            from app.runtime.autonomous_activity.binding import unregister
+                            unregister(activity_runtime_binding)
+                        if extension_started:
+                            for hook in reversed(extension.shutdown_hooks):
+                                await hook()
                     finally:
-                        if configuration_registered:
-                            unregister_hosted_configuration(
-                                extension.settings_provider,
-                                extension.prompt_provider,
-                            )
-                if runtime_disposer is not None:
-                    runtime_disposer()
+                        try:
+                            if configuration_registered:
+                                unregister_hosted_configuration(extension.settings_provider, extension.prompt_provider)
+                        finally:
+                            if runtime_disposer is not None:
+                                runtime_disposer()
+            if shutdown_error is not None:
+                raise shutdown_error
 
     return runtime_lifespan
 
@@ -245,6 +215,7 @@ def create_app(
     *,
     lifespan_handler: LifespanHandler | None = None,
     runtime_config: RuntimeConfig | None = None,
+    serving_retention_owner=None,
     prepare_media_directories: bool = True,
     profile: Literal["full", "public"] = "full",
 ) -> FastAPI:
@@ -264,206 +235,234 @@ def create_app(
     runtime_lifespan = lifespan_handler
     process_settings_snapshot: dict[str, object] | None = None
     memory_runtime = None
-    if runtime_config is not None:
-        composition = compose_runtime(runtime_config, base_settings=settings)
-        from app.runtime.memory.batch_runtime import MemoryBatchRuntime
-        from app.runtime.memory_selection_provider import memory_provider
-        from app.runtime.memory.episode_prior_search import episode_prior_search
+    disposed = False
+    try:
+        if runtime_config is not None:
+            composition = compose_runtime(runtime_config, base_settings=settings)
+            from app.runtime.memory.batch_runtime import MemoryBatchRuntime
+            from app.runtime.memory_selection_provider import memory_provider
+            from app.runtime.memory.episode_prior_search import episode_prior_search
 
-        from app.runtime.relationships.review_runtime import RelationshipReviewRuntime
-        relationship_review = RelationshipReviewRuntime(composition.session_factory,
-            lambda material: memory_provider(composition.session_factory, material["owner_id"],
-                material["model_id"], material["thinking_level"], relationship=True))
-        memory_runtime = MemoryBatchRuntime(
-            composition.session_factory,
-            lambda owner, model, thinking: memory_provider(
-                composition.session_factory, owner, model, thinking
-            ),
-            generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
-            episode_provider_factory=lambda owner, model, thinking: memory_provider(
-                composition.session_factory, owner, model, thinking, episode=True),
-            episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
-            idle_work=relationship_review.tick,
-        )
-        runtime_settings = composition.settings
-        from app.domains.world_packages.storage.import_media import (
-            FilesystemWorldPackageImportMedia,
-        )
-        from app.runtime.world_packages.import_commit import (
-            SqlAlchemyWorldPackageImportCommitter,
-        )
-
-        world_package_import_committer = SqlAlchemyWorldPackageImportCommitter(
-            composition.session_factory,
-            media=FilesystemWorldPackageImportMedia(
-                media_root=runtime_config.data_paths.media,
-                runtime_root=runtime_config.data_paths.runtime,
-                media_url_path=runtime_settings.media_url_path,
-            ),
-        )
-        # Existing service modules retain a reference to the process Settings
-        # singleton. Materialize the typed profile into that object without
-        # consulting or rewriting parent-shell environment variables.
-        process_settings_snapshot = settings.model_dump()
-        for field_name in Settings.model_fields:
-            setattr(settings, field_name, getattr(runtime_settings, field_name))
-
-        def dispose_runtime() -> None:
-            composition.dispose()
-            assert process_settings_snapshot is not None
-            for field_name in Settings.model_fields:
-                setattr(
-                    settings,
-                    field_name,
-                    process_settings_snapshot[field_name],
-                )
-
-        def recover_embedded_runtime() -> None:
-            from app.runtime.relationships.policy_activation import activate_relationship_policies
-            activate_relationship_policies(composition.session_factory)
-            world_package_import_committer.recover_media()
-            repair_result = reconcile_local_autonomous_runtime_modes(
+            from app.runtime.relationships.review_runtime import RelationshipReviewRuntime
+            relationship_review = RelationshipReviewRuntime(composition.session_factory,
+                lambda material: memory_provider(composition.session_factory, material["owner_id"],
+                    material["model_id"], material["thinking_level"], relationship=True))
+            memory_runtime = MemoryBatchRuntime(
                 composition.session_factory,
-                excluded_world_ids=(
-                    world_package_import_committer.list_imported_world_ids()
+                lambda owner, model, thinking: memory_provider(
+                    composition.session_factory, owner, model, thinking
+                ),
+                generation_policy=composition.settings.MEMORY_GENERATION_POLICY,
+                episode_provider_factory=lambda owner, model, thinking: memory_provider(
+                    composition.session_factory, owner, model, thinking, episode=True),
+                episode_prior_search=episode_prior_search(composition.memory_recall_projection.index),
+                idle_work=relationship_review.tick,
+            )
+            runtime_settings = composition.settings
+            from app.domains.world_packages.storage.import_media import (
+                FilesystemWorldPackageImportMedia,
+            )
+            from app.runtime.world_packages.import_commit import (
+                SqlAlchemyWorldPackageImportCommitter,
+            )
+
+            world_package_import_committer = SqlAlchemyWorldPackageImportCommitter(
+                composition.session_factory,
+                media=FilesystemWorldPackageImportMedia(
+                    media_root=runtime_config.data_paths.media,
+                    runtime_root=runtime_config.data_paths.runtime,
+                    media_url_path=runtime_settings.media_url_path,
                 ),
             )
-            logger.info(
-                "autonomous_runtime_mode_reconciliation_completed "
-                "scanned_count=%s repaired_count=%s skipped_count=%s",
-                repair_result.scanned_count,
-                repair_result.repaired_count,
-                sum(count for _reason, count in repair_result.skipped_reasons),
-            )
-            # SNS recommendation uses canonical topic/recency/relation indexes.
-            # Do not rebuild or subscribe the retired SNS FTS projection.
-            composition.memory_recall_projection.start()
+            # Existing service modules retain a reference to the process Settings
+            # singleton. Materialize the typed profile into that object without
+            # consulting or rewriting parent-shell environment variables.
+            process_settings_snapshot = settings.model_dump()
+            for field_name in Settings.model_fields:
+                setattr(settings, field_name, getattr(runtime_settings, field_name))
 
-        if runtime_lifespan is None:
-            runtime_lifespan = create_lifespan(
-                extension,
-                security_validator=lambda: validate_startup_security(runtime_settings),
+            def dispose_runtime() -> None:
+                nonlocal disposed
+                if disposed:
+                    return
+                disposed = True
+                try:
+                    composition.dispose(release_pin=not getattr(runtime_app.state, "runtime_cleanup_incomplete", False))
+                finally:
+                    try:
+                        if serving_retention_owner is not None:
+                            serving_retention_owner.close()
+                    finally:
+                        assert process_settings_snapshot is not None
+                        for field_name in Settings.model_fields:
+                            setattr(settings, field_name, process_settings_snapshot[field_name])
+
+            def recover_embedded_runtime() -> None:
+                from app.runtime.relationships.policy_activation import activate_relationship_policies
+                activate_relationship_policies(composition.session_factory)
+                world_package_import_committer.recover_media()
+                repair_result = reconcile_local_autonomous_runtime_modes(
+                    composition.session_factory,
+                    excluded_world_ids=(
+                        world_package_import_committer.list_imported_world_ids()
+                    ),
+                )
+                logger.info(
+                    "autonomous_runtime_mode_reconciliation_completed "
+                    "scanned_count=%s repaired_count=%s skipped_count=%s",
+                    repair_result.scanned_count,
+                    repair_result.repaired_count,
+                    sum(count for _reason, count in repair_result.skipped_reasons),
+                )
+                # SNS recommendation uses canonical topic/recency/relation indexes.
+                # Do not rebuild or subscribe the retired SNS FTS projection.
+                composition.memory_recall_projection.start()
+
+            if runtime_lifespan is None:
+                runtime_lifespan = create_lifespan(
+                    extension,
+                    security_validator=lambda: validate_startup_security(runtime_settings),
+                    session_factory=composition.session_factory,
+                    component_manager_factory=lambda: (
+                        create_single_backend_runtime_components(
+                            runtime_settings,
+                            session_factory=composition.session_factory,
+                        )
+                    ),
+                    startup_recovery=recover_embedded_runtime,
+                    runtime_settings=runtime_settings,
+                    runtime_disposer=dispose_runtime,
+                    memory_runtime=memory_runtime,
+                    memory_hybrid_runtime=composition.memory_hybrid_runtime,
+                )
+        runtime_app = FastAPI(
+            title=runtime_settings.project_name,
+            lifespan=runtime_lifespan or (
+                create_public_lifespan(extension) if profile == "public" else create_lifespan(extension)
+            ),
+            docs_url="/docs" if runtime_settings.api_docs_enabled else None,
+            redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
+            openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
+        )
+        if composition is not None:
+            runtime_app.state.activity_runtime_binding = ActivityRuntimeBinding(composition.memory_hybrid_runtime.service, composition.config.data_paths.root)
+        from app.runtime.account_deletion import delete_current_user_account
+
+        runtime_app.state.account_deletion_workflow = delete_current_user_account
+        from app.runtime.world_packages.composition import configure_world_package_runtime
+        configure_world_package_runtime(runtime_app)
+        from app.runtime.routines.composition import configure_routines_runtime
+        configure_routines_runtime(runtime_app)
+        from types import SimpleNamespace
+        from app.runtime.daily_preparation import read_preparation, ensure_preparation
+        runtime_app.state.daily_preparation = SimpleNamespace(read=read_preparation, ensure=ensure_preparation)
+
+        from app.runtime.media.composition import MediaRuntime
+        runtime_app.state.media_runtime = MediaRuntime(composition.session_factory if composition else SessionLocal, runtime_settings)
+        runtime_app.state.media_worker_enabled = composition is not None
+        from app.runtime.chat.message_composition import configure_chat_services
+        configure_chat_services(runtime_app)
+        from app.runtime.chat.image_attachments import configure_chat_image_services
+        configure_chat_image_services(runtime_app)
+        from app.runtime.diagnostics.http import configure_runtime_diagnostics
+        configure_runtime_diagnostics(runtime_app)
+        from app.runtime.characters.management import build_character_management_workflows
+        runtime_app.state.character_management_workflows = build_character_management_workflows
+        from app.runtime.characters.management import build_character_credential_workflows
+        runtime_app.state.character_credential_workflows = build_character_credential_workflows
+        from app.runtime.character_activity_access import read_character as activity_character_reader
+        runtime_app.state.activity_character_reader = activity_character_reader
+        from app.runtime.characters.management import configure_character_activity_http
+        configure_character_activity_http(runtime_app)
+
+        from app.runtime.tree import build_tree_references
+        runtime_app.state.tree_references = build_tree_references
+        from app.runtime.character_lore import build_lore_workflows
+        runtime_app.state.lore_workflows = build_lore_workflows
+        from app.runtime.memory_http import build_memory_workflows
+        runtime_app.state.memory_workflows = (build_memory_workflows if composition is None else
+            lambda: build_memory_workflows(embedding_runtime_status=composition.memory_hybrid_runtime.read_status))
+        from app.runtime.characters.management import build_character_media_workflows
+        runtime_app.state.character_media_workflows = build_character_media_workflows
+        from app.runtime.characters.creator import build_creator_workflows
+        runtime_app.state.creator_workflows = build_creator_workflows
+        from app.runtime.social.composition import configure_social_runtime
+        configure_social_runtime(runtime_app)
+        from app.runtime.graph_projection.composition import configure_relationships_runtime
+        configure_relationships_runtime(runtime_app)
+        from app.runtime.characters.creator import build_image_generation_workflows
+        runtime_app.state.image_generation_workflows = build_image_generation_workflows
+        from app.runtime.characters.management import build_image_settings_workflows
+        runtime_app.state.image_settings_workflows = build_image_settings_workflows
+        from app.runtime.local_bot.keys import build_local_key_workflows
+        from app.runtime.local_bot.authentication import build_authentication_workflows
+        from app.runtime.local_bot.composition import build_bot_workflows
+        runtime_app.state.local_key_workflows = build_local_key_workflows
+        runtime_app.state.local_bot_authentication_workflows = build_authentication_workflows
+        runtime_app.state.local_bot_workflows = build_bot_workflows
+        runtime_app.add_middleware(RequestBodyLimitMiddleware)
+        runtime_app.include_router(
+            create_public_api_router(extension.routers if extension else ()),
+            prefix=runtime_settings.api_v1_prefix,
+        )
+        mount_public_media(
+            runtime_app,
+            runtime_settings,
+            prepare_directories=prepare_media_directories,
+        )
+        runtime_app.state.runtime_settings = runtime_settings
+        runtime_app.state.runtime_config = runtime_config
+        runtime_app.state.runtime_composition = composition
+        runtime_app.state.serving_retention_owner = serving_retention_owner
+        if composition is not None:
+            from app.runtime.autonomous_activity.checkpoint_maintenance import CheckpointMaintenance
+            runtime_app.state.checkpoint_maintenance = CheckpointMaintenance(
+                data_root=composition.config.data_paths.root,
                 session_factory=composition.session_factory,
-                component_manager_factory=lambda: (
-                    create_single_backend_runtime_components(
-                        runtime_settings,
-                        session_factory=composition.session_factory,
-                    )
-                ),
-                startup_recovery=recover_embedded_runtime,
-                runtime_settings=runtime_settings,
-                runtime_disposer=dispose_runtime,
-                memory_runtime=memory_runtime,
-                memory_hybrid_runtime=composition.memory_hybrid_runtime,
+                enabled=runtime_settings.SNS_CHECKPOINT_MAINTENANCE_ENABLED,
             )
-    runtime_app = FastAPI(
-        title=runtime_settings.project_name,
-        lifespan=runtime_lifespan or (
-            create_public_lifespan(extension) if profile == "public" else create_lifespan(extension)
-        ),
-        docs_url="/docs" if runtime_settings.api_docs_enabled else None,
-        redoc_url="/redoc" if runtime_settings.api_docs_enabled else None,
-        openapi_url=("/openapi.json" if runtime_settings.api_docs_enabled else None),
-    )
-    if composition is not None:
-        runtime_app.state.activity_runtime_binding = ActivityRuntimeBinding(composition.memory_hybrid_runtime.service, composition.config.data_paths.root)
-    from app.runtime.account_deletion import delete_current_user_account
+        else:
+            runtime_app.state.checkpoint_maintenance = None
+        runtime_app.state.memory_batch_runtime = memory_runtime
+        if memory_runtime is not None:
+            from app.runtime.memory.shutdown import (
+                MemoryShutdownCoordinator,
+                MemoryShutdownAdmissionMiddleware,
+            )
 
-    runtime_app.state.account_deletion_workflow = delete_current_user_account
-    from app.runtime.world_packages.composition import configure_world_package_runtime
-    configure_world_package_runtime(runtime_app)
-    from app.runtime.routines.composition import configure_routines_runtime
-    configure_routines_runtime(runtime_app)
-    from types import SimpleNamespace
-    from app.runtime.daily_preparation import read_preparation, ensure_preparation
-    runtime_app.state.daily_preparation = SimpleNamespace(read=read_preparation, ensure=ensure_preparation)
-
-    from app.runtime.media.composition import MediaRuntime
-    runtime_app.state.media_runtime = MediaRuntime(composition.session_factory if composition else SessionLocal, runtime_settings)
-    runtime_app.state.media_worker_enabled = composition is not None
-    from app.runtime.chat.message_composition import configure_chat_services
-    configure_chat_services(runtime_app)
-    from app.runtime.chat.image_attachments import configure_chat_image_services
-    configure_chat_image_services(runtime_app)
-    from app.runtime.diagnostics.http import configure_runtime_diagnostics
-    configure_runtime_diagnostics(runtime_app)
-    from app.runtime.characters.management import build_character_management_workflows
-    runtime_app.state.character_management_workflows = build_character_management_workflows
-    from app.runtime.characters.management import build_character_credential_workflows
-    runtime_app.state.character_credential_workflows = build_character_credential_workflows
-    from app.runtime.character_activity_access import read_character as activity_character_reader
-    runtime_app.state.activity_character_reader = activity_character_reader
-    from app.runtime.characters.management import configure_character_activity_http
-    configure_character_activity_http(runtime_app)
-
-    from app.runtime.tree import build_tree_references
-    runtime_app.state.tree_references = build_tree_references
-    from app.runtime.character_lore import build_lore_workflows
-    runtime_app.state.lore_workflows = build_lore_workflows
-    from app.runtime.memory_http import build_memory_workflows
-    runtime_app.state.memory_workflows = (build_memory_workflows if composition is None else
-        lambda: build_memory_workflows(embedding_runtime_status=composition.memory_hybrid_runtime.read_status))
-    from app.runtime.characters.management import build_character_media_workflows
-    runtime_app.state.character_media_workflows = build_character_media_workflows
-    from app.runtime.characters.creator import build_creator_workflows
-    runtime_app.state.creator_workflows = build_creator_workflows
-    from app.runtime.social.composition import configure_social_runtime
-    configure_social_runtime(runtime_app)
-    from app.runtime.graph_projection.composition import configure_relationships_runtime
-    configure_relationships_runtime(runtime_app)
-    from app.runtime.characters.creator import build_image_generation_workflows
-    runtime_app.state.image_generation_workflows = build_image_generation_workflows
-    from app.runtime.characters.management import build_image_settings_workflows
-    runtime_app.state.image_settings_workflows = build_image_settings_workflows
-    from app.runtime.local_bot.keys import build_local_key_workflows
-    from app.runtime.local_bot.authentication import build_authentication_workflows
-    from app.runtime.local_bot.composition import build_bot_workflows
-    runtime_app.state.local_key_workflows = build_local_key_workflows
-    runtime_app.state.local_bot_authentication_workflows = build_authentication_workflows
-    runtime_app.state.local_bot_workflows = build_bot_workflows
-    runtime_app.add_middleware(RequestBodyLimitMiddleware)
-    runtime_app.include_router(
-        create_public_api_router(extension.routers if extension else ()),
-        prefix=runtime_settings.api_v1_prefix,
-    )
-    mount_public_media(
-        runtime_app,
-        runtime_settings,
-        prepare_directories=prepare_media_directories,
-    )
-    runtime_app.state.runtime_settings = runtime_settings
-    runtime_app.state.runtime_config = runtime_config
-    runtime_app.state.runtime_composition = composition
-    runtime_app.state.memory_batch_runtime = memory_runtime
-    if memory_runtime is not None:
-        from app.runtime.memory.shutdown import (
-            MemoryShutdownCoordinator,
-            MemoryShutdownAdmissionMiddleware,
+            runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime)
+            runtime_app.add_middleware(
+                MemoryShutdownAdmissionMiddleware,
+                coordinator=runtime_app.state.memory_shutdown,
+            )
+        runtime_app.state.world_package_import_committer = world_package_import_committer
+        runtime_app.state.dispose_runtime = dispose_runtime if composition is not None else None
+        runtime_app.state.restore_process_settings = (
+            dispose_runtime if composition is not None else None
         )
+        if composition is not None:
 
-        runtime_app.state.memory_shutdown = MemoryShutdownCoordinator(memory_runtime)
-        runtime_app.add_middleware(
-            MemoryShutdownAdmissionMiddleware,
-            coordinator=runtime_app.state.memory_shutdown,
+            def runtime_database_dependency():
+                db = composition.session_factory()
+                try:
+                    yield db
+                finally:
+                    db.close()
+
+            runtime_app.dependency_overrides[get_db] = runtime_database_dependency
+        runtime_app.add_api_route(
+            "/health", runtime_health if profile == "public" else health, methods=["GET"]
         )
-    runtime_app.state.world_package_import_committer = world_package_import_committer
-    runtime_app.state.restore_process_settings = (
-        dispose_runtime if composition is not None else None
-    )
-    if composition is not None:
-
-        def runtime_database_dependency():
-            db = composition.session_factory()
-            try:
-                yield db
-            finally:
-                db.close()
-
-        runtime_app.dependency_overrides[get_db] = runtime_database_dependency
-    runtime_app.add_api_route(
-        "/health", runtime_health if profile == "public" else health, methods=["GET"]
-    )
-    return runtime_app
+        return runtime_app
+    except BaseException:
+        if composition is not None:
+            composition.dispose()
+        if serving_retention_owner is not None:
+            serving_retention_owner.close()
+        if process_settings_snapshot is not None:
+            for field_name in Settings.model_fields:
+                setattr(settings, field_name, process_settings_snapshot[field_name])
+        raise
 
 
 def health() -> dict[str, str]:

@@ -6,31 +6,18 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 
 
 @asynccontextmanager
-async def activity_checkpointer(data_directory: Path):
+async def activity_checkpointer(data_directory: Path, *, busy_ms: int | None = None):
     directory = (data_directory / "runtime" / "activity").resolve()
     directory.mkdir(parents=True, exist_ok=True)
     async with AsyncSqliteSaver.from_conn_string(str(directory / "activity-checkpoints.sqlite")) as saver:
+        if busy_ms is not None:
+            await saver.conn.execute(f"PRAGMA busy_timeout={int(busy_ms)}")
         await saver.setup()
         yield saver
 
 
 def checkpoint_config(*, activity_id: str) -> dict:
     return {"configurable": {"thread_id": f"activity:{activity_id}"}, "recursion_limit": 120}
-
-
-async def prune_completed(saver, db, *, now, keep_activity_id):
-    """Only completed canonical runs older than 30 days; unfinished never expire."""
-    from datetime import timedelta
-    from sqlalchemy import select
-    from app.domains.world_characters.activity_models import ActivityGraphRun
-    ids = db.scalars(select(ActivityGraphRun.activity_id).where(
-        ActivityGraphRun.finished_at < now - timedelta(days=30),
-        ActivityGraphRun.status.in_(("completed", "observed", "failed", "aborted")),
-        ActivityGraphRun.activity_id != keep_activity_id,
-    ).order_by(ActivityGraphRun.finished_at).limit(50)).all()
-    for identifier in ids:
-        await saver.adelete_thread(f"activity:{identifier}")
-    return len(ids)
 
 
 def backup_checkpoint(data_directory: Path, destination: Path):
@@ -46,7 +33,9 @@ def backup_checkpoint(data_directory: Path, destination: Path):
     if destination.exists():
         raise ValueError("checkpoint_backup_destination_exists")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(source.as_uri() + "?mode=ro", uri=True) as original:
-        with sqlite3.connect(destination) as backup:
-            original.backup(backup)
+    from app.runtime.migrations.generation import EmbeddedUpgradeLock
+    with EmbeddedUpgradeLock(data_directory.resolve() / "runtime" / "activity" / "checkpoint-maintenance.lock"):
+        with sqlite3.connect(source.as_uri() + "?mode=ro", uri=True) as original:
+            with sqlite3.connect(destination) as backup:
+                original.backup(backup)
     return True

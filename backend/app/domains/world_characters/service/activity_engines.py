@@ -79,6 +79,9 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
         status="running", stage="LoadContext", started_at=datetime.now(UTC),
         result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version, "name_binding": binding.to_dict()})
+    if engine == "personalized_graph_v2" and settings.SNS_CHECKPOINT_POLICY_ENABLED:
+        from app.domains.world_characters.contracts.checkpoint_retention import CheckpointRetention, RETENTION_KEY
+        row.result = {**row.result, RETENTION_KEY: CheckpointRetention().model_dump()}
     db.add(row)
     db.flush()
     return row
