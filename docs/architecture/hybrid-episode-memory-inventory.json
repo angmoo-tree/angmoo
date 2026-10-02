@@ -110,7 +110,7 @@
     },
     {
       "path": "backend/app/config.py",
-      "sha256": "2ab2071a684c128cd2d3d69ce10f8cb130a87066cc02f0cb680092c4801fad5a"
+      "sha256": "ffd5e642bf92302f8d1d7def49de11dc81e4d2b1651e39bcafe5d640737a15f8"
     },
     {
       "path": "backend/app/contracts/activity_output.py",
@@ -1634,7 +1634,7 @@
     },
     {
       "path": "backend/app/runtime/contributor_backend.py",
-      "sha256": "52b99d631330cd9e39df7a95748e2a5f2cdd153fc0b324db0d42b7bf81d95dc8"
+      "sha256": "2d6f55725efafefdbe23626534bdcc3af9be0808ac9e2b0bf4608d51763e9b4e"
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
@@ -2767,6 +2767,10 @@
     {
       "path": "backend/tests/migrations/test_alembic_layout.py",
       "sha256": "cba970f74bd5b1e8ad540808a4324493f8888b3d8dae5b40fce44d6b74f225eb"
+    },
+    {
+      "path": "backend/tests/migrations/test_canonical_retention.py",
+      "sha256": "9ed287185be89af0e3cba4a1537a0c7c38728e7132a84190fe88f479bd2a7903"
     },
     {
       "path": "backend/tests/migrations/test_character_background_v22.py",
