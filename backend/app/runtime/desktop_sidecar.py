@@ -388,25 +388,32 @@ def _run_installer_operation(
     )
     if not config.graph_projection_enabled:
         raise RuntimeError("installer_embedded_data_migration_failed")
-    checkpoint_installer_sqlite(config.database_path)
+    from app.runtime.migrations.canonical_retention import GenerationUsePin
 
-    after = preflight_installer_embedded_data(
-        data_root=data_root,
-        payload_manifest=args.payload_manifest,
-    )
-    if (
-        after.sqlite_source_version != after.sqlite_target_version
-        or after.ladybug_source_version != after.ladybug_target_version
-    ):
-        raise RuntimeError("installer_embedded_data_migration_failed")
-    payload = after.public_payload()
-    # Report the version observed before this installer invocation.  Without
-    # this override a real v2 -> v3 update is indistinguishable from a v3
-    # idempotent reinstall because the post-upgrade preflight sees only v3.
-    payload["sqlite_source_version"] = before.sqlite_source_version
-    payload["ladybug_source_version"] = before.ladybug_source_version
-    payload["status"] = "upgraded"
-    return payload
+    pin = GenerationUsePin(
+        data_root,
+        config.database_path.parent.relative_to(data_root / "canonical").as_posix(),
+    ).acquire()
+    try:
+        checkpoint_installer_sqlite(config.database_path)
+        after = preflight_installer_embedded_data(
+            data_root=data_root,
+            payload_manifest=args.payload_manifest,
+        )
+        if (
+            after.sqlite_source_version != after.sqlite_target_version
+            or after.ladybug_source_version != after.ladybug_target_version
+        ):
+            raise RuntimeError("installer_embedded_data_migration_failed")
+        payload = after.public_payload()
+        # Report the source version before this invocation, not the upgraded
+        # version inspected after the WAL checkpoint.
+        payload["sqlite_source_version"] = before.sqlite_source_version
+        payload["ladybug_source_version"] = before.ladybug_source_version
+        payload["status"] = "upgraded"
+        return payload
+    finally:
+        pin.close()
 
 
 def _run_installer_mode() -> int:

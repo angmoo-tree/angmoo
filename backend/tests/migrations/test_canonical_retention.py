@@ -141,7 +141,7 @@ def test_live_generation_pin_and_unconfirmed_staging_are_protected(tmp_path):
         pin.close(); owner.close()
 
 
-@pytest.mark.parametrize("damage", ["unreadable_pin", "bad_previous", "unknown_marker_schema", "duplicate_markers",
+@pytest.mark.parametrize("damage", ["unreadable_pin", "bad_previous", "bad_previous_type", "unknown_marker_schema", "duplicate_markers",
     "unknown_file", "bad_ownership", "bad_digest", "path_traversal"])
 def test_ambiguous_references_or_inventory_never_delete(tmp_path, damage):
     first = clean(tmp_path)
@@ -155,6 +155,10 @@ def test_ambiguous_references_or_inventory_never_delete(tmp_path, damage):
     elif damage == "unknown_marker_schema":
         path = tmp_path / "canonical" / "previous-generation.json"
         payload = json.loads(path.read_text()); payload["data_version"] = 99999
+        path.write_text(json.dumps(payload))
+    elif damage == "bad_previous_type":
+        path = tmp_path / "canonical" / "previous-generation.json"
+        payload = json.loads(path.read_text()); payload["relative_path"] = 1
         path.write_text(json.dumps(payload))
     elif damage == "duplicate_markers":
         (tmp_path / "canonical" / "previous-generation.json").write_bytes(

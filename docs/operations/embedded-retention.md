@@ -26,6 +26,8 @@ maintenance는 startup에 한 cycle을 실행하고 이후 1시간마다 실행�
 
 정리는 serving startup 소유권을 가진 contributor 또는 sidecar에서만 허용한다. 진단·installer/direct coordinator는 삭제 권한이 기본 OFF다. 실제 OS serving lock과 generation use pin은 raw PID나 lock 파일 존재와 구별한다. 소비자는 engine을 열기 전에 공유 migration lock 안에서 pin을 등록하고, worker·engine 종료 뒤 해제한다. 종료 성공을 확인할 수 없으면 pin을 보호하며 process 종료 후 OS lifetime lock 해제가 확인되어야 stale pin을 정리한다.
 
+installer의 WAL checkpoint와 후속 preflight도 선택한 generation의 사용 pin을 작업 종료까지 유지한다. 그 사이 다른 serving startup이 새 세대를 승격하더라도 작업 중인 DB는 삭제 대상에서 제외한다. installer가 삭제 권한을 갖는 것은 아니며, 정상 완료·예외 모두 pin을 해제한 뒤 다음 serving startup이 다시 보호 집합을 판단한다.
+
 DB 정리는 1시간마다 실행하지 않는다. 새 backend가 실제 시작하는 안전한 경계에서 실행한다. 같은 schema의 재시작은 새 DB 복제나 migration 없이 보존 정리만 시도한다. Docker는 backend 재생성·재시작, 개발자는 `up`으로 실제 backend를 다시 시작하는 때, Windows는 새 sidecar 시작이 해당 경계다. 이미 실행 중인 컨테이너에 로컬 소스 변경이 적용된다는 뜻은 아니다.
 
 삭제는 canonical/generations 바로 아래의 확인된 한 세대 전체에 한정한다. root/current/previous, symlink·junction·reparse, 경로 탈출, 열린 pin, 미확인 파일은 거절한다. WAL/SHM을 열린 DB에서 따로 지우지 않는다. 세대 밖 runtime에 먼저 원자적인 removal intent를 기록하여 부분 제거를 재시도한다. 삭제 실패가 working current의 시작 실패·재복제·재승격으로 바뀌지 않는다. graph/search/media/수동 backup은 이 정책으로 제거하지 않는다.

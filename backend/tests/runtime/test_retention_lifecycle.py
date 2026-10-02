@@ -307,3 +307,48 @@ def test_same_root_generation_and_checkpoint_failures_preserve_completed_result(
         assert calls == ["model"]
     finally:
         app.state.dispose_runtime()
+
+
+@pytest.mark.parametrize("failure", [False, True])
+def test_installer_checkpoint_consumer_pins_selected_generation_without_retention_authority(tmp_path, monkeypatch, failure):
+    from types import SimpleNamespace
+    from app.runtime import desktop_sidecar, installer_update
+    from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION
+    from app.integrations.ladybug_projection import LADYBUG_PROJECTION_SCHEMA_VERSION
+    from migrations.test_canonical_retention import clean, new_copy, prune
+    from test_installer_update import _manifest
+    desktop_sidecar._write_new_secret(tmp_path / "secrets" / "app-secret")
+    first = clean(tmp_path)
+    manifest = _manifest(tmp_path / "payload.json", sqlite=(1, SQLITE_SCHEMA_VERSION, SQLITE_SCHEMA_VERSION),
+        ladybug=(0, LADYBUG_PROJECTION_SCHEMA_VERSION, LADYBUG_PROJECTION_SCHEMA_VERSION))
+    args = SimpleNamespace(installer_data_preflight=False, payload_manifest=manifest,
+        legacy_data_root=tmp_path.parent / (tmp_path.name + "-missing-legacy"))
+    original = installer_update.checkpoint_installer_sqlite
+    checkpoints = []
+    def checkpoint_selected(database_path):
+        checkpoints.append(database_path)
+        pins = list((tmp_path / "runtime" / "canonical-uses").glob("*.json"))
+        assert len(pins) == 1
+        new_copy(tmp_path, name="B"); new_copy(tmp_path, name="C")
+        owner = ServingRetentionOwner(tmp_path).acquire()
+        try:
+            assert prune(tmp_path, owner).get("removed", 0) == 0
+            assert first.canonical.database_path.exists()
+        finally:
+            owner.close()
+        original(database_path)
+        if failure: raise OSError("injected installer checkpoint failure")
+    monkeypatch.setattr(installer_update, "checkpoint_installer_sqlite", checkpoint_selected)
+    operation = lambda: desktop_sidecar._run_installer_operation(args,
+        data_root=tmp_path, runtime_root=tmp_path / "runtime", compatibility_context={})
+    if failure:
+        with pytest.raises(OSError, match="installer checkpoint failure"): operation()
+    else:
+        assert operation()["status"] == "upgraded"
+    assert checkpoints == [first.canonical.database_path]
+    assert list((tmp_path / "runtime" / "canonical-uses").glob("*.json")) == []
+    owner = ServingRetentionOwner(tmp_path).acquire()
+    try:
+        assert prune(tmp_path, owner)["removed"] == 1
+    finally:
+        owner.close()

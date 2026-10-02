@@ -234,6 +234,9 @@ def _protected_uses(data_root: Path) -> set[str]:
 def _protected_markers(data_root: Path) -> set[str]:
     def validate(marker):
         from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest, SqliteVersionContractError
+        if (not isinstance(marker, dict) or type(marker.get("schema_version")) is not int
+                or marker["schema_version"] != 1 or not isinstance(marker.get("relative_path"), str)):
+            raise ValueError("generation_selection_record_ambiguous")
         if type(marker.get("data_version")) is not int or marker["data_version"] < 1:
             raise ValueError("generation_marker_version_ambiguous")
         try:
@@ -259,9 +262,11 @@ def _protected_markers(data_root: Path) -> set[str]:
         previous_controller = EmbeddedGenerationController(controller.root, artifact_relative_path="angmoo.sqlite3")
         previous_controller.current_marker = controller.previous_marker
         previous = previous_controller.current()
-        if previous["relative_path"] == current["relative_path"]:
+        if previous is None:
             raise ValueError("generation_previous_selection_ambiguous")
         validate(previous)
+        if previous["relative_path"] == current["relative_path"]:
+            raise ValueError("generation_previous_selection_ambiguous")
         protected.add(previous["relative_path"])
     return protected | _protected_uses(data_root)
 
