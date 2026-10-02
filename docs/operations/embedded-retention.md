@@ -42,4 +42,6 @@ DB 정리는 1시간마다 실행하지 않는다. 새 backend가 실제 시작�
 
 환경 설정 변경은 해당 backend를 실제 새 설정으로 시작할 때 반영한다. 이번 구현 검증은 임시 root만 사용하며 실제 Docker named volume이나 Windows 설치 데이터를 정리하는 작업을 포함하지 않는다.
 
+Docker에서는 선택한 Compose 파일 또는 별도 override의 backend `environment`에 위 이름과 `"false"` 값을 명시적으로 전달한다. `.env`에 이름만 추가했지만 Compose가 container environment로 전달하지 않은 경우에는 설정 변경이 적용됐다고 보지 않는다. backend를 다시 시작한 뒤 실제 프로세스에 전달한 설정을 확인한다.
+
 SQLite에서 상세 rows/BLOB를 삭제하면 빈 페이지가 재사용 가능해진다. 파일 bytes, WAL, Docker VHDX와 호스트 여유 공간이 같은 비율로 바로 줄어드는 것은 아니다. 이 정책은 VACUUM·VHDX 압축·Docker volume 제거·수동 legacy 삭제를 자동 실행하지 않는다.
