@@ -36,4 +36,4 @@ def resolve_clock(*, now: datetime | None, clock: Clock | None) -> Clock:
 
 
 
-__all__ = ["FrozenClock", "SystemClock", "resolve_clock", "aware_utc"]
+__all__ = ["FrozenClock", "SystemClock", "resolve_clock"]
