@@ -24879,6 +24879,17 @@
       "test_suppressions": {
         "tests/test_image_gitleaks_review.py": {}
       }
+    },
+    {
+      "commit": "80167525e1d17fc65e0b62d0271a30b1491bdb9b",
+      "feature_id": "AR-FRONTEND-BRACE-SECURITY-RECORD",
+      "reason": "Exact first-introduction blob of the development brace-expansion security verification document; dependency patch only, no new product source or test nodes. All earlier additions and frozen evidence remain unchanged.",
+      "tracked_files": {
+        "docs/verification/frontend-brace-expansion-security-20261002.md": "9439c93767df81135050473df39a1fe1a31957b9"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
