@@ -287,3 +287,56 @@ def test_upgrade_failure_preserves_source_and_unconfirmed_final(tmp_path, monkey
         if ownership.exists():
             assert not retention._read(ownership, retention.GenerationOwnership).promotion_confirmed
     assert source.exists()
+
+
+def test_previous_replacement_then_current_failure_preserves_all_generations(tmp_path, monkeypatch):
+    from app.runtime.migrations import generation
+    first = clean(tmp_path)
+    new_copy(tmp_path, name="B")
+    current_path = tmp_path / "canonical" / "current-generation.json"
+    before = snapshot(tmp_path / "canonical" / "generations")
+    original = generation._write_json_atomic
+    def fail_current(path, payload):
+        if path == current_path: raise OSError("injected current marker replacement")
+        return original(path, payload)
+    monkeypatch.setattr(generation, "_write_json_atomic", fail_current)
+    with pytest.raises(OSError, match="current marker replacement"):
+        new_copy(tmp_path, name="C")
+    assert json.loads(current_path.read_text())["relative_path"] == "generations/B"
+    assert (tmp_path / "canonical" / "previous-generation.json").read_bytes() == current_path.read_bytes()
+    final = tmp_path / "canonical" / "generations" / "C"
+    assert not retention._read(final / retention.OWNERSHIP_FILE, retention.GenerationOwnership).promotion_confirmed
+    owner = retention.ServingRetentionOwner(tmp_path).acquire()
+    try:
+        result = EmbeddedDataUpgradeCoordinator(StaticRuntimeDataPath(tmp_path), fallback_generation="clean").upgrade(retention_owner=owner)
+        assert not result.canonical.migrated and result.canonical.generation == "B"
+        assert result.retention == {"protection_ambiguous": 1}
+        after = snapshot(tmp_path / "canonical" / "generations")
+        assert all(after[path] == digest for path, digest in before.items())
+        assert first.canonical.database_path.exists() and final.exists()
+    finally:
+        owner.close()
+
+
+def test_removal_intent_write_failure_defers_without_copy_or_startup_failure(tmp_path, monkeypatch):
+    first = clean(tmp_path)
+    new_copy(tmp_path, name="B"); new_copy(tmp_path, name="C")
+    before = first.canonical.database_path.read_bytes()
+    original = retention._atomic_json
+    def fail_intent(path, payload):
+        if path.parent.name == "canonical-removals": raise OSError("injected removal intent write")
+        return original(path, payload)
+    owner = retention.ServingRetentionOwner(tmp_path).acquire()
+    monkeypatch.setattr(migration, "_backup_database", lambda *a: pytest.fail("unnecessary copy"))
+    try:
+        monkeypatch.setattr(retention, "_atomic_json", fail_intent)
+        result = EmbeddedDataUpgradeCoordinator(StaticRuntimeDataPath(tmp_path), fallback_generation="clean").upgrade(retention_owner=owner)
+        assert result.canonical.generation == "C" and not result.canonical.migrated
+        assert result.retention["deferred"] == 1
+        assert first.canonical.database_path.read_bytes() == before
+        assert list((tmp_path / "runtime" / "canonical-removals").glob("*.json")) == []
+        monkeypatch.setattr(retention, "_atomic_json", original)
+        result = EmbeddedDataUpgradeCoordinator(StaticRuntimeDataPath(tmp_path), fallback_generation="clean").upgrade(retention_owner=owner)
+        assert not result.canonical.migrated and not first.canonical.database_path.exists()
+    finally:
+        owner.close()

@@ -209,6 +209,8 @@ os.environ['DESKTOP_LAUNCH_TOKEN'], os.environ['DESKTOP_ALLOWED_ORIGIN'] = token
 sys.argv = ['sidecar', '--parent-pid', str(os.getpid()), '--data-root', str(root), '--runtime-root', str(root/'runtime'), '--legacy-data-root', str(root/'legacy'), '--launch-id', 'logging-handshake', '--runtime-profile', 'TEST']
 app = FastAPI()
 app.state.runtime_composition = SimpleNamespace(session_factory=lambda: None)
+disposed = []
+app.state.dispose_runtime = lambda: disposed.append(True)
 @app.get('/health')
 async def health():
     return {'status': 'ok'}
@@ -235,6 +237,7 @@ watchdog = threading.Timer(15, lambda: os._exit(91))
 watchdog.daemon = True
 watchdog.start()
 observed['exit_code'] = desktop_sidecar.main()
+assert disposed == [True]
 watchdog.cancel()
 observed['endpoint_removed'] = not (root/'runtime/sidecar.endpoint.json').exists()
 print(json.dumps(observed))

@@ -339,3 +339,42 @@ def test_three_characters_progress_with_normal_and_large_cleanup(tmp_path):
         assert enabled["duration_seconds"] < baseline["duration_seconds"] * 3 + 1.5
         (tmp_path / "concurrent-workload-metrics.json").write_text(json.dumps({"off": baseline, "on": enabled}, indent=2))
     asyncio.run(scenario())
+
+
+def test_canonical_busy_and_two_maintenance_owners_defer_safely(tmp_path, monkeypatch):
+    from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+    async def scenario():
+        engine, factory, ids = database(tmp_path)
+        locked = sqlite3.connect(engine.url.database)
+        try:
+            with factory() as db: completed(db, ids)
+            async with activity_checkpointer(tmp_path) as saver: await checkpoint(saver, "old")
+            locked.execute("BEGIN IMMEDIATE")
+            task = CheckpointMaintenance(data_root=tmp_path, session_factory=factory, clock=lambda: NOW)
+            began = monotonic()
+            try:
+                assert (await task.cycle())["deferred"] == 1
+                assert monotonic() - began < 1
+            finally:
+                locked.rollback()
+            entered, release = asyncio.Event(), asyncio.Event()
+            original = AsyncSqliteSaver.adelete_thread
+            async def delay(self, identifier):
+                entered.set(); await release.wait()
+                await original(self, identifier)
+            monkeypatch.setattr(AsyncSqliteSaver, "adelete_thread", delay)
+            first = CheckpointMaintenance(data_root=tmp_path, session_factory=factory, clock=lambda: NOW)
+            second = CheckpointMaintenance(data_root=tmp_path, session_factory=factory, clock=lambda: NOW)
+            running = asyncio.create_task(first.cycle())
+            await entered.wait()
+            try:
+                assert await second.cycle() == {"locked": 1}
+            finally:
+                release.set()
+            assert (await running)["pruned"] == 1
+            assert (await second.cycle()).get("pruned", 0) == 0
+            with factory() as db:
+                assert db.get(ActivityGraphRun, "old").result[RETENTION_KEY]["state"] == "pruned"
+        finally:
+            locked.close(); engine.dispose()
+    asyncio.run(scenario())
