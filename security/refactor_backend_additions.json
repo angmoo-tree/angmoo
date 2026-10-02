@@ -25825,6 +25825,97 @@
         "tests/migrations/test_canonical_retention.py": {},
         "tests/runtime/test_retention_lifecycle.py": {}
       }
+    },
+    {
+      "commit": "bffaebf349f9baab5fd7568b498b53da07d2a96a",
+      "feature_id": "AR-RETENTION-SDK-BUSY-20261002",
+      "reason": "Deterministic SDK busy recovery completes on the next cycle without repeated business execution; existing latency assertions remain unchanged.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_checkpoint_maintenance.py::test_three_characters_sdk_busy_cleanup_finishes_without_reexecution"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_checkpoint_maintenance.py": {
+          "test_startup_idle_periodic_and_two_root_isolation": [
+            "assert tasks[0].last_cycle['pruned'] == 1",
+            "assert tasks[1].last_cycle['pruned'] == 1",
+            "assert done",
+            "assert db.get(ActivityGraphRun, 'same-id').result[RETENTION_KEY]['state'] == 'retained'",
+            "assert task._task is None"
+          ],
+          "test_protected_candidate_cursor_advances_past_full_batch": [
+            "assert sum((item.get('pruned', 0) for item in outcomes)) == 1",
+            "assert all((row.result[RETENTION_KEY]['state'] == 'retained' for row in db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.activity_id.like('protected-%')))))"
+          ],
+          "test_recovery_lease_different_id_and_pending_effect_protect": [
+            "assert protection_reason(db, row, now=NOW) == 'live_actor_lease'",
+            "assert protection_reason(db, row, now=NOW) == 'pending_public_effect'"
+          ],
+          "test_busy_cancellation_backup_lock_and_reload_release": [
+            "assert not running.done()",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert backup_checkpoint(tmp_path, tmp_path / 'completed-backup.sqlite3')",
+            "assert await task.cycle() == {'locked': 1}",
+            "pytest.raises(EmbeddedGenerationError)",
+            "assert (await task.cycle()).get('deferred', 0) + task.last_cycle.get('cycle_deferred', 0) >= 1",
+            "assert monotonic() - started < 1"
+          ],
+          "test_100_activities_over_virtual_days_limits_detail_blobs": [
+            "assert metrics['24-hour']['checkpoint_rows'] == metrics['24-hour']['write_rows'] == 1",
+            "assert metrics['30-day-baseline']['checkpoint_rows'] == metrics['30-day-baseline']['write_rows'] == 201",
+            "assert metrics['24-hour']['detail_blob_bytes'] < metrics['30-day-baseline']['detail_blob_bytes'] / 100",
+            "assert db.get(ActivityGraphRun, 'failed-preserved').status == 'failed'",
+            "assert len(db.scalars(select(ActivityGraphRun).where(ActivityGraphRun.status == 'observed')).all()) == 100"
+          ],
+          "test_start_budget_finishes_active_delete_and_defers_next_target": [
+            "assert outcome['pruned'] == 1 and outcome['max_delete_ms'] == 6000",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert db.get(ActivityGraphRun, 'one').result[RETENTION_KEY]['state'] == 'pruned'",
+            "assert db.get(ActivityGraphRun, 'two').result[RETENTION_KEY]['state'] == 'retained'"
+          ],
+          "_overlap_workload": [
+            "assert all((value == list(range(1, 9)) for value in progress.values()))",
+            "assert provider_calls == {'A': 1, 'B': 1, 'C': 1}",
+            "assert provider_calls == {'A': 1, 'B': 1, 'C': 1}",
+            "assert value['step'] == 8",
+            "assert first.get('pruned', 0) + first.get('deferred', 0) == 21",
+            "assert first.get('pruned', 0) + followup_cleanup.get('pruned', 0) == 21",
+            "assert len(db.scalars(select(PostLike)).all()) == 3",
+            "assert len(db.scalars(select(AgentPublicActionExecution)).all()) == 3",
+            "assert all((db.get(ActivityGraphRun, lane[3]).status == 'completed' for lane in lanes))",
+            "assert saved is not None and saved.checkpoint['channel_values']['__root__']['step'] == 8",
+            "assert db.get(ActivityGraphRun, identifier).result[RETENTION_KEY]['state'] == 'pruned'",
+            "assert slot.locked_by_run_id == activity_id",
+            "assert slot.lease_expires_at.replace(tzinfo=NOW.tzinfo) > NOW"
+          ],
+          "test_three_characters_progress_with_normal_and_large_cleanup": [
+            "assert enabled['max_write_seconds'] < max(0.5, baseline['max_write_seconds'] * 3)",
+            "assert enabled['p95_write_seconds'] < baseline['p95_write_seconds'] * 3 + 0.05",
+            "assert enabled['max_tick_gap_seconds'] < max(1, baseline['max_tick_gap_seconds'] * 3)",
+            "assert enabled['duration_seconds'] < baseline['duration_seconds'] * 3 + 1.5"
+          ],
+          "test_three_characters_sdk_busy_cleanup_finishes_without_reexecution": [
+            "assert deferred_once",
+            "assert enabled['cleanup'].get('deferred', 0) >= 1",
+            "assert enabled['followup_cleanup'].get('pruned', 0) == enabled['cleanup']['deferred']",
+            "assert attempts['activity:expired-00'] == 2",
+            "assert enabled['provider_calls'] == {'A': 1, 'B': 1, 'C': 1}",
+            "assert all((values == list(range(1, 9)) for values in enabled['progress'].values()))"
+          ],
+          "test_canonical_busy_and_two_maintenance_owners_defer_safely": [
+            "assert (await running)['pruned'] == 1",
+            "assert (await second.cycle()).get('pruned', 0) == 0",
+            "assert (await task.cycle())['deferred'] == 1",
+            "assert monotonic() - began < 1",
+            "assert await second.cycle() == {'locked': 1}",
+            "assert db.get(ActivityGraphRun, 'old').result[RETENTION_KEY]['state'] == 'pruned'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_checkpoint_maintenance.py": {}
+      }
     }
   ]
 }
