@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "ddbab6044e4f234870ec2767beb9a9dc4f742c40087d80e59d875f4804129111"
+      "sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -294,7 +294,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "ddbab6044e4f234870ec2767beb9a9dc4f742c40087d80e59d875f4804129111",
+      "source_sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb",
       "transition_pr": "ER4 PR J"
     },
     {

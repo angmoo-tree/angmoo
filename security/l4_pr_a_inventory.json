@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3962,
-      "internal_edge_count": 5435,
+      "external_import_count": 3972,
+      "internal_edge_count": 5418,
       "legacy_import_exception_count": 0,
-      "module_count": 1338,
+      "module_count": 1347,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -872,6 +872,11 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.contracts.proposal_plan",
+            "path": "backend/app/domains/social/contracts/proposal_plan.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.contracts.recommendation",
             "path": "backend/app/domains/social/contracts/recommendation.py"
           },
@@ -1289,6 +1294,7 @@
           {
             "imports": [
               "app.contracts.activity_thought",
+              "app.domains.social.contracts.proposal_plan",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.schemas.feed_status"
             ],
@@ -2446,32 +2452,6 @@
           },
           {
             "imports": [
-              "app.config",
-              "app.domains.routines.repository.public_action_executions",
-              "app.domains.routines.service.public_action_executions",
-              "app.domains.social.contracts.feed_execution",
-              "app.domains.social.models.topics",
-              "app.domains.social.service.feed_cycle",
-              "app.domains.social.service.feed_cycle_values",
-              "app.domains.world_characters.models",
-              "app.integrations.direct_llm",
-              "app.runtime.activity_proposals.composition",
-              "app.runtime.relationships.social_metrics",
-              "app.runtime.social.agent_tools",
-              "app.runtime.social.feed_reaction_provider",
-              "app.runtime.social.feed_relationship_context",
-              "app.runtime.social.langgraph_actions",
-              "app.runtime.social.observations",
-              "app.runtime.social.subjective_composition",
-              "app.runtime.social.world_feed_actions",
-              "app.runtime.social.world_feed_queries",
-              "app.runtime.social_snapshot"
-            ],
-            "module": "app.runtime.social.feed_cycle",
-            "path": "backend/app/runtime/social/feed_cycle.py"
-          },
-          {
-            "imports": [
               "app.domains.routines.models",
               "app.domains.routines.service.action_briefs",
               "app.domains.routines.service.feed_history",
@@ -2514,27 +2494,6 @@
           },
           {
             "imports": [
-              "app.config",
-              "app.contracts.activity_thought",
-              "app.contracts.activity_thought_output",
-              "app.credentials",
-              "app.domains.relationships.contracts.social_consumption",
-              "app.domains.relationships.policies.interpretation_prompt",
-              "app.domains.social.contracts.feed_execution",
-              "app.domains.social.contracts.world_feed",
-              "app.domains.social.exceptions",
-              "app.domains.social.schemas.feed",
-              "app.domains.social.service.feed_reaction_prompts",
-              "app.domains.social.service.feed_reaction_validation",
-              "app.integrations.direct_llm",
-              "app.providers.gemini",
-              "app.runtime.relationships.social_metrics"
-            ],
-            "module": "app.runtime.social.feed_reaction_provider",
-            "path": "backend/app/runtime/social/feed_reaction_provider.py"
-          },
-          {
-            "imports": [
               "app.domains.relationships.contracts.social_context",
               "app.domains.relationships.models.social"
             ],
@@ -2549,6 +2508,31 @@
             ],
             "module": "app.runtime.social.feed_status",
             "path": "backend/app/runtime/social/feed_status.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.domains.routines.repository.public_action_executions",
+              "app.domains.routines.service.public_action_executions",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.models.topics",
+              "app.domains.social.service.feed_cycle",
+              "app.domains.social.service.feed_cycle_values",
+              "app.domains.world_characters.models",
+              "app.integrations.direct_llm",
+              "app.runtime.activity_proposals.composition",
+              "app.runtime.relationships.social_metrics",
+              "app.runtime.social.agent_tools",
+              "app.runtime.social.feed_relationship_context",
+              "app.runtime.social.langgraph_actions",
+              "app.runtime.social.observations",
+              "app.runtime.social.subjective_composition",
+              "app.runtime.social.world_feed_actions",
+              "app.runtime.social.world_feed_queries",
+              "app.runtime.social_snapshot"
+            ],
+            "module": "app.runtime.social.feed_workflows",
+            "path": "backend/app/runtime/social/feed_workflows.py"
           },
           {
             "imports": [
@@ -2654,6 +2638,34 @@
             ],
             "module": "app.runtime.social.observations",
             "path": "backend/app/runtime/social/observations.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.contracts.activity_thought",
+              "app.core.context_text",
+              "app.core.prompt_safety",
+              "app.core.redaction",
+              "app.core.unit_of_work",
+              "app.domains.relationships.contracts.social_consumption",
+              "app.domains.routines.models.resident",
+              "app.domains.routines.policies.action_matching",
+              "app.domains.routines.policies.execution_results",
+              "app.domains.routines.policies.writer_outputs",
+              "app.domains.routines.policies.writer_tasks",
+              "app.domains.routines.repository.public_action_executions",
+              "app.domains.routines.service.public_action_executions",
+              "app.domains.routines.service.relationship_context",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.contracts.subjective_context",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community",
+              "app.runtime.social.agent_tools",
+              "app.runtime.social.langgraph_actions",
+              "app.runtime.social.subjective_composition"
+            ],
+            "module": "app.runtime.social.planned_actions",
+            "path": "backend/app/runtime/social/planned_actions.py"
           },
           {
             "imports": [
@@ -3268,7 +3280,7 @@
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
-        "sha256": "b8ebf43336a6c5c6a584bf9a1c892b0a6bc57a66f1810cc51fcbe676d1319c32"
+        "sha256": "bb0c59a8f18f1c5f608d0448f2e6fdccf440239eacd1908cc5d1ef6c2092a015"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -3284,7 +3296,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "4e5040ba689e986e99181a484c76d8782c06c95ce0377c3c029284b7bf362de6"
+        "sha256": "8c78d34a2fdb0c51c7e80d1d3d76466c231e936e2d8646b72cb6b8e65ad88c94"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
