@@ -26503,6 +26503,39 @@
       "test_suppressions": {
         "tests/routines/test_planning_imports.py": {}
       }
+    },
+    {
+      "commit": "3fc8728515821de3b20c6dfe7b5498f244a00308",
+      "feature_id": "AR-SNS-V2-CLOSED-COMMITTED-SOURCE",
+      "reason": "Issue359: only a fully revalidated closed SNS retirement can account for a formerly introduced removed module; four current positive and negative tests keep unproven deletion and arbitrary source failures.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_committed_source_requires_exact_closed_retirement[changed_owner]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_committed_source_requires_exact_closed_retirement[none]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_committed_source_requires_exact_closed_retirement[remaining_source]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_committed_source_requires_exact_closed_retirement[unproven]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_sns_execution_retirement_gate.py": {
+          "evidence": [],
+          "test_closed_retirement_accounts_for_removed_and_retained_symbols": [
+            "assert removed == {(SOURCE, 'exclusive_graph')} and modules == {SOURCE}"
+          ],
+          "test_retirement_rejects_each_unproven_source_or_behavior_delta": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_rejects_global_local_relative_and_dynamic_old_imports": [
+            "pytest.raises(ValueError, match='import')"
+          ],
+          "test_committed_source_requires_exact_closed_retirement": [
+            "pytest.raises(ValueError)",
+            "assert errors == ['committed source lacks append-only introduction evidence: ' + path for path in sorted({arbitrary, SOURCE} if damage == 'unproven' else {arbitrary})]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_sns_execution_retirement_gate.py": {}
+      }
     }
   ]
 }
