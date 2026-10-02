@@ -70,7 +70,11 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
-    APP_ROOT / "runtime" / "resident" / "langgraph.py",
+    APP_ROOT / "runtime" / "autonomous_activity" / "gateway.py",
+    APP_ROOT / "runtime" / "autonomous_activity" / "llm_context.py",
+    APP_ROOT / "runtime" / "social" / "planned_actions.py",
+    APP_ROOT / "runtime" / "social" / "feed_workflows.py",
+    APP_ROOT / "runtime" / "resident" / "history.py",
     APP_ROOT / "runtime" / "resident" / "context.py",
     APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
@@ -86,7 +90,7 @@ def _imports(path: Path) -> set[str]:
     return imported
 
 def test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports():
-    imports = _imports(APP_ROOT / "runtime" / "resident" / "langgraph.py")
+    imports = _imports(APP_ROOT / "runtime" / "autonomous_activity" / "gateway.py")
 
     assert not {name for name in imports if "openclaw" in name.lower()}
     assert not {name for name in imports if name == "google" or name.startswith("google.")}
