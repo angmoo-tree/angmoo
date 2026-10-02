@@ -1,5 +1,5 @@
 {
-  "edge_count": 5417,
+  "edge_count": 5418,
   "external_import_count": 3972,
   "module_count": 1347,
   "modules": [
@@ -7939,7 +7939,7 @@
       "imports": [
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
-        "app.domains.routines.service.scheduling"
+        "app.domains.routines.utils.clock"
       ],
       "module": "app.domains.routines.policies.planning",
       "path": "backend/app/domains/routines/policies/planning.py",
@@ -9372,7 +9372,8 @@
       ],
       "imports": [
         "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.exceptions"
+        "app.domains.routines.exceptions",
+        "app.domains.routines.utils.clock"
       ],
       "module": "app.domains.routines.service.scheduling",
       "path": "backend/app/domains/routines/service/scheduling.py",

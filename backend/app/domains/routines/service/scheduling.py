@@ -1,14 +1,9 @@
 """Deterministic due-tick decisions for activity windows."""
 from __future__ import annotations
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from app.domains.routines.contracts.lifecycle import DueTick
 from app.domains.routines.exceptions import ActivityRuntimeValidationError
-
-
-def aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
+from app.domains.routines.utils.clock import aware_utc
 
 
 def latest_due_tick(

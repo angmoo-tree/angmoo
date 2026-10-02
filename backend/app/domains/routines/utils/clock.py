@@ -6,6 +6,12 @@ from datetime import UTC, datetime
 from app.domains.routines.contracts.clock import Clock
 
 
+def aware_utc(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
 class SystemClock:
     def now_utc(self) -> datetime:
         return datetime.now(UTC)
@@ -30,4 +36,4 @@ def resolve_clock(*, now: datetime | None, clock: Clock | None) -> Clock:
 
 
 
-__all__ = ["FrozenClock", "SystemClock", "resolve_clock"]
+__all__ = ["FrozenClock", "SystemClock", "resolve_clock", "aware_utc"]
