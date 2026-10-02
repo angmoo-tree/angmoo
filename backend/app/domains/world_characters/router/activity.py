@@ -16,7 +16,7 @@ router = APIRouter(prefix="/worlds", tags=["world-character-activity"])
 
 class EngineWrite(BaseModel):
     scope: Literal["character", "world", "global"]
-    engine: ActivityEngine | None
+    engine: Literal["personalized_graph_v2"] | None
     expected_version: int = Field(ge=0)
 
 
@@ -37,7 +37,7 @@ def _owner_actor(db, request, user, world_id, actor_id, *, mutation):
 def read_activity_runtime(world_id: str, actor_id: str, request: Request,
                           db: Session = Depends(get_db), user=Depends(get_current_user)):
     actor = _owner_actor(db, request, user, world_id, actor_id, mutation=False)
-    return activity_status(db, actor=actor)
+    return {**activity_status(db, actor=actor), "transition": request.app.state.activity_transition_reader(db, actor)}
 
 
 @router.put("/{world_id}/world-characters/{actor_id}/activity-runtime")
@@ -52,4 +52,4 @@ def update_activity_runtime(world_id: str, actor_id: str, data: EngineWrite, req
     except ValueError as exc:
         db.rollback()
         raise HTTPException(409 if "conflict" in str(exc) else 422, str(exc)) from exc
-    return activity_status(db, actor=actor)
+    return {**activity_status(db, actor=actor), "transition": request.app.state.activity_transition_reader(db, actor)}

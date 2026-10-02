@@ -142,7 +142,9 @@ def _real_run(monkeypatch, root):
         assigned_character_id=ctx.character.id, assigned_user_id=ctx.user_id,
         lease_expires_at=NOW + timedelta(days=500)))
     run = bind_run(db, actor=actor, activity_id=ctx.run_id)
-    run.contract_version = 1
+    # New generation enters the supported parent. Historical V1 completion
+    # remains covered by the canonical-reader fixtures, never by a new V1 run.
+    run.contract_version = 2
     db.commit()
     calls = []
     async def plan(self, **kwargs):
@@ -218,7 +220,7 @@ def test_terminal_bad_scope_or_result_never_constructs_graph(tmp_path, monkeypat
                 actor = SimpleNamespace(id=actor.id, character_id=actor.character_id,
                     membership_id=actor.membership_id, world_id="wrong-world")
             elif damage == "contract":
-                run.contract_version = 2
+                run.contract_version = 1
             elif damage == "paths":
                 run.result = {**run.result, "paths": {}}
             else:

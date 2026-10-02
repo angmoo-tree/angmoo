@@ -11,7 +11,7 @@ from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.social.models.topics import RecommendationDelivery
 from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.service.recommendation_topics import enroll_native_post
-from app.runtime.social.feed_cycle import run_world_keyword_feed
+from app.runtime.social.feed_workflows import run_world_keyword_feed
 
 
 @pytest.fixture(autouse=True)

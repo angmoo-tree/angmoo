@@ -102,7 +102,7 @@ def test_preflight_failure_has_no_candidate_zero_or_delivery_claim():
     from social.test_feed_reaction_intent import _engine as cycle_engine, FakeFeedProvider
     from app.domains.social.schemas.feed import FeedReactionDecision
     from app.domains.routines.service.run_results import _stored_gateway_result
-    from app.runtime.social.feed_cycle import run_world_keyword_feed
+    from app.runtime.social.feed_workflows import run_world_keyword_feed
     from app.domains.social.models.topics import RecommendationDelivery
     with Session(cycle_engine(), expire_on_commit=False) as db:
         ctx, _ = _seed(db, with_candidate=True)

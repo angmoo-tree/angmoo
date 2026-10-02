@@ -26,7 +26,7 @@ from app.integrations.direct_llm import DirectLlmError
 from app.integrations.direct_llm import RunLlmTracker
 from app.domains.social.service.feed_reaction_validation import validate_reaction_decision
 from app.runtime.resident.context import LangGraphResidentContext
-from app.runtime.social.feed_cycle import run_world_keyword_feed
+from app.runtime.social.feed_workflows import run_world_keyword_feed
 
 
 KEYWORDS = [

@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine, event, literal, select
 from sqlalchemy.orm import Session
 
-from app.runtime.resident import langgraph as resident
+from tests.routines import policy_ports as resident
 
 
 @pytest.mark.parametrize("reply_limit", [None, 5])

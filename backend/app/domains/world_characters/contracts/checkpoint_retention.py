@@ -86,7 +86,8 @@ def completion(row) -> ActivityCompletion:
 
 
 def business_result(result: dict) -> dict:
-    return {key: value for key, value in result.items() if key != RETENTION_KEY}
+    from app.domains.world_characters.contracts.social_io import POLICY_KEYS
+    return {key: value for key, value in result.items() if key not in {RETENTION_KEY, *POLICY_KEYS, "normal_reservations"}}
 
 
 def retention(result: dict | None) -> CheckpointRetention | None:

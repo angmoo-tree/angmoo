@@ -45,16 +45,24 @@ def test_combined_writer_uses_code_owned_task_and_keeps_thought():
 
 
 def test_recovery_reservation_survives_new_ledger_and_preserves_metadata():
-    row = SimpleNamespace(contract_version=2, result={"paths": {"inbox": {"status": "completed"}}})
-    db = SimpleNamespace(get=lambda *a, **k: row, commit=lambda: None)
-    RecoveryLedger(db, "run").reserve("Inbox:writer")
-    with pytest.raises(ValueError, match="recovery_exhausted"):
+    from sqlalchemy.orm import Session
+    from app.domains.world_characters.models import CharacterActiveWorld, WorldCharacter
+    from app.domains.world_characters.service.activity_engines import bind_run
+    from social.test_feed_reaction_intent import _engine, _seed
+    with Session(_engine(), expire_on_commit=False) as db:
+        ctx, _ = _seed(db, with_candidate=False)
+        actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
+        row = bind_run(db, actor=actor, activity_id="run")
+        row.result = {**row.result, "paths": {"inbox": {"status": "completed"}}}
+        db.commit()
         RecoveryLedger(db, "run").reserve("Inbox:writer")
-    for i in range(4):
-        RecoveryLedger(db, "run").reserve(str(i))
-    with pytest.raises(ValueError, match="recovery_exhausted"):
-        RecoveryLedger(db, "run").reserve("sixth")
-    assert row.result["paths"]["inbox"]["status"] == "completed"
+        with pytest.raises(ValueError, match="recovery_exhausted"):
+            RecoveryLedger(db, "run").reserve("Inbox:writer")
+        for i in range(4):
+            RecoveryLedger(db, "run").reserve(str(i))
+        with pytest.raises(ValueError, match="recovery_exhausted"):
+            RecoveryLedger(db, "run").reserve("sixth")
+        assert row.result["paths"]["inbox"]["status"] == "completed"
 
 
 def test_combined_social_calls_transport_once_and_retains_all_decision_fields(monkeypatch):

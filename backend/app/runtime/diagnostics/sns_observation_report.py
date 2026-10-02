@@ -404,6 +404,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     grouped_errors.sort(key=lambda row: (-row["count"], row["first_at"] or ""))
     planner_events = [item for item in call_events
                       if item.get("node") in {"InboxActionPlanner", "FeedActionPlanner", "InboxDecisionDraft", "FeedDecisionDraft", "RoutineDecisionDraft"}]
+    routine_events = [item for item in call_events if item.get("node") == "RoutineActionPlanner"]
+    routine_recovered = {item.get("activity_id") for item in routine_events
+        if item.get("event_type") == "llm_json_attempt"
+        and (item.get("details") or {}).get("status") == "valid"
+        and (item.get("details") or {}).get("json_attempt") == 2}
+    routine_final_failures = {item.get("activity_id") for item in errors
+        if item.get("lane") == "routine" and item.get("node") in {"ActionPlanner", "RoutineActionPlanner"}}
     output_failures = [item for item in planner_events
                        if item.get("event_type") == "llm_json_postprocess_error"]
     draft_failures = [item for item in call_events
@@ -460,6 +467,12 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "planner_retries_scheduled": len(retry_events),
                 "planner_recovered_activities": len(recovered),
                 "planner_final_failures": len(planner_final_failures),
+                "routine_planner_output_failures": sum(item.get("event_type") == "llm_json_postprocess_error" for item in routine_events),
+                "routine_planner_retries_scheduled": sum(item.get("event_type") == "llm_json_attempt" and
+                    (item.get("details") or {}).get("status") == "retry_scheduled" for item in routine_events),
+                "routine_planner_recovered_activities": len(routine_recovered),
+                "routine_planner_final_failures": len(routine_final_failures),
+                "routine_planner_physical_calls": sum(item.get("event_type") == "llm_call" for item in routine_events),
                 "combined_draft_validation_failures": len(draft_failures),
                 "writer_recovered_paths": len(writer_recovered_paths),
                 "damaged_event_lines": damaged, "dropped_events": dropped,
@@ -541,6 +554,10 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                   f"final path failures: {len(planner_final_failures)}",
                   f"- Combined draft validation failures: {len(draft_failures)}; "
                   f"writer-recovered paths: {len(writer_recovered_paths)}. Physical requests remain in calls.jsonl.",
+                  f"- Split Routine: {coverage['routine_planner_physical_calls']} physical requests; "
+                  f"{coverage['routine_planner_output_failures']} output failures; "
+                  f"{coverage['routine_planner_recovered_activities']} recovered activities; "
+                  f"{coverage['routine_planner_final_failures']} final failures.",
                   "", "## Repeated errors", ""])
     for row in grouped_errors:
         lines.append(f"- {row['lane'] or 'parent'} / {row['node'] or 'unknown'} / {row['error']}: "

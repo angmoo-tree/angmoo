@@ -498,3 +498,7 @@ Next와 static이 공유하는 제품 화면이다. Chat의 thread key와 근거
 `features/media`는 이미지 설정·사용량·선택/미리보기·생성 상태와 자신의 transport/types를 소유한다. Chat와 Social이 Media feature를 직접 import하지 않도록 `composition/screens/world-chat-screen.tsx`와 `world-app.tsx`가 이미지 picker/status를 view slot으로 연결한다. Chat/Social API는 각 소유자가 `attachment_asset_id`를 전달하며 원래 글/메시지 본문을 유지한다.
 
 비공개 이미지 URL은 `useRuntimeMediaUrl`에서 현재 runtime의 인증된 요청으로 blob을 가져온다. Next production과 static export는 동일 컴포넌트와 계약을 사용한다. 인식 불가 안내·미리보기 유지·사용자의 명시적 첨부 제거, 저장된 모델별 참조 OFF와 설정 revision 충돌은 실제 Backend 상태에 따라 표시한다. 원래 채팅/SNS 기능과 기존 이미지 Provider 데이터는 새 화면 추가만으로 제거하지 않는다.
+
+## SNS 실행 지원과 역사 표시 (2026-10-03)
+
+`features/characters`의 personalized activity API/type/panel이 현재 지원 engine 쓰기와 역사 engine 읽기를 구분한다. 신규 입력은 V2 또는 상속 null이고 과거 current·abandoned 및 backend 전환 상태는 그대로 표시한다. 전환 readiness·owner·World·scope/revision·claim 정산은 Backend가 소유한다. UI의 안내 문구나 선택만으로 활동 ON·승인·예약을 변경하지 않는다. Next와 static 모두 같은 소유 컴포넌트를 사용한다. [검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)과 [LOCAL 디자인 근거](../docs/architecture/frontend-design-reference.md)의 최신 기록을 함께 읽는다.

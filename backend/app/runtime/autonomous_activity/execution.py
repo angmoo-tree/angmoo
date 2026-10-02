@@ -9,12 +9,9 @@ from app.integrations.direct_llm import RunLlmTracker
 from app.runtime.autonomous_activity.binding import current, observer
 from app.runtime.autonomous_activity.checkpoints import activity_checkpointer, checkpoint_config
 from app.runtime.autonomous_activity.contracts import ActivityIdentity
-from app.runtime.autonomous_activity.feed import FeedLane
 from app.runtime.autonomous_activity.graph import build_autonomous_graph
-from app.runtime.autonomous_activity.inbox import InboxLane
 from app.runtime.autonomous_activity.inputs import shared_input
 from app.runtime.autonomous_activity.output_recovery import MAX_CALL_BUDGET
-from app.runtime.autonomous_activity.routine import RoutineLane
 from app.runtime.autonomous_activity.social_lane import plain
 from app.runtime.character_activity_state import initialize_from_last_success
 
@@ -46,6 +43,22 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         from app.runtime.autonomous_activity.checkpoint_maintenance import validate_completion_receipts
         validate_completion_receipts(ctx.db, latest)
         return business_result(latest.result)
+    from app.domains.world_characters.contracts.activity_retirement import retired_identity
+    if retired_identity(run.engine, run.contract_version):
+        from app.domains.characters.models import Character
+        from app.runtime.autonomous_activity.retirement import transition_uow
+        character = ctx.db.get(Character, actor.character_id)
+        if (latest is None or character is None or character.owner_id != ctx.user_id
+                or (latest.world_id, latest.world_character_id) != (actor.world_id, actor.id)):
+            raise ActivityScopeChangedError("legacy_activity_scope_invalid")
+        actor_id, activity_id, old_engine, old_version = actor.id, run.activity_id, run.engine, run.contract_version
+        ctx.db.commit()
+        outcome = transition_uow(ctx.db, actor_id=actor_id, entry_run_id=ctx.run_id)
+        row = ctx.db.get(ActivityGraphRun, activity_id, populate_existing=True)
+        return {"engine": old_engine, "contract_version": old_version,
+            "status": row.status if row.status == "abandoned" else "aborted",
+            "reason": outcome.reason or "legacy_sns_abandoned", "publish_result": {"public_action_count": 0},
+            "llm_usage_summary": {"call_count": 0}}
     binding = current()
     if binding is None:
         raise RuntimeError("personalized_activity_runtime_unavailable")
@@ -60,12 +73,15 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             world_id=actor.world_id, actor_id=actor.id, activity_started_at=run.started_at) if sink else None
     except Exception:
         attempt = None
-    # Normal graph budget plus one bounded recovery for each eligible node.
+    # Normal and recovery ceilings remain independent of eligible node count.
     tracker = RunLlmTracker(max_calls=MAX_CALL_BUDGET, observer=attempt.tracker_event if attempt else None)
     identity = ActivityIdentity(activity_id=run.activity_id, world_id=actor.world_id, actor_id=actor.id,
         contract_version=run.contract_version,
         cause="manual" if "manual" in ctx.session_key else "scheduled", generation_model=ctx.generation_model, thinking_level=ctx.generation_thinking_level).model_dump()
     policy = (run.result or {}).get("routine_policy")
+    from app.domains.world_characters.contracts.social_io import read_policies
+    execution_policies = read_policies(run.result).model_dump()
+    identity.update(execution_policies)
     from app.contracts.name_binding import read_name_binding
     from app.domains.world_characters.service.name_binding import validate_name_binding
     name_binding = read_name_binding(run.result)
@@ -99,6 +115,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("activity_contract_changed")
         if (row.result or {}).get("routine_policy") != policy:
             raise ActivityScopeChangedError("routine_policy_changed")
+        if read_policies(row.result).model_dump() != execution_policies:
+            raise ActivityScopeChangedError("social_execution_policy_changed")
         if (row.result or {}).get("name_binding") != frozen_names:
             raise ActivityScopeChangedError("name_binding_changed")
         if (row.result or {}).get("name_binding_policy") != name_policy:
@@ -121,6 +139,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         stored_identity = state.get("identity", identity)
         if any(stored_identity.get(key) != identity.get(key) for key in ("activity_id", "contract_version", "world_id", "actor_id", "generation_model", "thinking_level", "routine_output_contract", "routine_state_schema_version", "routine_thought_policy")):
             raise ActivityScopeChangedError("activity_identity_or_model_changed")
+        if read_policies(stored_identity).model_dump() != execution_policies:
+            raise ActivityScopeChangedError("social_execution_policy_changed")
         ctx.db.expire_all()
         row, slot, now = validate_claim()
         if state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
@@ -172,7 +192,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         results = {path: state.get(f"{path}_result", {}) for path in ("inbox", "routine", "feed")}
         count = sum(r.get("public_action_count", 0) for r in results.values())
         result = {"engine": "personalized_graph_v2", "contract_version": identity["contract_version"],
-            "execution_order": ["inbox", "feed", "routine"] if identity["contract_version"] == 2 else ["inbox", "routine", "feed"],
+            "execution_order": ["inbox", "feed", "routine"],
             "status": "failed" if any(r.get("status") == "failed" for r in results.values()) else "completed" if count else "observed",
             "summary": "Personalized Inbox, Routine and Feed graph completed.",
             "publish_result": {"public_action_count": count}, "paths": results,
@@ -191,13 +211,10 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
                     "public_action_count": item.get("public_action_count", 0)} for path, item in results.items()}})
         return {"result": result}
 
-    classes = (("inbox", InboxLane), ("routine", RoutineLane), ("feed", FeedLane))
-    version_options = {}
-    if identity["contract_version"] == 2:
-        from app.runtime.autonomous_activity.combined_lanes import CombinedInboxLane, CombinedFeedLane, CombinedRoutineLane
-        from app.runtime.autonomous_activity.combined_provider import RecoveryLedger
-        classes = (("inbox", CombinedInboxLane), ("routine", CombinedRoutineLane), ("feed", CombinedFeedLane))
-        version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id)}
+    from app.runtime.autonomous_activity.combined_lanes import CombinedInboxLane, CombinedFeedLane, CombinedRoutineLane
+    from app.runtime.autonomous_activity.combined_provider import RecoveryLedger
+    classes = (("inbox", CombinedInboxLane), ("routine", CombinedRoutineLane), ("feed", CombinedFeedLane))
+    version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id), "policies": execution_policies}
     adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service,
                       guard=guard, claim_validator=validate_claim,
                       **version_options,

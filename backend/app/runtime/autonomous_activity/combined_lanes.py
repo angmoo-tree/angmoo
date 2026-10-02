@@ -9,9 +9,9 @@ from app.runtime.autonomous_activity.routine import RoutineLane
 
 
 class CombinedGeneration:
-    def __init__(self, *args, ledger, **kwargs):
+    def __init__(self, *args, ledger, policies=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger)
+        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger, policies=policies)
 
     async def plan(self, state):
         mode = state.get("generation_mode")
@@ -36,7 +36,7 @@ class CombinedGeneration:
         if state.get("generation_mode") == "combined" and not result["assignments"]:
             try:
                 parse_social_draft(state["decision"].get("provisional_draft"),
-                    lane=self.lane, assignments=[])
+                    lane=self.lane, assignments=[], policy=self.provider.social_io_policy)
             except ValueError:
                 result["failure"] = {"stage": "ValidateDraft", "reason": "unsolicited_or_invalid_draft"}
         return result
@@ -73,7 +73,7 @@ class CombinedGeneration:
                     assignments=state["assignments"], combined=True, lane=self.lane, receipt=fields)
                 observe_output(self.tracker, names, lane=self.lane, fields=fields)
                 drafts = parse_social_draft(raw, lane=self.lane,
-                    assignments=state["assignments"])["reply_task_results"]
+                    assignments=state["assignments"], policy=self.provider.social_io_policy)["reply_task_results"]
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:

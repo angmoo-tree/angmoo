@@ -482,3 +482,11 @@ SNS/Chat·Credentials·World 소유권을 연결하는 SQL과 lifecycle 구성�
 앱 factory는 기존 `configure_chat_services`로 기본 Chat 서비스를 연결한 다음 `configure_chat_image_services`에서 그 앱의 media runtime을 받는 Generation·Evidence 서비스를 조립한다. 기본 서비스의 전역 객체를 바꾸지 않으며 full/public 두 앱 사이에 이미지 collaborator를 공유하지 않는다.
 
 비공개 픽셀은 `MEDIA_ROOT/private-image-assets`에 저장하며 인증된 content endpoint로만 읽는다. 백업은 SQLite, 이 디렉터리와 암호화 secret을 함께 보존해야 한다. World Package는 portable DTO projection을 사용하며 이 설정·키·업로드·분석을 포함하지 않는다. 실제 생성 서비스/ComfyUI 실행 검증은 키 없는 계약 검사와 구분한다.
+
+## SNS 계약 2 실행·입출력·역사 책임 (2026-10-03)
+
+수동/예약 SNS의 지원 진입은 `runtime/autonomous_activity/gateway.py`에 있다. 현재 부모는 계약 2의 Combined 순서를 소유하며 모델 호출 정책·복구 장부·lane wire와 canonical 공개 효과를 분리한다. `runtime/social/planned_actions.py`와 `feed_workflows.py`는 실제 공통 executor/workflow의 소유자다. 퇴역 `runtime/resident/langgraph.py` 또는 전용 Feed Provider를 경유하는 임시 facade를 만들지 않는다.
+
+판단 전용 응답/제안의 의미는 `domains/routines/contracts/reply_writing.py`와 `domains/social/contracts/proposal_plan.py`에 두고 실제 본문·서버 task·일정/공개 제안 결합은 canonical owner에서 검증한다. 모델용 view의 필드 축소는 원천 Candidate·revision·Chat/Memory 입력을 삭제하는 절차가 아니다. 신규 wire 정책과 Routine 출력 정책은 별도 metadata로 생성 시 고정하며 이전 V2/2의 정책 부재는 기존 계약으로 읽는다.
+
+미완료 current/V1의 퇴역은 `runtime/autonomous_activity/retirement.py`가 도메인 `routines/service/legacy_claims.py`와 조립한다. 실제 claim·불확실 효과는 actor별로 보류하고, 지원 정산 이후에만 abandoned/aborted로 종료한다. 성공·역사·원장·기존 보존 정책은 유지한다. current 설정은 승인·하루 준비·scope/revision 확인 후 조건부 전환하며 구 실행을 SDK로 재개하지 않는다. startup은 그 앱의 composition session factory를 사용한다. 상세 계약과 검증 범위는 [실행·검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)에 있다.

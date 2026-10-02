@@ -99,7 +99,9 @@ import sys
 from sqlalchemy.orm import configure_mappers
 from app.models import Base
 from app.runtime.memory import daypart_observations
-from app.runtime.resident import execution, writing, langgraph
+from app.runtime.resident import execution, writing
+from app.runtime.autonomous_activity import gateway
+from app.runtime.resident import history as resident_history
 from app.domains.memory.service import daypart, daypart_observations as observations
 from app.domains.identity.repository import credentials
 from app.domains.relationships.service import points
@@ -110,7 +112,9 @@ assert execution._record_provided_daypart_observations is daypart_observations._
 assert execution._filter_daypart_duplicate_inbox_candidates is observations.filter_daypart_duplicate_inbox_candidates
 assert writing._record_daypart_action_memory is daypart.record_action_memory
 assert writing.agent_run_crud.get_credential is credentials.get_credential
-assert langgraph.relationship_points is points
+assert resident_history.relationship_points is points
+assert execution.run_social_activity is gateway.run_social_activity
+assert "app.runtime.resident.langgraph" not in sys.modules
 assert 'app.services.agent_writing' not in sys.modules
 assert 'app.cruds.agent_runs' not in sys.modules
 metadata = register_models()

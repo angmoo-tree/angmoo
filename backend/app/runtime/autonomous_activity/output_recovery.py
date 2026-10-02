@@ -8,10 +8,12 @@ from app.providers.contracts import JsonRetryDecision, StructuredOutputValidatio
 NORMAL_CALL_BUDGET = 10
 RECOVERABLE_NODES = frozenset({"InboxTargetSelector", "FeedTargetSelector",
                               "InboxActionPlanner", "FeedActionPlanner", "RoutineWriter"})
-RECOVERY_CALL_BUDGET = len(RECOVERABLE_NODES)
-MAX_CALL_BUDGET = NORMAL_CALL_BUDGET + RECOVERY_CALL_BUDGET
+RECOVERY_CALL_BUDGET = 5
+MAX_CALL_BUDGET = 15
 FIRST_OUTPUT_TOKENS = 4096
 RETRY_OUTPUT_TOKENS = 8192
+ROUTINE_FIRST_OUTPUT_TOKENS = 8192
+ROUTINE_RETRY_OUTPUT_TOKENS = 16384
 
 
 class ActivityRetryGuardError(Exception):
@@ -65,4 +67,14 @@ def planner_json_retry(exc: BaseException, payload: dict | None,
             f"action_brief_missing at {exc.field_path}: every non-no_action decision "
             "requires a non-blank brief; regenerate the complete result for the supplied targets.",
         )
+    return None
+
+
+def routine_json_retry(exc: BaseException, payload: dict | None,
+                       diagnostic: dict, attempt: int) -> JsonRetryDecision | None:
+    """One full regeneration only for unusable MAX_TOKENS output, never brief repair."""
+    if retry_truncated_json(exc, payload, diagnostic, attempt):
+        return JsonRetryDecision("routine_output_truncated", ROUTINE_RETRY_OUTPUT_TOKENS,
+            "The previous JSON output was incomplete. Regenerate the complete Routine decision "
+            "for the same supplied activity, scene, sources and targets.")
     return None

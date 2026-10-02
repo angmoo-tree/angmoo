@@ -156,7 +156,7 @@ from app.domains.memory.service.daypart import purge_expired_events as _purge_ex
 from app.runtime.memory.daypart_observations import _record_provided_daypart_observations
 from app.integrations.direct_llm import DirectLlmDeferred
 from app.runtime.resident.context import LangGraphResidentContext
-from app.runtime.resident.langgraph import run_resident_langgraph
+from app.runtime.autonomous_activity.gateway import run_social_activity
 from app.runtime.extensions.resident_adapter import OpenClawGatewayClient
 from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
 from datetime import UTC
@@ -410,7 +410,7 @@ async def run_community_once(
 
             try:
                 social_search = current_social_search()
-                gateway_result = await run_resident_langgraph(
+                gateway_result = await run_social_activity(
                     LangGraphResidentContext(
                         db=db,
                         run_id=run_id,
@@ -1741,7 +1741,7 @@ async def _run_resident_slot_once(
 
             try:
                 social_search = current_social_search()
-                gateway_result = await run_resident_langgraph(
+                gateway_result = await run_social_activity(
                     LangGraphResidentContext(
                         db=db,
                         run_id=run_id,

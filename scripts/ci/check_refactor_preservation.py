@@ -41,6 +41,12 @@ _changes_spec = importlib.util.spec_from_file_location(
 product_changes = importlib.util.module_from_spec(_changes_spec)
 _changes_spec.loader.exec_module(product_changes)
 
+_sns_spec = importlib.util.spec_from_file_location(
+    "sns_execution_retirement", Path(__file__).with_name("sns_execution_retirement.py")
+)
+sns_execution_retirement = importlib.util.module_from_spec(_sns_spec)
+_sns_spec.loader.exec_module(sns_execution_retirement)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
 INVENTORY = ROOT / "security/refactor_feature_inventory.json"
@@ -796,6 +802,9 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT, 
     symbols_by_text = {}
     assertions_by_text = {}
     removed = product_changes.removed_bindings(approved_changes or [])
+    retired_symbols, retired_modules = sns_execution_retirement.validate(
+        approved_changes or [], root=root, reader=git_bytes)
+    removed.update(retired_symbols)
 
     def memo_symbols(source):
         if source not in symbols_by_text:
@@ -834,10 +843,11 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT, 
                 _, old_symbol = node_function(entry["old"])
                 new_path, new_symbol = node_function(entry.get("new", ""))
                 destination = (root / new_path).resolve()
-                if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or not destination.is_file():
+                retired_destination = new_path in retired_modules and (new_path, new_symbol) in retired_symbols
+                if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or (not destination.is_file() and not retired_destination):
                     errors.append(f"{stage}: unknown or unsafe split symbol: {entry}")
                     continue
-                if new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")) and (new_path, new_symbol) not in removed:
+                if not retired_destination and new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")) and (new_path, new_symbol) not in removed:
                     errors.append(f"{stage}: split destination does not define the mapped symbol: {entry['new']}")
                 consumers, tests = entry.get("direct_consumers", []), entry.get("test_nodes", [])
                 if not consumers or not tests:

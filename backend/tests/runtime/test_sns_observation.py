@@ -443,6 +443,46 @@ def test_export_separates_recovered_planner_output_from_final_failure(data_root,
         assert "SECRET_PRIVATE" not in (output / filename).read_text(encoding="utf-8")
 
 
+def test_split_routine_export_counts_physical_calls_recovery_and_deduplicated_failure(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root)
+    try:
+        for identifier, recovered in (("routine-recovered", True), ("routine-failed", False)):
+            _insert_run(data_root, activity_id=identifier, started_at=now)
+            attempt = observer.begin(activity_id=identifier, agent_run_id=identifier,
+                world_id="world-1", actor_id="actor-1", activity_started_at=now)
+            assert attempt is not None
+            for index in (1, 2):
+                attempt.tracker_event("call", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                    "call_order_in_run": index, "status": "succeeded"})
+                if recovered and index == 2:
+                    attempt.tracker_event("json_attempt", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_attempt": index, "status": "valid"})
+                else:
+                    attempt.tracker_event("json_postprocess_error", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_postprocess_error": {"attempt": index, "parse_error_type": "JSONDecodeError",
+                            "finish_reason": "MAX_TOKENS", "shape_hint": "unterminated", "preview_head": "PRIVATE"}})
+                if index == 1:
+                    attempt.tracker_event("json_attempt", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_attempt": index, "status": "retry_scheduled", "retry_reason": "json_parse_failed"})
+            if not recovered:
+                attempt.node("node_failed", lane="routine", node="ActionPlanner", exc=ValueError("routine_invalid"))
+                attempt.emit("lane_error", lane="routine", exc=ValueError("routine_invalid"),
+                             caused_by_event_id=attempt.last_error_event_id)
+        observer.queue.join()
+    finally:
+        assert observer.close()
+    output = tmp_path / "split-routine"
+    coverage = export_session(data_root, manifest["session_id"], destination=output)
+    assert coverage["routine_planner_physical_calls"] == 4
+    assert coverage["routine_planner_output_failures"] == 3
+    assert coverage["routine_planner_retries_scheduled"] == 2
+    assert coverage["routine_planner_recovered_activities"] == 1
+    assert coverage["routine_planner_final_failures"] == 1 and coverage["error_count"] == 1
+    assert "PRIVATE" not in (output / "calls.jsonl").read_text(encoding="utf-8")
+
+
 def test_export_distinguishes_writer_repair_from_planner_retry(data_root, tmp_path):
     now = datetime.now(UTC)
     _insert_run(data_root, activity_id="combined", started_at=now)

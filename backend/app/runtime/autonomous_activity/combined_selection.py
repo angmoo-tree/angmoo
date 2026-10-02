@@ -34,7 +34,8 @@ class CombinedSelection:
         for lane, prepared in state["prepared_lanes"].items():
             candidates = prepared.get("candidates", [])
             if len(candidates) > 1 and not prepared.get("preparation_error"):
-                choices[lane] = {"candidates": candidate_previews(candidates),
+                choices[lane] = {"candidates": candidate_previews(candidates, lane=lane,
+                    policy=state.get("identity", {}).get("social_io_policy")),
                     "selection_limit": min(INBOX_TARGET_LIMIT if lane == "inbox" else 1, len(candidates))}
                 preferences = prepared.get("shared_context", {}).get("action_preferences")
                 if preferences is not None:

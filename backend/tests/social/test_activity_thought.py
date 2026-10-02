@@ -11,7 +11,6 @@ from app.domains.social.models.subjective_context import SocialActionSubjectiveC
 from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.exceptions import SubjectiveContextPersistenceError
 from app.runtime.social.subjective_composition import record_activity_thought
-from app.runtime.social import feed_reaction_provider as provider_module
 from app.runtime.social.world_feed_search import load_ready_search_profile, search_world_feed_candidates
 from social.test_feed_reaction_intent import _engine, _seed
 from test_p8_l_r_today_sns_activity import NOW, _seed_today_activity, today_session
@@ -61,40 +60,25 @@ def test_social_thought_does_not_commit_and_links_own_source_or_action(today_ses
 
 @pytest.mark.parametrize("thought", [None, 12, "생각" * 200])
 def test_feed_thought_replaces_old_fields_and_uses_writer_call(monkeypatch, thought):
+    from social.v2_provider_probe import probe
+    from app.integrations.direct_llm import DirectLlmJsonError
     engine = _engine()
-    with Session(engine) as db:
-        ctx, target = _seed(db, with_candidate=True)
-        profile = load_ready_search_profile(db, world_character_id="world-character-actor")
-        candidates = search_world_feed_candidates(
-            db, profile=profile, keywords=profile.keywords[:2],
-            allowed_policy_actions=ctx.activity_policy.allowed_actions, now=ctx.run_started_at,
-            search_index=ctx.social_search_index, search_state=ctx.social_search_state,
-        ).candidates
-        calls = []
-        async def generate(**kwargs):
-            calls.append(kwargs)
-            assert "motivation_kind" not in str(kwargs["response_schema"])
-            assert "emotion_intensity" not in kwargs["user_prompt"]
-            if len(calls) == 1:
-                payload = dict(selected_candidate_index=0, selected_action="comment", interaction_intent="ordinary_comment",
-                               comment_purpose="question", brief="기술이 궁금하다.", thought="중복 계획 생각")
-            else:
-                payload = dict(text="어떻게 배웠어?", source_post_id=candidates[0].post_id,
-                               interaction_intent="ordinary_comment", comment_purpose="question", thought=thought)
-            return kwargs["validator"](payload)
-        monkeypatch.setattr(provider_module, "_api_key", lambda _: "fake")
-        monkeypatch.setattr(provider_module, "generate_json", generate)
-        provider = provider_module.DirectFeedReactionProvider(thought_enabled=True)
-        tracker = provider_module.RunLlmTracker(max_calls=3)
-        decision = asyncio.run(provider.plan(resident_context=ctx, profile=profile, candidates=candidates, tracker=tracker))
-        draft = asyncio.run(provider.write_comment(resident_context=ctx, profile=profile, candidate=candidates[0], decision=decision, tracker=tracker))
-        assert decision._activity_thought is None
-        assert decision.motivation_kind is None
-        assert draft.text == "어떻게 배웠어?"
-        assert draft._activity_thought == parse_activity_thought(thought)
-        assert len(calls) == 2
-        assert "thought" not in draft.model_dump()
-    engine.dispose()
+    try:
+        with Session(engine) as db:
+            ctx, target = _seed(db, with_candidate=True)
+            if isinstance(thought, int):
+                with pytest.raises(DirectLlmJsonError):
+                    probe(monkeypatch, ctx, target, thought=thought)
+                assert db.scalar(select(SocialActivityThought)) is None
+                return
+            calls, tracker, decision, draft = probe(monkeypatch, ctx, target, thought=thought)
+            assert len(calls) == 2
+            assert draft["reply_task_results"][0]["body"] == "어떻게 배웠어?"
+            assert draft["reply_task_results"][0]["_activity_thought"] == __import__("dataclasses").asdict(parse_activity_thought(thought))
+            assert "motivation_kind" not in str(calls[1]["response_schema"])
+            assert "emotion_intensity" not in calls[1]["user_prompt"]
+    finally:
+        engine.dispose()
 
 
 def test_today_thought_view_replaces_legacy_and_invalidates_changed_source(today_session, monkeypatch):

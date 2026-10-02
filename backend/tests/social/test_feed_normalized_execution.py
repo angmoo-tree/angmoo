@@ -19,8 +19,8 @@ from app.domains.social.service import feed_cycle
 from app.domains.social.service.recommendation_topics import enroll_native_post
 from app.integrations import direct_llm
 from app.runtime.relationships.experience_metrics import apply_pending_metrics
-from app.runtime.social import feed_reaction_provider as provider_module
-from app.runtime.social.feed_cycle import run_world_keyword_feed
+from social.raw_feed_fixture import RawFeedFixture
+from app.runtime.social.feed_workflows import run_world_keyword_feed
 from social.test_feed_reaction_intent import _engine
 from social.test_recommendation_cycle import _seed
 from social.test_feed_decision_normalization import raw_decision
@@ -52,9 +52,9 @@ def test_raw_normalized_like_executes_once_without_writer_or_recall(monkeypatch,
         ctx, target, actor = seed_cycle(db, metrics=metrics)
         calls = []
 
-        async def transport(**kwargs):
-            calls.append(kwargs)
-            assert kwargs["context"].node == "FeedReactionPlanner"
+        async def transport(node):
+            calls.append(node)
+            assert node == "decision"
             raw = raw_decision()
             if thought:
                 raw["thought"] = "A helpful note worth acknowledging."
@@ -63,12 +63,10 @@ def test_raw_normalized_like_executes_once_without_writer_or_recall(monkeypatch,
                     target_ref=target.author_world_character_id, affinity="increase",
                     trust="keep", tension="keep", new_evidence_refs=[target.id],
                 )]
-            return direct_llm.DirectLlmResponse(text=json.dumps(raw), parsed=None, usage={}, finish_reason="STOP")
+            return raw
 
-        monkeypatch.setattr(direct_llm, "generate_text", transport)
-        monkeypatch.setattr(provider_module, "_api_key", lambda ctx: "fixture")
-        provider = provider_module.DirectFeedReactionProvider(thought_enabled=thought)
-        with caplog.at_level(logging.INFO, logger=provider_module.__name__):
+        provider = RawFeedFixture(transport, thought=thought)
+        with caplog.at_level(logging.INFO):
             result = asyncio.run(run_world_keyword_feed(ctx, provider=provider))
         assert result["feed_outcome"] == "ACTION_SUCCEEDED"
         assert result["delivered_count"] == 1
@@ -86,20 +84,9 @@ def test_raw_normalized_like_executes_once_without_writer_or_recall(monkeypatch,
         if thought:
             assert saved_thought.thought_text == "A helpful note worth acknowledging."
 
-        # Validate the final provider instructions after thought/schema transforms.
-        request = calls[0]
-        assert "For like, repost, follow or NO_ACTION, return null for both" in request["system_prompt"]
-        examples = json.loads(request["user_prompt"])["rules"]["action_field_examples"]
-        assert examples[0] == dict(selected_action="like", interaction_intent=None, comment_purpose=None)
-        properties = request["response_schema"]["properties"]
-        assert "Must be null for like" in properties["interaction_intent"]["description"]
-        assert "null" in properties["comment_purpose"]["type"]
-        assert ("thought" in properties) == thought
-        assert ("relationship_metrics" in properties) == metrics
-        normalization = [r.getMessage() for r in caplog.records if "world_feed_decision_normalized" in r.getMessage()]
-        assert len(normalization) == 1
-        assert "fields=interaction_intent,comment_purpose" in normalization[0]
-        assert "A helpful note" not in normalization[0] and "Acknowledge" not in normalization[0]
+        # Canonical effects consume the normalized typed decision; the removed
+        # provider's prompts are covered by actual V2 SDK probe tests instead.
+        assert execution.interaction_intent is None and observation.comment_purpose is None
 
         if metrics:
             application = db.scalar(select(RelationshipMetricApplication))
@@ -141,8 +128,8 @@ def test_other_raw_decisions_and_stale_target_keep_boundaries(monkeypatch, caplo
         ctx, target, _actor = seed_cycle(db, metrics=False)
         nodes = []
 
-        async def transport(**kwargs):
-            nodes.append(kwargs["context"].node)
+        async def transport(node):
+            nodes.append(node)
             if len(nodes) == 2:
                 assert mode == "comment"
                 raw = dict(text="Thanks for sharing the note.", source_post_id=target.id,
@@ -163,10 +150,8 @@ def test_other_raw_decisions_and_stale_target_keep_boundaries(monkeypatch, caplo
                 # Simulate a real source change while the provider was responding.
                 target.deleted_at = ctx.run_started_at
                 db.commit()
-            return direct_llm.DirectLlmResponse(text=json.dumps(raw), parsed=None, usage={}, finish_reason="STOP")
+            return raw
 
-        monkeypatch.setattr(direct_llm, "generate_text", transport)
-        monkeypatch.setattr(provider_module, "_api_key", lambda ctx: "fixture")
         if mode == "stale":
             revalidate = feed_cycle.revalidate_candidate_actions
 
@@ -176,11 +161,11 @@ def test_other_raw_decisions_and_stale_target_keep_boundaries(monkeypatch, caplo
                 return revalidate(*args, **kwargs)
 
             monkeypatch.setattr(feed_cycle, "revalidate_candidate_actions", revoke_before_execution)
-        provider = provider_module.DirectFeedReactionProvider(thought_enabled=False)
-        with caplog.at_level(logging.INFO, logger=provider_module.__name__):
+        provider = RawFeedFixture(transport)
+        with caplog.at_level(logging.INFO):
             result = asyncio.run(run_world_keyword_feed(ctx, provider=provider))
         assert result["feed_outcome"] == expected
-        assert nodes == (["FeedReactionPlanner", "ReplyWriter"] if mode == "comment" else ["FeedReactionPlanner"])
+        assert nodes == (["decision", "writer"] if mode == "comment" else ["decision"])
         assert db.scalar(select(RecommendationDelivery)).state == "delivered"
         if mode not in {"stale", "deleted_while_planning"}:
             assert not any("world_feed_decision_normalized" in r.getMessage() for r in caplog.records)

@@ -175,9 +175,8 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_google_embedding_credential_for_character",
             "_google_api_key_for_character",
         },
-        "runtime/social/feed_reaction_provider.py": {"_api_key"},
+        "runtime/autonomous_activity/llm_context.py": {"_api_key"},
         "runtime/social/topic_preparation.py": {"generate_topics"},
-        "runtime/resident/langgraph.py": {"_decrypt_api_key"},
         "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "runtime/social/image_generation.py": {
             "_generate_visual_identity_payload",

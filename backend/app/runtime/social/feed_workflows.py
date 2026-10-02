@@ -14,7 +14,6 @@ from app.runtime.social.subjective_composition import record_declared_subjective
 from app.domains.routines.repository import public_action_executions as execution_queries
 from app.domains.routines.service import public_action_executions as execution_service
 from app.runtime.social.agent_tools import agent_tool_actions
-from app.runtime.social.feed_reaction_provider import DirectFeedReactionProvider
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -63,7 +62,6 @@ class RuntimeWorldFeedWorkflows:
     publishing = agent_tool_actions
     social_apply = world_feed_social_apply
     new_tracker = staticmethod(RunLlmTracker)
-    default_provider = staticmethod(DirectFeedReactionProvider)
     observe_source = staticmethod(observe_source)
     record_activity_thought = staticmethod(record_activity_thought)
     record_declared_subjective_context = staticmethod(
@@ -79,8 +77,9 @@ class RuntimeWorldFeedWorkflows:
         return WorldFeedQueries(db)
 
 
+
 async def run_world_keyword_feed(
-    ctx: WorldFeedContext, *, provider: FeedReactionProvider | None = None
+    ctx: WorldFeedContext, *, provider: FeedReactionProvider
 ) -> dict[str, Any]:
     from app.runtime.social_snapshot import prepare_activity_social_context, with_social_receipts
     from app.runtime.social.langgraph_actions import active_world_character

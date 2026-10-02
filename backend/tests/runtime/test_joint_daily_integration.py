@@ -29,7 +29,7 @@ from app.runtime.autonomous_activity import provider as transport
 from app.runtime.autonomous_activity.combined_lanes import CombinedFeedLane, CombinedInboxLane
 from app.runtime.autonomous_activity.combined_selection import CombinedSelection
 from app.runtime.autonomous_activity.contracts import Candidate
-from app.runtime.resident.langgraph import _execute_planned_action
+from app.runtime.social.planned_actions import _execute_planned_action
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.runtime.social.agent_tools import agent_tool_actions
 from model_fixture_support import models

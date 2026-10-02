@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.social.contracts.proposal_plan import ActivityProposalPlan
+
 from app.domains.social.schemas.feed_status import FeedStatusRead
 
 from datetime import date, datetime
@@ -158,21 +160,8 @@ class FeedCommentDraft(WorldFeedSchema):
     comment_purpose: FeedCommentPurpose
 
 
-class JointActivityProposalPreview(WorldFeedSchema):
+class JointActivityProposalPreview(ActivityProposalPlan, WorldFeedSchema):
     text: str = Field(min_length=1, max_length=500)
-    source_post_id: str
-    activity_seed: str = Field(min_length=1, max_length=500)
-    target_world_character_id: str
-    place_key: str | None = Field(default=None, max_length=64)
-    target_daypart: Literal["dawn", "morning", "afternoon", "evening"]
-    date_policy: Literal["exact", "earliest_available"]
-    target_date: date | None = None
-
-    @model_validator(mode="after")
-    def _coherent_schedule(self) -> "JointActivityProposalPreview":
-        if self.date_policy == "exact" and self.target_date is None:
-            raise ValueError("exact proposal requires target_date")
-        return self
 
 
 class WorldFeedObservationRead(WorldFeedSchema):

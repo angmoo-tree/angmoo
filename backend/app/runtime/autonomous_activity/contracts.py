@@ -26,13 +26,15 @@ class ActivityIdentity(BaseModel):
     world_id: str
     actor_id: str
     engine: Literal["personalized_graph_v2"] = "personalized_graph_v2"
-    contract_version: Literal[1, 2] = 1
+    contract_version: Literal[1, 2] = CONTRACT_VERSION
     cause: Literal["manual", "scheduled", "recovery"]
     generation_model: str | None = None
     thinking_level: str | None = None
     routine_output_contract: str | None = None
     routine_state_schema_version: int | None = None
     routine_thought_policy: str | None = None
+    social_io_policy: str = "social-io.common.v1"
+    routine_output_policy: str = "routine-split-output.legacy.v1"
 
 
 class Candidate(BaseModel):

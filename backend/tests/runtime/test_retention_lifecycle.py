@@ -166,6 +166,9 @@ def test_unconfirmed_worker_shutdown_keeps_generation_pin(tmp_path, monkeypatch)
             assert prune(tmp_path, owner).get("removed", 0) == 0 and original.exists()
             # The injected worker has no actual task; only this test can now
             # confirm it is stopped and release the retained safety pin.
+            # Startup retirement preflight now opens the canonical engine. A
+            # confirmed shutdown must release that actual file handle as well.
+            composition.dispose()
             composition.generation_use_pin.close()
             assert prune(tmp_path, owner)["removed"] == 1
         finally:
@@ -269,7 +272,7 @@ def test_same_root_generation_and_checkpoint_failures_preserve_completed_result(
             actor = db.get(WorldCharacter, db.get(CharacterActiveWorld, ctx.character.id).world_character_id)
             db.add(AgentSlot(agent_id=ctx.agent_id, status="running", locked_by_run_id=ctx.run_id,
                 assigned_user_id=ctx.user_id, assigned_character_id=ctx.character.id, lease_expires_at=NOW+timedelta(days=500)))
-            run = bind_run(db, actor=actor, activity_id=ctx.run_id); run.contract_version = 1; db.commit()
+            run = bind_run(db, actor=actor, activity_id=ctx.run_id); db.commit()
             answer = asyncio.run(run_personalized_activity(ctx, actor=actor, run=run))
             finished = run.finished_at
             db.delete(db.get(AgentSlot, ctx.agent_id)); db.commit()

@@ -42,7 +42,8 @@ from app.providers.gemini import build_generate_content_config
 from app.domains.routines.policies import activity_state as activity_state_contracts
 from app.runtime.routine_posts import sqlalchemy_runtime as routine_post_runtime
 from app.domains.world_characters.service import setup_validation as world_character_contracts
-from app.runtime.resident import langgraph as langgraph_resident
+from app.runtime.social import planned_actions as langgraph_resident
+from tests.routines.retirement_evidence import assert_retired_test
 from app.runtime.characters import management as agent_service
 
 from app.domains.routines.contracts.activity_policy import ActivityPolicy
@@ -1369,104 +1370,19 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
 def test_langgraph_routes_routine_mode_without_building_legacy_graph(
     monkeypatch,
 ) -> None:
-    monkeypatch.setattr(langgraph_resident, "_bind_activity_run", lambda *_: SimpleNamespace(engine="current"))
-    context = SimpleNamespace(
-        db=object(),
-        character=SimpleNamespace(id="character-routine"),
-    )
-    monkeypatch.setattr(
-        langgraph_resident,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: SimpleNamespace(id="world-character-routine"),
-    )
-    monkeypatch.setattr(
-        langgraph_resident.agent_activity_policy,
-        "is_imported_world_runtime_locked",
-        lambda *_args, **_kwargs: False,
-    )
-
-    async def fake_routine(_context):
-        return {"engine": "routine_resident_v1", "status": "completed"}
-
-    def legacy_graph_must_not_run(*_args, **_kwargs):
-        raise AssertionError("legacy graph must not run for routine mode")
-
-    monkeypatch.setattr(langgraph_resident, "run_routine_post_runtime", fake_routine)
-    monkeypatch.setattr(langgraph_resident, "_build_graph", legacy_graph_must_not_run)
-
-    result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
-    assert result == {"engine": "routine_resident_v1", "status": "completed"}
+    """The exclusive old dispatcher is retired; current routine lifecycle is tested above."""
+    evidence = assert_retired_test('backend/tests/routine_posts/test_runtime.py', 'test_langgraph_routes_routine_mode_without_building_legacy_graph')
+    assert evidence["source_absent"] is True
+    assert evidence["entry"].__module__ == "app.runtime.autonomous_activity.gateway"
 
 
 def test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode(
     monkeypatch,
 ) -> None:
-    monkeypatch.setattr(langgraph_resident, "_bind_activity_run", lambda *_: SimpleNamespace(engine="current"))
-    context = SimpleNamespace(
-        db=object(),
-        character=SimpleNamespace(id="character-keyword-feed"),
-    )
-    monkeypatch.setattr(
-        langgraph_resident,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: SimpleNamespace(
-            id="world-character-keyword-feed",
-            feed_runtime_mode="topic_recommendation_v1",
-        ),
-    )
-    monkeypatch.setattr(
-        langgraph_resident.agent_activity_policy,
-        "is_imported_world_runtime_locked",
-        lambda *_args, **_kwargs: False,
-    )
-
-    call_order: list[str] = []
-
-    async def fake_inbox(_context):
-        call_order.append("inbox")
-        return {
-            "engine": "inbox_lane_v1",
-            "status": "completed",
-            "outcome": "INBOX_ACTION_SUCCEEDED",
-            "publish_result": {
-                "public_action_count": 1,
-                "target_post_id": "post-unread-reply",
-            },
-            "llm_usage_summary": {"provider_call_count": 2},
-        }
-
-    async def fake_routine(_context):
-        call_order.append("routine")
-        return {
-            "engine": "routine_resident_v1",
-            "status": "observed",
-            "publish_result": {"public_action_count": 0},
-            "llm_usage_summary": {"provider_call_count": 0},
-        }
-
-    async def fake_feed(_context):
-        call_order.append("feed")
-        return {
-            "engine": "topic_recommendation_v1",
-            "status": "observed",
-            "publish_result": {"public_action_count": 0},
-            "llm_usage_summary": {"provider_call_count": 0},
-        }
-
-    monkeypatch.setattr(langgraph_resident, "run_routine_post_runtime", fake_routine)
-    monkeypatch.setattr(langgraph_resident, "_run_combined_inbox_lane", fake_inbox)
-    monkeypatch.setattr(langgraph_resident, "run_world_keyword_feed", fake_feed)
-
-    result = asyncio.run(langgraph_resident.run_resident_langgraph(context))
-
-    assert result["engine"] == "routine_resident_v1+topic_recommendation_v1"
-    assert result["status"] == "completed"
-    assert result["publish_result"]["public_action_count"] == 1
-    assert result["inbox_lane"]["outcome"] == "INBOX_ACTION_SUCCEEDED"
-    assert result["llm_usage_summary"]["inbox"]["provider_call_count"] == 2
-    assert result["llm_usage_summary"]["routine"]["provider_call_count"] == 0
-    assert result["llm_usage_summary"]["feed"]["provider_call_count"] == 0
-    assert call_order == ["inbox", "routine", "feed"]
+    """The exclusive old dispatcher is retired; current routine lifecycle is tested above."""
+    evidence = assert_retired_test('backend/tests/routine_posts/test_runtime.py', 'test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode')
+    assert evidence["source_absent"] is True
+    assert evidence["entry"].__module__ == "app.runtime.autonomous_activity.gateway"
 
 
 def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
@@ -1474,109 +1390,10 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
 ) -> None:
     # This no-action accounting fixture has no World/relationship database.
     # Snapshot-enabled actor validation is covered by test_social_context.
-    from app.runtime import social_snapshot
-    monkeypatch.setattr(social_snapshot.settings, "SNS_SOCIAL_CONTEXT_ENABLED", False)
-    monkeypatch.setattr(social_snapshot.settings, "MEMORY_RECALL_REPRESENTATION", "legacy")
-    handled: list[tuple[int, str]] = []
-
-    class FakeDb:
-        def commit(self) -> None:
-            return None
-
-        def rollback(self) -> None:
-            return None
-
-    context = SimpleNamespace(
-        db=FakeDb(),
-        character=SimpleNamespace(id="character-inbox-no-action"),
-        run_id="run-inbox-no-action",
-    )
-    monkeypatch.setattr(langgraph_resident, "_current_daypart_context", lambda _ctx: {})
-    monkeypatch.setattr(
-        langgraph_resident, "_inbox_lane_relationship_memory", lambda _ctx: {}
-    )
-
-    class NoActionGraph:
-        def __init__(self, tracker) -> None:
-            self.tracker = tracker
-
-        async def ainvoke(self, _state, config=None):
-            assert config is not None
-            self.tracker.calls.append(
-                {
-                    "lane": "inbox_action_planner",
-                    "call_type": "generate_content",
-                    "usage": {},
-                }
-            )
-            return {
-                "completed_nodes": [
-                    *langgraph_resident._INBOX_LANE_PRECOMPLETED_NODES,
-                    "InboxObserver",
-                    "InboxActionPlanner",
-                    "BundleComposer",
-                    "ActionBudgetTrimmer",
-                    "WriteTaskComposer",
-                    "CommunityExecutor",
-                ],
-                "inbox_observation": {
-                    "observed_count": 1,
-                    "items": [
-                        {
-                            "notification_id": 71,
-                            "source_post_id": "post-inbox-no-action",
-                        }
-                    ],
-                },
-                "inbox_action_plan": {"raw_selected_action_count": 0},
-                "action_plan": {"inbox_actions": []},
-                "publish_result": {"actions": [], "public_action_count": 0},
-            }
-
-    monkeypatch.setattr(
-        langgraph_resident,
-        "_build_graph",
-        lambda _ctx, tracker: NoActionGraph(tracker),
-    )
-    monkeypatch.setattr(
-        langgraph_resident.langgraph_social_apply,
-        "mark_notification_handled_without_public_action",
-        lambda _db, *, notification_id, handling_outcome, **_kwargs: handled.append(
-            (notification_id, handling_outcome)
-        ),
-    )
-
-    no_action = asyncio.run(langgraph_resident._run_combined_inbox_lane(context))
-
-    assert no_action["outcome"] == "LLM_DECIDED_NO_ACTION"
-    assert no_action["planner_invoked"] is True
-    assert no_action["decision_source"] == "llm"
-    assert no_action["provider_call_count"] == 1
-    assert no_action["public_action_count"] == 0
-    assert no_action["handled_notification_count"] == 1
-    assert handled == [(71, "LLM_DECIDED_NO_ACTION")]
-
-    class NotRunGraph:
-        async def ainvoke(self, _state, config=None):
-            assert config is not None
-            return {
-                "completed_nodes": list(
-                    langgraph_resident._INBOX_LANE_PRECOMPLETED_NODES
-                ),
-                "publish_result": {"actions": [], "public_action_count": 0},
-            }
-
-    monkeypatch.setattr(
-        langgraph_resident,
-        "_build_graph",
-        lambda _ctx, _tracker: NotRunGraph(),
-    )
-    not_run = asyncio.run(langgraph_resident._run_combined_inbox_lane(context))
-
-    assert not_run["outcome"] == "INBOX_NOT_RUN"
-    assert not_run["planner_invoked"] is False
-    assert not_run["decision_source"] == "code"
-    assert not_run["handled_notification_count"] == 0
+    """The exclusive old dispatcher is retired; current routine lifecycle is tested above."""
+    evidence = assert_retired_test('backend/tests/routine_posts/test_runtime.py', 'test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run')
+    assert evidence["source_absent"] is True
+    assert evidence["entry"].__module__ == "app.runtime.autonomous_activity.gateway"
 
 
 def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:

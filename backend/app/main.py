@@ -142,6 +142,14 @@ def create_lifespan(
                 with session_factory() as db:
                     demo_seed(db)
             startup_recovery()
+            # Upgrade and restored canonical data cross this boundary before any
+            # scheduler or manual request can resume a retired SNS identity.
+            if activity_runtime_binding is not None:
+                from app.runtime.autonomous_activity.retirement import transition_uow
+                composition = getattr(runtime_app.state, "runtime_composition", None)
+                transition_sessions = composition.session_factory if composition is not None else session_factory
+                with transition_sessions() as db:
+                    transition_uow(db)
             if extension is not None:
                 if extension.settings_provider is not None and extension.prompt_provider is not None:
                     register_hosted_configuration(extension.settings_provider, extension.prompt_provider)
@@ -374,6 +382,8 @@ def create_app(
         runtime_app.state.character_credential_workflows = build_character_credential_workflows
         from app.runtime.character_activity_access import read_character as activity_character_reader
         runtime_app.state.activity_character_reader = activity_character_reader
+        from app.runtime.autonomous_activity.retirement import inspect_transition
+        runtime_app.state.activity_transition_reader = inspect_transition
         from app.runtime.characters.management import configure_character_activity_http
         configure_character_activity_http(runtime_app)
 

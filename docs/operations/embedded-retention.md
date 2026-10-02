@@ -45,3 +45,9 @@ DB 정리는 1시간마다 실행하지 않는다. 새 backend가 실제 시작�
 Docker에서는 선택한 Compose 파일 또는 별도 override의 backend `environment`에 위 이름과 `"false"` 값을 명시적으로 전달한다. `.env`에 이름만 추가했지만 Compose가 container environment로 전달하지 않은 경우에는 설정 변경이 적용됐다고 보지 않는다. backend를 다시 시작한 뒤 실제 프로세스에 전달한 설정을 확인한다.
 
 SQLite에서 상세 rows/BLOB를 삭제하면 빈 페이지가 재사용 가능해진다. 파일 bytes, WAL, Docker VHDX와 호스트 여유 공간이 같은 비율로 바로 줄어드는 것은 아니다. 이 정책은 VACUUM·VHDX 압축·Docker volume 제거·수동 legacy 삭제를 자동 실행하지 않는다.
+
+## SNS 실행 지원 종료와의 공존 (2026-10-03)
+
+현재 SNS의 old current/V1 미완료 처리에는 같은 canonical Session의 지원 전환을 사용한다. old run은 재개하지 않고 claim/불확실 효과 확인 뒤 abandoned/aborted로 종료한다. 과거 성공·usage·원장·SDK 상세에는 신규 24시간 태그를 소급 부여하지 않는다. abandoned를 정상 완료 정리 대상으로 취급하지 않는다.
+
+새 split Routine 복구의 영속 정상/복구 reservation과 입출력·출력 policy는 기존 checkpoint_retention/name_binding/업무 결과와 같은 CAS metadata에 공존한다. Finalize 이후 SDK 최종 쓰기나 graph 확인이 실패해도 canonical 완료 결과를 재사용하며 재생성하지 않는다. startup은 해당 runtime의 실제 session factory에서 old 처리 후 worker를 시작한다. 기존 serving/use pin·upgrade/maintenance lock·paired backup·기본 2세대 보호를 유지하며 SNS 데이터 전환으로 schema copy를 새로 만들지 않는다. [로컬 교차 검증](../verification/sns-v2-routine-io-retirement-20261002.md)은 사용자 volume/설치 DB의 적용 결과가 아니다.

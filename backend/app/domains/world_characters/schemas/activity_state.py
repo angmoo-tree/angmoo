@@ -15,5 +15,5 @@ class StateUpdate(BaseModel):
 
 
 class EngineSelection(BaseModel):
-    engine: ActivityEngine | None  # null removes the explicit override
+    engine: Literal["personalized_graph_v2"] | None  # historical reads retain current
     expected_version: int = Field(ge=0)

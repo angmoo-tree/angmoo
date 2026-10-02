@@ -6,7 +6,7 @@ from app.contracts.activity_thought import ActivityThought, parse_activity_thoug
 from app.domains.social.schemas.feed import FeedReactionDecision, FeedCommentDraft, JointActivityProposalPreview, WorldFeedCandidateRead
 from app.domains.social.service.feed_cycle_publishing import _publish_action
 from app.domains.social.service.feed_cycle_values import _execution_signature, _brief_hash
-from app.runtime.social.feed_cycle import RuntimeWorldFeedWorkflows
+from app.runtime.social.feed_workflows import RuntimeWorldFeedWorkflows
 
 
 def decision_values(state, raw):
