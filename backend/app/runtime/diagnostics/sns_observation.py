@@ -331,6 +331,28 @@ class SNSAttempt:
                   exc=exc, caused_by_event_id=caused_by)
 
     def tracker_event(self, kind: str, payload: dict) -> None:
+        if kind == "provider_response":
+            if self.manifest["schema_version"] < 3:
+                return
+            self.emit("provider_response", lane=code(payload.get("lane")), node=code(payload.get("node")),
+                details={"capture_boundary": code(payload.get("capture_boundary")),
+                    "response_evidence_version": numbers(payload.get("response_evidence_version")),
+                    "call_order": numbers(payload.get("call_order_in_run")),
+                    "provider_call_order": numbers(payload.get("provider_call_order_in_run")),
+                    "json_attempt": numbers(payload.get("json_attempt")),
+                    "model": code(payload.get("model")),
+                    "candidate_count": numbers(payload.get("candidate_count")),
+                    "prompt_feedback_present": payload.get("prompt_feedback_present") is True,
+                    "prompt_block_reason": code(payload.get("prompt_block_reason")),
+                    "candidate_finish_reasons": [code(item) for item in
+                        (payload.get("candidate_finish_reasons") or [])[:8]],
+                    "candidate_part_counts": [numbers(item) for item in
+                        (payload.get("candidate_part_counts") or [])[:8]],
+                    "candidate_text_part_counts": [numbers(item) for item in
+                        (payload.get("candidate_text_part_counts") or [])[:8]],
+                    "candidate_metadata_truncated": payload.get("candidate_metadata_truncated") is True,
+                    "parsed_present": payload.get("parsed_present") is True})
+            return
         if kind == "request_config":
             if self.manifest["schema_version"] < 3:
                 return

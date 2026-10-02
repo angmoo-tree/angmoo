@@ -108,6 +108,7 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
                 "source_revision": source_revision or "unknown",
                 "database_relative_path": db_path.relative_to(data_root).as_posix(),
                 "initial_slots": slots, "event_schema_version": SCHEMA_VERSION,
+                "response_evidence_version": 1,
                 "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024,
                 "artifact_limit_bytes": 64 * 1024,
                 "artifact_session_limit_bytes": 16 * 1024 * 1024}
@@ -317,6 +318,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
             continue  # A lane/parent/activity wrapper of the original failure.
         errors.append(item)
     request_events = [item for item in events if item.get("event_type") == "request_config"]
+    response_events = [item for item in events if item.get("event_type") == "provider_response"]
     sqlite_events = [item for item in events if item.get("event_type") == "sqlite_write"]
     artifact_missing = 0
     artifact_truncated = 0
@@ -361,6 +363,20 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                      (item.get("details") or {}).get("call_order")) for item in request_events}
     request_evidence_complete = (call_keys <= request_keys and artifact_missing == 0
         and artifact_truncated == 0) if manifest["schema_version"] >= 3 else "not_recorded_in_schema_version"
+    successful_call_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                            (item.get("details") or {}).get("call_order"))
+        for item in call_events if item.get("event_type") == "llm_call"
+        and (item.get("details") or {}).get("call_type") == "generate_content"
+        and (item.get("details") or {}).get("status") == "ok"}
+    response_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                      (item.get("details") or {}).get("call_order"))
+        for item in response_events
+        if (item.get("details") or {}).get("capture_boundary") == "sdk_response"
+        and (item.get("details") or {}).get("response_evidence_version") == 1}
+    response_missing_count = len(successful_call_keys - response_keys)
+    response_evidence_complete = (response_missing_count == 0
+        if manifest.get("response_evidence_version") == 1 and manifest["schema_version"] >= 3
+        else "not_recorded_in_session")
     failures_by_node = {(item.get("activity_id"), item.get("agent_run_id"), item.get("node")): item
         for item in call_events if item.get("event_type") == "llm_call"
         and (item.get("details") or {}).get("status") == "error"}
@@ -463,6 +479,9 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                  "artifact_truncated_count": artifact_truncated,
                  "diagnostic_redaction_count": redactions,
                  "request_evidence_count": len(request_events),
+                 "response_evidence_complete": response_evidence_complete,
+                 "response_evidence_count": len(response_events),
+                 "response_evidence_missing_count": response_missing_count,
                  "sqlite_write_event_count": len(sqlite_events),
                  "complete_recording": manifest["schema_version"] in {2, 3} and tail_elapsed
                      and not stopped_early and flush_complete is True and bool(ticks)
@@ -478,6 +497,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     _jsonl(destination / "errors.jsonl", errors)
     _jsonl(destination / "calls.jsonl", call_events)
     _jsonl(destination / "request-evidence.jsonl", request_events)
+    _jsonl(destination / "response-evidence.jsonl", response_events)
     _jsonl(destination / "sqlite-writes.jsonl", sqlite_events)
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
@@ -505,6 +525,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     lines.extend(["", "## Request and SQLite diagnostics", "",
         f"- Request evidence complete: {request_evidence_complete}; request records: {len(request_events)}; "
         f"missing artifacts: {artifact_missing}; truncated artifacts: {artifact_truncated}.",
+        f"- Response evidence complete: {response_evidence_complete}; response records: {len(response_events)}; "
+        f"missing successful-call responses: {response_missing_count}.",
         f"- SQLite write events: {len(sqlite_events)}. Count storage retries separately from provider calls.",
         "- Generic provider errors without BadRequest fields leave the rejected argument unconfirmed."])
     for lane, statuses in lane_counts.items():

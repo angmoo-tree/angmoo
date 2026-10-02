@@ -220,6 +220,41 @@ def _finish_reason_from_response(response: Any) -> str | None:
     return value if isinstance(value, str) else "UNKNOWN"
 
 
+def _response_evidence(response: Any) -> dict[str, Any]:
+    """Capture bounded SDK response structure without content or free-text feedback."""
+    candidates = getattr(response, "candidates", None) or []
+    feedback = getattr(response, "prompt_feedback", None)
+
+    def enum_code(value: Any, enum_type: Any) -> str | None:
+        if value is None:
+            return None
+        wire = getattr(value, "value", value)
+        return wire if isinstance(wire, str) and wire in {item.value for item in enum_type} else "UNKNOWN"
+
+    return {
+        "capture_boundary": "sdk_response",
+        "response_evidence_version": 1,
+        "candidate_count": len(candidates),
+        "prompt_feedback_present": feedback is not None,
+        "prompt_block_reason": enum_code(getattr(feedback, "block_reason", None), types.BlockedReason),
+        "candidate_finish_reasons": [
+            enum_code(getattr(candidate, "finish_reason", None), types.FinishReason)
+            for candidate in candidates[:8]
+        ],
+        "candidate_part_counts": [
+            len(getattr(getattr(candidate, "content", None), "parts", None) or [])
+            for candidate in candidates[:8]
+        ],
+        "candidate_text_part_counts": [
+            sum(isinstance(getattr(part, "text", None), str) and bool(part.text.strip())
+                for part in (getattr(getattr(candidate, "content", None), "parts", None) or []))
+            for candidate in candidates[:8]
+        ],
+        "candidate_metadata_truncated": len(candidates) > 8,
+        "parsed_present": getattr(response, "parsed", None) is not None,
+    }
+
+
 def _native_parameters(schema: dict[str, Any]) -> types.Schema:
     """Use the SDK's OpenAPI nullable form; domain validation stays authoritative."""
     def convert(node):
@@ -328,6 +363,11 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         contents=contents,
         config=config,
     )
+    if request.diagnostic_callback is not None:
+        try:
+            request.diagnostic_callback({"model": request.model, **_response_evidence(response)})
+        except Exception:
+            pass  # Missing diagnostics never change response parsing or retry policy.
     return ProviderResponse(
         text=_text_from_response(response),
         parsed=getattr(response, "parsed", None),

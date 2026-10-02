@@ -806,7 +806,8 @@ async def generate_text(
             tools=tools,
             require_tool_call=require_tool_call,
             sdk_attempts=1 if tools else sdk_attempts,
-            diagnostic_callback=(lambda evidence: tracker._notify("request_config", {
+            diagnostic_callback=(lambda evidence: tracker._notify(
+                "provider_response" if evidence.get("capture_boundary") == "sdk_response" else "request_config", {
                 **evidence, "node": context.node, "lane": context.lane,
                 "call_order_in_run": call_order,
                 "provider_call_order_in_run": provider_call_order,
