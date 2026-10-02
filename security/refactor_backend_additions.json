@@ -25916,6 +25916,593 @@
       "test_suppressions": {
         "tests/runtime/test_checkpoint_maintenance.py": {}
       }
+    },
+    {
+      "commit": "49adc7b4f6df9f03a8211f0f482ca35845d35174",
+      "feature_id": "AR-SNS-V2-RETIREMENT",
+      "reason": "Issue359: committed bounded Routine recovery, lane wire, safe retirement, shared effect ownership and paired restore regression contracts",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/reply_writing.py": "ac8e0e0393d1522e3fe40a266470051b20aabf30",
+        "backend/app/domains/routines/service/legacy_claims.py": "1cbcc77434bfc770327d9129732d0e18979ed5f9",
+        "backend/app/domains/social/contracts/proposal_plan.py": "550bc5ec57caea75922be7381cea44fe6579084a",
+        "backend/app/domains/world_characters/contracts/activity_retirement.py": "e0e903bf2a804072043f8d2f899059505dc088b9",
+        "backend/app/domains/world_characters/contracts/social_io.py": "2ea9df3e5dc306631d658c0d08715a9c196b84f5",
+        "backend/app/runtime/autonomous_activity/gateway.py": "11e7a0462537738e23301ae889982353bda4aa54",
+        "backend/app/runtime/autonomous_activity/retirement.py": "fae1d784f5e0f20459d6b121689c4fcd1c391234",
+        "backend/app/runtime/autonomous_activity/social_wire.py": "3728edc5cfa74a0fd58fa3a1bab23e468d82b5fc",
+        "backend/app/runtime/resident/history.py": "e4ab83758f05ef81289fae341f6e2182ff583803",
+        "backend/tests/routines/policy_ports.py": "32353a273656858964ab1da6590cfbeb6ba42585",
+        "backend/tests/routines/retirement_evidence.py": "5083df07a66a49a596fa04a415095973c2aa2a57",
+        "backend/tests/runtime/test_activity_retirement.py": "7660147b1aa97e7a774de1a2bbdfd0dbff23f203",
+        "backend/tests/runtime/test_retirement_restore.py": "f506102ed33f6943d46c6e13213af9db22903c98",
+        "backend/tests/runtime/test_routine_bounded_integration.py": "245ede8caec15bc1b92d1aa7b7808519743395f7",
+        "backend/tests/runtime/test_routine_retention_boundary.py": "c5c1a02984b2f60a031b74459e7e1442166007f4",
+        "backend/tests/runtime/test_sns_execution_retirement_gate.py": "b96d49b33c1dcf5aac48bd13cf44a7db50338182",
+        "backend/tests/runtime/test_social_request_budgets.py": "e323c1aa29d2330e328339c05a1a64de74ebbb79",
+        "backend/tests/runtime/test_social_wire_policies.py": "dcd46a1031e4ef181e5b6822421eda374f4ec6ec",
+        "backend/tests/social/raw_feed_fixture.py": "31955c4ee84712d21081948de51a7c7142eb813c",
+        "backend/tests/social/v2_provider_probe.py": "94bb069ffc3aa20e0fd2995715a383d6f766dc9e",
+        "docs/verification/sns-v2-routine-io-retirement-20261002.md": "eba1e79f2f17ce8dab5f0c19c889606d2adb7adb",
+        "scripts/ci/sns_execution_retirement.py": "e78311d25dc2c10e44769614d13d8c2b18ae7ca4",
+        "security/sns_retirement_evidence.json": "be0a493990cfd0d035a60fb61807f1ef7801f828"
+      },
+      "test_nodes": [
+        "tests/runtime/test_activity_retirement.py::test_actual_approved_setup_and_day_plan_readiness_controls_current_transition",
+        "tests/runtime/test_activity_retirement.py::test_current_override_changes_only_after_readiness_and_keeps_autonomy",
+        "tests/runtime/test_activity_retirement.py::test_direct_current_conversion_cannot_skip_supported_settlement",
+        "tests/runtime/test_activity_retirement.py::test_live_owner_or_unconfirmed_effect_blocks_only_actor[lease]",
+        "tests/runtime/test_activity_retirement.py::test_live_owner_or_unconfirmed_effect_blocks_only_actor[pending_effect]",
+        "tests/runtime/test_activity_retirement.py::test_new_writes_reject_current_and_null_inheritance_is_unchanged",
+        "tests/runtime/test_activity_retirement.py::test_old_null_result_and_completed_history_are_readable",
+        "tests/runtime/test_activity_retirement.py::test_old_partial_success_is_abandoned_without_rewriting_effects_or_policies[current-1]",
+        "tests/runtime/test_activity_retirement.py::test_old_partial_success_is_abandoned_without_rewriting_effects_or_policies[personalized_graph_v2-1]",
+        "tests/runtime/test_activity_retirement.py::test_one_live_actor_does_not_block_other_world_retirement_or_shared_readiness",
+        "tests/runtime/test_activity_retirement.py::test_policy_revision_conflict_preserves_settlement_and_newer_override",
+        "tests/runtime/test_activity_retirement.py::test_shared_current_scope_waits_for_every_inheriting_actor_but_not_specific_v2",
+        "tests/runtime/test_activity_retirement.py::test_v2_common_legacy_policy_activity_is_never_retired",
+        "tests/runtime/test_retirement_restore.py::test_gateway_completed_id_precedes_unready_policy_and_other_pending_ids",
+        "tests/runtime/test_retirement_restore.py::test_historical_v1_canonical_completion_is_reused_without_v1_graph",
+        "tests/runtime/test_retirement_restore.py::test_paired_backup_restore_keeps_original_and_pruned_completion_while_retiring_old",
+        "tests/runtime/test_retirement_restore.py::test_paired_generation_restore_preserves_marker_manifest_and_legacy_records",
+        "tests/runtime/test_retirement_restore.py::test_retirement_in_serving_generation_preserves_pins_and_needs_no_schema_copy",
+        "tests/runtime/test_retirement_restore.py::test_retirement_uses_real_episode_beat_event_and_slot_ownership[False]",
+        "tests/runtime/test_retirement_restore.py::test_retirement_uses_real_episode_beat_event_and_slot_ownership[True]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[healthy-expected_caps0-True]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[lost_autonomy-expected_caps5-False]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[recover-expected_caps1-True]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[retry_truncated-expected_caps2-False]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[stop_invalid-expected_caps3-False]",
+        "tests/runtime/test_routine_bounded_integration.py::test_actual_split_routine_recovers_once_then_publishes_at_most_once[valid_max_tokens-expected_caps4-True]",
+        "tests/runtime/test_routine_retention_boundary.py::test_split_routine_completion_is_not_reexecuted_after_final_storage_failure[confirmation]",
+        "tests/runtime/test_routine_retention_boundary.py::test_split_routine_completion_is_not_reexecuted_after_final_storage_failure[sdk_write]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_closed_retirement_accounts_for_removed_and_retained_symbols",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[changed_owner]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[missing_symbol]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[missing_test]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[preimage]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[restored_source]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[still_committed]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[suppressed_test]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_each_unproven_source_or_behavior_delta[unsupported_module]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_global_local_relative_and_dynamic_old_imports[def resume():\\n    from .resident.langgraph import run_resident_langgraph\\n]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_global_local_relative_and_dynamic_old_imports[from app.runtime.resident import langgraph\\n]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_global_local_relative_and_dynamic_old_imports[import app.runtime.resident.langgraph\\n]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retirement_rejects_global_local_relative_and_dynamic_old_imports[import importlib\\ndef resume(): return importlib.import_module('app.runtime.resident.langgraph')\\n]",
+        "tests/runtime/test_sns_observation.py::test_split_routine_export_counts_physical_calls_recovery_and_deduplicated_failure",
+        "tests/runtime/test_social_request_budgets.py::test_fixed_ten_normal_five_recovery_reservations_survive_new_sessions",
+        "tests/runtime/test_social_request_budgets.py::test_same_recovery_key_has_one_winner_across_competing_sql_sessions",
+        "tests/runtime/test_social_wire_policies.py::test_lane_and_capability_schema_excludes_impossible_actions[feed-False-forbidden0]",
+        "tests/runtime/test_social_wire_policies.py::test_lane_and_capability_schema_excludes_impossible_actions[feed-True-forbidden1]",
+        "tests/runtime/test_social_wire_policies.py::test_lane_and_capability_schema_excludes_impossible_actions[inbox-False-forbidden2]",
+        "tests/runtime/test_social_wire_policies.py::test_lane_and_capability_schema_excludes_impossible_actions[inbox-True-forbidden3]",
+        "tests/runtime/test_social_wire_policies.py::test_meaning_counter_validation_and_target_checks_survive_wire_reduction",
+        "tests/runtime/test_social_wire_policies.py::test_mixed_inbox_writer_rejects_even_null_response_fields_on_ordinary_target[False]",
+        "tests/runtime/test_social_wire_policies.py::test_mixed_inbox_writer_rejects_even_null_response_fields_on_ordinary_target[True]",
+        "tests/runtime/test_social_wire_policies.py::test_new_feed_draft_uses_server_task_and_rejects_even_null_response_fields",
+        "tests/runtime/test_social_wire_policies.py::test_policies_are_independent_and_not_part_of_public_completion[routine-split-output.bounded.v1-social-io.common.v1]",
+        "tests/runtime/test_social_wire_policies.py::test_policies_are_independent_and_not_part_of_public_completion[routine-split-output.bounded.v1-social-io.lane-scoped.v1]",
+        "tests/runtime/test_social_wire_policies.py::test_policies_are_independent_and_not_part_of_public_completion[routine-split-output.legacy.v1-social-io.common.v1]",
+        "tests/runtime/test_social_wire_policies.py::test_policies_are_independent_and_not_part_of_public_completion[routine-split-output.legacy.v1-social-io.lane-scoped.v1]",
+        "tests/runtime/test_social_wire_policies.py::test_projection_only_changes_model_view_and_keeps_images_sources_and_writer_tasks[feed-excluded0]",
+        "tests/runtime/test_social_wire_policies.py::test_projection_only_changes_model_view_and_keeps_images_sources_and_writer_tasks[inbox-excluded1]",
+        "tests/runtime/test_social_wire_policies.py::test_split_routine_uses_real_json_transport_and_only_one_bounded_retry[responses0-expected_caps0-True]",
+        "tests/runtime/test_social_wire_policies.py::test_split_routine_uses_real_json_transport_and_only_one_bounded_retry[responses1-expected_caps1-True]",
+        "tests/runtime/test_social_wire_policies.py::test_split_routine_uses_real_json_transport_and_only_one_bounded_retry[responses2-expected_caps2-False]",
+        "tests/runtime/test_social_wire_policies.py::test_split_routine_uses_real_json_transport_and_only_one_bounded_retry[responses3-expected_caps3-True]",
+        "tests/runtime/test_social_wire_policies.py::test_split_routine_uses_real_json_transport_and_only_one_bounded_retry[responses4-expected_caps4-False]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_activity_retirement.py": {
+          "canonical": [],
+          "old_activity": [],
+          "test_old_partial_success_is_abandoned_without_rewriting_effects_or_policies": [
+            "assert result.abandoned_count == 1 and result.state == 'ready'",
+            "assert row.status == 'abandoned' and row.engine == engine and (row.contract_version == version)",
+            "assert row.finished_at is not None and row.result['reason'] == 'legacy_sns_abandoned'",
+            "assert 'checkpoint_retention' not in row.result",
+            "assert run.status == 'aborted' and run.gateway_result['usage'] == {'calls': 2}",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert row.result[key] == value"
+          ],
+          "test_old_null_result_and_completed_history_are_readable": [
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 1",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert db.get(ActivityGraphRun, 'old-run').result == original"
+          ],
+          "test_live_owner_or_unconfirmed_effect_blocks_only_actor": [
+            "assert outcome.state == 'pending_settlement'",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'interrupted'",
+            "assert db.get(AgentRun, 'old-run').status == 'running'"
+          ],
+          "test_current_override_changes_only_after_readiness_and_keeps_autonomy": [
+            "assert outcome.state == 'needs_preparation' and outcome.abandoned_count == 1",
+            "assert (policy.engine, policy.version) == ('current', 4)",
+            "assert outcome.converted_count == 1",
+            "assert (policy.engine, policy.version) == ('personalized_graph_v2', 5)",
+            "assert (actor.autonomous_enabled, actor.version) == initial",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).converted_count == 0"
+          ],
+          "test_new_writes_reject_current_and_null_inheritance_is_unchanged": [
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError, match='engine_invalid')",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).state == 'ready'",
+            "assert db.get(ActivityEnginePolicy, f'character:{actor.id}') is None"
+          ],
+          "test_v2_common_legacy_policy_activity_is_never_retired": [
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'interrupted'"
+          ],
+          "test_direct_current_conversion_cannot_skip_supported_settlement": [
+            "pytest.raises(ValueError, match='legacy_engine_transition_required')",
+            "assert db.get(ActivityEnginePolicy, f'character:{actor.id}').engine == 'current'"
+          ],
+          "test_one_live_actor_does_not_block_other_world_retirement_or_shared_readiness": [
+            "assert outcomes[actor_id].state == 'pending_settlement'",
+            "assert outcomes['second-actor'].state == 'ready' and outcomes['second-actor'].abandoned_count == 1",
+            "assert db.get(ActivityGraphRun, 'second-old').status == 'abandoned'",
+            "assert db.get(ActivityGraphRun, 'second-old').result['usage'] == {'calls': 3}",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'interrupted'"
+          ],
+          "test_shared_current_scope_waits_for_every_inheriting_actor_but_not_specific_v2": [
+            "assert result.state == 'needs_preparation' and result.abandoned_count == 1",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'abandoned'",
+            "assert db.get(ActivityEnginePolicy, 'global').engine == 'current'",
+            "assert 'specific' not in checked",
+            "assert resolve_engine(db, db.get(WorldCharacter, 'specific'))['engine'] == 'personalized_graph_v2'",
+            "assert result.converted_count == 1",
+            "assert (global_policy.engine, global_policy.version) == ('personalized_graph_v2', 4)",
+            "assert db.get(ActivityEnginePolicy, 'character:specific').version == 7",
+            "assert (db.get(WorldCharacter, actor_id).autonomous_enabled, db.get(WorldCharacter, actor_id).version) == original",
+            "assert db.get(WorldCharacter, 'unready').autonomous_enabled is False"
+          ],
+          "test_policy_revision_conflict_preserves_settlement_and_newer_override": [
+            "assert result.state == 'pending_conversion' and result.reason == 'engine_policy_conflict'",
+            "assert result.abandoned_count == 1 and result.converted_count == 0",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'abandoned'",
+            "assert db.get(ActivityGraphRun, 'old-run').result['usage'] == {'calls': 2}",
+            "assert (policy.engine, policy.version) == ('current', 2)",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW, readiness=lambda *a, **k: None).converted_count == 1"
+          ],
+          "test_actual_approved_setup_and_day_plan_readiness_controls_current_transition": [
+            "assert v2_readiness(db, actor, now=NOW) == 'legacy_v2_preparation_not_ready'",
+            "assert result.state == 'needs_preparation' and result.converted_count == 0",
+            "assert v2_readiness(db, actor, now=NOW) is None",
+            "assert result.state == 'ready' and result.converted_count == 1",
+            "assert db.get(ActivityEnginePolicy, f'character:{actor_id}').engine == 'personalized_graph_v2'"
+          ]
+        },
+        "tests/runtime/test_retirement_restore.py": {
+          "test_retirement_uses_real_episode_beat_event_and_slot_ownership": [
+            "assert db.get(SocialEvent, 'success-before-retirement').result == 'succeeded'",
+            "assert outcome.state == 'pending_settlement' and row.status == 'running'",
+            "assert beat.status == 'claimed' and consumption.status == 'claimed'",
+            "assert outcome.abandoned_count == 1 and row.status == 'abandoned'",
+            "assert beat.status == 'failed' and beat.claim_run_id is None",
+            "assert beat.failure_reason_code == 'legacy_sns_abandoned'",
+            "assert beat.result_snapshot == {'unexecuted_draft': True}",
+            "assert beat.source_post_id is None and beat.state_after_snapshot is None",
+            "assert consumption.status == 'released' and consumption.version == 3",
+            "assert db.get(AgentSlot, ctx.agent_id).locked_by_run_id is None",
+            "assert db.get(type(episode), episode_id).next_sequence_no == beat.sequence_no + 1",
+            "assert row.result['usage'] == {'calls': 2} and RETENTION_KEY not in row.result"
+          ],
+          "test_paired_backup_restore_keeps_original_and_pruned_completion_while_retiring_old": [
+            "assert backup_checkpoint(source, archive / 'activity.sqlite3')",
+            "assert (await task.cycle())['pruned'] == 1",
+            "assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in archive.iterdir()} == hashes",
+            "assert outcome.abandoned_count == 1 and outcome.state == 'needs_preparation'",
+            "assert old.status == 'abandoned' and old.result['partial_success'] == {'public_action_count': 1}",
+            "assert old.result['recovery_reservations'] == ['saved-json'] and RETENTION_KEY not in old.result",
+            "assert done.result == before and done.result[RETENTION_KEY]['state'] == 'pruned'",
+            "assert asyncio.run(run_personalized_activity(context, actor=actor, run=done)) == business_result(before)",
+            "assert db.get(AgentRun, 'old-restored').gateway_result['usage'] == {'calls': 2}",
+            "assert db.get(ActivityEnginePolicy, 'character:' + ids[2]).engine == 'current'",
+            "assert transition_uow(db, actor_id=ids[2], now=NOW, readiness=lambda *a, **k: None).converted_count == 1",
+            "assert transition_uow(db, actor_id=ids[2], now=NOW).abandoned_count == 0",
+            "assert [item async for item in saver.alist({'configurable': {'thread_id': 'activity:old-restored'}})]",
+            "assert [item async for item in saver.alist({'configurable': {'thread_id': 'activity:pruned-complete'}})] == []"
+          ],
+          "test_historical_v1_canonical_completion_is_reused_without_v1_graph": [
+            "assert first == result(version=1)",
+            "assert first['execution_order'] == ['inbox', 'routine', 'feed']"
+          ],
+          "test_gateway_completed_id_precedes_unready_policy_and_other_pending_ids": [
+            "assert asyncio.run(gateway.run_social_activity(ctx)) == business_result(original)",
+            "assert db.get(ActivityEnginePolicy, 'character:' + actor.id).engine == 'current'",
+            "assert db.get(ActivityGraphRun, 'run-feed').status == 'interrupted'",
+            "assert db.get(ActivityGraphRun, row.activity_id).result == original"
+          ],
+          "test_retirement_in_serving_generation_preserves_pins_and_needs_no_schema_copy": [
+            "assert not list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))",
+            "assert list((tmp_path / 'runtime' / 'canonical-uses').glob('*.json'))",
+            "assert prune(tmp_path, app.state.runtime_config.serving_retention_owner).get('removed', 0) == 0",
+            "assert database_path.exists()",
+            "assert app.state.runtime_config.generation == 'C'",
+            "assert not database_path.parent.exists()",
+            "assert (snapshot(tmp_path / 'secrets'), snapshot(tmp_path / 'media')) == secret_media",
+            "assert first.abandoned_count == 1",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert db.get(ActivityGraphRun, 'old-run').status == 'abandoned'"
+          ],
+          "test_paired_generation_restore_preserves_marker_manifest_and_legacy_records": [
+            "assert backup_checkpoint(source, archive / checkpoint_relative)",
+            "assert marker_copy == marker_source",
+            "assert snapshot(archive) == archive_before",
+            "assert {key: value for key, value in snapshot(restored / 'canonical').items() if not key.endswith(('.sqlite3', '.sqlite3-wal', '.sqlite3-shm'))} == marker_copy",
+            "assert app.state.runtime_config.generation == original_generation",
+            "assert result.abandoned_count == 1",
+            "assert row.status == 'abandoned' and row.engine == 'personalized_graph_v2' and (row.contract_version == 1)",
+            "assert row.result['usage'] == {'calls': 2} and row.result['partial_success'] is True",
+            "assert RETENTION_KEY not in row.result",
+            "assert transition_uow(db, actor_id=actor_id, now=NOW).abandoned_count == 0",
+            "assert [item async for item in saver.alist({'configurable': {'thread_id': 'activity:old-run'}})]"
+          ]
+        },
+        "tests/runtime/test_routine_bounded_integration.py": {
+          "test_actual_split_routine_recovers_once_then_publishes_at_most_once": [
+            "assert [call['max_output_tokens'] for call in calls] == expected_caps",
+            "assert planner_calls[0]['response_schema'] == planner_calls[1]['response_schema']",
+            "assert planner_calls[0]['system_prompt'] == planner_calls[1]['system_prompt']",
+            "assert planner_calls[1]['user_prompt'].startswith(planner_calls[0]['user_prompt'])",
+            "assert len(metadata.get('recovery_reservations', [])) == (1 if len(calls) > 1 and path.startswith(('recover', 'retry')) else 0)",
+            "assert len(metadata.get('normal_reservations', [])) == (2 if success else 1)",
+            "assert result['generation_mode'] == 'split'",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(Post.id))) == 1",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id)).where(AgentPublicActionExecution.status == 'succeeded')) == 1",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "pytest.raises((direct_llm.DirectLlmError, ValueError))",
+            "assert db.scalar(select(func.count(Post.id))) == 0",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id))) == 0"
+          ]
+        },
+        "tests/runtime/test_routine_retention_boundary.py": {
+          "test_split_routine_completion_is_not_reexecuted_after_final_storage_failure": [
+            "assert [call['max_output_tokens'] for call in calls] == [8192, 16384, 4096]",
+            "assert run.status == 'completed' and run.result['paths']['routine']['public_action_count'] == 1, run.result['paths']",
+            "assert run.result[RETENTION_KEY]['graph_complete'] is False",
+            "assert len(run.result['recovery_reservations']) == 1",
+            "assert len(run.result['normal_reservations']) == 2",
+            "assert not eligible(run, now=datetime.now(UTC) + timedelta(days=2))",
+            "assert (await task.cycle()).get('pruned', 0) == 0",
+            "assert first == second and first['publish_result']['public_action_count'] == 1",
+            "assert run.result == original_result and run.finished_at == finished",
+            "assert db.scalar(select(func.count(Post.id))) == 1",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id)).where(AgentPublicActionExecution.status == 'succeeded')) == 1",
+            "pytest.raises(OSError, match='final SDK')",
+            "assert [item async for item in saver.alist({'configurable': {'thread_id': 'activity:' + ctx.run_id}})]"
+          ]
+        },
+        "tests/runtime/test_sns_execution_retirement_gate.py": {
+          "evidence": [],
+          "test_closed_retirement_accounts_for_removed_and_retained_symbols": [
+            "assert removed == {(SOURCE, 'exclusive_graph')} and modules == {SOURCE}"
+          ],
+          "test_retirement_rejects_each_unproven_source_or_behavior_delta": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_rejects_global_local_relative_and_dynamic_old_imports": [
+            "pytest.raises(ValueError, match='import')"
+          ]
+        },
+        "tests/runtime/test_sns_observation.py": {
+          "data_root": [],
+          "_insert_run": [],
+          "test_sdk_response_metadata_survives_empty_json_failure_and_safe_export": [
+            "assert len(sdk_calls) == 1",
+            "assert coverage['response_evidence_complete'] is True",
+            "assert coverage['response_evidence_count'] == 1",
+            "assert coverage['response_evidence_missing_count'] == 0",
+            "assert record['activity_id'] == 'response-test'",
+            "assert record['agent_run_id'] == 'response-lease'",
+            "assert details['call_order'] == details['provider_call_order'] == details['json_attempt'] == 1",
+            "assert details['candidate_count'] == 0",
+            "assert details['prompt_feedback_present'] is blocked",
+            "assert details['prompt_block_reason'] == ('SAFETY' if blocked else None)",
+            "assert attempt is not None",
+            "pytest.raises(DirectLlmJsonError)",
+            "assert caught.value.failure_class == 'json_parse_failed'",
+            "assert caught.value.json_error_diagnostics[0]['response_length'] == 0",
+            "assert private not in (destination / name).read_text()"
+          ],
+          "test_response_evidence_missing_and_historical_sessions_are_distinguished": [
+            "assert coverage['response_evidence_complete'] is False",
+            "assert coverage['response_evidence_missing_count'] == 1",
+            "assert old_coverage['response_evidence_complete'] == 'not_recorded_in_session'",
+            "assert attempt is not None"
+          ],
+          "test_preparation_export_scopes_world_actor_time_and_omits_private_source": [
+            "assert [row['id'] for row in rows] == ['in-scope']",
+            "assert rows[0]['attempt_count'] == 4",
+            "assert 'private-persona' not in body and 'source_snapshot' not in body",
+            "assert list(db.iterdump()) == before"
+          ],
+          "test_name_binding_recorder_keeps_only_counts_policy_and_content_hashes": [
+            "assert 'private-user-name' not in source and 'private-key' not in source",
+            "assert 'private-output-body' not in source",
+            "assert event['details']['fields']['replies.0.body']['replacements'] == 2",
+            "assert event['details']['binding_digest'] == 'a' * 64"
+          ],
+          "test_session_captures_validation_failure_without_payload_and_exports_read_only": [
+            "assert 'activity-1' in manifest['carry_in_ids']",
+            "assert 'private-body' not in source",
+            "assert 'private-credential' not in source",
+            "assert 'memory-1' in source",
+            "assert 'decisions.0.action' in source",
+            "assert coverage['run_count'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert not coverage['complete_recording']",
+            "assert 'private-body' not in (destination / 'errors.jsonl').read_text(encoding='utf-8')",
+            "assert (destination / 'calls.jsonl').read_text(encoding='utf-8').count('llm_call') == 1",
+            "assert (destination / 'report.md').is_file()",
+            "assert attempt is not None",
+            "assert list(csv.DictReader(source))[0]['validation_code'] == 'unknown'"
+          ],
+          "test_schema3_exports_bounded_request_and_sqlite_evidence": [
+            "assert manifest['schema_version'] == 3",
+            "assert coverage['request_evidence_complete'] is True",
+            "assert coverage['artifact_missing_count'] == 0",
+            "assert coverage['sqlite_write_event_count'] == 1",
+            "assert len(artifacts) == 1",
+            "assert 'private-user-body' not in artifacts[0].read_text(encoding='utf-8')",
+            "assert '\"provider_detail_status\":\"absent\"' in calls",
+            "assert '\"unit\":\"S1\"' in (destination / 'sqlite-writes.jsonl').read_text(encoding='utf-8')",
+            "assert attempt is not None"
+          ],
+          "test_schema3_rejects_corrupt_artifact_during_export": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert attempt is not None"
+          ],
+          "test_schema3_large_artifact_is_reported_as_truncated_without_stopping_activity": [
+            "assert result['artifact_truncated_count'] == 1",
+            "assert result['request_evidence_complete'] is False",
+            "assert result['dropped_events'] == 0",
+            "assert attempt is not None"
+          ],
+          "test_schema3_export_rejects_artifact_path_outside_session": [
+            "assert result['artifact_missing_count'] == 1",
+            "assert not (tmp_path / 'path' / 'outside-secret.json').exists()",
+            "assert attempt is not None"
+          ],
+          "test_legacy_session_reports_request_evidence_not_recorded": [
+            "assert result['request_evidence_complete'] == 'not_recorded_in_schema_version'"
+          ],
+          "test_export_separates_recovered_planner_output_from_final_failure": [
+            "assert coverage['planner_output_failures'] == 2",
+            "assert coverage['planner_retries_scheduled'] == 1",
+            "assert coverage['planner_recovered_activities'] == 1",
+            "assert coverage['planner_final_failures'] == 1",
+            "assert coverage['error_count'] == 1",
+            "assert 'action_brief_missing' in csv_text and 'decisions.0.brief' in csv_text",
+            "assert 'recovered activities: 1; final path failures: 1' in report",
+            "assert 'a' * 64 in calls",
+            "assert recovered and failed",
+            "assert 'SECRET_PRIVATE' not in (output / filename).read_text(encoding='utf-8')"
+          ],
+          "test_split_routine_export_counts_physical_calls_recovery_and_deduplicated_failure": [
+            "assert coverage['routine_planner_physical_calls'] == 4",
+            "assert coverage['routine_planner_output_failures'] == 3",
+            "assert coverage['routine_planner_retries_scheduled'] == 2",
+            "assert coverage['routine_planner_recovered_activities'] == 1",
+            "assert coverage['routine_planner_final_failures'] == 1 and coverage['error_count'] == 1",
+            "assert 'PRIVATE' not in (output / 'calls.jsonl').read_text(encoding='utf-8')",
+            "assert observer.close()",
+            "assert attempt is not None"
+          ],
+          "test_export_distinguishes_writer_repair_from_planner_retry": [
+            "assert coverage['combined_draft_validation_failures'] == 1",
+            "assert coverage['writer_recovered_paths'] == 1",
+            "assert coverage['planner_retries_scheduled'] == 0",
+            "assert coverage['planner_final_failures'] == 0",
+            "assert 'combined_draft_body_invalid' in calls and 'PRIVATE' not in calls"
+          ],
+          "test_scope_stop_and_recorder_failure_do_not_change_activity": [
+            "assert observer.begin(activity_id='x', agent_run_id='x', world_id='other', actor_id='actor-1', activity_started_at=datetime.now(UTC)) is None",
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is None",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is None",
+            "assert session_status(data_root, manifest['session_id'])['state'] == 'stopped'",
+            "assert active_session(data_root)['session_id'] == manifest['session_id']"
+          ],
+          "test_guard_failure_has_node_phase_and_keeps_original_exception": [
+            "pytest.raises(ValueError, match='source_changed')",
+            "assert any((event == 'node_failed' and node == 'TargetSelector' and (details.get('phase') == 'guard') for event, node, details in events))"
+          ],
+          "test_export_joins_confirmed_actions_state_and_relationship_receipts": [
+            "assert coverage['effect_statuses']['public_action'] == {'succeeded': 1}",
+            "assert coverage['effect_statuses']['state_receipt'] == {'changed': 1}",
+            "assert coverage['effect_statuses']['relationship_metric'] == {'applied': 1}",
+            "assert 'post-1' in (output / 'effects.jsonl').read_text(encoding='utf-8')"
+          ],
+          "test_heartbeat_records_idle_scheduler_without_private_activity": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'ready' for item in events))"
+          ],
+          "test_restart_keeps_session_and_tail_only_accepts_existing_activity": [
+            "assert len(starts) == 2",
+            "assert {row['activity_id'] for row in starts} == {'within-window'}",
+            "assert len({row['process_instance_id'] for row in starts}) == 2",
+            "assert attempt is not None",
+            "assert resumed is not None and resumed.attempt_id != attempt.attempt_id",
+            "assert second.process_instance_id != process_id",
+            "assert second.begin(activity_id='too-late', agent_run_id='lease-3', world_id='world-1', actor_id='actor-1', activity_started_at=started + timedelta(seconds=65)) is None"
+          ],
+          "test_parent_lane_failure_is_linked_to_one_root_error": [
+            "assert coverage['error_count'] == 1",
+            "assert errors[0]['node'] == 'ActionPlanner'"
+          ],
+          "test_accelerated_idle_120_minute_window_and_tail_finalize_with_heartbeat": [
+            "assert coverage['complete_recording'] is (not coverage['heartbeat_gap_seconds'])",
+            "assert coverage['observed_any_activity'] is False",
+            "assert coverage['flush_complete'] is True",
+            "assert all((gap > 150 for gap in coverage['heartbeat_gap_seconds']))",
+            "assert (output / 'control.jsonl').read_text(encoding='utf-8').count('\"event_type\":\"heartbeat\"') > 100",
+            "assert observer.close()"
+          ],
+          "test_scheduler_failure_does_not_suppress_heartbeat": [
+            "assert any((item['event_type'] == 'heartbeat' for item in events))",
+            "assert any((item['event_type'] == 'scheduler_sample' and item['details']['scheduler_snapshot'] == 'unavailable' for item in events))"
+          ],
+          "test_tail_stop_and_v1_reader_do_not_claim_complete_recording": [
+            "assert status['window_elapsed'] and status['tail_elapsed']",
+            "assert status['stopped_early']",
+            "assert status['admission_cutoff_at'] == (started + timedelta(seconds=90)).isoformat()",
+            "assert coverage['control_event_count'] == 1",
+            "assert coverage['complete_recording'] is False",
+            "assert coverage['flush_complete'] is None",
+            "assert coverage['stopped_early'] is True",
+            "assert coverage['planner_output_failures'] == 0"
+          ],
+          "test_single_writer_per_data_root_and_rebind_after_close": [
+            "pytest.raises(RuntimeError, match='sns_observation_writer_still_running')",
+            "assert first.close()",
+            "assert second.process_instance_id != first.process_instance_id",
+            "assert second.close()"
+          ],
+          "test_full_queue_is_counted_and_subsequent_event_can_be_recorded": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='inbox', node='TargetSelector') is None",
+            "assert attempt.emit('node_completed', lane='inbox', node='TargetSelector') is not None",
+            "assert observer.dropped >= 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] >= 1",
+            "assert observer.close()"
+          ],
+          "test_event_write_failure_is_counted_without_failing_activity": [
+            "assert attempt is not None",
+            "assert attempt.emit('node_started', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['failed'] == 1",
+            "assert observer._counter(manifest['session_id'])['dropped'] == 1",
+            "assert attempt.emit('node_completed', lane='feed', node='LoadCandidates') is not None",
+            "assert observer._counter(manifest['session_id'])['written'] >= 2",
+            "assert observer.close()"
+          ],
+          "test_new_session_health_does_not_inherit_prior_session_error": [
+            "assert observer._active is not None",
+            "assert observer._active['session_id'] == second['session_id']",
+            "assert len(health) == 1",
+            "assert health[0]['last_error_stage'] is None",
+            "assert observer.close()"
+          ]
+        },
+        "tests/runtime/test_social_request_budgets.py": {
+          "canonical": [],
+          "test_fixed_ten_normal_five_recovery_reservations_survive_new_sessions": [
+            "assert (NORMAL_CALL_BUDGET, RECOVERY_CALL_BUDGET, MAX_CALL_BUDGET) == (10, 5, 15)",
+            "assert len(row.result['normal_reservations']) + len(row.result['recovery_reservations']) == 15",
+            "pytest.raises(ValueError, match='activity_recovery_exhausted')",
+            "pytest.raises(ValueError, match='activity_recovery_exhausted')",
+            "assert 'checkpoint_retention' in row.result"
+          ],
+          "test_same_recovery_key_has_one_winner_across_competing_sql_sessions": [
+            "assert sorted(results) == ['authorized', 'rejected']",
+            "assert db.get(ActivityGraphRun, identifier).result['recovery_reservations'] == ['RoutineActionPlanner:json']",
+            "assert str(exc) in {'activity_recovery_conflict', 'activity_recovery_exhausted'}"
+          ]
+        },
+        "tests/runtime/test_social_wire_policies.py": {
+          "test_mixed_inbox_writer_rejects_even_null_response_fields_on_ordinary_target": [
+            "pytest.raises(ValueError, match='social_draft_field_forbidden')"
+          ],
+          "candidate": [],
+          "test_lane_and_capability_schema_excludes_impossible_actions": [
+            "assert not forbidden & set(fields)",
+            "assert fields['target_id']['enum'] == ['post']",
+            "assert 'text' not in fields['proposal']['properties']",
+            "assert fields['proposal']['properties']['activity_seed']['maxLength'] == 500",
+            "assert not {'task_id', 'body'} & set(fields['proposal_response']['properties'])",
+            "assert 'counter_target_date' in fields['proposal_response']['properties']",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_meaning_counter_validation_and_target_checks_survive_wire_reduction": [
+            "pytest.raises(ValidationError)",
+            "assert not {'task_id', 'body'} & set(result['decisions'][0]['proposal_response'])",
+            "pytest.raises(ValidationError)"
+          ],
+          "test_projection_only_changes_model_view_and_keeps_images_sources_and_writer_tasks": [
+            "assert not excluded & set(preview)",
+            "assert preview['images'] == source['images']",
+            "assert preview['source_revisions'] == source['source_revisions']",
+            "assert not excluded & set(view['source'])",
+            "assert view['task_id'] == 'server-id'",
+            "assert source == original",
+            "assert source == original",
+            "assert target_view(source, 'inbox' if lane == 'feed' else 'feed') != target_view(source, lane)"
+          ],
+          "test_new_feed_draft_uses_server_task_and_rejects_even_null_response_fields": [
+            "assert not {'task_id', 'proposal_decision', 'counter_target_date'} & set(fields)",
+            "assert result['reply_task_results'][0]['task_id'] == 'server-id'",
+            "pytest.raises(ValueError, match='field_forbidden')"
+          ],
+          "test_policies_are_independent_and_not_part_of_public_completion": [
+            "assert read_policies(metadata).model_dump() == {'social_io_policy': io, 'routine_output_policy': routine}",
+            "assert business_result(metadata) == {'paths': metadata['paths'], 'recovery_reservations': ['used']}",
+            "assert read_policies(None).routine_output_policy == LEGACY_ROUTINE_OUTPUT"
+          ],
+          "test_split_routine_uses_real_json_transport_and_only_one_bounded_retry": [
+            "assert [call['max_output_tokens'] for call in calls] == expected_caps",
+            "assert all((call['thinking_level'] == 'high' for call in calls))",
+            "assert reservations == (['RoutineActionPlanner:json'] if len(calls) == 2 else [])",
+            "assert len(guards) == len(calls)",
+            "assert len(normal) == 1 and normal[0].startswith('RoutineActionPlanner:')",
+            "assert asyncio.run(request).chosen == 'same'",
+            "pytest.raises(direct_llm.DirectLlmError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_activity_retirement.py": {},
+        "tests/runtime/test_retirement_restore.py": {},
+        "tests/runtime/test_routine_bounded_integration.py": {},
+        "tests/runtime/test_routine_retention_boundary.py": {},
+        "tests/runtime/test_sns_execution_retirement_gate.py": {},
+        "tests/runtime/test_sns_observation.py": {},
+        "tests/runtime/test_social_request_budgets.py": {},
+        "tests/runtime/test_social_wire_policies.py": {}
+      }
+    },
+    {
+      "commit": "62181d71d6caeeabb03b103bdabdd2be342f23e7",
+      "feature_id": "AR-SNS-COLD-CLOCK",
+      "reason": "Issue359: unchanged pure UTC clock ownership and both fresh-process planning/service import regression cases",
+      "tracked_files": {
+        "backend/tests/routines/test_planning_imports.py": "8b065f6e59a80956e2908fb3b4a3c048d482770f"
+      },
+      "test_nodes": [
+        "tests/routines/test_planning_imports.py::test_planning_and_scheduling_are_independently_importable[app.domains.routines.policies.planning]",
+        "tests/routines/test_planning_imports.py::test_planning_and_scheduling_are_independently_importable[app.domains.routines.service.scheduling]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_planning_imports.py": {
+          "test_planning_and_scheduling_are_independently_importable": [
+            "assert result.returncode == 0, result.stderr"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_planning_imports.py": {}
+      }
     }
   ]
 }
