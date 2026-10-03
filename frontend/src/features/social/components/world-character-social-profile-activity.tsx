@@ -1,10 +1,12 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
 
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { worldCharacterProfileRoute, worldPostDetailRoute } from "@/lib/navigation/product-routes";
-import { formatDate } from "@/utils/profile-presentation";
 
 import { getWorldCharacterSocialProfile, WorldCharacterSocialProfileApiError } from "@/features/social/api/world-character-social-profile-client";
 import type { WorldCharacterSocialProfileCounts, WorldCharacterSocialProfilePost, WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
@@ -44,6 +46,8 @@ export function WorldCharacterSocialProfileActivity({
   worldCharacterId,
   worldId,
 }: Props) {
+  const uiText = useUiText("social");
+  const formatDate = useUiDateFormatter();
   const [state, setState] = useState<ActivityState>({ status: "loading" });
   const [loadingMore, setLoadingMore] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -89,12 +93,12 @@ export function WorldCharacterSocialProfileActivity({
   const counts = state.status === "ready" ? state.counts : null;
   const metrics = useMemo(
     () => [
-      ["지저귐", counts?.post_count],
-      ["대꾸", counts?.reply_count],
-      ["좋아요", counts?.liked_post_count],
-      ["받은 좋아요", counts?.received_like_count],
+      [uiText("지저귐"), counts?.post_count],
+      [uiText("대꾸"), counts?.reply_count],
+      [uiText("좋아요"), counts?.liked_post_count],
+      [uiText("받은 좋아요"), counts?.received_like_count],
     ] as const,
-    [counts],
+    [counts?.liked_post_count, counts?.post_count, counts?.received_like_count, counts?.reply_count, uiText],
   );
 
   async function loadMore() {
@@ -135,7 +139,7 @@ export function WorldCharacterSocialProfileActivity({
 
   return (
     <section
-      aria-label="현재 World 활동"
+      aria-label={uiText("현재 World 활동")}
       className={styles.activity}
       data-world-character-social-activity
       data-world-character-social-tab={activeTab}
@@ -149,7 +153,7 @@ export function WorldCharacterSocialProfileActivity({
         ))}
       </dl>
 
-      <div aria-label="현재 World 활동 종류" className={styles.tabs} role="tablist">
+      <div aria-label={uiText("현재 World 활동 종류")} className={styles.tabs} role="tablist">
         {TABS.map((tab) => (
           <button
             aria-controls="world-character-social-panel"
@@ -180,7 +184,7 @@ export function WorldCharacterSocialProfileActivity({
         {state.status === "ready" && state.items.length === 0 ? (
           <div className={styles.empty}>
             <strong>{emptyTitle(activeTab)}</strong>
-            <span>현재 World에서 공개되고 확인 가능한 활동만 표시합니다.</span>
+            <span>{uiText("현재 World에서 공개되고 확인 가능한 활동만 표시합니다.")}</span>
           </div>
         ) : null}
         {state.status === "ready" && state.items.length > 0 ? (
@@ -201,14 +205,14 @@ export function WorldCharacterSocialProfileActivity({
                   }
                   context={
                     activeTab === "replies"
-                      ? "이 World에서 남긴 대꾸"
+                      ? uiText("이 World에서 남긴 대꾸")
                       : activeTab === "likes"
-                        ? "이 World에서 좋아요한 글"
+                        ? uiText("이 World에서 좋아요한 글")
                         : undefined
                   }
                   href={detailHref}
                   key={`${activeTab}:${post.id}`}
-                  post={presentActivityPost(post)}
+                  post={presentActivityPost(post, formatDate)}
                   variant={post.reply_to_post_id ? "reply" : "feed"}
                 />
               );
@@ -219,7 +223,7 @@ export function WorldCharacterSocialProfileActivity({
           <div className={styles.moreRow}>
             <button disabled={loadingMore} onClick={() => void loadMore()} type="button">
               <RefreshCw aria-hidden="true" className={loadingMore ? styles.spin : undefined} size={17} />
-              {loadingMore ? "불러오는 중" : "더 보기"}
+              {loadingMore ? uiText("불러오는 중") : uiText("더 보기")}
             </button>
           </div>
         ) : null}
@@ -230,12 +234,14 @@ export function WorldCharacterSocialProfileActivity({
 
 function presentActivityPost(
   post: WorldCharacterSocialProfilePost,
+  formatDate: (value: string) => string,
 ): SocialPostPresentation {
   return {
     id: post.id,
     authorAvatarUrl: post.author_avatar_url,
     authorHandle: post.author_handle,
     authorName: post.author_name,
+    authorDeleted: post.author_deleted,
     createdAt: post.created_at,
     timeLabel: formatDate(post.created_at),
     title: post.reply_to_post_id ? "" : post.title,
@@ -267,9 +273,10 @@ function activityActions(
 }
 
 function ActivityLoading() {
+  const uiText = useUiText("social");
   return (
     <div aria-live="polite" className={styles.loading} role="status">
-      <span>현재 World 활동을 불러오는 중</span>
+      <span>{uiText("현재 World 활동을 불러오는 중")}</span>
       <i aria-hidden="true" />
       <i aria-hidden="true" />
     </div>
@@ -277,22 +284,22 @@ function ActivityLoading() {
 }
 
 function ActivityError({ error, onRetry }: { error: Error; onRetry: () => void }) {
+  const uiText = useUiText("social");
   const unavailable =
     error instanceof WorldCharacterSocialProfileApiError &&
     (error.status === 403 || error.status === 404);
   return (
     <div className={styles.error} role="alert">
-      <strong>{unavailable ? "이 활동을 볼 수 없어요" : "활동을 불러오지 못했어요"}</strong>
+      <strong>{unavailable ? uiText("이 활동을 볼 수 없어요") : uiText("활동을 불러오지 못했어요")}</strong>
       <span>
         {unavailable
-          ? "현재 World의 참여·차단 상태를 확인해 주세요."
-          : "로컬 runtime 상태를 확인한 뒤 다시 시도해 주세요."}
+          ? uiText("현재 World의 참여·차단 상태를 확인해 주세요.")
+          : uiText("로컬 runtime 상태를 확인한 뒤 다시 시도해 주세요.")}
       </span>
       {!unavailable ? (
         <button onClick={onRetry} type="button">
           <RefreshCw aria-hidden="true" size={17} />
-          다시 시도
-        </button>
+          {uiText("다시 시도")}</button>
       ) : null}
     </div>
   );

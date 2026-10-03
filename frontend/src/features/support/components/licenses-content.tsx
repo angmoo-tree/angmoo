@@ -1,3 +1,6 @@
+"use client";
+
+import { useUiText } from "@/hooks/use-ui-text";
 const LUCIDE_ISC_LICENSE = `ISC License
 
 Copyright (c) 2026 Lucide Icons and Contributors
@@ -37,6 +40,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.`;
 
 export function LicensesContent() {
+  const uiText = useUiText("support");
   return (
 <div className="min-h-screen bg-white" data-product-content="licenses">
         <header className="border-b border-[#eaedf2] px-5 py-8 md:px-9 md:py-10">
@@ -44,12 +48,9 @@ export function LicensesContent() {
             Angmoo notices
           </p>
           <h1 className="mt-2 text-[34px] font-extrabold leading-tight text-[#101828] md:text-[42px]">
-            라이선스
-          </h1>
+            {uiText("라이선스")}</h1>
           <p className="mt-4 max-w-[660px] break-keep text-[16px] font-bold leading-7 text-[#667085]">
-            Angmoo application과 함께 배포되는 제3자 구성요소의 라이선스
-            경계를 안내합니다.
-          </p>
+            {uiText("Angmoo application과 함께 배포되는 제3자 구성요소의 라이선스 경계를 안내합니다.")}</p>
         </header>
 
         <section className="px-5 py-8 md:px-9">
@@ -62,16 +63,11 @@ export function LicensesContent() {
             </h2>
             <div className="mt-4 space-y-3 break-keep text-[15px] font-medium leading-7 text-[#475467]">
               <p>
-                Angmoo application source는 GNU General Public License version
-                3 only 조건으로 제공됩니다.
-              </p>
+                {uiText("Angmoo application source는 GNU General Public License version 3 only 조건으로 제공됩니다.")}</p>
               <p>
-                이 조건은 Angmoo를 사용해 만든 World Package나 로컬 Runtime
-                데이터에 자동으로 부여되지 않습니다. 함께 배포되는 제3자
-                구성요소에는 각 구성요소의 라이선스가 적용됩니다.
-              </p>
+                {uiText("이 조건은 Angmoo를 사용해 만든 World Package나 로컬 Runtime 데이터에 자동으로 부여되지 않습니다. 함께 배포되는 제3자 구성요소에는 각 구성요소의 라이선스가 적용됩니다.")}</p>
               <p>
-                전체 원문은 저장소의{" "}
+                {uiText("전체 원문은 저장소의")}{" "}
                 <a
                   href="https://github.com/angmoo-tree/angmoo/blob/main/LICENSE"
                   target="_blank"
@@ -80,8 +76,7 @@ export function LicensesContent() {
                 >
                   LICENSE
                 </a>
-                에서 확인할 수 있습니다.
-              </p>
+                {uiText("에서 확인할 수 있습니다.")}</p>
             </div>
           </div>
 
@@ -91,13 +86,11 @@ export function LicensesContent() {
               Lucide Icons
             </h2>
             <div className="mt-4 space-y-3 break-keep text-[15px] font-medium leading-7 text-[#475467]">
-              <p>Angmoo는 일부 UI 아이콘에 Lucide Icons를 사용합니다.</p>
+              <p>{uiText("Angmoo는 일부 UI 아이콘에 Lucide Icons를 사용합니다.")}</p>
               <p>
-                Lucide Icons는 ISC License로 제공되며, 일부 Lucide 아이콘은
-                Feather Icons에서 파생되어 MIT License 고지가 적용됩니다.
-              </p>
+                {uiText("Lucide Icons는 ISC License로 제공되며, 일부 Lucide 아이콘은 Feather Icons에서 파생되어 MIT License 고지가 적용됩니다.")}</p>
               <p>
-                공식 라이선스 문서는{" "}
+                {uiText("공식 라이선스 문서는")}{" "}
                 <a
                   href="https://lucide.dev/license"
                   target="_blank"
@@ -106,8 +99,7 @@ export function LicensesContent() {
                 >
                   lucide.dev/license
                 </a>
-                에서 확인할 수 있습니다.
-              </p>
+                {uiText("에서 확인할 수 있습니다.")}</p>
             </div>
 
             <LicenseBlock title="Lucide Icons - ISC License" body={LUCIDE_ISC_LICENSE} />

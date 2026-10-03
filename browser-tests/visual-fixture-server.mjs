@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const fixture = JSON.parse(
@@ -49,6 +50,10 @@ const server = createServer((request, response) => {
     return;
   }
   const url = new URL(request.url ?? "/", `http://127.0.0.1:${port}`);
+  if (url.pathname === "/api/v1/auth/local/environment" && ["GET", "POST"].includes(request.method)) {
+    sendJson(response, VISUAL_ENVIRONMENT);
+    return;
+  }
   // Only the idempotent, provider-free Home bootstrap is simulated as a write.
   // Every other mutation remains forbidden by the visual fixture server.
   if (request.method === "POST" && url.pathname === "/api/v1/worlds/default-space/ensure") {
@@ -65,7 +70,7 @@ const server = createServer((request, response) => {
     return;
   }
   if (url.pathname === "/api/v1/auth/me") {
-    sendJson(response, fixture.owner);
+    sendJson(response, {...fixture.owner, ui_language: "ko", ui_preference_revision: 1});
     return;
   }
   if (url.pathname === "/api/v1/runtime/status") {

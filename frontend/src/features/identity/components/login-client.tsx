@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { LogIn } from "lucide-react";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -95,6 +97,7 @@ export function LoginClient({
   logoutLocallyOnly = false,
   returnTo = null,
 }: LoginClientProps) {
+  const uiText = useUiText("identity");
   const router = useRouter();
   const googleButtonRef = useRef<HTMLDivElement | null>(null);
   const googleSavingRef = useRef(false);
@@ -108,7 +111,7 @@ export function LoginClient({
     async (response: GoogleCredentialResponse) => {
       if (googleSavingRef.current) return;
       if (!response.credential) {
-        setError("Google 로그인 정보를 확인하지 못했습니다.");
+        setError(uiText("Google 로그인 정보를 확인하지 못했습니다."));
         return;
       }
 
@@ -123,7 +126,7 @@ export function LoginClient({
           return;
         }
         if (!auth.user) {
-          throw new Error("Google 로그인 응답을 확인하지 못했습니다.");
+          throw new Error(uiText("Google 로그인 응답을 확인하지 못했습니다."));
         }
         storeAuth({
           user: auth.user,
@@ -135,13 +138,13 @@ export function LoginClient({
             : returnTo ?? "/agents",
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Google 로그인에 실패했습니다.");
+        setError(err instanceof Error ? uiText(err.message) : uiText("Google 로그인에 실패했습니다."));
       } finally {
         googleSavingRef.current = false;
         setGoogleSaving(false);
       }
     },
-    [returnTo, router],
+    [returnTo, router, uiText],
   );
 
   useEffect(() => {
@@ -173,14 +176,14 @@ export function LoginClient({
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Google 로그인에 실패했습니다.");
+          setError(err instanceof Error ? uiText(err.message) : uiText("Google 로그인에 실패했습니다."));
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [handleGoogleCredential]);
+  }, [handleGoogleCredential, uiText]);
 
   async function handleEmailSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -196,7 +199,7 @@ export function LoginClient({
           : returnTo ?? "/agents",
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "로그인에 실패했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("로그인에 실패했습니다."));
     } finally {
       setEmailSaving(false);
     }
@@ -206,8 +209,7 @@ export function LoginClient({
     <section className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex h-[72px] items-center border-b border-[#eaedf2] bg-white/95 px-5 backdrop-blur-sm md:h-[88px] md:px-9">
         <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-          로그인
-        </h1>
+          {uiText("로그인")}</h1>
       </div>
 
       {error ? (
@@ -218,9 +220,7 @@ export function LoginClient({
 
       {logoutLocallyOnly ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#f9df9b] bg-[#fffaf0] px-5 py-4 text-[15px] font-medium text-[#8a5a00] md:mx-9">
-          이 브라우저의 로그인 정보는 지웠지만 서버 세션 폐기를 확인하지 못했습니다.
-          다시 로그인한 뒤 로그아웃을 재시도해 주세요.
-        </div>
+          {uiText("이 브라우저의 로그인 정보는 지웠지만 서버 세션 폐기를 확인하지 못했습니다. 다시 로그인한 뒤 로그아웃을 재시도해 주세요.")}</div>
       ) : null}
 
       <div className="flex justify-center px-5 py-8 md:px-9">
@@ -228,12 +228,9 @@ export function LoginClient({
           <div className="mx-auto flex w-full max-w-[480px] flex-col items-center space-y-4 text-center">
             <div>
               <p className="text-[18px] font-extrabold text-[#101828]">
-                Google 계정으로 시작
-              </p>
+                {uiText("Google 계정으로 시작")}</p>
               <p className="mx-auto mt-3 max-w-[420px] text-[13px] font-semibold leading-5 text-[#667085]">
-                Google은 계정 인증에만 사용됩니다. Angmoo는 Google 프로필 사진을 저장하지 않으며,
-                닉네임은 로그인 후 직접 설정합니다.
-              </p>
+                {uiText("Google은 계정 인증에만 사용됩니다. Angmoo는 Google 프로필 사진을 저장하지 않으며, 닉네임은 로그인 후 직접 설정합니다.")}</p>
             </div>
 
             {GOOGLE_CLIENT_ID ? (
@@ -243,14 +240,12 @@ export function LoginClient({
               />
             ) : (
               <div className="flex h-11 w-full items-center justify-center rounded-full border border-[#e1e5eb] bg-[#f9fafb] px-5 text-[15px] font-bold text-[#98a2b3]">
-                Google 로그인 설정이 필요합니다.
-              </div>
+                {uiText("Google 로그인 설정이 필요합니다.")}</div>
             )}
 
             {googleSaving ? (
               <p className="text-[14px] font-bold text-[#667085]">
-                Google 로그인 확인 중...
-              </p>
+                {uiText("Google 로그인 확인 중...")}</p>
             ) : null}
           </div>
 
@@ -259,10 +254,9 @@ export function LoginClient({
               <div className="my-7 h-px bg-[#eef1f5]" />
               <form onSubmit={handleEmailSubmit} className="mx-auto w-full max-w-[480px]">
                 <p className="mb-5 text-center text-[18px] font-extrabold text-[#101828]">
-                  이메일 로그인
-                </p>
+                  {uiText("이메일 로그인")}</p>
                 <div className="space-y-5">
-                  <Field label="이메일">
+                  <Field label={uiText("이메일")}>
                     <input
                       type="email"
                       value={email}
@@ -270,7 +264,7 @@ export function LoginClient({
                       className="h-14 w-full rounded-full border border-[#e1e5eb] bg-white px-5 text-[17px] font-medium text-[#101828] outline-none focus:border-[#ff6b6b] focus:ring-2 focus:ring-[#ffe2e2]"
                     />
                   </Field>
-                  <Field label="비밀번호">
+                  <Field label={uiText("비밀번호")}>
                     <input
                       type="password"
                       value={password}
@@ -286,7 +280,7 @@ export function LoginClient({
                   className="mt-7 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#ff6b6b] px-6 text-[17px] font-extrabold text-white shadow-[0_12px_24px_rgba(255,104,104,0.28)] transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <LogIn size={20} aria-hidden="true" />
-                  {emailSaving ? "로그인 중..." : "이메일 로그인"}
+                  {emailSaving ? uiText("로그인 중...") : uiText("이메일 로그인")}
                 </button>
               </form>
             </>

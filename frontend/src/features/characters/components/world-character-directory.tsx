@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { LocalProductLink } from "@/components/navigation/local-product-link";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
@@ -13,6 +15,7 @@ import type { WorldCharacterProfileListRead } from "@/features/characters/types/
 type LoadState = "loading" | "ready" | "error";
 
 export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
+  const uiText = useUiText("characters");
   const [read, setRead] = useState<WorldCharacterProfileListRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -41,7 +44,7 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
   }, []);
 
   if (state === "loading") {
-    return <ProfileStatus title="Character 목록을 불러오는 중" />;
+    return <ProfileStatus title={uiText("Character 목록을 불러오는 중")} />;
   }
   if (state === "error" || !read) {
     return <ProfileError error={error} onRetry={retry} />;
@@ -55,24 +58,23 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
         </span>
         <div>
           <p>WORLD CHARACTERS</p>
-          <h2>이 World의 앵무</h2>
+          <h2>{uiText("이 World의 앵무")}</h2>
           <span className={styles.directoryMeta}>
-            현재 참여 중인 Character {read.items.length}명
-          </span>
+            {uiText("현재 참여 중인 Character")}{read.items.length}{uiText("명")}</span>
         </div>
       </header>
       {read.items.length === 0 ? (
         <div className={styles.empty}>
           <Users aria-hidden="true" size={28} />
-          <h3>현재 참여 중인 Character가 없어요</h3>
-          <p>active membership이 확인된 Character만 여기에 표시됩니다.</p>
+          <h3>{uiText("현재 참여 중인 Character가 없어요")}</h3>
+          <p>{uiText("active membership이 확인된 Character만 여기에 표시됩니다.")}</p>
         </div>
       ) : (
-        <ol className={styles.profileList} aria-label="World Character 목록">
+        <ol className={styles.profileList} aria-label={uiText("World Character 목록")}>
           {read.items.map((profile) => (
             <li key={profile.world_character_id}>
               <LocalProductLink
-                ariaLabel={`${profile.display_name}의 World 프로필 열기`}
+                ariaLabel={uiText("{{value0}}의 World 프로필 열기", {value0: profile.display_name})}
                 className={styles.profileListLink}
                 href={worldCharacterProfileRoute(worldId, profile.world_character_id)}
               >
@@ -97,11 +99,12 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
 }
 
 export function ProfileStatus({ title }: { title: string }) {
+  const uiText = useUiText("characters");
   return (
     <section aria-live="polite" className={styles.status} role="status">
       <Users aria-hidden="true" size={27} />
       <h2>{title}</h2>
-      <p>현재 World의 identity와 capability를 확인하고 있어요.</p>
+      <p>{uiText("현재 World의 identity와 capability를 확인하고 있어요.")}</p>
     </section>
   );
 }
@@ -113,22 +116,22 @@ export function ProfileError({
   error: Error | null;
   onRetry: () => void;
 }) {
+  const uiText = useUiText("characters");
   const unavailable =
     error instanceof WorldCharacterProfileApiError && [403, 404].includes(error.status);
   return (
     <section className={styles.status} role="alert">
       <Users aria-hidden="true" size={27} />
-      <h2>{unavailable ? "이 프로필을 열 수 없어요" : "프로필을 불러오지 못했어요"}</h2>
+      <h2>{unavailable ? uiText("이 프로필을 열 수 없어요") : uiText("프로필을 불러오지 못했어요")}</h2>
       <p>
         {unavailable
-          ? "다른 World, 떠난 Character 또는 허용되지 않은 identity로 이동하지 않습니다."
-          : "로컬 runtime 상태를 확인한 뒤 다시 시도해주세요."}
+          ? uiText("다른 World, 떠난 Character 또는 허용되지 않은 identity로 이동하지 않습니다.")
+          : uiText("로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.")}
       </p>
       {!unavailable ? (
         <button onClick={onRetry} type="button">
           <RotateCcw aria-hidden="true" size={17} />
-          다시 시도
-        </button>
+          {uiText("다시 시도")}</button>
       ) : null}
     </section>
   );

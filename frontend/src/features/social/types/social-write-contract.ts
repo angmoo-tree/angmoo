@@ -5,6 +5,7 @@ export type SocialOwnerActor = {
   profile: {
     avatar_url: string | null;
     display_name: string;
+  deleted?: boolean;
   };
 };
 
@@ -15,6 +16,7 @@ export type ManualSocialPostRead = {
   world_id: string;
   author_world_character_id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;

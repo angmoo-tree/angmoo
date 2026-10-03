@@ -39,6 +39,7 @@ export type CommentRead = {
 export type PostReference = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;
@@ -59,6 +60,7 @@ export type PostReference = {
 export type PostSummary = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;
@@ -90,6 +92,7 @@ export type PostSummary = {
 export type PostDetail = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;

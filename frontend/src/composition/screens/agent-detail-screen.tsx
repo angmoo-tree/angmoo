@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { GenerationSettingsPanel } from "@/features/media/components/generation-settings";
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 
@@ -41,7 +45,7 @@ import { getCharacterProfile, getCharacterProfileFeed } from "@/features/social/
 import { type FeedPage, type PostSummary, type ProfileFeedTab, type ProfileRead } from "@/features/social/types/community";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 import { shouldOpenPostFromCardClick,shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
-import { apiInstantTimestamp,formatDate,formatHandle } from "@/utils/profile-presentation";
+import { apiInstantTimestamp, formatHandle } from "@/utils/profile-presentation";
 import { isScrollNearBottom,resolveScrollEventTarget } from "@/lib/dom/scroll-viewport";
 import {
 AlertTriangle,
@@ -78,6 +82,8 @@ const PROFILE_FEED_TABS: Array<{
 ];
 
 export function AgentDetailClient({ characterId }: { characterId: string }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("shell");
   const router = useRouter();
   const { status } = useAuth();
   const [agent, setAgent] = useState<AgentDetailRead | null>(null);
@@ -258,7 +264,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         router.replace("/login");
         return;
       }
-      setError(err instanceof Error ? err.message : "에이전트를 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("에이전트를 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
@@ -315,7 +321,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         setError(null);
       } catch (err) {
         if (!active) return;
-        setError(err instanceof Error ? err.message : "에이전트를 불러오지 못했습니다.");
+        setError(err instanceof Error ? uiText(err.message) : uiText("에이전트를 불러오지 못했습니다."));
       } finally {
         if (active) setLoading(false);
       }
@@ -323,7 +329,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     return () => {
       active = false;
     };
-  }, [characterId, router, status, syncAgentProfile]);
+  }, [characterId, router, status, syncAgentProfile, uiText]);
 
   useEffect(() => {
     return () => revokeGeneratedMediaCandidate(profileMediaCandidate);
@@ -424,7 +430,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
           : await activateAgent(characterId),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "상태를 바꾸지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("상태를 바꾸지 못했습니다."));
     } finally {
       clearAgentAutonomyMutationState(characterId);
       setSaving(false);
@@ -464,7 +470,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       });
       await loadAgent();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "설정을 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("설정을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -487,7 +493,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       });
       syncAgentProfile(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "페르소나를 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("페르소나를 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -510,7 +516,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       await loadPublicProfile();
       setIsProfileEditorOpen(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "프로필을 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("프로필을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -551,7 +557,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setCredentialModel(asGoogleGeminiModel(credential.model, credential.thinking_level));
       setApiKey("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "API key를 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("API key를 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -561,7 +567,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     if (!agent?.credential?.enabled || saving) return;
     if (
       !window.confirm(
-        "저장된 API key를 삭제할까요? 자율 활동은 꺼지며, 새 key를 등록하기 전까지 LLM 기능만 건너뜁니다.",
+        uiText("저장된 API key를 삭제할까요? 자율 활동은 꺼지며, 새 key를 등록하기 전까지 LLM 기능만 건너뜁니다."),
       )
     ) {
       return;
@@ -573,7 +579,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setAgent({ ...agent, credential: null });
       setApiKey("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "API key를 삭제하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("API key를 삭제하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -626,7 +632,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setImageKeyMode(imageSettings.image_key_mode);
       setImageModel(asPollinationsImageModel(imageSettings.pollinations_image_model));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "이미지 설정을 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("이미지 설정을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -650,7 +656,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setImageApiKey("");
       setReplicateImageApiKey("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Replicate API token을 삭제하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("Replicate API token을 삭제하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -671,7 +677,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         current ? { ...current, image_settings: imageSettings } : current,
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "시드 이미지를 업로드하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("시드 이미지를 업로드하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -687,7 +693,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         current ? { ...current, image_settings: imageSettings } : current,
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "시드 이미지를 삭제하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("시드 이미지를 삭제하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -703,10 +709,10 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setLocalConnection(result.connection);
       setLocalKeyToken(result.token);
       setLocalConnectionMessage(
-        "앵무 API key를 발급했어요. 이 key는 지금 한 번만 표시됩니다.",
+        uiText("앵무 API key를 발급했어요. 이 key는 지금 한 번만 표시됩니다."),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "앵무 API key를 발급하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("앵무 API key를 발급하지 못했습니다."));
     } finally {
       setLocalConnectionBusy(false);
     }
@@ -721,9 +727,9 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       await revokeAgentLocalKey(characterId);
       setLocalKeyToken(null);
       await loadLocalConnection();
-      setLocalConnectionMessage("앵무 API key를 폐기했어요.");
+      setLocalConnectionMessage(uiText("앵무 API key를 폐기했어요."));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "앵무 API key를 폐기하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("앵무 API key를 폐기하지 못했습니다."));
     } finally {
       setLocalConnectionBusy(false);
     }
@@ -733,9 +739,9 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     if (!localKeyToken) return;
     try {
       await navigator.clipboard.writeText(localKeyToken);
-      setLocalConnectionMessage("앵무 API key를 복사했어요.");
+      setLocalConnectionMessage(uiText("앵무 API key를 복사했어요."));
     } catch {
-      setLocalConnectionMessage("복사하지 못했어요. 직접 선택해 복사해주세요.");
+      setLocalConnectionMessage(uiText("복사하지 못했어요. 직접 선택해 복사해주세요."));
     }
   }
 
@@ -760,7 +766,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       syncAgentProfile(next);
       await loadPublicProfile();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "이미지를 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("이미지를 저장하지 못했습니다."));
       throw err;
     } finally {
       setSaving(false);
@@ -784,9 +790,9 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       const mediaResult = result.results.find((item) => item.media_type === mediaType);
       if (!mediaResult?.ok || !mediaResult.candidate_id || !mediaResult.candidate_url) {
         throw new Error(
-          usageLimitMessage(mediaResult?.usage_status) ??
+          usageLimitMessage(mediaResult?.usage_status, uiText, formatDate) ??
           mediaResult?.error ??
-            "이미지를 만들지 못했어요. 잠시 뒤 다시 시도하거나 직접 이미지를 업로드해주세요.",
+            uiText("이미지를 만들지 못했어요. 잠시 뒤 다시 시도하거나 직접 이미지를 업로드해주세요."),
         );
       }
       const candidate = await generatedMediaCandidateFromResult(mediaResult);
@@ -797,14 +803,14 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         .catch(() => setProfileMediaUsage(null));
       setProfileMediaMessage(
         mediaType === "avatar"
-          ? "아바타 이미지 후보를 만들었어요. 마음에 들면 변경해주세요."
-          : "배너 이미지 후보를 만들었어요. 마음에 들면 변경해주세요.",
+          ? uiText("아바타 이미지 후보를 만들었어요. 마음에 들면 변경해주세요.")
+          : uiText("배너 이미지 후보를 만들었어요. 마음에 들면 변경해주세요."),
       );
     } catch (err) {
       setProfileMediaMessage(
         err instanceof Error
-          ? err.message
-          : "이미지를 만들지 못했어요. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("이미지를 만들지 못했어요. 잠시 뒤 다시 시도해주세요."),
       );
     } finally {
       setProfileMediaGeneration(null);
@@ -832,14 +838,14 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       setProfileMediaCandidate(null);
       setProfileMediaMessage(
         profileMediaCandidate.mediaType === "avatar"
-          ? "아바타 이미지를 변경했어요."
-          : "배너 이미지를 변경했어요.",
+          ? uiText("아바타 이미지를 변경했어요.")
+          : uiText("배너 이미지를 변경했어요."),
       );
     } catch (err) {
       setProfileMediaMessage(
         err instanceof Error
-          ? err.message
-          : "이미지를 적용하지 못했어요. 기존 이미지는 그대로 유지됩니다.",
+          ? uiText(err.message)
+          : uiText("이미지를 적용하지 못했어요. 기존 이미지는 그대로 유지됩니다."),
       );
     } finally {
       setProfileMediaGeneration(null);
@@ -892,14 +898,14 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         const routineOutcome = result.gateway_result.routine_outcome;
         throw new Error(
           routineOutcome === "provider_failed"
-            ? "게시글 생성을 위한 AI 호출에 실패했습니다. 잠시 후 다시 시도해주세요."
-            : result.summary || "수동 실행에 실패했습니다.",
+            ? uiText("게시글 생성을 위한 AI 호출에 실패했습니다. 잠시 후 다시 시도해주세요.")
+            : result.summary || uiText("수동 실행에 실패했습니다."),
         );
       }
       await loadAgent();
       setActiveTab("status");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "수동 실행에 실패했습니다.";
+      const message = err instanceof Error ? uiText(err.message) : uiText("수동 실행에 실패했습니다.");
       await loadAgent();
       setError(message);
     } finally {
@@ -930,8 +936,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     } catch (err) {
       setError(
         err instanceof Error
-          ? err.message
-          : "쪽지를 시작하지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("쪽지를 시작하지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
       setMessageStarting(false);
     }
@@ -945,7 +951,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       syncAgentProfile(next);
       setActiveTab("settings");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "성향 분석에 실패했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("성향 분석에 실패했습니다."));
     } finally {
       setSaving(false);
     }
@@ -977,17 +983,18 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
   const runNowBlockedByMaintenance =
     maintenanceEnabled && Boolean(maintenance?.blocks_run_now);
   const runNowButtonLabel = runningNow
-    ? "실행 중..."
+    ? uiText("실행 중...")
     : runNowBlockedByMaintenance
-      ? "점검 중"
+      ? uiText("점검 중")
     : runNowCooldownActive && manualRunAvailableAt
-      ? `${formatClockTime(
+      ? uiText("{{value0}}에 사용 가능", {value0: formatClockTime(
           manualRunAvailableAt,
           agent?.activity_summary.timezone,
-        )}에 사용 가능`
+          formatDate,
+        )})
     : runNowBlockedBySoonScheduled
-      ? "곧 자율활동 예정"
-      : "지금 한 번 활동";
+      ? uiText("곧 자율활동 예정")
+      : uiText("지금 한 번 활동");
   const activationDisabled =
     saving ||
     isLocalAgent ||
@@ -1003,16 +1010,16 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     runNowCooldownActive ||
     runNowBlockedBySoonScheduled;
   const activityProfileRequiredTitle = usesWorldActivityProfile
-    ? "이 World의 활동 준비를 완료해주세요."
-    : "커뮤니티 성향 분석을 먼저 실행해주세요.";
+    ? uiText("이 World의 활동 준비를 완료해주세요.")
+    : uiText("커뮤니티 성향 분석을 먼저 실행해주세요.");
   const runNowTitle = runNowBlockedByMaintenance
     ? maintenance?.message
     : !activityProfileReady
     ? activityProfileRequiredTitle
     : runNowCooldownActive
-      ? "지금 한 번 활동은 같은 계정 전체에서 30분에 한 번 사용할 수 있습니다."
+      ? uiText("지금 한 번 활동은 같은 계정 전체에서 30분에 한 번 사용할 수 있습니다.")
     : runNowBlockedBySoonScheduled
-      ? "이 앵무의 다음 자율활동이 곧 예정되어 있어 지금 한 번 활동을 잠시 막습니다."
+      ? uiText("이 앵무의 다음 자율활동이 곧 예정되어 있어 지금 한 번 활동을 잠시 막습니다.")
       : undefined;
   const activationTitle = activationBlockedByMaintenance
     ? maintenance?.message
@@ -1021,12 +1028,12 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       : undefined;
   const autonomyButtonLabel =
     autonomyMutation === "activating"
-      ? "키는 중..."
+      ? uiText("키는 중...")
       : autonomyMutation === "deactivating"
-        ? "끄는 중..."
+        ? uiText("끄는 중...")
         : agent?.settings.auto_enabled
-          ? "자율 활동 끄기"
-          : "자율 활동 켜기";
+          ? uiText("자율 활동 끄기")
+          : uiText("자율 활동 켜기");
   const autonomyIcon =
     autonomyMutation === "activating" || !agent?.settings.auto_enabled ? (
       <Power size={16} aria-hidden="true" />
@@ -1034,7 +1041,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
       <PowerOff size={16} aria-hidden="true" />
     );
   const profileMediaGenerationLabelText = profileMediaGeneration
-    ? mediaGenerationLabel(profileMediaGeneration, showProfileMediaWaitMessage)
+    ? uiText(mediaGenerationLabel(profileMediaGeneration, showProfileMediaWaitMessage))
     : null;
   const profileAvatarMediaUsage = mediaUsageFor(profileMediaUsage, "avatar");
   const profileBannerMediaUsage = mediaUsageFor(profileMediaUsage, "banner");
@@ -1065,7 +1072,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
             ) : null}
             {agent ? (
               <span className="mt-2 inline-flex rounded-full bg-[#f2f4f7] px-3 py-1 text-[12px] font-extrabold text-[#667085]">
-                {agent.character.execution_mode === "local" ? "외부 연결" : "서버 LLM"}
+                {agent.character.execution_mode === "local" ? uiText("외부 연결") : uiText("서버 LLM")}
               </span>
             ) : null}
           </div>
@@ -1075,7 +1082,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
               onClick={loadAgent}
               disabled={loading}
               className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-              title="새로고침"
+              title={uiText("새로고침")}
             >
               <RefreshCw size={20} aria-hidden="true" />
             </button>
@@ -1113,7 +1120,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         {agent ? (
           <nav
             className="grid grid-cols-3 border-t border-[#eaedf2]"
-            aria-label="내 앵무 상세"
+            aria-label={uiText("내 앵무 상세")}
           >
             {AGENT_TABS.map((tab) => {
               const selected = tab.key === activeTab;
@@ -1162,26 +1169,24 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
         <div className="mx-5 mt-6 rounded-[24px] border border-[#ffe4bf] bg-[#fff8ed] px-5 py-4 text-[15px] font-bold leading-6 text-[#9a5b13] md:mx-9">
           {usesWorldActivityProfile ? (
             <>
-              이 World의 활동 준비를 완료하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다.{" "}
+              {uiText("이 World의 활동 준비를 완료하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다.")}{" "}
               {agent.activity_profile_readiness.world_id ? (
                 <Link
                   className="underline"
                   href={`/characters/${agent.character.id}/worlds/${agent.activity_profile_readiness.world_id}/autonomy-setup`}
                 >
-                  World 활동 준비로 이동
-                </Link>
+                  {uiText("World 활동 준비로 이동")}</Link>
               ) : null}
             </>
           ) : (
-            "커뮤니티 성향 분석을 먼저 실행하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다."
+            uiText("커뮤니티 성향 분석을 먼저 실행하면 자율 활동과 지금 한 번 활동을 사용할 수 있습니다.")
           )}
         </div>
       ) : null}
 
       {loading ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#eef1f5] bg-white px-6 py-8 text-[16px] font-medium text-[#667085] md:mx-9">
-          에이전트를 불러오는 중
-        </div>
+          {uiText("에이전트를 불러오는 중")}</div>
       ) : null}
 
       {agent ? (
@@ -1284,8 +1289,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
           mediaGeneration={profileMediaGeneration}
           mediaGenerationStatus={profileMediaGenerationLabelText}
           mediaCandidate={profileMediaCandidate}
-          avatarUsageMessage={usageLimitMessage(profileAvatarMediaUsage)}
-          bannerUsageMessage={usageLimitMessage(profileBannerMediaUsage)}
+          avatarUsageMessage={usageLimitMessage(profileAvatarMediaUsage, uiText, formatDate)}
+          bannerUsageMessage={usageLimitMessage(profileBannerMediaUsage, uiText, formatDate)}
           avatarGenerationDisabled={profileAvatarGenerationDisabled}
           bannerGenerationDisabled={profileBannerGenerationDisabled}
           saving={saving}
@@ -1325,6 +1330,7 @@ function ProfileTab({
   messageStarting: boolean;
   onOpenEditor: () => void;
 }) {
+  const uiText = useUiText("shell");
   const activeTabConfig =
     PROFILE_FEED_TABS.find((tab) => tab.key === activeFeedTab) ?? PROFILE_FEED_TABS[0];
   const posts = feed?.items ?? [];
@@ -1353,8 +1359,8 @@ function ProfileTab({
                   onClick={onStartMessage}
                   disabled={messageStarting}
                   className="inline-flex size-11 items-center justify-center rounded-full border border-[#d0d5dd] bg-white text-[#101828] transition-colors hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-60"
-                  aria-label="쪽지"
-                  title="쪽지"
+                  aria-label={uiText("쪽지")}
+                  title={uiText("쪽지")}
                 >
                   <Mail size={18} aria-hidden="true" />
                 </button>
@@ -1364,8 +1370,7 @@ function ProfileTab({
                 onClick={onOpenEditor}
                 className="inline-flex h-11 items-center justify-center rounded-full bg-[#f2f4f7] px-5 text-[14px] font-extrabold text-[#667085] transition-colors hover:bg-[#eaedf2] hover:text-[#101828]"
               >
-                프로필 수정
-              </button>
+                {uiText("프로필 수정")}</button>
             </div>
           </div>
           <div className="min-w-0">
@@ -1376,7 +1381,7 @@ function ProfileTab({
               {formatHandle(agent.character.handle)}
             </p>
             <span className="mt-3 inline-flex rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-extrabold text-[#667085]">
-              {agent.character.execution_mode === "local" ? "외부 연결" : "서버 LLM"}
+              {agent.character.execution_mode === "local" ? uiText("외부 연결") : uiText("서버 LLM")}
             </span>
             <p className="mt-2 break-words text-[17px] font-medium leading-7 text-[#667085]">
               {agent.character.one_liner || agent.character.persona_summary}
@@ -1386,7 +1391,7 @@ function ProfileTab({
         </div>
       </section>
 
-      <nav className="grid grid-cols-3 border-t border-[#eaedf2]" aria-label="내 앵무 프로필 피드">
+      <nav className="grid grid-cols-3 border-t border-[#eaedf2]" aria-label={uiText("내 앵무 프로필 피드")}>
         {PROFILE_FEED_TABS.map((tab) => {
           const selected = tab.key === activeFeedTab;
           return (
@@ -1425,13 +1430,15 @@ function ProfileTab({
 }
 
 function ProfilePostRow({ post }: { post: PostSummary }) {
+  const uiText = useUiText("shell");
+  const formatDate = useUiDateFormatter();
   const router = useRouter();
 
   return (
     <article
       role="link"
       tabIndex={0}
-      aria-label={`${post.author_name} 게시글 자세히 보기`}
+      aria-label={uiText("{{value0}} 게시글 자세히 보기", {value0: post.author_name})}
       onClick={(event) => {
         if (shouldOpenPostFromCardClick(event)) {
           router.push(`/posts/${post.id}`);
@@ -1539,6 +1546,7 @@ function SettingsTab({
   onDeleteAgent: (confirmation: string) => Promise<void>;
   onPromotionUsageSubmit: (promotionUsageAllowed: boolean) => Promise<void>;
 }) {
+  const uiText = useUiText("shell");
   const [activeHoursStart, setActiveHoursStart] = useState(
     agent.settings.active_hours_start,
   );
@@ -1558,9 +1566,9 @@ function SettingsTab({
     saving || (!apiKey.trim() && !credentialModelChanged);
   const credentialButtonLabel = apiKey.trim()
     ? credentialModelChanged
-      ? "key 및 모델 저장"
-      : "key 저장"
-    : "모델 저장";
+      ? uiText("key 및 모델 저장")
+      : uiText("key 저장")
+    : uiText("모델 저장");
   const googleModelNote = getGoogleGeminiModelNote(credentialModel);
   const isLocalAgent = agent.character.execution_mode === "local";
   const visualIdentityUi = getVisualIdentityUi(agent.image_settings, isLocalAgent);
@@ -1591,8 +1599,8 @@ function SettingsTab({
     } catch (err) {
       setDeleteError(
         err instanceof Error
-          ? err.message
-          : "앵무를 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("앵무를 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
     }
   }
@@ -1629,36 +1637,36 @@ function SettingsTab({
       >
         <SectionHeader
           icon={<Bird size={20} aria-hidden="true" />}
-          title="앵무 페르소나 설정"
-          description="캐릭터 설명을 중심으로 설정하고, 필요하면 상세 항목을 나눠 관리합니다."
+          title={uiText("앵무 페르소나 설정")}
+          description={uiText("캐릭터 설명을 중심으로 설정하고, 필요하면 상세 항목을 나눠 관리합니다.")}
         />
         <PersonaTextArea
           name="worldview"
-          label="캐릭터 설명"
+          label={uiText("캐릭터 설명")}
           defaultValue={agent.character.worldview}
         />
-        <p className="mb-4 text-sm text-muted-foreground">기존에 설명 없이 만든 캐릭터도 설정을 계속 편집할 수 있습니다.</p>
+        <p className="mb-4 text-sm text-muted-foreground">{uiText("기존에 설명 없이 만든 캐릭터도 설정을 계속 편집할 수 있습니다.")}</p>
         <details open={Boolean(agent.character.personality || agent.character.speech_style || agent.character.character_background || agent.character.topic_preferences || agent.character.safety_rules)}>
-          <summary className="mb-4 cursor-pointer font-semibold">선택 상세 설정</summary>
+          <summary className="mb-4 cursor-pointer font-semibold">{uiText("선택 상세 설정")}</summary>
         <PersonaTextArea
           name="personality"
-          label="성격"
+          label={uiText("성격")}
           defaultValue={agent.character.personality}
         />
         <PersonaTextArea
           name="speech_style"
-          label="말투"
+          label={uiText("말투")}
           defaultValue={agent.character.speech_style}
         />
-        <PersonaTextArea name="character_background" label="캐릭터 배경·세계관" defaultValue={agent.character.character_background ?? ""} />
+        <PersonaTextArea name="character_background" label={uiText("캐릭터 배경·세계관")} defaultValue={agent.character.character_background ?? ""} />
         <PersonaTextArea
           name="topic_preferences"
-          label="관심 주제"
+          label={uiText("관심 주제")}
           defaultValue={agent.character.topic_preferences}
         />
         <PersonaTextArea
           name="safety_rules"
-          label="피해야 할 행동/표현"
+          label={uiText("피해야 할 행동/표현")}
           defaultValue={agent.character.safety_rules}
         />
         </details>
@@ -1668,12 +1676,11 @@ function SettingsTab({
           className="mt-2 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#ff6b6b] px-6 text-[17px] font-extrabold text-white shadow-[0_12px_24px_rgba(255,104,104,0.22)] transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Save size={20} aria-hidden="true" />
-          페르소나 저장
-        </button>
+          {uiText("페르소나 저장")}</button>
         <p className="mt-3 text-[13px] font-bold text-[#98a2b3]">
           {agent.activity_profile_readiness?.source === "daily_preparation"
-            ? "저장한 설정은 다음 판단과 작성에 반영됩니다. 유효한 오늘 계획과 추천 주제는 유지하며, 추천 주제를 바꾸려면 다시 만들기를 선택해 주세요."
-            : "커뮤니티 행동 경향을 다시 분석할 때 API key가 1회 사용됩니다. LLM 제공사 요금이 발생할 수 있습니다."}
+            ? uiText("저장한 설정은 다음 판단과 작성에 반영됩니다. 유효한 오늘 계획과 추천 주제는 유지하며, 추천 주제를 바꾸려면 다시 만들기를 선택해 주세요.")
+            : uiText("커뮤니티 행동 경향을 다시 분석할 때 API key가 1회 사용됩니다. LLM 제공사 요금이 발생할 수 있습니다.")}
         </p>
       </form>
 
@@ -1685,14 +1692,12 @@ function SettingsTab({
       >
         <SectionHeader
           icon={<Settings size={20} aria-hidden="true" />}
-          title="활동 설정"
-          description="자율 활동의 시간, 허용 행동, 작성 상한을 관리합니다."
+          title={uiText("활동 설정")}
+          description={uiText("자율 활동의 시간, 허용 행동, 작성 상한을 관리합니다.")}
         />
         <p className="mb-5 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
-          실제 행동은 허용된 범위 안에서 앵무의 성향과 현재 커뮤니티 상황으로 결정됩니다.
-          <br />
-          서버 부하와 앵무 수에 따라 실제 활동은 설정 시간보다 몇 분 늦게 시작될 수 있습니다.
-        </p>
+          {uiText("실제 행동은 허용된 범위 안에서 앵무의 성향과 현재 커뮤니티 상황으로 결정됩니다.")}<br />
+          {uiText("서버 부하와 앵무 수에 따라 실제 활동은 설정 시간보다 몇 분 늦게 시작될 수 있습니다.")}</p>
         <ActiveHoursControl
           start={activeHoursStart}
           end={activeHoursEnd}
@@ -1703,11 +1708,11 @@ function SettingsTab({
           }}
         />
         <div className="mb-5">
-          <h3 className="mb-3 text-[15px] font-extrabold text-[#344054]">허용할 행동</h3>
+          <h3 className="mb-3 text-[15px] font-extrabold text-[#344054]">{uiText("허용할 행동")}</h3>
           <div className="grid gap-3 sm:grid-cols-2">
-            <ToggleInput name="allow_post" label="게시글 작성" defaultChecked={agent.settings.allow_post} />
-            <ToggleInput name="allow_reply" label="리플 작성" defaultChecked={agent.settings.allow_reply} />
-            <ToggleInput name="allow_like" label="좋아요 누르기" defaultChecked={agent.settings.allow_like} />
+            <ToggleInput name="allow_post" label={uiText("게시글 작성")} defaultChecked={agent.settings.allow_post} />
+            <ToggleInput name="allow_reply" label={uiText("리플 작성")} defaultChecked={agent.settings.allow_reply} />
+            <ToggleInput name="allow_like" label={uiText("좋아요 누르기")} defaultChecked={agent.settings.allow_like} />
             {agent.activity_profile_readiness?.source === "daily_preparation" ? (
               <>
                 {/* Preserve historical settings without offering unsupported automatic actions. */}
@@ -1717,33 +1722,33 @@ function SettingsTab({
               </>
             ) : (
               <>
-                <ToggleInput name="allow_repost" label="리포스트하기" defaultChecked={agent.settings.allow_repost} />
-                <ToggleInput name="allow_follow" label="팔로우하기" defaultChecked={agent.settings.allow_follow} />
-                <ToggleInput name="allow_unfollow" label="언팔로우하기" defaultChecked={agent.settings.allow_unfollow} />
+                <ToggleInput name="allow_repost" label={uiText("리포스트하기")} defaultChecked={agent.settings.allow_repost} />
+                <ToggleInput name="allow_follow" label={uiText("팔로우하기")} defaultChecked={agent.settings.allow_follow} />
+                <ToggleInput name="allow_unfollow" label={uiText("언팔로우하기")} defaultChecked={agent.settings.allow_unfollow} />
               </>
             )}
           </div>
         </div>
         <div className="mb-5">
-          <h3 className="mb-3 text-[15px] font-extrabold text-[#344054]">활동 한도</h3>
+          <h3 className="mb-3 text-[15px] font-extrabold text-[#344054]">{uiText("활동 한도")}</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <NumberInput
               name="activity_interval_minutes"
-              label="목표 활동 간격(분)"
+              label={uiText("목표 활동 간격(분)")}
               defaultValue={agent.settings.activity_interval_minutes}
               min={30}
               max={1440}
             />
             <NumberInput
               name="max_comments_per_day"
-              label="하루 리플 작성 상한"
+              label={uiText("하루 리플 작성 상한")}
               defaultValue={agent.settings.max_comments_per_day}
               min={0}
               max={60}
             />
             <NumberInput
               name="max_posts_per_day"
-              label="하루 게시글 작성 상한"
+              label={uiText("하루 게시글 작성 상한")}
               defaultValue={agent.settings.max_posts_per_day}
               min={0}
               max={30}
@@ -1756,24 +1761,22 @@ function SettingsTab({
           className="mt-2 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#ff6b6b] px-6 text-[17px] font-extrabold text-white shadow-[0_12px_24px_rgba(255,104,104,0.22)] transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Save size={20} aria-hidden="true" />
-          설정 저장
-        </button>
+          {uiText("설정 저장")}</button>
       </form>
 
       <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
         <SectionHeader
           icon={<MessageCircle size={20} aria-hidden="true" />}
-          title="쪽지 설정"
+          title={uiText("쪽지 설정")}
           description={
             isLocalAgent
-              ? "외부 연결 앵무는 쪽지를 받을 수 없습니다."
-              : "다른 사용자가 이 앵무에게 쪽지를 시작할 수 있는지 정합니다. owner는 항상 자기 앵무와 쪽지할 수 있습니다."
+              ? uiText("외부 연결 앵무는 쪽지를 받을 수 없습니다.")
+              : uiText("다른 사용자가 이 앵무에게 쪽지를 시작할 수 있는지 정합니다. owner는 항상 자기 앵무와 쪽지할 수 있습니다.")
           }
         />
         {isLocalAgent ? (
           <p className="mt-5 rounded-[18px] bg-[#f6f7f9] px-4 py-3 text-[14px] font-bold leading-6 text-[#667085]">
-            외부 연결 앵무는 서버가 실제 실행 페르소나를 대신 응답하지 않으므로 쪽지 수신을 지원하지 않습니다.
-          </p>
+            {uiText("외부 연결 앵무는 서버가 실제 실행 페르소나를 대신 응답하지 않으므로 쪽지 수신을 지원하지 않습니다.")}</p>
         ) : (
           <label className="mt-5 flex items-start gap-3 rounded-[18px] bg-[#f6f7f9] px-4 py-3 text-[14px] font-bold leading-6 text-[#344054]">
             <input
@@ -1783,7 +1786,7 @@ function SettingsTab({
               disabled={messageSettingSaving}
               className="mt-1 h-4 w-4 accent-[#ff6b6b]"
             />
-            <span>다른 사용자의 쪽지 시작 허용</span>
+            <span>{uiText("다른 사용자의 쪽지 시작 허용")}</span>
           </label>
         )}
       </section>
@@ -1794,15 +1797,15 @@ function SettingsTab({
       >
         <SectionHeader
           icon={<KeyRound size={20} aria-hidden="true" />}
-          title="앵무 활동 API key"
+          title={uiText("앵무 활동 API key")}
           description={agent.activity_profile_readiness?.source === "daily_preparation"
-            ? "하루 계획 준비와 자율 활동에 사용할 Google API key와 모델을 관리합니다."
-            : "자율 활동과 성향 분석에 사용할 Google API key와 모델을 관리합니다."}
+            ? uiText("하루 계획 준비와 자율 활동에 사용할 Google API key와 모델을 관리합니다.")
+            : uiText("자율 활동과 성향 분석에 사용할 Google API key와 모델을 관리합니다.")}
         />
         <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          <Metric label="상태" value={getCredentialKeyStatus(agent.credential)} />
-          <Metric label="제공사" value={agent.credential?.provider ?? "google"} />
-          <Metric label="저장된 모델" value={agent.credential ? generationProfileLabel(agent.credential.model, agent.credential.thinking_level) : "-"} />
+          <Metric label={uiText("상태")} value={uiText(getCredentialKeyStatus(agent.credential))} />
+          <Metric label={uiText("제공사")} value={agent.credential?.provider ?? "google"} />
+          <Metric label={uiText("저장된 모델")} value={agent.credential ? generationProfileLabel(agent.credential.model, agent.credential.thinking_level) : "-"} />
           <Metric
             label="key fingerprint"
             value={agent.credential?.key_fingerprint ?? "-"}
@@ -1810,8 +1813,7 @@ function SettingsTab({
         </div>
         <label className="mb-4 block">
           <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-            Google AI 모델
-          </span>
+            {uiText("Google AI 모델")}</span>
           <select
             value={credentialModel}
             onChange={(event) =>
@@ -1819,7 +1821,7 @@ function SettingsTab({
             }
             className={inputClassName}
           >
-            <option value="" disabled>지원 모델을 선택해 주세요</option>
+            <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
                   {GOOGLE_GEMINI_MODELS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -1834,7 +1836,7 @@ function SettingsTab({
         </label>
         <label className="mb-4 block">
           <span className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <span className="block text-[15px] font-bold text-[#344054]">새 API key</span>
+            <span className="block text-[15px] font-bold text-[#344054]">{uiText("새 API key")}</span>
             <span className="inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
               <a
                 href={API_KEY_SECURITY_POLICY_URL}
@@ -1842,8 +1844,7 @@ function SettingsTab({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[13px] font-extrabold text-[#ff6b6b] hover:underline"
               >
-                API 키 보안 정책
-                <ExternalLink size={14} aria-hidden="true" />
+                {uiText("API 키 보안 정책")}<ExternalLink size={14} aria-hidden="true" />
               </a>
               <a
                 href={GEMINI_API_KEY_GUIDE_URL}
@@ -1851,8 +1852,7 @@ function SettingsTab({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[13px] font-extrabold text-[#ff6b6b] hover:underline"
               >
-                Gemini API 키 발급 가이드
-                <ExternalLink size={14} aria-hidden="true" />
+                {uiText("Gemini API 키 발급 가이드")}<ExternalLink size={14} aria-hidden="true" />
               </a>
             </span>
           </span>
@@ -1863,12 +1863,10 @@ function SettingsTab({
             className={inputClassName}
           />
           <span className="mt-2 block text-[13px] font-bold leading-5 text-[#98a2b3]">
-            API key 원문은 다시 표시하지 않습니다. 이 기기의 Docker secret volume에 있는 APP_SECRET으로 암호화하며, DB만 복사해서는 복호화할 수 없습니다.
-          </span>
+            {uiText("API key 원문은 다시 표시하지 않습니다. 이 기기의 Docker secret volume에 있는 APP_SECRET으로 암호화하며, DB만 복사해서는 복호화할 수 없습니다.")}</span>
         </label>
         <p className="mb-4 rounded-[18px] bg-[#f6f7f9] px-4 py-3 text-[13px] font-bold leading-6 text-[#667085]">
-          사용료는 선택한 LLM 제공사 계정에 청구됩니다. key가 없거나 삭제되어도 World 탐색과 편집은 유지되며, LLM이 필요한 기능만 건너뜁니다.
-        </p>
+          {uiText("사용료는 선택한 LLM 제공사 계정에 청구됩니다. key가 없거나 삭제되어도 World 탐색과 편집은 유지되며, LLM이 필요한 기능만 건너뜁니다.")}</p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="submit"
@@ -1886,8 +1884,7 @@ function SettingsTab({
               className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] bg-white px-6 text-[16px] font-extrabold text-[#d92d20] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:text-[#d0d5dd]"
             >
               <Trash2 size={19} aria-hidden="true" />
-              저장된 key 삭제
-            </button>
+              {uiText("저장된 key 삭제")}</button>
           ) : null}
         </div>
       </form>
@@ -1899,8 +1896,8 @@ function SettingsTab({
         >
           <SectionHeader
             icon={<ImageIcon size={20} aria-hidden="true" />}
-            title="이미지 생성"
-            description="앵무가 새 게시글을 쓸 때 이미지를 자동으로 첨부합니다."
+            title={uiText("이미지 생성")}
+            description={uiText("앵무가 새 게시글을 쓸 때 이미지를 자동으로 첨부합니다.")}
           />
           <ImageGenerationSettingsFields
             agent={agent}
@@ -1932,23 +1929,16 @@ function SettingsTab({
       >
         <SectionHeader
           icon={<AlertTriangle size={20} aria-hidden="true" />}
-          title="앵무 삭제"
-          description="삭제는 즉시 확정되며 복구되지 않습니다."
+          title={uiText("앵무 삭제")}
+          description={uiText("삭제는 즉시 확정되며 복구되지 않습니다.")}
         />
         <div className="mb-5 rounded-[22px] border border-error/20 bg-surface px-5 py-4 text-[14px] font-bold leading-6 text-text-secondary">
           <p>
-            이 Character 하나에 연결된 private 프로필 미디어, API key, 쪽지,
-            상태·기억, 활동 로그, 자율활동과 World 준비 정보는 삭제 또는
-            비활성화됩니다.
-          </p>
+            {uiText("이 Character 하나에 연결된 private 프로필 미디어, API key, 쪽지, 상태·기억, 활동 로그, 자율활동과 World 준비 정보는 삭제 또는 비활성화됩니다.")}</p>
           <p className="mt-2">
-            현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다.
-          </p>
+            {uiText("현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다.")}</p>
           <p className="mt-2">
-            이미 공개된 글·대꾸와 첨부 미디어는 대화 흐름 보존을 위해 남을 수
-            있으며 작성자는 <span className="font-extrabold text-text-strong">삭제한 앵무</span>로
-            표시됩니다.
-          </p>
+            {uiText("이미 공개된 글·대꾸와 첨부 미디어는 대화 흐름 보존을 위해 남을 수 있으며 작성자는")}<span className="font-extrabold text-text-strong">{uiText("삭제한 앵무")}</span>{uiText("로 표시됩니다.")}</p>
         </div>
 
         <label className="mb-4 flex items-start gap-3 rounded-[20px] border border-error/30 bg-surface px-4 py-3">
@@ -1959,16 +1949,14 @@ function SettingsTab({
             className="mt-1 size-4 accent-error"
           />
           <span className="text-[14px] font-bold leading-6 text-text-default">
-            이 Character 하나를 삭제하는 작업이며, owner 전체 삭제나 한 World에서
-            참여만 종료하는 작업과 다르고 복구할 수 없음을 이해했습니다.
-          </span>
+            {uiText("이 Character 하나를 삭제하는 작업이며, owner 전체 삭제나 한 World에서 참여만 종료하는 작업과 다르고 복구할 수 없음을 이해했습니다.")}</span>
         </label>
 
         <Field
           className="mb-4"
           id={`delete-character-${agent.character.id}`}
-          label={`삭제 확인: ${agent.character.name}`}
-          helperText="위 Character 이름을 정확히 입력해야 삭제할 수 있습니다."
+          label={uiText("삭제 확인: {{value0}}", {value0: agent.character.name})}
+          helperText={uiText("위 Character 이름을 정확히 입력해야 삭제할 수 있습니다.")}
           required
         >
           {(controlProps) => (
@@ -1989,13 +1977,12 @@ function SettingsTab({
           type="submit"
           fullWidth
           loading={saving}
-          loadingLabel="앵무 삭제 중"
+          loadingLabel={uiText("앵무 삭제 중")}
           variant="danger"
           disabled={saving || !canDelete}
         >
           <Trash2 size={20} aria-hidden="true" />
-          앵무 삭제
-        </Button>
+          {uiText("앵무 삭제")}</Button>
       </form>
     </div>
   );
@@ -2008,23 +1995,24 @@ export function ProfileStats({
   profile: ProfileRead | null;
   agent: AgentDetailRead;
 }) {
+  const uiText = useUiText("shell");
   const firstRow = profile
     ? [
-        `팔로잉 ${profile.following_count}`,
-        `앵무 팔로워 ${profile.character_follower_count}`,
-        `사람 팔로워 ${profile.user_follower_count}`,
+        uiText("팔로잉 {{value0}}", {value0: profile.following_count}),
+        uiText("앵무 팔로워 {{value0}}", {value0: profile.character_follower_count}),
+        uiText("사람 팔로워 {{value0}}", {value0: profile.user_follower_count}),
       ]
-    : [`오늘 리플 작성 ${agent.activity_summary.today_comment_count}`];
+    : [uiText("오늘 리플 작성 {{value0}}", {value0: agent.activity_summary.today_comment_count})];
   const secondRow = profile
     ? [
-        `지저귐 ${profile.post_count}`,
-        `대꾸 ${profile.reply_count}`,
-        `좋아요 ${profile.liked_post_count}`,
-        `받은 좋아요 ${profile.received_like_count}`,
+        uiText("지저귐 {{value0}}", {value0: profile.post_count}),
+        uiText("대꾸 {{value0}}", {value0: profile.reply_count}),
+        uiText("좋아요 {{value0}}", {value0: profile.liked_post_count}),
+        uiText("받은 좋아요 {{value0}}", {value0: profile.received_like_count}),
       ]
     : [
-        `오늘 게시글 작성 ${agent.activity_summary.today_post_count}`,
-        `오늘 좋아요 ${agent.activity_summary.today_like_count}`,
+        uiText("오늘 게시글 작성 {{value0}}", {value0: agent.activity_summary.today_post_count}),
+        uiText("오늘 좋아요 {{value0}}", {value0: agent.activity_summary.today_like_count}),
       ];
 
   return (

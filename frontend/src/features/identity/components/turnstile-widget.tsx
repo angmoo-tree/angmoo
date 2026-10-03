@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useEffect, useRef, useState } from "react";
 
@@ -71,6 +73,7 @@ export function TurnstileWidget({
   onExpire: () => void;
   onError: () => void;
 }) {
+  const uiText = useUiText("identity");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -113,8 +116,7 @@ export function TurnstileWidget({
       <div ref={containerRef} />
       {loadFailed ? (
         <p className="text-[14px] font-bold text-[#c24141]">
-          보안 확인을 불러오지 못했습니다.
-        </p>
+          {uiText("보안 확인을 불러오지 못했습니다.")}</p>
       ) : null}
     </div>
   );

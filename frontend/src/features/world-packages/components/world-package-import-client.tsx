@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { AlertTriangle, CheckCircle2, FileArchive, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +21,7 @@ export function WorldPackageImportClient({
 }: {
   authStatus: "checking" | "authenticated" | "unauthenticated";
 }) {
+  const uiText = useUiText("world-packages");
   const router = useRuntimeRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [prepared, setPrepared] = useState<PreparedWorldPackageImport | null>(null);
@@ -37,7 +40,7 @@ export function WorldPackageImportClient({
   async function chooseFile(file: File | null) {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(WORLD_PACKAGE_EXTENSION)) {
-      setError(".angmoo-world 파일만 선택할 수 있습니다.");
+      setError(uiText(".angmoo-world 파일만 선택할 수 있습니다."));
       return;
     }
     if (prepared) {
@@ -46,7 +49,7 @@ export function WorldPackageImportClient({
         await discardWorldPackageImport(prepared);
       } catch (reason) {
         setError(
-          `이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다. (${importError(reason)})`,
+          uiText("이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다. ({{value0}})", {value0: importError(reason)}),
         );
         setPending(null);
         if (inputRef.current) inputRef.current.value = "";
@@ -105,26 +108,24 @@ export function WorldPackageImportClient({
   }
 
   if (authStatus === "checking") {
-    return <ImportNotice><Loader2 className="size-5 animate-spin" /> local owner를 확인하는 중입니다.</ImportNotice>;
+    return <ImportNotice><Loader2 className="size-5 animate-spin" /> {uiText("local owner를 확인하는 중입니다.")}</ImportNotice>;
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <header>
         <p className="text-xs font-black uppercase tracking-[0.14em] text-[#ff6b6b]">WORLD PACKAGE V1</p>
-        <h1 className="mt-3 text-3xl font-black text-[#101828]">World Package 가져오기</h1>
+        <h1 className="mt-3 text-3xl font-black text-[#101828]">{uiText("World Package 가져오기")}</h1>
         <p className="mt-4 max-w-3xl font-semibold leading-7 text-[#667085]">
-          원본 파일은 bounded staging에서만 검증합니다. 미리보기 승인 전에는 World나
-          Device Home을 변경하지 않으며, 외부 코드·provider·네트워크를 실행하지 않습니다.
-        </p>
+          {uiText("원본 파일은 bounded staging에서만 검증합니다. 미리보기 승인 전에는 World나 Device Home을 변경하지 않으며, 외부 코드·provider·네트워크를 실행하지 않습니다.")}</p>
       </header>
 
       {!result ? (
         <Card as="section" elevated>
           <label className="flex cursor-pointer flex-col items-center rounded-[24px] border-2 border-dashed border-[#d0d5dd] bg-[#f9fafb] px-6 py-10 text-center hover:border-[#ff9b9b]">
             {pending === "stage" ? <Loader2 className="size-9 animate-spin text-[#ff6b6b]" /> : <FileArchive className="size-9 text-[#ff6b6b]" />}
-            <strong className="mt-4 text-lg text-[#101828]">.angmoo-world 파일 선택</strong>
-            <span className="mt-2 text-sm font-semibold text-[#667085]">파일 경로를 직접 입력하지 않습니다.</span>
+            <strong className="mt-4 text-lg text-[#101828]">{uiText(".angmoo-world 파일 선택")}</strong>
+            <span className="mt-2 text-sm font-semibold text-[#667085]">{uiText("파일 경로를 직접 입력하지 않습니다.")}</span>
             <input
               ref={inputRef}
               accept={`${WORLD_PACKAGE_EXTENSION},${WORLD_PACKAGE_MEDIA_TYPE}`}
@@ -166,6 +167,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
   onDiscard: () => void;
   onDuplicateStrategy: (strategy: "reject" | "independent_copy") => void;
 }) {
+  const uiText = useUiText("world-packages");
   const preview = prepared.preview;
   const blocked = preview.blocking_issues.length > 0;
   const alreadyImported = preview.collision_plan.duplicate_state === "already_imported";
@@ -183,23 +185,23 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
       </div>
 
       <dl className="mt-6 grid gap-4 rounded-[22px] bg-[#f7f8fa] p-5 sm:grid-cols-2 lg:grid-cols-4">
-        <Value label="자율 캐릭터" value={`${preview.character_names.length}명`} />
-        <Value label="장소·역할" value={`${preview.place_count} · ${preview.role_count}`} />
-        <Value label="관리 자산" value={`${preview.asset_count}개 · ${formatBytes(preview.asset_bytes)}`} />
-        <Value label="예정 slug" value={preview.collision_plan.planned_world_slug} />
+        <Value label={uiText("자율 캐릭터")} value={uiText("{{value0}}명", {value0: preview.character_names.length})} />
+        <Value label={uiText("장소·역할")} value={`${preview.place_count} · ${preview.role_count}`} />
+        <Value label={uiText("관리 자산")} value={uiText("{{value0}}개 · {{value1}}", {value0: preview.asset_count, value1: formatBytes(preview.asset_bytes)})} />
+        <Value label={uiText("예정 slug")} value={preview.collision_plan.planned_world_slug} />
       </dl>
 
       {preview.character_settings?.length ? (
         <details className="mt-5 rounded-[20px] border border-border p-5">
-          <summary className="cursor-pointer font-black text-foreground">가져올 캐릭터 설정 확인</summary>
+          <summary className="cursor-pointer font-black text-foreground">{uiText("가져올 캐릭터 설정 확인")}</summary>
           <div className="mt-4 space-y-5">
             {preview.character_settings.map((character, index) => (
               <div className="space-y-2" key={`${character.name}-${index}`}>
                 <h4 className="font-bold text-foreground">{character.name}</h4>
-                <p className="text-sm font-semibold text-muted-foreground">캐릭터 설명</p>
-                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.description || "설명 없음"}</p>
-                <p className="text-sm font-semibold text-muted-foreground">캐릭터 배경·세계관</p>
-                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.character_background || "별도 설정 없음"}</p>
+                <p className="text-sm font-semibold text-muted-foreground">{uiText("캐릭터 설명")}</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.description || uiText("설명 없음")}</p>
+                <p className="text-sm font-semibold text-muted-foreground">{uiText("캐릭터 배경·세계관")}</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{character.character_background || uiText("별도 설정 없음")}</p>
               </div>
             ))}
           </div>
@@ -208,13 +210,13 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
 
       <div className="mt-5 grid gap-5 md:grid-cols-2">
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
-          <h3 className="font-black text-[#101828]">라이선스·출처</h3>
+          <h3 className="font-black text-[#101828]">{uiText("라이선스·출처")}</h3>
           <p className="mt-3 text-sm font-bold text-[#475467]">{preview.license.expression}</p>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#667085]">{preview.license.attribution || "저작자 표시 없음"}</p>
-          {preview.license.source_url ? <a className="mt-3 block break-all text-sm font-bold text-state-running underline" href={preview.license.source_url} rel="noreferrer" target="_blank">원본 안내 열기</a> : null}
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#667085]">{preview.license.attribution || uiText("저작자 표시 없음")}</p>
+          {preview.license.source_url ? <a className="mt-3 block break-all text-sm font-bold text-state-running underline" href={preview.license.source_url} rel="noreferrer" target="_blank">{uiText("원본 안내 열기")}</a> : null}
         </div>
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
-          <h3 className="font-black text-[#101828]">충돌 계획</h3>
+          <h3 className="font-black text-[#101828]">{uiText("충돌 계획")}</h3>
           <p className="mt-3 text-sm font-bold text-[#475467]">{duplicateLabel(preview.collision_plan.duplicate_state)}</p>
           <ul className="mt-3 space-y-2 text-sm text-[#667085]">{preview.collision_plan.characters.map((character) => <li key={character.source_ref}>{character.display_name} → @{character.planned_handle}</li>)}</ul>
         </div>
@@ -222,43 +224,41 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
 
       {alreadyImported ? (
         <label className="mt-5 block rounded-[20px] border border-[#fdb022] bg-[#fffaeb] p-4 text-sm font-bold text-[#7a2e0e]">
-          이미 가져온 같은 content입니다. 원본을 덮어쓰지 않고 독립 복사본으로만 가져올 수 있습니다.
-          <Select className="mt-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
-            <option value="independent_copy">독립 복사본으로 가져오기</option>
-            <option value="reject">가져오지 않기</option>
+          {uiText("이미 가져온 같은 content입니다. 원본을 덮어쓰지 않고 독립 복사본으로만 가져올 수 있습니다.")}<Select className="mt-3" value={duplicateStrategy} onChange={(event) => onDuplicateStrategy(event.target.value as "reject" | "independent_copy")}>
+            <option value="independent_copy">{uiText("독립 복사본으로 가져오기")}</option>
+            <option value="reject">{uiText("가져오지 않기")}</option>
           </Select>
         </label>
       ) : null}
 
-      {preview.warnings.length ? <IssueList title="확인할 내용" items={preview.warnings} tone="warning" /> : null}
-      {blocked ? <IssueList title="가져오기를 막는 문제" items={preview.blocking_issues} tone="error" /> : null}
+      {preview.warnings.length ? <IssueList title={uiText("확인할 내용")} items={preview.warnings} tone="warning" /> : null}
+      {blocked ? <IssueList title={uiText("가져오기를 막는 문제")} items={preview.blocking_issues} tone="error" /> : null}
 
       <label className="mt-6 flex items-start gap-3 rounded-[20px] bg-[#f7f8fa] p-4 text-sm font-semibold leading-6 text-[#475467]">
         <input className="mt-1 size-4" checked={approved} disabled={blocked} onChange={(event) => onApproval(event.target.checked)} type="checkbox" />
-        <span>위 라이선스·제외 항목·충돌 계획과 digest <code className="break-all text-xs">{preview.content_digest}</code>를 확인하고 이 미리보기 그대로 가져옵니다.</span>
+        <span>{uiText("위 라이선스·제외 항목·충돌 계획과 digest")}<code className="break-all text-xs">{preview.content_digest}</code>{uiText("를 확인하고 이 미리보기 그대로 가져옵니다.")}</span>
       </label>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Button variant="strong" loading={pending === "commit"} loadingLabel="World 가져오는 중" disabled={!approved || blocked || pending !== null || duplicateStrategy === "reject" && alreadyImported} onClick={onCommit}>
-          <ShieldCheck className="size-4" /> World 가져오기
-        </Button>
-        <Button variant="secondary" loading={pending === "discard"} loadingLabel="미리보기 폐기 중" disabled={pending !== null} onClick={onDiscard}>
-          <RotateCcw className="size-4" /> 미리보기 폐기
-        </Button>
+        <Button variant="strong" loading={pending === "commit"} loadingLabel={uiText("World 가져오는 중")} disabled={!approved || blocked || pending !== null || duplicateStrategy === "reject" && alreadyImported} onClick={onCommit}>
+          <ShieldCheck className="size-4" /> {uiText("World 가져오기")}</Button>
+        <Button variant="secondary" loading={pending === "discard"} loadingLabel={uiText("미리보기 폐기 중")} disabled={pending !== null} onClick={onDiscard}>
+          <RotateCcw className="size-4" /> {uiText("미리보기 폐기")}</Button>
       </div>
     </Card>
   );
 }
 
 function ImportSuccess({ result }: { result: WorldPackageImportResult }) {
+  const uiText = useUiText("world-packages");
   return (
     <section className="rounded-[28px] border border-[#abefc6] bg-[#ecfdf3] p-8 text-center">
       <CheckCircle2 className="mx-auto size-11 text-[#039855]" />
-      <h2 className="mt-4 text-2xl font-black text-[#05603a]">World를 안전하게 가져왔습니다</h2>
-      <p className="mt-3 text-sm font-semibold text-[#027a48]">Device Home 등록과 새 World seed commit이 하나의 transaction으로 완료됐습니다.</p>
+      <h2 className="mt-4 text-2xl font-black text-[#05603a]">{uiText("World를 안전하게 가져왔습니다")}</h2>
+      <p className="mt-3 text-sm font-semibold text-[#027a48]">{uiText("Device Home 등록과 새 World seed commit이 하나의 transaction으로 완료됐습니다.")}</p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Link className={primaryButtonClass} href={PRODUCT_ROUTES.deviceHome}>Device Home에서 보기</Link>
-        <Link className={secondaryButtonClass} href={studioWorldRoute(result.imported_world_id)}>새 World 열기</Link>
+        <Link className={primaryButtonClass} href={PRODUCT_ROUTES.deviceHome}>{uiText("Device Home에서 보기")}</Link>
+        <Link className={secondaryButtonClass} href={studioWorldRoute(result.imported_world_id)}>{uiText("새 World 열기")}</Link>
       </div>
     </section>
   );

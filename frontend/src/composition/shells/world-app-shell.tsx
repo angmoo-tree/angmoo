@@ -1,3 +1,6 @@
+"use client";
+
+import { useUiText } from "@/hooks/use-ui-text";
 import type { ReactNode } from "react";
 
 import { DeviceShell } from "@/components/layout/device-shell";
@@ -19,6 +22,7 @@ export function WorldAppShell({
   worldId,
   worldName,
 }: WorldAppShellProps) {
+  const uiText = useUiText("shell");
   const header = (
     <header className={styles.header}>
       <div className={styles.identity}>
@@ -31,7 +35,7 @@ export function WorldAppShell({
 
   return (
     <DeviceShell
-      ariaLabel={`${worldName} World 앱`}
+      ariaLabel={uiText("{{value0}} World 앱", {value0: worldName})}
       header={header}
       navigation={navigation}
       surface="world-app"

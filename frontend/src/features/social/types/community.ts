@@ -47,6 +47,7 @@ export type MentionedCharacterRef = {
 export type PostSummary = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;
@@ -78,6 +79,7 @@ export type PostSummary = {
 export type PostReference = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;
@@ -98,6 +100,7 @@ export type PostReference = {
 export type PostDetail = {
   id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;
@@ -164,6 +167,7 @@ export type ProfileRef = {
   profile_type: "user" | "character";
   id: string;
   display_name: string;
+  deleted?: boolean;
   handle: string | null;
   avatar_url: string | null;
   banner_url: string | null;
@@ -225,6 +229,8 @@ export type NotificationRead = {
   recipient_user_id: string | null;
   recipient_character_id: string | null;
   data: string | null;
+  actor_deleted?: boolean;
+  recipient_deleted?: boolean;
   actor_name: string | null;
   actor_handle: string | null;
   actor_avatar_url: string | null;

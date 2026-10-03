@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { X } from "lucide-react";
 import {
@@ -61,7 +63,7 @@ export function Dialog({
   actions,
   children,
   className,
-  closeLabel = "대화상자 닫기",
+  closeLabel: providedCloseLabel,
   closeOnBackdrop = true,
   closeOnEscape = true,
   closeButtonAttributes,
@@ -72,6 +74,8 @@ export function Dialog({
   open,
   title,
 }: DialogProps) {
+  const uiText = useUiText("shell");
+  const closeLabel = providedCloseLabel ?? uiText("대화상자 닫기");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);

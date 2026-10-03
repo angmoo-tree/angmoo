@@ -1,5 +1,18 @@
 # Angmoo Frontend Architecture
 
+한글·영어 UI와 감지된 사용자 환경은 `composition/providers/user-environment-provider.tsx`가
+인증 세션과 함께 조립한다. Identity의 환경 API가 저장·CAS·기준 화면 lease를 소유하고,
+공용 `types/user-environment.ts`는 표시에 필요한 DTO만 담는다. 각 기능의 `locales/ko.json`,
+`locales/en.json`과 shell catalog는 `ui-resources.ts`에서 합치고, React provider마다 별도의
+i18next instance를 생성한다. 서버 전역 번역 상태와 DOM 문자열 치환은 사용하지 않는다.
+
+`use-ui-text`, `use-ui-date-formatter`, `use-ui-number-formatter`는 UI 표시만 담당한다.
+원문·페르소나·World package metadata·기술 enum·API 입력값은 번역하지 않는다.
+감지 locale/zone과 저장 UI 선택은 독립이며, 환경 조회·동기화가 준비된 뒤 신규 기본 콘텐츠를
+결정한다. logout·backend 교체·늦은 응답은 세션 revision과 취소 신호로 구분한다.
+공용 JSON 전송의 401 처리는 요청을 접수했던 세션과 runtime에만 적용한다.
+typed HTTP 오류의 status/code/허용된 params/Retry-After를 보존하고 provider 원문은 UI로 넘기지 않는다.
+
 Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고, 여러 기능을 화면에서 조립하는 구조**를 사용한다. Chat을 고칠 때는 Chat 기능을, 여러 화면의 공통 버튼을 고칠 때는 공용 컴포넌트를 찾을 수 있도록 책임을 나누는 것이 목적이다.
 
 이 문서는 [Bulletproof React의 구조 가이드](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)와 [Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 코드의 배치·책임·의존 방향과 기존 구현의 소유권을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 영역은 `assets/components/config/hooks/lib/stores/styles/types/utils`로 구분한다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.

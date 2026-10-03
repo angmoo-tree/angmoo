@@ -5,7 +5,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/components/content/expandable-post-text.tsx",
-      "sha256": "14d44808a689e2fce47339a8335297b8f65b5291e1ae6d5876ae4e65711369ee"
+      "sha256": "89950512fb0612fe0eaed1ddedc1384e3819cd072b3ec130f16d1aabb4d35b81"
     },
     {
       "classifications": [
@@ -26,42 +26,42 @@
         "ADAPTED"
       ],
       "path": "frontend/src/components/media/post-media-grid.tsx",
-      "sha256": "44a81a0d44e7086e1eb352c71d00c23d244b50c02717284424a73d95539fead7"
+      "sha256": "2421cf2fd8d39e6a829c74c03402f050b30b4f735e7de1233cae5a7e2c423d7a"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/components/ui/profile-avatar.tsx",
-      "sha256": "f79624403ad09babdbe079f7eeea492a94bb1ae9b8feaab2ebb285aad45f5eb1"
+      "sha256": "d346c2cca54c5c7972d04a9f1a0b1a2e75fa590dc0c946cc94d1c7b9299b036e"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/composition/screens/character-profile-screen.tsx",
-      "sha256": "5dce43afaccad63cbcb5d589c4f33da3848b6f729473a57154329e71a78f1e85"
+      "sha256": "a7e04e483f1b07a07816ac908f7b5b6b1ecdf90818ffe1cc347f411d218792dc"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-detail-screen.tsx",
-      "sha256": "f30920e829e8706942a1a1f0727a4ecf70066657c845079b51cf8460400857d2"
+      "sha256": "c92b5c8c84a41d103539b5b4fd910712b0e5bd0e346e62fe258f654a14e00001"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-list-screen.tsx",
-      "sha256": "eaf80c5f31ca8282c393603ebf3fe32f36a25c1c6262cf45cba3991b6ce26062"
+      "sha256": "133c0dd8f893a30779679fb92ea8a88ca40807695806ae51239949fc4e35581e"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "278ecfb34dec78834b4dddc24a9cb1184036712d32b452bff960640ee800de50"
+      "sha256": "e37388d9d6162deb5e7167622db5ce39008c3999e3215c0d66c6a6a68fe08a5f"
     },
     {
       "classifications": [
@@ -75,14 +75,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/shells/creator-studio-frame.tsx",
-      "sha256": "ae380ab21f6e4943b1286e4083a66ce2ac5df2c8766d5dd0955aa63e40d00a5e"
+      "sha256": "fc918945197dc585e51368bf87d4511dcd755141269e3203e091964086fa51ee"
     },
     {
       "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
-      "sha256": "4120a4b3f88f2664867f485cb76fbf922dde8c701be3aacda3008d54e5cfdf65"
+      "sha256": "1fb31d3ac104e8c6c11e3f19c0c9dd5c4df216fcb7be47611ea665dafaf8ae6a"
     },
     {
       "classifications": [
@@ -96,35 +96,35 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/device-home/components/device-home.tsx",
-      "sha256": "1a27680de49d1c135bc784449a294d074b4f18d5622e8621131c0edf00aa32a2"
+      "sha256": "35d52c81ebfe90231a86f5c7530a2866fcd5ab3e93e9bda03b17ec3b4ca6a1e6"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-settings.tsx",
-      "sha256": "0f86c42407e54ebde3366e0cccd5c22690c7f90512e0511bc3de84f96c56fafb"
+      "sha256": "72f01a7b721b34868fc4a9565909234bf721cf2c81925217bbdf6c885a1e07f4"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-status.tsx",
-      "sha256": "eaf8d9daa7ffda0664ca018ba85c52bd0ecae544fb3d2f792fb537bc668c7eb8"
+      "sha256": "979ac1f02e11e6b19678f91c207eb620df107fe9ebdcfdb9b3f10b8fc5d569e2"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/image-picker.tsx",
-      "sha256": "19aa23a21e28aff8096addc1f7f76964ec883d01bfade4a18aa98521e46987b7"
+      "sha256": "37f82811cbba251331ff550abff17390013355f01f513cb9c8a061b2a2208d2f"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/interpretation-settings.tsx",
-      "sha256": "f6ce2f67104da1c41485aff03dc2b74bec6556c79a3d87e04a65db5fa3f41d7a"
+      "sha256": "e318c0ff8d19c4ec94f6c016dce7ffa0be4031ed2e6f686fc941ade0fa7a8819"
     },
     {
       "classifications": [
@@ -138,28 +138,28 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/usage-settings.tsx",
-      "sha256": "644abeb83ce1478c4b4a23be153995b7162f6e3505a282c48bb3a25b470d4ed5"
+      "sha256": "2df739b380c990de5baae094355915d0e5b95d95065c16e4199909ab183de6e7"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "03102defb82af92362a2d9c96bfebfaa8f0322194cd68c8e7666f95c00fe6a92"
+      "sha256": "f122597dca6db6f32c9673630845e7af5225ec876cd8e1ea69e26d19d500377b"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-      "sha256": "9ef2972dbf92464b29d9d008e231f57e89938286003417a65b31882474524a7b"
+      "sha256": "b26722eee3acfe17d55fbde26a8fe23c4acfd43f1bcc51341aa3315d384416fa"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/components/social-post-row.tsx",
-      "sha256": "67934741f105db6c9e14c8b11a321de8374887df3eb3a848719859da00fd6748"
+      "sha256": "0382d9250898c9a19f5b7a7a8d5856c26db0eca8ab3296e9a650e444ad3c3ef8"
     },
     {
       "classifications": [
@@ -173,14 +173,14 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "a061d3a1cc4de566973f04a9b464263da3426a957c8fe8d09258973c06551359"
+      "sha256": "5d37c9ded01b1555740e1c9286e192b2c538700e7ff4db4a1b16e745b9b57d87"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/social/types/social-presentation-contract.ts",
-      "sha256": "2f2ec3b82220636acc3bc9a19ef695beb4647687fa953156909d9ba6953e17da"
+      "sha256": "f58764f358f3aed2553526c4d7a1b9eef6d402daf4ec32117f70e0743872c65e"
     },
     {
       "classifications": [
@@ -226,7 +226,7 @@
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
-        "sha256": "3efa9660f83711dc211ecd4d0991c34d442f5c2731a8b8a12b8da3eab1ad4a73"
+        "sha256": "2c72a18d36618836f8adcebdd2ebb929275bee9ecb3ccad3c9d5f02af1148592"
       },
       {
         "path": "browser-tests/relationship-graph/product-shell.spec.ts",
@@ -234,7 +234,7 @@
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "sha256": "a7c3d278abe3e94153879eeae6da59b04c253e29a647abd704d922665e1c0eb3"
+        "sha256": "cc39c3558113be29c7e5a0d3cc2db4d6329c54f882e170aac20a1ef5a6e6dba1"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
@@ -1221,7 +1221,7 @@
       {
         "path": "frontend/src/components/ui/avatar.tsx",
         "present": true,
-        "sha256": "f3a7f8f9c6986f2a3054a4c0d8fa295859ca610029349f02c0a4373cdf4b0b67"
+        "sha256": "2fce11c11a488fdd735bdf1c15e5e63fa67dbc5fc790505e141f9ed737587873"
       },
       {
         "path": "frontend/src/components/ui/button.tsx",
@@ -1231,7 +1231,7 @@
       {
         "path": "frontend/src/components/ui/dialog.tsx",
         "present": true,
-        "sha256": "336712019e196fd5b6220cf0a0e4da2c518d40745a3f31775e88b13bf39b1e63"
+        "sha256": "45f92972577383d65ded3301cb9861f1f2e5fecfc6b2d881f97149be09fea996"
       },
       {
         "path": "frontend/src/components/ui/feedback.tsx",
@@ -1246,12 +1246,12 @@
       {
         "path": "frontend/src/components/ui/navigation.tsx",
         "present": true,
-        "sha256": "3dfc714cd950860b746730c39ab7bfdc6cb3a8afdbac2e7441497d5406963ec8"
+        "sha256": "a362fa24abce9143c95070377e36832b821aa4067b1aea09e2e9314dc0203fdb"
       },
       {
         "path": "frontend/src/components/ui/profile-avatar.tsx",
         "present": true,
-        "sha256": "f79624403ad09babdbe079f7eeea492a94bb1ae9b8feaab2ebb285aad45f5eb1"
+        "sha256": "d346c2cca54c5c7972d04a9f1a0b1a2e75fa590dc0c946cc94d1c7b9299b036e"
       },
       {
         "path": "frontend/src/components/ui/semantic-foundation.module.css",
@@ -1276,22 +1276,22 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "dd94a730a9bddf23b64989d27721eaa99a18de2f7d38d112b2a0614c34c39151"
+        "sha256": "102ca7685c3bda8781eb5373db3c0bedd3b054adbfffc2727db4b2b67f98d076"
       },
       {
         "path": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
         "present": true,
-        "sha256": "6b8a45d720fc7894def577d87688ea0b45afc3861125c7b45e1b1e8c88256745"
+        "sha256": "2c2f26f31419bc77eb048eb925690d5dd2565114c454456b8a959cc631ca4f7e"
       },
       {
         "path": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
         "present": true,
-        "sha256": "7b57de853f9b9b3013464521d2bbbb24fe88b46cbf84b93920023019bda4de34"
+        "sha256": "b2a0c803f1510bf46280094cc20d16199e2d593385aac084c9ae113fe9d1f960"
       },
       {
         "path": "frontend/src/features/world-packages/components/world-package-import-client.tsx",
         "present": true,
-        "sha256": "67b5569c6e8004ab7f121565ea754db013f685a562e255f50b9a30134083cf47"
+        "sha256": "7b27bae92d628d073cd4e75c564ca77bbe0fa648d2a88ddc137cf19d84399276"
       },
       {
         "path": "frontend/src/styles/globals.css",
@@ -1410,7 +1410,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 17,
+      "expected_screenshot_call_count": 18,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1427,7 +1427,7 @@
       "preserved_ui_b_fixture": {
         "path": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
         "present": true,
-        "sha256": "6b8a45d720fc7894def577d87688ea0b45afc3861125c7b45e1b1e8c88256745"
+        "sha256": "2c2f26f31419bc77eb048eb925690d5dd2565114c454456b8a959cc631ca4f7e"
       },
       "production_preview_script": {
         "path": "frontend/scripts/serve-production.mjs",
@@ -1470,7 +1470,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/characters-autonomy-phone-436x880.png",
           "present": true,
-          "sha256": "30cbb803750972a7e609cd647aeff265dcd253eb9c78931f636bb9ce8cdba246"
+          "sha256": "4647ef647421ad621e8d08a9376cfab953c2d7c4c008fd8b33ae77806c475dd8"
         },
         {
           "path": "browser-tests/snapshots/ui-f/creator-studio-empty-1440x900.png",
@@ -1485,54 +1485,54 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "adf0e3a9ebf319549a6474f5f1832789ce58295e989e55f04f483b9026214320"
+          "sha256": "320e85cae48798674f9ac7e44876ece22894f4ccfd6b0ca0db87ba6b5a4e3210"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
           "present": true,
-          "sha256": "aacdc919e9104dec05db604e230364546ccf88458a04380bc7acfcd0b9e0bc86"
+          "sha256": "2fc0e5eadaa3330f0262fc53f047688463f6cd396056499a6458d2f5653acab7"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-runtime-offline-390x844.png",
           "present": true,
-          "sha256": "d6f8a689fb70f9518da879dc29edd07129d4d358bad6d623791bf9d0675d6771"
+          "sha256": "cc3ff7c4284a25a75c863d163cf0c75f2672f8fa8b4136b92f438392acc9e8cb"
         },
         {
           "path": "browser-tests/snapshots/ui-f/global-feed-media-phone-390x844.png",
           "present": true,
-          "sha256": "d07754cdca6922e2136feecead3e9a91f86e787eb3b53a1a6388d6e261a6a452"
+          "sha256": "064c430f057c0986cc78b3e66bbd0d8d63e8f02be3e9e25413768dfa28b26f59"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-degraded-1440x900.png",
           "present": true,
-          "sha256": "871829621f71f15c3758ff0f189f9f913213f115363968bec41505ed1f6a2921"
+          "sha256": "0acf8dd55659beff56d5d40d4973f6e1ccb8b1fdf5c2b87bc769b4e9d2c90b7f"
         },
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
           "present": true,
-          "sha256": "dcc5358171e49fb8f97342651c60c9aca134b8825fca11a8011fca484b17d9c1"
+          "sha256": "cf6c8cd0aea9fddd7128b87ef4be3e4bd4d541629e32fbd5e6fd8ba32ab235f5"
         },
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
           "present": true,
-          "sha256": "47df531788b8a502f834d04ed6c0204d9ebb9e40cb5a603fbe00a4fdbd0e4b2e"
+          "sha256": "97c16d1cc23a59e97d4e35f5aa6829b501f96c9135b70a8fce5b9477dad8f9bf"
         }
       ],
       "specs": [
         {
           "path": "browser-tests/product-surfaces.visual.spec.ts",
           "present": true,
-          "sha256": "3efa9660f83711dc211ecd4d0991c34d442f5c2731a8b8a12b8da3eab1ad4a73"
+          "sha256": "2c72a18d36618836f8adcebdd2ebb929275bee9ecb3ccad3c9d5f02af1148592"
         },
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",
           "present": true,
-          "sha256": "a7c3d278abe3e94153879eeae6da59b04c253e29a647abd704d922665e1c0eb3"
+          "sha256": "cc39c3558113be29c7e5a0d3cc2db4d6329c54f882e170aac20a1ef5a6e6dba1"
         }
       ]
     },
-    "screenshot_call_count": 17,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate.",
+    "screenshot_call_count": 18,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",

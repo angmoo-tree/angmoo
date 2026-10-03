@@ -14,6 +14,18 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+현재 UI 언어는 저장한 `ko`/`en` 선택을 우선하며, 최초 감지는 Korean만 `ko`, 그 밖의 언어는 `en`이다.
+언어 버튼의 표시·접근성 이름은 두 모드 모두 `Korean`, `English`로 고정한다. 주변 제목·상태·오류는
+현재 UI 언어로 표시한다. 기억·검색 locale와 시간대는 읽기 전용 감지 상태로 안내하며 UI 선택과 분리한다.
+원문·캐릭터 이름·카드·World 내용은 번역하지 않는다. 신규 기본 안내에서는 캐릭터·게시글·답글·
+게시글 주제 제안·외부 연동 토큰·Provider API key를 의미에 맞게 구분한다.
+
+날짜·숫자는 UI locale와 active runtime zone의 Intl 표시를 사용하고 UTC 저장 값은 유지한다.
+한도 해제와 재시도는 backend의 typed UTC 값을 현재 zone으로 표시하며, 오류 상태는 번역 문구의
+substring이 아닌 typed 상태로 판단한다. 긴 영어에서도 기존 semantic primitives·44px 조작 영역·
+keyboard/focus·모바일 스크롤 계약을 유지한다. 이번 다국어 검증의 로컬 캡처는 11개 canonical
+UI-B/UI-F snapshot이나 native USER CHECK를 대체하지 않는다.
+
 > 2026-09-07 구조 이전 위치: 공용 primitive는 `src/components/ui`, 전역 semantic token은
 > `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, DOM scroll은 `src/lib/dom`,
 > 카드 탐색은 `src/lib/navigation`, 순수 표시 도구는 `src/utils`가 구현을 소유한다. 아래 과거 UI 단계의 `shared/ui` 표기는 당시 위치이며

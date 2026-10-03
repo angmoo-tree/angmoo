@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Mail, MessageCircle, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,6 +28,7 @@ export function WorldCharacterProfile({
   worldCharacterId: string;
   worldId: string;
 }) {
+  const uiText = useUiText("shell");
   const router = useRuntimeRouter();
   const goBack = useRuntimeBack(worldCharacterDirectoryRoute(worldId));
   const searchParams = useRuntimeSearchParams();
@@ -67,13 +70,13 @@ export function WorldCharacterProfile({
       setChatEntry(entryResult.status === "fulfilled" ? entryResult.value : null);
       setChatError(
         entryResult.status === "rejected"
-          ? "채팅 가능 상태를 확인하지 못했어요. 잠시 후 다시 열어주세요."
+          ? uiText("채팅 가능 상태를 확인하지 못했어요. 잠시 후 다시 열어주세요.")
           : null,
       );
       setState("ready");
     });
     return () => controller.abort();
-  }, [attempt, worldCharacterId, worldId]);
+  }, [attempt, uiText, worldCharacterId, worldId]);
 
   const retry = useCallback(() => {
     setState("loading");
@@ -125,7 +128,7 @@ export function WorldCharacterProfile({
   }
 
   if (state === "loading") {
-    return <ProfileStatus title="WorldCharacter 프로필을 불러오는 중" />;
+    return <ProfileStatus title={uiText("WorldCharacter 프로필을 불러오는 중")} />;
   }
   if (state === "error" || !profile) {
     return <ProfileError error={error} onRetry={retry} />;
@@ -137,16 +140,16 @@ export function WorldCharacterProfile({
       worldId={worldId}
       worldCharacterId={worldCharacterId}
       onBack={goBack}
-      chatAction={chatEntry?.requester?.world_character_id === worldCharacterId ? <Button variant="secondary" onClick={() => setEditing(!editing)}>내 프로필 편집</Button> : chatEntry ? (
+      chatAction={chatEntry?.requester?.world_character_id === worldCharacterId ? <Button variant="secondary" onClick={() => setEditing(!editing)}>{uiText("내 프로필 편집")}</Button> : chatEntry ? (
             <button
-              aria-label={`${profile.display_name}와 채팅 시작`}
+              aria-label={uiText("{{value0}}와 채팅 시작", {value0: profile.display_name})}
               className={styles.letterButton}
               data-chat-entry-capability={chatEntry.create_or_get_capability}
               disabled={
                 chatEntry.create_or_get_capability !== "available" || chatStarting
               }
               onClick={() => void startChat()}
-              title="채팅 시작"
+              title={uiText("채팅 시작")}
               type="button"
             >
               {chatStarting ? (

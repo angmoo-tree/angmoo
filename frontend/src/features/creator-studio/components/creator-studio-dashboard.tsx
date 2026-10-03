@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -29,6 +31,7 @@ export function CreatorStudioDashboard({
   authStatus: CreatorStudioAuthStatus;
   getLocalWorldSurface: StudioWorldLoader;
 }) {
+  const uiText = useUiText("creator-studio");
   const [worlds, setWorlds] = useState<WorldSurfaceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -57,22 +60,21 @@ export function CreatorStudioDashboard({
   }, [worlds]);
 
   if (authStatus === "checking" || (authStatus === "authenticated" && loading)) {
-    return <StudioNotice title="World 목록을 불러오는 중입니다" />;
+    return <StudioNotice title={uiText("World 목록을 불러오는 중입니다")} />;
   }
   if (authStatus === "unauthenticated") {
     return (
-      <StudioNotice title="로컬 owner 연결이 필요합니다">
+      <StudioNotice title={uiText("로컬 owner 연결이 필요합니다")}>
         <Link
           className={styles.secondaryAction}
           href={`/login?returnTo=${encodeURIComponent(PRODUCT_ROUTES.studio)}`}
         >
-          owner 연결
-        </Link>
+          {uiText("owner 연결")}</Link>
       </StudioNotice>
     );
   }
   if (error) {
-    return <StudioNotice title="Creator Studio를 열지 못했습니다" />;
+    return <StudioNotice title={uiText("Creator Studio를 열지 못했습니다")} />;
   }
 
   return (
@@ -80,29 +82,24 @@ export function CreatorStudioDashboard({
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>WORLD WORKSPACE</p>
-          <h1 className={styles.title}>내 World</h1>
+          <h1 className={styles.title}>{uiText("내 World")}</h1>
           <p className={styles.description}>
-            초안부터 공개까지 한곳에서 관리합니다. Studio 목록은 이 설치의 local
-            owner와 활성 creator membership 범위만 읽습니다.
-          </p>
+            {uiText("초안부터 공개까지 한곳에서 관리합니다. Studio 목록은 이 설치의 local owner와 활성 creator membership 범위만 읽습니다.")}</p>
         </div>
         <div className={styles.actions}>
           <Link className={styles.secondaryAction} href={PRODUCT_ROUTES.studioImport}>
-            Package 가져오기
-          </Link>
+            {uiText("Package 가져오기")}</Link>
           <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
-            새 World 만들기
-          </Link>
+            {uiText("새 World 만들기")}</Link>
         </div>
       </header>
 
       {worlds.length === 0 ? (
         <section className={styles.empty}>
-          <h2>아직 만든 World가 없습니다</h2>
-          <p>첫 World를 만들고 공개 준비를 마치면 Device Home에 앱이 나타납니다.</p>
+          <h2>{uiText("아직 만든 World가 없습니다")}</h2>
+          <p>{uiText("첫 World를 만들고 공개 준비를 마치면 Device Home에 앱이 나타납니다.")}</p>
           <Link className={styles.primaryAction} href={PRODUCT_ROUTES.studioNewWorld}>
-            World 초안 시작
-          </Link>
+            {uiText("World 초안 시작")}</Link>
         </section>
       ) : (
         <div className={styles.groups}>
@@ -112,8 +109,8 @@ export function CreatorStudioDashboard({
             return (
               <section key={group.id}>
                 <div className={styles.groupHeader}>
-                  <h2>{group.label}</h2>
-                  <span>{group.description} · {items.length}</span>
+                  <h2>{uiText(group.label)}</h2>
+                  <span>{uiText(group.description)} · {items.length}</span>
                 </div>
                 <div className={styles.worldGrid}>
                   {items.map((world) => <WorldCard key={world.world_id} world={world} />)}
@@ -128,14 +125,15 @@ export function CreatorStudioDashboard({
 }
 
 function WorldCard({ world }: { world: WorldSurfaceItem }) {
+  const uiText = useUiText("creator-studio");
   return (
     <article className={styles.worldCard}>
       <div className={styles.worldCardHeader}>
         <div>
           <h3>{world.name}</h3>
-          <p>{world.tagline || "한 줄 소개가 아직 없습니다."}</p>
+          <p>{world.tagline || uiText("한 줄 소개가 아직 없습니다.")}</p>
         </div>
-        <span className={styles.status}>{statusLabel(world)}</span>
+        <span className={styles.status}>{uiText(statusLabel(world))}</span>
       </div>
       <div className={styles.meta}>
         <span>{world.visibility}</span>
@@ -144,12 +142,10 @@ function WorldCard({ world }: { world: WorldSurfaceItem }) {
       </div>
       <div className={styles.actions}>
         <Link className={styles.secondaryAction} href={studioWorldRoute(world.world_id)}>
-          편집
-        </Link>
+          {uiText("편집")}</Link>
         {world.launchable ? (
           <Link className={styles.primaryAction} href={worldAppRoute(world.world_id)}>
-            World 열기
-          </Link>
+            {uiText("World 열기")}</Link>
         ) : null}
       </div>
     </article>

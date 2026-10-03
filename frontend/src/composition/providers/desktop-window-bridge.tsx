@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Minus, X } from "lucide-react";
 import { useEffect, useSyncExternalStore } from "react";
@@ -80,6 +82,7 @@ function phoneResizeDirectionAtPoint(
 }
 
 export function DesktopWindowBridge() {
+  const uiText = useUiText("shell");
   const active = useSyncExternalStore(
     () => () => undefined,
     isTauriDesktopRuntime,
@@ -229,7 +232,7 @@ export function DesktopWindowBridge() {
       data-window-route={currentDesktopRoute()}
     >
       <button
-        aria-label="Angmoo 창 이동"
+        aria-label={uiText("Angmoo 창 이동")}
         className={styles.dragHandle}
         onMouseDown={() => void invokeDesktopWindowCommand("start_product_window_drag")}
         type="button"
@@ -237,7 +240,7 @@ export function DesktopWindowBridge() {
         <span aria-hidden="true" />
       </button>
       <button
-        aria-label="Angmoo 창 최소화"
+        aria-label={uiText("Angmoo 창 최소화")}
         className={styles.windowButton}
         onClick={() => void invokeDesktopWindowCommand("minimize_product_window")}
         type="button"
@@ -245,7 +248,7 @@ export function DesktopWindowBridge() {
         <Minus aria-hidden="true" size={14} strokeWidth={2.2} />
       </button>
       <button
-        aria-label="Angmoo 창 닫기"
+        aria-label={uiText("Angmoo 창 닫기")}
         className={`${styles.windowButton} ${styles.closeButton}`}
         onClick={() => void invokeDesktopWindowCommand("close_product_window")}
         type="button"

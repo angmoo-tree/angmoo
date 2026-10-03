@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: "/",
     siteName: "Angmoo",
-    locale: "ko_KR",
+    locale: "en_US",
     type: "website",
     images: [
       {
@@ -52,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en">
       <body className="antialiased">
         <AuthProvider>
           <DesktopWindowBridge />

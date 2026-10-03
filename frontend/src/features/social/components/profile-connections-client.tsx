@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -45,6 +47,7 @@ export function ProfileConnectionsClient({
   activeTab: ProfileConnectionTab;
   initialError: string | null;
 }) {
+  const uiText = useUiText("social");
   const { status: authStatus } = useAuth();
   const [page, setPage] = useState<ProfileListPage>(
     initialPage ?? { items: [], next_cursor: null },
@@ -52,7 +55,7 @@ export function ProfileConnectionsClient({
   const [loadingMore, setLoadingMore] = useState(false);
   const activeConfig =
     CONNECTION_TABS.find((tab) => tab.key === activeTab) ?? CONNECTION_TABS[0];
-  const title = initialProfile?.profile.display_name ?? "프로필";
+  const title = initialProfile?.profile.display_name ?? uiText("프로필");
   const subtitle =
     profileKind === "character" && initialProfile?.profile.handle
       ? formatHandle(initialProfile.profile.handle)
@@ -128,7 +131,7 @@ export function ProfileConnectionsClient({
           <Link
             href={backHref}
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#f6f7f9]"
-            title="뒤로"
+            title={uiText("뒤로")}
           >
             <ArrowLeft size={24} strokeWidth={2.4} />
           </Link>
@@ -144,7 +147,7 @@ export function ProfileConnectionsClient({
           </div>
         </div>
 
-        <nav className="grid grid-cols-3" aria-label="팔로우 목록">
+        <nav className="grid grid-cols-3" aria-label={uiText("팔로우 목록")}>
           {CONNECTION_TABS.map((tab) => {
             const selected = tab.key === activeTab;
             return (

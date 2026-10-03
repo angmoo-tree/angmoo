@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import {
   Heart,
@@ -62,7 +64,9 @@ export function SocialPostRow({
   reference,
   variant = "feed",
 }: SocialPostRowProps) {
+  const uiText = useUiText("social");
   const router = useRuntimeRouter();
+  const authorName = post.authorDeleted ? uiText("삭제한 캐릭터") : post.authorName;
   const openable = Boolean(href);
   const textClassName = classNames(
     styles.postText,
@@ -75,7 +79,7 @@ export function SocialPostRow({
 
   return (
     <article
-      aria-label={openable ? `${post.authorName} 게시글 자세히 보기` : undefined}
+      aria-label={openable ? uiText("{{value0}} 게시글 자세히 보기", {value0: authorName}) : undefined}
       className={classNames(
         styles.postRow,
         openable && styles.openableRow,
@@ -104,14 +108,14 @@ export function SocialPostRow({
     >
       {authorHref ? (
         <LocalProductLink
-          ariaLabel={`${post.authorName} 프로필 열기`}
+          ariaLabel={uiText("{{value0}} 프로필 열기", {value0: authorName})}
           className={styles.avatarLink}
           data-post-card-ignore
           href={authorHref}
         >
           <ProfileAvatar
             avatarUrl={post.authorAvatarUrl}
-            name={post.authorName}
+            name={authorName}
             sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
             textClassName={styles.avatarText}
           />
@@ -119,7 +123,7 @@ export function SocialPostRow({
       ) : (
         <ProfileAvatar
           avatarUrl={post.authorAvatarUrl}
-          name={post.authorName}
+          name={authorName}
           sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
           textClassName={styles.avatarText}
         />
@@ -128,15 +132,15 @@ export function SocialPostRow({
         <header className={styles.postHeader}>
           {authorHref ? (
             <LocalProductLink
-              ariaLabel={`${post.authorName} 프로필 열기`}
+              ariaLabel={uiText("{{value0}} 프로필 열기", {value0: authorName})}
               className={styles.authorLink}
               data-post-card-ignore
               href={authorHref}
             >
-              {post.authorName}
+              {authorName}
             </LocalProductLink>
           ) : (
-            <span className={styles.author}>{post.authorName}</span>
+            <span className={styles.author}>{authorName}</span>
           )}
           <span className={styles.meta}>
             {post.authorHandle ? (
@@ -187,13 +191,14 @@ export function SocialPostActionStrip({
   actions: readonly SocialPostActionPresentation[];
   onAction?: (action: SocialPostActionPresentation) => void;
 }) {
+  const uiText = useUiText("social");
   const visibleActions = actions.filter(
     (action) => action.interaction !== "button" || onAction,
   );
   if (visibleActions.length === 0) return null;
 
   return (
-    <div className={styles.actionStrip} aria-label="게시글 동작" role="group">
+    <div className={styles.actionStrip} aria-label={uiText("게시글 동작")} role="group">
       {visibleActions.map((action) => {
         const Icon = ACTION_ICONS[action.kind];
         const positiveLike =

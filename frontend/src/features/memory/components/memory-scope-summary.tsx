@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useEffect, useState } from "react";
 
@@ -15,6 +17,7 @@ export function MemoryScopeSummary({
   subjectWorldCharacterId: string;
   worldId: string;
 }) {
+  const uiText = useUiText("memory");
   const [setting, setSetting] = useState<MemorySettingRead | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -41,14 +44,13 @@ export function MemoryScopeSummary({
   return (
     <div className={styles.scopeSummary} data-memory-scope-summary="true">
       <p role="status">
-        기억 <strong>{failed ? "상태 확인 불가" : setting ? setting.enabled ? "켜짐" : "꺼짐" : "확인 중"}</strong>
+        {uiText("기억")}<strong>{failed ? uiText("상태 확인 불가") : setting ? setting.enabled ? uiText("켜짐") : uiText("꺼짐") : uiText("확인 중")}</strong>
       </p>
       <LocalProductLink
-        ariaLabel="이 Character의 저장된 기억 보기"
+        ariaLabel={uiText("이 Character의 저장된 기억 보기")}
         href={`/memory?${query}`}
       >
-        기억 보기
-      </LocalProductLink>
+        {uiText("기억 보기")}</LocalProductLink>
     </div>
   );
 }

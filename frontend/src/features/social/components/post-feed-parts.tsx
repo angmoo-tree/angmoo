@@ -1,7 +1,9 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
 import { MentionedText } from "@/components/content/mentioned-text";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
-import { formatSocialDate } from "@/features/social/api/social-feed-client";
 import type { FeedContentFilter,PostReference,PostReportReason,PostSummary } from "@/features/social/types/social-feed-contract";
 import { formatHandle } from "@/utils/profile-presentation";
 import {
@@ -38,14 +40,15 @@ export function PostOptionsMenu({
   onDelete?: () => void;
   onReport?: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div className="relative shrink-0">
       <button
         type="button"
         onClick={onToggle}
         className="inline-flex size-11 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
-        title="게시글 메뉴"
-        aria-label="게시글 메뉴"
+        title={uiText("게시글 메뉴")}
+        aria-label={uiText("게시글 메뉴")}
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -64,8 +67,7 @@ export function PostOptionsMenu({
               role="menuitem"
             >
               <Trash2 size={15} aria-hidden="true" />
-              삭제
-            </button>
+              {uiText("삭제")}</button>
           ) : null}
           {onReport ? (
             <button
@@ -75,8 +77,7 @@ export function PostOptionsMenu({
               role="menuitem"
             >
               <Flag size={15} aria-hidden="true" />
-              신고
-            </button>
+              {uiText("신고")}</button>
           ) : null}
         </div>
       ) : null}
@@ -103,6 +104,7 @@ export function ReportPostDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4"
@@ -110,31 +112,29 @@ export function ReportPostDialog({
       aria-modal="true"
     >
       <div className="w-full max-w-[460px] rounded-lg border border-[#e1e5eb] bg-white p-5 shadow-[0_20px_60px_rgba(16,24,40,0.22)]">
-        <h2 className="text-[18px] font-extrabold text-[#101828]">글 신고</h2>
+        <h2 className="text-[18px] font-extrabold text-[#101828]">{uiText("글 신고")}</h2>
         <label className="mt-4 block text-[13px] font-extrabold text-[#344054]">
-          신고 사유
-          <select
+          {uiText("신고 사유")}<select
             value={reason}
             onChange={(event) => onReasonChange(event.target.value as PostReportReason)}
             disabled={pending}
             className="mt-2 h-11 w-full rounded-md border border-[#d0d5dd] bg-white px-3 text-[14px] font-bold text-[#101828] outline-none focus:border-[#ff6b6b]"
           >
-            <option value="sexual_joke">성적인 드립</option>
-            <option value="political_joke">정치적 드립</option>
-            <option value="harassment_or_hate">괴롭힘/혐오</option>
-            <option value="spam">스팸</option>
-            <option value="other">기타</option>
+            <option value="sexual_joke">{uiText("성적인 드립")}</option>
+            <option value="political_joke">{uiText("정치적 드립")}</option>
+            <option value="harassment_or_hate">{uiText("괴롭힘/혐오")}</option>
+            <option value="spam">{uiText("스팸")}</option>
+            <option value="other">{uiText("기타")}</option>
           </select>
         </label>
         <label className="mt-4 block text-[13px] font-extrabold text-[#344054]">
-          상세 내용
-          <textarea
+          {uiText("상세 내용")}<textarea
             value={details}
             onChange={(event) => onDetailsChange(event.target.value.slice(0, 500))}
             disabled={pending}
             rows={4}
             className="mt-2 w-full resize-none rounded-md border border-[#d0d5dd] bg-white px-3 py-2 text-[14px] font-medium text-[#101828] outline-none focus:border-[#ff6b6b]"
-            placeholder="선택 입력"
+            placeholder={uiText("선택 입력")}
           />
         </label>
         {error ? (
@@ -149,15 +149,14 @@ export function ReportPostDialog({
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md border border-[#e1e5eb] bg-white px-4 text-[14px] font-extrabold text-[#475467] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            취소
-          </button>
+            {uiText("취소")}</button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md bg-[#101828] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:bg-[#98a2b3]"
           >
-            {pending ? "신고 중" : "신고"}
+            {pending ? uiText("신고 중") : uiText("신고")}
           </button>
         </div>
       </div>
@@ -176,6 +175,7 @@ export function DeletePostDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4"
@@ -183,10 +183,9 @@ export function DeletePostDialog({
       aria-modal="true"
     >
       <div className="w-full max-w-[420px] rounded-lg border border-[#e1e5eb] bg-white p-5 shadow-[0_20px_60px_rgba(16,24,40,0.22)]">
-        <h2 className="text-[18px] font-extrabold text-[#101828]">글 삭제</h2>
+        <h2 className="text-[18px] font-extrabold text-[#101828]">{uiText("글 삭제")}</h2>
         <p className="mt-3 text-[15px] font-medium leading-6 text-[#475467]">
-          이 글을 삭제할까요? 이 글과 하위 대꾸가 일반 화면에서 보이지 않습니다.
-        </p>
+          {uiText("이 글을 삭제할까요? 이 글과 하위 대꾸가 일반 화면에서 보이지 않습니다.")}</p>
         {error ? (
           <div className="mt-3 rounded-md border border-[#ffd7d7] bg-[#fff5f5] px-3 py-2 text-[13px] font-bold text-[#c24141]">
             {error}
@@ -199,15 +198,14 @@ export function DeletePostDialog({
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md border border-[#e1e5eb] bg-white px-4 text-[14px] font-extrabold text-[#475467] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            취소
-          </button>
+            {uiText("취소")}</button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md bg-[#c24141] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#a93636] disabled:cursor-not-allowed disabled:bg-[#e4a0a0]"
           >
-            {pending ? "삭제 중" : "삭제"}
+            {pending ? uiText("삭제 중") : uiText("삭제")}
           </button>
         </div>
       </div>
@@ -228,8 +226,9 @@ export function FeedScopeTabs({
   selectedAgentName: string;
   onSelect: (mode: FeedMode) => void;
 }) {
+  const uiText = useUiText("social");
   return (
-    <div className="grid grid-cols-3" aria-label="둥지 피드 범위">
+    <div className="grid grid-cols-3" aria-label={uiText("둥지 피드 범위")}>
       <button
         type="button"
         onClick={() => onSelect("public")}
@@ -237,8 +236,7 @@ export function FeedScopeTabs({
         aria-current={mode === "public" ? "page" : undefined}
         className={feedScopeTabClass(mode === "public")}
       >
-        전체
-      </button>
+        {uiText("전체")}</button>
       <button
         type="button"
         onClick={() => onSelect("character-following")}
@@ -247,12 +245,11 @@ export function FeedScopeTabs({
         className={feedScopeTabClass(mode === "character-following")}
         title={
           selectedAgentName
-            ? `${selectedAgentName}가 팔로우한 피드`
-            : "선택된 앵무가 없습니다"
+            ? uiText("{{value0}}가 팔로우한 피드", {value0: selectedAgentName})
+            : uiText("선택된 앵무가 없습니다")
         }
       >
-        앵무 팔로우
-      </button>
+        {uiText("앵무 팔로우")}</button>
       <button
         type="button"
         onClick={() => onSelect("user-following")}
@@ -260,8 +257,7 @@ export function FeedScopeTabs({
         aria-current={mode === "user-following" ? "page" : undefined}
         className={feedScopeTabClass(mode === "user-following")}
       >
-        내 팔로우
-      </button>
+        {uiText("내 팔로우")}</button>
     </div>
   );
 }
@@ -289,6 +285,7 @@ export function FeedContentFilterBar({
   disabled: boolean;
   onChange: (value: FeedContentFilter) => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div className="border-b border-[#eaedf2] bg-white px-5 py-3 md:px-9">
       <div className="flex min-w-0 items-center">
@@ -302,7 +299,7 @@ export function FeedContentFilterBar({
               onClick={() => onChange(option.value)}
               className={feedContentFilterClass(option.value === value)}
             >
-              {option.label}
+              {uiText(option.label)}
             </button>
           ))}
         </div>
@@ -339,6 +336,8 @@ export function PostReferenceCard({
   label: string;
   post: PostReference;
 }) {
+  const uiText = useUiText("social");
+  const formatDate = useUiDateFormatter();
   return (
     <div className="mb-6 rounded-[20px] border border-[#e1e5eb] bg-[#f9fafb] p-4 transition-colors hover:border-[#ffb5b5] hover:bg-[#fffafa]">
       <Link
@@ -348,10 +347,10 @@ export function PostReferenceCard({
         {label}
       </Link>
       <div className="mb-1 flex min-w-0 flex-wrap items-center gap-x-2 text-[14px] font-bold text-[#667085]">
-        <span className="text-[#101828]">{post.author_name}</span>
+        <span className="text-[#101828]">{post.author_deleted ? uiText("삭제한 캐릭터") : post.author_name}</span>
         {post.author_handle ? <span>{formatHandle(post.author_handle)}</span> : null}
         <span>·</span>
-        <span>{formatSocialDate(post.created_at)}</span>
+        <span>{formatDate(post.created_at)}</span>
       </div>
       <p className="line-clamp-3 break-words text-[15px] leading-6 text-[#475467]">
         <span className="font-extrabold text-[#101828]">

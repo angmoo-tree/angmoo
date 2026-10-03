@@ -1,6 +1,9 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { InterpretationSettingsPanel } from "@/features/media/components/interpretation-settings";
 import { ImageUsageSettingsPanel } from "@/features/media/components/usage-settings";
+import { LanguageSettings } from "@/features/identity/components/language-settings";
 
 import { generationProfileValue } from "@/config/generation-profiles";
 import {
@@ -36,6 +39,7 @@ function asMessageGoogleModel(value: string | undefined, thinking = "high"): Mes
 }
 
 export function SettingsClient() {
+  const uiText = useUiText("shell");
   const router = useRouter();
   const { status: authStatus, user } = useAuth();
   const [installation, setInstallation] = useState<LocalBootstrapRead | null>(null);
@@ -56,12 +60,12 @@ export function SettingsClient() {
   const [logoutPending, setLogoutPending] = useState(false);
 
   const installationStatus = installationLoading
-    ? { label: "설치 확인 중", tone: "waiting" as const }
+    ? { label: uiText("설치 확인 중"), tone: "waiting" as const }
     : installationError
-      ? { label: "설치 확인 실패", tone: "degraded" as const }
+      ? { label: uiText("설치 확인 실패"), tone: "degraded" as const }
       : installation?.state === "claimed" && installation.owner
-        ? { label: "로컬 세션 연결됨", tone: "healthy" as const }
-        : { label: "owner 연결 확인 필요", tone: "degraded" as const };
+        ? { label: uiText("로컬 세션 연결됨"), tone: "healthy" as const }
+        : { label: uiText("owner 연결 확인 필요"), tone: "degraded" as const };
 
   const loadInstallation = useCallback(async () => {
     setInstallationLoading(true);
@@ -72,13 +76,13 @@ export function SettingsClient() {
       setInstallation(null);
       setInstallationError(
         error instanceof Error
-          ? error.message
-          : "현재 설치의 owner 연결 상태를 확인하지 못했습니다.",
+          ? uiText(error.message)
+          : uiText("현재 설치의 owner 연결 상태를 확인하지 못했습니다."),
       );
     } finally {
       setInstallationLoading(false);
     }
-  }, []);
+  }, [uiText]);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") router.replace("/login");
@@ -96,8 +100,8 @@ export function SettingsClient() {
         setInstallation(null);
         setInstallationError(
           error instanceof Error
-            ? error.message
-            : "현재 설치의 owner 연결 상태를 확인하지 못했습니다.",
+            ? uiText(error.message)
+            : uiText("현재 설치의 owner 연결 상태를 확인하지 못했습니다."),
         );
       })
       .finally(() => {
@@ -106,7 +110,7 @@ export function SettingsClient() {
     return () => {
       active = false;
     };
-  }, [authStatus]);
+  }, [authStatus, uiText]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
@@ -123,8 +127,8 @@ export function SettingsClient() {
         if (active) {
           setMessageError(
             error instanceof Error
-              ? error.message
-              : "쪽지용 API key 설정을 불러오지 못했습니다.",
+              ? uiText(error.message)
+              : uiText("쪽지용 API key 설정을 불러오지 못했습니다."),
           );
         }
       })
@@ -134,7 +138,7 @@ export function SettingsClient() {
     return () => {
       active = false;
     };
-  }, [authStatus]);
+  }, [authStatus, uiText]);
 
   async function handleLogout() {
     if (logoutPending) return;
@@ -179,8 +183,8 @@ export function SettingsClient() {
     } catch (error) {
       setMessageError(
         error instanceof Error
-          ? error.message
-          : "쪽지용 API key 설정을 저장하지 못했습니다.",
+          ? uiText(error.message)
+          : uiText("쪽지용 API key 설정을 저장하지 못했습니다."),
       );
     } finally {
       setMessageSaving(false);
@@ -203,8 +207,8 @@ export function SettingsClient() {
     } catch (error) {
       setMessageError(
         error instanceof Error
-          ? error.message
-          : "쪽지용 API key를 삭제하지 못했습니다.",
+          ? uiText(error.message)
+          : uiText("쪽지용 API key를 삭제하지 못했습니다."),
       );
     } finally {
       setMessageSaving(false);
@@ -213,20 +217,19 @@ export function SettingsClient() {
 
   return (
     <section className={styles.page} data-local-settings-surface="true">
-      <PageHeader title="설정" subtitle="현재 설치 · 로컬 세션 · API key" />
+      <PageHeader title={uiText("설정")} subtitle={uiText("현재 설치 · 로컬 세션 · API key")} />
 
       <div className={styles.content}>
+        <LanguageSettings />
         <Card as="section" className={styles.sectionCard}>
           <div className={styles.sectionHeading}>
             <span className={styles.sectionIcon} aria-hidden="true">
               <Database />
             </span>
             <div>
-              <h2>현재 설치와 로컬 세션</h2>
+              <h2>{uiText("현재 설치와 로컬 세션")}</h2>
               <p>
-                이 설치의 owner 연결과 현재 세션을 보여줍니다. 다른 PC나 외부 계정과
-                자동으로 합쳐지지 않습니다.
-              </p>
+                {uiText("이 설치의 owner 연결과 현재 세션을 보여줍니다. 다른 PC나 외부 계정과 자동으로 합쳐지지 않습니다.")}</p>
             </div>
           </div>
 
@@ -242,30 +245,29 @@ export function SettingsClient() {
               <div className={styles.feedbackStack}>
                 <span>{installationError}</span>
                 <Button variant="secondary" compact onClick={() => void loadInstallation()}>
-                  다시 확인
-                </Button>
+                  {uiText("다시 확인")}</Button>
               </div>
             </InlineError>
           ) : null}
 
           <dl className={styles.detailGrid}>
             <div>
-              <dt>설치 이름</dt>
-              <dd>{installation?.local_label?.trim() || "이 장치"}</dd>
+              <dt>{uiText("설치 이름")}</dt>
+              <dd>{installation?.local_label?.trim() || uiText("이 장치")}</dd>
             </div>
             <div>
-              <dt>현재 owner</dt>
-              <dd>{user?.display_name ?? installation?.owner?.display_name ?? "확인 중"}</dd>
+              <dt>{uiText("현재 owner")}</dt>
+              <dd>{user?.display_name ?? installation?.owner?.display_name ?? uiText("확인 중")}</dd>
             </div>
             {installation?.installation_id ? (
               <div className={styles.detailWide}>
-                <dt>설치 식별자</dt>
+                <dt>{uiText("설치 식별자")}</dt>
                 <dd className={styles.identifier}>{installation.installation_id}</dd>
               </div>
             ) : null}
             {user?.email ? (
               <div className={styles.detailWide}>
-                <dt>연결된 이메일</dt>
+                <dt>{uiText("연결된 이메일")}</dt>
                 <dd className={styles.identifier}>{user.email}</dd>
               </div>
             ) : null}
@@ -276,15 +278,12 @@ export function SettingsClient() {
               variant="strong"
               onClick={() => void handleLogout()}
               loading={logoutPending}
-              loadingLabel="로컬 세션 종료 중"
+              loadingLabel={uiText("로컬 세션 종료 중")}
             >
               <LogOut size={17} aria-hidden="true" />
-              로컬 세션 끝내기
-            </Button>
+              {uiText("로컬 세션 끝내기")}</Button>
             <p>
-              owner 데이터는 지우지 않습니다. 현재 세션만 끝내고 이 설치의 owner를
-              다시 확인합니다.
-            </p>
+              {uiText("owner 데이터는 지우지 않습니다. 현재 세션만 끝내고 이 설치의 owner를 다시 확인합니다.")}</p>
           </div>
         </Card>
 
@@ -294,22 +293,20 @@ export function SettingsClient() {
               <KeyRound />
             </span>
             <div>
-              <h2>쪽지용 API key</h2>
+              <h2>{uiText("쪽지용 API key")}</h2>
               <p>
-                이 설치에서 현재 owner의 쪽지 응답을 생성할 때 사용할 Google API key를
-                선택합니다.
-              </p>
+                {uiText("이 설치에서 현재 owner의 쪽지 응답을 생성할 때 사용할 Google API key를 선택합니다.")}</p>
             </div>
           </div>
 
           {messageLoading ? (
             <div className={styles.statusLine} role="status">
-              <StatusChip label="API key 설정 확인 중" tone="waiting" />
+              <StatusChip label={uiText("API key 설정 확인 중")} tone="waiting" />
             </div>
           ) : null}
 
           <div className={styles.formStack}>
-            <Field id="message-default-model" label="기본 모델">
+            <Field id="message-default-model" label={uiText("기본 모델")}>
               {(controlProps) => (
                 <Select
                   {...controlProps}
@@ -319,7 +316,7 @@ export function SettingsClient() {
                     setMessageModel(event.target.value as MessageGoogleGeminiModel)
                   }
                 >
-                  <option value="" disabled>지원 모델을 선택해 주세요</option>
+                  <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
                   {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -330,7 +327,7 @@ export function SettingsClient() {
             </Field>
 
             <fieldset className={styles.choiceFieldset}>
-              <legend>API key 출처</legend>
+              <legend>{uiText("API key 출처")}</legend>
               <div className={styles.choiceGrid}>
                 <label
                   className={styles.choiceCard}
@@ -344,11 +341,11 @@ export function SettingsClient() {
                     onChange={() => setMessageSource("message_key")}
                   />
                   <span>
-                    <strong>쪽지 전용 key 사용</strong>
+                    <strong>{uiText("쪽지 전용 key 사용")}</strong>
                     <small>
                       {messageSettings?.message_key_fingerprint
-                        ? `저장됨: ${messageSettings.message_key_fingerprint}`
-                        : "아직 저장된 key가 없습니다."}
+                        ? uiText("저장됨: {{value0}}", {value0: messageSettings.message_key_fingerprint})
+                        : uiText("아직 저장된 key가 없습니다.")}
                     </small>
                   </span>
                 </label>
@@ -364,8 +361,8 @@ export function SettingsClient() {
                     onChange={() => setMessageSource("agent_key")}
                   />
                   <span>
-                    <strong>내 앵무 key 참조</strong>
-                    <small>raw key를 복제하지 않고 이 설치의 기존 credential을 참조합니다.</small>
+                    <strong>{uiText("내 앵무 key 참조")}</strong>
+                    <small>{uiText("raw key를 복제하지 않고 이 설치의 기존 credential을 참조합니다.")}</small>
                   </span>
                 </label>
               </div>
@@ -375,7 +372,7 @@ export function SettingsClient() {
               <Field
                 id="message-google-api-key"
                 label="Google API key"
-                helperText="새 key를 저장하거나 기존 key를 교체할 때만 입력하세요."
+                helperText={uiText("새 key를 저장하거나 기존 key를 교체할 때만 입력하세요.")}
               >
                 {(controlProps) => (
                   <Input
@@ -385,12 +382,12 @@ export function SettingsClient() {
                     value={messageApiKey}
                     disabled={messageLoading || messageSaving}
                     onChange={(event) => setMessageApiKey(event.target.value)}
-                    placeholder="새 key 입력"
+                    placeholder={uiText("새 key 입력")}
                   />
                 )}
               </Field>
             ) : (
-              <Field id="message-source-character" label="사용할 내 앵무">
+              <Field id="message-source-character" label={uiText("사용할 내 앵무")}>
                 {(controlProps) => (
                   <Select
                     {...controlProps}
@@ -398,7 +395,7 @@ export function SettingsClient() {
                     disabled={messageLoading || messageSaving}
                     onChange={(event) => setSourceCharacterId(event.target.value)}
                   >
-                    <option value="">앵무 선택</option>
+                    <option value="">{uiText("앵무 선택")}</option>
                     {(messageSettings?.owned_agents ?? []).map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.display_name}
@@ -411,23 +408,22 @@ export function SettingsClient() {
           </div>
 
           {messageError ? <InlineError className={styles.feedback}>{messageError}</InlineError> : null}
-          {messageSaved ? <Toast tone="success">쪽지용 API key 설정을 저장했습니다.</Toast> : null}
-          {messageCleared ? <Toast tone="success">저장된 쪽지용 API key를 삭제했습니다.</Toast> : null}
+          {messageSaved ? <Toast tone="success">{uiText("쪽지용 API key 설정을 저장했습니다.")}</Toast> : null}
+          {messageCleared ? <Toast tone="success">{uiText("저장된 쪽지용 API key를 삭제했습니다.")}</Toast> : null}
 
           <div className={styles.buttonRow}>
             <Button
               variant="primary"
               onClick={() => void handleSaveMessageSettings()}
               loading={messageSaving}
-              loadingLabel="저장 중"
+              loadingLabel={uiText("저장 중")}
               disabled={
                 messageLoading ||
                 (messageSource === "agent_key" && !sourceCharacterId)
               }
             >
               <Save size={17} aria-hidden="true" />
-              저장
-            </Button>
+              {uiText("저장")}</Button>
             {messageSettings?.message_key_fingerprint ? (
               <Button
                 variant="danger"
@@ -435,8 +431,7 @@ export function SettingsClient() {
                 disabled={messageSaving}
               >
                 <Trash2 size={17} aria-hidden="true" />
-                저장된 key 삭제
-              </Button>
+                {uiText("저장된 key 삭제")}</Button>
             ) : null}
           </div>
         </Card>
@@ -449,29 +444,21 @@ export function SettingsClient() {
               <AlertTriangle />
             </span>
             <div>
-              <h2>데이터 삭제 범위</h2>
+              <h2>{uiText("데이터 삭제 범위")}</h2>
               <p>
-                삭제 작업은 대상에 따라 범위가 다릅니다. 이 Local 설정 화면은 현재
-                owner 전체 삭제 capability를 제공하지 않습니다.
-              </p>
+                {uiText("삭제 작업은 대상에 따라 범위가 다릅니다. 이 Local 설정 화면은 현재 owner 전체 삭제 capability를 제공하지 않습니다.")}</p>
             </div>
           </div>
 
-          <StatusChip label="owner 전체 삭제 지원 안 함" tone="disabled" />
+          <StatusChip label={uiText("owner 전체 삭제 지원 안 함")} tone="disabled" />
 
           <div className={styles.scopeList}>
             <p>
-              개별 앵무 삭제는 내 앵무 관리에서 해당 Character 하나만 대상으로
-              진행합니다.
-            </p>
+              {uiText("개별 앵무 삭제는 내 앵무 관리에서 해당 Character 하나만 대상으로 진행합니다.")}</p>
             <p>
-              World에서 제거는 Creator Studio에서 해당 World 참여만 끝내며 전역
-              Character identity와 과거 기록을 삭제하지 않습니다.
-            </p>
+              {uiText("World에서 제거는 Creator Studio에서 해당 World 참여만 끝내며 전역 Character identity와 과거 기록을 삭제하지 않습니다.")}</p>
             <p>
-              로컬 세션 끝내기는 현재 세션만 해제하며 owner 데이터·SQLite·credential을
-              삭제하지 않습니다.
-            </p>
+              {uiText("로컬 세션 끝내기는 현재 세션만 해제하며 owner 데이터·SQLite·credential을 삭제하지 않습니다.")}</p>
           </div>
         </Card>
       </div>

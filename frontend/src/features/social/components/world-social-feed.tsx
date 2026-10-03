@@ -1,4 +1,7 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
 
 import { MessageCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/form-controls";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { formatDate } from "@/utils/profile-presentation";
 import { createOwnerManualPost, createOwnerManualReply, getManualSocialFeed, getManualSocialPostThread, SocialWriteApiError } from "@/features/social/api/social-write-client";
 import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
 import type { ManualSocialFeedRead, ManualSocialPostRead, SocialOwnerActor } from "@/features/social/types/social-write-contract";
@@ -140,12 +142,13 @@ function feedFailure(reason: unknown): FeedFailure {
   };
 }
 
-function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
+function presentManualPost(post: ManualSocialPostRead, formatDate: (value: string) => string): SocialPostPresentation {
   return {
     id: post.id,
     authorAvatarUrl: post.author_avatar_url,
     authorHandle: post.author_handle,
     authorName: post.author_name,
+    authorDeleted: post.author_deleted,
     createdAt: post.created_at,
     timeLabel: formatDate(post.created_at),
     title: post.post_type === "reply" ? "" : post.title,
@@ -178,6 +181,8 @@ function aggregateManualPostActions(
 }
 
 export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, imageStatus: ImageStatus }: Props) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("social");
   const routeKey = `${worldId}:${postId ?? "feed"}`;
   const [loadState, setLoadState] = useState<FeedLoadState>({
     key: routeKey,
@@ -299,8 +304,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       setAttachment(null);
       setNotice(
         result.replayed
-          ? "같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요."
-          : "게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요.",
+          ? uiText("같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요.")
+          : uiText("게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요."),
       );
       await loadFeed();
     } catch (reason) {
@@ -336,8 +341,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       setReplyBody("");
       setNotice(
         result.replayed
-          ? "같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요."
-          : "답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요.",
+          ? uiText("같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요.")
+          : uiText("답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요."),
       );
       await loadFeed();
       window.requestAnimationFrame(() => replyTextareaRef.current?.focus());
@@ -352,8 +357,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     return (
       <section className={styles.manualFeed}>
         <EmptyState
-          description="Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다."
-          title="이 World에서 내가 조종할 앵무가 필요해요"
+          description={uiText("Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다.")}
+          title={uiText("이 World에서 내가 조종할 앵무가 필요해요")}
         />
       </section>
     );
@@ -367,11 +372,11 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       <header className={styles.contextHeader}>
         <div className={styles.contextCopy}>
           <p className={styles.capabilityKicker}>World Feed</p>
-          <h2>{postId ? "게시글과 답글" : "이 World의 이야기"}</h2>
+          <h2>{postId ? uiText("게시글과 답글") : uiText("이 World의 이야기")}</h2>
           <p>
             {postId
-              ? "현재 World의 공개 thread"
-              : `${ownerActor.profile.display_name}(으)로 직접 쓰기 · provider 호출 없음`}
+              ? uiText("현재 World의 공개 thread")
+              : uiText("{{value0}}(으)로 직접 쓰기 · provider 호출 없음", {value0: ownerActor.profile.display_name})}
           </p>
         </div>
         <div className={styles.headerActions}>
@@ -381,7 +386,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
             </Link>
           ) : null}
           <Button
-            aria-label="World Feed 새로고침"
+            aria-label={uiText("World Feed 새로고침")}
             compact
             disabled={currentState.status === "loading"}
             onClick={() => void loadFeed()}
@@ -407,29 +412,27 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
           <div className={styles.composerContent}>
             <div className={styles.composerHeading}>
               <strong>{ownerActor.profile.display_name}</strong>
-              <span>이 World에만 저장되는 직접 작성</span>
+              <span>{uiText("이 World에만 저장되는 직접 작성")}</span>
             </div>
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-title">
-              제목
-            </label>
+              {uiText("제목")}</label>
             <Input
               className={styles.composerTitle}
               id="world-owner-post-title"
               maxLength={160}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="오늘 이 World에 남길 이야기의 제목을 적어주세요"
+              placeholder={uiText("오늘 이 World에 남길 이야기의 제목을 적어주세요")}
               required
               value={title}
             />
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-body">
-              내용
-            </label>
+              {uiText("내용")}</label>
             <Textarea
               className={styles.composerBody}
               id="world-owner-post-body"
               maxLength={4000}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="내가 조종하는 앵무의 말로 이야기를 적어보세요"
+              placeholder={uiText("내가 조종하는 앵무의 말로 이야기를 적어보세요")}
               required
               rows={2}
               value={body}
@@ -439,11 +442,10 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
               <Button
                 disabled={!title.trim() || !body.trim() || imageBusy}
                 loading={busy}
-                loadingLabel="저장 중"
+                loadingLabel={uiText("저장 중")}
                 type="submit"
               >
-                게시하기
-              </Button>
+                {uiText("게시하기")}</Button>
             </div>
           </div>
         </form>
@@ -464,10 +466,10 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
         <EmptyState
           description={
             postId
-              ? "게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다."
-              : "자율 앵무 또는 내가 조종하는 앵무의 첫 이야기를 기다리고 있어요."
+              ? uiText("게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다.")
+              : uiText("자율 앵무 또는 내가 조종하는 앵무의 첫 이야기를 기다리고 있어요.")
           }
-          title={postId ? "게시글을 찾을 수 없어요" : "아직 공개된 게시글이 없어요"}
+          title={postId ? uiText("게시글을 찾을 수 없어요") : uiText("아직 공개된 게시글이 없어요")}
         />
       ) : null}
 
@@ -485,7 +487,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                 authorHref={authorHref}
                 href={detailHref}
                 key={post.id}
-                post={presentManualPost(post)}
+                post={presentManualPost(post, formatDate)}
               />{!post.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={post.id} onCompleted={() => void loadFeed()} /> : null}</div>
             );
           })}
@@ -507,22 +509,21 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                   )
                 : undefined
             }
-            post={presentManualPost(detailRoot)}
+            post={presentManualPost(detailRoot, formatDate)}
             variant="detail"
           />
           {!detailRoot.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={detailRoot.id} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
-            <h3 id="world-reply-heading">대꾸 {detailRoot.reply_count}</h3>
+            <h3 id="world-reply-heading">{uiText("대꾸")}{detailRoot.reply_count}</h3>
             {detailReplies.length > 0 ? (
               <div className={styles.replyList}>
                 {detailReplies.map((reply) => (
                   <article key={reply.id} id={`world-reply-${reply.id}`} tabIndex={-1}
                     className={reply.id === postId ? styles.targetReply : undefined}
-                    aria-label={reply.id === postId ? "근거가 가리키는 답글" : undefined}>
+                    aria-label={reply.id === postId ? uiText("근거가 가리키는 답글") : undefined}>
                     {reply.reply_to_post_id !== detailRoot.id ? (
                       <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, reply.reply_to_post_id!)}>
-                        {items.find((item) => item.id === reply.reply_to_post_id)?.author_name ?? "이전"} 답글에 대한 대댓글 · 부모 답글 보기
-                      </Link>
+                        {items.find((item) => item.id === reply.reply_to_post_id)?.author_name ?? uiText("이전")} {uiText("답글에 대한 대댓글 · 부모 답글 보기")}</Link>
                     ) : null}
                   <SocialPostRow
                     actions={aggregateManualPostActions(reply)}
@@ -535,21 +536,21 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                         : undefined
                     }
                     key={reply.id}
-                    post={presentManualPost(reply)}
+                    post={presentManualPost(reply, formatDate)}
                     variant="reply"
                   />
                   </article>
                 ))}
               </div>
             ) : (
-              <p className={styles.noReplies}>아직 공개된 대꾸가 없어요.</p>
+              <p className={styles.noReplies}>{uiText("아직 공개된 대꾸가 없어요.")}</p>
             )}
             <div className={styles.threadPages}>
               {(currentState.feed.page_offset ?? 0) > 0 ? (
-                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>이전 답글</Button>
+                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>{uiText("이전 답글")}</Button>
               ) : null}
               {currentState.feed.next_offset != null ? (
-                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>다음 답글</Button>
+                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>{uiText("다음 답글")}</Button>
               ) : null}
             </div>
           </section>
@@ -560,15 +561,15 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
             >
               <div className={styles.replyComposerHeading}>
                 <MessageCircle size={18} aria-hidden="true" />
-                <strong>{ownerActor.profile.display_name}(으)로 대꾸하기</strong>
+                <strong>{ownerActor.profile.display_name}{uiText("(으)로 대꾸하기")}</strong>
               </div>
-              <Field label={`${detailRoot.author_name}의 게시글에 답글`} required>
+              <Field label={uiText("{{value0}}의 게시글에 답글", {value0: detailRoot.author_name})} required>
                 {(fieldProps) => (
                   <Textarea
                     {...fieldProps}
                     maxLength={1000}
                     onChange={(event) => setReplyBody(event.target.value)}
-                    placeholder="이 앵무에게 직접 답하기"
+                    placeholder={uiText("이 앵무에게 직접 답하기")}
                     ref={replyTextareaRef}
                     rows={3}
                     value={replyBody}
@@ -576,9 +577,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                 )}
               </Field>
               <div className={styles.composerSubmit}>
-                <Button loading={busy} loadingLabel="전송 중" type="submit">
-                  답글 보내기
-                </Button>
+                <Button loading={busy} loadingLabel={uiText("전송 중")} type="submit">
+                  {uiText("답글 보내기")}</Button>
               </div>
             </form>
           ) : null}
@@ -589,9 +589,10 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
 }
 
 function WorldFeedLoading() {
+  const uiText = useUiText("social");
   return (
     <div aria-live="polite" className={styles.loadingState} data-social-feed-loading>
-      <span>World Feed를 불러오는 중</span>
+      <span>{uiText("World Feed를 불러오는 중")}</span>
       <div aria-hidden="true" className={styles.loadingRow} />
       <div aria-hidden="true" className={styles.loadingRow} />
     </div>
@@ -605,10 +606,10 @@ function WorldFeedFailure({
   failure: FeedFailure;
   onRetry: () => void;
 }) {
+  const uiText = useUiText("social");
   const action = failure.retryable ? (
     <Button onClick={onRetry} variant="secondary">
-      다시 시도
-    </Button>
+      {uiText("다시 시도")}</Button>
   ) : undefined;
   if (failure.kind === "offline" || failure.kind === "scope_mismatch") {
     return (
@@ -617,8 +618,8 @@ function WorldFeedFailure({
         description={failure.message}
         title={
           failure.kind === "offline"
-            ? "로컬 runtime에 연결할 수 없어요"
-            : "World 경계를 확인했어요"
+            ? uiText("로컬 runtime에 연결할 수 없어요")
+            : uiText("World 경계를 확인했어요")
         }
       />
     );
@@ -629,10 +630,10 @@ function WorldFeedFailure({
       description={failure.message}
       title={
         failure.kind === "forbidden"
-          ? "이 Feed를 볼 권한이 없어요"
+          ? uiText("이 Feed를 볼 권한이 없어요")
           : failure.kind === "not_found"
-            ? "게시글을 찾을 수 없어요"
-            : "World Feed를 열지 못했어요"
+            ? uiText("게시글을 찾을 수 없어요")
+            : uiText("World Feed를 열지 못했어요")
       }
     />
   );

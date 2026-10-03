@@ -28,7 +28,7 @@ function getValidationMessage(detail: unknown[]) {
     return "하루 글 쓰기 상한은 0개 이상 30개 이하로 설정해주세요.";
   }
   if ("msg" in first && typeof first.msg === "string") {
-    return first.msg;
+    return "Please check the submitted values.";
   }
   return null;
 }

@@ -1,15 +1,21 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { AtSign, Bell, Check, Heart, MessageCircle, Quote, RefreshCw, Repeat2, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { listNotifications, markNotificationRead } from "@/features/social/api/community";
 import { type NotificationRead } from "@/features/social/types/community";
 
 export function NotificationsClient() {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("social");
   const [notifications, setNotifications] = useState<NotificationRead[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,11 +32,11 @@ export function NotificationsClient() {
       setNotifications(page.items);
       setNextCursor(page.next_cursor);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "알림을 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("알림을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [uiText]);
 
   useEffect(() => {
     let active = true;
@@ -42,7 +48,7 @@ export function NotificationsClient() {
       })
       .catch((err) => {
         if (!active) return;
-        setError(err instanceof Error ? err.message : "알림을 불러오지 못했습니다.");
+        setError(err instanceof Error ? uiText(err.message) : uiText("알림을 불러오지 못했습니다."));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -51,7 +57,7 @@ export function NotificationsClient() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [uiText]);
 
   const loadMore = useCallback(async () => {
     if (!nextCursor || loadingMore) return;
@@ -63,11 +69,11 @@ export function NotificationsClient() {
       setNotifications((previous) => [...previous, ...page.items]);
       setNextCursor(page.next_cursor);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "알림을 더 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("알림을 더 불러오지 못했습니다."));
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, nextCursor]);
+  }, [loadingMore, nextCursor, uiText]);
 
   useEffect(() => {
     if (!nextCursor || loadingMore) return;
@@ -93,7 +99,7 @@ export function NotificationsClient() {
         items.map((item) => (item.id === notificationId ? updated : item)),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "알림을 읽음 처리하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("알림을 읽음 처리하지 못했습니다."));
     } finally {
       setSavingId(null);
     }
@@ -102,13 +108,13 @@ export function NotificationsClient() {
   return (
     <section className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex min-h-[88px] w-full items-center gap-3 border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:px-9">
-        <h1 className="shrink-0 text-[28px] font-extrabold text-[#101828] md:text-[30px]">알림</h1>
+        <h1 className="shrink-0 text-[28px] font-extrabold text-[#101828] md:text-[30px]">{uiText("알림")}</h1>
         <button
           type="button"
           onClick={loadNotifications}
           disabled={loading}
           className="ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-          title="새로고침"
+          title={uiText("새로고침")}
         >
           <RefreshCw size={20} aria-hidden="true" />
         </button>
@@ -122,14 +128,12 @@ export function NotificationsClient() {
 
       {loading ? (
         <div className="p-8 text-center text-[15px] font-medium text-gray-500">
-          알림을 불러오는 중
-        </div>
+          {uiText("알림을 불러오는 중")}</div>
       ) : null}
 
       {!loading && notifications.length === 0 ? (
         <div className="p-8 text-center text-[15px] font-medium text-gray-500">
-          아직 알림이 없습니다.
-        </div>
+          {uiText("아직 알림이 없습니다.")}</div>
       ) : null}
 
       <div className="flex flex-col">
@@ -143,7 +147,7 @@ export function NotificationsClient() {
               {actorHref ? (
                 <Link href={actorHref} className="shrink-0 rounded-full">
                   <ProfileAvatar
-                    name={notification.actor_name ?? "알림"}
+                    name={notification.actor_deleted ? uiText("삭제한 캐릭터") : notification.actor_name ?? uiText("알림")}
                     avatarUrl={notification.actor_avatar_url}
                     sizeClassName="size-12"
                     textClassName="text-[20px]"
@@ -151,7 +155,7 @@ export function NotificationsClient() {
                 </Link>
               ) : (
                 <ProfileAvatar
-                  name={notification.actor_name ?? "알림"}
+                  name={notification.actor_deleted ? uiText("삭제한 캐릭터") : notification.actor_name ?? uiText("알림")}
                   avatarUrl={notification.actor_avatar_url}
                   sizeClassName="size-12"
                   textClassName="text-[20px]"
@@ -161,7 +165,7 @@ export function NotificationsClient() {
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-[14px] font-bold text-[#667085]">
                   <NotificationTypeBadge notification={notification} />
                   <span>{formatDate(notification.created_at)}</span>
-                  {notification.read_at ? <span className="text-[#98a2b3]">읽음</span> : null}
+                  {notification.read_at ? <span className="text-[#98a2b3]">{uiText("읽음")}</span> : null}
                 </div>
                 <NotificationMessage notification={notification} actorHref={actorHref} />
               </div>
@@ -171,7 +175,7 @@ export function NotificationsClient() {
                   onClick={() => handleRead(notification.id)}
                   disabled={savingId === notification.id}
                   className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-                  title="읽음"
+                  title={uiText("읽음")}
                 >
                   <Check size={20} aria-hidden="true" />
                 </button>
@@ -185,10 +189,11 @@ export function NotificationsClient() {
 }
 
 function NotificationTypeBadge({ notification }: { notification: NotificationRead }) {
+  const uiText = useUiText("social");
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fff0ef] px-3 py-1 text-[#ff6b6b]">
       <NotificationIcon type={notification.notification_type} />
-      {notificationTypeLabel(notification.notification_type)}
+      {uiText(notificationTypeLabel(notification.notification_type))}
     </span>
   );
 }
@@ -200,7 +205,8 @@ function NotificationMessage({
   notification: NotificationRead;
   actorHref: string | null;
 }) {
-  const copy = notificationCopy(notification);
+  const uiText = useUiText("social");
+  const copy = notificationCopy(notification, uiText);
   return (
     <div>
       {copy.href ? (
@@ -246,63 +252,63 @@ function NotificationMessage({
   );
 }
 
-function notificationCopy(notification: NotificationRead) {
-  const actorName = notification.actor_name ?? "누군가";
+function notificationCopy(notification: NotificationRead, uiText: (key: string, values?: Record<string, string | number>) => string) {
+  const actorName = notification.actor_deleted ? uiText("삭제한 캐릭터") : notification.actor_name ?? uiText("누군가");
   const actorMeta = notification.actor_handle ? `@${notification.actor_handle}` : null;
-  const recipientName = notification.recipient_name ?? "해당 앵무";
-  const followTargetName = notification.recipient_character_id ? recipientName : "내 프로필";
+  const recipientName = notification.recipient_deleted ? uiText("삭제한 캐릭터") : notification.recipient_name ?? uiText("해당 캐릭터");
+  const followTargetName = notification.recipient_character_id ? recipientName : uiText("내 프로필");
   const ownedPostText = notification.recipient_character_id
-    ? `${recipientName}의 지저귐`
-    : "내 지저귐";
+    ? uiText("{{name}}의 게시글", {name: recipientName})
+    : uiText("내 게시글");
   const postText = previewText(notification.post_title, notification.post_body);
   const sourceText = previewText(notification.source_post_title, notification.source_post_body);
 
   switch (notification.notification_type) {
     case "reply":
       return {
-        title: `${actorName} · ${ownedPostText}에 대꾸를 남겼어요.`,
+        title: uiText("{{actor}} · {{post}}에 답글을 남겼어요.", {actor: actorName, post: ownedPostText}),
         actorMeta,
-        body: sourceText ? `대꾸: ${sourceText}` : postText ? `원문: ${postText}` : null,
+        body: sourceText ? uiText("답글: {{text}}", {text: sourceText}) : postText ? uiText("원문: {{text}}", {text: postText}) : null,
         href: postHref(notification.source_post_id ?? notification.post_id),
       };
     case "quote":
       return {
-        title: `${actorName} · ${ownedPostText}을 인용했어요.`,
+        title: uiText("{{actor}} · {{post}}을 인용했어요.", {actor: actorName, post: ownedPostText}),
         actorMeta,
-        body: sourceText ? `인용글: ${sourceText}` : postText ? `원문: ${postText}` : null,
+        body: sourceText ? uiText("인용글: {{text}}", {text: sourceText}) : postText ? uiText("원문: {{text}}", {text: postText}) : null,
         href: postHref(notification.source_post_id ?? notification.post_id),
       };
     case "mention":
       return {
-        title: `${actorName} · ${recipientName}을 멘션했어요.`,
+        title: uiText("{{actor}} · {{name}}을 멘션했어요.", {actor: actorName, name: recipientName}),
         actorMeta,
-        body: postText ? `원문: ${postText}` : null,
+        body: postText ? uiText("원문: {{text}}", {text: postText}) : null,
         href: postHref(notification.post_id),
       };
     case "like":
       return {
-        title: `${actorName} · ${ownedPostText}을 좋아했어요.`,
+        title: uiText("{{actor}} · {{post}}을 좋아했어요.", {actor: actorName, post: ownedPostText}),
         actorMeta,
-        body: postText ? `원문: ${postText}` : null,
+        body: postText ? uiText("원문: {{text}}", {text: postText}) : null,
         href: postHref(notification.post_id),
       };
     case "repost":
       return {
-        title: `${actorName} · ${ownedPostText}을 리포스트했어요.`,
+        title: uiText("{{actor}} · {{post}}을 리포스트했어요.", {actor: actorName, post: ownedPostText}),
         actorMeta,
-        body: postText ? `원문: ${postText}` : null,
+        body: postText ? uiText("원문: {{text}}", {text: postText}) : null,
         href: postHref(notification.post_id),
       };
     case "follow":
       return {
-        title: `${actorName} · ${followTargetName} 팔로우를 시작했어요.`,
+        title: uiText("{{actor}} · {{name}} 팔로우를 시작했어요.", {actor: actorName, name: followTargetName}),
         actorMeta,
         body: null,
         href: notificationActorHref(notification),
       };
     default:
       return {
-        title: `${actorName}의 새 알림이 있어요.`,
+        title: uiText("{{actor}}의 새 알림이 있어요.", {actor: actorName}),
         actorMeta,
         body: postText,
         href: postHref(notification.post_id),

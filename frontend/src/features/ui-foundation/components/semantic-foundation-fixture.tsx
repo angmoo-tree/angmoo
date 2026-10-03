@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import {
   ArrowLeft,
@@ -42,6 +44,7 @@ const NAV_ITEMS = [
 ];
 
 export function SemanticFoundationFixture() {
+  const uiText = useUiText("ui-foundation");
   const [selectedTab, setSelectedTab] = useState("all");
   const [activeNavigation, setActiveNavigation] = useState("feed");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,7 +69,7 @@ export function SemanticFoundationFixture() {
         }
         actions={
           <IconButton
-            label="상태 새로고침"
+            label={uiText("상태 새로고침")}
             variant="secondary"
             data-ui-test="focus-target"
           >
@@ -99,15 +102,14 @@ export function SemanticFoundationFixture() {
             <Button variant="strong" data-ui-test="active-target">
               실행 중지
             </Button>
-            <Button variant="secondary">취소</Button>
+            <Button variant="secondary">{uiText("취소")}</Button>
             <Button variant="ghost">자세히</Button>
             <Button variant="danger">연결 제거</Button>
             <Button variant="secondary" disabled data-ui-test="disabled-button">
               사용할 수 없음
             </Button>
-            <Button loading loadingLabel="저장 중" data-ui-test="loading-button">
-              저장
-            </Button>
+            <Button loading loadingLabel={uiText("저장 중")} data-ui-test="loading-button">
+              {uiText("저장")}</Button>
           </div>
         </section>
 
@@ -133,7 +135,7 @@ export function SemanticFoundationFixture() {
                 />
               )}
             </Field>
-            <Field id="foundation-world-role" label="World 역할">
+            <Field id="foundation-world-role" label={uiText("World 역할")}>
               {(fieldProps) => (
                 <Select {...fieldProps} defaultValue="student">
                   <option value="student">학생</option>
@@ -151,7 +153,7 @@ export function SemanticFoundationFixture() {
             </Field>
             <Field
               id="foundation-invalid"
-              label="활동 시간"
+              label={uiText("활동 시간")}
               error="활동 시간은 00:00부터 23:59 사이여야 합니다."
             >
               {(fieldProps) => (
@@ -233,7 +235,7 @@ export function SemanticFoundationFixture() {
           <div className={styles.statusGrid}>
             <StatusChip label="정상" tone="healthy" />
             <StatusChip label="실행 중" tone="running" />
-            <StatusChip label="대기 중" tone="waiting" />
+            <StatusChip label={uiText("대기 중")} tone="waiting" />
             <StatusChip label="일부 기능 제한" tone="degraded" />
             <StatusChip label="실패" tone="danger" />
             <StatusChip label="비활성" tone="disabled" />
@@ -249,7 +251,7 @@ export function SemanticFoundationFixture() {
           </div>
           <div data-ui-test="tabs">
             <Tabs
-              ariaLabel="캐릭터 상태"
+              ariaLabel={uiText("캐릭터 상태")}
               items={TAB_ITEMS}
               selectedId={selectedTab}
               onSelect={setSelectedTab}
@@ -283,14 +285,14 @@ export function SemanticFoundationFixture() {
             <Toast tone="success">설정이 현재 기기에 저장되었습니다.</Toast>
             <EmptyState
               icon={<Bird size={24} aria-hidden="true" />}
-              title="아직 연결된 캐릭터가 없습니다"
+              title={uiText("아직 연결된 캐릭터가 없습니다")}
               description="새 캐릭터를 만들거나 기존 캐릭터를 이 World에 연결할 수 있습니다."
               action={<Button variant="secondary">캐릭터 연결</Button>}
             />
             <DegradedPanel
-              title="관계 그래프를 잠시 읽을 수 없습니다"
+              title={uiText("관계 그래프를 잠시 읽을 수 없습니다")}
               description="피드와 캐릭터 데이터는 유지됩니다. 진단 상태를 확인한 뒤 다시 시도하세요."
-              action={<Button variant="secondary">다시 확인</Button>}
+              action={<Button variant="secondary">{uiText("다시 확인")}</Button>}
             />
           </div>
         </section>
@@ -315,15 +317,14 @@ export function SemanticFoundationFixture() {
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title="이 World에서 올마이트 연결을 제거할까요?"
+        title={uiText("이 World에서 올마이트 연결을 제거할까요?")}
         description="캐릭터 자체는 삭제되지 않으며 현재 World 참여만 종료됩니다."
         dialogAttributes={{ "data-ui-test": "dialog" }}
         closeButtonAttributes={{ "data-ui-test": "dialog-close" }}
         actions={
           <div className={styles.dialogActions}>
             <Button variant="secondary" onClick={() => setDialogOpen(false)}>
-              취소
-            </Button>
+              {uiText("취소")}</Button>
             <Button variant="danger" onClick={() => setDialogOpen(false)}>
               연결 제거
             </Button>

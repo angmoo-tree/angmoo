@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -35,6 +37,7 @@ export function LocalProductLink({
   target,
   title,
 }: LocalProductLinkProps) {
+  const uiText = useUiText("shell");
   const unavailable =
     isStaticFrontendProfile() && !isStaticLocalProductRouteSupported(href);
 
@@ -54,7 +57,7 @@ export function LocalProductLink({
           event.stopPropagation();
         }}
         role="link"
-        title={title ?? "현재 앱에서는 열 수 없는 화면입니다."}
+        title={title ?? uiText("현재 앱에서는 열 수 없는 화면입니다.")}
       >
         {children}
       </span>

@@ -305,7 +305,7 @@ function errorDetail(payload: unknown, fallback: string) {
     "detail" in payload &&
     typeof payload.detail === "string"
   ) {
-    return payload.detail;
+    return /^[a-z][a-z0-9_]{0,80}$/.test(payload.detail) ? payload.detail : fallback;
   }
   return fallback;
 }

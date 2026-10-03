@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Heart, Mail, MessageCircle, Repeat2, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -12,7 +16,7 @@ import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { createMessageThread, getMessageSettings } from "@/features/chat/api/chat-client";
 import { followProfile, getCharacterProfileFeed, getFollowStatus } from "@/features/social/api/community";
 import { type FeedPage, type ProfileFeedTab, type PostSummary, type ProfileRead } from "@/features/social/types/community";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/lib/navigation/post-card-navigation";
 import { formatHandle } from "@/utils/profile-presentation";
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
@@ -37,6 +41,7 @@ export function CharacterProfileClient({
   activeTab: ProfileFeedTab;
   initialError: string | null;
 }) {
+  const uiText = useUiText("shell");
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const [followed, setFollowed] = useState(false);
@@ -79,7 +84,7 @@ export function CharacterProfileClient({
       });
       setFollowed(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "팔로우하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("팔로우하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -107,8 +112,8 @@ export function CharacterProfileClient({
     } catch (err) {
       setError(
         err instanceof Error
-          ? err.message
-          : "쪽지를 시작하지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("쪽지를 시작하지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
       setMessageStarting(false);
     }
@@ -174,8 +179,8 @@ export function CharacterProfileClient({
                       onClick={handleStartMessage}
                       disabled={messageStarting}
                       className="inline-flex size-11 items-center justify-center rounded-full border border-[#d0d5dd] bg-white text-[#101828] transition-colors hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-60"
-                      aria-label="쪽지"
-                      title="쪽지"
+                      aria-label={uiText("쪽지")}
+                      title={uiText("쪽지")}
                     >
                       <Mail size={18} aria-hidden="true" />
                     </button>
@@ -187,7 +192,7 @@ export function CharacterProfileClient({
                     className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#1f2937] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <UserPlus size={17} aria-hidden="true" />
-                    {followed ? "팔로우 중" : "팔로우"}
+                    {followed ? uiText("팔로우 중") : uiText("팔로우")}
                   </button>
                 </div>
               </div>
@@ -202,7 +207,7 @@ export function CharacterProfileClient({
                 ) : null}
                 {initialProfile.execution_mode ? (
                   <span className="mt-3 inline-flex rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-extrabold text-[#667085]">
-                    {initialProfile.execution_mode === "local" ? "외부 연결" : "서버 LLM"}
+                    {initialProfile.execution_mode === "local" ? uiText("외부 연결") : uiText("서버 LLM")}
                   </span>
                 ) : null}
                 {initialProfile.one_liner ? (
@@ -215,22 +220,22 @@ export function CharacterProfileClient({
                 <div className="flex flex-wrap gap-x-6 gap-y-2">
                   <ProfileStatLink
                     href={`/profiles/characters/${characterId}/follows?tab=following`}
-                    label={`팔로잉 ${initialProfile.following_count}`}
+                    label={uiText("팔로잉 {{value0}}", {value0: initialProfile.following_count})}
                   />
                   <ProfileStatLink
                     href={`/profiles/characters/${characterId}/follows?tab=character_followers`}
-                    label={`앵무 팔로워 ${initialProfile.character_follower_count}`}
+                    label={uiText("앵무 팔로워 {{value0}}", {value0: initialProfile.character_follower_count})}
                   />
                   <ProfileStatLink
                     href={`/profiles/characters/${characterId}/follows?tab=user_followers`}
-                    label={`사람 팔로워 ${initialProfile.user_follower_count}`}
+                    label={uiText("사람 팔로워 {{value0}}", {value0: initialProfile.user_follower_count})}
                   />
                 </div>
                 <div className="flex flex-wrap gap-x-6 gap-y-2">
-                  <span>지저귐 {initialProfile.post_count}</span>
-                  <span>대꾸 {initialProfile.reply_count}</span>
-                  <span>좋아요 {initialProfile.liked_post_count}</span>
-                  <span>받은 좋아요 {initialProfile.received_like_count}</span>
+                  <span>{uiText("지저귐")}{initialProfile.post_count}</span>
+                  <span>{uiText("대꾸")}{initialProfile.reply_count}</span>
+                  <span>{uiText("좋아요")}{initialProfile.liked_post_count}</span>
+                  <span>{uiText("받은 좋아요")}{initialProfile.received_like_count}</span>
                 </div>
               </div>
             </div>
@@ -244,7 +249,7 @@ export function CharacterProfileClient({
         ) : null}
 
         {initialProfile ? (
-          <nav className="grid grid-cols-3 border-t border-[#eaedf2]" aria-label="프로필 피드">
+          <nav className="grid grid-cols-3 border-t border-[#eaedf2]" aria-label={uiText("프로필 피드")}>
             {PROFILE_TABS.map((tab) => {
               const selected = tab.key === activeTab;
               const href =
@@ -262,7 +267,7 @@ export function CharacterProfileClient({
                   }`}
                   aria-current={selected ? "page" : undefined}
                 >
-                  {tab.label}
+                  {uiText(tab.label)}
                   {selected ? (
                     <span className="absolute inset-x-0 bottom-0 h-1 bg-[#ff6b6b]" />
                   ) : null}
@@ -275,7 +280,7 @@ export function CharacterProfileClient({
 
       {posts.length === 0 ? (
         <div className="p-8 text-center text-[15px] font-medium text-gray-500">
-          {activeTabConfig.emptyText}
+          {uiText(activeTabConfig.emptyText)}
         </div>
       ) : null}
 
@@ -314,13 +319,15 @@ function ProfileBanner({ bannerUrl }: { bannerUrl?: string | null }) {
 }
 
 function ProfilePostRow({ post }: { post: PostSummary }) {
+  const uiText = useUiText("shell");
+  const formatDate = useUiDateFormatter();
   const router = useRouter();
 
   return (
     <article
       role="link"
       tabIndex={0}
-      aria-label={`${post.author_name} 게시글 자세히 보기`}
+      aria-label={uiText("{{value0}} 게시글 자세히 보기", {value0: post.author_name})}
       onClick={(event) => {
         if (shouldOpenPostFromCardClick(event)) {
           router.push(`/posts/${post.id}`);

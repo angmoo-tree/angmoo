@@ -1,4 +1,9 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+import { useUserEnvironment } from "@/hooks/use-user-environment";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import {
   Bot,
@@ -24,16 +29,16 @@ import {
   targetProfileHref,
   type AgentActivityLogView,
 } from "@/features/characters/utils/activity";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { Badge } from "@/components/ui/status";
 import { EmptyState } from "@/components/ui/feedback";
 
 export function AgentActivityList({
   logs,
   characterName,
-  emptyText = "아직 활동 로그가 없습니다.",
+  emptyText: providedEmptyText,
   showActorName = true,
-  timeZone = "Asia/Seoul",
+  timeZone: packageTimezone,
 }: {
   logs: AgentActivityLogView[];
   characterName: string;
@@ -41,11 +46,16 @@ export function AgentActivityList({
   showActorName?: boolean;
   timeZone?: string;
 }) {
+  const formatDate = useUiDateFormatter();
+  void packageTimezone;
+  const timeZone = useUserEnvironment().environment?.timezone ?? "UTC";
+  const uiText = useUiText("characters");
+  const emptyText = providedEmptyText ?? uiText("아직 활동 로그가 없습니다.");
   if (logs.length === 0) {
     return (
       <EmptyState
         description={emptyText}
-        title="활동 기록 없음"
+        title={uiText("활동 기록 없음")}
       />
     );
   }
@@ -56,11 +66,11 @@ export function AgentActivityList({
         className="border-b border-border-default bg-surface-subtle px-4 py-2 text-xs font-bold text-text-secondary"
         data-activity-log-timezone={timeZone}
       >
-        표시 시간 · {timeZone}
+        {uiText("표시 시간 ·")}{timeZone}
       </p>
       {logs.map((log) => {
         const Icon = getActivityIcon(log.action_type);
-        const detail = formatActivityDetail(log);
+        const detail = formatActivityDetail(log, uiText);
         const profileHref = targetProfileHref(log);
 
         return (
@@ -72,18 +82,18 @@ export function AgentActivityList({
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <Badge>
-                    {formatActionLabel(log.action_type)}
+                    {uiText(formatActionLabel(log.action_type))}
                   </Badge>
                   <time
                     dateTime={log.created_at}
                     className="text-[14px] font-medium text-text-secondary"
-                    title={`${timeZone} 기준`}
+                    title={uiText("{{value0}} 기준", {value0: timeZone})}
                   >
                     {formatDate(log.created_at, timeZone)}
                   </time>
                 </div>
                 <p className="break-words text-[17px] font-extrabold leading-7 text-text-strong">
-                  {formatActivityHeadline(log, characterName, { showActorName })}
+                  {formatActivityHeadline(log, characterName, { showActorName, uiText })}
                 </p>
                 {detail ? (
                   <p className="mt-1 break-words text-[15px] font-medium leading-6 text-text-secondary">
@@ -96,7 +106,7 @@ export function AgentActivityList({
                     title={log.target_post_id}
                     className="mt-3 inline-flex min-h-11 items-center rounded-full border border-border-control bg-surface px-4 py-2 text-[13px] font-extrabold text-text-strong transition-colors hover:border-brand-soft-border hover:bg-surface-subtle focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                   >
-                    {formatTargetLinkLabel(log.action_type)}
+                    {uiText(formatTargetLinkLabel(log.action_type))}
                   </LocalProductLink>
                 ) : null}
                 {!log.target_post_id && profileHref ? (
@@ -104,7 +114,7 @@ export function AgentActivityList({
                     href={profileHref}
                     className="mt-3 inline-flex min-h-11 items-center rounded-full border border-border-control bg-surface px-4 py-2 text-[13px] font-extrabold text-text-strong transition-colors hover:border-brand-soft-border hover:bg-surface-subtle focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
                   >
-                    {formatTargetLinkLabel(log.action_type)}
+                    {uiText(formatTargetLinkLabel(log.action_type))}
                   </LocalProductLink>
                 ) : null}
               </div>

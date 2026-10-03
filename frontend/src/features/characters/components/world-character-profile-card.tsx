@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import styles from "@/features/characters/components/world-character-profile.module.css";
@@ -13,6 +15,7 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
   profile: WorldCharacterPublicProfile; worldId: string; worldCharacterId: string; onBack: () => void;
   chatAction: ReactNode; chatNotice: ReactNode; children: ReactNode;
 }) {
+  const uiText = useUiText("characters");
   return (
     <section
       className={styles.profile}
@@ -23,10 +26,10 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
       <ProfileBanner bannerUrl={profile.banner_url} />
       <div className={styles.profileBody}>
         <button
-          aria-label="이전 화면으로"
+          aria-label={uiText("이전 화면으로")}
           className={styles.backButton}
           onClick={onBack}
-          title="이전 화면으로"
+          title={uiText("이전 화면으로")}
           type="button"
         >
           <ArrowLeft aria-hidden="true" size={20} />
@@ -46,7 +49,7 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
           <h2>{profile.display_name}</h2>
           {profile.handle ? <p>{formatHandle(profile.handle)}</p> : null}
           <div className={styles.badges}>
-            <span>{profile.control_mode === "owner_controlled" ? "사용자 조종" : "자율 앵무"}</span>
+            <span>{profile.control_mode === "owner_controlled" ? uiText("사용자 조종") : uiText("자율 앵무")}</span>
             {profile.role_key ? <span>{profile.role_key}</span> : null}
           </div>
           {profile.intro ? <div className={styles.intro}>{profile.intro}</div> : null}

@@ -1,10 +1,14 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { MentionedText } from "@/components/content/mentioned-text";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
 import { type PostDetail,type PostReference,type PostReportReason,type PostSummary } from "@/features/social/types/social-feed-contract";
 import { type SocialPostActionPresentation } from "@/features/social/types/social-presentation-contract";
-import { formatDate,formatHandle } from "@/utils/profile-presentation";
+import { formatHandle } from "@/utils/profile-presentation";
 import {
 Flag,
 MoreHorizontal,
@@ -74,6 +78,8 @@ export function ReplyNodeRow({
   onReportPost: (post: PostSummary) => void;
   depth?: number;
 }) {
+  const uiText = useUiText("social");
+  const formatDate = useUiDateFormatter();
   const reply = node.reply;
   const parent =
     reply.reply_to_post_id && reply.reply_to_post_id !== rootPostId
@@ -102,7 +108,7 @@ export function ReplyNodeRow({
             ? `/profiles/characters/${reply.author_character_id}`
             : undefined
         }
-        context={parent ? `${parent.author_name}에게 대꾸` : undefined}
+        context={parent ? uiText("{{value0}}에게 대꾸", {value0: parent.author_name}) : undefined}
         href={`/posts/${reply.id}`}
         menu={
           hasMenu ? (
@@ -117,6 +123,7 @@ export function ReplyNodeRow({
         post={{
           id: reply.id,
           authorName: reply.author_name,
+    authorDeleted: reply.author_deleted,
           authorHandle: reply.author_handle,
           authorAvatarUrl: reply.author_avatar_url,
           createdAt: reply.created_at,
@@ -162,14 +169,15 @@ export function PostOptionsMenu({
   onDelete?: () => void;
   onReport?: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div className="relative shrink-0">
       <button
         type="button"
         onClick={onToggle}
         className="inline-flex size-11 items-center justify-center rounded-full bg-white/80 text-[#667085] transition-colors hover:bg-[#eef1f5] hover:text-[#101828]"
-        title="게시글 메뉴"
-        aria-label="게시글 메뉴"
+        title={uiText("게시글 메뉴")}
+        aria-label={uiText("게시글 메뉴")}
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -188,8 +196,7 @@ export function PostOptionsMenu({
               role="menuitem"
             >
               <Trash2 size={15} aria-hidden="true" />
-              삭제
-            </button>
+              {uiText("삭제")}</button>
           ) : null}
           {onReport ? (
             <button
@@ -199,8 +206,7 @@ export function PostOptionsMenu({
               role="menuitem"
             >
               <Flag size={15} aria-hidden="true" />
-              신고
-            </button>
+              {uiText("신고")}</button>
           ) : null}
         </div>
       ) : null}
@@ -227,6 +233,7 @@ export function ReportPostDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4"
@@ -234,31 +241,29 @@ export function ReportPostDialog({
       aria-modal="true"
     >
       <div className="w-full max-w-[460px] rounded-lg border border-[#e1e5eb] bg-white p-5 shadow-[0_20px_60px_rgba(16,24,40,0.22)]">
-        <h2 className="text-[18px] font-extrabold text-[#101828]">글 신고</h2>
+        <h2 className="text-[18px] font-extrabold text-[#101828]">{uiText("글 신고")}</h2>
         <label className="mt-4 block text-[13px] font-extrabold text-[#344054]">
-          신고 사유
-          <select
+          {uiText("신고 사유")}<select
             value={reason}
             onChange={(event) => onReasonChange(event.target.value as PostReportReason)}
             disabled={pending}
             className="mt-2 h-11 w-full rounded-md border border-[#d0d5dd] bg-white px-3 text-[14px] font-bold text-[#101828] outline-none focus:border-[#ff6b6b]"
           >
-            <option value="sexual_joke">성적인 드립</option>
-            <option value="political_joke">정치적 드립</option>
-            <option value="harassment_or_hate">괴롭힘/혐오</option>
-            <option value="spam">스팸</option>
-            <option value="other">기타</option>
+            <option value="sexual_joke">{uiText("성적인 드립")}</option>
+            <option value="political_joke">{uiText("정치적 드립")}</option>
+            <option value="harassment_or_hate">{uiText("괴롭힘/혐오")}</option>
+            <option value="spam">{uiText("스팸")}</option>
+            <option value="other">{uiText("기타")}</option>
           </select>
         </label>
         <label className="mt-4 block text-[13px] font-extrabold text-[#344054]">
-          상세 내용
-          <textarea
+          {uiText("상세 내용")}<textarea
             value={details}
             onChange={(event) => onDetailsChange(event.target.value.slice(0, 500))}
             disabled={pending}
             rows={4}
             className="mt-2 w-full resize-none rounded-md border border-[#d0d5dd] bg-white px-3 py-2 text-[14px] font-medium text-[#101828] outline-none focus:border-[#ff6b6b]"
-            placeholder="선택 입력"
+            placeholder={uiText("선택 입력")}
           />
         </label>
         {error ? (
@@ -273,15 +278,14 @@ export function ReportPostDialog({
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md border border-[#e1e5eb] bg-white px-4 text-[14px] font-extrabold text-[#475467] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            취소
-          </button>
+            {uiText("취소")}</button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md bg-[#101828] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:bg-[#98a2b3]"
           >
-            {pending ? "신고 중" : "신고"}
+            {pending ? uiText("신고 중") : uiText("신고")}
           </button>
         </div>
       </div>
@@ -300,6 +304,7 @@ export function DeletePostDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const uiText = useUiText("social");
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4"
@@ -307,10 +312,9 @@ export function DeletePostDialog({
       aria-modal="true"
     >
       <div className="w-full max-w-[420px] rounded-lg border border-[#e1e5eb] bg-white p-5 shadow-[0_20px_60px_rgba(16,24,40,0.22)]">
-        <h2 className="text-[18px] font-extrabold text-[#101828]">글 삭제</h2>
+        <h2 className="text-[18px] font-extrabold text-[#101828]">{uiText("글 삭제")}</h2>
         <p className="mt-3 text-[15px] font-medium leading-6 text-[#475467]">
-          이 글을 삭제할까요? 이 글과 하위 대꾸가 일반 화면에서 보이지 않습니다.
-        </p>
+          {uiText("이 글을 삭제할까요? 이 글과 하위 대꾸가 일반 화면에서 보이지 않습니다.")}</p>
         {error ? (
           <div className="mt-3 rounded-md border border-[#ffd7d7] bg-[#fff5f5] px-3 py-2 text-[13px] font-bold text-[#c24141]">
             {error}
@@ -323,15 +327,14 @@ export function DeletePostDialog({
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md border border-[#e1e5eb] bg-white px-4 text-[14px] font-extrabold text-[#475467] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            취소
-          </button>
+            {uiText("취소")}</button>
           <button
             type="button"
             onClick={onConfirm}
             disabled={pending}
             className="inline-flex h-10 items-center justify-center rounded-md bg-[#c24141] px-4 text-[14px] font-extrabold text-white transition-colors hover:bg-[#a93636] disabled:cursor-not-allowed disabled:bg-[#e4a0a0]"
           >
-            {pending ? "삭제 중" : "삭제"}
+            {pending ? uiText("삭제 중") : uiText("삭제")}
           </button>
         </div>
       </div>
@@ -374,6 +377,8 @@ export function PostReferenceCard({
   label: string;
   post: PostReference;
 }) {
+  const uiText = useUiText("social");
+  const formatDate = useUiDateFormatter();
   return (
     <div className="mt-6 rounded-[20px] border border-[#e1e5eb] bg-[#f9fafb] p-4 transition-colors hover:border-[#ffb5b5] hover:bg-[#fffafa]">
       <Link
@@ -383,7 +388,7 @@ export function PostReferenceCard({
         {label}
       </Link>
       <div className="mb-1 flex min-w-0 flex-wrap items-center gap-x-2 text-[14px] font-bold text-[#667085]">
-        <span className="text-[#101828]">{post.author_name}</span>
+        <span className="text-[#101828]">{post.author_deleted ? uiText("삭제한 캐릭터") : post.author_name}</span>
         {post.author_handle ? <span>{formatHandle(post.author_handle)}</span> : null}
         <span>·</span>
         <span>{formatDate(post.created_at)}</span>

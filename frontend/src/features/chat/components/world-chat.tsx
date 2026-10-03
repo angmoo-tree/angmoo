@@ -1,4 +1,7 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { RetrievalDiagnostics } from "./retrieval-diagnostics";
 
 import { generationProfileValue, generationProfileLabel } from "@/config/generation-profiles";
@@ -49,6 +52,8 @@ export function WorldChat({ threadId, worldId, ...slots }: WorldChatProps) {
 }
 
 function WorldChatList({ worldId }: { worldId: string }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("chat");
   const [read, setRead] = useState<WorldChatThreadListRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -77,7 +82,7 @@ function WorldChatList({ worldId }: { worldId: string }) {
   }, []);
 
   if (state === "loading") {
-    return <WorldChatStatus title="World Chat을 불러오는 중" />;
+    return <WorldChatStatus title={uiText("World Chat을 불러오는 중")} />;
   }
   if (state === "error" || !read) {
     return <WorldChatError error={error} onRetry={retry} />;
@@ -95,36 +100,33 @@ function WorldChatList({ worldId }: { worldId: string }) {
         </div>
         <div>
           <p className={styles.kicker}>WORLD CHAT</p>
-          <h2>대화</h2>
+          <h2>{uiText("대화")}</h2>
           <p>
-            {read.items.length}/{read.max_threads}개의 World 대화
-          </p>
+            {read.items.length}/{read.max_threads}{uiText("개의 World 대화")}</p>
         </div>
       </header>
 
       {read.ambiguous_legacy_count > 0 ? (
         <div className={styles.notice} role="status">
-          <strong>World를 확인해야 하는 이전 대화가 있어요.</strong>
+          <strong>{uiText("World를 확인해야 하는 이전 대화가 있어요.")}</strong>
           <p>
-            {read.ambiguous_legacy_count}개의 이전 대화는 임의의 World에 연결하지
-            않았습니다.
-          </p>
+            {read.ambiguous_legacy_count}{uiText("개의 이전 대화는 임의의 World에 연결하지 않았습니다.")}</p>
         </div>
       ) : null}
 
       {read.items.length === 0 ? (
         <div className={styles.empty}>
           <MessageCircle aria-hidden="true" size={28} />
-          <h3>아직 시작한 대화가 없어요</h3>
-          <p>같은 World의 Character와 시작한 대화가 여기에 표시됩니다.</p>
+          <h3>{uiText("아직 시작한 대화가 없어요")}</h3>
+          <p>{uiText("같은 World의 Character와 시작한 대화가 여기에 표시됩니다.")}</p>
         </div>
       ) : (
-        <ol className={styles.threadList} aria-label="World 대화 목록">
+        <ol className={styles.threadList} aria-label={uiText("World 대화 목록")}>
           {read.items.map((thread) => (
             <li key={thread.id}>
               <div className={styles.threadRow}>
                 <LocalProductLink
-                  ariaLabel={`${thread.responding.display_name}의 World 프로필 열기`}
+                  ariaLabel={uiText("{{value0}}의 World 프로필 열기", {value0: thread.responding.display_name})}
                   className={styles.threadProfileLink}
                   href={worldCharacterProfileRoute(
                     worldId,
@@ -145,23 +147,22 @@ function WorldChatList({ worldId }: { worldId: string }) {
                   </div>
                 </LocalProductLink>
                 <Link
-                  aria-label={`${thread.responding.display_name}와의 대화 열기`}
+                  aria-label={uiText("{{value0}}와의 대화 열기", {value0: thread.responding.display_name})}
                   className={styles.threadLink}
                   href={worldChatThreadRoute(worldId, thread.id)}
                 >
                   <div className={styles.threadBody}>
                     <p className={styles.requesterLabel}>
-                      {thread.requester.display_name}(으)로 대화
-                    </p>
+                      {thread.requester.display_name}{uiText("(으)로 대화")}</p>
                     <p className={styles.preview}>
-                      {thread.latest_message?.content ?? "아직 메시지가 없어요."}
+                      {thread.latest_message?.content ?? uiText("아직 메시지가 없어요.")}
                     </p>
                   </div>
                   <time
                     className={styles.time}
                     dateTime={thread.last_message_at ?? thread.created_at}
                   >
-                    {compactDate(thread.last_message_at ?? thread.created_at)}
+                    {formatDate(thread.last_message_at ?? thread.created_at)}
                   </time>
                 </Link>
               </div>
@@ -183,6 +184,8 @@ function WorldChatThread({
   threadId: string;
   worldId: string;
 } & WorldChatViewSlots) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("chat");
   const [thread, setThread] = useState<WorldChatThreadRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -609,7 +612,7 @@ function WorldChatThread({
   );
 
   if (state === "loading") {
-    return <WorldChatStatus title="대화를 불러오는 중" />;
+    return <WorldChatStatus title={uiText("대화를 불러오는 중")} />;
   }
   if (state === "error" || !thread) {
     return (
@@ -627,10 +630,10 @@ function WorldChatThread({
   );
   const modelControlDisabled = sending || generationBusy || modelUpdating;
   const modelControlDescription = modelControlDisabled
-    ? "답장을 처리하는 동안에는 응답 모델을 변경할 수 없습니다."
+    ? uiText("답장을 처리하는 동안에는 응답 모델을 변경할 수 없습니다.")
     : thread.model_binding_mode === "default"
-      ? `기본 모델 ${generationProfileLabel(thread.default_model, thread.default_thinking_level)}을 다음 답장에 사용합니다.`
-      : `${generationProfileLabel(thread.selected_model, thread.selected_thinking_level)}을 이 대화에서 고정해 사용합니다.`;
+      ? uiText("기본 모델 {{value0}}을 다음 답장에 사용합니다.", {value0: generationProfileLabel(thread.default_model, thread.default_thinking_level)})
+      : uiText("{{value0}}을 이 대화에서 고정해 사용합니다.", {value0: generationProfileLabel(thread.selected_model, thread.selected_thinking_level)});
 
   return (
     <section
@@ -641,15 +644,15 @@ function WorldChatThread({
     >
       <header className={styles.threadHeading}>
         <Link
-          aria-label="World 대화 목록으로"
+          aria-label={uiText("World 대화 목록으로")}
           className={styles.backLink}
           href={worldChatRoute(worldId)}
-          title="World 대화 목록으로"
+          title={uiText("World 대화 목록으로")}
         >
           <ArrowLeft aria-hidden="true" size={20} />
         </Link>
         <LocalProductLink
-          ariaLabel={`${thread.responding.display_name}의 World 프로필 열기`}
+          ariaLabel={uiText("{{value0}}의 World 프로필 열기", {value0: thread.responding.display_name})}
           className={styles.headerProfileLink}
           href={worldCharacterProfileRoute(
             worldId,
@@ -664,16 +667,16 @@ function WorldChatThread({
           />
           <div className={styles.threadTitle}>
             <h2>{thread.responding.display_name}</h2>
-            <p>{thread.requester.display_name}(으)로 대화 중</p>
+            <p>{thread.requester.display_name}{uiText("(으)로 대화 중")}</p>
           </div>
         </LocalProductLink>
       </header>
 
       <div className={styles.roleBoundary}>
-        <span>말하는 앵무</span>
+        <span>{uiText("말하는 앵무")}</span>
         <strong>{thread.requester.display_name}</strong>
         <span aria-hidden="true">→</span>
-        <span>답하는 앵무</span>
+        <span>{uiText("답하는 앵무")}</span>
         <strong>{thread.responding.display_name}</strong>
       </div>
 
@@ -685,7 +688,7 @@ function WorldChatThread({
       <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} />
 
       <div className={styles.modelControl}>
-        <label htmlFor={`world-chat-model-${thread.id}`}>응답 모델</label>
+        <label htmlFor={`world-chat-model-${thread.id}`}>{uiText("응답 모델")}</label>
         <select
           aria-describedby={`world-chat-model-help-${thread.id}`}
           disabled={modelControlDisabled}
@@ -696,26 +699,24 @@ function WorldChatThread({
           value={modelSelection}
         >
           <option value="default">
-            기본 모델 사용 — 현재 {generationProfileLabel(thread.default_model, thread.default_thinking_level)}
+            {uiText("기본 모델 사용 — 현재")}{generationProfileLabel(thread.default_model, thread.default_thinking_level)}
           </option>
-          <option value="" disabled>지원 모델을 선택해 주세요</option>
+          <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
                   {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
             <option key={option.value} value={option.value}>
-              {option.label} — 이 대화에서 고정
-            </option>
+              {option.label} {uiText("— 이 대화에서 고정")}</option>
           ))}
         </select>
         <p id={`world-chat-model-help-${thread.id}`}>{modelControlDescription}</p>
         {modelFailure ? (
           <div className={styles.modelFailure} role="alert">
-            <span>모델을 바꾸지 못했어요.</span>
+            <span>{uiText("모델을 바꾸지 못했어요.")}</span>
             <button
               disabled={modelControlDisabled}
               onClick={() => void updateModelSelection(modelFailure)}
               type="button"
             >
-              다시 시도
-            </button>
+              {uiText("다시 시도")}</button>
           </div>
         ) : null}
       </div>
@@ -723,11 +724,11 @@ function WorldChatThread({
       {thread.messages.length === 0 && !generation ? (
         <div className={styles.empty}>
           <MessageCircle aria-hidden="true" size={28} />
-          <h3>아직 메시지가 없어요</h3>
-          <p>이 대화에 저장된 메시지가 생기면 여기에 표시됩니다.</p>
+          <h3>{uiText("아직 메시지가 없어요")}</h3>
+          <p>{uiText("이 대화에 저장된 메시지가 생기면 여기에 표시됩니다.")}</p>
         </div>
       ) : (
-        <ol className={styles.messages} aria-label="대화 메시지">
+        <ol className={styles.messages} aria-label={uiText("대화 메시지")}>
           {thread.messages.map((message) => {
             const fromRequester = message.role === "user";
             const evidence = fromRequester
@@ -748,12 +749,12 @@ function WorldChatThread({
                       ? thread.requester.display_name
                       : thread.responding.display_name}
                   </strong>
-                  <time dateTime={message.created_at}>{compactDate(message.created_at)}</time>
+                  <time dateTime={message.created_at}>{formatDate(message.created_at)}</time>
                 </div>
                 <p>
                   {message.status === "ok"
                     ? message.content
-                    : "이 응답은 완료되지 않았어요."}
+                    : uiText("이 응답은 완료되지 않았어요.")}
                 </p>
                 {message.attachment ? <ChatAttachment url={message.attachment.url} /> : null}
                 {message.status === "ok" && evidence ? (
@@ -763,8 +764,7 @@ function WorldChatThread({
                     onClick={() => setEvidenceRequestId(evidence.request_id)}
                     type="button"
                   >
-                    근거 {evidence.count}개 보기
-                  </button>
+                    {uiText("근거")}{evidence.count}{uiText("개 보기")}</button>
                 ) : null}
               </li>
             );
@@ -778,7 +778,7 @@ function WorldChatThread({
               key={generation.request.response_slot_id}
             >
               {generation.phase === "pending" && generation.request.image_analysis_state === "waiting" ? (
-                <p role="status">사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.</p>
+                <p role="status">{uiText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.")}</p>
               ) : generation.phase === "pending" && generation.typingVisible ? (
                 <TypingPresence name={thread.responding.display_name} />
               ) : generation.phase === "streaming" ? (
@@ -813,19 +813,18 @@ function WorldChatThread({
       {renderImagePicker?.({ threadId, value: attachment, disabled: sending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy })}
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
-          {thread.responding.display_name}에게 보낼 메시지
-        </label>
+          {thread.responding.display_name}{uiText("에게 보낼 메시지")}</label>
         <textarea
           disabled={sending || modelUpdating || (!!generation && generation.phase !== "failed")}
           id={`world-chat-${thread.id}`}
           maxLength={4000}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="메시지를 입력하세요"
+          placeholder={uiText("메시지를 입력하세요")}
           rows={1}
           value={draft}
         />
         <button
-          aria-label="메시지 보내기"
+          aria-label={uiText("메시지 보내기")}
           disabled={
             (!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) ||
             sending ||
@@ -843,7 +842,7 @@ function WorldChatThread({
       </form>
       {sendFailure ? (
         <div className={styles.sendFailure} role="alert">
-          <span>메시지를 보내지 못했어요.</span>
+          <span>{uiText("메시지를 보내지 못했어요.")}</span>
           <button
             disabled={sending}
             onClick={() =>
@@ -855,8 +854,7 @@ function WorldChatThread({
             }
             type="button"
           >
-            다시 보내기
-          </button>
+            {uiText("다시 보내기")}</button>
         </div>
       ) : null}
     </section>
@@ -864,20 +862,22 @@ function WorldChatThread({
 }
 
 function ChatAttachment({ url }: { url: string }) {
+  const uiText = useUiText("chat");
   const source = useRuntimeMediaUrl(url);
   // Authenticated attachment bytes are displayed through a revocable blob URL.
   // eslint-disable-next-line @next/next/no-img-element
-  return source ? <img src={source} alt="대화에 첨부한 이미지" className={styles.attachmentImage} /> : <p>첨부 이미지를 불러오는 중…</p>;
+  return source ? <img src={source} alt={uiText("대화에 첨부한 이미지")} className={styles.attachmentImage} /> : <p>{uiText("첨부 이미지를 불러오는 중…")}</p>;
 }
 
 function TypingPresence({ name }: { name: string }) {
+  const uiText = useUiText("chat");
   return (
     <div
-      aria-label={`${name}가 응답을 입력하고 있습니다.`}
+      aria-label={uiText("{{value0}}가 응답을 입력하고 있습니다.", {value0: name})}
       className={styles.typingPresence}
       role="status"
     >
-      <span>입력 중</span>
+      <span>{uiText("입력 중")}</span>
       <span aria-hidden="true" className={styles.typingDots}>
         <i />
         <i />
@@ -902,6 +902,7 @@ function GenerationFailure({
   retrying: boolean;
   onTextOnly?: () => void;
 }) {
+  const uiText = useUiText("chat");
   const settingsRequired = [
     "credential_required",
     "credential_invalid",
@@ -910,9 +911,9 @@ function GenerationFailure({
   return (
     <div className={styles.failureBubble} role="alert">
       <strong>
-        {failureClass === "image_interpretation_unavailable" ? "사진을 인식하지 못했어요." : settingsRequired
-          ? "채팅에 사용할 AI 설정이 필요해요."
-          : "답장을 만들지 못했어요."}
+        {failureClass === "image_interpretation_unavailable" ? uiText("사진을 인식하지 못했어요.") : settingsRequired
+          ? uiText("채팅에 사용할 AI 설정이 필요해요.")
+          : uiText("답장을 만들지 못했어요.")}
       </strong>
       {retryable ? (
         <button disabled={disabled || retrying} onClick={onRetry} type="button">
@@ -921,25 +922,25 @@ function GenerationFailure({
           ) : (
             <RotateCcw aria-hidden="true" size={16} />
           )}
-          {retrying ? "다시 시도 중" : "다시 시도"}
+          {retrying ? uiText("다시 시도 중") : uiText("다시 시도")}
         </button>
       ) : settingsRequired ? (
         <Link href="/settings">
           <Settings aria-hidden="true" size={16} />
-          설정 열기
-        </Link>
+          {uiText("설정 열기")}</Link>
       ) : null}
-      {onTextOnly ? <button disabled={disabled || retrying} onClick={onTextOnly} type="button">사진 없이 이 텍스트로 진행</button> : null}
+      {onTextOnly ? <button disabled={disabled || retrying} onClick={onTextOnly} type="button">{uiText("사진 없이 이 텍스트로 진행")}</button> : null}
     </div>
   );
 }
 
 function WorldChatStatus({ title }: { title: string }) {
+  const uiText = useUiText("chat");
   return (
     <section className={styles.status} aria-live="polite" role="status">
       <MessageCircle aria-hidden="true" size={26} />
       <h2>{title}</h2>
-      <p>현재 World 경계를 확인하고 있어요.</p>
+      <p>{uiText("현재 World 경계를 확인하고 있어요.")}</p>
     </section>
   );
 }
@@ -999,6 +1000,7 @@ function WorldChatError({
   error: Error | null;
   onRetry: () => void;
 }) {
+  const uiText = useUiText("chat");
   const status = error instanceof WorldChatApiError ? error.status : 500;
   const scopeMismatch =
     error instanceof WorldChatApiError && error.detail === "world_chat_scope_mismatch";
@@ -1006,17 +1008,17 @@ function WorldChatError({
   const missing = status === 404;
   const retryable = !denied && !missing && !scopeMismatch;
   const title = scopeMismatch
-    ? "World 경계를 확인했어요"
+    ? uiText("World 경계를 확인했어요")
     : denied
-      ? "이 대화를 볼 권한이 없어요"
+      ? uiText("이 대화를 볼 권한이 없어요")
       : missing
-        ? "대화를 찾을 수 없어요"
-        : "World Chat을 불러오지 못했어요";
+        ? uiText("대화를 찾을 수 없어요")
+        : uiText("World Chat을 불러오지 못했어요");
   const description = scopeMismatch
-    ? "다른 World의 응답은 표시하지 않았습니다."
+    ? uiText("다른 World의 응답은 표시하지 않았습니다.")
     : denied || missing
-      ? "다른 World나 대화로 자동 이동하지 않습니다."
-      : "로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.";
+      ? uiText("다른 World나 대화로 자동 이동하지 않습니다.")
+      : uiText("로컬 runtime 상태를 확인한 뒤 다시 시도해주세요.");
 
   return (
     <section className={styles.status} role="alert">
@@ -1024,27 +1026,15 @@ function WorldChatError({
       <h2>{title}</h2>
       <p>{description}</p>
       <div className={styles.statusActions}>
-        {backHref ? <Link href={backHref}>대화 목록으로</Link> : null}
+        {backHref ? <Link href={backHref}>{uiText("대화 목록으로")}</Link> : null}
         {retryable ? (
           <button onClick={onRetry} type="button">
             <RotateCcw aria-hidden="true" size={17} />
-            다시 시도
-          </button>
+            {uiText("다시 시도")}</button>
         ) : null}
       </div>
     </section>
   );
-}
-
-function compactDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("ko-KR", {
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "2-digit",
-  }).format(date);
 }
 
 function threadModelSelection(thread: WorldChatThreadRead): ModelSelection {

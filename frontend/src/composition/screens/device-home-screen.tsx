@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserEnvironment } from "@/hooks/use-user-environment";
 import { DeviceHome } from "@/features/device-home/components/device-home";
 import { ensureDefaultSpace } from "@/features/worlds/api/worlds";
 import { getProductRuntimeState } from "@/features/runtime-status/api/runtime-status-client";
@@ -10,7 +11,9 @@ import type { ProductRuntimeState } from "@/features/runtime-status/types/runtim
 import { DeviceHomeShell } from "@/composition/screens/device-home-shell";
 
 export function DeviceHomeScreen() {
-  const { status } = useAuth();
+  const { status: authStatus } = useAuth();
+  const { ready } = useUserEnvironment();
+  const status = authStatus === "authenticated" && !ready ? "checking" : authStatus;
   const [runtimeState, setRuntimeState] = useState<ProductRuntimeState>("stale_state");
   useEffect(() => {
     if (status !== "authenticated") return;

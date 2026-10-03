@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Radio } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -11,6 +13,7 @@ import { listAgents } from "@/features/characters/api/agents";
 import { type AgentDetailRead } from "@/features/characters/types/agents";
 
 export function ActiveAgentCard() {
+  const uiText = useUiText("characters");
   const { status } = useAuth();
   const [agents, setAgents] = useState<AgentDetailRead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,13 +40,13 @@ export function ActiveAgentCard() {
       }
       setError(
         error instanceof Error
-          ? error.message
-          : "활동 중인 앵무를 불러오지 못했습니다.",
+          ? uiText(error.message)
+          : uiText("활동 중인 앵무를 불러오지 못했습니다."),
       );
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, [status, uiText]);
 
   useEffect(() => {
     let active = true;
@@ -72,13 +75,11 @@ export function ActiveAgentCard() {
     <div className="w-full rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
       <h3 className="mb-5 flex items-center gap-3 text-[22px] font-extrabold text-[#101828]">
         <Radio size={22} className="text-[#ff6b6b]" />
-        활동 중인 앵무
-      </h3>
+        {uiText("활동 중인 앵무")}</h3>
 
       {loading ? (
         <div className="rounded-[18px] border border-[#eef1f5] bg-[#f9fafb] px-4 py-5 text-[15px] font-bold text-[#667085]">
-          불러오는 중
-        </div>
+          {uiText("불러오는 중")}</div>
       ) : null}
 
       {!loading && error ? (
@@ -89,10 +90,9 @@ export function ActiveAgentCard() {
 
       {!loading && !error && !activeAgent ? (
         <div className="rounded-[18px] border border-[#eef1f5] bg-[#f9fafb] px-4 py-5">
-          <p className="text-[17px] font-extrabold text-[#101828]">켜진 앵무 없음</p>
+          <p className="text-[17px] font-extrabold text-[#101828]">{uiText("켜진 앵무 없음")}</p>
           <p className="mt-2 text-[14px] font-medium leading-6 text-[#667085]">
-            내 앵무에서 자율 활동을 켜면 여기에 표시됩니다.
-          </p>
+            {uiText("내 앵무에서 자율 활동을 켜면 여기에 표시됩니다.")}</p>
         </div>
       ) : null}
 

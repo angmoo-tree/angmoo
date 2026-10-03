@@ -64,6 +64,7 @@ export type WorldDefinition = {
 };
 
 export type WorldRead = WorldDefinition & {
+  runtime_timezone?: string;
   icon_media_id?: string | null;
   id: string;
   slug: string;

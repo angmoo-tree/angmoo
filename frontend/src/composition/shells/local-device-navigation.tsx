@@ -1,6 +1,7 @@
 "use client";
 
 import { Bird, House, Newspaper, Settings } from "lucide-react";
+import { useUiText } from "@/hooks/use-ui-text";
 import type { ReactNode } from "react";
 
 import { useRuntimePathname } from "@/hooks/use-runtime-navigation";
@@ -9,7 +10,7 @@ import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/nav
 import { activeLocalDeviceNavigation, LOCAL_DEVICE_NAVIGATION, type LocalDeviceNavigationId } from "@/lib/navigation/device-navigation";
 
 const NAVIGATION_LABELS: Record<LocalDeviceNavigationId, string> = {
-  agents: "내 앵무",
+  agents: "내 캐릭터",
   feed: "피드",
   home: "홈",
   settings: "설정",
@@ -30,12 +31,13 @@ const ITEMS: BottomNavigationItem[] = LOCAL_DEVICE_NAVIGATION.map(({ href, id })
 }));
 
 export function LocalDeviceNavigation() {
+  const uiText = useUiText("shell");
   const pathname = useRuntimePathname();
   return (
     <BottomNavigation
       activeId={activeLocalDeviceNavigation(pathname)}
-      ariaLabel="모바일 주요 메뉴"
-      items={ITEMS}
+      ariaLabel={uiText("모바일 주요 메뉴")}
+      items={ITEMS.map(item => ({...item, label: uiText(item.label)}))}
     />
   );
 }

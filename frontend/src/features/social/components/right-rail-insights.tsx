@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Flame, Heart, MessageCircle, Repeat2, Trophy } from "lucide-react";
 import Link from "next/link";
@@ -7,7 +11,7 @@ import { useEffect, useState } from "react";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { MentionedText } from "@/components/content/mentioned-text";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { listTodayActivity, listTodayPopularPosts } from "@/features/social/api/community";
 import { type PostSummary, type TodayActivityRead } from "@/features/social/types/community";
 import { formatHandle } from "@/utils/profile-presentation";
@@ -24,6 +28,7 @@ export function RightRailInsights() {
 }
 
 export function useRightRailInsights() {
+  const uiText = useUiText("social");
   const [posts, setPosts] = useState<PostSummary[]>([]);
   const [activities, setActivities] = useState<TodayActivityRead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +46,7 @@ export function useRightRailInsights() {
       })
       .catch((err) => {
         if (!active) return;
-        setError(err instanceof Error ? err.message : "오른쪽 패널을 불러오지 못했습니다.");
+        setError(err instanceof Error ? uiText(err.message) : uiText("오른쪽 패널을 불러오지 못했습니다."));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -50,7 +55,7 @@ export function useRightRailInsights() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [uiText]);
 
   return { posts, activities, loading, error };
 }
@@ -64,15 +69,16 @@ export function PopularPostsCard({
   loading: boolean;
   error: string | null;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("social");
   return (
     <section className="w-full rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
       <h3 className="mb-5 flex items-center gap-3 text-[22px] font-extrabold text-[#101828]">
         <Flame size={22} className="text-[#ff6b6b]" />
-        반응 좋은 지저귐
-      </h3>
-      <p className="mb-5 -mt-3 text-[13px] font-bold text-[#667085]">서버 전체 · 오늘 기준</p>
+        {uiText("반응 좋은 지저귐")}</h3>
+      <p className="mb-5 -mt-3 text-[13px] font-bold text-[#667085]">{uiText("서버 전체 · 오늘 기준")}</p>
 
-      <RailState loading={loading} error={error} empty={!posts.length} emptyText="아직 반응이 모인 지저귐이 없습니다." />
+      <RailState loading={loading} error={error} empty={!posts.length} emptyText={uiText("아직 반응이 모인 지저귐이 없습니다.")} />
 
       {!loading && !error && posts.length ? (
         <div className="flex max-h-[360px] flex-col gap-5 overflow-y-auto pr-1">
@@ -86,14 +92,14 @@ export function PopularPostsCard({
                   {index + 1}
                 </span>
                 <ProfileAvatar
-                  name={post.author_name}
+                  name={post.author_deleted ? uiText("삭제한 캐릭터") : post.author_name}
                   avatarUrl={post.author_avatar_url}
                   sizeClassName="size-[38px]"
                   textClassName="text-[16px]"
                 />
                 <div className="min-w-0">
                   <div className="truncate text-[16px] font-extrabold text-[#101828]">
-                    {post.author_name}
+                    {post.author_deleted ? uiText("삭제한 캐릭터") : post.author_name}
                   </div>
                   <div className="truncate text-[13px] font-bold text-[#667085]">
                     {post.author_handle ? formatHandle(post.author_handle) : formatDate(post.created_at)}
@@ -122,7 +128,7 @@ export function PopularPostsCard({
                   <Heart size={15} fill="currentColor" />
                   {post.like_count}
                 </span>
-                <span>{getReactionScore(post)}점</span>
+                <span>{getReactionScore(post)}{uiText("점")}</span>
               </div>
             </article>
           ))}
@@ -141,15 +147,15 @@ export function TodayActivityCard({
   loading: boolean;
   error: string | null;
 }) {
+  const uiText = useUiText("social");
   return (
     <section className="w-full rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
       <h3 className="mb-2 flex items-center gap-3 text-[22px] font-extrabold text-[#101828]">
         <Trophy size={22} className="text-[#ff6b6b]" />
-        오늘의 활약
-      </h3>
-      <p className="mb-5 text-[13px] font-bold text-[#667085]">서버 전체 · 오늘 기준</p>
+        {uiText("오늘의 활약")}</h3>
+      <p className="mb-5 text-[13px] font-bold text-[#667085]">{uiText("서버 전체 · 오늘 기준")}</p>
 
-      <RailState loading={loading} error={error} empty={!activities.length} emptyText="오늘 집계할 앵무 활동이 아직 없습니다." />
+      <RailState loading={loading} error={error} empty={!activities.length} emptyText={uiText("오늘 집계할 앵무 활동이 아직 없습니다.")} />
 
       {!loading && !error && activities.length ? (
         <div className="flex max-h-[380px] flex-col gap-3 overflow-y-auto pr-1">
@@ -176,7 +182,7 @@ export function TodayActivityCard({
                   {formatHandle(activity.handle)}
                 </div>
                 <div className="mt-1 truncate text-[12px] font-bold text-[#667085]">
-                  지저귐 {activity.post_count} · 대꾸 {activity.reply_count} · 좋아요 {activity.like_count}
+                  {uiText("지저귐")}{activity.post_count} {uiText("· 대꾸")}{activity.reply_count} {uiText("· 좋아요")}{activity.like_count}
                 </div>
               </div>
               <span className="shrink-0 rounded-full bg-black px-3 py-1.5 text-[13px] font-extrabold text-white">
@@ -201,11 +207,11 @@ function RailState({
   empty: boolean;
   emptyText: string;
 }) {
+  const uiText = useUiText("social");
   if (loading) {
     return (
       <div className="rounded-[18px] border border-[#eef1f5] bg-[#f9fafb] px-4 py-5 text-[15px] font-bold text-[#667085]">
-        불러오는 중
-      </div>
+        {uiText("불러오는 중")}</div>
     );
   }
 
