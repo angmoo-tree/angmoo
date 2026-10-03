@@ -10,14 +10,16 @@ from app.config import settings
 from app.domains.characters import dependencies, exceptions, models
 from app.domains.characters.contracts import CharacterImageGenerationWorkflows
 from app.domains.characters.service import image_generation
-from app.domains.identity.models import User
+from app.domains.identity.models import InstallationIdentity, User
+from app.domains.identity.models_environment import EnvironmentTimezoneChange, LocalEnvironment
 from app.integrations import image_provider, pollinations_image, replicate_image
 from app.runtime.characters import creator
 
 
 def _engine():
     engine = create_engine("sqlite:///:memory:")
-    for model in (User, models.Character, models.AgentCreationDraft,
+    for model in (User, InstallationIdentity, LocalEnvironment, EnvironmentTimezoneChange,
+                  models.Character, models.AgentCreationDraft,
                   models.ProfileImageQuotaReservation, models.ProfileImageCandidate):
         model.__table__.create(engine)
     return engine

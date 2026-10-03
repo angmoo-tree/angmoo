@@ -5,15 +5,20 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.domains.chat.contracts.retrieval_intent import RetrievalRoute
+from app.domains.chat.contracts.retrieval_intent import (
+    RetrievalAggregationKind, RetrievalAggregationMeaning, RetrievalDecision,
+    RetrievalIntentEnvelope, RetrievalRoute,
+)
 from app.domains.chat.service.hybrid_canonical import HybridCanonicalService
 from app.domains.memory.contracts.hybrid_recall import HybridRecallResult, HybridEmbeddingUsage, RecallAxisReceipt, RecallAxisStatus
 from app.domains.memory.contracts.recall import RecallDocumentKind
 
 
 def command(*, operations=("search_memory_items",), aggregation=None, enabled=True):
-    intent = SimpleNamespace(route=RetrievalRoute.CANONICAL, envelope_hash="a"*64,
-        search_text="훈련 약속", aggregation=aggregation)
+    intent = RetrievalIntentEnvelope(decision=RetrievalDecision.RETRIEVAL,
+        route=RetrievalRoute.CANONICAL, intent="search_memory", search_text="훈련 약속",
+        aggregation=RetrievalAggregationMeaning(RetrievalAggregationKind(aggregation), "memory")
+        if aggregation is not None else None)
     resolved = SimpleNamespace(intent_hash=intent.envelope_hash, envelope_hash="b"*64,
         owner_id="owner", world_id="world", responding_world_character_id="subject",
         request_id="request", canonical_operation_allowlist=operations,

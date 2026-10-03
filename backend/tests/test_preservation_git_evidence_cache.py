@@ -23,6 +23,8 @@ OTHER = "b" * 40
     (("merge-base", "--is-ancestor", SHA, "HEAD"), False),
     (("log", "--reverse", "--format=%H", "--diff-filter=A", SHA + ".." + OTHER, "--", "fixture.py"), True),
     (("log", "--format=%H", SHA + "..HEAD", "--", "fixture.py"), False),
+    (("log", "--format=%H", "--all", SHA + ".." + OTHER, "--", "fixture.py"), False),
+    (("log", "--format=%H", "--reflog", SHA + ".." + OTHER, "--", "fixture.py"), False),
     (("rev-parse", "HEAD"), False),
     (("diff", "--", "fixture.py"), False),
 ])

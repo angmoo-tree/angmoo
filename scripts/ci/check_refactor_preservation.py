@@ -250,12 +250,15 @@ def immutable_git_read(args: tuple[str, ...]) -> bool:
     if args[:2] == ("merge-base", "--is-ancestor") and len(args) == 4:
         return all(re.fullmatch(sha, value) for value in args[2:])
     if args and args[0] == "log" and "--" in args:
-        revisions = [value for value in args[1:args.index("--")] if not value.startswith("--")]
-        return bool(revisions and all(re.fullmatch(sha + r"\.\." + sha, value) for value in revisions))
+        options = args[1:args.index("--")]
+        if any(value.startswith("--") and value not in {"--format=%H", "--reverse", "--diff-filter=A"} for value in options):
+            return False
+        revisions = [value for value in options if not value.startswith("--")]
+        return bool(len(revisions) == 1 and re.fullmatch(sha + r"\.\." + sha, revisions[0]))
     return False
 
 
-def _read_git(args: tuple[str, ...], root: str) -> bytes:
+def _read_git(args: tuple[str, ...], root: str | Path) -> bytes:
     result = subprocess.run(["git", *args], cwd=root, capture_output=True)
     if result.returncode:
         raise ValueError("git evidence unavailable; fetch full history: " + result.stderr.decode("utf-8", errors="replace").strip())
@@ -273,7 +276,7 @@ def git_bytes(*args: str, root: Path = ROOT) -> bytes:
     # memoized. Cache identity also includes the absolute repository path.
     if subprocess.run is _NATIVE_GIT_RUN and immutable_git_read(args):
         return _immutable_git_bytes(args, str(root.resolve()))
-    return _read_git(args, str(root))
+    return _read_git(args, root)
 
 
 def git_blob(data: bytes) -> str:

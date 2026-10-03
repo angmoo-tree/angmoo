@@ -15,9 +15,12 @@ from chat_service_support import messages as world_chat
 
 def _create_tables(engine) -> None:
     from app.domains.chat.models import MessageAttachment
+    from app.domains.identity.models_environment import EnvironmentTimezoneChange, LocalEnvironment
     for table in (
         models.User.__table__,
         models.InstallationIdentity.__table__,
+        LocalEnvironment.__table__,
+        EnvironmentTimezoneChange.__table__,
         models.Character.__table__,
         models.LlmCredential.__table__,
         models.World.__table__,

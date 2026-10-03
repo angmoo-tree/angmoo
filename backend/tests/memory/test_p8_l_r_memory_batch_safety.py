@@ -469,9 +469,10 @@ def test_expired_final_attempt_becomes_attention_without_invalid_lease(memory_se
 def test_oversized_request_fails_before_physical_call_reservation(memory_session):
     _, repo, job, provider, service = batch_stack(memory_session)
 
-    def reject(_sources):
+    def reject(_sources, *, environment):
         from app.domains.memory.exceptions import MemoryValidationError
 
+        assert environment is not None
         raise MemoryValidationError("memory_selection_input_budget_exceeded")
 
     provider.validate_sources = reject
@@ -613,6 +614,15 @@ def test_departed_scope_is_not_called_and_does_not_block_healthy_delivery(
     assert states["left-source"] == "invalidated"
     assert states["healthy-source"] == "delivered"
     schedule_batches(memory_session, now=datetime.now(UTC), shutdown=True)
+    # Put the unavailable scope first explicitly. Random job UUIDs must not
+    # decide whether the healthy scope is claimed before this guard is visited.
+    memory_session.get(MemoryBatchRun, job_id).available_at = (
+        datetime.now(UTC) - timedelta(minutes=1)
+    )
+    memory_session.get(
+        MemoryBatchSetting, memory_session.get(MemoryBatchRun, job_id).scope_setting_id
+    ).last_claimed_at = None
+    memory_session.commit()
     memory_session.rollback()
     claimed = repo.claim(lease_token="only-active-subject", now=datetime.now(UTC))
     repo.commit()
