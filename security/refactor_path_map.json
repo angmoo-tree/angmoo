@@ -1586,7 +1586,7 @@
     "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria": "tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
     "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save": "tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
     "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection": "tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
-    "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+    "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
     "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget": "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
     "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details[exc0]": "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc0]",
     "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details[exc1]": "tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details[exc1]",
@@ -11845,7 +11845,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms"
           ],
           "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
         },
@@ -12599,7 +12599,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ],
           "source_member": "Original whole definition or constant, unchanged after only exact owner-type/collaborator binding restoration. Runtime binds the same attached owner and Session lazily; original error and transaction order remain."
@@ -46625,7 +46625,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms"
           ]
         },
         {
@@ -47714,7 +47714,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -49817,7 +49817,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms"
           ]
         },
         {
@@ -50911,7 +50911,7 @@
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+            "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -110645,7 +110645,7 @@
         "tests/routines/test_tendency.py::test_tendency_payload_requires_30_internal_independent_post_topics[31]",
         "tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
         "tests/routines/test_tendency.py::test_tendency_payload_requires_internal_planner_tendency_profile",
-        "tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+        "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
         "tests/routines/test_tendency.py::test_v6_final_action_prompt_requires_menu_note_and_scan_match",
         "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary",
         "tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
@@ -136783,7 +136783,7 @@
     "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria": "backend/tests/routines/test_tendency.py::test_tendency_payload_requires_hidden_feed_seed_interest_criteria",
     "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save": "backend/tests/routines/test_tendency.py::test_tendency_payload_rejects_prompt_injection_before_save",
     "backend/tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection": "backend/tests/routines/test_tendency.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
-    "backend/tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "backend/tests/routines/test_tendency.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+    "backend/tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term": "backend/tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
     "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget": "backend/tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
     "backend/tests/test_tendency_note_action_selection.py::_run_tendency_analysis_route_with_error": "backend/tests/routines/test_tendency.py::_run_tendency_analysis_route_with_error",
     "backend/tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_hides_json_parse_details": "backend/tests/routines/test_tendency.py::test_tendency_analysis_route_hides_json_parse_details",

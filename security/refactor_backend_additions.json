@@ -26536,6 +26536,1234 @@
       "test_suppressions": {
         "tests/runtime/test_sns_execution_retirement_gate.py": {}
       }
+    },
+    {
+      "commit": "dd96e488b578c061d1226247b1a093a400ce83e4",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-BACKEND-20261003",
+      "reason": "Issue 360: exact committed introductions and collected test nodes; historical evidence and original assertions remain protected.",
+      "tracked_files": {
+        "backend/alembic/versions/20261003_0105_local_environment.py": "c2f150b6ff1b8607aa03165b9633004b5a955cef",
+        "backend/app/contracts/environment.py": "c72e0cef45cf63bfdf752f1feafe58d18a84d262",
+        "backend/app/contracts/language.py": "4c14d2e0376b09b4612f7d64ed9ae0f177b47c2d",
+        "backend/app/core/accounting.py": "1e70ba8d5006f9d3163b2d4087c101e5c8905958",
+        "backend/app/core/atomic_json.py": "6281d5aa5846d2f063517d89cf05e30bb2a9c6da",
+        "backend/app/core/calendar.py": "08cc0793af2b84f5bd70a55ef94bbad49f965b08",
+        "backend/app/core/calendar_ledger.py": "235995cf58a2ae93d1c7ce961d524b969cf24db1",
+        "backend/app/core/time_meaning.py": "0bf751209a80bcbcffd4f23e219fec801afe14c4",
+        "backend/app/domains/identity/models_environment.py": "f4052fd844997106a22fba293dc531c36603fbef",
+        "backend/app/domains/identity/schemas_environment.py": "48eacd00c1acfe5d97f356dbcf9fbfc045a57c37",
+        "backend/app/domains/identity/service/environment.py": "178c86113e3ab79634737327b36e400b17cd57bf",
+        "backend/app/domains/routines/service/environment_schedule.py": "f6474bfc3981efaf13ddb826b507c87b7c91f43b",
+        "backend/app/domains/worlds/policies/default_content.py": "5d4de28e852e49294b962cff77b97fea5faa53c0",
+        "backend/app/runtime/migrations/sqlite_versions/environment_v27.py": "bfbaceb4d11cbbbda9baf49d5fd6593c4aec8a61",
+        "backend/app/runtime/migrations/sqlite_versions/environment_v27_ddl.json": "8531247fd1bfcb2230615bd7830ac6ea9e6c3f68",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v27.json": "7825624a7436dbb89b5d2048c175d242cfc17bd7",
+        "backend/app/runtime/persistence/sqlite_environment_schema.py": "c6c8062a63894ec41cae7373706d4bc08454454d",
+        "backend/tests/chat/test_multilingual_time_resolution.py": "2656c1642e810d79f8e5558dee9e7953b86b6f76",
+        "backend/tests/environment_fixture_support.py": "996b2598bfa6232ee52f9b28d839f74ac4748869",
+        "backend/tests/identity/test_calendar_accounting.py": "abcca33c5cbc6ad33b5388bee1b5f7e5c328adc2",
+        "backend/tests/identity/test_environment_admission.py": "566356e4ad4e535435b0735d9084058abd55fcd8",
+        "backend/tests/identity/test_local_environment.py": "657cfae059740170d63b939a10f4f5fdcc07b2a2",
+        "backend/tests/memory/test_legacy_literal_boundaries.py": "65a3d63528643feab380c8d3ac565b314bad6eaf",
+        "backend/tests/memory/test_multilingual_projection_lifecycle.py": "4494d583f574529980b289ec1d91795dfecfedb7",
+        "backend/tests/runtime/test_gemini_schema_missing_contract.py": "272ab96a668e2eda5ea61bfa3abd963b6702805b",
+        "backend/tests/runtime/test_language_provider_boundaries.py": "793ce67445449608a591eab19e2132563f18fef4",
+        "backend/tests/runtime/test_multilingual_gemini_contracts.py": "ad6e98d7ae016fd1992bca9168ee19a71067b120",
+        "backend/tests/social/test_deleted_identity_language_contract.py": "c442405fe319ae276a785b039ea28bb244a25921",
+        "scripts/diagnostics/freeze_environment_v27_schema.py": "ea3fd73588690eab1ff31b77cc80698bca682eea"
+      },
+      "test_nodes": [
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u0623\\u0645\\u0633-2026-03-08T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639 \\u0627\\u0644\\u0645\\u0627\\u0636\\u064a-2026-03-02T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u0627\\u0644\\u0634\\u0647\\u0631 \\u0627\\u0644\\u0645\\u0627\\u0636\\u064a-2026-02-01T05:00:00Z-2026-03-01T05:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u0627\\u0644\\u064a\\u0648\\u0645-2026-03-09T04:00:00Z-2026-03-10T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u4eca\\u65e5-2026-03-09T04:00:00Z-2026-03-10T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u5148\\u6708-2026-02-01T05:00:00Z-2026-03-01T05:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u5148\\u9031-2026-03-02T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\u6628\\u65e5-2026-03-08T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\uc5b4\\uc81c-2026-03-08T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\uc624\\ub298-2026-03-09T04:00:00Z-2026-03-10T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\uc9c0\\ub09c\\ub2ec-2026-02-01T05:00:00Z-2026-03-01T05:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[\\uc9c0\\ub09c\\uc8fc-2026-03-02T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[last month-2026-02-01T05:00:00Z-2026-03-01T05:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[last week-2026-03-02T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[today-2026-03-09T04:00:00Z-2026-03-10T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_bounded_legacy_languages_use_the_same_civil_meaning[yesterday-2026-03-08T05:00:00Z-2026-03-09T04:00:00Z]",
+        "tests/chat/test_multilingual_time_resolution.py::test_explicit_query_region_overrides_only_this_typed_request",
+        "tests/chat/test_multilingual_time_resolution.py::test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history[\\u0641\\u064a \\u0648\\u0642\\u062a \\u0645\\u0627]",
+        "tests/chat/test_multilingual_time_resolution.py::test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history[\\u3044\\u3064\\u304b]",
+        "tests/chat/test_multilingual_time_resolution.py::test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history[\\uc5b8\\uc820\\uac00]",
+        "tests/chat/test_multilingual_time_resolution.py::test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history[sometime recently]",
+        "tests/chat/test_multilingual_time_resolution.py::test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history[three weeks and two days ago]",
+        "tests/identity/test_calendar_accounting.py::test_charge_and_original_reservation_are_not_reset_by_zone_round_trip",
+        "tests/identity/test_calendar_accounting.py::test_last_remaining_reservation_has_one_winner_across_two_sqlite_sessions",
+        "tests/identity/test_calendar_accounting.py::test_translation_original_month_settlement_guard_expiry_and_unknown_are_durable",
+        "tests/identity/test_calendar_accounting.py::test_translation_unavailable_history_never_authorizes_zero_reset[corrupt]",
+        "tests/identity/test_calendar_accounting.py::test_translation_unavailable_history_never_authorizes_zero_reset[known_missing]",
+        "tests/identity/test_calendar_accounting.py::test_zone_update_competes_with_last_remaining_admission_without_extra_budget",
+        "tests/identity/test_environment_admission.py::test_autonomous_owner_snapshot_survives_restart_while_idle_schedule_moves",
+        "tests/identity/test_local_environment.py::test_dst_gap_overlap_and_month_utc_bounds",
+        "tests/identity/test_local_environment.py::test_first_active_screen_lease_sequence_revision_and_handover",
+        "tests/identity/test_local_environment.py::test_initial_defaults_failed_detector_and_last_valid",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[]",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[en_US]",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[und]",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[x-private]",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[zzzz-ZZ]",
+        "tests/identity/test_local_environment.py::test_invalid_detector_language_is_not_a_success[zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz]",
+        "tests/identity/test_local_environment.py::test_invalid_zone[../../UTC]",
+        "tests/identity/test_local_environment.py::test_invalid_zone[Asia/Unknown]",
+        "tests/identity/test_local_environment.py::test_invalid_zone[Mars/Colony]",
+        "tests/identity/test_local_environment.py::test_invalid_zone[]",
+        "tests/identity/test_local_environment.py::test_local_day_uses_two_boundaries_not_24_hours[day0-23]",
+        "tests/identity/test_local_environment.py::test_local_day_uses_two_boundaries_not_24_hours[day1-25]",
+        "tests/identity/test_local_environment.py::test_non_owner_cannot_read_or_mutate_environment",
+        "tests/identity/test_local_environment.py::test_ui_preference_partial_patch_is_separate_from_detected_language",
+        "tests/identity/test_local_environment.py::test_v26_to_v27_preserves_all_original_user_columns",
+        "tests/identity/test_local_environment.py::test_zone_transition_collaborator_is_atomic_and_failure_rolls_back",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[A-17-A-17 was cancelled.-A-170 was accepted.]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[\\u0642\\u0647\\u0648\\u0629-\\u0642\\u0647\\u0648\\u0629-\\u0627\\u0644\\u0642\\u0647\\u0648\\u064a\\u0627\\u062a]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645-\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645-\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645\\u0646\\u062f]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[\\u56f3\\u66f8\\u9928-\\u56f3\\u66f8\\u9928\\u3067\\u4f1a\\u3063\\u305f-\\u6d77\\u8fba\\u3067\\u4f1a\\u3063\\u305f]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[\\ucd95\\uc81c-\\ucd95\\uc81c\\uc5d0\\uc11c \\uce5c\\uad6c\\ub97c \\ub9cc\\ub0ac\\ub2e4.-\\ucc45\\uc744 \\uc77d\\uc5c8\\ub2e4.]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[art.-We discussed art.-A party began.]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[caf\\xe9-Cafe\\u0301!-caf\\xe9teria]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[coffee!-coffee!-coffeeshop]",
+        "tests/memory/test_legacy_literal_boundaries.py::test_legacy_and_grouped_boundary_results_agree[v1.2-v1.2.-v1.20]",
+        "tests/memory/test_multilingual_projection_lifecycle.py::test_cancel_restart_reconciles_offline_correction_and_deletion_before_search",
+        "tests/memory/test_multilingual_projection_lifecycle.py::test_committed_edit_during_rebuild_uses_same_fence_and_small_transaction",
+        "tests/memory/test_multilingual_projection_lifecycle.py::test_old_generation_files_are_preserved_and_wrong_profile_is_rejected",
+        "tests/routines/test_tendency.py::test_tendency_prompt_uses_original_name_and_general_character_terms",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_lowering_and_required_are_not_lost[0]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_lowering_and_required_are_not_lost[3.25]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_lowering_and_required_are_not_lost[None]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_lowering_and_required_are_not_lost[]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_lowering_and_required_are_not_lost[ordinary_comment]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_fatal_other_target_takes_precedence_over_missing_intent",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_missing_then_valid_preserves_input_and_has_no_third_request",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_nullable_ref_nested_properties_and_source_isolation[False]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_nullable_ref_nested_properties_and_source_isolation[True]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_real_sdk_http_preserves_nullable_enum_for_all_lanes",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_second_error_is_final_with_shared_retry_chance[bad_json]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_second_error_is_final_with_shared_retry_chance[bad_target]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_second_error_is_final_with_shared_retry_chance[missing]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_source_and_wire_intent_values_are_equivalent[feed-False]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_source_and_wire_intent_values_are_equivalent[feed-True]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_source_and_wire_intent_values_are_equivalent[inbox-False]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_source_and_wire_intent_values_are_equivalent[inbox-True]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_const_fails_before_transport[True]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_const_fails_before_transport[inf]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_const_fails_before_transport[value1]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_const_fails_before_transport[value2]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_verified_missing_path_is_recoverable_once[both-interaction_intent]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_verified_missing_path_is_recoverable_once[intent-interaction_intent]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_verified_missing_path_is_recoverable_once[purpose-comment_purpose]",
+        "tests/runtime/test_language_provider_boundaries.py::test_episode_request_and_result_keep_language_and_refs[ar-AE]",
+        "tests/runtime/test_language_provider_boundaries.py::test_episode_request_and_result_keep_language_and_refs[en-US]",
+        "tests/runtime/test_language_provider_boundaries.py::test_episode_request_and_result_keep_language_and_refs[ja-JP]",
+        "tests/runtime/test_language_provider_boundaries.py::test_episode_request_and_result_keep_language_and_refs[ko-KR]",
+        "tests/runtime/test_language_provider_boundaries.py::test_final_combined_language_policy_and_schema_reach_real_sdk_http[feed-False]",
+        "tests/runtime/test_language_provider_boundaries.py::test_final_combined_language_policy_and_schema_reach_real_sdk_http[feed-True]",
+        "tests/runtime/test_language_provider_boundaries.py::test_final_combined_language_policy_and_schema_reach_real_sdk_http[inbox-False]",
+        "tests/runtime/test_language_provider_boundaries.py::test_final_combined_language_policy_and_schema_reach_real_sdk_http[inbox-True]",
+        "tests/runtime/test_language_provider_boundaries.py::test_image_analysis_english_policy_original_text_and_auxiliary_hint[Original A-17]",
+        "tests/runtime/test_language_provider_boundaries.py::test_image_analysis_english_policy_original_text_and_auxiliary_hint[\\u0648\\u0639\\u062f A-17]",
+        "tests/runtime/test_language_provider_boundaries.py::test_image_analysis_english_policy_original_text_and_auxiliary_hint[\\u539f\\u6587 A-17]",
+        "tests/runtime/test_language_provider_boundaries.py::test_image_analysis_english_policy_original_text_and_auxiliary_hint[\\uc575\\ubb34 A-17]",
+        "tests/runtime/test_language_provider_boundaries.py::test_relationship_request_keeps_direction_subject_evidence_and_keep[Speak English.]",
+        "tests/runtime/test_language_provider_boundaries.py::test_relationship_request_keeps_direction_subject_evidence_and_keep[\\u062a\\u062d\\u062f\\u062b \\u0628\\u0627\\u0644\\u0639\\u0631\\u0628\\u064a\\u0629]",
+        "tests/runtime/test_language_provider_boundaries.py::test_relationship_request_keeps_direction_subject_evidence_and_keep[\\u65e5\\u672c\\u8a9e\\u3092\\u4f7f\\u3046]",
+        "tests/runtime/test_language_provider_boundaries.py::test_relationship_request_keeps_direction_subject_evidence_and_keep[\\ud55c\\uad6d\\uc5b4\\ub85c \\ub9d0\\ud55c\\ub2e4]",
+        "tests/runtime/test_language_provider_boundaries.py::test_selection_provider_receives_frozen_locale_and_preserves_source[ar-AE]",
+        "tests/runtime/test_language_provider_boundaries.py::test_selection_provider_receives_frozen_locale_and_preserves_source[en-US]",
+        "tests/runtime/test_language_provider_boundaries.py::test_selection_provider_receives_frozen_locale_and_preserves_source[ja-JP]",
+        "tests/runtime/test_language_provider_boundaries.py::test_selection_provider_receives_frozen_locale_and_preserves_source[ko-KR]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[A-17-A-17 was cancelled.-A-170 was accepted.]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[\\u0642\\u0647\\u0648\\u0629-\\u0642\\u0647\\u0648\\u0629-\\u0627\\u0644\\u0642\\u0647\\u0648\\u064a\\u0627\\u062a]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645-\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645-\\u0645\\u06cc\\u200c\\u0631\\u0648\\u0645\\u0646\\u062f]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[\\u56f3\\u66f8\\u9928-\\u56f3\\u66f8\\u9928\\u3067\\u4f1a\\u3063\\u305f-\\u6d77\\u8fba\\u3067\\u4f1a\\u3063\\u305f]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[\\ucd95\\uc81c-\\ucd95\\uc81c\\uc5d0\\uc11c \\uce5c\\uad6c\\ub97c \\ub9cc\\ub0ac\\ub2e4.-\\ucc45\\uc744 \\uc77d\\uc5c8\\ub2e4.]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[art-We discussed art.-A party began.]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[caf\\xe9-Cafe\\u0301!-caf\\xe9teria]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[coffee-coffee!-coffeeshop]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_actual_fts_literal_boundaries_preserve_original_sources[v1.2-v1.2.-v1.20]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_backward_snapshot_defaults_and_hash_inputs_are_stable",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_closed_relative_meaning_has_independent_civil_boundary_oracle[day--3-start0-end0]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_closed_relative_meaning_has_independent_civil_boundary_oracle[month--1-start2-end2]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_closed_relative_meaning_has_independent_civil_boundary_oracle[week--1-start1-end1]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_combined_retry_freezes_environment_and_receipt_blocks_writer[ar-AE]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_combined_retry_freezes_environment_and_receipt_blocks_writer[en-US]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_combined_retry_freezes_environment_and_receipt_blocks_writer[ja-JP]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_combined_retry_freezes_environment_and_receipt_blocks_writer[ko-KR]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values0]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values1]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values2]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values3]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values4]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values5]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_corrupt_checkpoint_environment_never_becomes_a_fresh_default[values6]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_latest_guard_prevents_second_physical_transmission[budget_exhausted]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_latest_guard_prevents_second_physical_transmission[claim_changed]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_latest_guard_prevents_second_physical_transmission[permission_changed]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_latest_guard_prevents_second_physical_transmission[source_changed]",
+        "tests/runtime/test_multilingual_gemini_contracts.py::test_morning_dst_and_skipped_date_have_civil_boundaries",
+        "tests/social/test_deleted_identity_language_contract.py::test_actual_deletion_and_legacy_named_active_characters_keep_separate_identities",
+        "tests/social/test_deleted_identity_language_contract.py::test_new_placeholder_names_stay_reserved[Deleted character]",
+        "tests/social/test_deleted_identity_language_contract.py::test_new_placeholder_names_stay_reserved[\\uc0ad\\uc81c\\ud55c \\uc575\\ubb34]",
+        "tests/social/test_deleted_identity_language_contract.py::test_new_placeholder_names_stay_reserved[\\uc0ad\\uc81c\\ud55c \\uce90\\ub9ad\\ud130]",
+        "tests/social/test_deleted_identity_language_contract.py::test_new_placeholder_names_stay_reserved[deleted_character]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_multilingual_time_resolution.py": {
+          "test_bounded_legacy_languages_use_the_same_civil_meaning": [
+            "assert RetrievalRoutingService._resolve_time(intent=intent, scope=scope, now=NOW) == (start, end, 'resolved')",
+            "assert repr(payload) == saved",
+            "assert scope.world_timezone == 'America/New_York'"
+          ],
+          "test_explicit_query_region_overrides_only_this_typed_request": [
+            "assert RetrievalRoutingService._resolve_time(intent=intent, scope=scope, now=NOW) == ('2026-03-07T15:00:00Z', '2026-03-08T15:00:00Z', 'resolved')",
+            "assert scope.world_timezone == 'America/New_York'",
+            "assert intent.time_scope.payload()['timezone'] == 'Asia/Tokyo'"
+          ],
+          "test_unrecognized_legacy_meaning_is_ambiguous_instead_of_all_history": [
+            "assert RetrievalRoutingService._resolve_time(intent=intent, scope=_FakePolicy().load_scope(_command()), now=NOW) == (None, None, 'ambiguous')"
+          ]
+        },
+        "tests/identity/test_calendar_accounting.py": {
+          "change": [],
+          "configure_images": [],
+          "reserve": [],
+          "test_last_remaining_reservation_has_one_winner_across_two_sqlite_sessions": [
+            "assert sorted((row[0] for row in results)) == ['rejected', 'reserved']",
+            "assert count_service_image_quota_used(database, user_id='owner', quota_date=NOW.date(), period=period) == 1"
+          ],
+          "test_charge_and_original_reservation_are_not_reset_by_zone_round_trip": [
+            "assert period.protected and period.allowance_available_at == datetime(2026, 10, 4, 0, tzinfo=UTC)",
+            "assert count_service_image_quota_used(database, user_id='owner', quota_date=at.date(), period=period) == 3",
+            "pytest.raises(ServiceImageQuotaError)",
+            "pytest.raises(ServiceImageQuotaError)",
+            "assert last.id not in {row.id for row in rows}",
+            "assert not expired.protected",
+            "assert count_service_image_quota_used(database, user_id='owner', quota_date=later.date(), period=expired) == 0"
+          ],
+          "test_zone_update_competes_with_last_remaining_admission_without_extra_budget": [
+            "assert sorted(result) == ['changed', 'rejected', 'reserved']",
+            "assert count_service_image_quota_used(database, user_id='owner', quota_date=NOW.date(), period=period) == 2"
+          ],
+          "test_translation_original_month_settlement_guard_expiry_and_unknown_are_durable": [
+            "assert new.protected and new.allowance_available_at == datetime(2026, 4, 1, 4, tzinfo=UTC)",
+            "assert azure_translation._reserve_translation_chars(1, period=new) is None",
+            "assert third and third != second",
+            "assert azure_translation._reserve_translation_chars(1, period=new) is None",
+            "assert not expired.protected",
+            "assert fourth",
+            "assert usage['ledger']['buckets'][usage['reservations'][fourth]['bucket']]['count'] == 3",
+            "assert usage['reservations'][first]['status'] == 'consumed'",
+            "assert usage['reservations'][third]['status'] == 'unknown'"
+          ],
+          "test_translation_unavailable_history_never_authorizes_zero_reset": [
+            "assert azure_translation._reserve_translation_chars(1) is None",
+            "pytest.raises(CalendarLedgerInvalid)"
+          ]
+        },
+        "tests/identity/test_environment_admission.py": {
+          "test_autonomous_owner_snapshot_survives_restart_while_idle_schedule_moves": [
+            "assert actor.owner_user_id is None",
+            "assert a.result['environment_snapshot']['memory_search_locale'] == 'ko-KR'",
+            "assert a.result['environment_snapshot']['timezone'] == 'Asia/Seoul'",
+            "assert reconcile_environment_schedules(db, now=NOW + timedelta(seconds=60), limit=1) == 1",
+            "assert bind_run(restarted, actor=restarted.get(WorldCharacter, actor_id), activity_id='frozen-a').result == old_result",
+            "assert reconcile_environment_schedules(restarted, now=NOW + timedelta(seconds=60), limit=1) == 1",
+            "assert b.result['environment_snapshot']['memory_search_locale'] == 'ja-JP'",
+            "assert b.result['environment_snapshot']['timezone_revision'] == 2",
+            "assert restarted.get(AgentSlot, 'running-a').timezone_revision == 1",
+            "assert restarted.get(AgentSlot, 'running-a').locked_by_run_id == 'frozen-a'",
+            "assert restarted.get(AgentSlot, 'cooldown-c').next_tick_at.replace(tzinfo=UTC) == NOW + timedelta(minutes=5)",
+            "assert idle.timezone_revision == 2",
+            "assert datetime(2026, 10, 3, 13, tzinfo=UTC) <= idle.next_tick_at.replace(tzinfo=UTC) < datetime(2026, 10, 3, 14, tzinfo=UTC)",
+            "assert reconcile_environment_schedules(final, now=NOW + timedelta(minutes=2), limit=32) == 0",
+            "assert final.get(ActivityGraphRun, 'frozen-a').result == old_result",
+            "pytest.raises(ValueError, match='recovery_exhausted')"
+          ]
+        },
+        "tests/identity/test_local_environment.py": {
+          "database": [],
+          "report": [],
+          "test_initial_defaults_failed_detector_and_last_valid": [
+            "assert (first.memory_search_locale, first.timezone, first.environment_revision) == ('en', 'UTC', 0)",
+            "assert empty.environment_revision == 0 and db.get(LocalEnvironment, 'owner') is None",
+            "assert good.memory_search_locale == 'ja-JP' and good.timezone == 'America/New_York'",
+            "assert snapshot(db, 'owner').memory_search_locale == 'ja-JP'",
+            "assert repeat.environment_revision == 1 and repeat.timezone_revision == 1",
+            "assert read_environment(db, 'owner', now=NOW + timedelta(minutes=5)).timezone == good.timezone"
+          ],
+          "test_first_active_screen_lease_sequence_revision_and_handover": [
+            "pytest.raises(EnvironmentConflict, match='owned')",
+            "pytest.raises(EnvironmentConflict, match='sequence_stale')",
+            "pytest.raises(EnvironmentConflict, match='revision_conflict')",
+            "assert handed.memory_search_locale == 'ar-AE' and handed.environment_revision == 2",
+            "assert owned.lease_token != handed.lease_token",
+            "assert frozen['memory_search_locale'] == 'ar-AE'"
+          ],
+          "test_invalid_detector_language_is_not_a_success": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_invalid_zone": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_non_owner_cannot_read_or_mutate_environment": [
+            "pytest.raises(PermissionError, match='owner_required')",
+            "assert snapshot(database, 'stranger').timezone == 'UTC'"
+          ],
+          "test_ui_preference_partial_patch_is_separate_from_detected_language": [
+            "assert owner.feed_content_filter == 'posts' and owner.ui_preference_revision == 1",
+            "assert snapshot(db, 'owner').memory_search_locale == 'en'",
+            "assert owner.ui_preference_revision == 1"
+          ],
+          "test_zone_transition_collaborator_is_atomic_and_failure_rolls_back": [
+            "pytest.raises(ValueError, match='protection_failed')",
+            "assert observed == [('UTC', 'America/New_York', 1, 'UTC')]",
+            "assert snapshot(db, 'owner').environment_revision == 0",
+            "assert db.query(EnvironmentTimezoneChange).count() == 0"
+          ],
+          "test_local_day_uses_two_boundaries_not_24_hours": [
+            "assert (end - start).total_seconds() == hours * 3600"
+          ],
+          "test_dst_gap_overlap_and_month_utc_bounds": [
+            "assert wall_time(date(2026, 3, 8), 2, 30, 'America/New_York') == datetime(2026, 3, 8, 7, tzinfo=UTC)",
+            "assert wall_time(date(2026, 11, 1), 1, 30, 'America/New_York') == datetime(2026, 11, 1, 5, 30, tzinfo=UTC)",
+            "assert start == datetime(2026, 9, 30, 15, tzinfo=UTC)",
+            "assert end == datetime(2026, 10, 31, 15, tzinfo=UTC)"
+          ],
+          "test_v26_to_v27_preserves_all_original_user_columns": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(26).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(27).schema_digest"
+          ]
+        },
+        "tests/memory/test_legacy_literal_boundaries.py": {
+          "test_legacy_and_grouped_boundary_results_agree": [
+            "assert [r.memory_item_id for r in strict] == ['positive']",
+            "assert [r.memory_item_id for r in grouped.candidates] == ['positive']",
+            "assert strict[0].snippet == grouped.candidates[0].snippet == positive",
+            "assert not index.search(replace(query(text), lexical_policy=MemoryRecallLexicalPolicy.LEGACY_STRICT_V1))",
+            "assert not index.search_grouped(query(text), deadline=monotonic() + 5).candidates"
+          ]
+        },
+        "tests/memory/test_multilingual_projection_lifecycle.py": {
+          "fill": [],
+          "complete": [
+            "assert projection.state is MemoryRecallProjectionState.READY"
+          ],
+          "test_cancel_restart_reconciles_offline_correction_and_deletion_before_search": [
+            "assert first._cursor_path.exists()",
+            "assert first.state is MemoryRecallProjectionState.REBUILDING",
+            "assert cursor['phase'] == 'build' and cursor['cursor']",
+            "pytest.raises(MemoryRecallPreparing)",
+            "assert not resumed._cursor_path.exists()",
+            "assert [hit.memory_item_id for hit in hits] == [original_id]",
+            "assert hits[0].snippet == 'The coffee meeting for A-17 was cancelled.'",
+            "assert not second_index.search(MemoryRecallSearchQuery(scope, '약속', (RecallDocumentKind.MEMORY_ITEM,), 10))",
+            "assert second_index.doctor().healthy",
+            "assert connection.execute('SELECT searchable FROM memory_recall_documents WHERE memory_item_id=?', ('padding-00000',)).fetchone() in (None, (0,))"
+          ],
+          "test_committed_edit_during_rebuild_uses_same_fence_and_small_transaction": [
+            "assert pages and max(pages) == 100",
+            "assert [hit.memory_item_id for hit in hits] == [identifier]",
+            "assert hits[0].snippet == 'New art. No party agreement for A-17.'",
+            "assert not index.search(MemoryRecallSearchQuery(scope, 'tea', (RecallDocumentKind.MEMORY_ITEM,), 10))"
+          ],
+          "test_old_generation_files_are_preserved_and_wrong_profile_is_rejected": [
+            "assert current.database_path != old.database_path and old.database_path.read_bytes() == original",
+            "pytest.raises(MemoryRecallIndexSchemaError)"
+          ]
+        },
+        "tests/routines/test_tendency.py": {
+          "_activity_policy": [],
+          "test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency": [
+            "assert 'preferred range' not in prompt",
+            "assert '0~1' not in prompt",
+            "assert '2~6' not in prompt",
+            "assert '- observe:' not in prompt",
+            "assert 'Post only when there is a character-owned topic worth opening.' in prompt",
+            "assert 'Like when quiet agreement is enough.' in prompt"
+          ],
+          "test_activity_setting_read_excludes_internal_planner_tendency_profile": [
+            "assert 'planner_tendency_profile' not in schemas.AgentActivitySettingRead.model_fields",
+            "assert 'tendency_analysis_ready' in schemas.AgentActivitySettingRead.model_fields"
+          ],
+          "_tendency_setting_with_profile": [],
+          "test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria": [
+            "assert not agent_service._has_tendency_analysis(_tendency_setting_with_profile({}))",
+            "assert not agent_service._has_tendency_analysis(_tendency_setting_with_profile({'feed_seed_interest_criteria': '   '}))",
+            "assert agent_service._has_tendency_analysis(_tendency_setting_with_profile({'feed_seed_interest_criteria': 'Prefer feed posts that fit the persona.'}))"
+          ],
+          "test_public_activity_entrypoints_use_lane_specific_profile_readiness": [
+            "assert feed_cue_source.index('if not _has_tendency_analysis(setting):') < feed_cue_source.index('if not setting.auto_enabled:')",
+            "assert '_ensure_tendency_analysis_ready(setting)' in inspect.getsource(agent_service.run_first_greeting)",
+            "assert '_ensure_activity_profile_ready(' in inspect.getsource(agent_service._activate_agent_uow)",
+            "assert '_ensure_activity_profile_ready(' in inspect.getsource(agent_service.run_agent_now)"
+          ],
+          "test_public_activity_entrypoints_require_tendency_readiness": [
+            "assert feed_cue_source.index('if not _has_tendency_analysis(setting):') < feed_cue_source.index('if not setting.auto_enabled:')",
+            "assert '_ensure_tendency_analysis_ready(setting)' in inspect.getsource(agent_service.run_first_greeting)"
+          ],
+          "test_tendency_payload_normalizes_internal_independent_post_profile": [
+            "assert summary.startswith('키마 린은')",
+            "assert ranges['post']['note'] == '키마 린은 코스프레 준비와 오늘의 텐션을 새 글로 풀어냅니다.'",
+            "assert profile['independent_post_initiative'] == {'level': 'high', 'tick_probability': 0.34}",
+            "assert len(profile['independent_post_topics']) == 30",
+            "assert profile['independent_post_topics'][0] == topics[0]",
+            "assert '단순 유행어' in str(profile['feed_seed_interest_criteria'])"
+          ],
+          "test_tendency_payload_requires_30_internal_independent_post_topics": [
+            "pytest.raises(agent_service.TendencyAnalysisParseError)"
+          ],
+          "test_tendency_payload_requires_internal_planner_tendency_profile": [
+            "pytest.raises(agent_service.TendencyAnalysisParseError)"
+          ],
+          "test_tendency_payload_requires_hidden_feed_seed_interest_criteria": [
+            "pytest.raises(agent_service.TendencyAnalysisParseError)"
+          ],
+          "test_tendency_payload_rejects_prompt_injection_before_save": [
+            "pytest.raises(agent_service.TendencyPromptInjectionDetectedError, match='tendency_prompt_injection_detected')"
+          ],
+          "test_tendency_payload_rejects_hidden_feed_seed_interest_injection": [
+            "pytest.raises(agent_service.TendencyPromptInjectionDetectedError, match='tendency_prompt_injection_detected')"
+          ],
+          "test_tendency_prompt_uses_original_name_and_general_character_terms": [
+            "assert 'Use the terms character, post, reply and post topic suggestion' in prompt",
+            "assert 'refer to this character by its original name \"키마 린\"' in prompt",
+            "assert 'summary must start with \"키마 린\"' in prompt",
+            "assert 'action_ranges[].note must start with \"키마 린\"' in prompt",
+            "assert 'feed_seed_interest_criteria' in prompt",
+            "assert '3-6 complete sentences' in prompt",
+            "assert 'Do not put action-routing guidance' in prompt",
+            "assert 'independent_post_topics must contain exactly 30 items' in prompt",
+            "assert 'Write new visible notes in the admitted memory/search locale: en' in prompt",
+            "assert 'in Korean' not in prompt and 'Korean user-facing' not in prompt",
+            "assert 'call this Angmoo persona \"앵무\" instead of \"캐릭터\"' not in prompt",
+            "assert 'use \"앵무\" when referring to the Angmoo persona' not in prompt"
+          ],
+          "test_tendency_analysis_uses_medium_thinking_and_larger_output_budget": [
+            "assert agent_service.settings.tendency_analysis_thinking_level == 'medium'",
+            "assert 'max_output_tokens=TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS' in source",
+            "assert 'thinking_level=credential.thinking_level' in source",
+            "assert 'thinking=settings.tendency_analysis_thinking_level' in source",
+            "assert agent_service.settings.tendency_analysis_thinking_level is None",
+            "assert agent_service.settings.tendency_analysis_thinking_level is None"
+          ],
+          "_run_tendency_analysis_route_with_error": [
+            "pytest.raises(HTTPException)"
+          ],
+          "test_tendency_analysis_route_hides_json_parse_details": [
+            "assert agent_routes.TENDENCY_ANALYSIS_RETRY_DETAIL == '성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요.'",
+            "assert http_exc.status_code == status.HTTP_502_BAD_GATEWAY",
+            "assert http_exc.detail == agent_routes.TENDENCY_ANALYSIS_RETRY_DETAIL"
+          ],
+          "test_tendency_analysis_route_maps_prompt_injection_to_422": [
+            "assert http_exc.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY",
+            "assert http_exc.detail == 'tendency_prompt_injection_detected'"
+          ],
+          "test_tendency_analysis_route_keeps_non_json_errors": [
+            "assert http_exc.status_code == expected_status",
+            "assert http_exc.detail == expected_detail"
+          ],
+          "test_normalize_angmoo_terms_in_tendency_text_changes_persona_only": [
+            "assert normalize('이 캐릭터는 활발합니다.') == '이 앵무는 활발합니다.'",
+            "assert normalize('캐릭터답게 표현합니다.') == '앵무답게 표현합니다.'",
+            "assert normalize('해당 캐릭터의 성향입니다.') == '해당 앵무의 성향입니다.'",
+            "assert normalize('캐릭터 성향을 보여줍니다.') == '앵무 성향을 보여줍니다.'",
+            "assert normalize('최애 캐릭터 정보를 공유합니다.') == '최애 캐릭터 정보를 공유합니다.'",
+            "assert normalize('게임 캐릭터 이야기를 합니다.') == '게임 캐릭터 이야기를 합니다.'"
+          ],
+          "test_feed_scan_create_post_brief_requires_seed_or_owner_cue": [
+            "assert no_seed == ''",
+            "assert no_interest == ''",
+            "assert agent_briefs.normalize_post_seed_intent('public_reaction') == 'public_reaction'",
+            "assert agent_briefs.normalize_post_seed_intent('direct_address') == 'public_reaction'",
+            "assert 'primary_intent_type: own_thought' in own_thought",
+            "assert public_reaction == ''",
+            "assert legacy_direct_address == ''",
+            "assert missing_intent == ''",
+            "assert 'source: owner_feed_cue' in owner_cue"
+          ],
+          "test_feed_history_sanitize_uses_google_non_streaming_stream_params": [
+            "assert agent_runs._feed_history_sanitize_stream_params() == {'googleResponseMode': 'non_streaming'}"
+          ],
+          "test_feed_scan_uses_google_non_streaming_stream_params": [
+            "assert agent_runs._feed_scan_stream_params() == {'googleResponseMode': 'non_streaming'}",
+            "assert 'stream_params=_feed_scan_stream_params()' in source"
+          ],
+          "test_writing_composition_prompt_has_input_voice_boundary": [
+            "assert '입력 말투 경계 규칙' in prompt",
+            "assert '제공된 Final action brief, saved_state, recent_activity_summary, target/thread context' in prompt",
+            "assert 'title, body, reply를 쓸 때는 위 입력에 남아 있던 웃음소리' in prompt",
+            "assert '현재 Character의 persona와 speech_style에 명시된 말투만 기준' in prompt"
+          ],
+          "test_recent_feed_interest_history_formatter_limits_and_filters": [
+            "assert result.count('- post_id:') == 5",
+            "assert 'post-1' in result",
+            "assert 'post-2' in result",
+            "assert 'post-3' in result",
+            "assert 'post-4' in result",
+            "assert 'post-5' in result",
+            "assert 'post-6' not in result",
+            "assert 'post-self' not in result",
+            "assert 'post-reply' not in result",
+            "assert 'post-hidden' not in result",
+            "assert 'summary post-1' in result",
+            "assert 'topic post-1' in result",
+            "assert 'novelty post-1' in result",
+            "assert 'body_preview:' in result"
+          ],
+          "test_agent_feed_post_summary_uses_topic_and_preview": [
+            "assert card.post_id == 'post-1'",
+            "assert card.author == 'source author'",
+            "assert card.topic_signature == '큰 주제: 반복되는 응원 루프'",
+            "assert card.title == '원문 제목'",
+            "assert len(card.body_preview) == 300",
+            "assert card.body_preview.endswith('...')"
+          ],
+          "test_agent_feed_post_summary_prefers_post_topic_columns": [
+            "assert card.topic_signature == 'column topic wins'"
+          ],
+          "test_post_topic_signature_falls_back_to_activity_log_metadata": [
+            "assert community_service.post_topic_signature_for_prompt(None, post) == 'log fallback topic'"
+          ],
+          "test_note_agent_tool_feed_interests_stores_topic_metadata": [
+            "assert payload['topic_signature'] == '큰 주제: 응원 루프'",
+            "assert payload['novelty_basis'] == '새로운 진행이 있음'",
+            "assert stored_payload['topic_signature'] == '큰 주제: 응원 루프'",
+            "assert captured['action_type'] == 'feed_interests_noted'"
+          ],
+          "test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable": [
+            "assert payload['interests'][0]['post_id'] == 'post-1'",
+            "assert payload['post_seed'] == '고맙다고 공개적으로 말하고 싶다'",
+            "assert payload['post_seed_intent'] == 'public_reaction'",
+            "assert 'legacy_reaction_seed_not_writable' in payload['warnings']",
+            "assert json.loads(str(captured['result']))['post_seed_intent'] == 'public_reaction'"
+          ],
+          "test_note_agent_tool_feed_interests_drops_seed_without_interest": [
+            "assert payload['interests'] == []",
+            "assert payload['post_seed'] == ''",
+            "assert payload['post_seed_intent'] == ''",
+            "assert payload['no_relevant_signal'] is True",
+            "assert 'post_seed_dropped_without_feed_interest' in payload['warnings']",
+            "assert stored_payload['post_seed'] == ''"
+          ],
+          "test_note_agent_tool_feed_interests_keeps_interest_without_seed": [
+            "assert len(payload['interests']) == 1",
+            "assert payload['post_seed'] == ''",
+            "assert payload['no_relevant_signal'] is False",
+            "assert captured['target_post_id'] == 'post-1'"
+          ],
+          "test_note_agent_tool_feed_history_sanitize_removes_style_marker": [
+            "assert result.action_type == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE",
+            "assert captured['action_type'] == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE",
+            "assert '냐하하' not in result.result",
+            "assert payload['consumed_sources'][0]['seed_semantic_summary'] == 'copied lunch strategy voice'",
+            "assert 'style_marker_removed' in payload['consumed_sources'][0]['warnings']",
+            "assert 'style_marker_removed' in payload['recent_feed_interests'][0]['warnings']",
+            "assert 'style_marker_removed' in payload['recent_own_root_topics'][0]['warnings']",
+            "assert stored_payload['consumed_sources'][0]['seed_semantic_summary'] == 'copied lunch strategy voice'"
+          ],
+          "test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton": [
+            "assert item['post_id'] == 'post-locked'",
+            "assert item['topic_signature'] == 'locked topic'",
+            "assert item['novelty_basis'] == 'locked novelty'",
+            "assert item['source_title'] == 'locked title'",
+            "assert item['seed_semantic_summary'] == 'copied surface voice'",
+            "assert 'style_marker_removed' in item['warnings']",
+            "assert 'wrong topic' not in result.result",
+            "assert 'raw old source text' not in result.result"
+          ],
+          "test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata": [
+            "assert item['post_id'] == 'post-missing'",
+            "assert item['seed_semantic_summary'] == 'locked topic / locked novelty / locked title'",
+            "assert 'raw omitted source' not in result.result"
+          ],
+          "test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload": [
+            "assert 'feed_history_sanitize_tool_endpoint_started' in joined",
+            "assert 'feed_history_sanitize_tool_endpoint_finished' in joined",
+            "assert 'sessionKeyHash=' in joined",
+            "assert 'agentRunId=run-1' in joined",
+            "assert 'characterId=char-1' in joined",
+            "assert 'consumedSourcesCount=1' in joined",
+            "assert 'requestPayloadBytes=' in joined",
+            "assert 'resultBytes=' in joined",
+            "assert 'session-secret-value' not in joined",
+            "assert 'secret raw summary text' not in joined",
+            "assert 'post-secret' not in joined"
+          ],
+          "test_note_agent_tool_feed_history_sanitize_logs_authorization_error": [
+            "assert 'feed_history_sanitize_tool_endpoint_error' in joined",
+            "assert 'failureKind=authorization_error' in joined",
+            "assert 'errorCategory=AgentRunAuthorizationError' in joined",
+            "assert 'session-secret-value' not in joined",
+            "pytest.raises(community_service.AgentRunAuthorizationError)"
+          ],
+          "test_feed_history_metadata_fallback_excludes_raw_seed": [
+            "assert 'topic_signature: lunch strategy' in consumed",
+            "assert 'novelty_basis: new lunch timing' in consumed",
+            "assert 'source_title: source lunch title' in consumed",
+            "assert 'post_seed' not in consumed",
+            "assert 'raw old seed text' not in consumed",
+            "assert '냐하하' not in consumed"
+          ],
+          "test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic": [
+            "assert len(payload['interests']) == 1",
+            "assert payload['post_seed'] == ''",
+            "assert payload['post_seed_intent'] == ''",
+            "assert payload['no_relevant_signal'] is False",
+            "assert 'post_seed_topic_repeated_recent_own_root' in payload['warnings']"
+          ],
+          "test_post_created_activity_result_stores_topic_metadata": [
+            "assert payload['created_post_id'] == 'post-1'",
+            "assert payload['topic_signature'] == '큰 주제: 자기 생각'",
+            "assert payload['novelty_basis'] == '새 관점'",
+            "assert payload['lore_chunk_ids'] == ['lore-chunk-1', 'lore-chunk-2']",
+            "assert payload['retrieval_mode'] == 'pgvector'"
+          ],
+          "test_create_agent_tool_post_stores_post_topic_metadata": [
+            "assert stored['post_id'] == 'post-1'",
+            "assert stored['topic_signature'] == '큰 주제: 자기 생각'",
+            "assert stored['novelty_basis'] == '새 관점'"
+          ],
+          "test_create_agent_tool_post_consumes_feed_cue_only_when_requested": [
+            "assert consumed == [{'character_id': 'char-1', 'run_id': 'run-1', 'post_id': 'post-1'}]"
+          ],
+          "test_recent_own_root_topic_exists_uses_post_topic_columns": [
+            "assert community_service.recent_own_root_topic_exists(FakeDb(), character_id='char-1', topic_signature='이미 쓴 큰 주제')"
+          ],
+          "test_v6_final_action_prompt_requires_menu_note_and_scan_match": [
+            "assert 'They are not numeric quotas' in prompt",
+            "assert 'the selected inbox/feed/writing context supports it' in prompt",
+            "assert 'A visible candidate is not a command to act' in prompt"
+          ],
+          "test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought": [
+            "assert '\"primary_intent_type\" is \"own_thought\"' in prompt",
+            "assert '\"primary_intent_type\" is \"public_reaction\"' not in prompt",
+            "assert 'A nickname mention, gratitude, encouragement, or impression can appear only as supporting context' in prompt",
+            "assert 'Do not write the post as a public reply to, or public praise of, a specific author.' in prompt",
+            "assert 'topic_signature' in prompt",
+            "assert 'internal metadata' in prompt",
+            "assert 'own public thought, observation, question, or analysis' in prompt",
+            "assert '\"primary_intent_type\" is \"direct_address\"' not in prompt",
+            "assert 'Source-owned concrete scenes from feed_scan' in prompt",
+            "assert 'Do not write final title/body as if the current character personally saw, did, or felt' in prompt",
+            "assert \"recast it as the current character's thought, empathy, question, or reflection\" in prompt"
+          ],
+          "test_self_update_composition_prompt_excludes_state_and_activity": [
+            "assert '- saved_state:' not in prompt",
+            "assert '- recent_activity_summary:' not in prompt",
+            "assert 'source: self_update' in prompt",
+            "assert 'writing_mode: self_update_post' in prompt",
+            "assert 'do not use prior state/activity logs' in prompt",
+            "assert 'Recent own post reference' not in prompt"
+          ],
+          "test_self_update_composition_prompt_includes_lore_as_private_reference": [
+            "assert 'Character lore retrieval' in prompt",
+            "assert 'lore-chunk-1' in prompt",
+            "assert 'private reference material' in prompt",
+            "assert 'Do not copy' in prompt",
+            "assert '\"lore_chunk_ids\" and \"retrieval_mode\" are internal metadata' in prompt"
+          ]
+        },
+        "tests/runtime/test_gemini_schema_missing_contract.py": {
+          "candidate": [],
+          "test_source_and_wire_intent_values_are_equivalent": [
+            "assert Draft202012Validator(source).is_valid(data) == Draft202012Validator(wire).is_valid(data)"
+          ],
+          "test_const_lowering_and_required_are_not_lost": [
+            "assert not Draft202012Validator(wire).is_valid({})",
+            "assert source == saved",
+            "assert Draft202012Validator(source).is_valid({'const': value}) == Draft202012Validator(wire).is_valid({'const': value})"
+          ],
+          "test_unsupported_const_fails_before_transport": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_verified_missing_path_is_recoverable_once": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert error.value.field_path == f'decisions.0.{path}'",
+            "assert retry is not None and retry.max_output_tokens == 4096",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'STOP'}, 2) is None",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'MAX_TOKENS'}, 1) is None"
+          ],
+          "test_fatal_other_target_takes_precedence_over_missing_intent": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert error.value.validation_code == 'decision_target_invalid'",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'STOP'}, 1) is None"
+          ],
+          "test_missing_then_valid_preserves_input_and_has_no_third_request": [
+            "assert result['decisions'][0]['interaction_intent'] == 'ordinary_comment'",
+            "assert len(calls) == 2 and guards == [2]",
+            "assert calls[0]['system_prompt'] == calls[1]['system_prompt']",
+            "assert calls[1]['user_prompt'].startswith(calls[0]['user_prompt'])",
+            "assert [call['max_output_tokens'] for call in calls] == [4096, 4096]"
+          ],
+          "test_nullable_ref_nested_properties_and_source_isolation": [
+            "assert source == saved and build_gemini_developer_response_schema(Model) == wire",
+            "assert Draft202012Validator(source).is_valid(data) == Draft202012Validator(wire).is_valid(data)"
+          ],
+          "test_real_sdk_http_preserves_nullable_enum_for_all_lanes": [
+            "assert len(requests) == 4",
+            "assert wire == schema",
+            "assert nullable['anyOf'][-1] == {'type': 'null'}",
+            "assert native['nullable'] is True and 'ordinary_comment' in native['enum']"
+          ],
+          "test_second_error_is_final_with_shared_retry_chance": [
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert len(calls) == 2 and error.value.attempt_count == 2"
+          ]
+        },
+        "tests/runtime/test_language_provider_boundaries.py": {
+          "material": [],
+          "capture": [],
+          "test_selection_provider_receives_frozen_locale_and_preserves_source": [
+            "assert result[0].summary == ORIGINAL and source.text == ORIGINAL",
+            "assert prompt['environment'] == environment.to_dict()",
+            "assert prompt['sources'][0]['text'] == ORIGINAL",
+            "assert 'admitted memory/search language' in requests[0].system_prompt",
+            "assert len(requests) == provider.physical_calls == 1",
+            "assert requests[0].sdk_attempts == 1 and requests[0].thinking_level == 'high'"
+          ],
+          "test_episode_request_and_result_keep_language_and_refs": [
+            "assert result.episodes[0].summary == ORIGINAL",
+            "assert json.loads(requests[0].user_prompt)['environment'] == bundle.environment.to_dict()",
+            "assert ORIGINAL in requests[0].user_prompt",
+            "assert 'memory_search_locale' in requests[0].system_prompt",
+            "assert len(requests) == provider.physical_calls == 1 and requests[0].max_output_tokens == 8192"
+          ],
+          "test_image_analysis_english_policy_original_text_and_auxiliary_hint": [
+            "assert result.visible_text == [visible] and result.recall_hint is None",
+            "assert result.description == 'A sign with A-17.'",
+            "assert 'description and uncertainties concisely in English' in requests[0].system_prompt",
+            "assert 'visible_text exactly in its original language' in requests[0].system_prompt",
+            "assert len(requests) == 1 and requests[0].sdk_attempts == 1 and (requests[0].max_output_tokens == 1800)"
+          ],
+          "test_relationship_request_keeps_direction_subject_evidence_and_keep": [
+            "assert result['decision'] == 'keep' and result['perception'] == ORIGINAL",
+            "assert sent['subject'] == payload['subject'] and sent['existing_relationship'] == payload['existing_relationship']",
+            "assert (sent['actor_ref'], sent['target_ref'], sent['world_ref']) == ('character-a', 'character-b', 'world-1')",
+            "assert \"subject's explicitly directed language\" in requests[0].system_prompt",
+            "assert 'unchanged' in requests[0].system_prompt and len(requests) == 1"
+          ],
+          "test_final_combined_language_policy_and_schema_reach_real_sdk_http": [
+            "assert result['decisions'][0]['action'] == 'no_action'",
+            "assert len(requests) == 1",
+            "assert 'English' in system and 'language' in system",
+            "assert not any(('가' <= ch <= '힣' for ch in system))",
+            "assert ORIGINAL in prompt and json.dumps(environment, ensure_ascii=False) in prompt",
+            "assert 'ordinary_comment' in values and intent['anyOf'][1] == {'type': 'null'}",
+            "assert ('joint_activity_proposal' in values) == (capable and lane_name == 'feed')",
+            "assert ('proposal_response' in values) == (capable and lane_name == 'inbox')",
+            "assert body['generationConfig']['maxOutputTokens'] == 8192"
+          ]
+        },
+        "tests/runtime/test_multilingual_gemini_contracts.py": {
+          "install_transport": [],
+          "decision": [],
+          "test_combined_retry_freezes_environment_and_receipt_blocks_writer": [
+            "assert current['environment_revision'] == 2",
+            "assert result['_json_recovery_receipt'] == {'reason': 'comment_intent_missing', 'attempt': 2, 'node': 'FeedDecisionDraft'}",
+            "assert len(calls) == 2 and [r['max_output_tokens'] for r in calls] == [8192, 8192]",
+            "assert calls[1]['user_prompt'].startswith(calls[0]['user_prompt'])",
+            "assert json.dumps(original, ensure_ascii=False) in calls[0]['user_prompt']",
+            "assert calls[0]['response_schema'] == calls[1]['response_schema']",
+            "assert calls[0]['thinking_level'] == calls[1]['thinking_level']",
+            "assert 'language' in calls[0]['system_prompt'].lower()",
+            "assert len(calls[1]['user_prompt']) - len(calls[0]['user_prompt']) <= 512",
+            "pytest.raises(ValueError, match='recovery|draft')",
+            "assert len(calls) == 2",
+            "assert row.result['recovery_reservations'] == ['FeedActionPlanner:json']",
+            "pytest.raises(ValueError, match='recovery_exhausted')"
+          ],
+          "test_latest_guard_prevents_second_physical_transmission": [
+            "pytest.raises(Exception)",
+            "assert len(calls) == 1",
+            "assert not row.result.get('recovery_reservations')",
+            "assert attempt == 2"
+          ],
+          "test_closed_relative_meaning_has_independent_civil_boundary_oracle": [
+            "assert result == (start, end)"
+          ],
+          "test_morning_dst_and_skipped_date_have_civil_boundaries": [
+            "assert (end - start).total_seconds() == 11 * 3600",
+            "assert wall_time(date(2026, 3, 8), 2, 30, 'America/New_York') == datetime(2026, 3, 8, 7, tzinfo=UTC)",
+            "assert wall_time(date(2026, 11, 1), 1, 30, 'America/New_York') == datetime(2026, 11, 1, 5, 30, tzinfo=UTC)",
+            "assert day_bounds(date(2011, 12, 30), 'Pacific/Apia')[0] == day_bounds(date(2011, 12, 30), 'Pacific/Apia')[1]",
+            "pytest.raises(ValueError)"
+          ],
+          "test_actual_fts_literal_boundaries_preserve_original_sources": [
+            "assert [r.memory_item_id for r in result.candidates] == ['positive']",
+            "assert result.candidates[0].snippet == positive"
+          ],
+          "test_corrupt_checkpoint_environment_never_becomes_a_fresh_default": [
+            "pytest.raises(ValueError, match='environment_snapshot_invalid')"
+          ],
+          "test_backward_snapshot_defaults_and_hash_inputs_are_stable": [
+            "assert EnvironmentSnapshot.from_dict(None) == EnvironmentSnapshot()",
+            "assert EnvironmentSnapshot.from_dict(original).to_dict() == original",
+            "assert original == deepcopy(original)"
+          ]
+        },
+        "tests/social/test_deleted_identity_language_contract.py": {
+          "test_actual_deletion_and_legacy_named_active_characters_keep_separate_identities": [
+            "assert db.get(Character, 'to-delete').deleted_at is not None",
+            "assert result.author_character_id == key",
+            "assert result.author_deleted is (key == 'to-delete')",
+            "assert (result.title, result.body) == ('Original A-17', '앵무·둥지 · 原文 · لم أوافق')",
+            "assert result.author_name == name",
+            "assert db.get(Character, key).name == name"
+          ],
+          "test_new_placeholder_names_stay_reserved": [
+            "assert is_blocked_name(name)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_multilingual_time_resolution.py": {},
+        "tests/identity/test_calendar_accounting.py": {},
+        "tests/identity/test_environment_admission.py": {},
+        "tests/identity/test_local_environment.py": {},
+        "tests/memory/test_legacy_literal_boundaries.py": {},
+        "tests/memory/test_multilingual_projection_lifecycle.py": {},
+        "tests/routines/test_tendency.py": {},
+        "tests/runtime/test_gemini_schema_missing_contract.py": {},
+        "tests/runtime/test_language_provider_boundaries.py": {},
+        "tests/runtime/test_multilingual_gemini_contracts.py": {},
+        "tests/social/test_deleted_identity_language_contract.py": {}
+      }
+    },
+    {
+      "commit": "77aa85f75e3f8ae6157d0aa41ac07a3018cc058c",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-FRONTEND-20261003",
+      "reason": "Issue 360: exact committed introductions and collected test nodes; historical evidence and original assertions remain protected.",
+      "tracked_files": {
+        "browser-tests/fixtures/visual-environment.mjs": "9d82b057d9f484df65c024aa373d72d07379a841",
+        "browser-tests/internationalization-teardown.ts": "066019c612348696044d501af65729516e70542c",
+        "browser-tests/internationalization.spec.ts": "fda43e05611a782760d13ba04e9426bd8db38616",
+        "browser-tests/playwright.internationalization.config.ts": "15c91166d5559e843eec61eeaa03c8deca23c8a5",
+        "frontend/scripts/check-ui-catalog.mjs": "5a045f07613f21ffaa3b4b2381f0e63bae93693d",
+        "frontend/scripts/inventory-ui-language.mjs": "7e91ca16b3e5a028043ba5c0f56f497a976b67ec",
+        "frontend/scripts/test-user-environment.mjs": "675ad63d58d2e27b6afd44533b8cf0569a6b95ac",
+        "frontend/src/composition/locales/en.json": "5abe37da5ec38fd047c5f0d75d1d5ad208052283",
+        "frontend/src/composition/locales/ko.json": "5f3331d27078cfc8bec3914d8f9287f29ae915b8",
+        "frontend/src/composition/providers/ui-resources.ts": "37dababb20c13544c1b36fdd0e621c862d5c5238",
+        "frontend/src/composition/providers/user-environment-provider.tsx": "7a2a39f4371c65a74e7d430b0099564d9203bb38",
+        "frontend/src/features/characters/locales/en.json": "858f8a326e220aad55ca9afceaa74216a6908973",
+        "frontend/src/features/characters/locales/ko.json": "5a71d36e6c790d23a5e611e850a9ed9fe7787963",
+        "frontend/src/features/chat/locales/en.json": "b1bb35daf92f4e180059dc5207aff40d1ddfb3ce",
+        "frontend/src/features/chat/locales/ko.json": "6775a50eac9fe4e216fbaf2680eb5a4595888cdf",
+        "frontend/src/features/creator-studio/locales/en.json": "607d0727dbb6fd2c7c913077e931fa555572f551",
+        "frontend/src/features/creator-studio/locales/ko.json": "fb29c04de414b1520847b144425fec0c5715f67f",
+        "frontend/src/features/device-home/locales/en.json": "8aebde7a75474e8b366bd55c08995daf670e4bd1",
+        "frontend/src/features/device-home/locales/ko.json": "387861dafa86fb305fb3e4df249df84b08dfd204",
+        "frontend/src/features/identity/api/environment.ts": "8857b0f177f45d66aaa3b64b6cb7ca103faa8d40",
+        "frontend/src/features/identity/components/language-settings.tsx": "482677e6f7d3f27126978b3070d9a916f2d734e3",
+        "frontend/src/features/identity/locales/en.json": "5d85ec45f44201a482a7f0ba6dd246d3c3bb4fee",
+        "frontend/src/features/identity/locales/ko.json": "90dd50a85f412d6157aa352cc90ce1d003f0de62",
+        "frontend/src/features/media/locales/en.json": "0e114311cc7fb279a3551e58e803690fc61e3cd1",
+        "frontend/src/features/media/locales/ko.json": "d667b0daf9bd5a12d761d5d9e290ead9255270cd",
+        "frontend/src/features/memory/locales/en.json": "d57204f9d332162927a45899b798bb2fdf0ba883",
+        "frontend/src/features/memory/locales/ko.json": "3cede16ebb409724bbd0af40e47a971dedf5b067",
+        "frontend/src/features/relationships/locales/en.json": "f68400932539d338209f64bd06d145c2970726bc",
+        "frontend/src/features/relationships/locales/ko.json": "93ee5cba9fd694f60f8a825dd64962ba066bc333",
+        "frontend/src/features/runtime-status/locales/en.json": "f453b4c79e75e77426bc8721cb94c6729b3a6ae6",
+        "frontend/src/features/runtime-status/locales/ko.json": "c3229cfc55a0f0be18cc44055551fbf57506505b",
+        "frontend/src/features/social/locales/en.json": "c25a32b878caece3a015646c89a92c30e9cef7ef",
+        "frontend/src/features/social/locales/ko.json": "c0bb01817252e31b7d17897cc656028808f12fc0",
+        "frontend/src/features/support/locales/en.json": "c513d2c8b4b43cfd42043c6c325fc3409329518f",
+        "frontend/src/features/support/locales/ko.json": "d077ea0a921ca11abf2b55774e54a27b527a718b",
+        "frontend/src/features/tree/locales/en.json": "ce78299553a8539c2e4ac0cd12631fc54e8bf9cd",
+        "frontend/src/features/tree/locales/ko.json": "d3ce5b287e47ee00657248a95fa82ffdf3cf211f",
+        "frontend/src/features/ui-foundation/locales/en.json": "6237032e2854045510de19e67ad7aa0998ae2cd3",
+        "frontend/src/features/ui-foundation/locales/ko.json": "33123805a02549011a392769187e5e54667a5967",
+        "frontend/src/features/world-packages/locales/en.json": "7dc4440cf2a7ae04be46fa640608d7dfafacbc96",
+        "frontend/src/features/world-packages/locales/ko.json": "2d278cb6c617fab34a9c0080c0b9eca1ac64b327",
+        "frontend/src/features/worlds/locales/en.json": "87606c9992b8c8f746801211d32e0d6e67ec81fa",
+        "frontend/src/features/worlds/locales/ko.json": "728662065852befd677f2b3924c59349cdfb306a",
+        "frontend/src/hooks/use-ui-date-formatter.ts": "bc53032ef475a144ab8c43cf6f559c156b27756a",
+        "frontend/src/hooks/use-ui-error-text.ts": "871da04d085501f064a8db9d359c0a40d42da2ee",
+        "frontend/src/hooks/use-ui-number-formatter.ts": "f5af1a633a1b7d617d188004bfaf8272a0ec79e4",
+        "frontend/src/hooks/use-ui-text.ts": "a728bb6742da2f50185e5f9e639dd47c436c44b8",
+        "frontend/src/hooks/use-user-environment.ts": "818543f70e1f456cb12369ea5ac12ab7fc9a97be",
+        "frontend/src/lib/http/error-contract.ts": "1520a7071e5fe0a4597dbfdada70bb32f6c09832",
+        "frontend/src/lib/http/error-presentation.ts": "6e5393a5915e731a326a129cad41b949b504114e",
+        "frontend/src/lib/i18n/detection.ts": "c9d444534d926a74c91e79ccd4f3e7f87177445d",
+        "frontend/src/lib/i18n/environment-context.ts": "6c7055da94bc1a3a860e97ea98978d827f79eb59",
+        "frontend/src/lib/i18n/instance.ts": "d1b46b5ead6b2d1d80be86d5e5c8533c0de06e76",
+        "frontend/src/types/user-environment.ts": "44aed3d949710498ff43605909278891364be2cd",
+        "scripts/diagnostics/serve_multilingual_fixture.py": "9cd6827c38812eb5c6bf69923bd9222b4b72a4c0"
+      },
+      "test_nodes": [
+        "tests/test_post_refactor_contract_changes.py::test_git_object_cache_rereads_head_and_candidate_manifest"
+      ],
+      "test_assertions": {
+        "tests/test_post_refactor_contract_changes.py": {
+          "test_only_named_contract_changes_apply_and_original_snapshot_is_immutable": [
+            "assert original['full']['schemas']['Persona'] == 'old'",
+            "assert expected['full']['schemas'] == {'Persona': 'new', 'Other': 'untouched'}",
+            "assert drifted != expected",
+            "pytest.raises(ValueError, match='preimage')"
+          ],
+          "test_named_definition_delta_cannot_approve_a_different_owner_or_body": [
+            "assert changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'choose', old, drift, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/other.py', 'choose', old, new, records=records)",
+            "assert not changes.definition_matches(tmp_path, 'backend/profile.py', 'other', old, new, records=records)"
+          ],
+          "test_ast_evidence_normalizes_empty_fields_but_never_executes_calls": [
+            "assert changes.normalize_ast_dump(ast.dump(node, show_empty=True)) == ast.dump(node)",
+            "assert changes.assertions('test.py::test_version', before, after, [record]) == after",
+            "pytest.raises(ValueError, match='constructor')",
+            "assert changes.normalize_ast_dump(fragment) == ast.dump(ast.parse(fragment))"
+          ],
+          "test_exact_orm_delta_preserves_other_tables_and_rejects_changed_preimage": [
+            "assert changes.contracts(original, [record]) == {'orm_tables': {'profiles': 'new', 'secrets': 'untouched'}}",
+            "assert original['orm_tables']['profiles'] == 'old'",
+            "pytest.raises(ValueError, match='ORM preimage')"
+          ],
+          "test_orm_and_duplicate_changes_cannot_be_excused": [
+            "pytest.raises(ValueError, match='ORM')",
+            "pytest.raises(ValueError, match='duplicate')"
+          ],
+          "test_assertion_change_requires_exact_before_after_and_keeps_other_nodes": [
+            "assert changes.assertions('test.py::test_change', before, after, [record]) == after",
+            "assert changes.assertions('test.py::test_other', before, after, [record]) == before",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_assertion_chain_checks_every_transition_and_exact_final_state": [
+            "assert changes.assertions('test.py::test_change', Counter(['v9', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v10', 'safety']), final, records) == final",
+            "assert changes.assertions('test.py::test_change', final, final, records) == final",
+            "assert changes.assertions('test.py::test_change', Counter(['v9']), final, records) == final",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')",
+            "pytest.raises(ValueError, match='before/after')"
+          ],
+          "test_manifest_requires_committed_provenance_and_append_only_history": [
+            "assert changes.load(tmp_path) == [record]",
+            "pytest.raises(ValueError, match='append-only')",
+            "pytest.raises(ValueError, match='provenance')",
+            "assert args[1] == 'rev-parse'"
+          ],
+          "test_git_object_cache_rereads_head_and_candidate_manifest": [
+            "assert changes.load(tmp_path) == changes.load(tmp_path) == [record]",
+            "assert sum((args[1:] == ('rev-parse', 'HEAD') for args in calls)) == 2",
+            "assert sum((args[1:] == ('rev-parse', commit + ':backend/a.py') for args in calls)) == 1",
+            "pytest.raises(ValueError, match='provenance')",
+            "pytest.raises(changes.subprocess.CalledProcessError)",
+            "assert state['head'] in args",
+            "assert args[-1] == state['head']"
+          ],
+          "test_removed_binding_requires_exact_parent_and_committed_and_current_absence": [
+            "assert args[1] == 'show'",
+            "pytest.raises(ValueError, match='removed binding')",
+            "assert changes.removed_bindings(changes.load(tmp_path)) == {(source, 'LIMIT')}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_post_refactor_contract_changes.py": {}
+      }
+    },
+    {
+      "commit": "ecd8d2cff6f6d2dedd79367cacdbe17c9e747027",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-GIT-CACHE-20261003",
+      "reason": "Issue 360: exact committed introductions and collected test nodes; historical evidence and original assertions remain protected.",
+      "tracked_files": {
+        "backend/tests/test_preservation_git_evidence_cache.py": "93de1b9de785418decb7cd84d7b9acb94ddea33b"
+      },
+      "test_nodes": [
+        "tests/test_preservation_git_evidence_cache.py::test_actual_head_changes_are_reread_and_original_blob_stays_pinned",
+        "tests/test_preservation_git_evidence_cache.py::test_injected_reader_is_never_cached",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args0-True]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args1-True]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args10-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args2-True]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args3-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args4-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args5-True]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args6-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args7-True]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args8-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args9-False]"
+      ],
+      "test_assertions": {
+        "tests/test_preservation_git_evidence_cache.py": {
+          "test_only_pinned_object_or_range_reads_are_cacheable": [
+            "assert checker.immutable_git_read(args) is immutable"
+          ],
+          "test_actual_head_changes_are_reread_and_original_blob_stays_pinned": [
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker._immutable_git_bytes.cache_info().hits == 1",
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'changed'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('rev-parse', 'HEAD', root=tmp_path).decode().strip() != original"
+          ],
+          "test_injected_reader_is_never_cached": [
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'first'",
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'second'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_preservation_git_evidence_cache.py": {}
+      }
+    },
+    {
+      "commit": "8368f245b9dcfdce0a33d3a5e97c4e5906cff175",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-FIXTURES-20261003",
+      "reason": "Issue 360: two additional mutable Git log classifier cases; existing historical source and assertions remain protected.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args11-False]",
+        "tests/test_preservation_git_evidence_cache.py::test_only_pinned_object_or_range_reads_are_cacheable[args12-False]"
+      ],
+      "test_assertions": {
+        "tests/test_preservation_git_evidence_cache.py": {
+          "test_only_pinned_object_or_range_reads_are_cacheable": [
+            "assert checker.immutable_git_read(args) is immutable"
+          ],
+          "test_actual_head_changes_are_reread_and_original_blob_stays_pinned": [
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker._immutable_git_bytes.cache_info().hits == 1",
+            "assert checker.git_bytes('show', 'HEAD:fixture.txt', root=tmp_path) == b'changed'",
+            "assert checker.git_bytes('show', original + ':fixture.txt', root=tmp_path) == b'original'",
+            "assert checker.git_bytes('rev-parse', 'HEAD', root=tmp_path).decode().strip() != original"
+          ],
+          "test_injected_reader_is_never_cached": [
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'first'",
+            "assert checker.git_bytes('show', SHA + ':fixture.txt', root=tmp_path) == b'second'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_preservation_git_evidence_cache.py": {}
+      }
+    },
+    {
+      "commit": "072c45104f05fba477df005d7c682585e4b9dd9b",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-HISTORICAL-FIXTURES-20261003",
+      "reason": "Issue 360: historical schema seeding helper introduced as test-only source; frozen legacy columns and digests remain protected.",
+      "tracked_files": {
+        "backend/tests/historical_schema_fixture.py": "62569fb79ea1b17e96e9685598a12e95c598f5a6"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "0e2fc098b66bc5dad517429f72bbd8431bf8b859",
+      "feature_id": "AR-MULTILINGUAL-ENVIRONMENT-PRIVACY-UPGRADE-20261003",
+      "reason": "Issue 360: canonical demo guard, private environment deletion and frozen v26 predecessor; capture exact new local test nodes without waiving historical evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/identity/test_local_environment.py::test_typed_environment_context_keeps_canonical_demo_mutation_guard",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[26]"
+      ],
+      "test_assertions": {
+        "tests/identity/test_local_environment.py": {
+          "database": [],
+          "report": [],
+          "test_initial_defaults_failed_detector_and_last_valid": [
+            "assert (first.memory_search_locale, first.timezone, first.environment_revision) == ('en', 'UTC', 0)",
+            "assert empty.environment_revision == 0 and db.get(LocalEnvironment, 'owner') is None",
+            "assert good.memory_search_locale == 'ja-JP' and good.timezone == 'America/New_York'",
+            "assert snapshot(db, 'owner').memory_search_locale == 'ja-JP'",
+            "assert repeat.environment_revision == 1 and repeat.timezone_revision == 1",
+            "assert read_environment(db, 'owner', now=NOW + timedelta(minutes=5)).timezone == good.timezone"
+          ],
+          "test_first_active_screen_lease_sequence_revision_and_handover": [
+            "pytest.raises(EnvironmentConflict, match='owned')",
+            "pytest.raises(EnvironmentConflict, match='sequence_stale')",
+            "pytest.raises(EnvironmentConflict, match='revision_conflict')",
+            "assert handed.memory_search_locale == 'ar-AE' and handed.environment_revision == 2",
+            "assert owned.lease_token != handed.lease_token",
+            "assert frozen['memory_search_locale'] == 'ar-AE'"
+          ],
+          "test_invalid_detector_language_is_not_a_success": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_invalid_zone": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_non_owner_cannot_read_or_mutate_environment": [
+            "pytest.raises(PermissionError, match='owner_required')",
+            "assert snapshot(database, 'stranger').timezone == 'UTC'"
+          ],
+          "test_ui_preference_partial_patch_is_separate_from_detected_language": [
+            "assert owner.feed_content_filter == 'posts' and owner.ui_preference_revision == 1",
+            "assert snapshot(db, 'owner').memory_search_locale == 'en'",
+            "assert owner.ui_preference_revision == 1"
+          ],
+          "test_zone_transition_collaborator_is_atomic_and_failure_rolls_back": [
+            "pytest.raises(ValueError, match='protection_failed')",
+            "assert observed == [('UTC', 'America/New_York', 1, 'UTC')]",
+            "assert snapshot(db, 'owner').environment_revision == 0",
+            "assert db.query(EnvironmentTimezoneChange).count() == 0"
+          ],
+          "test_local_day_uses_two_boundaries_not_24_hours": [
+            "assert (end - start).total_seconds() == hours * 3600"
+          ],
+          "test_dst_gap_overlap_and_month_utc_bounds": [
+            "assert wall_time(date(2026, 3, 8), 2, 30, 'America/New_York') == datetime(2026, 3, 8, 7, tzinfo=UTC)",
+            "assert wall_time(date(2026, 11, 1), 1, 30, 'America/New_York') == datetime(2026, 11, 1, 5, 30, tzinfo=UTC)",
+            "assert start == datetime(2026, 9, 30, 15, tzinfo=UTC)",
+            "assert end == datetime(2026, 10, 31, 15, tzinfo=UTC)"
+          ],
+          "test_v26_to_v27_preserves_all_original_user_columns": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(26).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(27).schema_digest"
+          ],
+          "test_typed_environment_context_keeps_canonical_demo_mutation_guard": [
+            "assert get_authenticated_user_context_allow_incomplete(read, context) is context",
+            "pytest.raises(HTTPException)",
+            "assert failure.value.status_code == 403"
+          ]
+        },
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 27",
+            "assert fixture['target_table_count'] == 149",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_local_environment.py": {},
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {}
+      }
+    },
+    {
+      "commit": "81e440826abf43256a520c3ba4cba8802187007e",
+      "feature_id": "AR-MULTILINGUAL-GEMINI-SCHEMA-ORACLE-20261003",
+      "reason": "Issue 360: fourteen independent exact JSON const conflict and unsupported schema rejection nodes; original assertions and source remain protected.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation[leaf0]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation[leaf1]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation[leaf2]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation[leaf3]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation[leaf4]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_enum_intersection_keeps_exact_json_values[-values1]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_enum_intersection_keeps_exact_json_values[0-values2]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_enum_intersection_keeps_exact_json_values[3.25-values3]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_enum_intersection_keeps_exact_json_values[None-values4]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_const_enum_intersection_keeps_exact_json_values[same-values0]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_reference_or_union_fails_before_provider_transport[source0-missing response schema definition: Missing]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_reference_or_union_fails_before_provider_transport[source1-recursive response schema reference]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_reference_or_union_fails_before_provider_transport[source2-unsupported response schema union]",
+        "tests/runtime/test_gemini_schema_missing_contract.py::test_unsupported_reference_or_union_fails_before_provider_transport[source3-unsupported response schema enum union]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_gemini_schema_missing_contract.py": {
+          "candidate": [],
+          "test_source_and_wire_intent_values_are_equivalent": [
+            "assert Draft202012Validator(source).is_valid(data) == Draft202012Validator(wire).is_valid(data)"
+          ],
+          "test_const_lowering_and_required_are_not_lost": [
+            "assert not Draft202012Validator(wire).is_valid({})",
+            "assert source == saved",
+            "assert Draft202012Validator(source).is_valid({'const': value}) == Draft202012Validator(wire).is_valid({'const': value})"
+          ],
+          "test_unsupported_const_fails_before_transport": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_const_enum_intersection_keeps_exact_json_values": [
+            "assert wire_oracle.is_valid({'value': constant})",
+            "assert not wire_oracle.is_valid({})",
+            "assert source == original",
+            "assert source_oracle.is_valid({'value': value}) == wire_oracle.is_valid({'value': value})"
+          ],
+          "test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation": [
+            "pytest.raises(ValueError, match='conflicting response schema const')",
+            "assert source == original"
+          ],
+          "test_unsupported_reference_or_union_fails_before_provider_transport": [
+            "pytest.raises(ValueError)",
+            "assert str(failure.value) == error",
+            "assert source == original"
+          ],
+          "test_verified_missing_path_is_recoverable_once": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert error.value.field_path == f'decisions.0.{path}'",
+            "assert retry is not None and retry.max_output_tokens == 4096",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'STOP'}, 2) is None",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'MAX_TOKENS'}, 1) is None"
+          ],
+          "test_fatal_other_target_takes_precedence_over_missing_intent": [
+            "pytest.raises(StructuredOutputValidationError)",
+            "assert error.value.validation_code == 'decision_target_invalid'",
+            "assert planner_json_retry(error.value, payload, {'finish_reason': 'STOP'}, 1) is None"
+          ],
+          "test_missing_then_valid_preserves_input_and_has_no_third_request": [
+            "assert result['decisions'][0]['interaction_intent'] == 'ordinary_comment'",
+            "assert len(calls) == 2 and guards == [2]",
+            "assert calls[0]['system_prompt'] == calls[1]['system_prompt']",
+            "assert calls[1]['user_prompt'].startswith(calls[0]['user_prompt'])",
+            "assert [call['max_output_tokens'] for call in calls] == [4096, 4096]"
+          ],
+          "test_nullable_ref_nested_properties_and_source_isolation": [
+            "assert source == saved and build_gemini_developer_response_schema(Model) == wire",
+            "assert Draft202012Validator(source).is_valid(data) == Draft202012Validator(wire).is_valid(data)"
+          ],
+          "test_real_sdk_http_preserves_nullable_enum_for_all_lanes": [
+            "assert len(requests) == 4",
+            "assert wire == schema",
+            "assert nullable['anyOf'][-1] == {'type': 'null'}",
+            "assert native['nullable'] is True and 'ordinary_comment' in native['enum']"
+          ],
+          "test_second_error_is_final_with_shared_retry_chance": [
+            "pytest.raises(direct_llm.DirectLlmJsonError)",
+            "assert len(calls) == 2 and error.value.attempt_count == 2"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_gemini_schema_missing_contract.py": {}
+      }
     }
   ]
 }
