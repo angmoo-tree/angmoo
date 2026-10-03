@@ -31,7 +31,7 @@ def test_card_final_edits_are_only_registered_persona_and_source_stays_private(d
     workflows = build_creator_workflows()
     draft = asyncio.run(drafts.create_draft(session, owner, schemas.AgentCreationDraftCreate(), workflows=workflows))
     imported = card_import.import_card(session, owner, draft.id, revision=1, content=card_bytes(), workflows=workflows)
-    assert imported["draft"].speech_style == "Original: Hello 대화 상대"
+    assert imported["draft"].speech_style == "Original: Hello User"
     assert "scenario_manual_merge" in imported["review"]
     with pytest.raises(AgentCreationDraftNotFoundError):
         card_import.read_source(session, SimpleNamespace(id="foreign"), draft.id)
