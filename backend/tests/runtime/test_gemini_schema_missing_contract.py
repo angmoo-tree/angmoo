@@ -62,6 +62,64 @@ def test_unsupported_const_fails_before_transport(value):
         build_gemini_developer_response_schema(Model)
 
 
+@pytest.mark.parametrize("constant,values", [
+    ("same", ["same", "other"]), ("", ["", "other"]),
+    (0, [0, 1]), (3.25, [3.25, 4]), (None, [None, "other"]),
+])
+def test_const_enum_intersection_keeps_exact_json_values(constant, values):
+    source = {"type": "object", "properties": {"value": {"const": constant, "enum": values}},
+              "required": ["value"]}
+    class Model:
+        @staticmethod
+        def model_json_schema():
+            return source
+    original = deepcopy(source)
+    converted = build_gemini_developer_response_schema(Model)
+    source_oracle, wire_oracle = Draft202012Validator(source), Draft202012Validator(converted)
+    for value in [None, False, True, 0, 1, 3.25, "", "same", "other"]:
+        assert source_oracle.is_valid({"value": value}) == wire_oracle.is_valid({"value": value})
+    assert wire_oracle.is_valid({"value": constant})
+    assert not wire_oracle.is_valid({})
+    assert source == original
+
+
+@pytest.mark.parametrize("leaf", [
+    {"const": "same", "enum": ["other"]},
+    {"const": 0, "enum": [False]},
+    {"const": None, "enum": ["null"]},
+    {"const": 0, "type": "string"},
+    {"const": "same", "type": ["integer", "null"]},
+])
+def test_conflicting_const_enum_or_type_is_rejected_without_schema_mutation(leaf):
+    source = {"type": "object", "properties": {"value": leaf}}
+    class Model:
+        @staticmethod
+        def model_json_schema():
+            return source
+    original = deepcopy(source)
+    with pytest.raises(ValueError, match="conflicting response schema const"):
+        build_gemini_developer_response_schema(Model)
+    assert source == original
+
+
+@pytest.mark.parametrize("source,error", [
+    ({"$ref": "#/$defs/Missing"}, "missing response schema definition: Missing"),
+    ({"$defs": {"Cycle": {"$ref": "#/$defs/Cycle"}}, "$ref": "#/$defs/Cycle"}, "recursive response schema reference"),
+    ({"anyOf": [{"type": "string"}, {"type": "integer"}]}, "unsupported response schema union"),
+    ({"type": ["string", "integer"], "enum": ["same", 0]}, "unsupported response schema enum union"),
+])
+def test_unsupported_reference_or_union_fails_before_provider_transport(source, error):
+    class Model:
+        @staticmethod
+        def model_json_schema():
+            return source
+    original = deepcopy(source)
+    with pytest.raises(ValueError) as failure:
+        build_gemini_developer_response_schema(Model)
+    assert str(failure.value) == error
+    assert source == original
+
+
 @pytest.mark.parametrize("missing,path", [("intent", "interaction_intent"), ("purpose", "comment_purpose"), ("both", "interaction_intent")])
 def test_verified_missing_path_is_recoverable_once(missing, path):
     row = {"target_id": "post", "action": "comment", "brief": "Ask about the book", "interaction_intent": "ordinary_comment", "comment_purpose": "question"}
