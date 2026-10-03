@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter
+from functools import lru_cache
 import hashlib
 import importlib.util
 from pathlib import Path
@@ -176,14 +177,22 @@ def protected_import(source, local, module, symbol=None):
             raise ValueError("Chat retirement imported binding mutated dynamically")
 
 
+@lru_cache(maxsize=1)
+def _product_change_module():
+    # Reuse only parsing of immutable source strings. load() still re-reads and
+    # verifies the candidate manifest, Git provenance and every actual owner.
+    spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+    changes = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(changes)
+    return changes
+
+
 def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     if enabled is False or enabled is None:
         return None
     if enabled is not True:
         raise ValueError("Chat forwarding retirement must be the exact reviewed boolean")
-    spec = importlib.util.spec_from_file_location("product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
-    changes = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(changes)
+    changes = _product_change_module()
     records = changes.load(root, reader=git_bytes)
 
     def matches(path, symbol, original, actual):

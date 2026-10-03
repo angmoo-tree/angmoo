@@ -19,6 +19,16 @@ import subprocess
 MANIFEST = "security/post_refactor_contract_changes.json"
 
 
+@lru_cache(maxsize=8192)
+def _committed_git(root: str, head: str, args: tuple[str, ...]) -> bytes:
+    """Reuse immutable Git-object reads within one checker process.
+
+    Mutable refs are resolved afresh by load. Injected test readers never use
+    this cache, and the candidate manifest/source is reread on every check.
+    """
+    return subprocess.check_output(["git", *args], cwd=root)
+
+
 def load(root: Path, *, reader=None) -> list[dict]:
     path = root / MANIFEST
     if not path.exists():
@@ -27,11 +37,20 @@ def load(root: Path, *, reader=None) -> list[dict]:
     if payload.get("schema_version") != 1 or not isinstance(payload.get("records"), list):
         raise ValueError("invalid post-refactor change manifest")
     records = payload["records"]
+    head = (subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip()
+            if reader is None else None)
     # One immutable committed file can contain many changed definitions. Read
     # its Git object once per validation, retaining every provenance check.
     @lru_cache(maxsize=None)
     def git(*args: str) -> bytes:
-        return reader(*args, root=root) if reader is not None else subprocess.check_output(["git", *args], cwd=root)
+        if reader is not None:
+            return reader(*args, root=root)
+        if args[:2] == ("log", "--format=%H"):
+            args = (*args[:2], head, *args[2:])
+        elif args[:2] == ("merge-base", "--is-ancestor"):
+            args = (*args[:-1], head)
+        # Every command issued below now names an immutable commit/object.
+        return _committed_git(str(root.resolve()), head, args)
     for commit in git("log", "--format=%H", "--", MANIFEST).decode().splitlines():
         old = json.loads(git("show", f"{commit}:{MANIFEST}"))["records"]
         if records[:len(old)] != old:
@@ -129,12 +148,12 @@ def frontend_asset_matches(source: str, original: bytes, actual: bytes, records:
     return expected == hashlib.sha256(actual).hexdigest()
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=2048)
 def definition_body(source: str) -> list[ast.stmt]:
     return ast.parse(source).body
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=8192)
 def definition_ast(source: str, symbol: str) -> str:
     body = definition_body(source)
     for part in symbol.split("."):
@@ -149,7 +168,7 @@ def definition_ast(source: str, symbol: str) -> str:
     return ast.dump(node, include_attributes=False)
 
 
-@lru_cache(maxsize=128)
+@lru_cache(maxsize=8192)
 def normalize_ast_dump(value: str) -> str:
     """Normalize AST dumps or captured assertion source without executing text."""
     if not re.match(r"[A-Z][A-Za-z_0-9]*\(", value):
