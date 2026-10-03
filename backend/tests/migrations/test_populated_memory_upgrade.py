@@ -21,6 +21,7 @@ from app.runtime.persistence.sqlite_schema import (
     SCHEMA_VERSION_TABLE, build_sqlite_v8_metadata, create_schema_version_table,
     sqlite_schema_digest,
 )
+from historical_schema_fixture import populate_frozen_schema
 
 GENERATION = 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'
 NOW = datetime(2026, 9, 7, 0, 0, tzinfo=UTC)
@@ -35,7 +36,8 @@ def _rows(path):
             # Compare every historical column; v21 adds a separately checked icon.
             columns = [row[1] for row in connection.execute(f'PRAGMA table_info("{name}")')
                        if not (name == 'worlds' and row[1] == 'icon_media_id')
-                       and not (name == 'characters' and row[1] == 'character_background')]
+                       and not (name == 'characters' and row[1] == 'character_background')
+                       and not (name == 'users' and row[1] in {'ui_language', 'ui_preference_revision'})]
             projection = ','.join(f'"{column}"' for column in columns)
             result[name] = connection.execute(f'SELECT {projection} FROM "{name}" ORDER BY id').fetchall()
         return result
@@ -60,10 +62,7 @@ def _seed(root):
                 (1,8,manifest.source_revision,manifest.source_migration_count,
                  sqlite_schema_digest(connection),encode_utc_timestamp(NOW)),
             )
-        with engine.begin() as connection:
-            connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
-            connection.exec_driver_sql("ALTER TABLE characters ADD COLUMN character_background TEXT NOT NULL DEFAULT ''")
-        with Session(engine) as session:
+        def seed(session):
             scope = _seed_world(session)
             session.add_all([
                 MemoryScopeSettingModel(id='scope-on',owner_id=scope.owner_id,world_id=scope.world_id,
@@ -91,9 +90,7 @@ def _seed(root):
                     source_digest=hashlib.sha256(b'synthetic-source').hexdigest()),
             ])
             session.commit()
-        with engine.begin() as connection:
-            connection.exec_driver_sql("ALTER TABLE characters DROP COLUMN character_background")
-            connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
+        populate_frozen_schema(engine, build_sqlite_v8_metadata(), seed)
     finally:
         engine.dispose()
     EmbeddedGenerationController(root/'canonical',artifact_relative_path='angmoo.sqlite3').promote(
@@ -137,6 +134,7 @@ def test_populated_v8_memory_upgrade_preserves_state_or_rejects_unowned_change(t
         with sqlite3.connect(target) as connection:
             assert connection.execute('PRAGMA foreign_key_check').fetchall() == []
             assert connection.execute('SELECT count(*) FROM worlds WHERE icon_media_id IS NOT NULL').fetchone()[0] == 0
+            assert connection.execute('SELECT count(*) FROM users WHERE ui_language IS NOT NULL OR ui_preference_revision != 0').fetchone()[0] == 0
             for name in MEMORY_BATCH_TABLES:
                 assert connection.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0] == 0
             # Upgrading preserves old memories and pending candidates without

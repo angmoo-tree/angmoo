@@ -18,6 +18,7 @@ from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.models import Base
 from app.integrations.direct_llm import RunLlmTracker
 from app.domains.routines.contracts.plans import PlanScope
+from app.domains.identity.service.environment import snapshot as environment_snapshot
 from app.domains.routines.service import daily_preparation as store
 from app.domains.routines.service import plans
 from app.domains.social.schemas.feed import WorldFeedCandidateRead
@@ -51,6 +52,9 @@ def database(path):
 
 def pair(db):
     world, first, original_second = _seed(db, two_characters=True)
+    # The original fixture has an explicit Seoul user calendar. Direct planning
+    # calls below must freeze that same environment instead of defaulting to UTC.
+    assert environment_snapshot(db, first.user.id).timezone == "Asia/Seoul"
     first = SimpleNamespace(character=first.character, world_character=first.world_character,
         user=first.user, membership=first.membership,
         credential=db.scalar(select(models.LlmCredential).where(models.LlmCredential.character_id == first.character.id)))
@@ -76,7 +80,8 @@ def pair(db):
 
 
 def save_plan(db, world, ready, target, now):
-    return store.apply_plan(db, scope=PlanScope(world, ready.membership, ready.world_character, ready.character),
+    return store.apply_plan(db, scope=PlanScope(world, ready.membership, ready.world_character, ready.character,
+        environment_snapshot(db, ready.user.id)),
         output=output(), target_date=target, now=now, source_digest="a" * 64, expected_snapshot={})
 
 
@@ -224,7 +229,8 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
         assert asyncio.run(inbox.execute(state))["executions"][0]["status"] == "reused"
         assert db.scalar(select(func.count(models.JointActivity.id))) == 1
         for ready in (first, second)[existing:]:
-            scope = PlanScope(world, ready.membership, ready.world_character, ready.character)
+            scope = PlanScope(world, ready.membership, ready.world_character, ready.character,
+                environment_snapshot(db, ready.user.id))
             local_now = _utc(datetime.combine(target, datetime.min.time()) + timedelta(hours=7))
             source, _, _, allowed = preparation._source(db, scope, local_now)
             assert "evening" not in source["generated_dayparts"]
@@ -263,7 +269,8 @@ def test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation(tm
         joint.target_daypart, joint.eligible_dayparts = "dawn", ["dawn"]
         joint.scheduled_start_at, joint.scheduled_end_at = store.daypart_windows(joint.scheduled_local_date, world.timezone)["dawn"]
         db.commit()
-        scope = PlanScope(world, first.membership, first.world_character, first.character)
+        scope = PlanScope(world, first.membership, first.world_character, first.character,
+            environment_snapshot(db, first.user.id))
         source, _, before, allowed = preparation._source(db, scope, now)
         assert "dawn" in source["generated_dayparts"] and source["confirmed_reservations"] == []
         full = store.compose_generated_plan(new_output(source).daily_plan,

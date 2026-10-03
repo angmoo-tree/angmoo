@@ -21,8 +21,8 @@ def test_diagnostic_head_matches_shipped_sqlite_manifest_and_alembic_graph():
     manifest = load_sqlite_manifest(SQLITE_SCHEMA_VERSION)
     assert RUNTIME_MIGRATION_HEAD == manifest.source_revision
     assert RUNTIME_MIGRATION_HEAD == SOURCE_ALEMBIC_REVISION
-    assert scripts.get_heads() == ["20260930_0104"]
-    assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == "20260929_0103"
+    assert scripts.get_heads() == ["20261003_0105"]
+    assert scripts.get_revision(RUNTIME_MIGRATION_HEAD).down_revision == "20260930_0104"
     # The released v19 marker retains its older lineage.
     assert load_sqlite_manifest(19).source_revision == "20260918_0096"
 
