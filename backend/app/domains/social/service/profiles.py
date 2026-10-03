@@ -243,6 +243,7 @@ def _profile_ref(
                 profile_type="character",
                 id=character.id,
                 display_name=DELETED_CHARACTER_NAME,
+                deleted=True,
                 handle=None,
                 avatar_url=None,
                 banner_url=None,

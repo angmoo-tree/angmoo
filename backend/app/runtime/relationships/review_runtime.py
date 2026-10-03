@@ -21,13 +21,16 @@ class RelationshipReviewRuntime:
 
     def prepare(self, now):
         with self.session_factory() as db:
+            from app.domains.identity.service.environment import snapshot, lock_environment_admission
+            lock_environment_admission(db)
             settings = db.execute(select(MemoryScopeSettingModel, MemoryBatchSetting, MemoryBatchProfile).join(
                 MemoryBatchSetting, MemoryBatchSetting.scope_setting_id == MemoryScopeSettingModel.id).join(
                 MemoryBatchProfile, MemoryBatchProfile.owner_id == MemoryScopeSettingModel.owner_id).where(
                 MemoryScopeSettingModel.enabled.is_(True), MemoryBatchSetting.ai_enabled.is_(True),
                 MemoryBatchSetting.consent_version.is_not(None), MemoryBatchSetting.schedule_enabled.is_(True))).all()
             for setting, batch, profile in settings:
-                local = now.astimezone(ZoneInfo(batch.timezone))
+                environment = snapshot(db, setting.owner_id)
+                local = now.astimezone(ZoneInfo(environment.timezone))
                 if local.strftime("%H:%M") < batch.local_time:
                     continue
                 period = local.date().isoformat()
@@ -47,7 +50,7 @@ class RelationshipReviewRuntime:
                         continue
                     plan_review(db, world_id=setting.world_id, actor_id=setting.subject_world_character_id,
                         target_id=target, period_key=period, memories=memories,
-                        base={"identity": identity,
+                        base={"identity": identity, "environment": environment.to_dict(),
                               "owner_id": setting.owner_id, "setting_id": setting.id, "profile_version": profile.version,
                               "model_id": profile.model_id, "thinking_level": profile.thinking_level})
             db.commit()

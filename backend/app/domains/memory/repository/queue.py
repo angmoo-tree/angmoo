@@ -53,12 +53,16 @@ class SqlAlchemyMemoryMaintenanceQueue:
             if existing.reason != normalized_reason:
                 raise MemoryConflictError("memory_job_replay_conflict")
             return existing.id
+        from app.domains.identity.service.environment import snapshot, lock_environment_admission
+        lock_environment_admission(self._session, scope.owner_id)
+        environment = snapshot(self._session, scope.owner_id)
         row = MemoryMaintenanceJob(
             id=str(uuid4()),
             scope_setting_id=scope_setting_id,
             reason=normalized_reason,
             idempotency_key=normalized_key,
             status=MemoryJobStatus.PENDING.value,
+            environment_snapshot=environment.to_dict(),
         )
         try:
             with self._session.begin_nested():

@@ -87,6 +87,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     name_binding = read_name_binding(run.result)
     frozen_names = (run.result or {}).get("name_binding")
     name_policy = (run.result or {}).get("name_binding_policy")
+    from app.contracts.environment import EnvironmentSnapshot
+    environment = EnvironmentSnapshot.from_dict((run.result or {}).get("environment_snapshot"))
     if policy is not None:
         identity.update(routine_output_contract=policy["output_contract"], routine_state_schema_version=policy["state_schema_version"], routine_thought_policy=policy["thought_policy"])
     if attempt:
@@ -181,7 +183,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             ctx.db.expire_all()
         initialize_from_last_success(ctx.db, actor=actor)
         ctx.db.commit()
-        shared = plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id)))
+        shared = plain(shared_input(ctx, actor, ctx.db.get(World, actor.world_id), environment=environment))
         if attempt and name_binding is not None:
             attempt.emit("name_binding", details={"policy_version": name_binding.policy_version,
                 "binding_digest": name_binding.digest, "profile_version": name_binding.user_profile_version,

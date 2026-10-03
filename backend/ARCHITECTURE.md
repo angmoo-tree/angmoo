@@ -1,5 +1,20 @@
 # Angmoo Backend Architecture
 
+사용자 환경은 Identity의 `service/environment.py`가 소유하는 명시적 서비스 계약이다.
+`contracts/environment.py`의 immutable snapshot을 SNS·Chat·기억 작업의 접수 시점에 저장하고,
+각 작업은 재시도·재개에도 같은 snapshot을 사용한다. 환경 전환은 owner 인증·CAS·120초 lease와
+단조 sequence로 보호한다. 환경 history는 인증된 보고 transaction에서 저장하며 quota owner는 그 UTC 보호 범위를 읽는다.
+`routines/service/environment_schedule.py`는 슬롯 claim의 짧은 transaction에서 미래 idle 일정만 제한된 수로 조정한다. 범용 서비스에서 다른 도메인의 내부 저장 모델을 몰래 수정하지 않는다.
+
+`core/calendar.py`는 UTC 순간과 현지 day/month 경계·DST gap/overlap을 계산한다. 기간별 소비 owner는
+`AccountingPeriod`의 보호 구간 합집합에서 원 ID를 한 번 계수한다. 시간대 변경은 새로운 예산을
+부여하지 않으며, legacy 집계와 미확정 예약은 보수적으로 보호한다. 24시간 보존·lease·cooldown은
+현지 달력이 아닌 UTC 경과 시간 계약을 유지한다. World package의 timezone/hash는 바꾸지 않는다.
+
+공통 Unicode scanner와 memory projection profile은 document/query/postcheck가 함께 사용한다.
+원본의 수정·삭제는 after-commit fence로 재검증하며, 새 generation이 검증되기 전에는 preparing 상태다.
+새 projection은 bounded page/cursor로 재개하고 기존 vector profile이나 원문을 재작성하지 않는다.
+
 Angmoo 백엔드는 **업무별 폴더 안에서 HTTP, 업무 흐름, 저장, 입출력 형식을 나누는 FastAPI 애플리케이션**입니다. 게시물 문제는 `social`, 대화 문제는 `chat`, 기억 문제는 `memory`에서 시작합니다. 같은 업무 안에서는 `router`, `service`, `repository`, `models`, `schemas`처럼 역할을 드러내는 이름을 사용합니다.
 
 이 문서는 기능을 추가하거나 버그를 수정할 때 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. 구조 전환의 PR·테스트·설치 결과는 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다. 이 문서에 구조가 설명돼 있다는 사실과 특정 배포판의 검증 완료 여부는 구분합니다.

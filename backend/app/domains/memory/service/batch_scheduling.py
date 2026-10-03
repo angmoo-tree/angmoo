@@ -14,6 +14,8 @@ from app.domains.memory.service.consolidation_requests import prepare_requests
 
 
 def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, now: datetime, shutdown: bool = False) -> None:
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(session)
     # Authorize the cutoff once, in one SQL statement even for many characters.
     # Recovery may later deliver holes inside this persisted time boundary.
     config_table = MemoryBatchSetting.__table__
@@ -64,11 +66,13 @@ def schedule_batches(session, *, dependencies: MemoryPreparationDependencies, no
             config.last_claimed_at = now
             continue
         if config.timezone != zone:
-            config.timezone, config.version = zone, config.version + 1
+            # Only future slots change; an admitted batch keeps its fence.
+            config.timezone = zone
             config.next_due_at = next_daily_slot(
                 after=now,
                 local_time=config.local_time,
                 timezone=zone,
+                last_consumed_date=date.fromisoformat(config.last_consumed_date) if config.last_consumed_date else None,
             )
         due = (
             config.schedule_enabled

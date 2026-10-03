@@ -83,6 +83,8 @@ def parse_action(payload: dict, candidates: list[dict], *, lane=None, policy=Non
     parsed = model.model_validate({**body, "state_update": None})
     by_id = {c["target_id"]: c for c in candidates}
     seen = set()
+    missing_path = None
+    brief_path = None
     for index, decision in enumerate(parsed.decisions):
         path = f"decisions.{index}"
         proposal = getattr(decision, "proposal", None)
@@ -102,7 +104,11 @@ def parse_action(payload: dict, candidates: list[dict], *, lane=None, policy=Non
                 raise StructuredOutputValidationError("non_comment_proposal_invalid", f"{path}.interaction_intent")
             decision.interaction_intent = decision.comment_purpose = None
         elif decision.interaction_intent is None or (decision.interaction_intent == "ordinary_comment" and decision.comment_purpose is None):
-            raise StructuredOutputValidationError("comment_intent_missing", f"{path}.interaction_intent")
+            # Defer recoverable omissions until every canonical target, action
+            # and proposal has been checked. A fatal sibling is not repairable.
+            if missing_path is None:
+                field = "interaction_intent" if decision.interaction_intent is None else "comment_purpose"
+                missing_path = f"{path}.{field}"
         if decision.interaction_intent == "joint_activity_proposal":
             if not by_id[decision.target_id].get("proposal_eligible") or proposal is None:
                 raise StructuredOutputValidationError("proposal_not_eligible", f"{path}.proposal")
@@ -116,7 +122,11 @@ def parse_action(payload: dict, candidates: list[dict], *, lane=None, policy=Non
         elif response is not None:
             raise StructuredOutputValidationError("unexpected_proposal_response", f"{path}.proposal_response")
         if decision.action != "no_action" and not decision.brief.strip():
-            raise StructuredOutputValidationError("action_brief_missing", f"{path}.brief")
+            brief_path = brief_path or f"{path}.brief"
+    if missing_path is not None:
+        raise StructuredOutputValidationError("comment_intent_missing", missing_path)
+    if brief_path is not None:
+        raise StructuredOutputValidationError("action_brief_missing", brief_path)
     allowed_refs = {ref for c in candidates for ref in c["source_ids"]}
     if not set(refs) <= allowed_refs:
         state, refs, state_status = None, [], "invalid"

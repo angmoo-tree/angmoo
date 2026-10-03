@@ -102,6 +102,7 @@
       "app.domains.identity.service.credential_resolution",
       "app.domains.identity.service.demo_access",
       "app.domains.identity.service.external_verification",
+      "app.domains.identity.service.environment",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",

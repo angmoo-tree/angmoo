@@ -1,11 +1,22 @@
 """Literal word groups over the unchanged projection's lexical tokens."""
 import re
-from app.core.search_text import normalize_search_text
+from app.core.search_text import normalize_search_text, word_spans, literal_boundary
 from app.domains.memory.contracts.fts_recall import FtsQueryGroup, GroupedFtsQuery
 from app.domains.memory.policies.lexical_terms import _lexical_terms, _is_cjk
 
 _SPAN = re.compile(r"\w+(?:[-:./+]\w+)*", re.UNICODE)
 _PARTICLE = r"(?:에서는|에서|으로|부터|까지|은|는|이|가|을|를|에|와|과|의|로|도|만)?(?!\w)"
+
+
+def strict_literal_groups(normalized: str) -> tuple[FtsQueryGroup, ...]:
+    """Exact non-CJK atoms for legacy AND queries; keep CJK spacing policy.
+
+    FTS splits ID punctuation. Postchecks must use the original structured atom
+    rather than treating a digit prefix as a match of a different identifier.
+    The caller has already bounded normalized input to 1,000 characters.
+    """
+    return tuple(FtsQueryGroup(value, ()) for _, _, value in word_spans(normalized, structured=True)
+                 if not any(_is_cjk(character) for character in value))
 
 
 def build_groups(text: str, *, max_groups=32) -> GroupedFtsQuery:
@@ -14,14 +25,13 @@ def build_groups(text: str, *, max_groups=32) -> GroupedFtsQuery:
     normalized = normalize_search_text(text, max_chars=4000)
     groups, seen, tokens = [], set(), set()
     size = 0
-    for match in _SPAN.finditer(normalized):
-        value = match.group()
+    for start, end, value in word_spans(normalized, structured=True):
         if value in seen:
             continue
         terms = _lexical_terms(value, query_mode=True)
         # Account for escaped literals, internal AND, outer parentheses and OR.
         rendered_size = len(('(' + ' AND '.join('"' + t.replace('"', '""') + '"' for t in terms) + ')').encode())
-        if match.end() > 1000 or len(groups) >= max_groups or len(tokens | set(terms)) > 128 or size + rendered_size + (4 if groups else 0) > 8192:
+        if end > 1000 or len(groups) >= max_groups or len(tokens | set(terms)) > 128 or size + rendered_size + (4 if groups else 0) > 8192:
             return GroupedFtsQuery(tuple(groups), True)
         if terms:
             groups.append(FtsQueryGroup(value, terms))
@@ -59,13 +69,15 @@ def match_groups(groups: tuple[FtsQueryGroup, ...], document: str) -> tuple[int,
             hit = value in document
         elif len(value) == 1 and _is_cjk(value):
             hit = re.search(r'(?<!\w)' + re.escape(value) + _PARTICLE, document) is not None
+        elif value.isdecimal():
+            # Preserve bounded Korean day/count units without partial ID hits.
+            hit = re.search(r'(?<!\w)' + re.escape(value) + r'(?:년|월|일|시|분|초|개|명|회)' + _PARTICLE, document) is not None
+            hit = hit or any(literal_boundary(document, match.start(), match.end())
+                for match in re.finditer(re.escape(value), document))
         else:
             # Numeric runs and structured identifiers cannot match substrings.
-            left = r'(?<![\w.:/+\-])' if not value[0].isdigit() else r'(?<![0-9A-Za-z_.:/+\-])'
-            right = r'(?![0-9A-Za-z_.:/+\-])'
-            if _is_cjk(value[-1]):
-                right = ''
-            hit = re.search(left + re.escape(value) + right, document) is not None
+            hit = any(literal_boundary(document, match.start(), match.end())
+                for match in re.finditer(re.escape(value), document))
         if hit:
             matched.append(index)
     return tuple(matched)

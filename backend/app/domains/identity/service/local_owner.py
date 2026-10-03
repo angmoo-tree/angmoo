@@ -381,7 +381,14 @@ def _snapshot(user: User) -> LocalUserSnapshot:
         profile_setup_completed=user.profile_setup_completed,
         feed_content_filter=user.feed_content_filter,
         is_admin=user.is_admin,
+        ui_language=user.ui_language,
+        ui_preference_revision=user.ui_preference_revision,
     )
+
+
+def read_ui_language(db: Session, owner_id: str) -> str | None:
+    """Supported preference read, independent from detector and world metadata."""
+    return db.scalar(select(User.ui_language).where(User.id == owner_id, User.deleted_at.is_(None)))
 
 
 def _as_utc(value: datetime) -> datetime:

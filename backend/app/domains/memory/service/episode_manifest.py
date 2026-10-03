@@ -4,6 +4,7 @@ from dataclasses import asdict
 from datetime import datetime
 
 from app.contracts.activity_thought import ActivityThought
+from app.contracts.environment import EnvironmentSnapshot
 from app.domains.memory.contracts.episode import EpisodeBundle, EpisodeSourceMember, EpisodeSourceUnit, EpisodePriorCandidate
 from app.domains.memory.exceptions import MemoryConflictError, MemoryValidationError
 from app.domains.memory.policies.episode_bundles import bundle_manifest_hash
@@ -23,7 +24,8 @@ def episode_input_manifest(bundle):
         "scope": asdict(bundle.scope), "activation_epoch": bundle.activation_epoch,
         "cutoff_sequence": bundle.cutoff_sequence, "manifest_hash": bundle_manifest_hash(bundle),
         "new": [unit(value) for value in bundle.new_units], "context": [unit(value) for value in bundle.context_units],
-        "prior": [asdict(value) for value in bundle.prior_episodes]}
+        "prior": [asdict(value) for value in bundle.prior_episodes],
+        **({"environment": bundle.environment.to_dict()} if bundle.environment is not None else {})}
 
 
 def restore_episode_input(manifest, *, scope, detail_reader):
@@ -75,7 +77,8 @@ def restore_episode_input(manifest, *, scope, detail_reader):
 
         bundle = EpisodeBundle(manifest["bundle_ref"], scope, tuple(restore(value) for value in new),
             tuple(restore(value) for value in context), tuple(EpisodePriorCandidate(**value) for value in manifest["prior"]),
-            manifest["activation_epoch"], manifest["cutoff_sequence"])
+            manifest["activation_epoch"], manifest["cutoff_sequence"],
+            EnvironmentSnapshot.from_dict(manifest["environment"]) if "environment" in manifest else None)
     except (KeyError, TypeError, ValueError):
         raise MemoryValidationError("episode_manifest_invalid") from None
     if bundle_manifest_hash(bundle) != manifest["manifest_hash"]:

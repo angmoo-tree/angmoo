@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, JSON, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models import Base
 
@@ -66,6 +66,9 @@ class LocalBotActionQuotaBucket(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+
+    period_state: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
 
 class LocalBotReadQuotaBucket(Base):
     __tablename__ = "local_bot_read_quota_buckets"

@@ -216,7 +216,7 @@ def apply_plan(db: Session, *, scope, output: GeneratedDailyPlan, target_date: d
     if plan is None:
         plan = DailyActivityPlan(id=uuid7_string(), world_id=scope.world.id,
             world_character_id=scope.world_character.id, local_date=target_date,
-            timezone_name=scope.world.timezone, timezone_contract_version=TIMEZONE_CONTRACT_VERSION,
+            timezone_name=scope.environment.timezone, timezone_contract_version=TIMEZONE_CONTRACT_VERSION,
             repertoire_id=None, generation_source="daily_generation", preparation_contract_version=CONTRACT,
             world_definition_hash=scope.world.contract_hash,
             character_definition_hash=source_digest, repertoire_contract_version=CONTRACT,
@@ -228,10 +228,10 @@ def apply_plan(db: Session, *, scope, output: GeneratedDailyPlan, target_date: d
         plan.version += 1
         plan.generation_source = "daily_generation"
         plan.preparation_contract_version = CONTRACT
-        plan.timezone_name = scope.world.timezone
+        plan.timezone_name = scope.environment.timezone
         plan.world_definition_hash = scope.world.contract_hash
     previous = {item.daypart: item for item in current_items(db, plan.id)}
-    windows = daypart_windows(target_date, scope.world.timezone)
+    windows = daypart_windows(target_date, scope.environment.timezone)
     for item in output.items:
         old = previous.get(item.daypart)
         if old and preserve_item(db, old):

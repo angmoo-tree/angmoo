@@ -31,6 +31,8 @@ RESERVED_NAME_TERMS = (
     "탈퇴한 사용자",
     "삭제한 유저",
     "삭제한 앵무",
+    "삭제한 캐릭터",
+    "deleted character",
 )
 
 _COMPACT_DROP_RE = re.compile(r"[^0-9a-z가-힣]+")

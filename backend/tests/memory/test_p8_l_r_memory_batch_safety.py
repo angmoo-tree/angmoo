@@ -696,7 +696,7 @@ def test_shutdown_deadline_cancels_late_provider_and_preserves_candidates(
     factory = sessionmaker(bind=memory_session.bind)
 
     class Slow:
-        async def select(self, sources, *, timeout):
+        async def select(self, sources, *, timeout, environment=None):
             await asyncio.sleep(10)
 
     runtime = MemoryBatchRuntime(factory, lambda owner, model, thinking: Slow())

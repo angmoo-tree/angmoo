@@ -12,7 +12,7 @@ from app.domains.memory.contracts.scope import MemoryScope
 
 
 MEMORY_RECALL_CONTRACT_VERSION = "memory-recall.v1"
-MEMORY_RECALL_GENERATION = "v1"
+MEMORY_RECALL_GENERATION = "unicode-boundary-v2"
 MEMORY_RECALL_SCHEMA_VERSION = 1
 MAX_CANONICAL_RECALL_RESULTS = 50
 
@@ -176,6 +176,10 @@ class MemoryRecallDoctor:
     rollback_available: bool
     healthy: bool
     tokenizer_strategy: str
+
+
+class MemoryRecallPreparing(RuntimeError):
+    """A new lexical generation is reconciling, never an empty result."""
 
 
 SOURCE_KIND_BY_TYPE = {

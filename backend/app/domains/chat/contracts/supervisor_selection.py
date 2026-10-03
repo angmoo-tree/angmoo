@@ -15,6 +15,11 @@ CONTROL_NAMES = frozenset({"USE_CONTEXT", "REQUEST_CLARIFICATION"})
 SEMANTIC_FIELDS = ("intent", "entities", "relationship", "time_scope", "aggregation", "coordination_hint")
 
 
+def _expected_keys(required, payload):
+    """Optional additive meaning keeps old payloads and semantic hashes valid."""
+    return set(required) | ({"activity_kinds"} if isinstance(payload, dict) and "activity_kinds" in payload else set())
+
+
 @dataclass(frozen=True, slots=True)
 class SelectionArgumentOptions:
     """Request-owned experiments; no provider or model-specific behavior."""
@@ -98,7 +103,7 @@ def tool_arguments_schema() -> dict:
     properties["time_scope"]["description"] = "Null when no time constraint is specified. Otherwise preserve the user's time expression; do not invent dates."
     properties["aggregation"]["description"] = "Null unless counting, comparing, ranking or another declared aggregation is requested. Do not invent an aggregation for ordinary recall."
     properties["coordination_hint"]["description"] = "Null for a single tool. For both tools supply the same supported hint and exactly the same complete semantic arguments to each call."
-    return {"type": "object", "properties": {key: properties[key] for key in SEMANTIC_FIELDS},
+    return {"type": "object", "properties": {key: properties[key] for key in (*SEMANTIC_FIELDS, "activity_kinds")},
             "required": list(SEMANTIC_FIELDS), "additionalProperties": False}
 
 
@@ -155,7 +160,7 @@ def model_arguments_schema(options: SelectionArgumentOptions = SelectionArgument
 def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validation_step=None):
     if not calls:
         payload = json.loads(text)
-        if not isinstance(payload, dict) or set(payload) != {*SEMANTIC_FIELDS, "control", "clarification_slot"}:
+        if not isinstance(payload, dict) or set(payload) != _expected_keys({*SEMANTIC_FIELDS, "control", "clarification_slot"}, payload):
             raise RetrievalContractError("retrieval_router_payload_keys_invalid")
         control = payload.pop("control")
         if control not in {"CURRENT_CONTEXT", "CLARIFICATION"}:
@@ -168,7 +173,7 @@ def parse_selection(text: str, calls: tuple[SelectionToolCall, ...], *, validati
     if any(not c.call_id or len(c.call_id) > 256 for c in calls):
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
     arguments = calls[0].arguments()
-    if not isinstance(arguments, dict) or set(arguments) != set(SEMANTIC_FIELDS):
+    if not isinstance(arguments, dict) or set(arguments) != _expected_keys(SEMANTIC_FIELDS, arguments):
         raise RetrievalContractError("retrieval_router_payload_keys_invalid")
     if any(call.arguments() != arguments for call in calls[1:]):
         raise RetrievalContractError("retrieval_router_coordination_route_mismatch")
@@ -221,7 +226,7 @@ def parse_control_selection(
             expected.add("graph_queries")
         if call.name == "REQUEST_CLARIFICATION":
             expected.add("clarification_slot")
-        if not isinstance(payload, dict) or set(payload) != expected:
+        if not isinstance(payload, dict) or set(payload) != _expected_keys(expected, payload):
             raise RetrievalContractError("retrieval_router_payload_keys_invalid")
         if options.hybrid_recall and call.name == "CANONICAL":
             search_text = payload.pop("search_text")
@@ -263,7 +268,7 @@ def parse_control_selection(
         clarify = call.name == "REQUEST_CLARIFICATION"
         if clarify:
             expected.add("clarification_slot")
-        if not isinstance(payload, dict) or set(payload) != expected:
+        if not isinstance(payload, dict) or set(payload) != _expected_keys(expected, payload):
             raise RetrievalContractError("retrieval_router_payload_keys_invalid")
         intent = parse_selection(json.dumps({
             **payload, "control": "CLARIFICATION" if clarify else "CURRENT_CONTEXT",
@@ -319,6 +324,8 @@ def _normalize_model_arguments(payload, *, both, options, trace):
 def effective_calls(request_id: str, intent, proposed: tuple[SelectionToolCall, ...]):
     names = TOOL_NAMES if intent.route.value == "BOTH" else ({intent.route.value} & TOOL_NAMES)
     arguments = {key: intent.payload()[key] for key in SEMANTIC_FIELDS}
+    if intent.activity_kinds:
+        arguments["activity_kinds"] = list(intent.activity_kinds)
     if intent.search_text is not None:
         arguments["search_text"] = intent.search_text
     if intent.version == "retrieval-intent.v2":

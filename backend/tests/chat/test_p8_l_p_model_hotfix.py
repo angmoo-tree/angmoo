@@ -101,6 +101,10 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
 ) -> None:
     thread = object()
     observed: dict[str, object] = {}
+    # This unit uses an opaque DB; the actual SQLite admission lock is covered
+    # by the environment admission tests. Verify its order before thread lock.
+    monkeypatch.setattr("app.domains.chat.service.generation.lock_environment_admission",
+        lambda _db, owner: observed.update(environment_owner=owner))
 
     monkeypatch.setattr(
         world_generation.thread_service,
@@ -136,7 +140,7 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
         "world-a",
         "thread-a",
     ) is thread
-    assert observed == {"lock_thread": True}
+    assert observed == {"environment_owner": "owner", "lock_thread": True}
 
 
 def test_v6_to_v7_backfills_only_resolved_threads_to_default_binding() -> None:

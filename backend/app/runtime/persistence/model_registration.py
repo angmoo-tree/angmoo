@@ -10,6 +10,7 @@ def register_models() -> MetaData:
     import app.domains.chat.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models_media  # noqa: F401
+    import app.domains.identity.models_environment  # noqa: F401
     import app.domains.media.models  # noqa: F401
     import app.domains.local_bot.models  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.consolidation_request  # noqa: F401

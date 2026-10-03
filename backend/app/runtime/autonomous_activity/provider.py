@@ -61,11 +61,11 @@ state_update is null to maintain the current state, or one coherent mood/intensi
 State means the actor's CURRENT condition after actually perceived experience, not a thought per post.
 Use one of the supplied nine moods, intensity 0..100, state_note at most 160 characters.
 Compare the last confirmed state, elapsed time and real new experience. No automatic emotional drift is required.
-평범한 확인·짧은 인사·점심 메뉴 등만으로 마지막 상태의 메모를 이번 발언 요약으로 교체하지 마세요.
-기존 상태와 실질적으로 같으면 강도를 임의로 조정하거나 비슷한 메모를 새로 쓰지 말고 state_update=null로 유지하세요.
-상태 메모에는 현재 남아 있는 감정·긴장·의욕을 쓰세요. 지금 결정한 답변·수락·계획을 이미 실행하거나 합의한 사실로 기록하지 마세요.
-brief는 앞으로 할 말이고 state_note는 그 말을 하기 전 현재 상태입니다. brief에서 수락을 정해도 state_note에 "수락했다"고 쓰지 마세요. 상태에는 초대를 받아 느낀 기대처럼 실제로 받은 경험만 남기세요.
-일정·상대의 응답·문제 해결이 확인되지 않았다면 "동행이 결정됨", "갈등이 해소됨", "작업을 완료함" 같은 결과를 상태에 넣지 마세요.
+An ordinary acknowledgement, greeting or lunch-menu exchange alone is not a reason to replace the state note.
+If substantially unchanged, keep state_update=null; do not adjust intensity or paraphrase the same note.
+Record only currently lingering emotion, tension or motivation. A reply, acceptance or plan you decide now is not an accomplished event.
+brief is what you intend to say; state_note describes the condition before saying it. Receiving an invitation can support anticipation, not a claim that you accepted it.
+Never record confirmed companionship, resolved conflict or finished work unless the supplied evidence confirms that outcome.
 Only actual supplied new observations may support state changes; an intended reply does not imply reconciliation.
 Remembered or already interpreted events are context, not new events to accumulate again.
 Mood alone is not evidence for changing trust or other relationships.
@@ -101,6 +101,8 @@ class ActivityProvider:
                    json_retry_policy=None,
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None):
+        from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
+        system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
         # Remove optional whole units before rejecting an oversized required
         # input. Never cut a source sentence, original thought or correction.
         payload = deepcopy(payload)
@@ -239,7 +241,7 @@ class ActivityProvider:
             writer_schema = restrict_reply_schema(writer_schema, lane, can_respond)
         response_instruction = ("For proposal_response copy the Planner proposal_decision and counter fields exactly; never choose them anew. "
             if not scoped or (lane == "inbox" and can_respond) else "")
-        system = ("Write one Korean reply per supplied task_id in the persona's style. "
+        system = ("Write one reply per supplied task_id in the persona's directed language and style. "
             "The ActionPlanner already decided action, purpose, attitude and core content. "
             "Express that decision; do not select another action or change relationship/state. "
             "Use only relevant supplied evidence. Memory is past, not an event happening now. "

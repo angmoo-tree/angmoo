@@ -248,7 +248,7 @@ def test_router_failure_diagnostic_is_closed_bounded_and_never_copies_text() -> 
 
 def test_provider_schema_matches_parser_shape_and_serializes_for_gemini_families() -> None:
     schema = retrieval_router_response_schema()
-    assert set(schema["required"]) == set(schema["properties"])
+    assert set(schema["properties"]) - set(schema["required"]) == {"activity_kinds"}
     assert "additionalProperties" not in schema
     nested_required = {
         "entities": {"ref", "mention", "role"},

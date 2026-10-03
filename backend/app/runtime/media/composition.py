@@ -143,7 +143,8 @@ class MediaRuntime:
     def usage(self, db, owner_id):
         from app.domains.social.service.generation_usage import read_usage
         from app.domains.media.service.interpretation import read_interpretation_usage
-        day = self.quota_day()
+        from app.domains.identity.service.environment import accounting_period
+        day = accounting_period(db, owner_id, "day").key
         return {**read_usage(db, day), **read_interpretation_usage(db, owner_id, day)}
 
     @staticmethod
@@ -327,9 +328,10 @@ class MediaRuntime:
             return None, credential, row.generation_revision, row.generation_daily_limit, code
 
     def admit_post(self, db, *, post, owner_id, character_id, draft):
+        from app.domains.identity.service.environment import accounting_period
         return admit(db, post=post, owner_id=owner_id, character_id=character_id,
             scene=draft._image_prompt, scene_error=draft._image_error, prepare=self.prepare_intent,
-            quota_day=quota_day(datetime.now(timezone.utc)))
+            quota_day=accounting_period(db, owner_id, "day").key)
 
     def authorize_job(self, db, job):
         from app.domains.social.models.posts import Post

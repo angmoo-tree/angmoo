@@ -58,8 +58,13 @@ def claim_due_resident_slots(
     single_flight: bool = False,
     references: SlotReferences,
 ) -> list[models.AgentSlot]:
-    if allowed_character_ids is not None and not allowed_character_ids:
+    if max_count <= 0 or (allowed_character_ids is not None and not allowed_character_ids):
         return []
+    from app.domains.routines.service.environment_schedule import reconcile_environment_schedules
+    from app.domains.identity.service.environment import installation_snapshot, lock_environment_admission
+    lock_environment_admission(db)
+    reconcile_environment_schedules(db, now=now, limit=max(3, max_count * 3))
+    environment_revision = installation_snapshot(db).timezone_revision
     if single_flight and has_active_resident_slot_run(db, now=now):
         return []
 
@@ -69,6 +74,7 @@ def claim_due_resident_slots(
         models.AgentSlot.assigned_character_id.is_not(None),
         models.AgentSlot.assigned_credential_id.is_not(None),
         models.AgentSlot.next_tick_at <= now,
+        models.AgentSlot.timezone_revision == environment_revision,
     ]
     owner_controlled = references.owner_controlled_predicate()
     conditions.append(~owner_controlled)

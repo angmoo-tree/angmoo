@@ -62,6 +62,8 @@ def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: 
 
 def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> ActivityGraphRun:
     """Existing runs keep their engine even if policy changes during execution."""
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(db, actor.owner_user_id)
     row = db.get(ActivityGraphRun, activity_id)
     if row is not None:
         if ((row.world_id, row.world_character_id) != (actor.world_id, actor.id)
@@ -79,11 +81,14 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
         output_policy=settings.ROUTINE_OUTPUT_POLICY, thought_policy=settings.ACTIVITY_THOUGHT_POLICY)
     from app.domains.world_characters.service.name_binding import resolve_name_binding
     binding = resolve_name_binding(db, actor=actor, owner_id=actor.owner_user_id)
+    from app.domains.identity.service.environment import snapshot
+    environment = snapshot(db, binding.owner_id)
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
         world_character_id=actor.id, engine=engine,
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
         status="running", stage="LoadContext", started_at=datetime.now(UTC),
-        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version, "name_binding": binding.to_dict()})
+        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version,
+            "name_binding": binding.to_dict(), "environment_snapshot": environment.to_dict()})
     if engine == "personalized_graph_v2":
         from app.domains.world_characters.contracts.social_io import new_policies
         row.result = {**row.result, **new_policies()}

@@ -61,6 +61,13 @@ class SqlAlchemyMemoryRecallDocumentSource:
                 session.scalars(select(MemoryItem.id).order_by(MemoryItem.id))
             )
 
+    def item_id_page(self, *, after: str = "", limit: int = 100) -> tuple[str, ...]:
+        if not 1 <= limit <= 200:
+            raise ValueError("memory_recall_page_limit_invalid")
+        with self._factory() as session:
+            return tuple(session.scalars(select(MemoryItem.id).where(MemoryItem.id > after)
+                .order_by(MemoryItem.id).limit(limit)))
+
     def documents_for_item_ids(
         self,
         item_ids: Iterable[str],
@@ -103,6 +110,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
     def item_ids_for_scope_setting(
         self,
         setting_id: str,
+        *, limit: int | None = None,
     ) -> tuple[str, ...]:
         with self._factory() as session:
             setting = session.get(MemoryScopeSettingModel, setting_id)
@@ -118,6 +126,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                         == setting.subject_world_character_id,
                     )
                     .order_by(MemoryItem.id)
+                    .limit(limit)
                 )
             )
 

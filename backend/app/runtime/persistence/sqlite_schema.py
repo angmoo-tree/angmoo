@@ -11,10 +11,10 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 26
-SOURCE_ALEMBIC_REVISION = "20260930_0104"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 103
-EXPECTED_CANONICAL_TABLE_COUNT = 147
+SQLITE_SCHEMA_VERSION = 27
+SOURCE_ALEMBIC_REVISION = "20261003_0105"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 104
+EXPECTED_CANONICAL_TABLE_COUNT = 149
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
 
 ACTIVITY_V19_TABLES = (
@@ -315,6 +315,10 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    # Historic builders sometimes clone the registered model subset directly.
+    # Environment v27 is additive only and must not enter their frozen schema.
+    from app.runtime.persistence.sqlite_environment_schema import remove_environment_schema
+    remove_environment_schema(metadata)
     from app.runtime.persistence.sqlite_image_schema import remove_image_schema
     remove_image_schema(metadata)
     _remove_daily_preparation(metadata)
@@ -709,9 +713,17 @@ def build_sqlite_v24_metadata() -> MetaData:
     return metadata
 
 
+def build_sqlite_v26_metadata() -> MetaData:
+    """Immutable pre-environment inventory; retain all original v26 columns."""
+    metadata = build_sqlite_baseline_metadata()
+    from app.runtime.persistence.sqlite_environment_schema import remove_environment_schema
+    remove_environment_schema(metadata)
+    return metadata
+
+
 def build_sqlite_v25_metadata() -> MetaData:
     from app.runtime.persistence.sqlite_image_schema import remove_image_schema
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v26_metadata()
     remove_image_schema(metadata)
     return metadata
 

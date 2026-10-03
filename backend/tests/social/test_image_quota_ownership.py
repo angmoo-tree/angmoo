@@ -21,6 +21,9 @@ def test_image_quota_keeps_day_window_commit_and_release_accounting(monkeypatch,
     )
     assert image_quota._daily_image_window(at.replace(tzinfo=None)) == image_quota._daily_image_window(at)
     with factory() as db:
+        from environment_fixture_support import seed_environment
+        seed_environment(db, "social-uow-owner")
+        db.commit()
         commits = []
         event.listen(db, "before_commit", lambda *_: commits.append("commit"))
         first = image_quota._reserve_service_image_quota(

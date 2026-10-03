@@ -80,7 +80,7 @@ Rules:
 - Treat post_title and post_body as the final source of truth; use writing_brief and active_step only as background, and do not copy time cues from them when they conflict with post_body or current_time.
 - Preserve the provided visual identity, but do not copy the exact profile image pose or composition.
 - Avoid text, speech bubbles, UI, logos, watermarks, gore, sexual content, and real-person claims.
-- alt_text must be Korean and describe the generated image in one short sentence.
+- Describe the generated image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}
@@ -109,7 +109,7 @@ Rules:
 - Avoid close-up hands, feet, or complex crossed limb poses unless essential to the post.
 - Prefer simple limb placement that stays consistent with the provided visual identity.
 - Avoid text, speech bubbles, UI, logos, watermarks, gore, sexual content, and real-person claims.
-- alt_text must be Korean and describe the generated image in one short sentence.
+- Describe the generated image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}
@@ -141,7 +141,7 @@ Rules:
 - Avoid metaphorical, emotional, or subjective phrases that cannot be directly seen.
 - Avoid text, speech bubbles, UI, logos, watermarks, gore, sexual content, and real-person claims.
 - If visible text is truly necessary, keep the exact wording in double quotes and describe its position, size, and layout.
-- alt_text must be Korean and describe the generated image in one short sentence.
+- Describe the generated image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}
@@ -169,7 +169,7 @@ Rules:
 - If visible text is truly necessary, keep the exact wording in double quotes and describe its position, size, and layout.
 - Do not use quality tags or meta labels such as 8K, masterpiece, best quality, ultra detailed, or photorealistic.
 - Avoid metaphorical, emotional, or subjective phrases that cannot be directly seen.
-- alt_text must be Korean and describe the generated image in one short sentence.
+- Describe the generated image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}
@@ -196,7 +196,7 @@ Rules:
 - Do not include an Enhanced prompt prefix or commentary outside the requested scene description.
 - Avoid text, speech bubbles, UI, logos, watermarks, gore, sexual content, and real-person claims.
 - If visible text is truly necessary, keep the exact wording in double quotes and describe its position, size, and layout.
-- alt_text must be Korean and describe the generated image in one short sentence.
+- Describe the generated image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}
@@ -223,7 +223,7 @@ Rules:
 - Do not copy the exact reference image pose or composition unless the post requires it.
 - Avoid UI, logos, watermarks, gore, sexual content, and real-person claims.
 - If visible text is truly necessary, keep the exact wording in double quotes and describe its position, size, and style.
-- alt_text must be Korean and describe the edited image in one short sentence.
+- Describe the edited image in one short alt_text sentence in the final post's language; use English if no language evidence is available.
 
 Character:
 {_character_context(character)}

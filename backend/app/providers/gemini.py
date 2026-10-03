@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import math
+from copy import deepcopy
 from time import monotonic
 from typing import Any
 
@@ -59,9 +60,9 @@ def build_gemini_developer_response_schema(
     source = model.model_json_schema()
     definitions = source.get("$defs", {})
 
-    def convert(value: Any) -> Any:
+    def convert(value: Any, references: tuple[str, ...] = ()) -> Any:
         if isinstance(value, list):
-            return [convert(item) for item in value]
+            return [convert(item, references) for item in value]
         if not isinstance(value, dict):
             return value
 
@@ -71,12 +72,38 @@ def build_gemini_developer_response_schema(
             if not isinstance(reference, str) or not reference.startswith(prefix):
                 raise ValueError(f"unsupported response schema reference: {reference}")
             name = reference[len(prefix) :]
+            if name in references:
+                raise ValueError("recursive response schema reference")
             target = definitions.get(name)
             if not isinstance(target, dict):
                 raise ValueError(f"missing response schema definition: {name}")
-            merged = dict(target)
+            merged = deepcopy(target)
             merged.update({key: item for key, item in value.items() if key != "$ref"})
-            return convert(merged)
+            return convert(merged, (*references, name))
+
+        # JSON Schema values must stay values, not be traversed as schema nodes.
+        value = deepcopy(value)
+        if "const" in value:
+            constant = value.pop("const")
+            if (isinstance(constant, bool) or not isinstance(constant, (str, int, float, type(None)))
+                    or isinstance(constant, float) and not math.isfinite(constant)):
+                raise ValueError("unsupported response schema constant")
+            if "enum" in value and (not isinstance(value["enum"], list) or not any(
+                type(candidate) is not bool and candidate == constant
+                for candidate in value["enum"])):
+                raise ValueError("conflicting response schema const and enum")
+            inferred = "null" if constant is None else ("string" if isinstance(constant, str)
+                else "integer" if isinstance(constant, int) else "number")
+            declared = value.get("type")
+            if declared is not None and inferred not in (declared if isinstance(declared, list) else [declared]):
+                if not (inferred == "integer" and declared == "number"):
+                    raise ValueError("conflicting response schema const and type")
+            value["type"] = declared or inferred
+            if constant is None:
+                value["type"] = "null"
+                value.pop("enum", None)
+            else:
+                value["enum"] = [constant]
 
         variants = value.get("anyOf")
         if isinstance(variants, list):
@@ -87,28 +114,44 @@ def build_gemini_developer_response_schema(
             ]
             has_null = len(non_null) != len(variants)
             if has_null and len(non_null) == 1:
-                converted = convert(non_null[0])
+                converted = convert(non_null[0], references)
                 if not isinstance(converted, dict):
                     raise ValueError("nullable response schema must resolve to an object")
                 converted_type = converted.get("type")
-                if isinstance(converted_type, str):
+                if isinstance(converted_type, str) and "enum" in converted:
+                    # An enum on a type array would also constrain null. Keep
+                    # the unrestricted null alternative separate from it.
+                    metadata = convert({k: v for k, v in value.items() if k != "anyOf"}, references)
+                    return {**metadata, "anyOf": [converted, {"type": "null"}]}
+                elif isinstance(converted_type, str):
                     converted["type"] = [converted_type, "null"]
                 else:
                     raise ValueError(
                         "nullable response schema must have one concrete type"
                     )
-                return converted
+                return {**convert({k: v for k, v in value.items() if k != "anyOf"}, references), **converted}
             raise ValueError("unsupported response schema union")
+
+        if isinstance(value.get("type"), list) and "enum" in value:
+            concrete = [kind for kind in value["type"] if kind != "null"]
+            if len(concrete) != 1 or "null" not in value["type"]:
+                raise ValueError("unsupported response schema enum union")
+            allows_null = None in value["enum"]
+            values = [item for item in value["enum"] if item is not None]
+            if not values and allows_null:
+                return {**convert({k: v for k, v in value.items() if k not in {"type", "enum"}}, references), "type": "null"}
+            leaf = convert({**value, "type": concrete[0], "enum": values}, references)
+            return {"anyOf": [leaf, {"type": "null"}]} if allows_null else leaf
 
         converted: dict[str, Any] = {}
         for key, item in value.items():
             if key == "properties" and isinstance(item, dict):
                 converted[key] = {
-                    property_name: convert(property_schema)
+                    property_name: convert(property_schema, references)
                     for property_name, property_schema in item.items()
                 }
             elif key in _GEMINI_DEVELOPER_SCHEMA_KEYS:
-                converted[key] = convert(item)
+                converted[key] = convert(item, references) if key == "items" else deepcopy(item)
         return converted
 
     converted = convert(source)
@@ -258,6 +301,16 @@ def _response_evidence(response: Any) -> dict[str, Any]:
 def _native_parameters(schema: dict[str, Any]) -> types.Schema:
     """Use the SDK's OpenAPI nullable form; domain validation stays authoritative."""
     def convert(node):
+        variants = node.get("anyOf")
+        if isinstance(variants, list):
+            concrete = [item for item in variants if item.get("type") != "null"]
+            if len(variants) == 2 and len(concrete) == 1:
+                # Native tools use the SDK's OpenAPI nullable flag. Preserve
+                # the same enum/null domain as the JSON response schema.
+                leaf = convert(concrete[0])
+                return {**convert({k: v for k, v in node.items() if k != "anyOf"}),
+                    **leaf, "nullable": True}
+            raise ValueError("native_tool_schema_union_unsupported")
         result = {}
         for key, value in node.items():
             if key == "additionalProperties":

@@ -15,6 +15,12 @@ class SqlAlchemyActivityScopeReads:
         self.db = db
         self._inspector: Inspector | None = None
 
+    def get_runtime_timezone(self, character_id: str) -> str:
+        from app.domains.characters.models import Character
+        from app.domains.identity.service.environment import snapshot
+        character = self.db.get(Character, character_id)
+        return snapshot(self.db, character.owner_id).timezone if character else "UTC"
+
     def _table_exists(self, name: str) -> bool:
         if self._inspector is None:
             self._inspector = inspect(self.db.get_bind())

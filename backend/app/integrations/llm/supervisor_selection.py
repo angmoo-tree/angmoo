@@ -10,7 +10,7 @@ from app.domains.chat.contracts.supervisor_selection import (
     SelectionArgumentOptions, SelectionToolCall, SelectionValidationTrace,
     parse_selection, parse_control_selection, model_arguments_schema, control_arguments_schema,
 )
-from app.domains.chat.contracts.supervisor_prompts import SUPERVISOR_SYSTEM_PROMPT, CANONICAL_DESCRIPTION, GRAPH_DESCRIPTION
+from app.domains.chat.contracts.supervisor_prompts import SUPERVISOR_SYSTEM_PROMPT, CANONICAL_DESCRIPTION, GRAPH_DESCRIPTION, MULTILINGUAL_SELECTION_POLICY
 from app.domains.chat.policies import resolve_world_chat_model_execution_policy
 from app.domains.identity.contracts import CredentialPurpose
 from app.integrations import direct_llm
@@ -76,7 +76,7 @@ def control_selection_system_prompt(options=SelectionArgumentOptions()):
                 "Set relationship to null for ordinary actions unless an actual relationship dimension is requested; preserve action direction in search_text. "
                 "Retrieve relevant memories once; the final response generator decides whether the evidence answers the question or needs clarification."
             )
-        return prompt
+        return prompt + MULTILINGUAL_SELECTION_POLICY
     core = SUPERVISOR_SYSTEM_PROMPT.replace("CURRENT_CONTEXT control outcome", "USE_CONTEXT function").replace("CLARIFICATION control outcome", "REQUEST_CLARIFICATION function")
     prompt = core + (
         "\nExpress every selection using native function calls only, without text or a JSON control object. "
@@ -125,7 +125,7 @@ def control_selection_system_prompt(options=SelectionArgumentOptions()):
             "Do not invent the yet-unknown counterpart. Use graph_queries=[] when no graph facts are needed. "
             "Both tool calls carry the same entire argument object. The backend binds fixed people and directions; the Graph Planner chooses operations."
         )
-    return prompt
+    return prompt + MULTILINGUAL_SELECTION_POLICY
 
 
 def selection_prompt(request):
@@ -154,7 +154,7 @@ def selection_system_prompt():
         '{"control":"CURRENT_CONTEXT","intent":"current_context","entities":[],"relationship":null,"time_scope":null,"aggregation":null,"coordination_hint":null,"clarification_slot":null}. '
         "Preserve relevant semantic fields for fact questions. CLARIFICATION sets control=CLARIFICATION, intent=clarification_required, "
         "and one clarification_slot from: "
-    ) + ", ".join(sorted(ROUTER_CLARIFICATION_SLOTS)) + ". No-tool coordination_hint is null."
+    ) + ", ".join(sorted(ROUTER_CLARIFICATION_SLOTS)) + ". No-tool coordination_hint is null." + MULTILINGUAL_SELECTION_POLICY
 
 
 def _text_shape(text):

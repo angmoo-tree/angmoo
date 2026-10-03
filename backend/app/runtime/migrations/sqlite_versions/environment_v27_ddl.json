@@ -1,0 +1,12 @@
+{
+  "local_environments": {
+    "create": "\nCREATE TABLE local_environments (\n\towner_id VARCHAR(64) NOT NULL, \n\tinstallation_id VARCHAR(64) NOT NULL, \n\tpreferred_language VARCHAR(80), \n\ttimezone VARCHAR(80), \n\tenvironment_revision INTEGER DEFAULT '0' NOT NULL, \n\ttimezone_revision INTEGER DEFAULT '0' NOT NULL, \n\tconfirmed_at DATETIME, \n\tlease_client_id VARCHAR(64), \n\tlease_token_hash VARCHAR(64), \n\tlease_session_hash VARCHAR(64), \n\tlease_expires_at DATETIME, \n\tlease_sequence INTEGER DEFAULT '0' NOT NULL, \n\tPRIMARY KEY (owner_id), \n\tFOREIGN KEY(owner_id) REFERENCES users (id)\n)\n\n",
+    "indexes": []
+  },
+  "environment_timezone_changes": {
+    "create": "\nCREATE TABLE environment_timezone_changes (\n\tid VARCHAR(64) NOT NULL, \n\towner_id VARCHAR(64) NOT NULL, \n\trevision INTEGER NOT NULL, \n\tprevious_timezone VARCHAR(80) NOT NULL, \n\ttimezone VARCHAR(80) NOT NULL, \n\teffective_at DATETIME NOT NULL, \n\tPRIMARY KEY (id), \n\tCONSTRAINT uq_environment_zone_revision UNIQUE (owner_id, revision), \n\tFOREIGN KEY(owner_id) REFERENCES users (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_environment_timezone_changes_owner_id ON environment_timezone_changes (owner_id)"
+    ]
+  }
+}

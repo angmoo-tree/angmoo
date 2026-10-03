@@ -1,7 +1,8 @@
 """Compose authorized daily plans, source persona, topics and provider work."""
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
+from app.contracts.environment import EnvironmentSnapshot
 import json
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -77,14 +78,14 @@ def _automatic_eligible(db, scope, now):
     cooldown = credential.cooldown_until
     if cooldown and cooldown.replace(tzinfo=UTC) > now:
         return False
-    local = now.astimezone(ZoneInfo(scope.world.timezone))
+    local = now.astimezone(ZoneInfo(scope.environment.timezone))
     start, end = active_hours_minutes(setting.active_hours_start, setting.active_hours_end)
     minute = local.hour * 60 + local.minute
     return start != end and (start <= minute < end if start < end else minute >= start or minute < end)
 
 
 def _source(db, scope, now, *, generation_contract=GENERATION_CONTRACT):
-    local = now.astimezone(ZoneInfo(scope.world.timezone))
+    local = now.astimezone(ZoneInfo(scope.environment.timezone))
     plan = store.current_plan(db, scope.world_character.id, local.date())
     snapshot = store.plan_snapshot(db, plan)
     world = build_world_generation_context(db, scope.world).model_dump(mode="json")
@@ -126,9 +127,9 @@ def _source(db, scope, now, *, generation_contract=GENERATION_CONTRACT):
     source = {"persona": {**model_persona(scope.character), "interpretation": PERSONA_INTERPRETATION},
               "world": world, "role_key": scope.world_character.role_key,
               "local_date": local.date().isoformat(), "local_now": local.isoformat(),
-              "timezone": scope.world.timezone, "allowed_places": {k: sorted(v) for k, v in allowed.items()},
+              "timezone": scope.environment.timezone, "allowed_places": {k: sorted(v) for k, v in allowed.items()},
               "time_windows": {k: [start.astimezone(local.tzinfo).isoformat(), end.astimezone(local.tzinfo).isoformat()]
-                               for k, (start, end) in daypart_windows(local.date(), scope.world.timezone).items()},
+                               for k, (start, end) in daypart_windows(local.date(), scope.environment.timezone).items()},
               "fixed_items": fixed, "confirmed_reservations": reservations}
     if generation_contract == GENERATION_CONTRACT:
         source.update(generation_contract=GENERATION_CONTRACT,
@@ -152,8 +153,6 @@ def _source(db, scope, now, *, generation_contract=GENERATION_CONTRACT):
 
 
 def _plan_problem(db, scope, plan, now):
-    if plan.timezone_name != scope.world.timezone:
-        return "daily_plan_timezone_changed"
     items = store.current_items(db, plan.id)
     if len(items) != 4 or {i.daypart for i in items} != {"dawn", "morning", "afternoon", "evening"}:
         return "daily_plan_partial"
@@ -176,10 +175,26 @@ def _plan_problem(db, scope, plan, now):
     return None
 
 
+def _admitted_preparation_job(db, wc_id):
+    return db.scalar(select(ActivityPreparationJob).where(
+        ActivityPreparationJob.world_character_id == wc_id,
+        ActivityPreparationJob.state.in_(("pending", "running", "waiting")))
+        .order_by(ActivityPreparationJob.created_at, ActivityPreparationJob.id).limit(1))
+
+
+def _preparation_snapshot_scope(scope, job):
+    frozen = job.input_snapshot.get("environment")
+    environment = EnvironmentSnapshot.from_dict(frozen) if frozen else replace(scope.environment, timezone=job.timezone_name)
+    return replace(scope, environment=environment)
+
+
 def read_preparation(db, *, character_id, world_id, user, now=None):
     now = now or datetime.now(UTC)
     scope = _scope(db, character_id, world_id, user)
-    target = local_activity_date(now, scope.world.timezone)
+    admitted = _admitted_preparation_job(db, scope.world_character.id)
+    if admitted is not None:
+        scope = _preparation_snapshot_scope(scope, admitted)
+    target = admitted.local_date if admitted is not None else local_activity_date(now, scope.environment.timezone)
     plan = store.current_plan(db, scope.world_character.id, target)
     _prep, topic_state = _topics(db, scope)
     job = db.scalar(select(ActivityPreparationJob).where(
@@ -210,14 +225,19 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     fixed_clock = now is not None
     now = now or datetime.now(UTC)
     scope = _scope(db, character_id, world_id, user)
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(db, user.id)
+    admitted = _admitted_preparation_job(db, scope.world_character.id)
+    if admitted is not None:
+        scope = _preparation_snapshot_scope(scope, admitted)
     status = read_preparation(db, character_id=character_id, world_id=world_id, user=user, now=now)
     manual = request_id is not None
     if not manual:
         if (status.plan_state in {"failed", "needs_user_action"}
                 or (status.plan_state == "ready" and status.topic_state != "pending")
-                or not _automatic_eligible(db, scope, now)):
+                or (admitted is None and not _automatic_eligible(db, scope, now))):
             return status
-    target = local_activity_date(now, scope.world.timezone)
+    target = admitted.local_date if admitted is not None else local_activity_date(now, scope.environment.timezone)
     if manual:
         prior_request = store.job_for(db, scope.world_character.id, target, request_id)
         if prior_request and prior_request.state in {"ready", "failed", "needs_user_action", "cancelled"}:
@@ -233,7 +253,8 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
         # Historical unknown data needs an explicit request, never automatic enrollment.
         if not manual:
             return status.model_copy(update={"plan_state": "needs_user_action", "reason_code": "preparation_history_unknown"})
-    source, digest, before, allowed = _source(db, scope, now, generation_contract=generation_contract)
+    admitted_at = datetime.fromisoformat(prior_job.input_snapshot["local_now"]) if prior_job else now
+    source, digest, before, allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
     if expected_version is not None and before.get("version") != expected_version:
         raise store.PreparationConflict("daily_plan_version_conflict")
     if generation_contract == GENERATION_CONTRACT and not source["generated_dayparts"] and not initial:
@@ -246,9 +267,10 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     from app.contracts.name_binding import read_name_binding, NameBindingError
     from app.domains.characters.service.prompt_persona import render_persona
     new_names = resolve_name_binding(db, actor=scope.world_character, owner_id=user.id)
-    source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict()}
+    source = {**source, "name_binding_policy": new_names.policy_version, "name_binding": new_names.to_dict(),
+        "environment": scope.environment.to_dict()}
     job, token = store.claim(db, wc_id=scope.world_character.id, world_id=world_id, target_date=target,
-        timezone=scope.world.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
+        timezone=scope.environment.timezone, mode="initial" if initial else "manual_plan" if manual else "daily",
         request_id=request_id, source=source, input_digest=digest, now=now, lock_actor=lock_preparation_actor)
     job_id, wc_id = job.id, scope.world_character.id
     if token is None:
@@ -277,11 +299,10 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
     def reserve():
         current_time = now if fixed_clock else datetime.now(UTC)
         db.expire_all()
-        current_scope = _scope(db, character_id, world_id, user)
-        if local_activity_date(current_time, current_scope.world.timezone) != target or (
-            not manual and not _automatic_eligible(db, current_scope, current_time)):
+        current_scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), job)
+        if not manual and not _automatic_eligible(db, current_scope, admitted_at):
             raise store.PreparationConflict("preparation_scope_changed")
-        if _source(db, current_scope, current_time, generation_contract=generation_contract)[1] != digest:
+        if _source(db, current_scope, admitted_at, generation_contract=generation_contract)[1] != digest:
             raise store.PreparationConflict("preparation_source_changed")
         if names is not None:
             validate_name_binding(db, names, actor=current_scope.world_character, owner_id=user.id)
@@ -309,15 +330,15 @@ async def _ensure_preparation(db, *, character_id, world_id, user, request_id=No
             from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
             lock_preparation_actor(db, wc_id)
             db.expire_all()
-            scope = _scope(db, character_id, world_id, user)
-            if target != local_activity_date(current_time, scope.world.timezone) or (not manual and not _automatic_eligible(db, scope, current_time)):
+            scope = _preparation_snapshot_scope(_scope(db, character_id, world_id, user), db.get(ActivityPreparationJob, job_id))
+            if not manual and not _automatic_eligible(db, scope, admitted_at):
                 raise store.PreparationConflict("preparation_scope_changed")
             current_credential = find_world_character_credential(db, character_id=character_id)
             current_material = CredentialResolver.resolve_llm_credential(current_credential,
                 purpose=CredentialPurpose.WORLD_CHARACTER_SETUP_LLM, owner_id=user.id, character_id=character_id)
             if (current_material.credential_id, current_material.fingerprint, current_material.model, current_material.thinking_level) != (material.credential_id, material.fingerprint, material.model, material.thinking_level):
                 raise store.PreparationConflict("preparation_credential_changed")
-            fresh, current_digest, _, current_allowed = _source(db, scope, current_time, generation_contract=generation_contract)
+            fresh, current_digest, _, current_allowed = _source(db, scope, admitted_at, generation_contract=generation_contract)
             if current_digest != digest:
                 raise store.PreparationConflict("preparation_source_changed")
             if names is not None:

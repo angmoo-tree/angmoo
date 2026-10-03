@@ -32,6 +32,36 @@ from app.domains.identity.service.local_owner import LocalIdentityService
 router = APIRouter(prefix="/auth/local", tags=["auth"])
 
 
+from app.domains.identity.dependencies import resolve_authenticated_session_context, AuthenticatedSessionContext
+from app.domains.identity.schemas_environment import EnvironmentRead, EnvironmentReport
+from app.domains.identity.service.environment import EnvironmentConflict, read_environment, report_environment
+
+
+@router.get("/environment", response_model=EnvironmentRead)
+def get_environment(request: Request, db: Session = Depends(get_db),
+                    context: AuthenticatedSessionContext = Depends(resolve_authenticated_session_context)):
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return read_environment(db, context.user.id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+@router.post("/environment", response_model=EnvironmentRead)
+def synchronize_environment(data: EnvironmentReport, request: Request, db: Session = Depends(get_db),
+                            context: AuthenticatedSessionContext = Depends(resolve_authenticated_session_context)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return report_environment(db, context.user.id, data,
+            session_hash=context.session.token_hash if context.session else None)
+    except EnvironmentConflict as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except PermissionError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
 @router.get("/bootstrap", response_model=LocalBootstrapRead)
 def get_local_bootstrap_status(
     request: Request,

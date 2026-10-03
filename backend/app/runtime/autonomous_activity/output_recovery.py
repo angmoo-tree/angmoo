@@ -1,6 +1,7 @@
 """Bounded JSON recovery policy owned by the SNS V2 runtime."""
 
 import json
+import re
 from typing import Any
 
 from app.providers.contracts import JsonRetryDecision, StructuredOutputValidationError
@@ -48,11 +49,20 @@ def retry_truncated_json(exc: BaseException, payload: dict | None,
 
 def planner_json_retry(exc: BaseException, payload: dict | None,
                        diagnostic: dict, attempt: int) -> JsonRetryDecision | None:
-    """Allow one full regeneration for the two observed Planner failure modes."""
+    """Share one regeneration for brief, truncation or verified comment omission."""
     if attempt != 1:
         return None
     brief_missing = (isinstance(exc, StructuredOutputValidationError)
                      and exc.validation_code == "action_brief_missing")
+    if (_finish_reason(diagnostic.get("finish_reason")) == "STOP"
+            and isinstance(payload, dict)
+            and isinstance(exc, StructuredOutputValidationError)
+            and exc.validation_code == "comment_intent_missing"
+            and re.fullmatch(r"decisions\.[0-9]+\.(interaction_intent|comment_purpose)", exc.field_path)):
+        return JsonRetryDecision("comment_intent_missing", FIRST_OUTPUT_TOKENS,
+            "Every ordinary comment requires interaction_intent=ordinary_comment and a valid "
+            "comment_purpose. Regenerate the entire result for the same supplied targets. "
+            "Do not fill or merge fields from the previous response.")
     if _finish_reason(diagnostic.get("finish_reason")) == "MAX_TOKENS" and (
         brief_missing or retry_truncated_json(exc, payload, diagnostic, attempt)
     ):

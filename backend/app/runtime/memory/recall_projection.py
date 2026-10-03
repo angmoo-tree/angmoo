@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 import logging
+import json
+from threading import Event, RLock, Thread
+from app.core.atomic_json import write_json
 
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -14,7 +17,6 @@ from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.runtime.memory.recall_composition import recall_document_source as SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.sqlite_fts5_recall import (
     MemoryRecallIndexError,
-    MemoryRecallIndexSchemaError,
     SqliteMemoryRecallIndex,
 )
 
@@ -47,39 +49,96 @@ class EmbeddedMemoryRecallProjection:
         self._factory = session_factory
         self._source = SqlAlchemyMemoryRecallDocumentSource(session_factory, episode_only=episode_only)
         self._listening = False
+        self._rebuild_lock = RLock()
+        self._stopping = Event()
+        self._thread = None
+        self._writer = None
+        self._cursor_path = index.database_path.with_name("rebuild-progress.json")
         self.state = MemoryRecallProjectionState.STOPPED
 
-    def start(self) -> None:
+    def start(self, *, background: bool = True) -> None:
+        self._stopping.clear()
         self.state = MemoryRecallProjectionState.REBUILDING
         try:
+            self.index.open()
+            self._writer = self.index.rebuild_writer()
             try:
-                self.index.open()
-            except MemoryRecallIndexSchemaError:
-                # A projection schema mismatch is recoverable because canonical
-                # SQLite is authoritative and the new file is built in staging.
-                logger.warning("memory_recall_projection_schema_rebuild")
-            doctor = self.index.rebuild(self._source.all_documents())
-            if not doctor.healthy:
-                self.state = MemoryRecallProjectionState.DEGRADED
-                return
+                progress = json.loads(self._cursor_path.read_text(encoding="utf-8"))
+                if progress["generation"] != self.index.settings.generation or progress["phase"] not in {"build", "validate", "orphans"}:
+                    raise ValueError()
+                # Resume the original cursor, then reconcile all authoritative
+                # rows before promotion (including offline edits/deletions).
+                self._progress = progress
+            except (OSError, ValueError, KeyError, TypeError):
+                self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
+            write_json(self._cursor_path, self._progress)
             self._listen()
-            self.state = MemoryRecallProjectionState.READY
-        except MemoryRecallIndexSchemaError:
-            logger.exception("memory_recall_projection_schema_mismatch")
-            self.state = MemoryRecallProjectionState.SCHEMA_MISMATCH
-        except (MemoryRecallIndexError, OSError, ValueError):
-            logger.exception("memory_recall_projection_unavailable")
-            self.state = MemoryRecallProjectionState.DEGRADED
+            for _ in range(3):
+                self.advance_rebuild(max_pages=3)
+            if background and self.state is MemoryRecallProjectionState.REBUILDING:
+                self._thread = Thread(target=self._rebuild_loop, name="memory-fts-rebuild", daemon=True)
+                self._thread.start()
         except Exception:
-            # Never fail canonical startup because a disposable projection
-            # cannot be constructed. Recall remains explicitly degraded.
             logger.exception("memory_recall_projection_rebuild_failed")
             self.state = MemoryRecallProjectionState.DEGRADED
 
+    def _rebuild_loop(self):
+        while not self._stopping.is_set() and self.state is MemoryRecallProjectionState.REBUILDING:
+            self.advance_rebuild(max_pages=1)
+            self._stopping.wait(0.01)
+
+    def request_rebuild(self):
+        """Large committed changes schedule bounded work, not a request-time scan."""
+        with self._rebuild_lock:
+            if self._writer is None:
+                self._writer = self.index.rebuild_writer()
+            self._progress = {"generation": self.index.settings.generation, "phase": "build", "cursor": ""}
+            write_json(self._cursor_path, self._progress)
+            self.state = MemoryRecallProjectionState.REBUILDING
+            if self._thread is None or not self._thread.is_alive():
+                self._thread = Thread(target=self._rebuild_loop, name="memory-fts-rebuild", daemon=True)
+                self._thread.start()
+
+    def advance_rebuild(self, *, max_pages=1):
+        if not 1 <= max_pages <= 3:
+            raise ValueError("memory_recall_rebuild_page_budget_invalid")
+        try:
+            with self._rebuild_lock:
+                for _ in range(max_pages):
+                    if self._stopping.is_set() or self.state is not MemoryRecallProjectionState.REBUILDING:
+                        return
+                    phase, cursor = self._progress["phase"], self._progress["cursor"]
+                    ids = (self._writer.memory_item_id_page(after=cursor, limit=100) if phase == "orphans"
+                        else self._source.item_id_page(after=cursor, limit=100))
+                    if ids:
+                        documents = self._source.documents_for_item_ids(ids)
+                        self._writer.replace_memory_items({identifier: documents.get(identifier, ()) for identifier in ids})
+                        self._progress["cursor"] = ids[-1]
+                    elif phase == "build":
+                        self._progress.update(phase="validate", cursor="")
+                    elif phase == "validate":
+                        self._progress.update(phase="orphans", cursor="")
+                    else:
+                        self.index.promote_rebuild(self._writer)
+                        self._writer = None
+                        self._cursor_path.unlink(missing_ok=True)
+                        self.state = MemoryRecallProjectionState.READY
+                        return
+                    write_json(self._cursor_path, self._progress)
+        except Exception:
+            logger.exception("memory_recall_projection_page_failed")
+            self.state = MemoryRecallProjectionState.DEGRADED
+
     def stop(self) -> None:
-        self._unlisten()
-        self.index.close()
-        self.state = MemoryRecallProjectionState.STOPPED
+        self._stopping.set()
+        if self._thread is not None:
+            self._thread.join(timeout=2)
+        with self._rebuild_lock:
+            self._unlisten()
+            if self._writer is not None:
+                self._writer.close()
+            self.index.close()
+            self.state = MemoryRecallProjectionState.STOPPED
 
     def _listen(self) -> None:
         if self._listening:
@@ -113,14 +172,23 @@ class EmbeddedMemoryRecallProjection:
             query = select(MemoryItem.id)
             if statement.whereclause is not None:
                 query = query.where(statement.whereclause)
-            session.info.setdefault(_PENDING_ITEM_IDS, set()).update(
-                session.connection().execute(query).scalars()
-            )
+            identifiers = tuple(session.connection().execute(query.limit(101)).scalars())
+            if len(identifiers) > 100:
+                session.info[_PENDING_FULL_SYNC] = True
+            else:
+                session.info.setdefault(_PENDING_ITEM_IDS, set()).update(identifiers)
         if (
             getattr(orm_execute_state, "is_update", False)
             and getattr(table, "name", None) == MemoryScopeSettingModel.__tablename__
         ):
-            getattr(orm_execute_state, "session").info[_PENDING_FULL_SYNC] = True
+            query = select(MemoryScopeSettingModel.id)
+            if statement.whereclause is not None:
+                query = query.where(statement.whereclause)
+            identifiers = tuple(session.connection().execute(query.limit(101)).scalars())
+            if len(identifiers) > 100:
+                session.info[_PENDING_FULL_SYNC] = True
+            else:
+                session.info.setdefault(_PENDING_SETTING_IDS, set()).update(identifiers)
 
     @staticmethod
     def _after_flush(session: Session, _flush_context: object) -> None:
@@ -143,20 +211,22 @@ class EmbeddedMemoryRecallProjection:
         if not item_ids and not setting_ids and not full_sync:
             return
         try:
-            if full_sync:
-                item_ids.update(self._source.all_item_ids())
-            for setting_id in sorted(setting_ids):
-                resolved = self._source.scope_setting(setting_id)
-                if resolved is None:
-                    continue
-                scope, enabled = resolved
-                item_ids.update(self._source.item_ids_for_scope_setting(setting_id))
+            for identifier in setting_ids:
+                item_ids.update(self._source.item_ids_for_scope_setting(identifier, limit=101))
+                if len(item_ids) > 100:
+                    break
+            if full_sync or len(item_ids) > 100:
+                self.request_rebuild()
+                return
 
-            documents = self._source.documents_for_item_ids(item_ids)
-            self.index.replace_memory_items({item_id: documents.get(item_id, ()) for item_id in sorted(item_ids)})
+            with self._rebuild_lock:
+                documents = self._source.documents_for_item_ids(item_ids)
+                target = self._writer if self._writer is not None else self.index
+                target.replace_memory_items({item_id: documents.get(item_id, ()) for item_id in sorted(item_ids)})
             # One transactional mutation already recomputed the full digest.
             # Full doctor remains available at startup and explicit diagnosis.
-            self.state = MemoryRecallProjectionState.READY
+            if self._writer is None:
+                self.state = MemoryRecallProjectionState.READY
         except Exception:
             # This listener executes after canonical commit. Projection failure
             # cannot roll back the already successful Memory transaction.

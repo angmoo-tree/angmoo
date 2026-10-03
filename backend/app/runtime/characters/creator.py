@@ -107,7 +107,6 @@ from app.integrations.azure_translation import (
     _release_translation_chars,
     _read_translation_usage,
     _write_translation_usage,
-    _TRANSLATION_USAGE_LOCK,
 )
 from app.integrations import replicate_image
 from app.credentials import service_images as service_image_key
@@ -528,14 +527,14 @@ def _ensure_pollinations_model_available(model_name: str) -> None:
 
 
 
-def _translate_image_prompt_to_english(text: str) -> str:
+def _translate_image_prompt_to_english(text: str, *, period=None) -> str:
     prompt = text.strip()
     if not prompt or not HANGUL_RE.search(prompt):
         return prompt
     cached = _TRANSLATION_CACHE.get(prompt)
     if cached:
         return cached
-    translated = _translate_ko_to_en_with_azure(prompt)
+    translated = _translate_ko_to_en_with_azure(prompt, period=period)
     if not translated:
         return prompt
     if len(_TRANSLATION_CACHE) >= TRANSLATION_CACHE_MAX:
@@ -736,5 +735,15 @@ def build_image_generation_workflows():
         get_route_mode=operation_settings.get_pollinations_profile_image_route_mode,
         image_key_available=service_image_key.is_profile_image_available_for_model,
         resolve_api_key=_resolve_profile_image_api_key,
-        translate_prompt=_translate_image_prompt_to_english,
+        translate_prompt=_translate_prompt_in_environment,
     )
+
+
+def _translate_prompt_in_environment(db, user, text):
+    from app.domains.identity.service.environment import lock_environment_admission, accounting_period
+    lock_environment_admission(db, user.id)
+    period = accounting_period(db, user.id, "month")
+    # File reservation is durable before transport; release is bound to its ID.
+    # Do not hold the canonical SQLite write lock across an HTTP request.
+    db.commit()
+    return _translate_image_prompt_to_english(text, period=period)

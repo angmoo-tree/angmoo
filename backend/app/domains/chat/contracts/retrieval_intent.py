@@ -17,6 +17,8 @@ from app.domains.relationships.contracts.graph_requirements import GraphQueryReq
 
 
 RETRIEVAL_INTENT_VERSION = "retrieval-intent.v1"
+RETRIEVAL_ACTIVITY_KINDS = frozenset({"posts_authored", "replies_authored", "replies_received",
+    "mentions_received", "reactions_given", "reactions_received", "reposts", "follows"})
 _REF_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
 
 
@@ -101,8 +103,25 @@ class RetrievalRelationshipMeaning:
 class RetrievalTimeMeaning:
     kind: RetrievalTimeKind
     expression: str | None = None
+    unit: str | None = None
+    offset: int | None = None
+    period: str | None = None
+    timezone: str | None = None
 
     def __post_init__(self) -> None:
+        if self.unit is not None:
+            if self.unit not in {"day", "week", "month"} or type(self.offset) is not int or not -366 <= self.offset <= 0:
+                raise RetrievalContractError("retrieval_intent_time_meaning_invalid")
+            if self.kind is not RetrievalTimeKind.RELATIVE or self.period not in {None, "morning"} or (self.period and self.unit != "day"):
+                raise RetrievalContractError("retrieval_intent_time_meaning_invalid")
+        elif self.offset is not None or self.period is not None:
+            raise RetrievalContractError("retrieval_intent_time_meaning_invalid")
+        if self.timezone is not None:
+            from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+            try:
+                ZoneInfo(self.timezone)
+            except (TypeError, ValueError, ZoneInfoNotFoundError):
+                raise RetrievalContractError("retrieval_intent_time_meaning_invalid") from None
         if self.expression is not None and (
             not self.expression.strip() or len(self.expression) > 96
         ):
@@ -110,11 +129,14 @@ class RetrievalTimeMeaning:
         if self.kind in {
             RetrievalTimeKind.RELATIVE,
             RetrievalTimeKind.ABSOLUTE_RANGE,
-        } and self.expression is None:
+        } and self.expression is None and self.unit is None:
             raise RetrievalContractError("retrieval_intent_time_expression_required")
 
     def payload(self) -> dict[str, str | None]:
-        return {"kind": self.kind.value, "expression": self.expression}
+        payload = {"kind": self.kind.value, "expression": self.expression}
+        if self.unit is not None or self.timezone is not None:
+            payload.update(unit=self.unit, offset=self.offset, period=self.period, timezone=self.timezone)
+        return payload
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,8 +168,13 @@ class RetrievalIntentEnvelope:
     coordination_source: str = "model"
     graph_queries: tuple[GraphQueryRequirement, ...] = ()
     search_text: str | None = None
+    activity_kinds: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        if (not isinstance(self.activity_kinds, tuple) or len(self.activity_kinds) > 8
+            or any(type(kind) is not str or kind not in RETRIEVAL_ACTIVITY_KINDS for kind in self.activity_kinds)
+            or len(set(self.activity_kinds)) != len(self.activity_kinds)):
+            raise RetrievalContractError("retrieval_activity_kinds_invalid")
         if self.search_text is not None and (self.route is not RetrievalRoute.CANONICAL
             or not isinstance(self.search_text, str) or not self.search_text.strip() or len(self.search_text) > 4000):
             raise RetrievalContractError("retrieval_search_text_invalid")
@@ -187,6 +214,7 @@ class RetrievalIntentEnvelope:
 
     def payload(self) -> dict[str, Any]:
         return {
+            **({"activity_kinds": list(self.activity_kinds)} if self.activity_kinds else {}),
             **({"search_text": self.search_text} if self.search_text is not None else {}),
             **({"graph_queries": [q.payload() for q in self.graph_queries]} if self.version == "retrieval-intent.v2" else {}),
             "version": self.version,

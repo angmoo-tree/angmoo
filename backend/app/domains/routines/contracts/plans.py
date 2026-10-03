@@ -8,7 +8,8 @@ policy. Existing query-triggered autoflush remains part of the caller's Session.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from app.contracts.environment import EnvironmentSnapshot
 from typing import Any, Protocol
 
 
@@ -22,9 +23,11 @@ class PlanScope:
     membership: Any
     world_character: Any
     character: Any
+    environment: EnvironmentSnapshot = field(default_factory=EnvironmentSnapshot)
 
 
 class PlanReferences(Protocol):
+    def get_environment(self, owner_id: str) -> EnvironmentSnapshot: ...
     def routine_state_version(self, actor_id: str) -> int: ...
     def get_character(self, character_id: str) -> Any: ...
     def character_contract_hash(self, character: Any) -> str: ...

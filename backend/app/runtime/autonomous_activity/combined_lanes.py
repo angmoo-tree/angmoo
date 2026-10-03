@@ -77,6 +77,11 @@ class CombinedGeneration:
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
+            receipt = state.get("decision", {}).get("_json_recovery_receipt")
+            if isinstance(receipt, dict) and receipt.get("reason") == "comment_intent_missing":
+                # The complete envelope already used its sole regeneration.
+                # A split Writer would be a third repair of that same request.
+                raise ValueError("combined_missing_recovery_draft_invalid") from exc
             if mode == "split" and str(exc) != "routine_reuses_published_reply" and not str(exc).startswith("name_"):
                 raise
             if isinstance(self, RoutineLane):

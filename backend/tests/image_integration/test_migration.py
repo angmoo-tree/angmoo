@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from app.runtime.persistence.model_registration import register_models
-from app.runtime.persistence.sqlite_schema import build_sqlite_v25_metadata, build_sqlite_baseline_metadata, sqlite_schema_contract_digest, create_schema_version_table
+from app.runtime.persistence.sqlite_schema import build_sqlite_v25_metadata, build_sqlite_v26_metadata, SQLITE_SCHEMA_VERSION, sqlite_schema_contract_digest, create_schema_version_table
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 from app.runtime.migrations.sqlite_versions import images_v26
 import hashlib
@@ -17,7 +17,7 @@ def test_fresh_and_frozen_v25_upgrade(tmp_path):
     register_models()
     for upgraded in (False, True):
         engine = create_engine(f"sqlite:///{tmp_path / str(upgraded)}")
-        metadata = build_sqlite_v25_metadata() if upgraded else build_sqlite_baseline_metadata()
+        metadata = build_sqlite_v25_metadata() if upgraded else build_sqlite_v26_metadata()
         metadata.create_all(engine)
         with engine.begin() as connection:
             create_schema_version_table(connection)
@@ -75,7 +75,7 @@ def test_populated_upgrade_preserves_original_generation_even_mid_ddl_failure(tm
         assert not list(source.parent.parent.glob(".*.tmp-*"))
     else:
         upgraded=SqliteCanonicalUpgradeCoordinator(StaticRuntimeDataPath(tmp_path),fallback_generation="image-v25").upgrade()
-        assert upgraded.source_version==25 and upgraded.target_version==26 and upgraded.database_path!=source
+        assert upgraded.source_version==25 and upgraded.target_version==SQLITE_SCHEMA_VERSION and upgraded.database_path!=source
         engine=create_engine(f"sqlite:///{upgraded.database_path}")
         with engine.connect() as connection:
             assert connection.exec_driver_sql("SELECT encrypted_pollinations_api_key,visual_identity_prompt,generation_auto_enabled FROM agent_image_generation_settings").one()==("legacy-scoped-ciphertext","legacy appearance",0)

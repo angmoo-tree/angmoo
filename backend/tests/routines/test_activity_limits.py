@@ -46,8 +46,13 @@ from app.runtime.characters import management as agent_service
 
 
 def _create_autonomy_capacity_tables(engine) -> None:
+    from app.domains.identity.models import InstallationIdentity
+    from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
     for table in (
         models.User.__table__,
+        InstallationIdentity.__table__,
+        LocalEnvironment.__table__,
+        EnvironmentTimezoneChange.__table__,
         models.Character.__table__,
         models.World.__table__,
         models.WorldMembership.__table__,
@@ -83,6 +88,9 @@ def _add_capacity_world(
     world_id: str = "world-routine",
     timezone: str = "Asia/Seoul",
 ) -> models.World:
+    from environment_fixture_support import seed_environment
+    db.flush()
+    seed_environment(db, owner_user_id, timezone)
     world = models.World(
         id=world_id,
         slug=world_id,
@@ -1156,9 +1164,17 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
 
 def test_activity_policy_keeps_observe_internal_when_setting_disabled() -> None:
     engine = create_engine("sqlite:///:memory:")
+    from app.domains.identity.models_environment import LocalEnvironment
+    models.User.__table__.create(engine)
+    models.Character.__table__.create(engine)
+    LocalEnvironment.__table__.create(engine)
     models.AgentActivitySetting.__table__.create(engine)
 
     with Session(engine) as db:
+        db.add(models.User(id="owner", display_name="Owner"))
+        db.add(models.Character(id="char-1", owner_id="owner", name="Character", handle="character", persona_summary="Synthetic persona"))
+        from environment_fixture_support import seed_environment
+        seed_environment(db, "owner", timezone="Asia/Seoul")
         db.add(
             models.AgentActivitySetting(
                 character_id="char-1",
@@ -2019,7 +2035,7 @@ def test_activation_uses_canonical_initial_schedule(
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == expected
         assert observed["character_id"] == character.id
-        assert observed["timezone"] == "Asia/Seoul"
+        assert observed["timezone"] == "UTC"  # No detected environment was supplied.
 
 
 def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(

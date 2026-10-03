@@ -39,8 +39,8 @@ class TodaySnsActivityAssembler:
         except ZoneInfoNotFoundError as exc:
             raise ValueError("today_sns_world_timezone_invalid") from exc
         local_now = now.astimezone(zone)
-        local_start = datetime.combine(local_now.date(), time.min, tzinfo=zone)
-        start_utc = local_start.astimezone(UTC)
+        from app.core.calendar import day_bounds
+        start_utc, _ = day_bounds(local_now.date(), timezone)
         end_utc = local_now.astimezone(UTC)
         source = self._reader.read(
             owner_id=owner_id,

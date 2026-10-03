@@ -106,7 +106,7 @@ def test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_vers
     saved = client.put(path, headers=FRONTEND_HEADERS, json=body)
     assert saved.status_code == 200, saved.text
     assert saved.json()["version"] == 1
-    assert saved.json()["timezone"] == "Asia/Seoul"
+    assert saved.json()["timezone"] == "UTC"
     assert client.put(path, headers=FRONTEND_HEADERS, json=body).json()["version"] == 1
     assert (
         client.put(

@@ -6,6 +6,8 @@ from app.domains.routines.service import tick_schedule as agent_activity_policy
 from app.domains.characters import models, schemas
 from app.domains.characters.contracts import CharacterOwner
 from app.domains.characters.exceptions import AgentProfileImageQuotaExceededError, AgentCreationDraftMediaError
+from app.core.accounting import in_accounting_period
+from app.domains.identity.service.environment import accounting_period
 
 
 PROFILE_IMAGE_DAILY_LIMIT = 1
@@ -37,13 +39,13 @@ def _profile_image_usage_status(
     at: datetime | None = None,
 ) -> schemas.AgentProfileImageUsageStatusRead:
     current = at or datetime.now(UTC)
-    quota_date = _profile_image_quota_date(current)
+    period = accounting_period(db, user.id, "day", now=current)
     bucket = _profile_image_bucket(scope, media_type)
     used = int(
         db.scalar(
             select(func.count(models.ProfileImageQuotaReservation.id)).where(
                 models.ProfileImageQuotaReservation.user_id == user.id,
-                models.ProfileImageQuotaReservation.quota_date == quota_date,
+                in_accounting_period(models.ProfileImageQuotaReservation.created_at, period),
                 models.ProfileImageQuotaReservation.bucket == bucket,
                 models.ProfileImageQuotaReservation.status.in_(
                     PROFILE_IMAGE_USED_STATUSES
@@ -53,7 +55,7 @@ def _profile_image_usage_status(
         or 0
     )
     remaining = max(0, PROFILE_IMAGE_DAILY_LIMIT - used)
-    reset_at = _profile_image_reset_at(current)
+    reset_at = period.allowance_available_at
     return schemas.AgentProfileImageUsageStatusRead(
         bucket=bucket,  # type: ignore[arg-type]
         scope=scope,  # type: ignore[arg-type]
@@ -74,6 +76,8 @@ def _reserve_profile_image_quota(
     model: str,
     route_mode: str,
 ) -> models.ProfileImageQuotaReservation:
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(db, user.id)
     now = datetime.now(UTC)
     status = _profile_image_usage_status(
         db,
@@ -84,7 +88,7 @@ def _reserve_profile_image_quota(
     )
     if status.remaining <= 0:
         raise AgentProfileImageQuotaExceededError(status)
-    quota_date = _profile_image_quota_date(now)
+    quota_date = date.fromisoformat(accounting_period(db, user.id, "day", now=now).key)
     _lock_profile_image_quota(db, user_id=user.id, quota_date=quota_date, bucket=status.bucket)
     status = _profile_image_usage_status(
         db,
@@ -104,6 +108,7 @@ def _reserve_profile_image_quota(
         status="reserved",
         model=model,
         route_mode=route_mode,
+        created_at=now,
     )
     db.add(reservation)
     db.commit()

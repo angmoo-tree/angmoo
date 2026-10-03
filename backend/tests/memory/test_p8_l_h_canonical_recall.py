@@ -271,7 +271,7 @@ def test_private_index_is_separate_scoped_cjk_safe_and_rollbackable(
     assert doctor.healthy is True
     assert Path(doctor.database_path) == (
         data_root.resolve()
-        / "search/memory-recall/generations/v1/angmoo-memory-recall.sqlite3"
+        / "search/memory-recall/generations/unicode-boundary-v2/angmoo-memory-recall.sqlite3"
     )
     assert p5_index.read_bytes() == b"p5-feed-index-sentinel"
 

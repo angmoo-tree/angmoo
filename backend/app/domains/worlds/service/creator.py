@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.worlds.service.scheduling import reschedule_world_autonomy_slots
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -29,7 +30,6 @@ from app.domains.worlds.exceptions import (
     WorldDefinitionValidationError,
     WorldBannerValidationError,
 )
-from app.domains.worlds.service.scheduling import reschedule_world_autonomy_slots
 
 
 CREATOR_ROLES = frozenset({"owner", "editor"})
@@ -578,12 +578,8 @@ def update_world(
     world.readiness_status = (
         "publish_ready" if readiness.ready_for_publish else "not_ready"
     )
-    if "timezone" in data.model_fields_set:
-        reschedule_world_autonomy_slots(
-            db,
-            world_id=world.id,
-            timezone_name=world.timezone,
-        )
+    # Package timezone is definition metadata. Runtime admission and future
+    # scheduling follow the installation's detected environment revision.
     db.commit()
     db.refresh(world)
     return _creator_context(db, world=world, membership=membership)

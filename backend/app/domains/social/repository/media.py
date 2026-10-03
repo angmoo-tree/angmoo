@@ -1,6 +1,7 @@
 """Social-owned SQL; original caller transaction/flush/finish_write behavior is preserved."""
 
 from datetime import date, datetime, timezone
+from app.core.accounting import in_accounting_period
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session, aliased, selectinload
 from app.domains.social.models import posts as models
@@ -93,30 +94,35 @@ def lock_service_image_quota(
     db.execute(select(func.pg_advisory_xact_lock(func.hashtext(lock_key))))
 
 def count_service_image_quota_used(
-    db: Session, *, user_id: str, quota_date: date
+    db: Session, *, user_id: str, quota_date: date, period=None
 ) -> int:
     return int(
         db.scalar(
             select(func.count(models.PostImageQuotaReservation.id)).where(
                 models.PostImageQuotaReservation.user_id == user_id,
-                models.PostImageQuotaReservation.quota_date == quota_date,
+                _quota_period_predicate(period, quota_date),
                 models.PostImageQuotaReservation.key_source == "service",
                 models.PostImageQuotaReservation.status.in_(
-                    ("reserved", "queued", "processing", "attached")
+                    ("reserved", "queued", "processing", "attached", "outcome_unknown")
                 ),
             )
         )
         or 0
     )
 
-def count_service_image_global_used(db: Session, *, quota_date: date) -> int:
+def _quota_period_predicate(period, quota_date):
+    from app.core.accounting import in_accounting_period
+    return in_accounting_period(models.PostImageQuotaReservation.created_at, period) if period else models.PostImageQuotaReservation.quota_date == quota_date
+
+
+def count_service_image_global_used(db: Session, *, quota_date: date, period=None) -> int:
     return int(
         db.scalar(
             select(func.count(models.PostImageQuotaReservation.id)).where(
-                models.PostImageQuotaReservation.quota_date == quota_date,
+                _quota_period_predicate(period, quota_date),
                 models.PostImageQuotaReservation.key_source == "service",
                 models.PostImageQuotaReservation.status.in_(
-                    ("reserved", "queued", "processing", "attached")
+                    ("reserved", "queued", "processing", "attached", "outcome_unknown")
                 ),
             )
         )
@@ -133,6 +139,7 @@ def create_post_image_quota_reservation(
     status: str = "reserved",
     post_id: str | None = None,
     job_id: int | None = None,
+    created_at: datetime | None = None,
 ) -> models.PostImageQuotaReservation:
     reservation = models.PostImageQuotaReservation(
         user_id=user_id,
@@ -143,6 +150,7 @@ def create_post_image_quota_reservation(
         status=status,
         post_id=post_id,
         job_id=job_id,
+        **({"created_at": created_at} if created_at is not None else {}),
     )
     db.add(reservation)
     db.flush()
@@ -179,6 +187,7 @@ def count_active_post_image_jobs_for_character_between(
     character_id: str,
     start_at: datetime,
     end_at: datetime,
+    period=None,
 ) -> int:
     return int(
         db.scalar(
@@ -186,8 +195,8 @@ def count_active_post_image_jobs_for_character_between(
             .where(models.PostImageGenerationJob.character_id == character_id)
             .where(models.PostImageGenerationJob.intent_id.is_(None))
             .where(models.PostImageGenerationJob.status.in_(("queued", "processing")))
-            .where(models.PostImageGenerationJob.created_at >= start_at)
-            .where(models.PostImageGenerationJob.created_at < end_at)
+            .where(in_accounting_period(models.PostImageGenerationJob.created_at, period) if period
+                else (models.PostImageGenerationJob.created_at >= start_at) & (models.PostImageGenerationJob.created_at < end_at))
         )
         or 0
     )
@@ -204,6 +213,7 @@ def count_post_media_for_character_between(
     character_id: str,
     start_at: datetime,
     end_at: datetime,
+    period=None,
 ) -> int:
     return int(
         db.scalar(
@@ -212,8 +222,8 @@ def count_post_media_for_character_between(
             .where(
                 models.Post.author_character_id == character_id,
                 models.Post.deleted_at.is_(None),
-                models.PostMedia.created_at >= start_at,
-                models.PostMedia.created_at < end_at,
+                in_accounting_period(models.PostMedia.created_at, period) if period
+                    else (models.PostMedia.created_at >= start_at) & (models.PostMedia.created_at < end_at),
             )
         )
         or 0

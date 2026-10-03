@@ -28,6 +28,8 @@ def _notification_read(
             "recipient_character_id": notification.recipient_character_id,
             "data": notification.data,
             "actor_name": actor["name"],
+            "actor_deleted": actor.get("deleted", False),
+            "recipient_deleted": recipient.get("deleted", False),
             "actor_handle": actor["handle"],
             "actor_avatar_url": actor["avatar_url"],
             "recipient_name": recipient["name"],
@@ -45,13 +47,14 @@ def _notification_read(
 
 def _notification_actor_identity(
     db: Session, notification: models.Notification
-) -> dict[str, str | None]:
+) -> dict[str, str | bool | None]:
     if notification.actor_character_id:
         character = character_profiles.get_character(db, notification.actor_character_id)
         if character is not None:
             if character.deleted_at is not None:
                 return {
                     "name": DELETED_CHARACTER_NAME,
+                    "deleted": True,
                     "handle": None,
                     "avatar_url": None,
                 }
@@ -69,13 +72,14 @@ def _notification_actor_identity(
 
 def _notification_recipient_identity(
     db: Session, notification: models.Notification
-) -> dict[str, str | None]:
+) -> dict[str, str | bool | None]:
     if notification.recipient_character_id:
         character = character_profiles.get_character(db, notification.recipient_character_id)
         if character is not None:
             if character.deleted_at is not None:
                 return {
                     "name": DELETED_CHARACTER_NAME,
+                    "deleted": True,
                     "handle": None,
                     "avatar_url": None,
                 }
@@ -93,7 +97,7 @@ def _notification_recipient_identity(
 
 def _notification_post_preview(
     db: Session, post_id: str | None
-) -> dict[str, str | None]:
+) -> dict[str, str | bool | None]:
     if post_id is None:
         return {"title": None, "body": None}
     post = post_repository.get_post_including_report_hidden(db, post_id)
@@ -112,6 +116,7 @@ def _post_summary(db: Session, post: models.Post) -> schemas.PostSummary:
         {
             "id": post.id,
             "author_name": author["name"],
+            "author_deleted": author.get("deleted", False),
             "author_handle": author["handle"],
             "author_avatar_url": author["avatar_url"],
             "title": post.title,
@@ -155,6 +160,7 @@ def _post_detail(db: Session, post) -> schemas.PostDetail:
         {
             "id": post.id,
             "author_name": author["name"],
+            "author_deleted": author.get("deleted", False),
             "author_handle": author["handle"],
             "author_avatar_url": author["avatar_url"],
             "title": post.title,
@@ -197,6 +203,7 @@ def _hidden_post_detail(db: Session, post: models.Post) -> schemas.PostDetail:
         {
             "id": post.id,
             "author_name": author["name"],
+            "author_deleted": author.get("deleted", False),
             "author_handle": author["handle"],
             "author_avatar_url": author["avatar_url"],
             "title": REPORT_HIDDEN_TITLE,
@@ -236,6 +243,7 @@ def _post_reference(db: Session, post_id: str | None) -> schemas.PostReference |
         {
             "id": post.id,
             "author_name": author["name"],
+            "author_deleted": author.get("deleted", False),
             "author_handle": author["handle"],
             "author_avatar_url": author["avatar_url"],
             "title": post.title,
@@ -270,13 +278,14 @@ def _post_media_reads(db: Session, post: models.Post) -> list[schemas.PostMediaR
     ]
 
 
-def _post_author_identity(db: Session, post: models.Post) -> dict[str, str | None]:
+def _post_author_identity(db: Session, post: models.Post) -> dict[str, str | bool | None]:
     if post.author_character_id:
         character = character_profiles.get_character(db, post.author_character_id)
         if character is not None:
             if character.deleted_at is not None:
                 return {
                     "name": DELETED_CHARACTER_NAME,
+                    "deleted": True,
                     "handle": None,
                     "avatar_url": None,
                 }

@@ -160,6 +160,8 @@ def _add_ready_character(
     )
     db.add(user)
     db.flush()
+    from environment_fixture_support import seed_environment
+    seed_environment(db, user.id, world.timezone)
     db.add(character)
     db.flush()
     db.add(
@@ -277,6 +279,8 @@ def _seed(db: Session, *, two_characters: bool = False):
     db.add(owner)
     db.flush()
     world = _world(owner)
+    from environment_fixture_support import seed_environment
+    seed_environment(db, owner.id, world.timezone)
     db.add(world)
     db.flush()
     first = _add_ready_character(db, world=world, suffix="a")

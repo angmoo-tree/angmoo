@@ -144,6 +144,7 @@ class AgentSlot(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    timezone_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
 
 class AgentActivitySetting(Base):

@@ -95,7 +95,7 @@ def build_episode_job_inputs(session, batch, *, now, prior_search=None):
                 source_identities=tuple(dict.fromkeys((m.source_type, m.source_id) for u in part.new_units for m in u.members))[:100],
                 ranked_fts_ids=() if prior_search is None else prior_search(part))
             while True:
-                current = replace(part, bundle_ref=f"B{len(result) + 1}", prior_episodes=priors)
+                current = replace(part, bundle_ref=f"B{len(result) + 1}", prior_episodes=priors, environment=batch.environment)
                 try:
                     episode_prompt_payload(current)
                     break

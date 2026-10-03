@@ -27,7 +27,7 @@ def _workflows(key="fixture-key"):
     return CharacterImageGenerationWorkflows(
         get_model=lambda db: "fixture-model", get_route_mode=lambda db: "direct",
         image_key_available=lambda model: key is not None,
-        resolve_api_key=lambda model: key, translate_prompt=lambda text: text,
+        resolve_api_key=lambda model: key, translate_prompt=lambda db, user, text: text,
     )
 
 
@@ -93,5 +93,5 @@ def test_both_factories_bind_original_settings_key_and_translation_callbacks():
         workflows = dependencies.get_image_generation_workflows(request)
         assert workflows.get_model is creator.operation_settings.get_pollinations_profile_image_model
         assert workflows.get_route_mode is creator.operation_settings.get_pollinations_profile_image_route_mode
-        assert workflows.translate_prompt is creator._translate_image_prompt_to_english
+        assert workflows.translate_prompt is creator._translate_prompt_in_environment
         assert workflows.resolve_api_key is creator._resolve_profile_image_api_key

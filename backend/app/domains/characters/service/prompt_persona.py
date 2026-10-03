@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from typing import Any
 from app.domains.characters.policies.name_macros import render_names
 from app.domains.characters.policies.authored_names import authored_thought
+from app.contracts.language import PERSONA_LANGUAGE_POLICY
 
 
 PERSONA_INPUT_VERSION = "character-persona-input-v1"
@@ -21,7 +22,7 @@ PERSONA_INTERPRETATION = (
     "detail; for origin, past and affiliation use the separate character background. "
     "Card dialogue examples and fictional backstory are not actual conversations, "
     "events, relationships or memories. Current World time, places, roles, actual "
-    "history and application rules take precedence over character settings."
+    "history and application rules take precedence over character settings. " + PERSONA_LANGUAGE_POLICY
 )
 
 
