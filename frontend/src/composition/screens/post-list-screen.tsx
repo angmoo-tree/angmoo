@@ -459,7 +459,7 @@ export function PostListClient({
 
         {error ? (
           <div className="m-6 rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-600">
-            {error}
+            {uiText(error)}
           </div>
         ) : null}
 

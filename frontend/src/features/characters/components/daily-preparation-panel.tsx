@@ -92,7 +92,7 @@ export function DailyPreparationPanel({ initialAgent, initialRuntimeMode, worldI
         <Button variant="secondary" disabled={busy} onClick={() => void mutate("runtime")}>{uiText("일과 활동 방식 사용")}</Button>
       </div> : <p className="text-sm text-text-secondary">{uiText("실행하면 활동 시간에 맞춰 오늘의 큰 일과 4개를 자동으로 준비합니다. 처음에는 추천 주제도 함께 만듭니다. 생성과 SNS 활동에 설정한 API 키를 사용합니다.")}</p>}
       <Button loading={busy} disabled={!agent.settings.auto_enabled && (!agent.credential?.enabled || !agent.activity_profile_readiness.ready)} onClick={() => void mutate("toggle")}>{agent.settings.auto_enabled ? uiText("자율활동 끄기") : uiText("자율활동 시작")}</Button>
-      <p role="status">{uiText("자율활동")}{agent.settings.auto_enabled ? uiText("켜짐") : uiText("꺼짐")}</p>
+      <p role="status">{uiText("자율활동 {{state}}", {state: agent.settings.auto_enabled ? uiText("켜짐") : uiText("꺼짐")})}</p>
     </section>
     {error && <InlineError>{error}</InlineError>}
     <section className="space-y-4 rounded-2xl border border-border-default bg-surface p-5" aria-busy={busy}>

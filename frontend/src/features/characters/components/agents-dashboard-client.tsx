@@ -186,8 +186,7 @@ export function AgentsDashboardClient() {
 
       {!loading ? (
         <p className={styles.summary} data-character-summary>
-          {uiText("전체")}{summary.total} {uiText("· 자율활동 ON")}{summary.enabled} · OFF{" "}
-          {summary.disabled} {uiText("· 외부 연결")}{summary.external}
+          {uiText("전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}", {total: summary.total, enabled: summary.enabled, disabled: summary.disabled, external: summary.external})}
         </p>
       ) : null}
 

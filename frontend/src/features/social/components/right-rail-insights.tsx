@@ -182,7 +182,7 @@ export function TodayActivityCard({
                   {formatHandle(activity.handle)}
                 </div>
                 <div className="mt-1 truncate text-[12px] font-bold text-[#667085]">
-                  {uiText("지저귐")}{activity.post_count} {uiText("· 대꾸")}{activity.reply_count} {uiText("· 좋아요")}{activity.like_count}
+                  {uiText("게시글 {{posts}} · 답글 {{replies}} · 좋아요 {{likes}}", {posts: activity.post_count, replies: activity.reply_count, likes: activity.like_count})}
                 </div>
               </div>
               <span className="shrink-0 rounded-full bg-black px-3 py-1.5 text-[13px] font-extrabold text-white">

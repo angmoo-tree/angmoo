@@ -1,4 +1,5 @@
 "use client";
+import { requestFailureMessage } from "@/lib/http/error-presentation";
 import { useUiText } from "@/hooks/use-ui-text";
 
 
@@ -344,7 +345,7 @@ function StaticFeedRoute() {
       })
       .catch((reason) => {
         if (active) {
-          setError(reason instanceof Error ? uiText(reason.message) : uiText("게시글을 불러오지 못했습니다."));
+          setError(requestFailureMessage(reason, "게시글을 불러오지 못했어요."));
         }
       })
       .finally(() => {
@@ -353,7 +354,7 @@ function StaticFeedRoute() {
     return () => {
       active = false;
     };
-  }, [uiText]);
+  }, []);
 
   if (!ready) {
     return (
@@ -385,7 +386,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
       })
       .catch((reason) => {
         if (active) {
-          setError(reason instanceof Error ? uiText(reason.message) : uiText("게시글을 불러오지 못했습니다."));
+          setError(requestFailureMessage(reason, "게시글을 불러오지 못했어요."));
         }
       })
       .finally(() => {
@@ -394,7 +395,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
     return () => {
       active = false;
     };
-  }, [postId, uiText]);
+  }, [postId]);
 
   if (!ready) {
     return (

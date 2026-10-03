@@ -514,7 +514,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
           />
           {!detailRoot.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={detailRoot.id} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
-            <h3 id="world-reply-heading">{uiText("대꾸")}{detailRoot.reply_count}</h3>
+            <h3 id="world-reply-heading">{uiText("답글 {{count}}", { count: detailRoot.reply_count })}</h3>
             {detailReplies.length > 0 ? (
               <div className={styles.replyList}>
                 {detailReplies.map((reply) => (
@@ -561,7 +561,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
             >
               <div className={styles.replyComposerHeading}>
                 <MessageCircle size={18} aria-hidden="true" />
-                <strong>{ownerActor.profile.display_name}{uiText("(으)로 대꾸하기")}</strong>
+                <strong>{uiText("{{name}}(으)로 답글하기", { name: ownerActor.profile.display_name })}</strong>
               </div>
               <Field label={uiText("{{value0}}의 게시글에 답글", {value0: detailRoot.author_name})} required>
                 {(fieldProps) => (

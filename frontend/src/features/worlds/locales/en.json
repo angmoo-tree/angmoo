@@ -106,5 +106,8 @@
   "The state changed. Refresh and try again.": "The state changed. Refresh and try again.",
   "Please check the submitted values.": "Please check the submitted values.",
   "The usage limit was reached. Please try again later.": "The usage limit was reached. Please try again later.",
-  "The request could not be completed. Please try again.": "The request could not be completed. Please try again."
+  "The request could not be completed. Please try again.": "The request could not be completed. Please try again.",
+  "선택 설정 {{count}}개 그룹 · {{tier}}": "{{count}} optional setting groups · {{tier}}",
+  "선택 설정 {{count}}개 그룹 · {{tier}}_one": "{{count}} optional setting group · {{tier}}",
+  "선택 설정 {{count}}개 그룹 · {{tier}}_other": "{{count}} optional setting groups · {{tier}}"
 }

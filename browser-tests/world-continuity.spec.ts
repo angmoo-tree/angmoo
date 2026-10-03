@@ -29,7 +29,7 @@ test("continuity: nested evidence opens the exact later-page reply and its paren
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/worlds/${world.world_id}/posts/${target.id}`);
-  await expect(page.getByRole("heading", { name: "대꾸 115" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "답글 115" })).toBeVisible();
   const evidence = page.getByRole("article", { name: "근거가 가리키는 답글" });
   await expect(evidence).toContainText("근거의 정확한 대댓글");
   await expect(evidence).toBeInViewport();

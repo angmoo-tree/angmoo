@@ -156,12 +156,23 @@ export function DeviceHome({ authStatus, ensureDefaultSpace }: DeviceHomeProps) 
 function WorldAppIcon({ world }: { world: WorldSurfaceItem }) {
   const uiText = useUiText("device-home");
   const launch = presentWorldLaunchability(world);
+  const description = launch.state === "launchable"
+    ? uiText("{{name}} World 열기. 실행 가능.", { name: world.name })
+    : launch.state === "world_archived"
+      ? uiText("{{name}} World는 보관되어 Device Home에서 열 수 없습니다.", { name: world.name })
+      : launch.state === "world_not_published"
+        ? uiText("{{name}} World는 아직 공개되지 않아 Device Home에서 열 수 없습니다.", { name: world.name })
+        : launch.state === "world_not_ready"
+          ? uiText("{{name}} World는 공개 준비가 완료되지 않아 Device Home에서 열 수 없습니다.", { name: world.name })
+          : launch.state === "world_private"
+            ? uiText("{{name}} World는 비공개 상태라 Device Home에서 열 수 없습니다.", { name: world.name })
+            : uiText("{{name}} World는 현재 Device Home에서 열 수 없습니다.", { name: world.name });
   return (
     <AppIcon
       disabled={!world.launchable}
       href={world.launchable ? worldAppRoute(world.world_id) : undefined}
       label={world.name}
-      description={uiText("{{name}} World · {{status}}", {name: world.name, status: uiText(launch.badgeLabel)})}
+      description={description}
       visual={
         <>
           <WorldVisual world={world} />

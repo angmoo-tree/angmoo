@@ -4,7 +4,7 @@ import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 
 import { RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { worldCharacterProfileRoute, worldPostDetailRoute } from "@/lib/navigation/product-routes";
 
@@ -91,15 +91,12 @@ export function WorldCharacterSocialProfileActivity({
 
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
   const counts = state.status === "ready" ? state.counts : null;
-  const metrics = useMemo(
-    () => [
+  const metrics = [
       [uiText("지저귐"), counts?.post_count],
       [uiText("대꾸"), counts?.reply_count],
       [uiText("좋아요"), counts?.liked_post_count],
       [uiText("받은 좋아요"), counts?.received_like_count],
-    ] as const,
-    [counts?.liked_post_count, counts?.post_count, counts?.received_like_count, counts?.reply_count, uiText],
-  );
+    ] as const;
 
   async function loadMore() {
     if (state.status !== "ready" || !state.nextCursor || loadingMore) return;
@@ -166,7 +163,7 @@ export function WorldCharacterSocialProfileActivity({
             tabIndex={activeTab === tab.value ? 0 : -1}
             type="button"
           >
-            {tab.label}
+            {uiText(tab.label)}
           </button>
         ))}
       </div>
@@ -183,7 +180,7 @@ export function WorldCharacterSocialProfileActivity({
         ) : null}
         {state.status === "ready" && state.items.length === 0 ? (
           <div className={styles.empty}>
-            <strong>{emptyTitle(activeTab)}</strong>
+            <strong>{uiText(emptyTitle(activeTab))}</strong>
             <span>{uiText("현재 World에서 공개되고 확인 가능한 활동만 표시합니다.")}</span>
           </div>
         ) : null}

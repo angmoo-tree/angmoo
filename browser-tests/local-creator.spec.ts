@@ -3,7 +3,7 @@ import type { CharacterCardSourceRead } from "../frontend/src/features/character
 
 const staticShell = process.env.ANGMOO_CREATOR_STATIC === "1";
 const owner = { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
-  feed_content_filter: "all", is_admin: false, display_name_updated_at: null, display_name_change_available_at: null };
+  ui_language: "ko", ui_preference_revision: 0, feed_content_filter: "all", is_admin: false, display_name_updated_at: null, display_name_change_available_at: null };
 
 test("explicit draft cancellation returns to creation and survives reload", async ({ page }) => {
   const { writes } = await fixture(page);
@@ -110,7 +110,7 @@ for (const viewport of [{width:360,height:800},{width:390,height:844},{width:436
     await page.setViewportSize(viewport);
     const state = await fixture(page);
     await page.goto("/agents/new");
-    await expect(page.getByRole("heading", { name: "앵무 만들기" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "캐릭터 만들기" })).toBeVisible();
     await expect(page.getByLabel("API 키", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "저장하고 다음" }).click();
     await page.getByRole("textbox", { name: "이름", exact: true }).fill("테스트 앵무");
@@ -176,7 +176,7 @@ test("creation guide remains usable at two hundred percent browser CSS zoom", as
   await fixture(page);
   await page.setViewportSize({width:1440,height:1000});
   await page.goto("/agents/new");
-  await expect(page.getByRole("heading", {name:"앵무 만들기"})).toBeVisible();
+  await expect(page.getByRole("heading", {name:"캐릭터 만들기"})).toBeVisible();
   await page.evaluate(() => { document.body.style.zoom = "2"; });
   await page.getByRole("button", {name:"저장하고 다음"}).click();
   await expect(page.getByRole("textbox", {name:"이름",exact:true})).toBeVisible();

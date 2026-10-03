@@ -1291,7 +1291,7 @@ export function LoreSourcesCard({
         <p className="mt-1">
           {uiText("표 형식도 괜찮지만, 텍스트를 선택/복사할 수 있는 PDF나 Word 파일을 권장합니다. 스캔 이미지나 캡처 이미지는 아직 지원하지 않습니다.")}</p>
         <p className="mt-1">
-          {uiText("파일 1개")}{maxFileMb}{uiText("MB, 원문")}{formatCount(status?.max_text_chars ?? 50000)}{uiText("자, chunk")}{status?.max_chunks ?? 100}{uiText("개까지 저장합니다.")}</p>
+          {uiText("파일 1개 {{mb}}MB, 원문 {{chars}}자, chunk {{chunks}}개까지 저장합니다.", {mb: maxFileMb, chars: formatCount(status?.max_text_chars ?? 50000), chunks: status?.max_chunks ?? 100})}</p>
         <p className="mt-1">
           {uiText("저장/재빌드 시 Google gemini-embedding-2로 검색용 embedding을 만들며, 새 chunk마다 embedding 호출이 발생할 수 있습니다.")}</p>
         <p className="mt-1">

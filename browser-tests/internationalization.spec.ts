@@ -162,6 +162,14 @@ test("real routes: saved English, translated navigation and original records sur
       const korean = await page.locator("main").innerText();
       expect(korean.match(/[가-힣]+/g) ?? [], `${route}: untranslated product copy`).toEqual([]);
     }
+    await page.goto(`${info.project.use.baseURL}/settings`);
+    await page.locator("[data-language-settings]").getByRole("button",{name:"Korean",exact:true}).click();
+    await expect.poll(async()=>(await state(request)).ui_language).toBe("ko");
+    await page.goto(`${info.project.use.baseURL}/posts`);
+    await expect(page.getByRole("heading",{name:"피드",exact:true})).toBeVisible();
+    await expect(page.getByLabel("피드 범위",{exact:true})).toBeVisible();
+    await expect(page.getByRole("button",{name:"게시글",exact:true})).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang","ko");
     expect((await state(request)).display_name).toBe("Synthetic User · 原文 A-17");
     expect(errors).toEqual([]);
   } finally {await context.close();}

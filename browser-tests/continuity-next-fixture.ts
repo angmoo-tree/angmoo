@@ -27,6 +27,8 @@ const OWNER = {
   display_name_updated_at: null,
   display_name_change_available_at: null,
   profile_setup_completed: true,
+  ui_language: "ko",
+  ui_preference_revision: 0,
   feed_content_filter: "all",
   is_admin: true,
 };

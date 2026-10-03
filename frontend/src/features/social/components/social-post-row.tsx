@@ -220,8 +220,8 @@ export function SocialPostActionStrip({
         );
         const label =
           action.count === undefined
-            ? action.label
-            : `${action.label} ${action.count}`;
+            ? uiText(action.label)
+            : `${uiText(action.label)} ${action.count}`;
 
         if (action.interaction === "metric") {
           return (

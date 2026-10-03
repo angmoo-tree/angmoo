@@ -102,7 +102,7 @@ function WorldChatList({ worldId }: { worldId: string }) {
           <p className={styles.kicker}>WORLD CHAT</p>
           <h2>{uiText("대화")}</h2>
           <p>
-            {read.items.length}/{read.max_threads}{uiText("개의 World 대화")}</p>
+            {uiText("{{count}}/{{limit}}개의 World 대화", {count: read.items.length, limit: read.max_threads})}</p>
         </div>
       </header>
 
@@ -110,7 +110,7 @@ function WorldChatList({ worldId }: { worldId: string }) {
         <div className={styles.notice} role="status">
           <strong>{uiText("World를 확인해야 하는 이전 대화가 있어요.")}</strong>
           <p>
-            {read.ambiguous_legacy_count}{uiText("개의 이전 대화는 임의의 World에 연결하지 않았습니다.")}</p>
+            {uiText("{{count}}개의 이전 대화는 임의의 World에 연결하지 않았습니다.", {count: read.ambiguous_legacy_count})}</p>
         </div>
       ) : null}
 
@@ -153,7 +153,7 @@ function WorldChatList({ worldId }: { worldId: string }) {
                 >
                   <div className={styles.threadBody}>
                     <p className={styles.requesterLabel}>
-                      {thread.requester.display_name}{uiText("(으)로 대화")}</p>
+                      {uiText("{{name}}(으)로 대화", {name: thread.requester.display_name})}</p>
                     <p className={styles.preview}>
                       {thread.latest_message?.content ?? uiText("아직 메시지가 없어요.")}
                     </p>
@@ -667,7 +667,7 @@ function WorldChatThread({
           />
           <div className={styles.threadTitle}>
             <h2>{thread.responding.display_name}</h2>
-            <p>{thread.requester.display_name}{uiText("(으)로 대화 중")}</p>
+            <p>{uiText("{{name}}(으)로 대화 중", {name: thread.requester.display_name})}</p>
           </div>
         </LocalProductLink>
       </header>
@@ -699,7 +699,7 @@ function WorldChatThread({
           value={modelSelection}
         >
           <option value="default">
-            {uiText("기본 모델 사용 — 현재")}{generationProfileLabel(thread.default_model, thread.default_thinking_level)}
+            {uiText("기본 모델 사용 — 현재 {{model}}", {model: generationProfileLabel(thread.default_model, thread.default_thinking_level)})}
           </option>
           <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
                   {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
@@ -764,7 +764,7 @@ function WorldChatThread({
                     onClick={() => setEvidenceRequestId(evidence.request_id)}
                     type="button"
                   >
-                    {uiText("근거")}{evidence.count}{uiText("개 보기")}</button>
+                    {uiText("근거 {{count}}개 보기", {count: evidence.count})}</button>
                 ) : null}
               </li>
             );
@@ -813,7 +813,7 @@ function WorldChatThread({
       {renderImagePicker?.({ threadId, value: attachment, disabled: sending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy })}
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
-          {thread.responding.display_name}{uiText("에게 보낼 메시지")}</label>
+          {uiText("{{name}}에게 보낼 메시지", {name: thread.responding.display_name})}</label>
         <textarea
           disabled={sending || modelUpdating || (!!generation && generation.phase !== "failed")}
           id={`world-chat-${thread.id}`}

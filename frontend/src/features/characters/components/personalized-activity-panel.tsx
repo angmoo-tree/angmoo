@@ -59,7 +59,7 @@ export function PersonalizedActivityPanel({ worldId, actorId }: { worldId: strin
     {error && <p role="alert" className="text-sm text-text-secondary">{error}</p>}
     {!current ? <p className="text-sm text-text-secondary">{uiText("상태 확인 중")}</p> : <>
       <p className="text-sm text-text-secondary">{uiText(engines[current.effective.engine])} · {uiText(sources[current.effective.source] ?? uiText("설정 확인 필요"))}</p>
-      <p className="text-sm text-text-secondary">{uiText("자율활동")}{current.autonomous_enabled ? uiText("켜짐") : uiText("꺼짐")}{uiText(". 활동 방식을 바꿔도 켜짐·꺼짐 설정은 유지됩니다. 현행 활동은 시작 당시 정책을 유지하며, 이전 실행은 기록을 보존하고 종료합니다.")}</p>
+      <p className="text-sm text-text-secondary">{uiText("자율활동 {{state}}. 활동 방식을 바꿔도 켜짐·꺼짐 설정은 유지됩니다. 현행 활동은 시작 당시 정책을 유지하며, 이전 실행은 기록을 보존하고 종료합니다.", {state: current.autonomous_enabled ? uiText("켜짐") : uiText("꺼짐")})}</p>
       {current.transition && <p role="status" className="text-sm text-text-secondary">{uiText(transitions[current.transition.state])}</p>}
       <div className="space-y-2">
         <h4 className="font-bold text-text-strong">{uiText("현재 상태")}</h4>
@@ -80,7 +80,7 @@ export function PersonalizedActivityPanel({ worldId, actorId }: { worldId: strin
             {Object.entries(supportedEngines).map(([value, label]) => <option key={value} value={value}>{uiText(label)}</option>)}
           </select>
         </label>
-        <p className="text-xs text-text-secondary">{uiText(scopes[scope])}{uiText("에 저장된 설정:")}{current.policies[scope].engine ? uiText(engines[current.policies[scope].engine]) : uiText("기본값 따름")}{uiText(". 개별 설정이 있는 캐릭터는 해당 설정을 우선합니다.")}</p>
+        <p className="text-xs text-text-secondary">{uiText("{{scope}}에 저장된 설정: {{engine}}. 개별 설정이 있는 캐릭터는 해당 설정을 우선합니다.", {scope: uiText(scopes[scope]), engine: current.policies[scope].engine ? uiText(engines[current.policies[scope].engine]) : uiText("기본값 따름")})}</p>
         <button type="button" className="min-h-11 rounded-xl border border-border-default px-4 font-bold text-text-strong disabled:opacity-50" onClick={save}>{busy ? uiText("저장 중") : uiText("활동 방식 저장")}</button>
       </fieldset>}
       <div className="space-y-2 text-sm text-text-secondary">

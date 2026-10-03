@@ -220,7 +220,7 @@ function CreationGuide() {
 
   return <section className="space-y-6 p-5 md:p-9" aria-labelledby="creation-heading">
     <h1 id="creation-heading" className="text-3xl font-bold">{uiText("앵무 만들기")}</h1>
-    <p>{target ? uiText("이 World에서 활동할 캐릭터") : uiText("기본 SNS 공간에서 활동할 캐릭터")}{uiText("를 등록합니다. 생성과 카드 가져오기에는 AI 호출이나 API 키가 필요하지 않습니다.")}</p>
+    <p>{uiText("{{scope}}를 등록합니다. 생성과 카드 가져오기에는 AI 호출이나 API 키가 필요하지 않습니다.", {scope: target ? uiText("이 World에서 활동할 캐릭터") : uiText("기본 SNS 공간에서 활동할 캐릭터")})}</p>
     <ol className="flex flex-wrap gap-3" aria-label={uiText("생성 단계")}>{STEPS.map((label, index) => <li key={label} aria-current={index === step ? "step" : undefined}>{index + 1}. {uiText(label)}{index === step ? uiText("· 현재") : ""}</li>)}</ol>
     {error && <p role="alert">{error}</p>}
     {/* LOCAL: non-blocking metadata notice, shared by Next and static creation. */}
@@ -231,7 +231,7 @@ function CreationGuide() {
       <Button type="button" variant="secondary" disabled={busy} onClick={() => void perform(reloadCardMetadata)}>{uiText("카드 정보 다시 불러오기")}</Button>
     </div>}
     {legacyDraft && !draft && <aside className="space-y-3" aria-label={uiText("이전 초안 복구")}>
-      <p>{uiText("이전에 저장한 ‘")}{legacyDraft.name || uiText("이름 없는 앵무")}{uiText("’ 초안이 있습니다. 설정과 이미지를 이어서 편집할 수 있습니다. 등록은 이 공간에 자율활동 OFF로 진행하며, 이전 키를 자동 연결하지 않습니다.")}</p>
+      <p>{uiText("이전에 저장한 ‘{{name}}’ 초안이 있습니다. 설정과 이미지를 이어서 편집할 수 있습니다. 등록은 이 공간에 자율활동 OFF로 진행하며, 이전 키를 자동 연결하지 않습니다.", {name: legacyDraft.name || uiText("이름 없는 앵무")})}</p>
       <Button disabled={busy} onClick={() => void perform(async () => {
         const value = await adoptLegacyAgentDraft(legacyDraft.id, legacyDraft.revision, target);
         setDraft(value); setLegacyDraft(null); setStep(1);
@@ -283,7 +283,7 @@ function CreationGuide() {
       </fieldset>
       {draft?.source_kind === "card" && mode === "card" && <details><summary>{uiText("카드 원본과 반영 범위 확인")}</summary>
         <p>{uiText("설명·성격·대화 예시는 입력란에서 수정할 수 있습니다. 설명이 비어 있다면 등록 전에 작성해주세요. 상황 설정과 지원하지 않는 동적 문구는 직접 확인합니다.")}</p>
-        {metadataSelection && <p>{uiText("반영한 정의:")}{metadataSelection.keyword}{uiText("의 첫 번째 항목 / 같은 형식의 정의")}{metadataSelection.same_keyword_count}{uiText("개. 원본 PNG 전체는 그대로 보존합니다.")}</p>}
+        {metadataSelection && <p>{uiText("반영한 정의: {{keyword}}의 첫 번째 항목 / 같은 형식의 정의 {{count}}개. 원본 PNG 전체는 그대로 보존합니다.", {keyword: metadataSelection.keyword, count: metadataSelection.same_keyword_count})}</p>}
         {review.length > 0 && <ul className="list-disc space-y-2 pl-5">{review.map((code) => <li key={code}>{reviewLabel(code, uiText)}</li>)}</ul>}
         <p>{uiText("첫 인사·로어북·특수 지침 등은 원본에만 보존하며 자동으로 실행하지 않습니다. 원본 전용 항목:")}{rawOnly.join(", ") || uiText("원본 확인")}</p>
         <p>{uiText("원문 보기는 선택된 한 정의의 JSON을 표시합니다. 편집한 캐릭터 설정과 보관한 카드 원본은 구분됩니다.")}</p>

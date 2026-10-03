@@ -286,7 +286,7 @@ function WorldSection({
         {ownerActor ? (
           <>
             <p>
-              {uiText("기준 캐릭터:")}{ownerActor.profile.display_name}{uiText(". 이 World 안의 관계와 근거를 확인합니다.")}</p>
+              {uiText("기준 캐릭터: {{name}}. 이 World 안의 관계와 근거를 확인합니다.", {name: ownerActor.profile.display_name})}</p>
             <Link
               className={styles.capabilityAction}
               href={relationshipGraphRoute(ownerActor.character_id, worldId)}

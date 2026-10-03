@@ -424,5 +424,7 @@
   "아직 좋아요한 지저귐이 없습니다.": "No liked posts yet.",
   "새 World": "New World",
   "Worlds": "Worlds",
-  "Import": "Import"
+  "Import": "Import",
+  "기준 캐릭터: {{name}}. 이 World 안의 관계와 근거를 확인합니다.": "Reference character: {{name}}. View relationships and evidence within this World.",
+  "답글 {{count}}": "Replies {{count}}"
 }

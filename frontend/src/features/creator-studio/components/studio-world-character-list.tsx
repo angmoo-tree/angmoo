@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { enterStudioWorldCharacter, getStudioCharacterCandidates, getStudioWorldCharacters, leaveStudioWorldCharacter, stopStudioCharacter, StudioWorldCharacterApiError } from "@/features/creator-studio/api/studio-world-character-client";
 import type { StudioCharacterCandidateRead, StudioWorldCharacterRead, StudioWorldRole } from "@/features/creator-studio/types/studio-world-character";
@@ -130,15 +130,12 @@ export function StudioWorldCharacterList({
     confirmationName?: string;
   } | null>(null);
 
-  const roleOptions = useMemo(
-    () => [
+  const roleOptions = [
       { key: NO_SPECIFIC_ROLE_KEY, name: uiText("역할 없음"), autonomous_allowed: true },
       ...roles.filter(
         (role) => role.autonomous_allowed && role.key !== NO_SPECIFIC_ROLE_KEY,
       ),
-    ],
-    [roles, uiText],
-  );
+    ];
   const eligibleCandidates = candidates.filter((candidate) => candidate.eligible);
 
   useEffect(() => {

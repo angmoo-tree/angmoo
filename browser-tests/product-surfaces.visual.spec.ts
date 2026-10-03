@@ -169,7 +169,7 @@ test("UI-F captures the global social media stream at the standard Phone size", 
   await expect(mediaPost).toBeVisible();
   await expect(mediaPost.getByText("더보기", { exact: true })).toBeVisible();
   await expect(mediaPost.getByRole("img", { name: "노란 앵무 Angmoo 로고" })).toBeVisible();
-  await expect(mediaPost.getByLabel("대꾸 2", { exact: true })).toBeVisible();
+  await expect(mediaPost.getByLabel("답글 2", { exact: true })).toBeVisible();
   await expect(mediaPost.getByLabel("좋아요 1", { exact: true })).toBeVisible();
   await expect(mediaPost.getByRole("button", { name: "게시글 메뉴" })).toHaveCount(0);
   await settleVisualSurface(page);

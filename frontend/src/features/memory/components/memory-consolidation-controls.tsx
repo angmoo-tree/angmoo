@@ -110,15 +110,15 @@ export function MemoryConsolidationControls(props: Props) {
   }
   const running = progress !== null && workflowActive(progress);
   return <div>
-    <p>{props.subjectName}{uiText("의 현재까지 쌓인 경험을 정리합니다.")}{relationshipCapable ? uiText("기억이 이미 정리돼 있으면 남은 관계 정리를 이어갑니다.") : ""}{uiText("저장한 기억 정리 모델을 사용하며 AI 이용 비용이 발생할 수 있습니다.")}</p>
+    <p>{uiText("{{name}}의 현재까지 쌓인 경험을 정리합니다.", {name: props.subjectName})}{relationshipCapable ? uiText("기억이 이미 정리돼 있으면 남은 관계 정리를 이어갑니다.") : ""}{uiText("저장한 기억 정리 모델을 사용하며 AI 이용 비용이 발생할 수 있습니다.")}</p>
     <Button disabled={props.disabled || props.dirty || running || !capabilityReady} loading={busy} loadingLabel={uiText("요청 중")} onClick={() => void start()}>{relationshipCapable ? uiText("지금 기억·관계 정리") : uiText("지금 기억 정리")}</Button>
     {capabilityReason === "owner_controlled_memory_only" ? <p>{uiText("사용자 캐릭터는 기억만 정리합니다. 관계 유형과 인식은 AI가 대신 판단하지 않아요.")}</p> : null}
     {capabilityReason === "unsupported" ? <p>{uiText("현재 서버는 기억 정리만 지원합니다. 관계 통합 정리는 앱 업데이트 후 사용할 수 있어요.")}</p> : null}
     {props.dirty ? <p>{uiText("변경한 설정을 먼저 저장해 주세요.")}</p> : null}
     {progress ? <p role="status">{progress.flow_state ? uiText(flowLabels[progress.flow_state]) : uiText(labels[progress.state])}{progress.state === "completed" ? uiText("· 새 기억 {{value0}}개", {value0: progress.saved_count}) : ""}
       {progress.state === "partial_failed" ? uiText("· 저장한 기억 {{value0}}개 · 남은 경험 {{value1}}개", {value0: progress.saved_count, value1: progress.remaining_count}) : ""}</p> : null}
-    {progress?.relationship?.target_count !== null && progress?.relationship ? <p>{uiText("관계")}{progress.relationship.completed_count} / {progress.relationship.target_count}{uiText("개 검토 완료 · 유지")}{progress.relationship.kept_count}{uiText("개 · 갱신 판단")}{progress.relationship.changed_count}{uiText("개")}</p> : null}
-    {(progress?.relationship?.excluded_memory_count ?? 0) > 0 ? <p>{uiText("검토 중 사용할 수 없게 된 기억")}{progress?.relationship?.excluded_memory_count}{uiText("개는 제외했습니다. 기존 관계는 보존됩니다.")}</p> : null}
+    {progress?.relationship?.target_count !== null && progress?.relationship ? <p>{uiText("관계 {{completed}} / {{target}}개 검토 완료 · 유지 {{kept}}개 · 갱신 판단 {{changed}}개", {completed: progress.relationship.completed_count, target: progress.relationship.target_count, kept: progress.relationship.kept_count, changed: progress.relationship.changed_count})}</p> : null}
+    {(progress?.relationship?.excluded_memory_count ?? 0) > 0 ? <p>{uiText("검토 중 사용할 수 없게 된 기억 {{count}}개는 제외했습니다. 기존 관계는 보존됩니다.", {count: progress?.relationship?.excluded_memory_count ?? 0})}</p> : null}
     {progress?.flow_state === "completed" && progress.relationship?.projection_pending ? <p>{uiText("관계 저장은 완료됐습니다. 관계도 반영을 기다리고 있어요.")}</p> : null}
     {progress?.relationship?.next_attempt_at ? <p>{uiText("자동 재시도 예정:")}{formatDate(progress.relationship.next_attempt_at)} ({props.timezone}{uiText("). 다시 시도해도 API 대기 시간은 유지됩니다.")}</p> : null}
     {progress?.last_code === "memory_capacity_reached" ? <p role="alert">{uiText("기억 저장 한도에 도달해 새 기억 정리를 멈췄습니다. 저장 공간을 확보한 뒤 남은 정리를 다시 시도해 주세요.")}</p> : null}

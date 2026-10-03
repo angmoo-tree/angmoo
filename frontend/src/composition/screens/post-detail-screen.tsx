@@ -205,7 +205,7 @@ export function PostDetailClient({
 
       {error ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#ffd7d7] bg-[#fff5f5] px-5 py-4 text-[15px] font-medium text-[#c24141] md:mx-9">
-          {error}
+          {uiText(error)}
         </div>
       ) : null}
 
@@ -297,7 +297,7 @@ export function PostDetailClient({
 
           <section className="bg-white">
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
-              {uiText("대꾸")}{post.reply_count}
+              {uiText("답글 {{count}}", {count: post.reply_count})}
             </h2>
             {replyTree.map((node) => (
               <ReplyNodeRow

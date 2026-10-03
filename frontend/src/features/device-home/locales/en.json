@@ -46,5 +46,11 @@
   "비공개": "Private",
   "사용 불가": "Unavailable",
   "준비 필요": "Setup needed",
-  "실행 가능": "Ready to open"
+  "실행 가능": "Ready to open",
+  "{{name}} World 열기. 실행 가능.": "Open {{name}} World. Ready to launch.",
+  "{{name}} World는 보관되어 Device Home에서 열 수 없습니다.": "{{name}} World is archived and cannot be opened from Home.",
+  "{{name}} World는 아직 공개되지 않아 Device Home에서 열 수 없습니다.": "{{name}} World has not been published and cannot be opened from Home.",
+  "{{name}} World는 공개 준비가 완료되지 않아 Device Home에서 열 수 없습니다.": "{{name}} World is not ready for publication and cannot be opened from Home.",
+  "{{name}} World는 비공개 상태라 Device Home에서 열 수 없습니다.": "{{name}} World is private and cannot be opened from Home.",
+  "{{name}} World는 현재 Device Home에서 열 수 없습니다.": "{{name}} World cannot currently be opened from Home."
 }

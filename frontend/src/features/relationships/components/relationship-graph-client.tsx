@@ -98,8 +98,8 @@ export function RelationshipGraphClient({
       })
       .catch((nextError) => {
         if (active) {
-          const code = nextError instanceof Error ? uiText(nextError.message) : "relationship_query_failed";
-          setError(uiText(ERROR_LABELS[code] ?? code));
+          const code = nextError instanceof Error ? nextError.message : "relationship_query_failed";
+          setError(ERROR_LABELS[code] ?? code);
         }
       })
       .finally(() => {
@@ -108,7 +108,7 @@ export function RelationshipGraphClient({
     return () => {
       active = false;
     };
-  }, [characterId, depth, provider, requestVersion, router, status, uiText, worldId]);
+  }, [characterId, depth, provider, requestVersion, router, status, worldId]);
 
   const orderedNodes = useMemo(() => {
     if (!graph) return [];
@@ -190,7 +190,7 @@ export function RelationshipGraphClient({
       {presentationState === "failed" ? (
         <InlineError data-relationship-graph-state="failed">
           <div className="space-y-3">
-            <p>{error}</p>
+            <p>{uiText(error ?? "관계망을 지금 조회할 수 없습니다. 잠시 후 다시 시도해주세요.")}</p>
             <Button variant="secondary" onClick={retry}>
               {uiText("다시 시도")}</Button>
           </div>

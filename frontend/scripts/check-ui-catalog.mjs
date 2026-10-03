@@ -21,6 +21,10 @@ for (const dir of locales) {
     else if (JSON.stringify(params(value)) !== JSON.stringify(params(ko[key]))) errors.push(`${ns}:${key}: interpolation parity`);
     const base = key.replace(/_(one|other)$/, "");
     if (base !== key && (!en[`${base}_one`] || !en[`${base}_other`] || !ko[`${base}_one`] || !ko[`${base}_other`])) errors.push(`${ns}:${key}: plural parity`);
+    // K04 applies to authored UI resources. Persona/post/name data never enter
+    // this scan. The logo's actual bird description is an explicit brand use.
+    if (typeof ko[key] === "string" && /둥지|지저귐|대꾸|모이|쪽지|나무|앵무/.test(ko[key]) && !/노란 앵무.*Angmoo.*로고/.test(ko[key]))
+      errors.push(`${ns}:${key}: legacy generic product terminology`);
   }
 }
 const files = [];
@@ -40,7 +44,8 @@ for (const file of files) {
       ? ["STEPS", "PERSONA_FIELDS"] : file.endsWith(`${path.sep}character-profile-screen.tsx`)
       ? ["PROFILE_TABS"] : file.endsWith(`${path.sep}post-feed-parts.tsx`)
       ? ["FEED_CONTENT_FILTER_OPTIONS"] : file.endsWith(`${path.sep}creator-studio-dashboard.tsx`)
-      ? ["GROUPS"] : [];
+      ? ["GROUPS"] : file.endsWith(`${path.sep}world-character-social-profile-activity.tsx`)
+      ? ["TABS"] : [];
     if (authoredDeclarations.length && ts.isStringLiteralLike(node) && /[가-힣]/.test(node.text)) {
       let declaration = node.parent;
       while (declaration && !ts.isVariableDeclaration(declaration)) declaration = declaration.parent;
@@ -50,6 +55,11 @@ for (const file of files) {
       let fn = node.parent;
       while (fn && !ts.isFunctionDeclaration(fn)) fn = fn.parent;
       if (fn?.name?.text === "feedContentFilterEmptyText") check(node.text);
+    }
+    if (file.endsWith(`${path.sep}world-character-social-profile-activity.tsx`) && ts.isStringLiteralLike(node) && /[가-힣]/.test(node.text)) {
+      let fn = node.parent;
+      while (fn && !ts.isFunctionDeclaration(fn)) fn = fn.parent;
+      if (fn?.name?.text === "emptyTitle") check(node.text);
     }
     if (file.endsWith(`${path.sep}creator-studio-dashboard.tsx`) && ts.isStringLiteralLike(node) && /[가-힣]/.test(node.text)) {
       let fn = node.parent;

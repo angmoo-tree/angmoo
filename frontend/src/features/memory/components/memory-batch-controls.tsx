@@ -104,9 +104,9 @@ export function MemoryBatchControls({ worldId, subjectId, subjectName, scopeVers
     <h2>{uiText("기억 정리")}</h2>
     <p>{uiText("경험은 먼저 저장하고, AI가 지금 기억 정리, 예약 시각이나 앱 전체 종료 때 오래 보관할 기억을 고릅니다.")}</p>
     {!draft || !saved ? <Button variant="secondary" compact disabled={disabled} onClick={() => setRevision((value) => value + 1)}>{failed ? uiText("설정 다시 불러오기") : uiText("설정 불러오는 중")}</Button> : <>
-      <p role="status">{uiText(labels[saved.status])} {uiText("· 정리 대기")}{saved.pending_count}{uiText("개")}</p>
-      <p>{uiText("저장된 기억")}{formatNumber(saved.stored_count)} / {formatNumber(saved.storage_limit)}{uiText("개")}</p>
-      {saved.run_saved_count !== null && saved.run_pending_count !== null ? <p>{uiText("표시 중인 정리 작업에서 저장")}{saved.run_saved_count}{uiText("개 · 남은 경험")}{saved.run_pending_count}{uiText("개")}</p> : null}
+      <p role="status">{uiText(labels[saved.status])} {uiText(" · 정리 대기 {{count}}개", {count: saved.pending_count})}</p>
+      <p>{uiText("저장된 기억 {{count}} / {{limit}}개", {count: formatNumber(saved.stored_count), limit: formatNumber(saved.storage_limit)})}</p>
+      {saved.run_saved_count !== null && saved.run_pending_count !== null ? <p>{uiText("표시 중인 정리 작업에서 저장 {{saved}}개 · 남은 경험 {{pending}}개", {saved: saved.run_saved_count, pending: saved.run_pending_count})}</p> : null}
       {saved.capacity_blocked ? <p role="status">{uiText("저장 한도에 도달해 새 기억 정리를 멈췄어요. 기존 기억은 보존됩니다. 불필요한 기억을 삭제하거나 보관 기간이 지나 공간이 생기면 남은 경험을 이어 정리합니다.")}</p> : null}
       {saved.status === "attention" ? <p role="status">{uiText(memoryBatchFailureMessage(saved.last_code))}</p> : null}
       {!saved.memory_enabled ? <p>{uiText("기억이 꺼져 있어 자동 정리가 멈춰 있습니다. 기존 기록은 보존됩니다.")}</p> : null}

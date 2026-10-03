@@ -53,6 +53,11 @@ assert.equal(en.t("홈", {ns: "shell"}), "Home");
 assert.equal(ko.t("홈", {ns: "shell"}), "홈");
 await ko.changeLanguage("en"); assert.equal(en.language, "en");
 await ko.changeLanguage("ko"); assert.equal(en.language, "en");
+assert.equal(en.t("근거 {{count}}개 보기", {ns: "chat", count: 1}), "View 1 evidence item");
+assert.equal(en.t("근거 {{count}}개 보기", {ns: "chat", count: 2}), "View 2 evidence items");
+assert.equal(ko.t("근거 {{count}}개 보기", {ns: "chat", count: 2}), "근거 2개 보기");
+assert.equal(en.t("{{name}}(으)로 대화", {ns: "chat", name: "原文 A-17"}), "Chatting as 原文 A-17");
+assert.equal(en.t("{{name}}에게 보낼 메시지", {ns: "chat", name: "原文 A-17"}), "Message to 原文 A-17");
 function Message() { const text = useUiText("characters"); return React.createElement("p", null, text("휴식 · {{time}}", {time: "<script>原文 A-17</script>"})); }
 const rendered = renderToStaticMarkup(React.createElement(I18nextProvider, {i18n: en}, React.createElement(Message)));
 assert.ok(rendered.includes("&lt;script&gt;原文 A-17&lt;/script&gt;")); assert.ok(!rendered.includes("<script>"));
@@ -74,6 +79,8 @@ context.Intl = Intl;
 
 const auth = source("lib/auth/browser-session.ts"), {apiRequest} = source("lib/http/api-request.ts");
 const {ApiRequestError} = source("lib/http/error-contract.ts");
+const {requestSocialApi} = source("lib/http/social-request.ts");
+const {apiRequest: requestCommunity} = source("lib/http/community-request.ts");
 const {formatUiRequestFailure} = source("lib/http/error-presentation.ts");
 for (const language of ["ko","en"]) for (const zone of ["UTC","Asia/Seoul","America/New_York","Europe/London"]) {
   const instance = language === "ko" ? ko : en;
@@ -96,7 +103,19 @@ for (const body of ["<html>private provider data</html>", JSON.stringify({detail
   runtimeFetch = async () => new Response(body, {status: 409});
   await assert.rejects(apiRequest("/fixture"), error => error.status === 409 && !error.message.includes("private"));
 }
-for (const request of [apiRequest, auth.authRequest]) {
+for (const request of [requestSocialApi, requestCommunity]) {
+  auth.storeAuth({user: user("owner-a")});
+  runtimeFetch = async () => new Response('{"detail":"private-provider-data"}', {status: 503});
+  await assert.rejects(request("/fixture"), error => error instanceof ApiRequestError
+    && error.status === 503 && !error.message.includes("private"));
+  runtimeFetch = async () => new Response("invalid-success-json", {status: 200});
+  await assert.rejects(request("/fixture"));
+  runtimeFetch = async () => new Response('{"detail":"not_authenticated"}', {status: 401});
+  await assert.rejects(request("/fixture"), error => error.status === 401);
+  assert.equal(auth.getStoredUser().id, "owner-a");
+}
+const authenticatedSocial = (path, options) => requestSocialApi(path, {...options, clearAuthOnUnauthorized: true});
+for (const request of [apiRequest, auth.authRequest, authenticatedSocial]) {
   for (const transition of ["new-owner", "same-owner-new-session", "runtime-replaced", "aborted"]) {
     auth.storeAuth({user: user("owner-a")});
     browser.__ANGMOO_RUNTIME_CONFIG__ = {apiBaseUrl: "http://127.0.0.1:12345", launchToken: "old-in-memory"};
@@ -115,4 +134,4 @@ for (const request of [apiRequest, auth.authRequest]) {
   await assert.rejects(request("/fixture"), error => error.status === 401);
   assert.equal(auth.getStoredUser(), null);
 }
-console.log("User environment contracts PASS: isolated i18next/SSR, interpolation escaping, detectors, UTC display, typed HTTP errors and 8 late-response session transitions.");
+console.log("User environment contracts PASS: isolated i18next/SSR, interpolation escaping, detectors, UTC display, typed HTTP errors across shared transports and 12 late-response session transitions.");

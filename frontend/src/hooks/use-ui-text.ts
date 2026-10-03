@@ -7,10 +7,13 @@ export type UiText = (message: string, values?: Record<string, string | number>)
 
 /** Only product-authored messages are passed here; never user/card/source text. */
 export function useUiText(namespace: string): UiText {
-  const { t } = useTranslation(namespace);
-  return useCallback((message, values = {}) => String(t(message, {
+  // Subscribe to language changes for rendering, but keep the callback stable
+  // so data-loading effects do not run again solely because the UI language
+  // changed. Translation always reads this app's current i18next instance.
+  const { i18n } = useTranslation(namespace);
+  return useCallback((message, values = {}) => String(i18n.t(message, {
     ...values, defaultValue: message, ns: [namespace, "shell"],
     // These are literal examples in the card guide, rather than interpolation.
     user: "{{user}}", char: "{{char}}",
-  })), [t, namespace]);
+  })), [i18n, namespace]);
 }

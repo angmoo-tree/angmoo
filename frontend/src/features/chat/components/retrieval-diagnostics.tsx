@@ -106,10 +106,10 @@ export function RetrievalDiagnostics({ worldId, threadId }: {
       {error && <p role="alert">{uiText("진단을 불러오지 못했어요. 대화 접근 권한과 연결을 확인해 주세요.")}</p>}
       {!error && !data && <p role="status">{uiText("진단을 불러오는 중이에요.")}</p>}
       {data && <>
-        <p>{uiText("요청 상태:")}{data.request_state ?? uiText("요청 없음")}</p>
+        <p>{uiText("요청 상태: {{state}}", {state: data.request_state ?? uiText("요청 없음")})}</p>
         {data.request && <>
-          <p>{uiText("요청 시각:")}{formatDate(data.request.created_at)}</p>
-          <p>{uiText("요청 ID:")}{data.request.request_id}</p>
+          <p>{uiText("요청 시각: {{time}}", {time: formatDate(data.request.created_at)})}</p>
+          <p>{uiText("요청 ID: {{id}}", {id: data.request.request_id})}</p>
           <Button variant="secondary" compact type="button" onClick={() => { void navigator.clipboard.writeText(data.request!.request_id).then(() => setActionError(false)).catch(() => setActionError(true)); }}>{uiText("요청 ID 복사")}</Button>
           <Button variant="secondary" compact type="button" disabled={!diagnosticSnapshotMatches(data, worldId, threadId, requestId)} onClick={download}>{data.details === null && !data.search_trace ? uiText("기본 진단만 파일 저장") : uiText("상세 진단 파일 저장")}</Button>
         </>}
@@ -122,13 +122,13 @@ export function RetrievalDiagnostics({ worldId, threadId }: {
             </div>)}</dl>
           </li>)}
         </ol>}
-        {!!data.record?.omitted_events && <p>{uiText("상한으로 생략한 관측")}{data.record.omitted_events}{uiText("개가 있습니다.")}</p>}
+        {!!data.record?.omitted_events && <p>{uiText("상한으로 생략한 관측 {{count}}개가 있습니다.", {count: data.record.omitted_events})}</p>}
         <hr />
         <p>{uiText("상세 진단은 검색어와 적용 조건을 포함할 수 있습니다. 현재 대화의 다음 10개 요청 또는 30분 동안만 수집합니다. 수집한 결과는 최대 60분 보관하며, 끄기·재시작·용량 제한으로 사라질 수 있습니다.")}</p>
         <Button variant="secondary" compact type="button" disabled={busy} onClick={() => void toggle(!data.capture.enabled)}>
           {data.capture.enabled ? uiText("상세 진단 끄고 기록 지우기") : uiText("현재 대화의 상세 진단 켜기")}
         </Button>
-        <p>{uiText("상세 수집:")}{data.capture.enabled ? uiText("켜짐 · 남은 요청 {{value0}}개", {value0: data.capture.remaining}) : uiText("꺼짐")}</p>
+        <p>{uiText("상세 수집: {{state}}", {state: data.capture.enabled ? uiText("켜짐 · 남은 요청 {{value0}}개", {value0: data.capture.remaining}) : uiText("꺼짐")})}</p>
         {data.search_trace && <SearchTraceDetails trace={data.search_trace} />}
         {data.details || data.search_trace ? <>
           <details><summary>{uiText("수집한 검색 조건 보기")}</summary><pre>{JSON.stringify(data.details, null, 2)}</pre></details>

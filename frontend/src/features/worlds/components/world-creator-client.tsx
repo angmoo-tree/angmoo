@@ -586,7 +586,7 @@ function ReadinessCard({ context }: { context: WorldCreatorContext | null }) {
       </div>
       {!context ? <p className="mt-4 text-sm font-medium leading-6 text-[#667085]">{uiText("이름만으로 초안을 저장할 수 있습니다. 저장 후 필수 설정을 검증합니다.")}</p> : null}
       <IssueList issues={readiness?.issues ?? []} />
-      {readiness ? <p className="mt-4 text-xs font-bold text-[#667085]">{uiText("선택 설정")}{readiness.optional_setting_count}{uiText("개 그룹 ·")}{readiness.quality_tier}</p> : null}
+      {readiness ? <p className="mt-4 text-xs font-bold text-[#667085]">{uiText("선택 설정 {{count}}개 그룹 · {{tier}}", {count: readiness.optional_setting_count, tier: readiness.quality_tier})}</p> : null}
     </div>
   );
 }
