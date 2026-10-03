@@ -233,11 +233,47 @@ def missing_nodes(approved: list[str], current: list[str], moves: dict[str, str]
     return sorted(set(targets.values()) - set(current))
 
 
-def git_bytes(*args: str, root: Path = ROOT) -> bytes:
+_NATIVE_GIT_RUN = subprocess.run
+
+
+def immutable_git_read(args: tuple[str, ...]) -> bool:
+    """Recognize only reads whose complete object/revision inputs are pinned."""
+    sha = r"[0-9a-f]{40}"
+    if len(args) == 3 and args[:2] == ("cat-file", "blob"):
+        return bool(re.fullmatch(sha, args[2]))
+    if len(args) == 2 and args[0] == "show":
+        pinned = re.fullmatch(sha + r"(?:\^\d*)?:.+", args[1])
+        # Historical manifests can be tens of MiB. Keep these out of the
+        # process cache; their parsed candidate/history remains independently
+        # validated, and bounded source-object caching does the useful work.
+        return bool(pinned and ":security/" not in args[1])
+    if args[:2] == ("merge-base", "--is-ancestor") and len(args) == 4:
+        return all(re.fullmatch(sha, value) for value in args[2:])
+    if args and args[0] == "log" and "--" in args:
+        revisions = [value for value in args[1:args.index("--")] if not value.startswith("--")]
+        return bool(revisions and all(re.fullmatch(sha + r"\.\." + sha, value) for value in revisions))
+    return False
+
+
+def _read_git(args: tuple[str, ...], root: str) -> bytes:
     result = subprocess.run(["git", *args], cwd=root, capture_output=True)
     if result.returncode:
         raise ValueError("git evidence unavailable; fetch full history: " + result.stderr.decode("utf-8", errors="replace").strip())
     return result.stdout
+
+
+@lru_cache(maxsize=8192)
+def _immutable_git_bytes(args: tuple[str, ...], root: str) -> bytes:
+    return _read_git(args, root)
+
+
+def git_bytes(*args: str, root: Path = ROOT) -> bytes:
+    # Mutable refs, working-tree reads, and injected subprocess readers always
+    # execute again. No candidate file, HEAD, ancestry-to-HEAD or failure is
+    # memoized. Cache identity also includes the absolute repository path.
+    if subprocess.run is _NATIVE_GIT_RUN and immutable_git_read(args):
+        return _immutable_git_bytes(args, str(root.resolve()))
+    return _read_git(args, str(root))
 
 
 def git_blob(data: bytes) -> str:
