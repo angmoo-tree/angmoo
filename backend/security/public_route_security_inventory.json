@@ -212,6 +212,11 @@
       "module": "app.domains.identity.router.local",
       "endpoint": "get_local_bootstrap_status"
     },
+    "GET /api/v1/auth/local/environment": {
+      "access": "owner-only",
+      "module": "app.domains.identity.router.local",
+      "endpoint": "get_environment"
+    },
     "GET /api/v1/auth/me": {
       "access": "authenticated-shared",
       "module": "app.domains.identity.router.auth",
@@ -831,6 +836,11 @@
       "access": "public",
       "module": "app.domains.identity.router.local",
       "endpoint": "claim_local_owner"
+    },
+    "POST /api/v1/auth/local/environment": {
+      "access": "owner-only",
+      "module": "app.domains.identity.router.local",
+      "endpoint": "synchronize_environment"
     },
     "POST /api/v1/auth/local/session": {
       "access": "public",

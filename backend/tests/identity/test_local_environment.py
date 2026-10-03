@@ -142,3 +142,19 @@ def test_v26_to_v27_preserves_all_original_user_columns():
         environment_v27.verify_delta(connection, before)
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(27).schema_digest
     engine.dispose()
+
+
+def test_typed_environment_context_keeps_canonical_demo_mutation_guard():
+    from fastapi import HTTPException
+    from starlette.requests import Request
+    from app.domains.identity.dependencies import (
+        AuthenticatedSessionContext, get_authenticated_user_context_allow_incomplete,
+    )
+    user = User(id="synthetic-demo", display_name="Original demo name")
+    context = AuthenticatedSessionContext(user, None, False, "demo")
+    read = Request({"type": "http", "method": "GET", "path": "/api/v1/auth/local/environment", "headers": []})
+    assert get_authenticated_user_context_allow_incomplete(read, context) is context
+    write = Request({"type": "http", "method": "POST", "path": "/api/v1/auth/local/environment", "headers": []})
+    with pytest.raises(HTTPException) as failure:
+        get_authenticated_user_context_allow_incomplete(write, context)
+    assert failure.value.status_code == 403

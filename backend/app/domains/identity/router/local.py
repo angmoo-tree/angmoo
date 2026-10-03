@@ -32,14 +32,14 @@ from app.domains.identity.service.local_owner import LocalIdentityService
 router = APIRouter(prefix="/auth/local", tags=["auth"])
 
 
-from app.domains.identity.dependencies import resolve_authenticated_session_context, AuthenticatedSessionContext
+from app.domains.identity.dependencies import get_authenticated_user_context_allow_incomplete, AuthenticatedSessionContext
 from app.domains.identity.schemas_environment import EnvironmentRead, EnvironmentReport
 from app.domains.identity.service.environment import EnvironmentConflict, read_environment, report_environment
 
 
 @router.get("/environment", response_model=EnvironmentRead)
 def get_environment(request: Request, db: Session = Depends(get_db),
-                    context: AuthenticatedSessionContext = Depends(resolve_authenticated_session_context)):
+                    context: AuthenticatedSessionContext = Depends(get_authenticated_user_context_allow_incomplete)):
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
         return read_environment(db, context.user.id)
@@ -49,7 +49,7 @@ def get_environment(request: Request, db: Session = Depends(get_db),
 
 @router.post("/environment", response_model=EnvironmentRead)
 def synchronize_environment(data: EnvironmentReport, request: Request, db: Session = Depends(get_db),
-                            context: AuthenticatedSessionContext = Depends(resolve_authenticated_session_context)):
+                            context: AuthenticatedSessionContext = Depends(get_authenticated_user_context_allow_incomplete)):
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return report_environment(db, context.user.id, data,

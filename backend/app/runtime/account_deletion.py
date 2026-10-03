@@ -294,6 +294,8 @@ def _scrub_account_data(
     delete_creator_private_data(db, character_ids=character_ids, owner_id=user.id)
 
     scrub_memory_data(db, owner_id=user.id)
+    from app.domains.identity.service.environment import delete_private_environment
+    delete_private_environment(db, user.id)
     from app.domains.social.models.activity_thought import SocialActivityThought
     db.execute(delete(SocialActivityThought).where(SocialActivityThought.owner_id == user.id))
     db.execute(
@@ -585,6 +587,8 @@ def _scrub_account_data(
     user.terms_version = None
     user.profile_setup_completed = False
     user.feed_content_filter = "all"
+    user.ui_language = None
+    user.ui_preference_revision = 0
     user.deleted_at = now
 
 def _owned_agent_run_condition(user_id: str, character_ids: list[str]):

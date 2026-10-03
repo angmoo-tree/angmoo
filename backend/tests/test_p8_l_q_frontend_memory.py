@@ -110,7 +110,7 @@ def test_chat_shows_only_deterministic_evidence_capability_and_safe_dialog() -> 
     )
 
     assert "thread.evidence_summaries.find" in chat
-    assert "근거 {evidence.count}개 보기" in chat
+    assert 'uiText("근거 {{count}}개 보기", {count: evidence.count})' in chat
     assert "<WorldChatEvidenceInspector" in chat
     assert "evidence_summaries" in contract
     assert "item.excerpt ?" in inspector

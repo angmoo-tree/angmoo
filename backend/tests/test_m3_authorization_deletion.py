@@ -443,8 +443,17 @@ def test_account_deletion_removes_private_graph_and_keeps_public_content(
     engine = _engine()
     with Session(engine) as db:
         user = _user("owner", is_admin=True)
+        user.ui_language = "ko"
+        user.ui_preference_revision = 2
         character = _character("char-owner", user.id)
-        db.add_all([user, character])
+        other_owner = _user("other-environment-owner")
+        db.add_all([user, character, other_owner])
+        db.flush()
+        for owner in (user, other_owner):
+            db.add(models.LocalEnvironment(owner_id=owner.id, installation_id=f"synthetic-{owner.id}",
+                preferred_language="ja-JP", timezone="Asia/Tokyo"))
+            db.add(models.EnvironmentTimezoneChange(id=f"change-{owner.id}", owner_id=owner.id,
+                revision=1, previous_timezone="UTC", timezone="Asia/Tokyo", effective_at=datetime.now(UTC)))
         db.commit()
         post, tree_post = _seed_private_graph(db, user=user, character=character)
         _write_private_media(
@@ -472,6 +481,12 @@ def test_account_deletion_removes_private_graph_and_keeps_public_content(
         assert db.get(models.User, user.id).google_sub is None
         assert db.get(models.User, user.id).password_hash is None
         assert db.get(models.User, user.id).is_admin is False
+        assert db.get(models.User, user.id).ui_language is None
+        assert db.get(models.User, user.id).ui_preference_revision == 0
+        assert db.get(models.LocalEnvironment, user.id) is None
+        assert db.get(models.EnvironmentTimezoneChange, f"change-{user.id}") is None
+        assert db.get(models.LocalEnvironment, other_owner.id).preferred_language == "ja-JP"
+        assert db.get(models.EnvironmentTimezoneChange, f"change-{other_owner.id}").timezone == "Asia/Tokyo"
         assert db.get(models.Character, character.id).deleted_at is not None
         slot = db.get(models.AgentSlot, f"slot-{character.id}")
         assert slot.status == "empty"

@@ -122,7 +122,7 @@ def test_chat_v1_behavior_and_next_only_exposure_markers_are_preserved() -> None
         assert marker in thread
     for marker in (
         'router.replace("/login")',
-        'aria-label="쪽지 내역 삭제"',
+        'aria-label={uiText("쪽지 내역 삭제")}',
         ': `/messages/${encodeURIComponent(thread.id)}`;',
     ):
         assert marker in listing

@@ -98,7 +98,10 @@ def test_static_product_waits_for_packaged_runtime_and_exposes_only_retry() -> N
     assert "로컬 엔진과 저장된 World를 준비하고 있습니다." in gate
     assert "로컬 엔진 다시 시작" in gate
     assert "desktop_runtime_unreachable" in gate
-    for forbidden in ("shell", "sql", "cypher", "commandArgs"):
+    # The shell translation namespace is a presentation resource, not a native
+    # execution capability. Check native command names at their call boundary.
+    assert 'useUiText("shell")' in gate
+    for forbidden in ('invoke("shell"', 'invoke("sql"', 'invoke("cypher"', "commandArgs"):
         assert forbidden not in gate
 
 

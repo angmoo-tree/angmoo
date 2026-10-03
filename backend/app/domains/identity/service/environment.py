@@ -2,7 +2,7 @@
 from datetime import UTC, datetime, timedelta
 import secrets
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.contracts.environment import EnvironmentSnapshot, AccountingPeriod
@@ -15,6 +15,12 @@ from app.domains.identity.models_environment import EnvironmentTimezoneChange, L
 from app.domains.identity.schemas_environment import EnvironmentRead, EnvironmentReport
 
 LEASE_SECONDS = 120
+
+
+def delete_private_environment(db, owner_id: str) -> None:
+    """Remove only this owner's detector data during canonical account deletion."""
+    db.execute(delete(EnvironmentTimezoneChange).where(EnvironmentTimezoneChange.owner_id == owner_id))
+    db.execute(delete(LocalEnvironment).where(LocalEnvironment.owner_id == owner_id))
 
 
 class EnvironmentConflict(ValueError):

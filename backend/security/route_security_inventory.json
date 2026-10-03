@@ -217,6 +217,11 @@
       "module": "app.domains.identity.router.local",
       "endpoint": "get_local_bootstrap_status"
     },
+    "GET /api/v1/auth/local/environment": {
+      "access": "owner-only",
+      "module": "app.domains.identity.router.local",
+      "endpoint": "get_environment"
+    },
     "GET /api/v1/auth/me": {
       "access": "authenticated-shared",
       "module": "app.domains.identity.router.auth",
@@ -352,6 +357,11 @@
       "module": "app.domains.media.router",
       "endpoint": "usage"
     },
+    "GET /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "read_job"
+    },
     "GET /api/v1/messages/settings": {
       "access": "owner-only",
       "module": "app.domains.chat.router.messages",
@@ -381,11 +391,6 @@
       "access": "public",
       "module": "app.domains.social.router",
       "endpoint": "get_post"
-    },
-    "GET /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation": {
-      "access": "owner-only",
-      "module": "app.domains.media.router",
-      "endpoint": "read_job"
     },
     "GET /api/v1/posts/{post_id}/thread": {
       "access": "public",
@@ -852,6 +857,11 @@
       "module": "app.domains.identity.router.local",
       "endpoint": "claim_local_owner"
     },
+    "POST /api/v1/auth/local/environment": {
+      "access": "owner-only",
+      "module": "app.domains.identity.router.local",
+      "endpoint": "synchronize_environment"
+    },
     "POST /api/v1/auth/local/session": {
       "access": "public",
       "module": "app.domains.identity.router.local",
@@ -912,6 +922,11 @@
       "module": "app.domains.media.router",
       "endpoint": "upload"
     },
+    "POST /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation/{action}": {
+      "access": "owner-only",
+      "module": "app.domains.media.router",
+      "endpoint": "change_job"
+    },
     "POST /api/v1/messages/threads": {
       "access": "owner-only",
       "module": "app.domains.chat.router.messages",
@@ -936,11 +951,6 @@
       "access": "public",
       "module": "app.domains.social.router",
       "endpoint": "create_comment"
-    },
-    "POST /api/v1/media/worlds/{world_id}/posts/{post_id}/image-generation/{action}": {
-      "access": "owner-only",
-      "module": "app.domains.media.router",
-      "endpoint": "change_job"
     },
     "POST /api/v1/posts/{post_id}/likes": {
       "access": "authenticated-shared",

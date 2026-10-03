@@ -120,6 +120,7 @@ def test_security_inventory_access_classes_match_authentication_dependencies() -
             assert dependencies & {
                 "get_current_user",
                 "get_current_user_allow_incomplete",
+                "get_authenticated_user_context_allow_incomplete",
             }, key
 
 
@@ -158,7 +159,8 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 124
+    assert len(session_mutations) == 125
+    assert "POST /api/v1/auth/local/environment" in session_mutations
     assert "POST /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation" in session_mutations
     assert len(local_bot_mutations) == 10
     assert not admin_mutations
@@ -169,6 +171,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         assert _dependency_names(actual[key]) & {
             "get_current_user",
             "get_current_user_allow_incomplete",
+            "get_authenticated_user_context_allow_incomplete",
         }, key
     for key in local_bot_mutations:
         assert "get_current_local_bot" in _dependency_names(actual[key]), key

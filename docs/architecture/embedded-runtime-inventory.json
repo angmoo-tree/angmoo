@@ -50,6 +50,7 @@
         "httpx>=0.28.1,<1",
         "ladybug==0.19.1",
         "langchain-core>=1.0.0",
+        "langcodes>=3.5.1",
         "langgraph-checkpoint-sqlite>=3.0,<4",
         "langgraph-prebuilt>=1.0.4",
         "langgraph>=1.0.4",
@@ -92,10 +93,12 @@
     ],
     "frontend": {
       "dependencies": {
+        "i18next": "26.4.2",
         "lucide-react": "^1.29.0",
         "next": "16.3.6",
         "react": "19.2.8",
-        "react-dom": "19.2.8"
+        "react-dom": "19.2.8",
+        "react-i18next": "17.0.15"
       },
       "dev_dependencies": {
         "@tailwindcss/postcss": "^4",

@@ -1,5 +1,5 @@
 {
-  "edge_count": 5504,
+  "edge_count": 5505,
   "external_import_count": 4014,
   "module_count": 1361,
   "modules": [
@@ -15347,6 +15347,7 @@
         "app.domains.identity.exceptions",
         "app.domains.identity.models",
         "app.domains.identity.service.auth",
+        "app.domains.identity.service.environment",
         "app.domains.local_bot.models",
         "app.domains.media.models",
         "app.domains.memory.models.daypart",

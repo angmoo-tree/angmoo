@@ -33,8 +33,8 @@ def test_split_routine_completion_is_not_reexecuted_after_final_storage_failure(
     original_input = execution.shared_input
     # A synthetic retained context crosses the real mode threshold. No mode,
     # graph, validator, guard, ledger or publication function is replaced.
-    monkeypatch.setattr(execution, "shared_input", lambda *args: {
-        **original_input(*args), "retained_required_context": "x" * 40001})
+    monkeypatch.setattr(execution, "shared_input", lambda *args, **kwargs: {
+        **original_input(*args, **kwargs), "retained_required_context": "x" * 40001})
     calls = []
     async def sdk(**kwargs):
         calls.append(kwargs)
