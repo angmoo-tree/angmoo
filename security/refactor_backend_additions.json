@@ -28362,6 +28362,23 @@
       "test_suppressions": {
         "tests/test_native_chrome_retirement.py": {}
       }
+    },
+    {
+      "commit": "c9ca2492400066150e46e24cc672063c4eb7d11a",
+      "feature_id": "AR-WORLD-FEED-UI-UNIFICATION-20261004",
+      "reason": "New typed neutral header, World fixture/spec/configs and verification document; immutable committed source proof, no backend definitions or test-node changes.",
+      "tracked_files": {
+        "browser-tests/playwright.world-feed-ui-static.config.ts": "7f669948f7d201ae36f3f7ad35a93f2fcbc0cfb4",
+        "browser-tests/playwright.world-feed-ui.config.ts": "bd743f56fe65f7d63c9e97d3e2868133556d708e",
+        "browser-tests/world-feed-fixture.ts": "74c700c1d7b265feb538803cb3ec3c18d20c8fa3",
+        "browser-tests/world-feed-ui.spec.ts": "979b9da2abafd2e253f94eebe3bca32fe15d29b1",
+        "docs/verification/world-feed-ui-unification-20261004.md": "255a0aaaaf997ec7b0f354e3abb02b45f1925e83",
+        "frontend/src/components/layout/feed-header.module.css": "4f1be7dc16ce9024d3bee02b7c9873ecdf696655",
+        "frontend/src/components/layout/feed-header.tsx": "636f6a5ac3fb3d2ec07cc3d3d77be2af4b761a19"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

@@ -4,7 +4,8 @@
 - 제품 저장소: `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`.
 - 브랜치: `feat/0.1.0-release-readiness`.
 - 출발 HEAD: `2806ff6a0fd876e3e987fac4dd1c313441bd53b2`, 출발 작업 폴더 clean.
-- 기록 상태: P00–P14의 제품 구현·기능·시각·정적 검증 완료. P15 구현 커밋과 P16 정확한 커밋 보존 증거는 이후 기록으로 확정한다.
+- 기록 상태: **P00–P17 로컬 구현·검증·증거 등록·인계 완료. 직접 USER CHECK와 설치판 적용은 NOT_RUN.**
+- 구현 커밋: **c9ca2492400066150e46e24cc672063c4eb7d11a**, sign-off 포함, 소유 30개 파일. 증거/최종 문서는 같은 브랜치의 후속 sign-off 로컬 커밋으로 보존한다.
 - 원격 push·PR·Hosted CI·act·main 전환/병합·pull: **미수행**.
 
 ## 1. 구현 결과와 책임
@@ -111,17 +112,26 @@ Canonical은 Playwright 1.62.1, Ubuntu 24.04, Chromium 151.0.7922.34/revision 12
 
 ## 6. 단계·증거·운영 경계
 
-| 단계 | 기록 |
+| 단계 | 실행 결과와 근거 |
 | --- | --- |
-| P00 | clean branch/HEAD·watch 승인·격리 환경·글로벌 이전 geometry 확보 |
-| P01–P04 | canonical 지침·neutral header·목록 shell·실제 owner/profile 연결 |
-| P05–P09 | 필수 작성창·Media 표시 슬롯·공통 행·조회/재시도·다국어/접근성 |
-| P10 | 지정 18개 + 추가 101개 임시 API/media 검사 PASS |
-| P11 | Next/static 새 46개·기존 112개·image 40개 PASS, 기존 opt-in 10개는 별도 SKIP |
-| P12 | 앵커와 반응형/zoom 직접 검토, 대상 한 개 canonical 갱신 뒤 36개 PASS |
-| P13 | 정적 경계·design/catalog/error·lint/type·inventory·두 build PASS; 최종 exact preservation은 P16에서 확정 |
-| P14 | 이 문서·C/T 대응표·실패 원인·증거 범위 저장 |
-| P15–P17 | 구현 커밋·append-only 증거·최종 상태·사용자 확인 인계를 후속 기록으로 확정 |
+| P00 | 완료. 출발 branch/HEAD/clean·watch 승인·분리 포트·글로벌 이전 geometry 확보 |
+| P01 | 완료. 최신 C01–C16을 ARCHITECTURE/DESIGN·reference/product-shell에 반영 |
+| P02 | 완료. 글로벌 앵커 확보·neutral FeedHeader 추출, 글로벌 선택/Cue/필터/갱신 회귀 유지 |
+| P03 | 완료. Feed 목록만 content-owned header, 큰/작은 World 헤더·헤더 갱신 제거, 다른 shell 유지 |
+| P04 | 완료. 실제 ownerActor 사진/이름/handle·같은 World 내 프로필, 없는 사진 fallback·권한·늦은 응답 검증 |
+| P05 | 완료. 필수 제목 160/본문 4000·실제 수동 payload·48px 게시 아이콘·in-flight readOnly 유지 |
+| P06 | 완료. Media renderLayout·왼쪽 사진/오른쪽 게시·미리보기/피드백·native chooser, 기본 Chat/설정 picker 유지 |
+| P07 | 완료. 기존 SocialPostRow 재사용·더보기/이미지/프로필/상세·답글, Follow/repost 필터 미추가 |
+| P08 | 완료. 최초/World 전환/게시 후/이미지 완료 갱신·실패 retry·사진 있는 draft의 pull refresh·dirty guard·idempotency |
+| P09 | 완료. ko/en·360/390/436/480/768/960/1440·200%·focus·48px 정상/업로드/게시 busy 상태 |
+| P10 | 완료. 지정 임시 backend 18 PASS + 추가 API/media 101 PASS, 사용자 DB/실제 API 호출 0 |
+| P11 | 완료. 새 Next 23/static 23·기존 Next 35/static 77·image 40 PASS. 기존 opt-in 10 SKIP는 별도 |
+| P12 | 완료. 앵커 geometry·각 폭/zoom 캡처 직접 검토. World PNG 한 개 갱신 뒤 고정 Linux 전체 36 PASS |
+| P13 | 완료. catalog/error/lint/typecheck·architecture/inventory/design·일반/static build·정확한 보존 검사 PASS |
+| P14 | 완료. 구현 파일·C01–C16/T01–T21 대응·초기 실패/최종 결과·운영/설치/USER CHECK 경계 문서화 |
+| P15 | 완료. 소유 30개 파일만 c9ca2492400066150e46e24cc672063c4eb7d11a로 sign-off 로컬 커밋 |
+| P16 | 완료. 실제 커밋/blob·18개 frontend 전후 hash·1개 PNG 전후 hash, append-only 기록·공식 보존 검사 PASS. 증거는 별도 sign-off 로컬 커밋 |
+| P17 | 완료. 최종 branch/commit/status·원자료·현 Docker 소스 동기화·사용자 확인 경로 인계. 직접 USER CHECK는 NOT_RUN |
 
 재현에 사용하는 추적 파일은 `browser-tests/world-feed-fixture.ts`, `world-feed-ui.spec.ts`, `playwright.world-feed-ui.config.ts`, `playwright.world-feed-ui-static.config.ts`다. 제품 저장소에서 일반 build 후 `pnpm --dir browser-tests exec playwright test --config playwright.world-feed-ui.config.ts`, static build 후 같은 명령의 static config를 실행한다. backend 지정 검사는 backend cwd에서 `uv run python -m pytest tests/social/test_l3_owner_manual_social_inbox.py tests/social/test_source_write_ownership.py tests/social/test_world_feed_search.py tests/memory/test_episode_social_sources.py`로 실행했다.
 
@@ -132,3 +142,20 @@ Canonical은 Playwright 1.62.1, Ubuntu 24.04, Chromium 151.0.7922.34/revision 12
 사용자가 관찰 서버 유지·frontend watch 자동 반영을 승인했다. 실행 컨테이너 `/app/src`의 header/Social/Media 주요 파일 3개가 로컬 SHA256과 같고 frontend/backend 모두 기존 2026-10-04T11:56–11:57Z 시작 시각으로 healthy였다. 사용자 3000 서버는 유지했다. 운영 서버 재빌드/재시작·사용자 DB의 테스트 글/사진 생성·볼륨/키 변경은 하지 않았다. 개발 소스 동기화 확인을 운영 데이터 기반 end-to-end PASS 또는 설치판 적용으로 표현하지 않는다.
 
 직접 **USER CHECK**, 설치판 빌드/교체/실행, 실제 API·자연 활동 관찰 품질은 **NOT_RUN**이다. 사용자는 현재 브라우저에서 기본 SNS/생성 World의 Feed를 열어 오른쪽 사용자 사진→내 프로필, 제목+본문, 왼쪽 사진/오른쪽 게시 버튼과 실제 게시글 표시를 확인할 수 있다. 일반 reload/HMR의 draft 영구 보존은 약속하지 않는다.
+
+## 7. 정확한 보존·최종 로컬 상태
+
+고정 refactor 기준 5개를 그대로 유지했다. 두 append-only manifest의 기존 모든 record는 원래 prefix와 같고, `AR-WORLD-FEED-UI-UNIFICATION-20261004`만 각각 하나 추가했다. 구현의 실제 30개 Git blob과 frontend 18개 전후 hash·World PNG 한 개 전후 hash를 검증했다. Python definition/assertion·API/ORM 변경은 0이다.
+
+공식 committed snapshot capture가 새 source 7개·backend test node 0개를 등록했다. 이는 새 header·browser fixture/spec/config·검증 문서의 추적이며 backend 테스트를 추가하거나 대체한 의미가 아니다. 이어서 frontend 324 source files / frozen PR258 1867·PR263 1907 nodes / protected 5107·current 5107 nodes / inventory 37 items PASS.
+
+```text
+Appended committed evidence: sources=7 nodes=0
+Frontend preservation passed: 324 source files; browser assertions/fixtures/assets/locks preserved
+Frozen PR258 nodes=1867; PR263 nodes=1907; protected lineages=5107; current=5107
+Refactor preservation passed: items=37
+```
+
+검증기의 실행 조건·과거 검사·기준·tolerance를 우회하지 않았다. 첫 통합 실행에서 commit/blob·증거 capture·frontend 검사는 통과했지만, 캐시가 누적된 마지막 backend 검증 프로세스는 메모리 약 6GB를 사용하여 작업 소유 프로세스만 중단했다. 이 중단은 backend PASS로 계산하지 않았다. 마지막 전체 공식 `--contracts --nodes` 검증은 새 프로세스에서 재실행했다. 원래 validator·반환값·증거·캐시 조건은 그대로 유지했다. 보조 memo 관리 thread는 별도로 import된 모듈에 작용했으며, 공식 checker가 자체 로드한 모듈의 캐시에는 영향을 주지 않음을 확인했다. 따라서 주기적 eviction이 실제 checker 메모리를 줄였다고 주장하지 않고, 단계별 새 프로세스로 분리한 결과만 기록한다. 전체 로그는 `artifacts/world-feed-ui-20261004/20261004T131329Z/exact-preservation-final.log`에 있고, 최종 SHA·clean·frozen/append-only 재확인은 같은 폴더의 `local-closeout.json`에 남긴다.
+
+격리 Next/static/SSR/image fixture의 포트 3330/3331/3332/3351/3352는 최종 listener 0이며 임시 Linux visual 컨테이너도 종료됐다. 원자료/캡처/trace는 로컬 ignore 상태로 보존한다. 관찰용 3000 서버와 frontend/backend 컨테이너는 유지했고, 기존 시작 시각·healthy와 주요 frontend 3개 SHA256 일치를 재확인한 결과는 `runtime-closeout.json`에 있다. 설치판 적용·사용자 DB E2E·직접 USER CHECK와 원격 push/PR/Hosted CI/main 병합은 미수행이다.
