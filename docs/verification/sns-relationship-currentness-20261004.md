@@ -4,7 +4,7 @@
 - 구현 브랜치: `feat/0.1.0-release-readiness`
 - 시작 HEAD: `7011cfb96c5af9b1265026c52e3ed58fa7d943d7`, 시작 작업 폴더 clean
 - 원 계획: workspace `docs/plan/10-04 SNS 관계 스냅샷 재정렬 오판 방지와 SQLite 원본 재검증 코드 구현 세부 계획.md`, P00–P14
-- 현재 판정: 제품 수정·제품 관련 검사 425 PASS/기존 PostgreSQL 1 SKIP·보존 도구 회귀 57 PASS·frontend 공식 보존 검사 완료. 최종 backend 보존 검사 재실행과 종료 기록 로컬 커밋은 진행 중이다.
+- 현재 판정: P00–P14의 제품 구현·격리 검증 완료. 중복 제외 482 PASS / 기존 PostgreSQL 1 SKIP이며, backend/frontend 공식 보존 검사와 아키텍처·design 검사도 통과했다. 운영 적용·실서비스 재관찰·원격 작업은 미수행이다.
 
 ## 1. 원인과 변경 결과
 
@@ -111,13 +111,13 @@ SDK 제출 hook은 limiter/semaphore 대기 뒤에 다시 검증한다. 실제 �
 | `regressions-final.xml` | 308 PASS / 1 SKIP. 마지막 native deadline/SDK transaction 종료 보완 이후 같은 회귀를 재실행 |
 | `preservation-gate-regressions.xml` | 57 PASS. SNS 퇴역/소유 검증 28개와 기존 승인 계약·Git 증거 cache 회귀. 원본 정의·연속 변경·동일 소유·위조 출처·미승인 drift 보호 |
 
-중복 실행 node를 제외한 합계는 425 PASS / 기존 PostgreSQL 1 SKIP이다. 신규 보호 검사 105개와 관련 기존 검사 320개가 통과했다. `accumulated-guard.xml`의 49개 중 48개는 앞선 결과의 재검사이고 새 누적 마감 시각 검사는 1개이므로, 49개를 합계에 다시 더하지 않는다.
+제품 검사만 중복을 제외하면 425 PASS / 기존 PostgreSQL 1 SKIP이다. 신규 제품 보호 검사 105개와 관련 기존 검사 320개가 통과했다. 여기에 보존 도구 회귀 57개를 포함한 최종 합계는 **482 PASS / 1 SKIP**이며, 신규 보호 검사 116개와 관련 기존 검사 366개로 구성된다. `accumulated-guard.xml`의 49개 중 48개는 앞선 결과의 재검사이고 새 누적 마감 시각 검사는 1개이므로, 49개를 합계에 다시 더하지 않는다. 실제 XML의 node ID를 대조한 집계는 `test-summary.json`에 보존했다.
 
 유일한 기존 SKIP은 `routine_posts/test_runtime.py::test_same_tick_is_single_flight_across_twenty_postgres_sessions`이다. `SECURITY_CONCURRENCY_DATABASE_URL`이 필요하며 이 작업은 별도 PostgreSQL 서버/실제 운영 DB를 시작하지 않았다. SQLite single-flight와 이번 final writer interleaving은 실행했다. 이 SKIP을 PASS로 합치지 않는다.
 
 중간 구현·fixture 실패 XML도 보존했다. fixture의 membership enum, block ID, observer 클래스, node list 취급을 실제 계약에 맞추었으며 보호 assertion 삭제·test skip 추가·mock 관용화로 합격시키지 않았다. backend 경계 검사에서 확인한 World Characters → Relationships cycle은 공통 revision 상수만 `app/contracts`에 두어 수정했다. 현재 import inventory는 실제 source 관계를 다시 생성한 것이며 허용 policy·frozen API/ORM/test baseline을 재생성하지 않았다.
 
-최종 정적 검사 입력: `generate_architecture_inventory --check`, backend/frontend architecture boundary, frontend design contract, `git diff --check`. frontend 코드 수정은 0이므로 브라우저 화면·Next/static build를 이 결함의 합격 근거로 새로 추가하지 않았다. 공식 backend/frontend source/node/API/ORM preservation은 정확한 source commit의 추가 증거를 append하고 검증한 후 아래에 기록한다.
+최종 정적 검사 `generate_architecture_inventory --check`, backend/frontend architecture boundary, frontend design contract, `git diff --check`는 모두 통과했다. 현재 backend inventory는 modules 1,364 / internal edges 5,537 / external imports 4,019이며, backend 허용 경계 검사는 legacy exact edges 0을 확인했다. frontend 경계는 features 14 / legacy 0, design 검사는 raw colors 1,230 / files 36 / surfaces 18 / route gaps 0 / screenshots 18을 확인했다. frontend 코드 수정은 0이므로 브라우저 화면·Next/static build를 이 결함의 합격 근거로 새로 추가하지 않았다. 공식 backend/frontend source/node/API/ORM preservation 결과는 아래 종료 기록에 있다.
 
 ## 7. 운영 적용·후속 재관찰 경계
 
@@ -129,16 +129,19 @@ Docker backend/frontend는 조사 시 named volume만 사용하고 source watch 
 
 ## 8. 최종 로컬 종료 기록
 
-다음 두 source 커밋은 sign-off를 포함한 로컬 커밋이다.
+다음 세 source 커밋은 sign-off를 포함한 로컬 커밋이다.
 
 - `ddb2200b9bdc54b79b9607664e7430813316c85e`: 고정 관계 입력의 canonical 검증과 실제 SDK/공개 효과 경계 연결. 이번 소유 33개 파일만 커밋했다.
 - `60ae6cb1aa45c42a98c33dcca9681f177d56bbcb`: 여러 후보/상대가 같은 guard 마감 시각을 공유하는 보완과 추가 회귀 검사. 소유 5개 파일만 커밋했다.
+- `ee6dc3bf75580623b64f11e98350a870618b3b7a`: SNS 퇴역 소유 검증이 같은 함수의 승인된 연속 변경을 확인하도록 연결하고 미승인·위조 변경 보호 검사 11개를 추가했다. 소유 3개 파일만 커밋했다.
 
-공식 도입 도구로 첫 커밋의 신규 source 6개·test node 104개, 둘째 커밋의 추가 test node 1개를 기록했다. 기존 계약 변경 기록 139개와 source/node 도입 기록 334개는 변경하지 않고 각 파일에 정확한 커밋 증거 2개씩을 추가했다. prefix 대조 결과는 `closeout-scope.json`에 보존했다.
+공식 도입 도구로 첫 커밋의 신규 source 6개·test node 104개, 둘째 커밋의 추가 test node 1개, 셋째 커밋의 추가 test node 11개를 기록했다. 기존 계약 변경 기록 139개와 source/node 도입 기록 334개는 변경하지 않고 각 파일에 정확한 커밋 증거 3개씩을 추가했다. prefix 대조 결과는 `closeout-scope.json`에 보존했다. 현재 import inventory만 실제 import에 맞게 갱신했으며 frozen API/ORM/source/test baseline과 원래 SNS 퇴역 증거는 변경하지 않았다.
 
-Frontend 공식 보존 검사는 source 324개와 browser assertion/fixture/asset/lock 보존을 확인하고 통과했다. 둘째 source의 도입 기록을 추가하기 전에 시작된 중복 backend 검사는 취소하고, 두 커밋의 증거가 모두 준비된 최종 `--contracts --nodes` 검사로 대체했다. 취소를 PASS 또는 제품 코드 실패로 판정하지 않는다. 이 경위는 `superseded-check.json`에 기록했다.
+Frontend 공식 보존 검사는 source 324개와 browser assertion/fixture/asset/lock 보존을 확인하고 통과했다. 둘째 source의 도입 기록을 추가하기 전에 시작된 중복 backend 검사는 해당 작업 소유 프로세스만 취소하고, 모든 source 증거가 준비된 최종 `--contracts --nodes` 검사로 대체했다. 취소를 PASS 또는 제품 코드 실패로 판정하지 않는다. 이 경위는 `superseded-check.json`에 기록했다.
 
-최종 backend 보존 결과와 증거·종료 문서의 로컬 커밋 후 작업 폴더 상태는 해당 검사 종료 후 이 절에 확정한다. 로컬 완료는 배포/실서비스/원격 반영 승인과 분리한다.
+최종 backend 공식 `--contracts --nodes` 검사는 **exit 0**으로 통과했다. 원래 PR258 1,867개·PR263 1,907개 node를 바탕으로 검증한 protected lineages 5,085개와 current nodes 5,085개가 일치했으며 보존 항목 37개가 통과했다. 실제 결과는 `backend-preservation-complete.log`와 `preservation-complete-results.json`에 보존했다. 셋째 커밋의 공식 도입 검사 역시 exit 0이다.
+
+종료 커밋에는 `security/post_refactor_contract_changes.json`, `security/refactor_backend_additions.json`, 본 검증 문서만 명시적으로 stage한다. source 구현 3개와 종료 증거 커밋을 분리하며, 최종 HEAD와 clean 확인은 workspace 원 계획 §15 및 로컬 `final-git-state.json`에 기록한다. 전체 작업 소유 변경 경로는 37개이고 frontend·workflow·migration 변경은 0이다. 로컬 완료는 배포/실서비스/원격 반영과 분리한다.
 
 첫 최종 backend 검사에서 `SNS retained symbol differs from exact reviewed ownership`가 발생했다. `_execute_planned_action`은 공개 효과 직전 관계 검증과 SQLite writer 경계가 추가된 실제 소유 함수이지만, SNS 퇴역 검증은 옮긴 당시 AST와 현재 AST가 영구히 같은지만 검사했다. 원래 퇴역 기록·기준의 재작성이나 실행 함수의 복제/전역 hook으로 우회하지 않았다. SNS 검증이 기존 승인 계약 도구의 append-only 역사·Git ancestry/blob·정확한 전후 AST 검증을 거친 **같은 소유 함수의 연속 변경**만 인정하도록 연결했다. 다른 소유·미승인 공백·미커밋 변경·위조 출처·원래 퇴역 정의 변경은 계속 실패한다. 57개 관련 검사가 이를 대조했다.
 

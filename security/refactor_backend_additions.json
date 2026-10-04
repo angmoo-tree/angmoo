@@ -27790,6 +27790,470 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "ddb2200b9bdc54b79b9607664e7430813316c85e",
+      "feature_id": "AR-SNS-RELATIONSHIP-CURRENTNESS-20261004",
+      "reason": "Exact committed introductions for user-approved SNS canonical currentness P00-P14, new scoped contracts/services, protected regression nodes and verification document; original evidence retained.",
+      "tracked_files": {
+        "backend/app/contracts/relationship_currentness.py": "61a781bb00e49b28a5e50a8f6256f57d438014c7",
+        "backend/app/domains/relationships/policies/social_context_validation.py": "af815745ed7ba0e0ea0b553cb52784712587d8d3",
+        "backend/app/domains/relationships/service/social_context_validation.py": "c12e0e23b15eefaa390d087340a634ddae290250",
+        "backend/tests/relationships/test_social_context_validation.py": "60b7696bcd1b3e53210a813a306cb9f96d66df44",
+        "backend/tests/runtime/test_activity_relationship_validation.py": "d3168e4ef572490db747fa78cae099cb4a734676",
+        "docs/verification/sns-relationship-currentness-20261004.md": "0c4b71bd8af4b4b7624eae18f5298fd1db28bb54"
+      },
+      "test_nodes": [
+        "tests/relationships/test_social_context_validation.py::test_t01_t03_frozen_facts_survive_order_status_ranking_and_unselected_churn",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_aba_is_not_hidden_by_equal_current_values[version]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_aba_is_not_hidden_by_equal_current_values[view_version]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[affinity-1-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[familiarity-1-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[interaction_count-1-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[last_event_at-delta9-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[perception-New view-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[relationship_label-Friend-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[tension-1-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[trust-1-facts_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[version-1-version_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t04_t05_t07_actual_versions_and_used_facts_change[view_version-1-view_changed]",
+        "tests/relationships/test_social_context_validation.py::test_t07_display_name_normalization_and_actual_change",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[binding]",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[direction]",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[owner]",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[subject]",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[swap]",
+        "tests/relationships/test_social_context_validation.py::test_t08_scope_direction_and_binding_are_not_interchangeable[world]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[actor]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[block]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[character]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[membership]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[observed]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[relation]",
+        "tests/relationships/test_social_context_validation.py::test_t09_removed_or_invisible_facts_stop_validation[replacement]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[basis]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[binding]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[bool_version]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[duplicate_state]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[duplicate_target]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[extra]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[hash]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[invalid_binding]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[invalid_scope]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[invalid_state]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[missing]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[negative_version]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[revision]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[scope]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[snapshot]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[text]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[too_large]",
+        "tests/relationships/test_social_context_validation.py::test_t10_corrupt_receipts_fail_without_a_legacy_escape[too_many]",
+        "tests/relationships/test_social_context_validation.py::test_t10_unknown_policy_is_a_typed_invalid_receipt[1]",
+        "tests/relationships/test_social_context_validation.py::test_t10_unknown_policy_is_a_typed_invalid_receipt[None]",
+        "tests/relationships/test_social_context_validation.py::test_t10_unknown_policy_is_a_typed_invalid_receipt[revision1]",
+        "tests/relationships/test_social_context_validation.py::test_t10_unknown_policy_is_a_typed_invalid_receipt[revision2]",
+        "tests/relationships/test_social_context_validation.py::test_t10_unknown_policy_is_a_typed_invalid_receipt[unknown]",
+        "tests/relationships/test_social_context_validation.py::test_t11_distinct_actors_keep_independent_outgoing_facts",
+        "tests/relationships/test_social_context_validation.py::test_t11_fresh_other_connection_commit_is_detected",
+        "tests/relationships/test_social_context_validation.py::test_t12_basis_preserves_meaning_and_always_validates_scope[disabled]",
+        "tests/relationships/test_social_context_validation.py::test_t12_basis_preserves_meaning_and_always_validates_scope[no_facts]",
+        "tests/relationships/test_social_context_validation.py::test_t12_basis_preserves_meaning_and_always_validates_scope[unavailable]",
+        "tests/relationships/test_social_context_validation.py::test_t12_t25_canonical_failure_is_never_empty_success[deadline]",
+        "tests/relationships/test_social_context_validation.py::test_t12_t25_canonical_failure_is_never_empty_success[exception]",
+        "tests/relationships/test_social_context_validation.py::test_t13_equal_utc_instants_and_strict_numbers",
+        "tests/relationships/test_social_context_validation.py::test_t19_t21_legacy_uses_original_rows_hash_and_does_not_invent_view_version",
+        "tests/relationships/test_social_context_validation.py::test_t20_legacy_header_damage_is_typed_and_unprovable[coverage-value1]",
+        "tests/relationships/test_social_context_validation.py::test_t20_legacy_header_damage_is_typed_and_unprovable[snapshot_id- ]",
+        "tests/relationships/test_social_context_validation.py::test_t20_legacy_header_damage_is_typed_and_unprovable[status-value0]",
+        "tests/relationships/test_social_context_validation.py::test_t20_legacy_header_damage_is_typed_and_unprovable[validated_at-2026-10-04T12:00:00]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[duplicate]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[facts]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[hash]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[intro]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[key]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[row_type]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[state]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[status]",
+        "tests/relationships/test_social_context_validation.py::test_t20_unprovable_legacy_never_rebaselines[version]",
+        "tests/relationships/test_social_context_validation.py::test_t25_bounded_batch_query_count_and_receipt_size",
+        "tests/relationships/test_social_context_validation.py::test_t25_native_sqlite_deadline_interrupts_and_restores_connection[lock-file]",
+        "tests/relationships/test_social_context_validation.py::test_t25_native_sqlite_deadline_interrupts_and_restores_connection[query-file]",
+        "tests/relationships/test_social_context_validation.py::test_t25_zero_one_and_maximum_references_are_bounded[0]",
+        "tests/relationships/test_social_context_validation.py::test_t25_zero_one_and_maximum_references_are_bounded[12]",
+        "tests/relationships/test_social_context_validation.py::test_t25_zero_one_and_maximum_references_are_bounded[1]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Bram-BuildDecisionContext]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Bram-RecallSelected]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Elias-BuildDecisionContext]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Elias-RecallSelected]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Red-BuildDecisionContext]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t02_reordered_projection_does_not_invalidate_frozen_lane[Red-RecallSelected]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t04_changed_relationship_still_stops_lane",
+        "tests/runtime/test_activity_relationship_validation.py::test_t06_projection_view_delay_uses_canonical_facts_in_original_rank",
+        "tests/runtime/test_activity_relationship_validation.py::test_t10_new_run_pins_policy_and_existing_legacy_run_is_not_rewritten",
+        "tests/runtime/test_activity_relationship_validation.py::test_t14_real_langgraph_checkpoint_preserves_hidden_receipts_and_input",
+        "tests/runtime/test_activity_relationship_validation.py::test_t15_inbox_change_refreshes_selected_prompt_and_receipt_together",
+        "tests/runtime/test_activity_relationship_validation.py::test_t16_final_submission_guard_stops_real_provider_boundary[before_sdk]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t16_final_submission_guard_stops_real_provider_boundary[json_retry]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_inbox_executor_rejects_change_after_writer_and_commits_no_effect[block]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_inbox_executor_rejects_change_after_writer_and_commits_no_effect[version]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_sqlite_writer_fence_blocks_changes_between_validation_and_publish[file]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_feed_final_boundary_and_committed_reuse[claim]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_feed_final_boundary_and_committed_reuse[none]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_feed_final_boundary_and_committed_reuse[source]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_feed_final_boundary_and_committed_reuse[version]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_feed_final_boundary_and_committed_reuse[view]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_routine_publisher_respects_final_guard_and_reuses_effect[False]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t17_t18_routine_publisher_respects_final_guard_and_reuses_effect[True]",
+        "tests/runtime/test_activity_relationship_validation.py::test_t18_completed_effect_replay_does_not_validate_changed_historical_facts",
+        "tests/runtime/test_activity_relationship_validation.py::test_t22_routine_uses_frozen_source_relations_but_solo_adds_no_reads",
+        "tests/runtime/test_activity_relationship_validation.py::test_t26_diagnostics_only_store_allowlisted_counts_and_reasons"
+      ],
+      "test_assertions": {
+        "tests/relationships/test_social_context_validation.py": {
+          "binding": [],
+          "prepared": [],
+          "validate": [],
+          "test_t01_t03_frozen_facts_survive_order_status_ranking_and_unselected_churn": [
+            "assert validate(case, prompt, receipt).checked_count == 2",
+            "assert fresh.content_hash != prompt['content_hash']",
+            "assert validate(case, prompt, receipt).outcome == 'valid'",
+            "assert validate(case, subset_prompt, subset_receipt).outcome == 'valid'",
+            "assert (prompt, receipt) == original"
+          ],
+          "test_t04_t05_t07_actual_versions_and_used_facts_change": [
+            "pytest.raises(SocialContextValidationError, match=reason)"
+          ],
+          "test_t04_t05_aba_is_not_hidden_by_equal_current_values": [
+            "pytest.raises(SocialContextValidationError, match='version_changed|view_changed')"
+          ],
+          "test_t07_display_name_normalization_and_actual_change": [
+            "assert validate(case, prompt, receipt).outcome == 'valid'",
+            "pytest.raises(SocialContextValidationError, match='facts_changed')"
+          ],
+          "test_t08_scope_direction_and_binding_are_not_interchangeable": [
+            "pytest.raises(SocialContextValidationError, match='receipt_invalid')",
+            "pytest.raises(SocialContextValidationError, match='receipt_invalid')",
+            "pytest.raises(SocialContextValidationError, match='visibility_lost')"
+          ],
+          "test_t09_removed_or_invisible_facts_stop_validation": [
+            "pytest.raises(SocialContextValidationError, match='visibility_lost')"
+          ],
+          "test_t10_corrupt_receipts_fail_without_a_legacy_escape": [
+            "pytest.raises(SocialContextValidationError, match='receipt_invalid')"
+          ],
+          "test_t10_unknown_policy_is_a_typed_invalid_receipt": [
+            "pytest.raises(SocialContextValidationError, match='receipt_invalid')"
+          ],
+          "test_t20_legacy_header_damage_is_typed_and_unprovable": [
+            "pytest.raises(SocialContextValidationError, match='legacy_unprovable')"
+          ],
+          "test_t11_fresh_other_connection_commit_is_detected": [
+            "assert row.version == 1",
+            "pytest.raises(SocialContextValidationError, match='version_changed')"
+          ],
+          "test_t12_basis_preserves_meaning_and_always_validates_scope": [
+            "assert validate(case, prompt, receipt).outcome == basis",
+            "pytest.raises(SocialContextValidationError, match='visibility_lost')"
+          ],
+          "test_t12_t25_canonical_failure_is_never_empty_success": [
+            "pytest.raises(SocialContextValidationError, match='canonical_unavailable')"
+          ],
+          "test_t13_equal_utc_instants_and_strict_numbers": [
+            "assert facts_digest(item) == facts_digest(replace(item, relationship=replace(item.relationship, last_event_at=stamp.replace(tzinfo=None))))",
+            "assert facts_digest(item) == facts_digest(replace(item, relationship=replace(item.relationship, last_event_at=stamp.astimezone(timezone(timedelta(hours=9))))))",
+            "assert facts_digest(item) != facts_digest(replace(item, relationship=replace(item.relationship, last_event_at=stamp + timedelta(seconds=1))))",
+            "pytest.raises(SocialContextValidationError, match='facts_invalid')"
+          ],
+          "test_t19_t21_legacy_uses_original_rows_hash_and_does_not_invent_view_version": [
+            "assert validate(case, prompt, None, policy=LEGACY_CURRENTNESS).outcome == 'valid_legacy_facts'",
+            "assert validate(case, prompt, None, policy=LEGACY_CURRENTNESS).outcome == 'valid_legacy_facts'",
+            "assert prompt == original and 'view_version' not in prompt",
+            "pytest.raises(SocialContextValidationError, match='receipt_invalid')"
+          ],
+          "test_t20_unprovable_legacy_never_rebaselines": [
+            "pytest.raises(SocialContextValidationError, match='legacy_unprovable')",
+            "assert prompt == original"
+          ],
+          "test_t25_bounded_batch_query_count_and_receipt_size": [
+            "assert len(statements) <= 13",
+            "assert size < MAX_RECEIPT_BYTES",
+            "assert all((' IN ' in sql or ' = ' in sql for sql in statements))",
+            "assert decoded.to_dict() == receipt",
+            "assert validate(case, prompt, receipt).checked_count == 2"
+          ],
+          "test_t25_zero_one_and_maximum_references_are_bounded": [
+            "assert len(statements) <= (3 if count == 0 else 13)",
+            "assert native_timeouts == len(statements) + 2",
+            "assert size <= MAX_RECEIPT_BYTES",
+            "assert len(receipt['references']) == count",
+            "assert validate(case, prompt, receipt).checked_count == count"
+          ],
+          "test_t11_distinct_actors_keep_independent_outgoing_facts": [
+            "assert validate(case, prompt, receipt).outcome == 'valid'",
+            "pytest.raises(SocialContextValidationError, match='version_changed')"
+          ],
+          "test_t25_native_sqlite_deadline_interrupts_and_restores_connection": [
+            "pytest.raises(SocialContextValidationError, match='canonical_unavailable')",
+            "assert monotonic() - started < 1",
+            "assert driver.execute('PRAGMA busy_timeout').fetchone()[0] == original_timeout",
+            "assert case.db.scalar(text('SELECT 1')) == 1"
+          ]
+        },
+        "tests/runtime/test_activity_relationship_validation.py": {
+          "relation_case": [],
+          "_scope_guard": [],
+          "_lane": [],
+          "_state": [],
+          "test_t02_reordered_projection_does_not_invalidate_frozen_lane": [
+            "assert original.content_hash != reordered.content_hash"
+          ],
+          "test_t04_changed_relationship_still_stops_lane": [
+            "pytest.raises(ValueError, match='activity_relationship_changed')"
+          ],
+          "test_t10_new_run_pins_policy_and_existing_legacy_run_is_not_rewritten": [
+            "assert row.result[CURRENTNESS_POLICY_KEY] == CURRENTNESS_REVISION",
+            "assert bind_run(case.db, actor=case.actor, activity_id=row.activity_id).result[CURRENTNESS_POLICY_KEY] == CURRENTNESS_REVISION",
+            "assert resumed.result == frozen",
+            "assert read_currentness_policy(resumed.result) == LEGACY_CURRENTNESS"
+          ],
+          "_new_state": [],
+          "test_t06_projection_view_delay_uses_canonical_facts_in_original_rank": [
+            "assert snapshot.items[0].relationship.target_world_character_id == 'world-character-peer'",
+            "assert snapshot.items[0].relationship.view_version == 4",
+            "assert 'Canonical current perception' in snapshot.context_text",
+            "assert state == before"
+          ],
+          "test_t14_real_langgraph_checkpoint_preserves_hidden_receipts_and_input": [
+            "assert 'relationship_validation_receipts' not in wire and 'facts_digest' not in wire",
+            "assert 'relationship_validation_receipts' not in json.dumps(request)",
+            "assert stored.values['relationship_validation_receipts'] == state['relationship_validation_receipts']",
+            "assert stored.values['identity'] == state['identity']",
+            "assert stored.values['candidates'][0]['relationship'] == state['candidates'][0]['relationship']"
+          ],
+          "test_t15_inbox_change_refreshes_selected_prompt_and_receipt_together": [
+            "assert loaded['relationship_validation_receipts']",
+            "assert run.result['feed_preparation']['relationship_validation_receipts'] == loaded['relationship_validation_receipts']",
+            "assert loaded == previous",
+            "assert refreshed['candidates'][0]['target_id'] == 'post-target'",
+            "assert refreshed['relationship_validation_receipts']['post-target'] != previous['relationship_validation_receipts']['post-target']",
+            "pytest.raises(ValueError, match='activity_relationship_changed')"
+          ],
+          "test_t16_final_submission_guard_stops_real_provider_boundary": [
+            "pytest.raises(ActivityRetryGuardError)",
+            "assert len(calls) == (0 if point == 'before_sdk' else 1)",
+            "assert all(('facts_digest' not in request.user_prompt for request in calls))",
+            "assert not case.db.in_transaction()"
+          ],
+          "test_t17_inbox_executor_rejects_change_after_writer_and_commits_no_effect": [
+            "pytest.raises(ValueError, match='activity_relationship_changed')",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == before",
+            "assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == 'succeeded'))"
+          ],
+          "test_t18_completed_effect_replay_does_not_validate_changed_historical_facts": [
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'reused'"
+          ],
+          "test_t22_routine_uses_frozen_source_relations_but_solo_adds_no_reads": [
+            "pytest.raises(ValueError, match='routine_relationship_changed')"
+          ],
+          "test_t26_diagnostics_only_store_allowlisted_counts_and_reasons": [
+            "assert emitted[0][1]['details'] == {'revision': CURRENTNESS_REVISION, 'outcome': 'valid', 'reason': None, 'checked_count': 2}",
+            "assert emitted[-1][1]['details'] == {'revision': None, 'outcome': None, 'reason': None, 'checked_count': 12}"
+          ],
+          "test_t17_sqlite_writer_fence_blocks_changes_between_validation_and_publish": [
+            "assert result['status'] == 'succeeded'",
+            "assert checked == [True]",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "pytest.raises(OperationalError, match='locked')"
+          ],
+          "test_t17_t18_feed_final_boundary_and_committed_reuse": [
+            "assert state['candidates'][0]['target_id'] == 'post-target'",
+            "pytest.raises(ValueError, match=reason)",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == 'succeeded'))",
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'succeeded'",
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'reused'",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 1"
+          ],
+          "test_t17_t18_routine_publisher_respects_final_guard_and_reuses_effect": [
+            "assert calls == [True]",
+            "pytest.raises(ValueError, match='routine_relationship_changed')",
+            "assert db.scalar(select(func.count(models.Post.id))) == before",
+            "assert publish_routine_activity(ctx, prepared=prepared, generation=generation, relationship_validator=guard)['publish_result']['public_action_count'] == 1",
+            "assert publish_routine_activity(ctx, prepared=prepared, generation=generation, relationship_validator=must_not_validate_again)['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert db.scalar(select(func.count(models.Post.id))) == before + 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/relationships/test_social_context_validation.py": {},
+        "tests/runtime/test_activity_relationship_validation.py": {}
+      }
+    },
+    {
+      "commit": "60ae6cb1aa45c42a98c33dcca9681f177d56bbcb",
+      "feature_id": "AR-SNS-RELATIONSHIP-GUARD-DEADLINE-20261004",
+      "reason": "Exact first introduction of the cumulative guard deadline regression for user-approved C07/T25; retain earlier source and node evidence.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_activity_relationship_validation.py::test_t25_multiple_candidates_share_one_guard_deadline"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_activity_relationship_validation.py": {
+          "relation_case": [],
+          "_scope_guard": [],
+          "_lane": [],
+          "_state": [],
+          "test_t02_reordered_projection_does_not_invalidate_frozen_lane": [
+            "assert original.content_hash != reordered.content_hash"
+          ],
+          "test_t04_changed_relationship_still_stops_lane": [
+            "pytest.raises(ValueError, match='activity_relationship_changed')"
+          ],
+          "test_t10_new_run_pins_policy_and_existing_legacy_run_is_not_rewritten": [
+            "assert row.result[CURRENTNESS_POLICY_KEY] == CURRENTNESS_REVISION",
+            "assert bind_run(case.db, actor=case.actor, activity_id=row.activity_id).result[CURRENTNESS_POLICY_KEY] == CURRENTNESS_REVISION",
+            "assert resumed.result == frozen",
+            "assert read_currentness_policy(resumed.result) == LEGACY_CURRENTNESS"
+          ],
+          "test_t25_multiple_candidates_share_one_guard_deadline": [
+            "pytest.raises(SocialContextValidationError)",
+            "assert caught.value.reason == 'canonical_unavailable'",
+            "assert checked == ['post-target', 'second-target']",
+            "assert current_read_deadline.get() is None",
+            "assert current_read_deadline.get() is not None"
+          ],
+          "_new_state": [],
+          "test_t06_projection_view_delay_uses_canonical_facts_in_original_rank": [
+            "assert snapshot.items[0].relationship.target_world_character_id == 'world-character-peer'",
+            "assert snapshot.items[0].relationship.view_version == 4",
+            "assert 'Canonical current perception' in snapshot.context_text",
+            "assert state == before"
+          ],
+          "test_t14_real_langgraph_checkpoint_preserves_hidden_receipts_and_input": [
+            "assert 'relationship_validation_receipts' not in wire and 'facts_digest' not in wire",
+            "assert 'relationship_validation_receipts' not in json.dumps(request)",
+            "assert stored.values['relationship_validation_receipts'] == state['relationship_validation_receipts']",
+            "assert stored.values['identity'] == state['identity']",
+            "assert stored.values['candidates'][0]['relationship'] == state['candidates'][0]['relationship']"
+          ],
+          "test_t15_inbox_change_refreshes_selected_prompt_and_receipt_together": [
+            "assert loaded['relationship_validation_receipts']",
+            "assert run.result['feed_preparation']['relationship_validation_receipts'] == loaded['relationship_validation_receipts']",
+            "assert loaded == previous",
+            "assert refreshed['candidates'][0]['target_id'] == 'post-target'",
+            "assert refreshed['relationship_validation_receipts']['post-target'] != previous['relationship_validation_receipts']['post-target']",
+            "pytest.raises(ValueError, match='activity_relationship_changed')"
+          ],
+          "test_t16_final_submission_guard_stops_real_provider_boundary": [
+            "pytest.raises(ActivityRetryGuardError)",
+            "assert len(calls) == (0 if point == 'before_sdk' else 1)",
+            "assert all(('facts_digest' not in request.user_prompt for request in calls))",
+            "assert not case.db.in_transaction()"
+          ],
+          "test_t17_inbox_executor_rejects_change_after_writer_and_commits_no_effect": [
+            "pytest.raises(ValueError, match='activity_relationship_changed')",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == before",
+            "assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == 'succeeded'))"
+          ],
+          "test_t18_completed_effect_replay_does_not_validate_changed_historical_facts": [
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'reused'"
+          ],
+          "test_t22_routine_uses_frozen_source_relations_but_solo_adds_no_reads": [
+            "pytest.raises(ValueError, match='routine_relationship_changed')"
+          ],
+          "test_t26_diagnostics_only_store_allowlisted_counts_and_reasons": [
+            "assert emitted[0][1]['details'] == {'revision': CURRENTNESS_REVISION, 'outcome': 'valid', 'reason': None, 'checked_count': 2}",
+            "assert emitted[-1][1]['details'] == {'revision': None, 'outcome': None, 'reason': None, 'checked_count': 12}"
+          ],
+          "test_t17_sqlite_writer_fence_blocks_changes_between_validation_and_publish": [
+            "assert result['status'] == 'succeeded'",
+            "assert checked == [True]",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "pytest.raises(OperationalError, match='locked')"
+          ],
+          "test_t17_t18_feed_final_boundary_and_committed_reuse": [
+            "assert state['candidates'][0]['target_id'] == 'post-target'",
+            "pytest.raises(ValueError, match=reason)",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert not case.db.scalar(select(models.AgentPublicActionExecution).where(models.AgentPublicActionExecution.status == 'succeeded'))",
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'succeeded'",
+            "assert asyncio.run(lane.execute(state))['executions'][0]['status'] == 'reused'",
+            "assert case.db.scalar(select(func.count(models.PostLike.id))) == 1"
+          ],
+          "test_t17_t18_routine_publisher_respects_final_guard_and_reuses_effect": [
+            "assert calls == [True]",
+            "pytest.raises(ValueError, match='routine_relationship_changed')",
+            "assert db.scalar(select(func.count(models.Post.id))) == before",
+            "assert publish_routine_activity(ctx, prepared=prepared, generation=generation, relationship_validator=guard)['publish_result']['public_action_count'] == 1",
+            "assert publish_routine_activity(ctx, prepared=prepared, generation=generation, relationship_validator=must_not_validate_again)['routine_outcome'] == 'REUSED_SUCCESS'",
+            "assert db.scalar(select(func.count(models.Post.id))) == before + 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_activity_relationship_validation.py": {}
+      }
+    },
+    {
+      "commit": "ee6dc3bf75580623b64f11e98350a870618b3b7a",
+      "feature_id": "AR-SNS-CURRENTNESS-RETAINED-OWNERSHIP-20261004",
+      "reason": "Exact committed positive/negative regressions for verified continuous retained SNS ownership; immutable retirement and earlier source/node records unchanged.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_accepts_only_verified_continuous_committed_change",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_cannot_rewrite_the_frozen_retirement_definition",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_committed_change_after_an_unreviewed_gap",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_committed_delta_for_a_different_owner",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_forged_committed_provenance[after]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_forged_committed_provenance[before]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_forged_committed_provenance[blob]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_unreviewed_or_discontinuous_change[broken_chain]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_unreviewed_or_discontinuous_change[no_record]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_unreviewed_or_discontinuous_change[uncommitted_working_tree]",
+        "tests/runtime/test_sns_execution_retirement_gate.py::test_retained_owner_rejects_unreviewed_or_discontinuous_change[wrong_symbol]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_sns_execution_retirement_gate.py": {
+          "evidence": [],
+          "test_closed_retirement_accounts_for_removed_and_retained_symbols": [
+            "assert removed == {(SOURCE, 'exclusive_graph')} and modules == {SOURCE}"
+          ],
+          "test_retirement_rejects_each_unproven_source_or_behavior_delta": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_rejects_global_local_relative_and_dynamic_old_imports": [
+            "pytest.raises(ValueError, match='import')"
+          ],
+          "test_committed_source_requires_exact_closed_retirement": [
+            "pytest.raises(ValueError)",
+            "assert errors == ['committed source lacks append-only introduction evidence: ' + path for path in sorted({arbitrary, SOURCE} if damage == 'unproven' else {arbitrary})]"
+          ],
+          "reviewed_owner_change": [],
+          "test_retained_owner_accepts_only_verified_continuous_committed_change": [
+            "assert removed == {(SOURCE, 'exclusive_graph')} and modules == {SOURCE}",
+            "assert records[0]['retired_sns_modules'][0]['moved_symbols']['shared']['after_ast'] == gate.definitions(AFTER)['shared']"
+          ],
+          "test_retained_owner_rejects_unreviewed_or_discontinuous_change": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retained_owner_rejects_forged_committed_provenance": [
+            "pytest.raises(ValueError, match='provenance|preimage')"
+          ],
+          "test_retained_owner_cannot_rewrite_the_frozen_retirement_definition": [
+            "pytest.raises(ValueError, match='reviewed ownership')"
+          ],
+          "test_retained_owner_rejects_committed_change_after_an_unreviewed_gap": [
+            "pytest.raises(ValueError, match='reviewed ownership')"
+          ],
+          "test_retained_owner_rejects_committed_delta_for_a_different_owner": [
+            "pytest.raises(ValueError, match='reviewed ownership')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_sns_execution_retirement_gate.py": {}
+      }
     }
   ]
 }
