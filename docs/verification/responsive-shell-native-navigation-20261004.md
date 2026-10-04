@@ -4,7 +4,8 @@
 - 저장소: `D:/project_code/angmoo-workspace/angmoo-tree-angmoo`.
 - 브랜치: `feat/0.1.0-release-readiness`. 시작 HEAD `314c594167b9efe4ca07cdc67d3252e88a972878`, 시작 작업 폴더 clean.
 - 로컬 source 커밋: `41f05932cb65e1cf8cb39bc72426504cfb1bc592` — `feat: adopt responsive product screens and native desktop navigation` (sign-off). 최종 증거는 source 뒤의 별도 로컬 metadata/결과 문서 커밋으로 고정한다.
-- 상태: 제품 구현과 로컬 기술·browser 검증 완료. source 커밋에 대한 공식 보존 증거를 확정하는 중이다. 실제 OS 창 조작은 실행 차단으로 **NOT_RUN**, 사용자 Docker·설치판 적용과 직접 USER CHECK도 **NOT_RUN**이다.
+- inventory 검증 보완 커밋: `3c56b162aaa5356242f95160edb26ad68936d4b4` — `fix: validate retired chrome consistently in preservation inventory` (sign-off). 원본 inventory와 제품 구현은 유지하고 검증 소비자·회귀 검사·증거를 보완했다.
+- 상태: 제품 구현, 로컬 기술·browser·공식 보존 검증과 결과 문서화 완료. 실제 OS 창 조작은 실행 차단으로 **NOT_RUN**, 사용자 Docker·설치판 적용과 직접 USER CHECK도 **NOT_RUN**이다.
 
 ## 1. 변경 결과와 소유권
 
@@ -70,7 +71,7 @@ P02의 before는 시작 HEAD의 source/Git blobs와 기존 canonical PNG 17개 �
 | canonical product/semantic visual | pinned Linux의 원래 36개 node/원래 screenshot 허용 오차 | **36 PASS** |
 | 정확한 퇴역·evidence 도구 회귀 | 관련 pytest + 신규 style/native retirement 검사 | **172 PASS**, inventory 보호 7개 추가 |
 | frontend 공식 보존 | source 커밋의 exact 변화·퇴역 증거, `check_refactor_frontend_preservation.py` | **PASS, 324 원본 파일** |
-| backend 공식 보존 | source 커밋 후 exact additions append, `check_refactor_preservation.py --contracts --nodes` | 최종 결과 기록 중 |
+| backend 공식 보존 | source/보완 커밋의 exact additions append 후 공식 `check_refactor_preservation.main --contracts --nodes` | **PASS, 보호/현재 node 5107/5107, 37 items** |
 
 검사 준비·중간 실패도 삭제하지 않는다. backend cwd가 잘못된 첫 collection, dev/production metadata 차이, 기존 scrollbar 규칙 누락, old Phone drag/resize assertion, stale init route fixture, strict renderer query, native/browser 두 링크 owner 충돌, Next async route commit 전에 연속 Enter한 검사, image decode 전에 readiness를 확인한 검사를 각각 수정/재실행했다. scrollbar와 native 링크 충돌은 제품 owner에서 수정했다. 유효한 이미지 predicate는 `expect.poll`로 실제 decode를 기다리며 약화하지 않았다. 실제 route commit을 확인한 뒤 다음 조작을 수행한다. source build와 test server가 같은 mutable 산출물을 사용한 준비 중 실행은 최종 증거로 쓰지 않는다.
 
@@ -78,7 +79,9 @@ P02의 before는 시작 HEAD의 source/Git blobs와 기존 canonical PNG 17개 �
 
 최종 browser 합계는 **266 PASS/10 SKIP**이다. 이 합계에 Rust·backend pytest·기술 검사·native OS·운영 적용·실제 AI 품질 판정을 섞지 않는다.
 
-첫 공식 backend 실행은 inventory의 K12/K13/K23에 기록된 두 장식 파일의 삭제를 인정하지 않아 **FAIL**이었다. 같은 실행에서 보호/현재 node는 **5100/5100**, API/ORM 차이와 다른 오류는 없었다. 이 실패는 `backend-preservation-inventory-failure.log`에 보존한다. `check_sources`와 inventory가 같은 검증된 retirement 집합을 사용하도록 하고, inventory는 change proof를 검증한 뒤 항상 검사한다. 원본 inventory를 수정하거나 항목을 지우지 않았다. 추가 7개 회귀는 정상 proof 외의 미승인 삭제·무관한 누락·경로 탈출·기능/소유자/baseline 누락을 거절한다. 제품 source와 266개 browser 결과는 그대로이며 전체 보존 검사를 재실행한다.
+첫 공식 backend 실행은 inventory의 K12/K13/K23에 기록된 두 장식 파일의 삭제를 인정하지 않아 **FAIL**이었다. 같은 실행에서 보호/현재 node는 **5100/5100**, API/ORM 차이와 다른 오류는 없었다. 이 실패는 `backend-preservation-inventory-failure.log`에 보존한다. `check_sources`와 inventory가 같은 검증된 retirement 집합을 사용하도록 하고, inventory는 change proof를 검증한 뒤 항상 검사한다. 원본 inventory를 수정하거나 항목을 지우지 않았다. 추가 7개 회귀는 정상 proof 외의 미승인 삭제·무관한 누락·경로 탈출·기능/소유자/baseline 누락을 거절한다. 제품 source와 266개 browser 결과는 그대로이며 전체 보존 검사를 재실행했다.
+
+최종 실행은 `backend-preservation-final.log`에 **exit 0**, PR258 frozen **1867**, PR263 frozen **1907**, 보호/현재 계보 **5107/5107**, **37 items PASS**로 기록됐다. 로컬 `finish-inventory-preservation.py`에서 공식 `capture_refactor_backend_checkpoint.main --append`와 `check_refactor_preservation.main --contracts --nodes`를 모두 실행했다. 하나의 Python 프로세스에서 기존 immutable Git-object read cache를 공유했으며 validator 교체·검사 생략·결과 주입은 없다. mutable 입력은 공식 코드가 다시 읽고 source/assertion/suppression/API/ORM/node 검사를 모두 수행했다.
 
 ## 5. 시각·frozen 보존 계약
 
@@ -92,7 +95,9 @@ frozen checkpoint/path map/node/API/ORM/migration 원본을 재생성하지 않�
 
 구 caption CSS와 `phone_resize.rs`는 빈 파일/죽은 소스/임의 destination map으로 보존하지 않고 정식 삭제한다. 승인 증거는 exact committed preimage/삭제/current absence/남은 consumer와 대체 owner를 검증해야 한다. CSS는 활성 import가 없어야 하며 native 퇴역 허용 경로는 옛 `phone_resize.rs` 하나뿐이다. `lib.rs`, 일반 window policy, 기존 behavior test의 committed blobs가 필요하다. 다른 stock의 누락, 재등장, 틀린 preimage, 여전한 consumer는 회귀 검사로 거절한다. 공식 checker의 보호 기준을 무조건 완화하는 예외는 없다.
 
-실제 source 커밋의 exact record는 source blob **69개**, 바뀐 Python definition **8개**, assertion **4개**, frontend/browser text **38개**, PNG **1개**, 퇴역 **2개**다. 공식 append는 새 tracked 파일 **16개**와 backend test node **15개**의 introduction을 기록했다. 기존 post-refactor record **142개**와 additions **337개**의 prefix는 그대로이며 각각 마지막 record 하나만 추가했다. source baseline·backend checkpoint·frontend checkpoint·path map 네 원본의 Git bytes와 실제 파일도 그대로임을 해시로 확인했다.
+실제 source 커밋의 exact record는 source blob **69개**, 바뀐 Python definition **8개**, assertion **4개**, frontend/browser text **38개**, PNG **1개**, 퇴역 **2개**다. 첫 공식 append는 새 tracked 파일 **16개**와 backend test node **15개**의 introduction을 기록했다. inventory 보완 커밋의 두 번째 record는 source blob **5개**, 바뀐 Python definition **3개**, 기존 assertion 변경 **0개**다. 두 번째 공식 append는 새 파일 **0개**와 회귀 node **7개**를 기록했다.
+
+기존 post-refactor record **142개 → 144개**, additions **337개 → 339개**이며 두 원본 record prefix가 그대로임을 확인했다. source baseline·backend checkpoint·frontend checkpoint·path map·feature inventory **다섯 frozen 파일**의 Git bytes는 시작 HEAD와 동일하고, 실제 working 파일도 줄바꿈을 정규화하면 같은 내용이다. 재생성하지 않았다. `final-summary.json`은 이 보존 조건, 최종 browser/XML 결과와 실제 공식 backend exit 0을 다시 검증한 요약이다.
 
 ## 6. P00–P20 실행 대응
 
@@ -115,10 +120,10 @@ frozen checkpoint/path map/node/API/ORM/migration 원본을 재생성하지 않�
 | P14 | Next/static build, 새 spec/config collection와 실제 실행 |
 | P15 | Next/static geometry/history/routes/scope/media/visual 격리 검사, final 결과로 판정 |
 | P16 | contributor source 격리·빌드 PASS. **실제 창 시작이 승인 검토로 차단되어 OS/WebView 조작 NOT_RUN** |
-| P17 | source 로컬 commit·exact 변화/addition append 완료, frontend 공식 PASS·backend 최종 결과 기록 |
+| P17 | source/보완 로컬 commit·exact 변화/addition append 완료, frontend 공식 324 files PASS·backend 공식 5107/5107 nodes 및 37 items PASS |
 | P18 | **운영 Docker·설치판 적용/USER CHECK NOT_RUN**, 별도 요청 후 수행하도록 후속 기록 |
-| P19 | 이 결과 문서·canonical 계약·로컬 source/evidence commit. artifact ignore/보존 |
-| P20 | 최종 branch/status/SHA·C/T/V 대응·task-owned 환경 종료·미측정 후속 gate 확인 |
+| P19 | 이 결과 문서·canonical 계약·source/보완/evidence 로컬 commit으로 정리. artifact ignore/보존 |
+| P20 | 최종 branch/status/SHA·C/T/V 대응·frozen 5개/두 record prefix·task-owned 환경 종료·미측정 후속 gate 확인 |
 
 ## 7. C01–C22와 T01–T35 / 원 제안 V01–V20 대응
 
@@ -161,6 +166,8 @@ frozen checkpoint/path map/node/API/ORM/migration 원본을 재생성하지 않�
 
 후속 native USER CHECK는 격리 contributor fixture에서 최초 창, 독립 resize/min/최대화/복원/Snap, DPI/다중 모니터, Ctrl+L/Alt/F5/Ctrl+R, same/cross-kind 창, HTTP(S) 기본 브라우저, 악성 document/popup 차단, main X/Alt+F4 shutdown과 child X/reload를 확인한다. 실제 설치판 확인은 identity helper로 물리/running identity를 검증한 뒤 진행한다. 사용자 Windows 배율·보안 설정·설치 데이터는 이 검사를 위해 변경하지 않는다.
 
-source commit은 시작 HEAD의 직접 자손이며 이번 명시적 71개 파일만 포함한다. API/ORM 업무 source와 dependency lockfile 변경은 없다. 마지막 metadata/검증 문서 커밋의 정확한 SHA는 workspace 원 계획 §20과 로컬 `final-summary.json`, 최종 보고에 기록한다. 커밋 자체의 SHA를 그 커밋의 본문에 넣을 수 없으므로 이 문서는 source SHA를 고정 기준으로 사용한다.
+source commit은 시작 HEAD의 직접 자손이며 이번 명시적 71개 파일만 포함한다. 이후 inventory 보완은 명시적 5개 파일, 마지막 metadata/검증 문서 커밋은 증거 manifest 두 개와 이 문서만 포함한다. API/ORM 업무 source와 dependency lockfile 변경은 없다. 마지막 커밋의 정확한 SHA와 clean 상태는 workspace 원 계획 §20과 로컬 `final-summary.json`, 최종 보고에 기록한다.
 
 종료 확인 `shutdown.json`에는 fixture 포트 3200/3300/3301/3302/3351/3352의 listener **0**과 task-owned visual 컨테이너 **0**이 기록되어 있다. task-owned 서버는 종료했고 로컬 artifact/build/source snapshot은 ignore 상태로 보존했다. 실제 native exe는 시작되지 않았다. `next-collection-list.json`/`static-collection-list.json`과 실제 Next `next-final-results.json`/static `static-results.json`을 구분한다.
+
+최종 보존 검사 종료 뒤 `final-shutdown.json`으로 같은 포트 listener **0**, task-owned visual 컨테이너 **0**을 다시 확인했다. 사용자 runtime을 중지하거나 데이터·볼륨을 정리하지 않았다.

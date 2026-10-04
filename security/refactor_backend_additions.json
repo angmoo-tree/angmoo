@@ -28322,6 +28322,46 @@
         "tests/test_frontend_style_retirement.py": {},
         "tests/test_native_chrome_retirement.py": {}
       }
+    },
+    {
+      "commit": "3c56b162aaa5356242f95160edb26ad68936d4b4",
+      "feature_id": "AR-RESPONSIVE-CHROME-INVENTORY-20261004",
+      "reason": "Retained feature inventory consumes exact validated chrome retirement proof; seven negative/positive coverage and path regressions without stock rewriting.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[missing_feature]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[missing_other]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[missing_owner_field]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[unrecorded]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[unsafe]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[valid]",
+        "tests/test_native_chrome_retirement.py::test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection[wrong_baseline]"
+      ],
+      "test_assertions": {
+        "tests/test_native_chrome_retirement.py": {
+          "_module": [],
+          "test_native_retirement_requires_exact_deletion_and_surviving_behavior": [
+            "assert changes.load(tmp_path, reader=reader) == [record]",
+            "pytest.raises(ValueError)"
+          ],
+          "test_source_stock_rejects_every_unlisted_missing_file": [
+            "assert preservation.check_sources([retired, protected], {}, tmp_path, approved_changes=records) == [f'source missing without a surviving mapped destination: {protected} -> {protected}']",
+            "assert preservation.check_sources([retired], {}, tmp_path)"
+          ],
+          "test_inventory_uses_verified_retirement_without_losing_feature_or_path_protection": [
+            "assert errors == []",
+            "assert errors == [f'K12: missing or unsafe path {native}', f'K13: missing or unsafe path {style}', f'K23: missing or unsafe path {native}']",
+            "assert errors == ['K12: missing or unsafe path desktop/src-tauri/src/desktop_runtime.rs']",
+            "assert errors == ['K12: missing or unsafe path ../outside.rs']",
+            "assert errors == ['K01-K23/G01-G13 coverage is incomplete or duplicated']",
+            "assert errors == ['K12: missing owner']",
+            "assert errors == ['feature inventory baseline commit differs']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_native_chrome_retirement.py": {}
+      }
     }
   ]
 }
