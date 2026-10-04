@@ -60,24 +60,33 @@ def execute(lane, state):
         observations = [db.get(WorldCharacterFeedObservation, key) for key in state["lane_data"]["_feed"]["observation_ids"]]
         observation = next(row for row in observations if row.post_id == candidate.post_id)
         try:
-            with deferred_commits():
-                row = workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
-                    character_id=lane.ctx.character.id, signature=signature, scope="world_keyword_feed",
-                    action_type=decision.selected_action, target_post_id=candidate.post_id,
-                    target_profile_type="character" if raw["action"] == "follow" else None,
-                    target_profile_id=candidate.author_character_id if raw["action"] == "follow" else None,
-                    brief_hash=_brief_hash(decision.brief), world_id=lane.actor.world_id,
-                    actor_world_character_id=lane.actor.id, feed_observation_id=observation.id,
-                    interaction_intent=decision.interaction_intent, comment_purpose=decision.comment_purpose)
-                result = _publish_action(lane.ctx, workflows=workflows.publishing, candidate=candidate, decision=decision, draft=draft)
-                applied = workflows.social_apply.apply_successful_world_feed_action(db, profile=profile,
-                    candidate=candidate, decision=decision, draft=draft, action_result=result, execution=row, occurred_at=datetime.now(UTC))
-                workflows.executions.mark_public_action_execution_finished(db, row, status="succeeded", result=result)
-                workflows.record_activity_thought(db, execution=row, event=applied.event,
-                    source_post_id=str(result["post_id"]) if draft else None, thought=thought, captured_at=datetime.now(UTC))
-            db.commit()
+            def publish_current():
+                prior = committed(lane, state, raw)
+                if prior is not None:
+                    return prior, "reused"
+                lane.effect_relationship_validator(state, raw["target_id"])()
+                with deferred_commits():
+                    row = workflows.executions.create_public_action_execution(db, run_id=lane.ctx.run_id,
+                        character_id=lane.ctx.character.id, signature=signature, scope="world_keyword_feed",
+                        action_type=decision.selected_action, target_post_id=candidate.post_id,
+                        target_profile_type="character" if raw["action"] == "follow" else None,
+                        target_profile_id=candidate.author_character_id if raw["action"] == "follow" else None,
+                        brief_hash=_brief_hash(decision.brief), world_id=lane.actor.world_id,
+                        actor_world_character_id=lane.actor.id, feed_observation_id=observation.id,
+                        interaction_intent=decision.interaction_intent, comment_purpose=decision.comment_purpose)
+                    result = _publish_action(lane.ctx, workflows=workflows.publishing, candidate=candidate, decision=decision, draft=draft)
+                    applied = workflows.social_apply.apply_successful_world_feed_action(db, profile=profile,
+                        candidate=candidate, decision=decision, draft=draft, action_result=result, execution=row, occurred_at=datetime.now(UTC))
+                    workflows.executions.mark_public_action_execution_finished(db, row, status="succeeded", result=result)
+                    workflows.record_activity_thought(db, execution=row, event=applied.event,
+                        source_post_id=str(result["post_id"]) if draft else None, thought=thought, captured_at=datetime.now(UTC))
+                return row, "succeeded"
+            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            if db.in_transaction():
+                db.commit()
+            row, status = run_sqlite_session_immediate(db, publish_current, require_clean=True)
         except Exception:
             db.rollback()
             raise
-        results.append({"target_id": raw["target_id"], "status": "succeeded", "execution_id": row.id})
+        results.append({"target_id": raw["target_id"], "status": status, "execution_id": row.id})
     return results

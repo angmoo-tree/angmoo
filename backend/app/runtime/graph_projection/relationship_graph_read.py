@@ -6,6 +6,8 @@ the replayable graph projection.
 """
 
 from __future__ import annotations
+from contextlib import contextmanager
+from time import monotonic
 import app.domains.relationships.contracts.graph_read as relationships_contracts_graph_read
 import app.domains.relationships.contracts.graph_recall as relationships_contracts_graph_recall
 import app.domains.relationships.exceptions as relationships_exceptions
@@ -13,7 +15,7 @@ import app.domains.relationships.schemas as relationships_schemas
 import app.domains.relationships.service.graph_read as relationships_service_graph_read
 import app.domains.relationships.service.graph_recall as relationships_service_graph_recall
 
-from sqlalchemy import or_, select
+from sqlalchemy import event, or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.characters.models import Character as _model_Character
@@ -46,6 +48,9 @@ from app.domains.relationships.contracts.graph_query import (
     RelationshipRevalidationFacts,
 )
 from app.domains.relationships.contracts.graph_read import (GraphProjectionCounts)
+from app.domains.relationships.contracts.social_context import (
+    CanonicalSocialContextFacts, CanonicalSocialContextReference, SocialContextValidationError,
+)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
@@ -53,6 +58,34 @@ from app.runtime.graph_projection.metrics import graph_metrics
 from app.runtime.graph_projection.process_client import (
     borrow_process_graph_client,
 )
+
+
+@contextmanager
+def _canonical_read_deadline(db):
+    """Bound this Session's SQLite statements without owning its transaction."""
+    from app.contracts.read_deadline import current_read_deadline
+    deadline = current_read_deadline.get()
+    if deadline is None or db.get_bind().dialect.name != "sqlite":
+        yield
+        return
+    connection = db.connection()
+    driver = connection.connection.driver_connection
+    previous_timeout = driver.execute("PRAGMA busy_timeout").fetchone()[0]
+    def before_statement(_connection, _cursor, _statement, _parameters, _context, _many):
+        remaining = deadline - monotonic()
+        if remaining <= 0:
+            raise SocialContextValidationError("canonical_unavailable")
+        driver.execute(f"PRAGMA busy_timeout={max(0, min(previous_timeout, int(remaining * 1000)))}")
+    # No other app path installs a progress handler on this owned connection.
+    # It is removed, and the connection's prior busy policy restored, on exit.
+    driver.set_progress_handler(lambda: int(monotonic() >= deadline), 1000)
+    event.listen(connection, "before_cursor_execute", before_statement)
+    try:
+        yield
+    finally:
+        event.remove(connection, "before_cursor_execute", before_statement)
+        driver.set_progress_handler(None, 0)
+        driver.execute(f"PRAGMA busy_timeout={previous_timeout}")
 
 
 class _BackendErrorMappingRepository:
@@ -156,14 +189,15 @@ class SqlAlchemyRelationshipGraphReadGateway:
         world_character = self._db.get(
             _model_WorldCharacter,
             scope.subject_world_character_id,
+            populate_existing=True,
         )
         character = (
-            self._db.get(_model_Character, world_character.character_id)
+            self._db.get(_model_Character, world_character.character_id, populate_existing=True)
             if world_character is not None
             else None
         )
         membership = (
-            self._db.get(_model_WorldMembership, world_character.membership_id)
+            self._db.get(_model_WorldMembership, world_character.membership_id, populate_existing=True)
             if world_character is not None
             else None
         )
@@ -261,7 +295,12 @@ class SqlAlchemyRelationshipGraphReadGateway:
     def record_stale_edge(self) -> None:
         graph_metrics.increment("graph_query_stale_edge_total")
 
-    def _blocked_pairs(self, *, world_id: str) -> set[frozenset[str]]:
+    def _blocked_pairs(self, *, world_id: str, world_character_ids: set[str] | None = None) -> set[frozenset[str]]:
+        statement = select(_model_WorldCharacterBlock).where(_model_WorldCharacterBlock.world_id == world_id)
+        if world_character_ids is not None:
+            statement = statement.where(
+                _model_WorldCharacterBlock.blocker_world_character_id.in_(world_character_ids),
+                _model_WorldCharacterBlock.blocked_world_character_id.in_(world_character_ids))
         return {
             frozenset(
                 (
@@ -270,9 +309,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 )
             )
             for row in self._db.scalars(
-                select(_model_WorldCharacterBlock).where(
-                    _model_WorldCharacterBlock.world_id == world_id
-                )
+                statement.execution_options(populate_existing=True)
             )
         }
 
@@ -363,24 +400,27 @@ class SqlAlchemyRelationshipGraphReadGateway:
     ) -> dict[str, RelationshipRevalidationFacts]:
         if not hits:
             return {}
+        return self._referenced_relationship_facts(world_id=world_id,
+            identities=[(hit.relationship_state_id, hit.actor_world_character_id,
+                hit.target_world_character_id) for hit in hits],
+            subject_world_character_id=subject_world_character_id)
+
+    def _referenced_relationship_facts(self, *, world_id, identities, subject_world_character_id):
+        """Shared finite canonical batch; never synthesize graph hits to query it."""
         rows = {
             row.id: row
             for row in self._db.scalars(
                 select(_model_RelationshipState).where(
                     _model_RelationshipState.id.in_(
-                        [hit.relationship_state_id for hit in hits]
+                        [state for state, _, _ in identities]
                     ),
                     _model_RelationshipState.world_id == world_id,
-                )
+                ).execution_options(populate_existing=True)
             )
         }
         world_character_ids = {
             value
-            for hit in hits
-            for value in (
-                hit.actor_world_character_id,
-                hit.target_world_character_id,
-            )
+            for _, actor, target in identities for value in (actor, target)
         }
         world_characters = {
             row.id: row
@@ -388,7 +428,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 select(_model_WorldCharacter).where(
                     _model_WorldCharacter.id.in_(world_character_ids),
                     _model_WorldCharacter.world_id == world_id,
-                )
+                ).execution_options(populate_existing=True)
             )
         }
         membership_ids = {
@@ -401,17 +441,11 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     _model_WorldMembership.id.in_(membership_ids),
                     _model_WorldMembership.world_id == world_id,
                     _model_WorldMembership.status == "active",
-                )
+                ).execution_options(populate_existing=True)
             )
         }
-        blocked = self._blocked_pairs(world_id=world_id)
-        event_ids = {
-            value
-            for hit in hits
-            for value in (hit.last_event_id,)
-            if value is not None
-        }
-        event_ids.update(
+        blocked = self._blocked_pairs(world_id=world_id, world_character_ids=world_character_ids)
+        event_ids = set(
             row.last_event_id
             for row in rows.values()
             if row.last_event_id is not None
@@ -422,11 +456,11 @@ class SqlAlchemyRelationshipGraphReadGateway:
             event_ids=event_ids,
         )
         facts: dict[str, RelationshipRevalidationFacts] = {}
-        for hit in hits:
-            row = rows.get(hit.relationship_state_id)
-            actor = world_characters.get(hit.actor_world_character_id)
-            target = world_characters.get(hit.target_world_character_id)
-            facts[hit.relationship_state_id] = RelationshipRevalidationFacts(
+        for state_id, actor_id, target_id in identities:
+            row = rows.get(state_id)
+            actor = world_characters.get(actor_id)
+            target = world_characters.get(target_id)
+            facts[state_id] = RelationshipRevalidationFacts(
                 canonical_hit=(
                     self._relationship_hit(row) if row is not None else None
                 ),
@@ -457,6 +491,37 @@ class SqlAlchemyRelationshipGraphReadGateway:
                 ),
             )
         return facts
+
+    def canonical_social_context_facts(self, *, scope,
+            references: tuple[CanonicalSocialContextReference, ...]) -> CanonicalSocialContextFacts:
+        with _canonical_read_deadline(self._db):
+            return self._canonical_social_context_facts(scope=scope, references=references)
+
+    def _canonical_social_context_facts(self, *, scope,
+            references: tuple[CanonicalSocialContextReference, ...]) -> CanonicalSocialContextFacts:
+        if len(references) > 12 or len({ref.target_world_character_id for ref in references}) != len(references):
+            raise SocialContextValidationError("receipt_invalid")
+        access = self.graph_recall_scope_access(scope=scope)
+        if not references:
+            return CanonicalSocialContextFacts(access, {}, {})
+        targets = {ref.target_world_character_id for ref in references}
+        rows = list(self._db.scalars(select(_model_RelationshipState).where(
+            _model_RelationshipState.world_id == scope.world_id,
+            _model_RelationshipState.actor_world_character_id == scope.subject_world_character_id,
+            _model_RelationshipState.target_world_character_id.in_(targets),
+        ).limit(12).execution_options(populate_existing=True)))
+        by_target = {row.target_world_character_id: row for row in rows}
+        identities = []
+        for ref in references:
+            row = by_target.get(ref.target_world_character_id)
+            if row is not None and (ref.relationship_state_id is None or row.id == ref.relationship_state_id):
+                identities.append((row.id, scope.subject_world_character_id, ref.target_world_character_id))
+        facts = self._referenced_relationship_facts(world_id=scope.world_id, identities=identities,
+            subject_world_character_id=scope.subject_world_character_id) if identities else {}
+        nodes = self.node_candidates(world_id=scope.world_id,
+            world_character_ids={scope.subject_world_character_id, *targets},
+            subject_world_character_id=scope.subject_world_character_id)
+        return CanonicalSocialContextFacts(access, facts, {node.world_character_id: node for node in nodes})
 
     def _subject_observed_event_ids(
         self,
@@ -657,7 +722,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
             for row in self._db.scalars(
                 select(_model_WorldCharacter).where(
                     _model_WorldCharacter.id.in_(world_character_ids)
-                )
+                ).execution_options(populate_existing=True)
             )
         }
         characters = {
@@ -667,7 +732,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     _model_Character.id.in_(
                         [row.character_id for row in world_characters.values()]
                     )
-                )
+                ).execution_options(populate_existing=True)
             )
         }
         memberships = {
@@ -680,10 +745,10 @@ class SqlAlchemyRelationshipGraphReadGateway:
                             for row in world_characters.values()
                         ]
                     )
-                )
+                ).execution_options(populate_existing=True)
             )
         }
-        blocked = self._blocked_pairs(world_id=world_id)
+        blocked = self._blocked_pairs(world_id=world_id, world_character_ids={*world_character_ids, subject_world_character_id} - {None})
         result = []
         for world_character_id in sorted(world_characters):
             world_character = world_characters[world_character_id]

@@ -3,6 +3,7 @@ from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
 from app.core.ids import length_prefixed_identity_key
+from app.domains.relationships.contracts.social_context import LEGACY_CURRENTNESS
 
 from app.domains.world_characters.service.activity_engines import CONTRACT_VERSION
 FEED_TARGET_LIMIT = 1
@@ -35,6 +36,7 @@ class ActivityIdentity(BaseModel):
     routine_thought_policy: str | None = None
     social_io_policy: str = "social-io.common.v1"
     routine_output_policy: str = "routine-split-output.legacy.v1"
+    relationship_validation_policy: str = LEGACY_CURRENTNESS
 
 
 class Candidate(BaseModel):
@@ -89,6 +91,7 @@ class LaneState(TypedDict, total=False):
     memories: dict[str, dict]
     memory_validations: dict[str, dict]
     image_recall_snapshots: dict[str, dict]
+    relationship_validation_receipts: dict[str, dict]
     decision_context: dict
     decision_input_receipt: dict
     writer_input_receipts: list[dict]

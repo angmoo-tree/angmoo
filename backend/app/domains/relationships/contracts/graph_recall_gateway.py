@@ -12,6 +12,7 @@ from app.domains.relationships.contracts.graph_query import (
     RelationshipRevalidationFacts,
 )
 from app.domains.relationships.contracts.graph_read import (GraphProjectionCounts)
+from app.domains.relationships.contracts.social_context import CanonicalSocialContextFacts, CanonicalSocialContextReference
 from app.domains.relationships.contracts.graph_recall import (
     MAX_GRAPH_RECALL_EVIDENCE,
     MAX_GRAPH_RECALL_RESULTS,
@@ -69,6 +70,9 @@ GRAPH_RECALL_PRIMITIVE_REGISTRY = {
 
 class GraphRecallGateway(Protocol):
     """Canonical facts and graph lifecycle required by graph recall."""
+
+    def canonical_social_context_facts(self, *, scope: GraphRecallScope,
+        references: tuple[CanonicalSocialContextReference, ...]) -> CanonicalSocialContextFacts: ...
 
     def graph_recall_scope_access(
         self,

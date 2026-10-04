@@ -500,6 +500,10 @@ SNS/Chat·Credentials·World 소유권을 연결하는 SQL과 lifecycle 구성�
 
 ## SNS 계약 2 실행·입출력·역사 책임 (2026-10-03)
 
+SNS 관계 현재성은 AI에 제공한 순서를 유지하는 입력 해시와 backend 전용 검증 기록을 분리한다. `domains/relationships/contracts`와 `policies`는 scope·참조·사실 digest·legacy 증명을, `service/social_context_validation.py`는 유한 원본 검증을 소유한다. `runtime/graph_projection/relationship_graph_read.py`가 같은 Session에서 SQLite 원본과 기존 membership·차단·observed 사실을 읽는다. guard는 graph를 다시 선정하거나 현재 값을 새 baseline으로 저장하지 않는다.
+
+신규 run의 공통 revision 식별자는 `app/contracts/relationship_currentness.py`에서 공유하며 World Characters와 Relationships의 순환 의존을 만들지 않는다. 검증 기록은 LangGraph/Combined의 hidden 채널에 저장하고 SDK DTO에는 넣지 않는다. SDK 대기 전 읽기를 종료하며, 공개 효과는 기존 SQLite writer 안에서 최종 검증과 함께 커밋한다. 완료 효과를 먼저 재사용하고 기존 lease·source·memory·image·언어/시간대 보호를 유지한다. 구현·검증·legacy 제한은 [관계 원본 재검증 기록](../docs/verification/sns-relationship-currentness-20261004.md)에 있다.
+
 수동/예약 SNS의 지원 진입은 `runtime/autonomous_activity/gateway.py`에 있다. 현재 부모는 계약 2의 Combined 순서를 소유하며 모델 호출 정책·복구 장부·lane wire와 canonical 공개 효과를 분리한다. `runtime/social/planned_actions.py`와 `feed_workflows.py`는 실제 공통 executor/workflow의 소유자다. 퇴역 `runtime/resident/langgraph.py` 또는 전용 Feed Provider를 경유하는 임시 facade를 만들지 않는다.
 
 판단 전용 응답/제안의 의미는 `domains/routines/contracts/reply_writing.py`와 `domains/social/contracts/proposal_plan.py`에 두고 실제 본문·서버 task·일정/공개 제안 결합은 canonical owner에서 검증한다. 모델용 view의 필드 축소는 원천 Candidate·revision·Chat/Memory 입력을 삭제하는 절차가 아니다. 신규 wire 정책과 Routine 출력 정책은 별도 metadata로 생성 시 고정하며 이전 V2/2의 정책 부재는 기존 계약으로 읽는다.

@@ -30,7 +30,7 @@ def test_feed_planner_retry_executes_only_valid_second_decision(monkeypatch):
             tracker = RunLlmTracker(max_calls=3)
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=tracker,
                             hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             monkeypatch.setattr(activity_provider, "_api_key", lambda _: "test")
             monkeypatch.setattr(activity_provider, "_llm_context", lambda *_args, **_kwargs:
                 direct_llm.DirectLlmCallContext(
@@ -77,7 +77,7 @@ def test_feed_planner_failed_retry_keeps_delivery_but_has_no_public_effect(monke
             tracker = RunLlmTracker(max_calls=3)
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=tracker,
                             hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             monkeypatch.setattr(activity_provider, "_api_key", lambda _: "test")
             monkeypatch.setattr(activity_provider, "_llm_context", lambda *_args, **_kwargs:
                 direct_llm.DirectLlmCallContext(
@@ -126,7 +126,7 @@ def test_one_feed_candidate_skips_selector_and_delivers_before_planning(monkeypa
             async def guard(state):
                 return {}
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             calls = []
             async def plan(**kwargs):
                 calls.append("plan")
@@ -178,7 +178,7 @@ def test_v2_feed_reclaims_expired_observation_and_delivers_candidate(monkeypatch
                 return {}
 
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
 
             async def plan(**kwargs):
                 delivery = kwargs["delivery"]
@@ -211,7 +211,7 @@ def test_v2_feed_duplicate_cycle_does_not_reenter_candidate_load(monkeypatch):
                 return {}
 
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             profile = lane.profile()
             claim_cycle_keywords(db, profile=profile, cycle_key=f"v2:{ctx.run_id}:feed", run_id=ctx.run_id)
             db.commit()  # Simulate a prior LoadCandidates failure after its cursor commit.
@@ -251,7 +251,7 @@ def test_daily_policy_feed_without_approved_profile_uses_topics_and_preserves_li
             enroll_native_post(db, post); db.commit()
             async def guard(_): return {}
             lane = FeedLane(ctx, actor=actor, lane="feed", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             async def plan(**kwargs):
                 assert "action_preferences" not in kwargs["context"]
                 assert set(kwargs["candidates"][0]["allowed_actions"]) <= {"like", "comment"}

@@ -100,6 +100,7 @@ class ActivityProvider:
                    recover_truncation: bool = False,
                    json_retry_policy=None,
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
+                   before_provider_request: Callable[[int], Awaitable[None]] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None):
         from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
         system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
@@ -159,6 +160,14 @@ class ActivityProvider:
             })
         if delivery is not None:
             delivery.dispatched()
+        async def guard_request():
+            if before_provider_request is not None:
+                await before_provider_request(0)
+            # This runtime owns the network boundary. Close the completed read
+            # (and any owned lease renewal) before awaiting the SDK response.
+            db = getattr(self.context, "db", None)
+            if db is not None and db.in_transaction():
+                db.commit()
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,
@@ -172,6 +181,7 @@ class ActivityProvider:
                 retry_input_char_limit=64000 if json_retry_policy is not None else None,
                 sdk_attempts=1,
                 before_json_retry=before_json_retry,
+                before_provider_request=guard_request if before_provider_request is not None else None,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None:
@@ -196,7 +206,8 @@ class ActivityProvider:
         return await self.call(node=f"{lane.title()}TargetSelector", lane=f"{lane}_selector",
             system=SELECTOR_INSTRUCTIONS, payload={"context": context, "candidates": previews, "selection_limit": effective_limit},
             schema=schema, validator=validate, max_tokens=FIRST_OUTPUT_TOKENS,
-            recover_truncation=True, before_json_retry=before_json_retry, delivery=delivery)
+            recover_truncation=True, before_json_retry=before_json_retry,
+            before_provider_request=before_json_retry, delivery=delivery)
 
     async def plan(self, *, lane: str, context: dict, candidates: list[dict],
                    delivery=None, on_input_receipt=None, before_json_retry=None):
@@ -215,10 +226,11 @@ class ActivityProvider:
             payload={"context": context, "selected_targets": targets}, schema=schema,
             validator=lambda value: parse_action(value, candidates, lane=lane, policy=self.social_io_policy), max_tokens=4096,
             json_retry_policy=planner_json_retry, before_json_retry=before_json_retry,
+            before_provider_request=before_json_retry,
             delivery=delivery, on_input_receipt=on_input_receipt)
         return {**result, "judged_at": datetime.now(UTC).isoformat()}
 
-    async def write(self, *, lane: str, context: dict, assignments: list[dict], on_input_receipt=None):
+    async def write(self, *, lane: str, context: dict, assignments: list[dict], on_input_receipt=None, before_provider_request=None):
         # Normal Inbox uses one call. Large selected batches can use at most
         # three calls; never search or select an additional target here.
         if len(assignments) > 1 and len(json.dumps({"context": context, "assignments": assignments}, ensure_ascii=False, default=str)) > 40000:
@@ -229,7 +241,7 @@ class ActivityProvider:
                 if target and isinstance(context.get("memories"), dict):
                     scoped["memories"] = {k:v for k,v in context["memories"].items() if k == target}
                 result = await self.write(lane=lane, context=scoped, assignments=[assignment],
-                    on_input_receipt=on_input_receipt)
+                    on_input_receipt=on_input_receipt, before_provider_request=before_provider_request)
                 replies.extend(result.get("reply_task_results", []))
             return {"reply_task_results": replies}
         from app.contracts.activity_thought import THOUGHT_PROMPT
@@ -252,7 +264,7 @@ class ActivityProvider:
             payload={"context": context, "assignments": assignment_view(assignments, lane) if scoped else assignments},
             schema=writer_schema,
             validator=lambda value: parse_writer_output(value, lane=lane, assignments=assignments, policy=self.social_io_policy),
-            max_tokens=4096, on_input_receipt=on_input_receipt)
+            max_tokens=4096, on_input_receipt=on_input_receipt, before_provider_request=before_provider_request)
 
 def parse_writer_output(value, *, lane: str, assignments: list[dict], policy=None):
     """Canonical task/proposal validation shared by separate and combined generation."""

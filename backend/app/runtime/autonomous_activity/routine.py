@@ -27,6 +27,10 @@ from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardEr
 from app.runtime.autonomous_activity.queries import routine_query
 from app.runtime.autonomous_activity.recall import SelectedRecall, context_memories, split_validation
 from app.runtime.autonomous_activity.social_lane import plain
+from app.runtime.autonomous_activity.inputs import prepare_relationship, validate_relationship, ActivityRelationshipValidationError
+from app.domains.relationships.contracts.social_context import (
+    RelationshipValidationBinding, SocialContextValidationError, read_currentness_policy,
+)
 from app.runtime.character_activity_state import common_state_for_routine
 from app.runtime.routine_posts.sqlalchemy_runtime import prepare_routine_activity, publish_routine_activity
 
@@ -67,17 +71,56 @@ class RoutineLane:
             elif beat.status != "succeeded":
                 raise ValueError("routine_claim_lost")
         if state.get("decision_context") and state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
+            if state.get("stage") == "Execute" and self.completed_publication():
+                return {}  # Own effects may have changed the historical input.
             from app.runtime.autonomous_activity.routine_sources import source_manifest
-            from app.runtime.autonomous_activity.inputs import relationship_snapshot
             expected = state["decision_context"]
             if plain(source_manifest(self.ctx, self.prepared)) != expected.get("source_manifest", []):
                 raise ValueError("routine_source_changed")
-            for counterpart, previous in expected.get("relationships", {}).items():
-                relation = relationship_snapshot(self.ctx, self.actor, counterpart_id=counterpart)
-                current = plain(relation.prompt_view()) if relation else {}
-                if any(current.get(k) != previous.get(k) for k in ("content_hash", "status")):
-                    raise ValueError("routine_relationship_changed")
+            self.validate_relationships(state)
         return {}
+
+    def completed_publication(self):
+        from app.domains.routines.repository.public_action_executions import get_public_action_execution_by_signature
+        existing = get_public_action_execution_by_signature(self.ctx.db, self.prepared.execution_signature)
+        return existing is not None and existing.status == "succeeded"
+
+    def validate_relationships(self, state):
+        try:
+            identity = state.get("identity", {})
+            if (identity.get("activity_id", self.ctx.run_id) != self.ctx.run_id
+                    or identity.get("world_id", self.actor.world_id) != self.actor.world_id
+                    or identity.get("actor_id", self.actor.id) != self.actor.id):
+                raise SocialContextValidationError("receipt_invalid")
+            for counterpart, prompt in state.get("decision_context", {}).get("relationships", {}).items():
+                result = validate_relationship(self.ctx, self.actor, prompt=prompt,
+                    receipt=state.get("relationship_validation_receipts", {}).get(counterpart),
+                    binding=RelationshipValidationBinding(self.ctx.run_id, "routine", counterpart, counterpart),
+                    policy=read_currentness_policy(identity))
+                self.observe_relationship_validation(result.outcome, result.reason, result.checked_count, result.revision)
+        except SocialContextValidationError as exc:
+            self.observe_relationship_validation("invalid", exc.reason, 0,
+                (state.get("identity") or {}).get("relationship_validation_policy", "social-context-currentness.legacy.v1"))
+            raise ActivityRelationshipValidationError(exc.reason, lane="routine") from exc
+
+    def observe_relationship_validation(self, outcome, reason, count, revision):
+        tracker = getattr(self, "tracker", None)
+        if tracker is not None and getattr(tracker, "observer", None) is not None:
+            try:
+                tracker._notify("relationship_validation", {"lane": "routine", "revision": revision,
+                    "outcome": outcome, "reason": reason, "checked_count": count})
+            except Exception:
+                pass
+
+    def effect_relationship_validator(self, state):
+        def validate():
+            if self.claim_validator is not None:
+                self.claim_validator()
+            from app.runtime.autonomous_activity.routine_sources import source_manifest
+            if plain(source_manifest(self.ctx, self.prepared)) != state.get("decision_context", {}).get("source_manifest", []):
+                raise ValueError("routine_source_changed")
+            self.validate_relationships(state)
+        return validate
 
     async def load(self, state):
         from app.config import settings
@@ -128,16 +171,17 @@ class RoutineLane:
                 targets=state["candidates"], queries=state["queries"]))
         from app.runtime.autonomous_activity.routine_sources import source_manifest
         from app.runtime.relationships.social_metrics import source_prompt
-        from app.runtime.autonomous_activity.inputs import relationship_snapshot
         manifest = source_manifest(self.ctx, self.prepared)
-        relations = {}
+        relations, receipts = {}, {}
         for row in manifest:
             if row["target_ref"] not in relations:
-                relation = relationship_snapshot(self.ctx, self.actor, counterpart_id=row["target_ref"])
-                relations[row["target_ref"]] = relation.prompt_view() if relation else {}
+                counterpart = row["target_ref"]
+                prompt, receipts[counterpart], _ = prepare_relationship(self.ctx, self.actor,
+                    binding=RelationshipValidationBinding(self.ctx.run_id, "routine", counterpart, counterpart))
+                relations[counterpart] = prompt
         reference = datetime.fromisoformat(state["shared_context"]["now"])
         from app.runtime.media.composition import image_output_enabled
-        return {**refreshed, "decision_context": plain({**state["shared_context"], "routine": build_routine_prompt_context(self.prepared.context, as_of_utc=reference),
+        return {**refreshed, "relationship_validation_receipts": receipts, "decision_context": plain({**state["shared_context"], "routine": build_routine_prompt_context(self.prepared.context, as_of_utc=reference),
             "completed_social_replies": reply_prompt_context(
                 completed_replies(self.ctx, world_id=self.actor.world_id, actor_id=self.actor.id),
                 state["shared_context"].get("today_activity", {})),
@@ -192,11 +236,17 @@ class RoutineLane:
             + ("Legacy state_change remains for routine energy; " if context.output_contract != ENUM_OUTPUT else "Do not output energy, social_energy, effect classification or legacy motivation/emotion declarations. ") +
             "Common mood/intensity/note use state_update only. " + PLANNER_INSTRUCTIONS[PLANNER_INSTRUCTIONS.index("state_update is null"):] + "\n" + ROUTINE_TEMPORAL_INSTRUCTIONS + "\n" + ORIGINAL_POST_INSTRUCTIONS)
         receipt = {}
+        async def before_request(_attempt):
+            try:
+                await self.guard({**state, "stage": "ActionPlanner"})
+            except Exception as exc:
+                raise ActivityRetryGuardError(exc) from exc
         decision = await self.provider.call(node="RoutineActionPlanner", lane="routine_action_planner", system=system + "\n" + METRIC_INSTRUCTIONS,
             payload={**state["decision_context"], "beat_identity": beat_identity,
                 "considered_source_event_ids": context.considered_source_event_ids,
                 "allowed_continuity_facts": continuity, "allowed_detail_keys": details},
-            schema=schema, validator=validate, max_tokens=4096, on_input_receipt=receipt.update)
+            schema=schema, validator=validate, max_tokens=4096, on_input_receipt=receipt.update,
+            before_provider_request=before_request)
         from app.runtime.routine_posts.sqlalchemy_runtime import observe_prepared_sources
         observe_prepared_sources(self.ctx, context=self.prepared.context, beat=self.prepared.beat, world_character=self.actor)
         return {"decision": decision, "decision_input_receipt": receipt}
@@ -245,6 +295,7 @@ class RoutineLane:
             payload={"context": state["decision_context"], "validated_plan": state["decision"]["plan"], "writer_feedback": self.writer_feedback},
             schema=schema, validator=validate, max_tokens=FIRST_OUTPUT_TOKENS,
             recover_truncation=True, before_json_retry=before_retry,
+            before_provider_request=before_retry,
             on_input_receipt=receipt.update)
         self.validate_original_draft(draft)
         return {"drafts": [draft], "writer_input_receipts": [receipt]}
@@ -268,7 +319,8 @@ class RoutineLane:
         elif common["known"]:
             after.update(mood=common["mood"], mood_intensity=common["mood_intensity"], action_note=common["state_note"])
         generation = RoutineGeneration(validated.plan, validated.draft, after)
-        return {"executions": [plain(publish_routine_activity(self.ctx, prepared=self.prepared, generation=generation))]}
+        return {"executions": [plain(publish_routine_activity(self.ctx, prepared=self.prepared, generation=generation,
+            relationship_validator=self.effect_relationship_validator(state)))]}
 
     async def settle(self, state):
         from app.runtime.relationships.social_metrics import stage_sources

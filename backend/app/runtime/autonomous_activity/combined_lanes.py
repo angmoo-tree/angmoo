@@ -183,6 +183,7 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
         from datetime import UTC, datetime
 
         result = deepcopy(state)
+        result.setdefault("relationship_validation_receipts", {})
         selected = {s["target_id"] for s in state.get("selections", [])}
         data = state.get("lane_data", {}).get("_feed", {})
         raw_by_id = {c["post_id"]: c for c in data.get("candidates", [])}
@@ -198,7 +199,9 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
             if current is None or not current[1]:
                 raise ValueError("feed_target_stale")
             candidate["allowed_actions"] = list(current[1])
-            candidate["relationship"] = self.relationship(candidate["counterpart_id"])
+            prompt, receipt = self.relationship_preparation(candidate["target_id"], candidate["counterpart_id"])
+            candidate["relationship"] = prompt
+            result["relationship_validation_receipts"][candidate["target_id"]] = receipt
             candidate["proposal_eligible"] = proposal_eligibility(self.ctx.db,
                 actor_world_character_id=self.actor.id, target_post_id=post.id, now=datetime.now(UTC)).eligible
         return result

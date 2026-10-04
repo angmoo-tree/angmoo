@@ -78,6 +78,7 @@ class CombinedActivityProvider(ActivityProvider):
 
     async def call(self, **kwargs):
         request_guard = getattr(self, "request_guard", None)
+        kwargs["before_provider_request"] = kwargs.get("before_provider_request") or request_guard or kwargs.get("before_json_retry")
         if request_guard is not None:
             await request_guard(1)
         node = kwargs["node"]

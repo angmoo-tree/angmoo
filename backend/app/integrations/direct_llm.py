@@ -780,6 +780,7 @@ async def generate_text(
     sdk_attempts: int | None = None,
     on_request_start: Callable[[int], None] | None = None,
     json_attempt: int | None = None,
+    before_provider_request: Callable[[], Awaitable[None]] | None = None,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
@@ -825,18 +826,23 @@ async def generate_text(
             call_type="generate_content",
             on_rate_limit_wait=on_rate_limit_wait,
         )
+        async with credential_semaphore:
+            if semaphore is None:
+                return await _submit_once()
+            async with semaphore:
+                return await _submit_once()
+
+    async def _submit_once() -> DirectLlmResponse:
+        # After quota/semaphore waits, before reserving or physically submitting.
+        # Guard failures keep their owner's typed meaning and cannot be retried.
+        if before_provider_request is not None:
+            await before_provider_request()
         call_order = tracker.next_call_order()
         provider_call_order = tracker.next_provider_call_order()
         started = time.perf_counter()
         try:
-            async with credential_semaphore:
-                if semaphore is None:
-                    async with asyncio.timeout(timeout_seconds):
-                        response = await _invoke(call_order, provider_call_order)
-                else:
-                    async with semaphore:
-                        async with asyncio.timeout(timeout_seconds):
-                            response = await _invoke(call_order, provider_call_order)
+            async with asyncio.timeout(timeout_seconds):
+                response = await _invoke(call_order, provider_call_order)
             usage = response.usage.as_direct_llm_usage()
             result = DirectLlmResponse(
                 text=response.text,
@@ -1087,6 +1093,7 @@ async def generate_json(
     retry_input_char_limit: int | None = None,
     sdk_attempts: int | None = None,
     before_json_retry: Callable[[int], Awaitable[None]] | None = None,
+    before_provider_request: Callable[[], Awaitable[None]] | None = None,
 ) -> Any:
     if json_retry_policy is not None and (
         should_retry_json_error is not None or retry_max_output_tokens is not None
@@ -1139,6 +1146,7 @@ async def generate_json(
         payload_coerced = False
         last_payload = None
         response = await generate_text(
+            before_provider_request=before_provider_request,
             api_key=api_key,
             context=context,
             tracker=tracker,

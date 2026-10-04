@@ -82,6 +82,9 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     from app.domains.world_characters.contracts.social_io import read_policies
     execution_policies = read_policies(run.result).model_dump()
     identity.update(execution_policies)
+    from app.domains.relationships.contracts.social_context import read_currentness_policy, CURRENTNESS_POLICY_KEY
+    relationship_policy = read_currentness_policy(run.result)
+    identity[CURRENTNESS_POLICY_KEY] = relationship_policy
     from app.contracts.name_binding import read_name_binding
     from app.domains.world_characters.service.name_binding import validate_name_binding
     name_binding = read_name_binding(run.result)
@@ -119,6 +122,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("routine_policy_changed")
         if read_policies(row.result).model_dump() != execution_policies:
             raise ActivityScopeChangedError("social_execution_policy_changed")
+        if read_currentness_policy(row.result) != relationship_policy:
+            raise ActivityScopeChangedError("relationship_validation_policy_changed")
         if (row.result or {}).get("name_binding") != frozen_names:
             raise ActivityScopeChangedError("name_binding_changed")
         if (row.result or {}).get("name_binding_policy") != name_policy:
@@ -143,6 +148,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("activity_identity_or_model_changed")
         if read_policies(stored_identity).model_dump() != execution_policies:
             raise ActivityScopeChangedError("social_execution_policy_changed")
+        if read_currentness_policy(stored_identity) != relationship_policy:
+            raise ActivityScopeChangedError("relationship_validation_policy_changed")
         ctx.db.expire_all()
         row, slot, now = validate_claim()
         if state.get("stage") in {"ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:

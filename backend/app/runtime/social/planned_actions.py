@@ -283,6 +283,7 @@ def _execute_planned_action(
     index: int,
     writing: dict[str, Any],
     used_reply_bodies: dict[str, str] | None = None,
+    relationship_validator=None,
 ) -> dict[str, Any]:
     validate_social_context(ctx)
     action_type = str(action.get("action_type") or "")
@@ -394,126 +395,143 @@ def _execute_planned_action(
         return reused
     assert execution is not None
     try:
-        if action.get("interaction_intent") == "ordinary_comment":
-            execution.interaction_intent = "ordinary_comment"
-            execution.comment_purpose = action.get("comment_purpose")
-        occurred_at = datetime.now(UTC)
-        prepared_proposal_response = None
-        if proposal_response_input is not None:
-            prepared_proposal_response = (
-                langgraph_social_apply.prepare_proposal_response(
-                    ctx.db,
-                    character_id=ctx.character.id,
-                    response=proposal_response_input,
-                    now=occurred_at,
+        action_result = None
+        def publish_current():
+            nonlocal action_result
+            if relationship_validator is not None:
+                relationship_validator()
+            if action.get("interaction_intent") == "ordinary_comment":
+                execution.interaction_intent = "ordinary_comment"
+                execution.comment_purpose = action.get("comment_purpose")
+            occurred_at = datetime.now(UTC)
+            prepared_proposal_response = None
+            if proposal_response_input is not None:
+                prepared_proposal_response = (
+                    langgraph_social_apply.prepare_proposal_response(
+                        ctx.db,
+                        character_id=ctx.character.id,
+                        response=proposal_response_input,
+                        now=occurred_at,
+                    )
                 )
-            )
-        with unit_of_work.deferred_commits():
-            if action_type == "reply":
-                if not body:
-                    raise ValueError("reply body missing")
-                result = social_agent_tools_runtime.agent_tool_actions.reply_agent_tool_post(
-                    ctx.db,
-                    ctx.session_key,
-                    post_id or "",
-                    social_schemas.TimelineReplyCreate(
-                        body=body, author_character_id=ctx.character.id
-                    ),
-                )
-                payload = {"post_id": result.id, "reply_to_post_id": post_id}
-            elif action_type == "like":
-                result = social_agent_tools_runtime.agent_tool_actions.like_agent_tool_post(
-                    ctx.db,
-                    ctx.session_key,
-                    post_id or "",
-                    social_schemas.PostLikeCreate(character_id=ctx.character.id),
-                )
-                payload = {"post_id": result.id}
-            elif action_type == "repost":
-                result = social_agent_tools_runtime.agent_tool_actions.repost_agent_tool_post(
-                    ctx.db,
-                    ctx.session_key,
-                    post_id or "",
-                    social_schemas.PostLikeCreate(character_id=ctx.character.id),
-                )
-                payload = {"post_id": result.id}
-            elif action_type == "follow":
-                result = social_agent_tools_runtime.agent_tool_actions.follow_agent_tool_profile(
-                    ctx.db,
-                    ctx.session_key,
-                    social_schemas.FollowCreate(
-                        target_type="character",
-                        target_id=target_id or "",
-                        follower_character_id=ctx.character.id,
-                    ),
-                )
-                payload = {
-                    "target_type": result.target.profile_type,
-                    "target_id": result.target.id,
-                }
-            elif action_type == "unfollow":
-                social_agent_tools_runtime.agent_tool_actions.unfollow_agent_tool_profile(
-                    ctx.db,
-                    ctx.session_key,
-                    social_schemas.FollowCreate(
-                        target_type="character",
-                        target_id=target_id or "",
-                        follower_character_id=ctx.character.id,
-                    ),
-                )
-                payload = {"target_type": "character", "target_id": target_id}
-            else:
-                raise ValueError(f"unsupported action_type={action_type}")
-            social_result = langgraph_social_apply.apply_successful_public_action(
-                ctx.db,
-                actor_character_id=ctx.character.id,
-                action_type=action_type,
-                target_post_id=post_id,
-                target_character_id=target_id,
-                action_result=payload,
-                execution=execution,
-                occurred_at=occurred_at,
-                notification_id=(
-                    int(notification_id) if notification_id is not None else None
-                ),
-                source_text=body or None,
-                proposal_response=prepared_proposal_response,
-            )
-            action_result = _finish_execution(
-                ctx, execution, status="succeeded", result=payload
-            )
-            if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
-                thought_value = action.get("_activity_thought")
+            with unit_of_work.deferred_commits():
                 if action_type == "reply":
-                    task_id = (writer_validation or {}).get("task_id")
-                    task_result = _reply_task_results_by_id(writing).get(task_id, {})
-                    thought_value = task_result.get("_activity_thought") if str(task_result.get("body") or "").strip() == body else None
-                thought = ActivityThought(**thought_value) if isinstance(thought_value, dict) else ActivityThought()
-                record_activity_thought(
-                    ctx.db, execution=execution, event=social_result.event,
-                    source_post_id=str(payload["post_id"]) if action_type == "reply" else None,
-                    thought=thought, captured_at=occurred_at,
-                )
-            else:
-                record_declared_subjective_context(
+                    if not body:
+                        raise ValueError("reply body missing")
+                    result = social_agent_tools_runtime.agent_tool_actions.reply_agent_tool_post(
+                        ctx.db,
+                        ctx.session_key,
+                        post_id or "",
+                        social_schemas.TimelineReplyCreate(
+                            body=body, author_character_id=ctx.character.id
+                        ),
+                    )
+                    payload = {"post_id": result.id, "reply_to_post_id": post_id}
+                elif action_type == "like":
+                    result = social_agent_tools_runtime.agent_tool_actions.like_agent_tool_post(
+                        ctx.db,
+                        ctx.session_key,
+                        post_id or "",
+                        social_schemas.PostLikeCreate(character_id=ctx.character.id),
+                    )
+                    payload = {"post_id": result.id}
+                elif action_type == "repost":
+                    result = social_agent_tools_runtime.agent_tool_actions.repost_agent_tool_post(
+                        ctx.db,
+                        ctx.session_key,
+                        post_id or "",
+                        social_schemas.PostLikeCreate(character_id=ctx.character.id),
+                    )
+                    payload = {"post_id": result.id}
+                elif action_type == "follow":
+                    result = social_agent_tools_runtime.agent_tool_actions.follow_agent_tool_profile(
+                        ctx.db,
+                        ctx.session_key,
+                        social_schemas.FollowCreate(
+                            target_type="character",
+                            target_id=target_id or "",
+                            follower_character_id=ctx.character.id,
+                        ),
+                    )
+                    payload = {
+                        "target_type": result.target.profile_type,
+                        "target_id": result.target.id,
+                    }
+                elif action_type == "unfollow":
+                    social_agent_tools_runtime.agent_tool_actions.unfollow_agent_tool_profile(
+                        ctx.db,
+                        ctx.session_key,
+                        social_schemas.FollowCreate(
+                            target_type="character",
+                            target_id=target_id or "",
+                            follower_character_id=ctx.character.id,
+                        ),
+                    )
+                    payload = {"target_type": "character", "target_id": target_id}
+                else:
+                    raise ValueError(f"unsupported action_type={action_type}")
+                social_result = langgraph_social_apply.apply_successful_public_action(
                     ctx.db,
+                    actor_character_id=ctx.character.id,
+                    action_type=action_type,
+                    target_post_id=post_id,
+                    target_character_id=target_id,
+                    action_result=payload,
                     execution=execution,
-                    event=social_result.event,
-                    source_post_id=(
-                        str(payload.get("post_id"))
-                        if payload.get("post_id") is not None
-                        else post_id
+                    occurred_at=occurred_at,
+                    notification_id=(
+                        int(notification_id) if notification_id is not None else None
                     ),
-                    context=_declared_action_subjective_context(action_type, action),
-                    captured_at=occurred_at,
+                    source_text=body or None,
+                    proposal_response=prepared_proposal_response,
                 )
-            ctx.db.commit()
-        action_result["social_event_id"] = social_result.event.id
-        if writer_validation is not None:
-            action_result["writer_validation"] = writer_validation
-        return action_result
+                action_result = _finish_execution(
+                    ctx, execution, status="succeeded", result=payload
+                )
+                if settings.ACTIVITY_THOUGHT_POLICY == "thought_v1":
+                    thought_value = action.get("_activity_thought")
+                    if action_type == "reply":
+                        task_id = (writer_validation or {}).get("task_id")
+                        task_result = _reply_task_results_by_id(writing).get(task_id, {})
+                        thought_value = task_result.get("_activity_thought") if str(task_result.get("body") or "").strip() == body else None
+                    thought = ActivityThought(**thought_value) if isinstance(thought_value, dict) else ActivityThought()
+                    record_activity_thought(
+                        ctx.db, execution=execution, event=social_result.event,
+                        source_post_id=str(payload["post_id"]) if action_type == "reply" else None,
+                        thought=thought, captured_at=occurred_at,
+                    )
+                else:
+                    record_declared_subjective_context(
+                        ctx.db,
+                        execution=execution,
+                        event=social_result.event,
+                        source_post_id=(
+                            str(payload.get("post_id"))
+                            if payload.get("post_id") is not None
+                            else post_id
+                        ),
+                        context=_declared_action_subjective_context(action_type, action),
+                        captured_at=occurred_at,
+                    )
+            action_result["social_event_id"] = social_result.event.id
+            if writer_validation is not None:
+                action_result["writer_validation"] = writer_validation
+            return action_result
+        if relationship_validator is not None:
+            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            # Reservation already owns its commit; close its subsequent read.
+            if ctx.db.in_transaction():
+                ctx.db.commit()
+            return run_sqlite_session_immediate(ctx.db, publish_current, require_clean=True)
+        result = publish_current()
+        ctx.db.commit()
+        return result
     except Exception as exc:
         ctx.db.rollback()
+        from app.domains.relationships.contracts.social_context import SocialContextValidationError
+        if isinstance(exc, SocialContextValidationError):
+            _finish_execution(ctx, execution, status="failed", result=None, failure_class=str(exc))
+            raise
         failure_class = type(exc).__name__
         logger.warning(
             "langgraph_public_action_failed run_id=%s character_id=%s action=%s "

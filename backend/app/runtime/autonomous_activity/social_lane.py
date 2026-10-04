@@ -10,7 +10,10 @@ from app.domains.world_characters.schemas.activity_state import StateUpdate
 from app.domains.world_characters.service.activity_state import settle_state
 from app.runtime.autonomous_activity.contracts import INBOX_TARGET_LIMIT, identity_key
 from app.runtime.autonomous_activity.graph import LanePorts
-from app.runtime.autonomous_activity.inputs import relationship_snapshot
+from app.runtime.autonomous_activity.inputs import prepare_relationship, validate_relationship, ActivityRelationshipValidationError
+from app.domains.relationships.contracts.social_context import (
+    RelationshipValidationBinding, SocialContextValidationError, read_currentness_policy,
+)
 from app.runtime.autonomous_activity.provider import ActivityProvider
 from app.runtime.autonomous_activity.output_recovery import ActivityRetryGuardError
 from app.runtime.autonomous_activity.recall import SelectedRecall, context_memories, split_validation
@@ -48,18 +51,55 @@ class SocialLane:
                     continue
                 if state.get("stage") == "Execute" and self.completed_action(state, candidate["target_id"]):
                     continue  # Reuse committed effects; scope authorization still ran.
-                current_relation = self.relationship(candidate.get("counterpart_id"))
-                previous_relation = candidate.get("relationship", {})
+                self.validate_relationship_candidate(state, candidate)
                 from app.runtime.media.social_context import assert_current
                 frozen_images = state.get("image_recall_snapshots", {}).get(candidate["target_id"], {}).get("images", candidate.get("images", []))
                 assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
-                if any(current_relation.get(k) != previous_relation.get(k) for k in ("content_hash", "status")):
-                    raise ValueError("activity_relationship_changed")
                 for identifier, revision in candidate["source_revisions"].items():
                     post = self.ctx.db.get(Post, identifier, populate_existing=True)
                     if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
                         raise ValueError("activity_source_changed")
         return {}
+
+    def validate_relationship_candidate(self, state, candidate):
+        binding = RelationshipValidationBinding(self.ctx.run_id, self.lane,
+            candidate["target_id"], candidate.get("counterpart_id"))
+        try:
+            identity = state.get("identity", {})
+            if (identity.get("activity_id", self.ctx.run_id) != self.ctx.run_id
+                    or identity.get("world_id", self.actor.world_id) != self.actor.world_id
+                    or identity.get("actor_id", self.actor.id) != self.actor.id):
+                raise SocialContextValidationError("receipt_invalid")
+            result = validate_relationship(self.ctx, self.actor, binding=binding,
+                prompt=candidate.get("relationship", {}),
+                receipt=state.get("relationship_validation_receipts", {}).get(candidate["target_id"]),
+                policy=read_currentness_policy(identity))
+        except SocialContextValidationError as exc:
+            self.observe_relationship_validation("invalid", exc.reason, 0,
+                (state.get("identity") or {}).get("relationship_validation_policy", "social-context-currentness.legacy.v1"))
+            raise ActivityRelationshipValidationError(exc.reason, lane=self.lane) from exc
+        self.observe_relationship_validation(result.outcome, result.reason, result.checked_count, result.revision)
+
+    def observe_relationship_validation(self, outcome, reason, count, revision):
+        tracker = getattr(self, "tracker", None)
+        if tracker is not None and getattr(tracker, "observer", None) is not None:
+            try:
+                tracker._notify("relationship_validation", {"lane": self.lane,
+                    "revision": revision, "outcome": outcome, "reason": reason, "checked_count": count})
+            except Exception:
+                pass
+
+    def relationship_preparation(self, target_id, counterpart_id):
+        prompt, receipt, snapshot = prepare_relationship(self.ctx, self.actor,
+            binding=RelationshipValidationBinding(self.ctx.run_id, self.lane, target_id, counterpart_id))
+        if snapshot and getattr(self.tracker, "observer", None) is not None:
+            try:
+                self.tracker._notify("relationship_lookup", {
+                    "lane": self.lane, "counterpart_id": counterpart_id,
+                    "manifest": snapshot.manifest(), "sources": [item.source for item in snapshot.items]})
+            except Exception:
+                pass
+        return plain(prompt), receipt
 
     def completed_action(self, state, target_id):
         """Use the same durable identity for execution and its replay guard."""
@@ -168,8 +208,13 @@ class SocialLane:
     async def write(self, state):
         # Reuse proposal-capable Writer output and canonical writer validation.
         receipts = []
+        async def before_request(_attempt):
+            try:
+                await self.guard({**state, "stage": "Writer"})
+            except Exception as exc:
+                raise ActivityRetryGuardError(exc) from exc
         writing = await self.provider.write(lane=self.lane, context=state["decision_context"],
-            assignments=state["assignments"], on_input_receipt=receipts.append)
+            assignments=state["assignments"], on_input_receipt=receipts.append, before_provider_request=before_request)
         from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
         names, fields = activity_name_binding(self.ctx), {}
         writing = social_draft_names(writing, names,
@@ -198,9 +243,27 @@ class SocialLane:
                 "interaction_intent": decision.get("interaction_intent"), "comment_purpose": decision.get("comment_purpose"),
                 "brief": decision["brief"], "_activity_thought": asdict(parse_activity_thought(decision.get("thought")))}
             result = self.action_executor(self.ctx, action=action, scope=self.lane, index=index,
-                writing={"reply_task_results": state.get("drafts", [])}, used_reply_bodies=used)
+                writing={"reply_task_results": state.get("drafts", [])}, used_reply_bodies=used,
+                relationship_validator=self.effect_relationship_validator(state, decision["target_id"]))
             results.append({"target_id": decision["target_id"], **result})
         return {"executions": plain(results)}
+
+    def effect_relationship_validator(self, state, target_id):
+        def validate():
+            if self.claim_validator is not None:
+                self.claim_validator()
+            candidate = next((c for c in state.get("candidates", []) if c["target_id"] == target_id), None)
+            if candidate is None:
+                raise ActivityRelationshipValidationError("receipt_invalid", lane=self.lane)
+            self.validate_relationship_candidate(state, candidate)
+            from app.runtime.media.social_context import assert_current
+            frozen_images = state.get("image_recall_snapshots", {}).get(target_id, {}).get("images", candidate.get("images", []))
+            assert_current(self.ctx.db, self.ctx.user_id, frozen_images)
+            for identifier, revision in candidate.get("source_revisions", {}).items():
+                post = self.ctx.db.get(Post, identifier, populate_existing=True)
+                if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
+                    raise ValueError("activity_source_changed")
+        return validate
 
     async def settle(self, state):
         decision = state["decision"]
@@ -267,16 +330,3 @@ class SocialLane:
             "selected_ids": [s["target_id"] for s in state.get("selections", [])],
             "recall_status": {key: item["status"] for key, item in state.get("memories", {}).items()},
             "settlement": state.get("settlement", {})}}
-
-    def relationship(self, counterpart_id):
-        snapshot = relationship_snapshot(self.ctx, self.actor, counterpart_id=counterpart_id)
-        if snapshot and getattr(self.tracker, "observer", None) is not None:
-            try:
-                self.tracker._notify("relationship_lookup", {
-                    "lane": self.lane, "counterpart_id": counterpart_id,
-                    "manifest": snapshot.manifest(),
-                    "sources": [item.source for item in snapshot.items],
-                })
-            except Exception:
-                pass  # Diagnostic metadata cannot affect relationship recall.
-        return plain(snapshot.prompt_view()) if snapshot else {}

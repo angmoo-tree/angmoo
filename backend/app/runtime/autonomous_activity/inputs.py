@@ -10,6 +10,11 @@ from app.domains.characters.service.prompt_persona import request_persona, PERSO
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.social_context import SocialContextService
+from app.domains.relationships.contracts.social_context import (
+    RelationshipValidationBinding, SocialContextValidationError,
+)
+from app.domains.relationships.policies.social_context_validation import receipt_for_snapshot
+from app.domains.relationships.service.social_context_validation import SocialContextValidationService
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.service.activity_state import read_state
 from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
@@ -29,6 +34,30 @@ def relationship_snapshot(ctx, actor, *, counterpart_id=None):
     gateway = GraphRecallService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings, graph_provider="ladybug"))
     service = SocialContextService(gateway.execute)
     return service.prepare(GraphRecallScope(ctx.user_id, actor.world_id, actor.id), labels=labels, counterpart_id=counterpart_id)
+
+
+def prepare_relationship(ctx, actor, *, binding):
+    """One selection produces both the unchanged prompt and its durable receipt."""
+    snapshot = relationship_snapshot(ctx, actor, counterpart_id=binding.counterpart_id)
+    scope = GraphRecallScope(ctx.user_id, actor.world_id, actor.id)
+    prompt = snapshot.prompt_view() if snapshot else {}
+    receipt = receipt_for_snapshot(snapshot, scope=scope, binding=binding).to_dict()
+    validate_relationship(ctx, actor, prompt=prompt, receipt=receipt, binding=binding,
+        policy=receipt["revision"])
+    return prompt, receipt, snapshot
+
+
+def validate_relationship(ctx, actor, *, prompt, receipt, binding, policy):
+    service = SocialContextValidationService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings))
+    return service.validate(scope=GraphRecallScope(ctx.user_id, actor.world_id, actor.id),
+        binding=binding, prompt=prompt, receipt=receipt, policy=policy)
+
+
+class ActivityRelationshipValidationError(SocialContextValidationError):
+    """Stable lane failure code with a content-free internal validation reason."""
+    def __init__(self, reason, *, lane):
+        super().__init__(reason)
+        self.args = ("routine_relationship_changed" if lane == "routine" else "activity_relationship_changed",)
 
 
 def shared_input(ctx, actor, world, *, environment=None):

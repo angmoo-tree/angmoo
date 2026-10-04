@@ -113,7 +113,7 @@ class CombinedSelection:
                 payload=request, schema={"type": "object", "properties": properties,
                     "required": list(properties)},
                 validator=validate, max_tokens=4096, recover_truncation=True,
-                before_json_retry=guard_retry, delivery=delivery)
+                before_json_retry=guard_retry, before_provider_request=guard_retry, delivery=delivery)
             for lane in needed:
                 prepared[lane].update(result[lane])
         except Exception as exc:

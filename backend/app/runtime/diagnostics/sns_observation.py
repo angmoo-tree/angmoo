@@ -444,6 +444,18 @@ class SNSAttempt:
                     if isinstance(row, (list, tuple)) and len(row) == 2],
             })
             return
+        if kind == "relationship_validation":
+            self.emit("relationship_validation", lane=code(payload.get("lane")), details={
+                "revision": payload.get("revision") if payload.get("revision") in {
+                    "social-context-currentness.v1", "social-context-currentness.legacy.v1"} else None,
+                "outcome": payload.get("outcome") if payload.get("outcome") in {
+                    "valid", "valid_legacy_facts", "no_facts", "unavailable", "disabled", "invalid"} else None,
+                "reason": payload.get("reason") if payload.get("reason") in {
+                    "version_changed", "view_changed", "facts_changed", "visibility_lost", "receipt_invalid",
+                    "legacy_unprovable", "canonical_unavailable", "facts_invalid"} else None,
+                "checked_count": min(12, max(0, numbers(payload.get("checked_count")) or 0)),
+            })
+            return
         details = {"call_type": code(payload.get("call_type")), "call_order": numbers(payload.get("call_order_in_run")),
                    "validation_code": validation_code(payload.get("validation_code")),
                    "field_path": field_path(payload.get("field_path")),
