@@ -1,5 +1,14 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-04 World SNS list change: **ADAPTED** existing global feed/header/composer anatomy; **LOCAL** neutral
+`components/layout/feed-header` slots and World owner-profile composition. Title/body remain required and the two
+48px photo/publish actions are icon-only with accessible names and busy/focus states. Media retains its actual native
+input/upload/draft behavior through presentation slots. World list shell/context headers, small World name, header
+refresh and unsupported Follow/repost filters are omitted; existing read/retry/pull/write-success refresh remains.
+Detail/other sections and five World navigation destinations are preserved. No new external assets or business API are used.
+Local evidence is recorded in `docs/verification/world-feed-ui-unification-20261004.md`; operating watch and USER CHECK
+are separate from synthetic Next/static checks.
+
 2026-10-04 current change: **LOCAL** responsive viewport, normal OS windows and native route toolbar.
 The user-approved initial 480×850/minimum 480×480, body 960/workspace 1440 contracts replace the decorative
 Phone frame and ratio lock. Existing adoption entries remain historical provenance. No new hosted code,

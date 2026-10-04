@@ -5,7 +5,8 @@ export type SocialOwnerActor = {
   profile: {
     avatar_url: string | null;
     display_name: string;
-  deleted?: boolean;
+    handle?: string | null;
+    deleted?: boolean;
   };
 };
 

@@ -1,6 +1,7 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+import { FeedHeader } from "@/components/layout/feed-header";
 
 import { AgentActivityMaintenanceNotice,AgentActivityNoticeBanner,FeedCueComposer,MobileActiveAgentTrigger,selectDefaultAgent } from "@/features/characters/components/feed-activity-parts";
 import { DeletePostDialog,FeedContentFilterBar,feedContentFilterEmptyText,type FeedMode,FeedScopeTabs,mergeUniquePosts,normalizeFeedContentFilter,PostOptionsMenu,PostReferenceCard,ReportPostDialog } from "@/features/social/components/post-feed-parts";
@@ -394,12 +395,13 @@ export function PostListClient({
   return (
     <section className="flex h-full w-full flex-col">
       <div className="sticky top-0 z-30 border-b border-[#eaedf2] bg-white/95 backdrop-blur-sm">
-        <div className="flex min-h-[72px] items-center justify-between px-5 py-4 md:min-h-[82px] md:px-9">
-          <div className="relative flex w-full items-center justify-between md:w-auto">
-            <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">{uiText("둥지")}</h1>
+        <FeedHeader
+          title={uiText("둥지")}
+          compactOnDesktop
+          center={
             <Link
               href="/"
-              className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full md:hidden"
+              className="flex size-12 items-center justify-center rounded-full"
               aria-label="Angmoo"
             >
               <Image
@@ -411,8 +413,9 @@ export function PostListClient({
                 priority
               />
             </Link>
-            <MobileActiveAgentTrigger agent={activeAgent} />
-          </div>
+          }
+          right={<MobileActiveAgentTrigger agent={activeAgent} />}
+          desktopAction={
           <button
             type="button"
             onClick={() => loadFeed(feedMode, feedContentFilter)}
@@ -423,7 +426,8 @@ export function PostListClient({
           >
             <RefreshCw size={18} aria-hidden="true" />
           </button>
-        </div>
+          }
+        />
         <FeedScopeTabs
           mode={feedMode}
           loading={loading}

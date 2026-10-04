@@ -14,6 +14,27 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-04 World SNS 피드 목록·수동 작성 계약
+
+기본 SNS와 생성 World의 목록은 글로벌 Feed와 같은 neutral `FeedHeader` 및 `SocialPostRow`를 사용한다.
+목록 헤더는 왼쪽 `피드`/`Feed`, 중앙 기존 Angmoo 로고, 오른쪽 현재 World 사용자 프로필만 표시한다.
+우측은 실제 ownerActor의 인증된 아바타 또는 이니셜이며 현재 World 프로필로 이동한다. 활동 점선·작은 World 이름·
+World App/context 설명·헤더 새로고침·Follow/repost 필터는 목록에서 렌더링하지 않는다.
+글로벌의 Feed Cue·캐릭터 선택·두 필터·desktop 갱신은 그대로 유지한다.
+
+수동 작성은 실제 사용자 이름과 지원 payload의 handle, 필수 제목(160)·본문(4000), 원본 형식/비율의 사진 1장,
+아래 왼쪽 사진 `Image` 아이콘과 오른쪽 코랄색·흰 `Send` 아이콘의 48px 원형 버튼 순서다.
+버튼 caption은 없고 접근성 이름·title·busy/disabled·focus-visible·텍스트 오류 안내를 유지한다.
+Media는 native input·upload/abort/draft/preview를, Social은 form·submit/idempotency와 action 행 배치를,
+composition은 World 사용자와 feature의 ReactNode 표시 슬롯 연결을 소유한다.
+
+첫 조회·World 전환·게시 후 갱신·실패 화면의 명시적 재시도·모바일 당겨 새로고침·이미지 완료 갱신은 기존 loadFeed를 쓴다.
+부분 갱신과 실패는 입력을 보존하고 문서 전체 reload/HMR의 입력 영구 보존을 보장하지 않는다.
+World 상세 thread와 다른 section의 shell header·기존 다섯 하단 탐색은 유지한다. API/ORM·backend 실행 계약 변경은 없다.
+
+출처 분류: 기존 글로벌 anatomy의 **ADAPTED**, 새 neutral 표시 슬롯과 independent World 연결의 **LOCAL**.
+새 hosted source·asset·font·dependency를 추가하지 않는다. 로컬 fixture 검사와 운영 적용·직접 USER CHECK는 구분한다.
+
 ## 2026-10-04 현재 반응형 화면·일반 native 창 계약
 
 사용자가 확정한 10-04 반응형 공통 화면 계획의 C01–C22를 현재 계약으로 적용한다.
@@ -633,8 +654,7 @@ World Feed는 hosted Feed의 성숙한 anatomy를 Local World scope에 맞게 �
 구조:
 
 ```text
-sticky World Feed header
-optional capability-backed filter/tabs
+sticky Feed header: title / Angmoo logo / current World user
 compact owner composer
 timeline
   post row
@@ -643,7 +663,7 @@ timeline
 bottom World navigation
 ```
 
-현재처럼 큰 설명·composer card가 첫 viewport 대부분을 점유하지 않는다. World 이름과 scope는 header 또는 compact context row에서 분명히 보인다.
+현재처럼 큰 설명·composer card가 첫 viewport 대부분을 점유하지 않는다. 2026-10-04 사용자 결정으로 목록의 World 이름·scope 안내와 헤더 갱신 버튼을 제거한다. 실제 route/worldId·owner 경계는 유지하고 상세/다른 section의 탐색은 별도로 보존한다.
 
 각 post row:
 
@@ -676,10 +696,10 @@ Global Feed의 상단 composer는 캐릭터의 다음 자율활동 주제를 주
 - 현재 Local write 계약이 요구하는 제목·본문을 분리해 보존한다.
 - 화면의 `제목`·`내용` 문구는 숨기되 실제 `label`과 input `id`로 accessible name을 유지한다.
 - 제목 placeholder는 `오늘 이 World에 남길 이야기의 제목을 적어주세요`, 본문 placeholder는 `내가 조종하는 앵무의 말로 이야기를 적어보세요`로 고정한다.
-- 기존 owner profile의 avatar와 display name만 표시하며 존재하지 않는 handle은 만들지 않는다.
+- 기존 owner profile의 avatar·display name과 지원 payload의 실제 handle을 표시하며 존재하지 않는 handle은 만들지 않는다.
 - 제출 중 중복 submit 방지와 idempotency 상태를 유지한다.
 - 성공 후 title/body를 비우고 timeline을 갱신하되 작성부는 계속 mount한다. 실패하면 입력값과 같은 idempotency key를 보존한다.
-- 진입 시 input을 자동 focus하지 않는다. keyboard 순서는 title → body → `게시하기`이며 독립적인 focus-visible을 유지한다.
+- 진입 시 input을 자동 focus하지 않는다. keyboard 순서는 title → body → 사진 첨부/선택된 사진 제거 → `게시하기`이며 독립적인 focus-visible을 유지한다. 게시·사진 action은 48px 원형 아이콘 전용 버튼이다.
 - empty Feed에 중복 `첫 글 쓰기` action을 만들지 않는다.
 
 ### 9.3 Action strip

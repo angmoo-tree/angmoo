@@ -1,5 +1,14 @@
 # Angmoo Frontend Architecture
 
+### World Feed presentation ownership (2026-10-04)
+
+`components/layout/feed-header` is a neutral visual slot component, independent of features and data fetching.
+`composition/screens/world-app` supplies the actual World owner/profile route and content-owned list header mode.
+Social owns manual title/body submission, idempotency and composer action layout; Media owns native input, upload,
+preview and draft lifecycle. Their `renderLayout` ReactNode contract is connected only in composition, without a
+cross-feature implementation/type import. Global Feed keeps its actor/Cue/filters/desktop refresh. Backend/API/ORM
+contracts are unchanged by this presentation adaptation.
+
 한글·영어 UI와 감지된 사용자 환경은 `composition/providers/user-environment-provider.tsx`가
 인증 세션과 함께 조립한다. Identity의 환경 API가 저장·CAS·기준 화면 lease를 소유하고,
 공용 `types/user-environment.ts`는 표시에 필요한 DTO만 담는다. 각 기능의 `locales/ko.json`,

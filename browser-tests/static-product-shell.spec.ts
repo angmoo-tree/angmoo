@@ -2925,10 +2925,9 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   const feedSurface = page.locator('[data-world-social-surface="feed"]');
   await expect(feedSurface).toBeVisible();
   await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
-  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCSS(
-    "color",
-    "rgb(255, 107, 107)",
-  );
+  await expect(feedSurface.locator("[data-feed-header]").getByRole("heading", { name: "피드", exact: true })).toBeVisible();
+  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCount(0);
+  await expect(feedSurface.locator("[data-feed-header] button")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "닫기" })).toHaveCount(0);
   const composer = page.locator("#world-owner-composer");
@@ -2973,7 +2972,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   await page.keyboard.press("Tab");
   await expect(bodyInput).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("첨부 이미지 선택")).toBeFocused();
+  await expect(composer.getByRole("button", { name: "사진 첨부", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(submitPost).toBeFocused();
 

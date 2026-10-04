@@ -142,7 +142,7 @@ test("manual SNS submission preserves title body and selected asset without reco
     await expect(composer).toBeVisible();
     const composerBox=await composer.boundingBox();
     expect(composerBox).not.toBeNull();
-    for (const control of [page.getByLabel("제목",{exact:true}),page.getByLabel("내용",{exact:true}),page.getByLabel("첨부 이미지 선택"),page.getByRole("button",{name:"게시하기",exact:true})]) {
+    for (const control of [page.getByLabel("제목",{exact:true}),page.getByLabel("내용",{exact:true}),page.getByRole("button",{name:"사진 첨부",exact:true}),page.getByRole("button",{name:"게시하기",exact:true})]) {
       await expect(control).toBeVisible();
       const box=await control.boundingBox();
       expect(box).not.toBeNull();
@@ -200,7 +200,7 @@ test(`completed ${extension} generation displays original authenticated pixels w
   await page.reload();await expect(image).toBeVisible();
   await expect.poll(()=>image.evaluate((element)=>(element as HTMLImageElement).naturalWidth)).toBe(18);
   const previousBlob=await image.getAttribute("src");
-  await page.getByRole("link",{name:"Device Home",exact:true}).click();
+  await page.locator("[data-feed-header]").getByRole("link",{name:"Angmoo",exact:true}).click();
   if(staticShell) {
     // Static navigation unloads the document; its blob URLs expire with it.
     await expect.poll(()=>page.evaluate(async url=>{try{await fetch(url!);return false;}catch{return true;}},previousBlob)).toBe(true);

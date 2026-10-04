@@ -4,7 +4,7 @@ import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 
-import { MessageCircle, RefreshCw } from "lucide-react";
+import { MessageCircle, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
 import {
   type ComponentType,
@@ -19,7 +19,8 @@ import {
 
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 import { worldAppRoute, worldPostDetailRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
+import { formatHandle } from "@/utils/profile-presentation";
 import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/form-controls";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
@@ -33,7 +34,8 @@ type Props = {
   ownerActor: SocialOwnerActor | null;
   postId?: string;
   worldId: string;
-  renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void }) => ReactNode;
+  feedHeader?: ReactNode;
+  renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void; renderLayout: (slots: { trigger: ReactNode; preview: ReactNode; feedback: ReactNode }) => ReactNode }) => ReactNode;
   imageStatus?: ComponentType<{ worldId: string; postId: string; onCompleted: () => void }>;
 };
 
@@ -181,7 +183,7 @@ function aggregateManualPostActions(
   return actions;
 }
 
-export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, imageStatus: ImageStatus }: Props) {
+export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, renderImagePicker, imageStatus: ImageStatus }: Props) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("social");
   const routeKey = `${worldId}:${postId ?? "feed"}`;
@@ -307,7 +309,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       setNotice(
         result.replayed
           ? uiText("같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요.")
-          : uiText("게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요."),
+          : uiText("게시글을 저장했습니다."),
       );
       await loadFeed();
     } catch (reason) {
@@ -355,9 +357,19 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     }
   }
 
+  const publishButton = (
+    <IconButton className={styles.publishButton} type="submit" variant="primary"
+      label={uiText("게시하기")} title={busy ? uiText("저장 중") : uiText("게시하기")}
+      loading={busy} loadingLabel={uiText("저장 중")}
+      disabled={!title.trim() || !body.trim() || imageBusy}>
+      <Send size={22} aria-hidden="true" />
+    </IconButton>
+  );
+
   if (!ownerActor) {
     return (
       <section className={styles.manualFeed}>
+        {!postId ? <div className={styles.feedHeader}>{feedHeader}</div> : null}
         <EmptyState
           description={uiText("Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다.")}
           title={uiText("이 World에서 내가 조종할 앵무가 필요해요")}
@@ -371,6 +383,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       className={styles.manualFeed}
       data-world-social-surface={postId ? "detail" : "feed"}
     >
+      {!postId ? <div className={styles.feedHeader}>{feedHeader}</div> : (
       <header className={styles.contextHeader}>
         <div className={styles.contextCopy}>
           <p className={styles.capabilityKicker}>World Feed</p>
@@ -398,6 +411,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
           </Button>
         </div>
       </header>
+      )}
 
       {!postId ? (
         <form
@@ -414,7 +428,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
           <div className={styles.composerContent}>
             <div className={styles.composerHeading}>
               <strong>{ownerActor.profile.display_name}</strong>
-              <span>{uiText("이 World에만 저장되는 직접 작성")}</span>
+              {ownerActor.profile.handle ? <span>{formatHandle(ownerActor.profile.handle)}</span> : null}
             </div>
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-title">
               {uiText("제목")}</label>
@@ -425,6 +439,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
               onChange={(event) => setTitle(event.target.value)}
               placeholder={uiText("오늘 이 World에 남길 이야기의 제목을 적어주세요")}
               required
+              readOnly={busy}
               value={title}
             />
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-body">
@@ -436,19 +451,23 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
               onChange={(event) => setBody(event.target.value)}
               placeholder={uiText("내가 조종하는 앵무의 말로 이야기를 적어보세요")}
               required
-              rows={2}
+              readOnly={busy}
+              rows={3}
               value={body}
             />
-            <div className={styles.composerSubmit}>
-              {renderImagePicker?.({ value: attachment, disabled: busy, onChange: setAttachment, onBusyChange: setImageBusy })}
-              <Button
-                disabled={!title.trim() || !body.trim() || imageBusy}
-                loading={busy}
-                loadingLabel={uiText("저장 중")}
-                type="submit"
-              >
-                {uiText("게시하기")}</Button>
-            </div>
+            {renderImagePicker ? renderImagePicker({
+              value: attachment, disabled: busy, onChange: setAttachment, onBusyChange: setImageBusy,
+              renderLayout: ({ trigger, preview, feedback }) => (
+                <>
+                  {preview}
+                  {feedback}
+                  <div className={styles.composerActions}>
+                    {trigger}
+                    {publishButton}
+                  </div>
+                </>
+              ),
+            }) : <div className={`${styles.composerActions} ${styles.submitOnly}`}>{publishButton}</div>}
           </div>
         </form>
       ) : null}

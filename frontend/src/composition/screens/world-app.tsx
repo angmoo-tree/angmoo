@@ -3,6 +3,7 @@ import { useUiText } from "@/hooks/use-ui-text";
 
 
 import Link from "next/link";
+import Image from "next/image";
 import type { LocalWorldAppRead, OwnerControlledActorRead } from "@/features/worlds/types/world-app";
 import {
   ArrowLeft,
@@ -19,6 +20,9 @@ import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-s
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
 import { ImagePicker } from "@/features/media/components/image-picker";
+import { FeedHeader } from "@/components/layout/feed-header";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { GenerationStatus } from "@/features/media/components/generation-status";
 import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
@@ -152,6 +156,7 @@ function WorldAppContent({
 
   return (
     <WorldAppShell
+      headerMode={activeSection.id === "feed" && !postId ? "content" : "shell"}
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
       status={
         <WorldHomeReturn />
@@ -201,6 +206,28 @@ function WorldHomeReturn() {
       <ArrowLeft size={16} aria-hidden="true" />
       Device Home
     </Link>
+  );
+}
+
+function WorldFeedHeader({ ownerActor, worldId }: { ownerActor: OwnerControlledActorRead | null; worldId: string }) {
+  const uiText = useUiText("shell");
+  const socialText = useUiText("social");
+  return (
+    <FeedHeader
+      title={uiText("피드")}
+      center={
+        <LocalProductLink ariaLabel="Angmoo" className={styles.feedLogo} href={PRODUCT_ROUTES.deviceHome}>
+          <Image src="/icon.svg" alt={uiText("Angmoo 로고")} width={48} height={48} priority />
+        </LocalProductLink>
+      }
+      right={ownerActor ? (
+        <LocalProductLink ariaLabel={socialText("내 프로필")} title={socialText("내 프로필")} className={styles.feedProfile}
+          href={worldCharacterProfileRoute(worldId, ownerActor.world_character_id)}>
+          <ProfileAvatar name={ownerActor.profile.display_name} avatarUrl={ownerActor.profile.avatar_url}
+            sizeClassName={styles.feedProfileAvatar} textClassName={styles.feedProfileInitial} />
+        </LocalProductLink>
+      ) : null}
+    />
   );
 }
 
@@ -256,7 +283,8 @@ function WorldSection({
         ownerActor={ownerActor}
         postId={postId}
         worldId={worldId}
-        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} />}
+        feedHeader={<WorldFeedHeader ownerActor={ownerActor} worldId={worldId} />}
+        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} renderLayout={input.renderLayout} />}
         imageStatus={GenerationStatus}
       />
     );

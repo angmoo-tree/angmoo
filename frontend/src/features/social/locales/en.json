@@ -112,6 +112,7 @@
   "다시 시도": "Retry",
   "같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요.": "Reused the same request safely. No duplicate post was created.",
   "게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요.": "Post saved. This write made no LLM or provider call.",
+  "게시글을 저장했습니다.": "Post saved.",
   "같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요.": "Reused the same reply request safely. No duplicate Inbox item was created.",
   "답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요.": "Reply saved. The target character may observe it during its next permitted activity; a public response is not forced.",
   "Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다.": "Create a user-controlled character in Creator Studio to write posts and replies in this World.",
