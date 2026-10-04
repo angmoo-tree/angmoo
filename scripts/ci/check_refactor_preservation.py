@@ -799,13 +799,17 @@ def check_suppressions(snapshots: list[dict], files: dict[str, str], root: Path 
     return errors
 
 
+def _retired_chrome_sources(approved_changes: list[dict] | None) -> set[str]:
+    # load() already verifies the committed deletion, exact preimage and
+    # surviving owners. All stock views use the same explicit retirements.
+    return {item["source"] for record in approved_changes or []
+            for field in ("retired_frontend_styles", "retired_native_chrome")
+            for item in record.get(field, [])}
+
+
 def check_sources(sources: list[str], files: dict[str, str], root: Path = ROOT, *, approved_changes: list[dict] | None = None) -> list[str]:
     errors = []
-    # load() already verifies the committed deletion, exact preimage and
-    # surviving owners. Only those named obsolete chrome sources may retire.
-    retired = {item["source"] for record in approved_changes or []
-               for field in ("retired_frontend_styles", "retired_native_chrome")
-               for item in record.get(field, [])}
+    retired = _retired_chrome_sources(approved_changes)
     for old, target in mapped_targets(sources, files).items():
         path = (root / target).resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
@@ -1029,8 +1033,9 @@ def unrecorded_committed_nodes(current: list[str], targets: dict[str, str], root
     return errors
 
 
-def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT) -> list[str]:
+def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT, *, approved_changes: list[dict] | None = None) -> list[str]:
     errors = []
+    retired = _retired_chrome_sources(approved_changes)
     if inventory.get("baseline_commit") != baseline["commit"]:
         errors.append("feature inventory baseline commit differs")
     items = inventory.get("items", [])
@@ -1047,6 +1052,8 @@ def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT) -> list[
         for path in item.get("current_paths", []) + item.get("test_paths", []):
             candidate = (root / path).resolve()
             if not candidate.is_relative_to(root.resolve()) or not candidate.exists():
+                if candidate.is_relative_to(root.resolve()) and not candidate.exists() and path in retired:
+                    continue
                 errors.append(f"{item['id']}: missing or unsafe path {path}")
     return errors
 
@@ -1062,7 +1069,7 @@ def main() -> int:
     moves = json.loads(MOVES.read_text(encoding="utf-8"))
     checkpoint = json.loads(CHECKPOINT.read_text(encoding="utf-8"))
     additions = json.loads(ADDITIONS.read_text(encoding="utf-8"))
-    errors = check_inventory(inventory, baseline) + checkpoint_errors(checkpoint, baseline_bytes)
+    errors = checkpoint_errors(checkpoint, baseline_bytes)
     asgi_moves = {}
     approved_changes = []
     try:
@@ -1106,6 +1113,9 @@ def main() -> int:
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
         targets = {}
+    # Authorization is validated before inventory paths are interpreted. A
+    # rejected proof leaves approved_changes empty and missing stock fails.
+    errors.extend(check_inventory(inventory, baseline, approved_changes=approved_changes))
     if args.contracts:
         contracts = current_contracts(asgi_moves)
         contract_snapshots = [{**snapshot, "contracts": product_changes.contracts(snapshot["contracts"], approved_changes)}

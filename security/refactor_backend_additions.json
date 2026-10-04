@@ -28254,6 +28254,74 @@
       "test_suppressions": {
         "tests/runtime/test_sns_execution_retirement_gate.py": {}
       }
+    },
+    {
+      "commit": "41f05932cb65e1cf8cb39bc72426504cfb1bc592",
+      "feature_id": "AR-RESPONSIVE-SHELL-NATIVE-NAVIGATION-20261004",
+      "reason": "Add responsive viewport, typed native navigation, exact chrome retirement regressions and retained local verification documentation without changing frozen source or API/ORM evidence.",
+      "tracked_files": {
+        "backend/tests/test_frontend_style_retirement.py": "93ced2d2840db0d4f29dd151e5ee52196e8f39c6",
+        "backend/tests/test_native_chrome_retirement.py": "3b59ecbf9346ba999ec9534261b120a9a40a790d",
+        "browser-tests/playwright.responsive-shell-static.config.ts": "afdbcdda0d8a027be7c15fb664421892069e725a",
+        "browser-tests/playwright.responsive-shell.config.ts": "a11625eef3c6bd491dcbb1adbc0f193c910c3573",
+        "browser-tests/playwright.shell-regressions.config.ts": "db20fd17cfaf52c5cd9b5b7b0173dbea8ab549af",
+        "browser-tests/responsive-shell.spec.ts": "1e2ddbc4fd640c8e2b625b1264f568e012909b7c",
+        "docs/verification/responsive-shell-native-navigation-20261004.md": "f371b6ab2d33b91a34e3d28f5eeec807bf7b5dc5",
+        "frontend/src/composition/navigation/desktop-navigation-toolbar.module.css": "8e3baf6d5635bbaf1ccf092ff73b454e3af9c4c1",
+        "frontend/src/composition/navigation/desktop-navigation-toolbar.tsx": "5139fff5740d564168fa555a10f59a7843677229",
+        "frontend/src/composition/shells/product-viewport.module.css": "a7bf445bd047e82344b6e25a1458cb580dc525e2",
+        "frontend/src/composition/shells/product-viewport.tsx": "b7d213d794e0da08f9a2fecc3217e18df7fddacf",
+        "frontend/src/hooks/use-product-leave-guard.ts": "4891113ad23874376e83f93bb75b236e10ad7227",
+        "frontend/src/lib/desktop/desktop-history.ts": "f75508e348575a8b0a22c90538029071f6c115de",
+        "frontend/src/lib/desktop/navigation-guard.ts": "d243666b85e4488e1690aaa4162eae08aee1d961",
+        "frontend/src/lib/navigation/navigation-capabilities.ts": "b0e4b4e0d53208c6e01d32058daeb3c3e000dce1",
+        "frontend/src/lib/navigation/product-route-validation.ts": "e9ddd15ffd83b4409179537fb24a7c35ef342084"
+      },
+      "test_nodes": [
+        "tests/test_frontend_style_retirement.py::test_style_retirement_accepts_only_the_recorded_source_and_exact_preimage",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[active_import]",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[changed_preimage]",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[missing_owner]",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[resurrected]",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[still_committed]",
+        "tests/test_frontend_style_retirement.py::test_style_retirement_requires_committed_deletion_and_no_remaining_consumers[valid]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[active_import]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[changed_preimage]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[missing_owner]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[resurrected]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[still_committed]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[unrelated_source]",
+        "tests/test_native_chrome_retirement.py::test_native_retirement_requires_exact_deletion_and_surviving_behavior[valid]",
+        "tests/test_native_chrome_retirement.py::test_source_stock_rejects_every_unlisted_missing_file"
+      ],
+      "test_assertions": {
+        "tests/test_frontend_style_retirement.py": {
+          "test_style_retirement_accepts_only_the_recorded_source_and_exact_preimage": [
+            "assert changes.frontend_style_retirement_matches(source, 'old css', [record])",
+            "assert not changes.frontend_style_retirement_matches(source, 'unrecorded css', [record])",
+            "assert not changes.frontend_style_retirement_matches('frontend/src/shell/other.module.css', 'old css', [record])"
+          ],
+          "test_style_retirement_requires_committed_deletion_and_no_remaining_consumers": [
+            "assert changes.load(tmp_path, reader=reader) == [record]",
+            "pytest.raises(ValueError)"
+          ]
+        },
+        "tests/test_native_chrome_retirement.py": {
+          "_module": [],
+          "test_native_retirement_requires_exact_deletion_and_surviving_behavior": [
+            "assert changes.load(tmp_path, reader=reader) == [record]",
+            "pytest.raises(ValueError)"
+          ],
+          "test_source_stock_rejects_every_unlisted_missing_file": [
+            "assert preservation.check_sources([retired, protected], {}, tmp_path, approved_changes=records) == [f'source missing without a surviving mapped destination: {protected} -> {protected}']",
+            "assert preservation.check_sources([retired], {}, tmp_path)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_frontend_style_retirement.py": {},
+        "tests/test_native_chrome_retirement.py": {}
+      }
     }
   ]
 }
