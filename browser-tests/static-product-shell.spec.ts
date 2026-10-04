@@ -538,8 +538,8 @@ test("static Phone routes share one frame, one scroll owner, and supported navig
       };
     });
     expect(geometry.documentOverflow).toBe(0);
-    expect(geometry.width).toBeLessThanOrEqual(436);
-    if (viewport.width <= 436) {
+    expect(geometry.width).toBe(Math.min(viewport.width, 960));
+    if (viewport.width <= 960) {
       expect(Math.abs(geometry.width - viewport.width)).toBeLessThanOrEqual(1);
     } else {
       expect(Math.abs(geometry.left - (viewport.width - geometry.width) / 2)).toBeLessThanOrEqual(1);
@@ -820,7 +820,7 @@ test("static Character dashboard fails closed for malformed, historical, and emp
   await expect(emptyResult.getByRole("link")).toHaveCount(0);
 });
 
-test("Tauri Phone reserves titlebar controls above page-owned header actions", async ({
+test("Tauri Phone puts native route navigation above page-owned header actions", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -857,25 +857,22 @@ test("Tauri Phone reserves titlebar controls above page-owned header actions", a
     { width: 436, height: 880 },
   ]) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto("/agents");
 
-    const controls = page.locator('[data-window-route="/agents"]');
+    const controls = page.locator('[data-desktop-navigation="true"]');
     const createAction = page.getByRole("link", { name: "만들기", exact: true });
     const inset = page.locator('[data-device-titlebar-inset="true"]');
     await expect(controls).toBeVisible();
     await expect(createAction).toBeVisible();
-    await expect(inset).toBeVisible();
+    await expect(inset).toHaveCount(0);
 
-    const [controlsBox, createBox, insetBox] = await Promise.all([
+    const [controlsBox, createBox] = await Promise.all([
       controls.boundingBox(),
       createAction.boundingBox(),
-      inset.boundingBox(),
     ]);
     expect(controlsBox).not.toBeNull();
     expect(createBox).not.toBeNull();
-    expect(insetBox).not.toBeNull();
     expect(createBox!.y).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
-    expect(insetBox!.height).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
   }
 
   const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
@@ -1316,7 +1313,7 @@ test("UI-D0 Tauri Phone keeps post B after a delayed post A response", async ({
   });
 
   try {
-    await page.goto("/");
+    await page.goto("/posts");
     await page.getByText("Stale post A", { exact: true }).click();
     await postARequested;
     await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toBeVisible();
@@ -2456,7 +2453,8 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
   );
   const profile = page.locator('[data-world-character-surface="profile"]');
   await expect(profile.getByRole("heading", { name: responding.display_name })).toBeVisible();
-  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await expect(profile.getByRole("button", { name: "이전 화면으로" })).toHaveCount(0);
+  await page.getByRole("button", { name: "뒤로", exact: true }).click();
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   await authorLinks.last().click();
   await expect(profile).toBeVisible();
@@ -4010,152 +4008,42 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     "data-angmoo-desktop-window",
     "phone",
   );
-  await expect(page.locator("body")).toHaveAttribute("data-angmoo-window-drag", "manual");
+  await expect(page.locator("body")).not.toHaveAttribute("data-angmoo-window-drag", /.+/);
   await expect(page.locator("[data-tauri-drag-region]")).toHaveCount(0);
-  await expect(page.locator('[data-window-route="/"]')).toHaveAttribute(
-    "data-window-drag-disabled",
-    "true",
-  );
+  await expect(page.locator('[data-desktop-navigation]')).toBeVisible();
   const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
     const rect = node.getBoundingClientRect();
-    const root = node.parentElement;
+    const toolbar = document.querySelector('[data-desktop-navigation]')!.getBoundingClientRect();
     return {
       height: rect.height,
-      rootBackground: root ? getComputedStyle(root).backgroundColor : null,
+      top: rect.top,
+      bodyBackground: getComputedStyle(document.body).backgroundColor,
       viewportHeight: window.innerHeight,
       viewportWidth: window.innerWidth,
+      toolbarBottom: toolbar.bottom,
       width: rect.width,
     };
   });
-  expect(Math.abs(phoneGeometry.width - phoneGeometry.viewportWidth)).toBeLessThanOrEqual(1);
-  expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
-  expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
-
-  const radius = Math.min(
-    42,
-    Math.max(26, phoneGeometry.viewportWidth * 0.0725),
-  );
-  const cornerOffset = radius - radius / Math.sqrt(2);
-  const resizeProbes = [
-    {
-      cursor: "ns-resize",
-      direction: "north",
-      x: phoneGeometry.viewportWidth / 2,
-      y: 2,
-    },
-    {
-      cursor: "nesw-resize",
-      direction: "north-east",
-      x: phoneGeometry.viewportWidth - cornerOffset,
-      y: cornerOffset,
-    },
-    {
-      cursor: "ew-resize",
-      direction: "east",
-      x: phoneGeometry.viewportWidth - 2,
-      y: phoneGeometry.viewportHeight / 2,
-    },
-    {
-      cursor: "nwse-resize",
-      direction: "south-east",
-      x: phoneGeometry.viewportWidth - cornerOffset,
-      y: phoneGeometry.viewportHeight - cornerOffset,
-    },
-    {
-      cursor: "ns-resize",
-      direction: "south",
-      x: phoneGeometry.viewportWidth / 2,
-      y: phoneGeometry.viewportHeight - 2,
-    },
-    {
-      cursor: "nesw-resize",
-      direction: "south-west",
-      x: cornerOffset,
-      y: phoneGeometry.viewportHeight - cornerOffset,
-    },
-    {
-      cursor: "ew-resize",
-      direction: "west",
-      x: 2,
-      y: phoneGeometry.viewportHeight / 2,
-    },
-    {
-      cursor: "nwse-resize",
-      direction: "north-west",
-      x: cornerOffset,
-      y: cornerOffset,
-    },
-  ] as const;
-  for (const probe of resizeProbes) {
-    await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
-      buttons: 0,
-      clientX: probe.x,
-      clientY: probe.y,
-      isPrimary: true,
-      pointerType: "mouse",
-    });
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-angmoo-window-resize",
-      probe.direction,
-    );
-    await expect(page.locator("html")).toHaveCSS("cursor", probe.cursor);
-    await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
-      button: 0,
-      buttons: 1,
-      clientX: probe.x,
-      clientY: probe.y,
-      isPrimary: true,
-      pointerType: "mouse",
-    });
+  expect(Math.abs(phoneGeometry.width - Math.min(phoneGeometry.viewportWidth, 960))).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.top - phoneGeometry.toolbarBottom)).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.height + phoneGeometry.toolbarBottom - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(phoneGeometry.bodyBackground).not.toBe("rgba(0, 0, 0, 0)");
+  // Ordinary OS chrome owns resizing/dragging. Renderer edge/background
+  // pointer events must never invoke the retired native interception commands.
+  for (const [x, y] of [[2, 2], [phoneGeometry.viewportWidth - 2, 2], [2, phoneGeometry.viewportHeight - 2], [phoneGeometry.viewportWidth / 2, phoneGeometry.viewportHeight / 2]]) {
+    for (const type of ["pointermove", "pointerdown"]) {
+      await page.locator('[data-product-shell="device"]').dispatchEvent(type, {
+        button: 0, buttons: type === "pointerdown" ? 1 : 0,
+        clientX: x, clientY: y, isPrimary: true, pointerType: "mouse",
+      });
+    }
   }
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
-      }),
-    )
-    .toEqual(
-      resizeProbes.map(({ direction }) => ({
-        command: "start_product_window_resize",
-        args: { direction },
-      })),
-    );
-  await page.evaluate(() => {
-    const desktop = window as unknown as {
-      __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
-    };
-    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
-  });
-  await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
-    buttons: 0,
-    clientX: phoneGeometry.viewportWidth / 2,
-    clientY: phoneGeometry.viewportHeight / 2,
-    isPrimary: true,
-    pointerType: "mouse",
-  });
   await expect(page.locator("html")).not.toHaveAttribute("data-angmoo-window-resize", /.+/);
-
-  await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
-    button: 0,
-    buttons: 1,
-    clientX: phoneGeometry.viewportWidth / 2,
-    clientY: phoneGeometry.viewportHeight / 2,
-    isPrimary: true,
-    pointerType: "mouse",
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
-      }),
-    )
-    .toEqual(["start_product_window_drag"]);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+  }).__ANGMOO_DESKTOP_INVOCATIONS__.filter(({ command }) =>
+    ["start_product_window_resize", "start_product_window_drag"].includes(command)
+  ))).toEqual([]);
 
   await page.getByRole("link", { name: "Memory 열기" }).click();
   await expect
@@ -4189,7 +4077,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
         ).length;
       }),
     )
-    .toBe(1);
+    .toBe(0);
   await page.getByRole("link", { name: "Creator Studio 열기" }).click();
   await expect
     .poll(() =>
@@ -4206,17 +4094,10 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     });
   await expect(page).toHaveURL(/\/$/);
 
-  await page.getByRole("button", { name: "Angmoo 창 최소화" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
-      }),
-    )
-    .toContain("minimize_product_window");
+  await expect(page.getByRole("button", { name: "Angmoo 창 최소화" })).toHaveCount(0);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+  }).__ANGMOO_DESKTOP_INVOCATIONS__.some(({ command }) => command === "minimize_product_window"))).toBe(false);
 });
 
 test("Tauri Phone opens the owner relationship graph in a wide product window", async ({
@@ -4470,7 +4351,7 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
       },
     };
   });
-  await page.goto("/");
+  await page.goto("/studio");
 
   await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
   await expect(page.locator("body")).toHaveAttribute(

@@ -1,4 +1,5 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiErrorText } from "@/hooks/use-ui-error-text";
 
@@ -29,6 +30,7 @@ export function GenerationSettingsPanel({ characterId }: { characterId: string }
   const [busy, setBusy] = useState(false); const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null); const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => { const operation = new AbortController(); Promise.all([getGeneration(characterId, operation.signal), getCatalog(operation.signal)]).then(([settings, models]) => { setSaved(settings); setValue(initial(settings)); setCatalog(models); }).catch(reason => { if (!operation.signal.aborted) setError(errorText(reason, "이미지 설정을 불러오지 못했습니다.")); }); return () => operation.abort(); }, [characterId, errorText]);
+  useProductLeaveGuard(Boolean(key || partnerKey || busy || uploading || (saved && value && JSON.stringify(initial(saved)) !== JSON.stringify(value))));
   function choose(provider: Provider, model: string, mode = "") {
     if (!value || !saved) return;
     const profile = saved.profiles[`${provider}:${model}:${mode}`];

@@ -1,4 +1,5 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUserEnvironment } from "@/hooks/use-user-environment";
 
@@ -184,6 +185,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const permitCommittedNavigation = useProductLeaveGuard(JSON.stringify(definition) !== JSON.stringify(context ? worldToDefinition(context) : EMPTY_DEFINITION));
   const worldBannerUrl = useRuntimeMediaUrl(
     safeSameOriginMediaUrl(context?.world.banner_media_id),
   );
@@ -244,6 +246,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
     setContext(saved);
     setDefinition(worldToDefinition(saved));
     if (!worldId) {
+      permitCommittedNavigation();
       router.replace(studioWorldRoute(saved.world.id));
     }
     return saved;

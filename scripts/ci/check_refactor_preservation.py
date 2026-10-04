@@ -799,11 +799,18 @@ def check_suppressions(snapshots: list[dict], files: dict[str, str], root: Path 
     return errors
 
 
-def check_sources(sources: list[str], files: dict[str, str], root: Path = ROOT) -> list[str]:
+def check_sources(sources: list[str], files: dict[str, str], root: Path = ROOT, *, approved_changes: list[dict] | None = None) -> list[str]:
     errors = []
+    # load() already verifies the committed deletion, exact preimage and
+    # surviving owners. Only those named obsolete chrome sources may retire.
+    retired = {item["source"] for record in approved_changes or []
+               for field in ("retired_frontend_styles", "retired_native_chrome")
+               for item in record.get(field, [])}
     for old, target in mapped_targets(sources, files).items():
         path = (root / target).resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
+            if path.is_relative_to(root.resolve()) and not path.exists() and target in retired:
+                continue
             errors.append(f"source missing without a surviving mapped destination: {old} -> {target}")
         elif old.endswith(".py") and not old.endswith("/__init__.py"):
             tree = ast.parse(path.read_text(encoding="utf-8-sig"))
@@ -1080,7 +1087,7 @@ def main() -> int:
         )
         asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
                                         public_retirement=public_retirement)
-        errors.extend(check_sources(sources, moves["files"]))
+        errors.extend(check_sources(sources, moves["files"], approved_changes=approved_changes))
         errors.extend(check_split_evidence(moves, [baseline, *snapshots], approved_changes=approved_changes))
         errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets,
                                                   approved_changes=approved_changes))

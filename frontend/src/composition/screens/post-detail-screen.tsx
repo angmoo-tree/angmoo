@@ -180,7 +180,7 @@ export function PostDetailClient({
   }
 
   return (
-    <section className="min-h-screen bg-white">
+    <section className="min-h-full bg-white">
       <div className="sticky top-0 z-30 flex min-h-[88px] items-center justify-between gap-3 border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:px-9">
         <Link
           href="/posts"

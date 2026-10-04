@@ -99,6 +99,32 @@ def load(root: Path, *, reader=None) -> list[dict]:
             for revision, field in ((commit + "^", "before_sha256"), (commit, "after_sha256")):
                 if hashlib.sha256(git("show", f"{revision}:{source}")).hexdigest() != change[field]:
                     raise ValueError("visual asset committed preimage differs")
+        for removed in record.get("retired_frontend_styles", []):
+            source = removed["source"]
+            if (not re.fullmatch(r"frontend/src/[A-Za-z0-9_./-]+\.module\.css", source)
+                    or ".." in Path(source).parts
+                    or any(owner not in record["source_blobs"] for owner in (removed["consumer"], removed["replacement"]))):
+                raise ValueError("style retirement requires exact committed consumer and replacement")
+            before = git("show", f"{commit}^:{source}").decode("utf-8")
+            if text_digest(before) != removed["before_sha256"] or git("ls-tree", commit, "--", source).strip() or (root / source).exists():
+                raise ValueError("style retirement committed preimage or actual absence differs")
+            imported = re.compile(r"['\"][^'\"\n]*" + re.escape(Path(source).name) + r"['\"]")
+            for folder in (root / "frontend/src", root / "frontend/static-shell/app"):
+                for path in folder.rglob("*"):
+                    if path.is_file() and path.suffix in {".ts", ".tsx", ".js", ".jsx", ".css"} and imported.search(path.read_text(encoding="utf-8")):
+                        raise ValueError("retired style still has an active consumer")
+        for removed in record.get("retired_native_chrome", []):
+            source = removed["source"]
+            owners = ("desktop/src-tauri/src/lib.rs", "desktop/src-tauri/src/window_policy.rs",
+                      "backend/tests/test_l3_er5_tauri_product_shell_contract.py")
+            if source != "desktop/src-tauri/src/phone_resize.rs" or any(owner not in record["source_blobs"] for owner in owners):
+                raise ValueError("native chrome retirement requires exact host, policy and behavior evidence")
+            before = git("show", f"{commit}^:{source}").decode("utf-8")
+            if text_digest(before) != removed["before_sha256"] or git("ls-tree", commit, "--", source).strip() or (root / source).exists():
+                raise ValueError("native chrome retirement preimage or actual absence differs")
+            for path in (root / "desktop/src-tauri/src").rglob("*.rs"):
+                if re.search(r"\bphone_resize\b", path.read_text(encoding="utf-8")):
+                    raise ValueError("retired native chrome still has an active consumer")
         if record.get("orm_tables"):
             migrations = record.get("migration_sources", [])
             if not migrations or any(path not in record["source_blobs"] for path in migrations):
@@ -146,6 +172,21 @@ def frontend_asset_matches(source: str, original: bytes, actual: bytes, records:
                     raise ValueError("visual asset change chain preimage differs")
                 expected = change["after_sha256"]
     return expected == hashlib.sha256(actual).hexdigest()
+
+
+def frontend_style_retirement_matches(source: str, original: str, records: list[dict]) -> bool:
+    """A deleted style needs an exact hash chain; never excuse other stock."""
+    expected = text_digest(original)
+    for record in records:
+        for change in record.get("frontend_files", []):
+            if change["source"] == source:
+                if expected != change["before_sha256"]:
+                    raise ValueError("retired style change chain preimage differs")
+                expected = change["after_sha256"]
+        for change in record.get("retired_frontend_styles", []):
+            if change["source"] == source:
+                return expected == change["before_sha256"]
+    return False
 
 
 @lru_cache(maxsize=2048)

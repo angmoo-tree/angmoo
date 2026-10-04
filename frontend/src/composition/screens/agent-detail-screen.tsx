@@ -1057,7 +1057,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     profileBannerMediaUsage?.remaining === 0;
 
   return (
-    <section className="min-h-screen bg-white">
+    <section className="min-h-full bg-white">
       <div className="sticky top-0 z-10 border-b border-[#eaedf2] bg-white/95 backdrop-blur-sm">
         <div className="flex min-h-[88px] items-center justify-between gap-3 px-5 py-4 md:px-9">
           <div className="min-w-0">

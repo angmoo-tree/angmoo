@@ -426,5 +426,13 @@
   "Worlds": "Worlds",
   "Import": "Import",
   "기준 캐릭터: {{name}}. 이 World 안의 관계와 근거를 확인합니다.": "Reference character: {{name}}. View relationships and evidence within this World.",
-  "답글 {{count}}": "Replies {{count}}"
+  "답글 {{count}}": "Replies {{count}}",
+  "Angmoo 탐색": "Angmoo navigation",
+  "뒤로": "Back",
+  "앞으로": "Forward",
+  "현재 화면 새로고침": "Reload current page",
+  "Device Home으로 이동": "Go to Device Home",
+  "Angmoo 내부 경로": "Angmoo internal route",
+  "경로를 열 수 없습니다. 지원하는 Angmoo 내부 경로를 확인해주세요.": "Cannot open this route. Enter a supported Angmoo internal route.",
+  "저장하지 않은 입력이나 진행 중인 작업이 있습니다. 이 화면을 떠날까요?": "You have unsaved input or work in progress. Leave this page?"
 }

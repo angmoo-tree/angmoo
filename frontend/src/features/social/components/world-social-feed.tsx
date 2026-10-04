@@ -1,4 +1,5 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
@@ -196,6 +197,7 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
   const [attachment, setAttachment] = useState<{ id: string; url: string; allowed: boolean } | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [replyBody, setReplyBody] = useState("");
+  useProductLeaveGuard(Boolean(title.trim() || body.trim() || replyBody.trim() || attachment || imageBusy || busy));
   const pendingPostRef = useRef<PendingPost | null>(null);
   const pendingRepliesRef = useRef(new Map<string, PendingReply>());
   const requestGenerationRef = useRef(0);

@@ -157,7 +157,7 @@ export function CharacterProfileClient({
   const isLocalCharacter = initialProfile?.execution_mode === "local";
 
   return (
-    <section className="min-h-screen bg-white">
+    <section className="min-h-full bg-white">
       <div className="border-b border-[#eaedf2] bg-white">
         {initialProfile ? (
           <>

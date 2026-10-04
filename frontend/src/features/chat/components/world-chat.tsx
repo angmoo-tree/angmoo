@@ -1,4 +1,5 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useUiText } from "@/hooks/use-ui-text";
 
@@ -210,6 +211,7 @@ function WorldChatThread({
     text: string;
     typingVisible: boolean;
   } | null>(null);
+  useProductLeaveGuard(Boolean(draft.trim() || attachment || imageBusy || sending || (generation && generation.phase !== "failed")));
   const streamControllerRef = useRef<AbortController | null>(null);
   const activeGenerationRef = useRef<string | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

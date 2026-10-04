@@ -75,7 +75,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
     state.kind === "waiting" && state.status.phase === "crashed";
   return (
     <main
-      className="flex min-h-screen w-full items-center justify-center bg-surface-warm px-8 text-text-strong"
+      className="flex min-h-full w-full items-center justify-center bg-surface-warm px-8 text-text-strong"
       aria-live="polite"
       data-desktop-runtime-state={crashed ? "crashed" : "starting"}
     >

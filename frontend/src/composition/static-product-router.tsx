@@ -33,6 +33,7 @@ import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/compositio
 import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
 import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
+import { isStaticLocalProductRouteSupported } from "@/lib/navigation/device-navigation";
 
 type BrowserLocation = {
   pathname: string;
@@ -105,7 +106,7 @@ function StaticWindowRouteMismatch({
 }) {
   const uiText = useUiText("shell");
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface p-8 text-on-surface">
+    <main className="flex min-h-full items-center justify-center bg-surface p-8 text-on-surface">
       <section className="max-w-xl rounded-[32px] border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-state-running">
           Product window boundary
@@ -124,6 +125,7 @@ function StaticWindowRouteMismatch({
 function renderStaticRoute(location: BrowserLocation) {
   const { pathname, search } = location;
   if (pathname === "/ui-foundation") return <SemanticFoundationFixture />;
+  if (!isStaticLocalProductRouteSupported(`${pathname}${search}`)) return <StaticNotFound pathname={pathname} />;
   if (pathname === "/") return <DeviceHomeScreen />;
   if (pathname === "/memory") {
     const params = new URLSearchParams(search);
@@ -320,7 +322,7 @@ function StaticCanonicalRouteRedirect({ route }: { route: string }) {
     router.replace(route);
   }, [route, router]);
   return (
-    <main className="min-h-screen bg-transparent" aria-live="polite">
+    <main className="min-h-full bg-transparent" aria-live="polite">
       <span className="sr-only">{uiText("Canonical Angmoo 제품 경로로 이동합니다.")}</span>
     </main>
   );
@@ -424,7 +426,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
 function StaticLoadingScreen() {
   const uiText = useUiText("shell");
   return (
-    <main className="min-h-screen bg-transparent" aria-live="polite">
+    <main className="min-h-full bg-transparent" aria-live="polite">
       <span className="sr-only">{uiText("Angmoo 제품 화면을 준비하고 있습니다.")}</span>
     </main>
   );
@@ -433,7 +435,7 @@ function StaticLoadingScreen() {
 function StaticNotFound({ pathname }: { pathname: string }) {
   const uiText = useUiText("shell");
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-6 text-center">
+    <main className="flex min-h-full items-center justify-center bg-canvas px-6 text-center">
       <div className="w-full min-w-0 max-w-[32rem] rounded-[32px] border border-border-control bg-surface p-8 shadow-summary">
         <h1 className="text-2xl font-extrabold text-text-strong">{uiText("지원하지 않는 Angmoo 경로입니다.")}</h1>
         <p className="mt-3 break-all text-sm text-text-default">{pathname}</p>

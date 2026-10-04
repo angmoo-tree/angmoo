@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ProductViewport } from "@/composition/shells/product-viewport";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/composition/providers/auth-provider";
 import { PwaServiceWorkerLifecycle } from "@/composition/providers/pwa-service-worker-lifecycle";
@@ -55,9 +57,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <AuthProvider>
-          <DesktopWindowBridge />
+          <Suspense fallback={null}><DesktopWindowBridge /></Suspense>
           <PwaServiceWorkerLifecycle />
-          {children}
+          <ProductViewport>{children}</ProductViewport>
         </AuthProvider>
       </body>
     </html>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useUiText } from "@/hooks/use-ui-text";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
 import { Home } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -50,14 +51,14 @@ export function CreatorStudioFrame({
         </nav>
       }
       utility={
-        <Link
-          aria-label={uiText("Device Home으로 돌아가기")}
+        <LocalProductLink toolbarEquivalent="home"
+          ariaLabel={uiText("Device Home으로 돌아가기")}
           className={styles.homeLink}
           href={PRODUCT_ROUTES.deviceHome}
           title="Device Home"
         >
           <Home size={19} />
-        </Link>
+        </LocalProductLink>
       }
     >
       {children}

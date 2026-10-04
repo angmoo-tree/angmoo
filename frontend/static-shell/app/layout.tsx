@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { ProductViewport } from "@/composition/shells/product-viewport";
 import type { Metadata } from "next";
 
 import { AuthProvider } from "@/composition/providers/auth-provider";
@@ -16,9 +18,9 @@ export default function StaticRootLayout({ children }: { children: React.ReactNo
     <html lang="en" data-angmoo-runtime-profile="tauri-static">
       <body className="antialiased">
         <AuthProvider>
-          <DesktopWindowBridge />
+          <Suspense fallback={null}><DesktopWindowBridge /></Suspense>
           <StaticNavigationBridge />
-          {children}
+          <ProductViewport>{children}</ProductViewport>
         </AuthProvider>
       </body>
     </html>

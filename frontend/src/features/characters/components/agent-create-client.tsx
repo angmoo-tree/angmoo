@@ -1,4 +1,5 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
 import { useUiText, type UiText } from "@/hooks/use-ui-text";
 
 
@@ -50,6 +51,7 @@ function CreationGuide() {
   const [draft, setDraft] = useState<AgentCreationDraftRead | null>(null);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [unsavedInput, setUnsavedInput] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"direct" | "card" | "copy" | "external">(target && query.get("mode") === "copy" ? "copy" : "direct");
   const [cards, setCards] = useState<AgentDetailRead[]>([]);
@@ -64,6 +66,7 @@ function CreationGuide() {
   const [restoring, setRestoring] = useState(true);
   const [legacyDraft, setLegacyDraft] = useState<AgentCreationDraftRead | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const permitCommittedNavigation = useProductLeaveGuard(unsavedInput || Boolean(pendingFile) || busy);
   const requestEpoch = useRef(0);
 
   useEffect(() => {
@@ -121,6 +124,7 @@ function CreationGuide() {
     finally { if (epoch === requestEpoch.current) setBusy(false); }
   }
   function edit(field: typeof TEXT_FIELDS[number], value: string) {
+    setUnsavedInput(true);
     setDraft((current) => current ? { ...current, [field]: value } : current);
   }
   async function save() {
@@ -130,6 +134,7 @@ function CreationGuide() {
     const values = Object.fromEntries(keys.map((key) => [key, draft[key]]));
     const saved = await updateAgentDraft(draft.id, { ...values, revision: draft.revision });
     setDraft(saved);
+    setUnsavedInput(false);
     return saved;
   }
   async function start() {
@@ -169,7 +174,7 @@ function CreationGuide() {
     if (epoch !== requestEpoch.current) return;
     setDraft(result.draft); setReview(result.review); setRawOnly(result.raw_only);
     setMetadataSelection(result.metadata_selection); setCardMetadataError(null);
-    setSource(null); setPendingFile(null); setStep(1);
+    setSource(null); setPendingFile(null); setUnsavedInput(false); setStep(1);
   }
   async function reloadCardMetadata() {
     if (!draft || draft.source_kind !== "card") return;
@@ -188,7 +193,7 @@ function CreationGuide() {
     if (!saved) return;
     try {
       const result = await completeAgentDraft(saved.id, { revision: saved.revision });
-      setCreated(result); sessionStorage.removeItem(storageKey);
+      setCreated(result); setUnsavedInput(false); permitCommittedNavigation(); sessionStorage.removeItem(storageKey);
     } catch (reason) {
       // A lost response may follow a successful commit. Recover the same receipt.
       try { setDraft(await getAgentDraft(saved.id)); } catch { /* Keep the saved draft for explicit retry. */ }

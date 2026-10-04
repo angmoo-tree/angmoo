@@ -14,6 +14,30 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-04 현재 반응형 화면·일반 native 창 계약
+
+사용자가 확정한 10-04 반응형 공통 화면 계획의 C01–C22를 현재 계약으로 적용한다.
+아래 기존 Phone 실루엣·75–125% 비율 조정·투명 창·직접 그린 caption 설명은 당시 구현의 기록이며,
+이번 계약이 그 장식과 창 크기 조항을 대체한다. 논리적 `phone` kind와 `main` label, 데이터·API·기능 의미는 유지한다.
+
+- Next와 static root가 같은 `ProductViewport`를 사용한다. viewport 높이는 한 소유자가 `100dvh`로 결정하고,
+  toolbar 뒤 남은 높이를 본문에 전달한다. 일반 화면은 최대 960 CSSpx, Memory·Studio·관계 그래프는 1440 CSSpx까지
+  사용 가능한 폭을 채우고 중앙 정렬한다. DeviceFrame의 436px/880px 상한·검은 외곽선·기기 모서리·기기 그림자는 제거한다.
+- native는 불투명 일반 OS 창이다. 최초 main client는 480×850 logical px, 기본 최소 client는 480×480이다.
+  현재 monitor work area·DPI·실제 outer inset에 맞춰 초기/최소 크기와 위치를 조정한다. 가로·세로 독립 resize,
+  maximize·Snap을 허용하며 CSS 본문 상한을 native maximum이나 aspect lock으로 적용하지 않는다.
+- native에만 OS caption 아래 뒤로·앞으로·현재 문서 새로고침·Device Home·내부 경로 입력을 제공한다.
+  실제 URL·history entry와 session/tail metadata를 구독하며 별도의 route 배열은 두지 않는다.
+  bootstrap은 초기 index URL에서 한 번 소비한다. 실제 깊은 URL이 새 문서의 초기 route보다 우선한다.
+- 창별 kind/label/singleton 경계와 main 종료 조정·child 종료 의미는 유지한다. 외부 문서·popup은 native에서 차단하고,
+  사용자 HTTP(S) 링크만 검증된 좁은 command로 기본 브라우저에 연다. remote 권한·shell 권한 확대는 하지 않는다.
+- 44×44 조작 영역, ko/en 접근성 이름, IME·dialog·textarea 보호, unsaved input 소유자의 떠나기 확인을 유지한다.
+  toolbar와 정확히 같은 standalone home만 명시적 capability로 숨긴다. World/feed/list 복귀·취소·하단 4메뉴·데이터 refresh는 유지한다.
+- 사진 형식/원래 비율, SNS·Chat 수락 작업의 조회·재개, scope key·구독·인증·언어·runtime 소유자는 보존한다.
+  browser fake native, 실제 contributor native, Docker 적용, 설치판 적용과 직접 USER CHECK는 별도 결과로 기록한다.
+
+출처 분류: **LOCAL**. 사용자 확정 계약을 독립 구현하며 새 hosted source·asset·font·dependency를 가져오지 않는다.
+
 현재 UI 언어는 저장한 `ko`/`en` 선택을 우선하며, 최초 감지는 Korean만 `ko`, 그 밖의 언어는 `en`이다.
 언어 버튼의 표시·접근성 이름은 두 모드 모두 `Korean`, `English`로 고정한다. 주변 제목·상태·오류는
 현재 UI 언어로 표시한다. 기억·검색 locale와 시간대는 읽기 전용 감지 상태로 안내하며 UI 선택과 분리한다.

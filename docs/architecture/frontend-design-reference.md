@@ -1,5 +1,11 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-04 current change: **LOCAL** responsive viewport, normal OS windows and native route toolbar.
+The user-approved initial 480×850/minimum 480×480, body 960/workspace 1440 contracts replace the decorative
+Phone frame and ratio lock. Existing adoption entries remain historical provenance. No new hosted code,
+asset, font, remote permission or dependency is imported. Browser, real native and operational application
+results are recorded separately in the responsive-shell verification record.
+
 The 2026-09-07 common-UI move retains the existing Local primitive implementation
 and all original adoption classifications. Its current paths are in
 `security/frontend_design_policy.json`: `components/ui`, `styles`, `hooks` and

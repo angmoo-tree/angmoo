@@ -3,7 +3,8 @@ import { useUiText } from "@/hooks/use-ui-text";
 
 
 import { Mail, MessageCircle, RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { NavigationCapabilitiesContext } from "@/lib/navigation/navigation-capabilities";
 import { createOrGetWorldChatThread, getWorldChatEntry, WorldChatApiError } from "@/features/chat/api/world-chat-client";
 import { type WorldChatEntryRead } from "@/features/chat/types/world-chat-contract";
 import { parseWorldCharacterSocialProfileTab } from "@/features/social/utils/world-character-social-profile";
@@ -31,6 +32,7 @@ export function WorldCharacterProfile({
   const uiText = useUiText("shell");
   const router = useRuntimeRouter();
   const goBack = useRuntimeBack(worldCharacterDirectoryRoute(worldId));
+  const navigation = useContext(NavigationCapabilitiesContext);
   const searchParams = useRuntimeSearchParams();
   const activeSocialTab = parseWorldCharacterSocialProfileTab(
     searchParams.get("tab"),
@@ -139,7 +141,7 @@ export function WorldCharacterProfile({
       profile={profile}
       worldId={worldId}
       worldCharacterId={worldCharacterId}
-      onBack={goBack}
+      onBack={navigation.back ? undefined : goBack}
       chatAction={chatEntry?.requester?.world_character_id === worldCharacterId ? <Button variant="secondary" onClick={() => setEditing(!editing)}>{uiText("내 프로필 편집")}</Button> : chatEntry ? (
             <button
               aria-label={uiText("{{value0}}와 채팅 시작", {value0: profile.display_name})}

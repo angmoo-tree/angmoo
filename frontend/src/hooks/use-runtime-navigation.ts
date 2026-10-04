@@ -12,12 +12,13 @@ import {
   isTauriDesktopRuntime,
   navigateBackCurrentDesktopRoute,
   navigateDesktopProductRoute,
+  reportDesktopNavigationError,
 } from "@/lib/desktop/product-window";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
 function staticNavigate(href: string, replace: boolean) {
   if (isTauriDesktopRuntime()) {
-    void navigateDesktopProductRoute(href, replace).catch(() => undefined);
+    void navigateDesktopProductRoute(href, replace).catch(reportDesktopNavigationError);
     return;
   }
   if (replace) window.location.replace(href);
@@ -27,6 +28,12 @@ function staticNavigate(href: string, replace: boolean) {
 export function useRuntimeRouter() {
   const router = useNextRouter();
   return useMemo(() => {
+    if (typeof window !== "undefined" && isTauriDesktopRuntime() && !isStaticFrontendProfile()) {
+      return { ...router,
+        push: (href: string) => { void navigateDesktopProductRoute(href).catch(reportDesktopNavigationError); },
+        replace: (href: string) => { void navigateDesktopProductRoute(href, true).catch(reportDesktopNavigationError); },
+      };
+    }
     if (!isStaticFrontendProfile() || typeof window === "undefined") {
       return router;
     }

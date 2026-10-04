@@ -594,8 +594,8 @@ test("Next Phone routes share one centered frame, one scroll owner, and local na
       };
     });
     expect(geometry.documentOverflow).toBe(0);
-    expect(geometry.width).toBeLessThanOrEqual(436);
-    if (viewport.width <= 436) {
+    expect(geometry.width).toBe(Math.min(viewport.width, 960));
+    if (viewport.width <= 960) {
       expect(Math.abs(geometry.width - geometry.documentWidth)).toBeLessThanOrEqual(1);
     } else {
       expect(
@@ -619,7 +619,7 @@ test("wide browser keeps one phone device and exposes multiple launchable Worlds
   await expect(page.getByRole("link", { name: "별빛정원 World 열기. 실행 가능." })).toBeVisible();
   const frame = await page.locator('[data-product-shell="device"]').boundingBox();
   expect(frame).not.toBeNull();
-  expect(frame!.width).toBeLessThanOrEqual(436);
+  expect(frame!.width).toBe(960);
 
   await page.getByRole("link", { name: "설정 열기" }).focus();
   await expect(page.getByRole("link", { name: "설정 열기" })).toBeFocused();

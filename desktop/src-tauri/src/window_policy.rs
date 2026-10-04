@@ -1,176 +1,166 @@
-use tauri::{LogicalSize, WebviewWindow};
+use tauri::{LogicalSize, PhysicalPosition, WebviewWindow};
 
-pub const PHONE_TARGET_WIDTH: f64 = 468.0;
-pub const PHONE_TARGET_HEIGHT: f64 = 916.0;
-pub const PHONE_ASPECT_RATIO: f64 = PHONE_TARGET_WIDTH / PHONE_TARGET_HEIGHT;
-const PHONE_MIN_SCALE: f64 = 0.75;
-const PHONE_MAX_SCALE: f64 = 1.25;
-const MONITOR_EDGE_RESERVE: f64 = 64.0;
+pub const MAIN_INITIAL_WIDTH: f64 = 480.0;
+pub const MAIN_INITIAL_HEIGHT: f64 = 850.0;
+pub const PRODUCT_MIN_WIDTH: f64 = 480.0;
+pub const PRODUCT_MIN_HEIGHT: f64 = 480.0;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct PhoneWindowSize {
-    pub width: f64,
-    pub height: f64,
+pub struct ProductWindowGeometry {
+    pub initial: (f64, f64),
+    pub minimum: (f64, f64),
+    pub position: (i32, i32),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct PhoneWindowBounds {
-    pub minimum: PhoneWindowSize,
-    pub initial: PhoneWindowSize,
-    pub maximum: PhoneWindowSize,
-}
-
-fn size_at_scale(scale: f64) -> PhoneWindowSize {
-    PhoneWindowSize {
-        width: (PHONE_TARGET_WIDTH * scale).round(),
-        height: (PHONE_TARGET_HEIGHT * scale).round(),
-    }
-}
-
-pub fn phone_bounds_for_monitor(
-    physical_width: u32,
-    physical_height: u32,
-    scale_factor: f64,
-) -> PhoneWindowBounds {
-    let safe_scale = if scale_factor.is_finite() && scale_factor > 0.0 {
-        scale_factor
+/// Work-area coordinates/insets are physical pixels; client sizes are logical.
+/// This is a creation policy, never an aspect-ratio or resize-event constraint.
+pub fn product_geometry_for_work_area(
+    origin: (i32, i32),
+    area: (u32, u32),
+    scale: f64,
+    outer_insets: (u32, u32),
+    target: (f64, f64),
+) -> ProductWindowGeometry {
+    let scale = if scale.is_finite() && scale > 0.0 {
+        scale
     } else {
         1.0
     };
-    let logical_width = physical_width as f64 / safe_scale;
-    let logical_height = physical_height as f64 / safe_scale;
-    let available_width = (logical_width - MONITOR_EDGE_RESERVE).max(1.0);
-    let available_height = (logical_height - MONITOR_EDGE_RESERVE).max(1.0);
-    let maximum_scale = PHONE_MAX_SCALE
-        .min(available_width / PHONE_TARGET_WIDTH)
-        .min(available_height / PHONE_TARGET_HEIGHT)
-        .max(1.0 / PHONE_TARGET_HEIGHT);
-    let minimum_scale = PHONE_MIN_SCALE.min(maximum_scale);
-    let initial_scale = 1.0_f64.min(maximum_scale);
-    PhoneWindowBounds {
-        minimum: size_at_scale(minimum_scale),
-        initial: size_at_scale(initial_scale),
-        maximum: size_at_scale(maximum_scale),
+    let available = (
+        (area.0.saturating_sub(outer_insets.0) as f64 / scale).max(1.0),
+        (area.1.saturating_sub(outer_insets.1) as f64 / scale).max(1.0),
+    );
+    let minimum = (
+        PRODUCT_MIN_WIDTH.min(available.0),
+        PRODUCT_MIN_HEIGHT.min(available.1),
+    );
+    let initial = (
+        target.0.min(available.0).max(minimum.0),
+        target.1.min(available.1).max(minimum.1),
+    );
+    let outer = (
+        initial.0 * scale + outer_insets.0 as f64,
+        initial.1 * scale + outer_insets.1 as f64,
+    );
+    ProductWindowGeometry {
+        initial,
+        minimum,
+        position: (
+            origin
+                .0
+                .saturating_add(((area.0 as f64 - outer.0).max(0.0) / 2.0).round() as i32),
+            origin
+                .1
+                .saturating_add(((area.1 as f64 - outer.1).max(0.0) / 2.0).round() as i32),
+        ),
     }
 }
 
-pub fn apply_phone_window_policy(window: &WebviewWindow) -> tauri::Result<PhoneWindowSize> {
-    let bounds = if let Some(monitor) = window.current_monitor()? {
-        phone_bounds_for_monitor(
-            monitor.work_area().size.width,
-            monitor.work_area().size.height,
+pub fn apply_product_window_policy(
+    window: &WebviewWindow,
+    width: f64,
+    height: f64,
+) -> tauri::Result<()> {
+    window.set_resizable(true)?;
+    window.set_maximizable(true)?;
+    window.set_decorations(true)?;
+    window.set_shadow(true)?;
+    // Body CSS caps must never become native maxima.
+    window.set_max_size(None::<LogicalSize<f64>>)?;
+    let inner = window.inner_size()?;
+    let outer = window.outer_size()?;
+    let insets = (
+        outer.width.saturating_sub(inner.width),
+        outer.height.saturating_sub(inner.height),
+    );
+    let monitor = window.current_monitor()?.or(window.primary_monitor()?);
+    let geometry = if let Some(monitor) = monitor {
+        let area = monitor.work_area();
+        product_geometry_for_work_area(
+            (area.position.x, area.position.y),
+            (area.size.width, area.size.height),
             monitor.scale_factor(),
+            insets,
+            (width, height),
         )
     } else {
-        PhoneWindowBounds {
-            minimum: size_at_scale(PHONE_MIN_SCALE),
-            initial: size_at_scale(1.0),
-            maximum: size_at_scale(PHONE_MAX_SCALE),
+        ProductWindowGeometry {
+            initial: (width, height),
+            minimum: (PRODUCT_MIN_WIDTH, PRODUCT_MIN_HEIGHT),
+            position: (0, 0),
         }
     };
-    window.set_resizable(true)?;
-    window.set_maximizable(false)?;
-    // Tauri documents that an undecorated Windows window with shadow enabled
-    // receives a one-pixel white border. The CSS/WebView Phone silhouette owns
-    // its own antialiased bezel, so the native Phone shadow must stay disabled.
-    window.set_shadow(false)?;
     window.set_min_size(Some(LogicalSize::new(
-        bounds.minimum.width,
-        bounds.minimum.height,
+        geometry.minimum.0,
+        geometry.minimum.1,
     )))?;
-    window.set_max_size(Some(LogicalSize::new(
-        bounds.maximum.width,
-        bounds.maximum.height,
-    )))?;
-    window.set_size(LogicalSize::new(
-        bounds.initial.width,
-        bounds.initial.height,
+    window.set_size(LogicalSize::new(geometry.initial.0, geometry.initial.1))?;
+    window.set_position(PhysicalPosition::new(
+        geometry.position.0,
+        geometry.position.1,
     ))?;
-    window.center()?;
-    Ok(bounds.initial)
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
-    fn phone_policy_keeps_a_continuous_75_to_125_percent_range() {
-        assert_eq!(
-            phone_bounds_for_monitor(2560, 1440, 1.0),
-            PhoneWindowBounds {
-                minimum: PhoneWindowSize {
-                    width: 351.0,
-                    height: 687.0,
-                },
-                initial: PhoneWindowSize {
-                    width: 468.0,
-                    height: 916.0,
-                },
-                maximum: PhoneWindowSize {
-                    width: 585.0,
-                    height: 1145.0,
-                },
-            }
+    fn initial_client_and_minimum_are_independent() {
+        let g = product_geometry_for_work_area(
+            (0, 0),
+            (1920, 1080),
+            1.0,
+            (16, 39),
+            (MAIN_INITIAL_WIDTH, MAIN_INITIAL_HEIGHT),
         );
+        assert_eq!(g.initial, (480.0, 850.0));
+        assert_eq!(g.minimum, (480.0, 480.0));
+        assert_eq!(g.position, (712, 96));
     }
-
     #[test]
-    fn phone_policy_fits_a_1080p_monitor_at_125_percent() {
-        assert_eq!(
-            phone_bounds_for_monitor(1920, 1080, 1.25),
-            PhoneWindowBounds {
-                minimum: PhoneWindowSize {
-                    width: 351.0,
-                    height: 687.0,
-                },
-                initial: PhoneWindowSize {
-                    width: 409.0,
-                    height: 800.0,
-                },
-                maximum: PhoneWindowSize {
-                    width: 409.0,
-                    height: 800.0,
-                },
-            }
-        );
-    }
-
-    #[test]
-    fn phone_policy_fits_a_1080p_monitor_at_150_percent() {
-        assert_eq!(
-            phone_bounds_for_monitor(1920, 1080, 1.5),
-            PhoneWindowBounds {
-                minimum: PhoneWindowSize {
-                    width: 335.0,
-                    height: 656.0,
-                },
-                initial: PhoneWindowSize {
-                    width: 335.0,
-                    height: 656.0,
-                },
-                maximum: PhoneWindowSize {
-                    width: 335.0,
-                    height: 656.0,
-                },
-            }
-        );
-    }
-
-    #[test]
-    fn invalid_scale_falls_back_to_100_percent() {
-        assert_eq!(
-            phone_bounds_for_monitor(1920, 1080, 0.0),
-            phone_bounds_for_monitor(1920, 1080, 1.0)
-        );
-    }
-
-    #[test]
-    fn every_bound_stays_within_one_logical_pixel_of_the_phone_ratio() {
-        let bounds = phone_bounds_for_monitor(2560, 1440, 1.25);
-        for size in [bounds.minimum, bounds.initial, bounds.maximum] {
-            let expected_height = size.width / PHONE_ASPECT_RATIO;
-            assert!((size.height - expected_height).abs() <= 1.0);
+    fn high_dpi_and_negative_monitor_origin_fit_the_outer_window() {
+        for scale in [1.0, 1.25, 1.5, 2.0] {
+            let g = product_geometry_for_work_area(
+                (-1920, -100),
+                (1920, 1040),
+                scale,
+                (24, 60),
+                (480.0, 850.0),
+            );
+            assert!(g.position.0 >= -1920 && g.position.1 >= -100);
+            assert!(g.initial.0 * scale + 24.0 <= 1920.0);
+            assert!(g.initial.1 * scale + 60.0 <= 1040.0);
+            assert!(g.minimum.1 <= g.initial.1);
         }
+    }
+    #[test]
+    fn small_work_area_reduces_each_minimum_instead_of_fixing_a_ratio() {
+        let g = product_geometry_for_work_area((20, 30), (420, 400), 1.0, (16, 40), (480.0, 850.0));
+        assert_eq!(g.initial, (404.0, 360.0));
+        assert_eq!(g.minimum, (404.0, 360.0));
+        assert_eq!(g.position, (20, 30));
+    }
+    #[test]
+    fn invalid_scale_has_a_safe_fallback() {
+        for scale in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            assert_eq!(
+                product_geometry_for_work_area(
+                    (0, 0),
+                    (1920, 1080),
+                    scale,
+                    (16, 40),
+                    (480.0, 850.0)
+                ),
+                product_geometry_for_work_area((0, 0), (1920, 1080), 1.0, (16, 40), (480.0, 850.0))
+            );
+        }
+    }
+    #[test]
+    fn workspace_initial_size_retains_its_own_target() {
+        let g =
+            product_geometry_for_work_area((0, 0), (2560, 1440), 1.0, (16, 40), (1280.0, 820.0));
+        assert_eq!(g.initial, (1280.0, 820.0));
+        assert_eq!(g.minimum, (480.0, 480.0));
     }
 }

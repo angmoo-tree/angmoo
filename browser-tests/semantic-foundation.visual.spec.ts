@@ -174,8 +174,8 @@ async function openFoundation(page: Page, testInfo: TestInfo): Promise<void> {
   });
   const fixtureImage = fixture.locator('img[src="/icon.svg"]');
   await expect(fixtureImage).toBeVisible();
-  expect(
-    await fixtureImage.evaluate(
+  await expect.poll(() =>
+    fixtureImage.evaluate(
       (image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
     ),
   ).toBe(true);

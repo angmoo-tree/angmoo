@@ -399,7 +399,7 @@ export function MemoryWorkspace({
   return (
     <main className={styles.shell} data-main-landmark-owner="memory" data-product-shell="memory">
       <header className={styles.header}>
-        <LocalProductLink ariaLabel={uiText("Device Home으로 돌아가기")} className={styles.homeLink} href={PRODUCT_ROUTES.deviceHome}>
+        <LocalProductLink toolbarEquivalent="home" ariaLabel={uiText("Device Home으로 돌아가기")} className={styles.homeLink} href={PRODUCT_ROUTES.deviceHome}>
           <ArrowLeft aria-hidden="true" size={20} />
         </LocalProductLink>
         <div className={styles.brandMark}><BrainCircuit aria-hidden="true" size={24} /></div>

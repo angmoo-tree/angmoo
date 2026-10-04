@@ -37,17 +37,24 @@
     },
     {
       "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/composition/navigation/desktop-navigation-toolbar.tsx",
+      "sha256": "5f7678e73ba9533b947037a53a14ce628c1fd865db835ca5e11fd0f62b2430bb"
+    },
+    {
+      "classifications": [
         "ADAPTED"
       ],
       "path": "frontend/src/composition/screens/character-profile-screen.tsx",
-      "sha256": "a7e04e483f1b07a07816ac908f7b5b6b1ecdf90818ffe1cc347f411d218792dc"
+      "sha256": "25f6e8eea1339d7e397fd4e267d414a3dcf87c40fedfa9032c5f1c59be33cd49"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-detail-screen.tsx",
-      "sha256": "348196e2027d9c48a06142642b1134347070fa824449782094c9244188dac798"
+      "sha256": "01abaf80c01fef19ec15d1cb1528c56cf2e61d7d6c2c8a9fadb0cc6c16a32d2e"
     },
     {
       "classifications": [
@@ -75,7 +82,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/shells/creator-studio-frame.tsx",
-      "sha256": "fc918945197dc585e51368bf87d4511dcd755141269e3203e091964086fa51ee"
+      "sha256": "45a8c5cdad23c7cf2389b6dfc42b5f968927bde8ee62ec62026bed4c9ab8c9fe"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/composition/shells/product-viewport.tsx",
+      "sha256": "34529053def4fc70181048da4128e25d2b7a88fb389a41224d773b57f063c877"
     },
     {
       "classifications": [
@@ -103,7 +117,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/media/components/generation-settings.tsx",
-      "sha256": "72f01a7b721b34868fc4a9565909234bf721cf2c81925217bbdf6c885a1e07f4"
+      "sha256": "f05527f0f77521efab21efe1a89f9a17fa6f8a3474cb6d2ef2b0d1ea75ec61ad"
     },
     {
       "classifications": [
@@ -145,7 +159,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/memory/components/memory-workspace.tsx",
-      "sha256": "f122597dca6db6f32c9673630845e7af5225ec876cd8e1ea69e26d19d500377b"
+      "sha256": "09455a225cd33190599d9f8b7e6821b2dcb3b1fc67ba018003078dd82be6c8c4"
     },
     {
       "classifications": [
@@ -173,7 +187,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "8f0aeba9de7357f005c3aaab30f76774f479b7c43a8b262206aa2382fdc79957"
+      "sha256": "9a249b91ccd627a6d59cfa6e11e8f316d77b4036eceddd07199dbe2e3f72ffae"
     },
     {
       "classifications": [
@@ -188,6 +202,13 @@
       ],
       "path": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
       "sha256": "ac73d03a67fb893a976b9adb9f44069afded9e3264fd50753e65d7f67171c532"
+    },
+    {
+      "classifications": [
+        "LOCAL"
+      ],
+      "path": "frontend/src/lib/desktop/desktop-history.ts",
+      "sha256": "7636204b00a7e5c7df6753517483a9de52e79ccbbe1b6ae5aad421c3de9ac34a"
     },
     {
       "classifications": [
@@ -222,7 +243,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "c292b9a2cd96d73a00079996d9e37aeeffe2c78bffa144d08a77f75762048599"
+        "sha256": "1a2ac24186a57a1b6d2587a2c68d01f4672165dbd606a2e0a28b21044f88166f"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -234,11 +255,11 @@
       },
       {
         "path": "browser-tests/semantic-foundation.visual.spec.ts",
-        "sha256": "cc39c3558113be29c7e5a0d3cc2db4d6329c54f882e170aac20a1ef5a6e6dba1"
+        "sha256": "32b233993618b597ea01b6d7e8c004d09229f2f4d4a6303a5a03bf48c20be0b4"
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "a00af5c54cac2cec087b80f5562348fc47446eb7a0808603ace5038fba66c355"
+        "sha256": "391753089b3daa3395f3e187edd96284b47d3b958fa38e9613755e0e3e306d81"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1276,7 +1297,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "35b6c31ebaf99bc33becd7fb5d92e022d60de11e32876724c6d6a27dcb9ffe17"
+        "sha256": "cff39a6d143793255fb7e4c6a99182cf05f55efa6b6842795470a453eb899733"
       },
       {
         "path": "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
@@ -1296,7 +1317,7 @@
       {
         "path": "frontend/src/styles/globals.css",
         "present": true,
-        "sha256": "6a4596c114f5b4da7f4114aafef0fb3f547e1ef3ce2d9f2e4b8b821c2dc70b24"
+        "sha256": "37312fb58cfe89aa2b3c8b01c9bfd72d4e97c113ee1ed8101aa2bcef0d1ef0f1"
       },
       {
         "path": "frontend/src/styles/semantic-tokens.css",
@@ -1410,7 +1431,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 18,
+      "expected_screenshot_call_count": 21,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1485,7 +1506,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/device-home-centered-1440x1000.png",
           "present": true,
-          "sha256": "320e85cae48798674f9ac7e44876ece22894f4ccfd6b0ca0db87ba6b5a4e3210"
+          "sha256": "038e93bab2e4da599e97c510baf8572f36146d7b4d930a11400645b1f9e638e3"
         },
         {
           "path": "browser-tests/snapshots/ui-f/device-home-phone-360x800.png",
@@ -1527,12 +1548,12 @@
         {
           "path": "browser-tests/semantic-foundation.visual.spec.ts",
           "present": true,
-          "sha256": "cc39c3558113be29c7e5a0d3cc2db4d6329c54f882e170aac20a1ef5a6e6dba1"
+          "sha256": "32b233993618b597ea01b6d7e8c004d09229f2f4d4a6303a5a03bf48c20be0b4"
         }
       ]
     },
-    "screenshot_call_count": 18,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK.",
+    "screenshot_call_count": 21,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK. Responsive viewport adds three LOCAL diagnostic capture sites (21 calls total), separate from canonical pinned-Linux snapshot review and native USER CHECK.",
     "target_viewports": [
       "360x800",
       "390x844",

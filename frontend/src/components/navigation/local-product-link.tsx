@@ -3,7 +3,8 @@ import { useUiText } from "@/hooks/use-ui-text";
 
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
+import { NavigationCapabilitiesContext } from "@/lib/navigation/navigation-capabilities";
 
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
@@ -20,6 +21,7 @@ export type LocalProductLinkProps = {
   rel?: string;
   target?: "_blank";
   title?: string;
+  toolbarEquivalent?: "home";
 };
 
 /**
@@ -36,10 +38,14 @@ export function LocalProductLink({
   rel,
   target,
   title,
+  toolbarEquivalent,
 }: LocalProductLinkProps) {
   const uiText = useUiText("shell");
+  const navigation = useContext(NavigationCapabilitiesContext);
   const unavailable =
     isStaticFrontendProfile() && !isStaticLocalProductRouteSupported(href);
+
+  if (toolbarEquivalent === "home" && navigation.home) return null;
 
   if (unavailable) {
     return (

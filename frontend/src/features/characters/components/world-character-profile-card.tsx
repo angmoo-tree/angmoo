@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
 import type { WorldCharacterPublicProfile } from "@/features/characters/types/world-character-profile";
 
 export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, onBack, chatAction, chatNotice, children }: {
-  profile: WorldCharacterPublicProfile; worldId: string; worldCharacterId: string; onBack: () => void;
+  profile: WorldCharacterPublicProfile; worldId: string; worldCharacterId: string; onBack?: () => void;
   chatAction: ReactNode; chatNotice: ReactNode; children: ReactNode;
 }) {
   const uiText = useUiText("characters");
@@ -25,7 +25,7 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
     >
       <ProfileBanner bannerUrl={profile.banner_url} />
       <div className={styles.profileBody}>
-        <button
+        {onBack ? <button
           aria-label={uiText("이전 화면으로")}
           className={styles.backButton}
           onClick={onBack}
@@ -33,7 +33,7 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
           type="button"
         >
           <ArrowLeft aria-hidden="true" size={20} />
-        </button>
+        </button> : null}
         <div className={styles.avatarRow}>
           <span className={styles.avatarFrame}>
             <ProfileAvatar

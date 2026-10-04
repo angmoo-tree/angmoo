@@ -1,0 +1,41 @@
+.toolbar {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  padding: 4px;
+}
+.button {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.button:hover { background: var(--color-surface-muted); }
+.button:disabled { opacity: .4; cursor: default; }
+.button:focus-visible, .address:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.form { min-width: 0; flex: 1 1 8rem; }
+.address {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--color-border-control);
+  border-radius: 8px;
+  background: var(--color-surface-muted);
+  color: inherit;
+  padding: 8px;
+}
+.error { width: 100%; margin: 0; color: var(--color-state-danger); font-size: .85rem; overflow-wrap: anywhere; }

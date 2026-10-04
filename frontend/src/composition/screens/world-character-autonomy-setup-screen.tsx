@@ -548,7 +548,7 @@ export function WorldCharacterAutonomySetupClient({
 
   return (
     <div
-      className="min-h-screen bg-surface px-4 py-8 md:px-8"
+      className="min-h-full bg-surface px-4 py-8 md:px-8"
       data-product-content="autonomy-setup"
     >
       <div className="mx-auto max-w-5xl space-y-6">
