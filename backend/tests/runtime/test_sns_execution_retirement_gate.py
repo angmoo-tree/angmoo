@@ -1,5 +1,6 @@
 """A retirement record cannot bypass source, ownership or import preservation."""
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -95,3 +96,92 @@ def test_committed_source_requires_exact_closed_retirement(evidence, monkeypatch
             approved_changes=[] if damage == "unproven" else [record])
         assert errors == ["committed source lacks append-only introduction evidence: " + path
                           for path in sorted({arbitrary, SOURCE} if damage == "unproven" else {arbitrary})]
+
+
+@pytest.fixture
+def reviewed_owner_change(evidence):
+    root, retirement, original_reader = evidence
+    retirement.update(id="retirement", reason="closed retirement", review="owned behavior reviewed")
+    updated = "def shared(value): return value + 1\n"
+    change = {"id": "owner-change", "implementation_commit": "d"*40,
+        "reason": "reviewed owner behavior change", "review": "approved exact regression",
+        "source_blobs": {OWNER: "e"*40}, "definitions": [{"source": OWNER, "symbol": "shared",
+            "before_ast": gate.definitions(AFTER)["shared"], "after_ast": gate.definitions(updated)["shared"]}]}
+    records = [retirement, change]
+    (root / OWNER).write_text(updated)
+    manifest = root / "security/post_refactor_contract_changes.json"
+    manifest.parent.mkdir()
+    def save():
+        manifest.write_text(json.dumps({"schema_version": 1, "records": records}))
+    save()
+    def reader(*args, **kwargs):
+        if args[0] in {"log", "merge-base"}: return b""
+        if args == ("rev-parse", "b"*40 + ":" + OWNER): return ("c"*40).encode()
+        if args == ("rev-parse", "d"*40 + ":" + OWNER): return ("e"*40).encode()
+        if args == ("show", "d"*40 + "^:" + OWNER): return AFTER.encode()
+        if args == ("show", "d"*40 + ":" + OWNER): return updated.encode()
+        return original_reader(*args, **kwargs)
+    return root, records, reader, save
+
+
+def test_retained_owner_accepts_only_verified_continuous_committed_change(reviewed_owner_change):
+    root, records, reader, _ = reviewed_owner_change
+    removed, modules = gate.validate(records, root=root, reader=reader)
+    assert removed == {(SOURCE, "exclusive_graph")} and modules == {SOURCE}
+    assert records[0]["retired_sns_modules"][0]["moved_symbols"]["shared"]["after_ast"] == gate.definitions(AFTER)["shared"]
+
+
+@pytest.mark.parametrize("damage", ["no_record", "wrong_symbol", "broken_chain", "uncommitted_working_tree"])
+def test_retained_owner_rejects_unreviewed_or_discontinuous_change(reviewed_owner_change, damage):
+    root, records, reader, save = reviewed_owner_change
+    if damage == "no_record": records.pop()
+    elif damage == "wrong_symbol": records[1]["definitions"][0]["symbol"] = "different"
+    elif damage == "broken_chain": records[1]["definitions"][0]["before_ast"] = gate.definitions("def shared(value): return 0\n")["shared"]
+    else: (root / OWNER).write_text("def shared(value): return value + 2\n")
+    save()
+    with pytest.raises(ValueError): gate.validate(records, root=root, reader=reader)
+
+
+@pytest.mark.parametrize("damage", ["blob", "before", "after"])
+def test_retained_owner_rejects_forged_committed_provenance(reviewed_owner_change, damage):
+    root, records, reader, save = reviewed_owner_change
+    if damage == "blob": records[1]["source_blobs"][OWNER] = "f"*40
+    else: records[1]["definitions"][0][damage + "_ast"] = gate.definitions("def shared(value): return None\n")["shared"]
+    save()
+    with pytest.raises(ValueError, match="provenance|preimage"):
+        gate.validate(records, root=root, reader=reader)
+
+
+def test_retained_owner_cannot_rewrite_the_frozen_retirement_definition(reviewed_owner_change):
+    root, records, reader, save = reviewed_owner_change
+    records[0]["retired_sns_modules"][0]["moved_symbols"]["shared"]["after_ast"] = records[1]["definitions"][0]["after_ast"]
+    save()
+    with pytest.raises(ValueError, match="reviewed ownership"):
+        gate.validate(records, root=root, reader=reader)
+
+
+def test_retained_owner_rejects_committed_change_after_an_unreviewed_gap(reviewed_owner_change):
+    root, records, reader, save = reviewed_owner_change
+    gap = "def shared(value): return 0\n"
+    records[1]["definitions"][0]["before_ast"] = gate.definitions(gap)["shared"]
+    save()
+    def committed_gap_reader(*args, **kwargs):
+        if args == ("show", "d"*40 + "^:" + OWNER): return gap.encode()
+        return reader(*args, **kwargs)
+    # Provenance is valid, but the frozen owner cannot reach the new definition
+    # through this record because the intervening change was never reviewed.
+    with pytest.raises(ValueError, match="reviewed ownership"):
+        gate.validate(records, root=root, reader=committed_gap_reader)
+
+
+def test_retained_owner_rejects_committed_delta_for_a_different_owner(reviewed_owner_change):
+    root, records, reader, save = reviewed_owner_change
+    other = "backend/app/runtime/social/other_owner.py"
+    records[1]["source_blobs"] = {other: "e"*40}
+    records[1]["definitions"][0]["source"] = other
+    save()
+    def other_owner_reader(*args, **kwargs):
+        mapped = tuple(arg.replace(other, OWNER) for arg in args)
+        return reader(*mapped, **kwargs)
+    with pytest.raises(ValueError, match="reviewed ownership"):
+        gate.validate(records, root=root, reader=other_owner_reader)

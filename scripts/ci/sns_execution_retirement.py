@@ -4,6 +4,8 @@ This distinguishes retained symbol ownership from deliberately removed runtime
 behavior. It does not regenerate a baseline or exempt arbitrary source files.
 """
 import ast
+from functools import lru_cache
+import importlib.util
 from pathlib import Path
 
 ALLOWED = frozenset({
@@ -25,8 +27,31 @@ def definitions(source):
     return result
 
 
+@lru_cache(maxsize=1)
+def _product_change_module():
+    spec = importlib.util.spec_from_file_location(
+        "sns_product_changes", Path(__file__).with_name("post_refactor_contract_changes.py"))
+    changes = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(changes)
+    return changes
+
+
+def _definition_node(source, symbol):
+    nodes = []
+    for node in ast.parse(source).body:
+        if getattr(node, "name", None) == symbol or (
+            isinstance(node, (ast.Assign, ast.AnnAssign)) and any(
+                isinstance(target, ast.Name) and target.id == symbol
+                for target in (node.targets if isinstance(node, ast.Assign) else [node.target]))):
+            nodes.append(node)
+    if len(nodes) != 1:
+        raise ValueError("SNS retained ownership requires one exact symbol")
+    return nodes[0]
+
+
 def validate(records, *, root, reader):
     removed, modules = set(), set()
+    reviewed_records = None
     for record in records:
         for item in record.get("retired_sns_modules", []):
             source = item["source"]
@@ -50,12 +75,26 @@ def validate(records, *, root, reader):
                 path, name = destination["source"], destination["symbol"]
                 if path not in record["source_blobs"] or path in ALLOWED:
                     raise ValueError("SNS retained ownership needs committed actual source")
-                frozen = definitions(reader("show", f"{commit}:{path}", root=root).decode("utf-8-sig"))
-                actual = definitions((root / path).read_text(encoding="utf-8-sig"))
+                frozen_source = reader("show", f"{commit}:{path}", root=root).decode("utf-8-sig")
+                actual_source = (root / path).read_text(encoding="utf-8-sig")
+                frozen = definitions(frozen_source)
+                actual = definitions(actual_source)
                 if (destination["before_ast"] != owned[symbol]
-                        or frozen.get(name) != destination["after_ast"]
-                        or actual.get(name) != destination["after_ast"]):
+                        or frozen.get(name) != destination["after_ast"]):
                     raise ValueError("SNS retained symbol differs from exact reviewed ownership")
+                if actual.get(name) != destination["after_ast"]:
+                    changes = _product_change_module()
+                    if reviewed_records is None:
+                        # Validate the candidate manifest's append-only history,
+                        # Git ancestry, blobs and every exact pre/post definition.
+                        # Raw records alone cannot approve a changed owner.
+                        reviewed_records = changes.load(root, reader=reader)
+                        if reviewed_records != records:
+                            raise ValueError("SNS retained change records differ from verified manifest")
+                    if not changes.definition_matches(root, path, name,
+                            _definition_node(frozen_source, name), _definition_node(actual_source, name),
+                            records=reviewed_records):
+                        raise ValueError("SNS retained symbol differs from exact reviewed ownership")
             for test in item["successor_tests"]:
                 path, name = test.split("::", 1)
                 candidate = (root / "backend" / path).resolve()
