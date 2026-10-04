@@ -16,7 +16,7 @@ export function personaTextLength(value: string): number {
   return Array.from(normalizePersonaText(value)).length;
 }
 
-export function personaLengthError(value: string, limit: number): string | undefined {
+export function personaLengthError(value: string, limit: number): { code: "persona_length_exceeded"; limit: number; excess: number } | undefined {
   const excess = personaTextLength(value) - limit;
-  return excess > 0 ? `최대 ${limit.toLocaleString()}자까지 입력할 수 있습니다. ${excess.toLocaleString()}자 초과했습니다.` : undefined;
+  return excess > 0 ? { code: "persona_length_exceeded", limit, excess } : undefined;
 }

@@ -1,5 +1,7 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+import { formatWorldPackageFailure, type WorldPackageFailure } from "@/features/world-packages/utils/error-presentation";
 
 
 import { AlertTriangle, CheckCircle2, FileArchive, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
@@ -22,6 +24,7 @@ export function WorldPackageImportClient({
   authStatus: "checking" | "authenticated" | "unauthenticated";
 }) {
   const uiText = useUiText("world-packages");
+  const formatNumber = useUiNumberFormatter();
   const router = useRuntimeRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [prepared, setPrepared] = useState<PreparedWorldPackageImport | null>(null);
@@ -29,7 +32,7 @@ export function WorldPackageImportClient({
   const [duplicateStrategy, setDuplicateStrategy] = useState<"reject" | "independent_copy">("reject");
   const [pending, setPending] = useState<"stage" | "commit" | "discard" | null>(null);
   const [result, setResult] = useState<WorldPackageImportResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<WorldPackageFailure | null>(null);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -40,7 +43,7 @@ export function WorldPackageImportClient({
   async function chooseFile(file: File | null) {
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(WORLD_PACKAGE_EXTENSION)) {
-      setError(uiText(".angmoo-world 파일만 선택할 수 있습니다."));
+      setError({ kind: "local", message: ".angmoo-world 파일만 선택할 수 있습니다." });
       return;
     }
     if (prepared) {
@@ -48,9 +51,8 @@ export function WorldPackageImportClient({
       try {
         await discardWorldPackageImport(prepared);
       } catch (reason) {
-        setError(
-          uiText("이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다. ({{value0}})", {value0: importError(reason)}),
-        );
+        setError({ kind: "request", reason,
+          context: "이전 가져오기 미리보기를 정리하지 못해 새 파일을 열지 않았습니다. ({{value0}})" });
         setPending(null);
         if (inputRef.current) inputRef.current.value = "";
         return;
@@ -70,7 +72,7 @@ export function WorldPackageImportClient({
           : "reject",
       );
     } catch (reason) {
-      setError(importError(reason));
+      setError({ kind: "request", reason });
     } finally {
       setPending(null);
       if (inputRef.current) inputRef.current.value = "";
@@ -86,7 +88,7 @@ export function WorldPackageImportClient({
       setPrepared(null);
       setApprovedDigest(null);
     } catch (reason) {
-      setError(importError(reason));
+      setError({ kind: "request", reason });
     } finally {
       setPending(null);
     }
@@ -101,7 +103,7 @@ export function WorldPackageImportClient({
       setPrepared(null);
       setApprovedDigest(null);
     } catch (reason) {
-      setError(importError(reason));
+      setError({ kind: "request", reason });
     } finally {
       setPending(null);
     }
@@ -152,7 +154,7 @@ export function WorldPackageImportClient({
       ) : null}
 
       {result ? <ImportSuccess result={result} /> : null}
-      {error ? <InlineError>{error}</InlineError> : null}
+      {error ? <InlineError>{formatWorldPackageFailure(error, "import", uiText, formatNumber)}</InlineError> : null}
     </div>
   );
 }
@@ -180,7 +182,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
           <p className="mt-2 text-sm font-semibold text-[#667085]">{preview.world_tagline}</p>
         </div>
         <span className="rounded-full bg-[#ecfdf3] px-3 py-2 text-xs font-black text-[#027a48]">
-          {trustLabel(preview.trust_state)}
+          {uiText(trustLabel(preview.trust_state))}
         </span>
       </div>
 
@@ -217,7 +219,7 @@ function ImportPreview({ prepared, approved, duplicateStrategy, pending, onAppro
         </div>
         <div className="rounded-[20px] border border-[#e1e5eb] p-5">
           <h3 className="font-black text-[#101828]">{uiText("충돌 계획")}</h3>
-          <p className="mt-3 text-sm font-bold text-[#475467]">{duplicateLabel(preview.collision_plan.duplicate_state)}</p>
+          <p className="mt-3 text-sm font-bold text-[#475467]">{uiText(duplicateLabel(preview.collision_plan.duplicate_state))}</p>
           <ul className="mt-3 space-y-2 text-sm text-[#667085]">{preview.collision_plan.characters.map((character) => <li key={character.source_ref}>{character.display_name} → @{character.planned_handle}</li>)}</ul>
         </div>
       </div>
@@ -274,10 +276,6 @@ function Value({ label, value }: { label: string; value: string }) {
 
 function IssueList({ title, items, tone }: { title: string; items: string[]; tone: "warning" | "error" }) {
   return <div className={`mt-5 rounded-[20px] p-5 ${tone === "error" ? "bg-[#fff1f0] text-[#b42318]" : "bg-[#fffaeb] text-[#7a2e0e]"}`}><h3 className="flex items-center gap-2 font-black"><AlertTriangle className="size-4" />{title}</h3><ul className="mt-3 list-disc space-y-1 pl-5 text-sm font-semibold">{items.map((item) => <li key={item}>{item}</li>)}</ul></div>;
-}
-
-function importError(reason: unknown) {
-  return reason instanceof Error ? reason.message : "World Package를 처리하지 못했습니다.";
 }
 
 function formatBytes(value: number) {

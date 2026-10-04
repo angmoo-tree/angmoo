@@ -40,6 +40,21 @@ for (const file of files) {
   function check(key) { checked++; if(!catalog?.en[key]&&!catalogs.get("shell")?.en[key])errors.push(`${path.relative(root,file)}: missing ${ns}:${key}`); }
   function visit(node) {
     if(ts.isCallExpression(node)&&["uiText","t"].includes(node.expression.getText(ast))&&node.arguments[0]&&ts.isStringLiteralLike(node.arguments[0])) check(node.arguments[0].text);
+    // Validation messages and typed local errors are translated by their
+    // consumers. Audit these authored values even though the call is dynamic.
+    if (ts.isStringLiteralLike(node) && ts.isPropertyAssignment(node.parent) && node.parent.initializer === node) {
+      const property = node.parent.name.getText(ast);
+      if ((file.endsWith(`${path.sep}api${path.sep}request.ts`) && property === "message")
+        || (file.includes(`${path.sep}world-packages${path.sep}components${path.sep}`) && ["message", "context"].includes(property))) check(node.text);
+      let declaration = node.parent;
+      while (declaration && !ts.isVariableDeclaration(declaration)) declaration = declaration.parent;
+      if (declaration && ["ERROR_MESSAGES", "FIELD_LABELS", "IMAGE_INPUT_MESSAGES"].includes(declaration.name.getText(ast))) check(node.text);
+    }
+    if (file.endsWith(`${path.sep}world-package-import-client.tsx`) && ts.isStringLiteralLike(node) && /[가-힣]/.test(node.text)) {
+      let fn = node.parent;
+      while (fn && !ts.isFunctionDeclaration(fn)) fn = fn.parent;
+      if (fn?.name && ["trustLabel", "duplicateLabel"].includes(fn.name.text)) check(node.text);
+    }
     const authoredDeclarations = file.endsWith(`${path.sep}agent-create-client.tsx`)
       ? ["STEPS", "PERSONA_FIELDS"] : file.endsWith(`${path.sep}character-profile-screen.tsx`)
       ? ["PROFILE_TABS"] : file.endsWith(`${path.sep}post-feed-parts.tsx`)

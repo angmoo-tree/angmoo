@@ -166,5 +166,7 @@
   "Please check the submitted values.": "입력한 값을 확인해주세요.",
   "The usage limit was reached. Please try again later.": "사용 한도에 도달했습니다. 잠시 후 다시 시도해주세요.",
   "The request could not be completed. Please try again.": "요청을 완료할 수 없습니다. 다시 시도해주세요.",
-  "다음 한도 해제 시각: {{at}}": "다음 한도 해제 시각: {{at}}"
+  "다음 한도 해제 시각: {{at}}": "다음 한도 해제 시각: {{at}}",
+  "Choose a still PNG, JPEG, or WebP image up to 10 MiB.": "10MiB 이하의 정지 PNG, JPEG, WebP 이미지를 선택해주세요.",
+  "The photo could not be read. Please select it again.": "사진을 읽지 못했습니다. 다시 선택해주세요."
 }

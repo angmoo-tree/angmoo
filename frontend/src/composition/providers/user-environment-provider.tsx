@@ -1,15 +1,30 @@
 "use client";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { useAuth } from "@/hooks/use-auth";
 import { ApiRequestError } from "@/lib/http/api-request";
 import { createUiI18n, resolveUiLanguage } from "@/lib/i18n/instance";
-import { detectUserEnvironment } from "@/lib/i18n/detection";
+import { detectPreferredLanguage, detectUserEnvironment } from "@/lib/i18n/detection";
 import { EnvironmentContext } from "@/lib/i18n/environment-context";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
 import { getUserEnvironment, synchronizeUserEnvironment } from "@/features/identity/api/environment";
 import { uiResources } from "@/composition/providers/ui-resources";
 import type { UserEnvironment } from "@/types/user-environment";
+
+// Browser preference is display-only. Authentication still owns persistence,
+// the environment lease and readiness for new default content.
+function subscribeToUiLanguage(changed: () => void) {
+  window.addEventListener("languagechange", changed);
+  window.addEventListener("focus", changed);
+  document.addEventListener("visibilitychange", changed);
+  return () => {
+    window.removeEventListener("languagechange", changed);
+    window.removeEventListener("focus", changed);
+    document.removeEventListener("visibilitychange", changed);
+  };
+}
+
+function serverUiLanguage() { return null; }
 
 export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   const { status, user, sessionRevision = 0 } = useAuth();
@@ -21,6 +36,7 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   const [runtimeRevision, setRuntimeRevision] = useState(0);
   const [environmentScope, setEnvironmentScope] = useState("");
   const currentScope = `${userId ?? ""}:${runtimeRevision}:${sessionRevision}`;
+  const detectedUiLanguage = useSyncExternalStore(subscribeToUiLanguage, detectPreferredLanguage, serverUiLanguage);
 
   useEffect(() => {
     const changed = () => { setReady(false); setEnvironment(null); setRuntimeRevision(value => value + 1); };
@@ -76,7 +92,7 @@ export function UserEnvironmentProvider({ children }: { children: ReactNode }) {
   }, [status, userId, runtimeRevision, sessionRevision]);
 
   const scopedEnvironment = environmentScope === currentScope ? environment : null;
-  const language = resolveUiLanguage(user?.ui_language, scopedEnvironment?.preferred_language);
+  const language = resolveUiLanguage(user?.ui_language, scopedEnvironment?.preferred_language ?? detectedUiLanguage ?? undefined);
   useEffect(() => { void i18n.changeLanguage(language); document.documentElement.lang = language; }, [i18n, language]);
   const value = useMemo(() => ({ environment: status === "authenticated" ? scopedEnvironment : null,
     ready: status === "authenticated" && ready && environmentScope === currentScope, errorCode }),

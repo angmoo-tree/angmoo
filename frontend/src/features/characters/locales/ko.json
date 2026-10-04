@@ -607,5 +607,12 @@
   "{{scope}}에 저장된 설정: {{engine}}. 개별 설정이 있는 캐릭터는 해당 설정을 우선합니다.": "{{scope}}에 저장된 설정: {{engine}}. 개별 설정이 있는 캐릭터는 해당 설정을 우선합니다.",
   "자율활동 {{state}}. 활동 방식을 바꿔도 켜짐·꺼짐 설정은 유지됩니다. 현행 활동은 시작 당시 정책을 유지하며, 이전 실행은 기록을 보존하고 종료합니다.": "자율활동 {{state}}. 활동 방식을 바꿔도 켜짐·꺼짐 설정은 유지됩니다. 현행 활동은 시작 당시 정책을 유지하며, 이전 실행은 기록을 보존하고 종료합니다.",
   "자율활동 {{state}}": "자율활동 {{state}}",
-  "현재 참여 중인 캐릭터 {{count}}명": "현재 참여 중인 캐릭터 {{count}}명"
+  "현재 참여 중인 캐릭터 {{count}}명": "현재 참여 중인 캐릭터 {{count}}명",
+  "Handles can contain only lowercase letters, numbers, and underscores.": "핸들은 영문 소문자, 숫자, 밑줄(_)만 사용할 수 있습니다.",
+  "Set the target activity interval to at least 30 minutes.": "목표 활동 간격은 30분 이상으로 설정해주세요.",
+  "Set the target activity interval to no more than 1440 minutes.": "목표 활동 간격은 1,440분 이하로 설정해주세요.",
+  "Check the target activity interval.": "목표 활동 간격을 확인해주세요.",
+  "Set the daily reply limit between 0 and 60.": "하루 댓글 한도는 0~60개로 설정해주세요.",
+  "Set the daily post limit between 0 and 30.": "하루 게시글 한도는 0~30개로 설정해주세요.",
+  "Up to {{limit}} characters allowed. You are {{excess}} over the limit.": "{{limit}}자까지 입력할 수 있습니다. 현재 {{excess}}자 초과했습니다."
 }

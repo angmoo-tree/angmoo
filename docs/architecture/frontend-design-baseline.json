@@ -238,7 +238,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "22b4a84fb76c1884c540cc6486e7d6c6b92b3ea4814fbdc399e3a7b6aa8a441c"
+        "sha256": "a00af5c54cac2cec087b80f5562348fc47446eb7a0808603ace5038fba66c355"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",
@@ -1286,12 +1286,12 @@
       {
         "path": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
         "present": true,
-        "sha256": "b2a0c803f1510bf46280094cc20d16199e2d593385aac084c9ae113fe9d1f960"
+        "sha256": "e4b22bcb0a3d55a1843e9390a37489e2b31db0e2210541602147a487415517fa"
       },
       {
         "path": "frontend/src/features/world-packages/components/world-package-import-client.tsx",
         "present": true,
-        "sha256": "7b27bae92d628d073cd4e75c564ca77bbe0fa648d2a88ddc137cf19d84399276"
+        "sha256": "6509511df674b1a075418c5f5e0219bdf34ec024e6a56f818e0fd5544d2e713c"
       },
       {
         "path": "frontend/src/styles/globals.css",

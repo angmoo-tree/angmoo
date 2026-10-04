@@ -1,5 +1,7 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+import { formatWorldPackageFailure, type WorldPackageFailure } from "@/features/world-packages/utils/error-presentation";
 
 
 import { CheckCircle2, Download, PackageOpen, ShieldCheck } from "lucide-react";
@@ -20,6 +22,7 @@ type ConfirmationKey = "rights" | "license" | "exclusions";
 
 export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
   const uiText = useUiText("world-packages");
+  const formatNumber = useUiNumberFormatter();
   const [licenseExpression, setLicenseExpression] = useState("CC-BY-4.0");
   const [attribution, setAttribution] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -35,7 +38,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
   const [pendingCleanup, setPendingCleanup] =
     useState<PreparedWorldPackageExport | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<WorldPackageFailure | null>(null);
 
   const allConfirmed = useMemo(
     () => Object.values(confirmations).every(Boolean),
@@ -67,7 +70,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
     try {
       setPreview(await previewWorldPackageExport(worldId, request()));
     } catch (reason) {
-      setError(exportError(reason));
+      setError({ kind: "request", reason });
     } finally {
       setPending(null);
     }
@@ -114,21 +117,19 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
     } catch (reason) {
       if (prepared && nativeWriteCompleted) {
         setPendingAcknowledgement(prepared);
-        setError(uiText("파일은 저장됐지만 Angmoo의 전달 확인이 끝나지 않았습니다. 아래에서 확인을 다시 시도해 주세요."));
+        setError({ kind: "local", message: "파일은 저장됐지만 Angmoo의 전달 확인이 끝나지 않았습니다. 아래에서 확인을 다시 시도해 주세요." });
       } else {
         if (prepared) {
           try {
             await discardPreparedWorldPackageExport(prepared);
           } catch {
             setPendingCleanup(prepared);
-            setError(
-              uiText("내보내기 전달과 실패 작업 정리가 모두 끝나지 않았습니다. 같은 World를 다시 내보내기 전에 아래에서 정리를 재시도해 주세요."),
-            );
+            setError({ kind: "local", message: "내보내기 전달과 실패 작업 정리가 모두 끝나지 않았습니다. 같은 World를 다시 내보내기 전에 아래에서 정리를 재시도해 주세요." });
             return;
           }
         }
         setPendingCleanup(null);
-        setError(exportError(reason));
+        setError({ kind: "request", reason });
       }
     } finally {
       if (destinationToken) {
@@ -147,9 +148,8 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       setPendingCleanup(null);
       setMessage(uiText("완료되지 않은 내보내기 작업을 정리했습니다. 다시 내보낼 수 있습니다."));
     } catch (reason) {
-      setError(
-        uiText("완료되지 않은 내보내기 작업을 아직 정리하지 못했습니다. ({{value0}})", {value0: exportError(reason)}),
-      );
+      setError({ kind: "request", reason,
+        context: "완료되지 않은 내보내기 작업을 아직 정리하지 못했습니다. ({{value0}})" });
     } finally {
       setPending(null);
     }
@@ -164,7 +164,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
       setMessage(uiText("저장된 World Package의 전달 확인을 완료했습니다."));
       setPendingAcknowledgement(null);
     } catch (reason) {
-      setError(exportError(reason));
+      setError({ kind: "request", reason });
     } finally {
       setPending(null);
     }
@@ -296,7 +296,7 @@ export function WorldPackageExportPanel({ worldId }: { worldId: string }) {
           <ShieldCheck className="size-4" />
           {uiText("실패 작업 정리 후 다시 시도")}</Button>
       ) : null}
-      {error ? <InlineError className="mt-4">{error}</InlineError> : null}
+      {error ? <InlineError className="mt-4">{formatWorldPackageFailure(error, "export", uiText, formatNumber)}</InlineError> : null}
       {message ? <p className="mt-4 rounded-[18px] bg-[#ecfdf3] p-4 text-sm font-bold text-[#027a48]" role="status">{message}</p> : null}
     </Card>
   );
@@ -328,10 +328,6 @@ function ExportPreviewCard({ preview }: { preview: WorldPackageExportPreview }) 
 
 function PreviewValue({ label, value }: { label: string; value: string }) {
   return <div><dt className="text-xs font-bold text-[#98a2b3]">{label}</dt><dd className="mt-1 font-black text-[#344054]">{value}</dd></div>;
-}
-
-function exportError(reason: unknown) {
-  return reason instanceof Error ? reason.message : "World Package 내보내기를 완료하지 못했습니다.";
 }
 
 function formatBytes(value: number) {

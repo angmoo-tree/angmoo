@@ -139,9 +139,12 @@ test("real routes: saved English, translated navigation and original records sur
       if (["/", "/agents", "/agents/new", "/posts"].includes(route))
         await expect(page.getByRole("navigation",{name:"Main mobile navigation"})).toContainText("Settings");
       if (route === "/memory") await expect(page.getByRole("link", {name:"Back to Home",exact:true})).toBeVisible();
-      // Memory chooses a default scoped URL asynchronously. Complete that
-      // navigation before testing the next direct entry.
-      if (route === "/memory") await expect(page).toHaveURL(/\/memory\?world=/);
+      // A fresh isolated DB can have no runnable memory scope. Both the empty
+      // state and an asynchronous default-scope navigation are real outcomes.
+      if (route === "/memory") await Promise.race([
+        page.waitForURL(/\/memory\?world=/),
+        page.getByRole("heading", {name:"No manageable memory scopes",exact:true}).waitFor({state:"visible"}),
+      ]);
       if (route === "/studio") await expect(page.getByRole("complementary", {name:"Browse Creator Studio"})).toBeVisible();
       if (info.project.name === "static" && nextOnly.includes(route)) {
         await page.getByRole("heading",{name:"Unsupported Angmoo route."}).waitFor({state:"attached"});
@@ -174,3 +177,122 @@ test("real routes: saved English, translated navigation and original records sur
     expect(errors).toEqual([]);
   } finally {await context.close();}
 });
+
+for (const [locale, expected, detectorFails] of [["ko-KR", "ko", false], ["en-US", "en", false],
+  ["ja-JP", "en", false], ["ko-KR", "en", true]] as const) {
+  test(`anonymous first visit: ${locale}, detector failure=${detectorFails}`, async ({browser}, info) => {
+    const context = await browser.newContext({locale});
+    let environmentCalls = 0;
+    await context.addInitScript(({fails}) => {
+      window.__ANGMOO_RUNTIME_CONFIG__ = {apiBaseUrl:"http://127.0.0.1:18399", graphProvider:"ladybug", profile:"tauri-static"};
+      if (fails) for (const property of ["language", "languages"]) Object.defineProperty(navigator, property,
+        {get() {throw new Error("synthetic detector unavailable");}});
+    }, {fails: detectorFails});
+    await context.route(/\/auth\//, async route => {
+      const pathname = new URL(route.request().url()).pathname;
+      if (pathname.endsWith("/local/environment")) environmentCalls++;
+      const bootstrap = pathname.endsWith("/local/bootstrap");
+      await route.fulfill({status: bootstrap ? 200 : pathname.endsWith("/me") ? 401 : 409,
+        contentType:"application/json", body:JSON.stringify(bootstrap
+          ? {state:"unclaimed",installation_id:"synthetic-unclaimed",local_label:null,owner:null,candidates:[]}
+          : {detail:"not_authenticated"})});
+    });
+    const page = await context.newPage(), errors:string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    page.on("console", message => {if (/hydration|did not match/i.test(message.text())) errors.push(message.text());});
+    try {
+      await page.goto(`${info.project.use.baseURL}/login`);
+      await expect(page.locator('[data-local-owner-state="unclaimed"]')).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", expected);
+      await expect(page.getByRole("heading", {name:expected === "ko" ? "이 장치의 owner 준비" : "Prepare device owner", exact:true})).toBeVisible();
+      await page.reload();
+      await expect(page.locator('[data-local-owner-state="unclaimed"]')).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", expected);
+      expect(environmentCalls).toBe(0);
+      expect(errors).toEqual([]);
+    } finally {await context.close();}
+  });
+}
+
+for (const language of ["en", "ko"] as const) {
+  test(`${language}: PersonaField native validity and typed handle validation`, async ({browser,request}, info) => {
+    const {context,page,section,errors} = await open(browser,info,"en-US","Europe/London");
+    const alerts = page.getByRole("main").getByRole("alert");
+    try {
+      await section.getByRole("button", {name:language === "en" ? "English" : "Korean", exact:true}).click();
+      await expect.poll(async () => (await state(request)).ui_language).toBe(language);
+      await page.goto(`${info.project.use.baseURL}/agents/new`);
+      const next = page.getByRole("button", {name:language === "en" ? "Save and continue" : "저장하고 다음", exact:true});
+      await next.click();
+      const name = page.getByRole("textbox", {name:language === "en" ? "Name" : "이름", exact:true});
+      await name.fill("Original 原文");
+      const introduction = page.getByRole("textbox", {name:language === "en" ? "One-line introduction" : "한 줄 소개", exact:true});
+      const original = "😀".repeat(501);
+      await introduction.fill(original);
+      const expected = language === "en" ? "Up to 500 characters allowed. You are 1 over the limit."
+        : "500자까지 입력할 수 있습니다. 현재 1자 초과했습니다.";
+      await expect(alerts).toHaveText(expected);
+      await expect(introduction).toHaveValue(original);
+      await expect(introduction).toHaveAttribute("aria-invalid", "true");
+      expect(await introduction.evaluate((control:HTMLTextAreaElement) => control.validationMessage)).toBe(expected);
+      await introduction.fill("e\u0301😀");
+      await expect(alerts).toHaveCount(0);
+      expect(await introduction.evaluate((control:HTMLTextAreaElement) => control.validationMessage)).toBe("");
+      await page.route(/\/agents\/drafts\/[^/]+$/, route => route.request().method() === "PATCH"
+        ? route.fulfill({status:422,contentType:"application/json",body:JSON.stringify({detail:[{
+          loc:["body","handle"],type:"string_pattern_mismatch",msg:"PRIVATE credential",input:"PRIVATE input"}]})}) : route.continue());
+      await next.click();
+      await expect(alerts).toHaveText(language === "en"
+        ? "Handles can contain only lowercase letters, numbers, and underscores."
+        : "핸들은 영문 소문자, 숫자, 밑줄(_)만 사용할 수 있습니다.");
+      await expect(name).toHaveValue("Original 原文");
+      await expect(page.locator("body")).not.toContainText("PRIVATE");
+      expect(errors).toEqual([]);
+    } finally {await context.close();}
+  });
+}
+
+for (const [code,status,english,korean] of [
+  ["world_package_persona_invalid",422,"Personality: 6,001 / 6,000 characters","성격: 6,001 / 6,000자"],
+  ["world_package_preparation_failed",503,"The server could not process the import.","서버가 가져오기 요청을 처리하지 못했습니다."],
+  ["world_package_manifest_missing",422,"The World Package is missing its manifest.","World Package에 필수 매니페스트가 없습니다."],
+] as const) {
+  test(`World Package ${code}: safe translated error persists across UI language change`, async ({browser,request}, info) => {
+    const {context,page,section,errors} = await open(browser,info,"ko-KR","Asia/Seoul");
+    const alerts = page.getByRole("main").getByRole("alert");
+    let submissions = 0;
+    try {
+      await section.getByRole("button", {name:"English",exact:true}).click();
+      await expect.poll(async () => (await state(request)).ui_language).toBe("en");
+      await page.route(/\/world-package-imports\/stage$/, route => {
+        submissions++;
+        return route.fulfill({status,contentType:"application/json",body:JSON.stringify({detail:{code,
+          fields:[{field:"personality",actual:6001,limit:6000,input:"PRIVATE uploaded text"},
+            {field:"character_background",actual:8001,limit:8000}],raw:"PRIVATE credential"}})});
+      });
+      await page.goto(`${info.project.use.baseURL}/studio/import`);
+      await page.locator('input[type="file"]').setInputFiles({name:"synthetic.angmoo-world",mimeType:"application/octet-stream",buffer:Buffer.from("synthetic-only")});
+      await expect(alerts).toContainText(english);
+      expect(await alerts.innerText()).not.toMatch(/[가-힣]|world_package_|PRIVATE/);
+      if (code === "world_package_persona_invalid") await expect(alerts).toContainText("Character background / worldview: 8,001 / 8,000 characters");
+      // Use the real preference endpoint and normal auth refresh while the
+      // import component stays mounted. No second package request is sent.
+      const changed = await page.evaluate(async () => {
+        const prefix = location.port === "3362" ? "http://127.0.0.1:18399/api/v1" : "/api/backend";
+        const headers = {"Content-Type":"application/json","X-Angmoo-Frontend-Origin":location.origin};
+        const owner = await fetch(`${prefix}/auth/me`, {credentials:"include"}).then(response => response.json());
+        const response = await fetch(`${prefix}/auth/me/preferences`, {method:"PATCH",credentials:"include",headers,
+          body:JSON.stringify({ui_language:"ko",expected_ui_revision:owner.ui_preference_revision})});
+        if (response.ok) window.dispatchEvent(new Event("angmoo:auth-changed"));
+        return response.status;
+      });
+      expect(changed).toBe(200);
+      await expect(page.locator("html")).toHaveAttribute("lang","ko");
+      await expect(alerts).toContainText(korean);
+      await expect(alerts).not.toContainText("PRIVATE");
+      if (code === "world_package_persona_invalid") await expect(alerts).toContainText("캐릭터 배경·세계관: 8,001 / 8,000자");
+      expect(submissions).toBe(1);
+      expect(errors).toEqual([]);
+    } finally {await context.close();}
+  });
+}

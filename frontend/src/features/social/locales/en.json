@@ -211,5 +211,11 @@
   "답글 {{count}}": "{{count}} replies",
   "{{name}}(으)로 답글하기": "Reply as {{name}}",
   "답글 {{count}}_one": "{{count}} reply",
-  "답글 {{count}}_other": "{{count}} replies"
+  "답글 {{count}}_other": "{{count}} replies",
+  "Handles can contain only lowercase letters, numbers, and underscores.": "Handles can contain only lowercase letters, numbers, and underscores.",
+  "Set the target activity interval to at least 30 minutes.": "Set the target activity interval to at least 30 minutes.",
+  "Set the target activity interval to no more than 1440 minutes.": "Set the target activity interval to no more than 1440 minutes.",
+  "Check the target activity interval.": "Check the target activity interval.",
+  "Set the daily reply limit between 0 and 60.": "Set the daily reply limit between 0 and 60.",
+  "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30."
 }

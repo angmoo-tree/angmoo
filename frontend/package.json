@@ -15,6 +15,7 @@
     "test:character-card-proxy": "node ./scripts/test-character-card-proxy.mjs",
     "test:ui-catalog": "node ./scripts/check-ui-catalog.mjs",
     "test:user-environment": "node ./scripts/test-user-environment.mjs",
+    "test:ui-error-contracts": "node ./scripts/test-ui-error-contracts.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

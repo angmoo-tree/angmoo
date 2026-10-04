@@ -38,7 +38,9 @@
 
 ## UI와 검색
 
-번역 resources는 16개 namespace, 2,375개 source key의 feature/composition owner에 둔다. 공통 engine·환경 context·hook은 global lib/hooks가 소유하며 feature끼리의 내부 import를 늘리지 않는다. 이름·카드·World·게시글·검색 결과 원문은 catalog를 통해 통째로 치환하지 않는다. API 실패는 typed code/params/UTC retry 값을 표시하는 별도 경계에서 처리한다. Social/Community의 업무 wrapper는 유지하면서 실제 HTTP 전송은 인증/session/runtime scope를 확인하는 공통 `apiRequest`를 사용한다. 오래된 401 응답이 새 로그인이나 backend의 인증을 지우지 않도록 12개 전환 조합을 검사했다. 숫자/시간 표시는 Intl이고 UI 언어와 runtime zone은 독립이다.
+번역 resources는 feature/composition owner에 둔다. 최초 검사는 16개 namespace·2,375개 source key였고, F01–F04 후속 보완 이후의 catalog 검사는 16개 namespace·2,440개 source key다. 공통 engine·환경 context·hook은 global lib/hooks가 소유하며 feature끼리의 내부 import를 늘리지 않는다. 이름·카드·World·게시글·검색 결과 원문은 catalog를 통해 통째로 치환하지 않는다. API 실패는 typed code/params/UTC retry 값을 표시하는 별도 경계에서 처리한다. Social/Community의 업무 wrapper는 유지하면서 실제 HTTP 전송은 인증/session/runtime scope를 확인하는 공통 `apiRequest`를 사용한다. 오래된 401 응답이 새 로그인이나 backend의 인증을 지우지 않도록 12개 전환 조합을 검사했다. 숫자/시간 표시는 Intl이고 UI 언어와 runtime zone은 독립이다.
+
+2026-10-04 후속 소유: 인증 전 표시용 언어 감지는 `lib/i18n/detection.ts`와 composition의 구독이 소유하며 auth 환경 저장을 수행하지 않는다. PersonaField는 codepoint 초과 데이터의 현재 언어 표시와 native validity를 소유한다. 각 Identity/Characters/Social API가 업무 검증의 authored key·typed 숫자를 소유하고 공통 `api-request.ts`는 그 값을 보존하여 전송 오류를 만든다. 이미지 preflight 오류는 Media feature가 소유한다. World Package의 API가 안전한 실패 데이터를 보존하고 `features/world-packages/utils/error-presentation.ts`가 26개 code·8개 persona field와 import/export 안내를 번역한다. 세부 검증은 [UI 계약 수정 결과](multilingual-ui-contract-fixes-20261004.md)를 따른다.
 
 실제 지원 경로와 Next-only 경로는 기존 capability를 유지한다. Home/Feed/캐릭터/게시글/답글 등의 일반 명칭을 바꾸되 slug/ID/enum/URL/Provider Referer는 유지한다. 삭제된 작성자는 canonical deleted 상태로 표시하고 같은 이름의 활성 캐릭터를 삭제자로 오인하지 않는다. static의 unsupported 안내는 신규 기능 노출이 아니다.
 

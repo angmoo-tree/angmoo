@@ -2,6 +2,17 @@
 
 기준은 [통합 결과](multilingual-timezone-gemini-sns-integration-20261003.md)다. 107은 계약 기준 개수이며 pytest 개수가 아니다. 아래 판정은 network-denied 합성 DB/Provider, 실제 SDK mocked HTTP, production Next/static 및 소스 소유 검토 범위다. 실서비스 AI/embedding 품질·사용자 Docker/Windows 설치판은 포함하지 않는다.
 
+2026-10-04 독립 재검토 이후의 F01–F04 수정은 [UI 계약 수정 결과](multilingual-ui-contract-fixes-20261004.md)에 연결한다. I01/I07/I08/I10/I22/I34/I43/I48/X13의 초기 화면·validation·실패 안내 증거를 보강했다. 아래 최초 실행의 노드·107개 식별자·전체 집계는 유지하며, 필수 디자인/소스 보존 검사의 현재 판단은 후속 기록을 따른다.
+
+| 후속 기준 | 추가 수용 검사와 증거 |
+| --- | --- |
+| I01/I10/I34 | Next/static 익명 첫 방문 ko-KR/en-US/ja-JP/detector throw·완성된 owner 화면·새로고침·HTML lang·hydration 오류 0·환경 API 0. 기존 저장 UI 우선/실제 SQLite lease/preferences 검사는 유지. |
+| I07/I43/I48 | catalog의 동적 authored message/context/오류 map을 포함한 16 namespace·2,440 source key ko/en parity. 원 입력은 catalog로 치환하지 않음. |
+| I08/I22/I43/I48 | `test-ui-error-contracts.mjs`의 53 검사 및 실제 브라우저 PersonaField alert/ARIA/native validity·초과 글자 수·고친 입력의 오류 해제·handle 422. status/code/typed 범위/Retry-After 의미와 입력값 보존. |
+| I08/I43/I48/X13 | World Package persona/server/manifest 실패, 26개 backend code·8개 persona field·import/export 설명 구분·안전 fallback. 기존 실패 상태에서 정상 preference API로 ko 전환, 추가 stage/commit/export 0. |
+
+후속 artifact root는 `artifacts/multilingual-ui-contract-fixes-20261004/`이며 최초 `artifacts/multilingual-gemini-20261003/` 결과 및 독립 review의 FAIL 자료를 덮어쓰지 않는다.
+
 집계 상태: `LOCAL_CONTRACT_REVIEW_COMPLETE`. 전체 node별 실행 XML과 owner group의 모든 parameter는 로컬 `artifacts/multilingual-gemini-20261003/contract-evidence-matrix.json`에 보존한다. 결과는 파일 mtime이 아닌 final regression audit의 명시 실행 순서를 사용했다.
 
 | 기준 | 로컬 판정·실제로 확인한 범위 | 대표 실제 node/기타 증거 |

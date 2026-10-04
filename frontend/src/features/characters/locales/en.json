@@ -607,5 +607,12 @@
   "{{scope}}에 저장된 설정: {{engine}}. 개별 설정이 있는 캐릭터는 해당 설정을 우선합니다.": "Saved {{scope}} policy: {{engine}}. Individual character settings take priority.",
   "자율활동 {{state}}. 활동 방식을 바꿔도 켜짐·꺼짐 설정은 유지됩니다. 현행 활동은 시작 당시 정책을 유지하며, 이전 실행은 기록을 보존하고 종료합니다.": "Autonomous activity {{state}}. Changing the activity method preserves its on/off setting. Current activity keeps the policy from its start; older runs finish with their records preserved.",
   "자율활동 {{state}}": "Autonomous activity {{state}}",
-  "현재 참여 중인 캐릭터 {{count}}명": "Participating characters: {{count}}"
+  "현재 참여 중인 캐릭터 {{count}}명": "Participating characters: {{count}}",
+  "Handles can contain only lowercase letters, numbers, and underscores.": "Handles can contain only lowercase letters, numbers, and underscores.",
+  "Set the target activity interval to at least 30 minutes.": "Set the target activity interval to at least 30 minutes.",
+  "Set the target activity interval to no more than 1440 minutes.": "Set the target activity interval to no more than 1440 minutes.",
+  "Check the target activity interval.": "Check the target activity interval.",
+  "Set the daily reply limit between 0 and 60.": "Set the daily reply limit between 0 and 60.",
+  "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30.",
+  "Up to {{limit}} characters allowed. You are {{excess}} over the limit.": "Up to {{limit}} characters allowed. You are {{excess}} over the limit."
 }

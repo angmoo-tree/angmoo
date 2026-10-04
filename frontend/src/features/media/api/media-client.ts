@@ -19,11 +19,23 @@ export const discardDraft = (id: string) => apiRequest<void>(`/media/assets/${en
 export const preflightImage = (id: string, signal?: AbortSignal) => apiRequest<{ allowed: boolean; reason: string | null; settings_path?: string }>(`/media/assets/${encodeURIComponent(id)}/preflight`, { signal });
 export const getComfySample = (kind: "text" | "reference") => apiRequest<{ workflow: Workflow; values: Record<string, string | number>; dependencies: { nodes: string[]; models: string[] } }>(`/media/comfy-samples/${kind}`);
 
+const IMAGE_INPUT_MESSAGES = {
+  image_file_unsupported: "Choose a still PNG, JPEG, or WebP image up to 10 MiB.",
+  image_file_read_failed: "The photo could not be read. Please select it again.",
+};
+
+export class ImageUploadInputError extends Error {
+  constructor(readonly code: "image_file_unsupported" | "image_file_read_failed") {
+    super(IMAGE_INPUT_MESSAGES[code]);
+    this.name = "ImageUploadInputError";
+  }
+}
+
 export async function uploadImage(file: File, scopeKind: "character" | "thread" | "world", scopeId: string, signal?: AbortSignal) {
-  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) throw new Error("PNG·JPEG·WebP 정지 이미지 10MiB 이하를 선택해 주세요.");
+  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) throw new ImageUploadInputError("image_file_unsupported");
   const data = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("사진을 읽을 수 없습니다."));
+    reader.onerror = () => reject(new ImageUploadInputError("image_file_read_failed"));
     reader.onload = () => resolve(String(reader.result).split(",")[1]);
     reader.readAsDataURL(file);
   });

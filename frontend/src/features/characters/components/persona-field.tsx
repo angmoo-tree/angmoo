@@ -26,7 +26,9 @@ export function PersonaField({ label, name, value, defaultValue = "", onChange, 
   const uiText = useUiText("characters");
   const [draft, setDraft] = useState(defaultValue);
   const current = value ?? draft;
-  const error = personaLengthError(current, limit);
+  const lengthError = personaLengthError(current, limit);
+  const error = lengthError ? uiText("Up to {{limit}} characters allowed. You are {{excess}} over the limit.",
+    { limit: formatNumber(lengthError.limit), excess: formatNumber(lengthError.excess) }) : undefined;
   // LOCAL: creation and editing share backend-bound name guidance, never a rendered form value.
   const helper = description ?? ((name === "worldview" || label === "캐릭터 설명")
     ? uiText("{{user}}는 활동할 때 이 World의 내 프로필 이름으로, {{char}}는 이 캐릭터 이름으로 적용됩니다. 예: 동료: {{user}}. 카드의 별도 대화 예시에서는 사용자 역할을 ‘대화 상대’로 유지합니다.")

@@ -9,13 +9,21 @@ export type RequestOptions = Omit<RequestInit, "body"> & {
   suppressAuthFailureEvent?: boolean;
 };
 
+export type RequestValidationFailure = {
+  code: string;
+  message: string;
+  params?: Partial<Record<"limit" | "minimum" | "maximum" | "remaining", number>>;
+};
+
+type ValidationFormatter = (detail: unknown[]) => string | RequestValidationFailure | null;
+
 export { ApiRequestError } from "@/lib/http/error-contract";
 import { ApiRequestError } from "@/lib/http/error-contract";
 
 function getErrorMessage(
   payload: unknown,
   fallback: string,
-  formatValidation: (detail: unknown[]) => string | null,
+  formatValidation: ValidationFormatter,
 ) {
   if (
     payload &&
@@ -63,7 +71,7 @@ function statusMessage(status: number) {
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
-  formatValidation: (detail: unknown[]) => string | null = getValidationMessage,
+  formatValidation: ValidationFormatter = getValidationMessage,
 ) {
   const {
     body,
@@ -108,8 +116,10 @@ export async function apiRequest<T>(
       notifyAuthChanged();
     }
     const { code, params } = safeErrorDetails(payload);
-    throw new ApiRequestError(getErrorMessage(payload, statusMessage(response.status), formatValidation),
-      response.status, code, params, response.headers.get("Retry-After"));
+    const failure = getErrorMessage(payload, statusMessage(response.status), formatValidation);
+    const validation = typeof failure === "string" ? null : failure;
+    throw new ApiRequestError(typeof failure === "string" ? failure : failure.message,
+      response.status, validation?.code ?? code, { ...params, ...validation?.params }, response.headers.get("Retry-After"));
   }
 
   return payload as T;

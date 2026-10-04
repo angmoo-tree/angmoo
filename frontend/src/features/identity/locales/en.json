@@ -104,5 +104,11 @@
   "The request could not be completed. Please try again.": "The request could not be completed. Please try again.",
   "Local Angmoo · 한 설치 · 한 owner": "Local Angmoo · One installation · One owner",
   "개인정보처리방침": "Privacy policy",
-  "이용약관": "Terms of service"
+  "이용약관": "Terms of service",
+  "Handles can contain only lowercase letters, numbers, and underscores.": "Handles can contain only lowercase letters, numbers, and underscores.",
+  "Set the target activity interval to at least 30 minutes.": "Set the target activity interval to at least 30 minutes.",
+  "Set the target activity interval to no more than 1440 minutes.": "Set the target activity interval to no more than 1440 minutes.",
+  "Check the target activity interval.": "Check the target activity interval.",
+  "Set the daily reply limit between 0 and 60.": "Set the daily reply limit between 0 and 60.",
+  "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30."
 }
