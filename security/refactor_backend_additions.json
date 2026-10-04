@@ -27764,6 +27764,32 @@
       "test_suppressions": {
         "tests/runtime/test_gemini_schema_missing_contract.py": {}
       }
+    },
+    {
+      "commit": "ab15b7b641f875e37b47e84b60d4bfb3cc696a96",
+      "feature_id": "AR-MULTILINGUAL-CLOSEOUT-DOCS-20261004",
+      "reason": "Issue 360 follow-up: register the exact first introduction of three previous closeout verification documents; immutable source and historical records retained.",
+      "tracked_files": {
+        "docs/verification/multilingual-timezone-gemini-sns-contract-matrix-20261003.md": "66e206742503671006fe6a8d2441acf9d9600da0",
+        "docs/verification/multilingual-timezone-gemini-sns-integration-20261003.md": "1a22ea7ba9ff64bba17dc8dba9a92814963bbeed",
+        "docs/verification/multilingual-timezone-gemini-sns-owner-inventory-20261003.md": "4e34195834c3b662fb1b9f988185ca91e2012aeb"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "b9e6142e826fba5a7110d8ffcb422003142df261",
+      "feature_id": "AR-MULTILINGUAL-UI-CONTRACT-FIXES-20261004",
+      "reason": "Issue 360 follow-up: exact F01-F04 committed source introductions and unchanged collected-node coverage; frozen history retained.",
+      "tracked_files": {
+        "docs/verification/multilingual-ui-contract-fixes-20261004.md": "c57619aabcc44fba72400f5d0bb65e8e60c550ac",
+        "frontend/scripts/test-ui-error-contracts.mjs": "f91410ba2f5bf16ca27df64b0069f55e38e332e2",
+        "frontend/src/features/world-packages/utils/error-presentation.ts": "1c8d887430547dfa23a32442accb3e5df8f61669"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
