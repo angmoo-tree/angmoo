@@ -86,6 +86,11 @@ class RoutineLane:
         return existing is not None and existing.status == "succeeded"
 
     def validate_relationships(self, state):
+        from app.contracts.read_deadline import bounded_read
+        with bounded_read(2.0):
+            self._validate_relationships(state)
+
+    def _validate_relationships(self, state):
         try:
             identity = state.get("identity", {})
             if (identity.get("activity_id", self.ctx.run_id) != self.ctx.run_id

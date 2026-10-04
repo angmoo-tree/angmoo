@@ -1,5 +1,5 @@
 {
-  "edge_count": 5535,
+  "edge_count": 5537,
   "external_import_count": 4019,
   "module_count": 1364,
   "modules": [
@@ -15976,6 +15976,7 @@
         "app.config",
         "app.contracts.activity_thought",
         "app.contracts.activity_thought_output",
+        "app.contracts.read_deadline",
         "app.contracts.routine_output",
         "app.core.sqlite_concurrency",
         "app.domains.characters.policies.authored_names",
@@ -16068,6 +16069,7 @@
       "imports": [
         "app.config",
         "app.contracts.activity_thought",
+        "app.contracts.read_deadline",
         "app.core.sqlite_concurrency",
         "app.domains.relationships.contracts.social_context",
         "app.domains.routines.models",

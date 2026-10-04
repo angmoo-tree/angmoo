@@ -42,6 +42,12 @@ class SocialLane:
 
     async def guard(self, state):
         await self.scope_guard(state)
+        from app.contracts.read_deadline import bounded_read
+        with bounded_read(2.0):
+            self.guard_selected_inputs(state)
+        return {}
+
+    def guard_selected_inputs(self, state):
         # Committed effects can change affordances, so do not recheck old target
         # snapshots after Execute. Settlement validates its own source receipts.
         if state.get("stage") in {"TargetSelector", "PrepareImageRecall", "RecallSelected", "BuildDecisionContext", "ActionPlanner", "DecisionDraft", "ValidateDecision", "Writer", "ValidateDraft", "Execute"}:
@@ -59,8 +65,6 @@ class SocialLane:
                     post = self.ctx.db.get(Post, identifier, populate_existing=True)
                     if post is None or post.world_id != self.actor.world_id or post.deleted_at or post.report_hidden_at or post.visibility != "public" or post_revision(post) != revision:
                         raise ValueError("activity_source_changed")
-        return {}
-
     def validate_relationship_candidate(self, state, candidate):
         binding = RelationshipValidationBinding(self.ctx.run_id, self.lane,
             candidate["target_id"], candidate.get("counterpart_id"))

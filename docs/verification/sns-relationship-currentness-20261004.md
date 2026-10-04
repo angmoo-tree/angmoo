@@ -47,7 +47,7 @@ legacy 입력은 알려진 intro, 정확한 row/header schema, 원래 row 순서
 
 receipt는 snapshot당 최대 12개 참조·16KiB로 제한한다. actor/target/state는 명시적인 scoped ID batch로 읽고, block도 관련 ID 집합으로 제한한다. 다른 관계의 추가/변경이나 다른 actor의 outgoing 변경 때문에 고정 입력을 무효화하지 않는다.
 
-기본 누적 원본 조회 기한은 2초이고 설정 상한은 10초다. runtime은 현재 Connection의 SQLite progress handler와 statement별 남은 `busy_timeout`을 적용하고, 성공/실패 후 이전 timeout과 handler 소유 상태를 복구한다. 새 Connection/Session이나 별도 DB transaction을 생성하지 않는다. 합성 exclusive lock 및 오래 걸리는 recursive SQL은 50ms 테스트 deadline에서 native 중단되고, 이후 Connection을 정상 재사용하는 검사를 통과했다. Connection pool 취득·OS 전체 스케줄링 지연까지 완전한 시간 보장으로 확대하지 않는다.
+기본 누적 원본 조회 기한은 2초이고 service 설정 상한은 10초다. 여러 후보/상대를 확인하는 SocialLane/Routine guard는 하나의 마감 시각을 공유하여 snapshot마다 예산을 새로 시작하지 않는다. runtime은 현재 Connection의 SQLite progress handler와 statement별 남은 `busy_timeout`을 적용하고, 성공/실패 후 적용한 handler를 제거하고 이전 timeout을 복구한다. 새 Connection/Session이나 별도 DB transaction을 생성하지 않는다. 합성 exclusive lock 및 오래 걸리는 recursive SQL은 50ms 테스트 deadline에서 native 중단되고, 이후 Connection을 정상 재사용하는 검사를 통과했다. Connection pool 취득·OS 전체 스케줄링 지연까지 완전한 시간 보장으로 확대하지 않는다.
 
 | 참조 수 | SQLAlchemy canonical 읽기 | native timeout PRAGMA | receipt bytes |
 | --- | --- | --- | --- |
@@ -106,6 +106,7 @@ SDK 제출 hook은 limiter/semaphore 대기 뒤에 다시 검증한다. 실제 �
 | `before.xml` | 6 FAIL / 1 PASS. 수정 전 실제 lane 순서 오판 재현과 기존 버전 변경 보호 |
 | `acceptance-native.xml` | 116 PASS. 신규 Relationships 78개 + 실제 activity 경계 26개 + 기존 Feed 8개 + bind_run 관련 4개 |
 | `bounded-measurements.xml` | 3 PASS. 0/1/12 참조 및 native timeout overhead 측정; 같은 acceptance node의 추가 계측 |
+| `accumulated-guard.xml` | 49 PASS. 여러 후보의 누적 마감 시각 검사 1개 + 영향받는 기존/new lane 경계의 재검사 |
 | `regressions.xml` | 308 PASS / 1 SKIP. 기존 Relationships/Chat/Combined/Routine/재개/SDK/관찰/보존/다국어/이미지 lifecycle |
 | `regressions-final.xml` | 마지막 native deadline/SDK transaction 종료 보완 이후 같은 회귀의 재실행 결과는 최종 기록에 기재 |
 

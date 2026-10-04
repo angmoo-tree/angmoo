@@ -138,6 +138,36 @@ def test_t10_new_run_pins_policy_and_existing_legacy_run_is_not_rewritten(relati
     assert read_currentness_policy(resumed.result) == LEGACY_CURRENTNESS
 
 
+def test_t25_multiple_candidates_share_one_guard_deadline(relation_case, monkeypatch):
+    from time import monotonic
+    from app.contracts.read_deadline import current_read_deadline
+    from app.runtime.autonomous_activity import social_lane as owner
+    case = relation_case
+    lane, state = _lane(case), _new_state(case)
+    second = deepcopy(state["candidates"][0])
+    second["target_id"] = "second-target"
+    state["candidates"].append(second)
+    state["selections"] = []  # Selector guards every bounded candidate.
+    receipt = deepcopy(state["relationship_validation_receipts"]["post-target"])
+    receipt["binding"]["target_id"] = second["target_id"]
+    state["relationship_validation_receipts"][second["target_id"]] = receipt
+    original = owner.validate_relationship
+    checked = []
+    def validate(*args, **kwargs):
+        assert current_read_deadline.get() is not None
+        checked.append(kwargs["binding"].target_id)
+        result = original(*args, **kwargs)
+        # Move the clock boundary past the accumulated budget without sleep.
+        current_read_deadline.set(monotonic() - 1)
+        return result
+    monkeypatch.setattr(owner, "validate_relationship", validate)
+    with pytest.raises(SocialContextValidationError) as caught:
+        asyncio.run(lane.guard(state))
+    assert caught.value.reason == "canonical_unavailable"
+    assert checked == ["post-target", "second-target"]
+    assert current_read_deadline.get() is None
+
+
 def _new_state(case, snapshot=None):
     snapshot = snapshot or case.snapshot(case.relations)
     state = _state(case, snapshot)
