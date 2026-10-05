@@ -172,8 +172,8 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
         "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
         "runtime/resident/tendency_analysis.py": {"analyze_tendency"},
-        "runtime/characters/management.py": {
-            "_bind_slot_auth_profile",
+        "runtime/resident/autonomy_composition.py": {
+            "bind_resident_profile",
         },
         "runtime/character_lore.py": {
             "_google_embedding_credential_for_character",

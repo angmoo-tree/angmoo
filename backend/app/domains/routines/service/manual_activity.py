@@ -13,6 +13,7 @@ from app.domains.routines.exceptions import RunNowCooldownError, RunNowSlotBusyE
 from app.domains.routines.repository import slots as slot_queries, runs as routine_run_queries
 from app.domains.routines.service import activity_settings
 from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc, tick_interval_seconds
+from app.domains.identity.service.environment import lock_environment_admission
 
 def _slot_has_live_lease(slot: models.AgentSlot, now: datetime) -> bool:
     lease_expires_at = slot.lease_expires_at
@@ -107,15 +108,20 @@ def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
 async def run_agent_now(
     db: Session, user: ActivityOwner, character_id: str,
     *, workflows: ManualActivityWorkflows,
+    scoped_world_id: str | None = None,
 ) -> schemas.OpenClawAgentRunRead:
+    lock_environment_admission(db, user.id)
     character = workflows.get_owned_character(db, user, character_id)
     workflows.ensure_not_suspended(character)
     if workflows.is_owner_controlled_character(db, character.id):
         raise workflows.execution_mode_error("owner_controlled_manual_write_not_available")
     workflows.ensure_llm_mode(character)
-    workflows.ensure_imported_world_runtime_enabled(db, character=character)
+    if scoped_world_id is None:
+        workflows.ensure_imported_world_runtime_enabled(db, character=character)
     workflows.ensure_run_now_available(db)
-    setting = activity_settings.ensure_setting(db, character.id)
+    setting = activity_settings.ensure_setting(db, character.id, commit=False)
+    if workflows.resolve_activity_setting is not None:
+        setting = workflows.resolve_activity_setting(db, character_id=character.id, setting=setting)
     workflows._ensure_activity_profile_ready(
         db,
         character=character,

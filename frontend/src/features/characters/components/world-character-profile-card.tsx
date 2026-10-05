@@ -11,9 +11,9 @@ import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import type { WorldCharacterPublicProfile } from "@/features/characters/types/world-character-profile";
 
-export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, onBack, chatAction, chatNotice, children }: {
+export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, onBack, chatAction, profileActions, metrics, chatNotice, children }: {
   profile: WorldCharacterPublicProfile; worldId: string; worldCharacterId: string; onBack?: () => void;
-  chatAction: ReactNode; chatNotice: ReactNode; children: ReactNode;
+  chatAction?: ReactNode; profileActions?: ReactNode; metrics?: ReactNode; chatNotice?: ReactNode; children?: ReactNode;
 }) {
   const uiText = useUiText("characters");
   return (
@@ -43,17 +43,18 @@ export function WorldCharacterProfileCard({ profile, worldId, worldCharacterId, 
               textClassName={styles.profileAvatarText}
             />
           </span>
-          {chatAction}
+          <div className={styles.profileActions}>{profileActions ?? chatAction}</div>
         </div>
         <div className={styles.identity}>
           <h2>{profile.display_name}</h2>
           {profile.handle ? <p>{formatHandle(profile.handle)}</p> : null}
           <div className={styles.badges}>
-            <span>{profile.control_mode === "owner_controlled" ? uiText("사용자 조종") : uiText("자율 앵무")}</span>
+            <span>{profile.control_mode === "owner_controlled" ? uiText("사용자") : uiText("자율 앵무")}</span>
           </div>
           {profile.intro ? <div className={styles.intro}>{profile.intro}</div> : null}
           {profile.role_key ? <details className={styles.profileDetails}><summary>{uiText("World 프로필 정보")}</summary><p>{profile.role_key}</p></details> : null}
         </div>
+        {metrics}
         {chatNotice}
       </div>
       {children}

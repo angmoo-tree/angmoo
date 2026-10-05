@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-import { WorldCharacterProfile } from "@/composition/screens/world-character-profile-screen";
+import { WorldCharacterManagementScreen } from "@/composition/screens/world-character-management-screen";
 import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
@@ -296,12 +296,12 @@ function WorldSection({
 
   if (activeSection.id === "characters") {
     return worldCharacterId ? (
-      <WorldCharacterProfile
+      <WorldCharacterManagementScreen
         worldCharacterId={worldCharacterId}
         worldId={worldId}
       />
     ) : (
-      <WorldCharacterDirectory worldId={worldId} />
+      <WorldCharacterDirectory key={worldId} worldId={worldId} />
     );
   }
 

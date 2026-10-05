@@ -10,6 +10,9 @@ import Link from "next/link";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
 import { useEffect, useMemo, useState } from "react";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
+import { RelationshipGraphNode } from "./relationship-graph-node";
 
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -52,16 +55,6 @@ function position(index: number, count: number) {
   return { x: 240 + Math.cos(angle) * 145, y: 170 + Math.sin(angle) * 120 };
 }
 
-function graphNodeLabelLines(displayName: string): string[] {
-  const visibleCharacters = Array.from(displayName.replace(/\s+/g, "")).slice(0, 8);
-  if (visibleCharacters.length <= 4) return [visibleCharacters.join("")];
-  const splitAt = Math.ceil(visibleCharacters.length / 2);
-  return [
-    visibleCharacters.slice(0, splitAt).join(""),
-    visibleCharacters.slice(splitAt).join(""),
-  ];
-}
-
 export function RelationshipGraphClient({
   characterId,
   worldId,
@@ -74,12 +67,21 @@ export function RelationshipGraphClient({
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("relationships");
   const router = useRouter();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [depth, setDepth] = useState<1 | 2>(1);
-  const [graph, setGraph] = useState<RelationshipGraphRead | null>(null);
+  const [storedGraph, setGraph] = useState<RelationshipGraphRead | null>(null);
+  const [loadedIdentity, setLoadedIdentity] = useState<string | null>(null);
+  const identity = JSON.stringify([characterId, worldId, user?.id ?? null]);
+  const graph = loadedIdentity === identity && status === "authenticated" ? storedGraph : null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requestVersion, setRequestVersion] = useState(0);
+
+  useEffect(() => {
+    const changed = () => { setGraph(null); setLoading(true); setRequestVersion((value) => value + 1); };
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -89,26 +91,31 @@ export function RelationshipGraphClient({
     }
     if (status !== "authenticated") return;
     let active = true;
-    void getRelationshipGraph(characterId, worldId, depth, provider)
+    const scope = captureAuthRequestScope();
+    const controller = new AbortController();
+    queueMicrotask(() => { if (active) { setGraph(null); setLoading(true); } });
+    void getRelationshipGraph(characterId, worldId, depth, provider, { signal: controller.signal })
       .then((result) => {
-        if (active) {
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           setGraph(result);
+          setLoadedIdentity(JSON.stringify([characterId, worldId, scope.userId]));
           setError(null);
         }
       })
       .catch((nextError) => {
-        if (active) {
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           const code = nextError instanceof Error ? nextError.message : "relationship_query_failed";
-          setError(ERROR_LABELS[code] ?? code);
+          setError(ERROR_LABELS[code] ?? ERROR_LABELS.relationship_query_failed);
         }
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) setLoading(false);
       });
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [characterId, depth, provider, requestVersion, router, status, worldId]);
+  }, [characterId, depth, provider, requestVersion, router, status, user?.id, worldId]);
 
   const orderedNodes = useMemo(() => {
     if (!graph) return [];
@@ -292,10 +299,18 @@ export function RelationshipGraphClient({
                   const dy = (end.x-start.x)/length*18;
                   const cx = (start.x+end.x)/2+dx;
                   const cy = (start.y+end.y)/2+dy;
+                  const startRadius = orderedNodes.find((node) => node.world_character_id === edge.actor_world_character_id)?.is_center ? 35 : 29;
+                  const endRadius = orderedNodes.find((node) => node.world_character_id === edge.target_world_character_id)?.is_center ? 35 : 29;
+                  const startDistance = Math.hypot(cx - start.x, cy - start.y) || 1;
+                  const endDistance = Math.hypot(cx - end.x, cy - end.y) || 1;
+                  const startX = start.x + (cx - start.x) / startDistance * startRadius;
+                  const startY = start.y + (cy - start.y) / startDistance * startRadius;
+                  const endX = end.x + (cx - end.x) / endDistance * (endRadius + 4);
+                  const endY = end.y + (cy - end.y) / endDistance * (endRadius + 4);
                   return (
                     <g key={edge.relationship_state_id}>
                     <path
-                      d={`M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`}
+                      d={`M ${startX} ${startY} Q ${cx} ${cy} ${endX} ${endY}`}
                       fill="none"
                       className="stroke-state-running"
                       strokeWidth="2"
@@ -305,27 +320,7 @@ export function RelationshipGraphClient({
                     </g>
                   );
                 })}
-                {orderedNodes.map((node) => {
-                  const point = positions.get(node.world_character_id)!;
-                  const labelLines = graphNodeLabelLines(node.display_name);
-                  return (
-                    <g key={node.world_character_id}>
-                      <circle cx={point.x} cy={point.y} r={node.is_center ? 35 : 29} className={node.is_center ? "fill-action-dark" : "fill-surface-container-high"} />
-                      <text
-                        x={point.x}
-                        y={labelLines.length === 1 ? point.y + 4 : point.y - 3}
-                        textAnchor="middle"
-                        className={node.is_center ? "fill-on-action-dark text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}
-                      >
-                        {labelLines.map((line, index) => (
-                          <tspan key={`${node.world_character_id}-label-${index}`} x={point.x} dy={index === 0 ? 0 : 13}>
-                            {line}
-                          </tspan>
-                        ))}
-                      </text>
-                    </g>
-                  );
-                })}
+                {orderedNodes.map((node) => <RelationshipGraphNode key={node.world_character_id} node={node} point={positions.get(node.world_character_id)!} />)}
               </svg>
             </div>
             {graph.meta.truncated ? <p className="mt-3 text-xs text-on-surface-variant">{uiText("표시 상한에 따라 일부 관계만 보입니다.")}</p> : null}

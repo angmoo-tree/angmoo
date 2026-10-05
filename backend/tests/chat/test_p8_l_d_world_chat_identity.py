@@ -16,16 +16,25 @@ from chat_service_support import messages as world_chat
 def _create_tables(engine) -> None:
     from app.domains.chat.models import MessageAttachment
     from app.domains.identity.models_environment import EnvironmentTimezoneChange, LocalEnvironment
+    from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot
+    from app.domains.characters.models import AgentImageGenerationSetting
+    from app.domains.routines.models import AgentActivitySetting
+    from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
     for table in (
         models.User.__table__,
         models.InstallationIdentity.__table__,
         LocalEnvironment.__table__,
         EnvironmentTimezoneChange.__table__,
         models.Character.__table__,
+        CharacterImportSnapshot.__table__,
+        CharacterImportOrigin.__table__,
+        AgentActivitySetting.__table__,
+        AgentImageGenerationSetting.__table__,
         models.LlmCredential.__table__,
         models.World.__table__,
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
+        WorldCharacterConfiguration.__table__,
         models.WorldCharacterBlock.__table__,
         models.UserMessagePreference.__table__,
         models.MessageThread.__table__,
@@ -176,6 +185,9 @@ def _seed_world(
         ]
     )
     db.flush()
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    for character, role in ((requester_character, requester), (responding_character, responding)):
+        initialize_created_world_character(db, character=character, world_character=role)
     return requester, responding
 
 

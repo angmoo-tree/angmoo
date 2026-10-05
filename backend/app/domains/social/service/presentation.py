@@ -278,7 +278,7 @@ def _post_media_reads(db: Session, post: models.Post) -> list[schemas.PostMediaR
     ]
 
 
-def _post_author_identity(db: Session, post: models.Post) -> dict[str, str | bool | None]:
+def _post_author_identity(db: Session, post: models.Post, *, world_profiles=None) -> dict[str, str | bool | None]:
     if post.author_character_id:
         character = character_profiles.get_character(db, post.author_character_id)
         if character is not None:
@@ -289,6 +289,14 @@ def _post_author_identity(db: Session, post: models.Post) -> dict[str, str | boo
                     "handle": None,
                     "avatar_url": None,
                 }
+            if post.world_id is not None:
+                # World reads receive a typed, batched profile projection at
+                # their owning read boundary. Historical names remain safe
+                # while an unavailable role never borrows a live local profile.
+                profile = (world_profiles or {}).get(post.author_world_character_id)
+                if profile is not None and profile.world_id == post.world_id and profile.character_id == post.author_character_id:
+                    return {"name": profile.display_name, "handle": profile.handle, "avatar_url": profile.avatar_url}
+                return {"name": post.author_name, "handle": None, "avatar_url": None}
             return {
                 "name": character.name,
                 "handle": character.handle,

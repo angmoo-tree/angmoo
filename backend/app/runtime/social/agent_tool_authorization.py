@@ -9,6 +9,10 @@ from app.runtime.routines import activity_policy as agent_activity_policy
 
 
 class RuntimeAgentToolReferences:
+    def post_author_references(self, db: Session):
+        from app.runtime.social.manual_feed_references import RuntimeManualFeedReferences
+        return RuntimeManualFeedReferences(db)
+
     @property
     def activity_policy_denied(self) -> type[Exception]:
         return agent_activity_policy.ActivityPolicyDeniedError

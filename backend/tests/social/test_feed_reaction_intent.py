@@ -27,6 +27,7 @@ from app.integrations.direct_llm import RunLlmTracker
 from app.domains.social.service.feed_reaction_validation import validate_reaction_decision
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.social.feed_workflows import run_world_keyword_feed
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 
 
 KEYWORDS = [
@@ -200,6 +201,7 @@ def _seed(db: Session, *, with_candidate: bool):
     )
     db.add(actor_wc)
     db.flush()
+    initialize_created_world_character(db, character=actor, world_character=actor_wc)
     db.add_all(
         [
             models.CharacterActiveWorld(
@@ -275,6 +277,7 @@ def _seed(db: Session, *, with_candidate: bool):
         )
         db.add(author_wc)
         db.flush()
+        initialize_created_world_character(db, character=author, world_character=author_wc)
         target_post = models.Post(
             id="post-target",
             author_user_id=author_user.id,

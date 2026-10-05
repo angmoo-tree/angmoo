@@ -16,6 +16,8 @@ from app.domains.routines.service import activity_policy as canonical_activity_p
 from app.domains.routines.repository.activity_counts import count_public_actions_since, _count_action_today, _latest_action_at
 from app.domains.routines.utils.activity_actions import _normalize_action_types, _public_action_log_types
 from app.domains.routines.service.activity_policy import _evaluate_counted_actions, _block_actions
+from app.runtime.world_configuration.effective_values import setting_for_input
+from app.runtime.routines.configuration_reads import read_effective_setting
 
 APP_TIMEZONE = agent_activity_schedule.APP_TIMEZONE
 TickSchedule = agent_activity_schedule.TickSchedule
@@ -56,16 +58,21 @@ def build_activity_policy(
     character_id: str,
     now: datetime | None = None,
     ignore_active_hours: bool = False,
+    input_snapshot: dict | None = None,
+    frozen_input: bool = False,
 ) -> ActivityPolicy:
+    reader = (lambda _db, *, character_id, setting: setting_for_input(setting, input_snapshot, character_id=character_id)) if frozen_input else read_effective_setting
     return canonical_activity_policy.build_activity_policy(
         db, character_id=character_id, now=now,
         ignore_active_hours=ignore_active_hours, timezone_reader=activity_timezone,
+        settings_reader=reader,
     )
 
 
 def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str) -> None:
     return canonical_activity_policy.assert_action_allowed(
         db, run=run, action=action, timezone_reader=activity_timezone,
+        settings_reader=lambda _db, *, character_id, setting: setting_for_input(setting, run.input_snapshot, character_id=character_id),
     )
 
 

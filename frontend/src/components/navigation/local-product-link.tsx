@@ -22,7 +22,7 @@ export type LocalProductLinkProps = {
   target?: "_blank";
   title?: string;
   toolbarEquivalent?: "home";
-};
+} & { [key: `data-${string}`]: string | boolean | number | undefined };
 
 /**
  * Product-aware link boundary. Hosted Next routes stay available in Browser
@@ -39,6 +39,7 @@ export function LocalProductLink({
   target,
   title,
   toolbarEquivalent,
+  ...dataAttributes
 }: LocalProductLinkProps) {
   const uiText = useUiText("shell");
   const navigation = useContext(NavigationCapabilitiesContext);
@@ -50,6 +51,7 @@ export function LocalProductLink({
   if (unavailable) {
     return (
       <span
+        {...dataAttributes}
         aria-disabled="true"
         aria-label={ariaLabel}
         className={[className, styles.unavailable].filter(Boolean).join(" ")}
@@ -72,6 +74,7 @@ export function LocalProductLink({
 
   return (
     <Link
+      {...dataAttributes}
       aria-label={ariaLabel}
       className={className}
       data-post-card-ignore={dataPostCardIgnore}

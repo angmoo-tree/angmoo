@@ -1,6 +1,6 @@
 "use client";
 import { useOwnerReactions } from "@/features/social/hooks/use-owner-reactions";
-import { SocialReplyTree } from "@/features/social/components/social-reply-tree";
+import { applyConfirmedReaction } from "@/features/social/utils/confirmed-reactions";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
@@ -21,7 +21,7 @@ import { listAgents } from "@/features/characters/api/feed-actor";
 import { deleteSocialPost,getSocialPostThread,reportSocialPost } from "@/features/social/api/social-feed-client";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
 import { type PostDetail,type PostReportReason,type PostSummary,type PostThreadRead } from "@/features/social/types/social-feed-contract";
-import { AUTH_CHANGED_EVENT,getStoredUser,type UserRead } from "@/lib/auth/browser-session";
+import { AUTH_CHANGED_EVENT,captureAuthRequestScope,isCurrentAuthRequestScope,getStoredUser,type UserRead } from "@/lib/auth/browser-session";
 
 
 const EMPTY_REPLIES: PostSummary[] = [];
@@ -57,7 +57,9 @@ export function PostDetailClient({
 
   const post = thread?.post ?? null;
   const requestGeneration = useRef(0);
-  const reactions = useOwnerReactions(`global:${postId}:${viewer?.id ?? "public"}`, () => void loadThread());
+  const reactions = useOwnerReactions(`global:${postId}:${viewer?.id ?? "public"}`, change => {
+    setThread(current => current ? { ...current, post: applyConfirmedReaction(current.post, change), replies: current.replies.map(reply => applyConfirmedReaction(reply, change)) } : current);
+  });
   const replies = thread?.replies ?? EMPTY_REPLIES;
   const repliesById = useMemo(() => mapRepliesById(replies), [replies]);
   const replyTree = useMemo(
@@ -67,16 +69,18 @@ export function PostDetailClient({
 
   async function loadThread() {
     const generation = ++requestGeneration.current;
+    const authScope = captureAuthRequestScope();
+    const readRevision = reactions.captureReadRevision();
     setLoading(true);
     setError(null);
 
     try {
       const read = await getSocialPostThread(postId);
-      if (generation === requestGeneration.current) setThread(read);
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setThread({ ...read, post: reactions.reconcilePost(read.post, readRevision), replies: read.replies.map(reply => reactions.reconcilePost(reply, readRevision)) });
     } catch (err) {
-      if (generation === requestGeneration.current) setError(err instanceof Error ? uiText(err.message) : uiText("게시글을 불러오지 못했습니다."));
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setError(err instanceof Error ? uiText(err.message) : uiText("게시글을 불러오지 못했습니다."));
     } finally {
-      if (generation === requestGeneration.current) setLoading(false);
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setLoading(false);
     }
   }
   useEffect(() => () => { ++requestGeneration.current; }, [postId, viewer?.id]);
@@ -310,10 +314,10 @@ export function PostDetailClient({
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
               {uiText("답글 {{count}}", {count: post.reply_count})}
             </h2>
-            <SocialReplyTree nodes={replyTree} renderRow={reply => (
+            {replyTree.map(node => (
               <ReplyNodeRow
-                key={reply.id}
-                node={{reply, children: []}}
+                key={node.reply.id}
+                node={node}
                 repliesById={repliesById}
                 rootPostId={post.id}
                 openPostMenuId={openPostMenuId}
@@ -327,7 +331,7 @@ export function PostDetailClient({
                 likeAction={reactions.likeAction}
                 onLike={reactions.setReaction}
               />
-            )} />
+            ))}
           </section>
         </>
       ) : null}

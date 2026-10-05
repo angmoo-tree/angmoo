@@ -34,3 +34,19 @@ class SqlAlchemySlotReferences:
 
     def get_character(self, character_id: str) -> Character | None:
         return self.db.get(Character, character_id)
+
+    def capture_activity_input(self, character_id: str) -> dict | None:
+        from app.runtime.routines.configuration_reads import capture_activity_input
+        return capture_activity_input(self.db, character_id=character_id)
+
+    def activity_timezone(self, character_id):
+        from app.runtime.routines.activity_policy import activity_timezone
+        return activity_timezone(self.db, character_id=character_id)
+
+    def activity_configuration_for_input(self, metadata, *, character_id):
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        return configuration_for_input(metadata, character_id=character_id)
+
+    def effective_settings_for_input(self, setting, metadata, *, character_id):
+        from app.runtime.world_configuration.effective_values import setting_for_input
+        return setting_for_input(setting, metadata, character_id=character_id)

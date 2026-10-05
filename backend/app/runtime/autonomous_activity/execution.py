@@ -20,6 +20,20 @@ class ActivityScopeChangedError(ValueError):
     pass
 
 
+def context_for_activity_run(ctx, run):
+    if run.activity_id == ctx.run_id:
+        return ctx
+    # The recovery lease belongs to a fresh run. Model/persona effects continue
+    # to use the original activity's accepted inputs and canonical effect ID.
+    from app.domains.routines.models import AgentRun
+    original_run = ctx.db.get(AgentRun, run.activity_id)
+    snapshot = getattr(original_run, "input_snapshot", None)
+    stored_configuration = (run.result or {}).get("_world_configuration")
+    if stored_configuration is not None:
+        snapshot = {**(snapshot or {}), "_world_configuration": stored_configuration}
+    return replace(ctx, run_id=run.activity_id, input_snapshot=snapshot)
+
+
 async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     from app.domains.world_characters.contracts.checkpoint_retention import (
         TERMINAL_STATUSES, business_result, completion,
@@ -63,9 +77,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     if binding is None:
         raise RuntimeError("personalized_activity_runtime_unavailable")
     lease_run_id = ctx.run_id
-    if run.activity_id != lease_run_id:
-        # New live slot owns recovery; effects retain the original canonical run ID.
-        ctx = replace(ctx, run_id=run.activity_id)
+    ctx = context_for_activity_run(ctx, run)
     # Diagnostics are optional and cannot hold the activity's execution lease.
     try:
         sink = observer()
@@ -93,6 +105,9 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     name_binding = read_name_binding(run.result)
     frozen_names = (run.result or {}).get("name_binding")
     name_policy = (run.result or {}).get("name_binding_policy")
+    from app.runtime.autonomous_activity.configuration import configuration_for_activity, accepted_autonomy
+    configuration = configuration_for_activity(ctx, actor)
+    frozen_configuration = configuration.request_snapshot() if configuration is not None else None
     from app.contracts.environment import EnvironmentSnapshot
     environment = EnvironmentSnapshot.from_dict((run.result or {}).get("environment_snapshot"))
     if policy is not None:
@@ -112,7 +127,7 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
         membership = ctx.db.get(WorldMembership, actor.membership_id, populate_existing=True)
         if (active is None or active.world_character_id != actor.id or current_actor is None
             or current_actor.world_id != identity["world_id"] or current_actor.control_mode != "autonomous"
-            or current_actor.status != "active" or not current_actor.autonomous_enabled
+            or current_actor.status != "active" or not accepted_autonomy(ctx, current_actor)
             or world is None or world.status != "published" or world.readiness_status != "publish_ready"
             or membership is None or membership.status != "active" or membership.user_id != ctx.user_id):
             raise ActivityScopeChangedError("activity_scope_changed")
@@ -133,6 +148,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("name_binding_changed")
         if (row.result or {}).get("name_binding_policy") != name_policy:
             raise ActivityScopeChangedError("name_binding_changed")
+        if (row.result or {}).get("_world_configuration") != frozen_configuration:
+            raise ActivityScopeChangedError("world_configuration_changed")
         if name_binding is not None:
             validate_name_binding(ctx.db, name_binding, actor=current_actor, owner_id=ctx.user_id)
         from app.domains.routines.models import AgentRun, AgentSlot

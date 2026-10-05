@@ -6,9 +6,14 @@ from app.domains.routines.service import activity_logs as agent_crud
 from app.domains.social.service import abuse_quota as community_abuse_quota
 from app.runtime.relationships import sqlalchemy_social_event
 from app.domains.social.service.timeline import SocialTimelineService
+from app.runtime.social.post_authors import world_post_author_for_write
 
 
 class RuntimeSocialWriteWorkflows:
+    def world_post_author(self, db: Session, *, character_id: str, world_id: str, world_character_id: str):
+        return world_post_author_for_write(db, character_id=character_id,
+            world_id=world_id, world_character_id=world_character_id)
+
     def log_activity(self, db: Session, *, user_id: str, character_id: str, action_type: str, target_post_id: str | None, reason: str, result: str) -> object:
         return agent_crud.log_activity(db, user_id=user_id, character_id=character_id, action_type=action_type, target_post_id=target_post_id, reason=reason, result=result)
 

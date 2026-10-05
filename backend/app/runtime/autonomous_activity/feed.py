@@ -15,7 +15,7 @@ from app.domains.social.service.world_feed import (
 from app.runtime.autonomous_activity.contracts import Candidate
 from app.runtime.autonomous_activity.social_lane import SocialLane, plain
 from app.runtime.relationships.experience_metrics import post_revision
-from app.runtime.social.world_feed_queries import WorldFeedQueries
+from app.runtime.autonomous_activity.configuration import ActivityFeedQueries
 
 
 class FeedLane(SocialLane):
@@ -23,10 +23,12 @@ class FeedLane(SocialLane):
         self.ctx.db.commit()
 
     def profile(self, *, neutral_weights=True):
-        profile = load_ready_search_profile(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
+        profile = load_ready_search_profile(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
             world_character_id=self.actor.id)
         if profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled:
             raise ValueError("activity_autonomy_disabled")
+        from app.runtime.autonomous_activity.configuration import character_for_activity
+        profile = replace(profile, character=character_for_activity(self.ctx, self.actor))
         if not neutral_weights:
             return profile
         if profile.explicit_actions is not None:
@@ -51,7 +53,7 @@ class FeedLane(SocialLane):
         self.save_preparation()
         if claim.duplicate_cycle:
             return {"candidates": [], "lane_data": {"duplicate_cycle": True}}
-        search = search_world_feed_candidates(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
+        search = search_world_feed_candidates(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
             profile=profile, keywords=claim.keywords, allowed_policy_actions=self.ctx.activity_policy.allowed_actions,
             now=self.ctx.run_started_at, search_index=self.ctx.social_search_index, search_state=self.ctx.social_search_state)
         claims = claim_feed_observations(self.ctx.db, profile=profile, candidates=search.candidates,
@@ -129,7 +131,7 @@ class FeedLane(SocialLane):
         data = state["lane_data"]["_feed"]
         raw = next(row for row in data["candidates"] if row["post_id"] == target_id)
         decision = next(row for row in state["decision"]["decisions"] if row["target_id"] == target_id)
-        current = revalidate_candidate_actions(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
+        current = revalidate_candidate_actions(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
             profile=self.profile(), candidate=WorldFeedCandidateRead.model_validate(raw),
             allowed_policy_actions=self.ctx.activity_policy.allowed_actions)
         if current is None or decision["action"] not in current[1]:

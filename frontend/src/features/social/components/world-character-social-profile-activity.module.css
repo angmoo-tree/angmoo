@@ -1,41 +1,6 @@
 .activity {
-  border-top: 1px solid var(--color-border-default);
   background: var(--color-surface);
   color: var(--color-text-default);
-}
-
-.metrics {
-  display: flex;
-  margin: 0;
-  flex-wrap: wrap;
-  gap: var(--spacing-section);
-  padding: 18px 20px 24px;
-}
-
-.metric {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px;
-}
-
-.metric dt,
-.metric dd {
-  margin: 0;
-}
-
-.metric dt {
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-small);
-  font-weight: 750;
-  overflow-wrap: anywhere;
-}
-
-.metric dd {
-  color: var(--color-text-strong);
-  font-size: var(--text-body-small);
-  font-weight: 900;
 }
 
 .tabs {
@@ -43,6 +8,29 @@
   border-top: 1px solid var(--color-border-default);
   border-bottom: 1px solid var(--color-border-default);
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.refreshError {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-control);
+  color: var(--color-state-danger);
+  padding: var(--spacing-phone);
+}
+
+.refreshError button {
+  min-height: 44px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  padding-inline: var(--spacing-phone);
+}
+
+.refreshError button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .tab {
@@ -167,14 +155,8 @@
 }
 
 @media (max-width: 360px) {
-  .metrics {
-    padding-inline: 8px;
-  }
-
   .metric {
-    align-items: center;
-    flex-direction: column;
-    gap: 1px;
+    gap: 4px;
   }
 }
 

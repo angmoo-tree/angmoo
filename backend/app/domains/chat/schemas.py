@@ -196,6 +196,12 @@ class WorldChatThreadListRead(BaseModel):
     max_threads: int | None = None
 
 
+class WorldChatThreadDeleteRead(BaseModel):
+    world_id: str
+    thread_id: str
+    outcome: Literal["deleted", "already_deleted"]
+
+
 class WorldChatThreadCreateRead(BaseModel):
     outcome: Literal["created", "reused", "resolution_required"]
     thread: WorldChatThreadRead | None = None

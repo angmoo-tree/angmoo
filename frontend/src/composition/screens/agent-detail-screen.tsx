@@ -7,7 +7,12 @@ import { GenerationSettingsPanel } from "@/features/media/components/generation-
 import { RecommendationTopicsPanel } from "@/features/social/components/recommendation-topics-panel";
 
 import { generationProfileLabel } from "@/config/generation-profiles";
-import { ProfileStatLink } from "@/features/characters/components/agent-detail-parts";
+import { ProfileStatistics } from "@/components/content/profile-statistics";
+import { CharacterManagementIdentity, CharacterManagementTabs } from "@/features/characters/components/character-management-navigation";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { relationshipGraphRoute } from "@/lib/navigation/product-routes";
+import profileStyles from "@/features/characters/components/world-character-profile.module.css";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 import { ExpandablePostText } from "@/components/content/expandable-post-text";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
 import { Button } from "@/components/ui/button";
@@ -27,7 +32,7 @@ DEFAULT_ACTIVE_HOURS_END,
 DEFAULT_ACTIVE_HOURS_START,
 isValidActiveHours,
 } from "@/features/characters/components/activity-hours-control";
-import { AGENT_TABS,asGoogleGeminiModel,asPollinationsImageModel,DEVICE_SCROLL_OWNER_SELECTOR,fileToBase64Payload,formatClockTime,getCredentialKeyStatus,getInitialAgentDetailTab,getVisualIdentityUi,ImageGenerationSettingsFields,inputClassName,isReplicateImageModel,LocalConnectionSettings,LoreSourcesCard,mediaGenerationLabel,mediaUsageFor,Metric,normalizeHandleInput,NumberInput,PersonaTextArea,ProfileBanner,ProfileEditModal,PromotionUsageSettings,RUN_NOW_SCHEDULER_GUARD_MS,SectionHeader,StatusTab,TendencyCard,ToggleInput,usageLimitMessage,WorldActivityProfileCard,type AgentDetailTab,type MediaGenerationState,type MediaKind } from "@/features/characters/components/agent-detail-parts";
+import { asGoogleGeminiModel,asPollinationsImageModel,DEVICE_SCROLL_OWNER_SELECTOR,fileToBase64Payload,formatClockTime,getCredentialKeyStatus,getInitialAgentDetailTab,getVisualIdentityUi,ImageGenerationSettingsFields,inputClassName,isReplicateImageModel,LocalConnectionSettings,LoreSourcesCard,mediaGenerationLabel,mediaUsageFor,Metric,normalizeHandleInput,NumberInput,PersonaTextArea,ProfileBanner,ProfileEditModal,PromotionUsageSettings,RUN_NOW_SCHEDULER_GUARD_MS,SectionHeader,StatusTab,TendencyCard,ToggleInput,usageLimitMessage,WorldActivityProfileCard,type AgentDetailTab,type MediaGenerationState,type MediaKind } from "@/features/characters/components/agent-detail-parts";
 import { DEFAULT_GOOGLE_GEMINI_MODEL,DEFAULT_USER_IMAGE_MODEL,getGoogleGeminiModelNote,GOOGLE_GEMINI_MODELS,type GoogleGeminiModel,type PollinationsImageModel } from "@/features/characters/config/model-options";
 import { AGENT_AUTONOMY_MUTATION_EVENT,clearAgentAutonomyMutationState,getAgentAutonomyMutationState,setAgentAutonomyMutationState } from "@/features/characters/stores/agent-session";
 import { type AgentActivityMaintenanceRead,type AgentAutonomyMutationEventDetail,type AgentAutonomyMutationState,type AgentCreationDraftImageStyle,type AgentDetailRead,type AgentLocalConnectionRead,type AgentProfileImageUsageRead,type AgentProfileMediaUploadInput } from "@/features/characters/types/agents";
@@ -55,6 +60,7 @@ Heart,
 ImageIcon,
 KeyRound,
 Mail,
+Network,
 MessageCircle,
 PauseCircle,
 Play,
@@ -1060,22 +1066,8 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
     <section className="min-h-full bg-white">
       <div className="sticky top-0 z-10 border-b border-[#eaedf2] bg-white/95 backdrop-blur-sm">
         <div className="flex min-h-[88px] items-center justify-between gap-3 px-5 py-4 md:px-9">
-          <div className="min-w-0">
-            <p className="text-[14px] font-bold text-[#ff6b6b]">Agent</p>
-            <h1 className="truncate text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-              {agent?.character.name ?? characterId}
-            </h1>
-            {agent?.character.handle ? (
-              <p className="truncate text-[14px] font-bold text-[#667085]">
-                {formatHandle(agent.character.handle)}
-              </p>
-            ) : null}
-            {agent ? (
-              <span className="mt-2 inline-flex rounded-full bg-[#f2f4f7] px-3 py-1 text-[12px] font-extrabold text-[#667085]">
-                {agent.character.execution_mode === "local" ? uiText("외부 연결") : uiText("서버 LLM")}
-              </span>
-            ) : null}
-          </div>
+          <CharacterManagementIdentity name={agent?.character.name ?? characterId} handle={agent?.character.handle ?? null}
+            role="Agent" badge={agent?.character.execution_mode === "local" ? uiText("외부 연결") : uiText("서버 LLM")} />
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
             <button
               type="button"
@@ -1117,32 +1109,7 @@ export function AgentDetailClient({ characterId }: { characterId: string }) {
           </div>
         </div>
 
-        {agent ? (
-          <nav
-            className="grid grid-cols-3 border-t border-[#eaedf2]"
-            aria-label={uiText("내 앵무 상세")}
-          >
-            {AGENT_TABS.map((tab) => {
-              const selected = tab.key === activeTab;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`relative flex h-14 min-w-0 flex-col items-center justify-center px-2 text-[15px] font-extrabold transition-colors sm:text-[16px] ${
-                    selected ? "text-[#101828]" : "text-[#667085] hover:text-[#101828]"
-                  }`}
-                  aria-pressed={selected}
-                >
-                  <span>{tab.label}</span>
-                  {selected ? (
-                    <span className="absolute inset-x-0 bottom-0 h-1 bg-[#ff6b6b]" />
-                  ) : null}
-                </button>
-              );
-            })}
-          </nav>
-        ) : null}
+        {agent ? <CharacterManagementTabs activeView={activeTab} onViewChange={setActiveTab} label={uiText("내 앵무 상세")} /> : null}
       </div>
 
       {error ? (
@@ -1336,6 +1303,9 @@ function ProfileTab({
   const posts = feed?.items ?? [];
   const isLocalAgent = agent.character.execution_mode === "local";
   const canStartMessage = !isLocalAgent && !isStaticFrontendProfile();
+  const graphContext = agent.activity_profile_readiness;
+  const graphHref = graphContext.can_view_graph === true && graphContext.world_id && graphContext.world_character_id
+    ? relationshipGraphRoute(agent.character.id, graphContext.world_id) : null;
 
   return (
     <div className="bg-white">
@@ -1343,7 +1313,7 @@ function ProfileTab({
       <section className="overflow-hidden bg-white">
         <ProfileBanner bannerUrl={agent.character.banner_url} />
         <div className="px-5 pb-8 md:px-9">
-          <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
             <div className="-mt-[54px] shrink-0 rounded-full border-[5px] border-white bg-white md:-mt-[66px]">
               <ProfileAvatar
                 name={agent.character.name}
@@ -1352,22 +1322,26 @@ function ProfileTab({
                 textClassName="text-[40px] md:text-[48px]"
               />
             </div>
-            <div className="mt-5 flex shrink-0 items-center gap-2">
+            <div className={profileStyles.profileActions}>
+              {graphHref ? <LocalProductLink href={graphHref} className={profileStyles.letterButton} ariaLabel={uiText("{{value0}}의 관계망 열기", { value0: agent.character.name })}
+                title={uiText("{{value0}}의 관계망 열기", { value0: agent.character.name })} data-profile-action="relationships"><Network size={20} aria-hidden="true" /></LocalProductLink> : null}
               {canStartMessage ? (
                 <button
                   type="button"
                   onClick={onStartMessage}
                   disabled={messageStarting}
-                  className="inline-flex size-11 items-center justify-center rounded-full border border-[#d0d5dd] bg-white text-[#101828] transition-colors hover:bg-[#f6f7f9] disabled:cursor-not-allowed disabled:opacity-60"
+                  className={profileStyles.letterButton}
+                  data-profile-action="mail"
                   aria-label={uiText("쪽지")}
                   title={uiText("쪽지")}
                 >
-                  <Mail size={18} aria-hidden="true" />
+                  <Mail size={20} aria-hidden="true" />
                 </button>
               ) : null}
               <button
                 type="button"
                 onClick={onOpenEditor}
+                data-profile-action="edit"
                 className="inline-flex h-11 items-center justify-center rounded-full bg-[#f2f4f7] px-5 text-[14px] font-extrabold text-[#667085] transition-colors hover:bg-[#eaedf2] hover:text-[#101828]"
               >
                 {uiText("프로필 수정")}</button>
@@ -1387,7 +1361,7 @@ function ProfileTab({
               {agent.character.one_liner || agent.character.persona_summary}
             </p>
           </div>
-          <ProfileStats profile={profile} agent={agent} />
+          <ProfileStats profile={profile} />
         </div>
       </section>
 
@@ -1988,60 +1962,14 @@ function SettingsTab({
   );
 }
 
-export function ProfileStats({
-  profile,
-  agent,
-}: {
-  profile: ProfileRead | null;
-  agent: AgentDetailRead;
-}) {
+export function ProfileStats({ profile }: { profile: ProfileRead | null }) {
   const uiText = useUiText("shell");
-  const firstRow = profile
-    ? [
-        uiText("팔로잉 {{value0}}", {value0: profile.following_count}),
-        uiText("앵무 팔로워 {{value0}}", {value0: profile.character_follower_count}),
-        uiText("사람 팔로워 {{value0}}", {value0: profile.user_follower_count}),
-      ]
-    : [uiText("오늘 리플 작성 {{value0}}", {value0: agent.activity_summary.today_comment_count})];
-  const secondRow = profile
-    ? [
-        uiText("지저귐 {{value0}}", {value0: profile.post_count}),
-        uiText("대꾸 {{value0}}", {value0: profile.reply_count}),
-        uiText("좋아요 {{value0}}", {value0: profile.liked_post_count}),
-        uiText("받은 좋아요 {{value0}}", {value0: profile.received_like_count}),
-      ]
-    : [
-        uiText("오늘 게시글 작성 {{value0}}", {value0: agent.activity_summary.today_post_count}),
-        uiText("오늘 좋아요 {{value0}}", {value0: agent.activity_summary.today_like_count}),
-      ];
-
-  return (
-    <div className="mt-6 space-y-2 text-[15px] font-bold text-[#667085]">
-      <div className="flex flex-wrap gap-x-6 gap-y-2">
-        {profile ? (
-          <>
-            <ProfileStatLink
-              href={`/profiles/characters/${agent.character.id}/follows?tab=following`}
-              label={firstRow[0]}
-            />
-            <ProfileStatLink
-              href={`/profiles/characters/${agent.character.id}/follows?tab=character_followers`}
-              label={firstRow[1]}
-            />
-            <ProfileStatLink
-              href={`/profiles/characters/${agent.character.id}/follows?tab=user_followers`}
-              label={firstRow[2]}
-            />
-          </>
-        ) : (
-          firstRow.map((stat) => <span key={stat}>{stat}</span>)
-        )}
-      </div>
-      <div className="flex flex-wrap gap-x-6 gap-y-2">
-        {secondRow.map((stat) => (
-          <span key={stat}>{stat}</span>
-        ))}
-      </div>
-    </div>
-  );
+  const formatNumber = useUiNumberFormatter();
+  if (!profile) return <p className={profileStyles.statisticsNotice} role="status">{uiText("프로필 통계를 불러오지 못했어요.")}</p>;
+  return <ProfileStatistics data-character-profile-metrics statistics={[
+    { label: uiText("게시글"), value: formatNumber(profile.post_count) },
+    { label: uiText("답글"), value: formatNumber(profile.reply_count) },
+    { label: uiText("좋아요"), value: formatNumber(profile.liked_post_count) },
+    { label: uiText("받은 좋아요"), value: formatNumber(profile.received_like_count) },
+  ]} />;
 }

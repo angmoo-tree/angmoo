@@ -23,17 +23,15 @@ import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { Button, IconButton } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, InlineError } from "@/components/ui/feedback";
-import { ListRow } from "@/components/ui/surfaces";
 import { PageHeader } from "@/components/ui/navigation";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { StatusChip } from "@/components/ui/status";
-import { formatHandle } from "@/utils/profile-presentation";
 
 import { activateCharacterAutonomy, deactivateCharacterAutonomy, listCharacterDashboardItems } from "@/features/characters/api/character-dashboard-client";
 import { presentCharacterAutonomy, sortCharactersForDashboard, summarizeCharacterAutonomy } from "@/features/characters/utils/character-dashboard-presentation";
 import { type CharacterAutonomyMutationState, type CharacterDashboardItem } from "@/features/characters/types/character";
 import { presentCharacterRecentActivity } from "@/features/characters/utils/character-recent-activity-presentation";
 import { CHARACTER_AUTONOMY_MUTATION_EVENT, CHARACTERS_CHANGED_EVENT, clearCharacterAutonomyMutationState, clearFirstCharacterWelcomePending, getCharacterAutonomyMutationStates, hasFirstCharacterWelcomePending, setCharacterAutonomyMutationState, type CharacterAutonomyMutationEventDetail } from "@/features/characters/stores/agent-session";
+import { CharacterManagementCard, CharacterManagementMetric as Metric } from "./character-management-card";
 import styles from "./characters-dashboard.module.css";
 
 export function AgentsDashboardClient() {
@@ -293,101 +291,42 @@ function CharacterRow({
   const timezone = item.activity_summary.timezone || "UTC";
 
   return (
-    <ListRow
-      className={styles.row}
-      data-character-id={item.character.id}
-      data-character-autonomy-state={presentation.state}
-    >
-      <ProfileAvatar
-        name={item.character.name}
-        avatarUrl={item.character.avatar_url}
-        sizeClassName="size-[58px]"
-        textClassName="text-[22px]"
-      />
-      <article className={styles.rowBody}>
-        <div className={styles.identityActionRow}>
-          <div className={styles.identity}>
-            <div className={styles.statusLine}>
-              <StatusChip label={uiText(presentation.label)} tone={presentation.tone} />
-            </div>
-            <Link
-              href={`/agents/${item.character.id}`}
-              className={styles.characterName}
-            >
-              {item.character.name}
-            </Link>
-            <p className={styles.handle}>{formatHandle(item.character.handle)}</p>
-            {item.character.one_liner ? (
-              <p className={styles.oneLiner}>{item.character.one_liner}</p>
-            ) : null}
-          </div>
-
-          {isExternal ? (
-            <Link
-              href={`/agents/${item.character.id}?tab=settings&focus=connection`}
-              className={styles.secondaryLink}
-            >
-              {uiText("연결 설정")}</Link>
-          ) : (
-            <Button
-              aria-label={uiText("{{value0}} 자율활동 {{value1}}", {value0: item.character.name, value1: uiText(presentation.actionLabel ?? "")})}
-              compact
-              disabled={Boolean(mutation)}
-              loading={Boolean(mutation)}
-              loadingLabel={presentation.actionLabel ? uiText(presentation.actionLabel) : undefined}
-              variant={presentation.actionVariant ?? "secondary"}
-              onClick={onToggle}
-            >
-              {item.settings.auto_enabled ? (
-                <PowerOff size={16} aria-hidden="true" />
-              ) : (
-                <Power size={16} aria-hidden="true" />
-              )}
-              {presentation.actionLabel ? uiText(presentation.actionLabel) : null}
-            </Button>
-          )}
-        </div>
-
-        {isExternal ? (
-          <div className={styles.metrics} data-character-metrics>
-            <Metric label={uiText("활동 제어")} value={uiText("연결된 앱에서 관리")} />
-            <Metric label={uiText("Angmoo 예약")} value={uiText("사용하지 않음")} />
-          </div>
-        ) : (
-          <>
-            <div className={styles.metrics} data-character-metrics>
-              <Metric
-                label={uiText("활동 시간")}
-                value={`${item.settings.active_hours_start}–${item.settings.active_hours_end} · ${timezone}`}
-              />
-              <Metric
-                label={uiText("다음 활동")}
-                value={nextActivityLabel(item, timezone, formatDate, uiText)}
-              />
-              <RecentActivityMetric item={item} timezone={timezone} />
-            </div>
-            <p className={styles.policyLine}>
-              {uiText("목표")}{item.settings.activity_interval_minutes}{uiText("분 · 글")}{" "}
-              {item.settings.max_posts_per_day}{uiText("/일 · 답글")}{" "}
-              {item.settings.max_comments_per_day}{uiText("/일")}</p>
-            {presentation.state === "failed" && item.assigned_slot?.last_error ? (
-              <p className={styles.runtimeError}>
-                {uiText("최근 실행 오류:")}{item.assigned_slot.last_error}
-              </p>
-            ) : null}
-          </>
-        )}
-      </article>
-    </ListRow>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className={styles.metric}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
+    <CharacterManagementCard
+      identity={{ id: item.character.id, name: item.character.name, handle: item.character.handle,
+        avatarUrl: item.character.avatar_url, intro: item.character.one_liner }}
+      href={`/agents/${item.character.id}`}
+      linkLabel={uiText("{{value0}}의 프로필 열기", { value0: item.character.name })}
+      autonomyState={presentation.state}
+      status={<StatusChip label={uiText(presentation.label)} tone={presentation.tone} />}
+      action={isExternal ? (
+        <Link href={`/agents/${item.character.id}?tab=settings&focus=connection`} className={styles.secondaryLink}>
+          {uiText("연결 설정")}
+        </Link>
+      ) : (
+        <Button
+          aria-label={uiText("{{value0}} 자율활동 {{value1}}", {value0: item.character.name, value1: uiText(presentation.actionLabel ?? "")})}
+          compact disabled={Boolean(mutation)} loading={Boolean(mutation)}
+          loadingLabel={presentation.actionLabel ? uiText(presentation.actionLabel) : undefined}
+          variant={presentation.actionVariant ?? "secondary"} onClick={onToggle}
+        >
+          {item.settings.auto_enabled ? <PowerOff size={16} aria-hidden="true" /> : <Power size={16} aria-hidden="true" />}
+          {presentation.actionLabel ? uiText(presentation.actionLabel) : null}
+        </Button>
+      )}
+      metrics={isExternal ? <>
+        <Metric label={uiText("활동 제어")} value={uiText("연결된 앱에서 관리")} />
+        <Metric label={uiText("Angmoo 예약")} value={uiText("사용하지 않음")} />
+      </> : <>
+        <Metric label={uiText("활동 시간")} value={`${item.settings.active_hours_start}–${item.settings.active_hours_end} · ${timezone}`} />
+        <Metric label={uiText("다음 활동")} value={nextActivityLabel(item, timezone, formatDate, uiText)} />
+        <RecentActivityMetric item={item} timezone={timezone} />
+      </>}
+      policy={!isExternal ? <>{uiText("목표")}{item.settings.activity_interval_minutes}{uiText("분 · 글")}{" "}
+        {item.settings.max_posts_per_day}{uiText("/일 · 답글")}{" "}{item.settings.max_comments_per_day}{uiText("/일")}</> : null}
+      notice={presentation.state === "failed" && item.assigned_slot?.last_error ? (
+        <p className={styles.runtimeError}>{uiText("최근 실행 오류:")}{item.assigned_slot.last_error}</p>
+      ) : null}
+    />
   );
 }
 

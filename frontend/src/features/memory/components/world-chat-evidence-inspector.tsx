@@ -16,10 +16,13 @@ import styles from "./memory-workspace.module.css";
 import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 export function WorldChatEvidenceInspector({ open, onOpenChange, requestId, threadId, worldId }: { open: boolean; onOpenChange: (open: boolean) => void; requestId: string | null; threadId: string; worldId: string }) {
-  return <EvidenceInspectorContent key={`${worldId}:${threadId}:${requestId}:${open}`} open={open} onOpenChange={onOpenChange} requestId={requestId} threadId={threadId} worldId={worldId} />;
+  const uiText = useUiText("memory");
+  return <Dialog description={uiText("답변 전에 고정되었고, 지금 다시 확인한 근거만 표시합니다.")} dialogAttributes={{ "data-world-chat-evidence-dialog": "true" }} onOpenChange={onOpenChange} open={open} title={uiText("이 답변의 근거")}>
+    <EvidenceInspectorContent key={`${worldId}:${threadId}:${requestId}:${open}`} open={open} requestId={requestId} threadId={threadId} worldId={worldId} />
+  </Dialog>;
 }
 
-function EvidenceInspectorContent({ open, onOpenChange, requestId, threadId, worldId }: { open: boolean; onOpenChange: (open: boolean) => void; requestId: string | null; threadId: string; worldId: string }) {
+function EvidenceInspectorContent({ open, requestId, threadId, worldId }: { open: boolean; requestId: string | null; threadId: string; worldId: string }) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("memory");
   const [read, setRead] = useState<WorldChatEvidenceRead | null>(null);
@@ -36,7 +39,7 @@ function EvidenceInspectorContent({ open, onOpenChange, requestId, threadId, wor
     return () => controller.abort();
   }, [open, requestId, threadId, worldId]);
   return (
-    <Dialog description={uiText("답변 전에 고정되었고, 지금 다시 확인한 근거만 표시합니다.")} dialogAttributes={{ "data-world-chat-evidence-dialog": "true" }} onOpenChange={onOpenChange} open={open} title={uiText("이 답변의 근거")}>
+    <>
       {state === "loading" ? <div className={styles.dialogState}><LoaderCircle aria-hidden="true" className={styles.spin} /><p>{uiText("근거를 확인하는 중")}</p></div> : null}
       {state === "error" ? <div className={styles.dialogState} role="alert"><p>{uiText("근거를 불러오지 못했어요.")}</p></div> : null}
       {state === "ready" && read ? (
@@ -67,6 +70,6 @@ function EvidenceInspectorContent({ open, onOpenChange, requestId, threadId, wor
           )}
         </div>
       ) : null}
-    </Dialog>
+    </>
   );
 }

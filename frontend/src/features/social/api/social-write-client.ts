@@ -128,7 +128,6 @@ export async function setOwnerManualLike(worldId: string, postId: string, ownerI
       !["liked","not_liked"].includes(result.viewer_like_state) || !Number.isInteger(result.like_count) || result.like_count < 0 || result.can_owner_like !== true) {
     throw new SocialWriteApiError(502,"manual_social_like_scope_mismatch",true);
   }
-  window.dispatchEvent(new CustomEvent("angmoo-social-reaction", {detail:{worldId,postId,ownerId}}));
   return result;
 }
 

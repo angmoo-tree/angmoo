@@ -12,7 +12,7 @@ from app.domains.world_characters.service import autonomous_setup as world_chara
 from app.domains.world_characters import exceptions as wc_errors
 from app.domains.worlds import service as world_service
 from app.api.world_errors import _raise_world_error
-from app.api.world_character_dependencies import leave_service
+from app.api.world_character_dependencies import leave_service, entry_created_workflow
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
@@ -85,14 +85,18 @@ def enter_world_with_character(
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
     topics = Depends(recommendation_workflows),
+    initialize = Depends(entry_created_workflow),
 ) -> schemas.WorldCharacterEntryRead:
+    def created(db, *, world_id, world_character_id):
+        initialize(db, world_character_id=world_character_id)
+        topics.mark_new_subject(db, world_id=world_id, world_character_id=world_character_id)
     try:
         return world_character_setup.enter_world(
             db,
             world_id=world_id,
             user=user,
             data=data,
-            on_created=topics.mark_new_subject,
+            on_created=created,
         )
     except world_character_setup.WorldCharacterSetupError as exc:
         _raise_world_character_error(exc)

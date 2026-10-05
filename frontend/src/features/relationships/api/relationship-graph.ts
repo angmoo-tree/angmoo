@@ -16,6 +16,7 @@ export async function getRelationshipGraph(
   worldId: string,
   depth: 1 | 2,
   provider: "ladybug" = "ladybug",
+  options: { signal?: AbortSignal } = {},
 ) {
   const path = `/characters/${encodeURIComponent(characterId)}/worlds/${encodeURIComponent(worldId)}/relationship-graph?view=neighborhood&depth=${depth}&limit=20&provider=${provider}`;
   let response: Response;
@@ -24,6 +25,7 @@ export async function getRelationshipGraph(
       cache: "no-store",
       credentials: "same-origin",
       headers: { Accept: "application/json" },
+      signal: options.signal,
     });
   } catch (reason) {
     if (reason instanceof RuntimeFetchError) {
@@ -51,7 +53,19 @@ export async function getRelationshipGraph(
       response.status,
     );
   }
-  return payload as RelationshipGraphRead;
+  if (!payload || !("world_id" in payload) || payload.world_id !== worldId
+    || !Array.isArray(payload.nodes) || !Array.isArray(payload.edges) || !Array.isArray(payload.evidence)
+    || !payload.meta || typeof payload.center_world_character_id !== "string"
+    || !["ladybug", "canonical_fallback"].includes(payload.meta.source)
+    || !["disabled", "healthy", "lagging", "rebuilding", "unavailable", "timeout", "misconfigured"].includes(payload.meta.graph_status)
+    || payload.nodes.some((node) => !node || typeof node.world_character_id !== "string" || typeof node.character_id !== "string"
+      || typeof node.display_name !== "string" || typeof node.is_center !== "boolean")
+    || new Set(payload.nodes.map((node) => node.world_character_id)).size !== payload.nodes.length
+    || (payload.nodes.length > 0 && payload.nodes.filter(node => node.is_center).length !== 1)
+    || payload.nodes.some((node) => node.is_center && (node.character_id !== characterId || node.world_character_id !== payload.center_world_character_id))) {
+    throw new RelationshipGraphApiError("relationship_query_failed", 502);
+  }
+  return { ...payload, nodes: payload.nodes.map((node) => ({ ...node, avatar_url: typeof node.avatar_url === "string" ? node.avatar_url : null })) } as RelationshipGraphRead;
 }
 
 

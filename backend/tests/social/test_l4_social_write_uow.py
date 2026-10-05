@@ -26,6 +26,7 @@ from app.runtime.social.sqlalchemy_unit_of_work import (
 )
 from app.core.sqlite_concurrency import SqliteRetryPolicy
 from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 
 
 def _session_factory(tmp_path) -> sessionmaker[Session]:
@@ -63,7 +64,7 @@ def _character(character_id: str, owner_id: str, name: str) -> models.Character:
         id=character_id,
         owner_id=owner_id,
         name=name,
-        handle=f"{character_id}-handle",
+        handle=f"{character_id}_handle".replace("-", "_"),
         one_liner="fixture",
         personality="warm",
         speech_style="brief",
@@ -178,6 +179,8 @@ def _seed(factory: sessionmaker[Session]) -> None:
         db.flush()
         db.add_all([owner_actor, autonomous_actor])
         db.flush()
+        for character, actor in ((owner_character, owner_actor), (autonomous_character, autonomous_actor)):
+            initialize_created_world_character(db, character=character, world_character=actor)
         db.add_all(
             [
                 models.CharacterActiveWorld(

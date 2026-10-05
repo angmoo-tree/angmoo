@@ -60,6 +60,15 @@ from app.runtime.graph_projection.process_client import (
 )
 
 
+def _public_avatar(value):
+    """Only noncredential public URLs; renderer supplies the common fallback."""
+    from app.domains.characters.contracts import safe_configuration_media
+    try:
+        return safe_configuration_media(value)
+    except ValueError:
+        return None
+
+
 @contextmanager
 def _canonical_read_deadline(db):
     """Bound this Session's SQLite statements without owning its transaction."""
@@ -749,11 +758,13 @@ class SqlAlchemyRelationshipGraphReadGateway:
             )
         }
         blocked = self._blocked_pairs(world_id=world_id, world_character_ids={*world_character_ids, subject_world_character_id} - {None})
+        from app.domains.world_characters.service.configuration import batch_effective_profiles
+        profiles = batch_effective_profiles(self._db, world_id=world_id, world_character_ids=world_character_ids)
         result = []
         for world_character_id in sorted(world_characters):
             world_character = world_characters[world_character_id]
             character = characters.get(world_character.character_id)
-            if character is None:
+            if character is None or world_character.id not in profiles:
                 continue
             membership = memberships.get(world_character.membership_id)
             result.append(
@@ -761,7 +772,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
                     world_character_id=world_character.id,
                     world_id=world_character.world_id,
                     character_id=character.id,
-                    display_name=character.name,
+                    display_name=profiles[world_character.id].display_name,
+                    avatar_url=_public_avatar(profiles[world_character.id].avatar_url),
                     character_deleted=character.deleted_at is not None,
                     world_character_status=world_character.status,
                     membership_status=(

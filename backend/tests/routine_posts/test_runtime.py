@@ -554,6 +554,8 @@ def _seed(db: Session, *, autonomous_enabled: bool = True) -> RoutineFixture:
         db.add(episode)
         if daypart == "morning":
             morning_episode = episode
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    initialize_created_world_character(db, character=character, world_character=world_character)
     db.commit()
     assert morning_episode is not None
     return RoutineFixture(
@@ -1093,6 +1095,8 @@ def test_owner_manual_reply_is_observed_once_on_next_allowed_beat() -> None:
                 version=1,
             )
         )
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        initialize_created_world_character(db, character=owner_character, world_character=owner_world_character)
         db.commit()
 
         manual_reply = create_owner_reply(

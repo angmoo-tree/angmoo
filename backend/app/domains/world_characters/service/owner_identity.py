@@ -9,8 +9,12 @@ from sqlalchemy.orm import Session
 from app.core.ids import uuid7_string
 from app.domains.characters.service.profile import get_character
 from app.domains.characters.service.owner_controlled import (
-    seed_owner_controlled_character, update_owner_controlled_character,
+    seed_owner_controlled_character,
 )
+from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+from app.domains.world_characters.service.configuration import effective_configuration, initialize_configuration
+from app.domains.characters.contracts import ImportConfiguration, ImportProfile, ImportSettings
+from app.domains.characters.service.import_snapshots import capture_creation
 from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError,
@@ -56,22 +60,31 @@ class OwnerControlledIdentityService:
             return self.get(world_id=world_id, current_user_id=current_user_id)
 
     def patch(self, *, world_id: str, current_user_id: str, data):
+        from app.domains.identity.service.environment import lock_environment_admission
+        lock_environment_admission(self._db, current_user_id)
         self.get(world_id=world_id, current_user_id=current_user_id)
         row = self._find_identity(world_id, current_user_id)
         character = get_character(self._db, row.character_id)
         changes = data.model_dump(exclude_unset=True, exclude={"version"})
-        from app.domains.characters.service.profile import normalize_character_handle, _ensure_available_handle
+        from app.domains.characters.service.profile import normalize_character_handle
         from app.policies import name_policy
         if "display_name" in changes and name_policy.is_blocked_name(changes["display_name"]):
             raise ValueError("사용할 수 없는 이름입니다.")
-        if "handle" in changes and changes["handle"] != character.handle:
-            changes["handle"] = _ensure_available_handle(self._db,
-                normalize_character_handle(changes["handle"]), current_character_id=character.id, allow_suffix=False)
+        stored = self._db.get(WorldCharacterConfiguration, row.id)
+        if stored is None:
+            raise OwnerControlledIdentityConflictError("world_configuration_missing")
+        if "handle" in changes:
+            changes["handle"] = normalize_character_handle(changes["handle"])
+            profiles = self._db.execute(select(WorldCharacter.id, WorldCharacterConfiguration.profile).join(
+                WorldCharacterConfiguration, WorldCharacterConfiguration.world_character_id == WorldCharacter.id)
+                .where(WorldCharacter.world_id == world_id, WorldCharacter.id != row.id)).all()
+            if any(profile.get("handle") == changes["handle"] for _, profile in profiles):
+                raise OwnerControlledIdentityConflictError("profile_handle_conflict")
         from app.config import settings
         from app.integrations.media.files import media_url_to_path
         for field in ("avatar_url", "banner_url"):
             value = changes.get(field)
-            if value and value != getattr(character, field):
+            if value and value != stored.profile.get(field):
                 path = media_url_to_path(value).resolve()
                 path.relative_to((settings.media_root_path / "characters" / character.id).resolve())
                 if not path.is_file():
@@ -82,8 +95,7 @@ class OwnerControlledIdentityService:
         if updated.rowcount != 1:
             self._db.rollback()
             raise OwnerControlledIdentityConflictError("profile_version_conflict")
-        for key, value in changes.items():
-            setattr(character, {"display_name": "name", "intro": "one_liner"}.get(key, key), value)
+        stored.profile = ImportProfile.model_validate({**stored.profile, **changes}).model_dump(mode="json")
         try:
             self._db.commit()
         except IntegrityError as exc:
@@ -122,7 +134,7 @@ class OwnerControlledIdentityService:
         character = get_character(self._db, world_character.character_id)
         if character is None or character.deleted_at is not None:
             raise OwnerControlledIdentityNotFoundError(world_id)
-        return _snapshot(character, world_character)
+        return _snapshot(character, world_character, db=self._db)
 
     def create(
         self,
@@ -143,7 +155,7 @@ class OwnerControlledIdentityService:
             raise OwnerControlledIdentityConflictError(world_id) from exc
         self._db.refresh(character)
         self._db.refresh(world_character)
-        return _snapshot(character, world_character)
+        return _snapshot(character, world_character, db=self._db)
 
     def seed_create(
         self,
@@ -194,6 +206,11 @@ class OwnerControlledIdentityService:
             )
         )
         self._db.flush()
+        configuration = ImportConfiguration(profile=ImportProfile(display_name=character.name, handle=character.handle,
+            avatar_url=character.avatar_url, banner_url=character.banner_url, intro=character.one_liner or ""),
+            settings=ImportSettings(character_background=profile.background, topic_preferences="\n".join(profile.interests)))
+        origin = capture_creation(self._db, character_id=character.id, configuration=configuration, provenance="owner_identity_creation_uow")
+        initialize_configuration(self._db, world_character=world_character, snapshot_id=origin.id, configuration=configuration)
         return character, world_character
 
     def list_identities(self, *, world_id: str, current_user_id: str):
@@ -203,7 +220,7 @@ class OwnerControlledIdentityService:
             WorldCharacter.world_id == world_id, WorldCharacter.owner_user_id == current_user_id,
             WorldCharacter.control_mode == "owner_controlled", WorldCharacter.status.in_(("active", "inactive"))
         ).order_by(WorldCharacter.created_at, WorldCharacter.id))
-        return [_snapshot(character, row) for row in rows
+        return [_snapshot(character, row, db=self._db) for row in rows
                 if (character := get_character(self._db, row.character_id)) is not None and character.deleted_at is None]
 
     def select_identity(self, *, world_id: str, current_user_id: str, world_character_id: str):
@@ -225,7 +242,7 @@ class OwnerControlledIdentityService:
             selected.status = "active"
             selected.version += 1
         self._db.commit()
-        return _snapshot(character, selected)
+        return _snapshot(character, selected, db=self._db)
 
     def create_replacement(self, *, world_id: str, current_user_id: str, profile):
         self._require_local_owner(current_user_id)
@@ -238,7 +255,7 @@ class OwnerControlledIdentityService:
                 self._db.flush()
             character, row = self.seed_create(world_id=world_id, current_user_id=current_user_id, profile=profile)
             self._db.commit()
-            return _snapshot(character, row)
+            return _snapshot(character, row, db=self._db)
         except Exception:
             self._db.rollback()
             raise
@@ -250,6 +267,8 @@ class OwnerControlledIdentityService:
         current_user_id: str,
         profile: OwnerControlledProfile,
     ) -> OwnerControlledIdentitySnapshot:
+        from app.domains.identity.service.environment import lock_environment_admission
+        lock_environment_admission(self._db, current_user_id)
         self._require_local_owner(current_user_id)
         self._require_owned_world_membership(world_id, current_user_id)
         self._validate_role(world_id, profile.role_key)
@@ -264,10 +283,13 @@ class OwnerControlledIdentityService:
         ):
             raise OwnerControlledIdentityNotFoundError(world_id)
 
-        update_owner_controlled_character(
-            character, display_name=profile.display_name, avatar_url=profile.avatar_url,
-            intro=profile.intro, interests=profile.interests, background=profile.background,
-        )
+        stored = self._db.get(WorldCharacterConfiguration, world_character.id)
+        if stored is None:
+            raise OwnerControlledIdentityConflictError("world_configuration_missing")
+        stored.profile = ImportProfile.model_validate({**stored.profile, "display_name": profile.display_name,
+            "avatar_url": profile.avatar_url, "intro": profile.intro}).model_dump(mode="json")
+        stored.settings = ImportSettings.model_validate({**stored.settings, "character_background": profile.background,
+            "topic_preferences": "\n".join(profile.interests)}).model_dump(mode="json")
         world_character.role_key = profile.role_key
         world_character.local_profile = _profile_document(profile)
         world_character.version += 1
@@ -275,7 +297,7 @@ class OwnerControlledIdentityService:
         self._db.commit()
         self._db.refresh(character)
         self._db.refresh(world_character)
-        return _snapshot(character, world_character)
+        return _snapshot(character, world_character, db=self._db)
 
     def is_owner_controlled_character(self, character_id: str) -> bool:
         return bool(
@@ -362,6 +384,7 @@ def _profile_document(profile: OwnerControlledProfile) -> dict[str, object]:
 def _snapshot(
     character,
     world_character: WorldCharacter,
+    *, db,
 ) -> OwnerControlledIdentitySnapshot:
     local_profile = (
         world_character.local_profile
@@ -369,6 +392,7 @@ def _snapshot(
         else {}
     )
     interests = local_profile.get("interests")
+    effective = effective_configuration(db, world_character_id=world_character.id).profile
     return OwnerControlledIdentitySnapshot(
         world_character_id=world_character.id,
         world_id=world_character.world_id,
@@ -378,11 +402,11 @@ def _snapshot(
         autonomous_enabled=False,
         version=world_character.version,
         profile=OwnerControlledProfile(
-            display_name=character.name,
-            handle=character.handle,
-            banner_url=character.banner_url,
-            avatar_url=character.avatar_url,
-            intro=character.one_liner,
+            display_name=effective.display_name,
+            handle=effective.handle,
+            banner_url=effective.banner_url,
+            avatar_url=effective.avatar_url,
+            intro=effective.intro,
             role_key=world_character.role_key,
             preferred_address=str(local_profile.get("preferred_address") or ""),
             interests=tuple(

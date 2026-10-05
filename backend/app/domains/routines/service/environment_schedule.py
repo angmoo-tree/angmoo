@@ -7,7 +7,7 @@ from app.domains.routines.service.tick_schedule import initial_tick_schedule
 from app.domains.identity.service.environment import installation_snapshot
 
 
-def reconcile_environment_schedules(db, *, now, limit=32):
+def reconcile_environment_schedules(db, *, now, limit=32, settings_reader=None):
     environment = installation_snapshot(db)
     rows = list(db.scalars(select(AgentSlot).where(
         AgentSlot.assigned_character_id.is_not(None),
@@ -19,6 +19,12 @@ def reconcile_environment_schedules(db, *, now, limit=32):
         setting = db.get(AgentActivitySetting, row.assigned_character_id)
         if setting is None:
             continue
+        if settings_reader is not None:
+            from app.domains.routines.exceptions import ActivityRuntimeValidationError
+            try:
+                setting = settings_reader(setting, row.assigned_character_id)
+            except ActivityRuntimeValidationError:
+                continue
         # A cooldown/deferred retry is an elapsed-time contract. Only idle future
         # cadence is rebuilt; a due retry keeps its original admission timestamp.
         from app.domains.routines.constants import SLOT_STATUS_ASSIGNED_IDLE

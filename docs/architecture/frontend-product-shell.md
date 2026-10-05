@@ -1,5 +1,13 @@
 # Frontend product-shell boundaries
 
+2026-10-05: scoped World character management keeps the World header and five
+bottom destinations while composition connects the existing Profile/Status/Settings
+anatomy. Reaction target updates retain the scroll owner and mounted media/form.
+Native dialogs center inside the current viewport. World chat deletion uses the
+same feature controller from the list and room, preserving other rows and drafts.
+The profile Network action uses the existing graph product-window route and
+canonical role/World permission, independent of AI readiness.
+
 ## 2026-10-04 현재 반응형 화면·일반 native 창 계약
 
 사용자가 확정한 10-04 반응형 공통 화면 계획의 C01–C22를 현재 계약으로 적용한다.

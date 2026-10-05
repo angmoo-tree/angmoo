@@ -264,7 +264,7 @@ function CreationGuide() {
           }} />}</Field>
           {pendingFile && <div role="alert"><p>{uiText("현재 편집 내용을 이 카드의 설정으로 교체할까요?")}</p><Button type="button" onClick={() => void perform(() => readCard(pendingFile))}>{uiText("교체하기")}</Button><Button type="button" variant="secondary" onClick={() => setPendingFile(null)}>{uiText("취소")}</Button></div>}
         </>}
-        {mode === "copy" && <Field label={uiText("설정을 복사할 캐릭터")}>{(props) => <Select {...props} value={copyId} onChange={(e) => setCopyId(e.target.value)}><option value="">{uiText("선택해주세요")}</option>{cards.filter((item) => item.character.execution_mode === "llm").map((item) => <option key={item.character.id} value={item.character.id}>{item.character.name}</option>)}</Select>}</Field>}
+        {mode === "copy" && <Field label={uiText("설정을 복사할 캐릭터")} helperText={uiText("새 World는 최초 생성 기준 또는 기존 캐릭터의 전환 기준으로 시작하며, 이후 수정은 이 World에만 적용됩니다.")}>{(props) => <Select {...props} value={copyId} onChange={(e) => setCopyId(e.target.value)}><option value="">{uiText("선택해주세요")}</option>{cards.filter((item) => item.character.execution_mode === "llm").map((item) => <option key={item.character.id} value={item.character.id}>{item.character.name}</option>)}</Select>}</Field>}
       </>}
       {draft && step === 1 && <>
         <Field label={uiText("이름")} required>{(props) => <Input {...props} value={draft.name} maxLength={80} onChange={(e) => edit("name", e.target.value)} />}</Field>

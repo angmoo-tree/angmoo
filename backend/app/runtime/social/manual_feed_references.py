@@ -12,6 +12,7 @@ from app.domains.world_characters.service.owner_identity import OwnerControlledI
 from app.domains.world_characters.contracts.owner_identity import OwnerControlledIdentitySnapshot
 from app.domains.worlds.models import WorldMembership
 from app.domains.worlds.service.character_entry import get_character_entry_membership
+from app.runtime.social.post_authors import batch_world_post_authors
 
 
 class RuntimeManualFeedReferences:
@@ -21,6 +22,9 @@ class RuntimeManualFeedReferences:
         self._characters = {}
         self._active = None
         self._memberships = {}
+
+    def author_profiles(self, *, world_id: str, author_ids: set[str]):
+        return batch_world_post_authors(self.db, world_id=world_id, author_ids=author_ids)
 
     def prepare_authors(self, *, world_id: str, author_ids: set[str]) -> None:
         rows = list(self.db.execute(select(WorldCharacter, Character, WorldMembership)

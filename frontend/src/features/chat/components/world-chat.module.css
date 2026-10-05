@@ -88,8 +88,14 @@
 
 .threadRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  padding-right: 16px;
 }
+
+.threadContent { min-width: 0; }
+.threadDelete { flex-shrink: 0; }
+.headerActions { display: flex; flex: 0 0 auto; align-items: center; gap: 4px; }
 
 .threadProfileLink,
 .threadLink,
@@ -514,25 +520,6 @@
   opacity: 0.7;
 }
 
-.composer > button {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  background: var(--color-action-primary);
-  color: var(--color-on-action-primary);
-  cursor: pointer;
-}
-
-.composer > button:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
 .sendFailure {
   display: flex;
   align-items: center;
@@ -559,7 +546,6 @@
 }
 
 .composer textarea:focus-visible,
-.composer > button:focus-visible,
 .modelControl select:focus-visible,
 .modelFailure button:focus-visible,
 .failureBubble button:focus-visible,

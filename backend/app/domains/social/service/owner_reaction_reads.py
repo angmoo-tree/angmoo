@@ -13,6 +13,7 @@ from app.domains.social.repository import manual_feed as queries
 from app.domains.social.policies.owner_target import eligible_owner_target
 from app.domains.social.contracts.writes import SocialWriteError
 from app.domains.world_characters.contracts.owner_identity import OwnerControlledIdentityError
+from app.domains.social.service.post_authors import enrich_post_authors
 
 
 class OwnerReactionContext(TypedDict):
@@ -68,4 +69,5 @@ def enrich_public_reactions(db: Session, *, references: ManualFeedReferences, re
     for item in views:
         for key, value in context.get(item.id, {}).items():
             setattr(item, key, value)
+    enrich_post_authors(references=references, views=views)
     return read

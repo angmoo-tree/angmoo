@@ -1,5 +1,14 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-05 World post/chat/character management: **ADAPTED** shared Device Home
+management cards, Profile/Status/Settings layout, neutral Network/Mail actions,
+inline statistics and ProfileAvatar. **LOCAL** stored World settings, server-confirmed
+reaction lifetimes, scoped soft deletion and independent activity commands. The
+existing Network icon is reused with profile semantic colors. No new external
+visual assets, fonts or dependencies. Extracting repeated card JSX reduced raw
+color occurrences from 1229 to 1215; the derived design report and explicit policy
+count record that source change without resetting historical preservation files.
+
 2026-10-05 World integration: **ADAPTED** existing global detail/profile/DM anatomy and user-provided reaction/composer
 references. **LOCAL** selected-subtree/owner-reaction contracts, Home-only shell, compact model and Memory/diagnostic
 slots. Feed and Chat photo/Send form one adjacent right group; reply labels are sr-only. Payload-backed viewer state

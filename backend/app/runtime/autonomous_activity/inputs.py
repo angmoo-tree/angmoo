@@ -74,7 +74,10 @@ def shared_input(ctx, actor, world, *, environment=None):
     if len(records) > TODAY_LIMIT:
         data["records"] = records[:TODAY_LIMIT]
         data["omitted_records"] = len(records) - TODAY_LIMIT
-    character = ctx.character
+    from app.runtime.autonomous_activity.configuration import configuration_for_activity
+    from app.runtime.world_configuration.effective_values import configured_character
+    configuration = configuration_for_activity(ctx, actor)
+    character = configured_character(ctx.character, configuration)
     from app.runtime.autonomous_activity.name_binding import activity_name_binding
     name_binding = activity_name_binding(ctx)
     state = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)
@@ -82,7 +85,8 @@ def shared_input(ctx, actor, world, *, environment=None):
     return {"world_id": actor.world_id, "actor_id": actor.id, "now": now.isoformat(),
         "world": {"name": world.name, "tagline": world.tagline, "timezone": environment.timezone},
         "environment": environment.to_dict(),
-        "world_profile": actor.local_profile or {},
+        "world_profile": {**(actor.local_profile or {}), **(configuration.profile.model_dump(mode="json") if configuration else {})},
+        **({"world_configuration_revision": configuration.revision} if configuration else {}),
         "persona": {**request_persona(character, name_binding), "interpretation": PERSONA_INTERPRETATION},
         "current_state": state, "state_elapsed_seconds": max(0, int((now - confirmed).total_seconds())) if confirmed else None,
         "today_activity": data}

@@ -113,6 +113,10 @@ class AgentToolActionService:
             action="post",
             references=self.workflows,
         )
+        author_profile = self.workflows.accepted_post_author(db, run=run, character_id=author_character_id,
+            world_id=world_id, world_character_id=author_world_character_id)
+        if author_profile is not None and world_id is None and author_world_character_id is None:
+            world_id, author_world_character_id = author_profile.world_id, author_profile.world_character_id
         post = self.timeline.create_post(
             db,
             user,
@@ -124,6 +128,7 @@ class AgentToolActionService:
             log_manual_activity=False,
             world_id=world_id,
             author_world_character_id=author_world_character_id,
+            author_profile=author_profile,
         )
         result = build_post_created_activity_result(
             post_id=post.id,
@@ -259,6 +264,8 @@ class AgentToolActionService:
             ),
             activity_reason="agent_tool_reply",
             enforce_user_quota=False,
+            author_profile=self.workflows.accepted_post_author(db, run=run, character_id=character_id,
+                world_id=target_post.world_id),
         )
 
     def quote_agent_tool_post(

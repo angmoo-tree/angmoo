@@ -32,6 +32,7 @@ type ReservedDialogAttributes =
   | "tabIndex"
   | "onCancel"
   | "onClose"
+  | "onClick"
   | "onKeyDown"
   | "onMouseDown";
 
@@ -98,13 +99,16 @@ export function Dialog({
     triggerRef.current?.focus();
   }, [initialFocusRef, open]);
 
-  useEffect(
-    () => () => {
-      const dialog = dialogRef.current;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    return () => {
       if (dialog?.open) dialog.close();
-    },
-    [],
-  );
+      const trigger = triggerRef.current;
+      queueMicrotask(() => {
+        if (!dialog?.open && trigger?.isConnected) trigger.focus();
+      });
+    };
+  }, []);
 
   function handleBackdrop(event: MouseEvent<HTMLDialogElement>) {
     if (closeOnBackdrop && event.target === event.currentTarget) onOpenChange(false);
@@ -163,10 +167,10 @@ export function Dialog({
         event.preventDefault();
         if (closeOnEscape) onOpenChange(false);
       }}
-      onClose={() => {
-        if (open) onOpenChange(false);
+      onClose={(event) => {
+        if (open && !event.currentTarget.open) onOpenChange(false);
       }}
-      onMouseDown={handleBackdrop}
+      onClick={handleBackdrop}
       onKeyDown={handleKeyDown}
     >
       <div onMouseDown={(event) => event.stopPropagation()}>

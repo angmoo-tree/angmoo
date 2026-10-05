@@ -1,8 +1,9 @@
 import { generationProfilePayload } from "@/config/generation-profiles";
-import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { captureAuthRequestScope, clearStoredUser, isCurrentAuthRequestScope, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 import type { WorldChatGenerationEvent, WorldChatGenerationRequestRead, WorldChatLatestRequestRead, WorldChatMessageAcceptRead, WorldChatThreadCreate, WorldChatThreadCreateRead, WorldChatEntryRead, WorldChatThreadListRead, WorldChatThreadModelUpdate, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
+import type { WorldChatThreadDeleteRead } from "@/features/chat/types/world-chat-contract";
 
 type WorldChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -103,6 +104,22 @@ export async function createOrGetWorldChatThread(
     (payload.thread && !worldChatThreadMatchesScope(payload.thread, worldId))
   ) {
     throw new WorldChatApiError(502, "world_chat_scope_mismatch");
+  }
+  return payload;
+}
+
+export async function deleteWorldChatThread(
+  worldId: string,
+  threadId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<WorldChatThreadDeleteRead> {
+  const payload = await requestWorldChatApi<WorldChatThreadDeleteRead>(
+    worldChatApiPath(worldId, `/threads/${encodeURIComponent(threadId)}`),
+    { method: "DELETE", signal: options.signal },
+  );
+  if (!payload || payload.world_id !== worldId || payload.thread_id !== threadId ||
+      (payload.outcome !== "deleted" && payload.outcome !== "already_deleted")) {
+    throw new WorldChatApiError(502, "world_chat_delete_scope_mismatch");
   }
   return payload;
 }
@@ -277,6 +294,7 @@ async function requestWorldChatApi<T>(
   options: WorldChatRequestOptions = {},
 ): Promise<T> {
   const { body, headers, ...rest } = options;
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -290,7 +308,7 @@ async function requestWorldChatApi<T>(
   });
   const payload = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 && !rest.signal?.aborted && isCurrentAuthRequestScope(scope)) {
       clearStoredUser();
       notifyAuthChanged();
     }

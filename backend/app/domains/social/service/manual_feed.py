@@ -9,6 +9,7 @@ from app.domains.social.contracts.writes import SocialWriteConflictError as Manu
 from app.domains.social.repository import manual_feed as queries, event_evidence as post_queries
 from app.domains.social.service.post_attachments import media_view
 from app.domains.social.policies.owner_target import eligible_owner_target
+from app.domains.social.contracts.post_authors import WorldPostAuthor
 
 
 def _owner_actor(
@@ -53,15 +54,16 @@ def _post_read(
     viewer_world_character_id: str,
     blocked_author_ids: set[str],
     viewer_liked: bool = False,
+    author_profiles: dict[str, WorldPostAuthor] | None = None,
 ) -> ManualSocialPostRead:
     if post.world_id is None or post.author_world_character_id is None:
         raise ManualSocialConflictError("world_post_scope_missing")
     author = references.get_world_character(post.author_world_character_id)
-    author_character = (
-        references.get_character(author.character_id) if author is not None else None
-    )
-    local_profile = author.local_profile if author is not None else None
-    local_profile = local_profile if isinstance(local_profile, dict) else {}
+    author_character = references.get_character(author.character_id) if author is not None else None
+    profile = (author_profiles or {}).get(post.author_world_character_id)
+    if profile is not None and (profile.world_id != post.world_id or profile.character_id != post.author_character_id
+        or author_character is None or author_character.deleted_at is not None):
+        profile = None
     author_profile_available = _author_profile_available(
         db,
         references=references,
@@ -76,14 +78,9 @@ def _post_read(
         id=post.id,
         world_id=post.world_id,
         author_world_character_id=post.author_world_character_id,
-        author_name=post.author_name,
-        author_handle=author_character.handle if author_character is not None else None,
-        author_avatar_url=(
-            str(local_profile.get("avatar_url") or author_character.avatar_url)
-            if author_character is not None
-            and (local_profile.get("avatar_url") or author_character.avatar_url)
-            else None
-        ),
+        author_name=profile.display_name if profile is not None else post.author_name,
+        author_handle=profile.handle if profile is not None else None,
+        author_avatar_url=profile.avatar_url if profile is not None else None,
         title=post.title,
         body=post.body,
         media=[media_view(row) for row in post.media],
@@ -117,6 +114,7 @@ def _post_reads(
 
     author_ids = {post.author_world_character_id for post in posts if post.author_world_character_id}
     references.prepare_authors(world_id=world_id, author_ids=author_ids)
+    author_profiles = references.author_profiles(world_id=world_id, author_ids=author_ids)
     blocked = queries.blocked_authors(db, world_id=world_id, viewer_id=viewer_world_character_id, author_ids=author_ids)
 
     reply_counts = queries.reply_counts(db, world_id=world_id, post_ids=post_ids, viewer_id=viewer_world_character_id)
@@ -132,6 +130,7 @@ def _post_reads(
             viewer_world_character_id=viewer_world_character_id,
             blocked_author_ids=blocked,
             viewer_liked=post.id in liked,
+            author_profiles=author_profiles,
         )
         for post in posts
     ]

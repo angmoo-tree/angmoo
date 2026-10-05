@@ -59,6 +59,12 @@ export type WorldChatThreadListRead = {
   max_threads: number | null;
 };
 
+export type WorldChatThreadDeleteRead = {
+  world_id: string;
+  thread_id: string;
+  outcome: "deleted" | "already_deleted";
+};
+
 export type WorldChatThreadCreate = {
   responding_world_character_id: string;
   requester_world_character_id?: string | null;

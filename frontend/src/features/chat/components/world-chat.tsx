@@ -1,5 +1,6 @@
 "use client";
 import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { useUiText } from "@/hooks/use-ui-text";
 
@@ -14,6 +15,7 @@ import {
   Send,
   Settings,
   BookOpen,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -30,12 +32,14 @@ import { LocalProductLink } from "@/components/navigation/local-product-link";
 import type { WorldChatViewSlots } from "@/features/chat/types/view-slots";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { Dialog } from "@/components/ui/dialog";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { useWorldChatDelete, WorldChatDeleteDialog } from "./world-chat-delete";
 import { IconButton } from "@/components/ui/button";
 import { formatHandle } from "@/utils/profile-presentation";
 import { getLatestWorldChatResponseRequest, getWorldChatResponseRequest, getWorldChatThread, listWorldChatThreads, retryWorldChatResponse, sendWorldChatMessage, streamWorldChatResponse, updateWorldChatThreadModel, WorldChatApiError } from "@/features/chat/api/world-chat-client";
 import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
 import { type MessageGoogleGeminiModel } from "@/features/chat/types/chat-contract";
-import type { WorldChatGenerationRequestRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
+import type { WorldChatGenerationRequestRead, WorldChatThreadDeleteRead, WorldChatThreadListRead, WorldChatThreadRead } from "@/features/chat/types/world-chat-contract";
 
 import styles from "./world-chat.module.css";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
@@ -63,15 +67,47 @@ function WorldChatList({ worldId }: { worldId: string }) {
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const listRef = useRef<HTMLOListElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const queryRevisionRef = useRef(0);
+  const listControllerRef = useRef<AbortController | null>(null);
+  const deletedFocusRef = useRef<string | null>(null);
+  const onDeleted = useCallback((result: WorldChatThreadDeleteRead) => {
+    queryRevisionRef.current += 1;
+    listControllerRef.current?.abort();
+    const index = read?.items.findIndex(item => item.id === result.thread_id) ?? -1;
+    const adjacent = read?.items[index + 1] ?? read?.items[index - 1];
+    deletedFocusRef.current = adjacent?.id ?? "";
+    setRead(current => current ? { ...current, items: current.items.filter(item => item.id !== result.thread_id) } : current);
+  }, [read]);
+  const deletion = useWorldChatDelete(onDeleted);
+
+  useEffect(() => {
+    if (deletedFocusRef.current === null || deletion.target) return;
+    const adjacentId = deletedFocusRef.current;
+    deletedFocusRef.current = null;
+    // Wait until the native modal has closed and the updated list is focusable.
+    const frame = requestAnimationFrame(() => {
+      const row = adjacentId ? Array.from(listRef.current?.querySelectorAll<HTMLElement>("[data-thread-row-id]") ?? [])
+        .find(item => item.dataset.threadRowId === adjacentId) : null;
+      (row?.querySelector<HTMLElement>("a[href]") ?? headingRef.current)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [deletion.target, read]);
 
   useEffect(() => {
     const controller = new AbortController();
+    listControllerRef.current = controller;
+    const revision = ++queryRevisionRef.current;
+    const auth = captureAuthRequestScope();
     void listWorldChatThreads(worldId, { signal: controller.signal })
       .then((result) => {
+        if (controller.signal.aborted || revision !== queryRevisionRef.current || !isCurrentAuthRequestScope(auth)) return;
         setRead(result);
         setState("ready");
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted || revision !== queryRevisionRef.current || !isCurrentAuthRequestScope(auth)) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setRead(null);
         setError(reason instanceof Error ? reason : new Error("world_chat_unavailable"));
@@ -104,7 +140,7 @@ function WorldChatList({ worldId }: { worldId: string }) {
           <MessageCircle aria-hidden="true" size={21} />
         </div>
         <div>
-          <h2>{uiText("대화")}</h2>
+          <h2 ref={headingRef} tabIndex={-1}>{uiText("대화")}</h2>
           <p>
             {uiText("World 대화 {{count}}개", {count: read.items.length})}</p>
         </div>
@@ -125,10 +161,11 @@ function WorldChatList({ worldId }: { worldId: string }) {
           <p>{uiText("같은 World의 Character와 시작한 대화가 여기에 표시됩니다.")}</p>
         </div>
       ) : (
-        <ol className={styles.threadList} aria-label={uiText("World 대화 목록")}>
+        <ol ref={listRef} className={styles.threadList} aria-label={uiText("World 대화 목록")}>
           {read.items.map((thread) => (
             <li key={thread.id}>
-              <div className={styles.threadRow}>
+              <div className={styles.threadRow} data-thread-row-id={thread.id}>
+                <div className={styles.threadContent}>
                 <LocalProductLink
                   ariaLabel={uiText("{{value0}}의 World 프로필 열기", {value0: thread.responding.display_name})}
                   className={styles.threadProfileLink}
@@ -169,11 +206,20 @@ function WorldChatList({ worldId }: { worldId: string }) {
                     {formatDate(thread.last_message_at ?? thread.created_at)}
                   </time>
                 </Link>
+                </div>
+                <IconButton className={styles.threadDelete} variant="ghost"
+                  label={uiText("{{name}}와의 대화 삭제", { name: thread.responding.display_name })}
+                  title={uiText("{{name}}와의 대화 삭제", { name: thread.responding.display_name })}
+                  loading={deletion.pending && deletion.target?.threadId === thread.id} loadingLabel={uiText("대화 삭제 중")}
+                  onClick={() => deletion.open({ worldId, threadId: thread.id, name: thread.responding.display_name })}>
+                  <Trash2 size={20} aria-hidden="true" />
+                </IconButton>
               </div>
             </li>
           ))}
         </ol>
       )}
+      <WorldChatDeleteDialog deletion={deletion} />
     </section>
   );
 }
@@ -190,6 +236,7 @@ function WorldChatThread({
 } & WorldChatViewSlots) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("chat");
+  const router = useRuntimeRouter();
   const [thread, setThread] = useState<WorldChatThreadRead | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -217,7 +264,9 @@ function WorldChatThread({
     text: string;
     typingVisible: boolean;
   } | null>(null);
-  useProductLeaveGuard(Boolean(draft.trim() || attachment || imageBusy || sending || (generation && generation.phase !== "failed")));
+  const releaseLeaveGuard = useProductLeaveGuard(Boolean(draft.trim() || attachment || imageBusy || sending || (generation && generation.phase !== "failed")));
+  const threadDeletedRef = useRef(false);
+  const threadLoadControllerRef = useRef<AbortController | null>(null);
   const streamControllerRef = useRef<AbortController | null>(null);
   const activeGenerationRef = useRef<string | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -232,9 +281,27 @@ function WorldChatThread({
     typingTimerRef.current = null;
   }, []);
 
+  const deleteBusy = sending || imageBusy || modelUpdating || Boolean(generation && (generation.phase !== "failed" || generation.retrying));
+  const onDeleted = useCallback(() => {
+    threadDeletedRef.current = true;
+    threadLoadControllerRef.current?.abort();
+    streamControllerRef.current?.abort();
+    activeGenerationRef.current = null;
+    modelUpdateSequenceRef.current += 1;
+    clearTypingTimer();
+    setDraft("");
+    setAttachment(null);
+    setSendFailure(null);
+    setGeneration(null);
+    releaseLeaveGuard();
+    router.replace(worldChatRoute(worldId));
+  }, [clearTypingTimer, releaseLeaveGuard, router, worldId]);
+  const deletion = useWorldChatDelete(onDeleted, () => !deleteBusy);
+
   const refreshThread = useCallback(async () => {
+    const auth = captureAuthRequestScope();
     const result = await getWorldChatThread(worldId, threadId);
-    setThread(result);
+    if (!threadDeletedRef.current && isCurrentAuthRequestScope(auth)) setThread(result);
     return result;
   }, [threadId, worldId]);
 
@@ -473,6 +540,8 @@ function WorldChatThread({
 
   useEffect(() => {
     const controller = new AbortController();
+    threadLoadControllerRef.current = controller;
+    const auth = captureAuthRequestScope();
     void Promise.all([
       getWorldChatThread(worldId, threadId, { signal: controller.signal }),
       getLatestWorldChatResponseRequest(worldId, threadId, {
@@ -480,7 +549,7 @@ function WorldChatThread({
       }),
     ])
       .then(async ([result, latest]) => {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
         setThread(result);
         setModelSelection(threadModelSelection(result));
         setState("ready");
@@ -489,6 +558,7 @@ function WorldChatThread({
         }
       })
       .catch((reason: unknown) => {
+        if (controller.signal.aborted || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
         if (reason instanceof DOMException && reason.name === "AbortError") return;
         setThread(null);
         setError(reason instanceof Error ? reason : new Error("world_chat_unavailable"));
@@ -498,6 +568,7 @@ function WorldChatThread({
       controller.abort();
       streamControllerRef.current?.abort();
       activeGenerationRef.current = null;
+      modelUpdateSequenceRef.current += 1;
       clearTypingTimer();
     };
   }, [attempt, clearTypingTimer, hydrateRequest, threadId, worldId]);
@@ -555,12 +626,13 @@ function WorldChatThread({
       if (
         (!content && !attachment) || imageBusy || (attachment && !attachment.allowed) ||
         sending ||
+        deletion.pending ||
         modelUpdating ||
         (generation && generation.phase !== "failed")
       ) return;
       void submitMessage(content, newIdempotencyKey("message"), attachment?.id);
     },
-    [draft, attachment, imageBusy, generation, modelUpdating, sending, submitMessage],
+    [draft, attachment, imageBusy, generation, modelUpdating, sending, submitMessage, deletion.pending],
   );
 
   const retryResponse = useCallback(async (excludeAttachment = false) => {
@@ -569,6 +641,7 @@ function WorldChatThread({
       generation.phase !== "failed" ||
       !generation.request.retryable ||
       modelUpdating
+      || deletion.pending
     ) {
       return;
     }
@@ -588,14 +661,15 @@ function WorldChatThread({
         current ? { ...current, retrying: false } : current,
       );
     }
-  }, [consumeGeneration, generation, modelUpdating, threadId, worldId]);
+  }, [consumeGeneration, generation, modelUpdating, threadId, worldId, deletion.pending]);
 
   const updateModelSelection = useCallback(
     async (selection: ModelSelection) => {
-      if (!thread) return;
+      if (!thread || deletion.pending || threadDeletedRef.current) return;
       const sequence = modelUpdateSequenceRef.current + 1;
       modelUpdateSequenceRef.current = sequence;
       const confirmed = threadModelSelection(thread);
+      const auth = captureAuthRequestScope();
       setModelSelection(selection);
       setModelUpdating(true);
       setModelFailure(null);
@@ -607,11 +681,11 @@ function WorldChatThread({
             ? { mode: "default" }
             : { mode: "thread_override", selected_model: selection },
         );
-        if (modelUpdateSequenceRef.current !== sequence) return;
+        if (modelUpdateSequenceRef.current !== sequence || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
         setThread(updated);
         setModelSelection(threadModelSelection(updated));
       } catch {
-        if (modelUpdateSequenceRef.current !== sequence) return;
+        if (modelUpdateSequenceRef.current !== sequence || threadDeletedRef.current || !isCurrentAuthRequestScope(auth)) return;
         setModelSelection(confirmed);
         setModelFailure(selection);
       } finally {
@@ -620,7 +694,7 @@ function WorldChatThread({
         }
       }
     },
-    [thread, threadId, worldId],
+    [thread, threadId, worldId, deletion.pending],
   );
 
   if (state === "loading") {
@@ -640,7 +714,7 @@ function WorldChatThread({
     generation &&
       (generation.phase !== "failed" || generation.retrying),
   );
-  const modelControlDisabled = sending || generationBusy || modelUpdating;
+  const modelControlDisabled = sending || generationBusy || modelUpdating || deletion.pending;
   const modelControlDescription = modelControlDisabled
     ? uiText("답장을 처리하는 동안에는 응답 모델을 변경할 수 없습니다.")
     : thread.model_binding_mode === "default"
@@ -686,7 +760,7 @@ function WorldChatThread({
       </div>
 
         <div className={styles.composerActions}>{trigger}
-          <IconButton label={uiText("메시지 보내기")} type="submit" variant="primary" disabled={(!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) || sending || modelUpdating || (!!generation && generation.phase !== "failed")} loading={sending} loadingLabel={uiText("메시지 보내는 중")}><Send size={20} aria-hidden="true" /></IconButton>
+          <IconButton label={uiText("메시지 보내기")} type="submit" variant="primary" disabled={(!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) || sending || modelUpdating || deletion.pending || (!!generation && generation.phase !== "failed")} loading={sending} loadingLabel={uiText("메시지 보내는 중")}><Send size={20} aria-hidden="true" /></IconButton>
         </div>
       </div>
     </>;
@@ -727,7 +801,15 @@ function WorldChatThread({
             <p>{formatHandle(thread.responding.handle)}</p>
           </div>
         </LocalProductLink>
-        <IconButton type="button" variant="ghost" label={uiText("기억과 진단 보기")} aria-expanded={auxiliaryOpen} aria-controls={`world-chat-auxiliary-${thread.id}`} onClick={() => setAuxiliaryOpen(true)}><Settings size={20} aria-hidden="true" /></IconButton>
+        <div className={styles.headerActions}>
+          <IconButton type="button" variant="ghost" label={uiText("기억과 진단 보기")} aria-expanded={auxiliaryOpen} aria-controls={`world-chat-auxiliary-${thread.id}`} onClick={() => setAuxiliaryOpen(true)}><Settings size={20} aria-hidden="true" /></IconButton>
+          <IconButton variant="ghost" label={uiText("{{name}}와의 대화 삭제", { name: thread.responding.display_name })}
+            title={deleteBusy ? uiText("답장을 처리하는 동안에는 대화를 삭제할 수 없습니다.") : uiText("{{name}}와의 대화 삭제", { name: thread.responding.display_name })}
+            disabled={deleteBusy} loading={deletion.pending} loadingLabel={uiText("대화 삭제 중")}
+            onClick={() => deletion.open({ worldId, threadId, name: thread.responding.display_name })}>
+            <Trash2 size={20} aria-hidden="true" />
+          </IconButton>
+        </div>
       </header>
 
 
@@ -827,6 +909,7 @@ function WorldChatThread({
           <p>{modelControlDescription}</p>
         </> : null}
       </Dialog>
+      <WorldChatDeleteDialog deletion={deletion} hasDraft={Boolean(draft.trim() || attachment)} />
       {renderEvidenceInspector({
         onOpenChange: (open) => {
           if (!open) setEvidenceRequestId(null);
@@ -841,19 +924,19 @@ function WorldChatThread({
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
           {uiText("{{name}}에게 보낼 메시지", {name: thread.responding.display_name})}</label>
         <textarea ref={textareaRef}
-          disabled={sending || modelUpdating || (!!generation && generation.phase !== "failed")}
+          disabled={sending || modelUpdating || deletion.pending || (!!generation && generation.phase !== "failed")}
           id={`world-chat-${thread.id}`} maxLength={4000}
           onChange={(event) => { setDraft(event.target.value); event.target.style.height = "auto"; event.target.style.height = `${Math.min(event.target.scrollHeight, 132)}px`; }}
           onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
           placeholder={uiText("메시지를 입력하세요")} rows={1} value={draft}
         />
-        {renderImagePicker ? renderImagePicker({threadId, value: attachment, disabled: sending || modelUpdating || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy, renderLayout: composerLayout}) : composerLayout({trigger: null, preview: null, feedback: null})}
+        {renderImagePicker ? renderImagePicker({threadId, value: attachment, disabled: sending || modelUpdating || deletion.pending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy, renderLayout: composerLayout}) : composerLayout({trigger: null, preview: null, feedback: null})}
       </form>
       {sendFailure ? (
         <div className={styles.sendFailure} role="alert">
           <span>{uiText("메시지를 보내지 못했어요.")}</span>
           <button
-            disabled={sending}
+            disabled={sending || deletion.pending}
             onClick={() =>
               void submitMessage(
                 sendFailure.content,

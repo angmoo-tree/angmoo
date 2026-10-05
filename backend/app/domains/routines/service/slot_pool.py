@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 
 from datetime import datetime, UTC, timedelta
 
@@ -49,7 +50,8 @@ def ensure_agent_slots(
 
 
 def claim_agent_slot(
-    db: Session, *, run_id: str, agent_ids: list[str], lease_seconds: int
+    db: Session, *, run_id: str, agent_ids: list[str], lease_seconds: int,
+    admission_metadata: dict | None = None,
 ) -> models.AgentSlot | None:
     unique_agent_ids = list(
         dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
@@ -57,7 +59,7 @@ def claim_agent_slot(
     if not unique_agent_ids:
         return None
 
-    ensure_agent_slots(db, unique_agent_ids)
+    ensure_agent_slots(db, unique_agent_ids, commit=False)
 
     now = datetime.now(UTC)
     slot = db.scalar(
@@ -80,6 +82,7 @@ def claim_agent_slot(
     slot.locked_by_run_id = run_id
     slot.lease_expires_at = now + timedelta(seconds=lease_seconds)
     slot.last_error = None
+    slot.admission_metadata = deepcopy(admission_metadata)
     db.commit()
     db.refresh(slot)
     return slot
@@ -99,5 +102,6 @@ def release_agent_slot(
     slot.status = SLOT_STATUS_EMPTY
     slot.locked_by_run_id = None
     slot.lease_expires_at = None
+    slot.admission_metadata = None
     slot.last_error = last_error[:LAST_ERROR_MAX_LENGTH] if last_error else None
     db.commit()

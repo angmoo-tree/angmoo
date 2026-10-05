@@ -7,7 +7,7 @@ import logging
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -42,6 +42,11 @@ from app.domains.chat.repository.threads import (
 )
 from app.domains.chat.service import profiles
 from app.domains.chat.service.settings import MessageSettingsService
+from app.domains.identity.service.environment import lock_environment_admission
+from app.domains.world_characters.service.configuration import (
+    configuration_for_actor,
+    effective_configuration,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +181,7 @@ class ThreadService:
         *,
         _integrity_retry_available: bool = True,
     ) -> schemas.WorldChatThreadCreateRead:
+        lock_environment_admission(db, user.id)
         self._require_world_chat_owner_scope(db, user.id, world_id)
         requester_candidates = self._owner_controlled_world_characters(
             db, user.id, world_id
@@ -290,6 +296,7 @@ class ThreadService:
         data: schemas.WorldChatThreadModelUpdate,
     ) -> schemas.WorldChatThreadRead:
         """Change the next-generation model without mutating accepted snapshots."""
+        lock_environment_admission(db, user.id)
         self._require_world_chat_owner_scope(db, user.id, world_id)
         thread = self._get_owned_world_thread(
             db, user, world_id, thread_id, lock_thread=True
@@ -313,8 +320,45 @@ class ThreadService:
         db.commit()
         return read
 
+    def delete_world_thread(
+        self, db: Session, user: ChatUser, world_id: str, thread_id: str
+    ) -> schemas.WorldChatThreadDeleteRead:
+        """Hide one owned conversation without deleting its durable evidence.
+
+        Admission, model changes and deletion take the same installation lock
+        before looking up the thread. An accepted response cannot appear between
+        the in-flight check and the deletion commit.
+        """
+        try:
+            lock_environment_admission(db, user.id)
+            self._require_world_chat_owner_scope(
+                db, user.id, world_id, lock_scope=True
+            )
+            thread = self._get_owned_world_thread(
+                db, user, world_id, thread_id,
+                lock_thread=True, include_deleted=True,
+            )
+            if thread.deleted_at is not None:
+                outcome = "already_deleted"
+            else:
+                self._ensure_no_active_world_response_request(
+                    db, thread.id, error_code="world_chat_response_in_flight"
+                )
+                # Soft deletion has a single storage delta. Preserve the
+                # existing update timestamp instead of firing its ORM default.
+                db.execute(update(models.MessageThread).where(models.MessageThread.id == thread.id).values(
+                    deleted_at=datetime.now(UTC), updated_at=models.MessageThread.updated_at))
+                outcome = "deleted"
+            db.commit()
+            return schemas.WorldChatThreadDeleteRead(
+                world_id=world_id, thread_id=thread_id, outcome=outcome
+            )
+        except Exception:
+            db.rollback()
+            raise
+
     def _ensure_no_active_world_response_request(
-        self, db: Session, thread_id: str
+        self, db: Session, thread_id: str, *, error_code: str | None = None
     ) -> None:
         active = db.scalar(
             select(models.ChatResponseRequest.request_id)
@@ -328,7 +372,7 @@ class ThreadService:
         )
         if active is not None:
             raise MessageInFlightError(
-                "답장을 만드는 동안에는 모델을 바꿀 수 없습니다."
+                error_code or "답장을 만드는 동안에는 모델을 바꿀 수 없습니다."
             )
 
     def resolve_world_thread_response_model(
@@ -347,8 +391,11 @@ class ThreadService:
             preference = self.settings_service.ensure_user_preference(
                 db, user, commit_if_created=False
             )
-            self.settings_service._ensure_supported_model(preference.default_model)
-            thread.selected_model = preference.default_model
+            configuration = configuration_for_actor(db, character_id=thread.character_id, world_id=thread.world_id)
+            selected_model = configuration.settings.generation_model if configuration is not None else None
+            selected_model = selected_model or preference.default_model
+            self.settings_service._ensure_supported_model(selected_model)
+            thread.selected_model = selected_model
             thread.selected_thinking_level = preference.default_thinking_level
         else:
             self.settings_service._ensure_supported_model(thread.selected_model)
@@ -596,6 +643,9 @@ class ThreadService:
         default_model = (
             DEFAULT_MESSAGE_MODEL if preference is None else preference.default_model
         )
+        configuration = configuration_for_actor(db, character_id=thread.character_id, world_id=thread.world_id)
+        if configuration is not None and configuration.settings.generation_model:
+            default_model = configuration.settings.generation_model
         resolved_model = (
             default_model
             if thread.model_binding_mode == MessageModelBindingMode.DEFAULT.value
@@ -674,13 +724,25 @@ class ThreadService:
         if row is None:
             raise MessageNotFoundError("World Chat 참여자를 찾을 수 없습니다.")
         world_character, character = row
+        try:
+            configuration = effective_configuration(
+                db, world_character_id=world_character.id
+            )
+        except ValueError as exc:
+            raise MessageValidationError("world_configuration_missing") from exc
+        if (
+            configuration.world_id != world_id
+            or configuration.character_id != character.id
+        ):
+            raise MessageValidationError("world_configuration_scope_invalid")
+        profile = configuration.profile
         return schemas.WorldChatRoleRead(
             world_character_id=world_character.id,
             character_id=character.id,
-            display_name=character.name,
-            handle=character.handle,
-            avatar_url=character.avatar_url,
-            banner_url=character.banner_url,
+            display_name=profile.display_name,
+            handle=profile.handle,
+            avatar_url=profile.avatar_url,
+            banner_url=profile.banner_url,
             role_key=world_character.role_key,
             control_mode=world_character.control_mode,
             profile_capability="available",
@@ -722,14 +784,16 @@ class ThreadService:
         thread_id: str,
         *,
         lock_thread: bool = False,
+        include_deleted: bool = False,
     ) -> models.MessageThread:
         statement = select(models.MessageThread).where(
             models.MessageThread.id == thread_id,
             models.MessageThread.requester_id == user.id,
             models.MessageThread.world_id == world_id,
             models.MessageThread.world_scope_status == "resolved",
-            models.MessageThread.deleted_at.is_(None),
         )
+        if not include_deleted:
+            statement = statement.where(models.MessageThread.deleted_at.is_(None))
         if lock_thread and self._is_postgresql_session(db):
             statement = statement.with_for_update()
         thread = db.scalar(statement)

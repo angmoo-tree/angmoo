@@ -91,11 +91,12 @@ def test_t04_t05_aba_is_not_hidden_by_equal_current_values(relation_case, versio
 def test_t07_display_name_normalization_and_actual_change(relation_case):
     case = relation_case
     prompt, receipt = prepared(case)
-    character = case.db.get(models.Character, "character-author")
-    character.name = "  Character author  "
+    from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+    stored = case.db.get(WorldCharacterConfiguration, "world-character-author")
+    stored.profile = {**stored.profile, "display_name": "  Character author  "}
     case.db.commit()
     assert validate(case, prompt, receipt).outcome == "valid"
-    character.name = "Changed name"
+    stored.profile = {**stored.profile, "display_name": "Changed name"}
     case.db.commit()
     with pytest.raises(SocialContextValidationError, match="facts_changed"):
         validate(case, prompt, receipt)
@@ -313,6 +314,7 @@ def test_t25_zero_one_and_maximum_references_are_bounded(relation_case, count, r
     from social.test_feed_reaction_intent import _user, _character
     from app.domains.relationships.contracts.graph_recall import GraphRecallResult, GraphRecallStatus, GraphRecallSource
     from app.domains.relationships.service.social_context import SocialContextService
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
     case = relation_case
     for index in range(max(0, count - 2)):
         owner = _user("bound-" + str(index))
@@ -324,6 +326,7 @@ def test_t25_zero_one_and_maximum_references_are_bounded(relation_case, count, r
         peer = models.WorldCharacter(id="bound-peer-" + str(index), world_id=case.actor.world_id,
             character_id=character.id, membership_id=member.id, role_key="student", status="active")
         case.db.add(peer); case.db.flush()
+        initialize_created_world_character(case.db, character=character, world_character=peer)
         case.db.add(models.RelationshipState(id="bound-state-" + str(index), world_id=case.actor.world_id,
             actor_world_character_id=case.actor.id, target_world_character_id=peer.id,
             familiarity=20, affinity=10, trust=12, tension=3, interaction_count=4,

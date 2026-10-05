@@ -32,7 +32,8 @@ def _bind_activity_run(ctx, actor):
         ActivityGraphRun.status.in_(("running", "waiting", "interrupted")),
     ).order_by(ActivityGraphRun.started_at).limit(1))
     if row is None:
-        row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id)
+        from app.runtime.autonomous_activity.configuration import configuration_for_activity
+        row = bind_run(ctx.db, actor=actor, activity_id=ctx.run_id, configuration=configuration_for_activity(ctx, actor))
     ctx.db.commit()
     return row
 

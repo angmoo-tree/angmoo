@@ -31,6 +31,13 @@
   min-width: 0;
 }
 
+.headerStart {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--spacing-control);
+}
+
 .contextCopy h2,
 .contextCopy p {
   margin: 0;
@@ -76,6 +83,8 @@
 
 .backLink {
   display: inline-flex;
+  flex: none;
+  width: 44px;
   min-height: 44px;
   align-items: center;
   justify-content: center;
@@ -83,7 +92,7 @@
   color: var(--color-brand-accent);
   font-size: var(--text-label);
   font-weight: var(--text-label--font-weight);
-  padding-inline: var(--spacing-control);
+  padding: 0;
   text-decoration: none;
 }
 
@@ -284,10 +293,6 @@
 }
 
 @media (max-width: 390px) {
-  .contextHeader {
-    align-items: flex-start;
-  }
-
   .contextCopy > p:last-child {
     max-width: 176px;
   }

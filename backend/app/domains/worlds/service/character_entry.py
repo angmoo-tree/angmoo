@@ -19,6 +19,10 @@ def get_character_entry_membership(db: Session, membership_id: str):
     return db.get(models.WorldMembership, membership_id)
 
 
+def list_character_entry_memberships(db: Session, membership_ids):
+    return list(db.scalars(select(models.WorldMembership).where(models.WorldMembership.id.in_(membership_ids))))
+
+
 def find_character_entry_membership(db: Session, *, world_id: str, user_id: str):
     return db.scalar(select(models.WorldMembership).where(
         models.WorldMembership.world_id == world_id,

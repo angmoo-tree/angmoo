@@ -14,6 +14,33 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-05 World 게시글·관리·관계망 표시 계약
+
+World 상세 제목은 한글 `게시글`, 영어 `post`이며 뒤로가기 버튼의 오른쪽에
+기존 control 간격으로 시작 정렬한다. 답글 제목/목록 또는 빈 상태/페이지 이동
+뒤에 기존 사용자 답글 폼을 둔다. 좋아요는 해당 하트와 서버가 확인한 개수만
+갱신하고 사진·폼·초안·불러온 범위·스크롤을 유지한다.
+
+공통 native Dialog는 콘텐츠 viewport 중앙에 배치한다. World 채팅함 행 끝의
+Trash2는 링크와 분리한 44px 조작 영역이며 방 상단은 Settings → Trash2다.
+확인은 취소에 기본 포커스를 두고 실패 시 화면과 초안을 유지한다.
+
+World Characters는 기존 World 헤더/하단 탐색과 Device Home의 공통 상세 카드
+배치를 사용한다. 실제 사용자 먼저, 이후 기존 ON/최근 활동/이름/ID 순서다.
+요약은 전체·자율활동 ON·OFF·사용자이며 외부 연동 표현은 이 World 목록에서
+사용하지 않는다. 프로필 → 상태 → 설정과 편집 폼은 기존 관리 배치를 계승한다.
+저장 ON과 시간/자원 대기는 구분하고 World 전용 저장 범위를 한글/영어로 표시한다.
+
+프로필 action은 기존 Network 아이콘 → Mail → 허용된 편집 순서이며 neutral
+프로필 토큰을 사용한다. Follow 통계 세 개를 제외하고 기존 게시글/답글/좋아요/
+받은 좋아요를 hero 내부의 간결한 inline 통계로 표시한다. 별도 통계 구분선은
+없다. 관계망 원형 노드는 실제 World 사진을 common ProfileAvatar로 표시하고
+없거나 실패한 사진에는 기존 이니셜 fallback을 사용한다. 중심/방향/접근 가능한
+이름/관계 목록은 보존한다. 새 외부 이미지·아이콘·폰트는 도입하지 않는다.
+
+출처: 기존 관리/프로필 anatomy의 ADAPTED, scoped command와 input 수명의 LOCAL.
+로컬 구현/자동 검사와 운영 Docker 적용·설치판·직접 USER CHECK는 별도 결과다.
+
 ## 2026-10-05 World 상세·반응·Chat 통합 계약
 
 이번 사용자 확정 계약이 아래 역사 단계의 표시·World 대화 개수 조항보다 우선한다.

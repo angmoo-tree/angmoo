@@ -93,7 +93,7 @@ class WorldSocialProfileService:
             for post in posts
             if post.author_world_character_id is not None
         }
-        authors = self.references.authors(author_ids)
+        author_profiles = self.references.author_profiles(world_id=world_id, author_ids=author_ids)
         active_author_ids = self.references.active_author_ids(
             world_id=world_id, author_ids=author_ids
         )
@@ -129,29 +129,18 @@ class WorldSocialProfileService:
         snapshots: list[WorldCharacterSocialProfilePost] = []
         for post in posts:
             author_id = str(post.author_world_character_id or "")
-            author_row = authors.get(author_id)
-            world_character = author_row[0] if author_row else None
-            character = author_row[1] if author_row else None
-            local_profile = (
-                world_character.local_profile
-                if world_character is not None
-                and isinstance(world_character.local_profile, dict)
-                else {}
-            )
-            avatar = (
-                local_profile.get("avatar_url") or character.avatar_url
-                if character is not None
-                else None
-            )
+            profile = author_profiles.get(author_id)
+            if profile is not None and (profile.world_id != world_id or profile.character_id != post.author_character_id):
+                profile = None
             snapshots.append(
                 WorldCharacterSocialProfilePost(
                     id=post.id,
                     **reactions.get(post.id, {}),
                     world_id=world_id,
                     author_world_character_id=author_id,
-                    author_name=post.author_name,
-                    author_handle=character.handle if character is not None else None,
-                    author_avatar_url=str(avatar) if avatar else None,
+                    author_name=profile.display_name if profile is not None else post.author_name,
+                    author_handle=profile.handle if profile is not None else None,
+                    author_avatar_url=profile.avatar_url if profile is not None else None,
                     title=post.title,
                     body=post.body,
                     post_type=post.post_type,

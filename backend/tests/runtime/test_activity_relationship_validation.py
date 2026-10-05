@@ -23,6 +23,7 @@ from app.domains.relationships.contracts.social_context import (
     RelationshipValidationBinding, SocialContextValidationError,
 )
 from app.domains.relationships.policies.social_context_validation import receipt_for_snapshot
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 
 pytestmark = pytest.mark.usefixtures("deny_external_network")
 
@@ -54,6 +55,7 @@ def relation_case(request, tmp_path):
             world_contract_hash="a" * 64)
         db.add(peer)
         db.flush()
+        initialize_created_world_character(db, character=character, world_character=peer)
         rows = []
         for target in ("world-character-author", peer.id):
             row = models.RelationshipState(id="rel-" + target, world_id=actor.world_id,

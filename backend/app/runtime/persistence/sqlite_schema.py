@@ -11,11 +11,12 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 27
-SOURCE_ALEMBIC_REVISION = "20261003_0105"
-SOURCE_ALEMBIC_MIGRATION_COUNT = 104
-EXPECTED_CANONICAL_TABLE_COUNT = 149
+SQLITE_SCHEMA_VERSION = 28
+SOURCE_ALEMBIC_REVISION = "20261005_0106"
+SOURCE_ALEMBIC_MIGRATION_COUNT = 105
+EXPECTED_CANONICAL_TABLE_COUNT = 153
 SCHEMA_VERSION_TABLE = "angmoo_schema_version"
+WORLD_CONFIGURATION_V28_TABLES = ("world_character_configurations", "character_draft_import_origins", "character_import_origins", "character_import_snapshots")
 
 ACTIVITY_V19_TABLES = (
     "world_character_activity_states", "world_character_state_receipts",
@@ -315,6 +316,10 @@ def build_sqlite_v9_metadata() -> MetaData:
 
 
 def _copy_partial_index_predicates(metadata: MetaData) -> None:
+    for name in WORLD_CONFIGURATION_V28_TABLES:
+        if name in metadata.tables:
+            metadata.remove(metadata.tables[name])
+    _remove_world_admission_columns(metadata)
     # Historic builders sometimes clone the registered model subset directly.
     # Environment v27 is additive only and must not enter their frozen schema.
     from app.runtime.persistence.sqlite_environment_schema import remove_environment_schema
@@ -715,10 +720,25 @@ def build_sqlite_v24_metadata() -> MetaData:
 
 def build_sqlite_v26_metadata() -> MetaData:
     """Immutable pre-environment inventory; retain all original v26 columns."""
-    metadata = build_sqlite_baseline_metadata()
+    metadata = build_sqlite_v27_metadata()
     from app.runtime.persistence.sqlite_environment_schema import remove_environment_schema
     remove_environment_schema(metadata)
     return metadata
+
+
+def build_sqlite_v27_metadata() -> MetaData:
+    """The frozen pre-World-configuration schema; previous manifests stay fixed."""
+    metadata = build_sqlite_baseline_metadata()
+    for name in WORLD_CONFIGURATION_V28_TABLES:
+        metadata.remove(metadata.tables[name])
+    _remove_world_admission_columns(metadata)
+    return metadata
+
+
+def _remove_world_admission_columns(metadata):
+    for table, column in (("agent_slots", "admission_metadata"), ("agent_runs", "input_snapshot")):
+        if column in metadata.tables[table].c:
+            metadata.tables[table]._columns.remove(metadata.tables[table].c[column])
 
 
 def build_sqlite_v25_metadata() -> MetaData:

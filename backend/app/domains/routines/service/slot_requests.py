@@ -30,13 +30,15 @@ def assign_resident_slot(
     )
     candidate_agent_ids = settings.openclaw_agent_ids
     setting = activity_settings.ensure_setting(db, character_id, commit=commit)
+    timezone = workflows.timezone_reader(db, character_id=character_id)
+    references = workflows.slot_references()
+    metadata = references.capture_activity_input(character_id)
+    setting = references.effective_settings_for_input(setting, metadata, character_id=character_id)
     scheduled_tick_at = next_tick_at or tick_schedule.initial_tick_schedule(
         setting,
         character_id=character_id,
         now=datetime.now(UTC),
-        timezone=workflows.timezone_reader(
-            db, character_id=character_id
-        ),
+        timezone=timezone,
     ).next_tick_at
     slot = slot_assignments.assign_resident_slot(
         db,
@@ -47,7 +49,7 @@ def assign_resident_slot(
         heartbeat_interval_seconds=heartbeat_interval_seconds,
         next_tick_at=scheduled_tick_at,
         commit=commit,
-        references=workflows.slot_references(),
+        references=references,
     )
     if slot is None:
         raise AgentSlotUnavailableError(

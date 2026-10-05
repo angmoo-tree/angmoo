@@ -1,5 +1,26 @@
 # Angmoo Frontend Architecture
 
+### World management and confirmed reactions (2026-10-05)
+
+Characters owns the scoped dashboard/management clients, DTO validation, shared
+`character-management-card`, World editors and request lifetime. Device Home and
+World lists adapt their existing data to the same display card. Composition owns
+the Profile/Status/Settings panes and the Social stream, Chat letter and permitted
+relationship graph actions; features do not import one another's implementations.
+`components/content/profile-statistics` accepts only display values and links.
+
+Social owns typed server-confirmed reaction events and target updates. Auth/session
+revision, runtime scope and read revision protect both events and delayed reads.
+Background profile refresh preserves loaded cursor chains and the visible anchor.
+Chat owns canonical World deletion, a small scoped confirmation controller and
+late-response guards. The common native Dialog owns centering and focus behavior.
+Relationships renders canonical graph nodes with the common ProfileAvatar and
+accessible names; the graph DTO carries nullable public avatar URLs only.
+
+World profile/settings writes use the explicit World management API and revision.
+They do not invoke global Character update APIs. UI copy uses feature ko/en catalogs;
+World content, persona, model IDs and saved input remain untranslated.
+
 ### World Feed presentation ownership (2026-10-04)
 
 `components/layout/feed-header` is a neutral visual slot component, independent of features and data fetching.

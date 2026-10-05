@@ -22,6 +22,9 @@ def test_twenty_world_threads_create_and_reuse_without_a_cross_world_quota(tmp_p
             character = _character(f"responder-{index}", other.id); db.add(character); db.flush()
             target = _world_character("world-unlimited", character.id, membership_id="membership-world-unlimited-responder", suffix=f"extra-{index}")
             db.add(target); targets.append(target.id)
+            db.flush()
+            from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+            initialize_created_world_character(db, character=character, world_character=target)
         db.commit()
         created = []
         for target in targets:

@@ -5,6 +5,7 @@ from typing import Protocol
 from app.domains.social.contracts.profile_activity import (
     WorldCharacterSocialProfileQuery,
 )
+from app.domains.social.contracts.post_authors import PostAuthorReferences
 
 
 class ProfileIdentity(Protocol):
@@ -28,7 +29,7 @@ class ProfileWorldCharacter(Protocol):
     def local_profile(self) -> object: ...
 
 
-class ProfileActivityReferences(Protocol):
+class ProfileActivityReferences(PostAuthorReferences, Protocol):
     def owner_reaction_references(self): ...
     def profile(self, query: WorldCharacterSocialProfileQuery) -> ProfileIdentity: ...
     def _viewer_world_character_ids(

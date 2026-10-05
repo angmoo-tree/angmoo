@@ -109,6 +109,9 @@ class GenerationRequest:
     endpoint: dict[str, Any] | None = None
     partner_credential_id: str | None = None
     partner_credential_revision: int | None = None
+    world_id: str | None = None
+    world_character_id: str | None = None
+    world_configuration_revision: int | None = None
 
 
 @dataclass(frozen=True)

@@ -23,6 +23,6 @@ def _llm_context(
         node=node,
         lane=lane,
         provider=ctx.credential.provider,
-        model=ctx.credential.model,
+        model=getattr(ctx, "generation_model", ctx.credential.model),
         key_fingerprint=ctx.credential.key_fingerprint,
     )

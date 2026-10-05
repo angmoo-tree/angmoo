@@ -258,8 +258,11 @@ def _compose_writing_from_brief(
     character = character_profile.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise social_errors.CharacterNotFoundError(character_id)
+    from app.runtime.world_configuration.effective_values import character_for_input, setting_for_input
+    character = character_for_input(character, getattr(run, "input_snapshot", None))
     credential = _run_credential(db, run)
     setting = activity_settings.ensure_setting(db, character_id)
+    setting = setting_for_input(setting, getattr(run, "input_snapshot", None), character_id=character_id)
     state = character_state.get_character_state(db, character_id)
     lore_retrieval = (
         character_lore_service.retrieve_lore_for_self_update(db, character=character, workflows=build_lore_workflows())
@@ -339,6 +342,11 @@ def _run_composition_gateway(
     ).hexdigest()[:16]
 
     async def _run() -> dict[str, Any]:
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        input_snapshot = getattr(run, "input_snapshot", None) or {}
+        configuration = configuration_for_input(input_snapshot, character_id=run.character_id)
+        model = (input_snapshot.get("_generation_model") or
+            (configuration.settings.generation_model if configuration else None) or credential.model)
         return await client.run_agent(
             message="Compose Angmoo resident writing from the brief. Return JSON only.",
             agent_id=run.agent_id,
@@ -347,7 +355,7 @@ def _run_composition_gateway(
             ),
             tool_auth_key=run.tool_auth_key,
             provider=credential.provider,
-            model=credential.model,
+            model=model,
             auth_profile_id=credential.auth_profile_id,
             tool_choice="none",
             tools_allow=TOOLS_ALLOW_WRITING_COMPOSITION,

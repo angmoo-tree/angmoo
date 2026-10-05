@@ -1,5 +1,6 @@
 "use client";
 import { useOwnerReactions } from "@/features/social/hooks/use-owner-reactions";
+import { applyConfirmedReaction } from "@/features/social/utils/confirmed-reactions";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { FeedHeader } from "@/components/layout/feed-header";
@@ -10,7 +11,7 @@ import { DeletePostDialog,FeedContentFilterBar,feedContentFilterEmptyText,type F
 
 
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
-import { AUTH_CHANGED_EVENT,getStoredUser,storeUser,type UserRead } from "@/lib/auth/browser-session";
+import { AUTH_CHANGED_EVENT,captureAuthRequestScope,isCurrentAuthRequestScope,getStoredUser,storeUser,type UserRead } from "@/lib/auth/browser-session";
 import { isScrollNearBottom,resolveScrollEventTarget } from "@/lib/dom/scroll-viewport";
 import {
 RefreshCw
@@ -72,6 +73,10 @@ export function PostListClient({
   const [error, setError] = useState<string | null>(initialError);
   const feedGenerationRef = useRef(0);
   const loadMoreCursorRef = useRef<string | null>(null);
+  const reactions = useOwnerReactions(`global:${viewer?.id ?? "public"}:${feedMode}:${feedContentFilter}:${selectedAgentId}`, change => {
+    setPosts(current => current.map(post => applyConfirmedReaction(post, change)));
+  });
+  const { captureReadRevision, reconcilePost } = reactions;
 
   const refreshFeedCue = useCallback(async (characterId: string) => {
     try {
@@ -174,33 +179,34 @@ export function PostListClient({
     ) => {
       const generation = feedGenerationRef.current + 1;
       feedGenerationRef.current = generation;
+      const authScope = captureAuthRequestScope();
+      const readRevision = captureReadRevision();
       loadMoreCursorRef.current = null;
       setLoading(true);
       setError(null);
 
       try {
         const feed = await fetchFeedPage(mode, null, content);
-        if (generation !== feedGenerationRef.current) return;
-        setPosts(mergeUniquePosts([], feed.items));
+        if (generation !== feedGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
+        setPosts(mergeUniquePosts([], feed.items.map(post => reconcilePost(post, readRevision))));
         setNextCursor(feed.next_cursor);
         setFeedMode(mode);
         setFeedContentFilter(content);
       } catch (err) {
-        if (generation !== feedGenerationRef.current) return;
+        if (generation !== feedGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
         setError(err instanceof Error ? uiText(err.message) : uiText("피드를 불러오지 못했습니다."));
       } finally {
-        if (generation === feedGenerationRef.current) {
+        if (generation === feedGenerationRef.current && isCurrentAuthRequestScope(authScope)) {
           setLoading(false);
         }
       }
     },
-    [feedContentFilter, feedMode, fetchFeedPage, uiText],
+    [feedContentFilter, feedMode, fetchFeedPage, uiText, captureReadRevision, reconcilePost],
   );
 
   const feedModeRef = useRef<FeedMode>(feedMode);
   const feedContentFilterRef = useRef<FeedContentFilter>(feedContentFilter);
   const loadFeedRef = useRef(loadFeed);
-  const reactions = useOwnerReactions(`global:${viewer?.id ?? "public"}`, () => void loadFeedRef.current(feedModeRef.current, feedContentFilterRef.current));
 
   useEffect(() => {
     feedModeRef.current = feedMode;
@@ -232,27 +238,29 @@ export function PostListClient({
     const cursor = nextCursor;
     if (!cursor || loading || loadMoreCursorRef.current === cursor) return;
     const generation = feedGenerationRef.current;
+    const authScope = captureAuthRequestScope();
+    const readRevision = captureReadRevision();
     loadMoreCursorRef.current = cursor;
     setLoading(true);
     setError(null);
 
     try {
       const feed = await fetchFeedPage(feedMode, cursor, feedContentFilter);
-      if (generation !== feedGenerationRef.current) return;
-      setPosts((previous) => mergeUniquePosts(previous, feed.items));
+      if (generation !== feedGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
+      setPosts((previous) => mergeUniquePosts(previous, feed.items.map(post => reconcilePost(post, readRevision))));
       setNextCursor(feed.next_cursor);
     } catch (err) {
-      if (generation !== feedGenerationRef.current) return;
+      if (generation !== feedGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
       if (loadMoreCursorRef.current === cursor) {
         loadMoreCursorRef.current = null;
       }
       setError(err instanceof Error ? uiText(err.message) : uiText("피드를 더 불러오지 못했습니다."));
     } finally {
-      if (generation === feedGenerationRef.current) {
+      if (generation === feedGenerationRef.current && isCurrentAuthRequestScope(authScope)) {
         setLoading(false);
       }
     }
-  }, [feedContentFilter, feedMode, fetchFeedPage, loading, nextCursor, uiText]);
+  }, [feedContentFilter, feedMode, fetchFeedPage, loading, nextCursor, uiText, captureReadRevision, reconcilePost]);
 
   const handleFeedContentFilterChange = useCallback(
     async (nextFilter: FeedContentFilter) => {

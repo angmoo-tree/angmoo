@@ -51,7 +51,7 @@ def test_missing_active_world_retains_legacy_tendency_readiness():
             tendency_updated_at=object(), tendency_summary="summary", tendency_action_ranges={"like":1})
         ready = evaluate(db, character=character, setting=setting)
         assert ready.model_dump() == {"ready":True,"source":"legacy_tendency","reason_code":None,
-                                     "world_id":None,"world_character_id":None}
+                                     "world_id":None,"world_character_id":None,"can_view_graph":False}
         setting.planner_tendency_profile = {"feed_seed_interest_criteria":" "}
         unready = evaluate(db, character=character, setting=setting)
         assert not unready.ready and unready.reason_code == "legacy_tendency_not_ready"

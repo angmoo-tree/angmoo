@@ -45,3 +45,4 @@ class ManualActivityWorkflows:
     release_temporary_slot: TemporaryRelease
     execution_mode_error: type[Exception]
     credential_required_error: type[Exception]
+    resolve_activity_setting: Callable | None = None

@@ -17,6 +17,7 @@ def recover_expired_resident_slot_runs(
     *,
     now: datetime,
     next_tick_at_factory: Callable[[models.AgentSlot, datetime], datetime] | None = None,
+    autonomy_reader=None,
 ) -> int:
     now = agent_activity_schedule.aware_utc(now)
     slots = list(
@@ -61,7 +62,8 @@ def recover_expired_resident_slot_runs(
             if slot.assigned_character_id is not None
             else None
         )
-        if setting is None or not setting.auto_enabled:
+        enabled = autonomy_reader(db, character_id=slot.assigned_character_id, setting=setting) if autonomy_reader else bool(setting and setting.auto_enabled)
+        if not enabled:
             # A run-now lease must not become a persistent assignment after a
             # process crash. Its AgentRun evidence (when present) was closed
             # above, so the exact slot can now return to the free pool.

@@ -11,9 +11,10 @@ from app.domains.identity.service.environment import report_environment
 from app.domains.routines.models import AgentActivitySetting, AgentSlot
 from app.domains.routines.service.environment_schedule import reconcile_environment_schedules
 from app.domains.world_characters.activity_models import ActivityGraphRun
-from app.domains.world_characters.models import WorldCharacter
+from app.domains.world_characters.models import CharacterActiveWorld, CharacterWorldBinding, WorldCharacter
 from app.domains.world_characters.service.activity_engines import bind_run
 from app.runtime.autonomous_activity.combined_provider import RecoveryLedger
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 from retention_support import database
 
 pytestmark = pytest.mark.usefixtures("deny_external_network")
@@ -36,6 +37,12 @@ def test_autonomous_owner_snapshot_survives_restart_while_idle_schedule_moves(tm
             db.add(WorldCharacter(id="actor-b", world_id=world_id, character_id="idle-b",
                                   membership_id=actor.membership_id, status="active", control_mode="autonomous"))
             db.flush()
+            db.add(CharacterWorldBinding(character_id="idle-b", world_id=world_id))
+            db.add(CharacterActiveWorld(character_id="idle-b", world_character_id="actor-b",
+                selected_at=NOW, idempotency_key="synthetic:actor-b", version=1))
+            db.flush()
+            initialize_created_world_character(db, character=db.get(Character, "idle-b"),
+                world_character=db.get(WorldCharacter, "actor-b"))
             first = report_environment(db, owner, EnvironmentReport(client_id="synthetic-screen-1",
                 expected_revision=0, sequence=1, preferred_language="ko-KR", timezone="Asia/Seoul"),
                 session_hash="session", now=NOW)

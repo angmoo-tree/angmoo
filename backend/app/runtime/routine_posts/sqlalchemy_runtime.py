@@ -300,7 +300,13 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
     imported_locked = agent_activity_policy.is_imported_world_runtime_locked(
         db, world_character
     )
-    if not world_character.autonomous_enabled and (not manual or imported_locked):
+    from app.runtime.world_configuration.effective_values import configuration_for_input
+    input_snapshot = getattr(resident_context, "input_snapshot", None)
+    configuration = configuration_for_input(input_snapshot, character_id=resident_context.character.id)
+    if configuration is not None and (configuration.world_id != world_character.world_id or configuration.world_character_id != world_character.id):
+        return _safe_result(outcome="WORLD_SCOPE_INVALID", tracker=tracker)
+    enabled = configuration.autonomous_enabled if configuration is not None else world_character.autonomous_enabled
+    if not enabled and (not manual or (imported_locked and configuration is None)):
         return _safe_result(outcome="AUTONOMY_DISABLED", tracker=tracker)
     if "post" not in set(resident_context.activity_policy.allowed_actions):
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)
@@ -347,7 +353,7 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
 
     try:
         context = assemble_routine_post_context(
-            db, references=SqlAlchemyRoutineContextReferences(db),
+            db, references=SqlAlchemyRoutineContextReferences(db, input_snapshot=input_snapshot),
             world_character=world_character,
             character=resident_context.character,
             now=resident_context.run_started_at,
@@ -700,7 +706,8 @@ def publish_routine_activity(resident_context, *, prepared, generation, relation
                 media_runtime = current_media_runtime()
                 if media_runtime is not None:
                     media_runtime.admit_post(db, post=post, owner_id=resident_context.user_id,
-                        character_id=resident_context.character.id, draft=generation.draft)
+                        character_id=resident_context.character.id, draft=generation.draft,
+                        input_snapshot=getattr(resident_context, "input_snapshot", None))
                 event_result = social_event_runtime.record_successful_social_event(
                     db,
                     world_id=context.world.id,

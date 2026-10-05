@@ -18,6 +18,8 @@ from app.domains.chat.router.world_chat import router as world_chat_router
 from app.models import Base
 from app.database import get_db
 from app.domains.world_characters.router.profile import router as world_character_router
+from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 
@@ -218,6 +220,10 @@ def _seed(engine, principal, *, include_requester: bool = True) -> None:
         db.flush()
         db.add_all([requester, responding])
         db.flush()
+        for character, actor in ((requester_character, requester), (responding_character, responding)):
+            initialize_created_world_character(db, character=character, world_character=actor)
+            stored = db.get(WorldCharacterConfiguration, actor.id)
+            stored.profile = {**stored.profile, **actor.local_profile}
         db.add(post)
         db.commit()
     principal["user"] = owner

@@ -147,6 +147,10 @@ from app.runtime.resident.request_options import _feed_history_sanitize_stream_p
 from app.runtime.resident.request_options import _feed_scan_stream_params
 from app.runtime.resident.request_options import _tool_choice_any
 from app.runtime.resident.slots import build_slot_request_workflows
+from app.runtime.resident import slots as agent_slot_allocator
+from app.runtime.world_configuration.effective_values import setting_for_input, character_for_input
+from app.runtime.routines.configuration_reads import capture_activity_input, read_effective_setting, read_autonomy_enabled
+from copy import deepcopy
 
 from app.domains.operations.service import maintenance as maintenance_service
 from app.runtime.memory.daypart_observations import _build_daypart_memory_note
@@ -183,22 +187,9 @@ def assign_resident_slot(
     next_tick_at: datetime | None = None,
     commit: bool = True,
 ) -> schemas.AgentSlotRead:
-    return slot_requests.assign_resident_slot(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        credential_id=credential_id,
-        heartbeat_interval_seconds=heartbeat_interval_seconds,
-        next_tick_at=next_tick_at,
-        commit=commit,
-        workflows=build_slot_request_workflows(
-            db, credential_lookup=agent_run_crud.get_credential,
-            default_credential_lookup=agent_run_crud.get_default_credential,
-            ensure_auto_ticks_available=maintenance_service.ensure_auto_ticks_available,
-            ensure_run_now_available=maintenance_service.ensure_run_now_available,
-            timezone_reader=agent_activity_policy.activity_timezone,
-        ),
-    )
+    return agent_slot_allocator.prepare_resident_slot_assignment(db, user_id=user_id, character_id=character_id,
+        credential_id=credential_id, heartbeat_interval_seconds=heartbeat_interval_seconds,
+        next_tick_at=next_tick_at, commit=commit)
 
 
 def claim_temporary_resident_slot(
@@ -241,6 +232,7 @@ def release_temporary_resident_slot(
         user_id=user_id,
         character_id=character_id,
         credential_id=credential_id,
+        autonomy_reader=read_autonomy_enabled,
     )
 
 
@@ -280,12 +272,17 @@ async def run_community_once(
     candidate_agent_ids = (
         [data.agent_id] if data.agent_id else settings.openclaw_agent_ids
     )
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(db, user_id)
+    input_snapshot = capture_activity_input(db, character_id=character.id)
+    character = character_for_input(character, input_snapshot)
     lease_seconds = timeout_seconds + 90
     slot = slot_pool.claim_agent_slot(
         db,
         run_id=run_id,
         agent_ids=candidate_agent_ids,
         lease_seconds=lease_seconds,
+        admission_metadata=input_snapshot,
     )
     if slot is None:
         raise AgentSlotUnavailableError(
@@ -307,6 +304,8 @@ async def run_community_once(
             db,
             character_id=character.id,
             ignore_active_hours=require_public_action,
+            input_snapshot=input_snapshot,
+            frozen_input=True,
         )
         if enforce_activity_policy
         else None
@@ -386,6 +385,7 @@ async def run_community_once(
             agent_id=agent_id,
             session_key=session_key,
             tool_auth_key=_tool_auth_key(session_key, run_id=run_id),
+            input_snapshot=input_snapshot,
         )
         if use_langgraph_resident and activity_policy is not None:
             _purge_expired_daypart_memory_events(db)
@@ -431,6 +431,7 @@ async def run_community_once(
                         on_rate_limit_wait=_extend_lease_for_wait,
                         social_search_index=social_search.index,
                         social_search_state=social_search.state,
+                        input_snapshot=input_snapshot,
                     )
                 )
             except DirectLlmDeferred as exc:
@@ -1377,6 +1378,7 @@ async def _run_resident_slot_once(
 ) -> schemas.OpenClawAgentRunRead:
     engine = settings.agent_activity_engine
     use_langgraph_resident = engine == "langgraph" and enforce_activity_policy
+    input_snapshot = deepcopy(slot.admission_metadata)
     if (
         slot.assigned_user_id is None
         or slot.assigned_character_id is None
@@ -1447,6 +1449,7 @@ async def _run_resident_slot_once(
             character_id=slot.assigned_character_id,
             credential_id=slot.assigned_credential_id,
         )
+        character = character_for_input(character, input_snapshot)
         selected_post_id = _select_resident_run_post_id(
             SqlAlchemyPostSelectionReferences(db),
             preferred_post_id=post_id,
@@ -1460,7 +1463,7 @@ async def _run_resident_slot_once(
             else f"agent:{slot.agent_id}:resident-manual:{slot.assigned_user_id}:{character.id}:{run_id}"
         )
         tool_auth_key = _tool_auth_key(session_key, run_id=run_id)
-        setting = activity_settings.get_setting(db, character.id)
+        setting = setting_for_input(activity_settings.get_setting(db, character.id), input_snapshot, character_id=character.id)
         now = datetime.now(UTC)
         cooldown_until = (
             _aware_utc(credential.cooldown_until)
@@ -1479,6 +1482,7 @@ async def _run_resident_slot_once(
                 agent_id=slot.agent_id,
                 session_key=session_key,
                 tool_auth_key=tool_auth_key,
+                input_snapshot=input_snapshot,
             )
             run_created = True
             gateway_payload = {
@@ -1552,6 +1556,7 @@ async def _run_resident_slot_once(
                 agent_id=slot.agent_id,
                 session_key=session_key,
                 tool_auth_key=tool_auth_key,
+                input_snapshot=input_snapshot,
             )
             run_created = True
             gateway_payload = {
@@ -1607,6 +1612,8 @@ async def _run_resident_slot_once(
                 db,
                 character_id=character.id,
                 ignore_active_hours=require_public_action,
+                input_snapshot=input_snapshot,
+                frozen_input=True,
             )
             if enforce_activity_policy
             else None
@@ -1717,6 +1724,7 @@ async def _run_resident_slot_once(
             agent_id=slot.agent_id,
             session_key=session_key,
             tool_auth_key=tool_auth_key,
+            input_snapshot=input_snapshot,
         )
         run_created = True
         if use_langgraph_resident and activity_policy is not None:
@@ -1762,6 +1770,7 @@ async def _run_resident_slot_once(
                         on_rate_limit_wait=_extend_lease_for_wait,
                         social_search_index=social_search.index,
                         social_search_state=social_search.state,
+                        input_snapshot=input_snapshot,
                     )
                 )
             except DirectLlmDeferred as exc:
@@ -2681,7 +2690,8 @@ async def tick_resident_slots(
     def _recovery_next_tick_at(slot: models.AgentSlot, recovered_at: datetime) -> datetime:
         if not slot.assigned_character_id:
             return recovered_at
-        setting = activity_settings.get_setting(db, slot.assigned_character_id)
+        setting = read_effective_setting(db, character_id=slot.assigned_character_id,
+            setting=activity_settings.get_setting(db, slot.assigned_character_id))
         if setting is None:
             return recovered_at
         return agent_activity_policy.recovery_tick_schedule(
@@ -2697,6 +2707,7 @@ async def tick_resident_slots(
         db,
         now=now,
         next_tick_at_factory=_recovery_next_tick_at,
+        autonomy_reader=read_autonomy_enabled,
     )
     if recovered_count:
         logger.warning(
@@ -2721,6 +2732,10 @@ async def tick_resident_slots(
                 results=[],
                 slots=list_resident_slots(db),
             )
+    from app.runtime.routines.world_autonomy import reconcile_world_autonomy
+    from app.runtime.resident.autonomy_composition import build_autonomy_admission_references
+    reconcile_world_autonomy(db, allowed_character_ids=allowed_character_ids,
+        workflows=build_autonomy_admission_references())
     candidate_character_ids = {
         slot.assigned_character_id
         for slot in slot_queries.list_agent_slots(db)

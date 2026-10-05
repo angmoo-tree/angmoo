@@ -156,6 +156,9 @@ def seed_projection_fixture(db: Session, *, suffix: str = "base") -> P7Fixture:
     )
     db.add_all([actor_world_character, target_world_character])
     db.flush()
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    for character, role in ((actor, actor_world_character), (target, target_world_character)):
+        initialize_created_world_character(db, character=character, world_character=role)
     root_post = models.Post(
         id=f"p7-root-{suffix}",
         author_character_id=target.id,

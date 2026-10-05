@@ -36,7 +36,10 @@ def lock_environment_admission(db, owner_id: str | None = None) -> None:
     statement = update(InstallationIdentity).where(InstallationIdentity.bootstrap_state == "claimed")
     if owner_id is not None:
         statement = statement.where(InstallationIdentity.owner_user_id == owner_id)
-    db.execute(statement.values(bootstrap_state=InstallationIdentity.bootstrap_state))
+    db.execute(statement.values(
+        bootstrap_state=InstallationIdentity.bootstrap_state,
+        updated_at=InstallationIdentity.updated_at,
+    ))
 
 
 def snapshot(db, owner_id: str) -> EnvironmentSnapshot:

@@ -254,6 +254,7 @@ export function SocialPostActionStrip({
         ) : (
           <button
             disabled={action.disabled}
+            aria-busy={action.kind === "like" && action.disabled ? true : undefined}
             aria-pressed={action.kind === "like" ? positiveLike : undefined}
             aria-label={label}
             className={classNames(

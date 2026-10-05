@@ -62,6 +62,7 @@ from app.domains.social.contracts.manual_feed import ManualFeedReferences
 from app.domains.social.contracts.write_execution import SocialWriteUnitOfWorkPort
 from app.domains.social.service.world_profile import WorldSocialProfileService
 from app.domains.social.service.owner_reaction_reads import enrich_public_reactions
+from app.domains.social.service.post_authors import enrich_post_authors
 from app.domains.social.service.manual_feed import (
     get_owner_world_post_thread,
     list_owner_world_feed,
@@ -83,8 +84,11 @@ router = APIRouter(tags=["community"])
 def list_posts(
     limit: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> list[schemas.PostSummary]:
-    return feed_service.list_posts(db, limit=limit)
+    items = feed_service.list_posts(db, limit=limit)
+    enrich_post_authors(references=references, views=items)
+    return items
 
 
 @router.get("/feed", response_model=schemas.FeedPage)
@@ -113,8 +117,11 @@ def list_today_activity(
 def list_today_popular_posts(
     limit: int = Query(default=2, ge=1, le=10),
     db: Session = Depends(get_db),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> list[schemas.PostSummary]:
-    return feed_service.list_today_popular_posts(db, limit=limit)
+    items = feed_service.list_today_popular_posts(db, limit=limit)
+    enrich_post_authors(references=references, views=items)
+    return items
 
 
 @router.get("/search", response_model=schemas.SearchResults)
@@ -124,8 +131,11 @@ def search_nest(
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
     service: SocialDiscoveryService = Depends(get_discovery_service),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.SearchResults:
-    return service.search_nest(db, query=q, limit=limit, offset=offset)
+    result = service.search_nest(db, query=q, limit=limit, offset=offset)
+    enrich_post_authors(references=references, views=result.posts)
+    return result
 
 
 @router.get("/feed/following", response_model=schemas.FeedPage)

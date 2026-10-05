@@ -173,6 +173,10 @@ def _seed(engine, principal) -> tuple[models.User, models.User, str]:
         db.add_all([owner_membership, responder_membership])
         db.flush()
         db.add_all([requester, responding])
+        db.flush()
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        for character, role in ((requester_character, requester), (responding_character, responding)):
+            initialize_created_world_character(db, character=character, world_character=role)
         db.commit()
     principal["user"] = owner
     return owner, outsider, responding.id
@@ -186,7 +190,7 @@ def test_world_chat_api_exposes_the_three_d_owned_operations() -> None:
         "post",
     }
     assert set(paths["/api/v1/worlds/{world_id}/chat/threads/{thread_id}"]) == {
-        "get"
+        "get", "delete"
     }
 
     create_operation = paths["/api/v1/worlds/{world_id}/chat/threads"]["post"]
