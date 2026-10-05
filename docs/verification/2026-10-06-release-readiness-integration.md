@@ -252,6 +252,18 @@ renamed or newly skipped, no screenshot is recaptured, and no CI or production
 validation rule is weakened. New backend test nodes and the exact template and
 browser transitions require committed, append-only preservation evidence.
 
+## Design report source freshness
+
+After hosted runners resumed, architecture CI detected a stale deterministic
+design report. The approved product-shell fixtures and explicit Korean settings
+fixture changed three spec digests. The existing generator updates exactly
+those three SHA-256 fields in `frontend-design-baseline.json`; a recursive
+before/after comparison confirms every other field is identical. No product
+PNG is recaptured, no raw-color budget or visual expectation changes, and the
+policy and validator remain intact. The canonical checker passes with 1,215
+raw colors in 36 files, 18 surfaces, zero route gaps and 36 screenshot calls.
+The next candidate still requires its actual hosted architecture result.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has
