@@ -19,7 +19,7 @@
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "12f85bf7259230524c46eae4159357ca25fa247be83c736cb8b838e128075bfd"
+      "sha256": "bb2b994d504e95a012a9b889cd7e824107d09c8ac6a2137b0f2935082f4c1e85"
     },
     {
       "path": "frontend/next.config.ts",

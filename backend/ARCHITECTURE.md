@@ -9,6 +9,13 @@ distinct legacy transition baseline exactly once. Reads never create or recaptur
 an origin. Copies use that basis with new execution identities and initial OFF,
 without copying credentials, memories, relationships, leases or activity history.
 
+Character/account privacy erasure shares the existing deletion unit of work.
+It removes the deleting actors' configuration and origin/draft references, then
+erases an immutable import basis only after no live origin, draft or World
+configuration refers to it. Retained independent Worlds keep their basis and
+settings. This explicit privacy path does not permit ordinary snapshot edits.
+Idle-slot accepted input is cleared with the deleted actor's private settings.
+
 The Characters import service exposes its immutable input/output values from
 `service/import_configuration.py`. Consumers import that narrow typed entry;
 the existing `contracts.py` workflow exports retain their historical surface.

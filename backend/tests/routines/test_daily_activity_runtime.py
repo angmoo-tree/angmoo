@@ -263,6 +263,8 @@ def _add_ready_character(
                     enabled=True,
                 )
             )
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    initialize_created_world_character(db, character=character, world_character=world_character)
     db.commit()
     return ReadyCharacter(
         user=user,

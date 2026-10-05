@@ -202,6 +202,9 @@ def _seed(engine, principal) -> dict[str, object]:
         db.flush()
         db.add_all([requester, responding])
         db.flush()
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        initialize_created_world_character(db, character=requester_character, world_character=requester)
+        initialize_created_world_character(db, character=responding_character, world_character=responding)
         thread = models.MessageThread(
             id="q-thread",
             requester_id=owner.id,

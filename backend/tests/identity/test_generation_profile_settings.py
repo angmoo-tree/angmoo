@@ -76,7 +76,7 @@ def test_message_default_pair_changes_preserve_key_and_do_not_change_override():
 def test_resident_run_keeps_pair_even_when_orm_credential_refreshes():
     credential = SimpleNamespace(model="gemini-3.1-flash-lite", thinking_level="medium")
     context = LangGraphResidentContext(db=None, run_id="fixture", user_id="owner", agent_id="character",
-        session_key="fixture", character=None, credential=credential, state=None, activity_policy=None,
+        session_key="fixture", character=SimpleNamespace(id="character"), credential=credential, state=None, activity_policy=None,
         selected_post_id=None, run_started_at=None)
     credential.model, credential.thinking_level = "gemini-3.5-flash-lite", "high"
     assert (context.generation_model, context.generation_thinking_level) == ("gemini-3.1-flash-lite", "medium")

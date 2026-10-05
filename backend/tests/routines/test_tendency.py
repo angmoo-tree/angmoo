@@ -1378,7 +1378,8 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
     run = SimpleNamespace(
-        id="run-1", user_id="user-1", character_id="char-1", post_id=None
+        id="run-1", user_id="user-1", character_id="char-1", post_id=None,
+        input_snapshot=None,
     )
     stored: dict[str, object] = {}
 
@@ -1448,7 +1449,8 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: None,
     )
     run = SimpleNamespace(
-        id="run-1", user_id="user-1", character_id="char-1", post_id=None
+        id="run-1", user_id="user-1", character_id="char-1", post_id=None,
+        input_snapshot=None,
     )
     consumed: list[dict[str, object]] = []
 

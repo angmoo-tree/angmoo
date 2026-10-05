@@ -23,6 +23,8 @@
       "auth_sessions",
       "character_active_worlds",
       "character_card_sources",
+      "character_draft_import_origins",
+      "character_import_origins",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -110,6 +112,7 @@
       "world_activity_repertoires",
       "world_character_activity_states",
       "world_character_blocks",
+      "world_character_configurations",
       "world_character_feed_cursors",
       "world_character_feed_observations",
       "world_character_setup_attempts",
@@ -161,6 +164,9 @@
       "installation_identities",
       "local_owner_bootstrap_challenges",
       "runtime_scheduler_leases"
+    ],
+    "delete_unreferenced_shared_import_basis": [
+      "character_import_snapshots"
     ]
   },
   "character_deletion": {
@@ -184,6 +190,8 @@
       "agent_runs",
       "character_active_worlds",
       "character_card_sources",
+      "character_draft_import_origins",
+      "character_import_origins",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -264,6 +272,7 @@
       "world_activity_repertoires",
       "world_character_activity_states",
       "world_character_blocks",
+      "world_character_configurations",
       "world_character_feed_cursors",
       "world_character_feed_observations",
       "world_character_setup_attempts",
@@ -322,6 +331,9 @@
       "world_roles",
       "world_rules",
       "worlds"
+    ],
+    "delete_unreferenced_shared_import_basis": [
+      "character_import_snapshots"
     ]
   }
 }

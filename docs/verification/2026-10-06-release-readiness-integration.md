@@ -249,8 +249,7 @@ Additional local frontend checks pass: settings **2**, shared creator Next
 profiles **40**, and static Memory/native lifecycle **2**. Earlier locale,
 detector and Korean-readiness failures are retained separately. No test is
 renamed or newly skipped. These locale/template fixes recapture no screenshot
-and weaken no CI or production
-validation rule is weakened. New backend test nodes and the exact template and
+and weaken no CI or production validation rule. New backend test nodes and the exact template and
 browser transitions require committed, append-only preservation evidence.
 
 ## Design report source freshness
@@ -299,6 +298,40 @@ Next/static corpus passes **36 tests** in the pinned environment after the
 single image update. Its exact committed binary before/after hashes require
 append-only frontend-asset evidence; this automated result remains separate
 from the final candidate's explicit user review.
+
+## Backend CI preparation and private import-state erasure
+
+The earlier complete hosted backend run reports failures before reaching its
+60-minute limit. Its exact 5,411-node collection and timestamped progress identify
+46 failed nodes before cancellation; cancellation is not a successful test run.
+Existing activity/name/memory fixtures now initialize their synthetic World
+configuration through the same explicit creation/entry unit of work as the
+product. Historical tool-run doubles explicitly carry `input_snapshot=None`.
+Production readiness, immutable-input and retry rules are not weakened.
+
+The World shell contract now checks the approved management screen, and the
+public API test checks the approved 206 paths / 255 operations including scoped
+management and thread deletion. Existing private-route exclusions remain.
+The official embedded inventory generator refreshes actual source hashes and
+historical SQL markers; it starts no PostgreSQL server or compatibility test.
+
+Privacy review exposes an actual omission: import origin/configuration records
+and idle-slot accepted input were absent from existing erasure paths. The
+existing privacy transaction now removes the deleting actors' World settings
+and origin/draft links, then deletes only snapshots with no remaining World,
+origin or draft references. Another live independent World keeps its settings
+and immutable basis. Ordinary editing still cannot mutate or delete snapshots.
+Character/account erasure also clears idle-slot `admission_metadata`.
+
+Four new file-backed SQLite tests pass for single-instance preservation,
+last-reference erasure, rollback and account deletion including slot input.
+The existing authorization/deletion tests and privacy inventory check pass.
+Related fixture regressions pass in the isolated Windows replay: the initial
+62-test group, 95 tests in the revised runtime/privacy/inventory group, the four
+remaining activity/tool fixtures, and all 17 public-runtime tests. A Windows
+contention failure in the combined diagnostic run is retained; the unchanged
+bounded-write/performance checks subsequently pass in focused execution.
+The complete backend suite and final hosted candidate CI remain required.
 
 ## Preservation and publication boundaries
 

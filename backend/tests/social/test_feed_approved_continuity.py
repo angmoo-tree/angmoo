@@ -178,6 +178,9 @@ def test_topic_regeneration_does_not_rewrite_approved_provenance(monkeypatch):
         entry.feed_runtime_mode = "topic_recommendation_v1"
         refs = WorldFeedQueries(db)
         character = refs.character(entry.character_id)
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        initialize_created_world_character(db, character=character, world_character=entry)
+        db.commit()
         def baseline():
             pair = refs.approved_pair(entry.id)
             return (refs.character_hash(character), entry.character_contract_hash,

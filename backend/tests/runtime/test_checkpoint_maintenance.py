@@ -240,6 +240,8 @@ async def _overlap_workload(root, *, cleanup):
                     local_profile={}, character_contract_hash=initial_actor.character_contract_hash,
                     world_contract_hash=initial_actor.world_contract_hash)
                 db.add(actor); db.flush()
+                from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+                initialize_created_world_character(db, character=character, world_character=actor)
                 if name == "cleanup":
                     cleanup_ids = (*ids[:2], actor.id, *ids[3:])
                     continue

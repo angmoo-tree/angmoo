@@ -865,6 +865,7 @@ def _clear_resident_slots_for_agent(
         slot.assigned_user_id = None
         slot.assigned_character_id = None
         slot.assigned_credential_id = None
+        slot.admission_metadata = None
         slot.next_tick_at = None
         slot.last_run_at = None
         slot.heartbeat_interval_seconds = None

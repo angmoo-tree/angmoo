@@ -40,6 +40,9 @@ def test_world_identity_freezes_per_activity_and_next_activity_uses_rename():
         actor_b = WorldCharacter(id="actor-b", world_id=other.id, character_id=ready.character.id,
             membership_id=member.id, status="active", control_mode="autonomous")
         db.add(actor_b); db.commit()
+        from app.runtime.world_characters.creation_configuration import initialize_entered_world_character
+        initialize_entered_world_character(db, world_character_id=actor_b.id)
+        db.commit()
         second_profile = create_profile(db, other, ready.user.id, "민수")
         second = resolve_name_binding(db, actor=actor_b, owner_id=ready.user.id)
         assert second.user_display_name == "민수" and second.user_world_character_id == second_profile.world_character_id
