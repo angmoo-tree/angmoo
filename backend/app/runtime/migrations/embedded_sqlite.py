@@ -117,7 +117,17 @@ class SqliteCanonicalUpgradeCoordinator:
                 manifest_sha256=latest.manifest_sha256,
             )
 
-        source_manifest = load_sqlite_manifest(current.schema_version)
+        marker = self._controller.current()
+        source_manifest = load_sqlite_manifest(
+            current.schema_version,
+            source_manifest_sha256=(
+                str(marker["manifest_sha256"])
+                if marker is not None
+                and marker["relative_path"] == relative
+                and int(marker.get("data_version", 0)) == current.schema_version
+                else None
+            ),
+        )
         _validate_database(source_database, source_manifest)
         chain = migration_chain(current.schema_version)
         if not chain:

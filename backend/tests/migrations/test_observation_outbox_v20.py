@@ -180,7 +180,7 @@ def test_coordinator_preserves_source_generation_and_promotes_v20(tmp_path: Path
         StaticRuntimeDataPath(tmp_path), fallback_generation="observed-v19"
     ).upgrade()
     assert result.migrated is True
-    assert result.source_version == 19 and result.target_version == 27
+    assert result.source_version == 19 and result.target_version == 29
     assert result.database_path != database
     old_engine = create_engine(f"sqlite:///{database.as_posix()}")
     new_engine = create_engine(f"sqlite:///{result.database_path.as_posix()}")
@@ -189,7 +189,7 @@ def test_coordinator_preserves_source_generation_and_promotes_v20(tmp_path: Path
         assert _outbox_row(new, row_id)["relationship_state_id"] == state_id
         assert new.exec_driver_sql(
             "SELECT schema_version, source_revision FROM angmoo_schema_version"
-        ).one() == (27, "20261003_0105")
+        ).one() == (29, "20261005_0106")
     old_engine.dispose()
     new_engine.dispose()
 
@@ -290,7 +290,7 @@ def test_alembic_online_sqlite_env_prepares_foreign_keys(tmp_path: Path) -> None
     with engine.connect() as connection:
         assert connection.exec_driver_sql(
             "SELECT version_num FROM alembic_version"
-        ).scalar_one() == "20261003_0105"
+        ).scalar_one() == "20261005_0106"
         assert _outbox_row(connection, row_id)["relationship_state_id"] == state_id
         assert connection.exec_driver_sql("PRAGMA foreign_key_check").all() == []
         indexes = {row[1] for row in connection.exec_driver_sql(

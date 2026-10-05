@@ -11,7 +11,7 @@ from sqlalchemy import Connection, MetaData, UniqueConstraint, text
 from app.models import Base
 
 
-SQLITE_SCHEMA_VERSION = 28
+SQLITE_SCHEMA_VERSION = 29
 SOURCE_ALEMBIC_REVISION = "20261005_0106"
 SOURCE_ALEMBIC_MIGRATION_COUNT = 105
 EXPECTED_CANONICAL_TABLE_COUNT = 153

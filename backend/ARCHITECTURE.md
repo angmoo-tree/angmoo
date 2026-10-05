@@ -483,6 +483,8 @@ Docker 브라우저 실행과 Windows 설치 앱은 같은 업무 코드를 사�
 
 Alembic은 [`alembic/`](alembic/)과 [`alembic.ini`](alembic.ini)를 사용합니다. `env.py`는 같은 Base의 등록된 metadata를 참조합니다. 역사 revision의 본문·ID·연결 그래프는 보존합니다. 별도로 `runtime/migrations`의 embedded SQLite upgrade가 설치 데이터의 버전을 올립니다. ORM 파일 이동만을 이유로 table·constraint·schema version을 변경하지 않습니다.
 
+SQLite v29는 개발 watch 중 먼저 적용된 v28의 복구를 소유합니다. `sqlite_versions/registry.py`는 당시 generation marker의 정확한 manifest SHA와 동결된 초기 v28 계약을 연결하며, 원본의 schema 지문·revision·table inventory·무결성·외래키를 모두 검증합니다. 최종 v28과 v1–v27 manifest는 변경하지 않습니다. `world_configuration_v29.py`는 미공개 staging 복사본에서 nullable 실행 입력 컬럼 2개와 draft origin의 `ON DELETE CASCADE`만 보완합니다. 이미 저장된 World 설정·불변 가져오기 기준·접수 입력·lease·이력을 재생성하지 않습니다. 최종 v28도 같은 검증·승격 경로로 v29가 되며, 다른 schema drift는 거부합니다. Alembic 정의와 ORM의 최종 구조가 같으므로 source revision은 `20261005_0106`으로 유지하고 embedded 버전만 올립니다.
+
 과거 migration이 import하는 몇몇 옛 model/schema helper 경로와 지원 Hosted 확장이 사용하는 최소 alias는 명시적인 호환 계약입니다. 실제 구현은 소유 역할 한곳에 있고 같은 객체를 제공합니다. 새 제품 코드가 이 경로를 사용하지 않습니다. 임시 업무 집합이나 사용자가 없는 전달 서비스를 이런 역사적 호환과 혼동하지 않습니다.
 
 ## 11. 테스트와 구조 검사
