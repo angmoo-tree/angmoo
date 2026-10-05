@@ -5,6 +5,7 @@ import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { approvedErrorMessage } from "./approved-error-transitions.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const baseline = "de1abed71db6ea00b31b455ad9673b12619bf5f0";
@@ -13,7 +14,8 @@ function harness(historical, kind) {
   let response = {status: 200, text: '{"items":[],"ok":true}'};
   const runtimeFetch = async (url, options) => {
     requests.push([url, options]);
-    return {ok: response.status >= 200 && response.status < 300, status: response.status, text: async () => response.text};
+    return {ok: response.status >= 200 && response.status < 300, status: response.status,
+      headers: new Headers(response.headers), text: async () => response.text};
   };
   function load(name) {
     if (cache.has(name)) return cache.get(name).exports;
@@ -25,6 +27,8 @@ function harness(historical, kind) {
       if (["@/shared/runtime/public", "@/lib/runtime/runtime-config"].includes(spec)) return {runtimeFetch};
       if (["@/shared/auth/public", "@/lib/auth/browser-session"].includes(spec)) return {
         clearStoredUser: () => events.push("clear"), notifyAuthChanged: () => events.push("auth"),
+        captureAuthRequestScope: () => ({ epoch: 0, userId: "synthetic-owner" }),
+        isCurrentAuthRequestScope: () => true,
       };
       if (spec === "@/shared/ui/public") return {};
       const target = spec.startsWith("@/") ? "frontend/src/" + spec.slice(2)
@@ -32,7 +36,7 @@ function harness(historical, kind) {
       return load(target + ".ts");
     };
     const code = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText;
-    vm.runInNewContext(code, {module: loadedModule, exports: loadedModule.exports, require, URLSearchParams}, {filename: name});
+    vm.runInNewContext(code, {module: loadedModule, exports: loadedModule.exports, require, URLSearchParams, FormData, Headers}, {filename: name});
     return loadedModule.exports;
   }
   const entries = {
@@ -74,7 +78,12 @@ for (const response of [
       try {return {value: await h.api.requestSocialApi("/fixture", {anonymous, clearAuthOnUnauthorized: true})};}
       catch (error) {return {error: error.name + ":" + error.message};}
     };
-    assert.deepEqual(plain(await outcome(b)), plain(await outcome(a)));
+    const historical=plain(await outcome(a));
+    if (response.status >= 400) {
+      assert.ok(historical.error.startsWith("Error:"));
+      historical.error="ApiRequestError:"+approvedErrorMessage(historical.error.slice("Error:".length),response.status);
+    }
+    assert.deepEqual(plain(await outcome(b)), historical);
     assert.deepEqual(b.events, a.events);
     assert.deepEqual(plain(b.requests), plain(a.requests));
   }

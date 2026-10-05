@@ -81,7 +81,7 @@ from app.runtime.persistence.sqlite_schema import (
 
 
 SUPPORTED_SOURCE_VERSIONS = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
 )
 MAX_GENERATION_NAME_LENGTH = 64
 MAX_LENGTH_V8_GENERATION = (
@@ -618,6 +618,21 @@ def _seed_supported_predecessor(
                 )
                 from app.models import Base
                 from sqlalchemy.schema import CreateIndex, CreateTable
+
+                # Only this isolated historical fixture moves backwards. Final
+                # v28 already has v29's shape; earlier sources must omit all
+                # World-configuration tables and frozen admission input fields.
+                if source_version < 28:
+                    for name in (
+                        "character_draft_import_origins", "character_import_origins",
+                        "world_character_configurations", "character_import_snapshots",
+                    ):
+                        sql_connection.exec_driver_sql(f'DROP TABLE "{name}"')
+                    for name, column in (
+                        ("agent_slots", "admission_metadata"),
+                        ("agent_runs", "input_snapshot"),
+                    ):
+                        sql_connection.exec_driver_sql(f'ALTER TABLE "{name}" DROP COLUMN "{column}"')
 
                 # Strip only the later additive environment delta in this
                 # isolated supported-predecessor fixture. Production upgrades

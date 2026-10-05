@@ -5,6 +5,7 @@ import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { approvedErrorMessage } from "./approved-error-transitions.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 // Immutable pre-Character extraction. Compare real request bodies, failures and storage/event order.
@@ -20,7 +21,8 @@ function harness(historical) {
   let response = {status: 200, text: '{"ok":true}'};
   const runtimeFetch = async (url, options) => {
     requests.push([url, options]);
-    return {ok: response.status >= 200 && response.status < 300, status: response.status, text: async () => response.text};
+    return {ok: response.status >= 200 && response.status < 300, status: response.status,
+      headers: new Headers(response.headers), text: async () => response.text};
   };
   const cache = new Map();
   const source = name => historical
@@ -117,7 +119,7 @@ for(const status of [401,422,503]){
  const a=harness(true),b=harness(false);
  for(const h of [a,b])h.setResponse({status,text:'{"detail":"fixture failure"}'});
  const failure=async h=>{try{await h.api.updateAgentProfile("character",{name:"fixture"});return null;}catch(e){return e.message;}};
- assert.equal(await failure(b),await failure(a));assert.deepEqual(plain(b.events),plain(a.events));
+ assert.equal(await failure(b),approvedErrorMessage(await failure(a),status));assert.deepEqual(plain(b.events),plain(a.events));
 }
 for(const h of [before,after]){
  h.session.markFirstAgentWelcomePromptPending();

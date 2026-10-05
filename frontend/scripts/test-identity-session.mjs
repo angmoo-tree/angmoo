@@ -5,6 +5,7 @@ import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { approvedErrorMessage } from "./approved-error-transitions.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 // Immutable pre-Identity extraction, including the already moved runtime layer.
@@ -20,7 +21,8 @@ function harness(historical) {
   let response = {status: 200, text: '{"ok":true}'};
   const runtimeFetch = async (url, options) => {
     requests.push([url, options]);
-    return {ok: response.status >= 200 && response.status < 300, status: response.status, text: async () => response.text};
+    return {ok: response.status >= 200 && response.status < 300, status: response.status,
+      headers: new Headers(response.headers), text: async () => response.text};
   };
   const cache = new Map();
   const source = name => historical
@@ -73,7 +75,7 @@ for(const response of [
   const before=harness(true),after=harness(false);
   for(const h of [before,after]){h.setResponse(response);h.window.sessionStorage.setItem("angmoo.user","fixture");}
   const error=async h=>{try{await h.api.login({email:"fixture",password:"fixture"});return null;}catch(e){return e.message;}};
-  assert.equal(await error(after),await error(before));
+  assert.equal(await error(after),approvedErrorMessage(await error(before),response.status));
   assert.deepEqual(after.events,before.events);
   assert.deepEqual(after.window.sessionStorage.dump(),before.window.sessionStorage.dump());
 }

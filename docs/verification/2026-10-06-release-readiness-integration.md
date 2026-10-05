@@ -111,6 +111,49 @@ to obtain a passing result. Collection/preservation is distinct from executed
 tests. Hosted CI, Windows/platform-shell review, PR merge and the exact merged
 commit's main CI must be recorded separately in the execution ledger.
 
+## Corrections found during the first PR CI
+
+The first published candidate is `e2ae995b41910ce0ec0395b21c2e0d405ca2b42a`
+in [PR #361](https://github.com/angmoo-tree/angmoo/pull/361). Its frontend and
+Gitleaks jobs failed. Successful checks on that candidate do not replace the
+required checks on the eventual final head.
+
+- Cold-start registration tests still expected schema v27 and 149 tables. The
+  current v29 registry has 153 tables, adding exactly the four import-origin/
+  snapshot/World-configuration tables and removing none. The tests now require
+  those additions explicitly. The focused registration, daypart runtime and
+  installer fixture suites pass all 38 cases.
+- Historical installer fixtures incorrectly retained the new World tables and
+  admission/run input columns. Only the isolated fixture builder now removes
+  those later additions for v1-v27 sources before validating each source against
+  its original frozen manifest. Final v28 retains the current shape. Production
+  migration code and frozen manifests are unchanged. The existing real NSIS
+  matrix is extended from v1-v26 to v1-v28, retaining hosted-runner sentinels,
+  failure recovery and the final idempotent reinstall. Local fixture validation
+  does not count as hosted Windows installer execution.
+- The old frontend parity harnesses lacked HTTP headers and current request
+  scope helpers. Their historical commit pins, endpoint/payload checks, parsing
+  checks and auth/storage comparisons remain in place. Exact message transitions
+  approved in the earlier multilingual/typed-error implementation are listed
+  separately; unknown differences still fail comparison. Identity, Characters,
+  Social and 3 x 22 feature-error cases pass. The existing independent typed-error
+  suite passes 53 checks in both languages, and the environment/session suite
+  passes its 12 late-response transitions. Runtime transport code is unchanged.
+- All 13 Gitleaks directory findings are public source Git blob IDs in the two
+  append-only provenance manifests. Each of the 11 distinct source/blob pairs
+  was independently checked against its actual signed source commit and
+  ancestry. One exact rule/path/full-line review group distinguishes these
+  values. Ten review regressions require the original objects and reject changed
+  hashes, keys, paths and appended data. The same pinned scanner then reports
+  zero findings for the first candidate's tracked tree and all 1,034 ancestor
+  commits. This does not exempt arbitrary hashes, whole JSON files or credentials.
+
+The current L4 and hybrid reports are regenerated from these source changes.
+The original introduction and product-change records are retained; new source
+and assertion transitions must be appended against the actual committed fix.
+Final candidate tree/history, preservation and hosted CI remain independent
+completion gates after that commit.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has

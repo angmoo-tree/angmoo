@@ -2642,7 +2642,7 @@
     },
     {
       "path": "backend/tests/memory/test_daypart_runtime_bindings.py",
-      "sha256": "ffac56f6cf9b240f166b8d454feaf597c701084b9365f9a95deb6cbd56554dbd"
+      "sha256": "a1f877e27dc806348b244b07416614e691f03bddaa0dbdd31c9c23d1ce36d5b8"
     },
     {
       "path": "backend/tests/memory/test_embedding_settings.py",
