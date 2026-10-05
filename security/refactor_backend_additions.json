@@ -29001,6 +29001,990 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "b36c2d49ec11d45fa8f45d1dd4b5fd2b63dfeea6",
+      "feature_id": "AR-WORLD-UI-SNS-CORE-REVIEW-EVIDENCE-20261005",
+      "reason": "Register two verification documents first introduced by the exact parent metadata commit; historical records, implementation and test assertions remain unchanged.",
+      "tracked_files": {
+        "docs/verification/world-ui-sns-output-core-review-20261005.json": "4c3a30488a3a41746fa7aa3b9ccaaf6d53f8a45b",
+        "docs/verification/world-ui-sns-output-core-review-20261005.md": "76c4cca60e41b2f7a49b724c565d78667e4a930e"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "8551ea27c5b521504b9c22e22646b9637f5af758",
+      "feature_id": "AR-WORLD-UI-20261005",
+      "reason": "User-approved P00-P28 scoped World configuration, immutable import baselines, UI preservation, guarded Chat deletion, actual synthetic API and offline owning regression evidence",
+      "tracked_files": {
+        "backend/alembic/versions/20261005_0106_world_character_configuration.py": "bba412020977d5dadd310b5c0c49498eb5fcac63",
+        "backend/app/api/world_character_management_contracts.py": "8a660b6b5946eb3a726be1faafc9d241d64530de",
+        "backend/app/api/world_character_management_dependencies.py": "4b1cc56826a43cc776636543ba94f5270181216a",
+        "backend/app/domains/characters/models_import.py": "5cfd011d4641a9fa0ea9024fe48095cc5d24ed6a",
+        "backend/app/domains/characters/service/import_snapshots.py": "6d962d2e52a8b5e0334395b99edb9ac7297126e3",
+        "backend/app/domains/characters/service/world_image_profiles.py": "b4dfadde4267163b657632480b5e8edbc4c38809",
+        "backend/app/domains/routines/contracts/autonomy_admission.py": "7d419625f601103868f82763e40a6f8ef6c4983c",
+        "backend/app/domains/social/contracts/post_authors.py": "7f8db12962a1ef224c43f11286d0cb7758abbbd7",
+        "backend/app/domains/social/service/post_authors.py": "96975c259c05ac6b0392691745dc22088f235150",
+        "backend/app/domains/world_characters/configuration_models.py": "7828afbb7346ca2f9578314df8badfa461d4958d",
+        "backend/app/domains/world_characters/contracts/configuration.py": "fa6fbb2cf1c5365a105194d548232ca232a9a48c",
+        "backend/app/domains/world_characters/router/management.py": "99f373292daf600cb4c45bcb80a3da99afa32a83",
+        "backend/app/domains/world_characters/schemas/management.py": "d2e6ae9b8258df8798fe11189a9ac670a6822794",
+        "backend/app/domains/world_characters/service/configuration.py": "bfa9f2dcc6f0cab0e79b56f0c52902b3ac2f98cb",
+        "backend/app/domains/world_characters/service/management.py": "a85772cc9f2491b726ccf3e7baa021ec41e6d484",
+        "backend/app/runtime/autonomous_activity/configuration.py": "44b14791478d8468343c53ed2cfceed6bec4f82e",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v28.json": "cd607bbecacfa7e90e3f9f64096e9769bc9c41a3",
+        "backend/app/runtime/migrations/sqlite_versions/world_configuration_v28.py": "2305dcc6e586b6df76b1501a291e92f7470b0803",
+        "backend/app/runtime/migrations/sqlite_versions/world_configuration_v28_ddl.json": "763f8997badc224bc19fe41aad44e219b006eafe",
+        "backend/app/runtime/resident/autonomy_composition.py": "433eb935b17f592b58ed9851223f2abd197f7bff",
+        "backend/app/runtime/routines/configuration_reads.py": "49763ea71fa926d9aea56450b317213c75d3dd60",
+        "backend/app/runtime/routines/world_autonomy.py": "f4f31157228ff5fe43d25434bda4984baeada419",
+        "backend/app/runtime/social/post_authors.py": "3ddf81a71882cbbde9ca7f45d76ee6dc36f3b6f2",
+        "backend/app/runtime/world_characters/creation_configuration.py": "d096e7489fed0aa841d813961ae16d56ce9f9d38",
+        "backend/app/runtime/world_characters/management.py": "d2682dfa9927858ef4eda17fa9e242830880c4b2",
+        "backend/app/runtime/world_characters/manual_activity.py": "2b946ee3afaffa02178d3841f79244e2e89d90ab",
+        "backend/app/runtime/world_characters/profile_media.py": "ed4227cf2a1d51f4c4cfe2c1cd8ffb999fa2bc6c",
+        "backend/app/runtime/world_configuration/__init__.py": "5191d98d0975a177d0f1e6dcb6501e6b9bfe00da",
+        "backend/app/runtime/world_configuration/effective_values.py": "b903af56c2785b39386a769089762f660c5cd832",
+        "backend/tests/chat/test_world_chat_configuration.py": "d00b41d37e2fb9244534046f4d7fd0d649c388c1",
+        "backend/tests/chat/test_world_chat_delete.py": "a172a6bd2a308400f99a838d9ca9a649a52cda51",
+        "backend/tests/migrations/test_world_character_configuration_postgres.py": "e51ad3743a76d0710d93ab9434c3468094f7aa2c",
+        "backend/tests/migrations/test_world_character_configuration_upgrade.py": "cbea1e177e1b8249b63437ed6aba2843bfea0063",
+        "backend/tests/relationships/test_relationship_graph_avatar_read.py": "4a48095a6dd04c6bf0823788b552a622590a054b",
+        "backend/tests/routines/test_world_independent_autonomy.py": "e2385106082f2aa34d5f76c9c4a62723ed6d003b",
+        "backend/tests/social/test_world_configuration_inputs.py": "5944ddf62e2135350f6bf7baed9e27612f3f6244",
+        "backend/tests/social/test_world_post_authors.py": "457cbd2433746594d0e5da0c705adcfc3ef627d8",
+        "backend/tests/world_characters/test_world_character_configuration.py": "615a22abd92e5ca6a62dbadea0d9f30c12aa69b6",
+        "backend/tests/world_characters/test_world_character_snapshot_copy.py": "aef6c1d9ce0837b4d44bed2fa7be201b3aa9a75a",
+        "backend/tests/world_configuration_fixture_support.py": "caac81689a75d4344c324ed7aa2228fbbb834d12",
+        "browser-tests/playwright.social-preservation.config.ts": "6aabf0dcdf1fd133d5ba450afa6b399e4f98cc19",
+        "browser-tests/playwright.social-reactions-unit.config.ts": "cc9581c12a31826abb05ad35399ae802692e2109",
+        "browser-tests/playwright.world-character-api.config.ts": "ac228d6d97249b6b5262bf8d22601a9d10c4e114",
+        "browser-tests/playwright.world-character-management.config.ts": "ab624180ecd72312834101fefe35dd5342cf90b3",
+        "browser-tests/playwright.world-chat-delete-backend-static.config.ts": "4f4f07b373dd2153d5c8ffd9be1450757a68fdf3",
+        "browser-tests/playwright.world-chat-delete-backend.config.ts": "d79a3438f0a4ea35c45b4f055c0ed796bb51ba79",
+        "browser-tests/playwright.world-chat-delete-static.config.ts": "37327b2602c4de5ca2e2171fc07e9041b0076b0e",
+        "browser-tests/playwright.world-chat-delete.config.ts": "d465ab74894457a4e62fb95c48ce75328ea8c9d8",
+        "browser-tests/playwright.world-post-reactions-static.config.ts": "c54ed483652b5be93de816703a224ea9d40c2e60",
+        "browser-tests/playwright.world-post-reactions.config.ts": "6ee7610b59e449320a08c4643ab45012c6710711",
+        "browser-tests/profile-relationship-avatar.spec.ts": "023066e1ab7ae230d14bf8157242271f32942352",
+        "browser-tests/social-reactions-unit.spec.ts": "bc37611907bd3c72fa3bebe9ca4d7f21b7eff96d",
+        "browser-tests/world-character-configuration-api.spec.ts": "51b0aec04167bfb00e085a262d09da2e5975c54b",
+        "browser-tests/world-character-dashboard.spec.ts": "1641c83769ac3fc7bf2032c4e3123bf2dd2daca5",
+        "browser-tests/world-character-lifetime.spec.ts": "c9158a9cba960e9824c5b747e602ba886fbec0ad",
+        "browser-tests/world-character-management-fixture.ts": "ecf5e3031e7d2d980bcea6efb1be3450c7926234",
+        "browser-tests/world-character-management.spec.ts": "567f0648f90ac98cb7634208b3c3aded97c50d1f",
+        "browser-tests/world-chat-delete-backend.spec.ts": "f5a6c262e3ceabb2810e60e426be2087567d2d9b",
+        "browser-tests/world-chat-delete-fixture.py": "56f73efa8a1739d0d6e979ef27d7c67cae45d998",
+        "browser-tests/world-chat-delete-fixture.ts": "30fea031a3a923ce1e4ef1ed23125c971550880e",
+        "browser-tests/world-chat-dialog-delete.spec.ts": "a8ea9e8f86607a673b20cbad733109ce7efe5cab",
+        "browser-tests/world-post-reactions-fixture.ts": "5e2380b82e9b90ad5849688ab2295f4be135707b",
+        "browser-tests/world-post-reactions.spec.ts": "91f9183a3b71694b329f400fdd1ec5ee0e3a5152",
+        "docs/verification/2026-10-05-world-post-chat-character-management.md": "0e5191ada14c9d5f49690bfb4b531bb0f6c70105",
+        "frontend/src/components/content/profile-statistics.module.css": "914330fea63c8705ac016fec43c53e861de4e5e5",
+        "frontend/src/components/content/profile-statistics.tsx": "0e6cd8d47c2d9cf84893853cd3bef25a84bc93df",
+        "frontend/src/composition/screens/world-character-management-screen.tsx": "7f4e3c5ce67aaab2a12bc7d5672edf7377962d65",
+        "frontend/src/features/characters/api/world-character-dashboard-client.ts": "c8dd96edabb019686811159acfa8a04792603b30",
+        "frontend/src/features/characters/api/world-character-management-client.ts": "560b02fa195ea8f2d917346c4c4a4356705af5ba",
+        "frontend/src/features/characters/components/character-management-card.tsx": "668ba9f54180069a67e1bae8bb00169b7bdba5ef",
+        "frontend/src/features/characters/components/character-management-navigation.module.css": "3bcfe20bd3d3a2d1fc1532e3ca65604a36964268",
+        "frontend/src/features/characters/components/character-management-navigation.tsx": "6213c8f5a8df25b3b07620f4c2291ff44bfe0dd0",
+        "frontend/src/features/characters/components/world-character-management.module.css": "a1430eff08fb16fbab94ed72c4c3b42c8b8e7b57",
+        "frontend/src/features/characters/components/world-character-management.tsx": "e5e9bb33453ab6b53295369e045cf5e349b07bdc",
+        "frontend/src/features/characters/components/world-character-profile-editor.tsx": "dc24a6e23c467a88c7fcff6aa2ea4dc2c51f12d6",
+        "frontend/src/features/characters/components/world-character-settings-form.tsx": "c6413dbaf43d4eaf5f3981455b84c880b072a3a1",
+        "frontend/src/features/characters/hooks/use-world-character-management.ts": "ea414cd58187bbccfff4b741f879aa57c946dfad",
+        "frontend/src/features/characters/types/world-character-dashboard.ts": "947e5085bba2e954685d826ff098feb86a5f50fa",
+        "frontend/src/features/characters/types/world-character-management.ts": "e19692bffda190ba83e82b9079571606a2bdff7b",
+        "frontend/src/features/characters/utils/world-character-dashboard-presentation.ts": "299d7d1e0096b08ce85ce82d48ee0af5a54563f3",
+        "frontend/src/features/chat/components/world-chat-delete.tsx": "caa9027a648941d7e40b7fc3ecdb2228534d1d98",
+        "frontend/src/features/relationships/components/relationship-graph-node.module.css": "f1f646e298091e14d1e63297f88df15ff9241ca6",
+        "frontend/src/features/relationships/components/relationship-graph-node.tsx": "e12153df9d50d1aa1731bad4d67545493be88433",
+        "frontend/src/features/social/utils/activity-scroll-anchor.ts": "2950918fbec5868f49e7aadcaed167264cfb50c3",
+        "frontend/src/features/social/utils/confirmed-reactions.ts": "aa80f835cde0ebfde0ad21839bf32ea2efb9fd27",
+        "scripts/diagnostics/freeze_world_configuration_v28_schema.py": "bbd0e5b1a6cc86b30d4905da3d86db9ef37bc1d9",
+        "scripts/testing/offline-python/sitecustomize.py": "e6fc3aec758d4f48893ffe1187f70a5a21e388e8",
+        "scripts/testing/world-character-browser-fixture.py": "1724b7ce930a9b567b2133e580f26f3291a91d80"
+      },
+      "test_nodes": [
+        "tests/chat/test_world_chat_configuration.py::test_damaged_request_snapshot_fails_before_provider_execution[invalid_payload]",
+        "tests/chat/test_world_chat_configuration.py::test_damaged_request_snapshot_fails_before_provider_execution[other_world]",
+        "tests/chat/test_world_chat_configuration.py::test_legacy_retry_does_not_insert_world_snapshot_or_read_edited_world_persona",
+        "tests/chat/test_world_chat_configuration.py::test_thread_override_remains_explicit_and_missing_configuration_cannot_accept",
+        "tests/chat/test_world_chat_configuration.py::test_world_persona_model_and_revision_are_frozen_at_accept_and_retry",
+        "tests/chat/test_world_chat_configuration.py::test_world_thread_entry_create_list_and_detail_use_world_profile_without_mutating_actor",
+        "tests/chat/test_world_chat_delete.py::test_delete_permission_and_frontend_identity_do_not_change_storage",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[accepted]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[both_coordinating]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[canonical_planning]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[clarification_prepared]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[committing]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[current_context_ready]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[evidence_frozen]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[graph_planning]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[lease_acquired]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[optional_retrieving]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[preflighted]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[resolving]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[response_generating]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[response_streaming]",
+        "tests/chat/test_world_chat_delete.py::test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease[routing]",
+        "tests/chat/test_world_chat_delete.py::test_expired_response_uses_existing_lifecycle_before_user_retries_delete",
+        "tests/chat/test_world_chat_delete.py::test_inactive_counterpart_is_still_owned_and_cleanable",
+        "tests/chat/test_world_chat_delete.py::test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[False-accept]",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[False-model]",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[False-retry]",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[True-accept]",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[True-model]",
+        "tests/chat/test_world_chat_delete.py::test_two_sessions_serialize_admission_retry_model_and_delete[True-retry]",
+        "tests/migrations/test_world_character_configuration_postgres.py::test_t115_postgres_rollback_removes_partial_schema_then_resume",
+        "tests/migrations/test_world_character_configuration_postgres.py::test_t115_postgres_source_edit_serializes_behind_transition_lock",
+        "tests/migrations/test_world_character_configuration_postgres.py::test_t99_t111_postgres_additive_upgrade_preserves_old_values_and_reentry",
+        "tests/migrations/test_world_character_configuration_upgrade.py::test_t112_t114_t115_reentry_never_recaptures_or_merges_worlds",
+        "tests/migrations/test_world_character_configuration_upgrade.py::test_t115_source_edit_waits_for_one_confirmed_transition_revision",
+        "tests/migrations/test_world_character_configuration_upgrade.py::test_t115_transition_transaction_rollback_then_resume",
+        "tests/migrations/test_world_character_configuration_upgrade.py::test_t116_credential_url_is_not_copied_into_new_origin_or_config",
+        "tests/migrations/test_world_character_configuration_upgrade.py::test_t99_t111_three_origin_cases_and_existing_world_saved_state_preserved",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t82_t86_world_photos_names_and_direction_are_read_only",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t83_avatar_projection_uses_constant_queries_at_one_eight_and_supported_limit",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t83_t86_node_batch_scope_missing_config_and_query_count",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[//example.test/p.png]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[/media/../private/key.png]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[http://example.test/p.png]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[https://example.test/p.png?token=secret]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[https://user:password@example.test/p.png]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t84_public_avatar_excludes_unsafe_or_credential_urls[javascript:alert(1)]",
+        "tests/relationships/test_relationship_graph_avatar_read.py::test_t98_t116_import_basis_media_survives_source_replacement_and_delete",
+        "tests/routines/test_world_independent_autonomy.py::test_a_b_saved_on_use_existing_slots_and_a_off_preserves_b",
+        "tests/routines/test_world_independent_autonomy.py::test_claim_freezes_world_persona_model_policy_and_revision_across_edit_and_off",
+        "tests/routines/test_world_independent_autonomy.py::test_duplicate_actor_and_single_flight_use_existing_lease_checks",
+        "tests/routines/test_world_independent_autonomy.py::test_manual_imminent_guard_reads_world_on_even_when_global_flag_off",
+        "tests/routines/test_world_independent_autonomy.py::test_membership_revocation_and_admission_are_ordered_without_releasing_an_accepted_lease[False]",
+        "tests/routines/test_world_independent_autonomy.py::test_membership_revocation_and_admission_are_ordered_without_releasing_an_accepted_lease[True]",
+        "tests/routines/test_world_independent_autonomy.py::test_missing_world_configuration_is_rejected_before_manual_lease",
+        "tests/routines/test_world_independent_autonomy.py::test_off_and_automatic_admission_serialize_through_same_identity_lock[False]",
+        "tests/routines/test_world_independent_autonomy.py::test_off_and_automatic_admission_serialize_through_same_identity_lock[True]",
+        "tests/routines/test_world_independent_autonomy.py::test_saved_on_retained_when_pool_capacity_full_and_retry_uses_same_pool",
+        "tests/routines/test_world_independent_autonomy.py::test_saved_world_policy_is_readable_before_publish_but_automatic_and_manual_admission_are_rejected[draft-not_ready]",
+        "tests/routines/test_world_independent_autonomy.py::test_saved_world_policy_is_readable_before_publish_but_automatic_and_manual_admission_are_rejected[published-not_ready]",
+        "tests/routines/test_world_independent_autonomy.py::test_saved_world_policy_is_readable_before_publish_but_automatic_and_manual_admission_are_rejected[published-stale]",
+        "tests/routines/test_world_independent_autonomy.py::test_scoped_b_run_now_while_off_uses_b_snapshot_and_keeps_a_intent",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_read_retains_role_membership_binding_and_configuration_guards[inactive_role-world_character_inactive]",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_read_retains_role_membership_binding_and_configuration_guards[left_membership-world_scope_not_ready]",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_read_retains_role_membership_binding_and_configuration_guards[missing_binding-world_character_binding_invalid]",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_read_retains_role_membership_binding_and_configuration_guards[missing_configuration-world_configuration_missing]",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_revision_and_admission_are_ordered_on_real_sessions[False]",
+        "tests/routines/test_world_independent_autonomy.py::test_settings_revision_and_admission_are_ordered_on_real_sessions[True]",
+        "tests/routines/test_world_independent_autonomy.py::test_unsuccessful_slot_assignment_preserves_callers_world_transaction",
+        "tests/routines/test_world_independent_autonomy.py::test_world_active_hours_blocks_new_claim_preserving_saved_on",
+        "tests/routines/test_world_independent_autonomy.py::test_world_default_generation_model_and_thinking_captured_once",
+        "tests/social/test_world_configuration_inputs.py::test_activity_binding_and_recovery_retain_original_configuration[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_activity_binding_and_recovery_retain_original_configuration[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_actual_image_admission_and_worker_retain_frozen_world_values[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_actual_image_admission_and_worker_retain_frozen_world_values[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_actual_selector_planner_writer_transport_uses_each_accepted_world[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_actual_selector_planner_writer_transport_uses_each_accepted_world[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_feed_retains_accepted_on_or_manual_but_current_membership_is_required[creation-False]",
+        "tests/social/test_world_configuration_inputs.py::test_feed_retains_accepted_on_or_manual_but_current_membership_is_required[creation-True]",
+        "tests/social/test_world_configuration_inputs.py::test_feed_retains_accepted_on_or_manual_but_current_membership_is_required[legacy_transition-False]",
+        "tests/social/test_world_configuration_inputs.py::test_feed_retains_accepted_on_or_manual_but_current_membership_is_required[legacy_transition-True]",
+        "tests/social/test_world_configuration_inputs.py::test_gateway_writer_retains_accepted_default_model_after_credential_edit[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_gateway_writer_retains_accepted_default_model_after_credential_edit[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_image_foreign_world_or_actor_snapshot_is_rejected_without_intent[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_image_foreign_world_or_actor_snapshot_is_rejected_without_intent[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_image_validation_options_and_prepare_use_same_supported_profile[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_image_validation_options_and_prepare_use_same_supported_profile[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_world_photo_reference_uses_frozen_profile_before_original_card[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_world_photo_reference_uses_frozen_profile_before_original_card[legacy_transition]",
+        "tests/social/test_world_configuration_inputs.py::test_world_static_views_do_not_dirty_identity_or_learned_facts[creation]",
+        "tests/social/test_world_configuration_inputs.py::test_world_static_views_do_not_dirty_identity_or_learned_facts[legacy_transition]",
+        "tests/social/test_world_post_authors.py::test_actual_public_feed_thread_profiles_and_nested_references_use_world_values[creation]",
+        "tests/social/test_world_post_authors.py::test_actual_public_feed_thread_profiles_and_nested_references_use_world_values[legacy_transition]",
+        "tests/social/test_world_post_authors.py::test_actual_tool_post_and_reply_store_accepted_name_after_world_and_common_edits[creation]",
+        "tests/social/test_world_post_authors.py::test_actual_tool_post_and_reply_store_accepted_name_after_world_and_common_edits[legacy_transition]",
+        "tests/social/test_world_post_authors.py::test_author_profile_queries_are_batched_and_missing_roles_do_not_borrow_local_profiles[creation]",
+        "tests/social/test_world_post_authors.py::test_author_profile_queries_are_batched_and_missing_roles_do_not_borrow_local_profiles[legacy_transition]",
+        "tests/social/test_world_post_authors.py::test_historical_tool_run_never_reloads_current_world_configuration[creation]",
+        "tests/social/test_world_post_authors.py::test_historical_tool_run_never_reloads_current_world_configuration[legacy_transition]",
+        "tests/social/test_world_post_authors.py::test_manual_world_write_uses_current_profile_and_frozen_foreign_author_rejects_before_post[creation]",
+        "tests/social/test_world_post_authors.py::test_manual_world_write_uses_current_profile_and_frozen_foreign_author_rejects_before_post[legacy_transition]",
+        "tests/world_characters/test_world_character_configuration.py::test_t103_t105_independent_ids_default_off_saved_onoff_never_write_global_flags",
+        "tests/world_characters/test_world_character_configuration.py::test_t49_t52_dashboard_filters_participation_and_counts_zero_and_multiple_users",
+        "tests/world_characters/test_world_character_configuration.py::test_t49_t53_dashboard_partition_user_first_read_only_and_no_private_values",
+        "tests/world_characters/test_world_character_configuration.py::test_t53_recent_activity_requires_current_world_evidence_and_orders_by_time",
+        "tests/world_characters/test_world_character_configuration.py::test_t56_dashboard_batch_queries_do_not_grow_per_character",
+        "tests/world_characters/test_world_character_configuration.py::test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_and_readiness",
+        "tests/world_characters/test_world_character_configuration.py::test_t89_t90_world_settings_profile_and_explicit_removals_never_write_source_or_other_world",
+        "tests/world_characters/test_world_character_configuration.py::test_t89_world_handle_uses_canonical_policy_without_rewriting_unchanged_user_handle",
+        "tests/world_characters/test_world_character_configuration.py::test_t91_snapshot_immutable_and_payload_contains_configuration_only",
+        "tests/world_characters/test_world_character_configuration.py::test_t93_explicit_entry_initializes_existing_basis_once_and_get_never_backfills",
+        "tests/world_characters/test_world_character_configuration.py::test_t95_route_auth_origin_scope_fields_and_revision_fail_without_writes",
+        "tests/world_characters/test_world_character_configuration.py::test_t96_two_sessions_same_revision_exactly_one_success_and_one_conflict",
+        "tests/world_characters/test_world_character_configuration.py::test_t97_owner_world_profile_alias_writes_world_only_and_name_binding",
+        "tests/world_characters/test_world_character_snapshot_copy.py::test_t91_failed_creation_rolls_back_origin_and_world_instance",
+        "tests/world_characters/test_world_character_snapshot_copy.py::test_t91_t92_t103_t104_real_registration_and_copy_reuses_first_basis_only",
+        "tests/world_characters/test_world_character_snapshot_copy.py::test_t98_t116_copy_draft_expiry_cleans_lineage_without_mutating_basis"
+      ],
+      "test_assertions": {
+        "tests/chat/test_world_chat_configuration.py": {
+          "_fail": [],
+          "_fake_execution": [],
+          "_run": [],
+          "test_world_persona_model_and_revision_are_frozen_at_accept_and_retry": [
+            "assert original['revision'] == 7 and original['world_id'] == 'world-a'",
+            "assert row.selected_model == 'gemini-3.1-flash-lite'",
+            "assert inputs[-1].profile.personality == 'World A calm'",
+            "assert inputs[-1].profile.name == 'World A Person'",
+            "assert inputs[-1].profile.worldview == 'World A history'",
+            "assert json.loads(retried.node_state_json)['_world_configuration'] == original",
+            "assert retried.selected_model == row.selected_model",
+            "assert retry.user_message.id == accepted.user_message.id",
+            "assert inputs[-1].profile == inputs[0].profile"
+          ],
+          "test_thread_override_remains_explicit_and_missing_configuration_cannot_accept": [
+            "assert entry.status_code == 422 and entry.json()['detail'] == 'world_configuration_missing'",
+            "assert detail.status_code == 409 and detail.json()['detail'] == 'world_configuration_missing'",
+            "assert client.get('/api/v1/worlds/world-a/chat/threads').json()['items'] == []",
+            "assert db.get(models.ChatResponseRequest, accepted.response_request.request_id).selected_model == 'gemini-3.5-flash-lite'",
+            "pytest.raises(MessageValidationError, match='world_configuration_missing')",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == before",
+            "assert db.get(WorldCharacterConfiguration, 'wc-responding') is None",
+            "assert db.get(WorldCharacterConfiguration, 'wc-responding') is None"
+          ],
+          "test_world_thread_entry_create_list_and_detail_use_world_profile_without_mutating_actor": [
+            "assert all((response.status_code == 200 for response in responses))",
+            "assert projection['display_name'] == 'World A profile'",
+            "assert projection['handle'] == 'world-a-profile'",
+            "assert projection['avatar_url'] == '/media/synthetic-world-a-avatar.webp'",
+            "assert projection['banner_url'] == '/media/synthetic-world-a-banner.webp'",
+            "assert projection['world_character_id'] == 'wc-responding'",
+            "assert (actor.name, actor.handle, actor.avatar_url, actor.banner_url) == before_actor",
+            "assert db.get(WorldCharacterConfiguration, 'wc-requester').profile == original_requester",
+            "assert db.get(WorldCharacter, 'wc-responding').world_id == 'world-a'",
+            "assert db.get(models.MessageThread, thread_id).world_id == 'world-a'"
+          ],
+          "test_legacy_retry_does_not_insert_world_snapshot_or_read_edited_world_persona": [
+            "assert '_world_configuration' not in retry_metadata",
+            "assert retry_metadata['name_binding'] == metadata['name_binding']",
+            "assert retry_row.selected_model == row.selected_model",
+            "assert inputs[-1].profile.personality == 'calm'"
+          ],
+          "test_damaged_request_snapshot_fails_before_provider_execution": [
+            "assert row.state == 'failed' and row.retryable is False",
+            "assert json.loads(row.node_state_json)['failure_class'] == 'world_configuration_snapshot_invalid'",
+            "assert inputs == []"
+          ]
+        },
+        "tests/chat/test_world_chat_delete.py": {
+          "chat_delete_fixture": [
+            "assert created.status_code == 200"
+          ],
+          "_path": [],
+          "_accept": [],
+          "_fail": [],
+          "test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity": [
+            "assert result.status_code == 200",
+            "assert result.json() == {'world_id': 'world-a', 'thread_id': thread_id, 'outcome': 'deleted'}",
+            "assert client.get('/api/v1/worlds/world-a/chat/threads').json()['items'] == []",
+            "assert client.get(_path(thread_id)).status_code == 404",
+            "assert client.get(_path(thread_id) + '/requests/latest').status_code == 404",
+            "assert client.post(_path(thread_id) + '/messages', headers=FRONTEND_HEADERS, json={'content': 'old send', 'idempotency_key': 'delete-old-send-key'}).status_code == 404",
+            "assert client.post(_path(thread_id) + '/retry', headers=FRONTEND_HEADERS, json={'failed_request_id': request_id, 'idempotency_key': 'delete-old-retry-key'}).status_code == 404",
+            "assert client.get(_path(thread_id) + f'/requests/{request_id}/events').status_code == 404",
+            "assert replay.status_code == 200 and replay.json()['outcome'] == 'already_deleted'",
+            "assert fresh.status_code == 200 and fresh.json()['outcome'] == 'created'",
+            "assert fresh.json()['thread']['id'] != thread_id and fresh.json()['thread']['messages'] == []",
+            "assert timestamp is not None",
+            "assert db.get(models.ChatResponseRequest, request_id).state == 'failed'",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert {table.name: db.scalar(select(func.count()).select_from(table)) for table in Base.metadata.tables.values()} == before_counts",
+            "assert after_rows == before_rows",
+            "assert db.get(models.MessageThread, thread_id).deleted_at == timestamp",
+            "assert db.scalar(select(func.count(models.ChatResponseRequest.request_id))) == 1",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert db.scalar(select(func.count(models.MessageThread.id))) == 2"
+          ],
+          "test_delete_permission_and_frontend_identity_do_not_change_storage": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 401",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 403",
+            "assert client.delete(_path(thread_id)).status_code == 403",
+            "assert client.delete(_path(thread_id), headers={'Origin': 'https://example.test'}).status_code == 403",
+            "assert client.delete(_path(thread_id).replace('world-a', 'world-other'), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.delete(_path('missing'), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.delete(f'/api/v1/messages/threads/{thread_id}').status_code == 422",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None"
+          ],
+          "test_inactive_counterpart_is_still_owned_and_cleanable": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 200",
+            "assert db.get(models.WorldCharacter, 'wc-responding').status == 'inactive'",
+            "assert db.get(models.Character, 'responding-character').status == 'inactive'"
+          ],
+          "test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease": [
+            "assert response.status_code == 409",
+            "assert response.json()['detail'] == 'world_chat_response_in_flight'",
+            "assert db.execute(select(models.ChatResponseRequest.__table__)).mappings().one() == before",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1"
+          ],
+          "test_expired_response_uses_existing_lifecycle_before_user_retries_delete": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 409",
+            "assert latest.status_code == 200 and latest.json()['response_request']['state'] == 'timed_out'",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 200",
+            "assert request.state == 'timed_out' and request.lease_token is None",
+            "pytest.raises(GenerationContractError, match='response_transition_fence_conflict')",
+            "pytest.raises(GenerationContractError, match='response_lease_renew_conflict')",
+            "assert db.execute(select(models.ChatResponseRequest.__table__)).mappings().one() == before",
+            "assert db.scalar(select(func.count(models.MessageMessage.id)).where(models.MessageMessage.role == 'assistant')) == 0",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is not None"
+          ],
+          "test_two_sessions_serialize_admission_retry_model_and_delete": [
+            "assert held.wait(10)",
+            "assert second_attempted.wait(10)",
+            "assert results == ['deleted', '404']",
+            "assert deleted == (delete_first or operation == 'model')",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == (1 if operation == 'retry' or (operation == 'accept' and (not delete_first)) else 0)",
+            "assert db.scalar(select(func.count(models.ChatResponseRequest.request_id))) == (2 if operation == 'retry' and (not delete_first) else 1 if operation == 'retry' or (operation == 'accept' and (not delete_first)) else 0)",
+            "assert release.wait(10)",
+            "assert results == ['model_updated', 'deleted']",
+            "assert results == ['accepted', '409']"
+          ]
+        },
+        "tests/migrations/test_world_character_configuration_postgres.py": {
+          "migrate": [],
+          "postgres": [
+            "assert url.host in ('127.0.0.1', 'localhost') and url.database.startswith('angmoo_world_config_test')"
+          ],
+          "test_t99_t111_postgres_additive_upgrade_preserves_old_values_and_reentry": [
+            "assert old == [tuple(row) for row in connection.execute(text('SELECT id,name,personality FROM characters ORDER BY id'))]",
+            "assert first == [tuple(row) for row in connection.execute(text('SELECT id,digest,captured_at FROM character_import_snapshots ORDER BY id'))]",
+            "assert connection.execute(text('SELECT count(*) FROM world_character_configurations')).scalar_one() == 2",
+            "assert row.kind == 'legacy_transition' and basis.settings.personality == 'Original persona'",
+            "assert effective_configuration(db, world_character_id='config-role-a').revision == 1"
+          ],
+          "test_t115_postgres_rollback_removes_partial_schema_then_resume": [
+            "pytest.raises(RuntimeError, match='controlled')",
+            "assert not inspect(postgres).has_table('character_import_snapshots')",
+            "assert 'input_snapshot' not in {column['name'] for column in inspect(postgres).get_columns('agent_runs')}",
+            "assert inspect(postgres).has_table('character_import_snapshots')"
+          ],
+          "test_t115_postgres_source_edit_serializes_behind_transition_lock": [
+            "assert frozen.wait(15)",
+            "assert db.get(Character, 'config-actor-a').personality == 'Later PG source'",
+            "assert get_import_snapshot(db, 'config-actor-a')[1].settings.personality == 'Original persona'",
+            "assert editing.wait(10)"
+          ]
+        },
+        "tests/migrations/test_world_character_configuration_upgrade.py": {
+          "transition": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(28).schema_digest",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()"
+          ],
+          "test_t99_t111_three_origin_cases_and_existing_world_saved_state_preserved": [
+            "assert restored.kind == 'restored_initial' and restored.source_revision == 'registration:7'",
+            "assert restored.provenance == 'completed_registration:proven-creation'",
+            "assert creation.profile.display_name == 'Initial Bram' and creation.settings.personality == 'Verified first persona'",
+            "assert legacy_origin.kind == 'legacy_transition' and legacy_origin.provenance == 'v28:confirmed_source_configuration'",
+            "assert legacy_origin.captured_at and legacy_origin.source_revision.startswith('transition:')",
+            "assert legacy_basis.settings.personality == 'Original persona'",
+            "assert a.profile.display_name == 'Preserved A' and a.profile.intro == '' and (a.profile.avatar_url is None)",
+            "assert a.revision == 9 and a.autonomous_enabled and (a.settings.personality == 'Original persona')",
+            "assert b.profile.intro == 'Saved B' and b.revision == 4 and (not b.autonomous_enabled)",
+            "assert db.execute(text(\"SELECT input_snapshot FROM agent_runs WHERE id='old-admitted-run'\")).scalar() is None",
+            "assert db.execute(text(\"SELECT admission_metadata FROM agent_slots WHERE agent_id='old-slot'\")).scalar() is None",
+            "assert db.execute(text(\"SELECT locked_by_run_id FROM agent_slots WHERE agent_id='old-slot'\")).scalar() == 'old-admitted-run'",
+            "assert 'Original admitted input' in db.execute(text(\"SELECT gateway_result FROM agent_runs WHERE id='old-admitted-run'\")).scalar()"
+          ],
+          "test_t112_t114_t115_reentry_never_recaptures_or_merges_worlds": [
+            "assert first['config-actor-a'][0] != first['config-actor-b'][0]",
+            "assert first == second",
+            "assert a.settings.personality == 'World A changed after transition' and a.autonomous_enabled and (a.revision == 12)",
+            "assert get_import_snapshot(db, 'config-actor-a')[1].settings.personality == 'Original persona'"
+          ],
+          "test_t115_transition_transaction_rollback_then_resume": [
+            "assert connection.exec_driver_sql('SELECT count(*) FROM character_import_snapshots').scalar_one() == 2",
+            "assert connection.exec_driver_sql(\"SELECT count(*) FROM sqlite_master WHERE name='character_import_snapshots'\").scalar_one() == 0",
+            "assert 'input_snapshot' not in [row[1] for row in connection.exec_driver_sql('PRAGMA table_info(agent_runs)')]"
+          ],
+          "test_t115_source_edit_waits_for_one_confirmed_transition_revision": [
+            "assert frozen.wait(10)",
+            "assert db.get(Character, 'config-actor-a').personality == 'Late source edit'",
+            "assert get_import_snapshot(db, 'config-actor-a')[1].settings.personality == 'Original persona'",
+            "assert effective_configuration(db, world_character_id='config-role-a').settings.personality == 'Original persona'",
+            "assert editing.wait(10)"
+          ],
+          "test_t116_credential_url_is_not_copied_into_new_origin_or_config": [
+            "assert basis.profile.avatar_url is None",
+            "assert 'synthetic-secret' not in json.dumps(row.payload)",
+            "assert 'synthetic-secret' in db.get(Character, 'config-actor-a').avatar_url"
+          ]
+        },
+        "tests/relationships/test_relationship_graph_avatar_read.py": {
+          "test_t82_t86_world_photos_names_and_direction_are_read_only": [
+            "assert nodes[fixture.actor_world_character.id].display_name == 'World Mango'",
+            "assert nodes[fixture.actor_world_character.id].avatar_url == '/media/characters/mango/avatar.png'",
+            "assert nodes[fixture.target_world_character.id].avatar_url is None",
+            "assert result.edges[0].actor_world_character_id == fixture.actor_world_character.id",
+            "assert result.edges[0].target_world_character_id == fixture.target_world_character.id",
+            "assert not any((statement.lstrip().upper().startswith(('INSERT', 'UPDATE', 'DELETE')) for statement in statements))",
+            "assert before == [(row.world_character_id, row.profile, row.settings) for row in db.scalars(select(WorldCharacterConfiguration))]",
+            "assert not any((key in result.model_dump_json() for key in ('personality', 'credential', 'source_revision')))"
+          ],
+          "test_t83_t86_node_batch_scope_missing_config_and_query_count": [
+            "assert {node.world_character_id for node in many} == {a.actor_world_character.id, a.target_world_character.id}",
+            "assert len(statements) == first and len(one) == 1",
+            "assert gateway.node_candidates(world_id=a.world.id, world_character_ids={a.target_world_character.id}) == []"
+          ],
+          "test_t83_avatar_projection_uses_constant_queries_at_one_eight_and_supported_limit": [
+            "assert counts[0] == counts[1] == counts[2]",
+            "assert counts[0] <= 5",
+            "assert not db.dirty and (not db.new)",
+            "assert {node.world_character_id for node in nodes} == set(ids[:size])",
+            "assert all((node.world_id == fixture.world.id for node in nodes))"
+          ],
+          "test_t84_public_avatar_excludes_unsafe_or_credential_urls": [
+            "assert _public_avatar(value) is None"
+          ],
+          "test_t98_t116_import_basis_media_survives_source_replacement_and_delete": [
+            "assert origin_file.is_file() and (not private_file.exists())",
+            "assert origin_file.is_file() and private_file.is_file()",
+            "assert origin_file.is_file() and (not private_file.exists())",
+            "assert row.id == basis.id and payload.profile.avatar_url == '/media/characters/media-source/avatar.png'",
+            "assert payload.settings.personality == 'Initial'",
+            "assert not origin_file.exists()"
+          ]
+        },
+        "tests/routines/test_world_independent_autonomy.py": {
+          "reconcile_world_autonomy": [],
+          "engine": [],
+          "intent": [],
+          "due": [],
+          "test_a_b_saved_on_use_existing_slots_and_a_off_preserves_b": [
+            "assert intent(db, 'a', True).summary.enabled == 1",
+            "assert intent(db, 'b', True).summary.enabled == 1",
+            "assert reconcile_world_autonomy(db) == 2",
+            "assert a.agent_id != b.agent_id",
+            "assert all((not row.auto_enabled for row in db.scalars(select(AgentActivitySetting))))",
+            "assert intent(db, 'a', False).summary.enabled == 0",
+            "assert reconcile_world_autonomy(db) == 1",
+            "assert a.assigned_character_id is None",
+            "assert b_before == (b.assigned_character_id, b.status, b.next_tick_at, b.locked_by_run_id, b.lease_expires_at)",
+            "assert [row.assigned_character_id for row in claimed] == ['config-actor-b']",
+            "assert claimed[0].admission_metadata['_world_configuration']['world_id'] == 'config-world-b'",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled",
+            "assert db.get(CharacterActiveWorld, 'config-actor-a').world_character_id == 'config-role-a'",
+            "assert db.get(CharacterActiveWorld, 'config-actor-b').world_character_id == 'config-role-b'"
+          ],
+          "test_saved_on_retained_when_pool_capacity_full_and_retry_uses_same_pool": [
+            "assert reconcile_world_autonomy(db) == 1",
+            "assert reconcile_world_autonomy(db) == 0",
+            "assert all((db.get(WorldCharacter, f'config-role-{s}').autonomous_enabled for s in ('a', 'b')))",
+            "assert len(assigned) == 1",
+            "assert reconcile_world_autonomy(db) == 2",
+            "assert db.scalar(select(AgentSlot.assigned_character_id).where(AgentSlot.assigned_character_id.is_not(None))) == f'config-actor-{other}'"
+          ],
+          "test_unsuccessful_slot_assignment_preserves_callers_world_transaction": [
+            "assert role.autonomous_enabled",
+            "assert db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert db.scalar(select(AgentSlot.assigned_character_id).where(AgentSlot.agent_id == 'unavailable-actor-slot')) is None",
+            "assert slots.assign_resident_slot(db, agent_ids=['unavailable-actor-slot'], user_id='fixture-owner', character_id='missing-world-actor', credential_id='config-credential-a', heartbeat_interval_seconds=1800, next_tick_at=NOW, commit=False) is None"
+          ],
+          "test_claim_freezes_world_persona_model_policy_and_revision_across_edit_and_off": [
+            "assert {row.assigned_character_id for row in claimed} == {'config-actor-a', 'config-actor-b'}",
+            "assert reconcile_world_autonomy(db) == 0",
+            "assert original == a.admission_metadata and b_original == b.admission_metadata",
+            "assert a_lease == (a.locked_by_run_id, a.lease_expires_at)",
+            "assert view.personality == 'World a persona' and 'post' in policy.allowed_actions",
+            "assert db.get(Character, run.character_id).personality == 'Original persona'",
+            "assert ctx.generation_model == 'gemini-3.1-flash-lite'",
+            "assert run.input_snapshot['_world_configuration']['revision'] < role.version",
+            "assert slots.claim_due_resident_slots(db, now=NOW, max_count=2, lease_seconds=120) == []"
+          ],
+          "test_world_default_generation_model_and_thinking_captured_once": [
+            "assert ctx.generation_model == 'gemini-3.1-flash-lite' and ctx.generation_thinking_level == 'medium'"
+          ],
+          "test_world_active_hours_blocks_new_claim_preserving_saved_on": [
+            "assert slots.claim_due_resident_slots(db, now=NOW, max_count=2, lease_seconds=60) == []",
+            "assert db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert a.status != 'running' and a.admission_metadata is None",
+            "assert a.last_error == 'world_active_hours_waiting'",
+            "assert a.next_tick_at.replace(tzinfo=UTC) > NOW"
+          ],
+          "test_saved_world_policy_is_readable_before_publish_but_automatic_and_manual_admission_are_rejected": [
+            "assert reconcile_world_autonomy(db) == 1",
+            "assert effective.activity_interval_minutes == 17 and effective.max_posts_per_day == 3",
+            "assert effective.auto_enabled and (not read_autonomy_enabled(db, character_id=common.character_id, setting=common))",
+            "assert saved == (common.activity_interval_minutes, common.max_posts_per_day, common.auto_enabled)",
+            "assert db.get(World, 'config-world-a').status == status",
+            "pytest.raises(ActivityRuntimeValidationError, match='world_scope_not_ready')",
+            "assert slots.claim_due_resident_slots(db, now=NOW, max_count=2, lease_seconds=120) == []",
+            "assert automatic_slot.status != 'running' and automatic_slot.locked_by_run_id is None",
+            "assert automatic_slot.admission_metadata is None and automatic_slot.last_error == 'world_scope_not_ready'",
+            "pytest.raises(ActivityProfileRequiredError)",
+            "pytest.raises(ActivityRuntimeValidationError, match='world_scope_not_ready')",
+            "assert all((slot.status != 'running' and slot.locked_by_run_id is None and (slot.admission_metadata is None) for slot in db.scalars(select(AgentSlot))))",
+            "assert db.query(AgentRun).count() == 0",
+            "assert db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert not db.get(WorldCharacter, 'config-role-b').autonomous_enabled"
+          ],
+          "test_settings_read_retains_role_membership_binding_and_configuration_guards": [
+            "pytest.raises(ActivityRuntimeValidationError, match=reason)",
+            "assert not read_autonomy_enabled(db, character_id=setting.character_id, setting=setting)",
+            "assert db.query(AgentRun).count() == 0"
+          ],
+          "test_duplicate_actor_and_single_flight_use_existing_lease_checks": [
+            "assert first is not None",
+            "assert slots.claim_resident_slot_assignment(db, user_id='fixture-owner', character_id='config-actor-a', lease_seconds=300) is None",
+            "assert slots.claim_due_resident_slots(db, now=datetime.now(UTC), max_count=2, lease_seconds=300, single_flight=True) == []",
+            "assert before == (first.locked_by_run_id, first.lease_expires_at, first.admission_metadata)"
+          ],
+          "test_off_and_automatic_admission_serialize_through_same_identity_lock": [
+            "assert started.wait(3) and (not future.done())",
+            "assert not role.autonomous_enabled",
+            "assert len(accepted) == 1",
+            "assert result == [] and slot.status != 'running'",
+            "assert slot.status == 'running' and slot.admission_metadata == original"
+          ],
+          "test_settings_revision_and_admission_are_ordered_on_real_sessions": [
+            "assert accepted['_world_configuration']['settings']['personality'] == ('New revision persona' if edit_first else 'World a persona')",
+            "assert started.wait(3) and (not future.done())"
+          ],
+          "test_membership_revocation_and_admission_are_ordered_without_releasing_an_accepted_lease": [
+            "assert role.autonomous_enabled",
+            "assert db.get(WorldMembership, 'config-member-a').status == 'left'",
+            "assert db.get(WorldMembership, 'config-member-b').status == 'active'",
+            "assert started.wait(3) and (not future.done())",
+            "assert slot.status != 'running' and slot.locked_by_run_id is None",
+            "assert slot.admission_metadata is None and slot.last_error == 'world_scope_not_ready'",
+            "assert slot.status == 'running' and slot.admission_metadata == snapshot",
+            "assert (slot.locked_by_run_id, slot.lease_expires_at) == lease",
+            "assert snapshot['_world_configuration']['world_id'] == 'config-world-a'",
+            "assert future.result(timeout=10) == []",
+            "assert len(accepted) == 1"
+          ],
+          "test_missing_world_configuration_is_rejected_before_manual_lease": [
+            "pytest.raises(ActivityRuntimeValidationError, match='world_configuration_missing')",
+            "assert all((row.status != 'running' for row in db.scalars(select(AgentSlot))))"
+          ],
+          "test_scoped_b_run_now_while_off_uses_b_snapshot_and_keeps_a_intent": [
+            "assert result.status == 'completed' and len(captured) == 1",
+            "assert captured[0]['_world_configuration']['world_id'] == 'config-world-b'",
+            "assert captured[0]['_world_configuration']['settings']['personality'] == 'World b persona'",
+            "assert not db.get(WorldCharacter, 'config-role-b').autonomous_enabled",
+            "assert db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert a_before == db.get(WorldCharacterConfiguration, 'config-role-a').settings",
+            "assert all((row.assigned_character_id is None for row in db.scalars(select(AgentSlot))))",
+            "assert db.get(AgentRun, 'b-manual-fake').input_snapshot == captured[0]"
+          ],
+          "test_manual_imminent_guard_reads_world_on_even_when_global_flag_off": [
+            "assert not db.get(AgentActivitySetting, 'config-actor-a').auto_enabled",
+            "pytest.raises(RunNowSoonScheduledError)",
+            "assert db.query(AgentRun).count() == 0"
+          ]
+        },
+        "tests/social/test_world_configuration_inputs.py": {
+          "database": [],
+          "world_values": [],
+          "context": [],
+          "test_actual_selector_planner_writer_transport_uses_each_accepted_world": [
+            "assert len(calls) == 6",
+            "assert call.model == ('gemini-3.5-flash-lite' if suffix == 'a' else 'gemini-3.1-flash-lite')",
+            "assert payload['context']['persona']['personality'] == f'World {suffix} personality'",
+            "assert payload['context']['persona']['speech_style'] == f'World {suffix} speech'",
+            "assert 'Live common' not in json.dumps(payload)",
+            "assert payload['world_configuration_revision'] == configuration.revision",
+            "assert payload['persona']['name'] == graph_run.result['name_binding']['actor_display_name'] == f'{suffix.upper()} Bram'",
+            "assert 'legacy_persona_summary_extra' not in payload['persona']",
+            "assert len(db.dirty) == before == 0",
+            "assert common.personality == 'Live common persona'"
+          ],
+          "test_activity_binding_and_recovery_retain_original_configuration": [
+            "assert repeat.result['name_binding']['actor_display_name'] == 'Accepted Bram'",
+            "assert recovered.run_id == original.run_id and fresh.run_id == 'new-recovery-lease'",
+            "assert recovered.generation_model == 'gemini-3.5-flash-lite'",
+            "assert configuration_for_activity(recovered, actor).request_snapshot() == configuration.request_snapshot()",
+            "assert character_for_input(recovered.character, recovered.input_snapshot).personality == 'World a personality'",
+            "assert new_configuration.profile.display_name == 'New Bram'"
+          ],
+          "test_gateway_writer_retains_accepted_default_model_after_credential_edit": [
+            "assert result['status'] == 'completed'",
+            "assert len(calls) == 1 and calls[0]['model'] == 'gemini-3.5-flash-lite'",
+            "assert calls[0]['auth_profile_id'] == ctx.credential.auth_profile_id",
+            "assert calls[0]['tool_choice'] == 'none'"
+          ],
+          "test_world_static_views_do_not_dirty_identity_or_learned_facts": [
+            "assert model_character.name == 'A Bram' and model_character.personality == 'World a personality'",
+            "assert model_setting.activity_interval_minutes == 45 and model_setting.max_posts_per_day == 3",
+            "assert model_setting.tendency_summary == setting.tendency_summary",
+            "assert not db.dirty",
+            "assert before == (character.name, character.personality, setting.auto_enabled, setting.activity_interval_minutes, setting.tendency_summary)",
+            "pytest.raises((TypeError, AttributeError))",
+            "pytest.raises(ValueError, match='snapshot_scope_invalid')"
+          ],
+          "test_feed_retains_accepted_on_or_manual_but_current_membership_is_required": [
+            "assert accepted_autonomy(ctx, actor)",
+            "assert profile.world_character.autonomous_enabled and profile.character.name == 'A Bram'",
+            "assert actor.autonomous_enabled is False and (not db.dirty)",
+            "pytest.raises(WorldFeedReadinessError, match='world_scope_not_ready')"
+          ],
+          "png": [],
+          "FakeImages::__init__": [],
+          "FakeImages::generate": [
+            "assert key is None and reference is None"
+          ],
+          "test_actual_image_admission_and_worker_retain_frozen_world_values": [
+            "assert len(fake.requests) == 1",
+            "assert fake.requests[0].model == 'fixture-workflow'",
+            "assert fake.requests[0].positive == 'World a watercolor, World a red coat, reading at a desk'",
+            "assert (fake.requests[0].world_id, fake.requests[0].world_character_id, fake.requests[0].world_configuration_revision) == ('config-world-a', 'config-role-a', configuration.revision)",
+            "assert intent.state == 'queued'",
+            "assert json.loads(intent.request_json)['positive'] == 'World a watercolor, World a red coat, reading at a desk'",
+            "assert json.loads(intent.request_json)['model'] != image_setting.generation_model",
+            "assert db.get(PostImageGenerationJob, job_id).status == 'succeeded'",
+            "assert db.scalar(select(PostMedia).where(PostMedia.post_id == 'world-a-image-post')).source_kind == 'generated'",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled is False"
+          ],
+          "test_image_validation_options_and_prepare_use_same_supported_profile": [
+            "assert options == [{'value': 'comfyui:fixture-workflow', 'label': 'comfyui · fixture-workflow', 'enabled': True, 'reason': None}]",
+            "assert error is None and request.model == 'fixture-workflow'",
+            "assert select_world_image_profile(setting, 'comfyui:custom:workflow').model == 'custom:workflow'",
+            "assert available_world_image_models(setting)[0]['value'] == 'comfyui:custom:workflow'",
+            "assert available_world_image_models(setting)[0]['enabled'] is False",
+            "assert available_world_image_models(setting)[0]['enabled'] is False",
+            "pytest.raises(ImagePreparationError, match='connection_unverified')",
+            "assert media.prepare_intent(db, 'fixture-owner', actor.character_id, 'scene', None, configuration=configuration)[-1] == 'world_image_model_connection_unverified'",
+            "assert not db.dirty"
+          ],
+          "test_image_foreign_world_or_actor_snapshot_is_rejected_without_intent": [
+            "pytest.raises(ImagePreparationError, match='snapshot_scope_invalid')",
+            "assert list(db.scalars(select(ImageIntent))) == [] and (not db.dirty)"
+          ],
+          "test_world_photo_reference_uses_frozen_profile_before_original_card": [
+            "assert reference.source == 'profile' and original.source == 'card'",
+            "assert reference.digest != original.digest",
+            "assert image_setting.card_asset_id == original.asset_id"
+          ]
+        },
+        "tests/social/test_world_post_authors.py": {
+          "fixture": [],
+          "add_post": [],
+          "assert_world_author": [
+            "assert item['author_name'] == f'World {suffix} Bram'",
+            "assert item['author_handle'] == f'world_bram_{suffix}'",
+            "assert item['author_avatar_url'] == f'/media/world-{suffix}.png'"
+          ],
+          "test_actual_public_feed_thread_profiles_and_nested_references_use_world_values": [
+            "assert response.status_code == 200, response.text",
+            "assert response.status_code == 200, response.text",
+            "assert response.status_code == 200, response.text",
+            "assert [item.id for item in page.items] == ['author-a']",
+            "assert [(row.id, row.author_name) for row in db.scalars(select(Post).order_by(Post.id))] == before",
+            "assert [(row.world_character_id, row.profile, row.settings) for row in db.scalars(select(WorldCharacterConfiguration))] == configurations",
+            "assert not db.dirty",
+            "assert [row['id'] for row in result['replies']] == ['author-a-reply']",
+            "assert row['author_name'] == 'Common a Bram' and row['author_handle'] == 'common_bram_a'",
+            "assert row['author_avatar_url'] == '/media/common.png'"
+          ],
+          "vars_for_profile": [],
+          "test_author_profile_queries_are_batched_and_missing_roles_do_not_borrow_local_profiles": [
+            "assert result.status_code == 200",
+            "assert item['author_name'] == 'Historical accepted name'",
+            "assert item['author_handle'] is None and item['author_avatar_url'] is None",
+            "assert 'Common a Bram' not in result.text",
+            "assert result.status_code == 200, result.text",
+            "assert len(result.json()['items']) == 50",
+            "assert len(profile_selects) == 2"
+          ],
+          "test_actual_tool_post_and_reply_store_accepted_name_after_world_and_common_edits": [
+            "assert saved.author_name == 'World a Bram'",
+            "assert (saved.world_id, saved.author_world_character_id) == (accepted.world_id, accepted.world_character_id)",
+            "assert db.get(Post, reply.id).author_name == 'World a Bram'",
+            "assert db.get(Character, role.character_id).name == 'Later common Bram'",
+            "assert db.get(WorldCharacterConfiguration, role.id).profile['display_name'] == 'Later World Bram'",
+            "assert run.input_snapshot['_world_configuration'] == accepted.request_snapshot()"
+          ],
+          "test_manual_world_write_uses_current_profile_and_frozen_foreign_author_rejects_before_post": [
+            "pytest.raises(PostWorldScopeError, match='world_author_snapshot_scope_invalid')",
+            "assert len(db.scalars(select(Post)).all()) == before",
+            "assert db.get(Post, created.id).author_name == 'World a Bram'"
+          ],
+          "test_historical_tool_run_never_reloads_current_world_configuration": [
+            "assert db.get(Post, created.id).author_name == 'Common a Bram'",
+            "assert run.input_snapshot is None",
+            "assert statements == []"
+          ]
+        },
+        "tests/world_characters/test_world_character_configuration.py": {
+          "engine": [],
+          "_client": [],
+          "test_t49_t53_dashboard_partition_user_first_read_only_and_no_private_values": [
+            "assert dashboard.summary.model_dump() == {'total': 2, 'enabled': 0, 'disabled': 1, 'users': 1}",
+            "assert dashboard.items[0].profile.control_mode == 'owner_controlled'",
+            "assert dashboard.items[0].settings is None and dashboard.items[0].recent_activity is None",
+            "assert dashboard.items[1].profile.world_id == 'config-world-a'",
+            "assert 'Original persona' not in dashboard.model_dump_json()",
+            "assert 'encrypted' not in dashboard.model_dump_json() and 'fixture-owner' not in dashboard.model_dump_json()",
+            "assert before == [(row.id, row.version, row.autonomous_enabled) for row in db.scalars(select(WorldCharacter))]",
+            "assert origin_before == [(row.id, row.digest, row.payload) for row in db.scalars(select(CharacterImportSnapshot))]",
+            "assert not db.new and (not db.dirty)"
+          ],
+          "test_t89_t90_world_settings_profile_and_explicit_removals_never_write_source_or_other_world": [
+            "assert a.profile.display_name == \"A's Bram\" and a.profile.intro == '' and (a.profile.avatar_url is None)",
+            "assert a.settings.personality == 'World A persona' and a.settings.activity_interval_minutes == 45",
+            "assert a.settings.image_model == image_model and a.settings.image_style == 'soft' and (b.settings.image_model is None)",
+            "assert b.profile.display_name == 'Bram' and b.settings.personality == 'Original persona' and (b.revision == 1)",
+            "assert (source.name, source.personality, source.one_liner, source.handle) == original",
+            "assert origin.digest == digest and origin.payload['settings']['personality'] == 'Original persona'",
+            "assert a.profile.intro == '' and a.profile.avatar_url is None",
+            "assert b.profile.display_name == 'Bram' and b.settings.personality == 'Original persona'"
+          ],
+          "test_t95_route_auth_origin_scope_fields_and_revision_fail_without_writes": [
+            "assert client.get(prefix + '/settings').status_code == 200",
+            "assert client.patch(prefix + '/settings', json={'expected_revision': 1, 'settings': {'personality': 'No origin'}}).status_code == 403",
+            "assert client.patch(prefix + '/profile', headers=headers, json={'expected_revision': 1, 'avatar_url': 'https://example.test/not-owned.png'}).status_code == 422",
+            "assert client.patch(prefix.replace('config-role-a', 'config-role-b') + '/profile', headers=headers, json={'expected_revision': 1, 'intro': 'cross'}).status_code == 404",
+            "assert client.patch(prefix + '/profile', headers=headers, json={'expected_revision': 77, 'intro': 'conflict'}).json() == {'detail': 'world_character_revision_conflict'}",
+            "assert client.patch(prefix + '/settings', headers=headers, json=payload).status_code == 422",
+            "assert db.get(WorldCharacter, 'config-role-a').version == 1",
+            "assert effective_configuration(db, world_character_id='config-role-a').profile.intro == 'Original intro'"
+          ],
+          "test_t89_world_handle_uses_canonical_policy_without_rewriting_unchanged_user_handle": [
+            "assert effective_configuration(db, world_character_id=user_role.id).profile.handle == original_handle",
+            "assert db.get(Character, user_role.character_id).handle == source_handle",
+            "assert effective_configuration(db, world_character_id='config-role-a').profile.handle == 'bram_new'",
+            "pytest.raises(WorldManagementError, match='world_profile_handle_conflict')",
+            "assert effective_configuration(db, world_character_id='config-role-a').revision == 2",
+            "assert db.get(Character, 'config-actor-a').handle == 'bram_a'",
+            "pytest.raises(WorldManagementError, match='world_profile_handle_invalid')"
+          ],
+          "test_t96_two_sessions_same_revision_exactly_one_success_and_one_conflict": [
+            "assert sorted(values, key=str) == [2, 'world_character_revision_conflict']",
+            "assert db.get(WorldCharacter, 'config-role-a').version == 2",
+            "assert effective_configuration(db, world_character_id='config-role-b').revision == 1"
+          ],
+          "test_t97_owner_world_profile_alias_writes_world_only_and_name_binding": [
+            "assert updated.profile.display_name == 'World User' and updated.profile.handle == 'world_user'",
+            "assert (character.name, character.handle, character.one_liner) == before",
+            "assert names.user_display_name == 'World User'"
+          ],
+          "test_t103_t105_independent_ids_default_off_saved_onoff_never_write_global_flags": [
+            "assert origins[0] == origins[1]",
+            "assert all((db.get(WorldCharacter, f'config-role-{suffix}').autonomous_enabled for suffix in ('a', 'b')))",
+            "assert not db.get(WorldCharacter, 'config-role-a').autonomous_enabled",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled",
+            "assert all((not db.get(AgentActivitySetting, f'config-actor-{suffix}').auto_enabled for suffix in ('a', 'b')))",
+            "assert not role.autonomous_enabled",
+            "assert db.get(CharacterWorldBinding, role.character_id).world_id == role.world_id",
+            "assert db.get(CharacterActiveWorld, role.character_id).world_character_id == role.id"
+          ],
+          "test_t91_snapshot_immutable_and_payload_contains_configuration_only": [
+            "assert snapshot.kind == 'creation' and snapshot.contract_version == 1",
+            "assert set(snapshot.payload) == {'profile', 'settings'}",
+            "assert not any((word in json.dumps(snapshot.payload).lower() for word in ('credential', 'encrypted', 'memory', 'lease', 'auto_enabled', 'world_id')))",
+            "pytest.raises(ValueError, match='snapshot_immutable')"
+          ],
+          "test_t93_explicit_entry_initializes_existing_basis_once_and_get_never_backfills": [
+            "pytest.raises(WorldManagementError, match='world_configuration_missing')",
+            "assert db.get(WorldCharacterConfiguration, role.id) is None",
+            "assert stored.snapshot_id == basis_id",
+            "assert stored.profile['display_name'] == 'Bram' and role.version == 1",
+            "assert stored.profile['intro'] == 'World-local edit'",
+            "assert role.version == 2 and role.autonomous_enabled",
+            "pytest.raises(WorldCharacterSetupValidationError, match='world_character_not_ready')"
+          ],
+          "test_t53_recent_activity_requires_current_world_evidence_and_orders_by_time": [
+            "assert item.recent_activity.action_type == 'post'",
+            "assert item.recent_activity.post_id == 'recent-a' and item.recent_activity.title == 'World a post'",
+            "assert datetime.fromisoformat(item.recent_activity.occurred_at) == datetime(2026, 10, 5, 12, 0, tzinfo=UTC)"
+          ],
+          "test_t56_dashboard_batch_queries_do_not_grow_per_character": [
+            "assert len(expanded.items) == len(initial.items) + 7",
+            "assert len(statements) == first_count",
+            "assert first_count <= 22"
+          ],
+          "test_t49_t52_dashboard_filters_participation_and_counts_zero_and_multiple_users": [
+            "assert zero.summary.model_dump() == {'total': 2, 'enabled': 1, 'disabled': 1, 'users': 0}",
+            "assert {item.profile.world_character_id for item in zero.items} == {a.id, extra_ids[0]}",
+            "assert zero.items[0].profile.world_character_id == a.id",
+            "assert zero.items[1].profile.control_mode == 'autonomous'",
+            "assert zero.items[1].profile.display_name == '사용자'",
+            "assert multiple.summary.model_dump() == {'total': 3, 'enabled': 1, 'disabled': 0, 'users': 2}",
+            "assert all((item.profile.control_mode == 'owner_controlled' for item in multiple.items[:2]))",
+            "assert multiple.items[-1].profile.world_character_id == a.id",
+            "assert 'Private' not in multiple.model_dump_json()",
+            "assert service.dashboard(world_id=b.world_id, user=owner).summary.enabled == 1",
+            "assert not db.dirty and (not db.new)",
+            "pytest.raises(IntegrityError)"
+          ],
+          "test_t57_t107_dashboard_keeps_saved_on_across_hours_capacity_running_error_and_readiness": [
+            "assert state('capacity_wait').next_activity_at is None",
+            "assert state('waiting').next_activity_at is not None",
+            "assert state('not_ready').status.reason == 'credential_required'",
+            "assert item.status.state == expected",
+            "assert item.autonomous_enabled and dashboard.summary.enabled == 1",
+            "assert db.get(AgentActivitySetting, role.character_id).auto_enabled is False",
+            "assert db.get(WorldCharacter, 'config-role-b').autonomous_enabled is False",
+            "assert not db.new and (not db.dirty)"
+          ]
+        },
+        "tests/world_characters/test_world_character_snapshot_copy.py": {
+          "register": [],
+          "test_t91_t92_t103_t104_real_registration_and_copy_reuses_first_basis_only": [
+            "assert origin.kind == 'creation' and origin.provenance == f'registration:{original_draft.id}'",
+            "assert copied.name == 'Bram' and copied.personality == 'First persona'",
+            "assert new_id != cid and new_role.id != old_role.id and (not new_role.autonomous_enabled)",
+            "assert session.get(CharacterWorldBinding, new_id).world_id == other.world.id",
+            "assert get_import_snapshot(session, new_id)[0].id == origin.id",
+            "assert value.settings.personality == 'First persona' and value.profile.display_name == 'Bram'",
+            "assert session.get(models.Character, new_id).credential is None",
+            "assert old_role.autonomous_enabled and get_import_snapshot(session, cid)[0].digest == origin.digest",
+            "assert replay.character.id == cid",
+            "assert session.scalar(select(CharacterImportSnapshot.id).where(CharacterImportSnapshot.source_character_id == new_id)) is None"
+          ],
+          "test_t91_failed_creation_rolls_back_origin_and_world_instance": [
+            "pytest.raises(RuntimeError, match='controlled')",
+            "assert set(session.scalars(select(CharacterImportSnapshot.id))) == before",
+            "assert session.scalar(select(models.Character.id).where(models.Character.name == 'Rollback')) is None",
+            "assert session.get(models.AgentCreationDraft, draft.id).status == 'editing'"
+          ],
+          "test_t98_t116_copy_draft_expiry_cleans_lineage_without_mutating_basis": [
+            "assert session.get(models.AgentCreationDraft, draft.id) is None",
+            "assert session.get(CharacterDraftImportOrigin, draft.id) is None",
+            "assert (origin.id, origin.digest, origin.payload) == saved"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_world_chat_configuration.py": {},
+        "tests/chat/test_world_chat_delete.py": {},
+        "tests/migrations/test_world_character_configuration_postgres.py": {
+          "postgres": [
+            "pytest.skip('explicit isolated WORLD_CONFIGURATION_TEST_DATABASE_URL is required')"
+          ]
+        },
+        "tests/migrations/test_world_character_configuration_upgrade.py": {},
+        "tests/relationships/test_relationship_graph_avatar_read.py": {},
+        "tests/routines/test_world_independent_autonomy.py": {},
+        "tests/social/test_world_configuration_inputs.py": {},
+        "tests/social/test_world_post_authors.py": {},
+        "tests/world_characters/test_world_character_configuration.py": {},
+        "tests/world_characters/test_world_character_snapshot_copy.py": {}
+      }
+    },
+    {
+      "commit": "d2ada054d0c979794daecaca25907b6ac84947a6",
+      "feature_id": "AR-WORLD-UI-CHAT-ROUTE-20261005",
+      "reason": "P09 P12 P27: preserve original Chat HTTP and DI modules while registering the same scoped deletion through a separate owning router; prove full/public registration and existing entry/detail/admission errors.",
+      "tracked_files": {
+        "backend/app/domains/chat/router/world_thread_deletion.py": "ea2871eae8f22975fb6228b1bff25819db8e2579"
+      },
+      "test_nodes": [
+        "tests/chat/test_world_chat_delete.py::test_both_production_factories_register_one_owned_world_delete_with_original_dependencies[full]",
+        "tests/chat/test_world_chat_delete.py::test_both_production_factories_register_one_owned_world_delete_with_original_dependencies[public]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_world_chat_delete.py": {
+          "test_both_production_factories_register_one_owned_world_delete_with_original_dependencies": [
+            "assert len(routes) == 1 and routes[0].endpoint is world_thread_deletion.delete_world_thread",
+            "assert operation['responses']['200']['content']['application/json']['schema']['$ref'].endswith('/WorldChatThreadDeleteRead')",
+            "assert routes[0].response_model is schemas.WorldChatThreadDeleteRead",
+            "assert dependencies == {get_db, get_current_user, get_thread_service}",
+            "assert world_thread_deletion.get_db is get_db and world_thread_deletion.get_current_user is get_current_user"
+          ],
+          "chat_delete_fixture": [
+            "assert created.status_code == 200"
+          ],
+          "_path": [],
+          "_accept": [],
+          "_fail": [],
+          "test_soft_delete_preserves_rows_replays_timestamp_and_creates_new_identity": [
+            "assert result.status_code == 200",
+            "assert result.json() == {'world_id': 'world-a', 'thread_id': thread_id, 'outcome': 'deleted'}",
+            "assert client.get('/api/v1/worlds/world-a/chat/threads').json()['items'] == []",
+            "assert client.get(_path(thread_id)).status_code == 404",
+            "assert client.get(_path(thread_id) + '/requests/latest').status_code == 404",
+            "assert client.post(_path(thread_id) + '/messages', headers=FRONTEND_HEADERS, json={'content': 'old send', 'idempotency_key': 'delete-old-send-key'}).status_code == 404",
+            "assert client.post(_path(thread_id) + '/retry', headers=FRONTEND_HEADERS, json={'failed_request_id': request_id, 'idempotency_key': 'delete-old-retry-key'}).status_code == 404",
+            "assert client.get(_path(thread_id) + f'/requests/{request_id}/events').status_code == 404",
+            "assert replay.status_code == 200 and replay.json()['outcome'] == 'already_deleted'",
+            "assert fresh.status_code == 200 and fresh.json()['outcome'] == 'created'",
+            "assert fresh.json()['thread']['id'] != thread_id and fresh.json()['thread']['messages'] == []",
+            "assert timestamp is not None",
+            "assert db.get(models.ChatResponseRequest, request_id).state == 'failed'",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert {table.name: db.scalar(select(func.count()).select_from(table)) for table in Base.metadata.tables.values()} == before_counts",
+            "assert after_rows == before_rows",
+            "assert db.get(models.MessageThread, thread_id).deleted_at == timestamp",
+            "assert db.scalar(select(func.count(models.ChatResponseRequest.request_id))) == 1",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1",
+            "assert db.scalar(select(func.count(models.MessageThread.id))) == 2"
+          ],
+          "test_delete_permission_and_frontend_identity_do_not_change_storage": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 401",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 403",
+            "assert client.delete(_path(thread_id)).status_code == 403",
+            "assert client.delete(_path(thread_id), headers={'Origin': 'https://example.test'}).status_code == 403",
+            "assert client.delete(_path(thread_id).replace('world-a', 'world-other'), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.delete(_path('missing'), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.delete(f'/api/v1/messages/threads/{thread_id}').status_code == 422",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 404",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None"
+          ],
+          "test_inactive_counterpart_is_still_owned_and_cleanable": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 200",
+            "assert db.get(models.WorldCharacter, 'wc-responding').status == 'inactive'",
+            "assert db.get(models.Character, 'responding-character').status == 'inactive'"
+          ],
+          "test_every_nonterminal_state_refuses_delete_without_touching_request_or_lease": [
+            "assert response.status_code == 409",
+            "assert response.json()['detail'] == 'world_chat_response_in_flight'",
+            "assert db.execute(select(models.ChatResponseRequest.__table__)).mappings().one() == before",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is None",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == 1"
+          ],
+          "test_expired_response_uses_existing_lifecycle_before_user_retries_delete": [
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 409",
+            "assert latest.status_code == 200 and latest.json()['response_request']['state'] == 'timed_out'",
+            "assert client.delete(_path(thread_id), headers=FRONTEND_HEADERS).status_code == 200",
+            "assert request.state == 'timed_out' and request.lease_token is None",
+            "pytest.raises(GenerationContractError, match='response_transition_fence_conflict')",
+            "pytest.raises(GenerationContractError, match='response_lease_renew_conflict')",
+            "assert db.execute(select(models.ChatResponseRequest.__table__)).mappings().one() == before",
+            "assert db.scalar(select(func.count(models.MessageMessage.id)).where(models.MessageMessage.role == 'assistant')) == 0",
+            "assert db.get(models.MessageThread, thread_id).deleted_at is not None"
+          ],
+          "test_two_sessions_serialize_admission_retry_model_and_delete": [
+            "assert held.wait(10)",
+            "assert second_attempted.wait(10)",
+            "assert results == ['deleted', '404']",
+            "assert deleted == (delete_first or operation == 'model')",
+            "assert db.scalar(select(func.count(models.MessageMessage.id))) == (1 if operation == 'retry' or (operation == 'accept' and (not delete_first)) else 0)",
+            "assert db.scalar(select(func.count(models.ChatResponseRequest.request_id))) == (2 if operation == 'retry' and (not delete_first) else 1 if operation == 'retry' or (operation == 'accept' and (not delete_first)) else 0)",
+            "assert release.wait(10)",
+            "assert results == ['model_updated', 'deleted']",
+            "assert results == ['accepted', '409']"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_world_chat_delete.py": {}
+      }
+    },
+    {
+      "commit": "c2b86619d064f2113db41f917428763a9d776a1f",
+      "feature_id": "AR-WORLD-IMPORT-SERVICE-CONTRACT-20261005",
+      "reason": "P13/P18/P27 owning immutable import-service values while preserving historical workflow exports",
+      "tracked_files": {
+        "backend/app/domains/characters/service/import_configuration.py": "5664a87bdbe5acc4dc9978c2f43fa0ffa1192c0f"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

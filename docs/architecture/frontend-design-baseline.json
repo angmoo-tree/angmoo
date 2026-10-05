@@ -68,21 +68,21 @@
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-detail-screen.tsx",
-      "sha256": "685829f7037def1465b5367abd8d0c85c569ea79df85c4130ab9891761d1d976"
+      "sha256": "135a53b9f6675ff301353ac4964ea2713f9bf4b9c7279600569e44c0f09dcacf"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/composition/screens/post-list-screen.tsx",
-      "sha256": "790400d9743f97e6d599bca1a6b58292b92792539d1e47e5d43f83543594655d"
+      "sha256": "6d4ba08face11767ec8d6e8f69c21ce7b99b72b606edfa75a618e0e5280946f8"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "bb4042b8f03175d971925540ea66dda477c79ab41859a32a632a45c295a56d4e"
+      "sha256": "3a56118b476be01206ce1e8abfe3121aa7877ceab66617d1345860725dde4f4c"
     },
     {
       "classifications": [
@@ -110,7 +110,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
-      "sha256": "f71669a82e0dd481e269e666d29b5147d3c9924c30eb156a7764284011ab02c7"
+      "sha256": "4a447cad4915f11e59453674e762b7d087a0fc98fbb2e983e366bd48082f97ab"
     },
     {
       "classifications": [
@@ -180,14 +180,14 @@
         "LOCAL"
       ],
       "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-      "sha256": "1bba7d00bcdfe4520a9d1895f8c1b9cb17c016b6a6e24fd6015cea73c31beea6"
+      "sha256": "22d2693fbf587b3f392cbbf31b8aa85351e15d8c028458b8999d0d67cc31f4e3"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/components/social-post-row.tsx",
-      "sha256": "df1073e42b96c76a5875e87008637dab7da5f6b4f6bbc46510269ec2c3beae13"
+      "sha256": "8d7c1737ccd5041d33c0267a30b660e3448c76aa68b79d7c320978f5c8e5192c"
     },
     {
       "classifications": [
@@ -201,7 +201,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/social/components/world-social-feed.tsx",
-      "sha256": "3ade107da291007c6b1bf9ee64c5bbce01c85553ffab5ce4e79a9cf8fe1feaac"
+      "sha256": "3a0effb205deb22d7c8518f93292ee123b69c63845f14734de57714e79acb8d7"
     },
     {
       "classifications": [
@@ -383,7 +383,7 @@
   },
   "raw_colors": {
     "files": 36,
-    "occurrences": 1229,
+    "occurrences": 1215,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
       ".css": {
@@ -396,7 +396,7 @@
       },
       ".tsx": {
         "files": 34,
-        "occurrences": 1189
+        "occurrences": 1175
       }
     },
     "per_file": [
@@ -442,25 +442,25 @@
         }
       },
       {
-        "occurrences": 97,
+        "occurrences": 83,
         "path": "frontend/src/composition/screens/agent-detail-screen.tsx",
         "values": {
-          "#101828": 13,
+          "#101828": 9,
           "#344054": 7,
-          "#667085": 20,
+          "#667085": 16,
           "#98a2b3": 2,
           "#9a5b13": 1,
           "#c24141": 1,
-          "#d0d5dd": 2,
+          "#d0d5dd": 1,
           "#d92d20": 1,
           "#e1e5eb": 2,
-          "#eaedf2": 6,
+          "#eaedf2": 5,
           "#eef1f5": 6,
-          "#f2f4f7": 3,
-          "#f6f7f9": 5,
+          "#f2f4f7": 2,
+          "#f6f7f9": 4,
           "#f9fafb": 3,
           "#ff5252": 3,
-          "#ff6b6b": 12,
+          "#ff6b6b": 10,
           "#ffd7d7": 4,
           "#ffe4bf": 1,
           "#fff5f5": 2,
@@ -1104,7 +1104,7 @@
       "#027a48": 5,
       "#039855": 1,
       "#05603a": 1,
-      "#101828": 169,
+      "#101828": 165,
       "#12b76a": 1,
       "#147a45": 3,
       "#175cd3": 1,
@@ -1115,7 +1115,7 @@
       "#3b82f6": 1,
       "#475467": 32,
       "#52610f": 1,
-      "#667085": 161,
+      "#667085": 157,
       "#6941c6": 1,
       "#7a2e0e": 2,
       "#7a4b00": 1,
@@ -1137,7 +1137,7 @@
       "#c7d7fe": 1,
       "#c9ced6": 3,
       "#cdd3dc": 1,
-      "#d0d5dd": 17,
+      "#d0d5dd": 16,
       "#d7bd16": 1,
       "#d8a640": 1,
       "#d92d20": 5,
@@ -1154,7 +1154,7 @@
       "#e6c91f": 1,
       "#e7bd54": 1,
       "#eaecf0": 1,
-      "#eaedf2": 64,
+      "#eaedf2": 63,
       "#ecfdf3": 4,
       "#edf0f4": 1,
       "#eef1f5": 51,
@@ -1162,7 +1162,7 @@
       "#eff8ff": 1,
       "#f0fbf5": 3,
       "#f0fff6": 1,
-      "#f2f4f7": 32,
+      "#f2f4f7": 31,
       "#f2f8df": 1,
       "#f3f4f6": 5,
       "#f4ddad": 1,
@@ -1170,7 +1170,7 @@
       "#f4f3ff": 1,
       "#f4f7fb": 1,
       "#f5f8ff": 1,
-      "#f6f7f9": 26,
+      "#f6f7f9": 25,
       "#f79009": 3,
       "#f7ead8": 1,
       "#f7f8fa": 4,
@@ -1185,7 +1185,7 @@
       "#fedf89": 1,
       "#ff5252": 12,
       "#ff5a32": 2,
-      "#ff6b6b": 122,
+      "#ff6b6b": 120,
       "#ff8a8a": 4,
       "#ff8f8f": 1,
       "#ff9b9b": 1,
@@ -1265,7 +1265,7 @@
       {
         "path": "frontend/src/components/ui/dialog.tsx",
         "present": true,
-        "sha256": "45f92972577383d65ded3301cb9861f1f2e5fecfc6b2d881f97149be09fea996"
+        "sha256": "4fb479c022ae239f5d9c20d7504b272df529250a48bec5bb9f3aa7ac7b540429"
       },
       {
         "path": "frontend/src/components/ui/feedback.tsx",
@@ -1290,7 +1290,7 @@
       {
         "path": "frontend/src/components/ui/semantic-foundation.module.css",
         "present": true,
-        "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23"
+        "sha256": "84001b7f56585b95c9cb07b60d8eb58e43dbfcbe744245aec5210ae6a1c3cfc1"
       },
       {
         "path": "frontend/src/components/ui/status-badge.tsx",
@@ -1444,7 +1444,7 @@
         "max_diff_pixels": 25,
         "threshold": 0.1
       },
-      "expected_screenshot_call_count": 24,
+      "expected_screenshot_call_count": 36,
       "first_party_fixture_asset": {
         "served_path": "/icon.svg",
         "source": {
@@ -1565,8 +1565,8 @@
         }
       ]
     },
-    "screenshot_call_count": 24,
-    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK. Responsive viewport adds three LOCAL diagnostic capture sites (21 calls total), separate from canonical pinned-Linux snapshot review and native USER CHECK. World feed unification adds two LOCAL responsive/focus capture sites (23 calls total). Only the user-approved World composer canonical PNG is updated after exact pinned-Linux review; the other ten PNGs, corpus, screenshot count (11) and tolerances remain unchanged. Operating Docker source sync and direct USER CHECK are separate. World UI/output integration adds one LOCAL ko/en reply, profile, Chat and feed capture site (24 calls total); the existing World composer PNG alone is reviewed and updated for adjacent photo/Send and authoritative viewer reactions, without changing the corpus or tolerances.",
+    "screenshot_call_count": 36,
+    "status": "The 11 committed UI-B/UI-F deterministic snapshots and their visual thresholds are preserved. HY14 retains its opt-in real-workflow capture. The SNS delivery-history regression adds one shared mobile diagnostic capture for Next/static outside the canonical corpus; neither adds a committed visual baseline or claims USER CHECK. FP status mobile diagnostic capture already exists at HEAD; inventory corrected to 14 on 2026-09-23 without modifying canonical snapshots. Local creator adds a diagnostic 200-percent CSS zoom capture and a profile element capture; neither replaces canonical snapshots or native USER CHECK. Daily preparation adds one shared Next/static LOCAL diagnostic capture (16 calls total), without changing the canonical snapshots or claiming installed USER CHECK. Duplicate-card recovery adds one LOCAL static diagnostic at 200-percent CSS zoom (17 calls total); canonical snapshots, diff thresholds and native USER CHECK remain separate. Multilingual settings add one LOCAL shared Next/static functional capture (18 calls total). This does not substitute installed USER CHECK. Responsive viewport adds three LOCAL diagnostic capture sites (21 calls total), separate from canonical pinned-Linux snapshot review and native USER CHECK. World feed unification adds two LOCAL responsive/focus capture sites (23 calls total). Only the user-approved World composer canonical PNG is updated after exact pinned-Linux review; the other ten PNGs, corpus, screenshot count (11) and tolerances remain unchanged. Operating Docker source sync and direct USER CHECK are separate. World UI/output integration adds one LOCAL ko/en reply, profile, Chat and feed capture site (24 calls total); the existing World composer PNG alone is reviewed and updated for adjacent photo/Send and authoritative viewer reactions, without changing the corpus or tolerances. World post/Chat/character management adds twelve LOCAL diagnostic capture sites (36 calls total): detail widths/200-percent, centered memory Dialog/room actions, World cards/profile/status/settings, graph avatars, and actual S0/L0 copy/run/media integration. The 11 canonical PNGs, pinned Linux environment, thresholds and direct USER CHECK remain unchanged.",
     "target_viewports": [
       "360x800",
       "390x844",
