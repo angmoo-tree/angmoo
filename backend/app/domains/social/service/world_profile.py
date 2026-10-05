@@ -63,7 +63,7 @@ class WorldSocialProfileService:
         visible_posts = posts[: query.limit]
         visible_cursor_values = cursor_values[: query.limit]
         items = self._post_snapshots(
-            world_id=query.world_id, posts=visible_posts, blocked_ids=blocked_ids
+            world_id=query.world_id, posts=visible_posts, blocked_ids=blocked_ids, current_user_id=query.current_user_id
         )
         next_cursor = None
         if has_more and visible_cursor_values:
@@ -80,11 +80,14 @@ class WorldSocialProfileService:
         )
 
     def _post_snapshots(
-        self, *, world_id: str, posts: list[Post], blocked_ids: frozenset[str]
+        self, *, world_id: str, posts: list[Post], blocked_ids: frozenset[str], current_user_id: str
     ) -> tuple[WorldCharacterSocialProfilePost, ...]:
         if not posts:
             return ()
         post_ids = [post.id for post in posts]
+        from app.domains.social.service.owner_reaction_reads import read_owner_reactions
+        reactions = read_owner_reactions(self.repository.db, references=self.references.owner_reaction_references(),
+            posts=posts, current_user_id=current_user_id)
         author_ids = {
             str(post.author_world_character_id)
             for post in posts
@@ -143,6 +146,7 @@ class WorldSocialProfileService:
             snapshots.append(
                 WorldCharacterSocialProfilePost(
                     id=post.id,
+                    **reactions.get(post.id, {}),
                     world_id=world_id,
                     author_world_character_id=author_id,
                     author_name=post.author_name,

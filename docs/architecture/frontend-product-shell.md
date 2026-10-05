@@ -27,11 +27,15 @@
 
 Current structure: [frontend/ARCHITECTURE.md](../../frontend/ARCHITECTURE.md).
 
-World Feed list now owns its content header explicitly. `WorldAppShell.headerMode="content"` is supplied only for
-`section=feed` without `postId`; detail threads and other sections retain their original shell header. Composition fills
+World Home retains the shared World header. Every non-Home section supplies
+`WorldAppShell.headerMode="content"`; its feature owns the content header and loading/error state. Composition fills
 the neutral `FeedHeader` with Feed title, Angmoo Home logo and the current World owner profile. No World name or
-header refresh slot is supplied. Social owns existing read/refresh/write/draft behavior and Media owns file selection
-through ReactNode layout slots. The five bottom destinations and the single DeviceFrame scroll owner remain.
+feed-list header refresh slot is supplied. Social detail uses the selected post ID, its v2 subtree and explicit parent
+availability; the back and refresh actions belong to that content header. Social owns canonical owner reactions,
+invalidation and draft fencing. Media owns file selection through ReactNode layout slots. The five bottom
+destinations remain. Chat has a bounded flex surface with only its message pane scrolling; its header and composer
+stay visible above navigation. Memory and diagnostics reuse the existing lazy Dialog slots, without changing their
+capture or generation settings.
 Next `app` and `static-shell/app` share product screens, shells and providers in
 `src/composition`. Features own their components, API, types and local helpers.
 Common UI, hooks, transport, config and utilities stay independent of features.

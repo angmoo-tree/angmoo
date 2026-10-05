@@ -78,6 +78,9 @@ def resident_thought_payload(payload: dict, model, *, writer: bool) -> dict:
         result = {k: attach(v, raw.get(k)) for k, v in value.items() if k not in LEGACY_SELF_VIEW_FIELDS}
         include = (writer and ("body" in value or "post_body" in value)) or (not writer and (value.get("action_type") in {"like", "repost", "follow", "unfollow"} or value.get("decision") in {"follow", "unfollow"}))
         if include:
-            result["_activity_thought"] = asdict(parse_activity_thought(raw.get("thought")))
+            from app.contracts.authored_output import finalize_activity_thought
+            thought, receipt = finalize_activity_thought(raw.get("thought"))
+            result["_activity_thought"] = asdict(thought)
+            result["_auxiliary_normalization"] = {"thought": receipt.to_dict()}
         return result
     return attach(validated, payload)

@@ -275,7 +275,9 @@ test("global and World header/composer anchors match and global controls remain 
       await page.getByRole("dialog").getByRole("button", { name: "닫기", exact: true }).last().click();
     } else await expect(page.getByRole("button", { name: "새로고침", exact: true })).toBeVisible();
     const global = await measure();
-    await page.goto(feedRoute()); await expect(composer(page)).toBeVisible(); const world = await measure();
+    await page.goto(feedRoute()); await expect(composer(page)).toBeVisible();
+    await expect(page.locator('[data-social-post-row="anchor-post"]')).toBeVisible();
+    const world = await measure();
     for (const [before, after] of [[global.title, world.title], [global.avatar, world.avatar], [global.field, world.field], [global.postAvatar, world.postAvatar], [global.postBody, world.postBody]]) {
       expect(Math.abs(before!.x - after!.x)).toBeLessThanOrEqual(1);
       expect(before!.width).toBe(after!.width);

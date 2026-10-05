@@ -14,6 +14,21 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+## 2026-10-05 World 상세·반응·Chat 통합 계약
+
+이번 사용자 확정 계약이 아래 역사 단계의 표시·World 대화 개수 조항보다 우선한다.
+World Home에만 WORLD APP·World 이름·Device Home 상단바를 남기고 비홈 화면은 콘텐츠 헤더를 소유한다.
+선택한 게시글/답글 상세는 그 항목과 공개 하위 답글을 표시하고, 사용자 답글은 현재 항목을 즉시 부모로 저장한다.
+답글 폼은 사용자 아바타/이름·빈 본문·기존 Send 아이콘이며 실제 label은 sr-only다. 기본 Field는 visible이다.
+본문 열의 왼쪽에 답글/좋아요를 같은 순서와 넉넉한 그룹 간격으로 놓고, count와 viewer 선택을 구분한다.
+World 좋아요는 정식 서버 capability와 저장 응답을 사용한다. 미지원 Follow/repost/share를 추가하지 않는다.
+Feed와 Chat의 사진·Send는 오른쪽 같은 그룹에 인접 배치하며 공개 작성의 제목160/본문4000은 유지한다.
+World 프로필은 글로벌 hero/avatar/action/name/tabs/stream 표현과 원본 이미지를 계승한다.
+World Chat은 실제 대화 개수 제한과 N/5를 제거하고, 상대 헤더·user 우측 dark/assistant 좌측 light bubble·
+단일 메시지 scroll·rounded composer를 사용한다. 기존 모델 선택은 compact footer, 기억/진단은 보조 Dialog다.
+대화 생성·예산·stream·인식·기억 설정·lease 보호는 유지한다. ko/en 제품 문구와 접근성 이름만 번역한다.
+출처는 기존 글로벌 표현의 ADAPTED와 World scope/서버 저장/slot 연결의 LOCAL이며 새 외부 asset/font는 없다.
+
 ## 2026-10-04 World SNS 피드 목록·수동 작성 계약
 
 기본 SNS와 생성 World의 목록은 글로벌 Feed와 같은 neutral `FeedHeader` 및 `SocialPostRow`를 사용한다.
@@ -23,14 +38,14 @@ World App/context 설명·헤더 새로고침·Follow/repost 필터는 목록에
 글로벌의 Feed Cue·캐릭터 선택·두 필터·desktop 갱신은 그대로 유지한다.
 
 수동 작성은 실제 사용자 이름과 지원 payload의 handle, 필수 제목(160)·본문(4000), 원본 형식/비율의 사진 1장,
-아래 왼쪽 사진 `Image` 아이콘과 오른쪽 코랄색·흰 `Send` 아이콘의 48px 원형 버튼 순서다.
+아래 오른쪽 같은 그룹의 사진 `Image` 아이콘과 코랄색·흰 `Send` 아이콘의 48px 원형 버튼 순서다.
 버튼 caption은 없고 접근성 이름·title·busy/disabled·focus-visible·텍스트 오류 안내를 유지한다.
 Media는 native input·upload/abort/draft/preview를, Social은 form·submit/idempotency와 action 행 배치를,
 composition은 World 사용자와 feature의 ReactNode 표시 슬롯 연결을 소유한다.
 
 첫 조회·World 전환·게시 후 갱신·실패 화면의 명시적 재시도·모바일 당겨 새로고침·이미지 완료 갱신은 기존 loadFeed를 쓴다.
 부분 갱신과 실패는 입력을 보존하고 문서 전체 reload/HMR의 입력 영구 보존을 보장하지 않는다.
-World 상세 thread와 다른 section의 shell header·기존 다섯 하단 탐색은 유지한다. API/ORM·backend 실행 계약 변경은 없다.
+기존 다섯 하단 탐색은 유지한다. 당시 상세/shell/backend 불변 조항은 위 10-05의 명시적 변경 범위에서 대체한다.
 
 출처 분류: 기존 글로벌 anatomy의 **ADAPTED**, 새 neutral 표시 슬롯과 independent World 연결의 **LOCAL**.
 새 hosted source·asset·font·dependency를 추가하지 않는다. 로컬 fixture 검사와 운영 적용·직접 USER CHECK는 구분한다.
@@ -607,7 +622,7 @@ UI-C 현재 제품 destination은 `홈 /`, `피드 /posts`, `내 앵무 /agents`
 
 ### 8.4 Form controls
 
-- label은 field 밖에서 항상 식별 가능
+- label은 기본적으로 field 밖에서 식별 가능하다. World 답글의 명시적 `sr-only` 옵션은 실제 label 연결을 유지한다.
 - placeholder는 label 대체 금지
 - 최소 control 높이 44px, 주요 action 48px
 - focus-visible ring은 border와 별도로 인지 가능

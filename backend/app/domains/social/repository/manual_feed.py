@@ -1,6 +1,6 @@
 """Exact World-scoped source, reply and like queries in the caller Session."""
-from sqlalchemy import func, select, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select, or_, exists
+from sqlalchemy.orm import Session, selectinload
 from app.domains.social.models import posts as models
 from app.domains.social.models import feed as feed_models
 
@@ -14,19 +14,28 @@ def _visible(world_id: str):
     )
 
 
-def _descendants(world_id: str, post_ids: list[str]):
+def _unblocked(world_id: str, viewer_id: str | None):
+    if viewer_id is None:
+        return ()
+    block = feed_models.WorldCharacterBlock
+    return (~exists(select(block.id).where(block.world_id == world_id, or_(
+        (block.blocker_world_character_id == viewer_id) & (block.blocked_world_character_id == models.Post.author_world_character_id),
+        (block.blocked_world_character_id == viewer_id) & (block.blocker_world_character_id == models.Post.author_world_character_id)))),)
+
+
+def _descendants(world_id: str, post_ids: list[str], viewer_id: str | None = None):
     # UNION (not UNION ALL) terminates malformed cycles; only visible edges
     # within this World are traversed. The root itself is excluded by readers.
     tree = select(models.Post.id.label("root_id"), models.Post.id.label("post_id")).where(
-        models.Post.id.in_(post_ids), *_visible(world_id)
+        models.Post.id.in_(post_ids), *_visible(world_id), *_unblocked(world_id, viewer_id)
     ).cte("visible_descendants", recursive=True)
     return tree.union(select(tree.c.root_id, models.Post.id).join(
         tree, models.Post.reply_to_post_id == tree.c.post_id
-    ).where(*_visible(world_id)))
+    ).where(*_visible(world_id), *_unblocked(world_id, viewer_id)))
 
 
-def reply_counts(db: Session, *, world_id: str, post_ids: list[str]) -> dict[str, int]:
-    tree = _descendants(world_id, post_ids)
+def reply_counts(db: Session, *, world_id: str, post_ids: list[str], viewer_id: str | None = None) -> dict[str, int]:
+    tree = _descendants(world_id, post_ids, viewer_id)
     return {str(root): int(count) for root, count in db.execute(
         select(tree.c.root_id, func.count()).where(tree.c.post_id != tree.c.root_id)
         .group_by(tree.c.root_id)
@@ -58,16 +67,40 @@ def like_counts(db: Session, *, post_ids: list[str]) -> dict[str, int]:
     }
 
 
-def list_visible_posts(db: Session, *, world_id: str, limit: int) -> list[models.Post]:
-    visible = select(models.Post.id).where(*_visible(world_id), models.Post.reply_to_post_id.is_(None)).cte(
+def viewer_likes(db: Session, *, world_id: str, viewer_id: str, post_ids: list[str]) -> set[str]:
+    return set(db.scalars(select(models.PostLike.post_id).where(models.PostLike.post_id.in_(post_ids),
+        models.PostLike.world_id == world_id, models.PostLike.actor_world_character_id == viewer_id)))
+
+
+def canonical_root_id(db: Session, *, world_id: str, post_id: str) -> str | None:
+    # IDs only: hidden ancestor text is never loaded or returned.
+    tree = select(models.Post.id, models.Post.reply_to_post_id).where(models.Post.id == post_id,
+        models.Post.world_id == world_id).cte("thread_ancestors", recursive=True)
+    tree = tree.union(select(models.Post.id, models.Post.reply_to_post_id).join(tree,
+        models.Post.id == tree.c.reply_to_post_id).where(models.Post.world_id == world_id))
+    return db.scalar(select(tree.c.id).where(tree.c.reply_to_post_id.is_(None)))
+
+
+def visible_post(db: Session, *, world_id: str, post_id: str):
+    return db.scalar(select(models.Post).where(models.Post.id == post_id, *_visible(world_id)))
+
+
+def visible_parent_ids(db: Session, *, world_id: str, post_ids: set[str], viewer_id: str) -> set[str]:
+    return set(db.scalars(select(models.Post.id).where(models.Post.id.in_(post_ids),
+        *_visible(world_id), *_unblocked(world_id, viewer_id))))
+
+
+def list_visible_posts(db: Session, *, world_id: str, limit: int, viewer_id: str | None = None) -> list[models.Post]:
+    visible = select(models.Post.id).where(*_visible(world_id), *_unblocked(world_id, viewer_id), models.Post.reply_to_post_id.is_(None)).cte(
         "visible_feed_posts", recursive=True
     )
     visible = visible.union(select(models.Post.id).join(
         visible, models.Post.reply_to_post_id == visible.c.id
-    ).where(*_visible(world_id)))
+    ).where(*_visible(world_id), *_unblocked(world_id, viewer_id)))
     return list(
         db.scalars(
             select(models.Post)
+            .options(selectinload(models.Post.media))
             .join(visible, models.Post.id == visible.c.id)
             .where(
                 models.Post.world_id == world_id,
@@ -84,9 +117,10 @@ def list_visible_posts(db: Session, *, world_id: str, limit: int) -> list[models
 def list_visible_replies(
     db: Session, *, world_id: str, root: models.Post, offset: int = 0,
     limit: int = 50, target_id: str | None = None,
+    viewer_id: str | None = None,
 ) -> tuple[list[models.Post], int, int | None]:
-    tree = _descendants(world_id, [root.id])
-    query = select(models.Post).join(tree, models.Post.id == tree.c.post_id).where(
+    tree = _descendants(world_id, [root.id], viewer_id)
+    query = select(models.Post).options(selectinload(models.Post.media)).join(tree, models.Post.id == tree.c.post_id).where(
         models.Post.id != root.id
     )
     size = max(1, min(limit, 100))

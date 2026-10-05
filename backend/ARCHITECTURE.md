@@ -486,6 +486,18 @@ Import inventory는 현재 파일과 의존 관계의 사실이고 import policy
 
 이 문서는 구조·역할·연결·변경 예시를 설명합니다. 세부 API 필드, 모델별 예산 숫자, release 상태는 해당 코드와 상세 계약에서 관리해 중복된 기준이 생기지 않게 합니다.
 
+## World 반응·SNS 보조 출력과 입력 예산 (2026-10-05)
+
+Social의 service/repository가 선택 항목 중심 공개 subtree, 사용자 nested parent, scoped PostLike를 소유한다.
+Relationships는 수동 반응의 audit_only source 기록을 지원 typed port로 같은 Session/UoW에 연결한다.
+World Chat만 대화 개수 quota를 제거하고 tuple/unique/재시도·권한·생성 예산은 유지한다.
+Characters는 전체 이름/매크로 검증을, Routine은 topic300/novelty500 정규화를 소유한다.
+공통 authored-output 값은 thought280과 안전한 receipt를 제공하며 raw tail/Provider reasoning은 저장하지 않는다.
+Chat raw thought finalizer는 생성 port의 선택적 callable이고 DB·prompt에 직렬화하지 않는다.
+SNS 신규 정책/모델 자료는 run 생성 때 고정한다. Provider/integration의 같은 요청 준비 경계에서 공식 계수와
+전송을 연결하고 runtime이 온전한 선택 문맥 제외·기존 fence/장부를 소유한다. 다른 업무는 명시적 opt-in 없이 변하지 않는다.
+옛 run은 저장된 mode/legacy 입력 정책으로 재개하며 실제 계수·품질·비용과 로컬 fake 검증은 구분한다.
+
 ## SNS·Chat 이미지 소유권 (2026-09-30)
 
 `domains/media`가 비공개 asset·공통 인식 설정·분석 캐시·분석 시도를 소유한다. `domains/identity/service/media_credentials.py`는 기존 암호화 scope 규칙으로 목적별 키를 저장하고, `domains/characters/service/generation_settings.py`가 캐릭터별 Provider/model/options/reference 선호와 revision을 소유한다. Provider adapter는 같은 Backend의 `integrations`에 있으며 별도 서버를 추가하지 않는다.

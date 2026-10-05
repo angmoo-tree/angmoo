@@ -16,7 +16,7 @@ def activity_output_schema() -> dict:
     }
 
 
-def parse_activity_output(raw: str, parsed: object = None) -> tuple[str, ActivityThought]:
+def parse_activity_output(raw: str, parsed: object = None, *, thought_finalizer=None) -> tuple[str, ActivityThought]:
     """Never regenerate a usable body because its optional thought is absent/bad.
 
     An invalid envelope/body is an output failure, not visible fallback JSON.
@@ -30,4 +30,6 @@ def parse_activity_output(raw: str, parsed: object = None) -> tuple[str, Activit
     text = parsed.get("text") if isinstance(parsed, dict) else None
     if not isinstance(text, str) or not text.strip() or len(text.strip()) > 16_000:
         raise ValueError("activity_output_invalid_body")
-    return text.strip(), parse_activity_thought(parsed.get("thought"))
+    raw_thought = parsed.get("thought")
+    return text.strip(), (thought_finalizer(raw_thought) if thought_finalizer is not None
+                          else parse_activity_thought(raw_thought))

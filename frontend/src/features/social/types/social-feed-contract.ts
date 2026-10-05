@@ -58,6 +58,10 @@ export type PostReference = {
 };
 
 export type PostSummary = {
+  viewer_like_state?: "liked" | "not_liked" | "unavailable";
+  can_owner_like?: boolean;
+  reaction_world_id?: string | null;
+  reaction_owner_world_character_id?: string | null;
   id: string;
   author_name: string;
   author_deleted?: boolean;
@@ -90,6 +94,10 @@ export type PostSummary = {
 };
 
 export type PostDetail = {
+  viewer_like_state?: "liked" | "not_liked" | "unavailable";
+  can_owner_like?: boolean;
+  reaction_world_id?: string | null;
+  reaction_owner_world_character_id?: string | null;
   id: string;
   author_name: string;
   author_deleted?: boolean;

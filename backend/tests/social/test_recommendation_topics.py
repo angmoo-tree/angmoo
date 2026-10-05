@@ -83,10 +83,16 @@ def test_no_backfill_no_new_topic_and_edit_drops_signature(scope):
 
 def test_metadata_errors_do_not_become_text():
     from app.domains.routine_posts.schemas import RoutinePostDraft
-    for value in [None, [], {}, 123, "x" * 301, " "]:
+    for value in [None, [], {}, 123, " "]:
         assert valid_final_signature(value) is None
         draft = RoutinePostDraft(title="정상 글", body="본문은 보존", novelty_basis="새 관찰", topic_signature=value)
         assert draft.body == "본문은 보존" and draft.topic_signature == ""
+    # A valid long auxiliary string is a bounded prefix, not invalid metadata.
+    value = "x" * 301
+    assert valid_final_signature(value) is None
+    draft = RoutinePostDraft(title="정상 글", body="본문은 보존", novelty_basis="새 관찰", topic_signature=value)
+    assert draft.body == "본문은 보존" and draft.topic_signature == value[:300]
+    assert valid_final_signature(draft.topic_signature) == value[:300]
     assert valid_final_signature(" 축구 ") == "축구"
 
 

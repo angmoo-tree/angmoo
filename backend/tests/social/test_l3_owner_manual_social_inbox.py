@@ -558,11 +558,11 @@ def test_owner_world_post_thread_is_exactly_world_scoped() -> None:
     assert thread.status_code == 200
     payload = thread.json()
     assert payload["world_id"] == "world-manual"
-    assert [item["id"] for item in payload["items"]] == [
+    assert [item["id"] for item in [payload["selected_post"], *payload["replies"]]] == [
         "post-autonomous-target",
         reply.json()["post"]["id"],
     ]
-    assert all(item["world_id"] == "world-manual" for item in payload["items"])
+    assert all(item["world_id"] == "world-manual" for item in [payload["selected_post"], *payload["replies"]])
 
     wrong_world = client.get(
         "/api/v1/worlds/not-this-world/manual-social/posts/post-autonomous-target",
@@ -576,7 +576,7 @@ def test_owner_world_post_thread_is_exactly_world_scoped() -> None:
     )
     assert reply_as_root.status_code == 200
     assert reply_as_root.json()["root_post_id"] == "post-autonomous-target"
-    assert reply_as_root.json()["target_post_id"] == reply.json()["post"]["id"]
+    assert reply_as_root.json()["selected_post"]["id"] == reply.json()["post"]["id"]
 
 
 def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> None:
@@ -632,7 +632,7 @@ def test_manual_social_count_projection_is_exact_world_visible_and_batched() -> 
         headers=FRONTEND_HEADERS,
     )
     assert thread.status_code == 200
-    items_by_id = {item["id"]: item for item in thread.json()["items"]}
+    items_by_id = {item["id"]: item for item in [thread.json()["selected_post"], *thread.json()["replies"]]}
     assert set(items_by_id) == {"post-autonomous-target", "reply-count-visible", "reply-count-nested"}
     assert items_by_id["post-autonomous-target"]["reply_count"] == 2
     assert items_by_id["post-autonomous-target"]["like_count"] == 1

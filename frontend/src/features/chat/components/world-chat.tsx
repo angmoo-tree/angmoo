@@ -13,10 +13,12 @@ import {
   RotateCcw,
   Send,
   Settings,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import {
   type FormEvent,
+  type ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -27,6 +29,8 @@ import { worldChatRoute, worldChatThreadRoute, worldCharacterProfileRoute } from
 import { LocalProductLink } from "@/components/navigation/local-product-link";
 import type { WorldChatViewSlots } from "@/features/chat/types/view-slots";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { Dialog } from "@/components/ui/dialog";
+import { IconButton } from "@/components/ui/button";
 import { formatHandle } from "@/utils/profile-presentation";
 import { getLatestWorldChatResponseRequest, getWorldChatResponseRequest, getWorldChatThread, listWorldChatThreads, retryWorldChatResponse, sendWorldChatMessage, streamWorldChatResponse, updateWorldChatThreadModel, WorldChatApiError } from "@/features/chat/api/world-chat-client";
 import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
@@ -100,10 +104,9 @@ function WorldChatList({ worldId }: { worldId: string }) {
           <MessageCircle aria-hidden="true" size={21} />
         </div>
         <div>
-          <p className={styles.kicker}>WORLD CHAT</p>
           <h2>{uiText("대화")}</h2>
           <p>
-            {uiText("{{count}}/{{limit}}개의 World 대화", {count: read.items.length, limit: read.max_threads})}</p>
+            {uiText("World 대화 {{count}}개", {count: read.items.length})}</p>
         </div>
       </header>
 
@@ -204,6 +207,9 @@ function WorldChatThread({
   const [modelUpdating, setModelUpdating] = useState(false);
   const [modelFailure, setModelFailure] = useState<ModelSelection | null>(null);
   const [evidenceRequestId, setEvidenceRequestId] = useState<string | null>(null);
+  const [auxiliaryOpen, setAuxiliaryOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagePaneRef = useRef<HTMLDivElement>(null);
   const [generation, setGeneration] = useState<{
     phase: "pending" | "streaming" | "failed";
     request: WorldChatGenerationRequestRead;
@@ -216,6 +222,10 @@ function WorldChatThread({
   const activeGenerationRef = useRef<string | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const modelUpdateSequenceRef = useRef(0);
+  useEffect(() => {
+    const pane = messagePaneRef.current;
+    if (pane) pane.scrollTop = pane.scrollHeight;
+  }, [thread?.messages.length, generation?.text]);
 
   const clearTypingTimer = useCallback(() => {
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
@@ -637,6 +647,51 @@ function WorldChatThread({
       ? uiText("기본 모델 {{value0}}을 다음 답장에 사용합니다.", {value0: generationProfileLabel(thread.default_model, thread.default_thinking_level)})
       : uiText("{{value0}}을 이 대화에서 고정해 사용합니다.", {value0: generationProfileLabel(thread.selected_model, thread.selected_thinking_level)});
 
+  const composerLayout = ({trigger, preview, feedback}: {trigger: ReactNode; preview: ReactNode; feedback: ReactNode}) => {
+    return <>
+      {preview}{feedback}
+      <div className={styles.composerFooter}>
+      <div className={styles.modelControl}>
+        <label htmlFor={`world-chat-model-${thread.id}`}>{uiText("응답 모델")}</label>
+        <select
+          aria-describedby={`world-chat-model-help-${thread.id}`}
+          disabled={modelControlDisabled}
+          id={`world-chat-model-${thread.id}`}
+          onChange={(event) =>
+            void updateModelSelection(event.target.value as ModelSelection)
+          }
+          value={modelSelection}
+        >
+          <option value="default">
+            {uiText("기본 모델 사용 — 현재 {{model}}", {model: generationProfileLabel(thread.default_model, thread.default_thinking_level)})}
+          </option>
+          <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
+                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label} {uiText("— 이 대화에서 고정")}</option>
+          ))}
+        </select>
+        <p className={styles.srOnly} id={`world-chat-model-help-${thread.id}`}>{modelControlDescription}</p>
+        {modelFailure ? (
+          <div className={styles.modelFailure} role="alert">
+            <span>{uiText("모델을 바꾸지 못했어요.")}</span>
+            <button
+              disabled={modelControlDisabled}
+              onClick={() => void updateModelSelection(modelFailure)}
+              type="button"
+            >
+              {uiText("다시 시도")}</button>
+          </div>
+        ) : null}
+      </div>
+
+        <div className={styles.composerActions}>{trigger}
+          <IconButton label={uiText("메시지 보내기")} type="submit" variant="primary" disabled={(!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) || sending || modelUpdating || (!!generation && generation.phase !== "failed")} loading={sending} loadingLabel={uiText("메시지 보내는 중")}><Send size={20} aria-hidden="true" /></IconButton>
+        </div>
+      </div>
+    </>;
+  };
+
   return (
     <section
       className={styles.threadSurface}
@@ -669,60 +724,14 @@ function WorldChatThread({
           />
           <div className={styles.threadTitle}>
             <h2>{thread.responding.display_name}</h2>
-            <p>{uiText("{{name}}(으)로 대화 중", {name: thread.requester.display_name})}</p>
+            <p>{formatHandle(thread.responding.handle)}</p>
           </div>
         </LocalProductLink>
+        <IconButton type="button" variant="ghost" label={uiText("기억과 진단 보기")} aria-expanded={auxiliaryOpen} aria-controls={`world-chat-auxiliary-${thread.id}`} onClick={() => setAuxiliaryOpen(true)}><Settings size={20} aria-hidden="true" /></IconButton>
       </header>
 
-      <div className={styles.roleBoundary}>
-        <span>{uiText("말하는 앵무")}</span>
-        <strong>{thread.requester.display_name}</strong>
-        <span aria-hidden="true">→</span>
-        <span>{uiText("답하는 앵무")}</span>
-        <strong>{thread.responding.display_name}</strong>
-      </div>
 
-      {renderMemorySummary({
-        subjectWorldCharacterId: thread.responding.world_character_id,
-        worldId,
-      })}
-
-      <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} />
-
-      <div className={styles.modelControl}>
-        <label htmlFor={`world-chat-model-${thread.id}`}>{uiText("응답 모델")}</label>
-        <select
-          aria-describedby={`world-chat-model-help-${thread.id}`}
-          disabled={modelControlDisabled}
-          id={`world-chat-model-${thread.id}`}
-          onChange={(event) =>
-            void updateModelSelection(event.target.value as ModelSelection)
-          }
-          value={modelSelection}
-        >
-          <option value="default">
-            {uiText("기본 모델 사용 — 현재 {{model}}", {model: generationProfileLabel(thread.default_model, thread.default_thinking_level)})}
-          </option>
-          <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
-                  {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label} {uiText("— 이 대화에서 고정")}</option>
-          ))}
-        </select>
-        <p id={`world-chat-model-help-${thread.id}`}>{modelControlDescription}</p>
-        {modelFailure ? (
-          <div className={styles.modelFailure} role="alert">
-            <span>{uiText("모델을 바꾸지 못했어요.")}</span>
-            <button
-              disabled={modelControlDisabled}
-              onClick={() => void updateModelSelection(modelFailure)}
-              type="button"
-            >
-              {uiText("다시 시도")}</button>
-          </div>
-        ) : null}
-      </div>
-
+      <div className={styles.messagePane} ref={messagePaneRef}>
       {thread.messages.length === 0 && !generation ? (
         <div className={styles.empty}>
           <MessageCircle aria-hidden="true" size={28} />
@@ -745,6 +754,8 @@ function WorldChatThread({
                 }
                 key={message.id}
               >
+                {!fromRequester ? <ProfileAvatar avatarUrl={thread.responding.avatar_url} name={thread.responding.display_name} sizeClassName={styles.messageAvatar} /> : null}
+                <div className={styles.messageBubble}>
                 <div className={styles.messageMeta}>
                   <strong>
                     {fromRequester
@@ -763,11 +774,14 @@ function WorldChatThread({
                   <button
                     className={styles.evidenceButton}
                     data-evidence-capability={evidence.capability}
+                    aria-label={uiText("근거 {{count}}개 보기", {count: evidence.count})}
+                    title={uiText("근거 {{count}}개 보기", {count: evidence.count})}
                     onClick={() => setEvidenceRequestId(evidence.request_id)}
                     type="button"
                   >
-                    {uiText("근거 {{count}}개 보기", {count: evidence.count})}</button>
+                    <BookOpen size={18} aria-hidden="true" /></button>
                 ) : null}
+                </div>
               </li>
             );
           })}
@@ -779,6 +793,8 @@ function WorldChatThread({
               data-response-slot={generation.request.response_slot_id}
               key={generation.request.response_slot_id}
             >
+              <ProfileAvatar avatarUrl={thread.responding.avatar_url} name={thread.responding.display_name} sizeClassName={styles.messageAvatar} />
+              <div className={styles.messageBubble}>
               {generation.phase === "pending" && generation.request.image_analysis_state === "waiting" ? (
                 <p role="status">{uiText("사진을 인식하고 있어요. 인식이 끝나면 답장을 만들어요.")}</p>
               ) : generation.phase === "pending" && generation.typingVisible ? (
@@ -797,11 +813,20 @@ function WorldChatThread({
                   onTextOnly={generation.request.can_retry_without_image ? () => void retryResponse(true) : undefined}
                 />
               ) : null}
+              </div>
             </li>
           ) : null}
         </ol>
       )}
 
+      </div>
+      <Dialog open={auxiliaryOpen} onOpenChange={setAuxiliaryOpen} title={uiText("기억과 진단")} dialogAttributes={{id: `world-chat-auxiliary-${thread.id}`}}>
+        {auxiliaryOpen ? <>
+          {renderMemorySummary({subjectWorldCharacterId: thread.responding.world_character_id, worldId})}
+          <RetrievalDiagnostics key={thread.id} worldId={worldId} threadId={thread.id} />
+          <p>{modelControlDescription}</p>
+        </> : null}
+      </Dialog>
       {renderEvidenceInspector({
         onOpenChange: (open) => {
           if (!open) setEvidenceRequestId(null);
@@ -812,35 +837,17 @@ function WorldChatThread({
         worldId,
       })}
 
-      {renderImagePicker?.({ threadId, value: attachment, disabled: sending || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy })}
       <form className={styles.composer} onSubmit={handleSubmit}>
         <label className={styles.srOnly} htmlFor={`world-chat-${thread.id}`}>
           {uiText("{{name}}에게 보낼 메시지", {name: thread.responding.display_name})}</label>
-        <textarea
+        <textarea ref={textareaRef}
           disabled={sending || modelUpdating || (!!generation && generation.phase !== "failed")}
-          id={`world-chat-${thread.id}`}
-          maxLength={4000}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder={uiText("메시지를 입력하세요")}
-          rows={1}
-          value={draft}
+          id={`world-chat-${thread.id}`} maxLength={4000}
+          onChange={(event) => { setDraft(event.target.value); event.target.style.height = "auto"; event.target.style.height = `${Math.min(event.target.scrollHeight, 132)}px`; }}
+          onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }}
+          placeholder={uiText("메시지를 입력하세요")} rows={1} value={draft}
         />
-        <button
-          aria-label={uiText("메시지 보내기")}
-          disabled={
-            (!draft.trim() && !attachment) || imageBusy || (!!attachment && !attachment.allowed) ||
-            sending ||
-            modelUpdating ||
-            (!!generation && generation.phase !== "failed")
-          }
-          type="submit"
-        >
-          {sending ? (
-            <LoaderCircle aria-hidden="true" className={styles.spin} size={19} />
-          ) : (
-            <Send aria-hidden="true" size={19} />
-          )}
-        </button>
+        {renderImagePicker ? renderImagePicker({threadId, value: attachment, disabled: sending || modelUpdating || (!!generation && generation.phase !== "failed"), onChange: value => { setAttachment(value); setSendFailure(null); }, onBusyChange: setImageBusy, renderLayout: composerLayout}) : composerLayout({trigger: null, preview: null, feedback: null})}
       </form>
       {sendFailure ? (
         <div className={styles.sendFailure} role="alert">
@@ -1006,17 +1013,23 @@ function WorldChatError({
   const status = error instanceof WorldChatApiError ? error.status : 500;
   const scopeMismatch =
     error instanceof WorldChatApiError && error.detail === "world_chat_scope_mismatch";
+  const oldLimitPolicy =
+    error instanceof WorldChatApiError && error.detail === "world_chat_limit_policy_outdated";
   const denied = status === 403;
   const missing = status === 404;
   const retryable = !denied && !missing && !scopeMismatch;
-  const title = scopeMismatch
+  const title = oldLimitPolicy
+    ? uiText("대화 제한 정책 업데이트가 필요해요")
+    : scopeMismatch
     ? uiText("World 경계를 확인했어요")
     : denied
       ? uiText("이 대화를 볼 권한이 없어요")
       : missing
         ? uiText("대화를 찾을 수 없어요")
         : uiText("World Chat을 불러오지 못했어요");
-  const description = scopeMismatch
+  const description = oldLimitPolicy
+    ? uiText("서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.")
+    : scopeMismatch
     ? uiText("다른 World의 응답은 표시하지 않았습니다.")
     : denied || missing
       ? uiText("다른 World나 대화로 자동 이동하지 않습니다.")

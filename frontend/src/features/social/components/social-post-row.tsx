@@ -1,5 +1,6 @@
 "use client";
 import { useUiText } from "@/hooks/use-ui-text";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 
 
 import {
@@ -192,6 +193,7 @@ export function SocialPostActionStrip({
   onAction?: (action: SocialPostActionPresentation) => void;
 }) {
   const uiText = useUiText("social");
+  const formatNumber = useUiNumberFormatter();
   const visibleActions = actions.filter(
     (action) => action.interaction !== "button" || onAction,
   );
@@ -201,10 +203,7 @@ export function SocialPostActionStrip({
     <div className={styles.actionStrip} aria-label={uiText("게시글 동작")} role="group">
       {visibleActions.map((action) => {
         const Icon = ACTION_ICONS[action.kind];
-        const positiveLike =
-          action.kind === "like" &&
-          action.count !== undefined &&
-          action.count > 0;
+        const positiveLike = action.kind === "like" && action.accent === true;
         const accent = action.kind === "like" ? positiveLike : action.accent;
         const content = (
           <>
@@ -214,14 +213,14 @@ export function SocialPostActionStrip({
               aria-hidden="true"
             />
             {action.count !== undefined ? (
-              <span className={styles.actionCount}>{action.count}</span>
+              <span className={styles.actionCount}>{formatNumber(action.count)}</span>
             ) : null}
           </>
         );
         const label =
           action.count === undefined
             ? uiText(action.label)
-            : `${uiText(action.label)} ${action.count}`;
+            : `${uiText(action.label)} ${formatNumber(action.count)}`;
 
         if (action.interaction === "metric") {
           return (
@@ -254,6 +253,8 @@ export function SocialPostActionStrip({
           </Link>
         ) : (
           <button
+            disabled={action.disabled}
+            aria-pressed={action.kind === "like" ? positiveLike : undefined}
             aria-label={label}
             className={classNames(
               styles.action,

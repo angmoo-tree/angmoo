@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 import hashlib
 import json
@@ -781,6 +781,7 @@ async def generate_text(
     on_request_start: Callable[[int], None] | None = None,
     json_attempt: int | None = None,
     before_provider_request: Callable[[], Awaitable[None]] | None = None,
+    request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
@@ -790,10 +791,8 @@ async def generate_text(
     if tools and not adapter.capabilities.tool_calls:
         raise DirectLlmError("native_tool_calls_unsupported")
 
-    async def _invoke(call_order: int, provider_call_order: int) -> Any:
-        if on_request_start is not None:
-            on_request_start(call_order)
-        request = ProviderRequest(
+    def make_request(call_order=None, provider_call_order=None):
+        return ProviderRequest(
             api_key=api_key,
             model=context.model,
             system_prompt=system_prompt,
@@ -815,6 +814,10 @@ async def generate_text(
                 "json_attempt": json_attempt,
             })) if tracker.observer is not None else None,
         )
+    async def _invoke(call_order, provider_call_order, checked_request):
+        if on_request_start is not None:
+            on_request_start(call_order)
+        request = replace(checked_request, diagnostic_callback=make_request(call_order, provider_call_order).diagnostic_callback)
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
         return await adapter.generate_text(request)
@@ -837,12 +840,17 @@ async def generate_text(
         # Guard failures keep their owner's typed meaning and cannot be retried.
         if before_provider_request is not None:
             await before_provider_request()
+        checked_request = make_request()
+        if request_preparer is not None:
+            checked_request = await request_preparer(checked_request)
+            if before_provider_request is not None:
+                await before_provider_request()
         call_order = tracker.next_call_order()
         provider_call_order = tracker.next_provider_call_order()
         started = time.perf_counter()
         try:
             async with asyncio.timeout(timeout_seconds):
-                response = await _invoke(call_order, provider_call_order)
+                response = await _invoke(call_order, provider_call_order, checked_request)
             usage = response.usage.as_direct_llm_usage()
             result = DirectLlmResponse(
                 text=response.text,
@@ -1029,6 +1037,10 @@ def _json_error_diagnostic(
     if isinstance(exc, StructuredOutputValidationError):
         diagnostic["validation_code"] = exc.validation_code
         diagnostic["field_path"] = exc.field_path
+    from app.contracts.name_binding import NameBindingError
+    if isinstance(exc, NameBindingError):
+        diagnostic.update(validation_code=exc.code, field_path=exc.field_path,
+                          rendered_chars=exc.rendered_chars, limit=exc.limit)
     if preview_tail:
         diagnostic["preview_tail"] = preview_tail
     return diagnostic
@@ -1094,6 +1106,7 @@ async def generate_json(
     sdk_attempts: int | None = None,
     before_json_retry: Callable[[int], Awaitable[None]] | None = None,
     before_provider_request: Callable[[], Awaitable[None]] | None = None,
+    request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
 ) -> Any:
     if json_retry_policy is not None and (
         should_retry_json_error is not None or retry_max_output_tokens is not None
@@ -1147,6 +1160,7 @@ async def generate_json(
         last_payload = None
         response = await generate_text(
             before_provider_request=before_provider_request,
+            request_preparer=request_preparer,
             api_key=api_key,
             context=context,
             tracker=tracker,

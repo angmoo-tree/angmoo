@@ -614,5 +614,9 @@
   "Check the target activity interval.": "Check the target activity interval.",
   "Set the daily reply limit between 0 and 60.": "Set the daily reply limit between 0 and 60.",
   "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30.",
-  "Up to {{limit}} characters allowed. You are {{excess}} over the limit.": "Up to {{limit}} characters allowed. You are {{excess}} over the limit."
+  "Up to {{limit}} characters allowed. You are {{excess}} over the limit.": "Up to {{limit}} characters allowed. You are {{excess}} over the limit.",
+  "모델 입력 한도를 확인할 수 없어 이번 활동을 중단했습니다.": "This activity stopped because the model input limit could not be verified.",
+  "입력 토큰 계산을 완료하지 못해 이번 활동을 중단했습니다.": "This activity stopped because input token counting could not be completed.",
+  "저장된 모델 입력 정책이 바뀌어 새 활동에서 다시 확인합니다.": "The saved model input policy changed. It will be checked in a new activity.",
+  "World 프로필 정보": "World profile information"
 }

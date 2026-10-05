@@ -63,6 +63,8 @@ export function ReplyNodeRow({
   onToggleMenu,
   onDeletePost,
   onReportPost,
+  likeAction,
+  onLike,
   depth = 0,
 }: {
   node: ReplyNode;
@@ -76,6 +78,8 @@ export function ReplyNodeRow({
   onToggleMenu: (postId: string) => void;
   onDeletePost: (post: PostSummary) => void;
   onReportPost: (post: PostSummary) => void;
+  likeAction?: (post: PostSummary) => SocialPostActionPresentation;
+  onLike?: (post: PostSummary) => void;
   depth?: number;
 }) {
   const uiText = useUiText("social");
@@ -98,7 +102,8 @@ export function ReplyNodeRow({
       }
     >
       <SocialPostRow
-        actions={aggregatePostActions(
+        onAction={() => onLike?.(reply)}
+        actions={likeAction ? [aggregatePostActions(reply.id, reply.reply_count, reply.like_count)[0], likeAction(reply)] : aggregatePostActions(
           reply.id,
           reply.reply_count,
           reply.like_count,
@@ -149,6 +154,8 @@ export function ReplyNodeRow({
               onToggleMenu={onToggleMenu}
               onDeletePost={onDeletePost}
               onReportPost={onReportPost}
+              likeAction={likeAction}
+              onLike={onLike}
               depth={depth + 1}
             />
           ))}
@@ -346,29 +353,7 @@ export function mapRepliesById(replies: PostSummary[]) {
   return new Map(replies.map((reply) => [reply.id, reply]));
 }
 
-export function buildReplyTree(replies: PostSummary[], rootPostId: string): ReplyNode[] {
-  const nodes = new Map<string, ReplyNode>();
-  const roots: ReplyNode[] = [];
-
-  for (const reply of replies) {
-    nodes.set(reply.id, { reply, children: [] });
-  }
-
-  for (const reply of replies) {
-    const node = nodes.get(reply.id);
-    if (!node) continue;
-
-    const parentId = reply.reply_to_post_id;
-    const parent = parentId && parentId !== rootPostId ? nodes.get(parentId) : null;
-    if (parent) {
-      parent.children.push(node);
-    } else {
-      roots.push(node);
-    }
-  }
-
-  return roots;
-}
+export { buildReplyTree } from "../utils/reply-tree";
 
 export function PostReferenceCard({
   label,

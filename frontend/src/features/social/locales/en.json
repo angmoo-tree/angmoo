@@ -218,5 +218,10 @@
   "Set the target activity interval to no more than 1440 minutes.": "Set the target activity interval to no more than 1440 minutes.",
   "Check the target activity interval.": "Check the target activity interval.",
   "Set the daily reply limit between 0 and 60.": "Set the daily reply limit between 0 and 60.",
-  "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30."
+  "Set the daily post limit between 0 and 30.": "Set the daily post limit between 0 and 30.",
+  "좋아요를 저장하지 못했습니다. 다시 시도해 주세요.": "Could not save your like. Please try again.",
+  "답글": "Reply",
+  "부모 게시글 보기": "View parent post",
+  "부모 게시글을 볼 수 없습니다.": "The parent post is unavailable.",
+  "피드로 돌아가기": "Back to feed"
 }

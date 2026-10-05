@@ -32,5 +32,9 @@ class RuntimeSourceWriteReferences:
     def get_membership(self, membership_id: str) -> SourceMembership | None:
         return get_character_entry_membership(self.db, membership_id)
 
-    def record_source_event(self, *, world_id: str, actor_world_character_id: str, target_world_character_id: str | None, operation: str, post: Post, root_post: Post, request_key: str, failure_injector: Callable[[str], None] | None) -> None:
-        record_source_post_event(self.db, world_id=world_id, actor_world_character_id=actor_world_character_id, target_world_character_id=target_world_character_id, operation=operation, post=post, root_post=root_post, request_key=request_key, failure_injector=failure_injector)
+    def record_source_event(self, *, world_id: str, actor_world_character_id: str, target_world_character_id: str | None, operation: str, post: Post, root_post: Post, target_post: Post | None, request_key: str, failure_injector: Callable[[str], None] | None) -> None:
+        record_source_post_event(self.db, world_id=world_id, actor_world_character_id=actor_world_character_id, target_world_character_id=target_world_character_id, operation=operation, post=post, root_post=root_post, target_post=target_post, request_key=request_key, failure_injector=failure_injector)
+
+    def record_source_reaction_event(self, **kwargs):
+        from app.domains.relationships.service.source_reactions import record_source_reaction_event
+        record_source_reaction_event(self.db, **kwargs)

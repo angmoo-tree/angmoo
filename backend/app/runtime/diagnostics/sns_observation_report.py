@@ -460,6 +460,12 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     effect_statuses = {kind: dict(Counter(row.get("status") or "unknown" for row in effects
         if row.get("kind") == kind)) for kind in ("public_action", "state_receipt", "relationship_metric")}
     coverage = {"session_id": session_id, "exported_at": now.isoformat(),
+                "model_profile_queries": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "models_get" for item in events),
+                "token_count_records": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "count_tokens" for item in events),
+                "token_count_physical_calls": sum(item.get("event_type") == "input_budget" and
+                    (item.get("details") or {}).get("operation") == "count_tokens" and
+                    not (item.get("details") or {}).get("cache_hit") for item in events),
+                "auxiliary_normalization_records": sum(item.get("event_type") == "auxiliary_normalization" for item in events),
                 "window_started_at": manifest["started_at"], "window_ends_at": manifest["ends_at"],
                 "tail_ends_at": manifest["tail_ends_at"], "session_state": session_status(data_root, session_id)["state"],
                 "events": len(events), "run_count": len(runs), "error_count": len(errors),

@@ -638,6 +638,7 @@ def publish_routine_activity(resident_context, *, prepared, generation, relation
         "scene_brief": generation.plan.scene_brief,
         "continuity_facts": generation.plan.continuity_facts,
         "used_detail_keys": generation.plan.used_detail_keys,
+        "auxiliary_normalization": generation.draft._normalization_receipt,
     }
 
     try:
@@ -775,6 +776,7 @@ def publish_routine_activity(resident_context, *, prepared, generation, relation
                             joint_activity.id if joint_activity is not None else None
                         ),
                         "opening_post_id": post.opening_post_id,
+                        "auxiliary_normalization": generation.draft._normalization_receipt,
                     },
                 )
                 if context.thought_policy == "thought_v1":

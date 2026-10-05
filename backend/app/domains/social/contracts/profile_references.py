@@ -29,6 +29,7 @@ class ProfileWorldCharacter(Protocol):
 
 
 class ProfileActivityReferences(Protocol):
+    def owner_reaction_references(self): ...
     def profile(self, query: WorldCharacterSocialProfileQuery) -> ProfileIdentity: ...
     def _viewer_world_character_ids(
         self, query: WorldCharacterSocialProfileQuery

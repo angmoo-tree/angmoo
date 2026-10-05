@@ -55,7 +55,7 @@ def parse_envelope(value, validate_decision):
     return {**decision, "provisional_draft": value.get("draft")}
 
 
-def parse_social_draft(raw, *, lane, assignments, policy=None):
+def parse_social_draft(raw, *, lane, assignments, policy=None, name_receipt=None):
     if not isinstance(raw, dict) or not isinstance(raw.get("replies"), list):
         raise ValueError("combined_draft_missing")
     from app.domains.world_characters.contracts.social_io import LANE_IO
@@ -80,23 +80,34 @@ def parse_social_draft(raw, *, lane, assignments, policy=None):
         replies.append({k: v for k, v in row.items() if k != "target_id"} | {"task_id": tasks[target]})
     if seen != set(tasks):
         raise ValueError("combined_draft_target_mismatch")
-    return parse_writer_output({"replies": replies}, lane=lane, assignments=assignments)
+    return parse_writer_output({"replies": replies}, lane=lane, assignments=assignments, name_receipt=name_receipt)
 
 
-def parse_routine_draft(payload, image_enabled=False):
+def parse_routine_draft(payload, image_enabled=False, *, name_receipt=None):
     if not isinstance(payload, dict):
         raise ValueError("combined_routine_draft_missing")
-    value, thought = extract_activity_thought(payload, include_thought=True)
+    from app.contracts.authored_output import finalize_activity_thought
+    from app.domains.routine_posts.policies.output_normalization import normalize_routine_auxiliary
+    value, _ = extract_activity_thought(payload, include_thought=False)
+    thought, thought_receipt = finalize_activity_thought(payload.get("thought"))
+    value, receipts = normalize_routine_auxiliary(value, name_receipt=name_receipt)
+    receipts["thought"] = thought_receipt.to_dict()
+    if name_receipt and "thought" in name_receipt:
+        receipts["thought"]["input_chars"] = name_receipt["thought"]["input_chars"]
     from app.domains.routine_posts.service.image_output import extract_scene
     value, scene, error = extract_scene(value, image_enabled)
     draft = RoutinePostDraft.model_validate(value)
     auxiliary = {"_image_prompt": scene, "_image_error": error} if image_enabled else {}
-    return {**draft.model_dump(mode="json"), "_thought": asdict(thought), **auxiliary}
+    return {**draft.model_dump(mode="json"), "_thought": asdict(thought),
+            "_auxiliary_normalization": receipts, **auxiliary}
 
 
 async def generation_mode(state):
     # This node is checkpointed before any generation request. A resume never
     # switches modes based on the response size or a changed context.
+    from app.contracts.sns_generation import COMBINED_ONLY, read_generation_policies
+    if read_generation_policies(state.get("identity")).sns_generation_policy == COMBINED_ONLY:
+        return {"generation_mode": "combined"}
     size = len(json.dumps({"context": state.get("decision_context"),
         "targets": state.get("candidates")}, ensure_ascii=False, default=str))
     return {"generation_mode": "split" if size > 40000 else "combined"}

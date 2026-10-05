@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/composition/providers/auth-provider";
 import { PwaServiceWorkerLifecycle } from "@/composition/providers/pwa-service-worker-lifecycle";
 import { DesktopWindowBridge } from "@/composition/providers/desktop-window-bridge";
+import { BrowserNavigationGuard } from "@/composition/providers/browser-navigation-guard";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -57,6 +58,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <AuthProvider>
+          <BrowserNavigationGuard />
           <Suspense fallback={null}><DesktopWindowBridge /></Suspense>
           <PwaServiceWorkerLifecycle />
           <ProductViewport>{children}</ProductViewport>

@@ -12,6 +12,8 @@ import { getWorldCharacterSocialProfile, WorldCharacterSocialProfileApiError } f
 import type { WorldCharacterSocialProfileCounts, WorldCharacterSocialProfilePost, WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
 import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
+import { useOwnerReactions } from "../hooks/use-owner-reactions";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
 import styles from "./world-character-social-profile-activity.module.css";
 
 type Props = {
@@ -52,6 +54,8 @@ export function WorldCharacterSocialProfileActivity({
   const [loadingMore, setLoadingMore] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const requestGeneration = useRef(0);
+  const reactions = useOwnerReactions(`${worldId}:${worldCharacterId}:${activeTab}`, () => setAttempt(value => value + 1), worldId);
+  const formatNumber = useUiNumberFormatter();
 
   useEffect(() => {
     const generation = ++requestGeneration.current;
@@ -130,7 +134,7 @@ export function WorldCharacterSocialProfileActivity({
             : new Error("world_character_social_profile_unavailable"),
       });
     } finally {
-      setLoadingMore(false);
+      if (generation === requestGeneration.current) setLoadingMore(false);
     }
   }
 
@@ -145,7 +149,7 @@ export function WorldCharacterSocialProfileActivity({
         {metrics.map(([label, value]) => (
           <div className={styles.metric} key={label}>
             <dt>{label}</dt>
-            <dd>{value ?? "—"}</dd>
+            <dd>{value == null ? "—" : formatNumber(value)}</dd>
           </div>
         ))}
       </dl>
@@ -174,6 +178,7 @@ export function WorldCharacterSocialProfileActivity({
         id="world-character-social-panel"
         role="tabpanel"
       >
+        {reactions.error ? <p role="alert">{uiText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</p> : null}
         {state.status === "loading" ? <ActivityLoading /> : null}
         {state.status === "error" ? (
           <ActivityError error={state.error} onRetry={retry} />
@@ -187,11 +192,11 @@ export function WorldCharacterSocialProfileActivity({
         {state.status === "ready" && state.items.length > 0 ? (
           <div className={styles.stream} data-social-stream="world-character-profile">
             {state.items.map((post) => {
-              const rootPostId = post.reply_to_post_id ?? post.id;
-              const detailHref = worldPostDetailRoute(worldId, rootPostId);
+              const detailHref = worldPostDetailRoute(worldId, post.id);
               return (
                 <SocialPostRow
-                  actions={activityActions(post, detailHref)}
+                  actions={[activityActions(post, detailHref)[0], reactions.likeAction(post)]}
+                  onAction={() => void reactions.setReaction(post)}
                   authorHref={
                     post.author_profile_capability === "available"
                       ? worldCharacterProfileRoute(

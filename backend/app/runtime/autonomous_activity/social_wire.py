@@ -25,7 +25,7 @@ class OrdinaryAction(BaseModel):
     comment_purpose: Literal["question", "advice", "empathy", "encouragement", "information", "humor",
         "disagreement", "competition", "observation"] | None = None
     brief: str = Field(default="", max_length=280)
-    thought: str | None = Field(default=None, max_length=280)
+    thought: str | None = None
 
 
 class FeedAction(OrdinaryAction):

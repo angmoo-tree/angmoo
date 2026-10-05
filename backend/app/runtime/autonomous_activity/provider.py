@@ -2,6 +2,7 @@
 from datetime import UTC, datetime
 import json
 from copy import deepcopy
+from dataclasses import replace
 from typing import Any, Awaitable, Callable
 
 from pydantic import BaseModel, Field
@@ -101,6 +102,7 @@ class ActivityProvider:
                    json_retry_policy=None,
                    before_json_retry: Callable[[int], Awaitable[None]] | None = None,
                    before_provider_request: Callable[[int], Awaitable[None]] | None = None,
+                   before_admitted_request: Callable[[], None] | None = None,
                    on_input_receipt: Callable[[dict], None] | None = None):
         from app.contracts.language import PERSONA_LANGUAGE_POLICY, QUERY_LANGUAGE_POLICY
         system += "\n" + PERSONA_LANGUAGE_POLICY + "\n" + QUERY_LANGUAGE_POLICY
@@ -112,15 +114,18 @@ class ActivityProvider:
         def serialized():
             return json.dumps(payload, ensure_ascii=False, default=str)
         user = serialized()
+        from app.contracts.sns_generation import MODEL_TOKEN_BUDGET
+        token_budget = getattr(self, "generation_policies", None)
+        token_budget = token_budget is not None and token_budget.sns_input_budget_policy == MODEL_TOKEN_BUDGET
         today_data = context.get("today_activity", [])
         today = today_data.get("records", []) if isinstance(today_data, dict) else today_data
-        while len(system) + len(user) > 64000 and isinstance(today, list) and today:
+        while not token_budget and len(system) + len(user) > 64000 and isinstance(today, list) and today:
             today.pop()
             omissions["today_activity"] += 1
             context["input_omissions"] = omissions
             user = serialized()
         memories = context.get("memories", {})
-        if isinstance(memories, dict):
+        if not token_budget and isinstance(memories, dict):
             # If a target's packet group will not fit, omit the whole group:
             # retaining a pre-correction packet alone would change its meaning.
             for value in reversed(list(memories.values())):
@@ -131,7 +136,7 @@ class ActivityProvider:
                     value.update(packets=[], status="partial", input_budget_omitted=True)
                     context["input_omissions"] = omissions
                     user = serialized()
-        if len(system) + len(user) > 64000:
+        if not token_budget and len(system) + len(user) > 64000:
             raise ValueError("activity_input_budget_exceeded")
         from hashlib import sha256
         receipt = {"node": node, "input_sha256": sha256(user.encode()).hexdigest(),
@@ -158,7 +163,8 @@ class ActivityProvider:
                 "source_ids": [item.get("post_id") for item in context.get("source_manifest", [])]
                     if isinstance(context, dict) else [],
             })
-        if delivery is not None:
+        dispatched = not token_budget
+        if delivery is not None and dispatched:
             delivery.dispatched()
         async def guard_request():
             if before_provider_request is not None:
@@ -168,6 +174,34 @@ class ActivityProvider:
             db = getattr(self.context, "db", None)
             if db is not None and db.in_transaction():
                 db.commit()
+        original_user = user
+        admitted_user = None
+        async def prepare_request(request):
+            nonlocal admitted_user, dispatched
+            from app.providers.input_budget import InputBudgetError
+            from app.runtime.autonomous_activity.input_budget import omit_optional_unit
+            budget = getattr(self, "input_budget", None)
+            if budget is None:
+                raise InputBudgetError("activity_input_budget_unavailable")
+            suffix = request.user_prompt[len(original_user):]
+            retry = admitted_user is not None
+            while True:
+                actual_user = (admitted_user if retry else serialized()) + suffix
+                actual = replace(request, user_prompt=actual_user, prepared_request=None)
+                checked, permitted = await budget.admit(actual, guard=guard_request, omissions=omissions)
+                if permitted:
+                    await guard_request()
+                    if before_admitted_request is not None:
+                        before_admitted_request()
+                    if delivery is not None:
+                        delivery.dispatched()
+                    dispatched = True
+                    admitted_user = actual_user.removesuffix(suffix) if suffix else actual_user
+                    if on_input_receipt is not None:
+                        on_input_receipt({**receipt, "input_sha256": sha256(actual_user.encode()).hexdigest(), "omissions": dict(omissions)})
+                    return checked
+                if retry or not omit_optional_unit(context, omissions):
+                    raise InputBudgetError("activity_input_budget_exceeded")
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,
@@ -178,13 +212,14 @@ class ActivityProvider:
                     None if json_retry_policy is not None else lambda *_: False),
                 retry_max_output_tokens=RETRY_OUTPUT_TOKENS if recover_truncation else None,
                 json_retry_policy=json_retry_policy,
-                retry_input_char_limit=64000 if json_retry_policy is not None else None,
+                retry_input_char_limit=64000 if json_retry_policy is not None and not token_budget else None,
                 sdk_attempts=1,
                 before_json_retry=before_json_retry,
                 before_provider_request=guard_request if before_provider_request is not None else None,
+                request_preparer=prepare_request if token_budget else None,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
-            if delivery is not None:
+            if delivery is not None and dispatched:
                 delivery.uncertain()
             raise
 
@@ -233,7 +268,7 @@ class ActivityProvider:
     async def write(self, *, lane: str, context: dict, assignments: list[dict], on_input_receipt=None, before_provider_request=None):
         # Normal Inbox uses one call. Large selected batches can use at most
         # three calls; never search or select an additional target here.
-        if len(assignments) > 1 and len(json.dumps({"context": context, "assignments": assignments}, ensure_ascii=False, default=str)) > 40000:
+        if not getattr(getattr(self, "generation_policies", None), "sns_generation_policy", None) and len(assignments) > 1 and len(json.dumps({"context": context, "assignments": assignments}, ensure_ascii=False, default=str)) > 40000:
             replies = []
             for assignment in assignments:
                 target = assignment.get("source", {}).get("target_id")
@@ -263,10 +298,20 @@ class ActivityProvider:
         return await self.call(node=f"{lane.title()}Writer", lane=f"{lane}_writer", system=system,
             payload={"context": context, "assignments": assignment_view(assignments, lane) if scoped else assignments},
             schema=writer_schema,
-            validator=lambda value: parse_writer_output(value, lane=lane, assignments=assignments, policy=self.social_io_policy),
+            validator=lambda value: self.finalize_writer(value, lane=lane, assignments=assignments),
             max_tokens=4096, on_input_receipt=on_input_receipt, before_provider_request=before_provider_request)
 
-def parse_writer_output(value, *, lane: str, assignments: list[dict], policy=None):
+    def finalize_writer(self, value, *, lane, assignments):
+        from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output, observe_normalization
+        names = activity_name_binding(self.context) if getattr(self.context, "db", None) is not None else None
+        fields = {}
+        value = social_draft_names(value, names, lane=lane, assignments=assignments, receipt=fields)
+        output = parse_writer_output(value, lane=lane, assignments=assignments, policy=self.social_io_policy, name_receipt=fields)
+        observe_output(self.tracker, names, lane=lane, fields=fields)
+        observe_normalization(self.tracker, lane=lane, receipts=[r["_auxiliary_normalization"] for r in output["reply_task_results"]])
+        return output
+
+def parse_writer_output(value, *, lane: str, assignments: list[dict], policy=None, name_receipt=None):
     """Canonical task/proposal validation shared by separate and combined generation."""
     from app.contracts.activity_thought import parse_activity_thought
     from dataclasses import asdict
@@ -275,18 +320,29 @@ def parse_writer_output(value, *, lane: str, assignments: list[dict], policy=Non
         from app.runtime.autonomous_activity.social_wire import validate_reply_wire
         validate_reply_wire(value, lane, any(task.get("proposal_response") is not None for task in assignments),
                             assignments=assignments)
-    output = WriterOutput.model_validate(value).model_dump(mode="json")
+    # Optional product self-expression must not reject an otherwise valid body.
+    from app.contracts.authored_output import finalize_activity_thought
+    raw_rows = value.get("replies", []) if isinstance(value, dict) else []
+    clean = {**value, "replies": [{k: v for k, v in row.items() if k != "thought"}
+        if isinstance(row, dict) else row for row in raw_rows]} if isinstance(value, dict) and isinstance(raw_rows, list) else value
+    output = WriterOutput.model_validate(clean).model_dump(mode="json")
     if len({r["task_id"] for r in output["replies"]}) != len(output["replies"]):
         raise ValueError("writer_duplicate_task")
     if {r["task_id"] for r in output["replies"]} != {a["task_id"] for a in assignments}:
         raise ValueError("writer_task_mismatch")
     tasks = {a["task_id"]: a for a in assignments}
-    for row in output["replies"]:
+    for index, row in enumerate(output["replies"]):
         fixed = tasks[row["task_id"]].get("proposal_response")
         fields = ("proposal_decision", "counter_activity_seed", "counter_place_key", "counter_target_daypart", "counter_date_policy", "counter_target_date")
         if any(row.get(k) != (fixed.get(k) if fixed else None) for k in fields):
             raise ValueError("writer_changed_proposal_decision")
-        row["_activity_thought"] = asdict(parse_activity_thought(row.pop("thought", None)))
+        row.pop("thought", None)
+        thought, receipt = finalize_activity_thought(raw_rows[index].get("thought"))
+        row["_activity_thought"] = asdict(thought)
+        row["_auxiliary_normalization"] = {"thought": receipt.to_dict()}
+        source_receipt = (name_receipt or {}).get(f"replies.{index}.thought")
+        if source_receipt is not None:
+            row["_auxiliary_normalization"]["thought"]["input_chars"] = source_receipt["input_chars"]
     # Old checkpoints have the same frozen proposal inside source, but did not
     # copy it to the legacy Writer task field. Never resolve a different live
     # proposal here, or convert an ordinary reply into a proposal response.

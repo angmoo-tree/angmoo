@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 from app.core.unit_of_work import deferred_commits
 from app.contracts.activity_thought import ActivityThought, parse_activity_thought
+from app.contracts.authored_output import finalize_activity_thought, restore_activity_thought
 from app.domains.social.schemas.feed import FeedReactionDecision, FeedCommentDraft, JointActivityProposalPreview, WorldFeedCandidateRead
 from app.domains.social.service.feed_cycle_publishing import _publish_action
 from app.domains.social.service.feed_cycle_values import _execution_signature, _brief_hash
@@ -39,7 +40,14 @@ def execute(lane, state):
             continue
         candidate, decision = decision_values(state, raw)
         profile = lane.profile()
-        draft, thought = None, parse_activity_thought(raw.get("thought"))
+        thought, thought_receipt = finalize_activity_thought(raw.get("thought"),
+            inherited=ActivityThought(**raw["_activity_thought"]) if raw.get("_activity_thought") else None)
+        draft = None
+        normalization = raw.get("_auxiliary_normalization")
+        if normalization is None:
+            if isinstance(raw.get("_activity_thought"), dict):
+                thought, thought_receipt = restore_activity_thought(raw["_activity_thought"])
+            normalization = {"thought": thought_receipt.to_dict()}
         if raw["action"] == "comment":
             key = next(a["task_id"] for a in state["assignments"] if a["target_post_id"] == candidate.post_id)
             written = next(r for r in state["drafts"] if r["task_id"] == key)
@@ -54,6 +62,10 @@ def execute(lane, state):
                 draft = FeedCommentDraft(text=text, source_post_id=candidate.post_id,
                     interaction_intent="ordinary_comment", comment_purpose=raw["comment_purpose"])
             thought = ActivityThought(**written["_activity_thought"]) if written.get("_activity_thought") else ActivityThought()
+            normalization = written.get("_auxiliary_normalization")
+            if normalization is None:
+                thought, inherited_receipt = restore_activity_thought(written.get("_activity_thought") or {})
+                normalization = {"thought": inherited_receipt.to_dict()}
         signature = _execution_signature(profile=profile, candidate=candidate, decision=decision,
             cycle_key=state["lane_data"]["_feed"]["cycle_key"])
         from app.domains.social.models.feed import WorldCharacterFeedObservation
@@ -75,6 +87,7 @@ def execute(lane, state):
                         actor_world_character_id=lane.actor.id, feed_observation_id=observation.id,
                         interaction_intent=decision.interaction_intent, comment_purpose=decision.comment_purpose)
                     result = _publish_action(lane.ctx, workflows=workflows.publishing, candidate=candidate, decision=decision, draft=draft)
+                    result["auxiliary_normalization"] = normalization
                     applied = workflows.social_apply.apply_successful_world_feed_action(db, profile=profile,
                         candidate=candidate, decision=decision, draft=draft, action_result=result, execution=row, occurred_at=datetime.now(UTC))
                     workflows.executions.mark_public_action_execution_finished(db, row, status="succeeded", result=result)

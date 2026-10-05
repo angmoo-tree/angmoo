@@ -22,6 +22,23 @@ class SqlAlchemySocialWriteUnitOfWork:
         self._session = session
         self._retry_policy = retry_policy
         self._service = SocialSourceWriteService(session, timeline=timeline_service, references=RuntimeSourceWriteReferences(session), failure_injector=failure_injector, attachments=attachments)
+        from app.domains.social.service.owner_reactions import OwnerReactionService
+        self._reactions = OwnerReactionService(session, references=RuntimeSourceWriteReferences(session), failure_injector=failure_injector)
+
+    def set_owner_like(self, command):
+        from sqlalchemy.exc import IntegrityError
+        for attempt in range(2):
+            try:
+                return self._run(lambda: self._reactions.set_like(command))
+            except IntegrityError as exc:
+                self._session.rollback()
+                constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
+                message = str(exc.orig)
+                canonical = constraint in {"uq_post_likes_post_character", "uq_post_likes_post_actor_world_character"} or message in {
+                    "UNIQUE constraint failed: post_likes.post_id, post_likes.character_id",
+                    "UNIQUE constraint failed: post_likes.post_id, post_likes.actor_world_character_id"}
+                if not canonical or attempt:
+                    raise
 
 
     def create_owner_post(self, command: OwnerPostCommand) -> SocialWriteResult:

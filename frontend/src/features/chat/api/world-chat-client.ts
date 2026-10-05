@@ -30,10 +30,14 @@ export async function listWorldChatThreads(
     !payload ||
     !Array.isArray(payload.items) ||
     typeof payload.ambiguous_legacy_count !== "number" ||
-    typeof payload.max_threads !== "number" ||
+    !Object.prototype.hasOwnProperty.call(payload, "max_threads") ||
+    (payload.max_threads !== null && (!Number.isInteger(payload.max_threads) || payload.max_threads < 0)) ||
     payload.items.some((thread) => !worldChatThreadMatchesScope(thread, worldId))
   ) {
     throw new WorldChatApiError(502, "world_chat_scope_mismatch");
+  }
+  if (payload.max_threads !== null) {
+    throw new WorldChatApiError(409, "world_chat_limit_policy_outdated");
   }
   return payload;
 }

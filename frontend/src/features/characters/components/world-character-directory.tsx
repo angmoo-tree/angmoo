@@ -57,7 +57,6 @@ export function WorldCharacterDirectory({ worldId }: { worldId: string }) {
           <Users aria-hidden="true" size={21} />
         </span>
         <div>
-          <p>WORLD CHARACTERS</p>
           <h2>{uiText("이 World의 앵무")}</h2>
           <span className={styles.directoryMeta}>
             {uiText("현재 참여 중인 캐릭터 {{count}}명", {count: read.items.length})}</span>

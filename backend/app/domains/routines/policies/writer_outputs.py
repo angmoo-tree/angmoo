@@ -240,6 +240,7 @@ def _apply_reply_writer_output(
             "post_id": task.get("target_post_id"),
             "body": body,
             **({"_activity_thought": item["_activity_thought"]} if "_activity_thought" in item else {}),
+            **({"_auxiliary_normalization": item["_auxiliary_normalization"]} if "_auxiliary_normalization" in item else {}),
             "writer_node": writer_node,
             "repair_attempted": repair_attempted,
             "repair_succeeded": repair_attempted,

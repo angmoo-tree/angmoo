@@ -1,5 +1,11 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-05 World integration: **ADAPTED** existing global detail/profile/DM anatomy and user-provided reaction/composer
+references. **LOCAL** selected-subtree/owner-reaction contracts, Home-only shell, compact model and Memory/diagnostic
+slots. Feed and Chat photo/Send form one adjacent right group; reply labels are sr-only. Payload-backed viewer state
+replaces the earlier read-only World-like rule. No new hosted assets, fonts, unsupported follow/repost/share or business
+capabilities are imported. Historical stages below keep provenance; these explicit user decisions supersede their changed clauses.
+
 2026-10-04 World SNS list change: **ADAPTED** existing global feed/header/composer anatomy; **LOCAL** neutral
 `components/layout/feed-header` slots and World owner-profile composition. Title/body remain required and the two
 48px photo/publish actions are icon-only with accessible names and busy/focus states. Media retains its actual native

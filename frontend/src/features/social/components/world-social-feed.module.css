@@ -177,7 +177,7 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--spacing-control);
   margin-top: var(--spacing-micro);
 }

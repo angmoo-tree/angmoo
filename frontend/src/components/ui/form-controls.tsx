@@ -31,6 +31,7 @@ export type FieldProps = {
   helperText?: string;
   id?: string;
   label: string;
+  labelVisibility?: "visible" | "sr-only";
   required?: boolean;
 };
 
@@ -41,6 +42,7 @@ export function Field({
   helperText,
   id,
   label,
+  labelVisibility = "visible",
   required = false,
 }: FieldProps) {
   const generatedId = useId();
@@ -51,7 +53,7 @@ export function Field({
 
   return (
     <div className={classNames(styles.field, className)} data-ui-primitive="field">
-      <div className={styles.fieldHeader}>
+      <div className={labelVisibility === "sr-only" ? styles.srOnly : styles.fieldHeader}>
         <label className={styles.fieldLabel} htmlFor={controlId}>
           {label}
           {required ? (

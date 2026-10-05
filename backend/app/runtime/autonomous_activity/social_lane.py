@@ -188,6 +188,9 @@ class SocialLane:
             on_input_receipt=receipt.update, before_json_retry=before_retry)
         from app.runtime.autonomous_activity.name_binding import activity_name_binding, decision_names
         decision = decision_names(decision, activity_name_binding(self.ctx), candidates=self.selected(state))
+        from app.runtime.autonomous_activity.name_binding import observe_normalization
+        observe_normalization(self.tracker, lane=self.lane,
+            receipts=[row["_auxiliary_normalization"] for row in decision["decisions"]])
         return {"decision": decision, "decision_input_receipt": receipt}
 
     async def validate(self, state):
@@ -221,9 +224,12 @@ class SocialLane:
             assignments=state["assignments"], on_input_receipt=receipts.append, before_provider_request=before_request)
         from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
         names, fields = activity_name_binding(self.ctx), {}
-        writing = social_draft_names(writing, names,
-            assignments=state["assignments"], lane=self.lane, receipt=fields)
-        observe_output(self.tracker, names, lane=self.lane, fields=fields)
+        # Real Provider output is already finalized once, before canonical parsing.
+        # Historical/fake adapters without receipts retain the compatibility pass.
+        if any("_auxiliary_normalization" not in row for row in writing.get("reply_task_results", [])):
+            writing = social_draft_names(writing, names,
+                assignments=state["assignments"], lane=self.lane, receipt=fields)
+            observe_output(self.tracker, names, lane=self.lane, fields=fields)
         return {"drafts": writing.get("reply_task_results", []), "writer_input_receipts": receipts}
 
     async def execute(self, state):
@@ -245,7 +251,8 @@ class SocialLane:
             action = {"action_type": "reply" if decision["action"] == "comment" else decision["action"],
                 "post_id": data["post_id"], "notification_id": data.get("notification_id"),
                 "interaction_intent": decision.get("interaction_intent"), "comment_purpose": decision.get("comment_purpose"),
-                "brief": decision["brief"], "_activity_thought": asdict(parse_activity_thought(decision.get("thought")))}
+                "brief": decision["brief"], "_activity_thought": decision.get("_activity_thought") or asdict(parse_activity_thought(decision.get("thought"))),
+                "_auxiliary_normalization": decision.get("_auxiliary_normalization")}
             result = self.action_executor(self.ctx, action=action, scope=self.lane, index=index,
                 writing={"reply_task_results": state.get("drafts", [])}, used_reply_bodies=used,
                 relationship_validator=self.effect_relationship_validator(state, decision["target_id"]))

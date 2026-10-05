@@ -174,10 +174,12 @@
 .actionStrip {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-compact);
+  justify-content: flex-start;
+  gap: var(--spacing-major);
   margin-top: var(--spacing-phone);
 }
+.replyBranch { min-width: 0; }
+.replyBranch[data-reply-depth]:not([data-reply-depth="0"]) { border-inline-start: 1px solid var(--color-border-default); }
 
 .action,
 .actionLink,

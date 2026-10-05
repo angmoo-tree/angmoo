@@ -193,7 +193,7 @@ class WorldChatThreadRead(BaseModel):
 class WorldChatThreadListRead(BaseModel):
     items: list[WorldChatThreadRead]
     ambiguous_legacy_count: int = 0
-    max_threads: int = 5
+    max_threads: int | None = None
 
 
 class WorldChatThreadCreateRead(BaseModel):

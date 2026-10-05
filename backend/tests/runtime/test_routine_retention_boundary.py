@@ -31,8 +31,8 @@ def test_split_routine_completion_is_not_reexecuted_after_final_storage_failure(
     monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
     monkeypatch.setattr(provider, "_api_key", lambda _: "synthetic")
     original_input = execution.shared_input
-    # A synthetic retained context crosses the real mode threshold. No mode,
-    # graph, validator, guard, ledger or publication function is replaced.
+    # A persisted legacy run below retains the old mode threshold. New runs
+    # always use combined; no mode, graph, guard or publication is replaced.
     monkeypatch.setattr(execution, "shared_input", lambda *args, **kwargs: {
         **original_input(*args, **kwargs), "retained_required_context": "x" * 40001})
     calls = []
@@ -95,7 +95,13 @@ def test_split_routine_completion_is_not_reexecuted_after_final_storage_failure(
                     assigned_character_id=ctx.character.id, assigned_user_id=ctx.user_id,
                     lease_expires_at=datetime.now(UTC) + timedelta(minutes=10)))
                 run = bind_run(db, actor=actor, activity_id=ctx.run_id)
+                # Reconstruct the saved pre-upgrade result: only the new
+                # generation-policy keys were absent in those existing runs.
+                from app.contracts.sns_generation import POLICY_KEYS, read_generation_policies
+                run.result = {key: value for key, value in run.result.items() if key not in POLICY_KEYS}
                 db.commit()
+                assert bind_run(db, actor=actor, activity_id=ctx.run_id) is run
+                assert read_generation_policies(run.result).sns_generation_policy is None
                 if failure == "sdk_write":
                     with pytest.raises(OSError, match="final SDK"):
                         await execution.run_personalized_activity(ctx, actor=actor, run=run)

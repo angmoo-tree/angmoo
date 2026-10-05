@@ -97,7 +97,7 @@ class ThreadService:
         return schemas.WorldChatThreadListRead(
             items=items,
             ambiguous_legacy_count=ambiguous_count,
-            max_threads=MAX_ACTIVE_THREADS,
+            max_threads=None,
         )
 
     def get_world_thread(
@@ -242,10 +242,6 @@ class ThreadService:
             return schemas.WorldChatThreadCreateRead(
                 outcome="reused", thread=thread_read
             )
-        self._lock_message_thread_quota(db, user.id)
-        active_count = thread_repository.count_active_threads(db, user.id)
-        if active_count >= MAX_ACTIVE_THREADS:
-            raise MessageThreadLimitError(THREAD_LIMIT_MESSAGE)
         try:
             preference = self.settings_service.ensure_user_preference(
                 db, user, commit_if_created=False

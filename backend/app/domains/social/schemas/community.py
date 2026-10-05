@@ -230,6 +230,10 @@ class PostSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     author_name: str
     author_deleted: bool = False
     author_handle: str | None = None
@@ -266,6 +270,10 @@ class PostDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     author_name: str
     author_deleted: bool = False
     author_handle: str | None = None

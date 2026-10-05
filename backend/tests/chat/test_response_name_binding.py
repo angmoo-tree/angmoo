@@ -48,3 +48,36 @@ def test_chat_resolves_before_first_delta_and_stream_storage_memory_match(respon
     assert message.content == deltas == "민식, 반가워. `{{user}}`는 코드 예시야."
     assert len(memory.sources) == 1
     assert memory.sources[0].assistant_message_id == message.id
+
+
+@pytest.mark.parametrize("tail_invalid", [False, True])
+def test_raw_thought_port_checks_entire_tail_before_first_delta(response_session, tail_invalid):
+    db=response_session
+    owner=db.get(models.User,"p-owner")
+    rename_profile(db,"p-world",owner.id,"민식")
+    accepted=generation_service.accept_world_message(db,owner,"p-world","p-thread",
+        WorldChatMessageCreate(content="합성 테스트",idempotency_key="synthetic-thought-port"))
+    repository=SqlAlchemyResponseLifecycleRepository(db)
+    record=repository.get_request(accepted.response_request.request_id)
+    class Generator(_Generator):
+        async def generate(self,request):
+            response=await super().generate(request)
+            assert request.thought_finalizer is not None
+            raw="{{user}} " + "한"*350 + ("{{getvar::secret}}" if tail_invalid else "")
+            return replace(response,text="Synthetic visible body",activity_thought=request.thought_finalizer(raw))
+    generator=Generator(); memory=_MemoryProducer()
+    events=asyncio.run(_collect(_workflow(db,RetrievalRoute.CURRENT_CONTEXT,generator,memory_producer=memory).run(_command(record))))
+    final=repository.get_request(record.request_id)
+    deltas="".join(event.payload["text"] for event in events if event.event_type is GenerationEventType.DELTA)
+    assert len(generator.requests)==1
+    if tail_invalid:
+        assert final.state is ResponseRequestState.FAILED and not deltas and not memory.sources
+    else:
+        assert final.state is ResponseRequestState.COMMITTED
+        message=db.get(models.MessageMessage,final.committed_assistant_message_id)
+        assert message.content==deltas=="Synthetic visible body" and len(memory.sources)==1
+        from app.domains.chat.models import ChatMessageThought
+        thought = db.get(ChatMessageThought, message.id)
+        assert thought.thought_text == ("민식 " + "한" * 350)[:280]
+        assert thought.status == "recorded" and thought.truncated is True
+        assert memory.sources[0].assistant_message_id == message.id

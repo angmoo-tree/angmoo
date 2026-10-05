@@ -284,11 +284,11 @@ class RoutineLane:
             names, fields = activity_name_binding(self.ctx), {}
             payload = authored_routine_draft(payload, names, receipt=fields)
             observe_output(self.tracker, names, lane="routine", fields=fields)
-            value, thought = extract_activity_thought(payload, include_thought=True)
-            value, scene, error = extract_scene(value, enabled)
-            draft = schemas.RoutinePostDraft.model_validate(value)
-            auxiliary = {"_image_prompt": scene, "_image_error": error} if enabled else {}
-            return {**draft.model_dump(mode="json"), "_thought": asdict(thought), **auxiliary}
+            from app.runtime.autonomous_activity.generation_contracts import parse_routine_draft
+            draft = parse_routine_draft(payload, image_enabled=enabled, name_receipt=fields)
+            from app.runtime.autonomous_activity.name_binding import observe_normalization
+            observe_normalization(self.tracker, lane="routine", receipts=draft["_auxiliary_normalization"])
+            return draft
         async def before_retry(_attempt):
             try:
                 await self.guard({**state, "stage": "Writer"})
@@ -310,9 +310,25 @@ class RoutineLane:
         plan = self.validated_plan(state)
         data = dict(state["drafts"][0])
         thought = data.pop("_thought")
+        normalization = data.pop("_auxiliary_normalization", None)
         scene, error = data.pop("_image_prompt", ""), data.pop("_image_error", None)
         draft = schemas.RoutinePostDraft.model_validate(data)
-        draft._activity_thought = ActivityThought(**thought)
+        if normalization is None:
+            from app.contracts.authored_output import restore_activity_thought
+            from app.domains.routine_posts.policies.output_normalization import normalize_routine_auxiliary
+            from app.domains.characters.policies.authored_names import authored_routine_draft
+            from app.runtime.autonomous_activity.name_binding import activity_name_binding
+            restored = authored_routine_draft(data, activity_name_binding(self.ctx))
+            restored, normalization = normalize_routine_auxiliary(restored)
+            normalized_thought, thought_receipt = restore_activity_thought(thought)
+            normalization["thought"] = thought_receipt.to_dict()
+            for field in ("topic_signature", "novelty_basis"):
+                normalization[field].update(input_chars=None, rendered_chars=None, inherited=True)
+            draft = schemas.RoutinePostDraft.model_validate(restored)
+            draft._activity_thought = normalized_thought
+        else:
+            draft._activity_thought = ActivityThought(**thought)
+        draft._normalization_receipt = normalization
         draft._image_prompt, draft._image_error = scene, error
         after = _state_after(self.prepared.context.state_before, plan)
         validated = validate_routine_generation(RoutineGeneration(plan, draft, after),

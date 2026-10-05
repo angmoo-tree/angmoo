@@ -23,6 +23,7 @@ def record_source_post_event(
     operation: str,
     post: SourceEventPost,
     root_post: SourceEventPost,
+    target_post: SourceEventPost | None = None,
     request_key: str,
     failure_injector: Callable[[str], None] | None,
 ) -> None:
@@ -66,7 +67,7 @@ def record_source_post_event(
             source_object_id=post.id,
             root_post_id=root_post.id,
             source_post_id=post.id,
-            target_post_id=None if operation == "post" else root_post.id,
+            target_post_id=None if operation == "post" else (target_post or root_post).id,
             content_sha256=content_digest,
             source_visibility_at_event=post.visibility,
             source_author_id_at_event=actor_world_character_id,

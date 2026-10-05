@@ -93,6 +93,8 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
         from app.domains.world_characters.contracts.social_io import new_policies
         from app.contracts.relationship_currentness import CURRENTNESS_POLICY_KEY, CURRENTNESS_REVISION
         row.result = {**row.result, **new_policies(), CURRENTNESS_POLICY_KEY: CURRENTNESS_REVISION}
+        from app.contracts.sns_generation import new_generation_policies
+        row.result = {**row.result, **new_generation_policies()}
     if engine == "personalized_graph_v2" and settings.SNS_CHECKPOINT_POLICY_ENABLED:
         from app.domains.world_characters.contracts.checkpoint_retention import CheckpointRetention, RETENTION_KEY
         row.result = {**row.result, RETENTION_KEY: CheckpointRetention().model_dump()}

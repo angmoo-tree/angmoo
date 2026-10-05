@@ -3,6 +3,9 @@ from __future__ import annotations
 from typing import Literal
 
 from app.contracts.activity_thought import ActivityThought
+from app.domains.routine_posts.policies.output_normalization import (
+    TOPIC_SIGNATURE_LIMIT, NOVELTY_BASIS_LIMIT, normalize_topic_signature, normalize_novelty_basis,
+)
 from pydantic import PrivateAttr, BaseModel, ConfigDict, Field, model_validator, field_validator
 
 from app.domains.social.contracts.subjective_context import (
@@ -105,15 +108,21 @@ class RoutineBeatPlan(RoutinePostSchema):
 class RoutinePostDraft(RoutinePostSchema):
     _image_prompt: str = PrivateAttr(default="")
     _image_error: str | None = PrivateAttr(default=None)
+    _normalization_receipt: dict | None = PrivateAttr(default=None)
     title: str = Field(min_length=1, max_length=160)
     body: str = Field(min_length=1, max_length=4000)
-    topic_signature: str = Field(default="", max_length=300)
-    novelty_basis: str = Field(min_length=1, max_length=500)
+    topic_signature: str = Field(default="", max_length=TOPIC_SIGNATURE_LIMIT)
+    novelty_basis: str = Field(min_length=1, max_length=NOVELTY_BASIS_LIMIT)
 
     @field_validator("topic_signature", mode="before")
     @classmethod
     def optional_signature(cls, value):
-        return value.strip() if isinstance(value, str) and len(value) <= 300 else ""
+        return normalize_topic_signature(value)
+
+    @field_validator("novelty_basis", mode="before")
+    @classmethod
+    def required_novelty(cls, value):
+        return normalize_novelty_basis(value)
 
 
 class RoutineStateChangeV2(RoutinePostSchema):

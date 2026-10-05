@@ -29,6 +29,29 @@ export type ManualSocialPostRead = {
   reply_count: number;
   like_count: number;
   author_profile_capability: "available" | "unavailable";
+  viewer_like_state?: "liked" | "not_liked" | "unavailable";
+  can_owner_like?: boolean;
+  reaction_world_id?: string | null;
+  reaction_owner_world_character_id?: string | null;
+};
+
+export type ManualSocialParentRead = { post_id: string; state: "available" | "unavailable" };
+export type ManualSocialThreadRead = {
+  schema_version: "owner-manual-social-thread-v2";
+  world_id: string;
+  owner_world_character_id: string;
+  selected_post: ManualSocialPostRead;
+  root_post_id: string;
+  parent: ManualSocialParentRead | null;
+  parent_references: ManualSocialParentRead[];
+  replies: ManualSocialPostRead[];
+  page_offset: number;
+  next_offset: number | null;
+};
+
+export type ManualSocialLikeRead = {
+  world_id: string; post_id: string; owner_world_character_id: string;
+  viewer_like_state: "liked" | "not_liked"; like_count: number; can_owner_like: true;
 };
 
 export type ManualSocialWritePostRead = Omit<

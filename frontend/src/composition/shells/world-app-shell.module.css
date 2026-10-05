@@ -31,3 +31,8 @@
 .content {
   min-height: 100%;
 }
+
+.content:has([data-world-chat-surface="thread"]) {
+  height: 100%;
+  min-height: 0;
+}

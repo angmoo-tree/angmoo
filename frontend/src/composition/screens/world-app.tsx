@@ -156,7 +156,7 @@ function WorldAppContent({
 
   return (
     <WorldAppShell
-      headerMode={activeSection.id === "feed" && !postId ? "content" : "shell"}
+      headerMode={activeSection.id === "home" ? "shell" : "content"}
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
       status={
         <WorldHomeReturn />

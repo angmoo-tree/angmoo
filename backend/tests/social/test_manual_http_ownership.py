@@ -43,6 +43,8 @@ def test_manual_http_factories_share_request_session_without_constructor_io():
                 "read_manual_social_feed",
                 "read_manual_social_post_thread",
                 "write_owner_post",
+                "set_owner_post_like",
+                "set_owner_post_like",
                 "write_owner_reply",
             ]
     engine.dispose()
@@ -75,6 +77,8 @@ def test_manual_http_origin_rejection_precedes_all_business_io():
             ("GET", "/manual-social/feed", None),
             ("GET", "/manual-social/posts/post", None),
             ("POST", "/manual-social/posts", {"title": "Hello", "body": "Body"}),
+            ("PUT", "/manual-social/posts/post/like", None),
+            ("DELETE", "/manual-social/posts/post/like", None),
             ("POST", "/manual-social/posts/post/replies", {"body": "Reply"}),
         ]:
             response = client.request(
@@ -91,5 +95,5 @@ def test_manual_http_origin_rejection_precedes_all_business_io():
             assert statements == []
         # The endpoint and its collaborator dependency use FastAPI's same cached
         # Session, rather than opening a second write/read transaction per request.
-        assert len(opened) == 5
+        assert len(opened) == 7
     engine.dispose()

@@ -5,10 +5,11 @@
 }
 
 .metrics {
-  display: grid;
+  display: flex;
   margin: 0;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  padding: 18px 14px 14px;
+  flex-wrap: wrap;
+  gap: var(--spacing-section);
+  padding: 18px 20px 24px;
 }
 
 .metric {
@@ -25,17 +26,15 @@
 }
 
 .metric dt {
-  overflow: hidden;
   color: var(--color-text-secondary);
-  font-size: 0.62rem;
+  font-size: var(--text-body-small);
   font-weight: 750;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .metric dd {
   color: var(--color-text-strong);
-  font-size: 0.76rem;
+  font-size: var(--text-body-small);
   font-weight: 900;
 }
 
@@ -48,13 +47,13 @@
 
 .tab {
   position: relative;
-  min-height: 52px;
+  min-height: 56px;
   border: 0;
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--text-body);
   font-weight: 750;
 }
 

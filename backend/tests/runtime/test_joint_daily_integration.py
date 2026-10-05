@@ -179,12 +179,15 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
             topic_signature="정원", created_at=now, world_local_datetime=now.isoformat(), age_seconds=0, age_bucket="recent",
             matched_keywords=["정원"], matched_fields=["body"], rank_score=1, allowed_actions=["comment"])
         from app.runtime.relationships.experience_metrics import post_revision
+        relationship, relationship_receipt = feed.relationship_preparation(root.id, second.world_character.id)
         candidate = Candidate(target_id=root.id, counterpart_id=second.world_character.id, source_ids=[root.id],
             source_revisions={root.id: post_revision(root)}, text=root.body, allowed_actions=["comment"],
-            proposal_eligible=True, relationship=feed.relationship(second.world_character.id)).model_dump()
+            proposal_eligible=True, relationship=relationship).model_dump()
         base = dict(identity={"activity_id": feed_ctx.run_id, "contract_version": 2}, shared_context={"current_state": {"version": 0}},
             memories={}, memory_validations={}, generation_mode="combined")
-        feed_state = {**base, "candidates": [candidate], "lane_data": {root.id: {"post_id": root.id}, "_feed": {
+        feed_state = {**base, "candidates": [candidate],
+            "relationship_validation_receipts": {root.id: relationship_receipt} if relationship_receipt else {},
+            "lane_data": {root.id: {"post_id": root.id}, "_feed": {
             "candidates": [raw.model_dump(mode="json")], "cycle_key": "joint-cycle", "observation_ids": [observation.id],
             "claim_tokens": {observation.id: observation.claim_token}}}, "selections": [{"target_id": root.id}]}
         selector = CombinedSelection({"inbox": feed, "feed": feed}, {"inbox": feed.ports(), "feed": feed.ports()})
@@ -206,7 +209,7 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
         inbox = adapter(CombinedInboxLane, context(db, second, "inbox"), second, "inbox")
         state = {**base, "identity": {"activity_id": inbox.ctx.run_id, "contract_version": 2}, **asyncio.run(inbox.load(base))}
         selector = CombinedSelection({"inbox": inbox, "feed": feed}, {"inbox": inbox.ports(), "feed": feed.ports()})
-        selection = asyncio.run(selector.select({**base, "selection_mode": "combined",
+        selection = asyncio.run(selector.select({**base, "identity": state["identity"], "selection_mode": "combined",
             "prepared_lanes": {"inbox": state, "feed": {"candidates": []}}}))
         state.update(selection["prepared_lanes"]["inbox"])
         asyncio.run(generate_and_write(inbox, state))

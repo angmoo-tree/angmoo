@@ -401,7 +401,7 @@ class SNSAttempt:
                 "binding_digest": code(payload.get("binding_digest")),
                 "profile_version": numbers(payload.get("profile_version")),
                 "fields": {key: {
-                    **{name: numbers(value.get(name)) for name in ("replacements", "protected", "unsupported")},
+                    **{name: numbers(value.get(name)) for name in ("replacements", "protected", "unsupported", "input_chars", "rendered_chars")},
                     "applied": value.get("applied") is True,
                     "before_sha256": code(value.get("before_sha256")), "final_sha256": code(value.get("final_sha256"))}
                     for key, value in (payload.get("fields") or {}).items()
@@ -444,6 +444,22 @@ class SNSAttempt:
                     if isinstance(row, (list, tuple)) and len(row) == 2],
             })
             return
+        if kind == "auxiliary_normalization":
+            self.emit(kind, lane=code(payload.get("lane")), details={"receipts": {
+                key: {"policy_version": code(value.get("policy_version")), "field": code(value.get("field")),
+                    **{name: numbers(value.get(name)) for name in ("input_chars", "rendered_chars", "normalized_chars", "limit")},
+                    "truncated": value.get("truncated") is True, "inherited": value.get("inherited") is True,
+                    "state": value.get("state") if value.get("state") in {"recorded", "missing", "invalid"} else None}
+                for key, value in (payload.get("receipts") or {}).items()
+                if key in {"thought", "topic_signature", "novelty_basis"} and isinstance(value, dict)}})
+            return
+        if kind == "input_budget":
+            self.emit("input_budget", details={
+                **{key: code(payload.get(key)) for key in ("operation", "status", "policy_version", "request_sha256", "model", "model_version", "coverage")},
+                **{key: numbers(payload.get(key)) for key in ("input_tokens", "input_limit", "output_tokens", "duration_ms")},
+                "cache_hit": payload.get("cache_hit") is True, "admitted": payload.get("admitted") is True,
+                "omissions": {key: numbers((payload.get("omissions") or {}).get(key)) for key in ("today_activity", "memory_packets")}})
+            return
         if kind == "relationship_validation":
             self.emit("relationship_validation", lane=code(payload.get("lane")), details={
                 "revision": payload.get("revision") if payload.get("revision") in {
@@ -459,6 +475,7 @@ class SNSAttempt:
         details = {"call_type": code(payload.get("call_type")), "call_order": numbers(payload.get("call_order_in_run")),
                    "validation_code": validation_code(payload.get("validation_code")),
                    "field_path": field_path(payload.get("field_path")),
+                   "rendered_chars": numbers(payload.get("rendered_chars")), "limit": numbers(payload.get("limit")),
                    "provider_call_order": numbers(payload.get("provider_call_order_in_run")),
                    "json_attempt": numbers(payload.get("json_attempt")),
                    "provider": code(payload.get("provider")), "model": code(payload.get("model")),
@@ -494,7 +511,8 @@ class SNSAttempt:
                 "finish_reason": code(diagnostic.get("finish_reason")), "shape_hint": code(diagnostic.get("shape_hint")),
                 "attempt": numbers(diagnostic.get("attempt")),
                 "validation_code": validation_code(diagnostic.get("validation_code")),
-                "field_path": field_path(diagnostic.get("field_path"))}
+                "field_path": field_path(diagnostic.get("field_path")),
+                "rendered_chars": numbers(diagnostic.get("rendered_chars")), "limit": numbers(diagnostic.get("limit"))}
         self.emit("llm_" + kind, lane=code(payload.get("lane")), node=code(payload.get("node")), details=details,
                   classification="degraded" if kind in {"json_postprocess_error", "draft_validation_error"} else None)
 

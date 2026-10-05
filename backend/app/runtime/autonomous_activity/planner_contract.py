@@ -33,7 +33,7 @@ class ActionChoice(BaseModel):
     proposal_response: ProposalDecision | None = None
     brief: str = Field(default="", max_length=280,
                        description="Required non-blank direction for every actual action; optional for no_action.")
-    thought: str | None = Field(default=None, max_length=280)
+    thought: str | None = None
 
 
 class ActionOutput(BaseModel):
@@ -80,7 +80,16 @@ def parse_action(payload: dict, candidates: list[dict], *, lane=None, policy=Non
     from app.domains.world_characters.contracts.social_io import LANE_IO
     from app.runtime.autonomous_activity.social_wire import judgement_model
     model = judgement_model(lane, candidates) if policy == LANE_IO else ActionOutput
-    parsed = model.model_validate({**body, "state_update": None})
+    # Optional authored text is finalized only after the full name/macro pass.
+    # Keep strict target/action/state validation independent of its raw type.
+    raw_decisions = body.get("decisions")
+    validation_body = dict(body)
+    if isinstance(raw_decisions, list):
+        validation_body["decisions"] = [
+            {**row, "thought": None} if isinstance(row, dict) else row
+            for row in raw_decisions
+        ]
+    parsed = model.model_validate({**validation_body, "state_update": None})
     by_id = {c["target_id"]: c for c in candidates}
     seen = set()
     missing_path = None
@@ -130,5 +139,7 @@ def parse_action(payload: dict, candidates: list[dict], *, lane=None, policy=Non
     allowed_refs = {ref for c in candidates for ref in c["source_ids"]}
     if not set(refs) <= allowed_refs:
         state, refs, state_status = None, [], "invalid"
-    return {"decisions": [{"proposal": None, "proposal_response": None, **d.model_dump()} for d in parsed.decisions], "relationship_metrics": metrics,
+    return {"decisions": [{"proposal": None, "proposal_response": None, **d.model_dump(),
+                          "thought": body["decisions"][index].get("thought")}
+                         for index, d in enumerate(parsed.decisions)], "relationship_metrics": metrics,
             "state_update": state, "state_source_refs": refs, "state_status": state_status}

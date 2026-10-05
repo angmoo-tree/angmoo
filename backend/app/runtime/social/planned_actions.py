@@ -485,6 +485,20 @@ def _execute_planned_action(
                     source_text=body or None,
                     proposal_response=prepared_proposal_response,
                 )
+                normalization = action.get("_auxiliary_normalization")
+                if action_type == "reply":
+                    task_id = (writer_validation or {}).get("task_id")
+                    task_result = _reply_task_results_by_id(writing).get(task_id, {})
+                    normalization = task_result.get("_auxiliary_normalization") if str(task_result.get("body") or "").strip() == body else None
+                if normalization is None:
+                    from app.contracts.authored_output import restore_activity_thought
+                    saved_thought = (task_result.get("_activity_thought") if action_type == "reply"
+                                     else action.get("_activity_thought"))
+                    if isinstance(saved_thought, dict):
+                        _, inherited_receipt = restore_activity_thought(saved_thought)
+                        normalization = {"thought": inherited_receipt.to_dict()}
+                if normalization is not None:
+                    payload["auxiliary_normalization"] = normalization
                 action_result = _finish_execution(
                     ctx, execution, status="succeeded", result=payload
                 )

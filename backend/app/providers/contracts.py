@@ -91,6 +91,7 @@ class ProviderRequest:
     # Scoped to this request; existing optional tool consumers retain their mode.
     require_tool_call: bool = False
     diagnostic_callback: Callable[[dict[str, Any]], None] | None = field(default=None, repr=False, compare=False)
+    prepared_request: Any | None = field(default=None, repr=False, compare=False)
 
 
 @dataclass(frozen=True)

@@ -1,7 +1,10 @@
 "use client";
+import { useOwnerReactions } from "@/features/social/hooks/use-owner-reactions";
+import { SocialReplyTree } from "@/features/social/components/social-reply-tree";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
 import { useUiText } from "@/hooks/use-ui-text";
+import { InlineError } from "@/components/ui/feedback";
 
 import { aggregatePostActions,buildReplyTree,DeletePostDialog,type DeleteTarget,mapRepliesById,PostOptionsMenu,PostReferenceCard,ReplyNodeRow,ReportPostDialog,type ReportTarget } from "@/features/social/components/post-detail-parts";
 
@@ -12,7 +15,7 @@ ArrowLeft,
 RefreshCw
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect,useMemo,useState } from "react";
+import { useEffect,useMemo,useState,useRef } from "react";
 
 import { listAgents } from "@/features/characters/api/feed-actor";
 import { deleteSocialPost,getSocialPostThread,reportSocialPost } from "@/features/social/api/social-feed-client";
@@ -34,6 +37,7 @@ export function PostDetailClient({
 }) {
   const formatDate = useUiDateFormatter();
   const uiText = useUiText("shell");
+  const socialText = useUiText("social");
   const router = useRouter();
   const [thread, setThread] = useState<PostThreadRead | null>(initialThread);
   const [loading, setLoading] = useState(false);
@@ -52,6 +56,8 @@ export function PostDetailClient({
   const [reportNotice, setReportNotice] = useState<string | null>(null);
 
   const post = thread?.post ?? null;
+  const requestGeneration = useRef(0);
+  const reactions = useOwnerReactions(`global:${postId}:${viewer?.id ?? "public"}`, () => void loadThread());
   const replies = thread?.replies ?? EMPTY_REPLIES;
   const repliesById = useMemo(() => mapRepliesById(replies), [replies]);
   const replyTree = useMemo(
@@ -60,17 +66,20 @@ export function PostDetailClient({
   );
 
   async function loadThread() {
+    const generation = ++requestGeneration.current;
     setLoading(true);
     setError(null);
 
     try {
-      setThread(await getSocialPostThread(postId));
+      const read = await getSocialPostThread(postId);
+      if (generation === requestGeneration.current) setThread(read);
     } catch (err) {
-      setError(err instanceof Error ? uiText(err.message) : uiText("게시글을 불러오지 못했습니다."));
+      if (generation === requestGeneration.current) setError(err instanceof Error ? uiText(err.message) : uiText("게시글을 불러오지 못했습니다."));
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) setLoading(false);
     }
   }
+  useEffect(() => () => { ++requestGeneration.current; }, [postId, viewer?.id]);
 
   useEffect(() => {
     const syncViewer = () => setViewer(getStoredUser());
@@ -208,6 +217,7 @@ export function PostDetailClient({
           {uiText(error)}
         </div>
       ) : null}
+      {reactions.error ? <InlineError>{socialText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</InlineError> : null}
 
       {reportNotice ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#d9f2e5] bg-[#f0fbf5] px-5 py-4 text-[15px] font-bold text-[#147a45] md:mx-9">
@@ -233,7 +243,8 @@ export function PostDetailClient({
           ) : null}
 
           <SocialPostRow
-            actions={aggregatePostActions(post.id, post.reply_count, post.like_count)}
+            actions={[aggregatePostActions(post.id, post.reply_count, post.like_count)[0], reactions.likeAction(post)]}
+            onAction={() => void reactions.setReaction(post)}
             authorHref={
               post.author_character_id
                 ? `/profiles/characters/${post.author_character_id}`
@@ -299,10 +310,10 @@ export function PostDetailClient({
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
               {uiText("답글 {{count}}", {count: post.reply_count})}
             </h2>
-            {replyTree.map((node) => (
+            <SocialReplyTree nodes={replyTree} renderRow={reply => (
               <ReplyNodeRow
-                key={node.reply.id}
-                node={node}
+                key={reply.id}
+                node={{reply, children: []}}
                 repliesById={repliesById}
                 rootPostId={post.id}
                 openPostMenuId={openPostMenuId}
@@ -313,8 +324,10 @@ export function PostDetailClient({
                 onDeletePost={(reply) => requestDeletePost(reply, false)}
                 canReportPost={canReportPost}
                 onReportPost={(reply) => requestReportPost(reply, false)}
+                likeAction={reactions.likeAction}
+                onLike={reactions.setReaction}
               />
-            ))}
+            )} />
           </section>
         </>
       ) : null}

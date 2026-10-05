@@ -34,6 +34,8 @@ from app.domains.social.dependencies import (
 from app.api.identity_dependencies import browser_session
 from app.domains.social.schemas.manual import (
     ManualSocialFeedRead,
+    ManualSocialThreadRead,
+    ManualSocialLikeRead,
     ManualSocialWriteRead,
     OwnerManualPostWrite,
     OwnerManualReplyWrite,
@@ -42,6 +44,7 @@ from app.domains.social.schemas.manual import (
 from app.domains.social.contracts.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
+    OwnerLikeCommand,
     SocialWriteConflictError,
     SocialWriteError,
     SocialWriteForbiddenError,
@@ -58,6 +61,7 @@ from app.domains.social.contracts.profile_activity import (
 from app.domains.social.contracts.manual_feed import ManualFeedReferences
 from app.domains.social.contracts.write_execution import SocialWriteUnitOfWorkPort
 from app.domains.social.service.world_profile import WorldSocialProfileService
+from app.domains.social.service.owner_reaction_reads import enrich_public_reactions
 from app.domains.social.service.manual_feed import (
     get_owner_world_post_thread,
     list_owner_world_feed,
@@ -89,8 +93,11 @@ def list_feed(
     cursor: str | None = None,
     content: schemas.FeedContentFilter = Query(default="all"),
     db: Session = Depends(get_db),
+    viewer: SocialUser | None = Depends(get_optional_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.FeedPage:
-    return feed_service.list_feed(db, limit=limit, cursor=cursor, content=content)
+    return enrich_public_reactions(db, references=references,
+        read=feed_service.list_feed(db, limit=limit, cursor=cursor, content=content), current_user_id=viewer.id if viewer else None)
 
 
 @router.get("/insights/today-activity", response_model=list[schemas.TodayActivityRead])
@@ -128,9 +135,11 @@ def list_following_feed(
     content: schemas.FeedContentFilter = Query(default="all"),
     db: Session = Depends(get_db),
     user: SocialUser = Depends(get_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.FeedPage:
-    return feed_service.list_following_feed(
-        db, user, limit=limit, cursor=cursor, content=content
+    return enrich_public_reactions(
+        db, references=references, current_user_id=user.id,
+        read=feed_service.list_following_feed(db, user, limit=limit, cursor=cursor, content=content),
     )
 
 
@@ -142,10 +151,12 @@ def list_character_following_feed(
     content: schemas.FeedContentFilter = Query(default="all"),
     db: Session = Depends(get_db),
     user: SocialUser = Depends(get_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.FeedPage:
     try:
-        return feed_service.list_character_following_feed(
-            db, user, character_id, limit=limit, cursor=cursor, content=content
+        return enrich_public_reactions(
+            db, references=references, current_user_id=user.id,
+            read=feed_service.list_character_following_feed(db, user, character_id, limit=limit, cursor=cursor, content=content),
         )
     except errors.CharacterNotFoundError:
         raise HTTPException(
@@ -174,18 +185,20 @@ def create_post(
 
 @router.get("/posts/{post_id}/thread", response_model=schemas.PostThreadRead)
 def get_post_thread(
-    post_id: str, db: Session = Depends(get_db)
+    post_id: str, db: Session = Depends(get_db), viewer: SocialUser | None = Depends(get_optional_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.PostThreadRead:
     try:
-        return post_service.get_post_thread(db, post_id)
+        return enrich_public_reactions(db, references=references, read=post_service.get_post_thread(db, post_id), current_user_id=viewer.id if viewer else None)
     except errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
 
 @router.get("/posts/{post_id}", response_model=schemas.PostDetail)
-def get_post(post_id: str, db: Session = Depends(get_db)) -> schemas.PostDetail:
+def get_post(post_id: str, db: Session = Depends(get_db), viewer: SocialUser | None = Depends(get_optional_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references)) -> schemas.PostDetail:
     try:
-        return post_service.get_post(db, post_id)
+        return enrich_public_reactions(db, references=references, read=post_service.get_post(db, post_id), current_user_id=viewer.id if viewer else None)
     except errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
@@ -403,10 +416,13 @@ def get_user_profile_feed(
     cursor: str | None = None,
     tab: Literal["posts", "replies", "likes"] = "posts",
     db: Session = Depends(get_db),
+    viewer: SocialUser | None = Depends(get_optional_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.FeedPage:
     try:
-        return profile_service.get_user_profile_feed(
-            db, user_id, limit=limit, cursor=cursor, tab=tab
+        return enrich_public_reactions(
+            db, references=references, current_user_id=viewer.id if viewer else None,
+            read=profile_service.get_user_profile_feed(db, user_id, limit=limit, cursor=cursor, tab=tab),
         )
     except errors.ProfileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
@@ -446,10 +462,13 @@ def get_character_profile_feed(
     cursor: str | None = None,
     tab: Literal["posts", "replies", "likes"] = "posts",
     db: Session = Depends(get_db),
+    viewer: SocialUser | None = Depends(get_optional_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
 ) -> schemas.FeedPage:
     try:
-        return profile_service.get_character_profile_feed(
-            db, character_id, limit=limit, cursor=cursor, tab=tab
+        return enrich_public_reactions(
+            db, references=references, current_user_id=viewer.id if viewer else None,
+            read=profile_service.get_character_profile_feed(db, character_id, limit=limit, cursor=cursor, tab=tab),
         )
     except errors.ProfileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
@@ -697,7 +716,7 @@ def read_manual_social_feed(
 
 @manual_router.get(
     "/{world_id}/manual-social/posts/{post_id}",
-    response_model=ManualSocialFeedRead,
+    response_model=ManualSocialThreadRead,
 )
 def read_manual_social_post_thread(
     world_id: str,
@@ -707,7 +726,7 @@ def read_manual_social_post_thread(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
     references: ManualFeedReferences = Depends(get_manual_feed_references),
-) -> ManualSocialFeedRead:
+) -> ManualSocialThreadRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
         return get_owner_world_post_thread(
@@ -752,6 +771,17 @@ def write_owner_post(
     except (SocialWriteError, OwnerControlledIdentityError) as exc:
         _raise_error(exc)
         raise AssertionError("unreachable")
+
+
+@manual_router.put("/{world_id}/manual-social/posts/{post_id}/like", response_model=ManualSocialLikeRead)
+@manual_router.delete("/{world_id}/manual-social/posts/{post_id}/like", response_model=ManualSocialLikeRead)
+def set_owner_post_like(world_id: str, post_id: str, request: Request,
+        current_user=Depends(get_current_user), executor: SocialWriteUnitOfWorkPort = Depends(get_source_write_executor)):
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return executor.set_owner_like(OwnerLikeCommand(world_id, str(current_user.id), post_id, request.method == "PUT"))
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
 
 
 @manual_router.post(

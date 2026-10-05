@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import math
 from copy import deepcopy
+from dataclasses import dataclass
 from time import monotonic
 from typing import Any
 
@@ -332,17 +333,33 @@ def _native_parameters(schema: dict[str, Any]) -> types.Schema:
     return types.Schema.model_validate(convert(schema))
 
 
-def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
-    client = genai.Client(
-        api_key=request.api_key,
-        http_options=types.HttpOptions(
-            timeout=max(1, int(request.timeout_seconds * 1000)),
-            retry_options=(
-                types.HttpRetryOptions(attempts=request.sdk_attempts)
-                if request.sdk_attempts is not None else None
-            ),
-        ),
-    )
+@dataclass(frozen=True)
+class PreparedGeminiRequest:
+    contents: Any
+    config: types.GenerateContentConfig
+
+    def count_request(self, model: str) -> dict:
+        contents = [types.Content(role="user", parts=[types.Part.from_text(text=self.contents)])] if isinstance(self.contents, str) else [self.contents]
+        config = self.config.model_dump(mode="json", by_alias=True, exclude_none=True)
+        instruction = config.pop("systemInstruction", None)
+        tools = config.pop("tools", None)
+        tool_config = config.pop("toolConfig", None)
+        config.pop("automaticFunctionCalling", None)
+        result = {"model": "models/" + model.removeprefix("models/"),
+            "contents": [item.model_dump(mode="json", by_alias=True, exclude_none=True) for item in contents],
+            "generationConfig": config}
+        if instruction is not None:
+            result["systemInstruction"] = {"parts": [{"text": instruction}]} if isinstance(instruction, str) else instruction
+        if tools:
+            result["tools"] = tools
+        if tool_config:
+            result["toolConfig"] = tool_config
+        return {"generateContentRequest": result}
+
+
+def prepare_generate_request(request: ProviderRequest) -> PreparedGeminiRequest:
+    if isinstance(request.prepared_request, PreparedGeminiRequest):
+        return request.prepared_request
     config = build_generate_content_config(
         model=request.model,
         system_prompt=request.system_prompt,
@@ -388,6 +405,15 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
                     )
                 )
         contents = types.Content(role="user", parts=parts)
+    return PreparedGeminiRequest(contents, config)
+
+
+def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
+    prepared = prepare_generate_request(request)
+    contents, config = prepared.contents, prepared.config
+    client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+        timeout=max(1, int(request.timeout_seconds * 1000)),
+        retry_options=types.HttpRetryOptions(attempts=request.sdk_attempts) if request.sdk_attempts is not None else None))
     if request.diagnostic_callback is not None:
         try:
             config_values = config.model_dump(by_alias=True, exclude_none=True)

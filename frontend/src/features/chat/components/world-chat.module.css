@@ -4,6 +4,9 @@
   background: var(--color-surface);
   color: var(--color-text-default);
 }
+.threadSurface { display: flex; height: 100%; min-height: 0; flex-direction: column; }
+.threadHeading { flex: 0 0 auto; }
+.messagePane { min-height: 0; flex: 1 1 auto; overflow: auto; overscroll-behavior: contain; }
 
 .heading {
   display: flex;
@@ -194,8 +197,8 @@
 
 .backLink {
   display: inline-flex;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -240,15 +243,21 @@
 }
 
 .modelControl {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
   align-items: center;
-  border-bottom: 1px solid var(--color-border-default);
   gap: 6px 10px;
-  padding: 10px 16px;
+  padding: 0;
 }
 
 .modelControl label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   color: var(--color-text-strong);
   font-size: 0.7rem;
   font-weight: 850;
@@ -256,7 +265,8 @@
 
 .modelControl select {
   min-width: 0;
-  min-height: 40px;
+  width: 100%;
+  min-height: 44px;
   border: 1px solid var(--color-border-control);
   border-radius: var(--radius-control);
   background: var(--color-surface-muted);
@@ -312,20 +322,23 @@
 
 .requesterMessage,
 .respondingMessage {
-  max-width: 86%;
-  border: 1px solid var(--color-border-default);
-  border-radius: 20px;
-  padding: 12px 14px;
+  display: flex;
+  max-width: 88%;
+  min-width: 0;
+  gap: var(--spacing-compact);
 }
+.messageAvatar { width: 36px; height: 36px; flex: 0 0 auto; }
+.messageBubble { min-width: 0; border-radius: 20px; padding: 12px 14px; background: var(--color-surface-muted); }
+.messageBubble > p { margin: 6px 0 0; font-size: 0.84rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.requesterMessage .messageBubble { background: var(--color-action-dark); color: var(--color-on-action-dark); }
+.requesterMessage .messageMeta, .requesterMessage .messageMeta strong { color: inherit; }
 
 .requesterMessage {
   align-self: flex-end;
-  background: var(--color-brand-soft);
 }
 
 .respondingMessage {
   align-self: flex-start;
-  background: var(--color-surface-warm);
 }
 
 .failedMessage {
@@ -361,6 +374,8 @@
 }
 
 .evidenceButton {
+  display: inline-flex;
+  width: 44px;
   min-height: 44px;
   margin-top: 8px;
   border: 0;
@@ -457,31 +472,38 @@
 }
 
 .composer {
-  position: sticky;
-  z-index: 2;
-  bottom: 0;
   display: flex;
-  align-items: flex-end;
-  border-top: 1px solid var(--color-border-default);
+  flex: 0 0 auto;
+  flex-direction: column;
+  min-width: 0;
+  margin: 12px 16px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-card);
   background: var(--color-surface);
   gap: 8px;
   padding: 12px 16px;
 }
 
 .composer textarea {
+  width: 100%;
   min-height: 44px;
   max-height: 132px;
   flex: 1;
-  resize: vertical;
-  border: 1px solid var(--color-border-control);
-  border-radius: 18px;
-  background: var(--color-surface-muted);
+  resize: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
   color: var(--color-text-strong);
   font: inherit;
   font-size: 0.82rem;
   line-height: 1.45;
   padding: 11px 13px;
 }
+.composerFooter { display: flex; width: 100%; align-items: flex-end; gap: var(--spacing-compact); }
+.composerActions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: var(--spacing-compact); }
+.composerActions button { width: 48px; height: 48px; }
+.composer img { max-height: 160px; }
+.composerFooter .modelFailure { width: 100%; }
 
 .composer textarea::placeholder {
   color: var(--color-text-secondary);

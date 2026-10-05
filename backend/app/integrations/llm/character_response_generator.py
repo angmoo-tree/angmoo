@@ -84,7 +84,8 @@ class DirectLlmCharacterResponseGenerator:
         relationship_metrics = None
         if structured:
             try:
-                text, activity_thought = parse_activity_output(result.text, result.parsed)
+                text, activity_thought = parse_activity_output(result.text, result.parsed,
+                    thought_finalizer=request.thought_finalizer)
                 if self._relationship_enabled:
                     envelope = result.parsed if isinstance(result.parsed, dict) else json.loads(result.text)
                     relationship_metrics = envelope.get("relationship_metrics")

@@ -82,6 +82,9 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     from app.domains.world_characters.contracts.social_io import read_policies
     execution_policies = read_policies(run.result).model_dump()
     identity.update(execution_policies)
+    from app.contracts.sns_generation import read_generation_policies
+    generation_policies = read_generation_policies(run.result).model_dump()
+    identity.update(generation_policies)
     from app.domains.relationships.contracts.social_context import read_currentness_policy, CURRENTNESS_POLICY_KEY
     relationship_policy = read_currentness_policy(run.result)
     identity[CURRENTNESS_POLICY_KEY] = relationship_policy
@@ -122,6 +125,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("routine_policy_changed")
         if read_policies(row.result).model_dump() != execution_policies:
             raise ActivityScopeChangedError("social_execution_policy_changed")
+        if read_generation_policies(row.result).model_dump() != generation_policies:
+            raise ActivityScopeChangedError("activity_generation_policy_changed")
         if read_currentness_policy(row.result) != relationship_policy:
             raise ActivityScopeChangedError("relationship_validation_policy_changed")
         if (row.result or {}).get("name_binding") != frozen_names:
@@ -148,6 +153,8 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
             raise ActivityScopeChangedError("activity_identity_or_model_changed")
         if read_policies(stored_identity).model_dump() != execution_policies:
             raise ActivityScopeChangedError("social_execution_policy_changed")
+        if read_generation_policies(stored_identity).model_dump() != generation_policies:
+            raise ActivityScopeChangedError("activity_generation_policy_changed")
         if read_currentness_policy(stored_identity) != relationship_policy:
             raise ActivityScopeChangedError("relationship_validation_policy_changed")
         ctx.db.expire_all()
@@ -223,7 +230,9 @@ async def run_personalized_activity(ctx, *, actor, run, action_executor=None):
     from app.runtime.autonomous_activity.combined_lanes import CombinedInboxLane, CombinedFeedLane, CombinedRoutineLane
     from app.runtime.autonomous_activity.combined_provider import RecoveryLedger
     classes = (("inbox", CombinedInboxLane), ("routine", CombinedRoutineLane), ("feed", CombinedFeedLane))
-    version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id), "policies": execution_policies}
+    from app.runtime.autonomous_activity.input_budget import SnsInputBudget
+    budget = SnsInputBudget(ctx.db, run.activity_id, notify=tracker._notify) if generation_policies["sns_input_budget_policy"] else None
+    version_options = {"ledger": RecoveryLedger(ctx.db, run.activity_id), "policies": {**execution_policies, **generation_policies}, "input_budget": budget}
     adapters = {path: cls(ctx, actor=actor, tracker=tracker, hybrid_service=binding.hybrid_service,
                       guard=guard, claim_validator=validate_claim,
                       **version_options,

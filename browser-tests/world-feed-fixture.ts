@@ -125,6 +125,8 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
       character_id: `character-${profile[2]}`, display_name: owner(profile[1]).profile.display_name, handle: owner(profile[1]).profile.handle,
       avatar_url: owner(profile[1]).profile.avatar_url, banner_url: null, intro: "Synthetic profile", role_key: null,
       control_mode: "owner_controlled", status: "active", profile_capability: "available" });
+    const directory = path.match(/^\/worlds\/([^/]+)\/world-characters$/);
+    if (directory) return reply(route, {schema_version:"world-character-profile-list-v1", world_id:directory[1], items:[]});
     const feed = path.match(/^\/worlds\/([^/]+)\/manual-social\/feed$/);
     if (feed) {
       if (state.feedFailures-- > 0) return reply(route, { detail: "sqlite_busy_retry_exhausted" }, 503);
@@ -145,8 +147,10 @@ export async function installWorldFeedFixture(page: Page, staticShell: boolean, 
         delivery: { provider_call_count: 0, inbox_candidate_id: null, inbox_status: "not_applicable", public_reaction_required: false } }, 201);
     }
     const thread = path.match(/^\/worlds\/([^/]+)\/manual-social\/posts\/([^/]+)$/);
-    if (thread) return reply(route, { ...readFeed(thread[1]), root_post_id: thread[2], target_post_id: thread[2], next_offset: null,
-      items: [{ ...uiDManualPost({ id: thread[2], title: "Synthetic thread title", body: "Synthetic thread body", worldId: thread[1] }), reply_count: 0 }] });
+    if (thread) return reply(route, { schema_version: "owner-manual-social-thread-v2", world_id: thread[1],
+      owner_world_character_id: ownerId(thread[1]), root_post_id: thread[2], page_offset: 0, next_offset: null,
+      parent: null, parent_references: [], replies: [],
+      selected_post: { ...uiDManualPost({ id: thread[2], title: "Synthetic thread title", body: "Synthetic thread body", worldId: thread[1] }), thread_root_post_id: thread[2], reply_count: 0 } });
     if (path === "/media/assets" && method === "POST") {
       if (state.uploadDelay) await new Promise(resolve => setTimeout(resolve, state.uploadDelay));
       if (state.uploadFailures-- > 0) return reply(route, { detail: "image_invalid" }, 422);

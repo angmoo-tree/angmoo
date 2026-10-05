@@ -1,7 +1,9 @@
 "use client";
+import { useOwnerReactions } from "@/features/social/hooks/use-owner-reactions";
 import { useUiText } from "@/hooks/use-ui-text";
 import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 import { FeedHeader } from "@/components/layout/feed-header";
+import { InlineError } from "@/components/ui/feedback";
 
 import { AgentActivityMaintenanceNotice,AgentActivityNoticeBanner,FeedCueComposer,MobileActiveAgentTrigger,selectDefaultAgent } from "@/features/characters/components/feed-activity-parts";
 import { DeletePostDialog,FeedContentFilterBar,feedContentFilterEmptyText,type FeedMode,FeedScopeTabs,mergeUniquePosts,normalizeFeedContentFilter,PostOptionsMenu,PostReferenceCard,ReportPostDialog } from "@/features/social/components/post-feed-parts";
@@ -198,6 +200,7 @@ export function PostListClient({
   const feedModeRef = useRef<FeedMode>(feedMode);
   const feedContentFilterRef = useRef<FeedContentFilter>(feedContentFilter);
   const loadFeedRef = useRef(loadFeed);
+  const reactions = useOwnerReactions(`global:${viewer?.id ?? "public"}`, () => void loadFeedRef.current(feedModeRef.current, feedContentFilterRef.current));
 
   useEffect(() => {
     feedModeRef.current = feedMode;
@@ -466,6 +469,7 @@ export function PostListClient({
             {uiText(error)}
           </div>
         ) : null}
+        {reactions.error ? <InlineError>{socialText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</InlineError> : null}
 
         {reportNotice ? (
           <div className="m-6 rounded-xl border border-[#d9f2e5] bg-[#f0fbf5] px-6 py-4 text-sm font-bold text-[#147a45]">
@@ -489,6 +493,7 @@ export function PostListClient({
               post.post_type === "repost" && Boolean(post.reposted_post);
             return (
               <SocialPostRow
+                onAction={() => void reactions.setReaction(post)}
                 actions={[
                   {
                     kind: "reply",
@@ -498,10 +503,7 @@ export function PostListClient({
                     href: detailHref,
                   },
                   {
-                    kind: "like",
-                    interaction: "metric",
-                    label: uiText("좋아요"),
-                    count: post.like_count,
+                    ...reactions.likeAction(post),
                   },
                 ]}
                 authorHref={

@@ -194,5 +194,13 @@
   "{{count}}개의 이전 대화는 임의의 World에 연결하지 않았습니다._one": "{{count}} older chat has not been assigned to an arbitrary World.",
   "{{count}}개의 이전 대화는 임의의 World에 연결하지 않았습니다._other": "{{count}} older chats have not been assigned to an arbitrary World.",
   "상한으로 생략한 관측 {{count}}개가 있습니다._one": "{{count}} observation was omitted due to the limit.",
-  "상한으로 생략한 관측 {{count}}개가 있습니다._other": "{{count}} observations were omitted due to the limit."
+  "상한으로 생략한 관측 {{count}}개가 있습니다._other": "{{count}} observations were omitted due to the limit.",
+  "World 대화 {{count}}개": "{{count}} World conversations",
+  "World 대화 {{count}}개_one": "{{count}} World conversation",
+  "World 대화 {{count}}개_other": "{{count}} World conversations",
+  "기억과 진단": "Memory and diagnostics",
+  "기억과 진단 보기": "Open memory and diagnostics",
+  "메시지 보내는 중": "Sending message",
+  "대화 제한 정책 업데이트가 필요해요": "The conversation limit policy needs an update",
+  "서버가 이전 대화 제한을 반환했습니다. 서버 업데이트 상태를 확인해주세요.": "The server returned the previous conversation limit. Check the server update status."
 }

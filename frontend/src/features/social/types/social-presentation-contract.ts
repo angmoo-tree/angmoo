@@ -12,6 +12,7 @@ type SocialPostActionBase = {
   label: string;
   count?: number;
   accent?: boolean;
+  disabled?: boolean;
 };
 
 export type SocialPostActionPresentation =

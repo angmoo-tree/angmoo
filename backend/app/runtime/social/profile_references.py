@@ -21,6 +21,10 @@ class RuntimeProfileReferences:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def owner_reaction_references(self):
+        from app.runtime.social.manual_feed_references import RuntimeManualFeedReferences
+        return RuntimeManualFeedReferences(self.db)
+
     def profile(self, query: WorldCharacterSocialProfileQuery) -> ProfileIdentity:
         return public_profile_service(self.db).get_for_world(
             world_id=query.world_id,

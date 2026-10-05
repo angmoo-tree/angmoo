@@ -61,20 +61,19 @@ def test_social_thought_does_not_commit_and_links_own_source_or_action(today_ses
 @pytest.mark.parametrize("thought", [None, 12, "생각" * 200])
 def test_feed_thought_replaces_old_fields_and_uses_writer_call(monkeypatch, thought):
     from social.v2_provider_probe import probe
-    from app.integrations.direct_llm import DirectLlmJsonError
     engine = _engine()
     try:
         with Session(engine) as db:
             ctx, target = _seed(db, with_candidate=True)
-            if isinstance(thought, int):
-                with pytest.raises(DirectLlmJsonError):
-                    probe(monkeypatch, ctx, target, thought=thought)
-                assert db.scalar(select(SocialActivityThought)) is None
-                return
             calls, tracker, decision, draft = probe(monkeypatch, ctx, target, thought=thought)
             assert len(calls) == 2
             assert draft["reply_task_results"][0]["body"] == "어떻게 배웠어?"
             assert draft["reply_task_results"][0]["_activity_thought"] == __import__("dataclasses").asdict(parse_activity_thought(thought))
+            if isinstance(thought, int):
+                # Optional invalid thought cannot discard a valid public body.
+                receipt = draft["reply_task_results"][0]["_auxiliary_normalization"]["thought"]
+                assert receipt["state"] == "invalid" and receipt["input_chars"] is None
+                assert db.scalar(select(SocialActivityThought)) is None
             assert "motivation_kind" not in str(calls[1]["response_schema"])
             assert "emotion_intensity" not in calls[1]["user_prompt"]
     finally:

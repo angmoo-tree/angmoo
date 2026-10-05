@@ -37,6 +37,9 @@ class ActivityIdentity(BaseModel):
     social_io_policy: str = "social-io.common.v1"
     routine_output_policy: str = "routine-split-output.legacy.v1"
     relationship_validation_policy: str = LEGACY_CURRENTNESS
+    sns_generation_policy: str | None = None
+    sns_input_budget_policy: str | None = None
+    model_budget_revision: str | None = None
 
 
 class Candidate(BaseModel):

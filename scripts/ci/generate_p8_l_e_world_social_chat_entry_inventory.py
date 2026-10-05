@@ -184,7 +184,7 @@ def _frontend_contract() -> dict[str, Any]:
     )
     _require_text(
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
-        ("WorldCharacterSocialProfileActivity",),
+        ("WorldCharacterSocialProfileActivity", "useOwnerReactions", "reactions.likeAction(post)"),
     )
     _require_text(
         "frontend/src/components/ui/device-frame.module.css",
@@ -193,9 +193,24 @@ def _frontend_contract() -> dict[str, Any]:
     _require_text(
         "frontend/src/lib/desktop/product-window.ts",
         (
-            "DESKTOP_ROUTE_HISTORY_INDEX",
-            "synchronizeDesktopRouteFromBrowserHistory",
+            "desktopHistoryAvailability",
             "navigateBackCurrentDesktopRoute",
+            'window.addEventListener("popstate", handlePopState)',
+        ),
+    )
+    _require_text(
+        "frontend/src/lib/desktop/desktop-history.ts",
+        (
+            "installDesktopHistory",
+            "desktopHistoryAvailability",
+            'window.addEventListener("popstate", onCommit)',
+            "window.history.pushState = push",
+        ),
+    )
+    _require_text(
+        "frontend/src/composition/providers/desktop-window-bridge.tsx",
+        (
+            'installDesktopHistory(publishDesktopRoute)',
         ),
     )
     _require_text(
@@ -232,7 +247,8 @@ def _frontend_contract() -> dict[str, Any]:
             "scope": "exact_current_world",
             "metrics": 4,
             "tabs": 3,
-            "owner_actions": 0,
+            "owner_actions": 2,
+            "owner_action_kinds": ["reply", "like"],
         },
         "phone_presentation": {
             "scrolling": "preserved",

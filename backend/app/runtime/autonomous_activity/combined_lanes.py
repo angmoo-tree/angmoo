@@ -9,9 +9,9 @@ from app.runtime.autonomous_activity.routine import RoutineLane
 
 
 class CombinedGeneration:
-    def __init__(self, *args, ledger, policies=None, **kwargs):
+    def __init__(self, *args, ledger, policies=None, input_budget=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger, policies=policies)
+        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger, policies=policies, input_budget=input_budget)
 
     async def plan(self, state):
         mode = state.get("generation_mode")
@@ -64,7 +64,7 @@ class CombinedGeneration:
                 names, fields = activity_name_binding(self.ctx), {}
                 raw = authored_routine_draft(raw, names, receipt=fields)
                 observe_output(self.tracker, names, lane="routine", fields=fields)
-                drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")))]
+                drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")), name_receipt=fields)]
                 self.validate_original_draft(drafts[0])
             else:
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
@@ -73,7 +73,10 @@ class CombinedGeneration:
                     assignments=state["assignments"], combined=True, lane=self.lane, receipt=fields)
                 observe_output(self.tracker, names, lane=self.lane, fields=fields)
                 drafts = parse_social_draft(raw, lane=self.lane,
-                    assignments=state["assignments"], policy=self.provider.social_io_policy)["reply_task_results"]
+                    assignments=state["assignments"], policy=self.provider.social_io_policy, name_receipt=fields)["reply_task_results"]
+            from app.runtime.autonomous_activity.name_binding import observe_normalization
+            observe_normalization(self.tracker, lane=self.lane,
+                receipts=[draft["_auxiliary_normalization"] for draft in drafts])
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
@@ -114,7 +117,7 @@ class CombinedInboxLane(CombinedGeneration, InboxLane):
 
 
 class CombinedRoutineLane(CombinedGeneration, RoutineLane):
-    pass
+    lane = "routine"
 
 
 class CombinedFeedLane(CombinedGeneration, FeedLane):

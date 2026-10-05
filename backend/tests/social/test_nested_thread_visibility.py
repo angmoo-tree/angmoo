@@ -33,14 +33,21 @@ def test_nested_target_jumps_to_its_page_and_preserves_parent(tmp_path):
             return get_owner_world_post_thread(db, references=RuntimeManualFeedReferences(db),
                 world_id=root.world_id, post_id=post_id, current_user_id=root.author_user_id, **kwargs)
         first = read(root.id)
-        assert len(first.items) == 51 and first.next_offset == 50
-        assert first.items[0].reply_count == 115
+        assert first.schema_version == "owner-manual-social-thread-v2"
+        assert first.selected_post.id == root.id and len(first.replies) == 50
+        assert first.page_offset == 0 and first.next_offset == 50
+        assert first.selected_post.reply_count == 115
+        second = read(root.id, offset=50)
+        assert second.selected_post.id == root.id and len(second.replies) == 50
+        assert second.page_offset == 50 and second.next_offset == 100
         target = read("reply-114")
-        assert target.root_post_id == root.id and target.target_post_id == "reply-114"
-        assert target.page_offset == 100 and target.next_offset is None
-        assert target.items[-1].reply_to_post_id == "reply-113"
+        assert target.root_post_id == root.id and target.selected_post.id == "reply-114"
+        assert target.page_offset == 0 and target.next_offset is None and target.replies == []
+        assert target.selected_post.reply_to_post_id == "reply-113"
+        assert target.parent.post_id == "reply-113" and target.parent.state == "available"
         previous = read("reply-114", offset=0)
-        assert previous.page_offset == 0 and previous.next_offset == 50
+        assert previous.page_offset == 0 and previous.next_offset is None
+        assert previous.selected_post.id == target.selected_post.id and previous.replies == []
 
 
 @pytest.mark.parametrize("hidden", ["private", "deleted", "reported"])
@@ -56,9 +63,16 @@ def test_unavailable_ancestor_excludes_descendants_and_counts(tmp_path, hidden):
         db.flush()
         assert resolve_visible_root(db, world_id=root.world_id, post_id=child.id) is None
         assert reply_counts(db, world_id=root.world_id, post_ids=[root.id]) == {}
+        thread = get_owner_world_post_thread(db, references=RuntimeManualFeedReferences(db),
+            world_id=root.world_id, post_id=child.id, current_user_id=root.author_user_id)
+        # Public selected children remain addressable; parent context never
+        # exposes hidden content and the root subtree still excludes them.
+        assert thread.selected_post.id == child.id and thread.root_post_id == root.id
+        assert thread.parent.model_dump() == {"post_id": parent.id, "state": "unavailable"}
+        assert thread.replies == [] and thread.selected_post.reply_count == 0
         with pytest.raises(SocialWriteNotFoundError):
             get_owner_world_post_thread(db, references=RuntimeManualFeedReferences(db),
-                world_id=root.world_id, post_id=child.id, current_user_id=root.author_user_id)
+                world_id=root.world_id, post_id=parent.id, current_user_id=root.author_user_id)
 
 
 def test_cycles_and_cross_world_ancestors_do_not_resolve(tmp_path):

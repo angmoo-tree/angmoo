@@ -159,7 +159,11 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 125
+    assert len(session_mutations) == 127
+    assert {
+        "PUT /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",
+        "DELETE /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",
+    } <= session_mutations
     assert "POST /api/v1/auth/local/environment" in session_mutations
     assert "POST /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation" in session_mutations
     assert len(local_bot_mutations) == 10

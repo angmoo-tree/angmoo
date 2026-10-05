@@ -43,6 +43,9 @@ class CombinedSelection:
         return {"context": state["shared_context"], "lanes": choices}
 
     async def mode(self, state):
+        from app.contracts.sns_generation import COMBINED_ONLY, read_generation_policies
+        if read_generation_policies(state.get("identity")).sns_generation_policy == COMBINED_ONLY:
+            return {"selection_mode": "combined"}
         size = len(json.dumps(self.request(state), ensure_ascii=False, default=str))
         return {"selection_mode": "split" if size > 56000 else "combined"}
 
