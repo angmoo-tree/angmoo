@@ -30155,6 +30155,92 @@
       "test_suppressions": {
         "tests/world_characters/test_legacy_configuration_media.py": {}
       }
+    },
+    {
+      "commit": "d042545edec2c8eea528ec8c5d941ff372ceb595",
+      "feature_id": "AR-RELEASE-CI-FIXTURES-20261006",
+      "reason": "P10: add exact public-source secret-review regressions and v27/v28 historical installer cases; retain frozen source manifests, old node evidence, production migrations and approved typed/i18n transport contracts.",
+      "tracked_files": {
+        "backend/tests/test_release_gitleaks_provenance.py": "979ce0d1e434ec7635ebcd55a802b8e53041df6c",
+        "frontend/scripts/approved-error-transitions.mjs": "48c41dbf2974c578bd3e6c2437737c7dee321cd2"
+      },
+      "test_nodes": [
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[27]",
+        "tests/test_p8_l_d_installer_upgrade_contract.py::test_supported_installer_builder_freezes_every_readable_predecessor[28]",
+        "tests/test_release_gitleaks_provenance.py::test_release_provenance_exceptions_reject_changed_value_key_path_or_extra_data",
+        "tests/test_release_gitleaks_provenance.py::test_release_provenance_review_keeps_rule_path_and_full_line_conditions",
+        "tests/test_release_gitleaks_provenance.py::test_reviewed_public_source_blobs_match_actual_committed_objects_and_ancestry"
+      ],
+      "test_assertions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {
+          "_script_module": [],
+          "test_supported_installer_builder_freezes_every_readable_predecessor": [
+            "assert fixture['target_data_version'] == 29",
+            "assert fixture['target_table_count'] == 153",
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone()[0] == source_version",
+            "assert source.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'",
+            "assert source.execute('PRAGMA foreign_key_check').fetchall() == []",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone()[0] == 2",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone()[0] == 2",
+            "assert ('chat_response_requests' in memory_tables) == (source_version >= 6)",
+            "assert ('social_action_subjective_contexts' in memory_tables) == (source_version >= 8)",
+            "assert ('memory_batch_settings' in memory_tables) == (source_version >= 9)",
+            "assert ('chat_retrieval_diagnostics' in memory_tables) == (source_version >= 11)",
+            "assert ('memory_embedding_settings' in memory_tables) == (source_version >= 12)",
+            "assert ('memory_episode_info' in memory_tables) == (source_version >= 13)",
+            "assert ('memory_consolidation_requests' in memory_tables) == (source_version >= 14)",
+            "assert ('social_recommendation_catalogs' in memory_tables) == (source_version >= 15)",
+            "assert ('relationship_experience_receipts' in memory_tables) == (source_version >= 17)",
+            "assert ('relationship_review_requests' in memory_tables) == (source_version >= 18)",
+            "assert ('activity_graph_runs' in memory_tables) == (source_version >= 19)",
+            "assert ('request_snapshot' in topic_columns) == (source_version >= 25)",
+            "assert ('state_schema_version' in beat_columns) == (source_version >= 24)",
+            "assert fixture['generation'] == 'er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8'",
+            "assert len(fixture['generation']) == 64",
+            "assert 'memory_items' in memory_tables",
+            "assert 'memory_items' not in memory_tables",
+            "assert roleless_count == 4",
+            "assert actual_reserved_roles == [('world-supported-v2-existing-role', 'disabled', 3)]",
+            "assert roleless_count == 0",
+            "assert actual_reserved_roles == [('world-supported-v2', 'enabled', 1), ('world-supported-v2-existing-role', 'enabled', 4), ('world-supported-v2-second', 'enabled', 1)]"
+          ],
+          "test_v3_installer_fixture_is_legacy_shaped_and_proves_v4_chat_backfill": [
+            "assert source.execute('SELECT schema_version FROM angmoo_schema_version').fetchone() == (3,)",
+            "assert not {'world_id', 'requester_world_character_id', 'responding_world_character_id', 'world_scope_status'}.intersection(columns)",
+            "assert source.execute('SELECT count(*) FROM message_threads').fetchone() == (2,)",
+            "assert source.execute('SELECT count(*) FROM message_messages').fetchone() == (2,)",
+            "pytest.raises(SystemExit, match='supported_upgrade_world_chat_messages_changed')"
+          ]
+        },
+        "tests/test_release_gitleaks_provenance.py": {
+          "groups": [],
+          "allowed": [],
+          "test_release_provenance_review_keeps_rule_path_and_full_line_conditions": [
+            "assert len(reviewed) == 1",
+            "assert reviewed[0]['targetRules'] == ['generic-api-key']",
+            "assert reviewed[0]['condition'] == 'AND'",
+            "assert reviewed[0]['regexTarget'] == 'line'",
+            "assert reviewed[0]['paths'] == ['(^|/)security/refactor_backend_additions\\\\.json$', '(^|/)security/post_refactor_contract_changes\\\\.json$']",
+            "assert len(reviewed[0]['regexes']) == len({(row[1], row[2]) for row in EVIDENCE})",
+            "assert all((pattern.startswith('^\\\\s*') and pattern.endswith('$') for pattern in reviewed[0]['regexes']))"
+          ],
+          "test_reviewed_public_source_blobs_match_actual_committed_objects_and_ancestry": [
+            "assert actual == blob",
+            "assert allowed(manifest, line)"
+          ],
+          "test_release_provenance_exceptions_reject_changed_value_key_path_or_extra_data": [
+            "assert not allowed('backend/app/config.py', line)",
+            "assert not allowed(manifest + '.backup', line)",
+            "assert not allowed(manifest, line.replace(blob, '0' * 40))",
+            "assert not allowed(manifest, line.replace(source, 'api_key'))",
+            "assert not allowed(manifest, line + ' \"api_key\": \"unrelated-value\"')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_p8_l_d_installer_upgrade_contract.py": {},
+        "tests/test_release_gitleaks_provenance.py": {}
+      }
     }
   ]
 }
