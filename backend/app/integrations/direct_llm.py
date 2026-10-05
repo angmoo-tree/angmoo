@@ -779,6 +779,7 @@ async def generate_text(
     require_tool_call: bool = False,
     sdk_attempts: int | None = None,
     on_request_start: Callable[[int], None] | None = None,
+    on_request_submission: Callable[[ProviderRequest], None] | None = None,
     json_attempt: int | None = None,
     before_provider_request: Callable[[], Awaitable[None]] | None = None,
     request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
@@ -815,6 +816,10 @@ async def generate_text(
             })) if tracker.observer is not None else None,
         )
     async def _invoke(call_order, provider_call_order, checked_request):
+        # Admission and its final fence have completed. Let the workflow record
+        # this exact physical input without changing the legacy start callback.
+        if on_request_submission is not None:
+            on_request_submission(checked_request)
         if on_request_start is not None:
             on_request_start(call_order)
         request = replace(checked_request, diagnostic_callback=make_request(call_order, provider_call_order).diagnostic_callback)
@@ -1107,6 +1112,7 @@ async def generate_json(
     before_json_retry: Callable[[int], Awaitable[None]] | None = None,
     before_provider_request: Callable[[], Awaitable[None]] | None = None,
     request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
+    on_request_submission: Callable[[ProviderRequest], None] | None = None,
 ) -> Any:
     if json_retry_policy is not None and (
         should_retry_json_error is not None or retry_max_output_tokens is not None
@@ -1147,6 +1153,13 @@ async def generate_json(
         input_sha256 = hashlib.sha256(
             (system_prompt + "\n" + actual_user_prompt).encode()
         ).hexdigest()
+        def request_submitted(request: ProviderRequest) -> None:
+            nonlocal input_sha256
+            input_sha256 = hashlib.sha256(
+                (request.system_prompt + "\n" + request.user_prompt).encode()
+            ).hexdigest()
+            if on_request_submission is not None:
+                on_request_submission(request)
         def request_started(call_order: int) -> None:
             tracker._notify("json_attempt_input", {
                 "node": context.node, "lane": context.lane,
@@ -1175,6 +1188,7 @@ async def generate_json(
             on_rate_limit_wait=on_rate_limit_wait,
             sdk_attempts=sdk_attempts,
             on_request_start=request_started,
+            on_request_submission=request_submitted,
             json_attempt=attempt + 1,
         )
         if on_response is not None:

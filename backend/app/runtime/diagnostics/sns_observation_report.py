@@ -448,7 +448,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     observed_end = min(now, allowed_end)
     ticks = sorted(utc(row["occurred_at"]) for row in events if row.get("event_type") == "heartbeat")
     checkpoints = [utc(manifest["started_at"]), *ticks, observed_end]
-    gaps = [round((right - left).total_seconds()) for left, right in zip(checkpoints, checkpoints[1:])
+    gaps = [(right - left).total_seconds() for left, right in zip(checkpoints, checkpoints[1:])
             if (right - left).total_seconds() > 150]
     window_elapsed = status["window_elapsed"]
     tail_elapsed = status["tail_elapsed"]

@@ -139,16 +139,18 @@ class ActivityProvider:
         if not token_budget and len(system) + len(user) > 64000:
             raise ValueError("activity_input_budget_exceeded")
         from hashlib import sha256
-        receipt = {"node": node, "input_sha256": sha256(user.encode()).hexdigest(),
-            "memory_packet_refs": [packet.get("ref") for item in (context.get("memories") or {}).values()
-                if isinstance(item, dict) for packet in item.get("packets", [])]
-            if isinstance(context, dict) else [], "omissions": dict(omissions)}
-        if on_input_receipt is not None:
-            on_input_receipt(receipt)
-        if getattr(self.tracker, "observer", None) is not None:
+        def record_input(actual_user):
             memories = context.get("memories") if isinstance(context, dict) else None
+            memory_refs = [packet.get("ref") for item in (memories or {}).values()
+                if isinstance(item, dict) for packet in item.get("packets", [])]
+            receipt = {"node": node, "input_sha256": sha256(actual_user.encode()).hexdigest(),
+                "memory_packet_refs": memory_refs, "omissions": dict(omissions)}
+            if on_input_receipt is not None:
+                on_input_receipt(receipt)
+            if getattr(self.tracker, "observer", None) is None:
+                return
             self.tracker._notify("input_manifest", {
-                "node": node, "lane": lane, "input_chars": len(system) + len(user),
+                "node": node, "lane": lane, "input_chars": len(system) + len(actual_user),
                 "schema_sha256": sha256(json.dumps(schema, sort_keys=True, default=str).encode()).hexdigest(),
                 "prompt_sha256": sha256(system.encode()).hexdigest(),
                 "selection_limit": payload.get("selection_limit"),
@@ -157,12 +159,13 @@ class ActivityProvider:
                 "lane_inputs": {name: {"candidate_count": len(value.get("candidates") or []),
                     "selection_limit": value.get("selection_limit")} for name, value in payload.get("lanes", {}).items()
                     if name in {"inbox", "feed"} and isinstance(value, dict)},
-                "omissions": omissions,
-                "memory_packet_refs": [packet.get("ref") for item in (memories or {}).values()
-                    if isinstance(item, dict) for packet in item.get("packets", [])],
+                "omissions": dict(omissions),
+                "memory_packet_refs": memory_refs,
                 "source_ids": [item.get("post_id") for item in context.get("source_manifest", [])]
                     if isinstance(context, dict) else [],
             })
+        if not token_budget:
+            record_input(user)
         dispatched = not token_budget
         if delivery is not None and dispatched:
             delivery.dispatched()
@@ -177,7 +180,7 @@ class ActivityProvider:
         original_user = user
         admitted_user = None
         async def prepare_request(request):
-            nonlocal admitted_user, dispatched
+            nonlocal admitted_user
             from app.providers.input_budget import InputBudgetError
             from app.runtime.autonomous_activity.input_budget import omit_optional_unit
             budget = getattr(self, "input_budget", None)
@@ -193,15 +196,18 @@ class ActivityProvider:
                     await guard_request()
                     if before_admitted_request is not None:
                         before_admitted_request()
-                    if delivery is not None:
-                        delivery.dispatched()
-                    dispatched = True
                     admitted_user = actual_user.removesuffix(suffix) if suffix else actual_user
-                    if on_input_receipt is not None:
-                        on_input_receipt({**receipt, "input_sha256": sha256(actual_user.encode()).hexdigest(), "omissions": dict(omissions)})
                     return checked
                 if retry or not omit_optional_unit(context, omissions):
                     raise InputBudgetError("activity_input_budget_exceeded")
+        def submitted_request(request):
+            nonlocal dispatched
+            # The final guard and physical-call allowance are checked by the
+            # transport before this synchronous submission boundary.
+            if delivery is not None:
+                delivery.dispatched()
+            dispatched = True
+            record_input(request.user_prompt)
         try:
             return await generate_json(api_key=_api_key(self.context),
                 context=_llm_context(self.context, node=node, lane=lane), tracker=self.tracker,
@@ -217,6 +223,7 @@ class ActivityProvider:
                 before_json_retry=before_json_retry,
                 before_provider_request=guard_request if before_provider_request is not None else None,
                 request_preparer=prepare_request if token_budget else None,
+                on_request_submission=submitted_request if token_budget else None,
                 on_response=delivery.delivered if delivery is not None else None)
         except BaseException:
             if delivery is not None and dispatched:

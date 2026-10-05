@@ -4,6 +4,7 @@ The locked SDK excludes system/schema/config from Developer count_tokens. This
 bounded adapter sends the same prepared SDK values via the documented HTTP API.
 """
 from datetime import UTC, datetime
+import asyncio
 from hashlib import sha256
 import json
 import re
@@ -15,6 +16,7 @@ from app.providers.input_budget import InputBudgetError, ModelTokenProfile
 
 REVISION = "gemini-models-countTokens.v1"
 BASE = "https://generativelanguage.googleapis.com/v1beta/"
+REQUEST_TIMEOUT_SECONDS = 10.0
 
 
 class GeminiModelTokenCounter:
@@ -30,7 +32,12 @@ class GeminiModelTokenCounter:
     async def _request(self, request, *, operation, body=None):
         model = self.model_id(request.model)
         try:
-            async with httpx.AsyncClient(timeout=10.0, follow_redirects=False, transport=self.transport) as client:
+            # httpx's read timeout restarts for each chunk. Also bound the full
+            # lookup/count request so a slow successful stream cannot hold the
+            # activity's admission indefinitely.
+            async with asyncio.timeout(REQUEST_TIMEOUT_SECONDS), httpx.AsyncClient(
+                timeout=REQUEST_TIMEOUT_SECONDS, follow_redirects=False, transport=self.transport
+            ) as client:
                 async with client.stream("GET" if body is None else "POST", BASE + "models/" + model + (":countTokens" if body is not None else ""),
                     headers={"x-goog-api-key": request.api_key}, json=body) as response:
                     if response.status_code != 200:
@@ -41,7 +48,7 @@ class GeminiModelTokenCounter:
                         if len(data) > 1024 * 1024:
                             raise InputBudgetError("activity_input_budget_unavailable")
                     return json.loads(data)
-        except (httpx.HTTPError, ValueError) as exc:
+        except (httpx.HTTPError, ValueError, TimeoutError) as exc:
             if isinstance(exc, InputBudgetError):
                 raise
             raise InputBudgetError("activity_input_budget_unavailable") from None

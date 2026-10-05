@@ -140,12 +140,17 @@ class CombinedActivityProvider(ActivityProvider):
                 admission_reservation = ("normal", f"{kwargs['node']}:{signature}")
             else:
                 self.ledger.reserve_normal(f"{kwargs['node']}:{signature}")
+        admission_attempts = {}
         def reserve_admitted():
-            nonlocal admission_reservation
             if admission_reservation is not None:
                 kind, key = admission_reservation
-                (self.ledger.reserve_normal if kind == "normal" else self.ledger.reserve)(key)
-                admission_reservation = None
+                attempt = admission_attempts.get((kind, key), 0) + 1
+                # The shared transport may retry an overload within the same
+                # JSON attempt. Each physical send consumes its durable lane
+                # allowance; a cache hit only avoids a token-count request.
+                physical_key = key if attempt == 1 else f"{key}:provider_retry:{attempt}"
+                (self.ledger.reserve_normal if kind == "normal" else self.ledger.reserve)(physical_key)
+                admission_attempts[(kind, key)] = attempt
         if token_budget:
             kwargs["before_admitted_request"] = reserve_admitted
         previous = kwargs.get("before_json_retry") or getattr(self, "retry_guard", None)
