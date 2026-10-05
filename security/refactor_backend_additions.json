@@ -29985,6 +29985,113 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "3fb5e9f46e768f2f9dd70062495db02dc4a47f6a",
+      "feature_id": "AR-SQLITE-EARLY-V28-RECOVERY-20261006",
+      "reason": "User-approved SQLite startup recovery: exact early v28 admission and frozen v29 staging normalization; preserve data and accepted input; add real file migration lifecycle regressions without PostgreSQL",
+      "tracked_files": {
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v28_early_world_configuration.json": "5720091614ec16560ec14f5d9ade90e48e86419f",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v29.json": "5044b39a9af7e9ae3e7c246dac92d4086c244a17",
+        "backend/app/runtime/migrations/sqlite_versions/world_configuration_v29.py": "2c54a0f3a7334945143b2fd977b34f78b90d52a5",
+        "backend/tests/migrations/test_world_configuration_v28_recovery.py": "f17c5d44d124c1bc874332f862c6ebcf7b8c05b1"
+      },
+      "test_nodes": [
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_contributor_factory_reopens_recovered_database_and_serves_health",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_failed_staging_migration_keeps_source_and_can_resume",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_known_source_contract_does_not_replace_frozen_final_v28",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work[early-v28]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work[final-v28]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work[v27]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_repaired_draft_foreign_key_cascades_without_deleting_basis",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_semantic_delta_guard_rejects_rewritten_admitted_input",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[count]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[extra-column]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[foreign-key]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[marker]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[missing-column]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[raw-digest]",
+        "tests/migrations/test_world_configuration_v28_recovery.py::test_unattested_or_damaged_v28_is_rejected_without_promotion[revision]"
+      ],
+      "test_assertions": {
+        "tests/migrations/test_world_configuration_v28_recovery.py": {
+          "_seed": [
+            "assert sqlite_schema_contract_digest(connection) == manifest.schema_digest"
+          ],
+          "_coordinator": [],
+          "_identity": [],
+          "test_production_upgrade_preserves_source_worlds_snapshots_and_admitted_work": [
+            "assert result.migrated and result.target_version == 29",
+            "assert result.database_path != source",
+            "assert hashlib.sha256(source.read_bytes()).hexdigest() == source_sha256",
+            "assert (tmp_path / 'canonical/previous-generation.json').read_bytes() == marker",
+            "assert all((after[table] == value for table, value in before.items()))",
+            "assert not repeat.migrated and repeat.database_path == result.database_path",
+            "assert (tmp_path / 'canonical/current-generation.json').read_bytes() == current_marker",
+            "assert _identity(repeat.database_path) == promoted_identity",
+            "assert (tmp_path / 'secrets/app-secret').read_text() == 'synthetic-recovery-secret-only'",
+            "assert (tmp_path / 'media/preserved.txt').read_bytes() == b'preserved-synthetic-media'",
+            "assert connection.exec_driver_sql('PRAGMA integrity_check').scalar_one() == 'ok'",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []",
+            "assert sqlite_schema_contract_digest(connection) == registry.load_sqlite_manifest(29).schema_digest",
+            "assert fk[6] == 'CASCADE'",
+            "assert json.loads(run_input) == {'fixed': 'accepted persona', 'revision': 7}",
+            "assert json.loads(slot_input) == {'world': 'config-world-a', 'revision': 7}",
+            "assert run_input is None and slot_input is None"
+          ],
+          "test_unattested_or_damaged_v28_is_rejected_without_promotion": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_(schema_manifest_mismatch|foreign_key_check_failed)')",
+            "assert source.read_bytes() == before",
+            "assert (tmp_path / 'canonical/current-generation.json').read_bytes() == marker",
+            "assert list((tmp_path / 'canonical/generations').iterdir()) == [source.parent]"
+          ],
+          "test_failed_staging_migration_keeps_source_and_can_resume": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='sqlite_migration_step_failed')",
+            "assert source.read_bytes() == before",
+            "assert (tmp_path / 'canonical/current-generation.json').read_bytes() == marker",
+            "assert list((tmp_path / 'canonical/generations').iterdir()) == [source.parent]",
+            "assert _coordinator(tmp_path).upgrade().target_version == 29"
+          ],
+          "test_semantic_delta_guard_rejects_rewritten_admitted_input": [
+            "pytest.raises(SqliteCanonicalUpgradeError, match='world_configuration_v29_admitted_input_changed')",
+            "assert source.read_bytes() == before",
+            "assert list((tmp_path / 'canonical/generations').iterdir()) == [source.parent]"
+          ],
+          "test_repaired_draft_foreign_key_cascades_without_deleting_basis": [
+            "assert connection.exec_driver_sql('SELECT count(*) FROM character_draft_import_origins').scalar_one() == 0",
+            "assert connection.exec_driver_sql('SELECT count(*) FROM character_import_snapshots').scalar_one() == before",
+            "assert connection.exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ],
+          "test_contributor_factory_reopens_recovered_database_and_serves_health": [
+            "assert response.status_code == 200, response.json()",
+            "assert response.json()['status'] == 'ok'",
+            "assert response.json()['persistence'] == 'sqlite'",
+            "assert response.json()['graph'] == 'ladybug'",
+            "assert session.execute(text('SELECT schema_version FROM angmoo_schema_version')).scalar_one() == 29"
+          ],
+          "test_known_source_contract_does_not_replace_frozen_final_v28": [
+            "assert early.schema_digest == EARLY_CONTRACT_SHA256",
+            "assert early.manifest_sha256 == EARLY_MANIFEST_SHA256",
+            "assert final.schema_digest == '19263f9b90e8827364078a594f8466811e895cb6ce4396ab817dd8b9db5e23fa'",
+            "assert final != early",
+            "assert registry.load_sqlite_manifest(29).schema_digest == final.schema_digest"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/migrations/test_world_configuration_v28_recovery.py": {}
+      }
+    },
+    {
+      "commit": "3018ec41c2550648bd4518de26e91e770553a2b5",
+      "feature_id": "AR-SQLITE-RECOVERY-REVIEW-20261006",
+      "reason": "Exact first introduction of the user-approved SQLite recovery review; documentation-only commit, identical backend/frontend/test trees, no new executable nodes.",
+      "tracked_files": {
+        "docs/verification/2026-10-06-sqlite-v28-startup-recovery.md": "191fc7af7240dd8f5db5d0f3d5fb342c52dda1a2"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

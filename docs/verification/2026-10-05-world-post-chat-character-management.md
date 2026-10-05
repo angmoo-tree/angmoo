@@ -192,3 +192,9 @@ $env:PYTHONPATH='D:\project_code\angmoo-workspace\angmoo-tree-angmoo\scripts\tes
 & backend/.venv/Scripts/python.exe scripts/ci/check_refactor_frontend_preservation.py
 & backend/.venv/Scripts/python.exe scripts/ci/check_refactor_preservation.py --contracts --nodes
 ```
+
+## Follow-up SQLite startup recovery — 2026-10-06
+
+The operational limitation above is the historical October5 state. The subsequent user-authorized focused recovery identifies the exactly attested earlier v28 source and uses a formal staging-copy v29 migration, retaining final v28 and all historical manifests. The actual original Docker volume preserves all153 original-column table identities and48,930 rows before workers start; integrity is `ok`, FK violations0, the original v28 generation is retained and repeated startup does not migrate again. Backend/frontend now start healthy on the preserved dataset, with SQLite/Ladybug and scheduler/projector ready. Focused SQLite regression124 and scoped consumer regression53 close with zero failures/errors/skips;15 new recovery cases are included in the124 total. No PostgreSQL test/resource is added in the recovery.
+
+[The dated recovery report](2026-10-06-sqlite-v28-startup-recovery.md) owns the recovery source/evidence commits, current health and browser read smoke, and the final official preservation result. The preceding implementation results and failed operational observation remain historical; they are not rewritten as fresh recovery verification. Installed-app validation, real AI quality and direct USER CHECK remain separate.

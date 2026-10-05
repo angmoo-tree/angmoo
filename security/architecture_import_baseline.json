@@ -1,7 +1,7 @@
 {
-  "edge_count": 5815,
-  "external_import_count": 4110,
-  "module_count": 1403,
+  "edge_count": 5817,
+  "external_import_count": 4114,
+  "module_count": 1404,
   "modules": [
     {
       "external_imports": [],
@@ -18994,6 +18994,7 @@
         "app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch",
         "app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles",
         "app.runtime.migrations.sqlite_versions.world_configuration_v28",
+        "app.runtime.migrations.sqlite_versions.world_configuration_v29",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -19275,6 +19276,20 @@
       ],
       "module": "app.runtime.migrations.sqlite_versions.world_configuration_v28",
       "path": "backend/app/runtime/migrations/sqlite_versions/world_configuration_v28.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.world_configuration_v29",
+      "path": "backend/app/runtime/migrations/sqlite_versions/world_configuration_v29.py",
       "wildcard_imports": []
     },
     {
