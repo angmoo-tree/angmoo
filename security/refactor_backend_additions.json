@@ -28379,6 +28379,520 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "d8c489f2e2aea85ba445d60b130bf537bfe26da7",
+      "feature_id": "AR-WORLD-UI-SNS-OUTPUT-20261005",
+      "reason": "User-authorized P00-P35 World reactions, selected threads, unlimited World Chat, authored output normalization and SNS token admission; frozen history retained.",
+      "tracked_files": {
+        "backend/app/contracts/authored_output.py": "fda3a961252faeb269d3fa681de4b476ab57f8bb",
+        "backend/app/contracts/sns_generation.py": "ef64ca5c5e3cf81c76b3179025339d306ec8fa0d",
+        "backend/app/domains/relationships/service/source_reactions.py": "aa1356913129524a8f247891fffd8283eef12027",
+        "backend/app/domains/routine_posts/policies/output_normalization.py": "e170b5da74f57e9ee1fe879fa3207daddf3da736",
+        "backend/app/domains/social/policies/owner_target.py": "3e39376b383201afb90242b8a2fc0d37b640be3e",
+        "backend/app/domains/social/repository/owner_reactions.py": "0113ffc321c623d0a19a572559fc668bdbb8bc04",
+        "backend/app/domains/social/service/owner_reaction_reads.py": "b128dacc92f8fa7e24ae57b0ae6b6750e3f9b8af",
+        "backend/app/domains/social/service/owner_reactions.py": "7917e525531c54083201288305fba4add000aab7",
+        "backend/app/integrations/gemini_input_budget.py": "a5092a8e6d855bfdb5e1aad95cb371399d7d4ad1",
+        "backend/app/providers/input_budget.py": "152f5814539b9e8f66c96f94e87928c1dbde6dd4",
+        "backend/app/runtime/autonomous_activity/input_budget.py": "942f2aceffed630b9eb8705daafda08ffd39a48b",
+        "backend/tests/chat/test_world_chat_unlimited.py": "7f94555ae20555e117da2d493eadb6443e037e19",
+        "backend/tests/routine_posts/test_authored_aux_normalization.py": "16c11c676ee0e6433ac93f4fec66dbe9f4953f92",
+        "backend/tests/runtime/test_sns_budget_transport.py": "3e2b243a5549852fd3fb8a844be344ee38bb9be3",
+        "backend/tests/runtime/test_sns_model_input_budget.py": "25130c3b4e36e68d8f5600f696da3949c72d3989",
+        "backend/tests/social/test_world_selected_thread_and_reactions.py": "590d365aaad9da378ab72a44bfd750a943242c8e",
+        "browser-tests/playwright.world-social-backend.config.ts": "f4ad38bf4806630c3b5dd2811a298825a6dd0d2e",
+        "browser-tests/playwright.world-social-output-static.config.ts": "7b9182e81b0f57bcaabe9083783333a2a29bc4b6",
+        "browser-tests/playwright.world-social-output.config.ts": "758fa3c594aa5aaeef6ff8bc4773a81518c1fc97",
+        "browser-tests/world-social-backend-fixture.py": "3d868595a86126fee7df711405eb4303ff3ead46",
+        "browser-tests/world-social-backend.spec.ts": "87db21a16d75368a609273aae9e43bff8fb010b5",
+        "browser-tests/world-social-chat-fixture.ts": "fdba040ec3a432c4ea7df670bf91d207ba57f084",
+        "browser-tests/world-social-output.spec.ts": "496c5413f0a5277a48e131a5c54c8f22dbb6c69c",
+        "docs/verification/world-ui-sns-output-integration-20261005.json": "6f76af637ca495c8f35c49428592bbe184a7262c",
+        "docs/verification/world-ui-sns-output-integration-20261005.md": "906e88698a82a67cb24e9c1d0b96142de257e418",
+        "frontend/src/composition/providers/browser-navigation-guard.tsx": "452b8fcb167f8711a7a299f2c6a9e1207911a97b",
+        "frontend/src/features/social/components/social-reply-tree.tsx": "7d5d28c515a86dfcf08fd9963ebdf38e525811ab",
+        "frontend/src/features/social/hooks/use-owner-reactions.ts": "082a0d71a18e177eb5c91d6051f1dc13dcd86449",
+        "frontend/src/features/social/utils/reply-tree.ts": "1ba6adb161b206e06216696d1a5a61fb87b0cadf"
+      },
+      "test_nodes": [
+        "tests/chat/test_response_name_binding.py::test_raw_thought_port_checks_entire_tail_before_first_delta[False]",
+        "tests/chat/test_response_name_binding.py::test_raw_thought_port_checks_entire_tail_before_first_delta[True]",
+        "tests/chat/test_world_chat_unlimited.py::test_twenty_world_threads_create_and_reuse_without_a_cross_world_quota",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[-1-novelty_basis-500]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[-1-thought-280]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[-1-topic_signature-300]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[0-novelty_basis-500]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[0-thought-280]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[0-topic_signature-300]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[1-novelty_basis-500]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[1-thought-280]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[1-topic_signature-300]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[70-novelty_basis-500]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[70-thought-280]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_auxiliary_length_is_normalized_after_names[70-topic_signature-300]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_checkpoint_without_receipt_keeps_true_without_guessing_raw_length",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_invalid_macro_in_discarded_tail_is_still_rejected[novelty_basis-500]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_invalid_macro_in_discarded_tail_is_still_rejected[thought-280]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_invalid_macro_in_discarded_tail_is_still_rejected[topic_signature-300]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[  ]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[3]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[None]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[value4]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_novelty_is_required_even_after_normalization[value5]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[  ]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[3]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[None]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[value4]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion[value5]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict[8]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict[None]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict[value2]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict[value3]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_planner_tail_macro_is_checked_before_prefix_is_saved",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_strip_before_limits_without_marking_whitespace_as_truncation",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[\\U0001f1f0\\U0001f1f7]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[\\U0001f469\\u200d\\U0001f680]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[\\U0001f642]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[\\u65e5]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[\\ud55c]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[a]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_unicode_code_points_are_preserved_without_reencoding[e\\u0301]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_untrusted_llm_cannot_supply_internal_normalization_metadata[_auxiliary_normalization]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_untrusted_llm_cannot_supply_internal_normalization_metadata[_normalization_receipt]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_untrusted_llm_cannot_supply_internal_normalization_metadata[_thought]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_untrusted_llm_cannot_supply_internal_normalization_metadata[status]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_visible_content_retains_strict_limits[body-4000]",
+        "tests/routine_posts/test_authored_aux_normalization.py::test_visible_content_retains_strict_limits[title-160]",
+        "tests/runtime/test_routine_bounded_integration.py::test_new_combined_long_auxiliary_publish_and_reopen_are_one_physical_call[False]",
+        "tests/runtime/test_routine_bounded_integration.py::test_new_combined_long_auxiliary_publish_and_reopen_are_one_physical_call[True]",
+        "tests/runtime/test_sns_budget_transport.py::test_claim_change_after_completed_counter_is_recorded_but_never_generated",
+        "tests/runtime/test_sns_budget_transport.py::test_counter_and_guard_failure_do_not_submit_or_mark_delivery_uncertain[count]",
+        "tests/runtime/test_sns_budget_transport.py::test_counter_and_guard_failure_do_not_submit_or_mark_delivery_uncertain[guard]",
+        "tests/runtime/test_sns_budget_transport.py::test_counter_and_guard_failure_do_not_submit_or_mark_delivery_uncertain[profile]",
+        "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks[2]",
+        "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks[3]",
+        "tests/runtime/test_sns_budget_transport.py::test_observation_failure_does_not_change_normalization_or_generation[off]",
+        "tests/runtime/test_sns_budget_transport.py::test_observation_failure_does_not_change_normalization_or_generation[queue_full]",
+        "tests/runtime/test_sns_budget_transport.py::test_observation_failure_does_not_change_normalization_or_generation[write_failed]",
+        "tests/runtime/test_sns_budget_transport.py::test_optional_omission_full_prepared_wire_and_caller_immutability",
+        "tests/runtime/test_sns_budget_transport.py::test_prepared_count_includes_image_tool_and_exact_config",
+        "tests/runtime/test_sns_budget_transport.py::test_representative_durable_graph_has_four_prepared_generation_calls",
+        "tests/runtime/test_sns_budget_transport.py::test_required_input_over_limit_has_no_generation_or_reservation",
+        "tests/runtime/test_sns_budget_transport.py::test_retry_feedback_is_counted_and_does_not_reserve_failed_generation",
+        "tests/runtime/test_sns_model_input_budget.py::test_budget_cache_is_run_scoped_and_durable_receipts_have_no_prompt_or_key",
+        "tests/runtime/test_sns_model_input_budget.py::test_count_failure_never_zero_or_redirect_or_retry[response0]",
+        "tests/runtime/test_sns_model_input_budget.py::test_count_failure_never_zero_or_redirect_or_retry[response1]",
+        "tests/runtime/test_sns_model_input_budget.py::test_count_failure_never_zero_or_redirect_or_retry[response2]",
+        "tests/runtime/test_sns_model_input_budget.py::test_counter_cache_receipts_and_network_attempts_remain_bounded_on_resume",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[100-True-\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[100-True-\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[100-True-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[100-True-{\"x\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[101-False-\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642\\U0001f642]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[101-False-\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c\\ud55c]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[101-False-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]",
+        "tests/runtime/test_sns_model_input_budget.py::test_equal_codepoint_input_uses_counter_result_not_language_or_character_size[101-False-{\"x\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}]",
+        "tests/runtime/test_sns_model_input_budget.py::test_full_prepared_request_includes_system_schema_feedback_and_config[change0]",
+        "tests/runtime/test_sns_model_input_budget.py::test_full_prepared_request_includes_system_schema_feedback_and_config[change1]",
+        "tests/runtime/test_sns_model_input_budget.py::test_full_prepared_request_includes_system_schema_feedback_and_config[change2]",
+        "tests/runtime/test_sns_model_input_budget.py::test_full_prepared_request_includes_system_schema_feedback_and_config[change3]",
+        "tests/runtime/test_sns_model_input_budget.py::test_incomplete_policy_is_not_silently_upgraded",
+        "tests/runtime/test_sns_model_input_budget.py::test_lost_claim_after_count_never_admits_or_records_success",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[150000]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[39999]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[40000]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[40001]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[55999]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[56000]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[56001]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[63999]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[64000]",
+        "tests/runtime/test_sns_model_input_budget.py::test_new_combined_policy_and_legacy_boundaries[64001]",
+        "tests/runtime/test_sns_model_input_budget.py::test_official_http_adapter_full_count_and_one_attempt",
+        "tests/runtime/test_sns_model_input_budget.py::test_resumed_model_revision_cannot_silently_replace_saved_limits",
+        "tests/runtime/test_sns_model_input_budget.py::test_separate_model_input_output_limits[100-16384-True]",
+        "tests/runtime/test_sns_model_input_budget.py::test_separate_model_input_output_limits[101-8192-False]",
+        "tests/runtime/test_sns_model_input_budget.py::test_separate_model_input_output_limits[99-8192-True]",
+        "tests/runtime/test_sns_model_input_budget.py::test_shared_context_reserves_output_only_when_declared",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_methods_are_explicitly_unsupported[None]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_methods_are_explicitly_unsupported[generateContent]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_methods_are_explicitly_unsupported[methods2]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_methods_are_explicitly_unsupported[methods3]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_methods_are_explicitly_unsupported[methods4]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_never_guesses_limit[kwargs0]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_never_guesses_limit[kwargs1]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_never_guesses_limit[kwargs2]",
+        "tests/runtime/test_sns_model_input_budget.py::test_unknown_profile_never_guesses_limit[kwargs3]",
+        "tests/runtime/test_sns_model_input_budget.py::test_whole_optional_omission_preserves_correction_group_and_required_sources",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_concurrent_like_puts_on_independent_sqlite_connections_are_one_transition",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_cycle_has_no_canonical_root_and_never_authorizes_reaction_or_reply",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_hidden_parent_is_unavailable_without_flattening_selected_subtree",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_like_set_unset_converges_and_each_real_transition_has_audit_only_event",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_public_context_is_server_scoped_and_get_never_mutates_sources",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_reaction_rollback_keeps_source_event_and_state_atomic[after_reaction_event]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_reaction_rollback_keeps_source_event_and_state_atomic[after_reaction_source]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_selected_hidden_or_wrong_world_not_read_or_written[deleted_at-value1]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_selected_hidden_or_wrong_world_not_read_or_written[report_hidden_at-value2]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_selected_hidden_or_wrong_world_not_read_or_written[visibility-private]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_selected_hidden_or_wrong_world_not_read_or_written[world_id-other]",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_selected_reply_is_anchor_and_nested_write_targets_immediate_author",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_subtree_pagination_counts_all_fifty_three_descendants_in_stable_order",
+        "tests/social/test_world_selected_thread_and_reactions.py::test_unambiguous_legacy_like_is_normalized_in_write_not_get"
+      ],
+      "test_assertions": {
+        "tests/chat/test_response_name_binding.py": {
+          "test_chat_resolves_before_first_delta_and_stream_storage_memory_match": [
+            "assert read_name_binding(final.node_state) == binding",
+            "assert final.state is ResponseRequestState.COMMITTED",
+            "assert message.content == deltas == '민식, 반가워. `{{user}}`는 코드 예시야.'",
+            "assert len(memory.sources) == 1",
+            "assert memory.sources[0].assistant_message_id == message.id",
+            "assert not deltas and final.state is ResponseRequestState.FAILED and (not memory.sources)",
+            "assert '민식' in request.profile.worldview and '민수' not in request.profile.worldview",
+            "assert request.profile.speech_style == '대화 상대: 반가워'"
+          ],
+          "test_raw_thought_port_checks_entire_tail_before_first_delta": [
+            "assert len(generator.requests) == 1",
+            "assert final.state is ResponseRequestState.FAILED and (not deltas) and (not memory.sources)",
+            "assert final.state is ResponseRequestState.COMMITTED",
+            "assert message.content == deltas == 'Synthetic visible body' and len(memory.sources) == 1",
+            "assert thought.thought_text == ('민식 ' + '한' * 350)[:280]",
+            "assert thought.status == 'recorded' and thought.truncated is True",
+            "assert memory.sources[0].assistant_message_id == message.id",
+            "assert request.thought_finalizer is not None"
+          ]
+        },
+        "tests/chat/test_world_chat_unlimited.py": {
+          "test_twenty_world_threads_create_and_reuse_without_a_cross_world_quota": [
+            "assert replay.outcome == 'reused' and replay.thread.id == created[5]",
+            "assert read.max_threads is None and len(read.items) == 20",
+            "assert read.model_dump()['max_threads'] is None",
+            "assert db.scalar(select(func.count(models.MessageThread.id))) == 20",
+            "assert world_chat.list_world_threads(fresh, fresh.get(models.User, 'owner'), 'world-unlimited').max_threads is None",
+            "assert result.outcome == 'created'"
+          ]
+        },
+        "tests/routine_posts/test_authored_aux_normalization.py": {
+          "names": [],
+          "raw_draft": [],
+          "test_auxiliary_length_is_normalized_after_names": [
+            "assert source == before",
+            "assert result['_thought'] == {'text': source[field][:limit], 'status': 'recorded', 'truncated': extra > 0}",
+            "assert result[field] == source[field][:limit]"
+          ],
+          "test_invalid_macro_in_discarded_tail_is_still_rejected": [
+            "pytest.raises(NameBindingError, match='name_macro_unsupported')"
+          ],
+          "test_visible_content_retains_strict_limits": [
+            "pytest.raises(NameBindingError, match='name_macro_rendered_limit')"
+          ],
+          "test_novelty_is_required_even_after_normalization": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_strip_before_limits_without_marking_whitespace_as_truncation": [
+            "assert result['_thought']['truncated'] is False",
+            "assert result['topic_signature'] == 'x' * 300",
+            "assert result['novelty_basis'] == 'x' * 500"
+          ],
+          "test_unicode_code_points_are_preserved_without_reencoding": [
+            "assert result['_thought']['text'] == value[:280]",
+            "assert result['topic_signature'] == value[:300]",
+            "assert result['novelty_basis'] == value[:500]"
+          ],
+          "test_checkpoint_without_receipt_keeps_true_without_guessing_raw_length": [
+            "assert thought.truncated and receipt.truncated and receipt.inherited",
+            "assert receipt.input_chars is receipt.rendered_chars is None"
+          ],
+          "test_planner_optional_thought_reaches_finalizer_and_strict_brief_stays_strict": [
+            "assert result['decisions'][0]['_activity_thought']['status'] == ('recorded' if isinstance(value, str) else 'missing' if value is None else 'invalid')",
+            "assert result['decisions'][0]['_activity_thought']['truncated'] is isinstance(value, str)",
+            "pytest.raises(ValueError)"
+          ],
+          "test_planner_tail_macro_is_checked_before_prefix_is_saved": [
+            "pytest.raises(NameBindingError, match='name_macro_unsupported')"
+          ],
+          "test_optional_topic_and_thought_keep_valid_body_and_no_string_coercion": [
+            "assert result['title'] == raw['title'] and result['body'] == raw['body']",
+            "assert result['topic_signature'] == ''",
+            "assert result['_thought']['text'] is None",
+            "assert result['_thought']['status'] == ('missing' if value is None or isinstance(value, str) else 'invalid')"
+          ],
+          "test_untrusted_llm_cannot_supply_internal_normalization_metadata": [
+            "pytest.raises(ValueError)"
+          ]
+        },
+        "tests/runtime/test_routine_bounded_integration.py": {
+          "test_new_combined_long_auxiliary_publish_and_reopen_are_one_physical_call": [
+            "assert result['result']['public_action_count'] == 1",
+            "assert len(adapter.requests) == len(tracker.calls) == counter.calls == 1 and counter.profiles == 1",
+            "assert tracker.calls[0]['node'] == 'RoutineDecisionDraft' and adapter.requests[0].max_output_tokens == 8192",
+            "assert post.title == 'A canonical current scene' and len(post.topic_signature) == 300",
+            "assert execution.status == 'succeeded'",
+            "assert execution.result['auxiliary_normalization']['thought']['truncated']",
+            "assert execution.result['auxiliary_normalization']['novelty_basis']['rendered_chars'] == 800",
+            "assert len(post.novelty_basis) == 500",
+            "assert db.scalar(select(func.count(Post.id))) == 1 and db.scalar(select(func.count(AgentPublicActionExecution.id))) == 1",
+            "assert len(run.result['normal_reservations']) == 1 and (not run.result.get('recovery_reservations'))",
+            "assert liked.viewer_like_state == 'liked' and liked.owner_world_character_id == owner.world_character_id",
+            "assert {feed.items[0].id, detail.selected_post.id, profile.items[0].id} == {post.id}",
+            "assert all((value.body == post.body and value.viewer_like_state == 'liked' and (value.like_count == 1) for value in (feed.items[0], detail.selected_post, profile.items[0])))",
+            "assert db.scalar(select(func.count(Post.id))) == db.scalar(select(func.count(AgentPublicActionExecution.id))) == 1",
+            "assert len(adapter.requests) == counter.calls == 1",
+            "pytest.raises(RuntimeError, match='exit_before_canonical_publish')"
+          ],
+          "test_actual_split_routine_recovers_once_then_publishes_at_most_once": [
+            "assert [call['max_output_tokens'] for call in calls] == expected_caps",
+            "assert planner_calls[0]['response_schema'] == planner_calls[1]['response_schema']",
+            "assert planner_calls[0]['system_prompt'] == planner_calls[1]['system_prompt']",
+            "assert planner_calls[1]['user_prompt'].startswith(planner_calls[0]['user_prompt'])",
+            "assert len(metadata.get('recovery_reservations', [])) == (1 if len(calls) > 1 and path.startswith(('recover', 'retry')) else 0)",
+            "assert len(metadata.get('normal_reservations', [])) == (2 if success else 1)",
+            "assert result['generation_mode'] == 'split'",
+            "assert result['result']['public_action_count'] == 1",
+            "assert db.scalar(select(func.count(Post.id))) == 1",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id)).where(AgentPublicActionExecution.status == 'succeeded')) == 1",
+            "assert replay['executions'][0]['publish_result']['public_action_count'] == 0",
+            "pytest.raises((direct_llm.DirectLlmError, ValueError))",
+            "assert db.scalar(select(func.count(Post.id))) == 0",
+            "assert db.scalar(select(func.count(AgentPublicActionExecution.id))) == 0"
+          ]
+        },
+        "tests/runtime/test_sns_budget_transport.py": {
+          "test_representative_durable_graph_has_four_prepared_generation_calls": [
+            "assert result['result']['status'] == 'completed' and contexts == {'inbox': [], 'feed': ['inbox'], 'routine': ['inbox', 'feed']}",
+            "assert len(adapter.requests) == len(tracker.calls) == counter.calls == 4 and counter.profiles == 1",
+            "assert [c['node'] for c in tracker.calls] == ['CombinedTargetSelector', 'InboxDecisionDraft', 'FeedDecisionDraft', 'RoutineDecisionDraft']",
+            "assert all((req.prepared_request is not None for req in adapter.requests))",
+            "assert len(row.result['normal_reservations']) == 4 and (not row.result.get('recovery_reservations'))",
+            "assert effects.count('routine:execute') == effects.count('feed:execute') == effects.count('inbox:execute') == 1",
+            "pytest.raises(RuntimeError, match='exit_after_valid_draft')",
+            "assert [len(normalized[k]) for k in ('topic_signature', 'novelty_basis')] == [300, 500]",
+            "assert normalized['_thought']['truncated'] and len(normalized['_thought']['text']) == 280"
+          ],
+          "SyntheticAdapter::__init__": [],
+          "SyntheticAdapter::generate_json": [
+            "assert req.prepared_request is not None"
+          ],
+          "runtime": [],
+          "test_required_input_over_limit_has_no_generation_or_reservation": [
+            "pytest.raises(InputBudgetError, match='activity_input_budget_exceeded')",
+            "assert not adapter.requests and (not tracker.calls) and (not row.result.get('normal_reservations'))",
+            "assert counter.calls == 1 and row.result['input_budget_attempts'] == {'models_get': 1, 'count_tokens': 1}"
+          ],
+          "test_claim_change_after_completed_counter_is_recorded_but_never_generated": [
+            "pytest.raises(ValueError)",
+            "assert not adapter.requests and (not tracker.calls) and (counter.calls == 1)",
+            "assert [e['operation'] for e in metadata] == ['models_get', 'count_tokens']",
+            "assert metadata[-1]['status'] == 'admission_rejected' and (not metadata[-1]['cache_hit'])",
+            "assert not row.result.get('normal_reservations')"
+          ],
+          "test_optional_omission_full_prepared_wire_and_caller_immutability": [
+            "assert await p.call(node='CombinedTargetSelector', lane='selector', system='s', payload=original, schema={}, validator=lambda v: v, max_tokens=8192) == {'ok': True}",
+            "assert receipt['omissions'] == {'today_activity': 2, 'memory_packets': 0} and receipt['admitted']",
+            "assert original == before and len(json.loads(sent.user_prompt)['context']['required']) == 64001",
+            "assert counter.calls == 3 and len(adapter.requests) == len(tracker.calls) == len(row.result['normal_reservations']) == 1",
+            "assert not row.result.get('recovery_reservations')",
+            "assert 'synthetic-never-sent' not in json.dumps(row.result)"
+          ],
+          "test_retry_feedback_is_counted_and_does_not_reserve_failed_generation": [
+            "pytest.raises(InputBudgetError, match='activity_input_budget_exceeded')",
+            "assert len(adapter.requests) == len(tracker.calls) == 1 and counter.calls == 2",
+            "assert adapter.requests[0].max_output_tokens == 8192",
+            "assert len(row.result['normal_reservations']) == 1 and (not row.result.get('recovery_reservations'))",
+            "assert sorted((r['output_tokens'] for r in row.result['input_budget_receipts'].values())) == [8192, 16384]"
+          ],
+          "test_long_writer_recovery_is_one_request_for_three_exact_tasks": [
+            "assert [r['task_id'] for r in result['reply_task_results']] == [t['task_id'] for t in tasks]",
+            "assert all((r['_activity_thought']['truncated'] and len(r['_activity_thought']['text']) == 280 for r in result['reply_task_results']))",
+            "assert len(adapter.requests) == len(tracker.calls) == len(row.result['recovery_reservations']) == 1",
+            "assert not row.result.get('normal_reservations')"
+          ],
+          "test_counter_and_guard_failure_do_not_submit_or_mark_delivery_uncertain": [
+            "pytest.raises(ValueError)",
+            "assert not adapter.requests and (not states) and (not tracker.calls)"
+          ],
+          "test_observation_failure_does_not_change_normalization_or_generation": [
+            "assert value['body'] == payload['body'] and value['_thought']['text'] == payload['thought'][:280]",
+            "assert value['topic_signature'] == payload['topic_signature'][:300] and value['novelty_basis'] == payload['novelty_basis'][:500]",
+            "assert value['_auxiliary_normalization']['thought']['truncated']",
+            "assert len(adapter.requests) == counter.calls == len(tracker.calls) == len(row.result['normal_reservations']) == 1",
+            "assert len(row.result['input_budget_receipts']) == 1 and (not row.result.get('recovery_reservations'))"
+          ],
+          "test_prepared_count_includes_image_tool_and_exact_config": [
+            "assert any(('inlineData' in part for content in wire['contents'] for part in content['parts']))",
+            "assert wire['tools'] and wire['toolConfig'] and wire['systemInstruction'] and wire['generationConfig']"
+          ]
+        },
+        "tests/runtime/test_sns_model_input_budget.py": {
+          "request": [],
+          "profile": [],
+          "test_separate_model_input_output_limits": [
+            "assert profile().permits(input_tokens, output_tokens) is allowed"
+          ],
+          "test_unknown_profile_never_guesses_limit": [
+            "pytest.raises(InputBudgetError)"
+          ],
+          "test_shared_context_reserves_output_only_when_declared": [
+            "assert not profile(context_limit=100).permits(90, 20)",
+            "pytest.raises(InputBudgetError, match='unsupported')"
+          ],
+          "test_new_combined_policy_and_legacy_boundaries": [
+            "assert asyncio.run(generation_mode(state))['generation_mode'] == 'combined'",
+            "assert asyncio.run(selector.mode(state))['selection_mode'] == 'combined'",
+            "assert asyncio.run(generation_mode({**state, 'identity': {}}))['generation_mode'] == 'split'"
+          ],
+          "test_incomplete_policy_is_not_silently_upgraded": [
+            "pytest.raises(ValueError)",
+            "assert read_generation_policies({}).sns_generation_policy is None"
+          ],
+          "test_equal_codepoint_input_uses_counter_result_not_language_or_character_size": [
+            "assert len(text) == 100",
+            "assert accepted is allowed and counter.calls == 1",
+            "assert not row.result.get('normal_reservations')",
+            "assert req.user_prompt == text"
+          ],
+          "test_full_prepared_request_includes_system_schema_feedback_and_config": [
+            "assert wire['generateContentRequest']['systemInstruction']['parts'][0]['text'] == 'system'",
+            "assert wire['generateContentRequest']['generationConfig']['responseJsonSchema']",
+            "assert wire != prepare_generate_request(request(**change)).count_request(request().model)"
+          ],
+          "test_official_http_adapter_full_count_and_one_attempt": [
+            "assert len(calls) == 2",
+            "assert json.loads(req.content)['generateContentRequest']['generationConfig']['responseJsonSchema']",
+            "assert (await port.count(request(), p))[0] == 42"
+          ],
+          "test_unknown_profile_methods_are_explicitly_unsupported": [
+            "assert len(calls) == 1",
+            "pytest.raises(InputBudgetError, match='model_budget_unsupported')"
+          ],
+          "test_count_failure_never_zero_or_redirect_or_retry": [
+            "assert len(calls) == 1",
+            "pytest.raises(InputBudgetError)"
+          ],
+          "seeded_db": [],
+          "Counter::profile": [],
+          "Counter::count": [],
+          "test_budget_cache_is_run_scoped_and_durable_receipts_have_no_prompt_or_key": [
+            "assert counter.profiles == 1 and counter.calls == 2 and (len(guards) >= 8)",
+            "assert len(row.result['input_budget_receipts']) == 2",
+            "assert 'fake-never-sent' not in json.dumps(row.result)",
+            "assert 'feedback' not in json.dumps(row.result)",
+            "assert counter2.profiles == counter2.calls == 1",
+            "assert allowed and checked.prepared_request is not None"
+          ],
+          "test_counter_cache_receipts_and_network_attempts_remain_bounded_on_resume": [
+            "assert len(budget.cache) == len(row.result['input_budget_receipts']) == 32",
+            "assert row.result['input_budget_attempts'] == {'models_get': 1, 'count_tokens': 36}",
+            "pytest.raises(InputBudgetError, match='activity_input_budget_unavailable')",
+            "assert resumed.profiles == resumed.calls == 0",
+            "assert row.result['input_budget_attempts'] == {'models_get': 1, 'count_tokens': 255}",
+            "assert (await budget.admit(request(user_prompt=f'required-{index}'), guard=guard, omissions={}))[1]"
+          ],
+          "test_resumed_model_revision_cannot_silently_replace_saved_limits": [
+            "pytest.raises(InputBudgetError, match='activity_model_profile_changed')",
+            "assert row.result['model_token_profile'] == original and counter.profiles == 1 and (counter.calls == 0)"
+          ],
+          "test_lost_claim_after_count_never_admits_or_records_success": [
+            "pytest.raises(ValueError, match='claim_lost')",
+            "assert not row.result.get('input_budget_receipts')"
+          ],
+          "test_whole_optional_omission_preserves_correction_group_and_required_sources": [
+            "assert omit_optional_unit(context, omissions)",
+            "assert context['today_activity']['records'] == [{'id': 'new'}]",
+            "assert omit_optional_unit(context, omissions)",
+            "assert omit_optional_unit(context, omissions)",
+            "assert context['memories']['target']['packets'] == []",
+            "assert context['source']['text'] == 'required'",
+            "assert not omit_optional_unit(context, omissions)"
+          ]
+        },
+        "tests/social/test_world_selected_thread_and_reactions.py": {
+          "setup": [
+            "assert client.post('/api/v1/worlds/world-manual/owner-character', headers=FRONTEND_HEADERS, json=_owner_payload()).status_code == 201"
+          ],
+          "test_selected_reply_is_anchor_and_nested_write_targets_immediate_author": [
+            "assert reply.status_code == 201, reply.text",
+            "assert reply.json()['post']['reply_to_post_id'] == 'reply-C'",
+            "assert page['schema_version'] == 'owner-manual-social-thread-v2'",
+            "assert page['selected_post']['id'] == 'reply-B' and page['root_post_id'] == 'post-autonomous-target'",
+            "assert 'sibling' not in [p['id'] for p in page['replies']]",
+            "assert candidate.target_post_id == evidence.target_post_id == 'reply-C'",
+            "assert evidence.root_post_id == 'post-autonomous-target'",
+            "assert candidate.target_world_character_id == 'world-character-autonomous-target'"
+          ],
+          "test_like_set_unset_converges_and_each_real_transition_has_audit_only_event": [
+            "assert selected['viewer_like_state'] == 'liked' and selected['can_owner_like']",
+            "assert response.status_code == 200, response.text",
+            "assert response.json()['viewer_like_state'] == state and response.json()['like_count'] == count",
+            "assert (row.world_id, row.actor_world_character_id, row.target_world_character_id) == ('world-manual', client.get(BASE + 'reply-C', headers=FRONTEND_HEADERS).json()['owner_world_character_id'], 'world-character-autonomous-target')",
+            "assert [e.event_type for e in events] == ['like_added', 'like_removed', 'like_added']",
+            "assert all((e.retrieval_status == 'audit_only' for e in events))",
+            "assert len({e.idempotency_key for e in events}) == 3",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 0",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 0"
+          ],
+          "test_reaction_rollback_keeps_source_event_and_state_atomic": [
+            "pytest.raises(RuntimeError)",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0"
+          ],
+          "test_selected_hidden_or_wrong_world_not_read_or_written": [
+            "assert client.get(BASE + 'reply-C', headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.put(BASE + 'reply-C/like', headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.get(BASE.replace('world-manual', 'other') + 'reply-C', headers=FRONTEND_HEADERS).status_code in {403, 404}"
+          ],
+          "test_hidden_parent_is_unavailable_without_flattening_selected_subtree": [
+            "assert response.status_code == 200",
+            "assert response.json()['parent'] == {'post_id': 'reply-B', 'state': 'unavailable'}",
+            "assert response.json()['selected_post']['reply_to_post_id'] == 'reply-B'"
+          ],
+          "test_unambiguous_legacy_like_is_normalized_in_write_not_get": [
+            "assert client.get(BASE + 'reply-C', headers=FRONTEND_HEADERS).json()['selected_post']['viewer_like_state'] == 'not_liked'",
+            "assert client.put(BASE + 'reply-C/like', headers=FRONTEND_HEADERS).status_code == 200",
+            "assert db.scalar(select(models.PostLike)).actor_world_character_id == owner_actor",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 0"
+          ],
+          "test_subtree_pagination_counts_all_fifty_three_descendants_in_stable_order": [
+            "assert first['selected_post']['reply_count'] == 54",
+            "assert first['next_offset'] == 50 and second['next_offset'] is None",
+            "assert len(all_ids) == len(set(all_ids)) == 54 and 'sibling' not in all_ids",
+            "assert [value for value in all_ids if value.startswith('page-')] == sorted((value for value in all_ids if value.startswith('page-')))"
+          ],
+          "test_cycle_has_no_canonical_root_and_never_authorizes_reaction_or_reply": [
+            "assert client.get(BASE + 'reply-B', headers=FRONTEND_HEADERS).status_code == 404",
+            "assert client.put(BASE + 'reply-B/like', headers=FRONTEND_HEADERS).status_code == 404"
+          ],
+          "test_public_context_is_server_scoped_and_get_never_mutates_sources": [
+            "assert client.put(BASE + 'reply-C/like', headers=FRONTEND_HEADERS).status_code == 200",
+            "assert not db.new and (not db.dirty) and (not db.deleted)",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert read.viewer_like_state == expected and read.like_count == 1",
+            "assert read.can_owner_like is (expected == 'liked')"
+          ],
+          "test_concurrent_like_puts_on_independent_sqlite_connections_are_one_transition": [
+            "assert client.post('/api/v1/worlds/world-manual/owner-character', headers=FRONTEND_HEADERS, json=_owner_payload()).status_code == 201",
+            "assert [r.status_code for r in responses] == [200, 200]",
+            "assert all((r.json()['viewer_like_state'] == 'liked' and r.json()['like_count'] == 1 for r in responses))",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 1",
+            "assert db.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "assert db.scalar(select(models.SocialEvent)).retrieval_status == 'audit_only'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_response_name_binding.py": {},
+        "tests/chat/test_world_chat_unlimited.py": {},
+        "tests/routine_posts/test_authored_aux_normalization.py": {},
+        "tests/runtime/test_routine_bounded_integration.py": {},
+        "tests/runtime/test_sns_budget_transport.py": {},
+        "tests/runtime/test_sns_model_input_budget.py": {},
+        "tests/social/test_world_selected_thread_and_reactions.py": {}
+      }
     }
   ]
 }

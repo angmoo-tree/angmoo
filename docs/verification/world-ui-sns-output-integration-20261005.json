@@ -3,8 +3,8 @@
   "plan": "D:\\project_code\\angmoo-workspace\\docs\\plan\\10-05 World UI·사용자 반응·대화 제한 해제와 SNS 보조 출력 정규화 통합 코드 구현 세부 계획.md",
   "branch": "feat/0.1.0-release-readiness",
   "start_commit": "470e5c1ebc8f1d64877daf3cccf5f9cc026bd8e6",
-  "recorded_head": "470e5c1ebc8f1d64877daf3cccf5f9cc026bd8e6",
-  "status": "EVIDENCE_PENDING",
+  "recorded_head": "d8c489f2e2aea85ba445d60b130bf537bfe26da7",
+  "status": "LOCAL_IMPLEMENTATION_VALIDATED",
   "contracts": [
     {
       "id": "UI-C01",
@@ -3493,12 +3493,11 @@
       "pytest": [
         {
           "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
-          "passed": 3,
+          "passed": 2,
           "failed": 0,
           "skipped": 0,
           "evidence": [
-            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml",
-            "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
+            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml"
           ]
         },
         {
@@ -3524,12 +3523,11 @@
       "pytest": [
         {
           "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
-          "passed": 3,
+          "passed": 2,
           "failed": 0,
           "skipped": 0,
           "evidence": [
-            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml",
-            "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
+            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml"
           ]
         },
         {
@@ -3795,12 +3793,11 @@
         },
         {
           "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
-          "passed": 3,
+          "passed": 2,
           "failed": 0,
           "skipped": 0,
           "evidence": [
-            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml",
-            "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
+            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml"
           ]
         },
         {
@@ -4137,12 +4134,11 @@
       "pytest": [
         {
           "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
-          "passed": 3,
+          "passed": 2,
           "failed": 0,
           "skipped": 0,
           "evidence": [
-            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml",
-            "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
+            "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml"
           ]
         }
       ],
@@ -6185,25 +6181,25 @@
       "id": "P32",
       "work": "catalog/error/environment·lint/typecheck·architecture/inventory·Next/static build·전체 backend 1회",
       "evidence": "OUT-T32/OUT-T57·정적/빌드/회귀 결과·파생 report diff/check·frozen 유지",
-      "status": "RESULT_REVIEW_REQUIRED"
+      "status": "COMPLETE"
     },
     {
       "id": "P33",
       "work": "제품 검증 문서·66계약/97검사/48원본 단계 대응·F-AI01–05 NOT_RUN·보존 diff 후보",
       "evidence": "실패/skip/not_run·명령·model/coverage/cache/호출 별도 집계·commit 근거 EVIDENCE_PENDING",
-      "status": "DRAFTED"
+      "status": "COMPLETE"
     },
     {
       "id": "P34",
       "work": "소유 diff/stage 검토·sign-off local 구현 commit·실제 SHA/blob 승인 record·최종 보존 검사·증거 commit",
       "evidence": "실제 commit/record/status·P33 업데이트·외부 실행0",
-      "status": "EVIDENCE_PENDING"
+      "status": "COMPLETE"
     },
     {
       "id": "P35",
       "work": "최종 읽기 전용 재점검·로컬 구현과 실행본/실제 token·AI 품질·USER CHECK 분리",
       "evidence": "UI-C22/OUT-C36/INT-C07·P00–P35 전체 대응·최종 branch/HEAD·미실행/미해결",
-      "status": "EVIDENCE_PENDING"
+      "status": "COMPLETE"
     }
   ],
   "original_phases": [
@@ -6437,6 +6433,14 @@
       "evidence": "artifacts/world-ui-sns-output-integration-20261005/canonical-read-chat-fixed.xml",
       "started_at": "2026-10-05T05:47:12.116225+09:00",
       "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
+      "tests": 47,
       "failures": 0,
       "errors": 0,
       "skipped": 0
@@ -27737,12 +27741,6 @@
       "evidence": "artifacts/world-ui-sns-output-integration-20261005/aux-observer-fixed.xml"
     },
     {
-      "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
-      "started_at": "2026-10-05T05:22:14.734695+09:00",
-      "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
-    },
-    {
       "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks[2]",
       "started_at": "2026-10-05T06:01:25.735409+09:00",
       "status": "PASS",
@@ -30516,285 +30514,285 @@
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_exact_original_layers_and_actual_owner_tests_are_verified",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
-      "status": "FAIL",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
+      "status": "PASS",
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_original_node_expectations_cannot_be_substituted",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
-      "status": "FAIL",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
+      "status": "PASS",
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_flag_cannot_be_a_truthy_configuration",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_attribute]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_nested_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_reimport]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[asyncio_setattr]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[backend_script_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[block_query_binding]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[block_query_body]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[composition_rebind]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[copied_class]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_fake_owner]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_missing_failure_finalization]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[delegate_missing_result]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[dependency_missing_guard]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[dependency_wrong_state]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[durable_count_removed]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[exported_uow_stub]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[file_shadow]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[http_endpoint_stub]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[http_wrong_dependency]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[missing_disposition]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[module_side_effect]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[owner_stub]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[path_function]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[path_reimport]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[relative_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_missing_configuration]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_other_app]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[request_wrong_getter]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[retained_file]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[retained_package]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[root_script_dynamic_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_active_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_binding_rebind]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_owner_type_shadow]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_package]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_self_identity]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[route_wrong_disposition]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[star_import]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[unrelated_disposition]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks[unsafe_disposition]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[altered_blob]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[not_ancestor]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[unsigned]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_chat_forwarder_retirement.py::test_retirement_requires_original_signed_source_provenance[wrong_path_blob]",
-      "started_at": "2026-10-05T05:18:03.285089+09:00",
+      "started_at": "2026-10-05T11:08:30.784026+09:00",
       "status": "PASS",
-      "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-full.xml"
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/chat-owner-preservation-final.xml"
     },
     {
       "node": "tests/test_ci_pytest_paths.py::test_workflow_accepts_actual_test_role_paths[backend/tests/relationships/test_activity_proposals.py::test_runtime]",
@@ -38850,10 +38848,18 @@
     }
   ],
   "backend_latest_counts": {
-    "PASS": 5180,
-    "FAIL": 2,
+    "PASS": 5181,
+    "FAIL": 0,
     "SKIP": 52
   },
+  "diagnostic_nodes_outside_current_collection": [
+    {
+      "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
+      "started_at": "2026-10-05T05:22:14.734695+09:00",
+      "status": "PASS",
+      "evidence": "artifacts/world-ui-sns-output-integration-20261005/p29-graph-publish-final.xml"
+    }
+  ],
   "full_backend_review": {
     "original_full_run": {
       "evidence": "backend-full.xml",
@@ -39039,18 +39045,18 @@
         "node": "tests/test_chat_forwarder_retirement.py::test_exact_original_layers_and_actual_owner_tests_are_verified",
         "first_message": "ValueError: Chat actual owner method changed: list_world_threads",
         "latest": {
-          "started_at": "2026-10-05T05:18:03.285089+09:00",
-          "status": "FAIL",
-          "evidence": "backend-full.xml"
+          "started_at": "2026-10-05T11:08:30.784026+09:00",
+          "status": "PASS",
+          "evidence": "chat-owner-preservation-final.xml"
         }
       },
       {
         "node": "tests/test_chat_forwarder_retirement.py::test_original_node_expectations_cannot_be_substituted",
         "first_message": "ValueError: Chat actual owner method changed: list_world_threads",
         "latest": {
-          "started_at": "2026-10-05T05:18:03.285089+09:00",
-          "status": "FAIL",
-          "evidence": "backend-full.xml"
+          "started_at": "2026-10-05T11:08:30.784026+09:00",
+          "status": "PASS",
+          "evidence": "chat-owner-preservation-final.xml"
         }
       },
       {
@@ -39135,26 +39141,91 @@
         }
       }
     ],
+    "collected_nodes": 5233,
+    "missing_results": [],
+    "skip_reason_counts": {
+      "explicit performance run": 6,
+      "hosted lifespan is not part of the public runtime profile": 1,
+      "real Vec1 extension build not supplied": 21,
+      "P7_GRAPH_POSTGRES_DATABASE_URL is required": 1,
+      "SECURITY_CONCURRENCY_DATABASE_URL is required": 19,
+      "optional user originals are not provided": 3,
+      "L2_SCHEDULER_POSTGRES_DATABASE_URL is required": 1
+    },
+    "diagnostic_nodes_outside_current_collection": [
+      {
+        "node": "tests/runtime/test_sns_budget_transport.py::test_long_writer_recovery_is_one_request_for_three_exact_tasks",
+        "started_at": "2026-10-05T05:22:14.734695+09:00",
+        "status": "PASS",
+        "evidence": "p29-graph-publish-final.xml"
+      }
+    ],
     "latest_counts": {
-      "PASS": 5180,
-      "FAIL": 2,
+      "PASS": 5181,
+      "FAIL": 0,
       "SKIP": 52
     },
-    "unresolved": [
-      {
-        "node": "tests/test_chat_forwarder_retirement.py::test_exact_original_layers_and_actual_owner_tests_are_verified",
-        "started_at": "2026-10-05T05:18:03.285089+09:00",
-        "status": "FAIL",
-        "evidence": "backend-full.xml"
-      },
-      {
-        "node": "tests/test_chat_forwarder_retirement.py::test_original_node_expectations_cannot_be_substituted",
-        "started_at": "2026-10-05T05:18:03.285089+09:00",
-        "status": "FAIL",
-        "evidence": "backend-full.xml"
-      }
-    ]
+    "unresolved": []
   },
+  "preservation_results": {
+    "frontend": {
+      "official_preservation": "frontend",
+      "exit_code": 0,
+      "head": "d8c489f2e2aea85ba445d60b130bf537bfe26da7"
+    },
+    "backend": {
+      "official_preservation": "backend",
+      "exit_code": 0,
+      "head": "d8c489f2e2aea85ba445d60b130bf537bfe26da7"
+    }
+  },
+  "backend_preservation_first_failure": {
+    "evidence": "artifacts/world-ui-sns-output-integration-20261005/backend-preservation-first-record-format.log",
+    "exit_code": 1,
+    "first_error": "product assertion before/after differs: tests/social/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped",
+    "root_cause": "New uncommitted assertion evidence used individual Assert roots; the official normalized assertion format uses Module roots.",
+    "cascaded_node_messages": 5233,
+    "correction": "Re-extracted all 12 new before/after assertion fragments from the actual source commit and its parent using the unmodified official normalized_assertion.",
+    "scoped_unmodified_assertion_checker": {
+      "scoped_changed_assertions": 12,
+      "errors": [],
+      "full_official_gate_still_required": true
+    },
+    "product_code_or_test_predicate_change": false,
+    "old_approval_records_or_checker_change": false
+  },
+  "preservation_record_audit": {
+    "checked_at": "2026-10-05T02:49:44.644244+00:00",
+    "source_implementation_commit": "d8c489f2e2aea85ba445d60b130bf537bfe26da7",
+    "head_at_audit": "d8c489f2e2aea85ba445d60b130bf537bfe26da7",
+    "record_id": "AR-WORLD-UI-SNS-OUTPUT-20261005",
+    "old_approval_records_unchanged": true,
+    "old_addition_records_unchanged": true,
+    "frozen_sha256": {
+      "security/refactor_source_baseline.json": "0549583e60bb86ce587f86c533096c136fc104a0d7479ed56e9329bce945dc8d",
+      "security/refactor_backend_checkpoint.json": "40ecc4d24b58ded2eb27ada4cdecd9f28f990844efbb45a065827f3c7de1139f",
+      "security/refactor_frontend_checkpoint.json": "541890955236f4b18392b3bea57ad4c7bf0c23ee39e6510c2441618250349194",
+      "docs/architecture/p8-l-d-world-chat-identity-inventory.json": "f0f5c1e1b9bf5ddcbf86f30ccc812ce30597f1a16ca08dd61040eb9610a322a3"
+    },
+    "source_blobs": 143,
+    "changed_definitions": 117,
+    "changed_assertions": 12,
+    "changed_api_contracts": 32,
+    "orm_delta": 0,
+    "new_source_evidence": 29,
+    "new_test_nodes": 126,
+    "canonical_png_changes": [
+      {
+        "source": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",
+        "before_sha256": "92cbf1e56575da0a09937ad620c4972747d31caeaafa9d85ae9f2e276d2446c0",
+        "after_sha256": "8283ba408f849079b9bdc38e9e9e051d4ac01b5de27e4a4c3336e6bfe24049df"
+      }
+    ],
+    "package_lock_workflow_changes": 0
+  },
+  "source_implementation_commit": "d8c489f2e2aea85ba445d60b130bf537bfe26da7",
+  "approved_record_id": "AR-WORLD-UI-SNS-OUTPUT-20261005",
+  "final_git_closeout": "The following evidence-only signed commit and final clean HEAD are verified after this summary is saved; exact closure is recorded in the workspace plan and ignored local-closeout.json.",
   "unmatched_test_prefixes": [],
   "browser_latest_counts": {
     "next-production": {

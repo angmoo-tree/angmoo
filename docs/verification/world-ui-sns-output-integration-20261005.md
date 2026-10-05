@@ -3,8 +3,8 @@
 - 계획: `D:\project_code\angmoo-workspace\docs\plan\10-05 World UI·사용자 반응·대화 제한 해제와 SNS 보조 출력 정규화 통합 코드 구현 세부 계획.md` — P00–P35.
 - 브랜치: `feat/0.1.0-release-readiness`.
 - 출발 HEAD: `470e5c1ebc8f1d64877daf3cccf5f9cc026bd8e6`, 작업 폴더 clean.
-- 상태: **제품 구현·관련 로컬 검증 완료, 전체 검사 및 실제 commit/blob 보존 기록 EVIDENCE_PENDING.**
-- 로컬 signed 구현 커밋: EVIDENCE_PENDING. 원격 push·PR·CI workflow·main 전환/병합 없음.
+- 상태: **P00–P35 로컬 구현·검증 완료.** 실제 API·운영 적용·직접 USER CHECK는 별도 NOT_RUN이다.
+- 로컬 signed 구현 커밋: `d8c489f2e2aea85ba445d60b130bf537bfe26da7`. 원격 push·PR·CI workflow·main 전환/병합 없음.
 - [기계 판독 대응표](world-ui-sns-output-integration-20261005.json). 아래 97개는 계약 확인 ID이며 서로 독립된 pytest 테스트 97개라는 뜻이 아니다.
 
 ## 구현과 책임
@@ -28,7 +28,7 @@ Characters가 전체 authored-name/macro 의미를 먼저 검증하고, Routine/
 | 실제 backend browser | Next BFF→HTTP router→실제 임시 SQLite. selected reply, canonical like/reload, commit 후 응답 유실→same-key retry 201, Post/Reply event 각1·Like audit event1, 관계/graph projection0·AI outbound0 |
 | canonical Linux | 고정 Playwright1.62.1/Chromium151·Ubuntu24.04·ko-KR·Asia/Seoul, Next/static 36 PASS |
 | 로컬 정적·빌드 | catalog16 namespaces/2461 keys, UI errors53, 환경·lint·typecheck·Next/static build PASS. Backend1375 modules/5603 edges·frontend14 features/legacy0·design raw colors1229/files36/surfaces18/route gaps0/screenshots24 |
-| 전체 backend | 최초 전체 실행 5,199건: 5,117 PASS·30 FAIL·52 SKIP, 19,947.25초. 해당 실행을 PASS로 바꾸지 않는다. 이후 현재 소스의 영향 재검사로 28건 해소, 실제 커밋의 승인 증거가 필요한 보존 검사 2건은 P34까지 EVIDENCE_PENDING. 개별 최신 결과·첫 실패/재검사 연결은 JSON의 full_backend_review 참조 |
+| 전체 backend | 최초 전체 실행 5,199건: 5,117 PASS·30 FAIL·52 SKIP. 이후 수정·영향 재검사와 실제 커밋 증거 연결로 최초30건 모두 해소했다. 현재 수집5,233개 node의 최신 결과는 **5,181 PASS·0 FAIL·52 SKIP**, 결과 없는 node0. 전체 단일 run을 재실행한 결과로 표시하지 않는다 |
 | 실제 token/품질/비용 F-AI01–05 | NOT_RUN. fake 계수/Provider는 실제 모델 tokenizer 일치·품질·지연·비용 실측이 아님 |
 | 운영 Docker·설치판·USER CHECK | NOT_RUN. fixture 성공은 실제 실행본 적용이나 직접 사용자 판정이 아님 |
 | PostgreSQL 동시성 | NOT_RUN. 준비된 격리 PostgreSQL이 없어 file-backed SQLite의 독립 연결로 원자성·경합을 검사 |
@@ -45,7 +45,7 @@ Characters가 전체 authored-name/macro 의미를 먼저 검증하고, Routine/
 
 ## 시각 기준과 실패 기록
 
-최초 canonical 결과34 PASS/2 FAIL은 두 배포 방식에서 같은 World 피드 PNG였다. 의도된 우측 사진/Send·좌측 반응 및 viewer 상태를 직접 검토했다. 두 실제 PNG는 동일 bytes이며 SHA256 `8283ba408f849079b9bdc38e9e051d4ac01b5de27e4a4c3336e6bfe24049df`이다. 이전 `92cbf1e56575da0a09937ad620c4972747d31caeaafa9d85ae9f2e276d2446c0`에서 그 PNG 하나만 갱신했다. 나머지10장·corpus11·tolerance를 유지한 최종 canonical36 PASS다.
+최초 canonical 결과34 PASS/2 FAIL은 두 배포 방식에서 같은 World 피드 PNG였다. 의도된 우측 사진/Send·좌측 반응 및 viewer 상태를 직접 검토했다. 두 실제 PNG는 동일 bytes이며 SHA256 `8283ba408f849079b9bdc38e9e9e051d4ac01b5de27e4a4c3336e6bfe24049df`이다. 이전 `92cbf1e56575da0a09937ad620c4972747d31caeaafa9d85ae9f2e276d2446c0`에서 그 PNG 하나만 갱신했다. 나머지10장·corpus11·tolerance를 유지한 최종 canonical36 PASS다.
 
 처음 repro8 FAIL/16 PASS, Next 내부 이동 이탈 guard 누락, 실제 Routine lane 이름 누락, 재검증 중 receipt 손실, Chat finalizer의 domain 경계는 실제 source를 수정하고 영향 검사를 통과했다. 검사의 hover/idle 상태 혼합(1px transform), static 하단 탐색 링크의 slash 가정, 합성 fixture 모델 alias/owner role은 실제 계약대로 시험 준비/측정을 고쳤다. 기대값을 오류 동작으로 낮추거나 픽셀 tolerance·권한·예산을 완화하지 않았다. 최초 실패 원자료를 보존하며 최종 성공과 구분한다.
 
@@ -262,10 +262,10 @@ Characters가 전체 authored-name/macro 의미를 먼저 검증하고, Routine/
 | P29 | Social/Chat/Routine/이름/계수/관찰 임시DB 회귀·긴 입력+긴 출력+복구+중단 재개 통합 slice | COMPLETE |
 | P30 | 실제 spec 수집·Next/static mock UI+실제 backend/fake Provider/counter 동작 | COMPLETE |
 | P31 | ko/en reference geometry·canonical 로컬시각·7폭/200%·빈폼/panel/예산 오류 | COMPLETE |
-| P32 | catalog/error/environment·lint/typecheck·architecture/inventory·Next/static build·전체 backend 1회 | RESULT_REVIEW_REQUIRED |
-| P33 | 제품 검증 문서·66계약/97검사/48원본 단계 대응·F-AI01–05 NOT_RUN·보존 diff 후보 | DRAFTED |
-| P34 | 소유 diff/stage 검토·sign-off local 구현 commit·실제 SHA/blob 승인 record·최종 보존 검사·증거 commit | EVIDENCE_PENDING |
-| P35 | 최종 읽기 전용 재점검·로컬 구현과 실행본/실제 token·AI 품질·USER CHECK 분리 | EVIDENCE_PENDING |
+| P32 | catalog/error/environment·lint/typecheck·architecture/inventory·Next/static build·전체 backend 1회 | COMPLETE |
+| P33 | 제품 검증 문서·66계약/97검사/48원본 단계 대응·F-AI01–05 NOT_RUN·보존 diff 후보 | COMPLETE |
+| P34 | 소유 diff/stage 검토·sign-off local 구현 commit·실제 SHA/blob 승인 record·최종 보존 검사·증거 commit | COMPLETE |
+| P35 | 최종 읽기 전용 재점검·로컬 구현과 실행본/실제 token·AI 품질·USER CHECK 분리 | COMPLETE |
 
 | 원본 | 통합 단계 |
 | --- | --- |
@@ -343,3 +343,16 @@ git diff --check
 Browser cwd=`browser-tests`, `node node_modules/@playwright/test/cli.js test --config=playwright.world-social-output.config.ts` 및 static config, 실제 HTTP config를 사용한다. canonical은 저장소의 고정 Linux 이미지 digest와 같은 Playwright/Chromium revision으로 로컬 컨테이너만 사용했다. scripts/ci 경로의 독립 Python 검사는 Hosted CI/workflow 실행이 아니다.
 
 P34: 실제 signed 구현 commit → 그 commit의 exact blobs/AST/API delta·새 source/node addition append → 공식 backend/front 보존 gate → 증거만 별도 signed local commit 순서다. frozen source/checkpoint·이전 approved records를 재생성하지 않는다. EVIDENCE_PENDING은 실제 SHA/결과를 확보한 뒤 바꾼다.
+
+
+## 실제 커밋·최종 보존 근거
+
+승인 기록 `AR-WORLD-UI-SNS-OUTPUT-20261005`는 실제 signed 구현 커밋의 143개 source blob·117개 정의·12개 기존 단언 변경·32개 API/스키마 차이를 기록한다. ORM delta0이며 새 파일29개·새 node126개를 공식 --append로 추가했다. 과거 승인/추가 records와 frozen source/backend/frontend checkpoints, P8-L-D digest는 그대로다.
+
+공식 frontend 보존 검사 **324 source PASS**, backend의 source/contracts/nodes 보존 검사 **PASS**이며 정확한 결과·HEAD는 JSON의 preservation_results에 있다. checker가 실제로 소유한 순수 AST memo만 주기적으로 비워 동일 자료를 다시 파싱했고 validator·허용 변경·단언·판정은 바꾸지 않았다. Chat 원본 보호·위조 거절 검사도 원 파일을 수정하지 않고 전체 scope를 재검사했다.
+
+최초 backend 보존 gate는 새 단언 증거가 개별 Assert AST로 저장되어 공식 Module AST와 일치하지 않는 오류로 실패했다. 그 예외 후 보호 계보가 비워져 현재 node5,233개에 도입 증거 없음이 연쇄 보고된 것이며, 5,233개 기능 테스트가 실패했다는 뜻은 아니다. 실제 구현 커밋과 부모에서 12개 단언 증거를 공식 normalized_assertion으로 다시 추출했고, 원 검사기의 단언 비교 12개를 먼저 통과한 뒤 전체 gate를 다시 실행했다. 제품 코드·단언·검사 기준·과거 승인 기록은 수정하지 않았다. 최초 log와 정정 범위는 backend_preservation_first_failure에 연결했다.
+
+52 SKIP는 명시적 성능 실행6·실제 Vec1 확장 미제공21·격리 PostgreSQL 미설정21·선택적 사용자 원본 미제공3·public profile에서 제외된 hosted lifespan1이다. 제외 이유와 최초 실패→현재 node 결과는 full_backend_review에 저장했다. 이전 진단용으로만 존재했던 Writer node1개는 현재 수집/최신 결과 수에 합산하지 않았다.
+
+이 문서와 append 증거만 별도의 signed 로컬 커밋에 저장하고 마지막 branch/HEAD/clean 및 source 정합성을 읽기 전용으로 확인한다. 그 최종 커밋 SHA는 자체 참조로 추정하지 않고 workspace 계획 및 로컬 closeout 원자료·Git log로 확인한다.
