@@ -161,6 +161,25 @@ and assertion transitions must be appended against the actual committed fix.
 Final candidate tree/history, preservation and hosted CI remain independent
 completion gates after that commit.
 
+## Notice drift found during the second PR CI
+
+On candidate `49e46d6a5ed885cdd72c2d6ca5c57306a2b4e478`, the dependency-license
+job passes both vulnerability audits and the GPL/policy checks, then rejects
+the stale third-party notice. The locked dependencies already include six new
+Python packages for configuration/language validation and six JavaScript
+production inventory entries for the earlier translation implementation and
+its peer dependencies. The notice still lists 79 Python and 60 JavaScript
+packages rather than the current 85 and 66.
+
+The deterministic notice is regenerated using the existing checker and policy.
+Every installed Python version agrees with its lock entry, the pnpm 10 and
+CI-pinned pnpm 11 inventories agree on all 66 JavaScript rows, all four exact
+conditional dependency reviews remain valid, and the regenerated notice passes
+the same strict comparison. This correction changes only the notice and this
+report: no dependency version, lockfile, license policy, audit rule or workflow
+is changed. The next published candidate must still pass hosted checks on its
+own SHA.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has

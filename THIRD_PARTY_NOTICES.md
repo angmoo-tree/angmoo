@@ -3,13 +3,14 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (79)
+## Python packages (85)
 
 - `aiosqlite 0.22.1` — OSI Approved :: MIT License
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
 - `annotated-types 0.7.0` — OSI Approved :: MIT License
 - `anyio 4.15.1` — MIT
+- `attrs 26.1.0` — MIT
 - `certifi 2026.4.22` — MPL-2.0
 - `cffi 2.0.0` — MIT
 - `charset-normalizer 3.4.7` — MIT
@@ -30,9 +31,12 @@ Package authors retain all rights granted by their respective licenses.
 - `iniconfig 2.3.0` — MIT
 - `jsonpatch 1.33` — Modified BSD License
 - `jsonpointer 3.1.1` — Modified BSD License
+- `jsonschema 4.26.0` — MIT
+- `jsonschema-specifications 2025.9.1` — MIT
 - `ladybug 0.19.1` — MIT
 - `langchain-core 1.4.3` — MIT
 - `langchain-protocol 0.0.16` — MIT
+- `langcodes 3.5.1` — OSI Approved :: MIT License
 - `langgraph 1.2.2` — MIT
 - `langgraph-checkpoint 4.1.1` — MIT
 - `langgraph-checkpoint-sqlite 3.1.1` — MIT
@@ -66,8 +70,10 @@ Package authors retain all rights granted by their respective licenses.
 - `python-multipart 0.0.32` — Apache-2.0
 - `pytz 2026.2` — MIT
 - `pyyaml 6.0.3` — MIT
+- `referencing 0.37.0` — MIT
 - `requests 2.34.2` — Apache-2.0
 - `requests-toolbelt 1.0.0` — Apache 2.0
+- `rpds-py 2026.6.3` — MIT
 - `sentencepiece 0.2.2` — Apache-2.0
 - `six 1.17.0` — MIT
 - `sniffio 1.3.1` — MIT OR Apache-2.0
@@ -85,7 +91,7 @@ Package authors retain all rights granted by their respective licenses.
 - `xxhash 3.7.0` — BSD
 - `zstandard 0.25.0` — BSD-3-Clause
 
-## JavaScript production packages (60)
+## JavaScript production packages (66)
 
 - `@babel/code-frame 7.29.7` — MIT
 - `@babel/compat-data 7.29.7` — MIT
@@ -100,6 +106,7 @@ Package authors retain all rights granted by their respective licenses.
 - `@babel/helper-validator-option 7.29.7` — MIT
 - `@babel/helpers 7.29.7` — MIT
 - `@babel/parser 7.29.8` — MIT
+- `@babel/runtime 7.29.7` — MIT
 - `@babel/template 7.29.7` — MIT
 - `@babel/traverse 7.29.8` — MIT
 - `@babel/types 7.29.8` — MIT
@@ -123,6 +130,8 @@ Package authors retain all rights granted by their respective licenses.
 - `escalade 3.2.0` — MIT
 - `gensync 1.0.0-beta.2` — MIT
 - `has-flag 4.0.0` — MIT
+- `html-parse-stringify 4.0.1` — MIT
+- `i18next 26.4.2` — MIT
 - `js-tokens 4.0.0` — MIT
 - `jsesc 3.1.0` — MIT
 - `json5 2.2.3` — MIT
@@ -136,6 +145,7 @@ Package authors retain all rights granted by their respective licenses.
 - `postcss 8.5.23` — MIT
 - `react 19.2.8` — MIT
 - `react-dom 19.2.8` — MIT
+- `react-i18next 17.0.15` — MIT
 - `scheduler 0.27.0` — MIT
 - `semver 6.3.1` — ISC
 - `semver 7.8.5` — ISC
@@ -144,8 +154,10 @@ Package authors retain all rights granted by their respective licenses.
 - `styled-jsx 5.1.6` — MIT
 - `supports-color 7.2.0` — MIT
 - `tslib 2.8.1` — 0BSD
+- `typescript 5.9.3` — Apache-2.0
 - `undici-types 6.21.0` — MIT
 - `update-browserslist-db 1.3.1` — MIT
+- `use-sync-external-store 1.7.0` — MIT
 - `yallist 3.1.1` — ISC
 
 ## Reviewed conditional dependencies
