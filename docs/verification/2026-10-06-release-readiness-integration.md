@@ -264,6 +264,22 @@ policy and validator remain intact. The canonical checker passes with 1,215
 raw colors in 36 files, 18 surfaces, zero route gaps and 36 screenshot calls.
 The next candidate still requires its actual hosted architecture result.
 
+## Frontend runtime security packages
+
+The first fully acquired container Gate finds seven fixable high/critical Perl
+issues in the frontend Debian Bookworm runtime. Its `perl-base` is
+`5.36.0-7+deb12u3`; Debian records `5.36.0-7+deb12u4` as the fixed security
+version ([Debian tracker](https://security-tracker.debian.org/tracker/source-package/perl)).
+The frontend runtime now follows the existing OS-package repair pattern:
+upgrade only installed `perl-base` alongside PCRE2, assert the minimum fixed
+version with `dpkg --compare-versions`, and remove APT lists in the same layer.
+The pinned Node base, application lockfile, runtime user, image labels and
+healthcheck remain unchanged. Trivy severity, fixable-finding policy and secret
+rules are retained; the rebuilt exact-candidate image must pass the real Gate.
+Local Docker asset, runtime and release contract checkers pass, together with
+their 20 existing regression tests. Image package and scan evidence is recorded
+separately from these source-contract checks.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has
