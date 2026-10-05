@@ -1,6 +1,6 @@
 """Read-only effective values accepted by Chat, Social and Routine adapters."""
 from dataclasses import dataclass
-from app.domains.characters.contracts import ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportProfile, ImportSettings
 
 
 @dataclass(frozen=True)

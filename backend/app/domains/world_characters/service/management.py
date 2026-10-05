@@ -6,7 +6,7 @@ from app.domains.world_characters.configuration_models import WorldCharacterConf
 from app.domains.world_characters.schemas import management as schemas
 from app.domains.world_characters.schemas.identity import WorldCharacterProfileRead
 from app.domains.world_characters.service.configuration import effective_configuration, configuration_value
-from app.domains.characters.contracts import ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportProfile, ImportSettings
 from app.domains.characters.exceptions import InvalidCharacterHandleError
 from app.domains.characters.service.profile import normalize_character_handle
 from app.domains.identity.service.owner_context import is_claimed_local_owner

@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
 from app.domains.world_characters.contracts.configuration import WorldEffectiveConfiguration
-from app.domains.characters.contracts import ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportProfile, ImportSettings
 
 
 def effective_configuration(db, *, world_character_id):

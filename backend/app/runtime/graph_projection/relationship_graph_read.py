@@ -62,7 +62,7 @@ from app.runtime.graph_projection.process_client import (
 
 def _public_avatar(value):
     """Only noncredential public URLs; renderer supplies the common fallback."""
-    from app.domains.characters.contracts import safe_configuration_media
+    from app.domains.characters.service.import_configuration import safe_configuration_media
     try:
         return safe_configuration_media(value)
     except ValueError:

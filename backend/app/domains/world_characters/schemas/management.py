@@ -3,7 +3,7 @@ from typing import Literal
 import re
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.domains.world_characters.schemas.identity import WorldCharacterProfileRead
-from app.domains.characters.contracts import ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportProfile, ImportSettings
 from app.domains.characters.contracts import PERSONA_LIMITS, normalize_persona_text
 
 
@@ -144,4 +144,3 @@ class WorldCharacterProfileMedia(ExpectedWorldRevision):
     media_type: Literal["avatar", "banner"]
     content_type: Literal["image/png", "image/jpeg", "image/webp"]
     data_base64: str = Field(min_length=1, max_length=16000000)
-

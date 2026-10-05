@@ -355,7 +355,7 @@ def test_image_foreign_world_or_actor_snapshot_is_rejected_without_intent(databa
 def test_world_photo_reference_uses_frozen_profile_before_original_card(database, tmp_path):
     import hashlib
     from app.domains.characters.models import CharacterCardSource, AgentCreationDraft
-    from app.domains.characters.contracts import ImportProfile
+    from app.domains.characters.service.import_configuration import ImportProfile
     root = tmp_path / "media"
     media = MediaRuntime(sessionmaker(database), SimpleNamespace(media_root_path=root, media_url_path="/media"), clients={})
     with Session(database, expire_on_commit=False) as db:

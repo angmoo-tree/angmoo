@@ -82,6 +82,7 @@
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.image_settings",
       "app.domains.characters.service.image_settings_owner",
+      "app.domains.characters.service.import_configuration",
       "app.domains.characters.service.import_snapshots",
       "app.domains.characters.service.management",
       "app.domains.characters.service.media",

@@ -1,7 +1,7 @@
 {
-  "edge_count": 5814,
-  "external_import_count": 4109,
-  "module_count": 1402,
+  "edge_count": 5815,
+  "external_import_count": 4110,
+  "module_count": 1403,
   "modules": [
     {
       "external_imports": [],
@@ -1144,13 +1144,8 @@
         "__future__",
         "dataclasses",
         "datetime",
-        "hashlib",
-        "json",
-        "pydantic",
-        "re",
         "sqlalchemy.orm",
-        "typing",
-        "urllib.parse"
+        "typing"
       ],
       "imports": [
         "app.domains.characters.models",
@@ -1563,12 +1558,26 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "hashlib",
+        "json",
+        "pydantic",
+        "re",
+        "urllib.parse"
+      ],
+      "imports": [],
+      "module": "app.domains.characters.service.import_configuration",
+      "path": "backend/app/domains/characters/service/import_configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.characters.contracts",
         "app.domains.characters.models",
-        "app.domains.characters.models_import"
+        "app.domains.characters.models_import",
+        "app.domains.characters.service.import_configuration"
       ],
       "module": "app.domains.characters.service.import_snapshots",
       "path": "backend/app/domains/characters/service/import_snapshots.py",
@@ -13060,7 +13069,7 @@
         "dataclasses"
       ],
       "imports": [
-        "app.domains.characters.contracts"
+        "app.domains.characters.service.import_configuration"
       ],
       "module": "app.domains.world_characters.contracts.configuration",
       "path": "backend/app/domains/world_characters/contracts/configuration.py",
@@ -13463,6 +13472,7 @@
       ],
       "imports": [
         "app.domains.characters.contracts",
+        "app.domains.characters.service.import_configuration",
         "app.domains.world_characters.schemas.identity"
       ],
       "module": "app.domains.world_characters.schemas.management",
@@ -13628,7 +13638,7 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.characters.contracts",
+        "app.domains.characters.service.import_configuration",
         "app.domains.characters.service.import_snapshots",
         "app.domains.world_characters.configuration_models",
         "app.domains.world_characters.contracts.configuration",
@@ -13691,8 +13701,8 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
+        "app.domains.characters.service.import_configuration",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.environment",
         "app.domains.identity.service.owner_context",
@@ -13748,7 +13758,7 @@
       "imports": [
         "app.config",
         "app.core.ids",
-        "app.domains.characters.contracts",
+        "app.domains.characters.service.import_configuration",
         "app.domains.characters.service.import_snapshots",
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.owner_controlled",
@@ -17551,8 +17561,8 @@
       "imports": [
         "app.config",
         "app.contracts.read_deadline",
-        "app.domains.characters.contracts",
         "app.domains.characters.models",
+        "app.domains.characters.service.import_configuration",
         "app.domains.identity.models",
         "app.domains.relationships.contracts.graph_query",
         "app.domains.relationships.contracts.graph_read",
@@ -21698,9 +21708,9 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.domains.characters.contracts",
         "app.domains.characters.models",
         "app.domains.characters.models_import",
+        "app.domains.characters.service.import_configuration",
         "app.domains.characters.service.import_snapshots",
         "app.domains.identity.models",
         "app.domains.routines.models",

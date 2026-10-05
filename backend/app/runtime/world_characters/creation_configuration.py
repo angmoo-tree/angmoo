@@ -1,6 +1,6 @@
 """Final creation UoW: bind a permanent origin and initialize this World once."""
 from sqlalchemy import select
-from app.domains.characters.contracts import ImportConfiguration, ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportConfiguration, ImportProfile, ImportSettings
 from app.domains.characters.models_import import CharacterImportOrigin
 from app.domains.characters.models import AgentImageGenerationSetting
 from app.domains.characters.service.import_snapshots import capture_creation, get_import_snapshot, attach_copy_origin

@@ -13,7 +13,7 @@ from app.domains.characters.service.owner_controlled import (
 )
 from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
 from app.domains.world_characters.service.configuration import effective_configuration, initialize_configuration
-from app.domains.characters.contracts import ImportConfiguration, ImportProfile, ImportSettings
+from app.domains.characters.service.import_configuration import ImportConfiguration, ImportProfile, ImportSettings
 from app.domains.characters.service.import_snapshots import capture_creation
 from app.domains.identity.service.owner_context import is_claimed_local_owner
 from app.domains.world_characters.contracts.owner_identity import (

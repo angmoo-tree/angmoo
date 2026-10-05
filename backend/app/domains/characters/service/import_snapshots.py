@@ -1,6 +1,6 @@
 """Capture only on final creation/migration; reads and copies never recapture."""
 from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot, CharacterDraftImportOrigin
-from app.domains.characters.contracts import ImportConfiguration, import_digest
+from app.domains.characters.service.import_configuration import ImportConfiguration, import_digest
 from sqlalchemy import select
 
 

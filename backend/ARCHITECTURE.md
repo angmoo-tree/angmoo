@@ -9,6 +9,12 @@ distinct legacy transition baseline exactly once. Reads never create or recaptur
 an origin. Copies use that basis with new execution identities and initial OFF,
 without copying credentials, memories, relationships, leases or activity history.
 
+The Characters import service exposes its immutable input/output values from
+`service/import_configuration.py`. Consumers import that narrow typed entry;
+the existing `contracts.py` workflow exports retain their historical surface.
+Field validation, public media validation and deterministic digests stay with
+the import-service values, without storage or runtime dependencies.
+
 WorldCharacters owns typed profile/persona/activity/model configuration, its
 WorldCharacter revision and saved autonomous intent. Scoped management validates
 local owner, World, active role, media ownership and expected revision. Public

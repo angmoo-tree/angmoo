@@ -116,7 +116,7 @@ def test_t84_public_avatar_excludes_unsafe_or_credential_urls(value):
 def test_t98_t116_import_basis_media_survives_source_replacement_and_delete(tmp_path, monkeypatch):
     from app.domains.characters.models import Character
     from app.domains.characters.models_import import CharacterImportOrigin
-    from app.domains.characters.contracts import ImportConfiguration, ImportProfile, ImportSettings
+    from app.domains.characters.service.import_configuration import ImportConfiguration, ImportProfile, ImportSettings
     from app.domains.characters.service.import_snapshots import capture_creation, get_import_snapshot
     from app.runtime.characters.management import _quarantine_agent_private_media
     from datetime import UTC, datetime
