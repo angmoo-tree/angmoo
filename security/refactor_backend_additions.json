@@ -28893,6 +28893,114 @@
         "tests/runtime/test_sns_model_input_budget.py": {},
         "tests/social/test_world_selected_thread_and_reactions.py": {}
       }
+    },
+    {
+      "commit": "bef447ec1d948afab79454568ede1fdd825240a1",
+      "feature_id": "AR-WORLD-UI-SNS-CORE-REVIEW-20261005",
+      "reason": "One-hour core review regressions: admitted receipts, physical retry reservations, final send fence, total token HTTP deadline and exact recorder gaps",
+      "tracked_files": {
+        "backend/tests/integrations/test_gemini_input_budget_deadline.py": "805c82ae79b813ef74314ad23ec6ffdfe263657e",
+        "backend/tests/runtime/test_sns_admitted_input_receipts.py": "ca901f93e8821b3b456cfcbdd1d2f130a92ecbe6",
+        "backend/tests/runtime/test_sns_observation_gap_precision.py": "a88da0fd9187d9aad9f8f81aeb3ab3cb0d0fa1df",
+        "backend/tests/runtime/test_sns_physical_attempt_reservations.py": "5d72994c9a4158d643843c6d2c0acee0f7ec4efa"
+      },
+      "test_nodes": [
+        "tests/integrations/test_gemini_input_budget_deadline.py::test_admission_http_has_total_deadline_even_with_regular_chunks[count]",
+        "tests/integrations/test_gemini_input_budget_deadline.py::test_admission_http_has_total_deadline_even_with_regular_chunks[profile]",
+        "tests/runtime/test_sns_admitted_input_receipts.py::test_json_retry_hash_and_receipts_match_each_admitted_request",
+        "tests/runtime/test_sns_admitted_input_receipts.py::test_omitted_memory_is_absent_from_checkpoint_and_observer_receipts",
+        "tests/runtime/test_sns_admitted_input_receipts.py::test_rejected_input_has_no_delivered_receipt_or_manifest",
+        "tests/runtime/test_sns_observation_gap_precision.py::test_gap_report_preserves_threshold_precision[150.0]",
+        "tests/runtime/test_sns_observation_gap_precision.py::test_gap_report_preserves_threshold_precision[150.1]",
+        "tests/runtime/test_sns_observation_gap_precision.py::test_gap_report_preserves_threshold_precision[150.49]",
+        "tests/runtime/test_sns_physical_attempt_reservations.py::test_final_guard_failure_after_reservation_has_no_dispatch_or_input_receipt",
+        "tests/runtime/test_sns_physical_attempt_reservations.py::test_last_normal_allowance_blocks_overload_resubmission",
+        "tests/runtime/test_sns_physical_attempt_reservations.py::test_overload_during_json_repair_reserves_both_recovery_attempts",
+        "tests/runtime/test_sns_physical_attempt_reservations.py::test_overload_retry_reserves_every_physical_normal_attempt"
+      ],
+      "test_assertions": {
+        "tests/integrations/test_gemini_input_budget_deadline.py": {
+          "SlowTrickle::__init__": [],
+          "SlowTrickle::__aiter__": [],
+          "SlowTrickle::aclose": [],
+          "test_admission_http_has_total_deadline_even_with_regular_chunks": [
+            "assert len(calls) == 1 and stream.closed",
+            "pytest.raises(InputBudgetError, match='activity_input_budget_unavailable')"
+          ]
+        },
+        "tests/runtime/test_sns_admitted_input_receipts.py": {
+          "OmitOneMemory::count": [],
+          "memory_payload": [],
+          "test_omitted_memory_is_absent_from_checkpoint_and_observer_receipts": [
+            "assert len(receipts) == len(adapter.requests) == 1",
+            "assert receipts[0]['memory_packet_refs'] == ['retained-packet']",
+            "assert receipts[0]['omissions'] == {'today_activity': 0, 'memory_packets': 1}",
+            "assert len(manifests) == 1",
+            "assert manifests[0]['memory_packet_refs'] == ['retained-packet']",
+            "assert manifests[0]['input_chars'] == len(adapter.requests[0].system_prompt) + len(adapter.requests[0].user_prompt)",
+            "assert original == before"
+          ],
+          "test_rejected_input_has_no_delivered_receipt_or_manifest": [
+            "pytest.raises(InputBudgetError, match='activity_input_budget_exceeded')",
+            "assert not adapter.requests and (not tracker.calls)",
+            "assert not receipts",
+            "assert not any((kind == 'input_manifest' for kind, _ in events))"
+          ],
+          "test_json_retry_hash_and_receipts_match_each_admitted_request": [
+            "assert len(receipts) == len(adapter.requests) == 2",
+            "assert all((receipt['memory_packet_refs'] == ['retained-packet'] for receipt in receipts))",
+            "assert [receipt['input_sha256'] for receipt in receipts] == [sha256(request.user_prompt.encode()).hexdigest() for request in adapter.requests]",
+            "assert adapter.requests[0].user_prompt != adapter.requests[1].user_prompt",
+            "assert observed == actual_hashes"
+          ]
+        },
+        "tests/runtime/test_sns_observation_gap_precision.py": {
+          "test_gap_report_preserves_threshold_precision": [
+            "assert coverage['heartbeat_gap_seconds'] == ([gap] if gap > 150 else [])",
+            "assert all((value > 150 for value in coverage['heartbeat_gap_seconds']))"
+          ]
+        },
+        "tests/runtime/test_sns_physical_attempt_reservations.py": {
+          "fail_first_submission": [],
+          "test_overload_retry_reserves_every_physical_normal_attempt": [
+            "assert len(row.result['normal_reservations']) == len(attempts) == len(tracker.calls) == 2",
+            "assert not row.result.get('recovery_reservations')"
+          ],
+          "test_last_normal_allowance_blocks_overload_resubmission": [
+            "pytest.raises(ValueError, match='activity_recovery_exhausted')",
+            "assert len(attempts) == len(tracker.calls) == 1",
+            "assert len(row.result['normal_reservations']) == 10",
+            "assert not row.result.get('recovery_reservations')"
+          ],
+          "test_overload_during_json_repair_reserves_both_recovery_attempts": [
+            "assert len(attempts) == len(tracker.calls) == 3",
+            "assert len(row.result['normal_reservations']) == 1",
+            "assert len(row.result['recovery_reservations']) == 2"
+          ],
+          "test_final_guard_failure_after_reservation_has_no_dispatch_or_input_receipt": [
+            "pytest.raises(ValueError, match='scope_changed_after_admission')",
+            "assert len(reserved) == 1",
+            "assert not states and (not receipts) and (not adapter.requests) and (not tracker.calls)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/integrations/test_gemini_input_budget_deadline.py": {},
+        "tests/runtime/test_sns_admitted_input_receipts.py": {},
+        "tests/runtime/test_sns_observation_gap_precision.py": {},
+        "tests/runtime/test_sns_physical_attempt_reservations.py": {}
+      }
+    },
+    {
+      "commit": "56c80b5e71359302711dc091ce2ec014192bfcf7",
+      "feature_id": "AR-WORLD-UI-SNS-CORE-UI-REVIEW-20261005",
+      "reason": "Commit-introduced terminal Chat and static query document retention browser regressions",
+      "tracked_files": {
+        "browser-tests/world-social-core-review.spec.ts": "81bbc2edca8efedbc04bce6c87fb69c5b01b2bd7"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

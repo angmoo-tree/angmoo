@@ -1,0 +1,177 @@
+{
+  "scope": "one-hour core review and necessary local fixes",
+  "started_at": "2026-10-05T04:25:31+00:00",
+  "recorded_at": "2026-10-05T05:49:44.553204+00:00",
+  "elapsed_minutes": 84.23,
+  "branch": "feat/0.1.0-release-readiness",
+  "reviewed_source_head": "77a70d1e0db0270949d936456c5faf3634e4c057",
+  "source_commits": [
+    "bef447ec1d948afab79454568ede1fdd825240a1",
+    "56c80b5e71359302711dc091ce2ec014192bfcf7",
+    "77a70d1e0db0270949d936456c5faf3634e4c057"
+  ],
+  "product_findings_fixed": 6,
+  "test_fixture_findings_fixed": 1,
+  "new_backend_regression_nodes": 12,
+  "new_browser_regression_nodes_per_profile": 3,
+  "final_backend_unique_nodes": 305,
+  "final_backend_executions": 305,
+  "xml": {
+    "core-after.xml": {
+      "tests": 218,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core-all-final.xml": {
+      "tests": 224,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core-existing.xml": {
+      "tests": 130,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "core-final.xml": {
+      "tests": 219,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "deadline-before.xml": {
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "gap-before.xml": {
+      "tests": 3,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0
+    },
+    "navigation-security-final.xml": {
+      "tests": 48,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "navigation-security.xml": {
+      "tests": 48,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "new-regressions-after.xml": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "new-regressions-final.xml": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "observer-window-recheck.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ownership-combined.xml": {
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "physical-before.xml": {
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0
+    },
+    "post-fix-guard.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 3,
+      "skipped": 0
+    },
+    "receipt-before.xml": {
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "browser": {
+    "next-final-results.json": {
+      "startTime": "2026-10-05T05:04:49.521Z",
+      "duration": 176353.239,
+      "expected": 56,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "static-final-results.json": {
+      "startTime": "2026-10-05T05:04:48.497Z",
+      "duration": 170068.136,
+      "expected": 56,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "backend-browser-results.json": {
+      "startTime": "2026-10-05T04:50:09.867Z",
+      "duration": 51926.86,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "preservation": {
+    "backend-preservation-final.log": {
+      "official_preservation": "backend",
+      "exit_code": 0,
+      "head": "77a70d1e0db0270949d936456c5faf3634e4c057",
+      "summary": [
+        "Refactor preservation passed: items=37"
+      ]
+    },
+    "frontend-preservation-final.log": {
+      "official_preservation": "frontend",
+      "exit_code": 0,
+      "head": "77a70d1e0db0270949d936456c5faf3634e4c057",
+      "summary": [
+        "Frontend preservation passed: 324 source files; browser assertions/fixtures/assets/locks preserved"
+      ]
+    }
+  },
+  "frozen_artifacts_unchanged": [
+    "security/refactor_source_baseline.json",
+    "security/refactor_backend_checkpoint.json",
+    "security/refactor_frontend_checkpoint.json",
+    "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
+  ],
+  "historical_record_prefix_unchanged": true,
+  "new_change_records": [
+    "AR-WORLD-UI-SNS-CORE-REVIEW-20261005",
+    "AR-WORLD-UI-SNS-CORE-UI-REVIEW-20261005",
+    "AR-WORLD-UI-SNS-CORE-NAV-REVIEW-20261005"
+  ],
+  "new_introduction_records": 2,
+  "new_sources_first_introduction": 5,
+  "new_backend_nodes_first_introduction": 12,
+  "not_run": [
+    "full backend suite rerun",
+    "actual AI/API keys/paid calls",
+    "operating Docker",
+    "installed app/native USER CHECK",
+    "push/PR/Hosted CI/main merge"
+  ]
+}
