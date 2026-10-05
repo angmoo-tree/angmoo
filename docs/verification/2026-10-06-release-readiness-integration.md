@@ -180,6 +180,45 @@ report: no dependency version, lockfile, license policy, audit rule or workflow
 is changed. The next published candidate must still pass hosted checks on its
 own SHA.
 
+## Current World browser contracts and hosted-runner incident
+
+Candidate `b251c11167fd03359fbe5bd88228db4796cccf41` passes the hosted
+dependency-license, architecture-boundary and embedded-data-migration checks.
+Its frontend job instead exposes seven older browser assumptions: a non-null
+World chat cap, profile-only fixtures without the management read, a closed
+diagnostics dialog queried without opening Settings, aggregate likes rendered
+as the viewer's own like, and pre-v2 nested post thread fixtures/selectors.
+
+The existing Next and static tests now share typed fixtures for the current
+management and selected-post thread contracts. They retain exact World/owner
+scope, selected evidence and parent navigation, later-page descendants,
+social counts/tabs, letter admission, model/request/stream/evidence checks,
+write idempotency and the no-provider assertions. They open/close the actual
+centered diagnostics dialog and check the header/message identities rather
+than removed role captions. The profile edit assertion matches the approved
+owner capability. Invalid owner and unrelated-root negative fixtures still
+exercise the v2 boundary rather than failing only on an obsolete schema.
+Korean-only static continuity fixtures explicitly declare the owner's Korean
+language instead of depending on the browser's environment fallback.
+
+After these corrections the complete local continuity profiles pass:
+Next **35 passed**, with **10 existing real-AI opt-in cases skipped**, and
+static **77 passed**. No test is renamed or newly skipped, and no timeout,
+production validator, runtime implementation, frozen baseline, snapshot image
+or CI policy is changed. The six existing browser files require an exact
+append-only record against the committed source before publication. Earlier
+failed attempts are retained as diagnosis evidence and are not counted as
+passes. Task-owned preview servers stop when these test processes finish.
+
+Separately, GitHub's Actions incident `3q1yb5m7ltvb` starts on October 5 at
+19:11 UTC. Its October 5 20:39 UTC update still reports failures and delays in
+hosted-runner assignment. The affected backend, OSS, Local Smoke and three
+CodeQL analyses have explicit annotations that no hosted runner acquired the
+job after multiple attempts. These failures are infrastructure evidence, not
+passing product checks. The final candidate must still complete its actual
+required and additional checks; the incident does not authorize bypassing a
+check. Source: [GitHub Actions incident](https://www.githubstatus.com/incidents/3q1yb5m7ltvb).
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has

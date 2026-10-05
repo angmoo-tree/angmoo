@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail as staticAgentDetail } from "./continuity-fixture";
 import { verifyMemoryRecovery } from "./memory-recovery-fixture";
-import { json, uiDWorld } from "./continuity-next-fixture";
+import { json, uiDWorld, uiDManualThread } from "./continuity-next-fixture";
 
 test("static memory: failed selection retry refreshes retained items and evidence", async ({ page }) => {
   const world = uiDWorld();
@@ -37,6 +37,8 @@ test.beforeEach(async ({ page }) => {
           display_name_updated_at: null,
           display_name_change_available_at: null,
           profile_setup_completed: true,
+          ui_language: "ko",
+          ui_preference_revision: 0,
           feed_content_filter: "all",
           is_admin: false,
         },
@@ -189,14 +191,14 @@ test("continuity: static evidence reply uses its verified root and exact target"
     const url = new URL(route.request().url());
     if (url.pathname === `/api/v1/worlds/mine/${UI_D_STATIC_WORLD_ID}`) return route.fulfill({json: staticUiDWorld()});
     if (url.pathname.endsWith("/owner-character")) return route.fulfill({json: staticUiDOwnerActor()});
-    if (url.pathname.includes("/manual-social/posts/")) return route.fulfill({json: {
-      ...staticUiDManualFeed([root, target]), root_post_id: root.id, target_post_id: target.id, page_offset: 50, next_offset: null,
-    }});
+    if (url.pathname.includes("/manual-social/posts/")) return route.fulfill({json:
+      uiDManualThread(target, [], { rootId: root.id, ownerId: "wc-ui-d-static-owner", pageOffset: 50 }),
+    });
     return route.fallback();
   });
   await page.goto(`/worlds/${UI_D_STATIC_WORLD_ID}/posts/${target.id}`);
-  const evidence = page.getByRole("article", {name: "근거가 가리키는 답글"});
+  const evidence = page.locator(`[data-social-post-row="${target.id}"]`);
   await expect(evidence).toContainText("정확한 정적 대댓글");
   await expect(evidence).toBeInViewport();
-  await expect(evidence.getByRole("link", {name: /부모 답글 보기/})).toHaveAttribute("href", /static-parent\/?$/);
+  await expect(page.getByRole("link", {name: /부모 게시글 보기/})).toHaveAttribute("href", /static-parent\/?$/);
 });

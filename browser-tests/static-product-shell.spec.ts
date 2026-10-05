@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { cardMetadataTests } from "./card-metadata-fixture";
+import { uiDManualThread, uiDWorldCharacterManagement } from "./continuity-next-fixture";
 
 cardMetadataTests();
 
@@ -2186,11 +2187,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
       await route.fulfill({
         contentType: "application/json",
         json: {
-          schema_version: "owner-manual-social-v1",
-          world_id: "world-static-probe",
-          owner_world_character_id: "wc-static-owner",
-          items: [
-            {
+          ...uiDManualThread({
               id: "post-static-probe",
               world_id: "world-static-probe",
               author_world_character_id: "wc-static-autonomous",
@@ -2206,8 +2203,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
               can_owner_reply: true,
               reply_count: 0,
               like_count: 0,
-            },
-          ],
+            }, [], { ownerId: "wc-static-owner" }),
         },
         status: 200,
       });
@@ -2217,9 +2213,9 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
   });
 
   await page.goto("/worlds/world-static-probe/posts/post-static-probe");
-  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true })).toBeVisible();
   await expect(page.getByText("World-scoped evidence")).toBeVisible();
-  await expect(page.getByRole("link", { name: "World Feed", exact: true })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "피드로 돌아가기", exact: true })).toHaveAttribute(
     "href",
     /\/worlds\/world-static-probe\/feed\/?$/,
   );
@@ -2356,11 +2352,11 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     }
     if (
       method === "GET" &&
-      url.pathname === `/api/v1/worlds/${worldId}/world-characters/${respondingId}`
+      url.pathname === `/api/v1/worlds/${worldId}/world-characters/${respondingId}/management`
     ) {
       await route.fulfill({
         contentType: "application/json",
-        json: {
+        json: uiDWorldCharacterManagement({
           schema_version: "world-character-profile-v1",
           world_id: worldId,
           world_character_id: respondingId,
@@ -2371,10 +2367,10 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
           banner_url: null,
           intro: "Static same-World autonomous Character.",
           role_key: responding.role_key,
-          control_mode: responding.control_mode,
+          control_mode: "autonomous",
           status: "active",
           profile_capability: "available",
-        },
+        }),
         status: 200,
       });
       return;
@@ -2458,8 +2454,8 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   await authorLinks.last().click();
   await expect(profile).toBeVisible();
-  const activity = profile.locator("[data-world-character-social-activity]");
-  const metrics = activity.locator("dl");
+  const activity = page.getByRole("region", { name: "현재 World 활동", exact: true });
+  const metrics = profile.locator("dl");
   for (const text of ["게시글", "8", "답글", "5", "좋아요", "4", "받은 좋아요", "3"]) {
     await expect(metrics).toContainText(text);
   }
@@ -2891,7 +2887,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       requestedSocialPaths.push(`${method} ${url.pathname}`);
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDManualFeed(detailItems),
+        json: uiDManualThread(detailItems[0], detailItems.slice(1), { ownerId: "wc-ui-d-static-owner" }),
         status: 200,
       });
       return;
@@ -3018,7 +3014,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   );
   const positiveLike = row.getByLabel("좋아요 1", { exact: true });
   await expect(positiveLike).toHaveCount(1);
-  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "none");
   expect(await positiveLike.evaluate((element) => element.tagName)).toBe("SPAN");
   expect(await positiveLike.getAttribute("aria-pressed")).toBeNull();
   expect(await positiveLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
@@ -3063,7 +3059,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     ),
   );
   await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true })).toBeVisible();
   await expect(page.locator("#world-owner-composer")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "게시하기" })).toHaveCount(0);
   await expect(
@@ -3083,7 +3079,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "답글 1" })).toBeVisible();
   await page
-    .getByLabel("Static UI-D Autonomous의 게시글에 답글")
+    .getByRole("textbox", { name: "답글", exact: true })
     .fill("실제 static scoped reply");
   await page.getByRole("button", { name: "답글 보내기" }).click();
 
@@ -3263,15 +3259,14 @@ test("UI-D static World detail rejects an unrelated same-World reply and owner m
       url.pathname ===
       `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}`
     ) {
-      const feed = staticUiDManualFeed(
-        responseMode === "owner" ? [rootPost] : [rootPost, unrelatedReply],
-      );
+      const thread = uiDManualThread(rootPost, [], { ownerId: "wc-ui-d-static-owner" });
       await route.fulfill({
         contentType: "application/json",
         json:
           responseMode === "owner"
-            ? { ...feed, owner_world_character_id: "wc-ui-d-static-foreign" }
-            : feed,
+            ? { ...thread, owner_world_character_id: "wc-ui-d-static-foreign" }
+            : { ...thread, replies: [{ ...unrelatedReply, thread_root_post_id: unrelatedReply.reply_to_post_id }],
+                parent_references: [{ post_id: unrelatedReply.reply_to_post_id, state: "available" }] },
         status: 200,
       });
       return;

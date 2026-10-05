@@ -50,10 +50,12 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     }
     if (url.pathname.endsWith("/requests/latest")) return send({ response_request: null });
     if (url.pathname.endsWith(`/threads/${threadId}`)) return send(thread);
-    if (url.pathname.endsWith("/threads")) return send({ items: [thread], ambiguous_legacy_count: 0, max_threads: 5 });
+    if (url.pathname.endsWith("/threads")) return send({ items: [thread], ambiguous_legacy_count: 0, max_threads: null });
     return send({ detail: "unexpected_fixture_route" }, 404);
   });
   await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+  await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "기억과 진단", exact: true })).toBeVisible();
   await page.getByText("검색 진단 · 문제 해결", { exact: true }).click();
   const select = page.getByRole("combobox", { name: "확인할 요청" });
   await expect(select.locator("option")).toHaveCount(31);
