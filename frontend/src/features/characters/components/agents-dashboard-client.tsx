@@ -182,13 +182,13 @@ export function AgentsDashboardClient() {
         }
       />
 
-      {!loading ? (
+      {!loading && error === null ? (
         <p className={styles.summary} data-character-summary>
           {uiText("전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}", {total: summary.total, enabled: summary.enabled, disabled: summary.disabled, external: summary.external})}
         </p>
       ) : null}
 
-      {error ? (
+      {error !== null ? (
         <InlineError className={styles.feedback}>
           <div>
             <p>{error}</p>
@@ -208,7 +208,7 @@ export function AgentsDashboardClient() {
           {uiText("내 앵무를 불러오는 중")}</p>
       ) : null}
 
-      {!loading && items.length === 0 ? (
+      {!loading && error === null && items.length === 0 ? (
         <EmptyState
           className={styles.feedback}
           title={uiText("아직 만든 앵무가 없습니다.")}

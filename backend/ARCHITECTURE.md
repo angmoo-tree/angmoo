@@ -15,6 +15,12 @@ the existing `contracts.py` workflow exports retain their historical surface.
 Field validation, public media validation and deterministic digests stay with
 the import-service values, without storage or runtime dependencies.
 
+Import-profile reads retain sanitized legacy HTTP loopback references to public
+managed media and the shipped `/icon.svg` asset verbatim. External HTTP,
+credentials, query/fragment data and non-public loopback routes remain rejected.
+This read compatibility does not change managed-media ownership on profile writes,
+make the server fetch the URL, or rewrite an immutable payload/digest.
+
 WorldCharacters owns typed profile/persona/activity/model configuration, its
 WorldCharacter revision and saved autonomous intent. Scoped management validates
 local owner, World, active role, media ownership and expected revision. Public

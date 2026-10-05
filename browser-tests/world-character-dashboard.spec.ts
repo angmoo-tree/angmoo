@@ -5,6 +5,29 @@ import { sortWorldCharactersForDashboard } from "../frontend/src/features/charac
 import type { WorldCharacterDashboardItem } from "../frontend/src/features/characters/types/world-character-dashboard";
 
 for (const language of ["ko", "en"] as const) {
+  test(`Device dashboard distinguishes a failed read from a confirmed empty list (${language})`, async ({ page }, info) => {
+    await installWorldCharacterManagementFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
+    let failed = true;
+    await page.route(/\/api\/(?:backend|v1)\/agents(?:\?|$)/, route =>
+      route.fulfill({
+        status: failed ? 500 : 200,
+        contentType: "application/json",
+        body: JSON.stringify(failed ? { detail: "synthetic_dashboard_failure" } : []),
+      }),
+    );
+    await page.goto("/agents");
+    await expect(page.locator('[data-ui-primitive="inline-error"]')).toBeVisible();
+    await expect(page.locator("[data-character-summary]")).toHaveCount(0);
+    await expect(page.locator('[data-ui-primitive="empty-state"]')).toHaveCount(0);
+    failed = false;
+    await page.getByRole("button", { name: language === "ko" ? "다시 시도" : "Retry", exact: true }).click();
+    await expect(page.locator('[data-ui-primitive="inline-error"]')).toHaveCount(0);
+    await expect(page.locator("[data-character-summary]")).toContainText(language === "ko" ? "전체 0" : "Total 0");
+    await expect(page.locator('[data-ui-primitive="empty-state"]')).toBeVisible();
+  });
+}
+
+for (const language of ["ko", "en"] as const) {
   test(`T49/T51/T53/T54/T62: scoped cards, user-first ordering and exact summary (${language})`, async ({ page }, info) => {
     const state = await installWorldCharacterManagementFixture(page, info.project.name === "static-export", String(info.project.use.baseURL), language);
     await page.goto(`/worlds/${FEED_WORLD}/characters`);

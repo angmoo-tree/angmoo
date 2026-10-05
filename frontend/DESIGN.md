@@ -14,6 +14,11 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+Device Character dashboard summary and empty-state UI appear only after a
+successful read. A failed read keeps its retry feedback and any previously loaded
+cards; it must not show an unconfirmed zero count or claim that no characters exist.
+This correction is LOCAL and reuses the existing error, summary and card layout.
+
 ## 2026-10-05 World 게시글·관리·관계망 표시 계약
 
 World 상세 제목은 한글 `게시글`, 영어 `post`이며 뒤로가기 버튼의 오른쪽에

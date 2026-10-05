@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from ipaddress import ip_address
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -15,6 +16,15 @@ __all__ = [
 ]
 
 
+def _is_loopback_host(host: str | None) -> bool:
+    if host == "localhost":
+        return True
+    try:
+        return host is not None and ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
 def safe_configuration_media(value: str | None) -> str | None:
     """Public reference only; query credentials and executable URLs never persist."""
     if value is None:
@@ -22,11 +32,24 @@ def safe_configuration_media(value: str | None) -> str | None:
     if not isinstance(value, str) or any(ord(char) < 32 for char in value) or "\\" in value:
         raise ValueError("configuration_media_invalid")
     parts = urlsplit(value)
+    try:
+        port = parts.port
+    except ValueError as exc:
+        raise ValueError("configuration_media_invalid") from exc
+    if port == 0:
+        raise ValueError("configuration_media_invalid")
     if parts.username or parts.password or parts.query or parts.fragment or ".." in parts.path.split("/"):
         raise ValueError("configuration_media_invalid")
-    relative = not parts.scheme and not parts.netloc and (parts.path.startswith("/media/") or
-        re.fullmatch(r"/api/v1/media/assets/[A-Za-z0-9-]+/content", parts.path))
-    if not relative and not (parts.scheme == "https" and parts.hostname):
+    managed_path = parts.path.startswith("/media/") or bool(
+        re.fullmatch(r"/api/v1/media/assets/[A-Za-z0-9-]+/content", parts.path)
+    )
+    relative = not parts.scheme and not parts.netloc and managed_path
+    # Old local profiles retained absolute public asset references. Reading the
+    # immutable basis preserves their bytes, rather than rewriting their digest.
+    legacy_local = parts.scheme == "http" and _is_loopback_host(parts.hostname) and (
+        managed_path or parts.path == "/icon.svg"
+    )
+    if not relative and not legacy_local and not (parts.scheme == "https" and parts.hostname):
         raise ValueError("configuration_media_invalid")
     return value
 
