@@ -19,6 +19,7 @@ from app.config import settings
 from app.models import Base
 from app.domains.chat import schemas
 from app.domains.chat.router.world_chat import router as thread_router
+from app.domains.chat.router.world_thread_deletion import router as deletion_router
 from app.domains.chat.router.world_chat_response import router as response_router
 from app.runtime.chat.message_composition import configure_chat_services
 
@@ -37,6 +38,7 @@ owner, _outsider, responding_id = _seed(engine, principal)
 app = FastAPI()
 configure_chat_services(app)
 app.include_router(thread_router, prefix="/api/v1")
+app.include_router(deletion_router, prefix="/api/v1")
 app.include_router(response_router, prefix="/api/v1")
 
 def database():

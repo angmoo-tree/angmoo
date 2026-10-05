@@ -120,7 +120,7 @@ class ThreadService:
         responding, _character = self._active_responding_world_character(
             db, world_id, responding_id
         )
-        responding_read = self._world_chat_role(db, responding.id, world_id=world_id)
+        responding_read = self._world_chat_entry_role(db, responding.id, world_id=world_id)
         requester_candidates = self._owner_controlled_world_characters(
             db, user.id, world_id
         )
@@ -141,7 +141,7 @@ class ThreadService:
                 disabled_reason="requester_cardinality_anomaly",
             )
         requester = requester_candidates[0]
-        requester_read = self._world_chat_role(
+        requester_read = self._world_chat_entry_role(
             db, requester.id, world_id=world_id, expected_owner_id=user.id
         )
         if requester.id == responding.id:
@@ -704,6 +704,23 @@ class ThreadService:
                 )
             )
         return summaries
+
+    def _world_chat_entry_role(
+        self,
+        db: Session,
+        world_character_id: str,
+        *,
+        world_id: str,
+        expected_owner_id: str | None = None,
+    ) -> schemas.WorldChatRoleRead:
+        """An invalid saved profile is an unavailable target for read-only entry."""
+        try:
+            return self._world_chat_role(
+                db, world_character_id, world_id=world_id,
+                expected_owner_id=expected_owner_id,
+            )
+        except MessageValidationError as exc:
+            raise MessageNotFoundError("target_profile_unavailable") from exc
 
     def _world_chat_role(
         self,

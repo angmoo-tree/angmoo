@@ -46,11 +46,6 @@ def get_world_chat_entry(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(exc),
         ) from exc
-    except errors.MessageValidationError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
 
 
 @router.get("/threads", response_model=chat.WorldChatThreadListRead)
@@ -169,34 +164,6 @@ def update_world_thread_model(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(exc),
-        ) from exc
-
-
-@router.delete(
-    "/threads/{thread_id}", response_model=chat.WorldChatThreadDeleteRead
-)
-def delete_world_thread(
-    world_id: str,
-    thread_id: str,
-    request: Request,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-    chat_service: ThreadService = Depends(get_thread_service),
-) -> chat.WorldChatThreadDeleteRead:
-    browser_session.require_local_frontend_request(request, mutation=True)
-    try:
-        return chat_service.delete_world_thread(db, user, world_id, thread_id)
-    except errors.MessageNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
-        ) from exc
-    except errors.MessageForbiddenError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
-        ) from exc
-    except errors.MessageInFlightError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
         ) from exc
 
 

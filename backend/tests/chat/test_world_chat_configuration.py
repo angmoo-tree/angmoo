@@ -115,12 +115,16 @@ def test_thread_override_remains_explicit_and_missing_configuration_cannot_accep
         assert db.scalar(select(func.count(models.MessageMessage.id))) == before
         assert db.get(WorldCharacterConfiguration, "wc-responding") is None
     entry = client.get("/api/v1/worlds/world-a/world-characters/wc-responding/chat-entry", headers=FRONTEND_HEADERS)
-    assert entry.status_code == 422 and entry.json()["detail"] == "world_configuration_missing"
+    assert entry.status_code == 404 and entry.json()["detail"] == "target_profile_unavailable"
     detail = client.get(f"/api/v1/worlds/world-a/chat/threads/{thread_id}")
     assert detail.status_code == 409 and detail.json()["detail"] == "world_configuration_missing"
+    created = client.post("/api/v1/worlds/world-a/chat/threads", headers=FRONTEND_HEADERS,
+        json={"responding_world_character_id": "wc-responding"})
+    assert created.status_code == 422 and created.json()["detail"] == "world_configuration_missing"
     assert client.get("/api/v1/worlds/world-a/chat/threads").json()["items"] == []
     with Session(engine) as db:
         assert db.get(WorldCharacterConfiguration, "wc-responding") is None
+        assert db.scalar(select(func.count(models.MessageMessage.id))) == before
 
 
 def test_world_thread_entry_create_list_and_detail_use_world_profile_without_mutating_actor(chat_delete_fixture):

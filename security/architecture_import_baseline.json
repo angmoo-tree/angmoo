@@ -1,7 +1,7 @@
 {
-  "edge_count": 5807,
-  "external_import_count": 4107,
-  "module_count": 1401,
+  "edge_count": 5814,
+  "external_import_count": 4109,
+  "module_count": 1402,
   "modules": [
     {
       "external_imports": [],
@@ -81,6 +81,7 @@
         "app.domains.chat.router.retrieval_diagnostics",
         "app.domains.chat.router.world_chat",
         "app.domains.chat.router.world_chat_response",
+        "app.domains.chat.router.world_thread_deletion",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.local_bot.router.bot",
@@ -114,6 +115,7 @@
         "app.domains.chat.router.retrieval_diagnostics",
         "app.domains.chat.router.world_chat",
         "app.domains.chat.router.world_chat_response",
+        "app.domains.chat.router.world_thread_deletion",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
@@ -2624,6 +2626,22 @@
       ],
       "module": "app.domains.chat.router.world_chat_response",
       "path": "backend/app/domains/chat/router/world_chat_response.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.context",
+        "app.domains.chat.dependencies",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.schemas",
+        "app.domains.chat.service.threads"
+      ],
+      "module": "app.domains.chat.router.world_thread_deletion",
+      "path": "backend/app/domains/chat/router/world_thread_deletion.py",
       "wildcard_imports": []
     },
     {

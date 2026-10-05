@@ -15,6 +15,7 @@ from app.models import Base
 from app.database import get_db
 from app.domains.chat.router.messages import router as messages_router
 from app.domains.chat.router.world_chat import router as world_chat_router
+from app.domains.chat.router.world_thread_deletion import router as world_chat_deletion_router
 
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
@@ -68,6 +69,7 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     configure_chat_services(app)
     app.include_router(messages_router, prefix="/api/v1")
     app.include_router(world_chat_router, prefix="/api/v1")
+    app.include_router(world_chat_deletion_router, prefix="/api/v1")
 
     def db_dependency():
         with Session(engine) as db:

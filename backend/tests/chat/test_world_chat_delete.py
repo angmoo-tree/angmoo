@@ -1,6 +1,7 @@
 """World deletion through real routers and file SQLite, without provider work."""
 from __future__ import annotations
 
+import importlib
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
@@ -9,6 +10,7 @@ from threading import Event
 import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
+from fastapi.routing import _iter_routes_with_context
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 
@@ -27,9 +29,27 @@ from app.domains.chat.exceptions import MessageInFlightError, MessageNotFoundErr
 from app.domains.chat.repository.response_lifecycle import SqlAlchemyResponseLifecycleRepository
 from app.domains.chat.router.messages import router as legacy_router
 from app.domains.chat.router.world_chat import entry_router, router as thread_router
+from app.domains.chat.router.world_thread_deletion import router as deletion_router
+from app.domains.chat.router import world_thread_deletion
+from app.domains.chat.dependencies import get_thread_service
 from app.domains.chat.router.world_chat_response import router as response_router
 from app.domains.chat.service import generation as generation_module, threads as thread_module
 from app.runtime.chat.message_composition import configure_chat_services
+
+
+@pytest.mark.parametrize("profile", ["full", "public"])
+def test_both_production_factories_register_one_owned_world_delete_with_original_dependencies(profile):
+    app = importlib.import_module("app.main").create_app(profile=profile, prepare_media_directories=False)
+    routes = [route for route, _ in _iter_routes_with_context(app.routes)
+        if getattr(route, "endpoint", None) is world_thread_deletion.delete_world_thread
+        and "DELETE" in (getattr(route, "methods", None) or ())]
+    assert len(routes) == 1 and routes[0].endpoint is world_thread_deletion.delete_world_thread
+    operation = app.openapi()["paths"]["/api/v1/worlds/{world_id}/chat/threads/{thread_id}"]["delete"]
+    assert operation["responses"]["200"]["content"]["application/json"]["schema"]["$ref"].endswith("/WorldChatThreadDeleteRead")
+    assert routes[0].response_model is schemas.WorldChatThreadDeleteRead
+    dependencies = {value.call for value in routes[0].dependant.dependencies}
+    assert dependencies == {get_db, get_current_user, get_thread_service}
+    assert world_thread_deletion.get_db is get_db and world_thread_deletion.get_current_user is get_current_user
 
 
 @pytest.fixture
@@ -47,6 +67,7 @@ def chat_delete_fixture(tmp_path):
     configure_chat_services(app)
     app.include_router(thread_router, prefix="/api/v1")
     app.include_router(entry_router, prefix="/api/v1")
+    app.include_router(deletion_router, prefix="/api/v1")
     app.include_router(response_router, prefix="/api/v1")
     app.include_router(legacy_router, prefix="/api/v1")
 
