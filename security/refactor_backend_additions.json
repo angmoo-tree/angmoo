@@ -30370,6 +30370,53 @@
       "test_suppressions": {
         "tests/test_local_creator_v2.py": {}
       }
+    },
+    {
+      "commit": "a3890a8a1211f9f0a97f6eb5e02025750eaf3f03",
+      "feature_id": "AR-RELEASE-WORLD-IMPORT-PRIVACY-20261006",
+      "reason": "P10: preserve independent World settings during character erasure, erase the final unused import basis in the parent transaction, and regress rollback/account slot privacy without providers",
+      "tracked_files": {
+        "backend/tests/test_character_import_privacy.py": "008c428e94a7a91e245eff0e31f80a4c52f7c5da"
+      },
+      "test_nodes": [
+        "tests/test_character_import_privacy.py::test_account_erasure_clears_import_state_and_private_slot_input",
+        "tests/test_character_import_privacy.py::test_import_erasure_rolls_back_with_the_parent_deletion_transaction",
+        "tests/test_character_import_privacy.py::test_last_instance_erasure_removes_the_unreferenced_private_basis",
+        "tests/test_character_import_privacy.py::test_one_instance_erasure_preserves_the_other_world_and_immutable_basis"
+      ],
+      "test_assertions": {
+        "tests/test_character_import_privacy.py": {
+          "test_one_instance_erasure_preserves_the_other_world_and_immutable_basis": [
+            "assert db.get(WorldCharacterConfiguration, 'config-role-a') is None",
+            "assert db.get(CharacterImportOrigin, 'config-actor-a') is None",
+            "assert db.get(CharacterImportOrigin, 'config-actor-b').snapshot_id == basis_id",
+            "assert (other.profile, other.settings, db.get(CharacterImportSnapshot, basis_id).payload) == before",
+            "assert db.connection().exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ],
+          "test_last_instance_erasure_removes_the_unreferenced_private_basis": [
+            "assert db.get(CharacterImportSnapshot, basis_id) is None",
+            "assert {row.character_id: row.snapshot_id for row in db.scalars(select(CharacterImportOrigin))} == retained_origins",
+            "assert {row.world_character_id: row.snapshot_id for row in db.scalars(select(WorldCharacterConfiguration))} == retained_roles",
+            "assert db.connection().exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ],
+          "test_import_erasure_rolls_back_with_the_parent_deletion_transaction": [
+            "assert db.get(CharacterImportSnapshot, basis_id).payload == before",
+            "assert db.get(CharacterImportOrigin, 'config-actor-a').snapshot_id == basis_id",
+            "assert db.get(WorldCharacterConfiguration, 'config-role-b').snapshot_id == basis_id"
+          ],
+          "test_account_erasure_clears_import_state_and_private_slot_input": [
+            "assert owner.deleted_at is not None",
+            "assert db.get(AgentSlot, 'privacy-slot').admission_metadata is None",
+            "assert list(db.scalars(select(CharacterImportSnapshot))) == []",
+            "assert list(db.scalars(select(CharacterImportOrigin))) == []",
+            "assert list(db.scalars(select(WorldCharacterConfiguration))) == []",
+            "assert db.connection().exec_driver_sql('PRAGMA foreign_key_check').all() == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_character_import_privacy.py": {}
+      }
     }
   ]
 }

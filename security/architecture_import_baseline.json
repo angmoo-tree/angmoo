@@ -1,5 +1,5 @@
 {
-  "edge_count": 5817,
+  "edge_count": 5819,
   "external_import_count": 4115,
   "module_count": 1404,
   "modules": [
@@ -17254,6 +17254,8 @@
       ],
       "imports": [
         "app.domains.characters.models",
+        "app.domains.characters.models_import",
+        "app.domains.world_characters.configuration_models",
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
         "app.runtime.media.privacy"
