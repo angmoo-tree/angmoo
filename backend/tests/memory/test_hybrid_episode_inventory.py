@@ -19,9 +19,9 @@ def test_current_inventory_preserves_predecessor_and_runtime_contract():
     module = generator()
     value = module.build_inventory()
     assert value["predecessor"]["sha256"] == module.PREDECESSOR_SHA256
-    # Durable Topic request names and environment snapshots advance the live schema to 27;
+    # World configuration and attested early-v28 recovery advance the live schema to 29;
     # the immutable predecessor digest above still protects historical evidence.
-    assert value["schema"]["embedded_schema_version"] == 27
+    assert value["schema"]["embedded_schema_version"] == 29
     assert value["bounds"]["chat_new_turns"] == 50
     assert value["bounds"]["thought_characters"] == 280
     assert value["defaults"]["MEMORY_RECALL_REPRESENTATION"] == "episode_v1"

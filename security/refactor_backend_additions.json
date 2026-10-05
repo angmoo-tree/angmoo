@@ -30092,6 +30092,69 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "9b9ebf829cc182bba1f0e923f4c776ae171c1b57",
+      "feature_id": "AR-RELEASE-LEGACY-MEDIA-20261006",
+      "reason": "User-authorized P02 local profile compatibility and truthful dashboard errors; exact first introduction of synthetic SQLite read regressions and the integration report, with immutable origin/digest and private URL rejection assertions retained.",
+      "tracked_files": {
+        "backend/tests/world_characters/test_legacy_configuration_media.py": "d2526bd1aa455e24958fd43650b7aa7d0aa6174a",
+        "docs/verification/2026-10-06-release-readiness-integration.md": "306e56c3952fd78d7cb379a874eb5cb0c8ac516f"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[//localhost:3000/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[file:///private/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://192.168.1.1/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://example.test/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost.example.test/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost/admin]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost/api/v1/identity/me]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:0/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:3000/\\\\private]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:3000/icon.svg#synthetic]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:3000/icon.svg?token=synthetic]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:3000/icon.svg\\n]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:3000/media/../private]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:99999/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://localhost:invalid/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[http://user:secret@localhost:3000/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_compatibility_does_not_admit_private_or_credential_references[javascript:alert(1)]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_legacy_origin_and_world_profile_are_readable_by_real_management_routes",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://127.0.0.1:3000/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://127.0.0.1:8080/api/v1/media/assets/synthetic-asset/content]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://[::1]:3000/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://localhost:3000/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://localhost:3030/icon.svg]",
+        "tests/world_characters/test_legacy_configuration_media.py::test_public_loopback_reference_is_read_verbatim[http://localhost:8080/media/characters/synthetic/avatar.webp]"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_legacy_configuration_media.py": {
+          "test_public_loopback_reference_is_read_verbatim": [
+            "assert profile.avatar_url == url",
+            "assert profile.model_dump()['avatar_url'] == url"
+          ],
+          "test_legacy_compatibility_does_not_admit_private_or_credential_references": [
+            "pytest.raises(ValidationError)"
+          ],
+          "test_legacy_origin_and_world_profile_are_readable_by_real_management_routes": [
+            "assert listing.status_code == 200, listing.text",
+            "assert {'config-actor-a', 'config-actor-b'} <= {item['character']['id'] for item in listing.json()}",
+            "assert detail.status_code == 200, detail.text",
+            "assert detail.json()['character']['avatar_url'] == expected_profile['avatar_url']",
+            "assert dashboard.status_code == 200, dashboard.text",
+            "assert settings.status_code == 200, settings.text",
+            "assert configuration.profile.avatar_url == expected_profile['avatar_url']",
+            "assert (origin.id, origin.digest, origin.payload) == expected_origin",
+            "assert db.query(CharacterImportSnapshot).count() == origin_count",
+            "assert effective.profile.avatar_url == expected_profile['avatar_url']",
+            "assert profiles['config-role-a'].avatar_url == expected_profile['avatar_url']",
+            "assert db.get(WorldCharacterConfiguration, 'config-role-a').profile == expected_profile"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_legacy_configuration_media.py": {}
+      }
     }
   ]
 }

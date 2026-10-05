@@ -71,12 +71,33 @@ or changed during this integration verification.
 | Before-fix compatibility regression | 7 failed / 16 passed; expected failures identify the compatibility defect |
 | Final focused `test_legacy_configuration_media.py` | 24 passed / 0 failed, including actual agents list/detail and World dashboard/settings routes, immutable origin and stored profile preservation |
 | Existing World configuration/import-copy/social-input suites | 36 existing cases passed in the combined run; that run also contained one subsequently corrected new test-fixture failure and is not reported as an overall pass |
-| Korean/English browser error-to-success transition | 2 passed / 0 failed; failed read has neither summary nor empty state, retry then confirms a genuinely empty result |
-| Frontend lint, typecheck and Next build | Completed successfully; hosted CI must validate the final committed candidate again |
+| Korean/English browser error-to-success transition | Next 2 passed / 0 failed and static export 2 passed / 0 failed; failed read has neither summary nor empty state, retry then confirms a genuinely empty result |
+| Frontend lint, typecheck, Next build and static export | Completed successfully on the final source; hosted CI must validate the final committed candidate again |
 | Backend/frontend ownership boundaries and derived inventories | Passed; the derived import inventory adds only the standard-library `ipaddress` dependency, and the design inventory refreshes the changed source digest without raising color budgets |
 | Current-tree secret scan | Fatal findings 0; binary/source asset audit notices retained |
 | Complete Git-history secret scan | Fatal findings 0; 49 audit notices, including historical model/screenshot assets, remain visible |
 | DCO | Initial branch ancestry passed; final appended commits require signed-off verification before publication |
+
+The additional pre-publication inventory regression initially reported four
+failures and fourteen passes. Ten new World-management/Chat-delete operations
+were missing from the security inventory, and the current L4/hybrid inventories
+still described earlier source/schema state. The owning routes were inspected:
+dashboard/management reads require authenticated World access, settings and
+mutations retain owner checks, and mutations retain the local-frontend guard.
+The inventory now records those ten operations with their actual endpoint and
+access class; the public derivative also includes the already-inventoried like
+PUT/DELETE operations. Current L4/hybrid reports are generated from actual
+source and schema v29, with their historical predecessor digests unchanged.
+
+The security harness retains all previous predicates and explicitly includes
+the seven new protected mutations, bringing the exact current session-mutation
+count from127 to134. The hybrid current-schema assertion follows the approved
+v29 migration. Those narrow transitions are recorded against their actual
+implementation commit; no historical assertion is edited in its evidence.
+The same inventory/security/hybrid test group then passed all18 cases with
+zero failures. Public route generation, L4 generation and frozen-memory/current
+successor checks also pass. The superseded pre-metadata contract-only run was
+stopped after source changes; it is not counted as a successful final check.
 
 The new historical fixture seeds a persisted legacy row through SQLAlchemy Core
 before exercising reads. The application's immutable snapshot update guard
