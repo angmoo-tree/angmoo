@@ -63,3 +63,19 @@ def test_release_provenance_exceptions_reject_changed_value_key_path_or_extra_da
         assert not allowed(manifest, line.replace(blob, "0" * 40))
         assert not allowed(manifest, line.replace(source, "api_key"))
         assert not allowed(manifest, line + ' "api_key": "unrelated-value"')
+    config = tomllib.loads((ROOT / ".gitleaks.toml").read_text(encoding="utf-8"))
+    vectors = [group for group in config["allowlists"]
+        if group["description"].startswith("Exact release-integration provenance test vectors")]
+    assert len(vectors) == 1
+    group = vectors[0]
+    assert group["targetRules"] == ["generic-api-key"]
+    assert group["condition"] == "AND" and group["regexTarget"] == "line"
+    assert group["paths"] == [r"(^|/)backend/tests/test_release_gitleaks_provenance\.py$"]
+    assert len(group["regexes"]) == len(EVIDENCE)
+    assert all(pattern.startswith(r"^\s*") and pattern.endswith("$") for pattern in group["regexes"])
+    for row in EVIDENCE:
+        line = repr(row) + ","
+        assert any(re.search(pattern, line) for pattern in group["regexes"])
+        assert not any(re.search(pattern, line.replace(row[2], "0" * 40)) for pattern in group["regexes"])
+        assert not any(re.search(pattern, line + ' api_key="unrelated-value"') for pattern in group["regexes"])
+    assert not any(re.search(pattern, "backend/app/config.py") for pattern in group["paths"])

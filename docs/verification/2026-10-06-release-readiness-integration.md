@@ -148,6 +148,13 @@ required checks on the eventual final head.
   zero findings for the first candidate's tracked tree and all 1,034 ancestor
   commits. This does not exempt arbitrary hashes, whole JSON files or credentials.
 
+The final-candidate scan also detects the same 13 public source proofs embedded
+as tuples in the review regression itself. A second exact rule/path/full-line
+group distinguishes only those attested test tuples, including source commit.
+The existing negative test additionally checks every tuple, changed value,
+appended data and the sole allowed test path. All 10 review regressions still
+pass; both review groups remain limited to independently verified public data.
+
 The current L4 and hybrid reports are regenerated from these source changes.
 The original introduction and product-change records are retained; new source
 and assertion transitions must be appended against the actual committed fix.
