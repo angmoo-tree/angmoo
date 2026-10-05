@@ -1544,7 +1544,7 @@
         {
           "path": "browser-tests/snapshots/ui-f/relationship-graph-ready-1440x900.png",
           "present": true,
-          "sha256": "cf6c8cd0aea9fddd7128b87ef4be3e4bd4d541629e32fbd5e6fd8ba32ab235f5"
+          "sha256": "37e34cc44a5454f8653eb9061d2b014c79ff4ca7539df6c6081c0f7b34a16a35"
         },
         {
           "path": "browser-tests/snapshots/ui-f/world-feed-composer-phone-436x880.png",

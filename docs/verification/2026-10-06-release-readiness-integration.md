@@ -248,7 +248,8 @@ Additional local frontend checks pass: settings **2**, shared creator Next
 **12** / static **12**, daily Next **2** / static **2**, image flows in both
 profiles **40**, and static Memory/native lifecycle **2**. Earlier locale,
 detector and Korean-readiness failures are retained separately. No test is
-renamed or newly skipped, no screenshot is recaptured, and no CI or production
+renamed or newly skipped. These locale/template fixes recapture no screenshot
+and weaken no CI or production
 validation rule is weakened. New backend test nodes and the exact template and
 browser transitions require committed, append-only preservation evidence.
 
@@ -279,6 +280,25 @@ rules are retained; the rebuilt exact-candidate image must pass the real Gate.
 Local Docker asset, runtime and release contract checkers pass, together with
 their 20 existing regression tests. Image package and scan evidence is recorded
 separately from these source-contract checks.
+
+## Approved relationship-avatar visual expectation
+
+The old ready-graph PNG still displays the full name inside a pink node. The
+approved World profile contract instead uses the common profile avatar, with
+its existing initial/color fallback when the fixture has no photo. The pinned
+Playwright 1.62.1 Noble environment reproduces the same 1,558-pixel difference
+in Next and static. The expected, actual and difference images are inspected;
+the difference is confined to the avatar node and the existing direction
+marker revealed at its boundary. IDs, layout, edges, labels and accessibility
+remain owned by the existing implementation.
+
+Only `relationship-graph-ready-1440x900.png` is refreshed from that approved
+contract. The degraded PNG is byte-identical. The screenshot tolerance,
+fixtures, assertions, policy and remaining PNGs are unchanged. The complete
+Next/static corpus passes **36 tests** in the pinned environment after the
+single image update. Its exact committed binary before/after hashes require
+append-only frontend-asset evidence; this automated result remains separate
+from the final candidate's explicit user review.
 
 ## Preservation and publication boundaries
 
