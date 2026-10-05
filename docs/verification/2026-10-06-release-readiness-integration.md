@@ -219,6 +219,39 @@ passing product checks. The final candidate must still complete its actual
 required and additional checks; the incident does not authorize bypassing a
 check. Source: [GitHub Actions incident](https://www.githubstatus.com/incidents/3q1yb5m7ltvb).
 
+## Korean defaults and subsequent frontend CI checks
+
+The next hosted frontend run passes the current World browser continuity checks
+but fails its two Local Settings cases: Korean locators have an owner response
+without a saved UI language. The settings fixture and existing daily/static
+creator detail fixtures now explicitly supply `ko` and a preference revision.
+The card upload test saves `ko` through the real authenticated preference API
+with the actual owner revision before opening its Korean creation controls.
+Static daily checks acknowledge the existing environment GET/POST separately,
+asserting the detector language, timezone and revision. Their original settings
+write and absence-of-activity-write assertions remain unchanged; actual lease,
+CAS and authentication tests are not replaced by this synthetic detector reply.
+
+This exposes a runtime defect in the Korean new-SNS template: its saved setting
+and daily descriptions are shorter than the existing World readiness minima,
+so a new Korean default World is `not_ready`. The new language-parametrized
+creation regression reproduces **1 failed (ko), 1 passed (en)** before the fix.
+The Worlds policy now supplies complete Korean descriptions. The readiness
+validator, minimum lengths, English template, schema and provider paths are
+unchanged. Existing World definitions and user databases are not rewritten.
+The complete local Creator backend file passes **16 tests**, including both
+owner languages; synthetic card upload and duplicate registration through the
+real isolated Next/backend pass **2 tests**, including pending preparation,
+initial OFF, missing-key rejection and original-byte preservation.
+
+Additional local frontend checks pass: settings **2**, shared creator Next
+**12** / static **12**, daily Next **2** / static **2**, image flows in both
+profiles **40**, and static Memory/native lifecycle **2**. Earlier locale,
+detector and Korean-readiness failures are retained separately. No test is
+renamed or newly skipped, no screenshot is recaptured, and no CI or production
+validation rule is weakened. New backend test nodes and the exact template and
+browser transitions require committed, append-only preservation evidence.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has

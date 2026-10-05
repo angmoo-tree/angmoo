@@ -8,6 +8,8 @@ const OWNER = {
   display_name_change_available_at: null,
   profile_setup_completed: true,
   feed_content_filter: "all",
+  ui_language: "ko",
+  ui_preference_revision: 0,
   is_admin: true,
 };
 
