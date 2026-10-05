@@ -17,11 +17,7 @@ import {
 } from "@/lib/desktop/product-window";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
-function staticNavigate(href: string, replace: boolean) {
-  if (isTauriDesktopRuntime()) {
-    void navigateDesktopProductRoute(href, replace).catch(reportDesktopNavigationError);
-    return;
-  }
+function navigateStaticBrowserQuery(href: string, replace: boolean): boolean {
   const destination = new URL(href, window.location.href);
   if (destination.origin === window.location.origin &&
       destination.pathname === window.location.pathname &&
@@ -31,8 +27,17 @@ function staticNavigate(href: string, replace: boolean) {
     // Keep its pending writes alive and notify the existing route subscriber.
     window.history[replace ? "replaceState" : "pushState"](window.history.state, "", href);
     publishDesktopRoute();
+    return true;
+  }
+  return false;
+}
+
+function staticNavigate(href: string, replace: boolean) {
+  if (isTauriDesktopRuntime()) {
+    void navigateDesktopProductRoute(href, replace).catch(reportDesktopNavigationError);
     return;
   }
+  if (navigateStaticBrowserQuery(href, replace)) return;
   if (replace) window.location.replace(href);
   else window.location.assign(href);
 }
