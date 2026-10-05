@@ -12,6 +12,7 @@ import {
   isTauriDesktopRuntime,
   navigateBackCurrentDesktopRoute,
   navigateDesktopProductRoute,
+  publishDesktopRoute,
   reportDesktopNavigationError,
 } from "@/lib/desktop/product-window";
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
@@ -19,6 +20,17 @@ import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 function staticNavigate(href: string, replace: boolean) {
   if (isTauriDesktopRuntime()) {
     void navigateDesktopProductRoute(href, replace).catch(reportDesktopNavigationError);
+    return;
+  }
+  const destination = new URL(href, window.location.href);
+  if (destination.origin === window.location.origin &&
+      destination.pathname === window.location.pathname &&
+      destination.search !== window.location.search &&
+      destination.hash === window.location.hash) {
+    // A query-only view change belongs to the current static React surface.
+    // Keep its pending writes alive and notify the existing route subscriber.
+    window.history[replace ? "replaceState" : "pushState"](window.history.state, "", href);
+    publishDesktopRoute();
     return;
   }
   if (replace) window.location.replace(href);

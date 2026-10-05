@@ -59,6 +59,8 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
     if(path===`/worlds/${FEED_WORLD}/chat/threads`){ const payload={items:Array.from({length:state.threadCount},(_,i)=>({...thread,id:i?`synthetic-chat-${i}`:SYNTHETIC_THREAD,messages:[],evidence_summaries:[]})),ambiguous_legacy_count:0,max_threads:state.maxThreads};return reply(route,payload); }
     if(path===`/worlds/${FEED_WORLD}/chat/threads/${SYNTHETIC_THREAD}`)return reply(route,thread);
     if(path.endsWith("/requests/latest"))return reply(route,{response_request:null});
+    if(path.endsWith("/requests/synthetic-request"))return accepted
+      ? reply(route,accepted) : reply(route,{detail:"chat_request_not_found"},404);
     if(path.endsWith("/messages")&&method==="POST"){
       if(state.chatFailure)return reply(route,{detail:"sqlite_busy_retry_exhausted"},503);
       const data=request.postDataJSON(), user={...message(thread.messages.length+1,true),content:data.content};thread.messages.push(user);
@@ -67,8 +69,10 @@ export async function installSocialChatFixture(page: Page, isStatic: boolean, ba
     }
     if(path.endsWith("/events")){
       if(state.chatEventDelay)await new Promise(resolve=>setTimeout(resolve,state.chatEventDelay));
-      thread.messages.push({...message(thread.messages.length+1),content:"Synthetic complete answer"});
+      const assistant={...message(thread.messages.length+1),content:"Synthetic complete answer"};
+      thread.messages.push(assistant);
       const records=[{type:"accepted",payload:{}},{type:"delta",payload:{text:"Synthetic complete answer"}},{type:"completed",payload:{}}].map((event,i)=>({...accepted,...event,sequence:i}));
+      accepted={...accepted,state:"committed",assistant_message:assistant,last_accepted_sequence:2};
       return route.fulfill({contentType:"application/x-ndjson",body:records.map(r=>JSON.stringify(r)).join("\n")+"\n"});
     }
     if(path.endsWith("/model")&&method==="PATCH"){
