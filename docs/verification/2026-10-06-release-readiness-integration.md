@@ -409,7 +409,9 @@ That includes every one of the eight reproduced failures and the five added
 negative/concurrency nodes. The current hybrid inventory changes only the
 Runtime graph and response-supervisor test digests; its frozen predecessor,
 schema, bounds, defaults and all other contracts are byte-equivalent in JSON.
-The 159 unreported tail nodes are checked separately before the next publish.
+The 159 unreported tail nodes separately pass in 170.19 seconds, with three
+existing warnings. These focused 210 executed nodes do not replace the final
+candidate's complete 5,420-node suite or its hosted checks.
 
 At integration start there are no running Docker containers and the user has
 ended the observation session. An isolated frontend preview is task-owned and

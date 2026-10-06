@@ -30417,6 +30417,141 @@
       "test_suppressions": {
         "tests/test_character_import_privacy.py": {}
       }
+    },
+    {
+      "commit": "64b5bb637423cc1447837a281266b6e9d9f764fb",
+      "feature_id": "AR-RELEASE-GRAPH-CANCELLATION-FROZEN-CHAIN-20261006",
+      "reason": "P10: retain original node cancellation across the supported LangGraph adapter, verify concurrent request isolation, reject D/E/F frozen evidence drift and historical regeneration; preserve all original lifecycle and upgrade assertions.",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/chat/test_response_supervisor.py::test_worker_cancellation_isolated_from_concurrent_graph_invocation",
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py::test_frozen_inventory_refuses_regeneration_after_successor",
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py::test_frozen_inventory_rejects_each_boundary_digest_drift[d]",
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py::test_frozen_inventory_rejects_each_boundary_digest_drift[e]",
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py::test_frozen_inventory_rejects_each_boundary_digest_drift[f]"
+      ],
+      "test_assertions": {
+        "tests/chat/test_response_supervisor.py": {
+          "RecordingExecutor::run": [],
+          "test_cancellation_reaches_inflight_graph_worker": [
+            "assert stored.state is ResponseRequestState.CANCELLED",
+            "assert stored.committed_assistant_message_id is None",
+            "assert current.get() is None",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert stopped.is_set()"
+          ],
+          "test_compiled_routes_preserve_calls_commits_and_supervisor_visits": [
+            "assert events[-1].event_type is GenerationEventType.COMPLETED",
+            "assert [e['operation'] for e in decisions] == ['route_and_resolve', branch, 'freeze_evidence', 'generate_response', 'end']",
+            "assert [e['step'] for e in decisions] == [1, 2, 3, 4, 5]",
+            "assert workflow._unit_of_work.commits == commits",
+            "assert stored.call_tracker['logical_total'] == calls",
+            "assert stored.call_tracker['physical_total'] == calls",
+            "assert len(generator.requests) == 1",
+            "assert current.get() is None"
+          ],
+          "test_graph_has_no_independent_router_node_or_checkpointing": [
+            "assert set(graph.nodes) - {'__start__'} == {'supervisor'} | {a.value for a in ResponseAction if a not in {ResponseAction.END, ResponseAction.ROUTE}}",
+            "assert graph.checkpointer is None"
+          ],
+          "test_runtime_diagnostics_persist_five_decisions_without_extra_commits": [
+            "assert events[-1].event_type is GenerationEventType.COMPLETED",
+            "assert commits == 12",
+            "assert diagnostic_writes == 4",
+            "assert row.payload_bytes <= 16384",
+            "assert [e['operation'] for e in payload['events'] if e['event'] == 'supervisor'] == ['route_and_resolve', 'current_context', 'freeze_evidence', 'generate_response', 'end']",
+            "assert any((e['event'] == 'crg_completed' for e in payload['events']))"
+          ],
+          "test_impossible_state_is_rejected_instead_of_skipping_work": [
+            "pytest.raises(ResponseExecutionError)"
+          ],
+          "AfterStepExecutor::__init__": [],
+          "AfterStepExecutor::run": [],
+          "test_failure_after_worker_commit_preserves_latest_fence_and_calls": [
+            "assert events[-1].event_type is GenerationEventType.FAILED",
+            "assert stored.state is ResponseRequestState.FAILED",
+            "assert stored.call_tracker['logical_total'] == expected_calls",
+            "assert stored.call_tracker['physical_total'] == expected_calls",
+            "assert stored.committed_assistant_message_id is None",
+            "assert len(generator.requests) == (1 if action is ResponseAction.GENERATE else 0)"
+          ],
+          "test_corrupt_graph_output_cannot_generate_or_commit": [
+            "assert events[-1].payload == {'failure_class': 'generation_conflict', 'retryable': False}",
+            "assert len(generator.requests) == 0",
+            "assert workflow._lifecycle.get_request(record.request_id).state is ResponseRequestState.FAILED"
+          ],
+          "test_cancel_after_worker_commit_does_not_leave_active_attempt": [
+            "pytest.raises(asyncio.CancelledError)",
+            "assert stored.state is ResponseRequestState.CANCELLED",
+            "assert stored.committed_assistant_message_id is None",
+            "assert current.get() is None",
+            "assert stored.call_tracker['physical_total'] == 2"
+          ],
+          "test_failed_crg_reservation_commit_does_not_call_provider": [
+            "assert events[-1].event_type is GenerationEventType.FAILED",
+            "assert stored.state is ResponseRequestState.FAILED",
+            "assert stored.call_tracker['logical_total'] == 2",
+            "assert stored.call_tracker['physical_total'] == 1",
+            "assert generator.requests == []"
+          ],
+          "test_recursion_exhaustion_is_failed_not_success": [
+            "assert events[-1].payload == {'failure_class': 'generation_conflict', 'retryable': False}",
+            "assert generator.requests == []",
+            "assert workflow._lifecycle.get_request(record.request_id).state is ResponseRequestState.FAILED"
+          ],
+          "test_shared_graph_keeps_concurrent_request_sessions_and_observers_separate": [
+            "assert events[-1].event_type is GenerationEventType.COMPLETED",
+            "assert len(generator.requests) == 1",
+            "assert generator.requests[0].evidence.request_id == record.request_id",
+            "assert executor.steps.progress.record.request_id == record.request_id",
+            "assert db.scalar(select(func.count(models.MessageMessage.id)).where(models.MessageMessage.role == 'assistant')) == 1",
+            "assert operations(a)[1] == 'current_context'",
+            "assert operations(b)[1] == 'canonical_retrieval'",
+            "assert current.get() is None"
+          ],
+          "test_worker_cancellation_isolated_from_concurrent_graph_invocation": [
+            "assert isinstance(cancelled, asyncio.CancelledError)",
+            "assert completed[-1].event_type is GenerationEventType.COMPLETED",
+            "assert workflows[0]._lifecycle.get_request(records[0].request_id).state is ResponseRequestState.CANCELLED",
+            "assert workflows[1]._lifecycle.get_request(records[1].request_id).state is ResponseRequestState.COMMITTED",
+            "assert generators[0].requests == []",
+            "assert len(generators[1].requests) == 1",
+            "assert current.get() is None"
+          ]
+        },
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py": {
+          "_sha256": [],
+          "_inventory": [],
+          "test_p8_l_e_generated_inventory_is_current": [
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_p8_l_e_chains_frozen_d_without_rewriting_history": [
+            "assert _sha256('docs/architecture/p8-l-d-world-chat-identity-inventory.json') == D_INVENTORY_SHA256",
+            "assert inventory['owner_stage'] == 'P8-L-E'",
+            "assert inventory['predecessor']['sha256'] == D_INVENTORY_SHA256",
+            "assert inventory['historical_chain'] == {'current_tree_owner': 'P8-L-E', 'p8_l_d_sha256': D_INVENTORY_SHA256, 'predecessor_mode': 'frozen_digest'}"
+          ],
+          "test_p8_l_e_inventory_closes_routes_capabilities_and_non_scope": [
+            "assert inventory['backend']['requester_cardinality'] == ['zero', 'one', 'anomaly']",
+            "assert inventory['backend']['create_or_get_operation'] == 'POST /worlds/{world_id}/chat/threads'",
+            "assert inventory['frontend']['profile_route'] == '/worlds/{worldId}/characters/{worldCharacterId}'",
+            "assert inventory['frontend']['route_parity'] == ['next', 'static', 'tauri']",
+            "assert inventory['non_scope'] == ['message_send', 'response_generation', 'streaming', 'retrieval', 'memory_write']"
+          ],
+          "test_frozen_inventory_rejects_each_boundary_digest_drift": [
+            "pytest.raises(checker.InventoryError, match='digest drift')"
+          ],
+          "test_frozen_inventory_refuses_regeneration_after_successor": [
+            "assert result.returncode == 1",
+            "assert 'inventory is frozen' in result.stderr",
+            "assert _sha256(relative) == before"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/chat/test_response_supervisor.py": {},
+        "tests/test_p8_l_e_world_social_chat_entry_inventory.py": {}
+      }
     }
   ]
 }
