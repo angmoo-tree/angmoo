@@ -413,6 +413,15 @@ The 159 unreported tail nodes separately pass in 170.19 seconds, with three
 existing warnings. These focused 210 executed nodes do not replace the final
 candidate's complete 5,420-node suite or its hosted checks.
 
+The 303217c1 initial architecture CI detects one omitted deterministic import
+inventory update. The official generator adds only `asyncio` to the Runtime
+response graph's external imports (4,115→4,116). Module count 1,404, internal
+edges 5,819, all module ownership, policy and every other inventory field remain
+unchanged; legacy exception edges stay zero. The generated-inventory check,
+boundary check, current Memory inventory, L4 inventory and frontend design
+contract pass. This refresh records current source imports and does not rewrite
+the frozen source checkpoint, predecessor inventories or permission policy.
+
 At integration start there are no running Docker containers and the user has
 ended the observation session. An isolated frontend preview is task-owned and
 stopped after validation. Docker images/containers/volumes, user data, backups

@@ -1,6 +1,6 @@
 {
   "edge_count": 5819,
-  "external_import_count": 4115,
+  "external_import_count": 4116,
   "module_count": 1404,
   "modules": [
     {
@@ -17058,6 +17058,7 @@
     },
     {
       "external_imports": [
+        "asyncio",
         "functools",
         "langgraph.errors",
         "langgraph.graph",
