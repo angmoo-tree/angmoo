@@ -1642,7 +1642,7 @@
     },
     {
       "path": "backend/app/runtime/chat/response_graph.py",
-      "sha256": "598ac59967a8293366893f515c1d23f43e2c8bcc7b5d229c842f0d6c6d1ce46b"
+      "sha256": "3ae4bdf714d9ea889c243fc2e1641d0d0105a32ccc1f9535d5eef36360a62d27"
     },
     {
       "path": "backend/app/runtime/chat/retrieval_policy.py",
@@ -2550,7 +2550,7 @@
     },
     {
       "path": "backend/tests/chat/test_response_supervisor.py",
-      "sha256": "94ee9766b6dd7e4a8ba961d6b5187dbf7f6e653d28cee34f99e65df69bdc8c5c"
+      "sha256": "8106afd104f34d7521730df4ea52df3fd6e8d6e3fc2fba74e595d7abb6c71cdc"
     },
     {
       "path": "backend/tests/chat/test_retrieval_diagnostics.py",

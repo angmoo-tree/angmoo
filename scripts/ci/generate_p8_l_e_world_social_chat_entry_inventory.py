@@ -12,6 +12,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = ROOT / "docs/architecture/p8-l-e-world-social-chat-entry-inventory.json"
+SUCCESSOR_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-f-canonical-memory-inventory.json"
+FROZEN_OUTPUT_SHA256 = "8f40f852077d32f77f1a417c9726e08d02041aa0d0fb6223ade13049e3777a79"
+SUCCESSOR_INVENTORY_SHA256 = "3558e78857a0095664815cb1364044e0d063115f76eed976be981cba95a96aab"
 D_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-d-world-chat-identity-inventory.json"
 D_INVENTORY_SHA256 = (
     "f0f5c1e1b9bf5ddcbf86f30ccc812ce30597f1a16ca08dd61040eb9610a322a3"
@@ -289,6 +292,30 @@ def build_inventory() -> dict[str, Any]:
     }
 
 
+def _check_frozen_successor_boundary() -> None:
+    """Keep E's committed evidence immutable once F owns the current tree."""
+    if _sha256(OUTPUT_PATH) != FROZEN_OUTPUT_SHA256:
+        raise InventoryError("frozen P8-L-E inventory digest drift")
+    if _sha256(D_INVENTORY_PATH) != D_INVENTORY_SHA256:
+        raise InventoryError("frozen P8-L-D predecessor digest drift")
+    inventory = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    predecessor = inventory.get("predecessor", {})
+    if (
+        predecessor.get("path") != D_INVENTORY_PATH.relative_to(ROOT).as_posix()
+        or predecessor.get("sha256") != D_INVENTORY_SHA256
+    ):
+        raise InventoryError("frozen P8-L-E predecessor chain drift")
+    if _sha256(SUCCESSOR_INVENTORY_PATH) != SUCCESSOR_INVENTORY_SHA256:
+        raise InventoryError("frozen P8-L-F successor digest drift")
+    successor = json.loads(SUCCESSOR_INVENTORY_PATH.read_text(encoding="utf-8"))
+    link = successor.get("predecessor", {})
+    if (
+        link.get("path") != OUTPUT_PATH.relative_to(ROOT).as_posix()
+        or link.get("sha256") != FROZEN_OUTPUT_SHA256
+    ):
+        raise InventoryError("frozen P8-L-F successor chain drift")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -296,6 +323,14 @@ def main() -> int:
     mode.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
+        if SUCCESSOR_INVENTORY_PATH.is_file():
+            if args.write:
+                raise InventoryError(
+                    "P8-L-E inventory is frozen; current-tree ownership moved to P8-L-F"
+                )
+            _check_frozen_successor_boundary()
+            print("P8-L-E social Chat-entry inventory is frozen and chained to P8-L-F")
+            return 0
         inventory = build_inventory()
         rendered = json.dumps(inventory, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
         if args.write:

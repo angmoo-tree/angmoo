@@ -45,6 +45,12 @@ World Chat soft deletion uses the same admission fence as create, accept, retry
 and model updates. Nonterminal requests reject deletion; terminal/idempotent
 deletion affects only the thread and preserves separate evidence and World data.
 
+The Runtime Chat graph adapter unwraps LangGraph's `NodeCancelledError` only
+when its original cause is an `asyncio.CancelledError`. It propagates that
+original signal to the response lifecycle owner, which settles cancellation,
+fences and durable checkpoints. The compiled graph remains shared; request
+sessions, observations and cancellation signals remain independent.
+
 사용자 환경은 Identity의 `service/environment.py`가 소유하는 명시적 서비스 계약이다.
 `contracts/environment.py`의 immutable snapshot을 SNS·Chat·기억 작업의 접수 시점에 저장하고,
 각 작업은 재시도·재개에도 같은 snapshot을 사용한다. 환경 전환은 owner 인증·CAS·120초 lease와

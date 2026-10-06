@@ -1,8 +1,9 @@
 """LangGraph wiring only; request resources live in the runtime context."""
 
+import asyncio
 from functools import lru_cache
 
-from langgraph.errors import GraphRecursionError
+from langgraph.errors import GraphRecursionError, NodeCancelledError
 from langgraph.graph import END, START, StateGraph
 from langgraph.runtime import Runtime
 
@@ -79,13 +80,19 @@ class LangGraphResponseExecutor:
     async def run(
         self, state: ResponseGraphState, steps: ResponseStepRunner
     ) -> ResponseGraphState:
+        token = active_tool_execution.set(RetrievalToolExecution())
         try:
-            token = active_tool_execution.set(RetrievalToolExecution())
             return await compiled_response_graph().ainvoke(
                 # Five Supervisor phases + three workers = eight graph steps;
                 # repairs/ToolNode batches are bounded inside their owning step.
                 state, context=steps, config={"recursion_limit": 10}
             )
+        except NodeCancelledError as exc:
+            # LangGraph wraps a node-raised cancellation as an ordinary error.
+            # The response lifecycle owns cancellation and its durable fence.
+            if isinstance(exc.__cause__, asyncio.CancelledError):
+                raise exc.__cause__ from None
+            raise
         except GraphRecursionError as exc:
             raise ResponseExecutionError("chat_supervisor_step_limit") from exc
         finally:

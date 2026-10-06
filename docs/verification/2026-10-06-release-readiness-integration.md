@@ -369,6 +369,48 @@ CI remain required.
 
 ## Preservation and publication boundaries
 
+The 4516b2c9 candidate passes all Windows checks, including the 29 supported
+upgrade cases (legacy plus SQLite v1–v28), clean installation and failure
+recovery. Its backend run 37394042290 is cancelled at the 60-minute job limit
+after 5,256 of 5,415 nodes (97%); eight failures are reported. Cancellation
+and this partial execution are not a suite PASS. Exact collection maps all
+eight failures, and they reproduce in an independent Git checkout using the
+same locked Python 3.13 environment without user data or provider calls.
+
+Three failures expose changed worker cancellation after a durable graph step.
+LangGraph 1.2.13 wraps node-raised cancellation in `NodeCancelledError`, carrying
+the original `CancelledError` as its cause. The Runtime adapter unwraps that
+specific cause and propagates it to the lifecycle owner; unrelated exceptions
+retain their failure behavior. Concurrent cancellation isolation is also tested.
+Two activity-engine fixtures initialize their World configuration through the
+normal creation unit of work, preserving every original policy, CAS, historical
+receipt and fixed-run assertion. The installer expectation includes the already
+supported v27/v28 fixtures instead of stopping at v26.
+
+The historical E inventory is restored byte-for-byte from committed source
+2f6b0e211b4a3c68aa45413dba721e89db99501d, with normalized digest
+8f40f852077d32f77f1a417c9726e08d02041aa0d0fb6223ade13049e3777a79.
+The original D and F inventories and digest constants remain unchanged. Once
+F exists, E verifies the immutable D→E→F chain and refuses regeneration; three
+negative digest cases and a write-refusal regression cover that boundary.
+Current World management behavior stays owned by the current UI/API contracts
+and browser checks rather than by symbols from an earlier facade.
+
+The measured whole-suite run includes all 28 real predecessor upgrade CLIs and
+reaches 97% at the old time limit. The backend budget is set to 75 minutes so the
+remaining tests and post-suite contracts can finish. All tests, assertions,
+failure exits, required jobs and protection rules remain enforced. Focused
+regression results and the new final candidate's full CI must be recorded
+separately before completion.
+
+The corrected executor, activity fixtures and immutable inventories pass all
+51 focused regressions in 15.46 seconds in the isolated locked environment.
+That includes every one of the eight reproduced failures and the five added
+negative/concurrency nodes. The current hybrid inventory changes only the
+Runtime graph and response-supervisor test digests; its frozen predecessor,
+schema, bounds, defaults and all other contracts are byte-equivalent in JSON.
+The 159 unreported tail nodes are checked separately before the next publish.
+
 At integration start there are no running Docker containers and the user has
 ended the observation session. An isolated frontend preview is task-owned and
 stopped after validation. Docker images/containers/volumes, user data, backups

@@ -20,8 +20,9 @@ env:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    # The complete suite exceeded 40m at 83%; keep every test and allow completion.
-    timeout-minutes: 60
+    # Run 37394042290 reached 97% of 5,415 nodes at 60m, including all 28
+    # real predecessor upgrade CLIs. Preserve the whole suite and its failures.
+    timeout-minutes: 75
     env:
       APP_ENV: test
       APP_SECRET: synthetic-ci-${{ github.repository_id }}-${{ github.run_id }}

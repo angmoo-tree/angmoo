@@ -56,11 +56,7 @@
     "profile_activity": {
       "feature_owner": "features/social",
       "metrics": 4,
-      "owner_action_kinds": [
-        "reply",
-        "like"
-      ],
-      "owner_actions": 2,
+      "owner_actions": 0,
       "scope": "exact_current_world",
       "tabs": 3
     },

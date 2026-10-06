@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from app.domains.world_characters.schemas.activity_state import StateUpdate
 from app.domains.world_characters.service.activity_state import read_state, settle_state
 from app.domains.world_characters.service.activity_engines import bind_run, resolve_engine, set_engine
+from app.domains.characters.models import Character
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 from world_characters.test_persona_continuity import _approved, _engine
 
 
@@ -67,6 +69,9 @@ def test_state_receipts_cas_time_and_duplicate_experience():
 def test_policy_inheritance_and_claim_frozen_across_global_transition():
     with Session(_engine(), expire_on_commit=False) as db:
         _, actor, _ = _approved(db)
+        initialize_created_world_character(
+            db, character=db.get(Character, actor.character_id), world_character=actor,
+        )
         assert resolve_engine(db, actor) == {"engine": "personalized_graph_v2", "source": "default", "version": 0}
         _restored_policy(db, actor, scope="global")
         first = _restored_run(db, actor, "first")
@@ -111,6 +116,9 @@ def test_contract_version_transition_and_rollback_do_not_rebind_existing_runs(mo
     from app.domains.world_characters.service import activity_engines
     with Session(_engine(), expire_on_commit=False) as db:
         _, actor, _ = _approved(db)
+        initialize_created_world_character(
+            db, character=db.get(Character, actor.character_id), world_character=actor,
+        )
         assert activity_engines.CONTRACT_VERSION == 2
         _restored_run(db, actor, "old", engine="personalized_graph_v2")
         assert bind_run(db, actor=actor, activity_id="old").contract_version == 1
