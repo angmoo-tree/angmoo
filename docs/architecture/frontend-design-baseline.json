@@ -273,7 +273,7 @@
       },
       {
         "path": "browser-tests/static-product-shell.spec.ts",
-        "sha256": "1ac7781b4b589f293972e79d1b3a6181f864e4f521947f437197eb879a621fc6"
+        "sha256": "e810c47c6220a0039723753e7390f3ed249c3d04b432de8b9ca4a292ac1eb34c"
       },
       {
         "path": "browser-tests/ui-e-local-settings/local-settings.spec.ts",

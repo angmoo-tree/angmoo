@@ -30552,6 +30552,500 @@
         "tests/chat/test_response_supervisor.py": {},
         "tests/test_p8_l_e_world_social_chat_entry_inventory.py": {}
       }
+    },
+    {
+      "commit": "9f868022e5f676fc53168943ec20e296bdc2295f",
+      "feature_id": "AR-WORLD-MEMORY32",
+      "reason": "World purpose credentials, v30 forward schema, root-private activity32 lineage and synthetic regressions; original checkpoint remains immutable",
+      "tracked_files": {
+        "backend/alembic/versions/20261006_0107_world_activity_credentials_batch32.py": "7b2e682bf0ff8b9d1dac5109f6ec12643c5e09e7",
+        "backend/app/domains/chat/service/privacy.py": "bdb653593e2a5069b5f858a2717d5709d586a3d2",
+        "backend/app/domains/identity/models_world_credentials.py": "f130c2d58bb9ef5f3331fe301427cf8f49819586",
+        "backend/app/domains/identity/service/migration_secrets.py": "8984df5134aab04227273fba88542d74cc6b2c90",
+        "backend/app/domains/identity/service/world_credentials.py": "2c2a185939187f6db9fd1c61c3eb117e61f75e8d",
+        "backend/app/domains/media/contracts_vision.py": "cd51a2fdf59d275ef0b992cdd7cbcfde454212f6",
+        "backend/app/domains/media/models_world_policy.py": "d77bc3437baeaca61be416b0b1e41744ca5b5773",
+        "backend/app/domains/media/service/world_policy.py": "7c4e18b6aca5eaaa61c557160bd0a58aea8b8d2b",
+        "backend/app/domains/memory/contracts/activity_batch.py": "17e6cdcfa44ca0536c9a1006bd0cb89c4f4e0daf",
+        "backend/app/domains/memory/models/activity_configuration.py": "63313b92d09e95b33056ffe3f1b1bf70ee979782",
+        "backend/app/domains/memory/policies/activity_bundles.py": "aa4444077a93ac0f2eb38dcdfd181b34c7599b3c",
+        "backend/app/domains/memory/policies/retrievability.py": "10cb9eb752ecd5b258773a3c9c0886e753bdb6c2",
+        "backend/app/domains/memory/repository/episode_privacy.py": "a719d299c2c34590ab6b51b257604b1afd0afdba",
+        "backend/app/domains/memory/repository/index_preparation.py": "0b4921c4acc328f79f675d2f4fbecc65a1fbff91",
+        "backend/app/domains/memory/repository/privacy.py": "51b29e69bc83c8999ada60c1981f5142d323bf42",
+        "backend/app/domains/memory/service/subject_profiles.py": "d326bb18de1022adbeeacb9b9e988b6caa122f0a",
+        "backend/app/domains/world_characters/schemas/deletion.py": "b4d82cf565292bc628e2cb23a68ab0b22e39b13d",
+        "backend/app/domains/world_characters/schemas/status.py": "bda4e73484ffc334b29198d739c9342ee53100d4",
+        "backend/app/providers/image_profiles.py": "0fe15ffcde25ecb2e24ae6f810b274362ce766ac",
+        "backend/app/runtime/media/erasure.py": "a5daf090146c3052d9384d970a52b3e2b5c4407f",
+        "backend/app/runtime/media/world_generation.py": "39d3e222f695f237e1be23695b176be1635b0b09",
+        "backend/app/runtime/media/world_vision.py": "94f2fdcb3119d9ecded63b2ed78a58a68e4f0812",
+        "backend/app/runtime/migrations/sqlite_versions/manifests/v30.json": "9024f18a135d2d036d58e6964efba70a99a8d7cc",
+        "backend/app/runtime/migrations/sqlite_versions/world_activity_v30.py": "3717c1766adb08f35e31a9531b6cff09b41f0aa2",
+        "backend/app/runtime/migrations/sqlite_versions/world_activity_v30_ddl.json": "809ed6dec9359fb3b31c58fd3c9aa602e5c9f602",
+        "backend/app/runtime/relationships/review_credentials.py": "463d443c7f90353d40560e4c01c254186c6c8488",
+        "backend/app/runtime/subject_scope.py": "1b352187bade28f50c03eee52503882eb3dfb18c",
+        "backend/app/runtime/world_characters/credentials.py": "fdfab20378fa96f8bd4e6c9c57979c9dedde7162",
+        "backend/app/runtime/world_characters/image_policy.py": "e945c20b0b042cb6245820632a783871bb791857",
+        "backend/app/runtime/world_characters/instance_deletion.py": "cc4ec0a9f801a9eb5ac373d540230bf8bcc8853e",
+        "backend/app/runtime/world_characters/status.py": "78c5a045047dbeaa33ce89ddbeb5eb852b6150b5",
+        "backend/app/runtime/world_configuration/persona.py": "bcdfd30b0e7ed13b268a18ed1f97294592a5eecb",
+        "backend/app/runtime/world_credential_binding.py": "754882b1b09add60a37ddf20f1add1106fecb8f5",
+        "backend/tests/identity/test_world_credentials.py": "0817552b418a904658b8025c992038811b3b472e",
+        "backend/tests/media/test_world_image_policy.py": "eb7f162a0786db5f510683e22995e72b20c70c1c",
+        "backend/tests/memory/legacy_profiles.py": "e3bf25b7d37ca8e514ae6dbfffc4641e8eb8e170",
+        "backend/tests/memory/projection_fixture.py": "ea30c310fee7e4066da920431cc35cace8425512",
+        "backend/tests/memory/test_activity32_integration.py": "fe489f09c20dc0d9ba0d138e82ea9052ae6c9977",
+        "backend/tests/memory/test_activity_batch32.py": "30b6387de2fde7f87a75f2803901b527b6e4cbf6",
+        "backend/tests/memory/test_world_embedding_preparation.py": "50d47bf81bdabb616b88b93d368816f4c4150049",
+        "backend/tests/migrations/test_world_activity_v30.py": "8dfff3845285cdf757b6f0310a26ecfa749515ee",
+        "backend/tests/test_world_activity_official_startup.py": "741b581deae300cb52e25b72870be7e025f6cd3c",
+        "backend/tests/world_characters/test_instance_deletion.py": "3bb3538b57660ef6a9c53bb600cedadb6c336a01",
+        "backend/tests/world_characters/test_world_key_execution.py": "e85cd7ea8eceef3a69db15d0db3b607b25c56f2c",
+        "scripts/diagnostics/freeze_world_activity_v30_schema.py": "4a03abab565558a9721719b7c4b2ca5194a77364"
+      },
+      "test_nodes": [
+        "tests/identity/test_world_credentials.py::test_admitted_revision_survives_rotation_but_not_explicit_revoke",
+        "tests/identity/test_world_credentials.py::test_direct_keys_independent_by_actor_purpose_and_rotation",
+        "tests/identity/test_world_credentials.py::test_foreign_picker_payload_and_unowned_actor_rejected",
+        "tests/identity/test_world_credentials.py::test_model_only_save_requires_current_revision",
+        "tests/identity/test_world_credentials.py::test_wrong_capability_rejected_without_registering_key[consolidation-data3]",
+        "tests/identity/test_world_credentials.py::test_wrong_capability_rejected_without_registering_key[embedding-data0]",
+        "tests/identity/test_world_credentials.py::test_wrong_capability_rejected_without_registering_key[embedding-data1]",
+        "tests/identity/test_world_credentials.py::test_wrong_capability_rejected_without_registering_key[image-data4]",
+        "tests/identity/test_world_credentials.py::test_wrong_capability_rejected_without_registering_key[vision-data2]",
+        "tests/image_integration/test_interpretation.py::test_deleted_job_during_provider_call_cannot_recreate_received_file",
+        "tests/media/test_world_image_policy.py::test_new_actor_defaults_are_saved_off_and_legacy_null_is_not_repaired",
+        "tests/media/test_world_image_policy.py::test_sns_chat_share_vision_cap_but_not_generation_and_rotation_keeps_usage",
+        "tests/memory/test_activity32_integration.py::test_explicit_key_revoke_during_selector_rejects_late_result",
+        "tests/memory/test_activity32_integration.py::test_key_rotation_while_selector_waits_keeps_admitted_revision",
+        "tests/memory/test_activity32_integration.py::test_mixed_32_one_call_skipped_private_inputs_still_limit_every_saved_episode",
+        "tests/memory/test_activity32_integration.py::test_pause_settle_previous_admission_policy_and_restore_without_schema_downgrade",
+        "tests/memory/test_activity32_integration.py::test_split_public_leaf_retains_private_root_and_every_root_source",
+        "tests/memory/test_activity32_integration.py::test_sqlite_960_turns_cross_every_page_bound_with_160_context_refs",
+        "tests/memory/test_activity_batch32.py::test_32_chat_activities_are_one_request_not_32_turns",
+        "tests/memory/test_activity_batch32.py::test_excerpt_preserves_exact_unicode_ranges_and_whole_identity[0]",
+        "tests/memory/test_activity_batch32.py::test_excerpt_preserves_exact_unicode_ranges_and_whole_identity[100000]",
+        "tests/memory/test_activity_batch32.py::test_excerpt_preserves_exact_unicode_ranges_and_whole_identity[499]",
+        "tests/memory/test_activity_batch32.py::test_excerpt_preserves_exact_unicode_ranges_and_whole_identity[500]",
+        "tests/memory/test_activity_batch32.py::test_excerpt_preserves_exact_unicode_ranges_and_whole_identity[501]",
+        "tests/memory/test_activity_batch32.py::test_new_output_limits_do_not_change_legacy_contract",
+        "tests/memory/test_activity_batch32.py::test_omitted_middle_change_invalidates_manifest_even_when_excerpt_matches",
+        "tests/memory/test_activity_batch32.py::test_private_intersection_does_not_union_or_ignore_skipped_inputs",
+        "tests/memory/test_activity_batch32.py::test_sns_and_chat_share_a_request_and_activity_is_not_an_output_reference",
+        "tests/memory/test_world_embedding_preparation.py::test_save_on_and_get_do_not_prepare_but_explicit_job_is_fenced[None]",
+        "tests/memory/test_world_embedding_preparation.py::test_save_on_and_get_do_not_prepare_but_explicit_job_is_fenced[revoke]",
+        "tests/memory/test_world_embedding_preparation.py::test_save_on_and_get_do_not_prepare_but_explicit_job_is_fenced[rotate]",
+        "tests/migrations/test_world_activity_v30.py::test_ambiguous_original_keys_are_preserved_for_reentry_instead_of_arbitrarily_selected",
+        "tests/migrations/test_world_activity_v30.py::test_historical_manifest_hashes_remain_attested",
+        "tests/migrations/test_world_activity_v30.py::test_local_comfy_partner_only_is_migrated_without_inventing_a_primary_key",
+        "tests/migrations/test_world_activity_v30.py::test_missing_or_wrong_secret_proof_stops_before_schema_changes[None]",
+        "tests/migrations/test_world_activity_v30.py::test_missing_or_wrong_secret_proof_stops_before_schema_changes[invalid]",
+        "tests/migrations/test_world_activity_v30.py::test_populated_transition_keeps_original_aad_configuration_and_independent_profiles",
+        "tests/migrations/test_world_activity_v30.py::test_v29_to_v30_schema_parity_and_idempotent_empty_transition",
+        "tests/test_world_activity_official_startup.py::test_official_factory_cold_start_read_only_settings_health_and_restart",
+        "tests/world_characters/test_instance_deletion.py::test_confirmation_and_revision_rejection_leave_entire_scope_intact[changes0]",
+        "tests/world_characters/test_instance_deletion.py::test_confirmation_and_revision_rejection_leave_entire_scope_intact[changes1]",
+        "tests/world_characters/test_instance_deletion.py::test_confirmation_and_revision_rejection_leave_entire_scope_intact[changes2]",
+        "tests/world_characters/test_instance_deletion.py::test_exact_erasure_preserves_original_other_world_public_material_and_revokes_keys",
+        "tests/world_characters/test_instance_deletion.py::test_file_failure_is_post_commit_retryable_without_restoring_actor",
+        "tests/world_characters/test_world_key_execution.py::test_comfy_partner_write_only_and_client_cannot_invent_connection",
+        "tests/world_characters/test_world_key_execution.py::test_frozen_purpose_binding_cannot_borrow_chat_key_or_latest_rotation",
+        "tests/world_characters/test_world_key_execution.py::test_vision_sns_chat_combined_cap_rotation_does_not_reset_usage",
+        "tests/world_characters/test_world_key_execution.py::test_world_status_read_has_actual_typed_state_and_no_writes"
+      ],
+      "test_assertions": {
+        "tests/identity/test_world_credentials.py": {
+          "world_session": [],
+          "write": [],
+          "test_direct_keys_independent_by_actor_purpose_and_rotation": [
+            "assert saved.has_key and saved.revision == 2",
+            "assert world_credentials.resolve(db, **scope, purpose='chat', revision=1).reveal() == original.reveal()",
+            "pytest.raises(CredentialResolutionError, match='key_required')",
+            "assert world_credentials.resolve(db, **scope, purpose='consolidation').reveal() == 'synthetic-direct-key'",
+            "assert row.has_key and row.revision == 1 and ('synthetic-direct-key' not in row.model_dump_json())",
+            "pytest.raises(CredentialResolutionError, match='key_required')"
+          ],
+          "test_wrong_capability_rejected_without_registering_key": [
+            "pytest.raises(CredentialResolutionError, match='profile_invalid')",
+            "assert world_credentials.find(world_session, **scope) is None"
+          ],
+          "test_foreign_picker_payload_and_unowned_actor_rejected": [
+            "pytest.raises(ValidationError)",
+            "pytest.raises(ValueError)"
+          ],
+          "test_model_only_save_requires_current_revision": [
+            "assert row.has_key and row.thinking_level == 'high'",
+            "pytest.raises(CredentialResolutionError, match='revision_conflict')"
+          ],
+          "test_admitted_revision_survives_rotation_but_not_explicit_revoke": [
+            "assert (old.reveal(), old.model, old.thinking_level) == ('synthetic-direct-key', 'gemini-3.1-flash-lite', 'high')",
+            "assert world_credentials.resolve(db, **scope).reveal() == 'rotated'",
+            "pytest.raises(CredentialResolutionError, match='binding_changed')",
+            "pytest.raises(CredentialResolutionError, match='revision_changed')",
+            "assert world_credentials.resolve(db, **scope, revision=4).reveal() == 'registered-again'"
+          ]
+        },
+        "tests/image_integration/test_interpretation.py": {
+          "pixels": [],
+          "image_db": [],
+          "FakeInterpreter::__init__": [],
+          "FakeInterpreter::analyze": [],
+          "test_shared_one_attempt_and_off_cache": [
+            "assert fake.calls == 1",
+            "assert db.scalar(select(func.count()).select_from(InterpretationAttempt)) == 1",
+            "assert service.preflight(db, 'owner', asset_id)['reason'] == 'cached'",
+            "assert service.cached(db, 'owner', asset_id).description == '파란색 직사각형'",
+            "assert left.id == right.id and left.recall_hint is None"
+          ],
+          "test_transport_uses_exact_profile_one_image_no_retry": [
+            "assert analysis.description == 'blue'",
+            "assert request.model == model and request.thinking_level == thinking",
+            "assert len(request.image_parts) == 1 and request.sdk_attempts == 1",
+            "assert request.image_parts[0].data == pixels()",
+            "assert request.image_parts[0].mime_type == 'image/png'",
+            "assert request.image_parts[0].url is None"
+          ],
+          "test_real_gemini_adapter_serializes_bytes_into_one_sdk_image": [
+            "assert analysis.description == '파란 사각형' and len(calls) == 1",
+            "assert kwargs['http_options'].retry_options.attempts == 1",
+            "assert len(parts) == 2 and parts[0].text",
+            "assert parts[1].inline_data.data == pixels()",
+            "assert parts[1].inline_data.mime_type == 'image/png'",
+            "assert request['config'].thinking_config.thinking_level.value == 'MEDIUM'"
+          ],
+          "test_invalid_hint_does_not_destroy_description": [
+            "assert parse_analysis({'description': 'visible', 'recall_hint': 'x' * 121}).recall_hint is None",
+            "pytest.raises(ValueError)"
+          ],
+          "prepared": [],
+          "test_consumer_cancellation_does_not_cancel_shared_analysis": [
+            "assert fake.calls == 1",
+            "pytest.raises(asyncio.CancelledError)",
+            "assert (await joined).status == 'succeeded'"
+          ],
+          "test_scope_isolation_and_owner_quota": [
+            "assert fake.calls == 1",
+            "assert service.cached(db, 'owner', identities[1]) is None",
+            "assert service.preflight(db, 'owner', identities[1])['reason'] == 'interpretation_daily_limit_reached'"
+          ],
+          "test_deleted_job_during_provider_call_cannot_recreate_received_file": [
+            "assert fake.calls == 1",
+            "assert not service.spool.exists() or not tuple(service.spool.iterdir())",
+            "assert db.scalar(select(func.count()).select_from(ImageInterpretation)) == 0",
+            "pytest.raises(Exception, match='interpretation_source_or_key_changed')"
+          ],
+          "test_received_analysis_recovers_db_failure_without_second_api": [
+            "assert fake.calls == 1 and len(calls) == 2",
+            "assert not list(service.spool.glob('*.json'))",
+            "assert (await service.interpret(db, 'owner', identity)).status == 'succeeded'"
+          ],
+          "test_failed_analysis_requires_explicit_retry_unknown_never_resubmits": [
+            "pytest.raises(ImagePreparationError)",
+            "pytest.raises(ImagePreparationError)",
+            "assert fake.calls == 1",
+            "pytest.raises(ImagePreparationError)",
+            "assert fake.calls == 1",
+            "assert (await service.interpret(db, 'owner', identity, retry_failed=True)).status == 'succeeded'"
+          ],
+          "test_settings_changed_during_analysis_discards_late_result": [
+            "pytest.raises(ImagePreparationError, match='settings_changed')",
+            "assert service.cached(db, 'owner', identity) is None"
+          ]
+        },
+        "tests/media/test_world_image_policy.py": {
+          "test_new_actor_defaults_are_saved_off_and_legacy_null_is_not_repaired": [
+            "assert (row.generation_limit, row.vision_limit, row.generation_enabled, row.vision_enabled) == (20, 10, False, False)",
+            "assert world_policy.initialize_new_actor(db, world_character_id=row.world_character_id).generation_limit is None"
+          ],
+          "test_sns_chat_share_vision_cap_but_not_generation_and_rotation_keeps_usage": [
+            "assert world_policy.reserve(db, **base, request_key='one', lane='sns').id == first.id",
+            "pytest.raises(ImagePreparationError, match='daily_limit')",
+            "assert world_policy.usage(db, world_character_id=actor, purpose='vision', now=now, timezone='Asia/Seoul') == 2",
+            "assert world_policy.usage(db, world_character_id=actor, purpose='image', now=now, timezone='Asia/Seoul') == 0",
+            "assert world_policy.usage(db, world_character_id='config-role-b', purpose='vision', now=now, timezone='Asia/Seoul') == 0"
+          ]
+        },
+        "tests/memory/test_activity32_integration.py": {
+          "SkipAll::__init__": [],
+          "SkipAll::validate_bundle": [],
+          "SkipAll::select": [],
+          "prepare": [
+            "assert batch is not None and batch.job_id == job_id and (batch.policy_version == ACTIVITY_POLICY_VERSION)"
+          ],
+          "Selector::__init__": [],
+          "Selector::validate_bundle": [],
+          "Selector::select": [],
+          "test_mixed_32_one_call_skipped_private_inputs_still_limit_every_saved_episode": [
+            "assert asyncio.run(run_episode_batch(repo, batch, provider_factory=lambda frozen: selector, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert selector.calls == 1 and len(selector.bundles[0].activities) == 32",
+            "assert restriction.mode == 'private_thread' and item.thread_id == restriction.thread_id",
+            "assert len(json.loads(restriction.sources_json)) == 33",
+            "assert db.scalar(select(func.count(MemoryCandidate.id)).where(MemoryCandidate.status == 'pending')) == 0",
+            "assert work.calls == 1 and work.state == 'completed'",
+            "assert len(packets.read(scope=batch.setting.scope, item_ids=(item.id,), now=now)) == 1",
+            "assert packets.read(scope=batch.setting.scope, item_ids=(item.id,), now=now) == ()",
+            "assert db.get(MemoryItem, item.id).summary == 'Original public experience'"
+          ],
+          "test_key_rotation_while_selector_waits_keeps_admitted_revision": [
+            "assert code == 'memory_selection_completed' and selector.calls == 1",
+            "assert db.scalar(select(func.count(MemoryItem.id))) == 1",
+            "assert world_credentials.resolve(db, **key_args, revision=1).reveal() == 'synthetic-world-memory-key'"
+          ],
+          "test_split_public_leaf_retains_private_root_and_every_root_source": [
+            "assert asyncio.run(run_episode_batch(repo, batch, provider_factory=lambda b: selector, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert selector.calls == 3",
+            "assert len(items) == 2",
+            "assert all((row.mode == 'private_thread' and len(json.loads(row.sources_json)) == 33 for row in restrictions))",
+            "assert len({item.thread_id for item in items}) == 1 and items[0].thread_id is not None",
+            "assert packets.read(scope=batch.setting.scope, item_ids=tuple((item.id for item in items)), now=now) == ()"
+          ],
+          "test_explicit_key_revoke_during_selector_rejects_late_result": [
+            "assert code != 'memory_selection_completed' and selector.calls == 1",
+            "assert db.scalar(select(func.count(MemoryItem.id))) == 0",
+            "assert db.scalar(select(func.count(MemoryCandidate.id)).where(MemoryCandidate.status == 'pending')) == 32"
+          ],
+          "test_sqlite_960_turns_cross_every_page_bound_with_160_context_refs": [
+            "assert asyncio.run(run_episode_batch(repo, initial, provider_factory=lambda b: first, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert enqueue_scope(db, dependencies=build_preparation_dependencies(generation_policy='activity32'), scope_setting_id=initial.setting.id, trigger='shutdown', now=now, cutoff=cutoff) == 1",
+            "assert len(batch.candidates) == 960",
+            "assert asyncio.run(run_episode_batch(repo, batch, provider_factory=lambda b: selector, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert selector.calls == 1 and len(bundle.activities) == 32 and (len(bundle.new_units) == 960)",
+            "assert sum((len(a.context_keys) for a in bundle.activities)) == 160",
+            "assert all((len(a.unit_keys) == 30 and len(a.context_keys) == 5 for a in bundle.activities))",
+            "assert len({m.source_id for u in bundle.new_units for m in u.members}) == 1920",
+            "assert all((u.thought.text.startswith('Own thought') for u in bundle.new_units))",
+            "assert {m.source_id for u in bundle.new_units for m in u.members if m.role == 'assistant'} == set(map(str, assistants[5:]))",
+            "assert len(bundle.prior_episodes) <= 8",
+            "assert repo.claim(lease_token='scale-resume', now=now) is None",
+            "assert db.scalar(select(func.count(MemoryCandidate.id)).where(MemoryCandidate.status == 'pending')) == 0"
+          ],
+          "test_pause_settle_previous_admission_policy_and_restore_without_schema_downgrade": [
+            "assert asyncio.run(run_episode_batch(repo, batch, provider_factory=lambda b: current, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert repo.claim(lease_token='paused-with-no-new-admission', now=now) is None",
+            "assert current.calls == 1 and db.get(MemoryEpisodeRestriction, item.id).sources_json == original_restriction",
+            "assert db.get(MemoryItem, item.id).summary == 'Original public experience'",
+            "assert db.scalar(select(func.count(MemoryItem.id))) == 1",
+            "assert restored.credential_id == batch.credential_id and restored.credential_revision == 1",
+            "assert restored.policy_version == ('episode-selection.v1' if n == 0 else ACTIVITY_POLICY_VERSION)",
+            "assert asyncio.run(run_episode_batch(repo, restored, provider_factory=lambda b: skip, timeout=10, clock=lambda: now)) == 'memory_selection_completed'",
+            "assert skip.calls == 1 and repo.claim(lease_token=f'after-settle-{n}', now=now) is None"
+          ]
+        },
+        "tests/memory/test_activity_batch32.py": {
+          "source": [],
+          "test_excerpt_preserves_exact_unicode_ranges_and_whole_identity": [
+            "assert value.text == ''.join((raw[left:right] for left, right in value.segments))",
+            "assert len(value.text) == min(500, length)",
+            "assert value.omitted_characters + len(value.text) == length",
+            "assert value.whole_hash == sha256(raw.encode()).hexdigest()",
+            "assert value.segments == ((0, 350), (length - 150, length))"
+          ],
+          "test_32_chat_activities_are_one_request_not_32_turns": [
+            "assert len(bundles) == 1",
+            "assert len(bundle.activities) == 32 and len(bundle.new_units) == 960",
+            "assert all((len(a.unit_keys) == 30 and len(a.context_keys) <= 5 for a in bundle.activities))",
+            "assert {u.unit_key for u in bundle.new_units} == {u.unit_key for u in units}"
+          ],
+          "test_sns_and_chat_share_a_request_and_activity_is_not_an_output_reference": [
+            "assert len(bundles) == 1 and len(bundles[0].activities) == 2",
+            "pytest.raises(MemoryValidationError, match='reference_invalid')"
+          ],
+          "test_private_intersection_does_not_union_or_ignore_skipped_inputs": [
+            "assert private_thread_intersection((None, 'thread', None)) == 'thread'",
+            "pytest.raises(MemoryValidationError, match='intersection_empty')"
+          ],
+          "test_new_output_limits_do_not_change_legacy_contract": [
+            "assert parse_episode_selection(payload, legacy).episodes",
+            "pytest.raises(MemoryValidationError, match='summary_invalid')",
+            "assert episode_input_manifest(legacy)['version'] == 'episode-input.v1'",
+            "assert 'segments' not in episode_input_manifest(legacy)['new'][0]['members'][0]"
+          ],
+          "test_omitted_middle_change_invalidates_manifest_even_when_excerpt_matches": [
+            "assert bundle.new_units[0].members[0].text == changed.new_units[0].members[0].text",
+            "assert bundle_manifest_hash(bundle) != bundle_manifest_hash(changed)",
+            "assert 'middle' not in str(episode_input_manifest(bundle))"
+          ]
+        },
+        "tests/memory/test_world_embedding_preparation.py": {
+          "configured": [],
+          "Embeddings::__init__": [],
+          "Embeddings::embed_measured": [],
+          "test_save_on_and_get_do_not_prepare_but_explicit_job_is_fenced": [
+            "assert provider.requests == [] and index.identity(f'memory-item:{item}') is None",
+            "assert len(provider.requests) == 1",
+            "assert provider.requests[0].api_key == 'synthetic-explicit-embedding'",
+            "assert (index.identity(f'memory-item:{item}') is None) == (change == 'revoke')",
+            "assert db.get(MemoryVectorEligibility, item).registration_revision == 'memory-vector.v1'",
+            "assert index_preparation.status(db, setting_id)['state'] == 'needs_preparation'",
+            "assert replay == started",
+            "assert row.credential_revision == 1",
+            "assert row.state == ('error' if change == 'revoke' else 'ready')"
+          ]
+        },
+        "tests/migrations/test_world_activity_v30.py": {
+          "test_v29_to_v30_schema_parity_and_idempotent_empty_transition": [
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(29).schema_digest",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(30).schema_digest",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(30).schema_digest"
+          ],
+          "test_historical_manifest_hashes_remain_attested": [
+            "assert load_sqlite_manifest(28).schema_digest == '19263f9b90e8827364078a594f8466811e895cb6ce4396ab817dd8b9db5e23fa'",
+            "assert load_sqlite_manifest(29).schema_digest == load_sqlite_manifest(28).schema_digest"
+          ],
+          "populated_v29": [],
+          "test_populated_transition_keeps_original_aad_configuration_and_independent_profiles": [
+            "assert tuple(connection.execute(text('SELECT encrypted_api_key FROM llm_credentials ORDER BY id'))) == old",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(30).schema_digest",
+            "assert not connection.exec_driver_sql('PRAGMA foreign_key_check').all()",
+            "assert world_credentials.resolve(db, **kwargs, purpose='sns').reveal() == 'synthetic-sns-key'",
+            "assert world_credentials.find(db, **kwargs, purpose='sns').aad_character_id == character",
+            "assert image.reveal() == 'synthetic-comfy-server' and partner == 'synthetic-comfy-partner'",
+            "assert not world_credentials.find(db, **kwargs, purpose='chat')",
+            "assert policy.generation_limit == 12 and policy.vision_limit is None and (not policy.vision_enabled)",
+            "assert policy.generation_settings['appearance'] == 'whole appearance'",
+            "assert policy.generation_settings['negative'] == 'whole negative'",
+            "assert policy.generation_settings['profiles']['comfyui:workflow']['options']['partner_auth']",
+            "assert db.get(MemorySubjectProfile, sid).version == 3"
+          ],
+          "test_missing_or_wrong_secret_proof_stops_before_schema_changes": [
+            "pytest.raises(SqliteMigrationDeltaError, match='secret_interpreter_required|secret_authentication_failed')",
+            "assert sqlite_schema_contract_digest(connection) == old",
+            "assert not world_activity_v30.NEW_TABLES.intersection(inspect(connection).get_table_names())"
+          ],
+          "test_ambiguous_original_keys_are_preserved_for_reentry_instead_of_arbitrarily_selected": [
+            "assert connection.execute(text('SELECT count(*) FROM llm_credentials WHERE character_id IS NOT NULL')).scalar_one() == 2",
+            "assert connection.execute(text(\"SELECT count(*) FROM world_credentials WHERE world_character_id=:id AND purpose='sns'\"), {'id': scope.subject_world_character_id}).scalar_one() == 0"
+          ],
+          "test_local_comfy_partner_only_is_migrated_without_inventing_a_primary_key": [
+            "assert not value.has_key and value.has_partner_key",
+            "assert primary.reveal() == '' and partner == 'synthetic-comfy-partner'"
+          ]
+        },
+        "tests/test_world_activity_official_startup.py": {
+          "test_official_factory_cold_start_read_only_settings_health_and_restart": [
+            "assert client.get('/health').status_code == 200",
+            "assert client.get('/health').status_code == 200",
+            "assert restored.state.runtime_config.data_paths.root == root.resolve()",
+            "assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(30).schema_digest",
+            "assert response.status_code == 200, (suffix, response.text)",
+            "assert 'synthetic' not in response.text",
+            "assert after == before and (not db.new) and (not db.dirty)",
+            "assert (p.generation_limit, p.vision_limit) == (20, 10)",
+            "assert (p.generation_limit, p.vision_limit) == (20, 10)"
+          ]
+        },
+        "tests/world_characters/test_instance_deletion.py": {
+          "state": [],
+          "seed_private": [],
+          "request": [],
+          "test_exact_erasure_preserves_original_other_world_public_material_and_revokes_keys": [
+            "assert cleanup(SimpleNamespace(sessions=sessionmaker(engine), assets=assets))",
+            "assert not (root / 'private.png').exists() and (root / 'public.png').exists()",
+            "assert result['deleted'] and result['private_memory_count'] == 1",
+            "assert db.get(Character, 'config-actor-a').deleted_at is None",
+            "assert db.get(WorldCharacter, 'config-role-b').status == 'active'",
+            "assert db.get(WorldCharacterConfiguration, 'config-role-b') is not None",
+            "assert db.get(MemoryItem, 'memory-a') is None and db.get(MemoryItem, 'memory-b') is not None",
+            "assert db.scalar(select(MessageMessage).where(MessageMessage.thread_id == 'private-thread')) is None",
+            "assert db.get(MessageThread, 'private-thread').deleted_at is not None",
+            "assert db.get(Post, 'public-post').body == 'Public body retained'",
+            "assert db.get(MediaAsset, 'asset-public').state == 'ready'",
+            "assert db.get(MediaAsset, 'asset-private').state == 'deleted'",
+            "assert db.get(WorldImagePolicy, 'config-role-a') is None",
+            "assert profile.deleted and profile.avatar_url is None",
+            "pytest.raises(CredentialResolutionError)"
+          ],
+          "test_confirmation_and_revision_rejection_leave_entire_scope_intact": [
+            "pytest.raises(WorldManagementError)",
+            "assert db.get(WorldCharacter, 'config-role-a').status == 'active'",
+            "assert db.get(WorldCharacterConfiguration, 'config-role-a') is not None"
+          ],
+          "test_file_failure_is_post_commit_retryable_without_restoring_actor": [
+            "assert cleanup(media) and (not target.exists())",
+            "assert not cleanup(media)",
+            "assert db.get(WorldCharacter, 'config-role-a').local_profile.get('private_cleanup')",
+            "assert db.get(WorldCharacter, 'config-role-a').status == 'left'"
+          ]
+        },
+        "tests/world_characters/test_world_key_execution.py": {
+          "test_frozen_purpose_binding_cannot_borrow_chat_key_or_latest_rotation": [
+            "pytest.raises(CredentialResolutionError, match='required')",
+            "assert 'synthetic-direct-key' not in json.dumps(frozen)",
+            "assert resolve(db, frozen, owner_id=SCOPE['owner_id'], world_id=SCOPE['world_id'], actor_id=SCOPE['world_character_id'], purpose='sns').reveal() == 'synthetic-direct-key'",
+            "pytest.raises(CredentialResolutionError)",
+            "assert world_credentials.resolve(db, **SCOPE, purpose='chat').reveal() == 'synthetic-direct-key'"
+          ],
+          "test_vision_sns_chat_combined_cap_rotation_does_not_reset_usage": [
+            "assert (policy.generation_limit, policy.vision_limit) == (20, 10)",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='vision', now=now, timezone='Asia/Seoul') == 10",
+            "pytest.raises(ImagePreparationError, match='daily_limit_reached')",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='image', now=now, timezone='Asia/Seoul') == 0",
+            "assert world_policy.usage(db, world_character_id=policy.world_character_id, purpose='vision', now=now + timedelta(days=1), timezone='Asia/Seoul') == 0",
+            "assert adapter.read(db, SCOPE['owner_id'], SimpleNamespace(scope_kind='world', scope_id=SCOPE['world_id']), SCOPE['world_character_id']).model == 'gemini-3.1-flash-lite'",
+            "pytest.raises(ImagePreparationError, match='scope_unavailable')",
+            "assert world_policy.reserve(db, **args).id == world_policy.reserve(db, **args).id"
+          ],
+          "test_world_status_read_has_actual_typed_state_and_no_writes": [
+            "assert value.contract_version == 'world-character-status-v1' and value.state.state == 'off'",
+            "assert value.persona['worldview'] == 'Original world'",
+            "assert set(value.summary['allowed_actions']) <= {'post', 'reply', 'like'}",
+            "assert value.summary['posts'] == value.summary['replies'] == value.summary['likes'] == 0",
+            "assert statements == []"
+          ],
+          "test_comfy_partner_write_only_and_client_cannot_invent_connection": [
+            "assert row.has_key and row.has_partner_key and ('server-only' not in row.model_dump_json()) and ('partner-only' not in row.model_dump_json())",
+            "assert primary.reveal() == 'server-only' and partner == 'partner-only'",
+            "pytest.raises(ImagePreparationError, match='connection_unverified')",
+            "assert primary.reveal() == 'server-only' and partner is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_world_credentials.py": {},
+        "tests/image_integration/test_interpretation.py": {},
+        "tests/media/test_world_image_policy.py": {},
+        "tests/memory/test_activity32_integration.py": {},
+        "tests/memory/test_activity_batch32.py": {},
+        "tests/memory/test_world_embedding_preparation.py": {},
+        "tests/migrations/test_world_activity_v30.py": {},
+        "tests/test_world_activity_official_startup.py": {},
+        "tests/world_characters/test_instance_deletion.py": {},
+        "tests/world_characters/test_world_key_execution.py": {}
+      }
+    },
+    {
+      "commit": "18feb4178476160a141efedf875d4def3f1740c9",
+      "feature_id": "AR-WORLD-UI",
+      "reason": "Shared semantic card anatomy, scoped World/Memory settings, preserved five-step creation and relationship graph; synthetic browser regressions and ko/en catalogs",
+      "tracked_files": {
+        "browser-tests/playwright.world-memory-integration.config.ts": "adbc9aeab59ae4cbfbbe608be81957a38415d7fd",
+        "browser-tests/world-memory-extra-ui.spec.ts": "216189ac9d9945eac7b54266460c46afb62454e5",
+        "browser-tests/world-memory-integration-ui.spec.ts": "2dfe76d2b6e7dc5f208ea37b213e4d37f19f810b",
+        "frontend/src/components/ui/credential-fields.tsx": "060ac3df03e0bff42ce7e221cb97ea2d8757442e",
+        "frontend/src/components/ui/settings-card.module.css": "eb16d4096af2449c2116b7d0563c1e602586f040",
+        "frontend/src/components/ui/settings-card.tsx": "5f3a9a349bdb62ce2be18b541f57316ac6fb7222",
+        "frontend/src/components/ui/status-cards.module.css": "90e46bbbb37253194bbbd31520622e7cdf96ade0",
+        "frontend/src/components/ui/status-cards.tsx": "04c0066a66e4c52c2fdb23f9bfb69af42d9f8aec",
+        "frontend/src/features/characters/api/world-character-status.ts": "6212bc73b08efbbbc5d5d5b6f7af04c7ea1b90d3",
+        "frontend/src/features/characters/api/world-credentials.ts": "a64157ce9f69ae3ad1762b14af034d4f72ae4541",
+        "frontend/src/features/characters/components/agent-create.module.css": "11834aefb9dc920f2c8c9f55c2ee9f471208a726",
+        "frontend/src/features/characters/components/daily-plan-card.tsx": "295289a9c9a827c655b89e5a65633fed545f4988",
+        "frontend/src/features/characters/components/world-character-deletion-card.tsx": "5d630dcdb7c0ced381ddb712ed2eb61c43c78ee5",
+        "frontend/src/features/characters/components/world-character-status-cards.tsx": "a76a0de640f75a0e16373c89c261f3be3c0142d9",
+        "frontend/src/features/characters/components/world-credential-card.tsx": "b83f6def3399fab324410652b2793963b5ff2fe0",
+        "frontend/src/features/characters/components/world-daily-plan-card.tsx": "a77bb43dcd40668678fdced267ed71b88d3cddfe",
+        "frontend/src/features/media/api/world-image-policy.ts": "b85d48bcf416bb343e9912a0c25bd18fec6ce5ab",
+        "frontend/src/features/media/components/novel-options-editor.tsx": "c5d30373b8a83e5cc8ea5b652a308b634c4db847",
+        "frontend/src/features/media/components/world-image-policy-controls.tsx": "c86edbf81a432dc09456348c40138e928c38c3c8",
+        "frontend/src/features/memory/components/memory-credential-fields.tsx": "fc6e22e848e497b21684ea0c1ea77faccd5dd115",
+        "frontend/src/features/relationships/utils/graph-layout.ts": "47ca1952843fd341988bb05cab51c4383bd3154f",
+        "frontend/src/lib/state/edited-fields.ts": "1e9771883a8a741e3eb3b6ced3aa525ce7898fec"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
