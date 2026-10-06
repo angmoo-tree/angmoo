@@ -19,6 +19,15 @@ successful read. A failed read keeps its retry feedback and any previously loade
 cards; it must not show an unconfirmed zero count or claim that no characters exist.
 This correction is LOCAL and reuses the existing error, summary and card layout.
 
+## 2026-10-06 World 캐릭터 관리 상단 새로고침 제거
+
+World 캐릭터 관리 상세의 상단 `관리 상태 새로고침` 아이콘 버튼은 제거한다.
+버튼 자리에 placeholder나 예약 폭을 남기지 않고 기존 활동 버튼을 정상 flex 배치한다.
+최초 조회·저장 응답 반영·활동 요청 후 조회와 오류의 명시적 재시도는 유지한다.
+설정 카드의 개별 조회/새로고침, browser/native 문서 새로고침은 이 제거 범위에 포함하지 않는다.
+출처는 **LOCAL**이며 Next/static의 동일 관리 컴포넌트에 적용한다. 다른 상태/설정 UI의 계획을
+완료했다고 표시하거나 신규 polling·AI 호출·실행 정책을 추가하지 않는다.
+
 ## 2026-10-05 World 게시글·관리·관계망 표시 계약
 
 World 상세 제목은 한글 `게시글`, 영어 `post`이며 뒤로가기 버튼의 오른쪽에

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Play, Power, PowerOff, RefreshCw } from "lucide-react";
+import { ArrowLeft, Play, Power, PowerOff } from "lucide-react";
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { InlineError } from "@/components/ui/feedback";
@@ -78,7 +78,6 @@ export function WorldCharacterManagement({ worldId, worldCharacterId, activeView
           badge={uiText(isUser ? "사용자" : "이 World의 캐릭터")} />
       </div>
       <div className={styles.headerActions}>
-        <IconButton label={uiText("관리 상태 새로고침")} title={uiText("관리 상태 새로고침")} disabled={busy} onClick={refresh}><RefreshCw aria-hidden="true" size={20} /></IconButton>
         {!isUser && read.can_manage ? <>
           <Button variant={item.autonomous_enabled ? "strong" : "primary"} loading={pending.has("autonomy")} disabled={busy || !toggleAllowed}
             title={!toggleAllowed ? uiText(worldCharacterRestrictionMessage(capabilities.reason)) : undefined} onClick={() => void toggle()}>
