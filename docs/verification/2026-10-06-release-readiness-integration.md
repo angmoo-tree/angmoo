@@ -333,6 +333,34 @@ contention failure in the combined diagnostic run is retained; the unchanged
 bounded-write/performance checks subsequently pass in focused execution.
 The complete backend suite and final hosted candidate CI remain required.
 
+## Newly reported backend dependency advisories
+
+The b12e2fd8 hosted dependency audit reports two newly published advisories:
+`langgraph-sdk 0.3.15` (GHSA-fvww-7h3r-vfhp) and `Mako 1.3.12`
+(CVE-2026-102991). The actual lock moves to the upstream fixed versions
+`langgraph-sdk 0.4.4` and `Mako 1.4.2`; no advisory is ignored or waived.
+The former SDK constraint in LangGraph 1.2.2 excludes SDK 0.4.x, so the resolver
+also updates LangGraph to 1.2.13, langchain-core to 1.6.6 and langchain-protocol
+to 0.0.19. Other locked package versions stay unchanged. Frozen installation,
+the license policy and vulnerability severity gates remain enforced.
+
+The updated lock audit reports zero known vulnerabilities among 85 packages.
+Runtime compatibility, license notices and final candidate CI are checked
+separately; an audit success alone is not a complete runtime verification.
+Upstream references: [SDK advisory](https://github.com/advisories/GHSA-fvww-7h3r-vfhp),
+[SDK fix release](https://github.com/langchain-ai/langgraph/releases/tag/sdk==0.4.4),
+[LangGraph release](https://github.com/langchain-ai/langgraph/releases/tag/1.2.13),
+[Mako changelog](https://raw.githubusercontent.com/sqlalchemy/mako/main/doc/build/changelog.rst).
+
+The b12e2fd8 backend preflight also detects a stale current hybrid-memory
+inventory hash for the deliberately updated canonical World fixture in
+`test_p8_l_q_memory_read_inspector.py`. The official generator changes only
+that file's digest; frozen predecessor, schema, bounds, policy and all other
+fields remain unchanged. The official Memory-batch successor check passes.
+The exact b12e2fd8 architecture, boundary, L4 and complete backend preservation
+checks pass, with 5,415 protected test lineages and all 37 preservation items.
+The complete execution and new lock's final hosted CI remain required.
+
 ## Preservation and publication boundaries
 
 At integration start there are no running Docker containers and the user has

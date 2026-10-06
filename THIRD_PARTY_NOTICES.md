@@ -34,17 +34,17 @@ Package authors retain all rights granted by their respective licenses.
 - `jsonschema 4.26.0` — MIT
 - `jsonschema-specifications 2025.9.1` — MIT
 - `ladybug 0.19.1` — MIT
-- `langchain-core 1.4.3` — MIT
-- `langchain-protocol 0.0.16` — MIT
+- `langchain-core 1.6.6` — MIT
+- `langchain-protocol 0.0.19` — MIT
 - `langcodes 3.5.1` — OSI Approved :: MIT License
-- `langgraph 1.2.2` — MIT
+- `langgraph 1.2.13` — MIT
 - `langgraph-checkpoint 4.1.1` — MIT
 - `langgraph-checkpoint-sqlite 3.1.1` — MIT
 - `langgraph-prebuilt 1.1.0` — MIT
-- `langgraph-sdk 0.3.15` — MIT
+- `langgraph-sdk 0.4.4` — MIT
 - `langsmith 0.10.10` — MIT
 - `lxml 6.1.1` — BSD-3-Clause
-- `mako 1.3.12` — MIT
+- `mako 1.4.2` — MIT
 - `markupsafe 3.0.3` — BSD-3-Clause
 - `oci 2.184.1` — Universal Permissive License 1.0 or Apache License 2.0
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
