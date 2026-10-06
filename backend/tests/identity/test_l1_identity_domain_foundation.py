@@ -28,12 +28,13 @@ def test_legacy_model_imports_share_canonical_identity_objects() -> None:
 
 
 def test_identity_model_table_contracts_are_unchanged() -> None:
+    """Keep the historic case ID; approved v27 adds only the two UI columns."""
     assert _actual_domains_identity_models.User.__tablename__ == 'users'
     assert _actual_domains_identity_models.AuthSession.__tablename__ == 'auth_sessions'
     assert _actual_domains_identity_models.LlmCredential.__tablename__ == 'llm_credentials'
     assert export_matches('app.domains.identity.public', 'User.__table__', legacy_auth_models.User.__table__)
     assert export_matches('app.domains.identity.public', 'LlmCredential.__table__', legacy_credential_models.LlmCredential.__table__)
-    assert set(_actual_domains_identity_models.User.__table__.columns.keys()) == {'id', 'email', 'google_sub', 'password_hash', 'display_name', 'is_admin', 'display_name_normalized', 'display_name_updated_at', 'privacy_policy_agreed_at', 'terms_agreed_at', 'privacy_policy_version', 'terms_version', 'profile_setup_completed', 'feed_content_filter', 'created_at', 'deleted_at'}
+    assert set(_actual_domains_identity_models.User.__table__.columns.keys()) == {'id', 'email', 'google_sub', 'password_hash', 'display_name', 'is_admin', 'display_name_normalized', 'display_name_updated_at', 'privacy_policy_agreed_at', 'terms_agreed_at', 'privacy_policy_version', 'terms_version', 'profile_setup_completed', 'feed_content_filter', 'created_at', 'deleted_at', 'ui_language', 'ui_preference_revision'}
     assert set(_actual_domains_identity_models.LlmCredential.__table__.columns.keys()) == {'id', 'owner_id', 'character_id', 'provider', 'purpose', 'model', 'auth_profile_id', 'label', 'encrypted_api_key', 'key_fingerprint', 'enabled', 'cooldown_until', 'created_at', 'updated_at', 'thinking_level'}
 
 

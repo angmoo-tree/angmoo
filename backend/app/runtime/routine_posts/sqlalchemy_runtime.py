@@ -300,7 +300,13 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
     imported_locked = agent_activity_policy.is_imported_world_runtime_locked(
         db, world_character
     )
-    if not world_character.autonomous_enabled and (not manual or imported_locked):
+    from app.runtime.world_configuration.effective_values import configuration_for_input
+    input_snapshot = getattr(resident_context, "input_snapshot", None)
+    configuration = configuration_for_input(input_snapshot, character_id=resident_context.character.id)
+    if configuration is not None and (configuration.world_id != world_character.world_id or configuration.world_character_id != world_character.id):
+        return _safe_result(outcome="WORLD_SCOPE_INVALID", tracker=tracker)
+    enabled = configuration.autonomous_enabled if configuration is not None else world_character.autonomous_enabled
+    if not enabled and (not manual or (imported_locked and configuration is None)):
         return _safe_result(outcome="AUTONOMY_DISABLED", tracker=tracker)
     if "post" not in set(resident_context.activity_policy.allowed_actions):
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)
@@ -347,7 +353,7 @@ def prepare_routine_activity(resident_context, *, interaction_source=None, track
 
     try:
         context = assemble_routine_post_context(
-            db, references=SqlAlchemyRoutineContextReferences(db),
+            db, references=SqlAlchemyRoutineContextReferences(db, input_snapshot=input_snapshot),
             world_character=world_character,
             character=resident_context.character,
             now=resident_context.run_started_at,
@@ -609,7 +615,7 @@ async def _run_routine_post_runtime(
     return publish_routine_activity(resident_context, prepared=prepared, generation=generation)
 
 
-def publish_routine_activity(resident_context, *, prepared, generation):
+def publish_routine_activity(resident_context, *, prepared, generation, relationship_validator=None):
     db = resident_context.db
     context, beat = prepared.context, prepared.beat
     world_character, joint_activity = prepared.world_character, prepared.joint_activity
@@ -638,169 +644,191 @@ def publish_routine_activity(resident_context, *, prepared, generation):
         "scene_brief": generation.plan.scene_brief,
         "continuity_facts": generation.plan.continuity_facts,
         "used_detail_keys": generation.plan.used_detail_keys,
+        "auxiliary_normalization": generation.draft._normalization_receipt,
     }
 
     try:
         from app.runtime.routine_posts.original_post import check_original
         check_original(resident_context, world_id=context.world.id, actor_id=world_character.id,
             title=generation.draft.title, body=generation.draft.body)
-        with unit_of_work.deferred_commits():
-            execution = public_action_executions.create_public_action_execution(
-                db,
-                run_id=resident_context.run_id,
-                character_id=resident_context.character.id,
-                signature=execution_signature,
-                scope="routine_activity_beat",
-                action_type="post",
-                brief_hash=result_snapshot["planner_output_hash"],
-                world_id=context.world.id,
-                actor_world_character_id=world_character.id,
-            )
-            from app.domains.relationships.contracts.social_consumption import validate_social_context
-            validate_social_context(resident_context)
-            post_read = agent_tool_actions.create_agent_tool_post(
-                db,
-                resident_context.session_key,
-                PostCreate(
-                    title=generation.draft.title,
-                    body=generation.draft.body,
-                    author_character_id=resident_context.character.id,
-                ),
-                topic_signature=generation.draft.topic_signature,
-                final_topic_signature=generation.draft.topic_signature,
-                novelty_basis=generation.draft.novelty_basis,
-                world_id=context.world.id,
-                author_world_character_id=world_character.id,
-            )
-            post = db.get(_model_Post, post_read.id)
-            if post is None:
-                raise activity_errors.ActivityRuntimeValidationError(
-                    "publish_evidence_missing"
+        post = None
+        def publish_current():
+            nonlocal post
+            # Reuse effects before checking their historical consumed inputs.
+            existing = public_action_queries.get_public_action_execution_by_signature(db, execution_signature)
+            if existing is not None and existing.status == "succeeded":
+                return {"engine": "routine_resident_v1", "status": "completed", "routine_outcome": "REUSED_SUCCESS",
+                    "publish_result": {"public_action_count": 0, **(existing.result or {}), "reused": True}}
+            if relationship_validator is not None:
+                relationship_validator()
+            with unit_of_work.deferred_commits():
+                execution = public_action_executions.create_public_action_execution(
+                    db,
+                    run_id=resident_context.run_id,
+                    character_id=resident_context.character.id,
+                    signature=execution_signature,
+                    scope="routine_activity_beat",
+                    action_type="post",
+                    brief_hash=result_snapshot["planner_output_hash"],
+                    world_id=context.world.id,
+                    actor_world_character_id=world_character.id,
                 )
-            result_snapshot["post_evidence"] = {
-                "post_id": post.id,
-                "world_id": post.world_id,
-                "author_world_character_id": post.author_world_character_id,
-            }
-            post.joint_activity_id = context.item.joint_activity_id
-            post.activity_episode_id = context.episode.id
-            post.activity_beat_id = beat.id
-            from app.runtime.media.binding import current as current_media_runtime
-            media_runtime = current_media_runtime()
-            if media_runtime is not None:
-                media_runtime.admit_post(db, post=post, owner_id=resident_context.user_id,
-                    character_id=resident_context.character.id, draft=generation.draft)
-            event_result = social_event_runtime.record_successful_social_event(
-                db,
-                world_id=context.world.id,
-                actor_world_character_id=world_character.id,
-                target_world_character_id=None,
-                event_type="post_published",
-                occurred_at=resident_context.run_started_at,
-                idempotency_key=sha256(
-                    f"p4|{execution.signature}|post_published".encode("utf-8")
-                ).hexdigest(),
-                evidence=social_event_runtime.EvidenceInput(
-                    evidence_kind="post",
-                    source_object_type="post",
-                    source_object_id=post.id,
-                    root_post_id=post.id,
-                    source_post_id=post.id,
-                    agent_run_id=resident_context.run_id,
-                    public_action_execution_id=execution.id,
-                    source_text=f"{post.title}\n{post.body}",
-                    source_visibility_at_event=post.visibility,
-                    source_author_id_at_event=world_character.id,
-                ),
-            )
-            result_snapshot["social_event_id"] = event_result.event.id
-            if joint_activity is not None:
-                started_event = joint_activity_runtime.apply_joint_post(
-                    db, references=SqlAlchemyJointReferences(db),
-                    joint_activity_id=joint_activity.id,
+                from app.domains.relationships.contracts.social_consumption import validate_social_context
+                validate_social_context(resident_context)
+                post_read = agent_tool_actions.create_agent_tool_post(
+                    db,
+                    resident_context.session_key,
+                    PostCreate(
+                        title=generation.draft.title,
+                        body=generation.draft.body,
+                        author_character_id=resident_context.character.id,
+                    ),
+                    topic_signature=generation.draft.topic_signature,
+                    final_topic_signature=generation.draft.topic_signature,
+                    novelty_basis=generation.draft.novelty_basis,
+                    world_id=context.world.id,
                     author_world_character_id=world_character.id,
-                    post=post,
-                    post_event=event_result.event,
-                    opening_claim=opening_claim,
+                )
+                post = db.get(_model_Post, post_read.id)
+                if post is None:
+                    raise activity_errors.ActivityRuntimeValidationError(
+                        "publish_evidence_missing"
+                    )
+                result_snapshot["post_evidence"] = {
+                    "post_id": post.id,
+                    "world_id": post.world_id,
+                    "author_world_character_id": post.author_world_character_id,
+                }
+                post.joint_activity_id = context.item.joint_activity_id
+                post.activity_episode_id = context.episode.id
+                post.activity_beat_id = beat.id
+                from app.runtime.media.binding import current as current_media_runtime
+                media_runtime = current_media_runtime()
+                if media_runtime is not None:
+                    media_runtime.admit_post(db, post=post, owner_id=resident_context.user_id,
+                        character_id=resident_context.character.id, draft=generation.draft,
+                        input_snapshot=getattr(resident_context, "input_snapshot", None))
+                event_result = social_event_runtime.record_successful_social_event(
+                    db,
+                    world_id=context.world.id,
+                    actor_world_character_id=world_character.id,
+                    target_world_character_id=None,
+                    event_type="post_published",
+                    occurred_at=resident_context.run_started_at,
+                    idempotency_key=sha256(
+                        f"p4|{execution.signature}|post_published".encode("utf-8")
+                    ).hexdigest(),
+                    evidence=social_event_runtime.EvidenceInput(
+                        evidence_kind="post",
+                        source_object_type="post",
+                        source_object_id=post.id,
+                        root_post_id=post.id,
+                        source_post_id=post.id,
+                        agent_run_id=resident_context.run_id,
+                        public_action_execution_id=execution.id,
+                        source_text=f"{post.title}\n{post.body}",
+                        source_visibility_at_event=post.visibility,
+                        source_author_id_at_event=world_character.id,
+                    ),
+                )
+                result_snapshot["social_event_id"] = event_result.event.id
+                if joint_activity is not None:
+                    started_event = joint_activity_runtime.apply_joint_post(
+                        db, references=SqlAlchemyJointReferences(db),
+                        joint_activity_id=joint_activity.id,
+                        author_world_character_id=world_character.id,
+                        post=post,
+                        post_event=event_result.event,
+                        opening_claim=opening_claim,
+                        now=resident_context.run_started_at,
+                    )
+                    result_snapshot["joint_activity_id"] = joint_activity.id
+                    result_snapshot["joint_opening_post_id"] = (
+                        post.id if started_event is not None else joint_activity.opening_post_id
+                    )
+                    result_snapshot["joint_started_event_id"] = (
+                        started_event.id if started_event is not None else None
+                    )
+                consume_manual_inbox_claims(
+                    db,
+                    source_event_ids=claimed_manual_source_ids,
+                    target_activity_beat_id=beat.id,
+                    claim_run_id=resident_context.run_id,
                     now=resident_context.run_started_at,
                 )
-                result_snapshot["joint_activity_id"] = joint_activity.id
-                result_snapshot["joint_opening_post_id"] = (
-                    post.id if started_event is not None else joint_activity.opening_post_id
-                )
-                result_snapshot["joint_started_event_id"] = (
-                    started_event.id if started_event is not None else None
-                )
-            consume_manual_inbox_claims(
-                db,
-                source_event_ids=claimed_manual_source_ids,
-                target_activity_beat_id=beat.id,
-                claim_run_id=resident_context.run_id,
-                now=resident_context.run_started_at,
-            )
-            activity_claims.complete_activity_beat(
-                db,
-                references=SqlAlchemyActivityReferences(db),
-                beat_id=beat.id,
-                claim_run_id=resident_context.run_id,
-                source_post_id=post.id,
-                state_after_snapshot=generation.state_after,
-                result_snapshot=result_snapshot,
-                external_claimed_source_event_ids=set(claimed_manual_source_ids),
-                now=resident_context.run_started_at,
-                commit=False,
-            )
-            execution.target_post_id = post.id
-            public_action_executions.mark_public_action_execution_finished(
-                db,
-                execution,
-                status="succeeded",
-                result={
-                    "post_id": post.id,
-                    "beat_id": beat.id,
-                    "world_id": context.world.id,
-                    "world_character_id": world_character.id,
-                    "social_event_id": event_result.event.id,
-                    "joint_activity_id": (
-                        joint_activity.id if joint_activity is not None else None
-                    ),
-                    "opening_post_id": post.opening_post_id,
-                },
-            )
-            if context.thought_policy == "thought_v1":
-                from app.contracts.activity_thought import ActivityThought
-                from app.runtime.social.subjective_composition import record_activity_thought
-                record_activity_thought(
-                    db, execution=execution, event=event_result.event,
-                    source_post_id=post.id, thought=generation.draft._activity_thought or ActivityThought(),
-                    captured_at=resident_context.run_started_at,
-                )
-            else:
-                subjective_context = None
-                if (
-                    generation.plan.motivation_kind is not None
-                    and generation.plan.motivation_text is not None
-                    and generation.plan.emotion_label is not None
-                ):
-                    subjective_context = ActionSubjectiveContextV1(
-                        motivation_kind=generation.plan.motivation_kind,
-                        motivation_text=generation.plan.motivation_text,
-                        emotion_label=generation.plan.emotion_label,
-                        emotion_text=generation.plan.emotion_text,
-                        emotion_intensity=generation.plan.emotion_intensity,
-                    )
-                record_declared_subjective_context(
+                activity_claims.complete_activity_beat(
                     db,
-                    execution=execution,
-                    event=event_result.event,
+                    references=SqlAlchemyActivityReferences(db),
+                    beat_id=beat.id,
+                    claim_run_id=resident_context.run_id,
                     source_post_id=post.id,
-                    context=subjective_context,
-                    captured_at=resident_context.run_started_at,
+                    state_after_snapshot=generation.state_after,
+                    result_snapshot=result_snapshot,
+                    external_claimed_source_event_ids=set(claimed_manual_source_ids),
+                    now=resident_context.run_started_at,
+                    commit=False,
                 )
-            if not prepared.common_state_managed and context.common_state:
-                from app.runtime.character_activity_state import settle_legacy_success
-                settle_legacy_success(db, prepared=prepared, run_id=resident_context.run_id, generation=generation)
-        db.commit()
+                execution.target_post_id = post.id
+                public_action_executions.mark_public_action_execution_finished(
+                    db,
+                    execution,
+                    status="succeeded",
+                    result={
+                        "post_id": post.id,
+                        "beat_id": beat.id,
+                        "world_id": context.world.id,
+                        "world_character_id": world_character.id,
+                        "social_event_id": event_result.event.id,
+                        "joint_activity_id": (
+                            joint_activity.id if joint_activity is not None else None
+                        ),
+                        "opening_post_id": post.opening_post_id,
+                        "auxiliary_normalization": generation.draft._normalization_receipt,
+                    },
+                )
+                if context.thought_policy == "thought_v1":
+                    from app.contracts.activity_thought import ActivityThought
+                    from app.runtime.social.subjective_composition import record_activity_thought
+                    record_activity_thought(
+                        db, execution=execution, event=event_result.event,
+                        source_post_id=post.id, thought=generation.draft._activity_thought or ActivityThought(),
+                        captured_at=resident_context.run_started_at,
+                    )
+                else:
+                    subjective_context = None
+                    if (
+                        generation.plan.motivation_kind is not None
+                        and generation.plan.motivation_text is not None
+                        and generation.plan.emotion_label is not None
+                    ):
+                        subjective_context = ActionSubjectiveContextV1(
+                            motivation_kind=generation.plan.motivation_kind,
+                            motivation_text=generation.plan.motivation_text,
+                            emotion_label=generation.plan.emotion_label,
+                            emotion_text=generation.plan.emotion_text,
+                            emotion_intensity=generation.plan.emotion_intensity,
+                        )
+                    record_declared_subjective_context(
+                        db,
+                        execution=execution,
+                        event=event_result.event,
+                        source_post_id=post.id,
+                        context=subjective_context,
+                        captured_at=resident_context.run_started_at,
+                    )
+                if not prepared.common_state_managed and context.common_state:
+                    from app.runtime.character_activity_state import settle_legacy_success
+                    settle_legacy_success(db, prepared=prepared, run_id=resident_context.run_id, generation=generation)
+        if relationship_validator is not None:
+            from app.core.sqlite_concurrency import run_sqlite_session_immediate
+            if db.in_transaction():
+                db.commit()
+            reused = run_sqlite_session_immediate(db, publish_current, require_clean=True)
+        else:
+            reused = publish_current()
+            db.commit()
+        if reused is not None:
+            return reused
     except Exception as exc:
         db.rollback()
         if opening_claim is not None:
@@ -813,6 +841,9 @@ def publish_routine_activity(resident_context, *, prepared, generation):
             retryable=isinstance(exc, IntegrityError),
             manual_source_event_ids=claimed_manual_source_ids,
         )
+        from app.domains.relationships.contracts.social_context import SocialContextValidationError
+        if isinstance(exc, SocialContextValidationError):
+            raise
         logger.exception(
             "routine_publish_failed run_id=%s beat_id=%s failure_class=%s",
             resident_context.run_id,

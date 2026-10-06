@@ -32,9 +32,10 @@ def resolve_engine(db: Session, actor: WorldCharacter) -> dict:
 
 
 def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: int,
-               world_id: str | None = None, actor_id: str | None = None) -> None:
+               world_id: str | None = None, actor_id: str | None = None,
+               settled_current: bool = False) -> None:
     """Caller authorizes ownership; policy never changes autonomy eligibility."""
-    if engine not in (None, "current", "personalized_graph_v2"):
+    if engine not in (None, "personalized_graph_v2"):
         raise ValueError("engine_invalid")
     if actor_id:
         actor = db.get(WorldCharacter, actor_id)
@@ -44,6 +45,8 @@ def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: 
     row = db.get(ActivityEnginePolicy, key, populate_existing=True)
     if (row.version if row else 0) != expected_version:
         raise ValueError("engine_policy_conflict")
+    if row is not None and row.engine == "current" and engine == "personalized_graph_v2" and not settled_current:
+        raise ValueError("legacy_engine_transition_required")
     if row is None:
         if engine is not None:
             db.add(ActivityEnginePolicy(scope_key=key, world_id=world_id, world_character_id=actor_id,
@@ -57,8 +60,10 @@ def set_engine(db: Session, *, engine: ActivityEngine | None, expected_version: 
     db.flush()
 
 
-def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> ActivityGraphRun:
+def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str, configuration=None) -> ActivityGraphRun:
     """Existing runs keep their engine even if policy changes during execution."""
+    from app.domains.identity.service.environment import lock_environment_admission
+    lock_environment_admission(db, actor.owner_user_id)
     row = db.get(ActivityGraphRun, activity_id)
     if row is not None:
         if ((row.world_id, row.world_character_id) != (actor.world_id, actor.id)
@@ -67,6 +72,8 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
             raise ValueError("activity_run_scope_or_version_invalid")
         return row
     engine = resolve_engine(db, actor)["engine"]
+    if engine != "personalized_graph_v2":
+        raise ValueError("legacy_engine_transition_required")
     from dataclasses import asdict
     from app.config import settings
     from app.contracts.routine_output import select_policy
@@ -74,11 +81,29 @@ def bind_run(db: Session, *, actor: WorldCharacter, activity_id: str) -> Activit
         output_policy=settings.ROUTINE_OUTPUT_POLICY, thought_policy=settings.ACTIVITY_THOUGHT_POLICY)
     from app.domains.world_characters.service.name_binding import resolve_name_binding
     binding = resolve_name_binding(db, actor=actor, owner_id=actor.owner_user_id)
+    if configuration is not None:
+        if (configuration.world_id, configuration.world_character_id, configuration.character_id) != (actor.world_id, actor.id, actor.character_id):
+            raise ValueError("world_configuration_snapshot_scope_invalid")
+        from dataclasses import replace
+        binding = replace(binding, actor_display_name=configuration.profile.display_name)
+    from app.domains.identity.service.environment import snapshot
+    environment = snapshot(db, binding.owner_id)
     row = ActivityGraphRun(activity_id=activity_id, world_id=actor.world_id,
         world_character_id=actor.id, engine=engine,
         contract_version=CONTRACT_VERSION if engine == "personalized_graph_v2" else 1,
         status="running", stage="LoadContext", started_at=datetime.now(UTC),
-        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version, "name_binding": binding.to_dict()})
+        result={"routine_policy": asdict(policy), "name_binding_policy": binding.policy_version,
+            "name_binding": binding.to_dict(), "environment_snapshot": environment.to_dict(),
+            **({"_world_configuration": configuration.request_snapshot()} if configuration is not None else {})})
+    if engine == "personalized_graph_v2":
+        from app.domains.world_characters.contracts.social_io import new_policies
+        from app.contracts.relationship_currentness import CURRENTNESS_POLICY_KEY, CURRENTNESS_REVISION
+        row.result = {**row.result, **new_policies(), CURRENTNESS_POLICY_KEY: CURRENTNESS_REVISION}
+        from app.contracts.sns_generation import new_generation_policies
+        row.result = {**row.result, **new_generation_policies()}
+    if engine == "personalized_graph_v2" and settings.SNS_CHECKPOINT_POLICY_ENABLED:
+        from app.domains.world_characters.contracts.checkpoint_retention import CheckpointRetention, RETENTION_KEY
+        row.result = {**row.result, RETENTION_KEY: CheckpointRetention().model_dump()}
     db.add(row)
     db.flush()
     return row

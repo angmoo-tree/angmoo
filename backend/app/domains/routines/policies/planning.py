@@ -12,7 +12,7 @@ from app.domains.routines.constants import (
     SELECTION_CONTRACT_VERSION,
 )
 from app.domains.routines.exceptions import DailyActivityPlanValidationError
-from app.domains.routines.service.scheduling import aware_utc as _aware_utc
+from app.domains.routines.utils.clock import aware_utc as _aware_utc
 
 
 def _zone(timezone_name: str) -> ZoneInfo:

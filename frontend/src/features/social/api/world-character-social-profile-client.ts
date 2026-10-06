@@ -1,4 +1,4 @@
-import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { captureAuthRequestScope, isCurrentAuthRequestScope, clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { RuntimeFetchError, runtimeFetch } from "@/lib/runtime/runtime-config";
 
 import type { WorldCharacterSocialProfilePost, WorldCharacterSocialProfileRead, WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
@@ -25,6 +25,7 @@ export async function getWorldCharacterSocialProfile(
     limit: String(options.limit ?? 10),
   });
   if (options.cursor) query.set("cursor", options.cursor);
+  const authScope = captureAuthRequestScope();
 
   let response: Response;
   try {
@@ -46,7 +47,7 @@ export async function getWorldCharacterSocialProfile(
 
   const payload = (await response.json().catch(() => null)) as unknown;
   if (!response.ok) {
-    if (response.status === 401) {
+    if (response.status === 401 && isCurrentAuthRequestScope(authScope)) {
       clearStoredUser();
       notifyAuthChanged();
     }

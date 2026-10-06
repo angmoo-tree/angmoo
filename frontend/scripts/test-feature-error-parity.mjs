@@ -6,6 +6,7 @@ import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { approvedErrorMessage } from "./approved-error-transitions.mjs";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const baseline = "b648587225114ae86553381556be42e017d87f62";
@@ -16,7 +17,8 @@ function harness(historical, response) {
   const window = {sessionStorage:storage, localStorage:storage, dispatchEvent:e=>events.push(e.type)};
   const runtimeFetch = async (url, options) => {
     requests.push([url,options]);
-    return {ok:response.status>=200&&response.status<300,status:response.status,text:async()=>response.text};
+    return {ok:response.status>=200&&response.status<300,status:response.status,
+      headers:new Headers(response.headers),text:async()=>response.text};
   };
   function load(name) {
     if (cache.has(name)) return cache.get(name).exports;
@@ -66,7 +68,9 @@ const consumers=[
 for (const [file,method,args] of consumers) for (const response of responses) {
   const before=harness(true,response),after=harness(false,response);
   const outcome=async h=>{try{return {value:await h.load("frontend/src/features/"+file)[method](...args)};}catch(error){return {error:error.message};}};
-  assert.deepEqual(plain(await outcome(after)),plain(await outcome(before)),file+" "+response.text);
+  const historical=plain(await outcome(before));
+  if ("error" in historical) historical.error=approvedErrorMessage(historical.error,response.status);
+  assert.deepEqual(plain(await outcome(after)),historical,file+" "+response.text);
   assert.deepEqual(plain(after.requests),plain(before.requests),file+" transport");
   assert.equal(after.requests.length,1);
   assert.deepEqual(after.events,before.events,file+" auth events");

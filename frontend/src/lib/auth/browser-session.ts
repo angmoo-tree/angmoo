@@ -1,3 +1,4 @@
+import { ApiRequestError } from "@/lib/http/error-contract";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 export type UserFeedContentFilter = "all" | "posts" | "reposts";
@@ -10,6 +11,8 @@ export type UserRead = {
   display_name_change_available_at: string | null;
   profile_setup_completed: boolean;
   feed_content_filter: UserFeedContentFilter;
+  ui_language?: "ko" | "en" | null;
+  ui_preference_revision?: number;
   is_admin: boolean;
 };
 
@@ -29,6 +32,26 @@ const USER_KEY = "angmoo.user";
 const PENDING_GOOGLE_SIGNUP_KEY = "angmoo.pendingGoogleSignup";
 
 export const AUTH_CHANGED_EVENT = "angmoo:auth-changed";
+
+let sessionRevision = 0;
+
+// A response belongs to the session and runtime that admitted its request.
+// The launch token stays in memory and is never exposed in an error or log.
+export function captureAuthRequestScope() {
+  const runtime = typeof window === "undefined" ? null : window.__ANGMOO_RUNTIME_CONFIG__;
+  return {
+    revision: sessionRevision,
+    userId: getStoredUser()?.id ?? null,
+    apiBaseUrl: runtime?.apiBaseUrl,
+    launchToken: runtime?.launchToken,
+  };
+}
+
+export function isCurrentAuthRequestScope(scope: ReturnType<typeof captureAuthRequestScope>) {
+  const current = captureAuthRequestScope();
+  return scope.revision === current.revision && scope.userId === current.userId
+    && scope.apiBaseUrl === current.apiBaseUrl && scope.launchToken === current.launchToken;
+}
 
 export function getStoredUser(): UserRead | null {
   if (typeof window === "undefined") return null;
@@ -64,6 +87,8 @@ function normalizeStoredUser(value: unknown): UserRead | null {
         ? user.profile_setup_completed
         : true,
     feed_content_filter: normalizeFeedContentFilter(user.feed_content_filter),
+    ui_language: user.ui_language === "ko" || user.ui_language === "en" ? user.ui_language : null,
+    ui_preference_revision: typeof user.ui_preference_revision === "number" ? user.ui_preference_revision : 0,
     is_admin: user.is_admin === true,
   };
 }
@@ -87,6 +112,7 @@ export function storeUser(user: UserRead) {
 
 export function cacheUser(user: UserRead) {
   if (typeof window === "undefined") return;
+  if (getStoredUser()?.id !== user.id) sessionRevision += 1;
   window.sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   if (user.profile_setup_completed) {
     window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
@@ -96,6 +122,7 @@ export function cacheUser(user: UserRead) {
 
 export function clearStoredUser() {
   if (typeof window === "undefined") return;
+  sessionRevision += 1;
   window.sessionStorage.removeItem(USER_KEY);
   window.localStorage.removeItem(USER_KEY);
 }
@@ -111,6 +138,7 @@ export function clearLegacyAuthStorage() {
 }
 
 export function isAuthError(error: unknown) {
+  if (error instanceof ApiRequestError) return error.status === 401;
   if (!(error instanceof Error)) return false;
   const message = error.message.trim();
   return (
@@ -136,6 +164,7 @@ export async function authRequest<T>(
     suppressAuthFailureEvent = false,
     ...rest
   } = options;
+  const scope = captureAuthRequestScope();
   const response = await runtimeFetch(`/api/backend${path}`, {
     ...rest,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -149,44 +178,25 @@ export async function authRequest<T>(
     payload = text ? JSON.parse(text) : null;
   } catch (error) {
     if (!response.ok) {
-      throw new Error(
-        htmlErrorMessage(text) ??
-          (text.trim() || `Request failed with ${response.status}`),
-      );
+      throw new ApiRequestError("The request could not be completed. Please try again.", response.status, null);
     }
     throw error;
   }
   if (!response.ok) {
-    if (response.status === 401 && !anonymous && !suppressAuthFailureEvent) {
+    if (response.status === 401 && !anonymous && !suppressAuthFailureEvent
+        && !rest.signal?.aborted && isCurrentAuthRequestScope(scope)) {
       clearStoredUser();
       notifyAuthChanged();
     }
-    throw new Error(errorMessage(payload, `Request failed with ${response.status}`));
+    const detail = payload && typeof payload === "object" && "detail" in payload ? payload.detail : null;
+    const code = typeof detail === "string" && /^[a-z][a-z0-9_]{0,80}$/.test(detail) ? detail : null;
+    throw new ApiRequestError(response.status === 401 ? "Please sign in again." : "The request could not be completed. Please try again.", response.status, code, {}, response.headers.get("Retry-After"));
   }
   return payload as T;
 }
 
-function errorMessage(payload: unknown, fallback: string) {
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "detail" in payload &&
-    typeof payload.detail === "string"
-  ) {
-    return payload.detail;
-  }
-  return fallback;
-}
-
-function htmlErrorMessage(text: string) {
-  const trimmed = text.trim().toLowerCase();
-  if (!trimmed.startsWith("<!doctype html") && !trimmed.startsWith("<html")) {
-    return null;
-  }
-  return "요청 처리 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-}
-
 export function storeAuth(auth: AuthRead) {
+  sessionRevision += 1;
   window.sessionStorage.setItem(USER_KEY, JSON.stringify(auth.user));
   window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
   removeLegacyAuthTokens();
@@ -195,7 +205,7 @@ export function storeAuth(auth: AuthRead) {
 }
 
 export function clearAuth() {
-  window.sessionStorage.removeItem(USER_KEY);
+  clearStoredUser();
   window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
   removeLegacyAuthTokens();
   window.localStorage.removeItem(USER_KEY);

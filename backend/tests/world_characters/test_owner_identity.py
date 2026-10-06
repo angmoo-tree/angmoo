@@ -411,7 +411,7 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         headers=FRONTEND_HEADERS,
         json=_payload(),
     ).json()
-    now = datetime.now(UTC)
+    now = datetime(2026, 10, 5, 16, tzinfo=UTC)
 
     autonomous = models.Character(
         id="autonomous-a",
@@ -467,6 +467,18 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         )
         db.add_all([owner_credential, autonomous_credential])
         db.flush()
+        db.add(models.AgentActivitySetting(character_id=autonomous.id,
+            auto_enabled=False, active_hours_start="09:00", active_hours_end="02:00"))
+        from app.domains.world_characters.models import CharacterWorldBinding
+        db.add(CharacterWorldBinding(character_id=autonomous.id, world_id="world-a"))
+        db.add(models.CharacterActiveWorld(character_id=autonomous.id,
+            world_character_id="wc-autonomous-a", selected_at=now,
+            idempotency_key="fixture-autonomous-a", version=1))
+        db.flush()
+        from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+        role = db.get(models.WorldCharacter, "wc-autonomous-a")
+        initialize_created_world_character(db, character=autonomous, world_character=role)
+        role.autonomous_enabled = True
         db.add_all(
             [
                 models.AgentSlot(

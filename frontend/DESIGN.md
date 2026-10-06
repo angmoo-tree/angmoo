@@ -14,6 +14,110 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+Device Character dashboard summary and empty-state UI appear only after a
+successful read. A failed read keeps its retry feedback and any previously loaded
+cards; it must not show an unconfirmed zero count or claim that no characters exist.
+This correction is LOCAL and reuses the existing error, summary and card layout.
+
+## 2026-10-05 World 게시글·관리·관계망 표시 계약
+
+World 상세 제목은 한글 `게시글`, 영어 `post`이며 뒤로가기 버튼의 오른쪽에
+기존 control 간격으로 시작 정렬한다. 답글 제목/목록 또는 빈 상태/페이지 이동
+뒤에 기존 사용자 답글 폼을 둔다. 좋아요는 해당 하트와 서버가 확인한 개수만
+갱신하고 사진·폼·초안·불러온 범위·스크롤을 유지한다.
+
+공통 native Dialog는 콘텐츠 viewport 중앙에 배치한다. World 채팅함 행 끝의
+Trash2는 링크와 분리한 44px 조작 영역이며 방 상단은 Settings → Trash2다.
+확인은 취소에 기본 포커스를 두고 실패 시 화면과 초안을 유지한다.
+
+World Characters는 기존 World 헤더/하단 탐색과 Device Home의 공통 상세 카드
+배치를 사용한다. 실제 사용자 먼저, 이후 기존 ON/최근 활동/이름/ID 순서다.
+요약은 전체·자율활동 ON·OFF·사용자이며 외부 연동 표현은 이 World 목록에서
+사용하지 않는다. 프로필 → 상태 → 설정과 편집 폼은 기존 관리 배치를 계승한다.
+저장 ON과 시간/자원 대기는 구분하고 World 전용 저장 범위를 한글/영어로 표시한다.
+
+프로필 action은 기존 Network 아이콘 → Mail → 허용된 편집 순서이며 neutral
+프로필 토큰을 사용한다. Follow 통계 세 개를 제외하고 기존 게시글/답글/좋아요/
+받은 좋아요를 hero 내부의 간결한 inline 통계로 표시한다. 별도 통계 구분선은
+없다. 관계망 원형 노드는 실제 World 사진을 common ProfileAvatar로 표시하고
+없거나 실패한 사진에는 기존 이니셜 fallback을 사용한다. 중심/방향/접근 가능한
+이름/관계 목록은 보존한다. 새 외부 이미지·아이콘·폰트는 도입하지 않는다.
+
+출처: 기존 관리/프로필 anatomy의 ADAPTED, scoped command와 input 수명의 LOCAL.
+로컬 구현/자동 검사와 운영 Docker 적용·설치판·직접 USER CHECK는 별도 결과다.
+
+## 2026-10-05 World 상세·반응·Chat 통합 계약
+
+이번 사용자 확정 계약이 아래 역사 단계의 표시·World 대화 개수 조항보다 우선한다.
+World Home에만 WORLD APP·World 이름·Device Home 상단바를 남기고 비홈 화면은 콘텐츠 헤더를 소유한다.
+선택한 게시글/답글 상세는 그 항목과 공개 하위 답글을 표시하고, 사용자 답글은 현재 항목을 즉시 부모로 저장한다.
+답글 폼은 사용자 아바타/이름·빈 본문·기존 Send 아이콘이며 실제 label은 sr-only다. 기본 Field는 visible이다.
+본문 열의 왼쪽에 답글/좋아요를 같은 순서와 넉넉한 그룹 간격으로 놓고, count와 viewer 선택을 구분한다.
+World 좋아요는 정식 서버 capability와 저장 응답을 사용한다. 미지원 Follow/repost/share를 추가하지 않는다.
+Feed와 Chat의 사진·Send는 오른쪽 같은 그룹에 인접 배치하며 공개 작성의 제목160/본문4000은 유지한다.
+World 프로필은 글로벌 hero/avatar/action/name/tabs/stream 표현과 원본 이미지를 계승한다.
+World Chat은 실제 대화 개수 제한과 N/5를 제거하고, 상대 헤더·user 우측 dark/assistant 좌측 light bubble·
+단일 메시지 scroll·rounded composer를 사용한다. 기존 모델 선택은 compact footer, 기억/진단은 보조 Dialog다.
+대화 생성·예산·stream·인식·기억 설정·lease 보호는 유지한다. ko/en 제품 문구와 접근성 이름만 번역한다.
+출처는 기존 글로벌 표현의 ADAPTED와 World scope/서버 저장/slot 연결의 LOCAL이며 새 외부 asset/font는 없다.
+
+## 2026-10-04 World SNS 피드 목록·수동 작성 계약
+
+기본 SNS와 생성 World의 목록은 글로벌 Feed와 같은 neutral `FeedHeader` 및 `SocialPostRow`를 사용한다.
+목록 헤더는 왼쪽 `피드`/`Feed`, 중앙 기존 Angmoo 로고, 오른쪽 현재 World 사용자 프로필만 표시한다.
+우측은 실제 ownerActor의 인증된 아바타 또는 이니셜이며 현재 World 프로필로 이동한다. 활동 점선·작은 World 이름·
+World App/context 설명·헤더 새로고침·Follow/repost 필터는 목록에서 렌더링하지 않는다.
+글로벌의 Feed Cue·캐릭터 선택·두 필터·desktop 갱신은 그대로 유지한다.
+
+수동 작성은 실제 사용자 이름과 지원 payload의 handle, 필수 제목(160)·본문(4000), 원본 형식/비율의 사진 1장,
+아래 오른쪽 같은 그룹의 사진 `Image` 아이콘과 코랄색·흰 `Send` 아이콘의 48px 원형 버튼 순서다.
+버튼 caption은 없고 접근성 이름·title·busy/disabled·focus-visible·텍스트 오류 안내를 유지한다.
+Media는 native input·upload/abort/draft/preview를, Social은 form·submit/idempotency와 action 행 배치를,
+composition은 World 사용자와 feature의 ReactNode 표시 슬롯 연결을 소유한다.
+
+첫 조회·World 전환·게시 후 갱신·실패 화면의 명시적 재시도·모바일 당겨 새로고침·이미지 완료 갱신은 기존 loadFeed를 쓴다.
+부분 갱신과 실패는 입력을 보존하고 문서 전체 reload/HMR의 입력 영구 보존을 보장하지 않는다.
+기존 다섯 하단 탐색은 유지한다. 당시 상세/shell/backend 불변 조항은 위 10-05의 명시적 변경 범위에서 대체한다.
+
+출처 분류: 기존 글로벌 anatomy의 **ADAPTED**, 새 neutral 표시 슬롯과 independent World 연결의 **LOCAL**.
+새 hosted source·asset·font·dependency를 추가하지 않는다. 로컬 fixture 검사와 운영 적용·직접 USER CHECK는 구분한다.
+
+## 2026-10-04 현재 반응형 화면·일반 native 창 계약
+
+사용자가 확정한 10-04 반응형 공통 화면 계획의 C01–C22를 현재 계약으로 적용한다.
+아래 기존 Phone 실루엣·75–125% 비율 조정·투명 창·직접 그린 caption 설명은 당시 구현의 기록이며,
+이번 계약이 그 장식과 창 크기 조항을 대체한다. 논리적 `phone` kind와 `main` label, 데이터·API·기능 의미는 유지한다.
+
+- Next와 static root가 같은 `ProductViewport`를 사용한다. viewport 높이는 한 소유자가 `100dvh`로 결정하고,
+  toolbar 뒤 남은 높이를 본문에 전달한다. 일반 화면은 최대 960 CSSpx, Memory·Studio·관계 그래프는 1440 CSSpx까지
+  사용 가능한 폭을 채우고 중앙 정렬한다. DeviceFrame의 436px/880px 상한·검은 외곽선·기기 모서리·기기 그림자는 제거한다.
+- native는 불투명 일반 OS 창이다. 최초 main client는 480×850 logical px, 기본 최소 client는 480×480이다.
+  현재 monitor work area·DPI·실제 outer inset에 맞춰 초기/최소 크기와 위치를 조정한다. 가로·세로 독립 resize,
+  maximize·Snap을 허용하며 CSS 본문 상한을 native maximum이나 aspect lock으로 적용하지 않는다.
+- native에만 OS caption 아래 뒤로·앞으로·현재 문서 새로고침·Device Home·내부 경로 입력을 제공한다.
+  실제 URL·history entry와 session/tail metadata를 구독하며 별도의 route 배열은 두지 않는다.
+  bootstrap은 초기 index URL에서 한 번 소비한다. 실제 깊은 URL이 새 문서의 초기 route보다 우선한다.
+- 창별 kind/label/singleton 경계와 main 종료 조정·child 종료 의미는 유지한다. 외부 문서·popup은 native에서 차단하고,
+  사용자 HTTP(S) 링크만 검증된 좁은 command로 기본 브라우저에 연다. remote 권한·shell 권한 확대는 하지 않는다.
+- 44×44 조작 영역, ko/en 접근성 이름, IME·dialog·textarea 보호, unsaved input 소유자의 떠나기 확인을 유지한다.
+  toolbar와 정확히 같은 standalone home만 명시적 capability로 숨긴다. World/feed/list 복귀·취소·하단 4메뉴·데이터 refresh는 유지한다.
+- 사진 형식/원래 비율, SNS·Chat 수락 작업의 조회·재개, scope key·구독·인증·언어·runtime 소유자는 보존한다.
+  browser fake native, 실제 contributor native, Docker 적용, 설치판 적용과 직접 USER CHECK는 별도 결과로 기록한다.
+
+출처 분류: **LOCAL**. 사용자 확정 계약을 독립 구현하며 새 hosted source·asset·font·dependency를 가져오지 않는다.
+
+현재 UI 언어는 저장한 `ko`/`en` 선택을 우선하며, 최초 감지는 Korean만 `ko`, 그 밖의 언어는 `en`이다.
+언어 버튼의 표시·접근성 이름은 두 모드 모두 `Korean`, `English`로 고정한다. 주변 제목·상태·오류는
+현재 UI 언어로 표시한다. 기억·검색 locale와 시간대는 읽기 전용 감지 상태로 안내하며 UI 선택과 분리한다.
+원문·캐릭터 이름·카드·World 내용은 번역하지 않는다. 신규 기본 안내에서는 캐릭터·게시글·답글·
+게시글 주제 제안·외부 연동 토큰·Provider API key를 의미에 맞게 구분한다.
+
+날짜·숫자는 UI locale와 active runtime zone의 Intl 표시를 사용하고 UTC 저장 값은 유지한다.
+한도 해제와 재시도는 backend의 typed UTC 값을 현재 zone으로 표시하며, 오류 상태는 번역 문구의
+substring이 아닌 typed 상태로 판단한다. 긴 영어에서도 기존 semantic primitives·44px 조작 영역·
+keyboard/focus·모바일 스크롤 계약을 유지한다. 이번 다국어 검증의 로컬 캡처는 11개 canonical
+UI-B/UI-F snapshot이나 native USER CHECK를 대체하지 않는다.
+
 > 2026-09-07 구조 이전 위치: 공용 primitive는 `src/components/ui`, 전역 semantic token은
 > `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, DOM scroll은 `src/lib/dom`,
 > 카드 탐색은 `src/lib/navigation`, 순수 표시 도구는 `src/utils`가 구현을 소유한다. 아래 과거 UI 단계의 `shared/ui` 표기는 당시 위치이며
@@ -550,7 +654,7 @@ UI-C 현재 제품 destination은 `홈 /`, `피드 /posts`, `내 앵무 /agents`
 
 ### 8.4 Form controls
 
-- label은 field 밖에서 항상 식별 가능
+- label은 기본적으로 field 밖에서 식별 가능하다. World 답글의 명시적 `sr-only` 옵션은 실제 label 연결을 유지한다.
 - placeholder는 label 대체 금지
 - 최소 control 높이 44px, 주요 action 48px
 - focus-visible ring은 border와 별도로 인지 가능
@@ -597,8 +701,7 @@ World Feed는 hosted Feed의 성숙한 anatomy를 Local World scope에 맞게 �
 구조:
 
 ```text
-sticky World Feed header
-optional capability-backed filter/tabs
+sticky Feed header: title / Angmoo logo / current World user
 compact owner composer
 timeline
   post row
@@ -607,7 +710,7 @@ timeline
 bottom World navigation
 ```
 
-현재처럼 큰 설명·composer card가 첫 viewport 대부분을 점유하지 않는다. World 이름과 scope는 header 또는 compact context row에서 분명히 보인다.
+현재처럼 큰 설명·composer card가 첫 viewport 대부분을 점유하지 않는다. 2026-10-04 사용자 결정으로 목록의 World 이름·scope 안내와 헤더 갱신 버튼을 제거한다. 실제 route/worldId·owner 경계는 유지하고 상세/다른 section의 탐색은 별도로 보존한다.
 
 각 post row:
 
@@ -640,10 +743,10 @@ Global Feed의 상단 composer는 캐릭터의 다음 자율활동 주제를 주
 - 현재 Local write 계약이 요구하는 제목·본문을 분리해 보존한다.
 - 화면의 `제목`·`내용` 문구는 숨기되 실제 `label`과 input `id`로 accessible name을 유지한다.
 - 제목 placeholder는 `오늘 이 World에 남길 이야기의 제목을 적어주세요`, 본문 placeholder는 `내가 조종하는 앵무의 말로 이야기를 적어보세요`로 고정한다.
-- 기존 owner profile의 avatar와 display name만 표시하며 존재하지 않는 handle은 만들지 않는다.
+- 기존 owner profile의 avatar·display name과 지원 payload의 실제 handle을 표시하며 존재하지 않는 handle은 만들지 않는다.
 - 제출 중 중복 submit 방지와 idempotency 상태를 유지한다.
 - 성공 후 title/body를 비우고 timeline을 갱신하되 작성부는 계속 mount한다. 실패하면 입력값과 같은 idempotency key를 보존한다.
-- 진입 시 input을 자동 focus하지 않는다. keyboard 순서는 title → body → `게시하기`이며 독립적인 focus-visible을 유지한다.
+- 진입 시 input을 자동 focus하지 않는다. keyboard 순서는 title → body → 사진 첨부/선택된 사진 제거 → `게시하기`이며 독립적인 focus-visible을 유지한다. 게시·사진 action은 48px 원형 아이콘 전용 버튼이다.
 - empty Feed에 중복 `첫 글 쓰기` action을 만들지 않는다.
 
 ### 9.3 Action strip

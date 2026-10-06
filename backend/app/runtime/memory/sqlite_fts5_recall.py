@@ -24,6 +24,7 @@ from time import monotonic
 import unicodedata
 
 from app.domains.memory.policies.lexical_terms import _lexical_terms
+from app.domains.memory.policies.grouped_fts import strict_literal_groups, match_groups
 from app.core.search_text import normalize_search_text
 from app.domains.memory.contracts.recall import MEMORY_RECALL_GENERATION
 from app.domains.memory.contracts.recall import MEMORY_RECALL_SCHEMA_VERSION
@@ -106,6 +107,47 @@ class SqliteMemoryRecallIndex:
 
     def close(self) -> None:
         self._opened = False
+
+    def rebuild_writer(self):
+        """A durable bounded writer, isolated from the searchable generation."""
+        writer = object.__new__(type(self))
+        writer.settings = self.settings
+        writer.database_path = self.database_path.with_name("angmoo-memory-recall.rebuild.sqlite3")
+        writer.staging_path = writer.database_path.with_suffix(".staging.sqlite3")
+        writer.rollback_path = writer.database_path.with_suffix(".rollback.sqlite3")
+        writer._lock, writer._opened = RLock(), False
+        writer.open()
+        return writer
+
+    def memory_item_id_page(self, *, after="", limit=100):
+        self._require_open()
+        with self._lock, self._connect(self.database_path) as connection:
+            return tuple(row[0] for row in connection.execute(
+                "SELECT DISTINCT memory_item_id FROM memory_recall_documents WHERE memory_item_id > ? ORDER BY memory_item_id LIMIT ?",
+                (after, limit)))
+
+    def promote_rebuild(self, writer):
+        """Promote only a fully reconciled, verified projection."""
+        with self._lock, writer._lock:
+            if not writer.doctor().healthy:
+                raise MemoryRecallIndexError("memory_recall_rebuild_invalid")
+            writer._checkpoint_path(writer.database_path)
+            if self.database_path.exists():
+                self._checkpoint_path(self.database_path)
+                _remove_database_family(self.rollback_path)
+                os.replace(self.database_path, self.rollback_path)
+            try:
+                os.replace(writer.database_path, self.database_path)
+                self._opened = True
+            except Exception:
+                if self.rollback_path.exists():
+                    os.replace(self.rollback_path, self.database_path)
+                raise
+
+    def _require_searchable(self):
+        if self.database_path.with_name("rebuild-progress.json").exists():
+            from app.domains.memory.contracts.recall import MemoryRecallPreparing
+            raise MemoryRecallPreparing("memory_recall_projection_preparing")
 
     @classmethod
     def reader(cls, database_path: Path, *, settings=None):
@@ -275,6 +317,7 @@ class SqliteMemoryRecallIndex:
     def search_grouped(self, query: MemoryRecallSearchQuery, *, deadline: float):
         from app.runtime.memory.grouped_fts_search import search_grouped
         self._require_open()
+        self._require_searchable()
         if query.lexical_policy != MemoryRecallLexicalPolicy.GROUP_OR_V1 or not 1 <= query.limit <= 50:
             raise ValueError("fts_grouped_query_invalid")
         filters, parameters = _scope_filters(query)
@@ -285,6 +328,7 @@ class SqliteMemoryRecallIndex:
         query: MemoryRecallSearchQuery,
     ) -> tuple[MemoryRecallCandidate, ...]:
         self._require_open()
+        self._require_searchable()
         if query.lexical_policy != MemoryRecallLexicalPolicy.LEGACY_STRICT_V1:
             raise ValueError("fts_policy_requires_bounded_result")
         if not 1 <= query.limit <= 50:
@@ -301,6 +345,7 @@ class SqliteMemoryRecallIndex:
         match_query = " AND ".join(_quote_fts_term(term) for term in terms)
         detail(search_text=query.text, normalized_query=match_query)
         candidate_limit = min(200, max(query.limit, query.limit * 4))
+        literal_groups = strict_literal_groups(normalized)
         fts_error = False
         sql = f"""
             SELECT d.*, bm25(memory_recall_fts) AS rank
@@ -319,6 +364,9 @@ class SqliteMemoryRecallIndex:
                         sql,
                         (match_query, *parameters, candidate_limit),
                     ).fetchall()
+                    if literal_groups:
+                        rows = [row for row in rows if len(match_groups(literal_groups,
+                            str(row["normalized_text"]))) == len(literal_groups)]
                 except sqlite3.OperationalError:
                     rows = []
                     fts_error = True
@@ -330,6 +378,7 @@ class SqliteMemoryRecallIndex:
                         parameters=parameters,
                         terms=terms,
                         limit=candidate_limit,
+                        literal_groups=literal_groups,
                     )
                     observe("search", method="normalized_substring_fallback", executed=True, returned=len(rows), reason="fts_execution_error" if fts_error else "fts_empty", limit=candidate_limit)
                 if (not rows and not fts_error and query.korean_spacing_fallback
@@ -722,6 +771,7 @@ class SqliteMemoryRecallIndex:
         parameters: list[str],
         terms: tuple[str, ...],
         limit: int,
+        literal_groups: tuple = (),
     ) -> list[sqlite3.Row]:
         rows = connection.execute(
             f"""
@@ -739,6 +789,8 @@ class SqliteMemoryRecallIndex:
                 or term in str(row["lexical_terms"]).split()
                 for term in terms
             )
+            and (not literal_groups or len(match_groups(literal_groups,
+                    str(row["normalized_text"]))) == len(literal_groups))
         ]
         return matched[:limit]
 

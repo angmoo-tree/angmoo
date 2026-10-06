@@ -1,4 +1,5 @@
 import { generationProfilePayload } from "@/config/generation-profiles";
+import { ApiRequestError } from "@/lib/http/error-contract";
 import { apiRequest } from "@/features/characters/api/request";
 import type { GoogleGeminiModel, PollinationsImageModel } from "@/features/characters/config/model-options";
 import { notifyAgentsChanged } from "@/features/characters/stores/agent-session";
@@ -143,9 +144,19 @@ export function getAgentDraft(draftId: string) {
   return apiRequest<AgentCreationDraftRead>(`/agents/drafts/${draftId}`);
 }
 
-export function importAgentCard(draftId: string, revision: number, data_base64: string) {
-  return apiRequest<CharacterCardImportRead>(
-    `/agents/drafts/${draftId}/card`, { method: "POST", body: { revision, data_base64 } });
+export async function importAgentCard(draftId: string, revision: number, data_base64: string) {
+  try {
+    return await apiRequest<CharacterCardImportRead>(
+      `/agents/drafts/${draftId}/card`, { method: "POST", body: { revision, data_base64 } });
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 422) {
+      // The feature owns this guidance. Legacy free-text response bodies remain
+      // private, and the typed HTTP status/code/params stay available to callers.
+      throw new ApiRequestError("카드를 읽을 수 없습니다. 형식·크기와 편집 상태를 확인해주세요.",
+        error.status, error.code ?? "character_card_invalid", error.params, error.retryAfter);
+    }
+    throw error;
+  }
 }
 
 export function getAgentCardSource(draftId: string) {

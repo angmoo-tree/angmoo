@@ -1,4 +1,7 @@
 import type { Page, Route } from "@playwright/test";
+import type { ManualSocialPostRead, ManualSocialThreadRead } from "../frontend/src/features/social/types/social-write-contract";
+import type { WorldCharacterManagementRead } from "../frontend/src/features/characters/types/world-character-management";
+import type { WorldCharacterPublicProfile } from "../frontend/src/features/characters/types/world-character-profile";
 
 type WorldFixture = {
   world_id: string;
@@ -27,6 +30,8 @@ const OWNER = {
   display_name_updated_at: null,
   display_name_change_available_at: null,
   profile_setup_completed: true,
+  ui_language: "ko",
+  ui_preference_revision: 0,
   feed_content_filter: "all",
   is_admin: true,
 };
@@ -229,4 +234,52 @@ function uiDManualFeed(
 }
 
 
-export { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed, UI_D_ROOT_POST_ID };
+function uiDManualThread(
+  selected: ManualSocialPostRead,
+  replies: ManualSocialPostRead[] = [],
+  { rootId = selected.id, ownerId = "wc-ui-d-owner", pageOffset = 0, nextOffset = null }: {
+    rootId?: string; ownerId?: string; pageOffset?: number; nextOffset?: number | null;
+  } = {},
+): ManualSocialThreadRead {
+  const parentIds = [...new Set([selected, ...replies]
+    .map((post) => post.reply_to_post_id).filter((id): id is string => id !== null))];
+  return {
+    schema_version: "owner-manual-social-thread-v2",
+    world_id: selected.world_id,
+    owner_world_character_id: ownerId,
+    selected_post: { ...selected, thread_root_post_id: rootId },
+    root_post_id: rootId,
+    parent: selected.reply_to_post_id === null ? null : { post_id: selected.reply_to_post_id, state: "available" },
+    parent_references: parentIds.map((post_id) => ({ post_id, state: "available" })),
+    replies: replies.map((post) => ({ ...post, thread_root_post_id: rootId })),
+    page_offset: pageOffset,
+    next_offset: nextOffset,
+  };
+}
+
+function uiDWorldCharacterManagement(profile: WorldCharacterPublicProfile): WorldCharacterManagementRead {
+  return {
+    contract_version: "world-character-management-v1",
+    world_id: profile.world_id,
+    world_character_id: profile.world_character_id,
+    character_id: profile.character_id,
+    can_manage: true,
+    item: {
+      profile, revision: 1, autonomous_enabled: false,
+      status: { state: "off", reason: null },
+      settings: profile.control_mode === "owner_controlled" ? null : {
+        active_hours_start: "09:00", active_hours_end: "02:00", timezone: "Asia/Seoul",
+        activity_interval_minutes: 30, max_posts_per_day: 30, max_comments_per_day: 30,
+      },
+      next_activity_at: null, recent_activity: null,
+      capabilities: {
+        can_activate: false, can_deactivate: false, can_run_now: false,
+        can_edit_profile: true, can_edit_settings: profile.control_mode === "autonomous",
+        can_view_graph: true, reason: "autonomy_not_ready",
+      },
+    },
+  };
+}
+
+export { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed,
+  uiDManualThread, uiDWorldCharacterManagement, UI_D_ROOT_POST_ID };

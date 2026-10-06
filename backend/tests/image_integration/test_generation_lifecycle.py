@@ -192,10 +192,10 @@ def test_daily_limit_keeps_blocked_posts_out_of_next_day_backlog(tmp_path,monkey
         monkeypatch.setattr(media,"quota_day",lambda:"2099-01-02")
     asyncio.run(media.worker.tick())
     with sessions() as db:
-        assert fake.calls==0
-        assert db.get(PostImageGenerationJob,first).failure_class=="generation_reservation_day_expired"
+        assert fake.calls==1
+        assert db.get(PostImageGenerationJob,first).status=="succeeded"
         assert db.get(PostImageGenerationJob,blocked.id).status=="skipped"
-        assert db.scalar(select(func.count()).select_from(PostMedia))==0
+        assert db.scalar(select(func.count()).select_from(PostMedia))==1
 
 
 def test_explicit_retry_is_idempotent_and_reserves_only_once(tmp_path):

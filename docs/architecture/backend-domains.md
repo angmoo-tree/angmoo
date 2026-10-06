@@ -35,6 +35,18 @@
 
 Import 목록을 재생성하면 사실이 갱신됩니다. 허용 규칙이 자동으로 완화되는 것은 아닙니다. 새 의존 때문에 실패하면 실제 책임과 호출을 확인합니다. 예외나 지원 entry를 추가할 때도 저장 계층 전체를 열거나 도메인 역방향·순환 검사를 끄지 않습니다.
 
+World별 캐릭터 설정은 `characters.contracts`의 불변 가져오기 값과
+`characters.service.import_snapshots`의 기준 검증·생성 서비스를 사용합니다.
+최초 생성 기준과 기존 캐릭터 전환 기준의 출처·digest·등록 transaction을
+Characters 업무가 소유하며, `characters.exceptions`의 검토한 오류 타입을
+정확한 entry로 제공합니다. World 저장값은
+`world_characters.contracts.configuration`과
+`world_characters.service.configuration`으로 읽습니다. Chat·Social·Routine은
+이 읽기 계약의 접수 당시 revision을 저장하며, World schemas는 Routine 정책을
+직접 가져오지 않습니다. 활동 시간·credential·slot·Media 검증은 실제 Runtime
+조립에서 기존 소유 정책과 연결합니다. 이 경로는 모든 models/repository를
+공개하거나 순환 import를 허용하지 않습니다.
+
 ## 필요한 잔존 경로
 
 역사 migration이 사용하는 schema helper와 지원 Hosted 확장의 import는 [호환 계약](backend-compatibility.md)에 정확한 소비자·실제 구현·유지 이유를 기록합니다. 정책의 `retained_modules`는 이 파일의 존재를 허용할 뿐, 그 import를 일반 경계 검사에서 제외하지 않습니다. 새 제품 코드는 실제 소유 역할을 사용합니다.

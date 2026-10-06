@@ -81,6 +81,10 @@ class WorldCharacterSocialProfilePost:
     reply_count: int
     like_count: int
     author_profile_capability: Literal["available", "unavailable"]
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     mentioned_characters: tuple[WorldCharacterSocialProfileMention, ...] = ()
     media: tuple[WorldCharacterSocialProfileMedia, ...] = ()
 

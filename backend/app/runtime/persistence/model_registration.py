@@ -7,9 +7,11 @@ def register_models() -> MetaData:
     """Load each owner once through Python imports and return the one metadata."""
     import app.domains.character_lore.models  # noqa: F401 - explicit ORM registration
     import app.domains.characters.models  # noqa: F401 - explicit ORM registration
+    import app.domains.characters.models_import  # noqa: F401
     import app.domains.chat.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models  # noqa: F401 - explicit ORM registration
     import app.domains.identity.models_media  # noqa: F401
+    import app.domains.identity.models_environment  # noqa: F401
     import app.domains.media.models  # noqa: F401
     import app.domains.local_bot.models  # noqa: F401 - explicit ORM registration
     import app.domains.memory.models.consolidation_request  # noqa: F401
@@ -37,6 +39,7 @@ def register_models() -> MetaData:
     import app.domains.social.models.activity_thought  # noqa: F401 - explicit ORM registration
     import app.domains.tree.models  # noqa: F401 - explicit ORM registration
     import app.domains.world_characters.models  # noqa: F401 - explicit ORM registration
+    import app.domains.world_characters.configuration_models  # noqa: F401
     import app.domains.world_characters.activity_models  # noqa: F401
     import app.domains.world_packages.models  # noqa: F401 - explicit ORM registration
     import app.domains.worlds.models  # noqa: F401 - explicit ORM registration

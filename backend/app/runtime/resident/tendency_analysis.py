@@ -29,6 +29,8 @@ async def analyze_tendency(
     character, setting, credential = prepare_tendency_analysis(
         db, user, character_id, workflows=workflows
     )
+    from app.domains.identity.service.environment import snapshot
+    environment = snapshot(db, user.id)
 
     if settings.server_llm_engine == "direct":
         run_id = str(uuid4())
@@ -58,7 +60,7 @@ async def analyze_tendency(
                     key_fingerprint=credential.key_fingerprint,
                 ),
                 tracker=tracker,
-                system_prompt=_build_tendency_analysis_prompt(character=character),
+                system_prompt=_build_tendency_analysis_prompt(character=character, environment=environment),
                 user_prompt=(
                     "Analyze this Angmoo persona for community activity. "
                     "Return only the requested JSON object."
@@ -136,7 +138,7 @@ async def analyze_tendency(
             bootstrap_context_run_kind="default",
             idempotency_key=run_id,
             thinking=settings.tendency_analysis_thinking_level,
-            extra_system_prompt=_build_tendency_analysis_prompt(character=character),
+            extra_system_prompt=_build_tendency_analysis_prompt(character=character, environment=environment),
         )
         raw_text = _extract_gateway_result_text(gateway_result)
         payload = _parse_tendency_json(raw_text)

@@ -55,6 +55,17 @@ def _character_ref(character: ChatCharacter) -> schemas.ProfileRef:
 
 
 from app.domains.chat.contracts import CharacterResponseProfile
+from app.domains.world_characters.contracts.configuration import WorldEffectiveConfiguration
+
+
+def _world_response_profile(configuration: WorldEffectiveConfiguration) -> CharacterResponseProfile:
+    profile, settings = configuration.profile, configuration.settings
+    return CharacterResponseProfile(
+        name=profile.display_name, handle=profile.handle, one_liner=profile.intro,
+        personality=settings.personality, speech_style=settings.speech_style,
+        worldview=settings.worldview, character_background=settings.character_background,
+        topic_preferences=settings.topic_preferences, safety_rules=settings.safety_rules,
+    )
 
 def _response_profile(character: ChatCharacter) -> CharacterResponseProfile:
     return CharacterResponseProfile(

@@ -5,6 +5,7 @@ from app.contracts.retrieval_observation import Observation, current
 from app.domains.memory.contracts.hybrid_recall import RankedMemoryCandidate
 from app.domains.memory.contracts.hybrid_recall import HybridAxisResult, RecallAxisReceipt, RecallAxisStatus
 from app.domains.memory.contracts.recall import MemoryRecallSearchIncomplete, MemoryRecallLexicalPolicy
+from app.domains.memory.contracts.recall import MemoryRecallPreparing
 from app.domains.memory.contracts.fts_recall import FtsWorkerRequest
 from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex
 from app.runtime.memory.vector_worker import VectorReadWorkers
@@ -36,6 +37,9 @@ def _fts_child(pipe, database_path, settings, query, deadline):
             payload["details"] = observation.details
             payload["detail_omitted"] = observation.detail_omitted
         pipe.send((True, (result, payload)))
+    except MemoryRecallPreparing:
+        pipe.send((True, (HybridAxisResult((), RecallAxisReceipt("fts", RecallAxisStatus.UNAVAILABLE,
+            False, 0, (monotonic()-started)*1000, "memory_recall_projection_preparing")), observation.payload())))
     except MemoryRecallSearchIncomplete:
         pipe.send((True, (HybridAxisResult((), RecallAxisReceipt("fts", RecallAxisStatus.UNAVAILABLE,
             True, 0, (monotonic()-started)*1000, "memory_fts_incomplete")), observation.payload())))

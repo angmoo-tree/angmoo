@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from app.integrations import google_identity
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.domains.identity import models, schemas
@@ -425,10 +425,31 @@ def update_user_display_name(
     return schemas.UserRead.model_validate(user)
 
 
+class UserPreferenceConflict(ValueError):
+    pass
+
+
 def update_user_preferences(
     db: Session, user: models.User, data: schemas.UserPreferencesUpdate
 ) -> schemas.UserRead:
-    user.feed_content_filter = data.feed_content_filter
+    values = {}
+    if "feed_content_filter" in data.model_fields_set:
+        values["feed_content_filter"] = data.feed_content_filter
+    if "ui_language" in data.model_fields_set:
+        revision = data.expected_ui_revision
+        if revision is None:
+            revision = user.ui_preference_revision
+        if revision != user.ui_preference_revision:
+            raise UserPreferenceConflict("ui_preference_revision_conflict")
+        if user.ui_language != data.ui_language:
+            values.update(ui_language=data.ui_language, ui_preference_revision=revision + 1)
+        if values:
+            changed = db.execute(update(models.User).where(models.User.id == user.id,
+                models.User.ui_preference_revision == revision).values(**values))
+            if changed.rowcount != 1:
+                raise UserPreferenceConflict("ui_preference_revision_conflict")
+    elif values:
+        db.execute(update(models.User).where(models.User.id == user.id).values(**values))
     db.commit()
     db.refresh(user)
     return schemas.UserRead.model_validate(user)

@@ -78,7 +78,7 @@ async def generate_media(
         for media_type in target_media_types
     ) and profile_image_key_available
     appearance_prompt = (
-        workflows.translate_prompt(draft.appearance_prompt)
+        workflows.translate_prompt(db, user, draft.appearance_prompt)
         if needs_generation
         else draft.appearance_prompt
     )
@@ -191,7 +191,7 @@ async def generate_profile_media(
             media_type=media_type,
         )
         appearance_prompt = (
-            workflows.translate_prompt(data.appearance_prompt.strip())
+            workflows.translate_prompt(db, user, data.appearance_prompt.strip())
             if usage_status.remaining > 0 and profile_image_key_available
             else data.appearance_prompt.strip()
         )

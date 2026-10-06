@@ -70,7 +70,11 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
-    APP_ROOT / "runtime" / "resident" / "langgraph.py",
+    APP_ROOT / "runtime" / "autonomous_activity" / "gateway.py",
+    APP_ROOT / "runtime" / "autonomous_activity" / "llm_context.py",
+    APP_ROOT / "runtime" / "social" / "planned_actions.py",
+    APP_ROOT / "runtime" / "social" / "feed_workflows.py",
+    APP_ROOT / "runtime" / "resident" / "history.py",
     APP_ROOT / "runtime" / "resident" / "context.py",
     APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
@@ -86,7 +90,7 @@ def _imports(path: Path) -> set[str]:
     return imported
 
 def test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports():
-    imports = _imports(APP_ROOT / "runtime" / "resident" / "langgraph.py")
+    imports = _imports(APP_ROOT / "runtime" / "autonomous_activity" / "gateway.py")
 
     assert not {name for name in imports if "openclaw" in name.lower()}
     assert not {name for name in imports if name == "google" or name.startswith("google.")}
@@ -168,16 +172,15 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
         "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
         "runtime/resident/tendency_analysis.py": {"analyze_tendency"},
-        "runtime/characters/management.py": {
-            "_bind_slot_auth_profile",
+        "runtime/resident/autonomy_composition.py": {
+            "bind_resident_profile",
         },
         "runtime/character_lore.py": {
             "_google_embedding_credential_for_character",
             "_google_api_key_for_character",
         },
-        "runtime/social/feed_reaction_provider.py": {"_api_key"},
+        "runtime/autonomous_activity/llm_context.py": {"_api_key"},
         "runtime/social/topic_preparation.py": {"generate_topics"},
-        "runtime/resident/langgraph.py": {"_decrypt_api_key"},
         "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "runtime/social/image_generation.py": {
             "_generate_visual_identity_payload",

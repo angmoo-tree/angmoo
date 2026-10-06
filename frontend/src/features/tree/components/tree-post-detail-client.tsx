@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { ArrowLeft, MessageCircle, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
@@ -7,7 +11,7 @@ import type { FormEvent } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { isOfficialOperatorName } from "@/utils/profile-presentation";
 import { createTreeComment, getTreePost } from "@/features/tree/api/tree";
 import { type TreePostDetail } from "@/features/tree/types/tree";
@@ -21,6 +25,8 @@ export function TreePostDetailClient({
   initialPost: TreePostDetail | null;
   initialError: string | null;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("tree");
   const { status: authStatus } = useAuth();
   const [post, setPost] = useState<TreePostDetail | null>(initialPost);
   const [loading, setLoading] = useState(false);
@@ -35,7 +41,7 @@ export function TreePostDetailClient({
     try {
       setPost(await getTreePost(postId));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "나무 글을 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("나무 글을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
@@ -45,11 +51,11 @@ export function TreePostDetailClient({
     event.preventDefault();
     const content = comment.trim();
     if (authStatus !== "authenticated") {
-      setCommentError("로그인 후 댓글을 쓸 수 있습니다.");
+      setCommentError(uiText("로그인 후 댓글을 쓸 수 있습니다."));
       return;
     }
     if (content.length < 2) {
-      setCommentError("두 글자 이상 적어주세요.");
+      setCommentError(uiText("두 글자 이상 적어주세요."));
       return;
     }
     setSaving(true);
@@ -58,7 +64,7 @@ export function TreePostDetailClient({
       setPost(await createTreeComment(postId, content));
       setComment("");
     } catch (err) {
-      setCommentError(err instanceof Error ? err.message : "댓글을 저장하지 못했습니다.");
+      setCommentError(err instanceof Error ? uiText(err.message) : uiText("댓글을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -70,19 +76,18 @@ export function TreePostDetailClient({
         <Link
           href={`/tree?tab=${post?.category ?? "notice"}`}
           className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb]"
-          title="나무"
+          title={uiText("나무")}
         >
           <ArrowLeft size={21} aria-hidden="true" />
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-          나무
-        </h1>
+          {uiText("나무")}</h1>
         <button
           type="button"
           onClick={loadPost}
           disabled={loading}
           className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-          title="새로고침"
+          title={uiText("새로고침")}
         >
           <RefreshCw size={20} aria-hidden="true" />
         </button>
@@ -113,7 +118,7 @@ export function TreePostDetailClient({
               <div className="min-w-0 flex-1">
                 <div className="mb-2 flex flex-wrap items-center gap-x-2 text-[18px] md:text-[22px]">
                   <span className="rounded-full bg-[#fff0ef] px-3 py-1 text-[13px] font-extrabold text-[#ff6b6b]">
-                    {categoryLabel(post.category)}
+                    {uiText(categoryLabel(post.category))}
                   </span>
                   <Link
                     href={`/profiles/users/${post.author.id}`}
@@ -128,7 +133,7 @@ export function TreePostDetailClient({
                 </div>
                 {post.related_character ? (
                   <div className="mb-3 text-[14px] font-bold text-[#98a2b3]">
-                    관련 앵무: {post.related_character.name}
+                    {uiText("관련 앵무:")}{post.related_character.name}
                   </div>
                 ) : null}
                 <p className="whitespace-pre-wrap break-all text-[18px] leading-[1.55] text-[#101828] md:break-words md:text-[23px] md:leading-[1.5]">
@@ -150,7 +155,7 @@ export function TreePostDetailClient({
               disabled={saving}
               rows={3}
               maxLength={1000}
-              placeholder="댓글을 남겨주세요"
+              placeholder={uiText("댓글을 남겨주세요")}
               className="min-h-[86px] w-full resize-none rounded-[18px] border border-[#e1e5eb] bg-white px-4 py-3 text-[15px] font-medium leading-6 text-[#101828] outline-none transition-colors placeholder:text-[#98a2b3] focus:border-[#ff8a8a] disabled:cursor-not-allowed disabled:bg-[#f3f4f6]"
             />
             <div className="mt-3 flex items-center justify-between gap-3">
@@ -163,19 +168,18 @@ export function TreePostDetailClient({
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#1d2939] disabled:cursor-not-allowed disabled:bg-[#c9ced6]"
               >
                 <Send size={16} />
-                {saving ? "저장 중" : "댓글 쓰기"}
+                {saving ? uiText("저장 중") : uiText("댓글 쓰기")}
               </button>
             </div>
           </form>
 
           <section>
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
-              댓글 {post.comments.length}
+              {uiText("댓글")}{post.comments.length}
             </h2>
             {post.comments.length === 0 ? (
               <div className="px-5 py-8 text-[15px] font-medium text-[#667085] md:px-9">
-                아직 댓글이 없습니다.
-              </div>
+                {uiText("아직 댓글이 없습니다.")}</div>
             ) : null}
             {post.comments.map((item) => (
               <article key={item.id} className="border-b border-[#eaedf2] px-5 py-5 md:px-9">

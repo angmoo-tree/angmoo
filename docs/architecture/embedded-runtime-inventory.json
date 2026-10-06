@@ -19,7 +19,7 @@
     },
     {
       "path": "Dockerfile.frontend",
-      "sha256": "12f85bf7259230524c46eae4159357ca25fa247be83c736cb8b838e128075bfd"
+      "sha256": "bb2b994d504e95a012a9b889cd7e824107d09c8ac6a2137b0f2935082f4c1e85"
     },
     {
       "path": "frontend/next.config.ts",
@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "eca43dacec07864576c11d36c73de31251c311550ce7d82cc45931c0ef6c3aee"
+      "sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -50,6 +50,7 @@
         "httpx>=0.28.1,<1",
         "ladybug==0.19.1",
         "langchain-core>=1.0.0",
+        "langcodes>=3.5.1",
         "langgraph-checkpoint-sqlite>=3.0,<4",
         "langgraph-prebuilt>=1.0.4",
         "langgraph>=1.0.4",
@@ -92,10 +93,12 @@
     ],
     "frontend": {
       "dependencies": {
+        "i18next": "26.4.2",
         "lucide-react": "^1.29.0",
         "next": "16.3.6",
         "react": "19.2.8",
-        "react-dom": "19.2.8"
+        "react-dom": "19.2.8",
+        "react-i18next": "17.0.15"
       },
       "dev_dependencies": {
         "@tailwindcss/postcss": "^4",
@@ -294,7 +297,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "eca43dacec07864576c11d36c73de31251c311550ce7d82cc45931c0ef6c3aee",
+      "source_sha256": "f67e32775141eeeecdc6a215faf0b7ce21f2ff88689910616885c76a87dc19eb",
       "transition_pr": "ER4 PR J"
     },
     {

@@ -231,6 +231,9 @@ def response_session() -> Session:
     session.flush()
     session.add_all([requester, responding])
     session.flush()
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    for character, role in ((requester_character, requester), (responding_character, responding)):
+        initialize_created_world_character(session, character=character, world_character=role)
     session.add(
         models.UserMessagePreference(
             user_id=owner.id,
@@ -1175,7 +1178,7 @@ def test_send_replay_and_retry_reuse_one_user_message_and_response_slot(
         retried.response_request.request_id,
     )
     assert retry_snapshot is not None
-    assert retry_snapshot.selected_model == "gemini-3.5-flash-lite"
+    assert retry_snapshot.selected_model == "gemini-3.1-flash-lite"
     assert response_session.scalar(
         select(func.count(models.MessageMessage.id)).where(
             models.MessageMessage.thread_id == "p-thread",

@@ -298,8 +298,6 @@ class GenerationWorker:
                     ImageGenerationAttempt.status == "reserved"))
                 if reserved is None:
                     raise ImagePreparationError("generation_reservation_missing")
-                if reserved.quota_day != self.execution.quota_day():
-                    raise ImagePreparationError("generation_reservation_day_expired")
                 reserved.status = "submitted"
                 current.attempt_count += 1
                 submit_db.commit()

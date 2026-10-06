@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
+from copy import deepcopy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -20,6 +21,7 @@ def create_agent_run(
     agent_id: str,
     session_key: str,
     tool_auth_key: str | None = None,
+    input_snapshot: dict | None = None,
 ) -> models.AgentRun:
     run = models.AgentRun(
         id=run_id,
@@ -31,6 +33,7 @@ def create_agent_run(
         session_key=session_key,
         tool_auth_key=tool_auth_key,
         status="running",
+        input_snapshot=deepcopy(input_snapshot),
     )
     db.add(run)
     try:

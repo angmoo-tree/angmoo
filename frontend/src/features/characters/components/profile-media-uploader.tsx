@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Check, ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
@@ -40,6 +42,7 @@ export function ProfileMediaUploader({
   generationOverlay?: { kind: MediaKind; label: string } | null;
   onUpload: (data: AgentProfileMediaUploadInput) => Promise<void>;
 }) {
+  const uiText = useUiText("characters");
   const avatarInputId = useId();
   const bannerInputId = useId();
   const draftBitmapRef = useRef<ImageBitmap | null>(null);
@@ -70,11 +73,11 @@ export function ProfileMediaUploader({
     if (!nextFile) return;
     setError(null);
     if (!ACCEPTED_TYPES.has(nextFile.type)) {
-      setError("jpg, png, webp 이미지만 사용할 수 있습니다.");
+      setError(uiText("jpg, png, webp 이미지만 사용할 수 있습니다."));
       return;
     }
     if (nextFile.size > MAX_MEDIA_BYTES) {
-      setError("이미지는 5MB 이하만 사용할 수 있습니다.");
+      setError(uiText("이미지는 5MB 이하만 사용할 수 있습니다."));
       return;
     }
 
@@ -91,7 +94,7 @@ export function ProfileMediaUploader({
       setCrop({ scale: 1, offsetX: 0, offsetY: 0 });
     } catch {
       bitmap?.close();
-      setError("이미지를 열 수 없습니다.");
+      setError(uiText("이미지를 열 수 없습니다."));
     }
   }
 
@@ -117,7 +120,7 @@ export function ProfileMediaUploader({
       });
       closeCropper();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "이미지를 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("이미지를 저장하지 못했습니다."));
     } finally {
       setUploading(false);
     }
@@ -137,7 +140,7 @@ export function ProfileMediaUploader({
           )}
           <UploadButton
             inputId={bannerInputId}
-            label="배너 업로드"
+            label={uiText("배너 업로드")}
             disabled={disabled}
             onChange={(event) => handleFileChange("banner", event)}
             className="absolute right-4 top-4 bg-white/95 shadow-[0_8px_20px_rgba(16,24,40,0.16)]"
@@ -162,7 +165,7 @@ export function ProfileMediaUploader({
           <div className="pt-4">
             <UploadButton
               inputId={avatarInputId}
-              label="아바타 업로드"
+              label={uiText("아바타 업로드")}
               disabled={disabled}
               onChange={(event) => handleFileChange("avatar", event)}
             />
@@ -177,13 +180,12 @@ export function ProfileMediaUploader({
           <div className="w-full max-w-[640px] rounded-[8px] bg-white p-5 shadow-[0_24px_80px_rgba(16,24,40,0.32)]">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-[20px] font-extrabold text-[#101828]">
-                {SPECS[draft.kind].label} 자르기
-              </h2>
+                {uiText(SPECS[draft.kind].label)} {uiText("자르기")}</h2>
               <button
                 type="button"
                 onClick={closeCropper}
                 className="inline-flex size-10 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#f2f4f7]"
-                title="닫기"
+                title={uiText("닫기")}
               >
                 <X size={20} aria-hidden="true" />
               </button>
@@ -204,7 +206,7 @@ export function ProfileMediaUploader({
 
             <div className="mt-5 grid gap-4">
               <Slider
-                label="확대"
+                label={uiText("확대")}
                 min={1}
                 max={3}
                 step={0.05}
@@ -212,7 +214,7 @@ export function ProfileMediaUploader({
                 onChange={(value) => setCrop((current) => ({ ...current, scale: value }))}
               />
               <Slider
-                label="가로"
+                label={uiText("가로")}
                 min={-45}
                 max={45}
                 step={1}
@@ -220,7 +222,7 @@ export function ProfileMediaUploader({
                 onChange={(value) => setCrop((current) => ({ ...current, offsetX: value }))}
               />
               <Slider
-                label="세로"
+                label={uiText("세로")}
                 min={-45}
                 max={45}
                 step={1}
@@ -236,8 +238,7 @@ export function ProfileMediaUploader({
                 disabled={uploading}
                 className="inline-flex h-11 items-center justify-center rounded-full border border-[#e1e5eb] px-5 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                취소
-              </button>
+                {uiText("취소")}</button>
               <button
                 type="button"
                 onClick={handleUpload}
@@ -245,8 +246,7 @@ export function ProfileMediaUploader({
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Check size={17} aria-hidden="true" />
-                저장
-              </button>
+                {uiText("저장")}</button>
             </div>
           </div>
         </div>

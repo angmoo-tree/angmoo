@@ -13,6 +13,7 @@ from app.domains.social.contracts.topic_history import (
     TopicHistoryReferences,
 )
 from sqlalchemy.orm import Session
+from app.domains.social.contracts.post_authors import WorldPostAuthor, PostAuthorReferences
 
 
 class ToolRun(Protocol):
@@ -60,6 +61,9 @@ class PendingFeedCue(Protocol):
 
 
 class AgentToolActionWorkflows(AgentToolReferences, Protocol):
+    def accepted_post_author(self, db: Session, *, run: ToolRun, character_id: str,
+        world_id: str | None = None, world_character_id: str | None = None) -> WorldPostAuthor | None: ...
+
     def log_activity(
         self,
         db: Session,
@@ -88,6 +92,8 @@ class ToolActivityPolicy(Protocol):
 
 
 class AgentToolReadWorkflows(AgentToolReferences, Protocol):
+    def post_author_references(self, db: Session) -> PostAuthorReferences: ...
+
     @property
     def topic_history(self) -> TopicHistoryReferences: ...
     def build_activity_policy(

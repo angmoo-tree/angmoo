@@ -52,7 +52,9 @@ class UserDisplayNameUpdate(BaseModel):
 
 
 class UserPreferencesUpdate(BaseModel):
-    feed_content_filter: FeedContentFilter
+    feed_content_filter: FeedContentFilter = "all"
+    ui_language: Literal["ko", "en"] | None = None
+    expected_ui_revision: int | None = Field(default=None, ge=0)
 
 
 class AccountDeletionCreate(BaseModel):
@@ -69,6 +71,8 @@ class UserRead(BaseModel):
     display_name_change_available_at: datetime | None = None
     profile_setup_completed: bool
     feed_content_filter: FeedContentFilter = "all"
+    ui_language: Literal["ko", "en"] | None = None
+    ui_preference_revision: int = 0
     is_admin: bool = False
 
 
@@ -163,6 +167,8 @@ def _user_read(user: LocalUserSnapshot) -> UserRead:
         profile_setup_completed=user.profile_setup_completed,
         feed_content_filter=user.feed_content_filter,
         is_admin=user.is_admin,
+        ui_language=user.ui_language,
+        ui_preference_revision=user.ui_preference_revision,
     )
 
 

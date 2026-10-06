@@ -12,6 +12,7 @@ export type RelationshipGraphNode = {
   character_id: string;
   display_name: string;
   is_center: boolean;
+  avatar_url?: string | null;
 };
 
 export type RelationshipGraphEdge = {

@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import {
   Link2,
@@ -10,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { enterStudioWorldCharacter, getStudioCharacterCandidates, getStudioWorldCharacters, leaveStudioWorldCharacter, stopStudioCharacter, StudioWorldCharacterApiError } from "@/features/creator-studio/api/studio-world-character-client";
 import type { StudioCharacterCandidateRead, StudioWorldCharacterRead, StudioWorldRole } from "@/features/creator-studio/types/studio-world-character";
@@ -82,6 +84,7 @@ export function StudioWorldCharacterList({
   worldId: string;
   roles: StudioWorldRole[];
 }) {
+  const uiText = useUiText("creator-studio");
   const router = useRuntimeRouter();
   const searchParams = useRuntimeSearchParams();
   const createdCharacterId = searchParams.get("createdCharacterId") ?? "";
@@ -113,7 +116,7 @@ export function StudioWorldCharacterList({
   const [actionBusy, setActionBusy] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(
     createdCharacterId
-      ? "캐릭터 생성은 완료되었습니다. 역할을 선택해 이 World에 연결해 주세요."
+      ? uiText("캐릭터 생성은 완료되었습니다. 역할을 선택해 이 World에 연결해 주세요.")
       : null,
   );
   const [actionError, setActionError] = useState<string | null>(null);
@@ -127,15 +130,12 @@ export function StudioWorldCharacterList({
     confirmationName?: string;
   } | null>(null);
 
-  const roleOptions = useMemo(
-    () => [
-      { key: NO_SPECIFIC_ROLE_KEY, name: "역할 없음", autonomous_allowed: true },
+  const roleOptions = [
+      { key: NO_SPECIFIC_ROLE_KEY, name: uiText("역할 없음"), autonomous_allowed: true },
       ...roles.filter(
         (role) => role.autonomous_allowed && role.key !== NO_SPECIFIC_ROLE_KEY,
       ),
-    ],
-    [roles],
-  );
+    ];
   const eligibleCandidates = candidates.filter((candidate) => candidate.eligible);
 
   useEffect(() => {
@@ -149,14 +149,14 @@ export function StudioWorldCharacterList({
           setResult({
             key: listRequestKey,
             items: [],
-            error: apiErrorMessage(reason, "이 World의 캐릭터를 불러오지 못했습니다."),
+            error: apiErrorMessage(reason, uiText("이 World의 캐릭터를 불러오지 못했습니다.")),
           });
         }
       });
     return () => {
       active = false;
     };
-  }, [listRequestKey, worldId]);
+  }, [listRequestKey, uiText, worldId]);
 
   useEffect(() => {
     if (!candidateOpen) return;
@@ -190,12 +190,12 @@ export function StudioWorldCharacterList({
           items: [],
           error: apiErrorMessage(
             reason,
-            "연결할 수 있는 내 캐릭터를 불러오지 못했습니다.",
+            uiText("연결할 수 있는 내 캐릭터를 불러오지 못했습니다."),
           ),
         });
       });
     return () => controller.abort();
-  }, [candidateOpen, candidateRequestKey, createdCharacterId, worldId]);
+  }, [candidateOpen, candidateRequestKey, createdCharacterId, uiText, worldId]);
 
   function refreshList() {
     setReloadKey((value) => value + 1);
@@ -224,14 +224,14 @@ export function StudioWorldCharacterList({
       });
       setActionMessage(
         entry.reused
-          ? "이미 연결된 캐릭터를 확인했습니다. 활동 준비 화면에서 이어갈 수 있습니다."
-          : "현재 World에 연결했습니다. 이제 P2 활동 준비·승인을 진행해 주세요.",
+          ? uiText("이미 연결된 캐릭터를 확인했습니다. 활동 준비 화면에서 이어갈 수 있습니다.")
+          : uiText("현재 World에 연결했습니다. 이제 P2 활동 준비·승인을 진행해 주세요."),
       );
       setCandidateOpen(false);
       refreshList();
       if (createdCharacterId) router.replace(returnTo);
     } catch (reason) {
-      setActionError(apiErrorMessage(reason, "캐릭터를 이 World에 연결하지 못했습니다."));
+      setActionError(apiErrorMessage(reason, uiText("캐릭터를 이 World에 연결하지 못했습니다.")));
     } finally {
       setActionBusy(false);
     }
@@ -283,14 +283,14 @@ export function StudioWorldCharacterList({
       );
       setActionMessage(
         left.replayed
-          ? "이미 이 World에서 제거된 상태를 확인했습니다. 기존 활동·관계 근거는 보존됩니다."
-          : "이 World에서 제거했습니다. 캐릭터 자체와 기존 활동·사건·관계 근거는 보존됩니다.",
+          ? uiText("이미 이 World에서 제거된 상태를 확인했습니다. 기존 활동·관계 근거는 보존됩니다.")
+          : uiText("이 World에서 제거했습니다. 캐릭터 자체와 기존 활동·사건·관계 근거는 보존됩니다."),
       );
       setRemoveTarget(null);
       setConfirmationName("");
       refreshList();
     } catch (reason) {
-      setActionError(apiErrorMessage(reason, "이 World에서 캐릭터를 제거하지 못했습니다."));
+      setActionError(apiErrorMessage(reason, uiText("이 World에서 캐릭터를 제거하지 못했습니다.")));
     } finally {
       setActionBusy(false);
     }
@@ -300,35 +300,31 @@ export function StudioWorldCharacterList({
     <section className="rounded-[28px] border border-border-control bg-surface p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-lg font-black text-text-strong">이 World의 캐릭터</p>
+          <p className="text-lg font-black text-text-strong">{uiText("이 World의 캐릭터")}</p>
           <p className="mt-1 text-sm font-medium leading-6 text-text-secondary">
-            자율활동 검증용 캐릭터를 만들거나 연결하고, 현재 World 참여만 안전하게 종료합니다.
-          </p>
+            {uiText("자율활동 검증용 캐릭터를 만들거나 연결하고, 현재 World 참여만 안전하게 종료합니다.")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
             href={createHref}
             className="inline-flex min-h-11 items-center gap-2 rounded-full bg-action-primary px-4 py-2 text-xs font-extrabold text-on-action-primary shadow-action"
           >
-            <Plus className="size-4" /> 새 캐릭터 만들기
-          </Link>
+            <Plus className="size-4" /> {uiText("새 캐릭터 만들기")}</Link>
           <Button
             compact
             variant="secondary"
             onClick={() => router.push(`${createHref}&mode=copy`)}
           >
-            <Link2 className="size-4" /> 기존 캐릭터 설정 복사
-          </Button>
+            <Link2 className="size-4" /> {uiText("기존 캐릭터 설정 복사")}</Button>
           <Button
             compact
             variant="secondary"
             onClick={refreshList}
             loading={loading}
-            loadingLabel="새로고침 중"
+            loadingLabel={uiText("새로고침 중")}
           >
             <RefreshCw className="size-4" />
-            새로고침
-          </Button>
+            {uiText("새로고침")}</Button>
         </div>
       </div>
 
@@ -345,31 +341,29 @@ export function StudioWorldCharacterList({
         <div className="mt-5 rounded-[22px] border border-brand-soft-border bg-surface-warm p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-black text-text-strong">현재 World에 연결</p>
+              <p className="text-sm font-black text-text-strong">{uiText("현재 World에 연결")}</p>
               <p className="mt-1 text-xs font-medium leading-5 text-text-secondary">
-                연결만으로 provider 호출이나 공개 글·관계 변화는 생기지 않습니다.
-              </p>
+                {uiText("연결만으로 provider 호출이나 공개 글·관계 변화는 생기지 않습니다.")}</p>
             </div>
-            <IconButton label="연결 패널 닫기" onClick={() => setCandidateOpen(false)}>
+            <IconButton label={uiText("연결 패널 닫기")} onClick={() => setCandidateOpen(false)}>
               <X className="size-5" />
             </IconButton>
           </div>
           {candidateLoading ? (
             <p className="mt-4 flex items-center gap-2 text-sm font-bold text-text-secondary">
-              <Loader2 className="size-4 animate-spin" /> 내 캐릭터를 확인하는 중입니다.
-            </p>
+              <Loader2 className="size-4 animate-spin" /> {uiText("내 캐릭터를 확인하는 중입니다.")}</p>
           ) : candidateError ? (
             <InlineError className="mt-4">{candidateError}</InlineError>
           ) : (
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Field label="내 캐릭터">
+              <Field label={uiText("내 캐릭터")}>
                 {(fieldProps) => (
                   <Select
                     {...fieldProps}
                     value={selectedCharacterId}
                     onChange={(event) => setSelectedCharacterId(event.target.value)}
                   >
-                    <option value="">선택해 주세요</option>
+                    <option value="">{uiText("선택해 주세요")}</option>
                     {eligibleCandidates.map((candidate) => (
                       <option key={candidate.character_id} value={candidate.character_id}>
                         {candidate.display_name}
@@ -379,7 +373,7 @@ export function StudioWorldCharacterList({
                   </Select>
                 )}
               </Field>
-              <Field label="World 역할">
+              <Field label={uiText("World 역할")}>
                 {(fieldProps) => (
                   <Select
                     {...fieldProps}
@@ -396,14 +390,13 @@ export function StudioWorldCharacterList({
           )}
           {!candidateLoading && !candidateError && eligibleCandidates.length === 0 ? (
             <p className="mt-4 rounded-2xl bg-surface px-4 py-3 text-xs font-bold text-text-secondary">
-              지금 연결할 수 있는 기존 캐릭터가 없습니다. 새 캐릭터를 만들어 주세요.
-            </p>
+              {uiText("지금 연결할 수 있는 기존 캐릭터가 없습니다. 새 캐릭터를 만들어 주세요.")}</p>
           ) : null}
           {!candidateLoading && candidates.some((candidate) => !candidate.eligible) ? (
             <div className="mt-3 grid gap-1">
               {candidates.filter((candidate) => !candidate.eligible).map((candidate) => (
                 <p key={candidate.character_id} className="text-[11px] font-bold text-text-secondary">
-                  {candidate.display_name}: {CANDIDATE_REASON_LABELS[candidate.reason_code ?? ""] ?? "연결할 수 없습니다."}
+                  {candidate.display_name}: {uiText(CANDIDATE_REASON_LABELS[candidate.reason_code ?? ""] ?? uiText("연결할 수 없습니다."))}
                 </p>
               ))}
             </div>
@@ -415,28 +408,24 @@ export function StudioWorldCharacterList({
               onClick={() => void handleConnect()}
               disabled={!selectedCharacterId || candidateLoading || actionBusy}
               loading={actionBusy}
-              loadingLabel="연결 중"
+              loadingLabel={uiText("연결 중")}
             >
               <Link2 className="size-4" />
-              이 World에 연결
-            </Button>
+              {uiText("이 World에 연결")}</Button>
             <Link href={createHref} className="text-xs font-extrabold text-brand-accent underline underline-offset-4">
-              새 캐릭터가 필요해요
-            </Link>
+              {uiText("새 캐릭터가 필요해요")}</Link>
           </div>
         </div>
       ) : null}
 
       {loading ? (
         <p className="mt-5 flex items-center gap-2 text-sm font-bold text-text-secondary">
-          <Loader2 className="size-4 animate-spin" /> 캐릭터를 확인하는 중입니다.
-        </p>
+          <Loader2 className="size-4 animate-spin" /> {uiText("캐릭터를 확인하는 중입니다.")}</p>
       ) : error ? (
         <InlineError className="mt-5">{error}</InlineError>
       ) : items.length === 0 ? (
         <p className="mt-5 rounded-[18px] bg-surface-muted px-4 py-3 text-sm font-bold text-text-default">
-          아직 이 World에 연결된 캐릭터가 없습니다. 새 캐릭터를 만들거나 기존 내 캐릭터를 연결해 활동 준비를 시작하세요.
-        </p>
+          {uiText("아직 이 World에 연결된 캐릭터가 없습니다. 새 캐릭터를 만들거나 기존 내 캐릭터를 연결해 활동 준비를 시작하세요.")}</p>
       ) : (
         <div className="mt-5 grid gap-3">
           {items.map((item) => (
@@ -449,7 +438,7 @@ export function StudioWorldCharacterList({
                   <div className="min-w-0">
                     <p className="truncate text-base font-black text-text-strong">{item.display_name}</p>
                     <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-text-secondary">
-                      {item.intro || "소개가 아직 없습니다."}
+                      {item.intro || uiText("소개가 아직 없습니다.")}
                     </p>
                   </div>
                 </div>
@@ -460,30 +449,27 @@ export function StudioWorldCharacterList({
                         href={`/characters/${encodeURIComponent(item.character_id)}/worlds/${encodeURIComponent(worldId)}/autonomy-setup`}
                         className="inline-flex min-h-11 items-center rounded-full bg-action-dark px-4 py-2 text-xs font-extrabold text-on-action-dark"
                       >
-                        활동 준비·상태 보기
-                      </Link>
+                        {uiText("활동 준비·상태 보기")}</Link>
                       <Button
                         compact
                         variant="danger"
                         onClick={() => beginRemove(item)}
                       >
-                        <Trash2 className="size-3.5" /> 이 World에서 제거
-                      </Button>
+                        <Trash2 className="size-3.5" /> {uiText("이 World에서 제거")}</Button>
                     </>
                   ) : (
                     <Button compact variant="strong" onClick={openOwnerProfile}>
-                      프로필 보기
-                    </Button>
+                      {uiText("프로필 보기")}</Button>
                   )}
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-extrabold">
                 <StatusChip
-                  label={item.control_mode === "autonomous" ? "자율 Character" : "내 조종 Character"}
+                  label={item.control_mode === "autonomous" ? uiText("자율 Character") : uiText("내 조종 Character")}
                   tone={item.control_mode === "autonomous" ? "running" : "neutral"}
                 />
-                <StatusChip label={SETUP_LABELS[item.activity_setup_state]} tone={item.activity_setup_state === "approved" ? "healthy" : "waiting"} />
-                <StatusChip label={`자율활동 ${item.autonomous_enabled ? "ON" : "OFF"}`} tone={item.autonomous_enabled ? "running" : "disabled"} />
+                <StatusChip label={uiText(SETUP_LABELS[item.activity_setup_state])} tone={item.activity_setup_state === "approved" ? "healthy" : "waiting"} />
+                <StatusChip label={uiText("자율활동 {{value0}}", {value0: item.autonomous_enabled ? "ON" : "OFF"})} tone={item.autonomous_enabled ? "running" : "disabled"} />
                 <StatusChip label={worldCharacterStatusLabel(item.status)} tone={item.status === "active" ? "healthy" : "neutral"} />
               </div>
             </article>
@@ -492,40 +478,37 @@ export function StudioWorldCharacterList({
       )}
 
       <p className="mt-5 text-xs font-medium leading-5 text-text-secondary">
-        캐릭터 자체 삭제는 여러 World와 채팅·활동 데이터에 더 큰 영향을 줄 수 있습니다. 전역 삭제는{" "}
-        <Link href="/agents" className="font-extrabold text-text-strong underline underline-offset-4">내 앵무 관리</Link>
-        에서 이름을 다시 확인한 뒤 수행합니다.
-      </p>
+        {uiText("캐릭터 자체 삭제는 여러 World와 채팅·활동 데이터에 더 큰 영향을 줄 수 있습니다. 전역 삭제는")}{" "}
+        <Link href="/agents" className="font-extrabold text-text-strong underline underline-offset-4">{uiText("내 앵무 관리")}</Link>
+        {uiText("에서 이름을 다시 확인한 뒤 수행합니다.")}</p>
 
       <Dialog
         open={Boolean(removeTarget)}
         onOpenChange={(open) => {
           if (!open && !actionBusy) setRemoveTarget(null);
         }}
-        title="이 World에서 제거"
-        description="이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다."
+        title={uiText("이 World에서 제거")}
+        description={uiText("이 World에서 새 자율활동은 중지되지만 이미 작성한 글과 확인된 사건·관계 근거는 보존됩니다. 캐릭터 자체와 다른 World의 참여는 삭제되지 않습니다.")}
         closeButtonAttributes={{ disabled: actionBusy }}
         actions={
           <>
             <Button variant="secondary" disabled={actionBusy} onClick={() => setRemoveTarget(null)}>
-              취소
-            </Button>
+              {uiText("취소")}</Button>
             <Button
               variant="danger"
               disabled={!removeTarget || confirmationName !== removeTarget.confirmation_name}
               loading={actionBusy}
-              loadingLabel="제거 중"
+              loadingLabel={uiText("제거 중")}
               onClick={() => void handleRemove()}
             >
               <Trash2 className="size-4" />
-              자율활동 정지 후 제거
-            </Button>
+              {uiText("자율활동 정지 후 제거")}</Button>
           </>
         }
       >
         {removeTarget ? (
           <Field
-            label={`확인을 위해 ${removeTarget.confirmation_name} 입력`}
+            label={uiText("확인을 위해 {{value0}} 입력", {value0: removeTarget.confirmation_name})}
             required
           >
             {(fieldProps) => (

@@ -82,7 +82,7 @@ UI_D_COLOR_CONTRACT = {
         "values": ["#8c1520", "#ae2f34"],
     },
     "reaction_contract": {
-        "like": "read_only_authoritative_metric",
+        "like": "authoritative_owner_button_with_metric_fallback",
         "reply": "authoritative_count_link_when_route_exists",
     },
     "world_composer": "always_visible_compact_direct_write_when_owner_actor_and_feed_route",

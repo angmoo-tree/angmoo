@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app.domains.world_characters.models import WorldCharacter
+from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
 from app.domains.social.contracts.profile_activity import (
     WorldCharacterSocialProfileQuery,
     WorldCharacterSocialProfileValidationError,
@@ -24,9 +24,9 @@ def test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit(
         current_user_id="owner",
     )
     with Session(engine) as db:
-        target = db.get(WorldCharacter, "wc-a-target")
-        before = dict(target.local_profile)
-        target.local_profile = {"avatar_url": "/media/pending-profile.webp"}
+        target = db.get(WorldCharacterConfiguration, "wc-a-target")
+        before = dict(target.profile)
+        target.profile = {**before, "avatar_url": "/media/pending-profile.webp"}
         service = world_character_social_profile_service(db)
         commits, statements = [], []
         event.listen(db, "before_commit", lambda *_: commits.append("commit"))
@@ -53,7 +53,7 @@ def test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit(
             )
             assert commits == []
             db.rollback()
-            assert db.get(WorldCharacter, "wc-a-target").local_profile == before
+            assert db.get(WorldCharacterConfiguration, "wc-a-target").profile == before
             page = service.read(query)
             assert all(
                 post.author_avatar_url == before["avatar_url"] for post in page.items

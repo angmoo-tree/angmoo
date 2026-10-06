@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { MessageCircle, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +12,7 @@ import type { FormEvent } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { type UserRead } from "@/lib/auth/browser-session";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { createTreePost, listTreePosts } from "@/features/tree/api/tree";
 import { type TreeCategory, type TreeFeedPage, type TreePostDetail, type TreePostSummary } from "@/features/tree/types/tree";
 import { isOfficialOperatorName } from "@/utils/profile-presentation";
@@ -51,6 +55,7 @@ export function TreeCommunityClient({
   initialQuery: string;
   initialError: string | null;
 }) {
+  const uiText = useUiText("tree");
   const { status: authStatus, user } = useAuth();
   const [posts, setPosts] = useState(initialPage.items);
   const [nextCursor, setNextCursor] = useState(initialPage.next_cursor);
@@ -74,11 +79,11 @@ export function TreeCommunityClient({
       setPosts(page.items);
       setNextCursor(page.next_cursor);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "나무 글을 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("나무 글을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
-  }, [initialCategory, initialQuery]);
+  }, [initialCategory, initialQuery, uiText]);
 
   useMobilePullToRefresh({
     refreshing: loading,
@@ -106,7 +111,7 @@ export function TreeCommunityClient({
       setPosts((previous) => [...previous, ...page.items]);
       setNextCursor(page.next_cursor);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "나무 글을 더 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("나무 글을 더 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
@@ -117,11 +122,11 @@ export function TreeCommunityClient({
     if (initialCategory === "notice") return;
     const content = composerText.trim();
     if (authStatus !== "authenticated") {
-      setComposerError("로그인 후 글을 쓸 수 있습니다.");
+      setComposerError(uiText("로그인 후 글을 쓸 수 있습니다."));
       return;
     }
     if (content.length < 2) {
-      setComposerError("두 글자 이상 적어주세요.");
+      setComposerError(uiText("두 글자 이상 적어주세요."));
       return;
     }
 
@@ -139,7 +144,7 @@ export function TreeCommunityClient({
       setComposerText("");
       setRelatedCharacterId("");
     } catch (err) {
-      setComposerError(err instanceof Error ? err.message : "글을 저장하지 못했습니다.");
+      setComposerError(err instanceof Error ? uiText(err.message) : uiText("글을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -150,7 +155,7 @@ export function TreeCommunityClient({
   return (
     <section className="flex min-h-screen w-full flex-col bg-white">
       <div className="sticky top-0 z-10 flex min-h-[72px] flex-wrap items-center justify-between gap-3 border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:min-h-[88px] md:px-9">
-        <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">나무</h1>
+        <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">{uiText("나무")}</h1>
         <div className="-mx-5 flex w-[calc(100%+2.5rem)] items-center gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:w-auto md:flex-wrap md:px-0 md:pb-0">
           {TABS.map((tab) => (
             <Link
@@ -167,7 +172,7 @@ export function TreeCommunityClient({
             onClick={loadPage}
             disabled={loading}
             className="hidden size-10 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60 md:inline-flex"
-            title="새로고침"
+            title={uiText("새로고침")}
           >
             <RefreshCw size={18} aria-hidden="true" />
           </button>
@@ -191,7 +196,7 @@ export function TreeCommunityClient({
 
       {initialQuery ? (
         <div className="border-b border-[#eaedf2] bg-[#f9fafb] px-5 py-3 text-[14px] font-bold text-[#667085] md:px-9">
-          나무 검색: <span className="text-[#101828]">{initialQuery}</span>
+          {uiText("나무 검색:")}<span className="text-[#101828]">{initialQuery}</span>
         </div>
       ) : null}
 
@@ -221,8 +226,7 @@ export function TreeCommunityClient({
             disabled={loading}
             className="h-12 w-full rounded-full border border-[#e1e5eb] bg-white text-[15px] font-extrabold text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            더 보기
-          </button>
+            {uiText("더 보기")}</button>
         </div>
       ) : null}
     </section>
@@ -252,8 +256,9 @@ function TreeComposer({
   onRelatedCharacterChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
-  const placeholder = PLACEHOLDER_BY_CATEGORY[category];
-  const buttonLabel = BUTTON_BY_CATEGORY[category];
+  const uiText = useUiText("tree");
+  const placeholder = uiText(PLACEHOLDER_BY_CATEGORY[category]);
+  const buttonLabel = uiText(BUTTON_BY_CATEGORY[category]);
 
   return (
     <form onSubmit={onSubmit} className="border-b border-[#eaedf2] bg-white px-5 py-5 md:px-9">
@@ -273,7 +278,7 @@ function TreeComposer({
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 text-[15px] font-bold text-[#667085]">
             <span className={composerAuthorNameClass(user?.display_name)}>
-              {user?.display_name ?? "로그인이 필요합니다"}
+              {user?.display_name ?? uiText("로그인이 필요합니다")}
             </span>
           </div>
 
@@ -295,7 +300,7 @@ function TreeComposer({
                   onChange={(event) => onRelatedCharacterChange(event.target.value)}
                   className="h-10 max-w-full rounded-full border border-[#e1e5eb] bg-white px-3 text-[13px] font-bold text-[#667085] outline-none focus:border-[#ff8a8a]"
                 >
-                  <option value="">관련 앵무 선택 안 함</option>
+                  <option value="">{uiText("관련 앵무 선택 안 함")}</option>
                   {agents.map((agent) => (
                     <option key={agent.character.id} value={agent.character.id}>
                       {agent.character.name}
@@ -311,7 +316,7 @@ function TreeComposer({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#1d2939] disabled:cursor-not-allowed disabled:bg-[#c9ced6]"
             >
               <Send size={16} />
-              {saving ? "저장 중" : buttonLabel}
+              {saving ? uiText("저장 중") : buttonLabel}
             </button>
           </div>
         </div>
@@ -321,6 +326,8 @@ function TreeComposer({
 }
 
 function TreePostRow({ post }: { post: TreePostSummary }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("tree");
   const authorHref = `/profiles/users/${post.author.id}`;
 
   return (
@@ -338,7 +345,7 @@ function TreePostRow({ post }: { post: TreePostSummary }) {
           <div>
             <div className="mb-2 flex min-w-0 flex-wrap items-center gap-x-2 text-[16px] md:text-[18px]">
               <span className="rounded-full bg-[#fff0ef] px-3 py-1 text-[13px] font-extrabold text-[#ff6b6b]">
-                {categoryLabel(post.category)}
+                {uiText(categoryLabel(post.category))}
               </span>
               <Link href={authorHref} className={treeAuthorNameClass(post.author.display_name)}>
                 {post.author.display_name}
@@ -348,7 +355,7 @@ function TreePostRow({ post }: { post: TreePostSummary }) {
             </div>
             {post.related_character ? (
               <div className="mb-2 text-[13px] font-bold text-[#98a2b3]">
-                관련 앵무: {post.related_character.name}
+                {uiText("관련 앵무:")}{post.related_character.name}
               </div>
             ) : null}
             <Link href={`/tree/${post.id}`} className="block">
@@ -362,7 +369,7 @@ function TreePostRow({ post }: { post: TreePostSummary }) {
             <Link
               href={`/tree/${post.id}`}
               className="flex items-center gap-2 transition-colors hover:text-[#ff6b6b]"
-              title="댓글"
+              title={uiText("댓글")}
             >
               <span className="rounded-full p-1.5 transition-colors hover:bg-[#ff6b6b]/10">
                 <MessageCircle className="size-[22px] md:size-[25px]" strokeWidth={1.6} />

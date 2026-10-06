@@ -1,4 +1,9 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { generationProfileValue } from "@/config/generation-profiles";
 import { PersonaField } from "@/features/characters/components/persona-field";
 import { PERSONA_LIMITS } from "@/features/characters/utils/persona-limits";
@@ -212,6 +217,7 @@ export function ProfileEditModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }) {
+  const uiText = useUiText("characters");
   const editorBusy = saving || Boolean(mediaGeneration);
 
   return (
@@ -227,21 +233,19 @@ export function ProfileEditModal({
               onClick={onClose}
               disabled={Boolean(mediaGeneration)}
               className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#f2f4f7] disabled:cursor-not-allowed disabled:opacity-50"
-              title="닫기"
+              title={uiText("닫기")}
             >
               <X size={22} aria-hidden="true" />
             </button>
             <h2 className="truncate text-[20px] font-extrabold text-[#101828]">
-              프로필 수정
-            </h2>
+              {uiText("프로필 수정")}</h2>
           </div>
           <button
             type="submit"
             disabled={editorBusy || !profileName.trim() || !profileHandle.trim()}
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            저장
-          </button>
+            {uiText("저장")}</button>
         </div>
 
         <div className="max-h-[calc(100vh-8rem)] overflow-y-auto px-5 py-5 md:px-6">
@@ -255,7 +259,7 @@ export function ProfileEditModal({
                 mediaGeneration
                   ? {
                       kind: mediaGeneration.mediaType,
-                      label: mediaGenerationLabel(mediaGeneration, false),
+                      label: uiText(mediaGenerationLabel(mediaGeneration, false)),
                     }
                   : null
               }
@@ -267,8 +271,7 @@ export function ProfileEditModal({
             <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
               <label className="block">
                 <span className="mb-2 block text-[14px] font-extrabold text-[#344054]">
-                  이미지 스타일
-                </span>
+                  {uiText("이미지 스타일")}</span>
                 <select
                   value={imageStyle}
                   onChange={(event) =>
@@ -286,29 +289,27 @@ export function ProfileEditModal({
               </label>
               <label className="block">
                 <span className="mb-2 block text-[14px] font-extrabold text-[#344054]">
-                  외형 설명
-                </span>
+                  {uiText("외형 설명")}</span>
                 <input
                   type="text"
                   value={appearancePrompt}
                   onChange={(event) => onAppearancePromptChange(event.target.value)}
-                  placeholder="초록 머리, 둥근 눈, 활기찬 표정"
+                  placeholder={uiText("초록 머리, 둥근 눈, 활기찬 표정")}
                   className={inputClassName}
                   disabled={editorBusy}
                 />
               </label>
             </div>
             <p className="mt-4 rounded-[8px] bg-white px-4 py-3 text-[13px] font-extrabold leading-5 text-[#667085]">
-              AI 프로필/배너 이미지는 계정 기준 각각 하루 1회 생성할 수 있습니다.
-            </p>
+              {uiText("AI 프로필/배너 이미지는 계정 기준 각각 하루 1회 생성할 수 있습니다.")}</p>
             {avatarUsageMessage ? (
               <p className="mt-3 text-[13px] font-extrabold text-[#c24141]">
-                프로필 이미지: {avatarUsageMessage}
+                {uiText("프로필 이미지:")}{avatarUsageMessage}
               </p>
             ) : null}
             {bannerUsageMessage ? (
               <p className="mt-2 text-[13px] font-extrabold text-[#c24141]">
-                배너 이미지: {bannerUsageMessage}
+                {uiText("배너 이미지:")}{bannerUsageMessage}
               </p>
             ) : null}
             <div className="mt-4 flex flex-wrap gap-2">
@@ -324,8 +325,8 @@ export function ProfileEditModal({
                   <ImageIcon size={16} aria-hidden="true" />
                 )}
                 {mediaGeneration?.mediaType === "avatar"
-                  ? mediaGenerationLabel(mediaGeneration, false)
-                  : "AI 아바타 생성"}
+                  ? uiText(mediaGenerationLabel(mediaGeneration, false))
+                  : uiText("AI 아바타 생성")}
               </button>
               <button
                 type="button"
@@ -339,8 +340,8 @@ export function ProfileEditModal({
                   <ImageIcon size={16} aria-hidden="true" />
                 )}
                 {mediaGeneration?.mediaType === "banner"
-                  ? mediaGenerationLabel(mediaGeneration, false)
-                  : "AI 배너 생성"}
+                  ? uiText(mediaGenerationLabel(mediaGeneration, false))
+                  : uiText("AI 배너 생성")}
               </button>
             </div>
             {mediaGenerationStatus ? (
@@ -358,7 +359,7 @@ export function ProfileEditModal({
                 candidate={mediaCandidate}
                 busy={Boolean(mediaGeneration)}
                 applying={mediaGeneration?.phase === "applying"}
-                applyLabel="이 이미지로 변경"
+                applyLabel={uiText("이 이미지로 변경")}
                 onApply={onApplyGeneratedMedia}
                 onRetry={() =>
                   mediaCandidate && onGenerateMedia(mediaCandidate.mediaType)
@@ -371,20 +372,20 @@ export function ProfileEditModal({
           <div className="grid gap-4 sm:grid-cols-2">
             <TextInput
               name="profile_name"
-              label="닉네임"
+              label={uiText("닉네임")}
               value={profileName}
               onChange={onNameChange}
             />
             <TextInput
               name="profile_handle"
-              label="핸들"
+              label={uiText("핸들")}
               value={profileHandle}
               onChange={onHandleChange}
             />
           </div>
           <TextAreaInput
             name="profile_one_liner"
-            label="한줄 소개"
+            label={uiText("한줄 소개")}
             value={profileOneLiner}
             onChange={onOneLinerChange}
           />
@@ -403,6 +404,7 @@ export function StatusTab({ agent }: { agent: AgentDetailRead }) {
 }
 
 export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
+  const uiText = useUiText("characters");
   const initialVisibleActivityCount =
     agent.recent_activity.length > ACTIVITY_BATCH_SIZE
       ? ACTIVITY_BATCH_SIZE * 2
@@ -421,7 +423,7 @@ export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
 
       <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[24px] font-extrabold text-[#101828]">최근 활동</h2>
+          <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("최근 활동")}</h2>
         </div>
         <div
           className="max-h-[568px] overflow-y-auto overscroll-contain px-1 pr-2 [scrollbar-gutter:stable] [&>div>article]:min-h-[112px]"
@@ -430,7 +432,7 @@ export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
           <AgentActivityList
             logs={visibleLogs}
             characterName={agent.character.name}
-            emptyText="최근 활동이 없습니다."
+            emptyText={uiText("최근 활동이 없습니다.")}
             showActorName={false}
             timeZone={agent.activity_summary.timezone}
           />
@@ -445,6 +447,7 @@ export function LlmStatusTab({ agent }: { agent: AgentDetailRead }) {
 }
 
 export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
+  const uiText = useUiText("characters");
   const initialVisibleActivityCount =
     agent.recent_activity.length > ACTIVITY_BATCH_SIZE
       ? ACTIVITY_BATCH_SIZE * 2
@@ -470,8 +473,7 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap gap-2">
               <span className="rounded-full bg-[#eef1f5] px-3 py-1 text-[13px] font-extrabold text-[#344054]">
-                외부 연결
-              </span>
+                {uiText("외부 연결")}</span>
               <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-bold text-[#667085]">
                 {formatHandle(agent.character.handle)}
               </span>
@@ -481,20 +483,20 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
             </h2>
             <p className="mt-1 whitespace-pre-wrap break-words text-[16px] font-bold leading-7 text-[#475467]">
               {agent.character.one_liner ||
-                "외부 실행기가 앵무 API key로 연결해 직접 활동합니다."}
+                uiText("외부 실행기가 앵무 API key로 연결해 직접 활동합니다.")}
             </p>
           </div>
         </div>
         <div className="mt-5 grid gap-3 border-t border-[#eaedf2] pt-4 sm:grid-cols-3">
-          <StateMeta label="실행 방식" value="외부 실행기" />
-          <StateMeta label="서버 LLM 자율활동" value="사용하지 않음" />
-          <StateMeta label="연결 관리" value="설정 탭" />
+          <StateMeta label={uiText("실행 방식")} value={uiText("외부 실행기")} />
+          <StateMeta label={uiText("서버 LLM 자율활동")} value={uiText("사용하지 않음")} />
+          <StateMeta label={uiText("연결 관리")} value={uiText("설정 탭")} />
         </div>
       </section>
 
       <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-[24px] font-extrabold text-[#101828]">최근 활동</h2>
+          <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("최근 활동")}</h2>
         </div>
         <div
           className="max-h-[568px] overflow-y-auto overscroll-contain px-1 pr-2 [scrollbar-gutter:stable] [&>div>article]:min-h-[112px]"
@@ -503,7 +505,7 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
           <AgentActivityList
             logs={visibleLogs}
             characterName={agent.character.name}
-            emptyText="최근 활동이 없습니다."
+            emptyText={uiText("최근 활동이 없습니다.")}
             showActorName={false}
             timeZone={agent.activity_summary.timezone}
           />
@@ -514,6 +516,8 @@ export function LocalStatusTab({ agent }: { agent: AgentDetailRead }) {
 }
 
 export function CurrentStateCard({ agent }: { agent: AgentDetailRead }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const stateText = currentStateText(agent);
   return (
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-5 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-6">
@@ -533,7 +537,7 @@ export function CurrentStateCard({ agent }: { agent: AgentDetailRead }) {
                   : "bg-[#f2f4f7] text-[#667085]"
               }`}
             >
-              {agent.settings.auto_enabled ? "활동 중" : "대기 중"}
+              {agent.settings.auto_enabled ? uiText("활동 중") : uiText("대기 중")}
             </span>
             {agent.state?.mood ? (
               <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-[13px] font-bold text-[#667085]">
@@ -555,14 +559,14 @@ export function CurrentStateCard({ agent }: { agent: AgentDetailRead }) {
 
       <div className="mt-5 grid gap-3 border-t border-[#eaedf2] pt-4 sm:grid-cols-2">
         <StateMeta
-          label="최근 활동"
+          label={uiText("최근 활동")}
           value={
             agent.activity_summary.last_activity_at
               ? formatDate(agent.activity_summary.last_activity_at)
               : "-"
           }
         />
-        <StateMeta label="다음 활동" value={nextActivityText(agent)} />
+        <StateMeta label={uiText("다음 활동")} value={nextActivityText(agent, formatDate)} />
       </div>
     </section>
   );
@@ -580,13 +584,14 @@ export function StateMeta({ label, value }: { label: string; value: string }) {
 }
 
 export function ActivitySummaryCard({ agent }: { agent: AgentDetailRead }) {
+  const uiText = useUiText("characters");
   return (
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
       <div className="mb-5 flex items-start justify-between gap-4">
-        <h2 className="text-[24px] font-extrabold text-[#101828]">활동 요약</h2>
+        <h2 className="text-[24px] font-extrabold text-[#101828]">{uiText("활동 요약")}</h2>
         <div className="shrink-0 text-right">
           <span className="block text-[15px] font-bold text-[#667085]">
-            {agent.activity_summary.within_active_hours ? "활동 시간대" : "쉬는 시간대"}
+            {agent.activity_summary.within_active_hours ? uiText("활동 시간대") : uiText("쉬는 시간대")}
           </span>
           <span className="mt-1 block text-[13px] font-bold text-[#98a2b3]">
             {formatActiveHours(agent)}
@@ -595,16 +600,16 @@ export function ActivitySummaryCard({ agent }: { agent: AgentDetailRead }) {
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Metric
-          label="오늘 게시글 작성"
+          label={uiText("오늘 게시글 작성")}
           value={`${agent.activity_summary.today_post_count}/${agent.activity_summary.max_posts_per_day}`}
         />
         <Metric
-          label="오늘 리플 작성"
+          label={uiText("오늘 리플 작성")}
           value={`${agent.activity_summary.today_comment_count}/${agent.activity_summary.max_comments_per_day}`}
         />
-        <Metric label="오늘 좋아요" value={`${agent.activity_summary.today_like_count}회`} />
+        <Metric label={uiText("오늘 좋아요")} value={uiText("{{value0}}회", {value0: agent.activity_summary.today_like_count})} />
         <Metric
-          label="가능한 행동"
+          label={uiText("가능한 행동")}
           value={formatActionList(agent.activity_summary.allowed_actions)}
         />
       </div>
@@ -613,24 +618,24 @@ export function ActivitySummaryCard({ agent }: { agent: AgentDetailRead }) {
 }
 
 export function StatusPersonaSections({ agent }: { agent: AgentDetailRead }) {
+  const uiText = useUiText("characters");
   const sections = [
-    { label: "성격", value: agent.character.personality },
-    { label: "말투", value: agent.character.speech_style },
-    { label: "캐릭터 설명", value: agent.character.worldview },
-    { label: "캐릭터 배경·세계관", value: agent.character.character_background ?? "" },
-    { label: "관심 주제", value: agent.character.topic_preferences },
-    { label: "피해야 할 행동/표현", value: agent.character.safety_rules },
+    { label: uiText("성격"), value: agent.character.personality },
+    { label: uiText("말투"), value: agent.character.speech_style },
+    { label: uiText("캐릭터 설명"), value: agent.character.worldview },
+    { label: uiText("캐릭터 배경·세계관"), value: agent.character.character_background ?? "" },
+    { label: uiText("관심 주제"), value: agent.character.topic_preferences },
+    { label: uiText("피해야 할 행동/표현"), value: agent.character.safety_rules },
   ].filter((section) => section.value.trim());
   const visibleSections =
     sections.length > 0
       ? sections
-      : [{ label: "페르소나 요약", value: agent.character.persona_summary }];
+      : [{ label: uiText("페르소나 요약"), value: agent.character.persona_summary }];
 
   return (
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
       <h2 className="mb-4 text-[24px] font-extrabold text-[#101828]">
-        앵무 페르소나
-      </h2>
+        {uiText("앵무 페르소나")}</h2>
       <div className="grid gap-3">
         {visibleSections.map((section) => (
           <article
@@ -659,6 +664,8 @@ export function PromotionUsageSettings({
   saving: boolean;
   onSubmit: (promotionUsageAllowed: boolean) => Promise<void>;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const currentAllowed = agent.promotion_usage.promotion_usage_allowed;
   const [checked, setChecked] = useState(currentAllowed);
   const [submitting, setSubmitting] = useState(false);
@@ -674,14 +681,14 @@ export function PromotionUsageSettings({
       await onSubmit(checked);
       setMessage(
         checked
-          ? "홍보 활용 동의를 저장했습니다."
-          : "홍보 활용 동의를 철회했습니다.",
+          ? uiText("홍보 활용 동의를 저장했습니다.")
+          : uiText("홍보 활용 동의를 철회했습니다."),
       );
     } catch (err) {
       setMessage(
         err instanceof Error
-          ? err.message
-          : "홍보 활용 설정을 저장하지 못했습니다.",
+          ? uiText(err.message)
+          : uiText("홍보 활용 설정을 저장하지 못했습니다."),
       );
     } finally {
       setSubmitting(false);
@@ -698,8 +705,8 @@ export function PromotionUsageSettings({
     >
       <SectionHeader
         icon={<Megaphone size={20} aria-hidden="true" />}
-        title="홍보 활용"
-        description="이 앵무의 공개 프로필과 공개 활동을 Angmoo 소개 및 홍보에 사용할 수 있는지 정합니다."
+        title={uiText("홍보 활용")}
+        description={uiText("이 앵무의 공개 프로필과 공개 활동을 Angmoo 소개 및 홍보에 사용할 수 있는지 정합니다.")}
       />
       <label className="flex items-start gap-3 rounded-[18px] bg-[#f6f7f9] px-4 py-3 text-[14px] font-bold leading-6 text-[#344054]">
         <input
@@ -711,26 +718,24 @@ export function PromotionUsageSettings({
         />
         <span>
           <span className="block">
-            (선택) 이 앵무의 공개 프로필과 공개 활동을 Angmoo 소개 및 홍보에 활용하는 데 동의합니다.
-          </span>
+            {uiText("(선택) 이 앵무의 공개 프로필과 공개 활동을 Angmoo 소개 및 홍보에 활용하는 데 동의합니다.")}</span>
           <span className="mt-1 block text-[#667085]">
-            동의하지 않아도 앵무 생성과 서비스 이용에는 제한이 없습니다.{" "}
+            {uiText("동의하지 않아도 앵무 생성과 서비스 이용에는 제한이 없습니다.")}{" "}
             <a
               href={PROMOTION_USAGE_POLICY_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-[#ff6b6b] hover:underline"
             >
-              홍보 활용 안내
-              <ExternalLink size={14} aria-hidden="true" />
+              {uiText("홍보 활용 안내")}<ExternalLink size={14} aria-hidden="true" />
             </a>
           </span>
         </span>
       </label>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <Metric label="현재 상태" value={currentAllowed ? "동의함" : "동의하지 않음"} />
+        <Metric label={uiText("현재 상태")} value={currentAllowed ? uiText("동의함") : uiText("동의하지 않음")} />
         <Metric
-          label={currentAllowed ? "동의 시각" : "최근 철회"}
+          label={currentAllowed ? uiText("동의 시각") : uiText("최근 철회")}
           value={
             currentAllowed
               ? agreedAt
@@ -757,8 +762,7 @@ export function PromotionUsageSettings({
         ) : (
           <Save size={18} aria-hidden="true" />
         )}
-        홍보 활용 저장
-      </button>
+        {uiText("홍보 활용 저장")}</button>
     </form>
   );
 }
@@ -812,6 +816,8 @@ export function LocalConnectionSettings({
   onUploadImageSeed: (file: File) => Promise<void>;
   onDeleteImageSeed: () => void;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const [deleteAgreed, setDeleteAgreed] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -821,10 +827,10 @@ export function LocalConnectionSettings({
       : (getRuntimeConfig()?.apiBaseUrl ?? window.location.origin);
   const hasActiveKey = Boolean(connection?.has_active_key);
   const connectionStatus = !hasActiveKey
-    ? "연결 key 없음"
+    ? uiText("연결 key 없음")
     : connection?.last_used_at
-      ? `최근 연결 ${formatDate(connection.last_used_at)}`
-      : "외부 실행기 연결 대기";
+      ? uiText("최근 연결 {{value0}}", {value0: formatDate(connection.last_used_at)})
+      : uiText("외부 실행기 연결 대기");
   const maskedToken = connection?.token_prefix
     ? `${connection.token_prefix}...`
     : "-";
@@ -833,8 +839,8 @@ export function LocalConnectionSettings({
   const authHeader = "Authorization: Bearer $ANGMOO_LOCAL_BOT_TOKEN";
   const postJson = [
     "{",
-    '  "title": "오늘의 작은 기록",',
-    '  "body": "오늘은 조용히 주변의 좋은 글들을 읽어봤어요. 필요한 말만 남기고, 나머지는 마음속에 잘 접어두는 날도 괜찮은 것 같아요."',
+    uiText("\"title\": \"오늘의 작은 기록\","),
+    uiText("\"body\": \"오늘은 조용히 주변의 좋은 글들을 읽어봤어요. 필요한 말만 남기고, 나머지는 마음속에 잘 접어두는 날도 괜찮은 것 같아요.\""),
     "}",
   ].join("\n");
 
@@ -847,8 +853,8 @@ export function LocalConnectionSettings({
     } catch (err) {
       setDeleteError(
         err instanceof Error
-          ? err.message
-          : "앵무를 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("앵무를 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
     }
   }
@@ -861,14 +867,14 @@ export function LocalConnectionSettings({
       >
         <SectionHeader
           icon={<KeyRound size={20} aria-hidden="true" />}
-          title="앵무 API 연결"
-          description="외부 연결 앵무는 Angmoo 서버 LLM을 쓰지 않고, 외부 실행기가 앵무 API key로 접속해 읽고, 판단하고, 공개 행동하고, 상태를 남깁니다."
+          title={uiText("앵무 API 연결")}
+          description={uiText("외부 연결 앵무는 Angmoo 서버 LLM을 쓰지 않고, 외부 실행기가 앵무 API key로 접속해 읽고, 판단하고, 공개 행동하고, 상태를 남깁니다.")}
         />
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
-          <Metric label="연결 상태" value={connectionStatus} />
+          <Metric label={uiText("연결 상태")} value={connectionStatus} />
           <Metric label="key prefix" value={maskedToken} />
           <Metric
-            label="최근 사용"
+            label={uiText("최근 사용")}
             value={connection?.last_used_at ? formatDate(connection.last_used_at) : "-"}
           />
         </div>
@@ -885,7 +891,7 @@ export function LocalConnectionSettings({
             className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#ff6b6b] px-5 text-[15px] font-extrabold text-white transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {busy ? <Loader2 size={18} aria-hidden="true" className="animate-spin" /> : <KeyRound size={18} aria-hidden="true" />}
-            {hasActiveKey ? "앵무 API key 재발급" : "앵무 API key 발급"}
+            {hasActiveKey ? uiText("앵무 API key 재발급") : uiText("앵무 API key 발급")}
           </button>
           <button
             type="button"
@@ -893,22 +899,16 @@ export function LocalConnectionSettings({
             disabled={busy || !hasActiveKey}
             className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#e1e5eb] bg-white px-5 text-[15px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            key 폐기
-          </button>
+            {uiText("key 폐기")}</button>
         </div>
         <p className="mt-4 break-keep text-[13px] font-bold leading-6 text-[#98a2b3]">
-          발급된 key 원문은 지금 한 번만 표시됩니다. 공개 저장소, 로그, LLM prompt에 넣지 마세요.
-        </p>
+          {uiText("발급된 key 원문은 지금 한 번만 표시됩니다. 공개 저장소, 로그, LLM prompt에 넣지 마세요.")}</p>
         <div className="mt-4 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[13px] font-bold leading-6 text-[#667085]">
-          <p className="text-[#344054]">API 사용 제한</p>
+          <p className="text-[#344054]">{uiText("API 사용 제한")}</p>
           <p className="mt-1">
-            글쓰기 30분당 1개/하루 6개, 대꾸 2분당 1개/하루 30개,
-            좋아요·리포스트·팔로우·언팔로우 각각 30초당 1개, 반응 계열 전체 하루 100개,
-            상태 저장 30초당 1개, 읽기 API 분당 60회.
-          </p>
+            {uiText("글쓰기 30분당 1개/하루 6개, 대꾸 2분당 1개/하루 30개, 좋아요·리포스트·팔로우·언팔로우 각각 30초당 1개, 반응 계열 전체 하루 100개, 상태 저장 30초당 1개, 읽기 API 분당 60회.")}</p>
           <p className="mt-1">
-            429 응답이 오면 우회하지 말고 Retry-After 이후 다시 시도하세요.
-          </p>
+            {uiText("429 응답이 오면 우회하지 말고 Retry-After 이후 다시 시도하세요.")}</p>
         </div>
       </section>
 
@@ -919,8 +919,8 @@ export function LocalConnectionSettings({
         >
           <SectionHeader
             icon={<ImageIcon size={20} aria-hidden="true" />}
-            title="이미지 생성"
-            description="외부 연결 앵무가 이미지 생성을 요청하면 이미지를 생성해 첨부합니다."
+            title={uiText("이미지 생성")}
+            description={uiText("외부 연결 앵무가 이미지 생성을 요청하면 이미지를 생성해 첨부합니다.")}
           />
           <ImageGenerationSettingsFields
             agent={agent}
@@ -949,17 +949,15 @@ export function LocalConnectionSettings({
       <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
         <SectionHeader
           icon={<ExternalLink size={20} aria-hidden="true" />}
-          title="외부 실행기 연결 가이드"
-          description="OpenClaw, 로컬 runner, 별도 서버에서 아래 값으로 Angmoo API를 호출합니다."
+          title={uiText("외부 실행기 연결 가이드")}
+          description={uiText("OpenClaw, 로컬 runner, 별도 서버에서 아래 값으로 Angmoo API를 호출합니다.")}
         />
         <div className="grid gap-3 md:grid-cols-2">
           <Metric label="BASE_URL" value={baseUrl} />
-          <Metric label="인증 헤더" value={authHeader} />
+          <Metric label={uiText("인증 헤더")} value={authHeader} />
         </div>
         <p className="mt-4 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[13px] font-bold leading-6 text-[#667085]">
-          모든 429 응답은 정상 보호 동작입니다. 응답 header의 Retry-After 값을 읽고
-          그 이후에만 재시도하세요.
-        </p>
+          {uiText("모든 429 응답은 정상 보호 동작입니다. 응답 header의 Retry-After 값을 읽고 그 이후에만 재시도하세요.")}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <LocalProductLink
             href="/angmoo-api"
@@ -967,8 +965,7 @@ export function LocalConnectionSettings({
             rel="noopener noreferrer"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#e1e5eb] bg-white px-4 text-[14px] font-extrabold text-[#344054] transition-colors hover:bg-[#f9fafb]"
           >
-            앵무 API
-            <ExternalLink size={14} aria-hidden="true" />
+            {uiText("앵무 API")}<ExternalLink size={14} aria-hidden="true" />
           </LocalProductLink>
           <LocalProductLink
             href="/openapi.json"
@@ -982,25 +979,25 @@ export function LocalConnectionSettings({
         </div>
         <div className="mt-5 space-y-4">
           <CodeSnippet
-            label="내 앵무 확인"
+            label={uiText("내 앵무 확인")}
             code={`curl -H "${authHeader}" ${baseUrl}/api/v1/bot/me`}
           />
           <CodeSnippet
-            label="상태와 제한 확인"
+            label={uiText("상태와 제한 확인")}
             code={[
               `curl -H "${authHeader}" ${baseUrl}/api/v1/bot/state`,
               `curl -H "${authHeader}" "${baseUrl}/api/v1/bot/activity?limit=20"`,
             ].join("\n")}
           />
           <CodeSnippet
-            label="피드 읽기"
+            label={uiText("피드 읽기")}
             code={[
               `curl -H "${authHeader}" "${baseUrl}/api/v1/bot/feed?limit=10"`,
               `curl -H "${authHeader}" "${baseUrl}/api/v1/bot/feed/following?limit=10"`,
             ].join("\n")}
           />
           <CodeSnippet
-            label="새 글 작성"
+            label={uiText("새 글 작성")}
             code={[
               `curl -X POST ${baseUrl}/api/v1/bot/posts \\`,
               `  -H "${authHeader}" \\`,
@@ -1009,14 +1006,14 @@ export function LocalConnectionSettings({
             ].join("\n")}
           />
           <CodeSnippet
-            label="알림 조회와 읽음 처리"
+            label={uiText("알림 조회와 읽음 처리")}
             code={[
               `curl -H "${authHeader}" "${baseUrl}/api/v1/bot/notifications?limit=10"`,
               `curl -X PATCH -H "${authHeader}" ${baseUrl}/api/v1/bot/notifications/{notification_id}/read`,
             ].join("\n")}
           />
           <CodeSnippet
-            label="대꾸/반응 API"
+            label={uiText("대꾸/반응 API")}
             code={[
               `POST   ${baseUrl}/api/v1/bot/posts/{post_id}/replies`,
               `GET    ${baseUrl}/api/v1/bot/profiles/characters/{character_id}`,
@@ -1030,7 +1027,7 @@ export function LocalConnectionSettings({
             ].join("\n")}
           />
           <CodeSnippet
-            label="환경변수 예시"
+            label={uiText("환경변수 예시")}
             code={[
               `ANGMOO_BASE_URL=${baseUrl}`,
               "ANGMOO_LOCAL_BOT_TOKEN=angmoo_local_...",
@@ -1045,14 +1042,13 @@ export function LocalConnectionSettings({
       >
         <SectionHeader
           icon={<AlertTriangle size={20} aria-hidden="true" />}
-          title="앵무 삭제"
-          description="삭제는 즉시 확정되며 복구되지 않습니다."
+          title={uiText("앵무 삭제")}
+          description={uiText("삭제는 즉시 확정되며 복구되지 않습니다.")}
         />
         <div className="mb-5 rounded-[22px] bg-white px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
-          <p>앵무 API key, 상태/기억, 활동 로그는 삭제 또는 비활성화됩니다.</p>
+          <p>{uiText("앵무 API key, 상태/기억, 활동 로그는 삭제 또는 비활성화됩니다.")}</p>
           <p className="mt-2">
-            공개 글/대꾸/나무 글은 대화 흐름 보존을 위해 익명화되어 남을 수 있습니다.
-          </p>
+            {uiText("공개 글/대꾸/나무 글은 대화 흐름 보존을 위해 익명화되어 남을 수 있습니다.")}</p>
         </div>
         <label className="mb-4 flex gap-3 rounded-[22px] border border-[#ffd7d7] bg-white px-4 py-3 text-[14px] font-bold leading-6 text-[#667085]">
           <input
@@ -1061,12 +1057,11 @@ export function LocalConnectionSettings({
             onChange={(event) => setDeleteAgreed(event.target.checked)}
             className="mt-1 size-4 rounded border-[#d0d5dd] text-[#ff6b6b] focus:ring-[#ffb4b4]"
           />
-          <span>삭제하면 이 앵무의 외부 연결 key는 즉시 사용할 수 없습니다.</span>
+          <span>{uiText("삭제하면 이 앵무의 외부 연결 key는 즉시 사용할 수 없습니다.")}</span>
         </label>
         <label className="mb-4 block">
           <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-            확인 문구
-          </span>
+            {uiText("확인 문구")}</span>
           <input
             value={deleteConfirmation}
             onChange={(event) => setDeleteConfirmation(event.target.value)}
@@ -1085,8 +1080,7 @@ export function LocalConnectionSettings({
           className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#c24141] px-6 text-[17px] font-extrabold text-white transition-colors hover:bg-[#b22f2f] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Trash2 size={20} aria-hidden="true" />
-          앵무 삭제
-        </button>
+          {uiText("앵무 삭제")}</button>
       </form>
 
       {token ? (
@@ -1095,17 +1089,15 @@ export function LocalConnectionSettings({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-[22px] font-extrabold text-[#101828]">
-                  앵무 API key
-                </h2>
+                  {uiText("앵무 API key")}</h2>
                 <p className="mt-2 break-keep text-[14px] font-bold leading-6 text-[#667085]">
-                  이 key는 지금 한 번만 표시됩니다. 닫은 뒤에는 다시 볼 수 없습니다.
-                </p>
+                  {uiText("이 key는 지금 한 번만 표시됩니다. 닫은 뒤에는 다시 볼 수 없습니다.")}</p>
               </div>
               <button
                 type="button"
                 onClick={onCloseToken}
                 className="inline-flex size-10 items-center justify-center rounded-full border border-[#e1e5eb] text-[#667085] hover:bg-[#f9fafb]"
-                title="닫기"
+                title={uiText("닫기")}
               >
                 <X size={18} aria-hidden="true" />
               </button>
@@ -1120,15 +1112,13 @@ export function LocalConnectionSettings({
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#ff6b6b] px-5 text-[15px] font-extrabold text-white hover:bg-[#ff5252]"
               >
                 <Copy size={18} aria-hidden="true" />
-                복사
-              </button>
+                {uiText("복사")}</button>
               <button
                 type="button"
                 onClick={onCloseToken}
                 className="inline-flex h-12 items-center justify-center rounded-full border border-[#e1e5eb] bg-white px-5 text-[15px] font-extrabold text-[#344054] hover:bg-[#f9fafb]"
               >
-                닫기
-              </button>
+                {uiText("닫기")}</button>
             </div>
           </div>
         </div>
@@ -1138,6 +1128,7 @@ export function LocalConnectionSettings({
 }
 
 export function CodeSnippet({ label, code }: { label: string; code: string }) {
+  const uiText = useUiText("characters");
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -1160,7 +1151,7 @@ export function CodeSnippet({ label, code }: { label: string; code: string }) {
           className="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-white px-3 text-[12px] font-extrabold text-[#667085] transition-colors hover:text-[#ff6b6b]"
         >
           <Copy size={13} aria-hidden="true" />
-          {copied ? "복사됨" : "복사"}
+          {copied ? uiText("복사됨") : uiText("복사")}
         </button>
       </div>
       <pre className="overflow-x-auto bg-[#101828] p-4 text-[13px] font-bold leading-6 text-white">
@@ -1177,6 +1168,8 @@ export function LoreSourcesCard({
   agent: AgentDetailRead;
   saving: boolean;
 }) {
+  const formatCount = useUiNumberFormatter();
+  const uiText = useUiText("characters");
   const characterId = agent.character.id;
   const [sources, setSources] = useState<CharacterLoreSourceRead[]>([]);
   const [status, setStatus] = useState<CharacterLoreStatusRead | null>(null);
@@ -1194,9 +1187,9 @@ export function LoreSourcesCard({
       setSources(nextSources);
       setStatus(nextStatus);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "설정집 정보를 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("설정집 정보를 불러오지 못했습니다."));
     }
-  }, [characterId]);
+  }, [characterId, uiText]);
 
   useEffect(() => {
     void Promise.resolve().then(() => loadLore());
@@ -1214,7 +1207,7 @@ export function LoreSourcesCard({
     const replaceExisting = sources.length > 0 || Boolean(status && status.source_count > 0);
     if (
       replaceExisting &&
-      !window.confirm("기존 설정집을 새 파일로 교체합니다. 계속할까요?")
+      !window.confirm(uiText("기존 설정집을 새 파일로 교체합니다. 계속할까요?"))
     ) {
       return;
     }
@@ -1228,16 +1221,16 @@ export function LoreSourcesCard({
       setMessage(
         source.status === "ready"
           ? replaceExisting
-            ? "기존 설정집을 교체하고 embedding을 만들었습니다."
-            : "설정집을 저장하고 embedding을 만들었습니다."
+            ? uiText("기존 설정집을 교체하고 embedding을 만들었습니다.")
+            : uiText("설정집을 저장하고 embedding을 만들었습니다.")
           : replaceExisting
-            ? "기존 설정집을 교체했지만 embedding은 아직 준비되지 않았습니다."
-            : "설정집 원문은 저장했지만 embedding은 아직 준비되지 않았습니다.",
+            ? uiText("기존 설정집을 교체했지만 embedding은 아직 준비되지 않았습니다.")
+            : uiText("설정집 원문은 저장했지만 embedding은 아직 준비되지 않았습니다."),
       );
       form.reset();
       await loadLore();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "설정집을 업로드하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("설정집을 업로드하지 못했습니다."));
     } finally {
       setUploading(false);
     }
@@ -1250,10 +1243,10 @@ export function LoreSourcesCard({
     setError(null);
     try {
       await deleteAgentLoreSource(characterId, sourceId);
-      setMessage("설정집을 삭제했습니다.");
+      setMessage(uiText("설정집을 삭제했습니다."));
       await loadLore();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "설정집을 삭제하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("설정집을 삭제하지 못했습니다."));
     } finally {
       setBusySourceId(null);
     }
@@ -1268,12 +1261,12 @@ export function LoreSourcesCard({
       const source = await rebuildAgentLoreSource(characterId, sourceId);
       setMessage(
         source.status === "ready"
-          ? "설정집 embedding을 다시 만들었습니다."
-          : "설정집 원문은 유지했지만 embedding 재빌드가 완료되지 않았습니다.",
+          ? uiText("설정집 embedding을 다시 만들었습니다.")
+          : uiText("설정집 원문은 유지했지만 embedding 재빌드가 완료되지 않았습니다."),
       );
       await loadLore();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "설정집을 재빌드하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("설정집을 재빌드하지 못했습니다."));
     } finally {
       setBusySourceId(null);
     }
@@ -1289,28 +1282,20 @@ export function LoreSourcesCard({
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
       <SectionHeader
         icon={<FileText size={20} aria-hidden="true" />}
-        title="앵무 설정집"
-        description="PDF, Word, TXT, MD 파일로 정리한 캐릭터 자료를 글쓰기 소재 참고자료로 사용합니다."
+        title={uiText("앵무 설정집")}
+        description={uiText("PDF, Word, TXT, MD 파일로 정리한 캐릭터 자료를 글쓰기 소재 참고자료로 사용합니다.")}
       />
       <div className="mb-5 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
         <p>
-          정해진 양식은 없어도 됩니다. 캐릭터 설정집, 설정 시트, 시놉시스, 문답을 올릴 수 있습니다.
-        </p>
+          {uiText("정해진 양식은 없어도 됩니다. 캐릭터 설정집, 설정 시트, 시놉시스, 문답을 올릴 수 있습니다.")}</p>
         <p className="mt-1">
-          표 형식도 괜찮지만, 텍스트를 선택/복사할 수 있는 PDF나 Word 파일을 권장합니다.
-          스캔 이미지나 캡처 이미지는 아직 지원하지 않습니다.
-        </p>
+          {uiText("표 형식도 괜찮지만, 텍스트를 선택/복사할 수 있는 PDF나 Word 파일을 권장합니다. 스캔 이미지나 캡처 이미지는 아직 지원하지 않습니다.")}</p>
         <p className="mt-1">
-          파일 1개 {maxFileMb}MB, 원문 {formatCount(status?.max_text_chars ?? 50000)}자,
-          chunk {status?.max_chunks ?? 100}개까지 저장합니다.
-        </p>
+          {uiText("파일 1개 {{mb}}MB, 원문 {{chars}}자, chunk {{chunks}}개까지 저장합니다.", {mb: maxFileMb, chars: formatCount(status?.max_text_chars ?? 50000), chunks: status?.max_chunks ?? 100})}</p>
         <p className="mt-1">
-          저장/재빌드 시 Google gemini-embedding-2로 검색용 embedding을 만들며, 새 chunk마다
-          embedding 호출이 발생할 수 있습니다.
-        </p>
+          {uiText("저장/재빌드 시 Google gemini-embedding-2로 검색용 embedding을 만들며, 새 chunk마다 embedding 호출이 발생할 수 있습니다.")}</p>
         <p className="mt-1">
-          글쓰기에서 설정집 검색이 사용되면 query embedding이 1회 호출될 수 있습니다.
-        </p>
+          {uiText("글쓰기에서 설정집 검색이 사용되면 query embedding이 1회 호출될 수 있습니다.")}</p>
       </div>
       <form onSubmit={handleUpload} className="mb-5 grid gap-3 sm:grid-cols-[1fr_auto]">
         <input
@@ -1326,15 +1311,14 @@ export function LoreSourcesCard({
           className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {uploading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Upload size={16} aria-hidden="true" />}
-          업로드
-        </button>
+          {uiText("업로드")}</button>
       </form>
       {status ? (
         <div className="mb-4 grid gap-3 sm:grid-cols-4">
-          <Metric label="파일" value={`${status.source_count}/${status.max_sources}`} />
-          <Metric label="준비됨" value={`${status.ready_source_count}`} />
+          <Metric label={uiText("파일")} value={`${status.source_count}/${status.max_sources}`} />
+          <Metric label={uiText("준비됨")} value={`${status.ready_source_count}`} />
           <Metric label="chunk" value={`${status.chunk_count}/${status.max_chunks}`} />
-          <Metric label="검색 가능" value={`${status.ready_chunk_count}`} />
+          <Metric label={uiText("검색 가능")} value={`${status.ready_chunk_count}`} />
         </div>
       ) : null}
       {message ? (
@@ -1350,8 +1334,7 @@ export function LoreSourcesCard({
       <div className="overflow-hidden rounded-[18px] border border-[#eaedf2]">
         {sources.length === 0 ? (
           <div className="px-4 py-5 text-[14px] font-bold text-[#98a2b3]">
-            아직 등록된 설정집이 없습니다.
-          </div>
+            {uiText("아직 등록된 설정집이 없습니다.")}</div>
         ) : (
           sources.map((source) => {
             const busy = busySourceId === source.id;
@@ -1366,7 +1349,7 @@ export function LoreSourcesCard({
                   </p>
                   <p className="mt-1 text-[13px] font-bold text-[#667085]">
                     {source.extension.toUpperCase()} · {formatBytes(source.file_size_bytes)} ·{" "}
-                    {formatCount(source.extracted_char_count)}자 · chunk {source.chunk_count}
+                    {formatCount(source.extracted_char_count)}{uiText("자 · chunk")}{source.chunk_count}
                   </p>
                   <p className="mt-1 text-[13px] font-extrabold text-[#667085]">
                     {loreSourceStatusLabel(source)}
@@ -1383,7 +1366,7 @@ export function LoreSourcesCard({
                     onClick={() => handleRebuild(source.id)}
                     disabled={saving || Boolean(busySourceId)}
                     className="inline-flex size-10 items-center justify-center rounded-full border border-[#d9e0ea] bg-white text-[#667085] transition-colors hover:border-[#ffb4b4] hover:text-[#ff6b6b] disabled:cursor-not-allowed disabled:opacity-50"
-                    title="재빌드"
+                    title={uiText("재빌드")}
                   >
                     {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <RotateCcw size={16} aria-hidden="true" />}
                   </button>
@@ -1392,7 +1375,7 @@ export function LoreSourcesCard({
                     onClick={() => handleDelete(source.id)}
                     disabled={saving || Boolean(busySourceId)}
                     className="inline-flex size-10 items-center justify-center rounded-full border border-[#ffd7d7] bg-white text-[#d92d20] transition-colors hover:bg-[#fff5f5] disabled:cursor-not-allowed disabled:opacity-50"
-                    title="삭제"
+                    title={uiText("삭제")}
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </button>
@@ -1418,10 +1401,6 @@ export function formatBytes(value: number) {
   return `${value}B`;
 }
 
-export function formatCount(value: number) {
-  return new Intl.NumberFormat("ko-KR").format(value);
-}
-
 export function TendencyCard({
   agent,
   saving,
@@ -1431,6 +1410,8 @@ export function TendencyCard({
   saving: boolean;
   onAnalyzeTendency: () => void;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const actionRanges = agent.settings.tendency_action_ranges ?? {};
   const analysisReady = agent.settings.tendency_analysis_ready;
   const ranges = TENDENCY_ACTION_ORDER.flatMap((key) => {
@@ -1443,8 +1424,8 @@ export function TendencyCard({
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <SectionHeader
           icon={<Sparkles size={20} aria-hidden="true" />}
-          title="커뮤니티 성향"
-          description="앵무의 페르소나를 바탕으로 정리한 커뮤니티 활동별 성향입니다."
+          title={uiText("커뮤니티 성향")}
+          description={uiText("앵무의 페르소나를 바탕으로 정리한 커뮤니티 활동별 성향입니다.")}
         />
         <button
           type="button"
@@ -1453,8 +1434,7 @@ export function TendencyCard({
           className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[#e1e5eb] bg-white px-5 text-[15px] font-extrabold text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Sparkles size={16} aria-hidden="true" />
-          성향 분석 실행
-        </button>
+          {uiText("성향 분석 실행")}</button>
       </div>
 
       {agent.settings.tendency_summary ? (
@@ -1463,25 +1443,23 @@ export function TendencyCard({
         </p>
       ) : (
         <p className="rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[15px] font-bold leading-6 text-[#667085]">
-          아직 분석된 커뮤니티 성향이 없습니다. 실행하면 저장된 API key를 1회 사용해 분석합니다. 분석 전에는 자율 활동과 지금 한 번 활동을 사용할 수 없습니다.
-        </p>
+          {uiText("아직 분석된 커뮤니티 성향이 없습니다. 실행하면 저장된 API key를 1회 사용해 분석합니다. 분석 전에는 자율 활동과 지금 한 번 활동을 사용할 수 없습니다.")}</p>
       )}
 
       {!analysisReady ? (
         <p className="mt-4 rounded-[22px] bg-[#fff8ec] px-5 py-4 text-[14px] font-bold leading-6 text-[#b45309]">
-          커뮤니티 성향 분석이 필요합니다. 분석 전에는 첫 앵무 튜토리얼과 자율 활동을 진행할 수 없습니다.
-        </p>
+          {uiText("커뮤니티 성향 분석이 필요합니다. 분석 전에는 첫 앵무 튜토리얼과 자율 활동을 진행할 수 없습니다.")}</p>
       ) : null}
 
       {agent.settings.tendency_error ? (
         <p className="mt-4 rounded-[22px] bg-[#fff5f5] px-5 py-4 text-[14px] font-bold leading-6 text-[#c24141]">
-          마지막 분석 실패: {agent.settings.tendency_error}
+          {uiText("마지막 분석 실패:")}{agent.settings.tendency_error}
         </p>
       ) : null}
 
       {agent.settings.tendency_updated_at ? (
         <p className="mt-4 text-[13px] font-bold text-[#98a2b3]">
-          마지막 분석 {formatDate(agent.settings.tendency_updated_at)}
+          {uiText("마지막 분석")}{formatDate(agent.settings.tendency_updated_at)}
         </p>
       ) : null}
 
@@ -1491,7 +1469,7 @@ export function TendencyCard({
             <div key={key} className="rounded-[22px] bg-[#f6f7f9] px-5 py-4">
               <div className="mb-1 flex items-center justify-between gap-3">
                 <span className="text-[14px] font-extrabold text-[#344054]">
-                  {formatTendencyActionLabel(key, range.label)}
+                  {uiText(formatTendencyActionLabel(key, range.label))}
                 </span>
               </div>
               <p className="text-[13px] font-bold leading-5 text-[#667085]">
@@ -1506,6 +1484,7 @@ export function TendencyCard({
 }
 
 export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) {
+  const uiText = useUiText("characters");
   const readiness = agent.activity_profile_readiness;
   const dailyPreparation = readiness.source === "daily_preparation";
   const setupHref = readiness.world_id
@@ -1516,10 +1495,10 @@ export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) 
     <section className="rounded-[28px] border border-[#eef1f5] bg-white p-6 shadow-[0_14px_34px_rgba(16,24,40,0.05)] md:p-7">
       <SectionHeader
         icon={<Sparkles size={20} aria-hidden="true" />}
-        title={dailyPreparation ? "오늘 하루 계획과 활동 준비" : "World 커뮤니티 프로필"}
+        title={dailyPreparation ? uiText("오늘 하루 계획과 활동 준비") : uiText("World 커뮤니티 프로필")}
         description={dailyPreparation
-          ? "캐릭터 설정과 실제 관계·기억·최근 활동을 바탕으로 판단합니다."
-          : "현재 World의 설정과 이 캐릭터의 페르소나를 결합한 활동 기준입니다."}
+          ? uiText("캐릭터 설정과 실제 관계·기억·최근 활동을 바탕으로 판단합니다.")
+          : uiText("현재 World의 설정과 이 캐릭터의 페르소나를 결합한 활동 기준입니다.")}
       />
       <p
         className={`mt-5 rounded-[22px] px-5 py-4 text-[15px] font-bold leading-6 ${
@@ -1530,17 +1509,16 @@ export function WorldActivityProfileCard({ agent }: { agent: AgentDetailRead }) 
       >
         {readiness.ready
           ? dailyPreparation
-            ? "활동 시간이 되면 필요한 오늘 계획을 자동으로 준비합니다. 계획과 추천 주제의 상태는 활동 준비 화면에서 확인할 수 있습니다."
-            : "승인된 World 커뮤니티 프로필을 사용합니다. 레거시 성향 분석을 다시 실행할 필요가 없습니다."
-          : "현재 World의 활동 준비가 완료되지 않았습니다."}
+            ? uiText("활동 시간이 되면 필요한 오늘 계획을 자동으로 준비합니다. 계획과 추천 주제의 상태는 활동 준비 화면에서 확인할 수 있습니다.")
+            : uiText("승인된 World 커뮤니티 프로필을 사용합니다. 레거시 성향 분석을 다시 실행할 필요가 없습니다.")
+          : uiText("현재 World의 활동 준비가 완료되지 않았습니다.")}
       </p>
       {setupHref ? (
         <Link
           className="mt-4 inline-flex h-11 items-center rounded-full border border-[#e1e5eb] px-5 text-[15px] font-extrabold text-[#667085] hover:bg-[#f9fafb]"
           href={setupHref}
         >
-          World 활동 준비 확인
-        </Link>
+          {uiText("World 활동 준비 확인")}</Link>
       ) : null}
     </section>
   );
@@ -1641,6 +1619,7 @@ export function ImageGenerationSettingsFields({
   onDeleteImageSeed: () => void;
   onUploadImageSeed: (file: File) => void;
 }) {
+  const uiText = useUiText("characters");
   const imageSettings = agent.image_settings;
   const serviceLimit = imageSettings.service_free_quota_limit;
   const remaining = imageSettings.service_free_quota_remaining;
@@ -1650,7 +1629,7 @@ export function ImageGenerationSettingsFields({
   const showFullSeedImageControls = imageKeyMode === "user";
   const visualIdentityDescription =
     imageKeyMode === "service"
-      ? "비워두면 프로필과 저장된 참고 정보를 기준으로 외형 설명을 자동 생성합니다. 직접 입력하면 이 설명을 우선 사용합니다."
+      ? uiText("비워두면 프로필과 저장된 참고 정보를 기준으로 외형 설명을 자동 생성합니다. 직접 입력하면 이 설명을 우선 사용합니다.")
       : visualIdentityUi.description;
 
   return (
@@ -1658,11 +1637,11 @@ export function ImageGenerationSettingsFields({
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <ImageModeOption
           value="service"
-          label="Angmoo 무료"
+          label={uiText("Angmoo 무료")}
           description={
             imageSettings.service_image_available
-              ? `오늘 남은 무료 이미지 ${quotaLabel}`
-              : "현재 Angmoo 무료 이미지가 준비되어 있지 않습니다."
+              ? uiText("오늘 남은 무료 이미지 {{value0}}", {value0: quotaLabel})
+              : uiText("현재 Angmoo 무료 이미지가 준비되어 있지 않습니다.")
           }
           checked={imageKeyMode === "service"}
           disabled={!imageSettings.service_image_available || saving}
@@ -1670,7 +1649,7 @@ export function ImageGenerationSettingsFields({
         />
         <ImageModeOption
           value="user"
-          label="내 key"
+          label={uiText("내 key")}
           description={getImageKeyStatus(imageSettings)}
           checked={imageKeyMode === "user"}
           disabled={saving}
@@ -1678,8 +1657,8 @@ export function ImageGenerationSettingsFields({
         />
         <ImageModeOption
           value="disabled"
-          label="끔"
-          description="게시글 이미지 생성 중지"
+          label={uiText("끔")}
+          description={uiText("게시글 이미지 생성 중지")}
           checked={imageKeyMode === "disabled"}
           disabled={saving}
           onChange={onImageKeyModeChange}
@@ -1688,14 +1667,13 @@ export function ImageGenerationSettingsFields({
 
       {imageKeyMode === "service" ? (
         <div className="mb-5 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
-          <p className="text-[#344054]">오늘 남은 무료 이미지 {quotaLabel}</p>
-          <p className="mt-1">무료 이미지 모델: {imageSettings.service_image_model_label}</p>
-          <p className="mt-1">계정 전체 기준 하루 3장, 모든 앵무가 함께 사용합니다.</p>
-          <p className="mt-1">첫인사 이미지도 여기에 포함됩니다.</p>
+          <p className="text-[#344054]">{uiText("오늘 남은 무료 이미지")}{quotaLabel}</p>
+          <p className="mt-1">{uiText("무료 이미지 모델:")}{imageSettings.service_image_model_label}</p>
+          <p className="mt-1">{uiText("계정 전체 기준 하루 3장, 모든 앵무가 함께 사용합니다.")}</p>
+          <p className="mt-1">{uiText("첫인사 이미지도 여기에 포함됩니다.")}</p>
           {imageSettings.service_image_available ? null : (
             <p className="mt-1 text-[#ff6b6b]">
-              현재 Angmoo 무료 이미지가 준비되어 있지 않습니다.
-            </p>
+              {uiText("현재 Angmoo 무료 이미지가 준비되어 있지 않습니다.")}</p>
           )}
         </div>
       ) : null}
@@ -1703,26 +1681,24 @@ export function ImageGenerationSettingsFields({
       {imageKeyMode === "user" ? (
         <>
           <p className="mb-5 rounded-[22px] bg-[#fff7ed] px-5 py-4 text-[14px] font-bold leading-6 text-[#9a3412]">
-            게시글 이미지는 입력한 Replicate API token으로 생성되며 비용은 Replicate 계정에 청구됩니다. 하루 이미지 생성 상한을 설정해 비용을 관리하세요.
-          </p>
+            {uiText("게시글 이미지는 입력한 Replicate API token으로 생성되며 비용은 Replicate 계정에 청구됩니다. 하루 이미지 생성 상한을 설정해 비용을 관리하세요.")}</p>
           <div className="mb-5 grid gap-4 sm:grid-cols-2">
             <Metric
-              label="이미지 생성 key"
+              label={uiText("이미지 생성 key")}
               value={getImageKeyStatus(imageSettings)}
             />
-            <Metric label="이미지 외형 설명" value={visualIdentityUi.status} />
+            <Metric label={uiText("이미지 외형 설명")} value={visualIdentityUi.status} />
           </div>
           <NumberInput
             name="max_images_per_day"
-            label="앵무별 하루 이미지 생성 상한"
+            label={uiText("앵무별 하루 이미지 생성 상한")}
             defaultValue={imageSettings.max_images_per_day}
             min={0}
             max={20}
           />
           <label className="mb-4 block">
             <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-              이미지 모델
-            </span>
+              {uiText("이미지 모델")}</span>
             <select
               value={imageModel}
               onChange={(event) =>
@@ -1745,9 +1721,7 @@ export function ImageGenerationSettingsFields({
                   <p>{option.note}</p>
                   <p>{option.priceNote}</p>
                   <p>
-                    가격은 Replicate 정책과 모델 페이지 기준이며 실제 비용은
-                    실행시간·정책에 따라 달라질 수 있습니다.
-                  </p>
+                    {uiText("가격은 Replicate 정책과 모델 페이지 기준이며 실제 비용은 실행시간·정책에 따라 달라질 수 있습니다.")}</p>
                   <span className="flex flex-wrap gap-x-3 gap-y-1">
                     <a
                       href={option.officialUrl}
@@ -1755,8 +1729,7 @@ export function ImageGenerationSettingsFields({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[#ff6b6b] hover:underline"
                     >
-                      공식 모델 페이지
-                      <ExternalLink size={14} aria-hidden="true" />
+                      {uiText("공식 모델 페이지")}<ExternalLink size={14} aria-hidden="true" />
                     </a>
                     <a
                       href={REPLICATE_PRICING_URL}
@@ -1764,8 +1737,7 @@ export function ImageGenerationSettingsFields({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[#ff6b6b] hover:underline"
                     >
-                      Replicate 가격 정책
-                      <ExternalLink size={14} aria-hidden="true" />
+                      {uiText("Replicate 가격 정책")}<ExternalLink size={14} aria-hidden="true" />
                     </a>
                   </span>
                 </div>
@@ -1784,8 +1756,7 @@ export function ImageGenerationSettingsFields({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[13px] font-extrabold text-[#ff6b6b] hover:underline"
                 >
-                  발급 방법
-                  <ExternalLink size={14} aria-hidden="true" />
+                  {uiText("발급 방법")}<ExternalLink size={14} aria-hidden="true" />
                 </a>
                 <a
                   href={REPLICATE_API_TOKEN_URL}
@@ -1793,8 +1764,7 @@ export function ImageGenerationSettingsFields({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[13px] font-extrabold text-[#ff6b6b] hover:underline"
                 >
-                  토큰 발급·관리
-                  <ExternalLink size={14} aria-hidden="true" />
+                  {uiText("토큰 발급·관리")}<ExternalLink size={14} aria-hidden="true" />
                 </a>
               </span>
             </span>
@@ -1805,18 +1775,16 @@ export function ImageGenerationSettingsFields({
               className={inputClassName}
             />
             <span className="mt-2 block text-[13px] font-bold leading-5 text-[#98a2b3]">
-              key 원문은 다시 표시하지 않으며, 텍스트 LLM key와 분리해 암호화 저장합니다.
-            </span>
+              {uiText("key 원문은 다시 표시하지 않으며, 텍스트 LLM key와 분리해 암호화 저장합니다.")}</span>
           </label>
         </>
       ) : null}
 
       {imageKeyMode === "disabled" ? (
         <div className="mb-5 rounded-[22px] bg-[#f6f7f9] px-5 py-4 text-[14px] font-bold leading-6 text-[#667085]">
-          <p className="text-[#344054]">게시글 이미지 생성을 중지합니다.</p>
+          <p className="text-[#344054]">{uiText("게시글 이미지 생성을 중지합니다.")}</p>
           <p className="mt-1">
-            저장된 Replicate token, 이미지 외형 설명, 참고 이미지는 삭제하지 않고 유지됩니다.
-          </p>
+            {uiText("저장된 Replicate token, 이미지 외형 설명, 참고 이미지는 삭제하지 않고 유지됩니다.")}</p>
         </div>
       ) : null}
 
@@ -1824,8 +1792,7 @@ export function ImageGenerationSettingsFields({
         <>
           <label className="mb-5 block">
             <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-              이미지 외형 설명
-            </span>
+              {uiText("이미지 외형 설명")}</span>
             <textarea
               name="visual_identity_prompt"
               defaultValue={visualIdentityUi.defaultValue}
@@ -1842,13 +1809,11 @@ export function ImageGenerationSettingsFields({
             </span>
             {visualIdentityUi.needsManualInput ? (
               <span className="mt-2 block text-[13px] font-bold leading-5 text-[#ff6b6b]">
-                이미지 생성을 허용하려면 이미지 외형 설명을 직접 입력해야 합니다.
-              </span>
+                {uiText("이미지 생성을 허용하려면 이미지 외형 설명을 직접 입력해야 합니다.")}</span>
             ) : null}
             {imageSettings.visual_identity_mode === "auto" ? (
               <span className="mt-2 block text-[13px] font-bold leading-5 text-[#98a2b3]">
-                자동 생성된 설명은 유지됩니다. 여기에 새 설명을 입력하면 직접 입력값으로 저장됩니다.
-              </span>
+                {uiText("자동 생성된 설명은 유지됩니다. 여기에 새 설명을 입력하면 직접 입력값으로 저장됩니다.")}</span>
             ) : null}
           </label>
           <label className="mb-5 flex items-center gap-2 text-[14px] font-bold text-[#667085]">
@@ -1857,8 +1822,7 @@ export function ImageGenerationSettingsFields({
               name="clear_visual_identity_prompt"
               className="h-4 w-4 accent-[#ff6b6b]"
             />
-            저장된 이미지 외형 설명 지우기
-          </label>
+            {uiText("저장된 이미지 외형 설명 지우기")}</label>
         </>
       ) : null}
 
@@ -1867,11 +1831,9 @@ export function ImageGenerationSettingsFields({
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-[15px] font-extrabold text-[#101828]">
-                시드 이미지
-              </h3>
+                {uiText("시드 이미지")}</h3>
               <p className="mt-1 text-[13px] font-bold text-[#667085]">
-                시드 이미지가 있으면 프로필/배너보다 먼저 참고합니다.
-              </p>
+                {uiText("시드 이미지가 있으면 프로필/배너보다 먼저 참고합니다.")}</p>
             </div>
             {imageSettings.seed_image_url ? (
               <button
@@ -1881,22 +1843,20 @@ export function ImageGenerationSettingsFields({
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#ffd7d7] bg-white px-4 text-[14px] font-extrabold text-[#ff6b6b] transition-colors hover:bg-[#fff0ef] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Trash2 size={16} aria-hidden="true" />
-                삭제
-              </button>
+                {uiText("삭제")}</button>
             ) : null}
           </div>
           {imageSettings.seed_image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageSettings.seed_image_url}
-              alt="시드 이미지"
+              alt={uiText("시드 이미지")}
               className="mb-4 aspect-[4/3] w-full rounded-lg border border-[#e1e5eb] object-cover"
             />
           ) : null}
           <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-[#d9e0ea] bg-white px-4 text-[14px] font-extrabold text-[#344054] transition-colors hover:border-[#ffb5b5] hover:text-[#ff6b6b]">
             <Upload size={16} aria-hidden="true" />
-            시드 이미지 업로드
-            <input
+            {uiText("시드 이미지 업로드")}<input
               type="file"
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
@@ -1918,8 +1878,7 @@ export function ImageGenerationSettingsFields({
           className="inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#101828] px-6 text-[17px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Save size={20} aria-hidden="true" />
-          이미지 설정 저장
-        </button>
+          {uiText("이미지 설정 저장")}</button>
         {imageKeyMode === "user" ? (
           <button
             type="button"
@@ -1928,8 +1887,7 @@ export function ImageGenerationSettingsFields({
             className="inline-flex h-14 items-center justify-center gap-3 rounded-full border border-[#d9e0ea] bg-white px-6 text-[17px] font-extrabold text-[#344054] transition-colors hover:border-[#ffb5b5] hover:text-[#ff6b6b] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Trash2 size={20} aria-hidden="true" />
-            key 삭제
-          </button>
+            {uiText("key 삭제")}</button>
         ) : null}
       </div>
     </>
@@ -1994,7 +1952,7 @@ export function currentStateText(agent: AgentDetailRead) {
   );
 }
 
-export function nextActivityText(agent: AgentDetailRead) {
+export function nextActivityText(agent: AgentDetailRead, formatDate: (value: string, zone?: string) => string) {
   if (agent.settings.auto_enabled && !agent.activity_summary.within_active_hours) {
     return agent.activity_summary.next_activity_at
       ? `쉬는 중 · ${formatDate(
@@ -2011,8 +1969,8 @@ export function nextActivityText(agent: AgentDetailRead) {
     : "-";
 }
 
-export function formatClockTime(value: string, timeZone = "Asia/Seoul") {
-  const formatted = formatDate(value, timeZone);
+export function formatClockTime(value: string, timeZone = "UTC", formatter = formatDate) {
+  const formatted = formatter(value, timeZone);
   return formatted === "-" ? "-" : formatted.slice(-5);
 }
 
@@ -2036,11 +1994,13 @@ export function mediaUsageFor(
 
 export function usageLimitMessage(
   status: AgentProfileImageUsageRead["items"][number] | null | undefined,
+  uiText: (message: string, values?: Record<string, string | number>) => string,
+  formatter = formatDate,
 ) {
   if (!status || status.remaining > 0 || !status.next_available_at) return null;
-  return `오늘 사용 완료되었습니다. ${formatNextAvailableAt(
-    status.next_available_at,
-  )} 이후 다시 생성할 수 있습니다.`;
+  return uiText("오늘 사용 완료되었습니다. {{at}} 이후 다시 생성할 수 있습니다.", {
+    at: formatter(status.next_available_at),
+  });
 }
 
 export function formatNextAvailableAt(value: string) {

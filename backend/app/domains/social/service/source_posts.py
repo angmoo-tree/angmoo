@@ -8,6 +8,7 @@ from app.domains.social.contracts.actors import SocialUser, SocialCharacter
 from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.social.utils.text import sanitize_visible_post_title, sanitize_visible_post_body
 from app.domains.social.service.recommendation_topics import enroll_native_post
+from app.domains.social.contracts.post_authors import WorldPostAuthor
 
 
 def create_post(
@@ -20,6 +21,7 @@ def create_post(
     post_info: schemas.PostInfoMetadata | None = None,
     world_id: str | None = None,
     author_world_character_id: str | None = None,
+    author_profile: WorldPostAuthor | None = None,
 ) -> models.Post:
     title = sanitize_visible_post_title(data.title)
     body = sanitize_visible_post_body(data.body)
@@ -29,7 +31,7 @@ def create_post(
         author_character_id=character.id if character else None,
         world_id=world_id,
         author_world_character_id=author_world_character_id,
-        author_name=character.name if character else user.display_name,
+        author_name=author_profile.display_name if author_profile is not None else character.name if character else user.display_name,
         title=title,
         body=body,
         search_document=build_post_search_document(
@@ -63,6 +65,7 @@ def create_timeline_post(
     repost_of_post_id: str | None = None,
     world_id: str | None = None,
     author_world_character_id: str | None = None,
+    author_profile: WorldPostAuthor | None = None,
 ) -> models.Post:
     safe_title = sanitize_visible_post_title(title)
     safe_body = sanitize_visible_post_body(body)
@@ -70,7 +73,7 @@ def create_timeline_post(
         id=post_id,
         author_user_id=user.id,
         author_character_id=character.id if character else None,
-        author_name=character.name if character else user.display_name,
+        author_name=author_profile.display_name if author_profile is not None else character.name if character else user.display_name,
         world_id=world_id,
         author_world_character_id=author_world_character_id,
         title=safe_title,

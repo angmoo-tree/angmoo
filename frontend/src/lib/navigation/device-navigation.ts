@@ -1,4 +1,5 @@
 import { PRODUCT_ROUTES } from "@/lib/navigation/product-routes";
+import { isSupportedProductRoute } from "@/lib/navigation/product-route-validation";
 
 export type ProductWindowCapability = "memory" | "phone" | "relationship-graph" | "studio";
 export type ProductRouteExposure =
@@ -159,46 +160,15 @@ export const LOCAL_DEVICE_NAVIGATION = LOCAL_PRODUCT_ROUTE_CAPABILITIES.filter(
   id: capability.id as LocalDeviceNavigationId,
 }));
 
-const STATIC_PRODUCT_ROUTE_PATTERNS = [
-  /^\/$/,
-  /^\/login$/,
-  /^\/settings$/,
-  /^\/memory$/,
-  /^\/memory-explorer$/,
-  /^\/posts(?:\/[^/]+)?$/,
-  /^\/agents(?:\/new|\/[^/]+)?$/,
-  /^\/studio$/,
-  /^\/studio\/import$/,
-  /^\/studio\/worlds\/(?:new|[^/]+)$/,
-  /^\/worlds\/new$/,
-  /^\/worlds\/[^/]+\/creator$/,
-  /^\/worlds\/(?!new(?:\/|$))[^/]+(?:\/(?:feed|chat|characters|relationships))?$/,
-  /^\/worlds\/(?!new(?:\/|$))[^/]+\/chat\/[^/]+$/,
-  /^\/worlds\/(?!new(?:\/|$))[^/]+\/characters\/[^/]+$/,
-  /^\/worlds\/(?!new(?:\/|$))[^/]+\/posts\/[^/]+$/,
-  /^\/characters\/[^/]+\/worlds\/(?!new(?:\/|$))[^/]+\/(?:autonomy-setup|relationship-graph)$/,
-] as const;
-
-function localProductPathname(href: string): string | null {
-  try {
-    const parsed = new URL(href, "http://angmoo.local");
-    if (parsed.origin !== "http://angmoo.local") return null;
-    return parsed.pathname.replace(/\/+$/, "") || "/";
-  } catch {
-    return null;
-  }
-}
-
 /**
  * Fail-closed static/Tauri product-route check. Next may keep hosted-only
  * pages, but the installed product must never expose a control that opens a
  * route the static router cannot render.
  */
 export function isStaticLocalProductRouteSupported(href: string): boolean {
-  const pathname = localProductPathname(href);
-  return Boolean(
-    pathname && STATIC_PRODUCT_ROUTE_PATTERNS.some((pattern) => pattern.test(pathname)),
-  );
+  // Screen owners retain their query error/normalization UI. Address entry
+  // and native dispatch use the same route grammar with strict query checks.
+  return isSupportedProductRoute(href, { validateQuery: false });
 }
 
 export function activeLocalDeviceNavigation(

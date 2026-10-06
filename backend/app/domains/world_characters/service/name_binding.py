@@ -8,6 +8,7 @@ from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError, OwnerWorldRequiredError, OwnerControlledIdentityNotFoundError,
 )
 from app.domains.world_characters.service.owner_identity import OwnerControlledIdentityService
+from app.domains.world_characters.service.configuration import effective_configuration
 
 
 def resolve_name_binding(db: Session, *, actor: WorldCharacter, owner_id: str | None,
@@ -27,7 +28,8 @@ def resolve_name_binding(db: Session, *, actor: WorldCharacter, owner_id: str | 
         identity = None
     if requester_id is not None and (identity is None or identity.world_character_id != requester_id):
         raise NameBindingError("name_binding_requester_mismatch")
-    return NameBindingSnapshot(owner_id, actor.world_id, actor.id, character.name,
+    effective_name = effective_configuration(db, world_character_id=actor.id).profile.display_name
+    return NameBindingSnapshot(owner_id, actor.world_id, actor.id, effective_name,
         identity.world_character_id if identity else None,
         identity.profile.display_name if identity else None, identity.version if identity else None)
 

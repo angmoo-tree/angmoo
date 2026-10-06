@@ -140,6 +140,11 @@ export async function runtimeFetch(
   if (runtime.launchToken && isSidecarRequest) {
     headers.set("X-Angmoo-Launcher-Token", runtime.launchToken);
   }
+  if (isSidecarRequest && typeof window !== "undefined") {
+    // Direct static requests retain the same explicit frontend identity as
+    // the Next proxy. The backend still validates the actual Origin and token.
+    headers.set("X-Angmoo-Frontend-Origin", window.location.origin);
+  }
   try {
     return await fetch(resolvedInput, {
       ...init,

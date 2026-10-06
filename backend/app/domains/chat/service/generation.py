@@ -1,6 +1,8 @@
 """Durable generation admission, replay, status and terminal failure rules."""
 
 from __future__ import annotations
+from app.contracts.environment import EnvironmentSnapshot
+from app.domains.identity.service.environment import lock_environment_admission, snapshot
 import asyncio
 import json
 
@@ -54,6 +56,8 @@ from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssemble
 from app.domains.identity.contracts import CredentialMaterial
 from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.worlds.service.character_entry import get_character_entry_world
+from app.domains.world_characters.contracts.configuration import configuration_from_request
+from app.domains.world_characters.service.configuration import configuration_for_actor
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180
 RESPONSE_CONTEXT_MESSAGE_LIMIT = 20
@@ -108,9 +112,8 @@ class GenerationService:
             )
         if request_repository._active_request(db, thread.id) is not None:
             raise MessageInFlightError("이미 답장을 만들고 있어요.")
-        selected_model = self.thread_service.resolve_world_thread_response_model(
-            db, user, thread
-        )
+        request_metadata = self._request_names(db, user, thread)
+        selected_model = self.thread_service.resolve_world_thread_response_model(db, user, thread)
         now = datetime.now(UTC)
         message = models.MessageMessage(
             thread_id=thread.id, role="user", content=content, model=None, status="ok"
@@ -147,7 +150,7 @@ class GenerationService:
                 selected_model=selected_model,
                 selected_thinking_level=thread.selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
-                request_metadata=self._request_names(db, user, thread),
+                request_metadata=request_metadata,
             )
         )
         db.commit()
@@ -217,6 +220,13 @@ class GenerationService:
         if later_user_message is not None:
             raise MessageValidationError("latest_retryable_response_required")
         prior_metadata = json.loads(prior.node_state_json)
+        # Retry the admitted input, including historical namespaces. Current
+        # World edits must not replace a saved name or introduce a new snapshot.
+        retry_metadata = {key: prior_metadata[key] for key in ("name_binding_policy", "name_binding")
+            if key in prior_metadata}
+        if "_world_configuration" in prior_metadata:
+            self._request_configuration(thread, prior_metadata)
+            retry_metadata["_world_configuration"] = prior_metadata["_world_configuration"]
         exclude_image = data.exclude_attachment or bool(prior_metadata.get("_image_excluded"))
         if data.exclude_attachment and not prior_metadata.get("_image_excluded"):
             if (prior_metadata.get("failure_class") != "image_interpretation_unavailable"
@@ -225,9 +235,8 @@ class GenerationService:
                 raise MessageValidationError("image_text_only_recovery_unavailable")
         if self.images and not exclude_image:
             self.images.reserve_retry(db, user.id, thread.id, message.id)
-        selected_model = self.thread_service.resolve_world_thread_response_model(
-            db, user, thread
-        )
+        selected_model = prior.selected_model
+        selected_thinking_level = prior.selected_thinking_level
         now = datetime.now(UTC)
         record = SqlAlchemyResponseLifecycleRepository(db).accept(
             CreateResponseRequest(
@@ -241,9 +250,11 @@ class GenerationService:
                 attempt_number=prior.attempt_number + 1,
                 retry_of_request_id=prior.request_id,
                 selected_model=selected_model,
-                selected_thinking_level=thread.selected_thinking_level,
+                selected_thinking_level=selected_thinking_level,
                 deadline_at=now + timedelta(seconds=RESPONSE_REQUEST_DEADLINE_SECONDS),
-                request_metadata={**self._request_names(db, user, thread), "_image_excluded": exclude_image},
+                request_metadata={**retry_metadata,
+                    "_environment": json.loads(prior.node_state_json).get("_environment", snapshot(db, user.id).to_dict()),
+                    "_image_excluded": exclude_image},
             )
         )
         db.commit()
@@ -291,6 +302,7 @@ class GenerationService:
     def _mutation_thread(
         self, db: Session, user: ChatUser, world_id: str, thread_id: str
     ) -> models.MessageThread:
+        lock_environment_admission(db, user.id)
         self.thread_service._require_world_chat_owner_scope(db, user.id, world_id)
         # Serialize admission with model PATCH before taking its model snapshot.
         thread = self.thread_service._get_owned_world_thread(
@@ -302,8 +314,29 @@ class GenerationService:
         return thread
 
     def _request_names(self, db, user, thread):
-        return self.workflows.capture_names(db, owner_id=user.id, world_id=thread.world_id,
-            actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id)
+        configuration = configuration_for_actor(db, character_id=thread.character_id, world_id=thread.world_id)
+        if configuration is None or configuration.world_character_id != thread.responding_world_character_id:
+            raise MessageValidationError("world_configuration_missing")
+        metadata = {**self.workflows.capture_names(db, owner_id=user.id, world_id=thread.world_id,
+            actor_id=thread.responding_world_character_id, requester_id=thread.requester_world_character_id),
+            "_environment": snapshot(db, user.id).to_dict()}
+        metadata["_world_configuration"] = configuration.request_snapshot()
+        return metadata
+
+    def _request_configuration(self, thread, metadata):
+        if "_world_configuration" not in metadata:
+            # Historical accepted requests retain their existing input path.
+            # A read or retry does not fabricate a new settings revision.
+            return None
+        try:
+            configuration = configuration_from_request(metadata["_world_configuration"])
+            if (configuration.world_id, configuration.world_character_id, configuration.character_id) != (
+                thread.world_id, thread.responding_world_character_id, thread.character_id
+            ):
+                raise ValueError("world_configuration_snapshot_scope_invalid")
+            return configuration
+        except (ValueError, TypeError, KeyError, AttributeError) as exc:
+            raise MessageValidationError("world_configuration_snapshot_invalid") from exc
 
     def _recover_if_expired(self, db: Session, record):
         now = datetime.now(UTC)
@@ -497,6 +530,14 @@ class GenerationService:
             ):
                 yield event
             return
+        try:
+            configuration = self._request_configuration(thread, record.node_state)
+        except MessageValidationError:
+            async for event in self._fail_before_workflow(db, record,
+                failure_class="world_configuration_snapshot_invalid", retryable=False,
+                reason=ResponseTerminalReason.CONTRACT_INVALID):
+                yield event
+            return
         if memory_recall_service is None:
             async for event in self._fail_before_workflow(
                 db,
@@ -574,6 +615,7 @@ class GenerationService:
         router_context, response_context = _recent_context(
             db, thread.id, exclude_message_id=message.id, images=self.images, owner_id=user.id
         )
+        environment = EnvironmentSnapshot.from_dict(record.node_state.get("_environment"))
         today_sns_snapshot = None
         world = get_character_entry_world(db, world_id)
         if world is not None and thread.responding_world_character_id is not None:
@@ -584,7 +626,7 @@ class GenerationService:
                     owner_id=user.id,
                     world_id=world_id,
                     subject_world_character_id=thread.responding_world_character_id,
-                    timezone=world.timezone,
+                    timezone=environment.timezone,
                     character_labels=character_labels,
                     now=datetime.now(UTC),
                 )
@@ -606,8 +648,10 @@ class GenerationService:
                 or "",
                 user_message=message_context,
                 image_context=image_evidence.context if image_evidence else None,
+                environment=environment,
             ),
-            profile=profiles._response_profile(responding_character),
+            profile=(profiles._world_response_profile(configuration) if configuration is not None
+                else profiles._response_profile(responding_character)),
             router_context=router_context,
             response_context=response_context,
             character_labels=character_labels,

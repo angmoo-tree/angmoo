@@ -5,27 +5,8 @@ from app.domains.routines.service.tick_schedule import APP_TIMEZONE
 
 
 def activity_timezone(reads: ActivityScopeReads, *, character_id: str) -> ZoneInfo:
-    """Resolve the selected World's IANA timezone, falling back to KST."""
-
-    if not reads.has_active_world_table():
-        return APP_TIMEZONE
-    active_world = reads.get_active_world(character_id)
-    if active_world is None:
-        return APP_TIMEZONE
-    if not reads.has_world_character_table():
-        return APP_TIMEZONE
-    world_character = reads.get_world_character(active_world.world_character_id)
-    if world_character is None or world_character.character_id != character_id:
-        return APP_TIMEZONE
-    if not reads.has_world_table():
-        return APP_TIMEZONE
-    world = reads.get_world(world_character.world_id)
-    if world is None:
-        return APP_TIMEZONE
-    try:
-        return ZoneInfo(world.timezone)
-    except (KeyError, ValueError):
-        return APP_TIMEZONE
+    """Runtime time is the owner's detected zone, independent of package metadata."""
+    return ZoneInfo(reads.get_runtime_timezone(character_id))
 
 
 def activity_timezone_name(reads: ActivityScopeReads, *, character_id: str) -> str:

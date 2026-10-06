@@ -1,6 +1,7 @@
 use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use tauri_plugin_shell::ShellExt;
 
 use crate::product_paths::ProductDataPaths;
 
@@ -56,13 +57,41 @@ impl ProductWindowKind {
 }
 
 pub fn validate_product_route(kind: ProductWindowKind, route: &str) -> Result<String, String> {
-    if route.len() > 1024 || !route.starts_with('/') || route.contains(['\\', '\0']) {
+    if route.len() > 1024
+        || !route.starts_with('/')
+        || route.contains(['\\', '\0'])
+        || route.starts_with("//")
+        || route.chars().any(char::is_control)
+    {
         return Err("invalid_product_route".to_owned());
+    }
+    let raw_path = route.split(['?', '#']).next().unwrap_or("");
+    for segment in raw_path.split('/') {
+        let decoded = decode_route_segment(segment)?;
+        if decoded == "."
+            || decoded == ".."
+            || decoded.contains(['/', '\\'])
+            || decoded.chars().any(char::is_control)
+        {
+            return Err("invalid_product_route_segment".to_owned());
+        }
+    }
+    if route.contains("__angmoo_") {
+        return Err("private_product_route".to_owned());
     }
     let parsed = tauri::Url::parse(&format!("http://angmoo.local{route}"))
         .map_err(|_| "invalid_product_route".to_owned())?;
     if parsed.fragment().is_some() {
         return Err("product_route_fragment_not_allowed".to_owned());
+    }
+    for (key, _) in parsed.query_pairs() {
+        let lower = key.to_ascii_lowercase();
+        let compact = lower.replace(['_', '-'], "");
+        if lower.starts_with("__angmoo_")
+            || matches!(compact.as_str(), "apikey" | "launchtoken" | "accesstoken")
+        {
+            return Err("private_product_route".to_owned());
+        }
     }
     let path = parsed.path();
     let segments = path
@@ -100,7 +129,7 @@ fn memory_query_matches(parsed: &tauri::Url) -> bool {
     let mut subject = false;
     let mut memory = false;
     for (key, value) in parsed.query_pairs() {
-        if !safe_segment(value.as_ref()) {
+        if !safe_decoded_segment(value.as_ref()) {
             return false;
         }
         match key.as_ref() {
@@ -157,18 +186,44 @@ fn relationship_path_matches(segments: &[&str]) -> bool {
     )
 }
 
+fn decode_route_segment(value: &str) -> Result<String, String> {
+    let mut decoded = Vec::with_capacity(value.len());
+    let bytes = value.as_bytes();
+    let mut offset = 0;
+    while offset < bytes.len() {
+        if bytes[offset] == b'%' {
+            let hex = |byte: u8| (byte as char).to_digit(16).map(|value| value as u8);
+            if offset + 2 >= bytes.len() {
+                return Err("invalid_product_route_segment".to_owned());
+            }
+            let high = hex(bytes[offset + 1]).ok_or("invalid_product_route_segment")?;
+            let low = hex(bytes[offset + 2]).ok_or("invalid_product_route_segment")?;
+            decoded.push((high << 4) | low);
+            offset += 3;
+        } else {
+            decoded.push(bytes[offset]);
+            offset += 1;
+        }
+    }
+    String::from_utf8(decoded).map_err(|_| "invalid_product_route_segment".to_owned())
+}
+
 fn safe_world_id(value: &str) -> bool {
-    value != "new" && safe_segment(value)
+    decode_route_segment(value)
+        .is_ok_and(|decoded| decoded != "new" && safe_decoded_segment(&decoded))
+}
+
+fn safe_decoded_segment(value: &str) -> bool {
+    !value.is_empty()
+        && value.chars().count() <= 255
+        && value != "."
+        && value != ".."
+        && !value.contains(['/', '\\'])
+        && !value.chars().any(char::is_control)
 }
 
 fn safe_segment(value: &str) -> bool {
-    !value.is_empty()
-        && value.len() <= 255
-        && value != "."
-        && value != ".."
-        && value
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'%' | b'.'))
+    decode_route_segment(value).is_ok_and(|decoded| safe_decoded_segment(&decoded))
 }
 
 fn initial_state_script(kind: ProductWindowKind, route: &str) -> Result<String, String> {
@@ -179,10 +234,10 @@ fn initial_state_script(kind: ProductWindowKind, route: &str) -> Result<String, 
     ))
 }
 
-fn navigation_script(kind: ProductWindowKind, route: &str) -> Result<String, String> {
+fn navigation_script(_kind: ProductWindowKind, route: &str) -> Result<String, String> {
+    let route = serde_json::to_string(route).map_err(|_| "window_state_encode_failed")?;
     Ok(format!(
-        "{}window.dispatchEvent(new Event('angmoo:desktop-route'));",
-        initial_state_script(kind, route)?
+        "window.dispatchEvent(new CustomEvent('angmoo:desktop-navigate',{{detail:{{route:{route},native:true}}}}));"
     ))
 }
 
@@ -226,13 +281,13 @@ fn configure_wide_window(
     match kind {
         ProductWindowKind::Memory => builder
             .inner_size(1180.0, 780.0)
-            .min_inner_size(900.0, 620.0),
+            .min_inner_size(480.0, 480.0),
         ProductWindowKind::Studio => builder
             .inner_size(1280.0, 820.0)
-            .min_inner_size(980.0, 680.0),
+            .min_inner_size(480.0, 480.0),
         ProductWindowKind::RelationshipGraph => builder
             .inner_size(1180.0, 780.0)
-            .min_inner_size(900.0, 620.0),
+            .min_inner_size(480.0, 480.0),
         ProductWindowKind::Phone => builder,
     }
 }
@@ -262,17 +317,24 @@ pub fn create_phone_window(
         window_url(app, ProductWindowKind::Phone, "/")?,
     )
     .title(ProductWindowKind::Phone.title())
-    .inner_size(468.0, 916.0)
-    .decorations(false)
-    .transparent(true)
+    .inner_size(
+        crate::window_policy::MAIN_INITIAL_WIDTH,
+        crate::window_policy::MAIN_INITIAL_HEIGHT,
+    )
+    .decorations(true)
+    .transparent(false)
     .resizable(true)
-    .maximizable(false)
-    .shadow(false)
-    .center()
+    .maximizable(true)
+    .shadow(true)
+    .visible(false)
     .initialization_script(initial_state_script(ProductWindowKind::Phone, "/")?);
-    configure_product_webview_data_directory(builder, paths)
-        .build()
-        .map_err(|error| error.to_string())
+    configure_product_document_boundary(
+        configure_product_webview_data_directory(builder, paths),
+        app,
+        ProductWindowKind::Phone,
+    )?
+    .build()
+    .map_err(|error| error.to_string())
 }
 
 pub async fn open_product_window_impl(
@@ -298,17 +360,117 @@ pub async fn open_product_window_impl(
 
     let builder = WebviewWindowBuilder::new(&app, kind.label(), window_url(&app, kind, &route)?)
         .title(kind.title())
-        .decorations(false)
+        .decorations(true)
         .resizable(true)
         .maximizable(true)
         .shadow(true)
-        .center()
+        .visible(false)
         .initialization_script(initial_state_script(kind, &route)?);
     let builder = configure_product_webview_data_directory(builder, &product_paths);
-    configure_wide_window(builder, kind)
-        .build()
+    let window =
+        configure_product_document_boundary(configure_wide_window(builder, kind), &app, kind)?
+            .build()
+            .map_err(|error| error.to_string())?;
+    let (width, height) = match kind {
+        ProductWindowKind::Studio => (1280.0, 820.0),
+        _ => (1180.0, 780.0),
+    };
+    crate::window_policy::apply_product_window_policy(&window, width, height)
         .map_err(|error| error.to_string())?;
+    window.show().map_err(|error| error.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+pub fn validate_product_navigation(kind: String, route: String) -> Result<String, String> {
+    validate_product_route(ProductWindowKind::parse(&kind)?, &route)
+}
+
+pub fn validate_external_product_link(value: &str) -> Result<tauri::Url, String> {
+    let url = tauri::Url::parse(value).map_err(|_| "invalid_external_product_link")?;
+    if value.len() > 4096
+        || !matches!(url.scheme(), "http" | "https")
+        || url.host_str().is_none()
+        || !url.username().is_empty()
+        || url.password().is_some()
+    {
+        return Err("invalid_external_product_link".to_owned());
+    }
+    Ok(url)
+}
+
+#[tauri::command]
+pub fn open_external_product_link(window: WebviewWindow, url: String) -> Result<(), String> {
+    if !matches!(
+        window.label(),
+        "main" | "memory" | "studio" | "relationship-graph"
+    ) {
+        return Err("invalid_product_window".to_owned());
+    }
+    let url = validate_external_product_link(&url)?;
+    #[allow(deprecated)]
+    window
+        .app_handle()
+        .shell()
+        .open(url.as_str(), None)
+        .map_err(|_| "external_product_link_failed".to_owned())
+}
+
+fn product_document_allowed(kind: ProductWindowKind, url: &tauri::Url, origin: &str) -> bool {
+    let Ok(expected) = tauri::Url::parse(origin) else {
+        return false;
+    };
+    if url.scheme() != expected.scheme()
+        || url.host_str() != expected.host_str()
+        || url.port_or_known_default() != expected.port_or_known_default()
+        || !url.username().is_empty()
+        || url.password().is_some()
+        || url.fragment().is_some()
+    {
+        return false;
+    }
+    if url.path() == "/index.html" {
+        let query: std::collections::HashMap<_, _> = url.query_pairs().into_owned().collect();
+        return url.query_pairs().count() == 2
+            && query.len() == 2
+            && query
+                .get(WINDOW_KIND_QUERY)
+                .is_some_and(|value| value == kind.bootstrap_kind())
+            && query
+                .get(WINDOW_ROUTE_QUERY)
+                .is_some_and(|value| validate_product_route(kind, value).is_ok());
+    }
+    let route = format!(
+        "{}{}",
+        url.path(),
+        url.query()
+            .map(|value| format!("?{value}"))
+            .unwrap_or_default()
+    );
+    validate_product_route(kind, &route).is_ok()
+}
+
+fn configure_product_document_boundary<'a>(
+    builder: WebviewWindowBuilder<'a, tauri::Wry, AppHandle<tauri::Wry>>,
+    app: &AppHandle,
+    kind: ProductWindowKind,
+) -> Result<WebviewWindowBuilder<'a, tauri::Wry, AppHandle<tauri::Wry>>, String> {
+    let origin = if tauri::is_dev() {
+        app.config()
+            .build
+            .dev_url
+            .as_ref()
+            .ok_or("tauri_dev_url_missing")?
+            .origin()
+            .ascii_serialization()
+    } else if cfg!(windows) || cfg!(target_os = "android") {
+        "http://tauri.localhost".to_owned()
+    } else {
+        "tauri://localhost".to_owned()
+    };
+    Ok(builder
+        .on_navigation(move |url| product_document_allowed(kind, url, &origin))
+        .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny))
 }
 
 pub fn current_window(window: &WebviewWindow) -> &WebviewWindow {
@@ -318,6 +480,96 @@ pub fn current_window(window: &WebviewWindow) -> &WebviewWindow {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn encoded_segments_and_private_query_keys_are_checked_before_navigation() {
+        for route in [
+            "//example.org/agents",
+            "/agents/%",
+            "/agents/%GG",
+            "/agents/%FF",
+            "/agents/%2e%2e",
+            "/agents/a%2fb",
+            "/agents/a%5cb",
+            "/agents/a%00b",
+            "/worlds/%6eew/feed",
+            "/settings?%61pi_key=secret",
+            "/settings?ACCESS-TOKEN=secret",
+            "/settings?%5f%5fangmoo_window_route=/",
+        ] {
+            assert!(
+                validate_product_route(ProductWindowKind::Phone, route).is_err(),
+                "{route}"
+            );
+        }
+        assert!(validate_product_route(ProductWindowKind::Phone, "/agents/hello%20world").is_ok());
+        assert!(
+            validate_product_route(
+                ProductWindowKind::Phone,
+                "/worlds/world-1/posts/post-1?returnTo=%2Fposts"
+            )
+            .is_ok()
+        );
+    }
+
+    #[test]
+    fn product_documents_require_the_exact_origin_kind_and_bootstrap() {
+        let allowed = |kind, value: &str, origin| {
+            product_document_allowed(kind, &tauri::Url::parse(value).unwrap(), origin)
+        };
+        assert!(allowed(
+            ProductWindowKind::Phone,
+            "http://127.0.0.1:3300/agents",
+            "http://127.0.0.1:3300"
+        ));
+        assert!(allowed(
+            ProductWindowKind::Memory,
+            "tauri://localhost/memory?world=world-1",
+            "tauri://localhost"
+        ));
+        assert!(allowed(
+            ProductWindowKind::Phone,
+            "http://tauri.localhost/index.html?__angmoo_window_kind=phone&__angmoo_window_route=%2Fagents",
+            "http://tauri.localhost"
+        ));
+        for value in [
+            "https://example.org/agents",
+            "http://127.0.0.1:3301/agents",
+            "http://127.0.0.1:3300/memory",
+            "http://127.0.0.1:3300/agents#fragment",
+            "http://user@127.0.0.1:3300/agents",
+        ] {
+            assert!(
+                !allowed(ProductWindowKind::Phone, value, "http://127.0.0.1:3300"),
+                "{value}"
+            );
+        }
+        assert!(!allowed(
+            ProductWindowKind::Phone,
+            "http://tauri.localhost/index.html?__angmoo_window_kind=phone&__angmoo_window_route=%2Fagents&__angmoo_window_route=%2Fsettings",
+            "http://tauri.localhost"
+        ));
+    }
+
+    #[test]
+    fn external_opener_accepts_only_credential_free_http_links() {
+        for value in [
+            "https://example.org/document",
+            "http://example.org/path?q=1",
+        ] {
+            assert!(validate_external_product_link(value).is_ok());
+        }
+        for value in [
+            "javascript:alert(1)",
+            "file:///forbidden-document",
+            "data:text/html,test",
+            "https://user:password@example.org",
+            "//example.org",
+            "tauri://localhost",
+        ] {
+            assert!(validate_external_product_link(value).is_err(), "{value}");
+        }
+    }
 
     #[test]
     fn product_routes_stay_inside_their_window_boundaries() {

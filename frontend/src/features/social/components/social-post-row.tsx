@@ -1,4 +1,7 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+
 
 import {
   Heart,
@@ -62,7 +65,9 @@ export function SocialPostRow({
   reference,
   variant = "feed",
 }: SocialPostRowProps) {
+  const uiText = useUiText("social");
   const router = useRuntimeRouter();
+  const authorName = post.authorDeleted ? uiText("삭제한 캐릭터") : post.authorName;
   const openable = Boolean(href);
   const textClassName = classNames(
     styles.postText,
@@ -75,7 +80,7 @@ export function SocialPostRow({
 
   return (
     <article
-      aria-label={openable ? `${post.authorName} 게시글 자세히 보기` : undefined}
+      aria-label={openable ? uiText("{{value0}} 게시글 자세히 보기", {value0: authorName}) : undefined}
       className={classNames(
         styles.postRow,
         openable && styles.openableRow,
@@ -104,14 +109,14 @@ export function SocialPostRow({
     >
       {authorHref ? (
         <LocalProductLink
-          ariaLabel={`${post.authorName} 프로필 열기`}
+          ariaLabel={uiText("{{value0}} 프로필 열기", {value0: authorName})}
           className={styles.avatarLink}
           data-post-card-ignore
           href={authorHref}
         >
           <ProfileAvatar
             avatarUrl={post.authorAvatarUrl}
-            name={post.authorName}
+            name={authorName}
             sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
             textClassName={styles.avatarText}
           />
@@ -119,7 +124,7 @@ export function SocialPostRow({
       ) : (
         <ProfileAvatar
           avatarUrl={post.authorAvatarUrl}
-          name={post.authorName}
+          name={authorName}
           sizeClassName={variant === "reply" ? styles.replyAvatar : styles.avatar}
           textClassName={styles.avatarText}
         />
@@ -128,15 +133,15 @@ export function SocialPostRow({
         <header className={styles.postHeader}>
           {authorHref ? (
             <LocalProductLink
-              ariaLabel={`${post.authorName} 프로필 열기`}
+              ariaLabel={uiText("{{value0}} 프로필 열기", {value0: authorName})}
               className={styles.authorLink}
               data-post-card-ignore
               href={authorHref}
             >
-              {post.authorName}
+              {authorName}
             </LocalProductLink>
           ) : (
-            <span className={styles.author}>{post.authorName}</span>
+            <span className={styles.author}>{authorName}</span>
           )}
           <span className={styles.meta}>
             {post.authorHandle ? (
@@ -187,19 +192,18 @@ export function SocialPostActionStrip({
   actions: readonly SocialPostActionPresentation[];
   onAction?: (action: SocialPostActionPresentation) => void;
 }) {
+  const uiText = useUiText("social");
+  const formatNumber = useUiNumberFormatter();
   const visibleActions = actions.filter(
     (action) => action.interaction !== "button" || onAction,
   );
   if (visibleActions.length === 0) return null;
 
   return (
-    <div className={styles.actionStrip} aria-label="게시글 동작" role="group">
+    <div className={styles.actionStrip} aria-label={uiText("게시글 동작")} role="group">
       {visibleActions.map((action) => {
         const Icon = ACTION_ICONS[action.kind];
-        const positiveLike =
-          action.kind === "like" &&
-          action.count !== undefined &&
-          action.count > 0;
+        const positiveLike = action.kind === "like" && action.accent === true;
         const accent = action.kind === "like" ? positiveLike : action.accent;
         const content = (
           <>
@@ -209,14 +213,14 @@ export function SocialPostActionStrip({
               aria-hidden="true"
             />
             {action.count !== undefined ? (
-              <span className={styles.actionCount}>{action.count}</span>
+              <span className={styles.actionCount}>{formatNumber(action.count)}</span>
             ) : null}
           </>
         );
         const label =
           action.count === undefined
-            ? action.label
-            : `${action.label} ${action.count}`;
+            ? uiText(action.label)
+            : `${uiText(action.label)} ${formatNumber(action.count)}`;
 
         if (action.interaction === "metric") {
           return (
@@ -249,6 +253,9 @@ export function SocialPostActionStrip({
           </Link>
         ) : (
           <button
+            disabled={action.disabled}
+            aria-busy={action.kind === "like" && action.disabled ? true : undefined}
+            aria-pressed={action.kind === "like" ? positiveLike : undefined}
             aria-label={label}
             className={classNames(
               styles.action,

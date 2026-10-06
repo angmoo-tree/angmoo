@@ -19,6 +19,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def _create_tables(engine) -> None:
     for table in (
         models.User.__table__,
+        models.LocalEnvironment.__table__,
+        models.EnvironmentTimezoneChange.__table__,
         models.Character.__table__,
         models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,

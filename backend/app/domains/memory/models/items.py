@@ -13,6 +13,8 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    JSON,
+    MetaData,
     String,
     Text,
     UniqueConstraint,
@@ -490,12 +492,20 @@ class MemoryMaintenanceJob(Base):
     )
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    environment_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 def create_memory_schema_v1(connection: Connection) -> None:
-    Base.metadata.create_all(
+    # This helper belongs to the immutable v4 -> v5 upgrade, not fresh schema.
+    # Clone first so new model columns cannot change a historical generation.
+    metadata = MetaData()
+    for table in Base.metadata.tables.values():
+        table.to_metadata(metadata)
+    jobs = metadata.tables["memory_maintenance_jobs"]
+    jobs._columns.remove(jobs.c.environment_snapshot)
+    metadata.create_all(
         connection,
-        tables=[Base.metadata.tables[name] for name in MEMORY_SCHEMA_V1_TABLES],
+        tables=[metadata.tables[name] for name in MEMORY_SCHEMA_V1_TABLES],
         checkfirst=False,
     )
 

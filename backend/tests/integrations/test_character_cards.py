@@ -272,7 +272,7 @@ def test_mapper_preserves_source_and_requires_user_review():
     parsed = parse_card(encoded(value))
     mapped = map_card(parsed)
     assert mapped.fields["worldview"] == "하루 {{user}} {{random}}"
-    assert mapped.fields["speech_style"] == "하루: 안녕 대화 상대"
+    assert mapped.fields["speech_style"] == "하루: 안녕 User"
     assert mapped.fields["topic_preferences"] == ""
     assert "personality_required_review_description" not in mapped.review
     assert "worldview_dynamic_text_review" in mapped.review

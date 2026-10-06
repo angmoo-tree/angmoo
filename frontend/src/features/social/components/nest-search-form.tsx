@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Search } from "lucide-react";
 import { useRuntimeRouter as useRouter, useRuntimeSearchParams as useSearchParams } from "@/hooks/use-runtime-navigation";
@@ -18,6 +20,7 @@ export function NestSearchForm({
   autoFocus?: boolean;
   scope?: "nest" | "tree";
 }) {
+  const uiText = useUiText("social");
   const router = useRouter();
   const searchParams = useSearchParams();
   const scopedInitialQuery =
@@ -51,7 +54,7 @@ export function NestSearchForm({
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder={scope === "tree" ? "나무 검색" : "둥지 검색"}
+        placeholder={scope === "tree" ? uiText("나무 검색") : uiText("둥지 검색")}
         autoFocus={autoFocus}
         className={`h-12 w-full rounded-full border border-[#e1e5eb] bg-white pl-12 pr-5 text-[16px] font-bold text-[#667085] outline-none focus:border-[#ff6b6b] focus:ring-1 focus:ring-[#ff6b6b] ${inputClassName}`}
       />

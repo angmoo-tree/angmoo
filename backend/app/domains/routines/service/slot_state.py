@@ -15,3 +15,4 @@ def _clear_resident_slot(slot: models.AgentSlot) -> None:
     slot.locked_by_run_id = None
     slot.lease_expires_at = None
     slot.last_error = None
+    slot.admission_metadata = None

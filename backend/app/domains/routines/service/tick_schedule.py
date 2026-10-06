@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 
 from app.domains.routines.policies import active_hours
 from app.config import settings
+from app.core.calendar import wall_time
 
 
 APP_TIMEZONE = ZoneInfo("Asia/Seoul")
@@ -325,7 +326,7 @@ def _active_window_containing(
             start,
             timezone=timezone,
         )
-        end_at = start_at + timedelta(minutes=duration)
+        end_at = _local_datetime_for_minute(local_now.date() + timedelta(days=day_offset), start + duration, timezone=timezone)
         if start_at <= local_now < end_at:
             return start_at.astimezone(UTC), end_at.astimezone(UTC)
     return None
@@ -347,7 +348,7 @@ def _next_active_window(
             start,
             timezone=timezone,
         )
-        end_at = start_at + timedelta(minutes=duration)
+        end_at = _local_datetime_for_minute(local_now.date() + timedelta(days=day_offset), start + duration, timezone=timezone)
         if end_at <= local_now:
             continue
         if start_at >= local_now or start_at <= local_now < end_at:
@@ -380,11 +381,7 @@ def _local_datetime_for_minute(
 ) -> datetime:
     day_offset, minute_of_day = divmod(minute, 24 * 60)
     hour, local_minute = divmod(minute_of_day, 60)
-    return datetime.combine(
-        base_date + timedelta(days=day_offset),
-        time(hour, local_minute),
-        tzinfo=timezone,
-    )
+    return wall_time(base_date + timedelta(days=day_offset), hour, local_minute, timezone.key)
 
 
 def _deterministic_spread_seconds(

@@ -19,4 +19,5 @@ def review_identity_context(db, *, owner_id, world_id, actor_id, target_id):
         or world_character_pair_is_blocked(db, world_id=world_id, first_world_character_id=actor_id, second_world_character_id=target_id)):
         raise ValueError('relationship_review_identity_unavailable')
     return dict(subject_name=character.name, counterpart_name=other.name,
-        subject_persona=(character.persona_summary or '')[:1200], subject_personality=(character.personality or '')[:800])
+        subject_persona=(character.persona_summary or '')[:1200], subject_personality=(character.personality or '')[:800],
+        subject_speech_style=(character.speech_style or '')[:1200])

@@ -1,6 +1,9 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
+import Image from "next/image";
 import type { LocalWorldAppRead, OwnerControlledActorRead } from "@/features/worlds/types/world-app";
 import {
   ArrowLeft,
@@ -12,11 +15,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
-import { WorldCharacterProfile } from "@/composition/screens/world-character-profile-screen";
+import { WorldCharacterManagementScreen } from "@/composition/screens/world-character-management-screen";
 import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
 import { ImagePicker } from "@/features/media/components/image-picker";
+import { FeedHeader } from "@/components/layout/feed-header";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { GenerationStatus } from "@/features/media/components/generation-status";
 import { PRODUCT_ROUTES, relationshipGraphRoute, studioWorldRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
 import { BottomNavigation, type BottomNavigationItem } from "@/components/ui/navigation";
@@ -62,6 +68,7 @@ function WorldAppContent({
   worldCharacterId,
   worldId,
 }: WorldAppProps) {
+  const uiText = useUiText("shell");
   const [world, setWorld] = useState<LocalWorldAppRead["world"] | null>(null);
   const [ownerActor, setOwnerActor] = useState<OwnerControlledActorRead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,8 +111,8 @@ function WorldAppContent({
     return (
       <WorldGate
         activeSection={activeSection}
-        title="World 앱을 확인하는 중"
-        description="owner 권한과 World 상태를 안전하게 확인하고 있어요."
+        title={uiText("World 앱을 확인하는 중")}
+        description={uiText("owner 권한과 World 상태를 안전하게 확인하고 있어요.")}
         worldId={worldId}
       />
     );
@@ -120,10 +127,10 @@ function WorldAppContent({
     return (
       <WorldGate
         activeSection={activeSection}
-        title="로컬 owner 연결이 필요해요"
-        description="owner session을 확인한 뒤 이 World 앱을 다시 엽니다."
+        title={uiText("로컬 owner 연결이 필요해요")}
+        description={uiText("owner session을 확인한 뒤 이 World 앱을 다시 엽니다.")}
         href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
-        linkLabel="owner 연결"
+        linkLabel={uiText("owner 연결")}
         worldId={worldId}
       />
     );
@@ -134,14 +141,14 @@ function WorldAppContent({
     return (
       <WorldGate
         activeSection={activeSection}
-        title={recovery ? "이어서 사용할 내 프로필을 선택해주세요" : unavailable ? "이 World 앱을 열 수 없어요" : "World 앱을 불러오지 못했어요"}
+        title={recovery ? uiText("이어서 사용할 내 프로필을 선택해주세요") : unavailable ? uiText("이 World 앱을 열 수 없어요") : uiText("World 앱을 불러오지 못했어요")}
         description={
-          recovery ? "보존된 프로필이 있습니다. World 관리에서 하나를 선택하면 기존 글·대화·관계를 그대로 이어갑니다." : unavailable
-            ? "권한이 없거나 World가 보관 상태로 바뀌었습니다. 다른 World로 자동 이동하지 않습니다."
-            : "runtime 상태를 확인한 뒤 다시 시도해주세요."
+          recovery ? uiText("보존된 프로필이 있습니다. World 관리에서 하나를 선택하면 기존 글·대화·관계를 그대로 이어갑니다.") : unavailable
+            ? uiText("권한이 없거나 World가 보관 상태로 바뀌었습니다. 다른 World로 자동 이동하지 않습니다.")
+            : uiText("runtime 상태를 확인한 뒤 다시 시도해주세요.")
         }
         href={recovery ? studioWorldRoute(worldId) : unavailable ? PRODUCT_ROUTES.deviceHome : PRODUCT_ROUTES.settings}
-        linkLabel={recovery ? "내 프로필 복구" : unavailable ? "Device Home으로 돌아가기" : "설정 열기"}
+        linkLabel={recovery ? uiText("내 프로필 복구") : unavailable ? uiText("Device Home으로 돌아가기") : uiText("설정 열기")}
         worldId={worldId}
       />
     );
@@ -149,6 +156,7 @@ function WorldAppContent({
 
   return (
     <WorldAppShell
+      headerMode={activeSection.id === "home" ? "shell" : "content"}
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
       status={
         <WorldHomeReturn />
@@ -176,16 +184,17 @@ function WorldNavigation({
   activeSection: WorldAppSection;
   worldId: string;
 }) {
+  const uiText = useUiText("shell");
   const items: BottomNavigationItem[] = WORLD_APP_SECTIONS.map((section) => ({
     href: worldAppSectionRoute(worldId, section),
     icon: SECTION_ICONS[section.id],
     id: section.id,
-    label: section.label,
+    label: uiText(section.label),
   }));
   return (
     <BottomNavigation
       activeId={activeSection.id}
-      ariaLabel="World 앱 기능"
+      ariaLabel={uiText("World 앱 기능")}
       items={items}
     />
   );
@@ -197,6 +206,28 @@ function WorldHomeReturn() {
       <ArrowLeft size={16} aria-hidden="true" />
       Device Home
     </Link>
+  );
+}
+
+function WorldFeedHeader({ ownerActor, worldId }: { ownerActor: OwnerControlledActorRead | null; worldId: string }) {
+  const uiText = useUiText("shell");
+  const socialText = useUiText("social");
+  return (
+    <FeedHeader
+      title={uiText("피드")}
+      center={
+        <LocalProductLink ariaLabel="Angmoo" className={styles.feedLogo} href={PRODUCT_ROUTES.deviceHome}>
+          <Image src="/icon.svg" alt={uiText("Angmoo 로고")} width={48} height={48} priority />
+        </LocalProductLink>
+      }
+      right={ownerActor ? (
+        <LocalProductLink ariaLabel={socialText("내 프로필")} title={socialText("내 프로필")} className={styles.feedProfile}
+          href={worldCharacterProfileRoute(worldId, ownerActor.world_character_id)}>
+          <ProfileAvatar name={ownerActor.profile.display_name} avatarUrl={ownerActor.profile.avatar_url}
+            sizeClassName={styles.feedProfileAvatar} textClassName={styles.feedProfileInitial} />
+        </LocalProductLink>
+      ) : null}
+    />
   );
 }
 
@@ -217,27 +248,28 @@ function WorldSection({
   worldCharacterId?: string;
   worldId: string;
 }) {
+  const uiText = useUiText("shell");
   if (activeSection.id === "home") {
     return (
       <section className={styles.worldOverview}>
         <div className={styles.overviewHeading}>
-          <StatusBadge label="실행 가능" tone="healthy" />
+          <StatusBadge label={uiText("실행 가능")} tone="healthy" />
           <span className={styles.role}>{world.membership_role}</span>
         </div>
         <h2>{world.name}</h2>
-        <p className={styles.tagline}>{world.tagline || "이 World의 일상을 만나보세요."}</p>
+        <p className={styles.tagline}>{world.tagline || uiText("이 World의 일상을 만나보세요.")}</p>
         <div className={styles.scopeNotice}>
-          <strong>World 경계가 적용됐어요</strong>
-          <p>아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.</p>
+          <strong>{uiText("World 경계가 적용됐어요")}</strong>
+          <p>{uiText("아래 기능은 항상 이 World의 식별자를 유지하며, 다른 World로 자동 fallback하지 않습니다.")}</p>
         </div>
         <div className={styles.scopeNotice}>
-          <strong>이 World의 내 프로필</strong>
+          <strong>{uiText("이 World의 내 프로필")}</strong>
           {ownerActor ? (
             <p>
               {ownerActor.profile.display_name} · @{ownerActor.profile.handle}
             </p>
           ) : (
-            <p>World 관리에서 내 프로필을 확인할 수 있습니다.</p>
+            <p>{uiText("World 관리에서 내 프로필을 확인할 수 있습니다.")}</p>
           )}
         </div>
       </section>
@@ -251,7 +283,8 @@ function WorldSection({
         ownerActor={ownerActor}
         postId={postId}
         worldId={worldId}
-        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} />}
+        feedHeader={<WorldFeedHeader ownerActor={ownerActor} worldId={worldId} />}
+        renderImagePicker={input => <ImagePicker scopeKind="world" scopeId={worldId} value={input.value} onChange={input.onChange} disabled={input.disabled} onBusyChange={input.onBusyChange} renderLayout={input.renderLayout} />}
         imageStatus={GenerationStatus}
       />
     );
@@ -263,12 +296,12 @@ function WorldSection({
 
   if (activeSection.id === "characters") {
     return worldCharacterId ? (
-      <WorldCharacterProfile
+      <WorldCharacterManagementScreen
         worldCharacterId={worldCharacterId}
         worldId={worldId}
       />
     ) : (
-      <WorldCharacterDirectory worldId={worldId} />
+      <WorldCharacterDirectory key={worldId} worldId={worldId} />
     );
   }
 
@@ -277,22 +310,19 @@ function WorldSection({
       <section className={styles.capability}>
         <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
         <p className={styles.capabilityKicker}>{activeSection.label}</p>
-        <h2>이 World의 관계망</h2>
+        <h2>{uiText("이 World의 관계망")}</h2>
         {ownerActor ? (
           <>
             <p>
-              기준 캐릭터: {ownerActor.profile.display_name}. 이 World 안의 관계와
-              근거를 확인합니다.
-            </p>
+              {uiText("기준 캐릭터: {{name}}. 이 World 안의 관계와 근거를 확인합니다.", {name: ownerActor.profile.display_name})}</p>
             <Link
               className={styles.capabilityAction}
               href={relationshipGraphRoute(ownerActor.character_id, worldId)}
             >
-              내 조종 앵무 관계망 열기
-            </Link>
+              {uiText("내 조종 앵무 관계망 열기")}</Link>
           </>
         ) : (
-          <p>Creator Studio에서 사용자 조종 앵무를 만든 뒤 관계망을 열 수 있습니다.</p>
+          <p>{uiText("Creator Studio에서 사용자 조종 앵무를 만든 뒤 관계망을 열 수 있습니다.")}</p>
         )}
       </section>
     );
@@ -302,8 +332,8 @@ function WorldSection({
     <section className={styles.capability} role="status">
       <div className={styles.capabilityIcon}>{SECTION_ICONS[activeSection.id]}</div>
       <p className={styles.capabilityKicker}>{activeSection.label}</p>
-      <h2>이 World 전용 기능은 준비 중이에요</h2>
-      <p>{activeSection.description}</p>
+      <h2>{uiText("이 World 전용 기능은 준비 중이에요")}</h2>
+      <p>{uiText(activeSection.description)}</p>
     </section>
   );
 }
@@ -323,12 +353,13 @@ function WorldGate({
   title: string;
   worldId: string;
 }) {
+  const uiText = useUiText("shell");
   return (
     <WorldAppShell
       navigation={<WorldNavigation activeSection={activeSection} worldId={worldId} />}
       status={<WorldHomeReturn />}
       worldId={worldId}
-      worldName="World 앱"
+      worldName={uiText("World 앱")}
     >
       <section className={styles.gate} role="status">
         <div className={styles.gateCard}>

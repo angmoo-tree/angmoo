@@ -35,7 +35,7 @@ def test_manual_feed_reads_owner_facts_in_order_without_committing(monkeypatch, 
         )
         assert calls == [
             "get_owner_identity", "get_world_character", "get_character", "get_membership",
-            "get_world_character", "get_character", "active_author_id",
+            "get_world_character", "get_character", "active_author_id", "get_membership",
         ]
         assert [post.id for post in feed.items] == ["social-uow-target-post"]
         assert feed.items[0].author_profile_capability == "available"

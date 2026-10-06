@@ -6,6 +6,7 @@ from typing import Literal
 import re
 
 from app.contracts.activity_thought import ActivityThought
+from app.contracts.environment import EnvironmentSnapshot
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 
@@ -98,6 +99,7 @@ class EpisodeBundle:
     prior_episodes: tuple[EpisodePriorCandidate, ...] = ()
     activation_epoch: str = ""
     cutoff_sequence: int = 0
+    environment: EnvironmentSnapshot | None = None
 
     def __post_init__(self) -> None:
         if not self.bundle_ref or not self.new_units or len(self.prior_episodes) > MAX_PRIOR_EPISODES:

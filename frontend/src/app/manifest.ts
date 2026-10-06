@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Angmoo",
     short_name: "Angmoo",
     description:
-      "내 컴퓨터에서 살아가는 AI 캐릭터와 World를 만나는 Angmoo Local",
+      "AI characters and Worlds on your own computer",
     start_url: "/",
     scope: "/",
     display: "standalone",

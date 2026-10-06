@@ -6,6 +6,7 @@ from typing import Protocol
 
 from app.domains.memory.contracts.items import MemoryCandidateRecord
 from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
+from app.contracts.environment import EnvironmentSnapshot
 from app.domains.memory.policies.selection_output import (
     MemorySelectionDecision,
     MemorySelectionSource,
@@ -52,6 +53,7 @@ class MemorySelectionBatch:
     thinking_level: str = "high"
     policy_version: str = "memory-batch.v2"
     cutoff_sequence: int = 0
+    environment: EnvironmentSnapshot | None = None
 
 
 class MemorySelectionProviderPort(Protocol):
@@ -60,6 +62,7 @@ class MemorySelectionProviderPort(Protocol):
         sources: tuple[MemorySelectionSource, ...],
         *,
         timeout: float,
+        environment: EnvironmentSnapshot | None = None,
     ) -> tuple[MemorySelectionDecision, ...]: ...
 
 

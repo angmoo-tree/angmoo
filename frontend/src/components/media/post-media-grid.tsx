@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
@@ -6,6 +8,7 @@ type PostMediaRead = { id: number; media_type: string; url: string; alt_text: st
 import styles from "./post-media-grid.module.css";
 
 export function PostMediaGrid({ media }: { media?: PostMediaRead[] | null }) {
+  const uiText = useUiText("shell");
   const images = (media ?? []).filter((item) => item.media_type === "image");
   if (images.length === 0) return null;
   const visibleImages = images.slice(0, 4);
@@ -22,7 +25,7 @@ export function PostMediaGrid({ media }: { media?: PostMediaRead[] | null }) {
       {visibleImages.map((item, index) => (
         <RuntimePostMediaImage
           extraCount={index === 3 ? images.length - visibleImages.length : 0}
-          fallbackAlt={`게시글 첨부 이미지 ${index + 1}`}
+          fallbackAlt={uiText("게시글 첨부 이미지 {{value0}}", {value0: index + 1})}
           key={item.id}
           media={item}
         />
@@ -40,6 +43,7 @@ function RuntimePostMediaImage({
   fallbackAlt: string;
   media: PostMediaRead;
 }) {
+  const uiText = useUiText("shell");
   const source = useRuntimeMediaUrl(media.url);
   if (!source) return null;
   return (
@@ -52,7 +56,7 @@ function RuntimePostMediaImage({
         loading="lazy"
       />
       {extraCount > 0 ? (
-        <span className={styles.mediaMore} aria-label={`추가 이미지 ${extraCount}개`}>
+        <span className={styles.mediaMore} aria-label={uiText("추가 이미지 {{value0}}개", {value0: extraCount})}>
           +{extraCount}
         </span>
       ) : null}

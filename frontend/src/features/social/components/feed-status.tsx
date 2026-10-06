@@ -1,3 +1,8 @@
+"use client";
+
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
 import type { FeedStatus } from "@/features/social/api/feed-status";
 
 const readinessLabels = { ready: "Feed 실행 준비됨", blocked: "Feed 준비 확인 필요", disabled: "자율활동 꺼짐", unsupported: "이전 Feed 모드" };
@@ -21,18 +26,20 @@ const outcomes: Record<string, string> = {
 };
 
 export function FeedStatusPanel({ status }: { status?: FeedStatus | null }) {
-  if (!status) return <p className="text-sm text-text-secondary">Feed 실행 상태 기록을 확인할 수 없습니다.</p>;
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("social");
+  if (!status) return <p className="text-sm text-text-secondary">{uiText("Feed 실행 상태 기록을 확인할 수 없습니다.")}</p>;
   const attempt = status.last_attempt;
-  return <section className="space-y-2 rounded-2xl border border-border-default bg-surface p-4" aria-label="Feed 실행 상태">
-    <h4 className="font-bold text-text-strong">현재 준비 상태 · {readinessLabels[status.readiness.state]}</h4>
-    {status.readiness.reason_code && <p className="text-sm text-text-secondary">{reasons[status.readiness.reason_code] ?? "실행 조건을 확인해 주세요."}</p>}
-    {status.readiness.persona_changed && <p className="text-sm text-text-secondary">기존 승인 프로필·일과로 활동을 계속합니다. 변경된 페르소나를 반영하려면 원할 때 새 결과를 생성할 수 있습니다.</p>}
-    <h4 className="pt-2 font-bold text-text-strong">마지막 Feed 실행</h4>
+  return <section className="space-y-2 rounded-2xl border border-border-default bg-surface p-4" aria-label={uiText("Feed 실행 상태")}>
+    <h4 className="font-bold text-text-strong">{uiText("현재 준비 상태 ·")}{uiText(readinessLabels[status.readiness.state])}</h4>
+    {status.readiness.reason_code && <p className="text-sm text-text-secondary">{uiText(reasons[status.readiness.reason_code] ?? uiText("실행 조건을 확인해 주세요."))}</p>}
+    {status.readiness.persona_changed && <p className="text-sm text-text-secondary">{uiText("기존 승인 프로필·일과로 활동을 계속합니다. 변경된 페르소나를 반영하려면 원할 때 새 결과를 생성할 수 있습니다.")}</p>}
+    <h4 className="pt-2 font-bold text-text-strong">{uiText("마지막 Feed 실행")}</h4>
     {attempt ? <div className="space-y-1 text-sm text-text-secondary">
-      <p>{new Date(attempt.occurred_at).toLocaleString("ko-KR")} · {outcomes[attempt.result] ?? "실행 결과 확인"}</p>
-      <p>후보 {attempt.candidate_count === null ? "미확인" : `${attempt.candidate_count}개`} · 전달 {attempt.delivered_count === null ? "확인되지 않음" : `${attempt.delivered_count}개`}</p>
-      {(attempt.delivery_state === "uncertain" || attempt.delivery_state === "dispatched") && <p>전달 완료 여부가 불확실합니다. 완료된 전달 이력과 구분합니다.</p>}
-      <p>현재 준비 상태와 과거 실행 결과는 다를 수 있습니다.</p>
-    </div> : <p className="text-sm text-text-secondary">최근 실행의 Feed 결과 기록이 없습니다. 후보가 없었다는 의미는 아닙니다.</p>}
+      <p>{formatDate(attempt.occurred_at)} · {uiText(outcomes[attempt.result] ?? uiText("실행 결과 확인"))}</p>
+      <p>{uiText("후보")}{attempt.candidate_count === null ? uiText("미확인") : uiText("{{value0}}개", {value0: attempt.candidate_count})} {uiText("· 전달")}{attempt.delivered_count === null ? uiText("확인되지 않음") : uiText("{{value0}}개", {value0: attempt.delivered_count})}</p>
+      {(attempt.delivery_state === "uncertain" || attempt.delivery_state === "dispatched") && <p>{uiText("전달 완료 여부가 불확실합니다. 완료된 전달 이력과 구분합니다.")}</p>}
+      <p>{uiText("현재 준비 상태와 과거 실행 결과는 다를 수 있습니다.")}</p>
+    </div> : <p className="text-sm text-text-secondary">{uiText("최근 실행의 Feed 결과 기록이 없습니다. 후보가 없었다는 의미는 아닙니다.")}</p>}
   </section>;
 }

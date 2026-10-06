@@ -15,6 +15,7 @@ from app.runtime.persistence.sqlite_schema import (
     build_sqlite_v21_metadata, create_schema_version_table, sqlite_schema_contract_digest,
 )
 from app.runtime.persistence.model_registration import register_models
+from historical_schema_fixture import populate_frozen_schema
 
 
 def test_populated_v21_upgrade_keeps_original_description_and_draft(tmp_path):
@@ -23,22 +24,15 @@ def test_populated_v21_upgrade_keeps_original_description_and_draft(tmp_path):
         build_sqlite_v21_metadata().create_all(connection)
         create_schema_version_table(connection)
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(21).schema_digest
-        # Current ORM is used only while preparing the historical fixture.
-        for table in character_background_v22.TABLES:
-            connection.exec_driver_sql(
-                f'ALTER TABLE "{table}" ADD COLUMN character_background TEXT NOT NULL DEFAULT \'\''
-            )
-    with Session(engine) as db:
+    def seed(db):
         db.add(registered_models.User(id="owner", display_name="Owner"))
         db.add(character_models.Character(id="bird", owner_id="owner", name="Bird",
             handle="bird", worldview="원래 설명", personality="원래 성격", persona_summary="원래 요약"))
         db.add(character_models.AgentCreationDraft(id="draft", user_id="owner",
             model="gemini-3.1-flash-lite", name="Draft", worldview="초안 설명",
             personality="", expires_at=datetime.now(UTC) + timedelta(days=1)))
-        db.commit()
+    populate_frozen_schema(engine, build_sqlite_v21_metadata(), seed)
     with engine.begin() as connection:
-        for table in character_background_v22.TABLES:
-            connection.exec_driver_sql(f'ALTER TABLE "{table}" DROP COLUMN character_background')
         assert sqlite_schema_contract_digest(connection) == load_sqlite_manifest(21).schema_digest
         before = character_background_v22.capture_delta(connection)
         character_background_v22.upgrade(connection)

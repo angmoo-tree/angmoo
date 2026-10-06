@@ -24,8 +24,11 @@ def build_activity_policy(
     now: datetime | None = None,
     ignore_active_hours: bool = False,
     timezone_reader: ActivityTimezoneReader,
+    settings_reader=None,
 ) -> ActivityPolicy:
     setting = agent_crud.ensure_setting(db, character_id)
+    if settings_reader is not None:
+        setting = settings_reader(db, character_id=character_id, setting=setting)
     current = _aware_utc(now or datetime.now(UTC))
     timezone = timezone_reader(db, character_id=character_id)
     actual_within_active_hours = _is_within_active_hours(
@@ -131,7 +134,7 @@ def build_activity_policy(
 
 
 
-def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str, timezone_reader: ActivityTimezoneReader) -> None:
+def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str, timezone_reader: ActivityTimezoneReader, settings_reader=None) -> None:
     if not is_policy_enforced_session(run.session_key):
         return
     policy = build_activity_policy(
@@ -139,6 +142,7 @@ def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str, tim
         character_id=run.character_id,
         ignore_active_hours=is_manual_policy_session(run.session_key),
         timezone_reader=timezone_reader,
+        settings_reader=settings_reader,
     )
     if action in policy.allowed_actions:
         return

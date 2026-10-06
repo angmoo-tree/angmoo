@@ -16,6 +16,7 @@ from app.domains.memory.contracts.recall import (
     MAX_CANONICAL_RECALL_RESULTS,
     MemoryRecallSearchQuery,
     MemoryRecallSearchIncomplete,
+    MemoryRecallPreparing,
     RecallDocumentKind,
 )
 from app.domains.memory.contracts.recall_store import (
@@ -168,6 +169,10 @@ class CanonicalRecallService:
                         ),
                     )
                 )
+            except MemoryRecallPreparing:
+                return CanonicalRecallResult(operation=validated.operation,
+                    status=CanonicalRecallStatus.DEGRADED, records=(),
+                    reason_code="memory_recall_projection_preparing")
             except MemoryRecallSearchIncomplete:
                 return CanonicalRecallResult(
                     operation=validated.operation,

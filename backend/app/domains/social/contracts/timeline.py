@@ -2,9 +2,12 @@
 from datetime import datetime
 from typing import Literal, Protocol
 from sqlalchemy.orm import Session
+from app.domains.social.contracts.post_authors import WorldPostAuthor
 
 
 class SocialWriteWorkflows(Protocol):
+    def world_post_author(self, db: Session, *, character_id: str, world_id: str, world_character_id: str) -> WorldPostAuthor | None: ...
+
     def log_activity(self, db: Session, *, user_id: str, character_id: str, action_type: str, target_post_id: str | None, reason: str, result: str) -> object: ...
 
     def consume_quota(self, db: Session, *, user_id: str, action: str) -> None: ...

@@ -19,6 +19,9 @@ from app.runtime.diagnostics.sns_observation_report import (
     export_session, session_status, start_session, stop_session,
 )
 from app.integrations.direct_llm import DirectLlmJsonError
+from app.integrations import direct_llm
+from app.providers import gemini
+from google.genai import types as gemini_types
 from tests.runtime.test_autonomous_activity_graph import lane_ports
 
 
@@ -66,6 +69,89 @@ def _insert_run(root: Path, *, activity_id: str, started_at: datetime, status: s
         db.execute("INSERT INTO activity_graph_runs VALUES (?,?,?,?,?,?,?,?,?)",
             (activity_id, "world-1", "actor-1", "personalized_graph_v2", status,
              "ActionPlanner", json.dumps({"paths": {}}), started_at.isoformat(), None))
+
+
+@pytest.mark.parametrize("blocked", [True, False])
+def test_sdk_response_metadata_survives_empty_json_failure_and_safe_export(data_root, tmp_path, monkeypatch, blocked):
+    from types import SimpleNamespace
+
+    now = datetime.now(UTC)
+    _insert_run(data_root, activity_id="response-test", started_at=now)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    private = "private-response-body-and-secret"
+    response = SimpleNamespace(text="", parsed=None, usage_metadata=None, candidates=[],
+        prompt_feedback=SimpleNamespace(block_reason=gemini_types.BlockedReason.SAFETY,
+            block_reason_message=private) if blocked else None)
+    sdk_calls = []
+
+    class Client:
+        def __init__(self, **kwargs):
+            self.models = SimpleNamespace(generate_content=self.generate_content)
+
+        def generate_content(self, **kwargs):
+            sdk_calls.append(kwargs)
+            return response
+
+    monkeypatch.setattr(gemini.genai, "Client", Client)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="response-test", agent_run_id="response-lease",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        tracker = direct_llm.RunLlmTracker(max_calls=1, observer=attempt.tracker_event)
+        context = direct_llm.DirectLlmCallContext(credential_id="synthetic-response-credential",
+            character_id="character-1", agent_run_id="response-lease", node="FeedTargetSelector",
+            lane="feed", provider="google", model="gemini-3.1-flash-lite")
+        with pytest.raises(DirectLlmJsonError) as caught:
+            asyncio.run(direct_llm.generate_json(api_key=private, context=context, tracker=tracker,
+                system_prompt=private, user_prompt=private, response_schema={"type": "object"},
+                should_retry_json_error=lambda *_: False))
+        assert caught.value.failure_class == "json_parse_failed"
+        assert caught.value.json_error_diagnostics[0]["response_length"] == 0
+        observer.queue.join()
+    finally:
+        observer.close()
+    destination = tmp_path / "response-export"
+    coverage = export_session(data_root, manifest["session_id"], destination=destination)
+    assert len(sdk_calls) == 1
+    assert coverage["response_evidence_complete"] is True
+    assert coverage["response_evidence_count"] == 1
+    assert coverage["response_evidence_missing_count"] == 0
+    records = [json.loads(line) for line in (destination / "response-evidence.jsonl").read_text().splitlines()]
+    record = records[0]
+    assert record["activity_id"] == "response-test"
+    assert record["agent_run_id"] == "response-lease"
+    details = record["details"]
+    assert details["call_order"] == details["provider_call_order"] == details["json_attempt"] == 1
+    assert details["candidate_count"] == 0
+    assert details["prompt_feedback_present"] is blocked
+    assert details["prompt_block_reason"] == ("SAFETY" if blocked else None)
+    for name in ("response-evidence.jsonl", "request-evidence.jsonl", "calls.jsonl", "errors.jsonl"):
+        assert private not in (destination / name).read_text()
+
+
+def test_response_evidence_missing_and_historical_sessions_are_distinguished(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root, heartbeat_seconds=0.05)
+    try:
+        attempt = observer.begin(activity_id="missing-response", agent_run_id="missing-lease",
+            world_id="world-1", actor_id="actor-1", activity_started_at=now)
+        assert attempt is not None
+        attempt.tracker_event("call", {"node": "FeedTargetSelector", "lane": "feed",
+            "call_type": "generate_content", "call_order_in_run": 1, "status": "ok"})
+        observer.queue.join()
+    finally:
+        observer.close()
+    coverage = export_session(data_root, manifest["session_id"], destination=tmp_path / "missing-export")
+    assert coverage["response_evidence_complete"] is False
+    assert coverage["response_evidence_missing_count"] == 1
+    path = data_root / "diagnostics" / "sns" / manifest["session_id"] / "manifest.json"
+    old = json.loads(path.read_text())
+    old.pop("response_evidence_version")
+    path.write_text(json.dumps(old), encoding="utf-8")
+    old_coverage = export_session(data_root, manifest["session_id"], destination=tmp_path / "old-export")
+    assert old_coverage["response_evidence_complete"] == "not_recorded_in_session"
 
 
 def test_preparation_export_scopes_world_actor_time_and_omits_private_source(data_root, tmp_path):
@@ -355,6 +441,46 @@ def test_export_separates_recovered_planner_output_from_final_failure(data_root,
     assert "a" * 64 in calls
     for filename in ("calls.jsonl", "errors.jsonl", "report.md"):
         assert "SECRET_PRIVATE" not in (output / filename).read_text(encoding="utf-8")
+
+
+def test_split_routine_export_counts_physical_calls_recovery_and_deduplicated_failure(data_root, tmp_path):
+    now = datetime.now(UTC)
+    manifest = start_session(data_root, world_id="world-1", now=now)
+    observer = SNSObserver(data_root)
+    try:
+        for identifier, recovered in (("routine-recovered", True), ("routine-failed", False)):
+            _insert_run(data_root, activity_id=identifier, started_at=now)
+            attempt = observer.begin(activity_id=identifier, agent_run_id=identifier,
+                world_id="world-1", actor_id="actor-1", activity_started_at=now)
+            assert attempt is not None
+            for index in (1, 2):
+                attempt.tracker_event("call", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                    "call_order_in_run": index, "status": "succeeded"})
+                if recovered and index == 2:
+                    attempt.tracker_event("json_attempt", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_attempt": index, "status": "valid"})
+                else:
+                    attempt.tracker_event("json_postprocess_error", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_postprocess_error": {"attempt": index, "parse_error_type": "JSONDecodeError",
+                            "finish_reason": "MAX_TOKENS", "shape_hint": "unterminated", "preview_head": "PRIVATE"}})
+                if index == 1:
+                    attempt.tracker_event("json_attempt", {"node": "RoutineActionPlanner", "lane": "routine_action_planner",
+                        "json_attempt": index, "status": "retry_scheduled", "retry_reason": "json_parse_failed"})
+            if not recovered:
+                attempt.node("node_failed", lane="routine", node="ActionPlanner", exc=ValueError("routine_invalid"))
+                attempt.emit("lane_error", lane="routine", exc=ValueError("routine_invalid"),
+                             caused_by_event_id=attempt.last_error_event_id)
+        observer.queue.join()
+    finally:
+        assert observer.close()
+    output = tmp_path / "split-routine"
+    coverage = export_session(data_root, manifest["session_id"], destination=output)
+    assert coverage["routine_planner_physical_calls"] == 4
+    assert coverage["routine_planner_output_failures"] == 3
+    assert coverage["routine_planner_retries_scheduled"] == 2
+    assert coverage["routine_planner_recovered_activities"] == 1
+    assert coverage["routine_planner_final_failures"] == 1 and coverage["error_count"] == 1
+    assert "PRIVATE" not in (output / "calls.jsonl").read_text(encoding="utf-8")
 
 
 def test_export_distinguishes_writer_repair_from_planner_retry(data_root, tmp_path):

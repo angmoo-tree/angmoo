@@ -9,9 +9,18 @@ from app.domains.social.service.agent_tool_actions import AgentToolActionService
 from app.runtime.social.agent_tool_authorization import RuntimeAgentToolReferences
 from app.runtime.social import feed_history
 from app.runtime.social.timeline import timeline_service
+from app.runtime.social.post_authors import world_post_author_for_write, historical_tool_post_author
 
 
 class RuntimeAgentToolActionWorkflows(RuntimeAgentToolReferences):
+    def accepted_post_author(self, db: Session, *, run, character_id: str,
+        world_id: str | None = None, world_character_id: str | None = None):
+        if not run.input_snapshot or "_world_configuration" not in run.input_snapshot:
+            return historical_tool_post_author(db, character_id=character_id,
+                world_id=world_id, world_character_id=world_character_id)
+        return world_post_author_for_write(db, character_id=character_id, world_id=world_id,
+            world_character_id=world_character_id, input_snapshot=run.input_snapshot)
+
     def log_activity(
         self,
         db: Session,

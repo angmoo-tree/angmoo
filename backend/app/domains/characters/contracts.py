@@ -125,7 +125,7 @@ class CharacterImageGenerationWorkflows:
     get_route_mode: Callable[[Session], str]
     image_key_available: Callable[[str], bool]
     resolve_api_key: Callable[[str], str | None]
-    translate_prompt: Callable[[str], str]
+    translate_prompt: Callable[[Session, CharacterOwner, str], str]
 
 
 class ServiceImageQuotaRead(Protocol):

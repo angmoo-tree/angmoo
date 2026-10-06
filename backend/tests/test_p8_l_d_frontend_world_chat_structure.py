@@ -59,6 +59,7 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     capability = _read(
         "frontend/src/lib/navigation/device-navigation.ts"
     )
+    route_validation = _read("frontend/src/lib/navigation/product-route-validation.ts")
     safe_navigation = _read("frontend/src/utils/safe-navigation.ts")
     rust = _read("desktop/src-tauri/src/product_windows.rs")
 
@@ -75,7 +76,10 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     assert "export function worldChatRoute" in product_routes
     assert "export function worldChatThreadRoute" in product_routes
     assert 'routeFamily: "/worlds/{worldId}/chat/{threadId}"' in capability
-    assert "/chat\\/[^/]+$/" in capability
+    assert 'import { isSupportedProductRoute }' in capability
+    assert 'isSupportedProductRoute(href, { validateQuery: false })' in capability
+    assert '["posts", "chat", "characters"].includes(parts[2]) && id(parts[3])' in route_validation
+    assert 'parts[0] === "worlds" && world(parts[1])' in route_validation
     assert '"chat", thread_id' in rust
     assert '"/worlds/world-1/chat/thread-1"' in rust
     assert "chat(?:\\/[^/?#]+)?" in safe_navigation
@@ -97,10 +101,12 @@ def test_world_chat_ui_preserves_p8_l_d_scope_under_p8_l_p_successor() -> None:
         'data-world-chat-surface="thread"',
         "thread.requester.display_name",
         "thread.responding.display_name",
-        "말하는 앵무",
-        "답하는 앵무",
         "World 경계를 확인했어요",
         "다른 World의 응답은 표시하지 않았습니다.",
+        "styles.headerProfileLink",
+        "<h2>{thread.responding.display_name}</h2>",
+        "worldCharacterProfileRoute(",
+        'error.detail === "world_chat_scope_mismatch"',
     ):
         assert marker in ui
     for successor_marker in (

@@ -42,6 +42,14 @@ class HybridCanonicalService:
         scope = MemoryScope(resolved.owner_id, resolved.world_id, resolved.responding_world_character_id)
         kinds = tuple(dict.fromkeys(kind for operation in resolved.canonical_operation_allowlist
                                    for kind in _SEARCH_KINDS.get(operation, ())))
+        if command.intent.activity_kinds:
+            activity_documents = {"posts_authored": (RecallDocumentKind.POST,),
+                "replies_authored": (RecallDocumentKind.REPLY,), "replies_received": (RecallDocumentKind.REPLY,),
+                "mentions_received": (RecallDocumentKind.REPLY,),
+                "reactions_given": (RecallDocumentKind.REACTION,), "reactions_received": (RecallDocumentKind.REACTION,),
+                "reposts": (RecallDocumentKind.SOCIAL_EVENT,), "follows": (RecallDocumentKind.SOCIAL_EVENT,)}
+            allowed = {kind for activity in command.intent.activity_kinds for kind in activity_documents[activity]}
+            kinds = tuple(kind for kind in kinds if kind in allowed)
         short_reason = "memory_opt_out" if not resolved.memory_enabled else (
             "canonical_operations_unavailable" if not kinds else (
                 "hybrid_aggregation_unsupported" if command.intent.aggregation is not None else None))

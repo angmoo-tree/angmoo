@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class ProfileRef(BaseModel):
     profile_type: Literal["user", "character"]
     id: str
+    deleted: bool = False
     display_name: str
     handle: str | None = None
     avatar_url: str | None = None

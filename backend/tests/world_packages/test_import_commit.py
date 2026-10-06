@@ -81,12 +81,12 @@ from app.runtime.relationships import (
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.runtime.characters import management as agent_service
-from app.runtime.resident import langgraph as langgraph_resident
+from app.runtime.autonomous_activity import gateway as langgraph_resident
 from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.runtime.resident.context import LangGraphResidentContext
-from app.runtime.social.feed_cycle import run_world_keyword_feed
+from app.runtime.social.feed_workflows import run_world_keyword_feed
 
 
 FIXTURE_ROOT = (
@@ -1083,7 +1083,7 @@ def test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime(
             )
         )
         combined_result = asyncio.run(
-            langgraph_resident.run_resident_langgraph(pre_enable_context)
+            langgraph_resident.run_social_activity(pre_enable_context)
         )
         assert routine_result["routine_outcome"] == "AUTONOMY_DISABLED"
         assert feed_result["feed_outcome"] == "AUTONOMY_DISABLED"

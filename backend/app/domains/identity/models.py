@@ -58,6 +58,8 @@ class User(Base):
     deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    ui_language: Mapped[Optional[str]] = mapped_column(String(2), nullable=True)
+    ui_preference_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     characters: Mapped[list["Character"]] = relationship(
         back_populates="owner", foreign_keys="Character.owner_id"

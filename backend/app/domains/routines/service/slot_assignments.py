@@ -18,6 +18,7 @@ from app.domains.routines.constants import (
 from app.domains.routines.contracts.slots import SlotReferences
 from app.domains.routines.service.slot_pool import ensure_agent_slots
 from app.domains.routines.service.slot_state import _clear_resident_slot
+from app.domains.identity.service.environment import lock_environment_admission
 
 
 def release_temporary_resident_slot_assignment(
@@ -27,9 +28,11 @@ def release_temporary_resident_slot_assignment(
     user_id: str,
     character_id: str,
     credential_id: str,
+    autonomy_reader=None,
 ) -> models.AgentSlot | None:
     """Return an exact manual lease to the pool without disabling autonomy."""
 
+    lock_environment_admission(db, user_id)
     slot = db.scalar(
         select(models.AgentSlot)
         .where(models.AgentSlot.agent_id == agent_id)
@@ -45,7 +48,8 @@ def release_temporary_resident_slot_assignment(
         return None
 
     setting = db.get(models.AgentActivitySetting, character_id)
-    if setting is not None and setting.auto_enabled:
+    enabled = autonomy_reader(db, character_id=character_id, setting=setting) if autonomy_reader else bool(setting and setting.auto_enabled)
+    if enabled:
         # A concurrent explicit activation adopted this assignment. It is no
         # longer temporary and must remain scheduled.
         db.rollback()
@@ -96,7 +100,8 @@ def release_resident_slot_assignment(
         (slot for slot in slots if slot.status == SLOT_STATUS_RUNNING), None
     )
     if running_slot is not None:
-        db.rollback()
+        if commit:
+            db.rollback()
         return running_slot
     for slot in slots:
         _clear_resident_slot(slot)
@@ -130,7 +135,8 @@ def assign_resident_slot(
 
     locked_character_id = references.lock_character_id(character_id)
     if locked_character_id is None:
-        db.rollback()
+        if commit:
+            db.rollback()
         return None
 
     existing_slot = db.scalar(
@@ -148,7 +154,8 @@ def assign_resident_slot(
         .with_for_update()
     )
     if existing_slot is not None and existing_slot.status == SLOT_STATUS_RUNNING:
-        db.rollback()
+        if commit:
+            db.rollback()
         return None
 
     slot = existing_slot or db.scalar(
@@ -161,7 +168,8 @@ def assign_resident_slot(
         .with_for_update(skip_locked=True)
     )
     if slot is None:
-        db.rollback()
+        if commit:
+            db.rollback()
         return None
 
     try:
@@ -198,7 +206,8 @@ def assign_resident_slot(
             )
         )
         if slot is None:
-            db.rollback()
+            if commit:
+                db.rollback()
             return None
     if commit:
         db.commit()
@@ -218,14 +227,14 @@ def claim_temporary_resident_slot_assignment(
     references: SlotReferences,
 ) -> models.AgentSlot | None:
     """Atomically claim an unassigned slot for one explicit manual run."""
-
     unique_agent_ids = list(
         dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
     )
     if not unique_agent_ids:
         return None
+    lock_environment_admission(db, user_id)
 
-    ensure_agent_slots(db, unique_agent_ids)
+    ensure_agent_slots(db, unique_agent_ids, commit=False)
     now = datetime.now(UTC)
     locked_character_id = references.lock_character_id(character_id)
     if locked_character_id is None:
@@ -264,6 +273,7 @@ def claim_temporary_resident_slot_assignment(
         "pending:temporary:"
         + hashlib.sha256(claim_material.encode("utf-8")).hexdigest()[:32]
     )
+    admission_metadata = references.capture_activity_input(character_id)
     try:
         with db.begin_nested():
             slot.status = SLOT_STATUS_RUNNING
@@ -275,6 +285,7 @@ def claim_temporary_resident_slot_assignment(
             slot.locked_by_run_id = claim_token
             slot.lease_expires_at = now + timedelta(seconds=lease_seconds)
             slot.last_error = None
+            slot.admission_metadata = admission_metadata
             db.flush()
     except IntegrityError:
         db.rollback()

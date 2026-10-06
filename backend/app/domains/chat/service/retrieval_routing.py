@@ -432,7 +432,7 @@ class RetrievalRoutingService:
         if meaning is None or meaning.kind is RetrievalTimeKind.HISTORICAL_UNSPECIFIED:
             return None, None, "not_requested"
         try:
-            zone = ZoneInfo(scope.world_timezone)
+            zone = ZoneInfo(meaning.timezone or scope.world_timezone)
         except ZoneInfoNotFoundError as exc:
             raise RetrievalContractError("retrieval_world_timezone_invalid") from exc
         local_now = now.astimezone(zone)
@@ -444,7 +444,9 @@ class RetrievalRoutingService:
         elif meaning.kind is RetrievalTimeKind.RECENT:
             start, end = local_now - timedelta(days=7), local_now
         elif meaning.kind is RetrievalTimeKind.RELATIVE:
-            resolved = _relative_range(meaning.expression or "", local_now)
+            from app.core.time_meaning import resolve_calendar_meaning
+            resolved = resolve_calendar_meaning(now, zone.key, unit=meaning.unit, offset=meaning.offset,
+                period=meaning.period) if meaning.unit else _relative_range(meaning.expression or "", local_now)
             if resolved is None:
                 return None, None, "ambiguous"
             start, end = resolved
@@ -514,35 +516,11 @@ class RetrievalRoutingService:
 def _relative_range(
     expression: str, local_now: datetime
 ) -> tuple[datetime, datetime] | None:
-    zone = local_now.tzinfo
-    today = local_now.date()
-
-    def day_range(day: date) -> tuple[datetime, datetime]:
-        start = datetime.combine(day, time.min, tzinfo=zone)
-        return start, start + timedelta(days=1)
-
-    if expression == "어제":
-        return day_range(today - timedelta(days=1))
-    if expression == "사흘 전":
-        return day_range(today - timedelta(days=3))
-    if expression == "오늘 아침":
-        start = datetime.combine(today, time.min, tzinfo=zone)
-        return start, datetime.combine(today, time(hour=12), tzinfo=zone)
-    if expression == "지난주":
-        current_week = today - timedelta(days=today.weekday())
-        start_day = current_week - timedelta(days=7)
-        start = datetime.combine(start_day, time.min, tzinfo=zone)
-        return start, start + timedelta(days=7)
-    if expression == "지난달":
-        current_month = today.replace(day=1)
-        previous_last = current_month - timedelta(days=1)
-        previous_month = previous_last.replace(day=1)
-        return (
-            datetime.combine(previous_month, time.min, tzinfo=zone),
-            datetime.combine(current_month, time.min, tzinfo=zone),
-        )
+    from app.core.time_meaning import LEGACY_CALENDAR_MEANINGS, resolve_calendar_meaning
+    legacy = LEGACY_CALENDAR_MEANINGS.get(expression.strip().casefold())
+    if legacy:
+        return resolve_calendar_meaning(local_now, local_now.tzinfo.key, unit=legacy[0], offset=legacy[1], period=legacy[2])
     return None
-
 
 def _utc_iso(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
@@ -591,6 +569,8 @@ def _apply_today_sns_sufficiency_guard(
         semantic_today or any(marker in normalized for marker in _TODAY_MARKERS)
     ) or not (
         intent.intent.startswith("today_")
+        or intent.activity_kinds
+        or _relevant_today_kinds(normalized, default_all=False)
         or any(marker in normalized for marker in _SNS_MARKERS)
     ):
         return intent, None
@@ -618,7 +598,7 @@ def _apply_today_sns_sufficiency_guard(
         return _intent_with_route(
             intent, RetrievalRoute.CANONICAL
         ), "today_context_invalid"
-    relevant_kinds = _relevant_today_kinds(normalized)
+    relevant_kinds = set(intent.activity_kinds) if intent.activity_kinds else _relevant_today_kinds(normalized)
     relevant_entries = [
         item
         for item in entries
@@ -634,8 +614,8 @@ def _apply_today_sns_sufficiency_guard(
     )
     exact_requested = any(
         marker in normalized
-        for marker in ("정확", "원문", "전체", "전부", "그대로", "몇 시")
-    )
+        for marker in ("정확", "원문", "전체", "전부", "그대로", "몇 시", "原文", "正確", "النص الأصلي")
+    ) or bool(re.search(r"\b(?:exact|original|verbatim|all)\b", normalized))
     content_incomplete = any(
         not bool(item.get("content_complete")) or bool(item.get("truncated"))
         for item in relevant_entries
@@ -670,8 +650,23 @@ def _apply_today_sns_sufficiency_guard(
     ), "today_context_sufficient"
 
 
-def _relevant_today_kinds(message: str) -> set[str]:
+def _relevant_today_kinds(message: str, *, default_all: bool = True) -> set[str]:
+    # Bounded compatibility for older envelopes; new model outputs use closed
+    # activity_kinds. Never treat a word inside another English word as a kind.
+    from app.core.search_text import literal_boundary
+    aliases = {"posts_authored": ("post", "posts", "投稿", "منشور"),
+        "replies_authored": ("reply", "replies", "返信", "رد"),
+        "reactions_given": ("like", "likes", "いいね", "إعجاب"),
+        "reposts": ("repost", "reposts", "リポスト"), "follows": ("follow", "follows", "フォロー")}
     kinds: set[str] = set()
+    for kind, words in aliases.items():
+        for word in words:
+            cursor = message.find(word)
+            while cursor >= 0:
+                if literal_boundary(message, cursor, cursor + len(word)):
+                    kinds.add(kind)
+                    break
+                cursor = message.find(word, cursor + len(word))
     if any(marker in message for marker in ("게시글", "지저귐", "글")):
         kinds.add("posts_authored")
     if any(marker in message for marker in ("대꾸", "댓글", "답글")):
@@ -682,7 +677,7 @@ def _relevant_today_kinds(message: str) -> set[str]:
         kinds.add("reposts")
     if "팔로우" in message:
         kinds.add("follows")
-    if not kinds or any(marker in message for marker in ("sns", "활동")):
+    if (default_all and not kinds) or any(marker in message for marker in ("sns", "활동")):
         kinds.update(
             {
                 "posts_authored",

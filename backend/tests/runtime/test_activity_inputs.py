@@ -8,6 +8,7 @@ import pytest
 
 from app.runtime.autonomous_activity import inputs, provider
 from app.contracts.name_binding import NameBindingSnapshot
+from app.contracts.environment import EnvironmentSnapshot
 from app.domains.world_characters.activity_models import ActivityGraphRun
 
 
@@ -31,8 +32,12 @@ def test_shared_input_keeps_latest_records_and_counts_omissions(monkeypatch, cou
     ctx = SimpleNamespace(db=SimpleNamespace(get=get_run), run_id="run", user_id="owner", character=SimpleNamespace(
         name="A", persona_summary="", personality="", speech_style="", worldview="",
         topic_preferences=[], safety_rules=[]))
+    environment = EnvironmentSnapshot("ja-JP", "UTC", 1, 1)
     value = inputs.shared_input(ctx, SimpleNamespace(id="actor", world_id="world", local_profile={}),
-                                SimpleNamespace(timezone="Asia/Seoul", name="World", tagline=""))
+                                SimpleNamespace(timezone="Asia/Seoul", name="World", tagline=""),
+                                environment=environment)
+    assert value["environment"] == environment.to_dict()
+    assert value["world"]["timezone"] == "UTC"
     assert value["today_activity"]["records"] == original[:12]
     assert value["today_activity"].get("omitted_records", 0) == max(0, count - 12)
     assert len(original) == count

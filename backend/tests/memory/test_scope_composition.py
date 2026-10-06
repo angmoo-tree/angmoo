@@ -19,6 +19,8 @@ def test_memory_scope_timezone_sees_caller_flush_without_committing(tmp_path):
     with Session(engine) as caller:
         scope = _seed_scope(caller)
         world = caller.get(models.World, scope.world_id)
+        from environment_fixture_support import seed_environment
+        seed_environment(caller, scope.owner_id, timezone="UTC")
         world.timezone = "UTC"
         caller.flush()
         repository = memory_batch_repository(caller)
@@ -28,7 +30,7 @@ def test_memory_scope_timezone_sees_caller_flush_without_committing(tmp_path):
         with Session(engine) as observer:
             assert observer.get(models.World, scope.world_id).timezone == "Asia/Seoul"
         caller.rollback()
-        assert repository.timezone(scope) == "Asia/Seoul"
+        assert repository.timezone(scope) == "UTC"  # Unknown detected environment, independent of package metadata.
     engine.dispose()
 
 

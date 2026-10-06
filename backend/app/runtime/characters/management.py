@@ -670,7 +670,16 @@ def _quarantine_agent_private_media(
         )
     )
     media_root = settings.media_root_path
-    paths = [media_root / "characters" / character_id]
+    character_media = (media_root / "characters" / character_id).resolve()
+    from app.domains.characters.service.import_snapshots import retained_import_media_urls
+    retained = set()
+    for url in retained_import_media_urls(db, excluding_character_id=character_id):
+        try:
+            retained.add(media_files.media_url_to_path(url).resolve())
+        except (ValueError, media_files.InvalidProfileMediaError):
+            continue
+    paths = ([path for path in character_media.rglob("*") if path.is_file() and path.resolve() not in retained]
+        if any(path.is_relative_to(character_media) for path in retained) else [character_media])
     paths.extend(media_root / "drafts" / draft_id for draft_id in completed_draft_ids)
     paths.extend(
         media_root / "profile-candidates" / user_id / candidate_id
@@ -686,14 +695,26 @@ def _activity_profile_readiness(
     character: character_models.Character,
     setting: _model_AgentActivitySetting,
 ) -> character_schemas.AgentActivityProfileReadinessRead:
-    return activity_profile_readiness.evaluate(
+    readiness = activity_profile_readiness.evaluate(
         db,
         character=character,
         setting=setting,
     )
+    from app.domains.world_characters.models import CharacterActiveWorld
+    selected = db.get(CharacterActiveWorld, character.id)
+    role = db.get(_model_WorldCharacter, selected.world_character_id) if selected else None
+    membership = db.get(_model_WorldMembership, role.membership_id) if role else None
+    allowed = bool(role and role.character_id == character.id and role.status == "active"
+        and membership and membership.status == "active" and membership.world_id == role.world_id
+        and membership.user_id == character.owner_id and character.deleted_at is None
+        and character.moderation_status != "suspended")
+    if allowed:
+        readiness = readiness.model_copy(update={"world_id": role.world_id, "world_character_id": role.id, "can_view_graph": True})
+    return readiness
 
 def _resident_openclaw_sync_enabled() -> bool:
-    return settings.agent_activity_engine == "openclaw"
+    from app.runtime.resident.autonomy_composition import resident_profile_sync_enabled
+    return resident_profile_sync_enabled()
 
 def _bind_slot_auth_profile(
     slot: routine_schemas_runs.AgentSlotRead,
@@ -702,24 +723,8 @@ def _bind_slot_auth_profile(
     character: character_models.Character,
     credential: _model_LlmCredential,
 ) -> None:
-    try:
-        material = CredentialResolver.resolve_llm_credential(
-            credential,
-            purpose=CredentialPurpose.PRIVATE_OPENCLAW,
-            owner_id=user_id,
-            character_id=character.id,
-        )
-        openclaw_auth_profiles.bind_credential_to_slot(
-            agent_id=slot.agent_id,
-            user_id=user_id,
-            character_id=character.id,
-            credential=credential,
-            api_key=material.reveal(),
-        )
-    except CredentialResolutionError as exc:
-        raise CredentialRequiredError("Agent credential key cannot be decrypted") from exc
-    except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-        raise CredentialSyncError(str(exc)) from exc
+    from app.runtime.resident.autonomy_composition import bind_resident_profile
+    bind_resident_profile(slot, user_id=user_id, character=character, credential=credential)
 
 def _release_slot_auth_profile(
     slot: _model_AgentSlot,
@@ -728,28 +733,12 @@ def _release_slot_auth_profile(
     character_id: str,
     credential: _model_LlmCredential,
 ) -> None:
-    try:
-        openclaw_auth_profiles.release_credential_from_slot(
-            agent_id=slot.agent_id,
-            user_id=user_id,
-            character_id=character_id,
-            credential=credential,
-        )
-    except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
-        raise CredentialSyncError(str(exc)) from exc
+    from app.runtime.resident.autonomy_composition import release_resident_profile
+    release_resident_profile(slot, user_id=user_id, character_id=character_id, credential=credential)
 
 def _reload_openclaw_secrets_sync() -> None:
-    token = settings.openclaw_gateway_token
-    if token is None:
-        return
-    try:
-        OpenClawGatewayClient(
-            url=settings.openclaw_gateway_url,
-            token=token,
-            timeout_seconds=settings.openclaw_timeout_seconds,
-        ).reload_secrets_sync()
-    except OpenClawGatewayError as exc:
-        raise CredentialSyncError(str(exc)) from exc
+    from app.runtime.resident.autonomy_composition import reload_resident_secrets
+    reload_resident_secrets()
 
 def _local_connection_read(db: Session, character: character_models.Character) -> bot_schemas.AgentLocalConnectionRead:
     return local_key_management._local_connection_read(db, character)
@@ -876,6 +865,7 @@ def _clear_resident_slots_for_agent(
         slot.assigned_user_id = None
         slot.assigned_character_id = None
         slot.assigned_credential_id = None
+        slot.admission_metadata = None
         slot.next_tick_at = None
         slot.last_run_at = None
         slot.heartbeat_interval_seconds = None
@@ -1197,26 +1187,31 @@ def build_activity_management_references() -> ActivityManagementReferences:
     )
 
 def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetailRead]:
+    from app.runtime.resident.autonomy_composition import build_autonomy_admission_references
+    admission = build_autonomy_admission_references(evaluate_readiness=_activity_profile_readiness,
+        assign_slot=agent_run_service.assign_resident_slot, sync_enabled=_resident_openclaw_sync_enabled,
+        bind_profile=_bind_slot_auth_profile, release_profile=_release_slot_auth_profile,
+        reload_secrets=_reload_openclaw_secrets_sync)
     return AutonomyWorkflows(
         get_user=identity_profile.get_user,
         get_character=character_profile.get_character,
         get_owned_character=_get_owned_character,
-        ensure_not_suspended=_ensure_not_suspended,
-        ensure_llm_mode=_ensure_llm_mode,
-        ensure_auto_ticks_available=maintenance_service.ensure_auto_ticks_available,
-        evaluate_readiness=_activity_profile_readiness,
-        get_credential=identity_credentials.get_character_credential,
+        ensure_not_suspended=admission.ensure_not_suspended,
+        ensure_llm_mode=admission.ensure_llm_mode,
+        ensure_auto_ticks_available=admission.ensure_auto_ticks_available,
+        evaluate_readiness=admission.evaluate_readiness,
+        get_credential=admission.get_credential,
         select_world_character=selected_autonomous_world_character,
         lock_world_capacity=lock_world_autonomy_capacity,
         count_world_autonomy=count_enabled_autonomous_world_characters,
-        count_effective_agents=_effective_server_llm_autonomy_count,
+        count_effective_agents=admission.count_effective_agents,
         set_world_autonomy=set_active_world_character_autonomy,
         set_character_status=character_mutations.set_activity_status,
-        assign_slot=agent_run_service.assign_resident_slot,
-        sync_enabled=_resident_openclaw_sync_enabled,
-        bind_profile=_bind_slot_auth_profile,
-        release_profile=_release_slot_auth_profile,
-        reload_secrets=_reload_openclaw_secrets_sync,
+        assign_slot=admission.assign_slot,
+        sync_enabled=admission.sync_enabled,
+        bind_profile=admission.bind_profile,
+        release_profile=admission.release_profile,
+        reload_secrets=admission.reload_secrets,
         build_detail=_build_agent_detail,
         character_not_found_error=AgentNotFoundError,
         credential_required_error=CredentialRequiredError,
@@ -1226,6 +1221,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetai
     )
 
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
+    from app.runtime.routines.configuration_reads import read_effective_setting
     return ManualActivityWorkflows(
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
@@ -1252,6 +1248,7 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
         release_temporary_slot=agent_run_service.release_temporary_resident_slot,
         execution_mode_error=AgentExecutionModeError,
         credential_required_error=CredentialRequiredError,
+        resolve_activity_setting=read_effective_setting,
     )
 
 def build_feed_cue_workflows() -> FeedCueWorkflows:

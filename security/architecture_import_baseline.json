@@ -1,7 +1,7 @@
 {
-  "edge_count": 5407,
-  "external_import_count": 3933,
-  "module_count": 1334,
+  "edge_count": 5819,
+  "external_import_count": 4116,
+  "module_count": 1404,
   "modules": [
     {
       "external_imports": [],
@@ -81,6 +81,7 @@
         "app.domains.chat.router.retrieval_diagnostics",
         "app.domains.chat.router.world_chat",
         "app.domains.chat.router.world_chat_response",
+        "app.domains.chat.router.world_thread_deletion",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.local_bot.router.bot",
@@ -88,6 +89,7 @@
         "app.domains.tree.router",
         "app.domains.world_characters.router.activity",
         "app.domains.world_characters.router.entry",
+        "app.domains.world_characters.router.management",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
         "app.domains.world_packages.router",
@@ -113,6 +115,7 @@
         "app.domains.chat.router.retrieval_diagnostics",
         "app.domains.chat.router.world_chat",
         "app.domains.chat.router.world_chat_response",
+        "app.domains.chat.router.world_thread_deletion",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
@@ -125,6 +128,7 @@
         "app.domains.tree.router",
         "app.domains.world_characters.router.activity",
         "app.domains.world_characters.router.entry",
+        "app.domains.world_characters.router.management",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
         "app.domains.world_packages.router",
@@ -229,10 +233,38 @@
     {
       "external_imports": [],
       "imports": [
-        "app.runtime.world_characters.composition"
+        "app.runtime.world_characters.composition",
+        "app.runtime.world_characters.creation_configuration"
       ],
       "module": "app.api.world_character_dependencies",
       "path": "backend/app/api/world_character_dependencies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.schemas.runs"
+      ],
+      "module": "app.api.world_character_management_contracts",
+      "path": "backend/app/api/world_character_management_contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.database",
+        "app.runtime.characters.management",
+        "app.runtime.world_characters.management",
+        "app.runtime.world_characters.manual_activity",
+        "app.runtime.world_characters.profile_media"
+      ],
+      "module": "app.api.world_character_management_dependencies",
+      "path": "backend/app/api/world_character_management_dependencies.py",
       "wildcard_imports": []
     },
     {
@@ -305,10 +337,24 @@
         "json"
       ],
       "imports": [
-        "app.contracts.activity_thought"
+        "app.contracts.activity_thought",
+        "app.contracts.authored_output"
       ],
       "module": "app.contracts.activity_thought_output",
       "path": "backend/app/contracts/activity_thought_output.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.contracts.activity_thought"
+      ],
+      "module": "app.contracts.authored_output",
+      "path": "backend/app/contracts/authored_output.py",
       "wildcard_imports": []
     },
     {
@@ -344,6 +390,25 @@
     {
       "external_imports": [
         "dataclasses",
+        "datetime",
+        "langcodes",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.contracts.environment",
+      "path": "backend/app/contracts/environment.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.contracts.language",
+      "path": "backend/app/contracts/language.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
         "hashlib",
         "json"
       ],
@@ -361,6 +426,13 @@
       "imports": [],
       "module": "app.contracts.read_deadline",
       "path": "backend/app/contracts/read_deadline.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.contracts.relationship_currentness",
+      "path": "backend/app/contracts/relationship_currentness.py",
       "wildcard_imports": []
     },
     {
@@ -407,10 +479,44 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.contracts.sns_generation",
+      "path": "backend/app/contracts/sns_generation.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.core",
       "path": "backend/app/core/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [],
+      "module": "app.core.accounting",
+      "path": "backend/app/core/accounting.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "fcntl",
+        "json",
+        "msvcrt",
+        "os",
+        "pathlib",
+        "tempfile"
+      ],
+      "imports": [],
+      "module": "app.core.atomic_json",
+      "path": "backend/app/core/atomic_json.py",
       "wildcard_imports": []
     },
     {
@@ -420,6 +526,29 @@
       ],
       "module": "app.core.bounded_text",
       "path": "backend/app/core/bounded_text.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.core.calendar",
+      "path": "backend/app/core/calendar.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "copy",
+        "datetime"
+      ],
+      "imports": [
+        "app.contracts.environment",
+        "app.core.calendar"
+      ],
+      "module": "app.core.calendar_ledger",
+      "path": "backend/app/core/calendar_ledger.py",
       "wildcard_imports": []
     },
     {
@@ -646,6 +775,18 @@
       ],
       "module": "app.core.sqlite_concurrency",
       "path": "backend/app/core/sqlite_concurrency.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.core.calendar"
+      ],
+      "module": "app.core.time_meaning",
+      "path": "backend/app/core/time_meaning.py",
       "wildcard_imports": []
     },
     {
@@ -1065,6 +1206,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.models"
+      ],
+      "module": "app.domains.characters.models_import",
+      "path": "backend/app/domains/characters/models_import.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.characters.policies",
@@ -1076,6 +1231,7 @@
         "hashlib"
       ],
       "imports": [
+        "app.contracts.name_binding",
         "app.domains.characters.policies.name_macros"
       ],
       "module": "app.domains.characters.policies.authored_names",
@@ -1347,10 +1503,12 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.core.accounting",
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.schemas",
+        "app.domains.identity.service.environment",
         "app.domains.routines.service.tick_schedule"
       ],
       "module": "app.domains.characters.service.image_quota",
@@ -1396,6 +1554,34 @@
       ],
       "module": "app.domains.characters.service.image_settings_owner",
       "path": "backend/app/domains/characters/service/image_settings_owner.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "ipaddress",
+        "json",
+        "pydantic",
+        "re",
+        "urllib.parse"
+      ],
+      "imports": [],
+      "module": "app.domains.characters.service.import_configuration",
+      "path": "backend/app/domains/characters/service/import_configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.models_import",
+        "app.domains.characters.service.import_configuration"
+      ],
+      "module": "app.domains.characters.service.import_snapshots",
+      "path": "backend/app/domains/characters/service/import_snapshots.py",
       "wildcard_imports": []
     },
     {
@@ -1537,6 +1723,10 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.activity_thought",
+        "app.contracts.authored_output",
+        "app.contracts.language",
+        "app.contracts.name_binding",
         "app.domains.characters.policies.authored_names",
         "app.domains.characters.policies.name_macros",
         "app.domains.characters.policies.persona"
@@ -1584,11 +1774,14 @@
       "imports": [
         "app.config",
         "app.domains.characters.models",
+        "app.domains.characters.models_import",
         "app.domains.characters.schemas",
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
+        "app.domains.characters.service.import_snapshots",
         "app.domains.characters.service.media_storage",
+        "app.domains.media.contracts",
         "app.integrations.media.files"
       ],
       "module": "app.domains.characters.service.settings_copy",
@@ -1620,6 +1813,19 @@
       ],
       "module": "app.domains.characters.service.state_notes",
       "path": "backend/app/domains/characters/service/state_notes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "copy",
+        "dataclasses",
+        "json"
+      ],
+      "imports": [
+        "app.domains.media.contracts"
+      ],
+      "module": "app.domains.characters.service.world_image_profiles",
+      "path": "backend/app/domains/characters/service/world_image_profiles.py",
       "wildcard_imports": []
     },
     {
@@ -1964,7 +2170,8 @@
         "hashlib",
         "json",
         "re",
-        "typing"
+        "typing",
+        "zoneinfo"
       ],
       "imports": [
         "app.domains.chat.contracts.reference_observation",
@@ -1981,6 +2188,7 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.domains.chat.contracts.retrieval_intent"
       ],
       "module": "app.domains.chat.contracts.retrieval_policy",
@@ -1994,6 +2202,7 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.domains.chat.contracts.context",
         "app.domains.chat.contracts.retrieval_policy"
       ],
@@ -2431,6 +2640,22 @@
     },
     {
       "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.context",
+        "app.domains.chat.dependencies",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.schemas",
+        "app.domains.chat.service.threads"
+      ],
+      "module": "app.domains.chat.router.world_thread_deletion",
+      "path": "backend/app/domains/chat/router/world_thread_deletion.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "pydantic",
         "typing"
@@ -2635,6 +2860,7 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.environment",
         "app.domains.characters.service.profile",
         "app.domains.chat.contracts",
         "app.domains.chat.contracts.context",
@@ -2651,7 +2877,10 @@
         "app.domains.chat.service.threads",
         "app.domains.chat.service.today_sns_activity",
         "app.domains.identity.contracts",
+        "app.domains.identity.service.environment",
         "app.domains.memory.service.recall",
+        "app.domains.world_characters.contracts.configuration",
+        "app.domains.world_characters.service.configuration",
         "app.domains.worlds.service.character_entry"
       ],
       "module": "app.domains.chat.service.generation",
@@ -2755,7 +2984,8 @@
         "app.domains.chat.contracts",
         "app.domains.chat.contracts.context",
         "app.domains.chat.exceptions",
-        "app.domains.chat.schemas"
+        "app.domains.chat.schemas",
+        "app.domains.world_characters.contracts.configuration"
       ],
       "module": "app.domains.chat.service.profiles",
       "path": "backend/app/domains/chat/service/profiles.py",
@@ -2866,6 +3096,8 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.core.search_text",
+        "app.core.time_meaning",
         "app.domains.chat.contracts.call_tracker",
         "app.domains.chat.contracts.recall_interpretation",
         "app.domains.chat.contracts.recall_mode",
@@ -2937,7 +3169,9 @@
         "app.domains.chat.repository.threads",
         "app.domains.chat.schemas",
         "app.domains.chat.service.profiles",
-        "app.domains.chat.service.settings"
+        "app.domains.chat.service.settings",
+        "app.domains.identity.service.environment",
+        "app.domains.world_characters.service.configuration"
       ],
       "module": "app.domains.chat.service.threads",
       "path": "backend/app/domains/chat/service/threads.py",
@@ -2951,6 +3185,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.core.calendar",
         "app.domains.chat.contracts.today_sns_activity"
       ],
       "module": "app.domains.chat.service.today_sns_activity",
@@ -3175,6 +3410,19 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.domains.identity.models_environment",
+      "path": "backend/app/domains/identity/models_environment.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -3279,8 +3527,11 @@
         "app.config",
         "app.database",
         "app.domains.identity.browser_session",
+        "app.domains.identity.dependencies",
         "app.domains.identity.exceptions",
         "app.domains.identity.schemas",
+        "app.domains.identity.schemas_environment",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.local_owner"
       ],
       "module": "app.domains.identity.router.local",
@@ -3301,6 +3552,19 @@
       ],
       "module": "app.domains.identity.schemas",
       "path": "backend/app/domains/identity/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "langcodes",
+        "pydantic",
+        "re",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.domains.identity.schemas_environment",
+      "path": "backend/app/domains/identity/schemas_environment.py",
       "wildcard_imports": []
     },
     {
@@ -3422,6 +3686,27 @@
       ],
       "module": "app.domains.identity.service.demo_access",
       "path": "backend/app/domains/identity/service/demo_access.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "secrets",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.contracts.environment",
+        "app.core.calendar",
+        "app.core.ids",
+        "app.core.security",
+        "app.domains.identity.models",
+        "app.domains.identity.models_environment",
+        "app.domains.identity.schemas_environment"
+      ],
+      "module": "app.domains.identity.service.environment",
+      "path": "backend/app/domains/identity/service/environment.py",
       "wildcard_imports": []
     },
     {
@@ -3914,9 +4199,14 @@
         "dataclasses",
         "datetime",
         "math",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "zoneinfo"
       ],
       "imports": [
+        "app.contracts.environment",
+        "app.core.calendar",
+        "app.core.calendar_ledger",
+        "app.domains.identity.service.environment",
         "app.domains.local_bot.exceptions",
         "app.domains.local_bot.models",
         "app.domains.local_bot.repository.quota",
@@ -4071,8 +4361,10 @@
         "uuid"
       ],
       "imports": [
+        "app.core.accounting",
         "app.domains.identity.contracts",
         "app.domains.identity.exceptions",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.media_credentials",
         "app.domains.media.contracts",
         "app.domains.media.generation_contracts",
@@ -4126,6 +4418,7 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.policies.selection_output"
@@ -4214,6 +4507,7 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.contracts.environment",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.scope"
       ],
@@ -4798,7 +5092,9 @@
       "external_imports": [
         "re"
       ],
-      "imports": [],
+      "imports": [
+        "app.core.search_text"
+      ],
       "module": "app.domains.memory.policies.lexical_terms",
       "path": "backend/app/domains/memory/policies/lexical_terms.py",
       "wildcard_imports": []
@@ -4877,6 +5173,7 @@
         "uuid"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.domains.memory.contracts.batch",
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.scope",
@@ -5194,6 +5491,7 @@
         "uuid"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.maintenance_queue",
         "app.domains.memory.contracts.provenance",
@@ -5391,6 +5689,7 @@
         "sqlalchemy"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.memory.contracts.batch_preparation",
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.scope",
@@ -5528,6 +5827,7 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.contracts.environment",
         "app.domains.memory.contracts.episode",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.exceptions",
@@ -6001,7 +6301,8 @@
       "imports": [
         "app.domains.relationships.contracts.graph_query",
         "app.domains.relationships.contracts.graph_read",
-        "app.domains.relationships.contracts.graph_recall"
+        "app.domains.relationships.contracts.graph_recall",
+        "app.domains.relationships.contracts.social_context"
       ],
       "module": "app.domains.relationships.contracts.graph_recall_gateway",
       "path": "backend/app/domains/relationships/contracts/graph_recall_gateway.py",
@@ -6151,7 +6452,11 @@
         "typing"
       ],
       "imports": [
-        "app.domains.relationships.contracts.graph_recall"
+        "app.contracts.relationship_currentness",
+        "app.domains.relationships.contracts.graph_query",
+        "app.domains.relationships.contracts.graph_recall",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.policies.graph_recall"
       ],
       "module": "app.domains.relationships.contracts.social_context",
       "path": "backend/app/domains/relationships/contracts/social_context.py",
@@ -6290,7 +6595,9 @@
         "collections.abc",
         "json"
       ],
-      "imports": [],
+      "imports": [
+        "app.contracts.language"
+      ],
       "module": "app.domains.relationships.policies.daily_review",
       "path": "backend/app/domains/relationships/policies/daily_review.py",
       "wildcard_imports": []
@@ -6405,6 +6712,22 @@
       "imports": [],
       "module": "app.domains.relationships.policies.proposals",
       "path": "backend/app/domains/relationships/policies/proposals.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.relationships.contracts.social_context",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.policies.graph_recall"
+      ],
+      "module": "app.domains.relationships.policies.social_context_validation",
+      "path": "backend/app/domains/relationships/policies/social_context_validation.py",
       "wildcard_imports": []
     },
     {
@@ -6965,19 +7288,33 @@
         "collections.abc",
         "dataclasses",
         "datetime",
-        "hashlib",
         "json",
         "time",
         "uuid"
       ],
       "imports": [
         "app.contracts.read_deadline",
-        "app.core.context_text",
         "app.domains.relationships.contracts.graph_recall",
-        "app.domains.relationships.contracts.social_context"
+        "app.domains.relationships.contracts.social_context",
+        "app.domains.relationships.policies.social_context_validation"
       ],
       "module": "app.domains.relationships.service.social_context",
       "path": "backend/app/domains/relationships/service/social_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "time"
+      ],
+      "imports": [
+        "app.contracts.read_deadline",
+        "app.domains.relationships.contracts.graph_recall_gateway",
+        "app.domains.relationships.contracts.social_context",
+        "app.domains.relationships.policies.graph_recall",
+        "app.domains.relationships.policies.social_context_validation"
+      ],
+      "module": "app.domains.relationships.service.social_context_validation",
+      "path": "backend/app/domains/relationships/service/social_context_validation.py",
       "wildcard_imports": []
     },
     {
@@ -6996,6 +7333,22 @@
       ],
       "module": "app.domains.relationships.service.source_posts",
       "path": "backend/app/domains/relationships/service/source_posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.contracts.source_posts",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.service.source_reactions",
+      "path": "backend/app/domains/relationships/service/source_reactions.py",
       "wildcard_imports": []
     },
     {
@@ -7152,6 +7505,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.contracts.authored_output"
+      ],
+      "module": "app.domains.routine_posts.policies.output_normalization",
+      "path": "backend/app/domains/routine_posts/policies/output_normalization.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "pydantic",
@@ -7159,6 +7521,7 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.domains.routine_posts.policies.output_normalization",
         "app.domains.social.contracts.subjective_context"
       ],
       "module": "app.domains.routine_posts.schemas",
@@ -7246,9 +7609,11 @@
       "imports": [
         "app.contracts.activity_thought",
         "app.contracts.activity_thought_output",
+        "app.contracts.authored_output",
         "app.domains.routine_posts.client",
         "app.domains.routine_posts.contracts.context",
         "app.domains.routine_posts.contracts.generation",
+        "app.domains.routine_posts.policies.output_normalization",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
         "app.domains.routine_posts.service.temporal_context",
@@ -7429,6 +7794,20 @@
       "imports": [],
       "module": "app.domains.routines.contracts.activity_scope",
       "path": "backend/app/domains/routines/contracts/activity_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management"
+      ],
+      "module": "app.domains.routines.contracts.autonomy_admission",
+      "path": "backend/app/domains/routines/contracts/autonomy_admission.py",
       "wildcard_imports": []
     },
     {
@@ -7629,7 +8008,9 @@
         "dataclasses",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.contracts.environment"
+      ],
       "module": "app.domains.routines.contracts.plans",
       "path": "backend/app/domains/routines/contracts/plans.py",
       "wildcard_imports": []
@@ -7650,6 +8031,17 @@
       "imports": [],
       "module": "app.domains.routines.contracts.prompt_context",
       "path": "backend/app/domains/routines/contracts/prompt_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.reply_writing",
+      "path": "backend/app/domains/routines/contracts/reply_writing.py",
       "wildcard_imports": []
     },
     {
@@ -7704,7 +8096,8 @@
         "__future__",
         "datetime",
         "sqlalchemy.sql.elements",
-        "typing"
+        "typing",
+        "zoneinfo"
       ],
       "imports": [],
       "module": "app.domains.routines.contracts.slots",
@@ -7928,7 +8321,7 @@
       "imports": [
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
-        "app.domains.routines.service.scheduling"
+        "app.domains.routines.utils.clock"
       ],
       "module": "app.domains.routines.policies.planning",
       "path": "backend/app/domains/routines/policies/planning.py",
@@ -8319,6 +8712,7 @@
       ],
       "imports": [
         "app.contracts.action_subjective_context",
+        "app.domains.routines.contracts.reply_writing",
         "app.domains.routines.policies.topic_arc_roles"
       ],
       "module": "app.domains.routines.schemas.resident_planning",
@@ -8682,6 +9076,22 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.identity.service.environment",
+        "app.domains.routines.constants",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.environment_schedule",
+      "path": "backend/app/domains/routines/service/environment_schedule.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.constants",
@@ -9038,6 +9448,21 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.routines.models.plans",
+        "app.domains.routines.service.slot_state"
+      ],
+      "module": "app.domains.routines.service.legacy_claims",
+      "path": "backend/app/domains/routines/service/legacy_claims.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -9067,6 +9492,7 @@
       ],
       "imports": [
         "app.config",
+        "app.domains.identity.service.environment",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.execution_errors",
@@ -9313,6 +9739,7 @@
     {
       "external_imports": [
         "__future__",
+        "copy",
         "datetime",
         "sqlalchemy.exc",
         "sqlalchemy.orm",
@@ -9345,7 +9772,8 @@
       ],
       "imports": [
         "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.exceptions"
+        "app.domains.routines.exceptions",
+        "app.domains.routines.utils.clock"
       ],
       "module": "app.domains.routines.service.scheduling",
       "path": "backend/app/domains/routines/service/scheduling.py",
@@ -9374,6 +9802,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.slots",
         "app.domains.routines.models",
@@ -9392,10 +9821,14 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.slots",
+        "app.domains.routines.exceptions",
         "app.domains.routines.models",
-        "app.domains.routines.repository.slots"
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.service.environment_schedule",
+        "app.domains.routines.service.tick_schedule"
       ],
       "module": "app.domains.routines.service.slot_claims",
       "path": "backend/app/domains/routines/service/slot_claims.py",
@@ -9418,6 +9851,7 @@
     {
       "external_imports": [
         "__future__",
+        "copy",
         "datetime",
         "sqlalchemy",
         "sqlalchemy.exc",
@@ -9555,6 +9989,7 @@
         "typing"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.core.prompt_safety",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
@@ -9608,6 +10043,7 @@
       ],
       "imports": [
         "app.config",
+        "app.core.calendar",
         "app.domains.routines.policies.active_hours"
       ],
       "module": "app.domains.routines.service.tick_schedule",
@@ -10248,6 +10684,7 @@
       "imports": [
         "app.domains.characters.schemas",
         "app.domains.routines.contracts.activity_policy",
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.contracts.topic_history"
       ],
       "module": "app.domains.social.contracts.agent_tools",
@@ -10363,6 +10800,7 @@
       ],
       "imports": [
         "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.contracts.source_writes",
         "app.domains.world_characters.contracts.owner_identity"
       ],
@@ -10396,6 +10834,16 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.post_authors",
+      "path": "backend/app/domains/social/contracts/post_authors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -10412,10 +10860,22 @@
         "typing"
       ],
       "imports": [
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.contracts.profile_activity"
       ],
       "module": "app.domains.social.contracts.profile_references",
       "path": "backend/app/domains/social/contracts/profile_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.proposal_plan",
+      "path": "backend/app/domains/social/contracts/proposal_plan.py",
       "wildcard_imports": []
     },
     {
@@ -10491,7 +10951,9 @@
         "sqlalchemy.orm",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.social.contracts.post_authors"
+      ],
       "module": "app.domains.social.contracts.timeline",
       "path": "backend/app/domains/social/contracts/timeline.py",
       "wildcard_imports": []
@@ -10556,7 +11018,8 @@
         "typing"
       ],
       "imports": [
-        "app.domains.social.contracts.writes"
+        "app.domains.social.contracts.writes",
+        "app.domains.social.schemas.manual"
       ],
       "module": "app.domains.social.contracts.write_execution",
       "path": "backend/app/domains/social/contracts/write_execution.py",
@@ -10733,6 +11196,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.policies.owner_target",
+      "path": "backend/app/domains/social/policies/owner_target.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "collections",
         "dataclasses",
@@ -10902,10 +11372,22 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.core.accounting",
         "app.domains.social.models.posts"
       ],
       "module": "app.domains.social.repository.media",
       "path": "backend/app/domains/social/repository/media.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.owner_reactions",
+      "path": "backend/app/domains/social/repository/owner_reactions.py",
       "wildcard_imports": []
     },
     {
@@ -11083,6 +11565,8 @@
         "app.domains.social.service.feed",
         "app.domains.social.service.inbox",
         "app.domains.social.service.manual_feed",
+        "app.domains.social.service.owner_reaction_reads",
+        "app.domains.social.service.post_authors",
         "app.domains.social.service.posts",
         "app.domains.social.service.profile_activity",
         "app.domains.social.service.profiles",
@@ -11138,6 +11622,7 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.domains.social.contracts.proposal_plan",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.schemas.feed_status"
       ],
@@ -11371,6 +11856,7 @@
         "app.domains.social.service.agent_presentation",
         "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.notifications",
+        "app.domains.social.service.post_authors",
         "app.domains.social.service.posts",
         "app.domains.social.service.presentation",
         "app.domains.social.service.profiles",
@@ -11567,10 +12053,13 @@
     },
     {
       "external_imports": [
+        "datetime",
         "sqlalchemy",
         "uuid"
       ],
       "imports": [
+        "app.core.accounting",
+        "app.domains.identity.service.environment",
         "app.domains.media.contracts",
         "app.domains.social.models.image_intents"
       ],
@@ -11726,6 +12215,7 @@
       ],
       "imports": [
         "app.config",
+        "app.domains.identity.service.environment",
         "app.domains.routines.service.tick_schedule",
         "app.domains.social.exceptions",
         "app.domains.social.models.posts",
@@ -11794,8 +12284,10 @@
       "imports": [
         "app.domains.social.contracts.actors",
         "app.domains.social.contracts.manual_feed",
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.contracts.writes",
         "app.domains.social.models.posts",
+        "app.domains.social.policies.owner_target",
         "app.domains.social.repository.event_evidence",
         "app.domains.social.repository.manual_feed",
         "app.domains.social.schemas.manual",
@@ -11870,6 +12362,43 @@
     },
     {
       "external_imports": [
+        "collections",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.manual_feed",
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.policies.owner_target",
+        "app.domains.social.repository.manual_feed",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.manual_feed",
+        "app.domains.social.service.post_authors",
+        "app.domains.world_characters.contracts.owner_identity"
+      ],
+      "module": "app.domains.social.service.owner_reaction_reads",
+      "path": "backend/app/domains/social/service/owner_reaction_reads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.core.ids",
+        "app.domains.social.contracts.writes",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.manual_feed",
+        "app.domains.social.repository.owner_reactions",
+        "app.domains.social.schemas.manual",
+        "app.domains.social.service.source_writes"
+      ],
+      "module": "app.domains.social.service.owner_reactions",
+      "path": "backend/app/domains/social/service/owner_reactions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy"
       ],
       "imports": [
@@ -11879,6 +12408,17 @@
       ],
       "module": "app.domains.social.service.post_attachments",
       "path": "backend/app/domains/social/service/post_attachments.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections"
+      ],
+      "imports": [
+        "app.domains.social.contracts.post_authors"
+      ],
+      "module": "app.domains.social.service.post_authors",
+      "path": "backend/app/domains/social/service/post_authors.py",
       "wildcard_imports": []
     },
     {
@@ -11987,6 +12527,7 @@
         "uuid"
       ],
       "imports": [
+        "app.core.search_text",
         "app.domains.social.models.posts",
         "app.domains.social.models.topics"
       ],
@@ -12034,6 +12575,7 @@
       "imports": [
         "app.core.unit_of_work",
         "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.models.posts",
         "app.domains.social.schemas.community",
         "app.domains.social.service.recommendation_topics",
@@ -12058,7 +12600,9 @@
         "app.domains.social.contracts.writes",
         "app.domains.social.models.manual_writes",
         "app.domains.social.models.posts",
+        "app.domains.social.policies.owner_target",
         "app.domains.social.repository.blocks",
+        "app.domains.social.repository.manual_feed",
         "app.domains.social.repository.manual_writes",
         "app.domains.social.schemas.community",
         "app.domains.social.service.manual_writes",
@@ -12112,6 +12656,7 @@
       "imports": [
         "app.domains.characters.service.profile",
         "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.post_authors",
         "app.domains.social.contracts.timeline",
         "app.domains.social.exceptions",
         "app.domains.social.models.posts",
@@ -12260,6 +12805,7 @@
         "app.domains.social.contracts.profile_references",
         "app.domains.social.models.posts",
         "app.domains.social.repository.world_profile",
+        "app.domains.social.service.owner_reaction_reads",
         "app.domains.social.service.profile_cursor",
         "app.domains.world_characters.contracts.public_profile"
       ],
@@ -12478,10 +13024,56 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.models"
+      ],
+      "module": "app.domains.world_characters.configuration_models",
+      "path": "backend/app/domains/world_characters/configuration_models.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.world_characters.contracts",
       "path": "backend/app/domains/world_characters/contracts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.contracts.activity_retirement",
+      "path": "backend/app/domains/world_characters/contracts/activity_retirement.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_characters.contracts.social_io"
+      ],
+      "module": "app.domains.world_characters.contracts.checkpoint_retention",
+      "path": "backend/app/domains/world_characters/contracts/checkpoint_retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.characters.service.import_configuration"
+      ],
+      "module": "app.domains.world_characters.contracts.configuration",
+      "path": "backend/app/domains/world_characters/contracts/configuration.py",
       "wildcard_imports": []
     },
     {
@@ -12590,6 +13182,16 @@
       ],
       "module": "app.domains.world_characters.contracts.setup",
       "path": "backend/app/domains/world_characters/contracts/setup.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.world_characters.contracts.social_io",
+      "path": "backend/app/domains/world_characters/contracts/social_io.py",
       "wildcard_imports": []
     },
     {
@@ -12767,6 +13369,27 @@
     },
     {
       "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.api.world_character_management_contracts",
+        "app.api.world_character_management_dependencies",
+        "app.api.world_errors",
+        "app.database",
+        "app.domains.characters.exceptions",
+        "app.domains.media.contracts",
+        "app.domains.world_characters.schemas.management",
+        "app.domains.world_characters.service.management",
+        "app.domains.worlds.service"
+      ],
+      "module": "app.domains.world_characters.router.management",
+      "path": "backend/app/domains/world_characters/router/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "fastapi",
         "sqlalchemy.orm",
@@ -12844,6 +13467,21 @@
     },
     {
       "external_imports": [
+        "pydantic",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.characters.service.import_configuration",
+        "app.domains.world_characters.schemas.identity"
+      ],
+      "module": "app.domains.world_characters.schemas.management",
+      "path": "backend/app/domains/world_characters/schemas/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -12887,8 +13525,13 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.relationship_currentness",
         "app.contracts.routine_output",
+        "app.contracts.sns_generation",
+        "app.domains.identity.service.environment",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention",
+        "app.domains.world_characters.contracts.social_io",
         "app.domains.world_characters.models",
         "app.domains.world_characters.schemas.activity_state",
         "app.domains.world_characters.service.name_binding"
@@ -12978,6 +13621,36 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention"
+      ],
+      "module": "app.domains.world_characters.service.checkpoint_retention",
+      "path": "backend/app/domains/world_characters/service/checkpoint_retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.service.import_configuration",
+        "app.domains.characters.service.import_snapshots",
+        "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.contracts.configuration",
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.service.configuration",
+      "path": "backend/app/domains/world_characters/service/configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -13025,6 +13698,29 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.import_configuration",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.environment",
+        "app.domains.identity.service.owner_context",
+        "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.schemas.identity",
+        "app.domains.world_characters.schemas.management",
+        "app.domains.world_characters.service.configuration",
+        "app.domains.worlds.service",
+        "app.policies.name_policy"
+      ],
+      "module": "app.domains.world_characters.service.management",
+      "path": "backend/app/domains/world_characters/service/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -13045,6 +13741,7 @@
         "app.domains.characters.service.profile",
         "app.domains.world_characters.contracts.owner_identity",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration",
         "app.domains.world_characters.service.owner_identity"
       ],
       "module": "app.domains.world_characters.service.name_binding",
@@ -13062,14 +13759,19 @@
       "imports": [
         "app.config",
         "app.core.ids",
+        "app.domains.characters.service.import_configuration",
+        "app.domains.characters.service.import_snapshots",
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.owner_controlled",
         "app.domains.characters.service.profile",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.owner_context",
+        "app.domains.world_characters.configuration_models",
         "app.domains.world_characters.contracts.owner_identity",
         "app.domains.world_characters.exceptions",
         "app.domains.world_characters.models",
         "app.domains.world_characters.schemas.identity",
+        "app.domains.world_characters.service.configuration",
         "app.domains.worlds.service",
         "app.integrations.media.files",
         "app.policies.name_policy"
@@ -14052,6 +14754,13 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.worlds.policies.default_content",
+      "path": "backend/app/domains/worlds/policies/default_content.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.worlds.repository",
       "path": "backend/app/domains/worlds/repository/__init__.py",
       "wildcard_imports": []
@@ -14166,9 +14875,12 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.identity.service.environment",
+        "app.domains.identity.service.local_owner",
         "app.domains.identity.service.owner_context",
         "app.domains.worlds.exceptions",
         "app.domains.worlds.models",
+        "app.domains.worlds.policies.default_content",
         "app.domains.worlds.service.definition",
         "app.domains.worlds.service.foundation"
       ],
@@ -14189,6 +14901,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.worlds.models",
         "app.domains.worlds.schemas"
       ],
@@ -14306,7 +15019,6 @@
       "external_imports": [
         "datetime",
         "json",
-        "threading",
         "typing",
         "urllib.error",
         "urllib.parse",
@@ -14314,6 +15026,11 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.environment",
+        "app.core.atomic_json",
+        "app.core.calendar",
+        "app.core.calendar_ledger",
+        "app.core.ids",
         "app.integrations.bounded_http",
         "app.integrations.provider_http"
       ],
@@ -14394,6 +15111,7 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.name_binding",
         "app.core.redaction",
         "app.providers.contracts",
         "app.providers.diagnostics",
@@ -14402,6 +15120,23 @@
       ],
       "module": "app.integrations.direct_llm",
       "path": "backend/app/integrations/direct_llm.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "datetime",
+        "hashlib",
+        "httpx",
+        "json",
+        "re"
+      ],
+      "imports": [
+        "app.providers.gemini",
+        "app.providers.input_budget"
+      ],
+      "module": "app.integrations.gemini_input_budget",
+      "path": "backend/app/integrations/gemini_input_budget.py",
       "wildcard_imports": []
     },
     {
@@ -14628,6 +15363,7 @@
         "json"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.domains.identity.contracts",
         "app.domains.memory.exceptions",
         "app.domains.memory.policies.batch",
@@ -14859,6 +15595,8 @@
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
         "app.runtime.autonomous_activity.binding",
+        "app.runtime.autonomous_activity.checkpoint_maintenance",
+        "app.runtime.autonomous_activity.retirement",
         "app.runtime.bootstrap.demo_seed",
         "app.runtime.character_activity_access",
         "app.runtime.character_lore",
@@ -14989,6 +15727,8 @@
       "external_imports": [
         "__future__",
         "asyncio",
+        "copy",
+        "dataclasses",
         "google",
         "google.genai",
         "hashlib",
@@ -15014,6 +15754,18 @@
       "imports": [],
       "module": "app.providers.generation_profiles",
       "path": "backend/app/providers/generation_profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.providers.contracts"
+      ],
+      "module": "app.providers.input_budget",
+      "path": "backend/app/providers/input_budget.py",
       "wildcard_imports": []
     },
     {
@@ -15055,6 +15807,7 @@
         "app.domains.identity.exceptions",
         "app.domains.identity.models",
         "app.domains.identity.service.auth",
+        "app.domains.identity.service.environment",
         "app.domains.local_bot.models",
         "app.domains.media.models",
         "app.domains.memory.models.daypart",
@@ -15143,15 +15896,42 @@
     },
     {
       "external_imports": [
-        "contextlib",
+        "__future__",
+        "asyncio",
+        "collections",
+        "dataclasses",
         "datetime",
-        "langgraph.checkpoint.sqlite.aio",
+        "logging",
         "pathlib",
         "sqlalchemy",
+        "time"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.routines.models",
+        "app.domains.routines.models.plans",
+        "app.domains.social.models.manual_writes",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.checkpoint_retention",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.checkpoint_retention",
+        "app.runtime.autonomous_activity.checkpoints",
+        "app.runtime.migrations.generation"
+      ],
+      "module": "app.runtime.autonomous_activity.checkpoint_maintenance",
+      "path": "backend/app/runtime/autonomous_activity/checkpoint_maintenance.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "langgraph.checkpoint.sqlite.aio",
+        "pathlib",
         "sqlite3"
       ],
       "imports": [
-        "app.domains.world_characters.activity_models"
+        "app.runtime.migrations.generation"
       ],
       "module": "app.runtime.autonomous_activity.checkpoints",
       "path": "backend/app/runtime/autonomous_activity/checkpoints.py",
@@ -15189,13 +15969,16 @@
     {
       "external_imports": [
         "hashlib",
-        "json"
+        "json",
+        "sqlalchemy"
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.contracts.sns_generation",
         "app.domains.routine_posts.service.image_output",
         "app.domains.routine_posts.service.original_post",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.social_io",
         "app.providers.contracts",
         "app.runtime.autonomous_activity.generation_contracts",
         "app.runtime.autonomous_activity.output_recovery",
@@ -15211,6 +15994,7 @@
         "json"
       ],
       "imports": [
+        "app.contracts.sns_generation",
         "app.providers.gemini",
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.output_recovery",
@@ -15224,11 +16008,25 @@
     },
     {
       "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.runtime.routines.activity_policy",
+        "app.runtime.social.world_feed_queries",
+        "app.runtime.world_configuration.effective_values"
+      ],
+      "module": "app.runtime.autonomous_activity.configuration",
+      "path": "backend/app/runtime/autonomous_activity/configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "pydantic",
         "typing"
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.world_characters.service.activity_engines"
       ],
       "module": "app.runtime.autonomous_activity.contracts",
@@ -15241,34 +16039,42 @@
         "datetime",
         "logging",
         "re",
-        "sqlite3",
         "types"
       ],
       "imports": [
         "app.config",
+        "app.contracts.environment",
         "app.contracts.name_binding",
+        "app.contracts.sns_generation",
         "app.core.sqlite_concurrency",
+        "app.domains.characters.models",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.routines.models",
         "app.domains.social.exceptions",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.activity_retirement",
+        "app.domains.world_characters.contracts.checkpoint_retention",
+        "app.domains.world_characters.contracts.social_io",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_state",
+        "app.domains.world_characters.service.checkpoint_retention",
         "app.domains.world_characters.service.name_binding",
         "app.domains.worlds.models",
         "app.integrations.direct_llm",
         "app.runtime.autonomous_activity.binding",
+        "app.runtime.autonomous_activity.checkpoint_maintenance",
         "app.runtime.autonomous_activity.checkpoints",
         "app.runtime.autonomous_activity.combined_lanes",
         "app.runtime.autonomous_activity.combined_provider",
         "app.runtime.autonomous_activity.combined_selection",
+        "app.runtime.autonomous_activity.configuration",
         "app.runtime.autonomous_activity.contracts",
-        "app.runtime.autonomous_activity.feed",
         "app.runtime.autonomous_activity.graph",
-        "app.runtime.autonomous_activity.inbox",
+        "app.runtime.autonomous_activity.input_budget",
         "app.runtime.autonomous_activity.inputs",
         "app.runtime.autonomous_activity.output_recovery",
+        "app.runtime.autonomous_activity.retirement",
         "app.runtime.autonomous_activity.revalidation",
-        "app.runtime.autonomous_activity.routine",
         "app.runtime.autonomous_activity.social_lane",
         "app.runtime.character_activity_state",
         "app.runtime.daily_preparation"
@@ -15294,13 +16100,13 @@
         "app.domains.social.service.feed_delivery",
         "app.domains.social.service.world_feed",
         "app.runtime.activity_proposals.composition",
+        "app.runtime.autonomous_activity.configuration",
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.feed_effects",
         "app.runtime.autonomous_activity.social_lane",
         "app.runtime.media.social_context",
         "app.runtime.relationships.experience_metrics",
-        "app.runtime.social.feed_observations",
-        "app.runtime.social.world_feed_queries"
+        "app.runtime.social.feed_observations"
       ],
       "module": "app.runtime.autonomous_activity.feed",
       "path": "backend/app/runtime/autonomous_activity/feed.py",
@@ -15312,15 +16118,39 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.contracts.authored_output",
+        "app.core.sqlite_concurrency",
         "app.core.unit_of_work",
         "app.domains.social.models.feed",
         "app.domains.social.schemas.feed",
         "app.domains.social.service.feed_cycle_publishing",
         "app.domains.social.service.feed_cycle_values",
-        "app.runtime.social.feed_cycle"
+        "app.runtime.social.feed_workflows"
       ],
       "module": "app.runtime.autonomous_activity.feed_effects",
       "path": "backend/app/runtime/autonomous_activity/feed_effects.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "asyncio",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.activity_retirement",
+        "app.domains.world_characters.contracts.checkpoint_retention",
+        "app.domains.world_characters.service.activity_engines",
+        "app.runtime.autonomous_activity.configuration",
+        "app.runtime.autonomous_activity.execution",
+        "app.runtime.autonomous_activity.retirement",
+        "app.runtime.routine_posts.sqlalchemy_runtime",
+        "app.runtime.routines.activity_policy",
+        "app.runtime.social.planned_actions"
+      ],
+      "module": "app.runtime.autonomous_activity.gateway",
+      "path": "backend/app/runtime/autonomous_activity/gateway.py",
       "wildcard_imports": []
     },
     {
@@ -15331,11 +16161,16 @@
       ],
       "imports": [
         "app.contracts.activity_thought_output",
+        "app.contracts.authored_output",
+        "app.contracts.sns_generation",
+        "app.domains.routine_posts.policies.output_normalization",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.image_output",
+        "app.domains.world_characters.contracts.social_io",
         "app.providers.contracts",
         "app.providers.gemini",
-        "app.runtime.autonomous_activity.provider"
+        "app.runtime.autonomous_activity.provider",
+        "app.runtime.autonomous_activity.social_wire"
       ],
       "module": "app.runtime.autonomous_activity.generation_contracts",
       "path": "backend/app/runtime/autonomous_activity/generation_contracts.py",
@@ -15381,6 +16216,25 @@
     },
     {
       "external_imports": [
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "json",
+        "time"
+      ],
+      "imports": [
+        "app.contracts.sns_generation",
+        "app.domains.world_characters.activity_models",
+        "app.integrations.gemini_input_budget",
+        "app.providers.gemini",
+        "app.providers.input_budget"
+      ],
+      "module": "app.runtime.autonomous_activity.input_budget",
+      "path": "backend/app/runtime/autonomous_activity/input_budget.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses",
         "datetime",
         "sqlalchemy",
@@ -15388,17 +16242,25 @@
       ],
       "imports": [
         "app.config",
+        "app.contracts.environment",
+        "app.core.calendar",
         "app.domains.characters.models",
         "app.domains.characters.service.prompt_persona",
+        "app.domains.identity.service.environment",
         "app.domains.relationships.contracts.graph_recall",
+        "app.domains.relationships.contracts.social_context",
+        "app.domains.relationships.policies.social_context_validation",
         "app.domains.relationships.service.graph_recall",
         "app.domains.relationships.service.social_context",
+        "app.domains.relationships.service.social_context_validation",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_state",
+        "app.runtime.autonomous_activity.configuration",
         "app.runtime.autonomous_activity.contracts",
         "app.runtime.autonomous_activity.name_binding",
         "app.runtime.graph_projection.relationship_graph_read",
-        "app.runtime.social.today_activity"
+        "app.runtime.social.today_activity",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.autonomous_activity.inputs",
       "path": "backend/app/runtime/autonomous_activity/inputs.py",
@@ -15407,6 +16269,20 @@
     {
       "external_imports": [],
       "imports": [
+        "app.credentials",
+        "app.domains.social.contracts.feed_execution",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.runtime.autonomous_activity.llm_context",
+      "path": "backend/app/runtime/autonomous_activity/llm_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.contracts.authored_output",
         "app.contracts.name_binding",
         "app.domains.characters.policies.authored_names",
         "app.domains.world_characters.activity_models"
@@ -15418,6 +16294,7 @@
     {
       "external_imports": [
         "json",
+        "re",
         "typing"
       ],
       "imports": [
@@ -15433,11 +16310,13 @@
         "typing"
       ],
       "imports": [
-        "app.domains.routines.schemas.resident_planning",
+        "app.domains.routines.contracts.reply_writing",
         "app.domains.social.schemas.feed",
+        "app.domains.world_characters.contracts.social_io",
         "app.domains.world_characters.schemas.activity_state",
         "app.providers.contracts",
-        "app.providers.gemini"
+        "app.providers.gemini",
+        "app.runtime.autonomous_activity.social_wire"
       ],
       "module": "app.runtime.autonomous_activity.planner_contract",
       "path": "backend/app/runtime/autonomous_activity/planner_contract.py",
@@ -15455,16 +16334,24 @@
       ],
       "imports": [
         "app.contracts.activity_thought",
+        "app.contracts.authored_output",
+        "app.contracts.language",
+        "app.contracts.sns_generation",
         "app.domains.relationships.policies.interpretation_prompt",
+        "app.domains.routines.contracts.reply_writing",
         "app.domains.routines.policies.writer_outputs",
-        "app.domains.routines.schemas.resident_planning",
+        "app.domains.world_characters.contracts.social_io",
         "app.integrations.direct_llm",
         "app.providers.gemini",
+        "app.providers.input_budget",
         "app.runtime.autonomous_activity.contracts",
+        "app.runtime.autonomous_activity.input_budget",
+        "app.runtime.autonomous_activity.llm_context",
+        "app.runtime.autonomous_activity.name_binding",
         "app.runtime.autonomous_activity.output_recovery",
         "app.runtime.autonomous_activity.planner_contract",
         "app.runtime.autonomous_activity.queries",
-        "app.runtime.social.feed_reaction_provider"
+        "app.runtime.autonomous_activity.social_wire"
       ],
       "module": "app.runtime.autonomous_activity.provider",
       "path": "backend/app/runtime/autonomous_activity/provider.py",
@@ -15502,6 +16389,32 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "types"
+      ],
+      "imports": [
+        "app.core.sqlite_concurrency",
+        "app.domains.characters.models",
+        "app.domains.relationships.models.personalization",
+        "app.domains.routines.service.daily_preparation",
+        "app.domains.routines.service.legacy_claims",
+        "app.domains.social.models.topics",
+        "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.contracts.activity_retirement",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.policies.approved_setup",
+        "app.domains.world_characters.service.activity_engines",
+        "app.domains.world_characters.service.approved_setup",
+        "app.domains.worlds.models",
+        "app.runtime.daily_preparation"
+      ],
+      "module": "app.runtime.autonomous_activity.retirement",
+      "path": "backend/app/runtime/autonomous_activity/retirement.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses",
         "datetime",
         "json",
@@ -15532,19 +16445,24 @@
         "app.config",
         "app.contracts.activity_thought",
         "app.contracts.activity_thought_output",
+        "app.contracts.authored_output",
+        "app.contracts.read_deadline",
         "app.contracts.routine_output",
         "app.core.sqlite_concurrency",
         "app.domains.characters.policies.authored_names",
         "app.domains.characters.service.prompt_persona",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.relationships.policies.interpretation_prompt",
         "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.contracts.request_context",
+        "app.domains.routine_posts.policies.output_normalization",
         "app.domains.routine_posts.schemas",
         "app.domains.routine_posts.service.evidence",
         "app.domains.routine_posts.service.image_output",
         "app.domains.routine_posts.service.original_post",
         "app.domains.routine_posts.service.temporal_context",
         "app.domains.routines.models.plans",
+        "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.service.joint_activity",
         "app.domains.social.models.posts",
         "app.domains.world_characters.activity_models",
@@ -15552,6 +16470,7 @@
         "app.domains.world_characters.service.activity_state",
         "app.providers.gemini",
         "app.runtime.autonomous_activity.contracts",
+        "app.runtime.autonomous_activity.generation_contracts",
         "app.runtime.autonomous_activity.graph",
         "app.runtime.autonomous_activity.inputs",
         "app.runtime.autonomous_activity.name_binding",
@@ -15622,7 +16541,9 @@
       "imports": [
         "app.config",
         "app.contracts.activity_thought",
+        "app.contracts.read_deadline",
         "app.core.sqlite_concurrency",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.routines.models",
         "app.domains.routines.policies.writer_tasks",
         "app.domains.social.models.posts",
@@ -15642,6 +16563,21 @@
       ],
       "module": "app.runtime.autonomous_activity.social_lane",
       "path": "backend/app/runtime/autonomous_activity/social_lane.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "copy",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.reply_writing",
+        "app.domains.social.contracts.proposal_plan",
+        "app.domains.world_characters.schemas.activity_state"
+      ],
+      "module": "app.runtime.autonomous_activity.social_wire",
+      "path": "backend/app/runtime/autonomous_activity/social_wire.py",
       "wildcard_imports": []
     },
     {
@@ -15764,6 +16700,7 @@
         "app.domains.characters.service.profile",
         "app.domains.identity.models",
         "app.domains.identity.service.demo_access",
+        "app.domains.identity.service.environment",
         "app.domains.operations.service.settings",
         "app.domains.routines.service.slot_pool",
         "app.integrations.azure_translation",
@@ -15823,6 +16760,7 @@
         "app.domains.characters.service.creator",
         "app.domains.characters.service.image_settings",
         "app.domains.characters.service.image_settings_owner",
+        "app.domains.characters.service.import_snapshots",
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",
@@ -15906,11 +16844,13 @@
         "app.runtime.media.privacy",
         "app.runtime.memory_privacy",
         "app.runtime.persistence.model_registration",
+        "app.runtime.resident.autonomy_composition",
         "app.runtime.resident.autonomy_reads",
         "app.runtime.resident.execution",
         "app.runtime.resident.first_greeting",
         "app.runtime.resident.tendency_analysis",
         "app.runtime.routines.activity_policy",
+        "app.runtime.routines.configuration_reads",
         "app.runtime.social.image_generation",
         "app.runtime.social.timeline",
         "app.runtime.world_characters.cleanup",
@@ -15950,7 +16890,8 @@
         "app.domains.worlds.service.default_space",
         "app.integrations.media.files",
         "app.policies.name_policy",
-        "app.runtime.characters.management"
+        "app.runtime.characters.management",
+        "app.runtime.world_characters.creation_configuration"
       ],
       "module": "app.runtime.characters.registration",
       "path": "backend/app/runtime/characters/registration.py",
@@ -16117,6 +17058,7 @@
     },
     {
       "external_imports": [
+        "asyncio",
         "functools",
         "langgraph.errors",
         "langgraph.graph",
@@ -16156,6 +17098,7 @@
         "app.domains.chat.contracts.retrieval_policy",
         "app.domains.identity.constants",
         "app.domains.identity.models",
+        "app.domains.identity.service.environment",
         "app.domains.memory.models.items",
         "app.domains.world_characters.models",
         "app.domains.worlds.models"
@@ -16256,7 +17199,8 @@
         "enum",
         "pathlib",
         "sqlalchemy.engine",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.config",
@@ -16268,6 +17212,7 @@
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.recall_projection",
         "app.runtime.memory.sqlite_fts5_recall",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.search"
       ],
@@ -16279,6 +17224,7 @@
       "external_imports": [
         "__future__",
         "argparse",
+        "dataclasses",
         "importlib",
         "json",
         "os",
@@ -16287,6 +17233,7 @@
         "uvicorn"
       ],
       "imports": [
+        "app.config",
         "app.core.redaction",
         "app.domains.runtime.schemas",
         "app.domains.runtime.service.status",
@@ -16294,6 +17241,7 @@
         "app.runtime.configuration",
         "app.runtime.diagnostics.status_composition",
         "app.runtime.logging_config",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_data",
         "app.runtime.persistence.runtime_data_path"
       ],
@@ -16307,6 +17255,8 @@
       ],
       "imports": [
         "app.domains.characters.models",
+        "app.domains.characters.models_import",
+        "app.domains.world_characters.configuration_models",
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
         "app.runtime.media.privacy"
@@ -16328,6 +17278,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.contracts.environment",
         "app.contracts.name_binding",
         "app.core.ids",
         "app.domains.characters.models",
@@ -16335,6 +17286,7 @@
         "app.domains.identity.contracts",
         "app.domains.identity.exceptions",
         "app.domains.identity.service.credential_resolution",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.world_character_credentials",
         "app.domains.operations.service.maintenance",
         "app.domains.routines.client",
@@ -16371,6 +17323,7 @@
         "__future__",
         "argparse",
         "ctypes",
+        "dataclasses",
         "importlib",
         "json",
         "multiprocessing",
@@ -16385,12 +17338,14 @@
         "uvicorn"
       ],
       "imports": [
+        "app.config",
         "app.core.desktop_loopback",
         "app.main",
         "app.runtime.configuration",
         "app.runtime.installer_update",
         "app.runtime.logging_config",
         "app.runtime.memory.native_probe",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path"
@@ -16602,17 +17557,22 @@
     {
       "external_imports": [
         "__future__",
+        "contextlib",
         "sqlalchemy",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "time"
       ],
       "imports": [
         "app.config",
+        "app.contracts.read_deadline",
         "app.domains.characters.models",
+        "app.domains.characters.service.import_configuration",
         "app.domains.identity.models",
         "app.domains.relationships.contracts.graph_query",
         "app.domains.relationships.contracts.graph_read",
         "app.domains.relationships.contracts.graph_recall",
         "app.domains.relationships.contracts.projection",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.relationships.exceptions",
         "app.domains.relationships.models.social",
         "app.domains.relationships.repository.projection_state",
@@ -16622,6 +17582,7 @@
         "app.domains.social.models.feed",
         "app.domains.social.models.posts",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration",
         "app.domains.worlds.models",
         "app.integrations.ladybug_projection",
         "app.integrations.relationship_graph_read",
@@ -16860,6 +17821,7 @@
         "asyncio",
         "dataclasses",
         "datetime",
+        "functools",
         "hashlib",
         "io",
         "json",
@@ -16870,10 +17832,12 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.characters.service.generation_settings",
+        "app.domains.characters.service.world_image_profiles",
         "app.domains.chat.models",
         "app.domains.identity.contracts",
         "app.domains.identity.exceptions",
         "app.domains.identity.models_media",
+        "app.domains.identity.service.environment",
         "app.domains.identity.service.media_credentials",
         "app.domains.media.api_image_policy",
         "app.domains.media.contracts",
@@ -16891,7 +17855,8 @@
         "app.integrations.image_api",
         "app.integrations.llm.image_interpretation",
         "app.integrations.novelai_images",
-        "app.runtime.media.binding"
+        "app.runtime.media.binding",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.media.composition",
       "path": "backend/app/runtime/media/composition.py",
@@ -17347,11 +18312,14 @@
       "external_imports": [
         "__future__",
         "enum",
+        "json",
         "logging",
         "sqlalchemy",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "threading"
       ],
       "imports": [
+        "app.core.atomic_json",
         "app.domains.memory.models.items",
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.sqlite_fts5_recall"
@@ -17378,6 +18346,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.models.batch",
         "app.domains.memory.models.items",
@@ -17488,6 +18457,7 @@
         "app.core.search_text",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.recall",
+        "app.domains.memory.policies.grouped_fts",
         "app.domains.memory.policies.korean_recall",
         "app.domains.memory.policies.lexical_terms",
         "app.domains.runtime.contracts.data_paths",
@@ -17700,14 +18670,39 @@
     {
       "external_imports": [
         "__future__",
+        "collections",
+        "ctypes",
+        "datetime",
+        "json",
+        "os",
+        "pathlib",
+        "pydantic",
+        "re",
+        "stat",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.runtime.migrations.generation",
+        "app.runtime.migrations.sqlite_versions.registry"
+      ],
+      "module": "app.runtime.migrations.canonical_retention",
+      "path": "backend/app/runtime/migrations/canonical_retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "hashlib",
+        "logging",
         "pathlib"
       ],
       "imports": [
         "app.database",
         "app.domains.runtime.contracts.data_paths",
         "app.integrations.ladybug_projection",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.embedded_sqlite",
         "app.runtime.migrations.generation",
         "app.runtime.migrations.ladybug_projection",
@@ -17733,6 +18728,7 @@
       ],
       "imports": [
         "app.domains.runtime.contracts.data_paths",
+        "app.runtime.migrations.canonical_retention",
         "app.runtime.migrations.generation",
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.registry",
@@ -17927,6 +18923,20 @@
         "pathlib"
       ],
       "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts",
+        "app.runtime.persistence.sqlite_environment_schema"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.environment_v27",
+      "path": "backend/app/runtime/migrations/sqlite_versions/environment_v27.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "hashlib",
+        "json",
+        "pathlib"
+      ],
+      "imports": [
         "app.runtime.migrations.sqlite_versions.contracts"
       ],
       "module": "app.runtime.migrations.sqlite_versions.images_v26",
@@ -17964,6 +18974,7 @@
         "app.runtime.migrations.sqlite_versions.contracts",
         "app.runtime.migrations.sqlite_versions.creator_v21",
         "app.runtime.migrations.sqlite_versions.daily_preparation_v23",
+        "app.runtime.migrations.sqlite_versions.environment_v27",
         "app.runtime.migrations.sqlite_versions.images_v26",
         "app.runtime.migrations.sqlite_versions.observation_outbox_v20",
         "app.runtime.migrations.sqlite_versions.routine_state_v24",
@@ -17986,6 +18997,8 @@
         "app.runtime.migrations.sqlite_versions.v7_to_v8_social_action_subjective_context",
         "app.runtime.migrations.sqlite_versions.v8_to_v9_memory_batch",
         "app.runtime.migrations.sqlite_versions.v9_to_v10_generation_profiles",
+        "app.runtime.migrations.sqlite_versions.world_configuration_v28",
+        "app.runtime.migrations.sqlite_versions.world_configuration_v29",
         "app.runtime.persistence.sqlite_schema"
       ],
       "module": "app.runtime.migrations.sqlite_versions.registry",
@@ -18253,6 +19266,37 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "sqlalchemy",
+        "urllib.parse",
+        "uuid"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.world_configuration_v28",
+      "path": "backend/app/runtime/migrations/sqlite_versions/world_configuration_v28.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.runtime.migrations.sqlite_versions.contracts"
+      ],
+      "module": "app.runtime.migrations.sqlite_versions.world_configuration_v29",
+      "path": "backend/app/runtime/migrations/sqlite_versions/world_configuration_v29.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.core.sqlite_concurrency",
@@ -18274,8 +19318,10 @@
       "imports": [
         "app.domains.character_lore.models",
         "app.domains.characters.models",
+        "app.domains.characters.models_import",
         "app.domains.chat.models",
         "app.domains.identity.models",
+        "app.domains.identity.models_environment",
         "app.domains.identity.models_media",
         "app.domains.local_bot.models",
         "app.domains.media.models",
@@ -18304,6 +19350,7 @@
         "app.domains.social.models.topics",
         "app.domains.tree.models",
         "app.domains.world_characters.activity_models",
+        "app.domains.world_characters.configuration_models",
         "app.domains.world_characters.models",
         "app.domains.world_packages.models",
         "app.domains.worlds.models",
@@ -18412,6 +19459,13 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.runtime.persistence.sqlite_environment_schema",
+      "path": "backend/app/runtime/persistence/sqlite_environment_schema.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.runtime.persistence.sqlite_generation_profiles",
       "path": "backend/app/runtime/persistence/sqlite_generation_profiles.py",
       "wildcard_imports": []
@@ -18462,6 +19516,7 @@
       "imports": [
         "app.domains.chat.infrastructure.world_scope_migration",
         "app.models",
+        "app.runtime.persistence.sqlite_environment_schema",
         "app.runtime.persistence.sqlite_generation_profiles",
         "app.runtime.persistence.sqlite_image_schema"
       ],
@@ -18685,6 +19740,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.domains.identity.service.environment",
         "app.domains.memory.models.batch",
         "app.domains.memory.models.items",
         "app.domains.relationships.models.personalization",
@@ -18758,6 +19814,25 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.config",
+        "app.credentials",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.access",
+        "app.domains.identity.repository.credentials",
+        "app.domains.operations.service.maintenance",
+        "app.domains.routines.contracts.autonomy_admission",
+        "app.domains.world_characters.service.readiness",
+        "app.runtime.extensions.resident_adapter",
+        "app.runtime.resident.autonomy_reads",
+        "app.runtime.resident.slots"
+      ],
+      "module": "app.runtime.resident.autonomy_composition",
+      "path": "backend/app/runtime/resident/autonomy_composition.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -18785,7 +19860,8 @@
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.models",
         "app.domains.social.contracts.search_index",
-        "app.domains.social.contracts.search_state"
+        "app.domains.social.contracts.search_state",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.resident.context",
       "path": "backend/app/runtime/resident/context.py",
@@ -18854,6 +19930,7 @@
     {
       "external_imports": [
         "asyncio",
+        "copy",
         "datetime",
         "json",
         "logging",
@@ -18870,6 +19947,7 @@
         "app.domains.identity.models",
         "app.domains.identity.repository.credentials",
         "app.domains.identity.service.credential_cooldown",
+        "app.domains.identity.service.environment",
         "app.domains.memory.service.daypart",
         "app.domains.memory.service.daypart_observations",
         "app.domains.operations.service.maintenance",
@@ -18914,8 +19992,10 @@
         "app.domains.world_characters.service.owner_identity",
         "app.domains.world_characters.service.readiness",
         "app.integrations.direct_llm",
+        "app.runtime.autonomous_activity.gateway",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.memory.daypart_observations",
+        "app.runtime.resident.autonomy_composition",
         "app.runtime.resident.context",
         "app.runtime.resident.context_references",
         "app.runtime.resident.credential_profiles",
@@ -18923,14 +20003,16 @@
         "app.runtime.resident.feed_context_references",
         "app.runtime.resident.gateway_results",
         "app.runtime.resident.identity_references",
-        "app.runtime.resident.langgraph",
         "app.runtime.resident.post_selection",
         "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.request_options",
         "app.runtime.resident.slots",
         "app.runtime.routines.activity_policy",
+        "app.runtime.routines.configuration_reads",
+        "app.runtime.routines.world_autonomy",
         "app.runtime.search.binding",
-        "app.runtime.social.feed_history"
+        "app.runtime.social.feed_history",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.resident.execution",
       "path": "backend/app/runtime/resident/execution.py",
@@ -19009,6 +20091,34 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "functools",
+        "logging",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.policies.daypart",
+        "app.domains.memory.service.daypart",
+        "app.domains.relationships.service.points",
+        "app.domains.routines.contracts.context_reads",
+        "app.domains.routines.contracts.topic_arcs",
+        "app.domains.routines.policies.handoff_coverage",
+        "app.domains.routines.policies.resident_clock",
+        "app.domains.routines.service.topic_arcs",
+        "app.domains.routines.service.writing_context",
+        "app.runtime.resident.context",
+        "app.runtime.resident.langgraph_queries",
+        "app.runtime.routines.activity_policy",
+        "app.runtime.social.planned_actions"
+      ],
+      "module": "app.runtime.resident.history",
+      "path": "backend/app/runtime/resident/history.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "collections.abc",
         "sqlalchemy.orm"
       ],
@@ -19020,117 +20130,6 @@
       ],
       "module": "app.runtime.resident.identity_references",
       "path": "backend/app/runtime/resident/identity_references.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "collections.abc",
-        "datetime",
-        "functools",
-        "hashlib",
-        "json",
-        "langgraph.errors",
-        "langgraph.graph",
-        "logging",
-        "pydantic",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing",
-        "unicodedata"
-      ],
-      "imports": [
-        "app.config",
-        "app.contracts.activity_thought",
-        "app.contracts.activity_thought_output",
-        "app.core.context_text",
-        "app.core.prompt_safety",
-        "app.core.redaction",
-        "app.core.unit_of_work",
-        "app.credentials",
-        "app.domains.character_lore.service.documents",
-        "app.domains.character_lore.service.presentation",
-        "app.domains.characters.schemas",
-        "app.domains.characters.service.profile",
-        "app.domains.identity.models",
-        "app.domains.memory.contracts.daypart",
-        "app.domains.memory.models.daypart",
-        "app.domains.memory.policies.daypart",
-        "app.domains.memory.service.daypart",
-        "app.domains.relationships.constants",
-        "app.domains.relationships.contracts.social_consumption",
-        "app.domains.relationships.models.points",
-        "app.domains.relationships.policies.interpretation_prompt",
-        "app.domains.relationships.repository.points",
-        "app.domains.relationships.service.points",
-        "app.domains.relationships.utils.points",
-        "app.domains.routines.contracts.action_planning",
-        "app.domains.routines.contracts.context_reads",
-        "app.domains.routines.contracts.resident",
-        "app.domains.routines.contracts.topic_arcs",
-        "app.domains.routines.models.resident",
-        "app.domains.routines.policies.action_matching",
-        "app.domains.routines.policies.execution_results",
-        "app.domains.routines.policies.handoff_coverage",
-        "app.domains.routines.policies.resident_clock",
-        "app.domains.routines.policies.topic_arc_roles",
-        "app.domains.routines.policies.topic_dates",
-        "app.domains.routines.policies.writer_outputs",
-        "app.domains.routines.policies.writer_tasks",
-        "app.domains.routines.policies.writing_contract",
-        "app.domains.routines.repository.independent_topics",
-        "app.domains.routines.repository.public_action_executions",
-        "app.domains.routines.schemas.resident_planning",
-        "app.domains.routines.service.action_budgets",
-        "app.domains.routines.service.action_plans",
-        "app.domains.routines.service.activity_logs",
-        "app.domains.routines.service.activity_settings",
-        "app.domains.routines.service.conversation_context",
-        "app.domains.routines.service.independent_topics",
-        "app.domains.routines.service.planner_results",
-        "app.domains.routines.service.post_writer_results",
-        "app.domains.routines.service.public_action_executions",
-        "app.domains.routines.service.relationship_context",
-        "app.domains.routines.service.resident_prompts",
-        "app.domains.routines.service.state_outputs",
-        "app.domains.routines.service.topic_arcs",
-        "app.domains.routines.service.writing_context",
-        "app.domains.routines.service.writing_plans",
-        "app.domains.routines.service.writing_tasks",
-        "app.domains.social.contracts.subjective_context",
-        "app.domains.social.repository.inbox",
-        "app.domains.social.repository.posts",
-        "app.domains.social.schemas.community",
-        "app.domains.social.service.image_attachment",
-        "app.domains.social.service.resident_affordances",
-        "app.domains.world_characters.activity_models",
-        "app.domains.world_characters.contracts.runtime_modes",
-        "app.domains.world_characters.service.activity_engines",
-        "app.integrations.direct_llm",
-        "app.providers.gemini",
-        "app.runtime.autonomous_activity.execution",
-        "app.runtime.character_lore",
-        "app.runtime.persistence.model_registration",
-        "app.runtime.relationships.social_metrics",
-        "app.runtime.resident.context",
-        "app.runtime.resident.langgraph_queries",
-        "app.runtime.routine_posts.sqlalchemy_runtime",
-        "app.runtime.routines.activity_policy",
-        "app.runtime.social.agent_tool_reads",
-        "app.runtime.social.agent_tool_state",
-        "app.runtime.social.agent_tools",
-        "app.runtime.social.feed_cycle",
-        "app.runtime.social.image_generation",
-        "app.runtime.social.langgraph_actions",
-        "app.runtime.social.observations",
-        "app.runtime.social.subjective_composition",
-        "app.runtime.social_snapshot"
-      ],
-      "module": "app.runtime.resident.langgraph",
-      "path": "backend/app/runtime/resident/langgraph.py",
       "wildcard_imports": []
     },
     {
@@ -19149,6 +20148,7 @@
         "app.domains.routines.contracts.planning_context",
         "app.domains.routines.policies.resident_clock",
         "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
         "app.runtime.resident.context"
       ],
       "module": "app.runtime.resident.langgraph_queries",
@@ -19236,7 +20236,10 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.routines.models",
-        "app.domains.world_characters.models"
+        "app.domains.world_characters.models",
+        "app.runtime.routines.activity_policy",
+        "app.runtime.routines.configuration_reads",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.resident.slot_references",
       "path": "backend/app/runtime/resident/slot_references.py",
@@ -19251,13 +20254,17 @@
       ],
       "imports": [
         "app.domains.identity.models",
+        "app.domains.identity.repository.credentials",
+        "app.domains.operations.service.maintenance",
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.contracts.slot_requests",
         "app.domains.routines.models",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_claims",
+        "app.domains.routines.service.slot_requests",
         "app.runtime.resident.identity_references",
-        "app.runtime.resident.slot_references"
+        "app.runtime.resident.slot_references",
+        "app.runtime.routines.activity_policy"
       ],
       "module": "app.runtime.resident.slots",
       "path": "backend/app/runtime/resident/slots.py",
@@ -19277,6 +20284,7 @@
         "app.domains.characters.service.creator",
         "app.domains.identity.contracts",
         "app.domains.identity.service.credential_resolution",
+        "app.domains.identity.service.environment",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.tendency_analysis",
@@ -19330,7 +20338,8 @@
         "app.runtime.character_lore",
         "app.runtime.extensions.resident_adapter",
         "app.runtime.social.agent_tool_authorization",
-        "app.runtime.social.agent_tools"
+        "app.runtime.social.agent_tools",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.resident.writing",
       "path": "backend/app/runtime/resident/writing.py",
@@ -19359,7 +20368,8 @@
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
         "app.runtime.routine_posts.interactions",
-        "app.runtime.routines.activity_references"
+        "app.runtime.routines.activity_references",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.routine_posts.context_references",
       "path": "backend/app/runtime/routine_posts/context_references.py",
@@ -19410,8 +20420,10 @@
         "app.config",
         "app.contracts.activity_thought",
         "app.contracts.routine_output",
+        "app.core.sqlite_concurrency",
         "app.core.unit_of_work",
         "app.domains.relationships.contracts.social_consumption",
+        "app.domains.relationships.contracts.social_context",
         "app.domains.routine_posts.constants",
         "app.domains.routine_posts.contracts.context",
         "app.domains.routine_posts.contracts.generation",
@@ -19448,7 +20460,8 @@
         "app.runtime.social.manual_inbox",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
-        "app.runtime.social_snapshot"
+        "app.runtime.social_snapshot",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.routine_posts.sqlalchemy_runtime",
       "path": "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
@@ -19479,7 +20492,9 @@
         "app.domains.routines.service.activity_sessions",
         "app.domains.routines.service.tick_schedule",
         "app.domains.routines.utils.activity_actions",
-        "app.runtime.routines.activity_scope"
+        "app.runtime.routines.activity_scope",
+        "app.runtime.routines.configuration_reads",
+        "app.runtime.world_configuration.effective_values"
       ],
       "module": "app.runtime.routines.activity_policy",
       "path": "backend/app/runtime/routines/activity_policy.py",
@@ -19508,6 +20523,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.characters.models",
+        "app.domains.identity.service.environment",
         "app.domains.world_characters.models",
         "app.domains.world_packages.models",
         "app.domains.worlds.models"
@@ -19525,6 +20542,23 @@
       ],
       "module": "app.runtime.routines.composition",
       "path": "backend/app/runtime/routines/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.routines.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration",
+        "app.domains.worlds.models",
+        "app.runtime.world_configuration.effective_values"
+      ],
+      "module": "app.runtime.routines.configuration_reads",
+      "path": "backend/app/runtime/routines/configuration_reads.py",
       "wildcard_imports": []
     },
     {
@@ -19573,6 +20607,7 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.identity.models",
+        "app.domains.identity.service.environment",
         "app.domains.world_characters.models",
         "app.domains.world_characters.service.activity_engines",
         "app.domains.world_characters.service.runtime_modes",
@@ -19581,6 +20616,30 @@
       ],
       "module": "app.runtime.routines.plan_references",
       "path": "backend/app/runtime/routines/plan_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.characters.models",
+        "app.domains.identity.models",
+        "app.domains.identity.service.environment",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.autonomy",
+        "app.domains.routines.service.slot_assignments",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.models",
+        "app.runtime.routines.activity_policy",
+        "app.runtime.routines.configuration_reads"
+      ],
+      "module": "app.runtime.routines.world_autonomy",
+      "path": "backend/app/runtime/routines/world_autonomy.py",
       "wildcard_imports": []
     },
     {
@@ -19732,7 +20791,8 @@
         "app.domains.routines.models",
         "app.domains.routines.repository.runs",
         "app.domains.social.service.agent_tool_authorization",
-        "app.runtime.routines.activity_policy"
+        "app.runtime.routines.activity_policy",
+        "app.runtime.social.manual_feed_references"
       ],
       "module": "app.runtime.social.agent_tool_authorization",
       "path": "backend/app/runtime/social/agent_tool_authorization.py",
@@ -19787,6 +20847,7 @@
         "app.domains.social.service.agent_tool_actions",
         "app.runtime.social.agent_tool_authorization",
         "app.runtime.social.feed_history",
+        "app.runtime.social.post_authors",
         "app.runtime.social.timeline"
       ],
       "module": "app.runtime.social.agent_tools",
@@ -19853,40 +20914,6 @@
     {
       "external_imports": [
         "__future__",
-        "dataclasses",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.config",
-        "app.domains.routines.repository.public_action_executions",
-        "app.domains.routines.service.public_action_executions",
-        "app.domains.social.contracts.feed_execution",
-        "app.domains.social.models.topics",
-        "app.domains.social.service.feed_cycle",
-        "app.domains.social.service.feed_cycle_values",
-        "app.domains.world_characters.models",
-        "app.integrations.direct_llm",
-        "app.runtime.activity_proposals.composition",
-        "app.runtime.relationships.social_metrics",
-        "app.runtime.social.agent_tools",
-        "app.runtime.social.feed_reaction_provider",
-        "app.runtime.social.feed_relationship_context",
-        "app.runtime.social.langgraph_actions",
-        "app.runtime.social.observations",
-        "app.runtime.social.subjective_composition",
-        "app.runtime.social.world_feed_actions",
-        "app.runtime.social.world_feed_queries",
-        "app.runtime.social_snapshot"
-      ],
-      "module": "app.runtime.social.feed_cycle",
-      "path": "backend/app/runtime/social/feed_cycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "datetime",
         "sqlalchemy.orm"
       ],
@@ -19946,34 +20973,6 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "logging",
-        "pydantic"
-      ],
-      "imports": [
-        "app.config",
-        "app.contracts.activity_thought",
-        "app.contracts.activity_thought_output",
-        "app.credentials",
-        "app.domains.relationships.contracts.social_consumption",
-        "app.domains.relationships.policies.interpretation_prompt",
-        "app.domains.social.contracts.feed_execution",
-        "app.domains.social.contracts.world_feed",
-        "app.domains.social.exceptions",
-        "app.domains.social.schemas.feed",
-        "app.domains.social.service.feed_reaction_prompts",
-        "app.domains.social.service.feed_reaction_validation",
-        "app.integrations.direct_llm",
-        "app.providers.gemini",
-        "app.runtime.relationships.social_metrics"
-      ],
-      "module": "app.runtime.social.feed_reaction_provider",
-      "path": "backend/app/runtime/social/feed_reaction_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "sqlalchemy"
       ],
       "imports": [
@@ -19996,6 +20995,39 @@
       ],
       "module": "app.runtime.social.feed_status",
       "path": "backend/app/runtime/social/feed_status.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.routines.repository.public_action_executions",
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.models.topics",
+        "app.domains.social.service.feed_cycle",
+        "app.domains.social.service.feed_cycle_values",
+        "app.domains.world_characters.models",
+        "app.integrations.direct_llm",
+        "app.runtime.activity_proposals.composition",
+        "app.runtime.relationships.social_metrics",
+        "app.runtime.social.agent_tools",
+        "app.runtime.social.feed_relationship_context",
+        "app.runtime.social.langgraph_actions",
+        "app.runtime.social.observations",
+        "app.runtime.social.subjective_composition",
+        "app.runtime.social.world_feed_actions",
+        "app.runtime.social.world_feed_queries",
+        "app.runtime.social_snapshot"
+      ],
+      "module": "app.runtime.social.feed_workflows",
+      "path": "backend/app/runtime/social/feed_workflows.py",
       "wildcard_imports": []
     },
     {
@@ -20115,7 +21147,8 @@
         "app.domains.world_characters.repository.source_writes",
         "app.domains.world_characters.service.owner_identity",
         "app.domains.worlds.models",
-        "app.domains.worlds.service.character_entry"
+        "app.domains.worlds.service.character_entry",
+        "app.runtime.social.post_authors"
       ],
       "module": "app.runtime.social.manual_feed_references",
       "path": "backend/app/runtime/social/manual_feed_references.py",
@@ -20148,6 +21181,63 @@
       ],
       "module": "app.runtime.social.observations",
       "path": "backend/app/runtime/social/observations.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "functools",
+        "logging",
+        "sqlalchemy.exc",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.contracts.activity_thought",
+        "app.contracts.authored_output",
+        "app.core.context_text",
+        "app.core.prompt_safety",
+        "app.core.redaction",
+        "app.core.sqlite_concurrency",
+        "app.core.unit_of_work",
+        "app.domains.relationships.contracts.social_consumption",
+        "app.domains.relationships.contracts.social_context",
+        "app.domains.routines.models.resident",
+        "app.domains.routines.policies.action_matching",
+        "app.domains.routines.policies.execution_results",
+        "app.domains.routines.policies.writer_outputs",
+        "app.domains.routines.policies.writer_tasks",
+        "app.domains.routines.repository.public_action_executions",
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.routines.service.relationship_context",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community",
+        "app.runtime.social.agent_tools",
+        "app.runtime.social.langgraph_actions",
+        "app.runtime.social.subjective_composition"
+      ],
+      "module": "app.runtime.social.planned_actions",
+      "path": "backend/app/runtime/social/planned_actions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.social.contracts.post_authors",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration",
+        "app.domains.world_characters.service.social_scope",
+        "app.domains.worlds.models",
+        "app.runtime.world_configuration.effective_values"
+      ],
+      "module": "app.runtime.social.post_authors",
+      "path": "backend/app/runtime/social/post_authors.py",
       "wildcard_imports": []
     },
     {
@@ -20190,6 +21280,8 @@
         "app.domains.social.contracts.profile_references",
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
+        "app.runtime.social.manual_feed_references",
+        "app.runtime.social.post_authors",
         "app.runtime.world_characters.composition"
       ],
       "module": "app.runtime.social.profile_references",
@@ -20254,6 +21346,7 @@
         "app.domains.characters.service.profile",
         "app.domains.identity.service.profile",
         "app.domains.relationships.service.source_posts",
+        "app.domains.relationships.service.source_reactions",
         "app.domains.social.contracts.actors",
         "app.domains.social.contracts.source_writes",
         "app.domains.social.models.posts",
@@ -20284,6 +21377,7 @@
       "external_imports": [
         "__future__",
         "collections.abc",
+        "sqlalchemy.exc",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -20291,6 +21385,7 @@
         "app.domains.relationships.service.observations",
         "app.domains.social.contracts.observations",
         "app.domains.social.contracts.writes",
+        "app.domains.social.service.owner_reactions",
         "app.domains.social.service.source_writes",
         "app.exceptions",
         "app.runtime.relationships.observation_references",
@@ -20355,7 +21450,8 @@
         "app.domains.routines.service.activity_logs",
         "app.domains.social.service.abuse_quota",
         "app.domains.social.service.timeline",
-        "app.runtime.relationships.sqlalchemy_social_event"
+        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.social.post_authors"
       ],
       "module": "app.runtime.social.timeline",
       "path": "backend/app/runtime/social/timeline.py",
@@ -20628,6 +21724,25 @@
     },
     {
       "external_imports": [
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.models_import",
+        "app.domains.characters.service.import_configuration",
+        "app.domains.characters.service.import_snapshots",
+        "app.domains.identity.models",
+        "app.domains.routines.models",
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration"
+      ],
+      "module": "app.runtime.world_characters.creation_configuration",
+      "path": "backend/app/runtime/world_characters/creation_configuration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -20643,12 +21758,73 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.characters.models",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.world_image_profiles",
+        "app.domains.identity.models",
+        "app.domains.identity.repository.credentials",
+        "app.domains.identity.service.environment",
+        "app.domains.media.contracts",
+        "app.domains.media.generation_contracts",
+        "app.domains.operations.service.maintenance",
+        "app.domains.routines.models",
+        "app.domains.routines.policies.active_hours",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.configuration_models",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.management",
+        "app.domains.world_characters.service.readiness",
+        "app.domains.worlds.service",
+        "app.integrations.media.files",
+        "app.providers.generation_profiles",
+        "app.runtime.world_characters.queries"
+      ],
+      "module": "app.runtime.world_characters.management",
+      "path": "backend/app/runtime/world_characters/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.exceptions",
+        "app.domains.identity.service.environment",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.manual_activity",
+        "app.domains.world_characters.service.management"
+      ],
+      "module": "app.runtime.world_characters.manual_activity",
+      "path": "backend/app/runtime/world_characters/manual_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.service.media_storage",
+        "app.domains.identity.service.environment",
+        "app.domains.world_characters.schemas.management",
+        "app.domains.world_characters.service.management",
+        "app.integrations.media.files"
+      ],
+      "module": "app.runtime.world_characters.profile_media",
+      "path": "backend/app/runtime/world_characters/profile_media.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.domains.characters.models",
         "app.domains.world_characters.models",
+        "app.domains.world_characters.service.configuration",
         "app.domains.worlds.models"
       ],
       "module": "app.runtime.world_characters.queries",
@@ -20667,6 +21843,28 @@
       ],
       "module": "app.runtime.world_characters.recovery",
       "path": "backend/app/runtime/world_characters/recovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.world_configuration",
+      "path": "backend/app/runtime/world_configuration/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "copy",
+        "dataclasses",
+        "types",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.service.prompt_persona",
+        "app.domains.world_characters.contracts.configuration"
+      ],
+      "module": "app.runtime.world_configuration.effective_values",
+      "path": "backend/app/runtime/world_configuration/effective_values.py",
       "wildcard_imports": []
     },
     {
@@ -20773,6 +21971,7 @@
       "imports": [
         "app.core.ids",
         "app.domains.characters.contracts",
+        "app.domains.characters.service.profile",
         "app.domains.characters.service.seed",
         "app.domains.world_characters.contracts.seed",
         "app.domains.world_characters.models",
@@ -20781,7 +21980,8 @@
         "app.domains.world_packages.service.registry",
         "app.domains.worlds.contracts",
         "app.domains.worlds.schemas",
-        "app.domains.worlds.service.creator"
+        "app.domains.worlds.service.creator",
+        "app.runtime.world_characters.creation_configuration"
       ],
       "module": "app.runtime.world_packages.seed",
       "path": "backend/app/runtime/world_packages/seed.py",

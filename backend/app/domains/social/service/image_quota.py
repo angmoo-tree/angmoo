@@ -19,28 +19,35 @@ def _daily_image_count(db: Session, *, character_id: str, at: datetime) -> int:
 
 
 def _daily_image_usage(db: Session, *, character_id: str, at: datetime) -> int:
-    start_at, end_at = _daily_image_window(at)
+    from app.domains.identity.service.environment import accounting_period
+    period = accounting_period(db, None, "day", now=at)
+    start_at, end_at = period.ranges[0]
     return community_crud.count_post_media_for_character_between(
         db,
         character_id=character_id,
         start_at=start_at,
         end_at=end_at,
+        period=period,
     ) + community_crud.count_active_post_image_jobs_for_character_between(
         db,
         character_id=character_id,
         start_at=start_at,
         end_at=end_at,
+        period=period,
     )
 
 
 
 def _daily_image_window_count(db: Session, *, character_id: str, at: datetime) -> int:
-    start_at, end_at = _daily_image_window(at)
+    from app.domains.identity.service.environment import accounting_period
+    period = accounting_period(db, None, "day", now=at)
+    start_at, end_at = period.ranges[0]
     return community_crud.count_post_media_for_character_between(
         db,
         character_id=character_id,
         start_at=start_at,
         end_at=end_at,
+        period=period,
     )
 
 
@@ -75,7 +82,10 @@ def _reserve_service_image_quota(
     post_id: str | None = None,
 ) -> models.PostImageQuotaReservation:
     limit = settings.pollinations_service_free_images_per_user_day
-    quota_date = _service_quota_date(at)
+    from app.domains.identity.service.environment import lock_environment_admission, accounting_period
+    lock_environment_admission(db, user_id)
+    period = accounting_period(db, user_id, "day", now=at)
+    quota_date = date.fromisoformat(period.key)
     if limit <= 0:
         raise ServiceImageQuotaError("free_quota_exceeded")
     community_crud.lock_service_image_quota(
@@ -87,13 +97,14 @@ def _reserve_service_image_quota(
         db,
         user_id=user_id,
         quota_date=quota_date,
+        period=period,
     )
     if used >= limit:
         raise ServiceImageQuotaError("free_quota_exceeded")
     global_cap = settings.pollinations_service_max_images_per_day
     if global_cap > 0:
         global_used = community_crud.count_service_image_global_used(
-            db, quota_date=quota_date
+            db, quota_date=quota_date, period=period
         )
         if global_used >= global_cap:
             raise ServiceImageQuotaError("service_limit_exceeded")
@@ -105,6 +116,7 @@ def _reserve_service_image_quota(
         source=source,
         status=status,
         post_id=post_id,
+        created_at=at,
     )
     db.commit()
     db.refresh(reservation)

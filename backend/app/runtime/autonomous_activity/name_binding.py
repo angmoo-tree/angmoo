@@ -11,18 +11,21 @@ def activity_name_binding(ctx):
 
 def decision_names(value, binding, *, candidates=()):
     result = dict(value)
-    if binding is None:
-        return result
-    if isinstance(result.get("state_update"), dict):
+    if binding is not None and isinstance(result.get("state_update"), dict):
         result["state_update"] = authored_fields(result["state_update"], binding,
             fields=("state_note",), limits={"state_note": 280})
     recipients = {row["target_id"]: row.get("counterpart_id") for row in candidates}
     decisions = []
     for row in result.get("decisions", []):
         row = dict(row)
-        if "thought" in row:
-            row["thought"] = authored_thought(row["thought"], binding,
-                recipient_id=recipients.get(row["target_id"]))
+        from app.contracts.authored_output import finalize_activity_thought
+        from dataclasses import asdict
+        raw = row.get("thought")
+        thought, receipt = finalize_activity_thought(raw, render=lambda text: authored_thought(text, binding,
+            recipient_id=recipients.get(row["target_id"])))
+        row["thought"] = thought.text
+        row["_activity_thought"] = asdict(thought)
+        row["_auxiliary_normalization"] = {"thought": receipt.to_dict()}
         decisions.append(row)
     if "decisions" in result:
         result["decisions"] = decisions
@@ -32,7 +35,7 @@ def decision_names(value, binding, *, candidates=()):
 def social_draft_names(value, binding, *, assignments, combined=False, lane, receipt=None):
     if binding is None or not isinstance(value, dict):
         return value
-    collection = "replies" if combined else "reply_task_results"
+    collection = "replies" if combined or "replies" in value else "reply_task_results"
     identifier = "target_id" if combined else "task_id"
     recipients = {(a["source"]["target_id"] if combined else a["task_id"]):
                   a["source"].get("counterpart_id") for a in assignments}
@@ -41,10 +44,16 @@ def social_draft_names(value, binding, *, assignments, combined=False, lane, rec
         rows = []
         for index, row in enumerate(value[collection]):
             fields = {}
-            rows.append(authored_fields(row, binding, fields=("title", "body"),
+            rendered = (authored_fields(row, binding, fields=("title", "body"),
                 recipient_id=recipients.get(row.get(identifier)),
                 limits={"title": 160, "body": 500 if lane == "feed" else 1000}, receipt=fields)
                 if isinstance(row, dict) else row)
+            if isinstance(rendered, dict) and "thought" in rendered:
+                rendered["thought"] = authored_thought(rendered["thought"], binding,
+                    recipient_id=recipients.get(row.get(identifier)))
+                if receipt is not None and isinstance(row.get("thought"), str):
+                    receipt[f"{collection}.{index}.thought"] = {"input_chars": len(row["thought"]), "rendered_chars": len(rendered["thought"])}
+            rows.append(rendered)
             if receipt is not None:
                 receipt.update({f"{collection}.{index}.{key}": entry for key, entry in fields.items()})
         result[collection] = rows
@@ -55,3 +64,9 @@ def observe_output(tracker, binding, *, lane, fields):
     if binding is not None and getattr(tracker, "observer", None) is not None:
         tracker._notify("name_binding_output", {"lane": lane, "policy_version": binding.policy_version,
             "binding_digest": binding.digest, "profile_version": binding.user_profile_version, "fields": fields})
+
+
+def observe_normalization(tracker, *, lane, receipts):
+    if getattr(tracker, "observer", None) is not None:
+        for value in receipts if isinstance(receipts, list) else [receipts]:
+            tracker._notify("auxiliary_normalization", {"lane": lane, "receipts": value})

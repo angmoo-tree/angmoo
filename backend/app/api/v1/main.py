@@ -17,9 +17,11 @@ from app.api.v1.routes import world_character_setup
 from app.domains.world_characters.router import setup as autonomy_setup
 from app.api.v1.routes import world_activity_runtime
 from app.domains.chat.router import world_chat
+from app.domains.chat.router import world_thread_deletion
 from app.domains.chat.router import world_chat_response, retrieval_diagnostics
 from app.domains.device_home.router import router as device_home_router
 from app.domains.world_characters.router.profile import router as world_character_router
+from app.domains.world_characters.router.management import router as world_character_management_router
 from app.domains.world_characters.router.activity import router as activity_runtime_router
 from app.domains.world_packages.router import router as world_package_router
 
@@ -33,9 +35,11 @@ PUBLIC_ROUTERS = (
     memory.router,
     world_chat.router,
     world_chat.entry_router,
+    world_thread_deletion.router,
     world_chat_response.router,
     retrieval_diagnostics.router,
     world_character_router,
+    world_character_management_router,
     activity_runtime_router,
     world_package_router,
     auth.public_router,

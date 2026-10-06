@@ -24,6 +24,10 @@ def _session() -> Session:
     )
     models.LocalBotActionQuotaBucket.__table__.create(engine)
     models.LocalBotReadQuotaBucket.__table__.create(engine)
+    from app.domains.identity.models import InstallationIdentity
+    from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
+    for model in (InstallationIdentity, LocalEnvironment, EnvironmentTimezoneChange):
+        model.__table__.create(engine)
     return Session(engine)
 
 

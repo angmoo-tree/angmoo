@@ -1,7 +1,10 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
+import { NavigationCapabilitiesContext } from "@/lib/navigation/navigation-capabilities";
 
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
 
@@ -18,7 +21,8 @@ export type LocalProductLinkProps = {
   rel?: string;
   target?: "_blank";
   title?: string;
-};
+  toolbarEquivalent?: "home";
+} & { [key: `data-${string}`]: string | boolean | number | undefined };
 
 /**
  * Product-aware link boundary. Hosted Next routes stay available in Browser
@@ -34,13 +38,20 @@ export function LocalProductLink({
   rel,
   target,
   title,
+  toolbarEquivalent,
+  ...dataAttributes
 }: LocalProductLinkProps) {
+  const uiText = useUiText("shell");
+  const navigation = useContext(NavigationCapabilitiesContext);
   const unavailable =
     isStaticFrontendProfile() && !isStaticLocalProductRouteSupported(href);
+
+  if (toolbarEquivalent === "home" && navigation.home) return null;
 
   if (unavailable) {
     return (
       <span
+        {...dataAttributes}
         aria-disabled="true"
         aria-label={ariaLabel}
         className={[className, styles.unavailable].filter(Boolean).join(" ")}
@@ -54,7 +65,7 @@ export function LocalProductLink({
           event.stopPropagation();
         }}
         role="link"
-        title={title ?? "현재 앱에서는 열 수 없는 화면입니다."}
+        title={title ?? uiText("현재 앱에서는 열 수 없는 화면입니다.")}
       >
         {children}
       </span>
@@ -63,6 +74,7 @@ export function LocalProductLink({
 
   return (
     <Link
+      {...dataAttributes}
       aria-label={ariaLabel}
       className={className}
       data-post-card-ignore={dataPostCardIgnore}

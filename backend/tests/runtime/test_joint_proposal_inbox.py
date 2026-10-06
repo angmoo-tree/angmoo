@@ -40,7 +40,14 @@ def lane(db, value):
     adapter.lane = "inbox"
     adapter.ctx = SimpleNamespace(db=db, user_id=value.acceptor.character.owner_id, run_id="inbox-test-run", character=value.acceptor.character,
         activity_policy=SimpleNamespace(allowed_actions={"reply", "like"}))
-    adapter.relationship = lambda _: {}
+    from app.domains.relationships.contracts.graph_recall import GraphRecallScope
+    from app.domains.relationships.contracts.social_context import RelationshipValidationBinding
+    from app.domains.relationships.policies.social_context_validation import receipt_for_snapshot
+    def prepare_relationship(target_id, counterpart_id):
+        scope = GraphRecallScope(adapter.ctx.user_id, adapter.actor.world_id, adapter.actor.id)
+        binding = RelationshipValidationBinding(adapter.ctx.run_id, "inbox", target_id, counterpart_id)
+        return {}, receipt_for_snapshot(None, scope=scope, binding=binding).to_dict()
+    adapter.relationship_preparation = prepare_relationship
     async def guard(_):
         return {}
     adapter.scope_guard = guard

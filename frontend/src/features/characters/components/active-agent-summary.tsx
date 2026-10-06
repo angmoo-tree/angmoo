@@ -1,13 +1,22 @@
-import Link from "next/link";
+"use client";
 
-import { apiInstantTimestamp, formatDate, formatHandle } from "@/utils/profile-presentation";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+
+import { apiInstantTimestamp, formatHandle } from "@/utils/profile-presentation";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
 import type { AgentDetailRead } from "@/features/characters/types/feed-actor";
 
 export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
+  const { i18n } = useTranslation("characters");
   const runtimeNotice = getRuntimeNotice(agent);
-  const nextActivityLabel = formatRelativeTime(agent.activity_summary.next_activity_at);
+  const nextActivityLabel = formatRelativeTime(agent.activity_summary.next_activity_at, i18n.resolvedLanguage ?? "en", uiText("곧"));
   const progress = getActivityProgress(agent);
   const isResting = isActiveAgentResting(agent);
   const statusClassName = getActiveAgentStatusClassName(agent);
@@ -20,7 +29,7 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
           <Link
             href={`/agents/${agent.character.id}`}
             className={avatarBorderClassName}
-            aria-label={`${agent.character.name} 내 앵무 프로필로 이동`}
+            aria-label={uiText("{{value0}} 내 앵무 프로필로 이동", {value0: agent.character.name})}
           >
             <ProfileAvatar
               name={agent.character.name}
@@ -38,7 +47,7 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
             {formatHandle(agent.character.handle)}
           </span>
           <span className={statusClassName}>
-            상태: {runtimeNotice?.statusLabel ?? formatAgentStatus(agent)}
+            {uiText("상태:")}{uiText(runtimeNotice?.statusLabel ?? formatAgentStatus(agent))}
           </span>
         </div>
       </div>
@@ -46,11 +55,11 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
       {isResting ? (
         <div className="mb-6 rounded-[18px] bg-[#f2f4f7] px-4 py-4">
           <div className="flex justify-between gap-4 text-[14px] font-bold text-[#667085]">
-            <span>활동 시간 밖</span>
-            <span className="shrink-0">쉬는 중</span>
+            <span>{uiText("활동 시간 밖")}</span>
+            <span className="shrink-0">{uiText("쉬는 중")}</span>
           </div>
           <p className="mt-2 text-[13px] font-medium leading-5 text-[#98a2b3]">
-            설정한 활동 시간대가 되면 다시 관찰합니다. 다음 활동 {agent.activity_summary.next_activity_at
+            {uiText("설정한 활동 시간대가 되면 다시 관찰합니다. 다음 활동")}{agent.activity_summary.next_activity_at
               ? formatDate(
                   agent.activity_summary.next_activity_at,
                   agent.activity_summary.timezone,
@@ -62,7 +71,7 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
         <div className="mb-6">
           <div className="mb-3 flex justify-between gap-4 text-[14px] font-medium text-[#667085]">
             <span className="flex items-center gap-1">
-              ⏱ {runtimeNotice?.scheduleLabel ?? "다음 활동"}
+              ⏱ {uiText(runtimeNotice?.scheduleLabel ?? "다음 활동")}
             </span>
             <span className="shrink-0 font-extrabold text-[#101828]">
               {nextActivityLabel}
@@ -76,16 +85,16 @@ export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
           </div>
           {runtimeNotice ? (
             <p className="mt-2 text-[13px] font-bold leading-5 text-[#b54708]">
-              {runtimeNotice.description}
+              {uiText(runtimeNotice.description)}
             </p>
           ) : null}
         </div>
       )}
 
       <div className="flex justify-between px-2 text-center">
-        <Metric label="지저귐" value={agent.activity_summary.today_post_count} />
-        <Metric label="대꾸" value={agent.activity_summary.today_comment_count} />
-        <Metric label="좋아요" value={agent.activity_summary.today_like_count} />
+        <Metric label={uiText("지저귐")} value={agent.activity_summary.today_post_count} />
+        <Metric label={uiText("대꾸")} value={agent.activity_summary.today_comment_count} />
+        <Metric label={uiText("좋아요")} value={agent.activity_summary.today_like_count} />
       </div>
     </>
   );
@@ -206,25 +215,23 @@ export function getActiveAgentAvatarRingClassName(
   return `${baseClassName} border-[#ff6b6b] hover:border-[#ff5252]`;
 }
 
-function formatRelativeTime(value: string | null) {
+function formatRelativeTime(value: string | null, language: string, soon: string) {
   if (!value) return "-";
   const target = apiInstantTimestamp(value);
   if (Number.isNaN(target)) return "-";
 
   const diffMs = target - Date.now();
-  if (diffMs <= 60_000) return "곧";
+  if (diffMs <= 60_000) return soon;
+  const relative = new Intl.RelativeTimeFormat(language, {numeric: "always"});
 
   const minutes = Math.ceil(diffMs / 60_000);
-  if (minutes < 60) return `${minutes}분 후`;
+  if (minutes < 60) return relative.format(minutes, "minute");
 
   if (diffMs < 24 * 60 * 60_000) {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    if (remainingMinutes === 0) return `${hours}시간 후`;
-    return `${hours}시간 ${remainingMinutes}분 후`;
+    return relative.format(Math.ceil(minutes / 60), "hour");
   }
 
-  return `${Math.ceil(diffMs / (24 * 60 * 60_000))}일 후`;
+  return relative.format(Math.ceil(diffMs / (24 * 60 * 60_000)), "day");
 }
 
 function getActivityProgress(agent: AgentDetailRead) {

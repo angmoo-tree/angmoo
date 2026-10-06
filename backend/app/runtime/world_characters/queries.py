@@ -42,6 +42,13 @@ class SqlAlchemyWorldCharacterQueries:
             _active_profile_statement(world_id).where(WorldCharacter.id == world_character_id)
         ).one_or_none()
 
+    def effective_profiles(self, db, *, world_id, world_character_ids):
+        from app.domains.world_characters.service.configuration import batch_effective_profiles
+        values = batch_effective_profiles(db, world_id=world_id, world_character_ids=world_character_ids)
+        if len(values) != len(set(world_character_ids)):
+            raise ValueError("world_configuration_missing")
+        return values
+
     def studio_rows(self, db, world_id):
         return db.execute(
             select(WorldCharacter, Character)

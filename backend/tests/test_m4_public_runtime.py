@@ -53,8 +53,29 @@ def test_public_runtime_exposes_only_approved_routes() -> None:
     operations = _operations()
     paths = {path for _, path in operations}
 
-    assert len(paths) == 196
-    assert len(operations) == 241
+    assert len(paths) == 206
+    assert len(operations) == 255
+    # Approved World management and chat deletion stay scoped to the selected World.
+    assert {
+        ("GET", "/api/v1/worlds/{world_id}/character-dashboard"),
+        ("GET", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/management"),
+        ("GET", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/settings"),
+        ("PATCH", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile"),
+        ("PATCH", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/settings"),
+        ("POST", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile/media"),
+        ("POST", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/activate"),
+        ("POST", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/deactivate"),
+        ("POST", "/api/v1/worlds/{world_id}/world-characters/{world_character_id}/run-now"),
+        ("DELETE", "/api/v1/worlds/{world_id}/chat/threads/{thread_id}"),
+    } <= operations
+    assert {
+        ("PUT", "/api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like"),
+        ("DELETE", "/api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like"),
+    } <= operations
+    assert {
+        ("GET", "/api/v1/auth/local/environment"),
+        ("POST", "/api/v1/auth/local/environment"),
+    } <= operations
     assert {
         ("GET", "/api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation"),
         ("POST", "/api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation"),

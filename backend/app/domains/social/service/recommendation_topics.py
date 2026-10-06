@@ -13,6 +13,7 @@ from uuid import uuid4
 
 from sqlalchemy import delete, select, update, or_
 from sqlalchemy.orm import Session
+from app.core.search_text import literal_boundary, normalize_search_text
 
 from app.domains.social.models.posts import Post
 from app.domains.social.models.topics import (
@@ -160,12 +161,14 @@ class TopicMatcher:
             node = self.root
             for char in normalized:
                 node = node.setdefault(char, {})
-            node.setdefault(None, []).append((identity, len(normalized)))
+            node.setdefault(None, []).append((identity, len(normalized), normalize_search_text(name, max_chars=120)))
 
     def match(self, fields: list[str], limit: int = MAX_POST_TOPICS) -> list[str]:
         matches: dict[str, tuple[int, int, str]] = {}
         for field_index, raw in enumerate(fields):
-            field = normalize_topic(raw)
+            original = normalize_search_text(raw, max_chars=50000)
+            positions = [i for i, char in enumerate(original) if not char.isspace()]
+            field = ''.join(original[i] for i in positions)
             for start in range(len(field)):
                 node = self.root
                 for position in range(start, len(field)):
@@ -173,7 +176,11 @@ class TopicMatcher:
                     node = node.get(char)
                     if node is None:
                         break
-                    for identity, length in node.get(None, ()):
+                    for identity, length, phrase in node.get(None, ()):
+                        left, right = positions[start], positions[position] + 1
+                        if not any('\uac00' <= c <= '\ud7af' or '\u3040' <= c <= '\u9fff' for c in phrase):
+                            if original[left:right] != phrase or not literal_boundary(original, left, right):
+                                continue
                         # Prefer more specific names, then earlier source field; stable ID tie.
                         rank = (-length, field_index, identity)
                         if identity not in matches or rank < matches[identity]:

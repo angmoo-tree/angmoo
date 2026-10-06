@@ -25,9 +25,43 @@
   "contract_id": "angmoo-l0-docker-runtime-v1",
   "core_modules": [
     {
+      "module": "app.core.accounting",
+      "disposition": "keep",
+      "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
+      "removal_condition": null,
+      "reason": "Pure SQL calendar-window predicates; domains retain quota SQL and transactions."
+    },
+    {
+      "module": "app.core.atomic_json",
+      "disposition": "keep",
+      "owner_stage": "AR-IMAGE-PUBLISH-BOUNDARIES",
+      "removal_condition": null,
+      "reason": "Shared durable bounded JSON write primitive; owns file locking and atomic replacement without domain policy, credentials, or provider calls."
+    },
+    {
       "module": "app.core.bounded_text",
       "disposition": "keep",
       "owner_stage": "AR-B5",
+      "removal_condition": null
+    },
+    {
+      "module": "app.core.calendar",
+      "disposition": "keep",
+      "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
+      "removal_condition": null,
+      "reason": "Pure UTC, IANA timezone, local date and DST calculations without scheduling or storage."
+    },
+    {
+      "module": "app.core.calendar_ledger",
+      "disposition": "keep",
+      "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
+      "removal_condition": null,
+      "reason": "Pure quota bucket validation and overlap accounting; domains own locks and persistence."
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.context_clipping",
+      "owner_stage": "AR-B7-DAYPART",
       "removal_condition": null
     },
     {
@@ -137,15 +171,16 @@
       "removal_condition": null
     },
     {
+      "module": "app.core.time_meaning",
       "disposition": "keep",
-      "module": "app.core.unit_of_work",
-      "owner_stage": "L0",
-      "removal_condition": null
+      "owner_stage": "AR-MULTILINGUAL-GEMINI-20261003",
+      "removal_condition": null,
+      "reason": "Bounded multilingual date and daypart interpretation with frozen environment values; no provider or storage."
     },
     {
       "disposition": "keep",
-      "module": "app.core.context_clipping",
-      "owner_stage": "AR-B7-DAYPART",
+      "module": "app.core.unit_of_work",
+      "owner_stage": "L0",
       "removal_condition": null
     }
   ],

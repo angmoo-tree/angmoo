@@ -16,12 +16,17 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
   let releaseSlow: (() => void) | undefined;
   let slow = false;
   const writes: string[] = [];
+  const environmentReports: string[] = [];
   await page.route("**/api/backend/**", async route => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/auth/local/environment")) {
+      environmentReports.push(url.pathname);
+      return route.fulfill({ contentType: "application/json", body: JSON.stringify({ installation_id: "synthetic-diagnostic", preferred_language: "ko-KR", memory_search_locale: "ko-KR", timezone: "Asia/Seoul", environment_revision: 1, timezone_revision: 1, synchronization: "active_owner", confirmed_at: null, lease_token: "synthetic-diagnostic-only", lease_expires_at: "2099-01-01T00:00:00Z" }) });
+    }
     if (route.request().method() !== "GET") writes.push(url.pathname);
     const send = (value: unknown, status = 200) => route.fulfill({ contentType: "application/json", body: JSON.stringify(value), status });
     if (url.pathname.endsWith("/auth/me")) return send({ id: "local-owner", email: null, display_name: "Local Owner",
-      display_name_updated_at: null, display_name_change_available_at: null, profile_setup_completed: true, feed_content_filter: "all" });
+      display_name_updated_at: null, display_name_change_available_at: null, profile_setup_completed: true, ui_language: "ko", ui_preference_revision: 0, feed_content_filter: "all" });
     if (url.pathname.endsWith("/runtime/status")) return send({ schema_version: "local-runtime-status-v1", installation_state: "ready" });
     if (url.pathname === `/api/backend/worlds/${worldId}/owner-character`) return send({
       schema_version: "owner-controlled-world-character-v1", world_id: worldId,
@@ -45,10 +50,12 @@ test("RT diagnostic history selects failures and exports matching snapshots", as
     }
     if (url.pathname.endsWith("/requests/latest")) return send({ response_request: null });
     if (url.pathname.endsWith(`/threads/${threadId}`)) return send(thread);
-    if (url.pathname.endsWith("/threads")) return send({ items: [thread], ambiguous_legacy_count: 0, max_threads: 5 });
+    if (url.pathname.endsWith("/threads")) return send({ items: [thread], ambiguous_legacy_count: 0, max_threads: null });
     return send({ detail: "unexpected_fixture_route" }, 404);
   });
   await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+  await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "기억과 진단", exact: true })).toBeVisible();
   await page.getByText("검색 진단 · 문제 해결", { exact: true }).click();
   const select = page.getByRole("combobox", { name: "확인할 요청" });
   await expect(select.locator("option")).toHaveCount(31);

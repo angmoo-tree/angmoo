@@ -128,20 +128,24 @@ def test_provider_receipt_matches_final_trimmed_input_and_keeps_original_packet(
         on_rate_limit_wait=None), None)
     monkeypatch.setattr(module, "_api_key", lambda _: "test")
     monkeypatch.setattr(module, "_llm_context", lambda *args, **kwargs: None)
-    sent, receipt = {}, {}
+    sent, receipt, boundary = {}, {}, {}
     async def generate(**kwargs):
         sent.update(json.loads(kwargs["user_prompt"]))
+        boundary.update(system=kwargs["system_prompt"], user=kwargs["user_prompt"])
         return {}
     monkeypatch.setattr(module, "generate_json", generate)
-    original = {"ref": "memory-1", "situation": "x" * 63000, "units": []}
+    # Mandatory language policy uses the same 64k budget. The retained packet
+    # fits with that policy, while the last whole group still exceeds it.
+    original = {"ref": "memory-1", "situation": "x" * 60000, "units": []}
     memories = context_memories({"first": {"status": "ready", "packets": [original]},
         "second": {"status": "ready", "packets": [original]},
         "third": {"status": "ready", "packets": [{"ref": "memory-2",
-            "situation": "z" * 1100, "units": []}]}})
+            "situation": "z" * 9000, "units": []}]}})
     asyncio.run(actor.call(node="test", lane="inbox", system="rules",
         payload={"context": {"memories": memories}}, schema={}, validator=lambda x: x,
         max_tokens=100, on_input_receipt=receipt.update))
-    assert sent["context"]["memories"]["first"]["packets"][0]["situation"] == "x" * 63000
+    assert sent["context"]["memories"]["first"]["packets"][0]["situation"] == "x" * 60000
+    assert len(boundary["system"]) + len(boundary["user"]) <= 64000
     assert sent["context"]["memories"]["second"]["packets"] == [{"ref": "memory-1", "already_in_context": True}]
     assert sent["context"]["memories"]["third"]["packets"] == []
     assert receipt["memory_packet_refs"] == ["memory-1", "memory-1"]

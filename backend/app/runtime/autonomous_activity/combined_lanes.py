@@ -9,9 +9,9 @@ from app.runtime.autonomous_activity.routine import RoutineLane
 
 
 class CombinedGeneration:
-    def __init__(self, *args, ledger, **kwargs):
+    def __init__(self, *args, ledger, policies=None, input_budget=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger)
+        self.provider = CombinedActivityProvider(self.ctx, self.tracker, ledger=ledger, policies=policies, input_budget=input_budget)
 
     async def plan(self, state):
         mode = state.get("generation_mode")
@@ -36,7 +36,7 @@ class CombinedGeneration:
         if state.get("generation_mode") == "combined" and not result["assignments"]:
             try:
                 parse_social_draft(state["decision"].get("provisional_draft"),
-                    lane=self.lane, assignments=[])
+                    lane=self.lane, assignments=[], policy=self.provider.social_io_policy)
             except ValueError:
                 result["failure"] = {"stage": "ValidateDraft", "reason": "unsolicited_or_invalid_draft"}
         return result
@@ -64,7 +64,7 @@ class CombinedGeneration:
                 names, fields = activity_name_binding(self.ctx), {}
                 raw = authored_routine_draft(raw, names, receipt=fields)
                 observe_output(self.tracker, names, lane="routine", fields=fields)
-                drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")))]
+                drafts = [parse_routine_draft(raw, image_enabled=bool(state.get("decision_context", {}).get("image_output_enabled")), name_receipt=fields)]
                 self.validate_original_draft(drafts[0])
             else:
                 from app.runtime.autonomous_activity.name_binding import activity_name_binding, social_draft_names, observe_output
@@ -73,10 +73,18 @@ class CombinedGeneration:
                     assignments=state["assignments"], combined=True, lane=self.lane, receipt=fields)
                 observe_output(self.tracker, names, lane=self.lane, fields=fields)
                 drafts = parse_social_draft(raw, lane=self.lane,
-                    assignments=state["assignments"])["reply_task_results"]
+                    assignments=state["assignments"], policy=self.provider.social_io_policy, name_receipt=fields)["reply_task_results"]
+            from app.runtime.autonomous_activity.name_binding import observe_normalization
+            observe_normalization(self.tracker, lane=self.lane,
+                receipts=[draft["_auxiliary_normalization"] for draft in drafts])
             return {"drafts": drafts, "writer_input_receipts": [
                 {**state["decision_input_receipt"], "shared_with_decision": True}]}
         except ValueError as exc:
+            receipt = state.get("decision", {}).get("_json_recovery_receipt")
+            if isinstance(receipt, dict) and receipt.get("reason") == "comment_intent_missing":
+                # The complete envelope already used its sole regeneration.
+                # A split Writer would be a third repair of that same request.
+                raise ValueError("combined_missing_recovery_draft_invalid") from exc
             if mode == "split" and str(exc) != "routine_reuses_published_reply" and not str(exc).startswith("name_"):
                 raise
             if isinstance(self, RoutineLane):
@@ -109,7 +117,7 @@ class CombinedInboxLane(CombinedGeneration, InboxLane):
 
 
 class CombinedRoutineLane(CombinedGeneration, RoutineLane):
-    pass
+    lane = "routine"
 
 
 class CombinedFeedLane(CombinedGeneration, FeedLane):
@@ -178,6 +186,7 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
         from datetime import UTC, datetime
 
         result = deepcopy(state)
+        result.setdefault("relationship_validation_receipts", {})
         selected = {s["target_id"] for s in state.get("selections", [])}
         data = state.get("lane_data", {}).get("_feed", {})
         raw_by_id = {c["post_id"]: c for c in data.get("candidates", [])}
@@ -193,7 +202,9 @@ class CombinedFeedLane(CombinedGeneration, FeedLane):
             if current is None or not current[1]:
                 raise ValueError("feed_target_stale")
             candidate["allowed_actions"] = list(current[1])
-            candidate["relationship"] = self.relationship(candidate["counterpart_id"])
+            prompt, receipt = self.relationship_preparation(candidate["target_id"], candidate["counterpart_id"])
+            candidate["relationship"] = prompt
+            result["relationship_validation_receipts"][candidate["target_id"]] = receipt
             candidate["proposal_eligible"] = proposal_eligibility(self.ctx.db,
                 actor_world_character_id=self.actor.id, target_post_id=post.id, now=datetime.now(UTC)).eligible
         return result

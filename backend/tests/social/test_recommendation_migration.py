@@ -40,31 +40,28 @@ def test_alembic_recommendation_heads_match_embedded():
 
 
 def test_populated_v14_to_v16_matches_fresh_and_keeps_switches():
-    from sqlalchemy.orm import Session
+    from historical_schema_fixture import populate_frozen_schema
     from social.test_world_feed_search import _user, _world, _add_world_character
     from app.runtime.persistence.sqlite_schema import build_sqlite_v14_metadata, create_schema_version_table, sqlite_schema_contract_digest
     from app.runtime.migrations.sqlite_versions import v15_to_v16_recommendation_mode as modes
     from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest as load_manifest
     register_models()
     engine = create_engine("sqlite://")
-    build_sqlite_v14_metadata().create_all(engine)
+    metadata = build_sqlite_v14_metadata()
+    metadata.create_all(engine)
     with engine.begin() as connection:
         create_schema_version_table(connection)
         assert sqlite_schema_contract_digest(connection) == load_manifest(14).schema_digest
-        # Permit the current shared ORM seeder, then restore the exact v14 tables.
-        connection.exec_driver_sql("ALTER TABLE worlds ADD COLUMN icon_media_id VARCHAR(500)")
-        connection.exec_driver_sql("ALTER TABLE characters ADD COLUMN character_background TEXT NOT NULL DEFAULT ''")
-    with Session(engine) as db:
+    def seed(db):
         owner = _user("migrate")
         db.add(owner); db.flush()
         world = _world(owner)
         db.add(world); db.flush()
         _, _, wc = _add_world_character(db, world=world, suffix="migrant", feed_mode="keyword_search_v1")
         wc.autonomous_enabled = False
-        db.commit()
+        db.flush()
+    populate_frozen_schema(engine, metadata, seed)
     with engine.begin() as connection:
-        connection.exec_driver_sql("ALTER TABLE worlds DROP COLUMN icon_media_id")
-        connection.exec_driver_sql("ALTER TABLE characters DROP COLUMN character_background")
         assert sqlite_schema_contract_digest(connection) == load_manifest(14).schema_digest
         before = capture_delta(connection)
         upgrade(connection)

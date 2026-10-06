@@ -27,6 +27,7 @@ class AgentRun(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    input_snapshot: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
 
 class AgentActivityLog(Base):
@@ -144,6 +145,8 @@ class AgentSlot(Base):
         onupdate=func.now(),
         nullable=False,
     )
+    timezone_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    admission_metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
 
 class AgentActivitySetting(Base):

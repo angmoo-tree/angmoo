@@ -12,6 +12,7 @@ from app.domains.world_characters.service.owner_identity import OwnerControlledI
 from app.domains.world_characters.contracts.owner_identity import OwnerControlledIdentitySnapshot
 from app.domains.worlds.models import WorldMembership
 from app.domains.worlds.service.character_entry import get_character_entry_membership
+from app.runtime.social.post_authors import batch_world_post_authors
 
 
 class RuntimeManualFeedReferences:
@@ -20,6 +21,10 @@ class RuntimeManualFeedReferences:
         self._actors = {}
         self._characters = {}
         self._active = None
+        self._memberships = {}
+
+    def author_profiles(self, *, world_id: str, author_ids: set[str]):
+        return batch_world_post_authors(self.db, world_id=world_id, author_ids=author_ids)
 
     def prepare_authors(self, *, world_id: str, author_ids: set[str]) -> None:
         rows = list(self.db.execute(select(WorldCharacter, Character, WorldMembership)
@@ -28,6 +33,7 @@ class RuntimeManualFeedReferences:
             .where(WorldCharacter.id.in_(author_ids), WorldCharacter.world_id == world_id)))
         self._actors = {actor.id: actor for actor, _, _ in rows}
         self._characters = {character.id: character for _, character, _ in rows}
+        self._memberships = {membership.id: membership for _, _, membership in rows}
         self._active = {(world_id, actor.id) for actor, character, membership in rows
             if actor.status == "active" and membership.status == "active"
             and membership.world_id == world_id and character.deleted_at is None
@@ -47,6 +53,8 @@ class RuntimeManualFeedReferences:
         return get_character(self.db, character_id)
 
     def get_membership(self, membership_id: str) -> SourceMembership | None:
+        if membership_id in self._memberships:
+            return self._memberships[membership_id]
         return get_character_entry_membership(self.db, membership_id)
 
     def active_author_id(self, *, world_id: str, author_world_character_id: str) -> str | None:

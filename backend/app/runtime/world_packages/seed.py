@@ -217,6 +217,9 @@ class SqlAlchemyWorldPackageDestinationSeed:
             )
             from app.domains.world_characters.models import CharacterWorldBinding
             self._db.add(CharacterWorldBinding(character_id=character_id, world_id=world_outcome.world.id))
+            from app.domains.characters.service.profile import get_character
+            from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+            initialize_created_world_character(self._db, character=get_character(self._db, character_id), world_character=world_character)
             mappings.append(
                 WorldPackageImportIdMapping(
                     source_ref=f"world-characters/{_local_ref(item.character_ref)}",

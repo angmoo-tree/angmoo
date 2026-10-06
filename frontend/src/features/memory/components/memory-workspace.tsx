@@ -1,4 +1,10 @@
 "use client";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { EpisodeMemoryDetail } from "./episode-memory-detail";
 
 import {
@@ -60,6 +66,9 @@ export function MemoryWorkspace({
   getLocalWorldSurface,
   listWorldCharacterProfiles,
 }: MemoryWorkspaceProps) {
+  const formatNumber = useUiNumberFormatter();
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("memory");
   const router = useRuntimeRouter();
   const [worlds, setWorlds] = useState<MemoryWorldOption[]>([]);
   const [characters, setCharacters] = useState<MemoryCharacterOption[]>([]);
@@ -94,17 +103,22 @@ export function MemoryWorkspace({
   const refreshBatchItems = useCallback(() => setRevision((value) => value + 1), []);
 
   const syncRoute = useCallback((nextWorld: string, nextSubject: string, nextMemory = "") => {
+    // Static replace performs a document navigation. A scope already present
+    // in the URL must not reload itself each time an empty roster is read.
+    if (nextWorld === (initialWorldId ?? "") && nextSubject === (initialSubjectId ?? "")
+        && nextMemory === (initialMemoryId ?? "")) return;
     const query = new URLSearchParams();
     if (nextWorld) query.set("world", nextWorld);
     if (nextSubject) query.set("subject", nextSubject);
     if (nextMemory) query.set("memory", nextMemory);
     router.replace(`/memory${query.size ? `?${query}` : ""}`);
-  }, [router]);
+  }, [router, initialWorldId, initialSubjectId, initialMemoryId]);
 
   useEffect(() => {
     const controller = new AbortController();
     void getLocalWorldSurface("device_home", { signal: controller.signal })
       .then(async (worldRead) => {
+        if (controller.signal.aborted) return;
         const available = worldRead.items.filter((world) => world.launchable);
         setWorlds(available);
         const requestedWorldExists = available.some((world) => world.world_id === worldId);
@@ -124,6 +138,7 @@ export function MemoryWorkspace({
         const characterRead = await listWorldCharacterProfiles(selectedWorld, {
           signal: controller.signal,
         });
+        if (controller.signal.aborted) return;
         setCharacters(characterRead.items);
         const requestedSubjectExists = characterRead.items.some(
           (character) => character.world_character_id === subjectId,
@@ -147,6 +162,7 @@ export function MemoryWorkspace({
           getMemorySetting(selectedWorld, selectedSubject, { signal: controller.signal }),
           listMemoryItems(selectedWorld, selectedSubject, { signal: controller.signal }),
         ]);
+        if (controller.signal.aborted) return;
         setSetting(settingRead);
         setList(listRead);
         setPagePhase("idle");
@@ -155,11 +171,11 @@ export function MemoryWorkspace({
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
-        setError(memoryErrorMessage(reason));
+        setError(uiText(memoryErrorMessage(reason)));
         setPhase("error");
       });
     return () => controller.abort();
-  }, [getLocalWorldSurface, listWorldCharacterProfiles, revision, subjectId, syncRoute, worldId]);
+  }, [getLocalWorldSurface, listWorldCharacterProfiles, revision, subjectId, syncRoute, uiText, worldId]);
 
   useEffect(() => {
     if (!worldId || !subjectId || !memoryId || phase !== "ready") return;
@@ -281,8 +297,8 @@ export function MemoryWorkspace({
         setSetting(result.setting);
         setList((current) => current ? { ...current, memory_enabled: result.setting.enabled } : current);
         setMutationNotice(ownerRequest.enabled
-          ? "기억을 켰어요. 이제부터 검증된 새 기억을 쌓을 수 있습니다."
-          : "기억을 껐어요. 새 기억 생성과 회상은 중단되고 기존 기록은 관리할 수 있습니다.");
+          ? uiText("기억을 켰어요. 이제부터 검증된 새 기억을 쌓을 수 있습니다.")
+          : uiText("기억을 껐어요. 새 기억 생성과 회상은 중단되고 기존 기록은 관리할 수 있습니다."));
       } else if (ownerRequest.kind === "pin") {
         const result = await setMemoryPin(worldId, subjectId, ownerRequest.memoryId, {
           expected_version: ownerRequest.expectedVersion,
@@ -295,8 +311,8 @@ export function MemoryWorkspace({
         } : current);
         setDetail((current) => current?.id === result.item.id ? { ...current, ...result.item } : current);
         setMutationNotice(ownerRequest.pinned
-          ? "이 기억을 고정했어요. 보존 기간이 지나도 유지됩니다."
-          : "기억 고정을 해제했어요. 다시 보존 기간 정책을 따릅니다.");
+          ? uiText("이 기억을 고정했어요. 보존 기간이 지나도 유지됩니다.")
+          : uiText("기억 고정을 해제했어요. 다시 보존 기간 정책을 따릅니다."));
       } else if (ownerRequest.kind === "correct") {
         const result = await correctMemoryItem(worldId, subjectId, ownerRequest.memoryId, {
           expected_item_version: ownerRequest.expectedItemVersion,
@@ -307,7 +323,7 @@ export function MemoryWorkspace({
         setCorrectionOpen(false);
         setCorrectionText("");
         await reloadCurrentScope(result.item.id);
-        setMutationNotice("기억을 정정했어요. 이전 기억은 교체됨으로 남고 새 기억만 회상에 사용됩니다.");
+        setMutationNotice(uiText("기억을 정정했어요. 이전 기억은 교체됨으로 남고 새 기억만 회상에 사용됩니다."));
       } else {
         await deleteMemoryItem(worldId, subjectId, ownerRequest.memoryId, {
           expected_version: ownerRequest.expectedVersion,
@@ -315,13 +331,13 @@ export function MemoryWorkspace({
         });
         setDeleteOpen(false);
         await reloadCurrentScope("");
-        setMutationNotice("기억을 삭제했어요. 이후 회상에서는 즉시 제외되며 검색용 사본은 자동으로 정리됩니다.");
+        setMutationNotice(uiText("기억을 삭제했어요. 이후 회상에서는 즉시 제외되며 검색용 사본은 자동으로 정리됩니다."));
       }
     } catch (reason: unknown) {
       const stale = reason instanceof MemoryApiError && reason.status === 409;
       if (ownerRequest.kind === "correct") setCorrectionOpen(false);
       if (ownerRequest.kind === "delete") setDeleteOpen(false);
-      setMutationFailure({ message: mutationErrorMessage(reason), request: ownerRequest, stale });
+      setMutationFailure({ message: uiText(mutationErrorMessage(reason)), request: ownerRequest, stale });
     } finally {
       mutationLockRef.current = false;
       setMutationKind(null);
@@ -383,18 +399,18 @@ export function MemoryWorkspace({
   return (
     <main className={styles.shell} data-main-landmark-owner="memory" data-product-shell="memory">
       <header className={styles.header}>
-        <LocalProductLink ariaLabel="Device Home으로 돌아가기" className={styles.homeLink} href={PRODUCT_ROUTES.deviceHome}>
+        <LocalProductLink toolbarEquivalent="home" ariaLabel={uiText("Device Home으로 돌아가기")} className={styles.homeLink} href={PRODUCT_ROUTES.deviceHome}>
           <ArrowLeft aria-hidden="true" size={20} />
         </LocalProductLink>
         <div className={styles.brandMark}><BrainCircuit aria-hidden="true" size={24} /></div>
         <div>
           <p className={styles.kicker}>LOCAL MEMORY</p>
-          <h1>기억</h1>
-          <p>Character가 보존한 기억과 현재 확인 가능한 근거를 관리합니다.</p>
+          <h1>{uiText("기억")}</h1>
+          <p>{uiText("Character가 보존한 기억과 현재 확인 가능한 근거를 관리합니다.")}</p>
         </div>
       </header>
 
-      <section className={styles.scopeBar} aria-label="기억 범위">
+      <section className={styles.scopeBar} aria-label={uiText("기억 범위")}>
         <label>
           <span>World</span>
           <select disabled={mutationKind !== null} onChange={(event) => chooseWorld(event.target.value)} value={worldId}>
@@ -402,7 +418,7 @@ export function MemoryWorkspace({
           </select>
         </label>
         <label>
-          <span>기억하는 Character</span>
+          <span>{uiText("기억하는 Character")}</span>
           <select disabled={mutationKind !== null} onChange={(event) => chooseSubject(event.target.value)} value={subjectId}>
             {characters.map((character) => <option key={character.world_character_id} value={character.world_character_id}>{character.display_name}</option>)}
           </select>
@@ -415,48 +431,48 @@ export function MemoryWorkspace({
         ) : null}
       </section>
 
-      {phase === "loading" ? <MemoryState icon={<LoaderCircle className={styles.spin} />} title="기억을 불러오는 중" /> : null}
-      {phase === "empty-scope" ? <MemoryState icon={<BookOpenText />} title="관리할 수 있는 기억 범위가 없어요" description="실행 가능한 World와 active Character를 먼저 준비해 주세요." /> : null}
-      {phase === "error" ? <MemoryState icon={<BrainCircuit />} title="기억을 불러오지 못했어요" description={error ?? undefined} action={<Button compact onClick={() => { setPhase("loading"); setError(null); setRevision((value) => value + 1); }} variant="secondary">다시 시도</Button>} /> : null}
+      {phase === "loading" ? <MemoryState icon={<LoaderCircle className={styles.spin} />} title={uiText("기억을 불러오는 중")} /> : null}
+      {phase === "empty-scope" ? <MemoryState icon={<BookOpenText />} title={uiText("관리할 수 있는 기억 범위가 없어요")} description={uiText("실행 가능한 World와 active Character를 먼저 준비해 주세요.")} /> : null}
+      {phase === "error" ? <MemoryState failed icon={<BrainCircuit />} title={uiText("기억을 불러오지 못했어요")} description={error ?? undefined} action={<Button compact onClick={() => { setPhase("loading"); setError(null); setRevision((value) => value + 1); }} variant="secondary">{uiText("다시 시도")}</Button>} /> : null}
 
       {phase === "ready" && list ? (
         <div className={styles.workspace}>
-          <section className={styles.listPane} aria-label="저장된 기억 목록">
+          <section className={styles.listPane} aria-label={uiText("저장된 기억 목록")}>
             <div className={styles.scopeNotice} data-memory-enabled={setting?.enabled ?? false}>
               <ShieldCheck aria-hidden="true" size={18} />
               <div className={styles.scopeNoticeCopy}>
-                <strong>{setting?.enabled ? "기억 사용 중" : "기억이 꺼져 있어요"}</strong>
-                <p>{setting?.enabled ? "검증된 새 기억을 만들고 이후 대화에서 회상합니다." : "새 장기 기억 생성과 회상은 중단되지만 기존 기억은 관리할 수 있습니다. 현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다."}</p>
+                <strong>{setting?.enabled ? uiText("기억 사용 중") : uiText("기억이 꺼져 있어요")}</strong>
+                <p>{setting?.enabled ? uiText("검증된 새 기억을 만들고 이후 대화에서 회상합니다.") : uiText("새 장기 기억 생성과 회상은 중단되지만 기존 기억은 관리할 수 있습니다. 현재 대화와 오늘의 World SNS 활동은 대화 연속성을 위해 계속 사용할 수 있습니다.")}</p>
               </div>
-              <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel="저장 중" onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
-                {setting?.enabled ? "기억 끄기" : "기억 켜기"}
+              <Button aria-pressed={setting?.enabled ?? false} compact disabled={!setting || mutationKind !== null} loading={mutationKind === "setting"} loadingLabel={uiText("저장 중")} onClick={toggleMemory} variant={setting?.enabled ? "secondary" : "primary"}>
+                {setting?.enabled ? uiText("기억 끄기") : uiText("기억 켜기")}
               </Button>
             </div>
             {mutationNotice ? <p className={styles.mutationNotice} role="status">{mutationNotice}</p> : null}
-            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? "현재 캐릭터"} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
+            <MemoryBatchControls subjectName={selectedCharacter?.display_name ?? uiText("현재 캐릭터")} scopeVersion={setting?.version ?? 0} key={`${worldId}:${subjectId}:${setting?.version}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} onCompleted={refreshBatchItems} />
             <MemoryEmbeddingControls key={`embedding:${worldId}:${subjectId}`} worldId={worldId} subjectId={subjectId} disabled={mutationKind !== null} acquire={acquireBatch} release={releaseBatch} />
             {mutationFailure ? (
               <div className={styles.mutationError} role="alert">
                 <p>{mutationFailure.message}</p>
                 <Button compact onClick={() => {
                   if (mutationFailure.stale) {
-                    void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: "최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요." }));
+                    void reloadCurrentScope().catch(() => setMutationFailure({ ...mutationFailure, message: uiText("최신 상태도 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요.") }));
                   } else {
                     void runOwnerMutation(mutationFailure.request);
                   }
-                }} variant="secondary">{mutationFailure.stale ? "최신 상태 불러오기" : "다시 시도"}</Button>
+                }} variant="secondary">{mutationFailure.stale ? uiText("최신 상태 불러오기") : uiText("다시 시도")}</Button>
               </div>
             ) : null}
             {list.items.length === 0 ? (
-              <MemoryState icon={<BookOpenText />} title="아직 저장된 기억이 없어요" description="기억이 켜진 뒤 성공한 대화와 활동에서 검증된 기억이 생기면 여기에 표시됩니다." />
+              <MemoryState icon={<BookOpenText />} title={uiText("아직 저장된 기억이 없어요")} description={uiText("기억이 켜진 뒤 성공한 대화와 활동에서 검증된 기억이 생기면 여기에 표시됩니다.")} />
             ) : (
               <ol className={styles.memoryList}>
                 {list.items.map((item) => (
                   <li key={item.id}>
                     <button aria-current={item.id === memoryId ? "true" : undefined} disabled={mutationKind !== null} onClick={() => chooseMemory(item.id)} type="button">
-                      <span className={styles.kind}>{memoryKindLabel(item.memory_kind)}{item.pinned ? " · 고정" : ""}</span>
+                      <span className={styles.kind}>{uiText(memoryKindLabel(item.memory_kind))}{item.pinned ? uiText("· 고정") : ""}</span>
                       <strong>{item.summary}</strong>
-                      <span className={styles.itemMeta}><Clock3 aria-hidden="true" size={14} />{formatDate(item.formed_at)} · {lifecycleLabel(item.lifecycle)}</span>
+                      <span className={styles.itemMeta}><Clock3 aria-hidden="true" size={14} />{formatDate(item.formed_at)} · {uiText(lifecycleLabel(item.lifecycle))}</span>
                     </button>
                   </li>
                 ))}
@@ -464,39 +480,39 @@ export function MemoryWorkspace({
             )}
             {list.next_cursor ? (
               <div className={styles.pagination}>
-                <Button compact disabled={pagePhase === "loading" || mutationKind !== null} onClick={() => void loadMore()} variant="secondary">{pagePhase === "loading" ? "더 불러오는 중" : "기억 더 보기"}</Button>
-                {pagePhase === "error" ? <p role="alert">기억을 더 불러오지 못했어요. 다시 시도해 주세요.</p> : null}
+                <Button compact disabled={pagePhase === "loading" || mutationKind !== null} onClick={() => void loadMore()} variant="secondary">{pagePhase === "loading" ? uiText("더 불러오는 중") : uiText("기억 더 보기")}</Button>
+                {pagePhase === "error" ? <p role="alert">{uiText("기억을 더 불러오지 못했어요. 다시 시도해 주세요.")}</p> : null}
               </div>
             ) : null}
           </section>
-          <section className={styles.detailPane} aria-label="기억 상세">
-            {detailPhase === "idle" ? <MemoryState icon={<BookOpenText />} title="기억을 선택해 주세요" description="요약, 생명주기, 현재 다시 확인한 canonical 근거와 owner control을 볼 수 있습니다." /> : null}
-            {detailPhase === "loading" ? <MemoryState icon={<LoaderCircle className={styles.spin} />} title="근거를 다시 확인하는 중" /> : null}
-            {detailPhase === "error" ? <MemoryState icon={<BrainCircuit />} title="이 기억의 근거를 확인하지 못했어요" description="목록 범위는 유지됩니다. 잠시 뒤 다시 선택해 주세요." /> : null}
+          <section className={styles.detailPane} aria-label={uiText("기억 상세")}>
+            {detailPhase === "idle" ? <MemoryState icon={<BookOpenText />} title={uiText("기억을 선택해 주세요")} description={uiText("요약, 생명주기, 현재 다시 확인한 canonical 근거와 owner control을 볼 수 있습니다.")} /> : null}
+            {detailPhase === "loading" ? <MemoryState icon={<LoaderCircle className={styles.spin} />} title={uiText("근거를 다시 확인하는 중")} /> : null}
+            {detailPhase === "error" ? <MemoryState failed icon={<BrainCircuit />} title={uiText("이 기억의 근거를 확인하지 못했어요")} description={uiText("목록 범위는 유지됩니다. 잠시 뒤 다시 선택해 주세요.")} /> : null}
             {detailPhase === "ready" && detail ? <MemoryDetail detail={detail} memoryEnabled={setting?.enabled ?? false} mutationKind={mutationKind} onCorrect={openCorrection} onDelete={() => { setMutationFailure(null); setDeleteOpen(true); }} onSelectMemory={chooseMemory} onTogglePin={togglePin} /> : null}
           </section>
         </div>
       ) : null}
 
       <Dialog
-        actions={<><Button disabled={mutationKind !== null} onClick={() => setCorrectionOpen(false)} variant="secondary">취소</Button><Button disabled={!correctionText.trim() || correctionText.trim().length > 2_000} loading={mutationKind === "correct"} loadingLabel="정정 중" onClick={submitCorrection}>정정 저장</Button></>}
-        description="기존 canonical 근거를 다시 확인한 뒤 새 기억으로 교체합니다. 이전 기억은 이력으로 남지만 회상에는 사용되지 않습니다."
+        actions={<><Button disabled={mutationKind !== null} onClick={() => setCorrectionOpen(false)} variant="secondary">{uiText("취소")}</Button><Button disabled={!correctionText.trim() || correctionText.trim().length > 2_000} loading={mutationKind === "correct"} loadingLabel={uiText("정정 중")} onClick={submitCorrection}>{uiText("정정 저장")}</Button></>}
+        description={uiText("기존 canonical 근거를 다시 확인한 뒤 새 기억으로 교체합니다. 이전 기억은 이력으로 남지만 회상에는 사용되지 않습니다.")}
         initialFocusRef={correctionRef}
         onOpenChange={(open) => { if (mutationKind === null) setCorrectionOpen(open); }}
         open={correctionOpen}
-        title="기억 정정"
+        title={uiText("기억 정정")}
       >
-        <Field error={correctionText.trim().length > 2_000 ? "기억 요약은 2,000자 이하여야 합니다." : undefined} helperText={`${correctionText.trim().length.toLocaleString("ko-KR")} / 2,000자`} label="정정할 기억 요약" required>
+        <Field error={correctionText.trim().length > 2_000 ? uiText("기억 요약은 2,000자 이하여야 합니다.") : undefined} helperText={uiText("{{value0}} / 2,000자", {value0: formatNumber(correctionText.trim().length)})} label={uiText("정정할 기억 요약")} required>
           {(field) => <Textarea {...field} maxLength={2_001} onChange={(event) => setCorrectionText(event.target.value)} ref={correctionRef} rows={7} value={correctionText} />}
         </Field>
       </Dialog>
 
       <Dialog
-        actions={<><Button disabled={mutationKind !== null} onClick={() => setDeleteOpen(false)} variant="secondary">취소</Button><Button loading={mutationKind === "delete"} loadingLabel="삭제 중" onClick={confirmDelete} variant="danger">기억 삭제</Button></>}
-        description="삭제한 기억은 이후 대화에서 즉시 회상되지 않습니다. 이 작업은 되돌릴 수 없습니다."
+        actions={<><Button disabled={mutationKind !== null} onClick={() => setDeleteOpen(false)} variant="secondary">{uiText("취소")}</Button><Button loading={mutationKind === "delete"} loadingLabel={uiText("삭제 중")} onClick={confirmDelete} variant="danger">{uiText("기억 삭제")}</Button></>}
+        description={uiText("삭제한 기억은 이후 대화에서 즉시 회상되지 않습니다. 이 작업은 되돌릴 수 없습니다.")}
         onOpenChange={(open) => { if (mutationKind === null) setDeleteOpen(open); }}
         open={deleteOpen}
-        title="이 기억을 삭제할까요?"
+        title={uiText("이 기억을 삭제할까요?")}
       >
         <p className={styles.dialogCopy}>{detail?.summary}</p>
       </Dialog>
@@ -513,37 +529,39 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
   onSelectMemory: (memoryId: string) => void;
   onTogglePin: () => void;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("memory");
   const active = detail.lifecycle === "active";
   return (
     <article className={styles.detail}>
-      <p className={styles.kind}>{memoryKindLabel(detail.memory_kind)}</p>
+      <p className={styles.kind}>{uiText(memoryKindLabel(detail.memory_kind))}</p>
       <h2>{detail.summary}</h2>
       {active ? (
-        <div className={styles.ownerActions} aria-label="기억 관리">
-          <Button compact disabled={mutationKind !== null} loading={mutationKind === "pin"} loadingLabel="저장 중" onClick={onTogglePin} variant="secondary">{detail.pinned ? <PinOff aria-hidden="true" size={16} /> : <Pin aria-hidden="true" size={16} />}{detail.pinned ? "고정 해제" : "고정"}</Button>
-          <Button compact disabled={!memoryEnabled || mutationKind !== null} onClick={onCorrect} variant="secondary"><PencilLine aria-hidden="true" size={16} /> 정정</Button>
-          <Button compact disabled={mutationKind !== null} onClick={onDelete} variant="danger"><Trash2 aria-hidden="true" size={16} /> 삭제</Button>
+        <div className={styles.ownerActions} aria-label={uiText("기억 관리")}>
+          <Button compact disabled={mutationKind !== null} loading={mutationKind === "pin"} loadingLabel={uiText("저장 중")} onClick={onTogglePin} variant="secondary">{detail.pinned ? <PinOff aria-hidden="true" size={16} /> : <Pin aria-hidden="true" size={16} />}{detail.pinned ? uiText("고정 해제") : uiText("고정")}</Button>
+          <Button compact disabled={!memoryEnabled || mutationKind !== null} onClick={onCorrect} variant="secondary"><PencilLine aria-hidden="true" size={16} /> {uiText("정정")}</Button>
+          <Button compact disabled={mutationKind !== null} onClick={onDelete} variant="danger"><Trash2 aria-hidden="true" size={16} /> {uiText("삭제")}</Button>
         </div>
       ) : null}
-      {active && !memoryEnabled ? <p className={styles.controlHint}>새 기억으로 정정하려면 먼저 이 범위의 기억을 켜 주세요. 고정 해제와 삭제는 계속할 수 있습니다.</p> : null}
+      {active && !memoryEnabled ? <p className={styles.controlHint}>{uiText("새 기억으로 정정하려면 먼저 이 범위의 기억을 켜 주세요. 고정 해제와 삭제는 계속할 수 있습니다.")}</p> : null}
       <dl className={styles.facts}>
-        <div><dt>상태</dt><dd>{lifecycleLabel(detail.lifecycle)}</dd></div>
-        <div><dt>형성</dt><dd>{formatDate(detail.formed_at)}</dd></div>
-        <div><dt>보존</dt><dd>{detail.pinned ? "고정됨" : `${detail.retention_days}일 정책`}</dd></div>
-        {detail.related_character ? <div><dt>관련 Character</dt><dd>{detail.related_character.display_name}</dd></div> : null}
-        {detail.superseded_by_memory_id ? <div><dt>교체 상태</dt><dd><button className={styles.inlineButton} onClick={() => onSelectMemory(detail.superseded_by_memory_id ?? "")} type="button">새 기억 열기</button></dd></div> : null}
+        <div><dt>{uiText("상태")}</dt><dd>{uiText(lifecycleLabel(detail.lifecycle))}</dd></div>
+        <div><dt>{uiText("형성")}</dt><dd>{formatDate(detail.formed_at)}</dd></div>
+        <div><dt>{uiText("보존")}</dt><dd>{detail.pinned ? uiText("고정됨") : uiText("{{value0}}일 정책", {value0: detail.retention_days})}</dd></div>
+        {detail.related_character ? <div><dt>{uiText("관련 Character")}</dt><dd>{detail.related_character.display_name}</dd></div> : null}
+        {detail.superseded_by_memory_id ? <div><dt>{uiText("교체 상태")}</dt><dd><button className={styles.inlineButton} onClick={() => onSelectMemory(detail.superseded_by_memory_id ?? "")} type="button">{uiText("새 기억 열기")}</button></dd></div> : null}
       </dl>
       <section className={styles.evidenceSection}>
         {detail.episode && <EpisodeMemoryDetail episode={detail.episode} />}
-        <div className={styles.sectionHeading}><h3>근거</h3><span>{detail.provenance_summary}</span></div>
-        {detail.evidence.length === 0 ? <p className={styles.muted}>연결된 근거가 없습니다.</p> : (
+        <div className={styles.sectionHeading}><h3>{uiText("근거")}</h3><span>{detail.provenance_summary}</span></div>
+        {detail.evidence.length === 0 ? <p className={styles.muted}>{uiText("연결된 근거가 없습니다.")}</p> : (
           <ol className={styles.evidenceList}>
             {detail.evidence.map((evidence, index) => (
               <li key={`${evidence.source_kind}:${evidence.source_created_at}:${index}`} data-availability={evidence.availability}>
-                <div className={styles.evidenceHeading}><strong>{evidence.source_label}</strong><span>{availabilityLabel(evidence.availability)}</span></div>
+                <div className={styles.evidenceHeading}><strong>{evidence.source_label}</strong><span>{uiText(availabilityLabel(evidence.availability))}</span></div>
                 <time dateTime={evidence.source_created_at}>{formatDate(evidence.source_created_at)}</time>
-                {evidence.excerpt ? <p>{evidence.excerpt}</p> : <p className={styles.muted}>원문은 현재 사용할 수 없습니다.</p>}
-                {evidence.canonical_href ? <LocalProductLink ariaLabel={`${evidence.source_label} 원문 열기`} className={styles.sourceLink} href={evidence.canonical_href}>원문 열기 <ExternalLink aria-hidden="true" size={15} /></LocalProductLink> : null}
+                {evidence.excerpt ? <p>{evidence.excerpt}</p> : <p className={styles.muted}>{uiText("원문은 현재 사용할 수 없습니다.")}</p>}
+                {evidence.canonical_href ? <LocalProductLink ariaLabel={uiText("{{value0}} 원문 열기", {value0: evidence.source_label})} className={styles.sourceLink} href={evidence.canonical_href}>{uiText("원문 열기")}<ExternalLink aria-hidden="true" size={15} /></LocalProductLink> : null}
               </li>
             ))}
           </ol>
@@ -553,8 +571,8 @@ function MemoryDetail({ detail, memoryEnabled, mutationKind, onCorrect, onDelete
   );
 }
 
-function MemoryState({ icon, title, description, action }: { icon: ReactNode; title: string; description?: string; action?: ReactNode }) {
-  return <div className={styles.state} role={title.includes("못") ? "alert" : "status"}>{icon}<h2>{title}</h2>{description ? <p>{description}</p> : null}{action}</div>;
+function MemoryState({ icon, title, description, action, failed = false }: { icon: ReactNode; title: string; description?: string; action?: ReactNode; failed?: boolean }) {
+  return <div className={styles.state} role={failed ? "alert" : "status"}>{icon}<h2>{title}</h2>{description ? <p>{description}</p> : null}{action}</div>;
 }
 
 function newMutationKey(prefix: string) {
@@ -565,7 +583,6 @@ function newMutationKey(prefix: string) {
 function memoryKindLabel(kind: string) { return ({ OWNER_PREFERENCE: "주인 선호", AUTOBIOGRAPHICAL_EVENT: "경험", DIRECTIONAL_RELATIONSHIP: "관계", THREAD_SUMMARY: "대화 요약", ACCEPTED_JOINT_COMMITMENT: "함께한 약속" } as Record<string, string>)[kind] ?? "기억"; }
 function lifecycleLabel(value: string) { return ({ active: "활성", expired: "보존 기간 만료", superseded: "새 기억으로 교체됨", deleted: "삭제됨" } as Record<string, string>)[value] ?? value; }
 function availabilityLabel(value: string) { return ({ available: "현재 확인됨", deleted: "원문 삭제됨", unavailable: "현재 확인 불가" } as Record<string, string>)[value] ?? value; }
-function formatDate(value: string) { return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)); }
 function memoryErrorMessage(reason: unknown) {
   if (reason instanceof MemoryApiError && reason.status === 404) return "이 World 또는 Character의 기억 범위를 찾을 수 없습니다.";
   if (reason instanceof MemoryApiError && reason.status === 403) return "이 기억 범위를 볼 권한이 없습니다.";

@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 
@@ -126,11 +128,13 @@ export type BottomNavigationProps = {
 
 export function BottomNavigation({
   activeId,
-  ariaLabel = "주요 메뉴",
+  ariaLabel: providedAriaLabel,
   className,
   items,
   onSelect,
 }: BottomNavigationProps) {
+  const uiText = useUiText("shell");
+  const ariaLabel = providedAriaLabel ?? uiText("주요 메뉴");
   const activeItemRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
 
   useEffect(() => {

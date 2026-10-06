@@ -56,7 +56,13 @@ export type WorldChatThreadRead = {
 export type WorldChatThreadListRead = {
   items: WorldChatThreadRead[];
   ambiguous_legacy_count: number;
-  max_threads: number;
+  max_threads: number | null;
+};
+
+export type WorldChatThreadDeleteRead = {
+  world_id: string;
+  thread_id: string;
+  outcome: "deleted" | "already_deleted";
 };
 
 export type WorldChatThreadCreate = {

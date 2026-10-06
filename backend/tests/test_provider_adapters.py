@@ -159,7 +159,8 @@ def test_gemini_request_evidence_matches_sdk_input_without_prompt_or_enum_values
         response_schema=schema, response_mime_type="application/json",
         diagnostic_callback=evidence.append)
     gemini._generate_content_sync(request)
-    assert len(received) == len(evidence) == 1
+    assert len(received) == 1
+    assert [item["capture_boundary"] for item in evidence] == ["sdk_input", "sdk_response"]
     actual = received[0]["config"].model_dump(by_alias=True, exclude_none=True)
     assert actual["responseJsonSchema"] == schema
     assert evidence[0]["schema_field"] == "responseJsonSchema"
@@ -190,3 +191,51 @@ def test_gemini_diagnostic_callback_failure_does_not_change_sdk_call(monkeypatch
     assert len(calls) == 2
     assert calls[0]["config"] == calls[1]["config"]
     assert calls[0]["contents"] == calls[1]["contents"]
+
+
+@pytest.mark.parametrize("block_reason", [types.BlockedReason.SAFETY, types.BlockedReason.PROHIBITED_CONTENT, None])
+def test_gemini_empty_response_evidence_retains_block_code_without_feedback_text(monkeypatch, block_reason):
+    evidence = []
+    private = "private-response-message-and-credential"
+    response = SimpleNamespace(text="", parsed=None, usage_metadata=None, candidates=[],
+        prompt_feedback=SimpleNamespace(block_reason=block_reason, block_reason_message=private,
+            safety_ratings=[SimpleNamespace(message=private)]))
+
+    class Client:
+        def __init__(self, **kwargs):
+            self.models = SimpleNamespace(generate_content=lambda **kw: response)
+
+    monkeypatch.setattr(gemini.genai, "Client", Client)
+    result = gemini._generate_content_sync(replace(_request(), diagnostic_callback=evidence.append))
+    details = evidence[-1]
+    assert result.text == "" and result.parsed is None
+    assert details["capture_boundary"] == "sdk_response"
+    assert details["candidate_count"] == 0
+    assert details["prompt_feedback_present"] is True
+    assert details["prompt_block_reason"] == (block_reason.value if block_reason else None)
+    assert details["candidate_finish_reasons"] == []
+    assert private not in str(evidence)
+
+
+@pytest.mark.parametrize("reason", [types.FinishReason.STOP, types.FinishReason.MAX_TOKENS, types.FinishReason.SAFETY])
+def test_gemini_response_evidence_retains_candidate_finishes_and_content_counts(reason):
+    response = types.GenerateContentResponse(candidates=[types.Candidate(finish_reason=reason,
+        content=types.Content(parts=[types.Part(text="private-generated-text")]))])
+    evidence = gemini._response_evidence(response)
+    assert evidence["candidate_count"] == 1
+    assert evidence["candidate_finish_reasons"] == [reason.value]
+    assert evidence["candidate_part_counts"] == [1]
+    assert evidence["candidate_text_part_counts"] == [1]
+    assert evidence["prompt_feedback_present"] is False
+    assert "private-generated-text" not in str(evidence)
+
+
+def test_gemini_response_evidence_bounds_candidates_and_rejects_unknown_enum_text():
+    response = SimpleNamespace(candidates=[SimpleNamespace(finish_reason="private-reason", content=None)] * 12,
+        prompt_feedback=SimpleNamespace(block_reason="private-block-message"), parsed=None)
+    evidence = gemini._response_evidence(response)
+    assert evidence["candidate_count"] == 12
+    assert evidence["candidate_metadata_truncated"] is True
+    assert evidence["candidate_finish_reasons"] == ["UNKNOWN"] * 8
+    assert evidence["prompt_block_reason"] == "UNKNOWN"
+    assert "private-" not in str(evidence)

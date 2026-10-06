@@ -10,7 +10,7 @@ from app.runtime.relationships.experience_metrics import post_revision
 
 class InboxLane(SocialLane):
     async def load(self, state):
-        candidates, data = [], {}
+        candidates, data, receipts = [], {}, {}
         from app.runtime.social.langgraph_actions import proposal_for_notification
         groups = pending_conversations(self.ctx.db, actor=self.actor,
             allowed_actions=self.ctx.activity_policy.allowed_actions)
@@ -35,11 +35,12 @@ class InboxLane(SocialLane):
             revisions = {p.id: post_revision(p) for p in posts}
             if group["parent"] is not None:
                 revisions[group["parent"].id] = post_revision(group["parent"])
+            relationship, receipts[key] = self.relationship_preparation(key, group["counterpart_id"])
             candidates.append(Candidate(target_id=key, counterpart_id=group["counterpart_id"],
                 source_ids=[p.id for p in posts], source_revisions=revisions,
                 text="\n".join(f"{p.author_name}: {p.body}" for p in posts),
                 parent_text=group["parent"].body if group["parent"] else "",
-                allowed_actions=allowed, activity_proposal=proposal_input, relationship=self.relationship(group["counterpart_id"]),
+                allowed_actions=allowed, activity_proposal=proposal_input, relationship=relationship,
                 waiting_since=notifications[0].created_at.isoformat()).model_dump())
             data[key] = {"post_id": post.id, "notification_id": notifications[-1].id,
                 "notification_ids": [n.id for n in notifications]}
@@ -48,7 +49,7 @@ class InboxLane(SocialLane):
         from app.runtime.media.social_context import snapshots, allocate
         for candidate in candidates:
             candidate["images"] = snapshots(self.ctx.db, self.ctx.user_id, candidate["source_ids"])
-        return {"candidates": allocate(candidates), "lane_data": data}
+        return {"candidates": allocate(candidates), "lane_data": data, "relationship_validation_receipts": receipts}
 
     async def guard(self, state):
         await super().guard(state)

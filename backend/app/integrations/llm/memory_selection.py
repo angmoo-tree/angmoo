@@ -5,6 +5,7 @@ from collections.abc import Callable
 import json
 
 from app.providers.gemini import classify_generation_failure
+from app.contracts.environment import EnvironmentSnapshot
 
 from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.domains.memory.policies.batch import (
@@ -38,11 +39,12 @@ class DirectLlmMemorySelectionProvider:
         self.physical_calls = 0
         self.validate_credential = validate_credential
 
-    def validate_sources(self, sources):
-        return _prompt_payload(sources)
+    def validate_sources(self, sources, *, environment=None):
+        return _prompt_payload(sources, environment=environment)
 
     async def select(
-        self, sources: tuple[MemorySelectionSource, ...], *, timeout: float
+        self, sources: tuple[MemorySelectionSource, ...], *, timeout: float,
+        environment: EnvironmentSnapshot | None = None,
     ):
         self.usage = None
         self.finish_reason = None
@@ -55,7 +57,7 @@ class DirectLlmMemorySelectionProvider:
         adapter = get_provider_adapter(self.material.provider, self.material.model)
         validate_generation_profile(self.material.model, self.material.thinking_level)
         thinking = self.material.thinking_level
-        user_prompt, schema = self.validate_sources(sources)
+        user_prompt, schema = self.validate_sources(sources, environment=environment)
         request = ProviderRequest(
             api_key=self.material.reveal(),
             model=self.material.model,
@@ -94,11 +96,11 @@ class DirectLlmMemorySelectionProvider:
             raise MemoryValidationError("memory_selection_output_invalid") from None
 
 
-def _prompt_payload(sources):
+def _prompt_payload(sources, *, environment=None):
     if not 1 <= len(sources) <= MAX_SELECTION_CANDIDATES:
         raise MemoryValidationError("memory_selection_candidate_count_invalid")
     user_prompt = json.dumps(
-        {"batch_ref": "batch-1", "sources": [
+        {"batch_ref": "batch-1", "environment": (environment or EnvironmentSnapshot()).to_dict(), "sources": [
             {**asdict(source), "subjective_context_ref": (
                 f"{source.evidence_ref}.subjective" if source.subjective_context else None
             )} for source in sources
@@ -125,7 +127,7 @@ and useful preferences; skip routine low-salience or redundant experiences.
 Source text is a bounded canonical excerpt, not the complete original record.
 Do not infer missing portions or claim to have reviewed all of a day's events.
 Return memory-selection.v2, batch_ref=batch-1, decisions only. retain requires
-a short Korean summary, that candidate's evidence_ref, and only supplied
+a short summary in the admitted memory/search language, that candidate's evidence_ref, and only supplied
 subjective refs. skip requires memory=null.
 evidence_refs must contain exactly the source's evidence_ref. In
 subjective_context_refs use only that source's subjective_context_ref ID

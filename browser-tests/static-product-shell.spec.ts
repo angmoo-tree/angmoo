@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { staticAgentDetail } from "./agent-detail-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
 import { cardMetadataTests } from "./card-metadata-fixture";
+import { uiDManualThread, uiDWorldCharacterManagement } from "./continuity-next-fixture";
 
 cardMetadataTests();
 
@@ -33,7 +34,10 @@ const ROUTES = [
   "/login?returnTo=%2F",
 ] as const;
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, info) => {
+  const origin = new URL(String(info.project.use.baseURL)).origin;
+  await page.route("**/*", route => new URL(route.request().url()).origin === origin
+    ? route.fallback() : route.abort("blockedbyclient"));
   await page.addInitScript(() => {
     Object.assign(window, {
       __ANGMOO_RUNTIME_CONFIG__: {
@@ -49,6 +53,14 @@ test.beforeEach(async ({ page }) => {
       "static-route-probe-token-000000000000",
     );
     const pathname = new URL(route.request().url()).pathname;
+    if (pathname === "/api/v1/auth/local/environment") {
+      await route.fulfill({status:200,contentType:"application/json",json:{
+        installation_id:"synthetic-static",preferred_language:"ko-KR",
+        memory_search_locale:"ko-KR",timezone:"Asia/Seoul",environment_revision:1,
+        timezone_revision:1,confirmed_at:null,synchronization:"active_owner",
+        lease_expires_at:null,lease_token:"synthetic-only-static-lease"}});
+      return;
+    }
     if (pathname === "/api/v1/auth/me") {
       await route.fulfill({
         contentType: "application/json",
@@ -59,6 +71,8 @@ test.beforeEach(async ({ page }) => {
           display_name_updated_at: null,
           display_name_change_available_at: null,
           profile_setup_completed: true,
+          ui_language: "ko",
+          ui_preference_revision: 0,
           feed_content_filter: "all",
           is_admin: false,
         },
@@ -525,8 +539,8 @@ test("static Phone routes share one frame, one scroll owner, and supported navig
       };
     });
     expect(geometry.documentOverflow).toBe(0);
-    expect(geometry.width).toBeLessThanOrEqual(436);
-    if (viewport.width <= 436) {
+    expect(geometry.width).toBe(Math.min(viewport.width, 960));
+    if (viewport.width <= 960) {
       expect(Math.abs(geometry.width - viewport.width)).toBeLessThanOrEqual(1);
     } else {
       expect(Math.abs(geometry.left - (viewport.width - geometry.width) / 2)).toBeLessThanOrEqual(1);
@@ -617,7 +631,7 @@ test("static Character dashboard keeps multiple autonomy states and World-local 
   await expect(alpha).toHaveAttribute("data-character-autonomy-state", "scheduled");
   await expect(beta).toHaveAttribute("data-character-autonomy-state", "running");
   await expect(alpha).toContainText("08:00–22:00 · America/New_York");
-  await expect(alpha).toContainText("08.29 20:30");
+  await expect(alpha).toContainText("08. 30. 09:30");
   const alphaMetrics = alpha.locator("[data-character-metrics]");
   const alphaRecent = alpha.locator("[data-character-recent-activity]");
   const alphaResultLink = alphaRecent.getByRole("link", {
@@ -626,8 +640,8 @@ test("static Character dashboard keeps multiple autonomy states and World-local 
   });
   const betaRecent = beta.locator("[data-character-recent-activity]");
   await expect(alphaRecent).toContainText("게시글 작성");
-  await expect(alphaRecent).toContainText("지저귐을 남겼어요.");
-  await expect(alphaRecent).toContainText("08.29 19:15");
+  await expect(alphaRecent).toContainText("게시글을 남겼어요.");
+  await expect(alphaRecent).toContainText("08. 30. 08:15");
   await expect(alphaRecent.locator("time")).toHaveAttribute(
     "datetime",
     "2026-08-29T23:15:00Z",
@@ -780,7 +794,7 @@ test("static Character dashboard fails closed for malformed, historical, and emp
     .locator('[data-character-id="character-ui-e-malformed"]')
     .locator("[data-character-recent-activity]");
   await expect(malformedResult).toContainText("게시글 작성");
-  await expect(malformedResult).toContainText("지저귐을 남겼어요.");
+  await expect(malformedResult).toContainText("게시글을 남겼어요.");
   await expect(malformedResult.getByRole("link")).toHaveCount(0);
   expect(await malformedResult.innerText()).not.toContain("{broken");
 
@@ -792,7 +806,7 @@ test("static Character dashboard fails closed for malformed, historical, and emp
     "historical",
   );
   await expect(historicalResult).toContainText("최근 활동 기록이 있어요.");
-  await expect(historicalResult).toContainText("08.30 08:15");
+  await expect(historicalResult).toContainText("08. 30. 08:15");
   await expect(historicalResult.getByRole("link")).toHaveCount(0);
 
   const emptyResult = page
@@ -807,7 +821,7 @@ test("static Character dashboard fails closed for malformed, historical, and emp
   await expect(emptyResult.getByRole("link")).toHaveCount(0);
 });
 
-test("Tauri Phone reserves titlebar controls above page-owned header actions", async ({
+test("Tauri Phone puts native route navigation above page-owned header actions", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -844,25 +858,22 @@ test("Tauri Phone reserves titlebar controls above page-owned header actions", a
     { width: 436, height: 880 },
   ]) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto("/agents");
 
-    const controls = page.locator('[data-window-route="/agents"]');
+    const controls = page.locator('[data-desktop-navigation="true"]');
     const createAction = page.getByRole("link", { name: "만들기", exact: true });
     const inset = page.locator('[data-device-titlebar-inset="true"]');
     await expect(controls).toBeVisible();
     await expect(createAction).toBeVisible();
-    await expect(inset).toBeVisible();
+    await expect(inset).toHaveCount(0);
 
-    const [controlsBox, createBox, insetBox] = await Promise.all([
+    const [controlsBox, createBox] = await Promise.all([
       controls.boundingBox(),
       createAction.boundingBox(),
-      inset.boundingBox(),
     ]);
     expect(controlsBox).not.toBeNull();
     expect(createBox).not.toBeNull();
-    expect(insetBox).not.toBeNull();
     expect(createBox!.y).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
-    expect(insetBox!.height).toBeGreaterThanOrEqual(controlsBox!.y + controlsBox!.height);
   }
 
   const navigation = page.getByRole("navigation", { name: "모바일 주요 메뉴" });
@@ -1082,9 +1093,9 @@ test("UI-D0 static global post detail waits for a delayed thread before mounting
 });
 
 for (const failure of [
-  { detail: "static_post_forbidden", kind: "403" },
-  { detail: "static_post_not_found", kind: "404" },
-  { detail: "static_post_runtime_unavailable", kind: "503" },
+  { detail: "static_post_forbidden", kind: "403", message: "이 작업을 수행할 권한이 없습니다." },
+  { detail: "static_post_not_found", kind: "404", message: "게시글을 불러오지 못했어요." },
+  { detail: "static_post_runtime_unavailable", kind: "503", message: "게시글을 불러오지 못했어요." },
 ] as const) {
   test(`UI-D0 static global post detail renders the ${failure.kind} error surface`, async ({
     page,
@@ -1103,7 +1114,8 @@ for (const failure of [
     });
 
     await page.goto(`/posts/post-error-${failure.kind}`);
-    await expect(page.getByText(failure.detail, { exact: true })).toBeVisible();
+    await expect(page.getByText(failure.message, { exact: true })).toBeVisible();
+    await expect(page.getByText(failure.detail, { exact: true })).toHaveCount(0);
     await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toHaveCount(0);
     await expect(page.locator("article")).toHaveCount(0);
     await expect(page.getByTitle("새로고침")).toBeEnabled();
@@ -1120,7 +1132,8 @@ test("UI-D0 static global post detail renders an offline error surface", async (
   );
 
   await page.goto("/posts/post-offline");
-  await expect(page.getByText("Failed to fetch", { exact: true })).toBeVisible();
+  await expect(page.getByText("게시글을 불러오지 못했어요.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Failed to fetch", { exact: true })).toHaveCount(0);
   await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toHaveCount(0);
   await expect(page.locator("article")).toHaveCount(0);
   await expect(page.getByTitle("새로고침")).toBeEnabled();
@@ -1158,7 +1171,7 @@ test("UI-D0 static global post detail manually refreshes after a transient failu
   });
 
   await page.goto("/posts/post-recover");
-  await expect(page.getByText("static_post_temporarily_unavailable", { exact: true })).toBeVisible();
+  await expect(page.getByText("게시글을 불러오지 못했어요.", { exact: true })).toBeVisible();
   expect(threadRequests).toBe(1);
 
   await page.getByTitle("새로고침").click();
@@ -1301,7 +1314,7 @@ test("UI-D0 Tauri Phone keeps post B after a delayed post A response", async ({
   });
 
   try {
-    await page.goto("/");
+    await page.goto("/posts");
     await page.getByText("Stale post A", { exact: true }).click();
     await postARequested;
     await expect(page.getByText("게시글을 불러오는 중", { exact: true })).toBeVisible();
@@ -1516,7 +1529,7 @@ test("static local creation stays available beyond the former hosted count cap",
 
   await page.goto("/agents/new");
 
-  await expect(page.getByRole("heading", { name: "앵무 만들기" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "캐릭터 만들기" })).toBeVisible();
   await expect(page.getByText("앵무 생성 제한")).toHaveCount(0);
   await expect(page.getByText("한도 도달")).toHaveCount(0);
   await expect(page.getByText("3/3")).toHaveCount(0);
@@ -2174,11 +2187,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
       await route.fulfill({
         contentType: "application/json",
         json: {
-          schema_version: "owner-manual-social-v1",
-          world_id: "world-static-probe",
-          owner_world_character_id: "wc-static-owner",
-          items: [
-            {
+          ...uiDManualThread({
               id: "post-static-probe",
               world_id: "world-static-probe",
               author_world_character_id: "wc-static-autonomous",
@@ -2194,8 +2203,7 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
               can_owner_reply: true,
               reply_count: 0,
               like_count: 0,
-            },
-          ],
+            }, [], { ownerId: "wc-static-owner" }),
         },
         status: 200,
       });
@@ -2205,9 +2213,9 @@ test("static P4 evidence opens the exact World-scoped post thread", async ({
   });
 
   await page.goto("/worlds/world-static-probe/posts/post-static-probe");
-  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true })).toBeVisible();
   await expect(page.getByText("World-scoped evidence")).toBeVisible();
-  await expect(page.getByRole("link", { name: "World Feed", exact: true })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "피드로 돌아가기", exact: true })).toHaveAttribute(
     "href",
     /\/worlds\/world-static-probe\/feed\/?$/,
   );
@@ -2344,11 +2352,11 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
     }
     if (
       method === "GET" &&
-      url.pathname === `/api/v1/worlds/${worldId}/world-characters/${respondingId}`
+      url.pathname === `/api/v1/worlds/${worldId}/world-characters/${respondingId}/management`
     ) {
       await route.fulfill({
         contentType: "application/json",
-        json: {
+        json: uiDWorldCharacterManagement({
           schema_version: "world-character-profile-v1",
           world_id: worldId,
           world_character_id: respondingId,
@@ -2359,10 +2367,10 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
           banner_url: null,
           intro: "Static same-World autonomous Character.",
           role_key: responding.role_key,
-          control_mode: responding.control_mode,
+          control_mode: "autonomous",
           status: "active",
           profile_capability: "available",
-        },
+        }),
         status: 200,
       });
       return;
@@ -2441,13 +2449,14 @@ test("P8-L-E static World author profile and letter entry keep exact Tauri route
   );
   const profile = page.locator('[data-world-character-surface="profile"]');
   await expect(profile.getByRole("heading", { name: responding.display_name })).toBeVisible();
-  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await expect(profile.getByRole("button", { name: "이전 화면으로" })).toHaveCount(0);
+  await page.getByRole("button", { name: "뒤로", exact: true }).click();
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   await authorLinks.last().click();
   await expect(profile).toBeVisible();
-  const activity = profile.locator("[data-world-character-social-activity]");
-  const metrics = activity.locator("dl");
-  for (const text of ["지저귐", "8", "대꾸", "5", "좋아요", "4", "받은 좋아요", "3"]) {
+  const activity = page.getByRole("region", { name: "현재 World 활동", exact: true });
+  const metrics = profile.locator("dl");
+  for (const text of ["게시글", "8", "답글", "5", "좋아요", "4", "받은 좋아요", "3"]) {
     await expect(metrics).toContainText(text);
   }
   await expect(activity.getByRole("tab")).toHaveCount(3);
@@ -2878,7 +2887,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       requestedSocialPaths.push(`${method} ${url.pathname}`);
       await route.fulfill({
         contentType: "application/json",
-        json: staticUiDManualFeed(detailItems),
+        json: uiDManualThread(detailItems[0], detailItems.slice(1), { ownerId: "wc-ui-d-static-owner" }),
         status: 200,
       });
       return;
@@ -2912,10 +2921,9 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   const feedSurface = page.locator('[data-world-social-surface="feed"]');
   await expect(feedSurface).toBeVisible();
   await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
-  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCSS(
-    "color",
-    "rgb(255, 107, 107)",
-  );
+  await expect(feedSurface.locator("[data-feed-header]").getByRole("heading", { name: "피드", exact: true })).toBeVisible();
+  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCount(0);
+  await expect(feedSurface.locator("[data-feed-header] button")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "닫기" })).toHaveCount(0);
   const composer = page.locator("#world-owner-composer");
@@ -2933,7 +2941,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   );
   await expect(bodyInput).toHaveAttribute(
     "placeholder",
-    "내가 조종하는 앵무의 말로 이야기를 적어보세요",
+    "내가 조종하는 캐릭터의 말로 이야기를 적어보세요",
   );
   await expect(submitPost).toBeDisabled();
   expect(await titleInput.evaluate((element) => document.activeElement === element)).toBe(false);
@@ -2960,7 +2968,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   await page.keyboard.press("Tab");
   await expect(bodyInput).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("첨부 이미지 선택")).toBeFocused();
+  await expect(composer.getByRole("button", { name: "사진 첨부", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(submitPost).toBeFocused();
 
@@ -2998,7 +3006,7 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   await expect(row).toHaveAttribute("data-variant", "feed");
   await expect(row).toHaveCSS("border-bottom-width", "1px");
   await expect(row).toHaveCSS("border-radius", "0px");
-  await expect(row.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+  await expect(row.getByRole("link", { name: "답글 1" })).toHaveAttribute(
     "href",
     new RegExp(
       `/worlds/${UI_D_STATIC_WORLD_ID}/posts/${UI_D_STATIC_ROOT_POST_ID}/?$`,
@@ -3006,11 +3014,11 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
   );
   const positiveLike = row.getByLabel("좋아요 1", { exact: true });
   await expect(positiveLike).toHaveCount(1);
-  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "none");
   expect(await positiveLike.evaluate((element) => element.tagName)).toBe("SPAN");
   expect(await positiveLike.getAttribute("aria-pressed")).toBeNull();
   expect(await positiveLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
-  await expect(zeroReactionRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  await expect(zeroReactionRow.getByRole("link", { name: "답글 0" })).toBeVisible();
   const zeroLike = zeroReactionRow.getByLabel("좋아요 0", { exact: true });
   await expect(zeroLike.locator("svg")).toHaveAttribute("fill", "none");
   expect(await zeroLike.evaluate((element) => element.tagName)).toBe("SPAN");
@@ -3051,13 +3059,13 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
     ),
   );
   await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true })).toBeVisible();
   await expect(page.locator("#world-owner-composer")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "게시하기" })).toHaveCount(0);
   await expect(
     page
       .locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`)
-      .getByLabel("대꾸 1"),
+      .getByLabel("답글 1"),
   ).toBeVisible();
   await expect(
     page
@@ -3069,20 +3077,20 @@ test("UI-D static World social core keeps compact composition, flat rows, exact 
       .locator('[data-social-post-row="reply-ui-d-static-existing"]')
       .getByLabel("좋아요 0"),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "대꾸 1" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "답글 1" })).toBeVisible();
   await page
-    .getByLabel("Static UI-D Autonomous의 게시글에 답글")
+    .getByRole("textbox", { name: "답글", exact: true })
     .fill("실제 static scoped reply");
   await page.getByRole("button", { name: "답글 보내기" }).click();
 
   await expect(
     page.getByText("Static UI-D Owner reply arrived.", { exact: false }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "답글 2" })).toBeVisible();
   await expect(
     page
       .locator(`[data-social-post-row="${UI_D_STATIC_ROOT_POST_ID}"]`)
-      .getByLabel("대꾸 2"),
+      .getByLabel("답글 2"),
   ).toBeVisible();
   expect(replyRequestBody).toEqual({ body: "실제 static scoped reply" });
   expect(replyIdempotencyKey).toMatch(/^owner-reply-/);
@@ -3251,15 +3259,14 @@ test("UI-D static World detail rejects an unrelated same-World reply and owner m
       url.pathname ===
       `/api/v1/worlds/${UI_D_STATIC_WORLD_ID}/manual-social/posts/${UI_D_STATIC_ROOT_POST_ID}`
     ) {
-      const feed = staticUiDManualFeed(
-        responseMode === "owner" ? [rootPost] : [rootPost, unrelatedReply],
-      );
+      const thread = uiDManualThread(rootPost, [], { ownerId: "wc-ui-d-static-owner" });
       await route.fulfill({
         contentType: "application/json",
         json:
           responseMode === "owner"
-            ? { ...feed, owner_world_character_id: "wc-ui-d-static-foreign" }
-            : feed,
+            ? { ...thread, owner_world_character_id: "wc-ui-d-static-foreign" }
+            : { ...thread, replies: [{ ...unrelatedReply, thread_root_post_id: unrelatedReply.reply_to_post_id }],
+                parent_references: [{ post_id: unrelatedReply.reply_to_post_id, state: "available" }] },
         status: 200,
       });
       return;
@@ -3355,12 +3362,12 @@ test("UI-D static global social rows render zero, one, and many authenticated me
   await expect(manyRow.getByLabel("추가 이미지 1개")).toBeVisible();
   await expect(manyRow).toHaveCSS("border-bottom-width", "1px");
   await expect(manyRow).toHaveCSS("border-radius", "0px");
-  await expect(zeroRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  await expect(zeroRow.getByRole("link", { name: "답글 0" })).toBeVisible();
   await expect(zeroRow.getByLabel("좋아요 0", { exact: true }).locator("svg")).toHaveAttribute(
     "fill",
     "none",
   );
-  await expect(manyRow.getByRole("link", { name: "대꾸 2" })).toBeVisible();
+  await expect(manyRow.getByRole("link", { name: "답글 2" })).toBeVisible();
   const aggregateLike = manyRow.getByLabel("좋아요 3", { exact: true });
   await expect(aggregateLike.locator("svg")).toHaveAttribute("fill", "currentColor");
   expect(await aggregateLike.evaluate((element) => element.tagName)).toBe("SPAN");
@@ -3423,9 +3430,9 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
 
   await page.goto(`/posts/${rootPostId}`);
 
-  await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "답글 2" })).toBeVisible();
   const rootRow = page.locator(`[data-social-post-row="${rootPostId}"]`);
-  await expect(rootRow.getByLabel("대꾸 2")).toBeVisible();
+  await expect(rootRow.getByLabel("답글 2")).toBeVisible();
   await expect(rootRow.getByLabel("좋아요 1").locator("svg")).toHaveAttribute(
     "fill",
     "currentColor",
@@ -3433,24 +3440,24 @@ test("UI-D static global detail preserves a nested reply hierarchy", async ({ pa
   const parentRow = page.locator(`[data-social-post-row="${parentReply.id}"]`);
   const childRow = page.locator(`[data-social-post-row="${childReply.id}"]`);
   await expect(parentRow).toBeVisible();
-  await expect(parentRow.getByLabel("대꾸 1")).toBeVisible();
+  await expect(parentRow.getByLabel("답글 1")).toBeVisible();
   await expect(parentRow.getByLabel("좋아요 0").locator("svg")).toHaveAttribute(
     "fill",
     "none",
   );
   await expect(childRow).toBeVisible();
-  await expect(childRow.getByText("Nested Parent에게 대꾸", { exact: true })).toBeVisible();
+  await expect(childRow.getByText("Nested Parent에게 답글", { exact: true })).toBeVisible();
   await expect(childRow.locator("xpath=..")).toHaveClass(/ml-4/);
 
   await expect(parentRow).toHaveAttribute("role", "link");
   await expect(parentRow).toHaveAttribute("tabindex", "0");
-  await expect(parentRow.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+  await expect(parentRow.getByRole("link", { name: "답글 1" })).toHaveAttribute(
     "href",
     new RegExp(`/posts/${parentReply.id}/?$`),
   );
   await expect(childRow).toHaveAttribute("role", "link");
   await expect(childRow).toHaveAttribute("tabindex", "0");
-  await expect(childRow.getByRole("link", { name: "대꾸 0" })).toHaveAttribute(
+  await expect(childRow.getByRole("link", { name: "답글 0" })).toHaveAttribute(
     "href",
     new RegExp(`/posts/${childReply.id}/?$`),
   );
@@ -3995,152 +4002,42 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     "data-angmoo-desktop-window",
     "phone",
   );
-  await expect(page.locator("body")).toHaveAttribute("data-angmoo-window-drag", "manual");
+  await expect(page.locator("body")).not.toHaveAttribute("data-angmoo-window-drag", /.+/);
   await expect(page.locator("[data-tauri-drag-region]")).toHaveCount(0);
-  await expect(page.locator('[data-window-route="/"]')).toHaveAttribute(
-    "data-window-drag-disabled",
-    "true",
-  );
+  await expect(page.locator('[data-desktop-navigation]')).toBeVisible();
   const phoneGeometry = await page.locator('[data-product-shell="device"]').evaluate((node) => {
     const rect = node.getBoundingClientRect();
-    const root = node.parentElement;
+    const toolbar = document.querySelector('[data-desktop-navigation]')!.getBoundingClientRect();
     return {
       height: rect.height,
-      rootBackground: root ? getComputedStyle(root).backgroundColor : null,
+      top: rect.top,
+      bodyBackground: getComputedStyle(document.body).backgroundColor,
       viewportHeight: window.innerHeight,
       viewportWidth: window.innerWidth,
+      toolbarBottom: toolbar.bottom,
       width: rect.width,
     };
   });
-  expect(Math.abs(phoneGeometry.width - phoneGeometry.viewportWidth)).toBeLessThanOrEqual(1);
-  expect(Math.abs(phoneGeometry.height - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
-  expect(phoneGeometry.rootBackground).toBe("rgba(0, 0, 0, 0)");
-
-  const radius = Math.min(
-    42,
-    Math.max(26, phoneGeometry.viewportWidth * 0.0725),
-  );
-  const cornerOffset = radius - radius / Math.sqrt(2);
-  const resizeProbes = [
-    {
-      cursor: "ns-resize",
-      direction: "north",
-      x: phoneGeometry.viewportWidth / 2,
-      y: 2,
-    },
-    {
-      cursor: "nesw-resize",
-      direction: "north-east",
-      x: phoneGeometry.viewportWidth - cornerOffset,
-      y: cornerOffset,
-    },
-    {
-      cursor: "ew-resize",
-      direction: "east",
-      x: phoneGeometry.viewportWidth - 2,
-      y: phoneGeometry.viewportHeight / 2,
-    },
-    {
-      cursor: "nwse-resize",
-      direction: "south-east",
-      x: phoneGeometry.viewportWidth - cornerOffset,
-      y: phoneGeometry.viewportHeight - cornerOffset,
-    },
-    {
-      cursor: "ns-resize",
-      direction: "south",
-      x: phoneGeometry.viewportWidth / 2,
-      y: phoneGeometry.viewportHeight - 2,
-    },
-    {
-      cursor: "nesw-resize",
-      direction: "south-west",
-      x: cornerOffset,
-      y: phoneGeometry.viewportHeight - cornerOffset,
-    },
-    {
-      cursor: "ew-resize",
-      direction: "west",
-      x: 2,
-      y: phoneGeometry.viewportHeight / 2,
-    },
-    {
-      cursor: "nwse-resize",
-      direction: "north-west",
-      x: cornerOffset,
-      y: cornerOffset,
-    },
-  ] as const;
-  for (const probe of resizeProbes) {
-    await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
-      buttons: 0,
-      clientX: probe.x,
-      clientY: probe.y,
-      isPrimary: true,
-      pointerType: "mouse",
-    });
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-angmoo-window-resize",
-      probe.direction,
-    );
-    await expect(page.locator("html")).toHaveCSS("cursor", probe.cursor);
-    await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
-      button: 0,
-      buttons: 1,
-      clientX: probe.x,
-      clientY: probe.y,
-      isPrimary: true,
-      pointerType: "mouse",
-    });
+  expect(Math.abs(phoneGeometry.width - Math.min(phoneGeometry.viewportWidth, 960))).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.top - phoneGeometry.toolbarBottom)).toBeLessThanOrEqual(1);
+  expect(Math.abs(phoneGeometry.height + phoneGeometry.toolbarBottom - phoneGeometry.viewportHeight)).toBeLessThanOrEqual(1);
+  expect(phoneGeometry.bodyBackground).not.toBe("rgba(0, 0, 0, 0)");
+  // Ordinary OS chrome owns resizing/dragging. Renderer edge/background
+  // pointer events must never invoke the retired native interception commands.
+  for (const [x, y] of [[2, 2], [phoneGeometry.viewportWidth - 2, 2], [2, phoneGeometry.viewportHeight - 2], [phoneGeometry.viewportWidth / 2, phoneGeometry.viewportHeight / 2]]) {
+    for (const type of ["pointermove", "pointerdown"]) {
+      await page.locator('[data-product-shell="device"]').dispatchEvent(type, {
+        button: 0, buttons: type === "pointerdown" ? 1 : 0,
+        clientX: x, clientY: y, isPrimary: true, pointerType: "mouse",
+      });
+    }
   }
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__;
-      }),
-    )
-    .toEqual(
-      resizeProbes.map(({ direction }) => ({
-        command: "start_product_window_resize",
-        args: { direction },
-      })),
-    );
-  await page.evaluate(() => {
-    const desktop = window as unknown as {
-      __ANGMOO_DESKTOP_INVOCATIONS__: unknown[];
-    };
-    desktop.__ANGMOO_DESKTOP_INVOCATIONS__ = [];
-  });
-  await page.locator('[data-product-shell="device"]').dispatchEvent("pointermove", {
-    buttons: 0,
-    clientX: phoneGeometry.viewportWidth / 2,
-    clientY: phoneGeometry.viewportHeight / 2,
-    isPrimary: true,
-    pointerType: "mouse",
-  });
   await expect(page.locator("html")).not.toHaveAttribute("data-angmoo-window-resize", /.+/);
-
-  await page.locator('[data-product-shell="device"]').dispatchEvent("pointerdown", {
-    button: 0,
-    buttons: 1,
-    clientX: phoneGeometry.viewportWidth / 2,
-    clientY: phoneGeometry.viewportHeight / 2,
-    isPrimary: true,
-    pointerType: "mouse",
-  });
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
-      }),
-    )
-    .toEqual(["start_product_window_drag"]);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+  }).__ANGMOO_DESKTOP_INVOCATIONS__.filter(({ command }) =>
+    ["start_product_window_resize", "start_product_window_drag"].includes(command)
+  ))).toEqual([]);
 
   await page.getByRole("link", { name: "Memory 열기" }).click();
   await expect
@@ -4174,7 +4071,7 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
         ).length;
       }),
     )
-    .toBe(1);
+    .toBe(0);
   await page.getByRole("link", { name: "Creator Studio 열기" }).click();
   await expect
     .poll(() =>
@@ -4191,17 +4088,10 @@ test("Tauri Phone delegates Studio to a reusable wide product window", async ({ 
     });
   await expect(page).toHaveURL(/\/$/);
 
-  await page.getByRole("button", { name: "Angmoo 창 최소화" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const desktop = window as unknown as {
-          __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
-        };
-        return desktop.__ANGMOO_DESKTOP_INVOCATIONS__.map(({ command }) => command);
-      }),
-    )
-    .toContain("minimize_product_window");
+  await expect(page.getByRole("button", { name: "Angmoo 창 최소화" })).toHaveCount(0);
+  expect(await page.evaluate(() => (window as unknown as {
+    __ANGMOO_DESKTOP_INVOCATIONS__: Array<{ command: string }>;
+  }).__ANGMOO_DESKTOP_INVOCATIONS__.some(({ command }) => command === "minimize_product_window"))).toBe(false);
 });
 
 test("Tauri Phone opens the owner relationship graph in a wide product window", async ({
@@ -4299,7 +4189,7 @@ test("Tauri Phone opens the owner relationship graph in a wide product window", 
   });
 
   await page.goto("/worlds/world-static-probe/relationships");
-  await page.getByRole("link", { name: "내 조종 앵무 관계망 열기" }).click();
+  await page.getByRole("link", { name: "내 조종 캐릭터 관계망 열기" }).click();
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -4331,6 +4221,10 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
     );
     const pathname = new URL(route.request().url()).pathname;
     apiRequests.push(pathname);
+    if (pathname === "/api/v1/auth/local/environment") {
+      await route.fallback();
+      return;
+    }
     if (pathname === "/api/v1/worlds/default-space/ensure" && route.request().method() === "POST") {
       await route.fulfill({ contentType: "application/json", json: { world_id: "world-media-probe", name: "SNS" } });
       return;
@@ -4345,6 +4239,8 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
           display_name_updated_at: null,
           display_name_change_available_at: null,
           profile_setup_completed: true,
+          ui_language: "ko",
+          ui_preference_revision: 0,
           feed_content_filter: "all",
           is_admin: false,
         },
@@ -4413,7 +4309,7 @@ test("static Device Home authenticates sidecar media before rendering a blob URL
 
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Media World World 열기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Media World World 열기. 실행 가능." })).toBeVisible();
   await expect(page.locator('img[src^="blob:"]')).toBeVisible();
   expect(apiRequests.filter((path) => path === "/api/v1/runtime/status")).toHaveLength(1);
   expect(apiRequests.filter((path) => path === "/api/v1/worlds/mine")).toHaveLength(1);
@@ -4449,7 +4345,7 @@ test("Tauri wide marker opens the shared static Studio route without a server pa
       },
     };
   });
-  await page.goto("/");
+  await page.goto("/studio");
 
   await expect(page.locator('[data-product-shell="creator-studio"]')).toBeVisible();
   await expect(page.locator("body")).toHaveAttribute(

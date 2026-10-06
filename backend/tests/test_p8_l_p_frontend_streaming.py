@@ -14,7 +14,7 @@ def test_world_chat_exposes_one_delayed_typing_presence_and_crg_delta_only() -> 
     client = CHAT_CLIENT.read_text(encoding="utf-8")
 
     assert "}, 300);" in ui
-    assert "<span>입력 중</span>" in ui
+    assert '<span>{uiText("입력 중")}</span>' in ui
     assert 'event.type === "delta"' in ui
     assert 'phase: "streaming"' in ui
     assert "current.text + text" in ui

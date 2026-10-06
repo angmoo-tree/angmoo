@@ -146,7 +146,7 @@ class ResponseGenerationWorkflowService:
         lease_token = f"lease-{uuid4().hex}"
         try:
             from app.contracts.name_binding import read_name_binding, NameBindingError
-            from app.domains.characters.service.prompt_persona import request_persona
+            from app.domains.characters.service.prompt_persona import request_persona, request_activity_thought
             name_binding = read_name_binding(record.node_state)
             if name_binding is not None:
                 if (name_binding.owner_id, name_binding.world_id, name_binding.actor_world_character_id,
@@ -200,6 +200,11 @@ class ResponseGenerationWorkflowService:
             yield accepted
 
             progress = ResponseExecutionProgress(record, record.call_tracker)
+            thought_finalizer = None
+            if name_binding is not None:
+                def thought_finalizer(value):
+                    return request_activity_thought(value, name_binding,
+                        recipient_id=command.preflight.requester_world_character_id)
             steps = ResponseWorkflowSteps(
                 command=command,
                 progress=progress,
@@ -212,6 +217,7 @@ class ResponseGenerationWorkflowService:
                 character_response=self._character_response,
                 today_snapshot_validator=self._today_snapshot_validator,
                 social_context_provider=self._social_context_provider,
+                thought_finalizer=thought_finalizer,
             )
             try:
                 state = await self._graph_executor.run(
@@ -225,15 +231,12 @@ class ResponseGenerationWorkflowService:
             bundle = state["bundle"]
             response = state["response"]
             if name_binding is not None:
-                from app.domains.characters.service.prompt_persona import render_names, authored_thought
+                from app.domains.characters.service.prompt_persona import render_names
                 if command.name_binding_validator:
                     command.name_binding_validator()
-                thought = response.activity_thought
-                if thought is not None and thought.text is not None:
-                    thought = replace(thought, text=authored_thought(thought.text, name_binding))
                 rendered = render_names(response.text, name_binding, output=True,
                     recipient_id=command.preflight.requester_world_character_id, limit=16000)
-                response = replace(response, text=rendered.text, activity_thought=thought)
+                response = replace(response, text=rendered.text)
                 observe("name_binding_output", policy_version=name_binding.policy_version,
                     binding_digest=name_binding.digest,
                     before_sha256=sha256(state["response"].text.encode()).hexdigest(),

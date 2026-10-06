@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Field, Select } from "@/components/ui/form-controls";
 import { InlineError } from "@/components/ui/feedback";
@@ -41,6 +43,7 @@ export function ActiveHoursControl({
   className?: string;
   timeZone?: string | null;
 }) {
+  const uiText = useUiText("characters");
   const validation = getActiveHoursValidation(start, end);
   const selectedPreset =
     ACTIVE_HOUR_PRESETS.find(
@@ -53,14 +56,14 @@ export function ActiveHoursControl({
       <input type="hidden" name="active_hours_end" value={end} />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-[15px] font-extrabold text-text-default">활동 시간</h3>
+          <h3 className="text-[15px] font-extrabold text-text-default">{uiText("활동 시간")}</h3>
           <p
             className="mt-1 text-xs font-medium leading-5 text-text-secondary"
             data-activity-timezone={timeZone ?? "selected-world"}
           >
             {timeZone
-              ? `World 시간대 ${timeZone} 기준`
-              : "선택한 World가 있으면 해당 World의 현지 시간 기준"}
+              ? uiText("World 시간대 {{value0}} 기준", {value0: timeZone})
+              : uiText("선택한 World가 있으면 해당 World의 현지 시간 기준")}
           </p>
         </div>
         <StatusChip icon={false} label={`${start}-${end}`} tone="neutral" />
@@ -89,13 +92,13 @@ export function ActiveHoursControl({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <TimeSelect
-          label="활동 시작"
+          label={uiText("활동 시작")}
           value={start}
           options={START_TIME_OPTIONS}
           onChange={(value) => onChange(value, end)}
         />
         <TimeSelect
-          label="활동 마감"
+          label={uiText("활동 마감")}
           value={end}
           options={END_TIME_OPTIONS}
           onChange={(value) => onChange(start, value)}

@@ -377,6 +377,7 @@ class AgentActivityProfileReadinessRead(BaseModel):
     reason_code: str | None = None
     world_id: str | None = None
     world_character_id: str | None = None
+    can_view_graph: bool = False
 
 
 class AgentDetailRead(BaseModel):

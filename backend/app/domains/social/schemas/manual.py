@@ -61,6 +61,37 @@ class ManualSocialPostRead(ManualSocialWritePostRead):
     thread_root_post_id: str | None = None
     reply_count: int = Field(ge=0)
     like_count: int = Field(ge=0)
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
+
+
+class ManualSocialParentRead(BaseModel):
+    post_id: str
+    state: Literal["available", "unavailable"]
+
+
+class ManualSocialThreadRead(BaseModel):
+    schema_version: Literal["owner-manual-social-thread-v2"] = "owner-manual-social-thread-v2"
+    world_id: str
+    owner_world_character_id: str
+    selected_post: ManualSocialPostRead
+    root_post_id: str
+    parent: ManualSocialParentRead | None = None
+    replies: list[ManualSocialPostRead]
+    parent_references: list[ManualSocialParentRead] = Field(default_factory=list)
+    page_offset: int = Field(default=0, ge=0)
+    next_offset: int | None = Field(default=None, ge=0)
+
+
+class ManualSocialLikeRead(BaseModel):
+    world_id: str
+    post_id: str
+    owner_world_character_id: str
+    viewer_like_state: Literal["liked", "not_liked"]
+    like_count: int = Field(ge=0)
+    can_owner_like: Literal[True] = True
 
 
 class ManualSocialDeliveryRead(BaseModel):
@@ -118,6 +149,10 @@ class WorldCharacterSocialProfileMediaRead(BaseModel):
 
 class WorldCharacterSocialProfilePostRead(BaseModel):
     id: str
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     world_id: str
     author_world_character_id: str
     author_name: str
@@ -166,6 +201,10 @@ class WorldCharacterSocialProfileRead(BaseModel):
             items=[
                 WorldCharacterSocialProfilePostRead(
                     id=item.id,
+                    viewer_like_state=item.viewer_like_state,
+                    can_owner_like=item.can_owner_like,
+                    reaction_world_id=item.reaction_world_id,
+                    reaction_owner_world_character_id=item.reaction_owner_world_character_id,
                     world_id=item.world_id,
                     author_world_character_id=item.author_world_character_id,
                     author_name=item.author_name,

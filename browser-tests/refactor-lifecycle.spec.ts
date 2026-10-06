@@ -1,15 +1,20 @@
 import { expect, test } from "@playwright/test";
+import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
 const token = "static-route-probe-token-000000000000";
-test.beforeEach(async ({page}) => {
+test.use({ locale: "ko-KR", timezoneId: "Asia/Seoul" });
+test.beforeEach(async ({page}, info) => {
+  const origin = new URL(String(info.project.use.baseURL)).origin;
+  await page.route("**/*", route => new URL(route.request().url()).origin === origin ? route.fallback() : route.abort("blockedbyclient"));
   await page.addInitScript(({token}) => Object.assign(window, {
     __ANGMOO_RUNTIME_CONFIG__: {profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: token},
   }), {token});
   await page.route("http://127.0.0.1:8080/api/v1/**", async route => {
     expect(route.request().headers()["x-angmoo-launcher-token"]).toBe(token);
     const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/auth/local/environment")) return route.fulfill({json: VISUAL_ENVIRONMENT});
     await route.fulfill({status: path.endsWith("/auth/me") ? 200 : 503, json: path.endsWith("/auth/me")
-      ? {id: "lifecycle-owner", email: null, display_name: "Owner", profile_setup_completed: true, feed_content_filter: "all", is_admin: false}
+      ? {id: "lifecycle-owner", email: null, display_name: "Owner", profile_setup_completed: true, ui_language: "ko", ui_preference_revision: 1, feed_content_filter: "all", is_admin: false}
       : {detail: "fixture_unavailable"}});
   });
 });
@@ -54,7 +59,7 @@ test("Memory scope switch ignores an older pending Character response", async ({
   expect(calls.some(path => path.includes("/a/world-characters/wc-a/"))).toBe(false);
 });
 
-test("Memory child close uses only the window command and restarted host status clears closing UI", async ({page}) => {
+test("Memory child reload preserves host shutdown state without requesting an exit", async ({page}) => {
   await page.addInitScript(({token}) => {
     const state = {phase: "RUNNING", deferred: false, commands: [] as string[]};
     Object.assign(window, {__LIFECYCLE__: state, __ANGMOO_DESKTOP_WINDOW__: {kind: "memory", route: "/memory"},
@@ -67,9 +72,9 @@ test("Memory child close uses only the window command and restarted host status 
     });
   }, {token});
   await page.goto("/memory");
-  await page.getByRole("button", {name: "Angmoo 창 닫기", exact: true}).click();
+  await page.getByRole("button", {name: "현재 화면 새로고침", exact: true}).click();
   const commands = await page.evaluate(() => (window as unknown as {__LIFECYCLE__: {commands: string[]}}).__LIFECYCLE__.commands);
-  expect(commands.filter(command => command === "close_product_window")).toHaveLength(1);
+  expect(commands.filter(command => command === "close_product_window")).toHaveLength(0);
   expect(commands.filter(command => /shutdown|quit|exit/.test(command) && command !== "desktop_shutdown_status")).toEqual([]);
   const dialog = page.getByRole("dialog", {name: "끄는 중…"});
   await expect(dialog).toHaveCount(0);
@@ -77,6 +82,6 @@ test("Memory child close uses only the window command and restarted host status 
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole("status")).toContainText("다음 실행에서 이어집니다");
   await page.reload();
-  await expect(page.getByRole("button", {name: "Angmoo 창 닫기", exact: true})).toBeVisible();
+  await expect(page.getByRole("button", {name: "현재 화면 새로고침", exact: true})).toBeVisible();
   await expect(dialog).toHaveCount(0);
 });

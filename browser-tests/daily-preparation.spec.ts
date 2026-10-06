@@ -1,8 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Route } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json } from "./continuity-next-fixture";
+import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
 const staticShell = process.env.ANGMOO_DAILY_STATIC === "1";
+test.use({ locale: "ko-KR", timezoneId: "Asia/Seoul" });
+
+async function environmentFixture(route: Route) {
+  expect(["GET", "POST"]).toContain(route.request().method());
+  if (route.request().method() === "POST") {
+    expect(route.request().postDataJSON()).toMatchObject({
+      expected_revision: 1, preferred_language: "ko-KR", timezone: "Asia/Seoul",
+    });
+  }
+  return json(route, VISUAL_ENVIRONMENT);
+}
 test("agent settings uses daily preparation without legacy analysis and preserves hidden settings", async ({ page }) => {
   if (staticShell) await page.addInitScript(() => Object.assign(window, { __ANGMOO_RUNTIME_CONFIG__: {
     profile: "tauri-static", apiBaseUrl: "http://127.0.0.1:8080", graphProvider: "ladybug", launchToken: "daily-fixture-token-0000000000000",
@@ -15,7 +27,8 @@ test("agent settings uses daily preparation without legacy analysis and preserve
   const writes: Record<string, unknown>[] = [];
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
     const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
-    if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all" });
+    if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all", ui_language: "ko", ui_preference_revision: 0 });
+    if (path === "/auth/local/environment") return environmentFixture(route);
     if (route.request().method() !== "GET") {
       expect(path).toBe(`/agents/${characterId}/settings`);
       writes.push(route.request().postDataJSON());
@@ -56,8 +69,9 @@ test("daily preparation keeps registration free and exposes explicit recovery", 
   await page.route(staticShell ? "http://127.0.0.1:8080/api/v1/**" : "**/api/backend/**", async route => {
     const path = new URL(route.request().url()).pathname.replace(/^\/api\/(backend|v1)/, "");
     const method = route.request().method();
+    if (path === "/auth/local/environment") return environmentFixture(route);
     if (method !== "GET") writes.push(`${method} ${path}`);
-    if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all" });
+    if (path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", profile_setup_completed: true, is_admin: true, feed_content_filter: "all", ui_language: "ko", ui_preference_revision: 0 });
     if (path === `/agents/${characterId}`) return json(route, agent);
     if (path === `/worlds/${worldId}`) return json(route, { id: worldId, name: "SNS", timezone: "Asia/Seoul", roles: [], status: "published" });
     if (path === `/worlds/${worldId}/characters/${characterId}`) return json(route, { id: actorId, world_id: worldId, character_id: characterId, role_key: "no_specific_role", status: "active", activity_runtime_mode: runtimeMode });

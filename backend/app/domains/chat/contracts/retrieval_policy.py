@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
+from app.contracts.environment import EnvironmentSnapshot
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,6 +22,7 @@ class RetrievalPreflightCommand:
     idempotency_conflict: bool = False
     router_runtime_available: bool = True
     image_context: str | None = None
+    environment: EnvironmentSnapshot | None = None
 
     def __post_init__(self) -> None:
         identifiers = (

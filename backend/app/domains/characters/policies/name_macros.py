@@ -113,7 +113,7 @@ def render_names(text: str, binding: NameBindingSnapshot, *, output: bool = Fals
             parts.append(segment)
     result = "".join(parts)
     if limit is not None and len(result) > limit:
-        raise NameBindingError("name_macro_rendered_limit")
+        raise NameBindingError("name_macro_rendered_limit", rendered_chars=len(result), limit=limit)
     return RenderedText(result, replacements, protected, unsupported)
 
 

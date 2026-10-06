@@ -141,6 +141,44 @@ def test_manifest_requires_committed_provenance_and_append_only_history(tmp_path
         changes.load(tmp_path)
 
 
+def test_git_object_cache_rereads_head_and_candidate_manifest(tmp_path, monkeypatch):
+    commit, blob = "a" * 40, "b" * 40
+    state = {"head": "c" * 40}
+    record = {"id": "cache-safety", "implementation_commit": commit,
+        "reason": "reviewed", "review": "local test", "source_blobs": {"backend/a.py": blob}}
+    payload = {"schema_version": 1, "records": [record]}
+    path = tmp_path / changes.MANIFEST
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    calls = []
+    def git(args, **kwargs):
+        calls.append(tuple(args))
+        if args[1:] == ["rev-parse", "HEAD"]:
+            return state["head"].encode()
+        if args[1] == "log":
+            assert state["head"] in args
+            return b""
+        if args[1] == "merge-base":
+            assert args[-1] == state["head"]
+            if state["head"] == "d" * 40:
+                raise changes.subprocess.CalledProcessError(1, args)
+            return b""
+        return blob.encode()
+    monkeypatch.setattr(changes.subprocess, "check_output", git)
+    assert changes.load(tmp_path) == changes.load(tmp_path) == [record]
+    assert sum(args[1:] == ("rev-parse", "HEAD") for args in calls) == 2
+    assert sum(args[1:] == ("rev-parse", commit + ":backend/a.py") for args in calls) == 1
+    altered = deepcopy(payload)
+    altered["records"][0]["source_blobs"]["backend/a.py"] = "e" * 40
+    path.write_text(json.dumps(altered), encoding="utf-8")
+    with pytest.raises(ValueError, match="provenance"):
+        changes.load(tmp_path)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    state["head"] = "d" * 40
+    with pytest.raises(changes.subprocess.CalledProcessError):
+        changes.load(tmp_path)
+
+
 @pytest.mark.parametrize("tamper", [None, "parent", "commit", "current", "untracked"])
 def test_removed_binding_requires_exact_parent_and_committed_and_current_absence(tmp_path, monkeypatch, tamper):
     commit, blob = "a" * 40, "b" * 40

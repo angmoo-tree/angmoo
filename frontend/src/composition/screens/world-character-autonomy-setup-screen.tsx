@@ -1,4 +1,10 @@
 "use client";
+import { useUiNumberFormatter } from "@/hooks/use-ui-number-formatter";
+
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { getWorldFeedStatus, type WorldFeedCycleStatusRead } from "@/features/social/api/feed-status";
 import { FeedStatusPanel } from "@/features/social/components/feed-status";
@@ -153,6 +159,9 @@ export function WorldCharacterAutonomySetupClient({
   characterId: string;
   worldId: string;
 }) {
+  const formatNumber = useUiNumberFormatter();
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("shell");
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const returnPath = `/characters/${characterId}/worlds/${worldId}/autonomy-setup`;
@@ -220,7 +229,7 @@ export function WorldCharacterAutonomySetupClient({
         }
       })
       .catch((nextError) => {
-        if (active) setError(errorMessage(nextError));
+        if (active) setError(uiText(errorMessage(nextError)));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -229,7 +238,7 @@ export function WorldCharacterAutonomySetupClient({
     return () => {
       active = false;
     };
-  }, [authStatus, characterId, returnPath, router, worldId]);
+  }, [authStatus, characterId, returnPath, router, uiText, worldId]);
 
   useEffect(() => {
     if (!setup?.autonomy_ready) return;
@@ -239,7 +248,7 @@ export function WorldCharacterAutonomySetupClient({
         if (active) setActivityPlan(nextPlan);
       })
       .catch((nextError) => {
-        if (active) setPlanError(errorMessage(nextError));
+        if (active) setPlanError(uiText(errorMessage(nextError)));
       })
       .finally(() => {
         if (active) setPlanLoading(false);
@@ -247,7 +256,7 @@ export function WorldCharacterAutonomySetupClient({
     return () => {
       active = false;
     };
-  }, [characterId, setup?.autonomy_ready, worldId]);
+  }, [characterId, setup?.autonomy_ready, uiText, worldId]);
 
   useEffect(() => {
     if (!entry?.id || !setup) return;
@@ -260,12 +269,12 @@ export function WorldCharacterAutonomySetupClient({
         }
       })
       .catch((nextError) => {
-        if (active) setFeedStatusError(errorMessage(nextError));
+        if (active) setFeedStatusError(uiText(errorMessage(nextError)));
       });
     return () => {
       active = false;
     };
-  }, [entry?.id, setup]);
+  }, [entry?.id, setup, uiText]);
 
 
   useEffect(() => {
@@ -279,12 +288,12 @@ export function WorldCharacterAutonomySetupClient({
         }
       })
       .catch((nextError) => {
-        if (active) setSocialMemoryError(errorMessage(nextError));
+        if (active) setSocialMemoryError(uiText(errorMessage(nextError)));
       });
     return () => {
       active = false;
     };
-  }, [characterId, setup?.autonomy_ready, worldId]);
+  }, [characterId, setup?.autonomy_ready, uiText, worldId]);
   const allowedRoles = useMemo(
     () =>
       world?.roles.filter(
@@ -316,11 +325,11 @@ export function WorldCharacterAutonomySetupClient({
       );
       setNotice(
         mode === "routine_resident_v1"
-          ? "P4 일과 연속 전개 모드를 선택했습니다. 자율활동은 별도로 켜야 합니다."
-          : "기존 resident 호환 모드로 되돌렸습니다.",
+          ? uiText("P4 일과 연속 전개 모드를 선택했습니다. 자율활동은 별도로 켜야 합니다.")
+          : uiText("기존 resident 호환 모드로 되돌렸습니다."),
       );
     } catch (nextError) {
-      setPlanError(errorMessage(nextError));
+      setPlanError(uiText(errorMessage(nextError)));
     } finally {
       setModePending(false);
     }
@@ -342,11 +351,11 @@ export function WorldCharacterAutonomySetupClient({
       await refreshSetup(nextEntry.id);
       setNotice(
         nextEntry.reused
-          ? "기존 World Character 준비 상태를 불러왔습니다."
-          : "World Character를 만들었습니다. 아직 자율활동은 시작되지 않았습니다.",
+          ? uiText("기존 World Character 준비 상태를 불러왔습니다.")
+          : uiText("World Character를 만들었습니다. 아직 자율활동은 시작되지 않았습니다."),
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -366,11 +375,11 @@ export function WorldCharacterAutonomySetupClient({
       await refreshSetup(nextEntry.id);
       setNotice(
         entry.role_key === null
-          ? "기본 역할을 연결했습니다. 활동 준비를 계속할 수 있습니다."
-          : "역할을 변경했습니다. 기존 활동 준비 결과가 있다면 새 역할에 맞게 다시 생성·승인해 주세요.",
+          ? uiText("기본 역할을 연결했습니다. 활동 준비를 계속할 수 있습니다.")
+          : uiText("역할을 변경했습니다. 기존 활동 준비 결과가 있다면 새 역할에 맞게 다시 생성·승인해 주세요."),
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
       setRoleKey(entry.role_key ?? NO_SPECIFIC_ROLE_KEY);
     } finally {
       setPending(null);
@@ -397,14 +406,14 @@ export function WorldCharacterAutonomySetupClient({
       setSetup(next);
       setNotice(
         next.reused
-          ? "현재 캐릭터·World와 일치하는 기존 결과를 재사용했습니다. 추가 LLM 호출은 없었습니다."
-          : "커뮤니티 프로필과 시간대별 일과 40개를 생성했습니다.",
+          ? uiText("현재 캐릭터·World와 일치하는 기존 결과를 재사용했습니다. 추가 LLM 호출은 없었습니다.")
+          : uiText("커뮤니티 프로필과 시간대별 일과 40개를 생성했습니다."),
       );
     } catch (nextError) {
       // A transport failure may have lost a committed response. Replay that
       // request; a reported domain failure permits a new explicit attempt.
       if (nextError instanceof WorldCharacterSetupApiError) generationRequest.current = null;
-      setGenerationError(errorMessage(nextError));
+      setGenerationError(uiText(errorMessage(nextError)));
       await refreshSetup(entry.id).catch(() => undefined);
     } finally {
       generationBusy.current = false;
@@ -433,12 +442,12 @@ export function WorldCharacterAutonomySetupClient({
       setSetup(next);
       setNotice(
         stage === "repertoire"
-          ? "보존된 프로필을 사용해 일과 후보만 다시 생성했습니다."
-          : "커뮤니티 프로필부터 다시 생성했습니다.",
+          ? uiText("보존된 프로필을 사용해 일과 후보만 다시 생성했습니다.")
+          : uiText("커뮤니티 프로필부터 다시 생성했습니다."),
       );
     } catch (nextError) {
       if (nextError instanceof WorldCharacterSetupApiError) retryRequest.current = null;
-      setGenerationError(errorMessage(nextError));
+      setGenerationError(uiText(errorMessage(nextError)));
       await refreshSetup(entry.id).catch(() => undefined);
     } finally {
       generationBusy.current = false;
@@ -460,10 +469,10 @@ export function WorldCharacterAutonomySetupClient({
       );
       setSetup(next);
       setNotice(
-        "자율활동 준비가 완료되었습니다. 이 승인은 일과를 확정할 뿐, 자율활동을 시작하지 않습니다.",
+        uiText("자율활동 준비가 완료되었습니다. 이 승인은 일과를 확정할 뿐, 자율활동을 시작하지 않습니다."),
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -484,10 +493,10 @@ export function WorldCharacterAutonomySetupClient({
       );
       setSetup(next);
       setNotice(next.autonomy_ready
-        ? "새 후보를 거절했습니다. 기존 World 프로필과 일과는 계속 사용합니다."
-        : "현재 후보를 거절했습니다. 동의 후 새 후보를 생성할 수 있습니다.");
+        ? uiText("새 후보를 거절했습니다. 기존 World 프로필과 일과는 계속 사용합니다.")
+        : uiText("현재 후보를 거절했습니다. 동의 후 새 후보를 생성할 수 있습니다."));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -505,46 +514,41 @@ export function WorldCharacterAutonomySetupClient({
       setActivityPlan(nextPlan);
       setNotice(
         nextPlan.reused
-          ? "이미 준비된 오늘 계획을 그대로 불러왔습니다. 추가 provider 호출은 없었습니다."
-          : "승인된 일과 후보에서 오늘의 중심 일과 4개를 준비했습니다. provider 호출은 없었습니다.",
+          ? uiText("이미 준비된 오늘 계획을 그대로 불러왔습니다. 추가 provider 호출은 없었습니다.")
+          : uiText("승인된 일과 후보에서 오늘의 중심 일과 4개를 준비했습니다. provider 호출은 없었습니다."),
       );
     } catch (nextError) {
-      setPlanError(errorMessage(nextError));
+      setPlanError(uiText(errorMessage(nextError)));
     } finally {
       setPlanPending(false);
     }
   }
 
   function localTime(value: string, timezone: string) {
-    return new Intl.DateTimeFormat("ko-KR", {
-      timeZone: timezone,
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(new Date(value));
+    return formatDate(value, timezone).slice(-5);
   }
 
   if (authStatus === "checking" || loading) {
-    return <div className="p-8 text-center text-on-surface-variant">준비 화면을 불러오는 중입니다.</div>;
+    return <div className="p-8 text-center text-on-surface-variant">{uiText("준비 화면을 불러오는 중입니다.")}</div>;
   }
 
   if (!agent || !world) {
     return (
       <div className="m-4 rounded-3xl border border-error/30 bg-error-container p-6 text-on-error-container">
-        {error ?? "캐릭터 또는 World를 불러올 수 없습니다."}
+        {error ?? uiText("캐릭터 또는 World를 불러올 수 없습니다.")}
       </div>
     );
   }
 
   if (setup?.preparation_contract === "daily-plan-v1" && entry) {
-    return <DailyPreparationPanel key={`${worldId}:${characterId}`} initialAgent={agent} initialRuntimeMode={entry.activity_runtime_mode} worldId={worldId} actorId={entry.id} worldName={world.name} timezone={world.timezone}>
+    return <DailyPreparationPanel key={`${worldId}:${characterId}`} initialAgent={agent} initialRuntimeMode={entry.activity_runtime_mode} worldId={worldId} actorId={entry.id} worldName={world.name} timezone={world.runtime_timezone ?? "UTC"}>
       <RecommendationTopicsPanel worldId={worldId} characterId={entry.id} />
     </DailyPreparationPanel>;
   }
 
   return (
     <div
-      className="min-h-screen bg-surface px-4 py-8 md:px-8"
+      className="min-h-full bg-surface px-4 py-8 md:px-8"
       data-product-content="autonomy-setup"
     >
       <div className="mx-auto max-w-5xl space-y-6">
@@ -554,18 +558,16 @@ export function WorldCharacterAutonomySetupClient({
             {agent.character.name} × {world.name}
           </h1>
           <p className="mt-3 max-w-3xl text-on-surface-variant">
-            캐릭터의 기본 페르소나와 World 설정을 결합해 이곳에서의 커뮤니티 성향과
-            4개 시간대별 일과 후보 40개를 만듭니다.
-          </p>
+            {uiText("캐릭터의 기본 페르소나와 World 설정을 결합해 이곳에서의 커뮤니티 성향과 4개 시간대별 일과 후보 40개를 만듭니다.")}</p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <div className="rounded-2xl bg-surface-container-low p-4">
-              <p className="text-xs font-bold text-on-surface-variant">캐릭터</p>
+              <p className="text-xs font-bold text-on-surface-variant">{uiText("캐릭터")}</p>
               <p className="mt-1 font-bold">{agent.character.one_liner || agent.character.name}</p>
             </div>
             <div className="rounded-2xl bg-surface-container-low p-4">
               <p className="text-xs font-bold text-on-surface-variant">World</p>
               <p className="mt-1 font-bold">{world.tagline}</p>
-              <p className="mt-1 text-sm text-on-surface-variant">{world.timezone}</p>
+              <p className="mt-1 text-sm text-on-surface-variant">{world.runtime_timezone ?? "UTC"}</p>
             </div>
           </div>
         </header>
@@ -583,32 +585,31 @@ export function WorldCharacterAutonomySetupClient({
 
         {!entry ? (
           <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-            <h2 className="text-xl font-black">1. World에서의 역할 확인</h2>
+            <h2 className="text-xl font-black">{uiText("1. World에서의 역할 확인")}</h2>
             <p className="mt-2 text-sm text-on-surface-variant">
-              입장은 생성 호출을 하지 않으며, 승인 전 자율활동도 켜지지 않습니다.
-            </p>
-            <label className="mt-5 block text-sm font-bold" htmlFor="world-role">역할</label>
+              {uiText("입장은 생성 호출을 하지 않으며, 승인 전 자율활동도 켜지지 않습니다.")}</p>
+            <label className="mt-5 block text-sm font-bold" htmlFor="world-role">{uiText("역할")}</label>
             <select
               id="world-role"
               value={roleKey}
               onChange={(event) => setRoleKey(event.target.value)}
               className="mt-2 w-full rounded-2xl border border-outline-variant bg-white px-4 py-3"
             >
-              <option value="">역할을 선택하세요</option>
-              <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
+              <option value="">{uiText("역할을 선택하세요")}</option>
+              <option value={NO_SPECIFIC_ROLE_KEY}>{uiText("역할 없음")}</option>
               {allowedRoles.map((role) => (
                 <option key={role.key} value={role.key}>{role.name}</option>
               ))}
             </select>
             <label className="mt-5 block text-sm font-bold" htmlFor="local-background">
-              이 World에서의 배경 <span className="font-normal text-on-surface-variant">(선택)</span>
+              {uiText("이 World에서의 배경")}<span className="font-normal text-on-surface-variant">{uiText("(선택)")}</span>
             </label>
             <textarea
               id="local-background"
               value={localBackground}
               maxLength={500}
               onChange={(event) => setLocalBackground(event.target.value)}
-              placeholder="예: 이번 학기에 전학 온 마법약 연구생"
+              placeholder={uiText("예: 이번 학기에 전학 온 마법약 연구생")}
               className="mt-2 min-h-28 w-full rounded-2xl border border-outline-variant bg-white px-4 py-3"
             />
             <button
@@ -617,7 +618,7 @@ export function WorldCharacterAutonomySetupClient({
               disabled={pending !== null || !roleKey}
               className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {pending === "entry" ? "입장 준비 중…" : "이 World에서 활동 준비하기"}
+              {pending === "entry" ? uiText("입장 준비 중…") : uiText("이 World에서 활동 준비하기")}
             </button>
           </section>
         ) : null}
@@ -625,8 +626,7 @@ export function WorldCharacterAutonomySetupClient({
         {entry && setup && (entry.role_key !== NO_SPECIFIC_ROLE_KEY || allowedRoles.length > 0) ? (
           <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
             <label className="block text-sm font-bold" htmlFor="existing-world-role">
-              이 World에서의 역할
-            </label>
+              {uiText("이 World에서의 역할")}</label>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <select
                 id="existing-world-role"
@@ -634,8 +634,8 @@ export function WorldCharacterAutonomySetupClient({
                 onChange={(event) => setRoleKey(event.target.value)}
                 className="min-w-56 flex-1 rounded-2xl border border-outline-variant bg-white px-4 py-3"
               >
-                <option value="">역할을 선택하세요</option>
-                <option value={NO_SPECIFIC_ROLE_KEY}>역할 없음</option>
+                <option value="">{uiText("역할을 선택하세요")}</option>
+                <option value={NO_SPECIFIC_ROLE_KEY}>{uiText("역할 없음")}</option>
                 {allowedRoles.map((role) => (
                   <option key={role.key} value={role.key}>{role.name}</option>
                 ))}
@@ -646,13 +646,13 @@ export function WorldCharacterAutonomySetupClient({
                 disabled={pending !== null || !roleKey || roleKey === entry.role_key}
                 className="rounded-full bg-primary px-5 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {pending === "role-update" ? "저장 중…" : "역할 저장"}
+                {pending === "role-update" ? uiText("저장 중…") : uiText("역할 저장")}
               </button>
             </div>
             <p className="mt-2 text-xs text-on-surface-variant">
               {entry.role_key === null
-                ? "등록 때 기본 역할이 연결되지 않았습니다. ‘역할 없음’을 저장하면 활동 준비를 계속할 수 있습니다."
-                : "역할을 바꾸면 기존 활동 준비 결과를 새 역할 기준으로 다시 확인해야 합니다."}
+                ? uiText("등록 때 기본 역할이 연결되지 않았습니다. ‘역할 없음’을 저장하면 활동 준비를 계속할 수 있습니다.")
+                : uiText("역할을 바꾸면 기존 활동 준비 결과를 새 역할 기준으로 다시 확인해야 합니다.")}
             </p>
           </section>
         ) : null}
@@ -662,15 +662,12 @@ export function WorldCharacterAutonomySetupClient({
             <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-black">2. 생성 전 확인</h2>
+                  <h2 className="text-xl font-black">{uiText("2. 생성 전 확인")}</h2>
                   <p className="mt-2 text-sm text-on-surface-variant">
-                    사용자의 캐릭터 전용 키로 논리적 호출 {preflight.logical_call_count}회,
-                    실제 provider 요청 {preflight.physical_request_count}회
-                    (프로필 1 + 일과 후보 묶음 2)를 수행합니다.
-                  </p>
+                    {uiText("사용자의 캐릭터 전용 키로 논리적 호출")}{preflight.logical_call_count}{uiText("회, 실제 provider 요청")}{preflight.physical_request_count}{uiText("회 (프로필 1 + 일과 후보 묶음 2)를 수행합니다.")}</p>
                 </div>
                 <span className="rounded-full bg-surface-container px-4 py-2 text-sm font-bold">
-                  {setup.autonomy_ready && setup.state !== "running" ? "기존 결과 사용 중" : statusLabel(setup.state)}
+                  {setup.autonomy_ready && setup.state !== "running" ? uiText("기존 결과 사용 중") : uiText(statusLabel(setup.state))}
                 </span>
               </div>
               <dl className="mt-5 grid gap-3 text-sm md:grid-cols-2">
@@ -679,9 +676,9 @@ export function WorldCharacterAutonomySetupClient({
                   <dd className="mt-1 font-bold">{preflight.provider ?? "-"} / {preflight.model ?? "-"}</dd>
                 </div>
                 <div className="rounded-2xl bg-surface-container-low p-4">
-                  <dt className="text-on-surface-variant">출력 상한</dt>
+                  <dt className="text-on-surface-variant">{uiText("출력 상한")}</dt>
                   <dd className="mt-1 font-bold">
-                    프로필 {preflight.profile_max_output_tokens.toLocaleString()} + 일과 {preflight.repertoire_max_output_tokens.toLocaleString()} tokens
+                    {uiText("프로필")}{formatNumber(preflight.profile_max_output_tokens)} {uiText("+ 일과")}{formatNumber(preflight.repertoire_max_output_tokens)} tokens
                   </dd>
                 </div>
               </dl>
@@ -691,8 +688,8 @@ export function WorldCharacterAutonomySetupClient({
               }} />
               {!preflight.credential_ready ? (
                 <p className="mt-4 rounded-2xl bg-error-container p-4 text-on-error-container">
-                  {reasonMessage(preflight.safe_reason_code) ?? "사용할 수 있는 캐릭터 키가 없습니다."}{" "}
-                  <Link className="font-bold underline" href={`/agents/${characterId}`}>캐릭터 설정 확인</Link>
+                  {reasonMessage(preflight.safe_reason_code) ?? uiText("사용할 수 있는 캐릭터 키가 없습니다.")}{" "}
+                  <Link className="font-bold underline" href={`/agents/${characterId}`}>{uiText("캐릭터 설정 확인")}</Link>
                 </p>
               ) : null}
               {setup.can_regenerate ? (
@@ -704,9 +701,7 @@ export function WorldCharacterAutonomySetupClient({
                     className="mt-1 size-4"
                   />
                   <span className="text-sm">
-                    캐릭터 키를 사용해 World 전용 프로필과 일과 40개를 생성하는 데 동의합니다.
-                    생성 결과는 승인 전까지 자율활동에 사용되지 않습니다.
-                  </span>
+                    {uiText("캐릭터 키를 사용해 World 전용 프로필과 일과 40개를 생성하는 데 동의합니다. 생성 결과는 승인 전까지 자율활동에 사용되지 않습니다.")}</span>
                 </label>
               ) : null}
               {reasonMessage(setup.safe_reason_code) ? (
@@ -720,7 +715,7 @@ export function WorldCharacterAutonomySetupClient({
                   disabled={!consented || !preflight.credential_ready || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {pending === "generate" ? "생성 중…" : setup.profile ? "프로필·일과 다시 만들기" : "프로필과 일과 40개 생성"}
+                  {pending === "generate" ? uiText("생성 중…") : setup.profile ? uiText("프로필·일과 다시 만들기") : uiText("프로필과 일과 40개 생성")}
                 </button>
               ) : null}
               {setup.can_retry_stage === "community_profile" ? (
@@ -730,7 +725,7 @@ export function WorldCharacterAutonomySetupClient({
                   aria-describedby={generationError ? "world-setup-generation-error" : undefined}
                   disabled={!consented || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:opacity-50"
-                >프로필부터 다시 생성</button>
+                >{uiText("프로필부터 다시 생성")}</button>
               ) : null}
               {setup.can_retry_stage === "repertoire" ? (
                 <button
@@ -739,7 +734,7 @@ export function WorldCharacterAutonomySetupClient({
                   aria-describedby={generationError ? "world-setup-generation-error" : undefined}
                   disabled={!consented || pending !== null}
                   className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:opacity-50"
-                >{pending === "retry-repertoire" ? "일과 재생성 중…" : "프로필을 유지하고 일과만 다시 생성"}</button>
+                >{pending === "retry-repertoire" ? uiText("일과 재생성 중…") : uiText("프로필을 유지하고 일과만 다시 생성")}</button>
               ) : null}
               {generationError ? (
                 <p id="world-setup-generation-error" role="alert" className="mt-4 rounded-2xl bg-error-container p-4 text-on-error-container">
@@ -749,21 +744,20 @@ export function WorldCharacterAutonomySetupClient({
             </section>
 
             {setup.active_profile && setup.active_repertoire ? (
-              <Card className="p-6" aria-label="현재 사용하는 승인 결과">
-                <h2 className="text-xl font-black">현재 사용하는 프로필과 일과</h2>
+              <Card className="p-6" aria-label={uiText("현재 사용하는 승인 결과")}>
+                <h2 className="text-xl font-black">{uiText("현재 사용하는 프로필과 일과")}</h2>
                 <p className="mt-3">{setup.active_profile.visible_summary}</p>
                 <p className="mt-3 text-muted">
                   {setup.persona_changed
-                    ? "페르소나가 수정되었습니다. 기존 승인 결과로 활동을 계속하며, 원할 때 아래에서 새 결과를 만들 수 있습니다."
-                    : "새 후보를 생성하거나 거절해도 기존 승인 결과는 유지됩니다."}
-                  {" "}새 결과를 승인하면 이후에 만드는 활동 계획부터 적용됩니다.
-                </p>
+                    ? uiText("페르소나가 수정되었습니다. 기존 승인 결과로 활동을 계속하며, 원할 때 아래에서 새 결과를 만들 수 있습니다.")
+                    : uiText("새 후보를 생성하거나 거절해도 기존 승인 결과는 유지됩니다.")}
+                  {" "}{uiText("새 결과를 승인하면 이후에 만드는 활동 계획부터 적용됩니다.")}</p>
               </Card>
             ) : null}
 
             {setup.profile ? (
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-                <h2 className="text-xl font-black">3. World 커뮤니티 프로필</h2>
+                <h2 className="text-xl font-black">{uiText("3. World 커뮤니티 프로필")}</h2>
                 <p className="mt-3 text-lg font-semibold">{setup.profile.visible_summary}</p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {setup.profile.search_keywords.map((keyword) => (
@@ -774,10 +768,10 @@ export function WorldCharacterAutonomySetupClient({
                   {Object.entries(setup.profile.action_profile).map(([action, preference]) => (
                     <div key={action} className="rounded-2xl bg-surface-container-low p-4">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold">{ACTION_LABELS[action] ?? action}</span>
+                        <span className="font-bold">{uiText(ACTION_LABELS[action] ?? action)}</span>
                         <span className="text-sm font-black text-text-strong">{preference.weight}</span>
                       </div>
-                      <p className="mt-2 text-xs text-on-surface-variant">{preference.note || "별도 조건 없음"}</p>
+                      <p className="mt-2 text-xs text-on-surface-variant">{preference.note || uiText("별도 조건 없음")}</p>
                     </div>
                   ))}
                 </div>
@@ -788,10 +782,10 @@ export function WorldCharacterAutonomySetupClient({
               <section className="rounded-[28px] border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <h2 className="text-xl font-black">4. 일과 후보 40개 검토</h2>
-                    <p className="mt-2 text-sm text-on-surface-variant">각 시간대에 정확히 10개가 있어야 합니다.</p>
+                    <h2 className="text-xl font-black">{uiText("4. 일과 후보 40개 검토")}</h2>
+                    <p className="mt-2 text-sm text-on-surface-variant">{uiText("각 시간대에 정확히 10개가 있어야 합니다.")}</p>
                   </div>
-                  <strong className="text-text-strong">총 {setup.repertoire.candidates.length}개</strong>
+                  <strong className="text-text-strong">{uiText("총")}{setup.repertoire.candidates.length}{uiText("개")}</strong>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
                   {DAYPARTS.map((item) => {
@@ -803,7 +797,7 @@ export function WorldCharacterAutonomySetupClient({
                         onClick={() => setDaypart(item.key)}
                         className={`rounded-2xl border px-4 py-3 text-left ${daypart === item.key ? "border-brand-soft-border bg-brand-soft" : "border-outline-variant bg-white"}`}
                       >
-                        <span className="block font-bold">{item.label} · {count}개</span>
+                        <span className="block font-bold">{item.label} · {count}{uiText("개")}</span>
                         <span className="text-xs text-on-surface-variant">{item.time}</span>
                       </button>
                     );
@@ -818,7 +812,7 @@ export function WorldCharacterAutonomySetupClient({
                       </div>
                       <p className="mt-2 text-sm text-on-surface-variant">{candidate.activity_seed}</p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                        {candidate.place_key ? <span className="rounded-full bg-surface-container-low px-2 py-1">장소 {candidate.place_key}</span> : null}
+                        {candidate.place_key ? <span className="rounded-full bg-surface-container-low px-2 py-1">{uiText("장소")}{candidate.place_key}</span> : null}
                         <span className="rounded-full bg-surface-container-low px-2 py-1">{candidate.social_mode}</span>
                       </div>
                     </article>
@@ -829,35 +823,31 @@ export function WorldCharacterAutonomySetupClient({
 
             {setup.can_approve || setup.can_reject ? (
               <section className="rounded-[28px] border border-brand-soft-border bg-brand-soft p-6">
-                <h2 className="text-xl font-black text-text-strong">5. 최종 승인</h2>
+                <h2 className="text-xl font-black text-text-strong">{uiText("5. 최종 승인")}</h2>
                 <p className="mt-2 text-sm text-text-default">
-                  새 후보를 승인하면 이후 새로 만드는 계획부터 사용합니다. 기존 오늘 계획과 활동 기록은 유지됩니다.
-                </p>
+                  {uiText("새 후보를 승인하면 이후 새로 만드는 계획부터 사용합니다. 기존 오늘 계획과 활동 기록은 유지됩니다.")}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={() => void handleApprove()}
                     disabled={!setup.can_approve || pending !== null}
                     className="rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:opacity-50"
-                  >{pending === "approve" ? "승인 중…" : "이 프로필과 일과 승인"}</button>
+                  >{pending === "approve" ? uiText("승인 중…") : uiText("이 프로필과 일과 승인")}</button>
                   <button
                     type="button"
                     onClick={() => void handleReject()}
                     disabled={!setup.can_reject || pending !== null}
                     className="rounded-full border border-outline bg-white px-6 py-3 font-bold"
-                  >후보 거절</button>
+                  >{uiText("후보 거절")}</button>
                 </div>
               </section>
             ) : null}
 
             {setup.autonomy_ready ? (
               <section className="rounded-[28px] border border-secondary bg-secondary-container p-6 text-on-secondary-container">
-                <h2 className="text-xl font-black">P2 준비 완료</h2>
+                <h2 className="text-xl font-black">{uiText("P2 준비 완료")}</h2>
                 <p className="mt-2">
-                  World 전용 프로필과 일과 40개가 승인되었습니다. 현재 자율활동은
-                  <strong>{setup.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태이며,
-                  P2 승인은 실행을 시작하지 않습니다.
-                </p>
+                  {uiText("World 전용 프로필과 일과 40개가 승인되었습니다. 현재 자율활동은")}<strong>{setup.autonomous_enabled ? uiText("켜짐") : uiText("꺼짐")}</strong> {uiText("상태이며, P2 승인은 실행을 시작하지 않습니다.")}</p>
               </section>
             ) : null}
 
@@ -866,11 +856,9 @@ export function WorldCharacterAutonomySetupClient({
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-bold text-brand-accent">P3 · DAILY ACTIVITY PLAN</p>
-                    <h2 className="mt-1 text-xl font-black">오늘의 활동 계획</h2>
+                    <h2 className="mt-1 text-xl font-black">{uiText("오늘의 활동 계획")}</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
-                      P2에서 승인한 후보 40개 중 새벽·오전·오후·저녁의 중심 일과를
-                      코드가 하나씩 선택합니다. 이 단계에서는 LLM/provider 비용이 발생하지 않습니다.
-                    </p>
+                      {uiText("P2에서 승인한 후보 40개 중 새벽·오전·오후·저녁의 중심 일과를 코드가 하나씩 선택합니다. 이 단계에서는 LLM/provider 비용이 발생하지 않습니다.")}</p>
                   </div>
                   {activityPlan ? (
                     <span className="rounded-full bg-surface-muted px-4 py-2 text-sm font-bold text-text-default">
@@ -886,7 +874,7 @@ export function WorldCharacterAutonomySetupClient({
                 ) : null}
 
                 {planLoading ? (
-                  <p className="mt-5 text-sm text-on-surface-variant">저장된 오늘 계획을 확인하는 중입니다.</p>
+                  <p className="mt-5 text-sm text-on-surface-variant">{uiText("저장된 오늘 계획을 확인하는 중입니다.")}</p>
                 ) : null}
 
                 {!planLoading && !activityPlan ? (
@@ -896,7 +884,7 @@ export function WorldCharacterAutonomySetupClient({
                     disabled={planPending}
                     className="mt-5 rounded-full bg-primary px-6 py-3 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {planPending ? "오늘 계획 준비 중…" : "오늘 계획 준비하기"}
+                    {planPending ? uiText("오늘 계획 준비 중…") : uiText("오늘 계획 준비하기")}
                   </button>
                 ) : null}
 
@@ -919,7 +907,7 @@ export function WorldCharacterAutonomySetupClient({
                                 <h3 className="mt-1 font-black">{item.title}</h3>
                               </div>
                               <div className="flex gap-2">
-                                {current ? <span className="rounded-full bg-state-running-surface px-2 py-1 text-xs font-bold text-state-running">현재</span> : null}
+                                {current ? <span className="rounded-full bg-state-running-surface px-2 py-1 text-xs font-bold text-state-running">{uiText("현재")}</span> : null}
                                 <span className="rounded-full bg-surface-container px-2 py-1 text-xs">{item.status}</span>
                               </div>
                             </div>
@@ -927,14 +915,14 @@ export function WorldCharacterAutonomySetupClient({
                             <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
                               <div className="rounded-xl bg-surface-container-low p-3">
                                 <dt className="text-on-surface-variant">Episode</dt>
-                                <dd className="mt-1 font-bold">{item.episode?.status ?? "없음"}</dd>
+                                <dd className="mt-1 font-bold">{item.episode?.status ?? uiText("없음")}</dd>
                               </div>
                               <div className="rounded-xl bg-surface-container-low p-3">
-                                <dt className="text-on-surface-variant">마지막 성공 활동</dt>
+                                <dt className="text-on-surface-variant">{uiText("마지막 성공 활동")}</dt>
                                 <dd className="mt-1 font-bold">
                                   {item.episode?.last_successful_beat_at
                                     ? localTime(item.episode.last_successful_beat_at, activityPlan.timezone_name)
-                                    : "아직 없음"}
+                                    : uiText("아직 없음")}
                                 </dd>
                               </div>
                             </dl>
@@ -944,8 +932,7 @@ export function WorldCharacterAutonomySetupClient({
                     </div>
                     <details className="mt-5 rounded-2xl border border-outline-variant bg-white p-4 text-sm">
                       <summary className="cursor-pointer font-bold text-on-surface">
-                        재진입 검증 정보
-                      </summary>
+                        {uiText("재진입 검증 정보")}</summary>
                       <dl className="mt-4 grid gap-3 text-xs text-on-surface-variant">
                         <div>
                           <dt className="font-bold text-on-surface">Plan ID</dt>
@@ -962,19 +949,14 @@ export function WorldCharacterAutonomySetupClient({
                       </dl>
                     </details>
                     <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
-                      오늘 계획은 저장되었지만 자율활동은
-                      <strong>{activityPlan.autonomous_enabled ? " 켜짐" : " 꺼짐"}</strong> 상태입니다.
-                      P3 계획 준비는 SNS 게시·댓글·좋아요를 실행하지 않습니다.
-                    </p>
+                      {uiText("오늘 계획은 저장되었지만 자율활동은")}<strong>{activityPlan.autonomous_enabled ? uiText("켜짐") : uiText("꺼짐")}</strong> {uiText("상태입니다. P3 계획 준비는 SNS 게시·댓글·좋아요를 실행하지 않습니다.")}</p>
                     <div className="mt-5 rounded-2xl border border-outline-variant bg-white p-5">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <p className="text-xs font-bold text-brand-accent">P4 · ROUTINE CONTINUATION</p>
-                          <h3 className="mt-1 font-black">일과 연속 전개 엔진</h3>
+                          <h3 className="mt-1 font-black">{uiText("일과 연속 전개 엔진")}</h3>
                           <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
-                            같은 시간대의 중심 일과, 직전 성공 게시글, 현재 상태를 이어 다음 장면을 씁니다.
-                            모드 선택만으로 자율활동이 켜지거나 Production 실행이 시작되지는 않습니다.
-                          </p>
+                            {uiText("같은 시간대의 중심 일과, 직전 성공 게시글, 현재 상태를 이어 다음 장면을 씁니다. 모드 선택만으로 자율활동이 켜지거나 Production 실행이 시작되지는 않습니다.")}</p>
                         </div>
                         <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
                           {activityPlan.activity_runtime_mode}
@@ -993,10 +975,10 @@ export function WorldCharacterAutonomySetupClient({
                         className="mt-4 rounded-full border border-border-control px-5 py-2 text-sm font-bold text-text-strong hover:bg-surface-muted disabled:opacity-50"
                       >
                         {modePending
-                          ? "변경 중…"
+                          ? uiText("변경 중…")
                           : activityPlan.activity_runtime_mode === "routine_resident_v1"
-                            ? "호환 모드로 되돌리기"
-                            : "P4 연속 전개 모드 선택"}
+                            ? uiText("호환 모드로 되돌리기")
+                            : uiText("P4 연속 전개 모드 선택")}
                       </button>
                       <div className="mt-4 grid gap-2 md:grid-cols-2">
                         {activityPlan.items
@@ -1005,12 +987,11 @@ export function WorldCharacterAutonomySetupClient({
                             <div key={`${item.id}-p4-evidence`} className="rounded-xl bg-surface-container-low p-3 text-xs">
                               <p className="font-bold">{DAYPARTS.find((value) => value.key === item.daypart)?.label ?? item.daypart}</p>
                               <p className="mt-1 text-on-surface-variant">
-                                성공 beat #{item.episode?.last_successful_sequence_no ?? "-"} · 댓글 근거 {item.episode?.used_event_count ?? 0}/{item.episode?.considered_event_count ?? 0} · 입력 상한 초과 {item.episode?.overflow_event_count ?? 0}
+                                {uiText("성공 beat #")}{item.episode?.last_successful_sequence_no ?? "-"} {uiText("· 댓글 근거")}{item.episode?.used_event_count ?? 0}/{item.episode?.considered_event_count ?? 0} {uiText("· 입력 상한 초과")}{item.episode?.overflow_event_count ?? 0}
                               </p>
                               {item.episode?.last_successful_post_id ? (
                                 <Link className="mt-2 inline-block font-bold text-state-running underline" href={worldPostDetailRoute(worldId, item.episode.last_successful_post_id)}>
-                                  마지막 성공 게시글 보기
-                                </Link>
+                                  {uiText("마지막 성공 게시글 보기")}</Link>
                               ) : null}
                             </div>
                           ))}
@@ -1026,11 +1007,9 @@ export function WorldCharacterAutonomySetupClient({
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-bold text-brand-accent">WORLD FEED</p>
-                    <h2 className="mt-1 text-xl font-black">캐릭터 Feed</h2>
+                    <h2 className="mt-1 text-xl font-black">{uiText("캐릭터 Feed")}</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
-                      같은 World의 게시글을 캐릭터에게 전달하는 Feed의 준비·실행 상태입니다.
-                      이 영역은 최근 검색·반응 상태만 보여주며 자율활동이나 P5 모드를 켜지 않습니다.
-                    </p>
+                      {uiText("같은 World의 게시글을 캐릭터에게 전달하는 Feed의 준비·실행 상태입니다. 이 영역은 최근 검색·반응 상태만 보여주며 자율활동이나 P5 모드를 켜지 않습니다.")}</p>
                   </div>
                   {feedStatus ? (
                     <span
@@ -1043,7 +1022,7 @@ export function WorldCharacterAutonomySetupClient({
                 </div>
 
                 {!feedStatus && !feedStatusError ? (
-                  <p className="mt-5 text-sm text-on-surface-variant">최근 관심 피드 상태를 확인하는 중입니다.</p>
+                  <p className="mt-5 text-sm text-on-surface-variant">{uiText("최근 관심 피드 상태를 확인하는 중입니다.")}</p>
                 ) : null}
                 {feedStatusError ? (
                   <p role="alert" className="mt-5 rounded-2xl bg-error-container p-4 text-on-error-container">
@@ -1059,30 +1038,26 @@ export function WorldCharacterAutonomySetupClient({
                   <>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">검색 키워드</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("검색 키워드")}</p>
                         <p className="mt-1 font-black">
                           {feedStatus.profile_keyword_count}/8
-                          {!feedStatus.profile_keywords_ready ? " · 확인 필요" : ""}
+                          {!feedStatus.profile_keywords_ready ? uiText("· 확인 필요") : ""}
                         </p>
                       </div>
                       <div className="rounded-2xl bg-surface-container-low p-4 sm:col-span-1 lg:col-span-2">
-                        <p className="text-xs text-on-surface-variant">다음 검색 묶음</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("다음 검색 묶음")}</p>
                         <p className="mt-1 font-bold">
                           {feedStatus.next_keywords.length > 0
                             ? feedStatus.next_keywords.map((keyword) => `#${keyword}`).join(" · ")
-                            : "준비되지 않음"}
+                            : uiText("준비되지 않음")}
                         </p>
                       </div>
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">마지막 검색</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("마지막 검색")}</p>
                         <p className="mt-1 font-bold">
                           {feedStatus.last_cycle_at
-                            ? new Intl.DateTimeFormat("ko-KR", {
-                                timeZone: world.timezone,
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              }).format(new Date(feedStatus.last_cycle_at))
-                            : "아직 없음"}
+                            ? formatDate(feedStatus.last_cycle_at)
+                            : uiText("아직 없음")}
                         </p>
                       </div>
                     </div>
@@ -1092,29 +1067,24 @@ export function WorldCharacterAutonomySetupClient({
                         className="mt-5 rounded-2xl bg-error-container p-4 text-sm text-on-error-container"
                         data-feed-lane-state="routine-only"
                       >
-                        P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다.
-                        Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다.
-                      </p>
+                        {uiText("P5 결합 피드가 비활성화되어 현재는 Routine 일과 게시글만 실행됩니다. Inbox 직접 반응과 관심 키워드 검색은 실행되지 않습니다.")}</p>
                     ) : feedStatus.runtime_state === "imported_locked" ? (
                       <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
-                        가져온 World의 명시적 자율활동 승인을 기다리고 있어 세 lane을 실행하지 않습니다.
-                      </p>
+                        {uiText("가져온 World의 명시적 자율활동 승인을 기다리고 있어 세 lane을 실행하지 않습니다.")}</p>
                     ) : feedStatus.runtime_state === "autonomy_disabled" ? (
                       <p className="mt-5 rounded-2xl bg-surface-container-low p-4 text-sm text-on-surface-variant">
-                        Inbox·Routine·Keyword Feed 준비는 완료됐지만 자율활동이 꺼져 있어 실행하지 않습니다.
-                      </p>
+                        {uiText("Inbox·Routine·Keyword Feed 준비는 완료됐지만 자율활동이 꺼져 있어 실행하지 않습니다.")}</p>
                     ) : feedStatus.runtime_state === "feed_search_degraded" ? (
                       <p className="mt-5 rounded-2xl bg-error-container p-4 text-sm text-on-error-container">
-                        Inbox와 Routine은 계속 실행되지만 관심 키워드 검색은 현재 복구가 필요합니다.
-                      </p>
+                        {uiText("Inbox와 Routine은 계속 실행되지만 관심 키워드 검색은 현재 복구가 필요합니다.")}</p>
                     ) : (
                       <div className="mt-5 rounded-2xl border border-secondary/40 bg-secondary-container p-5 text-on-secondary-container">
-                        <p className="font-black">관심 키워드 피드 준비됨</p>
+                        <p className="font-black">{uiText("관심 키워드 피드 준비됨")}</p>
                         <p className="mt-2 text-sm">
-                          마지막 검색 키워드: {summaryKeywords(feedStatus.last_cycle_summary).map((keyword) => `#${keyword}`).join(" · ") || "아직 없음"}
+                          {uiText("마지막 검색 키워드:")}{summaryKeywords(feedStatus.last_cycle_summary).map((keyword) => `#${keyword}`).join(" · ") || uiText("아직 없음")}
                         </p>
                         <p className="mt-1 text-sm">
-                          관련 글 {summaryNumber(feedStatus.last_cycle_summary, "filtered_candidate_count") ?? 0}개 · {feedOutcomeLabel(feedStatus)}
+                          {uiText("관련 글")}{summaryNumber(feedStatus.last_cycle_summary, "filtered_candidate_count") ?? 0}{uiText("개 ·")}{feedOutcomeLabel(feedStatus)}
                         </p>
                         {socialCausality ? (
                           <p className="mt-2 text-sm" data-causality-phase={socialCausality.phase}>
@@ -1131,24 +1101,20 @@ export function WorldCharacterAutonomySetupClient({
 
                     {feedStatus.recent_observations.length > 0 ? (
                       <div className="mt-5 space-y-3">
-                        <h3 className="font-black">최근 확인한 관련 게시글</h3>
+                        <h3 className="font-black">{uiText("최근 확인한 관련 게시글")}</h3>
                         {feedStatus.recent_observations.slice(0, 4).map((observation) => (
                           <article key={observation.observation_id} className="rounded-2xl border border-outline-variant bg-white p-4">
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div>
                                 <p className="font-bold">{observation.post_title}</p>
                                 <p className="mt-1 text-xs text-on-surface-variant">
-                                  {observation.author_name} · {new Intl.DateTimeFormat("ko-KR", {
-                                    timeZone: world.timezone,
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                  }).format(new Date(observation.post_created_at))}
+                                  {observation.author_name} · {formatDate(observation.post_created_at)}
                                 </p>
                               </div>
                               <span className="rounded-full bg-surface-container px-3 py-1 text-xs font-bold">
                                 {observation.selected_action
-                                  ? ACTION_LABELS[observation.selected_action] ?? observation.selected_action
-                                  : "관찰"}
+                                  ? uiText(ACTION_LABELS[observation.selected_action] ?? observation.selected_action)
+                                  : uiText("관찰")}
                               </span>
                             </div>
                             <p className="mt-3 text-xs text-on-surface-variant">
@@ -1171,16 +1137,14 @@ export function WorldCharacterAutonomySetupClient({
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-sm font-bold text-brand-accent">P6 · SOCIAL MEMORY</p>
-                    <h2 className="mt-1 text-xl font-black">실제 SNS 사건과 방향성 관계</h2>
+                    <h2 className="mt-1 text-xl font-black">{uiText("실제 SNS 사건과 방향성 관계")}</h2>
                     <p className="mt-2 max-w-3xl text-sm text-on-surface-variant">
-                      실제 DB 쓰기에 성공한 사건만 근거와 함께 보존합니다. 내가 상대를 보는 관계와
-                      상대가 나를 보는 관계는 서로 다른 상태이며, 이 화면은 캐릭터 소유자에게만 보입니다.
-                    </p>
+                      {uiText("실제 DB 쓰기에 성공한 사건만 근거와 함께 보존합니다. 내가 상대를 보는 관계와 상대가 나를 보는 관계는 서로 다른 상태이며, 이 화면은 캐릭터 소유자에게만 보입니다.")}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {socialMemory ? (
                       <span className="rounded-full bg-surface-container px-3 py-2 text-xs font-bold">
-                        graph {socialMemory.relationship_graph_status} {"\u00B7 \uB300\uAE30"} {socialMemory.graph_outbox_pending_count}
+                        graph {socialMemory.relationship_graph_status} {uiText("· 대기")} {socialMemory.graph_outbox_pending_count}
                         {socialMemory.graph_outbox_processing_count > 0
                           ? ` \u00B7 \uCC98\uB9AC ${socialMemory.graph_outbox_processing_count}`
                           : ""}
@@ -1193,13 +1157,13 @@ export function WorldCharacterAutonomySetupClient({
                       href={`/characters/${characterId}/worlds/${worldId}/relationship-graph`}
                       className="rounded-full border border-outline-variant px-4 py-2 text-xs font-bold"
                     >
-                      {"\uAD00\uACC4\uB9DD \uBCF4\uAE30"}
+                      {uiText("관계망 보기")}
                     </Link>
                   </div>
                 </div>
 
                 {!socialMemory && !socialMemoryError ? (
-                  <p className="mt-5 text-sm text-on-surface-variant">사건과 관계 근거를 확인하는 중입니다.</p>
+                  <p className="mt-5 text-sm text-on-surface-variant">{uiText("사건과 관계 근거를 확인하는 중입니다.")}</p>
                 ) : null}
                 {socialMemoryError ? (
                   <p role="alert" className="mt-5 rounded-2xl bg-error-container p-4 text-on-error-container">
@@ -1211,19 +1175,19 @@ export function WorldCharacterAutonomySetupClient({
                   <>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">최근 실제 사건</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("최근 실제 사건")}</p>
                         <p className="mt-1 text-2xl font-black">{socialMemory.recent_events.length}</p>
                       </div>
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">내가 보는 관계</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("내가 보는 관계")}</p>
                         <p className="mt-1 text-2xl font-black">{socialMemory.outgoing_relationships.length}</p>
                       </div>
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">상대가 보는 관계</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("상대가 보는 관계")}</p>
                         <p className="mt-1 text-2xl font-black">{socialMemory.incoming_relationships.length}</p>
                       </div>
                       <div className="rounded-2xl bg-surface-container-low p-4">
-                        <p className="text-xs text-on-surface-variant">열린 제안 · 공동 일과</p>
+                        <p className="text-xs text-on-surface-variant">{uiText("열린 제안 · 공동 일과")}</p>
                         <p className="mt-1 text-2xl font-black">
                           {socialMemory.open_proposals.length} · {socialMemory.active_joint_activities.length}
                         </p>
@@ -1234,11 +1198,11 @@ export function WorldCharacterAutonomySetupClient({
                       <div className="mt-5 grid gap-3 md:grid-cols-2">
                         {socialMemory.outgoing_relationships.slice(0, 6).map((relationship) => (
                           <article key={relationship.id} className="rounded-2xl border border-outline-variant bg-white p-4">
-                            <p className="font-bold">상대 {relationship.target_world_character_id}</p>
+                            <p className="font-bold">{uiText("상대")}{relationship.target_world_character_id}</p>
                             <p className="mt-2 text-xs text-on-surface-variant">
-                              친숙 {relationship.familiarity} · 호감 {relationship.affinity} · 신뢰 {relationship.trust} · 긴장 {relationship.tension}
+                              {uiText("친숙")}{relationship.familiarity} {uiText("· 호감")}{relationship.affinity} {uiText("· 신뢰")}{relationship.trust} {uiText("· 긴장")}{relationship.tension}
                             </p>
-                            <p className="mt-1 text-xs text-on-surface-variant">실제 상호작용 {relationship.interaction_count}회</p>
+                            <p className="mt-1 text-xs text-on-surface-variant">{uiText("실제 상호작용")}{relationship.interaction_count}{uiText("회")}</p>
                           </article>
                         ))}
                       </div>
@@ -1246,7 +1210,7 @@ export function WorldCharacterAutonomySetupClient({
 
                     {socialMemory.recent_events.length > 0 ? (
                       <div className="mt-5 space-y-3">
-                        <h3 className="font-black">최근 사건 근거</h3>
+                        <h3 className="font-black">{uiText("최근 사건 근거")}</h3>
                         {socialMemory.recent_events.slice(0, 8).map((event) => {
                           const evidencePostId = event.evidence.find(
                             (item) => item.root_post_id || item.source_post_id,
@@ -1258,20 +1222,15 @@ export function WorldCharacterAutonomySetupClient({
                               <div className="flex flex-wrap items-center justify-between gap-3">
                                 <p className="font-bold">{event.event_type}</p>
                                 <span className="rounded-full bg-surface-container px-3 py-1 text-xs">
-                                  {excluded ? "근거 제외됨" : "근거 확인 가능"}
+                                  {excluded ? uiText("근거 제외됨") : uiText("근거 확인 가능")}
                                 </span>
                               </div>
                               <p className="mt-2 text-xs text-on-surface-variant">
-                                {new Intl.DateTimeFormat("ko-KR", {
-                                  timeZone: world.timezone,
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                                }).format(new Date(event.occurred_at))}
+                                {formatDate(event.occurred_at)}
                               </p>
                               {threadPostId && !excluded ? (
                                 <Link className="mt-2 inline-block text-sm font-bold text-state-running underline" href={worldPostDetailRoute(worldId, threadPostId)}>
-                                  근거 게시글 보기
-                                </Link>
+                                  {uiText("근거 게시글 보기")}</Link>
                               ) : null}
                             </article>
                           );

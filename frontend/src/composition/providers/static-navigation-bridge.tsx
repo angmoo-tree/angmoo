@@ -3,14 +3,18 @@
 import { useEffect } from "react";
 
 import { isStaticFrontendProfile } from "@/lib/runtime/runtime-config";
+import { isTauriDesktopRuntime } from "@/lib/desktop/product-window";
 
 export function StaticNavigationBridge() {
   useEffect(() => {
-    if (!isStaticFrontendProfile()) return;
+    // Native links belong to DesktopWindowBridge (history and singleton
+    // dispatch). The browser fallback must never reload ahead of that owner.
+    if (!isStaticFrontendProfile() || isTauriDesktopRuntime()) return;
 
     function handleClick(event: MouseEvent) {
       if (
         event.defaultPrevented ||
+        isTauriDesktopRuntime() ||
         event.button !== 0 ||
         event.metaKey ||
         event.ctrlKey ||

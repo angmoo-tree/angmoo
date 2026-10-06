@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { verifyMemoryRecovery } from "./memory-recovery-fixture";
-import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed, UI_D_ROOT_POST_ID } from "./continuity-next-fixture";
+import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualThread, UI_D_ROOT_POST_ID } from "./continuity-next-fixture";
 
 test("memory: failed selection retry refreshes retained items and evidence", async ({ page }) => {
   const world = uiDWorld();
@@ -14,29 +14,32 @@ test("continuity: nested evidence opens the exact later-page reply and its paren
   await installBackendFixture(page, { worldReads: { [world.world_id]: world } });
   const root = uiDManualPost({ id: UI_D_ROOT_POST_ID, title: "원문", body: "원 게시글", replyCount: 115 });
   const parent = uiDManualPost({ id: "reply-parent", title: "", body: "부모 답글", replyToPostId: root.id });
-  const target = uiDManualPost({ id: "reply-target", title: "", body: "근거의 정확한 대댓글", replyToPostId: parent.id });
+  const target = uiDManualPost({ id: "reply-target", title: "", body: "근거의 정확한 대댓글", replyToPostId: parent.id, replyCount: 115 });
+  const child = uiDManualPost({ id: "reply-child-later-page", title: "", body: "대댓글의 마지막 페이지 답글", replyToPostId: target.id });
   await page.route("**/api/backend/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname.endsWith("/owner-character")) return json(route, uiDOwnerActor());
     if (url.pathname.includes("/manual-social/posts/")) {
       const targetId = url.pathname.split("/").at(-1);
-      const firstPage = url.searchParams.get("offset") === "0" || targetId === parent.id;
-      return json(route, { ...uiDManualFeed((firstPage ? [root, parent] : [root, target]).map((item) => ({...item, thread_root_post_id: root.id}))),
-        root_post_id: root.id, target_post_id: targetId, page_offset: firstPage ? 0 : 100,
-        next_offset: firstPage ? 50 : null });
+      if (targetId === parent.id) return json(route, uiDManualThread(parent, [target], { rootId: root.id }));
+      const firstPage = url.searchParams.get("offset") === "0";
+      return json(route, uiDManualThread(target, firstPage ? [] : [child], {
+        rootId: root.id, pageOffset: firstPage ? 0 : 100, nextOffset: firstPage ? 50 : null,
+      }));
     }
     return route.fallback();
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/worlds/${world.world_id}/posts/${target.id}`);
-  await expect(page.getByRole("heading", { name: "대꾸 115" })).toBeVisible();
-  const evidence = page.getByRole("article", { name: "근거가 가리키는 답글" });
+  await expect(page.getByRole("heading", { name: "답글 115" })).toBeVisible();
+  const evidence = page.locator(`[data-social-post-row="${target.id}"]`);
   await expect(evidence).toContainText("근거의 정확한 대댓글");
   await expect(evidence).toBeInViewport();
   expect(await evidence.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-  await page.getByRole("link", { name: /부모 답글 보기/ }).click();
+  await expect(page.locator(`[data-social-post-row="${child.id}"]`)).toContainText(child.body);
+  await page.getByRole("link", { name: /부모 게시글 보기/ }).first().click();
   await expect(page).toHaveURL(new RegExp(`/posts/${parent.id}$`));
-  await expect(page.getByRole("article", { name: "근거가 가리키는 답글" })).toContainText("부모 답글");
+  await expect(page.locator(`[data-social-post-row="${parent.id}"]`)).toContainText("부모 답글");
 });
 
 
@@ -240,6 +243,8 @@ test("retrieval diagnostics: bounded basic view and opt-in details on narrow scr
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/worlds/${worldId}/chat/${threadId}`);
+  await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "기억과 진단", exact: true })).toBeVisible();
   await page.getByText("검색 진단 · 문제 해결", { exact: true }).click();
   await expect(page.getByText("답변 생성에 근거 전달", { exact: true })).toBeVisible();
   await expect(page.getByText("앞 단계 결과가 없어 건너뜀", { exact: true })).toBeVisible();

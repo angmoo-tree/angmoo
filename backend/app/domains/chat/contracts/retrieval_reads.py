@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from sqlalchemy.orm import Session
+from app.contracts.environment import EnvironmentSnapshot
 
 from app.domains.chat.contracts.context import (
     ChatCharacter,
@@ -31,6 +32,7 @@ class RetrievalMembership(Protocol):
 
 
 class RetrievalPolicyReads(Protocol):
+    def environment(self, session: Session, command: RetrievalPreflightCommand) -> EnvironmentSnapshot: ...
     def installation(
         self, session: Session, command: RetrievalPreflightCommand
     ) -> ChatInstallation | None: ...

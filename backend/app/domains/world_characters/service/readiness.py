@@ -12,6 +12,8 @@ from app.domains.world_characters.policies.approved_setup import approved_pair_m
 
 
 def _has_legacy_tendency_analysis(setting: ReadinessSetting) -> bool:
+    if setting is None:
+        return False
     profile = (
         setting.planner_tendency_profile
         if isinstance(setting.planner_tendency_profile, dict)
@@ -25,6 +27,67 @@ def _has_legacy_tendency_analysis(setting: ReadinessSetting) -> bool:
         and isinstance(criteria, str)
         and criteria.strip()
     )
+
+
+def evaluate_many(db: Session, *, characters, activity_settings, world_id):
+    """The same readiness rules, with a fixed number of dashboard queries."""
+    from app.config import settings
+    ids = [character.id for character in characters]
+    selections = {row.character_id: row for row in db.scalars(select(models.CharacterActiveWorld).where(
+        models.CharacterActiveWorld.character_id.in_(ids)))}
+    roles = {row.id: row for row in db.scalars(select(models.WorldCharacter).where(
+        models.WorldCharacter.id.in_([row.world_character_id for row in selections.values()])))}
+    world = world_entry.get_character_entry_world(db, world_id)
+    memberships = {row.id: row for row in world_entry.list_character_entry_memberships(db,
+        [role.membership_id for role in roles.values()])}
+    allowed_roles = {role.role_key for role in world_entry.list_autonomous_entry_roles(db, world_id=world_id)}
+    repertoires, profiles, counts = {}, {}, {}
+    if not settings.DAILY_PREPARATION_ENABLED:
+        candidates = list(db.scalars(select(models.WorldActivityRepertoire).where(
+            models.WorldActivityRepertoire.world_character_id.in_(roles), models.WorldActivityRepertoire.status == "ready")
+            .order_by(models.WorldActivityRepertoire.approved_at.desc(), models.WorldActivityRepertoire.generated_at.desc())))
+        for repertoire in candidates:
+            repertoires.setdefault(repertoire.world_character_id, repertoire)
+        profiles = {row.id: row for row in db.scalars(select(models.WorldCommunityProfile).where(
+            models.WorldCommunityProfile.id.in_([row.community_profile_id for row in repertoires.values()])))}
+        for repertoire_id, daypart, count in db.execute(select(models.WorldActivityCandidate.repertoire_id,
+            models.WorldActivityCandidate.daypart, func.count(models.WorldActivityCandidate.id)).where(
+            models.WorldActivityCandidate.repertoire_id.in_([row.id for row in repertoires.values()]),
+            models.WorldActivityCandidate.enabled.is_(True)).group_by(models.WorldActivityCandidate.repertoire_id,
+                models.WorldActivityCandidate.daypart)):
+            counts.setdefault(repertoire_id, {})[daypart] = count
+    result = {}
+    for character in characters:
+        selection = selections.get(character.id)
+        role = roles.get(selection.world_character_id) if selection else None
+        base = {"world_id": world_id, "world_character_id": role.id if role else None, "source": "world_community_profile"}
+        membership = memberships.get(role.membership_id) if role else None
+        reason = None
+        if role is None or role.character_id != character.id or role.world_id != world_id or role.status != "active":
+            reason = "world_character_not_ready"
+        elif not world or world.status != "published" or world.readiness_status != "publish_ready" or not membership or membership.world_id != world_id or membership.user_id != character.owner_id or membership.status != "active":
+            reason = "world_scope_not_ready"
+        elif role.activity_runtime_mode != "routine_resident_v1":
+            setting = activity_settings.get(character.id)
+            reason = None if setting and _has_legacy_tendency_analysis(setting) else "legacy_tendency_not_ready"
+            base["source"] = "legacy_tendency"
+        elif settings.DAILY_PREPARATION_ENABLED:
+            base["source"] = "daily_preparation"
+            if role.control_mode != "autonomous" or role.role_key not in allowed_roles:
+                reason = "world_reference_invalid"
+        else:
+            repertoire = repertoires.get(role.id)
+            profile = profiles.get(repertoire.community_profile_id) if repertoire else None
+            if repertoire is None:
+                reason = "world_activity_repertoire_not_ready"
+            elif profile is None or profile.world_character_id != role.id or profile.status != "ready":
+                reason = "world_community_profile_not_ready"
+            elif not approved_pair_matches_world(role, profile, repertoire, world_hash=world.contract_hash):
+                reason = "world_activity_profile_stale"
+            elif counts.get(repertoire.id) != {daypart: 10 for daypart in world_character_contracts.DAYPARTS}:
+                reason = "world_activity_repertoire_not_ready"
+        result[character.id] = schemas.AgentActivityProfileReadinessRead(ready=reason is None, reason_code=reason, **base)
+    return result
 
 
 def evaluate(

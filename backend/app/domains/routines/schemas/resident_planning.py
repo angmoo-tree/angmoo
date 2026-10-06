@@ -6,6 +6,8 @@ The runtime supplies IO and graph execution; these models validate its values.
 
 from __future__ import annotations
 
+from app.domains.routines.contracts.reply_writing import ReplyTaskText
+
 from datetime import date
 from typing import Literal
 from pydantic import BaseModel, Field, model_validator
@@ -263,41 +265,9 @@ class _PersonaWriting(BaseModel):
     post_body: str | None = Field(default=None, max_length=4000)
 
 
-class _ReplyTaskText(BaseModel):
-    task_id: str = Field(min_length=1, max_length=180)
-    body: str | None = Field(default=None, max_length=1000)
-    proposal_decision: Literal["accept", "reject", "counter"] | None = None
-    counter_activity_seed: str | None = Field(default=None, max_length=500)
-    counter_place_key: str | None = Field(default=None, max_length=64)
-    counter_target_daypart: (
-        Literal["dawn", "morning", "afternoon", "evening"] | None
-    ) = None
-    counter_date_policy: Literal["exact", "earliest_available"] | None = None
-    counter_target_date: date | None = None
-
-    @model_validator(mode="after")
-    def validate_counter_contract(self) -> "_ReplyTaskText":
-        counter_values = (
-            self.counter_activity_seed,
-            self.counter_place_key,
-            self.counter_target_daypart,
-            self.counter_date_policy,
-            self.counter_target_date,
-        )
-        if self.proposal_decision != "counter":
-            if any(value is not None for value in counter_values):
-                raise ValueError("counter fields require proposal_decision=counter")
-            return self
-        if (
-            not self.counter_activity_seed
-            or self.counter_target_daypart is None
-            or self.counter_date_policy is None
-            or (
-                self.counter_date_policy == "exact" and self.counter_target_date is None
-            )
-        ):
-            raise ValueError("counter response fields are incomplete")
-        return self
+class _ReplyTaskText(ReplyTaskText):
+    """Historical resident schema name; shared writing owns the fields."""
+    pass
 
 
 class _ReplyWriterOutput(BaseModel):

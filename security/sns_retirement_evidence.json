@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "source_commit": "7da83fb8ff611f969600aea959dfa4b20092441d",
+  "source": "backend/app/runtime/resident/langgraph.py",
+  "cases": {
+    "backend/tests/routines/test_resident_graph.py": {
+      "test_execute_writing_plan_blocks_prompt_injection_before_publish": [
+        "_execute_writing_plan"
+      ],
+      "test_langgraph_thinking_levels_apply_to_v8_planners_and_writers": [
+        "_thinking_level_for_lane"
+      ],
+      "test_post_writer_thinking_level_falls_back_to_writer_setting": [
+        "_thinking_level_for_lane"
+      ],
+      "test_relationship_point_consumed_survives_later_state_recorder_rollback": [
+        "_record_relationship_points_after_publish"
+      ],
+      "test_root_post_mentions_do_not_create_relationship_points": [
+        "_record_relationship_points_after_publish"
+      ],
+      "test_pending_relationship_points_filters_legacy_mentions": [
+        "_pending_relationship_points_for_state"
+      ],
+      "test_langgraph_planner_thinking_level_ignores_blank_or_invalid": [
+        "_thinking_level_for_lane"
+      ],
+      "test_langgraph_supervisor_thinking_level_is_unused": [
+        "_thinking_level_for_lane"
+      ],
+      "test_post_writer_repairs_missing_independent_post_text": [
+        "_call_post_writer"
+      ],
+      "test_post_writer_planner_success_is_stored_and_prompted": [
+        "_call_post_writer_planner"
+      ],
+      "test_post_writer_planner_empty_success_gets_writer_ready_defaults": [
+        "_call_post_writer_planner"
+      ],
+      "test_post_writer_planner_json_failure_falls_back": [
+        "_call_post_writer_planner"
+      ],
+      "test_post_writer_planner_task_id_mismatch_falls_back": [
+        "_call_post_writer_planner"
+      ],
+      "test_lore_query_rewriter_success_adds_context_to_independent_post_task": [
+        "_build_lore_query_result"
+      ],
+      "test_lore_query_rewriter_skips_non_independent_without_llm": [
+        "_build_lore_query_result"
+      ],
+      "test_lore_query_rewriter_falls_back_to_deterministic_query": [
+        "_build_lore_query_result"
+      ],
+      "test_reply_writer_repairs_only_missing_tasks": [
+        "_call_reply_writer"
+      ],
+      "test_reply_writer_writes_all_tasks_in_one_call": [
+        "_call_reply_writer"
+      ],
+      "test_reply_writer_repair_writes_all_missing_tasks_in_one_call": [
+        "_call_reply_writer"
+      ],
+      "test_state_recorder_json_failure_saves_fallback_state": [
+        "_run_state_recorder"
+      ],
+      "test_state_recorder_length_failure_saves_sanitized_payload": [
+        "_run_state_recorder"
+      ],
+      "test_state_recorder_length_failure_does_not_retry_and_uses_low_thinking": [
+        "_run_state_recorder"
+      ],
+      "test_state_recorder_length_sanitize_requires_revalidatable_payload": [
+        "_run_state_recorder"
+      ],
+      "test_state_recorder_direct_llm_error_records_provider_hint": [
+        "_run_state_recorder"
+      ],
+      "test_state_recorder_fallback_save_failure_is_suppressed": [
+        "_run_state_recorder"
+      ],
+      "test_writing_plan_skip_reports_persona_writer_missing_post_text": [
+        "_execute_writing_plan"
+      ],
+      "test_writing_plan_with_repaired_text_creates_post": [
+        "_execute_writing_plan"
+      ],
+      "test_owner_feed_cue_writing_consumes_matching_pending_cue": [
+        "_execute_writing_plan"
+      ],
+      "test_writing_plan_success_records_lore_metadata_and_usage": [
+        "_execute_writing_plan"
+      ],
+      "test_writing_plan_reused_result_does_not_mark_lore_usage": [
+        "_execute_writing_plan"
+      ],
+      "test_writing_plan_success_ignores_legacy_topic_arc_progress": [
+        "_execute_writing_plan"
+      ],
+      "test_v8_planner_prompts_route_seed_and_relationship_without_topic_arc": [
+        "_build_graph"
+      ],
+      "test_writer_graph_orders_reply_plan_then_post_writer": [
+        "_build_graph"
+      ],
+      "test_llm_failure_meta_includes_node_lane_and_json_parse_details": [
+        "_llm_failure_meta"
+      ],
+      "test_llm_failure_meta_includes_provider_error_details": [
+        "_llm_failure_meta"
+      ],
+      "test_planner_json_failed_plan_is_recorded_in_planner_results": [
+        "_planner_json_failed_plan"
+      ],
+      "test_planner_json_fallback_normalizers_keep_only_failed_axis_empty": [
+        "_planner_json_failed_plan"
+      ],
+      "test_community_executor_runs_relationship_actions_before_writing": [
+        "_build_graph"
+      ],
+      "test_langgraph_recursion_limit_tracks_step_budget": [
+        "_langgraph_recursion_limit"
+      ],
+      "test_run_resident_langgraph_failed_result_includes_independent_roll": [
+        "run_resident_langgraph"
+      ],
+      "test_run_resident_langgraph_recursion_result_includes_independent_roll": [
+        "run_resident_langgraph"
+      ],
+      "test_high_thinking_json_output_token_constants_are_applied": [
+        "_call_json"
+      ]
+    },
+    "backend/tests/routine_posts/test_runtime.py": {
+      "test_langgraph_routes_routine_mode_without_building_legacy_graph": [
+        "run_resident_langgraph"
+      ],
+      "test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode": [
+        "run_resident_langgraph"
+      ],
+      "test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run": [
+        "_run_combined_inbox_lane"
+      ]
+    },
+    "backend/tests/world_packages/test_import_commit.py": {
+      "test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime": [
+        "run_resident_langgraph"
+      ]
+    }
+  },
+  "replacement_tests": [
+    "tests/runtime/test_routine_bounded_integration.py",
+    "tests/runtime/test_activity_retirement.py",
+    "tests/runtime/test_activity_combined_graph.py",
+    "tests/runtime/test_social_wire_policies.py",
+    "tests/runtime/test_joint_daily_integration.py"
+  ]
+}

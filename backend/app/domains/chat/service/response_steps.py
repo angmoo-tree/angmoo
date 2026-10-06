@@ -73,6 +73,7 @@ class ResponseWorkflowSteps:
         character_response: CharacterResponseGenerationService,
         today_snapshot_validator: TodaySnsSnapshotValidatorPort | None = None,
         social_context_provider=None,
+        thought_finalizer=None,
     ) -> None:
         self.command = command
         self.progress = progress
@@ -94,6 +95,7 @@ class ResponseWorkflowSteps:
         self._character_response = character_response
         self._today_snapshot_validator = today_snapshot_validator
         self._social_context_provider = social_context_provider
+        self._thought_finalizer = thought_finalizer
 
     def assert_active(self, state: ResponseGraphState) -> None:
         record = self.progress.record
@@ -505,6 +507,7 @@ class ResponseWorkflowSteps:
                 clarification_candidates=candidates,
                 recall_mode=command.recall_mode,
                 recall_interpretation=interpretation,
+                thought_finalizer=self._thought_finalizer,
                 today_sns_manifest=(
                     None
                     if command.today_sns_snapshot is None

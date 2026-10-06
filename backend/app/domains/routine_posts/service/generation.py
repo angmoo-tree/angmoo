@@ -147,7 +147,8 @@ Return only the requested structured JSON.""" + "\n" + ROUTINE_TEMPORAL_INSTRUCT
         writer_system = """You write one public Angmoo SNS root post as the given character.
 Use only the validated scene plan and bounded public context. Continue the prior successful post when present.
 Do not claim events that are absent, planned, failed, or not listed as used. Do not expose hidden data.
-Return topic_signature as a short Korean description of the completed title/body, at most 300 characters.
+Use the character's explicit speech-language directives and formal examples; English is the fallback when no language evidence exists.
+Return topic_signature in the completed post's language, at most 300 characters.
 Include natural topic names where relevant, but do not constrain the story to topic words or expose private conversations or unwritten plans.
 Return only the requested structured JSON.""" + "\n" + ROUTINE_TEMPORAL_INSTRUCTIONS
         writer_user = json.dumps(
@@ -190,9 +191,16 @@ Return only the requested structured JSON.""" + "\n" + ROUTINE_TEMPORAL_INSTRUCT
             image = payload.pop("image_prompt", "") if self._image_enabled else ""
             thought = None
             if self._thought_enabled:
-                payload, thought = extract_activity_thought(payload, include_thought=True)
+                from app.contracts.authored_output import finalize_activity_thought
+                thought, thought_receipt = finalize_activity_thought(payload.get("thought"))
+                payload, _ = extract_activity_thought(payload, include_thought=False)
+            from app.domains.routine_posts.policies.output_normalization import normalize_routine_auxiliary
+            payload, receipts = normalize_routine_auxiliary(payload)
             result = schemas.RoutinePostDraft.model_validate(payload)
             result._activity_thought = thought
+            if self._thought_enabled:
+                receipts["thought"] = thought_receipt.to_dict()
+            result._normalization_receipt = receipts
             if self._image_enabled:
                 if isinstance(image, str) and len(image) <= 1800:
                     result._image_prompt = image.strip()

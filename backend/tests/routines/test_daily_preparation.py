@@ -10,6 +10,7 @@ from app.domains.routines.schemas.daily_generation import GeneratedDailyPlan, In
 from app.domains.routines.service import daily_preparation as service
 from app.domains.routines.models.plans import ActivityEpisode
 from app.domains.routines.contracts.plans import PlanScope
+from app.domains.identity.service.environment import snapshot
 from app.domains.routines.models.preparation import ActivityPreparationJob
 from app.domains.world_characters.service.preparation_lock import lock_preparation_actor
 from app.runtime.persistence.model_registration import register_models
@@ -37,7 +38,7 @@ def test_initial_direct_plan_rolls_back_with_topics_and_late_windows_are_skipped
     engine = _engine()
     with Session(engine) as db:
         world, ready, _ = _seed(db)
-        scope = PlanScope(world, ready.membership, ready.world_character, ready.character)
+        scope = PlanScope(world, ready.membership, ready.world_character, ready.character, environment=snapshot(db, ready.user.id))
         now = _utc(datetime(2026, 9, 28, 15))
         plan = service.apply_plan(db, scope=scope, output=output(), target_date=now.astimezone(__import__('zoneinfo').ZoneInfo('Asia/Seoul')).date(),
                                   now=now, source_digest="a"*64, expected_snapshot={})
@@ -384,7 +385,7 @@ def test_direct_plan_joint_scheduling_keeps_two_actor_and_claim_contract(monkeyp
     from zoneinfo import ZoneInfo
     def prepare(db, fixture, *, now, key):
         world = db.get(existing.models.World, fixture.world_character.world_id)
-        plan = service.apply_plan(db, scope=PlanScope(world, fixture.membership, fixture.world_character, fixture.character),
+        plan = service.apply_plan(db, scope=PlanScope(world, fixture.membership, fixture.world_character, fixture.character, environment=snapshot(db, fixture.user.id)),
             output=output(), target_date=now.astimezone(ZoneInfo(world.timezone)).date(), now=now,
             source_digest="b"*64, expected_snapshot={})
         db.commit()

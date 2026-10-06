@@ -1,3 +1,6 @@
+"use client";
+
+import { useUiText } from "@/hooks/use-ui-text";
 import type { ProductRuntimeState } from "@/features/runtime-status/types/runtime-status";
 import { StatusChip } from "@/components/ui/status";
 
@@ -8,13 +11,16 @@ type RuntimeStatusSummaryProps = {
 };
 
 export function RuntimeStatusSummary({ state }: RuntimeStatusSummaryProps) {
+  const uiText = useUiText("runtime-status");
   const presentation = presentRuntimeState(state);
+  const label = uiText(presentation.label);
+  const description = uiText(presentation.description);
   return (
     <StatusChip
-      aria-label={`로컬 runtime: ${presentation.label}. ${presentation.description}`}
+      aria-label={uiText("로컬 runtime: {{value0}}. {{value1}}", {value0: label, value1: description})}
       data-runtime-state={state}
-      label={presentation.label}
-      title={presentation.description}
+      label={label}
+      title={description}
       tone={presentation.tone}
     />
   );

@@ -141,6 +141,7 @@ class GraphNodeCandidate:
     membership_status: str | None = "active"
     membership_world_id: str | None = None
     blocked_with_subject: bool = False
+    avatar_url: str | None = None
 
 
 @runtime_checkable

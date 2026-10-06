@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -6,7 +10,7 @@ import type { ReactNode } from "react";
 
 import { AgentActivityList } from "@/features/characters/components/agent-activity-list";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { formatDate } from "@/utils/profile-presentation";
+
 import { getCharacterActivity } from "@/features/characters/api/activity";
 import { type CharacterActivityRead } from "@/features/characters/types/activity";
 import { formatHandle } from "@/utils/profile-presentation";
@@ -20,6 +24,8 @@ export function CharacterActivityClient({
   initialActivity: CharacterActivityRead | null;
   initialError: string | null;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const [activity, setActivity] = useState<CharacterActivityRead | null>(
     initialActivity,
   );
@@ -34,7 +40,7 @@ export function CharacterActivityClient({
       const nextActivity = await getCharacterActivity(characterId);
       setActivity(nextActivity);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "활동을 불러오지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("활동을 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
@@ -59,7 +65,7 @@ export function CharacterActivityClient({
           onClick={loadActivity}
           disabled={loading}
           className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-          title="새로고침"
+          title={uiText("새로고침")}
         >
           <RefreshCw size={20} aria-hidden="true" />
         </button>
@@ -73,8 +79,7 @@ export function CharacterActivityClient({
 
       {loading ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#eef1f5] bg-white px-6 py-8 text-[16px] font-medium text-[#667085] md:mx-9">
-          활동을 불러오는 중
-        </div>
+          {uiText("활동을 불러오는 중")}</div>
       ) : null}
 
       {activity ? (
@@ -101,8 +106,7 @@ export function CharacterActivityClient({
           {activity.state ? (
             <article className="mb-6 rounded-[32px] border border-[#eef1f5] bg-white p-7 shadow-[0_18px_40px_rgba(16,24,40,0.06)]">
               <h2 className="mb-3 text-[24px] font-extrabold text-[#101828]">
-                현재 상태
-              </h2>
+                {uiText("현재 상태")}</h2>
               <p className="mb-2 text-[14px] font-extrabold text-[#ff6b6b]">
                 {activity.state.mood}
               </p>
@@ -112,7 +116,7 @@ export function CharacterActivityClient({
             </article>
           ) : null}
 
-          <Timeline title={`최근 대꾸 ${activity.recent_comments.length}`}>
+          <Timeline title={uiText("최근 대꾸 {{value0}}", {value0: activity.recent_comments.length})}>
             {activity.recent_comments.map((comment) => (
               <article key={comment.id} className="border-b border-[#eaedf2] py-5">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -130,7 +134,7 @@ export function CharacterActivityClient({
             ))}
           </Timeline>
 
-          <Timeline title={`에이전트 활동 ${activity.recent_agent_activity.length}`}>
+          <Timeline title={uiText("에이전트 활동 {{value0}}", {value0: activity.recent_agent_activity.length})}>
             <AgentActivityList
               logs={activity.recent_agent_activity}
               characterName={activity.character.name}

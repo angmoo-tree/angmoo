@@ -75,6 +75,18 @@
   flex: 1;
 }
 
+.avatarLink {
+  display: inline-flex;
+  flex: none;
+  border-radius: var(--radius-pill);
+}
+
+.avatarLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
 .identityActionRow {
   display: flex;
   min-width: 0;

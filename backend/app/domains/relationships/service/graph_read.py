@@ -181,6 +181,7 @@ def _node_reads(
             world_character_id=candidate.world_character_id,
             character_id=candidate.character_id,
             display_name=candidate.display_name,
+            avatar_url=candidate.avatar_url,
             is_center=candidate.world_character_id == center_id,
         )
         for candidate in sorted(

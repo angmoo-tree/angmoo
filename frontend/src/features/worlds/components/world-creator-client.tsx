@@ -1,4 +1,8 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { useUiText } from "@/hooks/use-ui-text";
+import { useUserEnvironment } from "@/hooks/use-user-environment";
+
 
 import {
   AlertTriangle,
@@ -40,8 +44,8 @@ const EMPTY_DEFINITION: WorldDefinition = {
   daily_life_description: "",
   genre_tags: [],
   tone_tags: [],
-  timezone: "Asia/Seoul",
-  language: "ko",
+  timezone: "UTC",
+  language: "en",
   visibility: "private",
   join_policy: "approval_required",
   additional_generation_guidance: "",
@@ -170,6 +174,8 @@ function fileAsBase64(file: File) {
 }
 
 export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile }: { worldId?: string; renderWorldTools: (worldId: string, roles: WorldRoleInput[]) => ReactNode; renderMyProfile: (worldId: string) => ReactNode }) {
+  const uiText = useUiText("worlds");
+  const { environment } = useUserEnvironment();
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const idempotencyKey = useRef(newIdempotencyKey());
@@ -179,6 +185,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const permitCommittedNavigation = useProductLeaveGuard(JSON.stringify(definition) !== JSON.stringify(context ? worldToDefinition(context) : EMPTY_DEFINITION));
   const worldBannerUrl = useRuntimeMediaUrl(
     safeSameOriginMediaUrl(context?.world.banner_media_id),
   );
@@ -204,7 +211,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
         setDefinition(worldToDefinition(next));
       })
       .catch((nextError) => {
-        if (active) setError(errorMessage(nextError));
+        if (active) setError(uiText(errorMessage(nextError)));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -213,7 +220,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
     return () => {
       active = false;
     };
-  }, [authStatus, returnPath, router, worldId]);
+  }, [authStatus, returnPath, router, uiText, worldId]);
 
   function change<K extends keyof WorldDefinition>(
     key: K,
@@ -224,7 +231,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
   }
 
   async function persist() {
-    const editable = { name: definition.name, tagline: definition.tagline, setting_description: definition.setting_description, daily_life_description: definition.daily_life_description, genre_tags: definition.genre_tags, tone_tags: definition.tone_tags, timezone: definition.timezone, language: definition.language, places: definition.places, roles: definition.roles, additional_generation_guidance: definition.additional_generation_guidance };
+    const editable = { name: definition.name, tagline: definition.tagline, setting_description: definition.setting_description, daily_life_description: definition.daily_life_description, genre_tags: definition.genre_tags, tone_tags: definition.tone_tags, places: definition.places, roles: definition.roles, additional_generation_guidance: definition.additional_generation_guidance };
     const saved = context
       ? await updateWorld(context.world.id, {
           ...editable,
@@ -232,11 +239,14 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
         })
       : await createWorld({
           ...definition,
+          timezone: environment?.timezone ?? "UTC",
+          language: environment?.memory_search_locale ?? "en",
           idempotency_key: idempotencyKey.current,
         });
     setContext(saved);
     setDefinition(worldToDefinition(saved));
     if (!worldId) {
+      permitCommittedNavigation();
       router.replace(studioWorldRoute(saved.world.id));
     }
     return saved;
@@ -248,9 +258,9 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
     setNotice(null);
     try {
       await persist();
-      setNotice("World 초안을 저장했습니다.");
+      setNotice(uiText("World 초안을 저장했습니다."));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -258,7 +268,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
 
   async function handleValidate() {
     if (!context) {
-      setError("먼저 World 초안을 저장해 주세요.");
+      setError(uiText("먼저 World 초안을 저장해 주세요."));
       return;
     }
     setPending("validate");
@@ -268,11 +278,11 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
       setContext((current) => (current ? { ...current, readiness } : current));
       setNotice(
         readiness.ready_for_publish
-          ? "공개 준비 검증을 통과했습니다."
-          : "아직 보완해야 할 필수 설정이 있습니다.",
+          ? uiText("공개 준비 검증을 통과했습니다.")
+          : uiText("아직 보완해야 할 필수 설정이 있습니다."),
       );
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -290,9 +300,9 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
       );
       setContext(published);
       setDefinition(worldToDefinition(published));
-      setNotice("World를 공개했습니다.");
+      setNotice(uiText("World를 공개했습니다."));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -307,12 +317,12 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
         row_version: context.world.row_version,
         content_type: file.type,
         data_base64: await fileAsBase64(file),
-        alt_text: `${definition.name || "World"} 배너`,
+        alt_text: uiText("{{value0}} 배너", {value0: definition.name || "World"}),
       }, kind);
       setContext(next);
-      setNotice("이미지를 저장했습니다.");
+      setNotice(uiText("이미지를 저장했습니다."));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -329,9 +339,9 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
         kind,
       );
       setContext(next);
-      setNotice("배너를 제거했습니다.");
+      setNotice(uiText("배너를 제거했습니다."));
     } catch (nextError) {
-      setError(errorMessage(nextError));
+      setError(uiText(errorMessage(nextError)));
     } finally {
       setPending(null);
     }
@@ -350,8 +360,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
   if (authStatus === "checking" || loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center text-[#667085]">
-        <Loader2 className="mr-3 size-5 animate-spin" /> World를 불러오는 중입니다.
-      </div>
+        <Loader2 className="mr-3 size-5 animate-spin" /> {uiText("World를 불러오는 중입니다.")}</div>
     );
   }
 
@@ -367,7 +376,7 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={worldBannerUrl}
-                alt={context?.world.banner_alt_text || `${definition.name} 배너`}
+                alt={context?.world.banner_alt_text || uiText("{{value0}} 배너", {value0: definition.name})}
                 className="size-full object-cover"
               />
             </div>
@@ -379,12 +388,10 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
             <div className="mt-2 flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
                 <h1 className="text-3xl font-black text-[#101828]">
-                  {context ? definition.name || "이름 없는 World" : "새 World 만들기"}
+                  {context ? definition.name || uiText("이름 없는 World") : uiText("새 World 만들기")}
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-[#667085]">
-                  세계관과 그 안의 일상을 작성합니다. 이 정의와 캐릭터 정체성을 바탕으로 일과를 준비합니다.
-                  추천 주제 AI는 키를 연결한 새 World의 최초 공개 또는 주제 다시 만들기 실행 시 사용합니다.
-                </p>
+                  {uiText("세계관과 그 안의 일상을 작성합니다. 이 정의와 캐릭터 정체성을 바탕으로 일과를 준비합니다. 추천 주제 AI는 키를 연결한 새 World의 최초 공개 또는 주제 다시 만들기 실행 시 사용합니다.")}</p>
               </div>
               {context ? (
                 <div className="flex flex-wrap gap-2 text-xs font-extrabold">
@@ -402,47 +409,43 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_340px]">
           <section className="space-y-6">
-            <Panel title="필수 세계관 설정" description="어렵지 않지만, 이 정보만으로도 캐릭터의 World별 일과를 만들 수 있어야 합니다.">
+            <Panel title={uiText("필수 세계관 설정")} description={uiText("어렵지 않지만, 이 정보만으로도 캐릭터의 World별 일과를 만들 수 있어야 합니다.")}>
               <div className="grid gap-5 md:grid-cols-2">
-                <Field label="World 이름" issue={issueByField.get("name")} counter={`${definition.name.length}/120`}>
-                  <input className={inputClass} value={definition.name} maxLength={120} onChange={(event) => change("name", event.target.value)} placeholder="예: 비늘항구의 밤" />
+                <Field label={uiText("World 이름")} issue={issueByField.get("name")} counter={`${definition.name.length}/120`}>
+                  <input className={inputClass} value={definition.name} maxLength={120} onChange={(event) => change("name", event.target.value)} placeholder={uiText("예: 비늘항구의 밤")} />
                 </Field>
-                <Field label="한 줄 소개" issue={issueByField.get("tagline")} counter={`${definition.tagline.length}/160`}>
-                  <input className={inputClass} value={definition.tagline} maxLength={160} onChange={(event) => change("tagline", event.target.value)} placeholder="이 세계의 핵심 매력을 한 문장으로 설명해 주세요." />
+                <Field label={uiText("한 줄 소개")} issue={issueByField.get("tagline")} counter={`${definition.tagline.length}/160`}>
+                  <input className={inputClass} value={definition.tagline} maxLength={160} onChange={(event) => change("tagline", event.target.value)} placeholder={uiText("이 세계의 핵심 매력을 한 문장으로 설명해 주세요.")} />
                 </Field>
               </div>
-              <Field label="세계관 설명" issue={issueByField.get("setting_description")} counter={`${definition.setting_description.length}/4000`} hint="장소, 시대, 기술·마법 수준, 사회 분위기와 캐릭터가 마주할 환경을 설명해 주세요.">
+              <Field label={uiText("세계관 설명")} issue={issueByField.get("setting_description")} counter={`${definition.setting_description.length}/4000`} hint={uiText("장소, 시대, 기술·마법 수준, 사회 분위기와 캐릭터가 마주할 환경을 설명해 주세요.")}>
                 <textarea className={largeTextareaClass} value={definition.setting_description} maxLength={4000} onChange={(event) => change("setting_description", event.target.value)} />
               </Field>
-              <Field label="이 세계의 일상" issue={issueByField.get("daily_life_description")} counter={`${definition.daily_life_description.length}/3000`} hint="주민이 언제 어디서 무엇을 하며 하루를 보내는지 적어 주세요.">
+              <Field label={uiText("이 세계의 일상")} issue={issueByField.get("daily_life_description")} counter={`${definition.daily_life_description.length}/3000`} hint={uiText("주민이 언제 어디서 무엇을 하며 하루를 보내는지 적어 주세요.")}>
                 <textarea className={largeTextareaClass} value={definition.daily_life_description} maxLength={3000} onChange={(event) => change("daily_life_description", event.target.value)} />
               </Field>
               <div className="grid gap-5 md:grid-cols-2">
-                <Field label="장르 태그" issue={issueByField.get("genre_tags")} hint="쉼표로 구분 · 1~5개">
-                  <CommaListInput values={definition.genre_tags} maxItems={5} onChange={(values) => change("genre_tags", values)} placeholder="판타지, 항구도시" />
+                <Field label={uiText("장르 태그")} issue={issueByField.get("genre_tags")} hint={uiText("쉼표로 구분 · 1~5개")}>
+                  <CommaListInput values={definition.genre_tags} maxItems={5} onChange={(values) => change("genre_tags", values)} placeholder={uiText("판타지, 항구도시")} />
                 </Field>
-                <Field label="분위기 태그" issue={issueByField.get("tone_tags")} hint="쉼표로 구분 · 1~5개">
-                  <CommaListInput values={definition.tone_tags} maxItems={5} onChange={(values) => change("tone_tags", values)} placeholder="따뜻함, 모험적" />
+                <Field label={uiText("분위기 태그")} issue={issueByField.get("tone_tags")} hint={uiText("쉼표로 구분 · 1~5개")}>
+                  <CommaListInput values={definition.tone_tags} maxItems={5} onChange={(values) => change("tone_tags", values)} placeholder={uiText("따뜻함, 모험적")} />
                 </Field>
               </div>
             </Panel>
 
-            <Panel title="운영 기본값" description="시간대는 이 World의 새벽·오전·오후·저녁을 계산하는 기준입니다.">
+            <Panel title={uiText("운영 기본값")} description={uiText("시간대는 이 World의 새벽·오전·오후·저녁을 계산하는 기준입니다.")}>
               <div className="grid gap-5 md:grid-cols-2">
-                <Field label="Timezone" issue={issueByField.get("timezone")}>
-                  <input className={inputClass} value={definition.timezone} maxLength={64} onChange={(event) => change("timezone", event.target.value)} />
-                </Field>
-                <Field label="언어" issue={issueByField.get("language")}>
-                  <input className={inputClass} value={definition.language} maxLength={16} onChange={(event) => change("language", event.target.value)} />
-                </Field>
+                <p>{uiText("감지된 사용자 시간대")}: {environment?.timezone ?? "UTC"}</p>
+                <p>{uiText("감지된 기억·검색 언어")}: {environment?.memory_search_locale ?? "en"}</p>
               </div>
             </Panel>
 
             <OptionalSettings definition={definition} change={change} />
-            {context && <details><summary>보존된 이전 World 설정 보기</summary><pre className="overflow-auto whitespace-pre-wrap">{JSON.stringify({ visibility: context.world.visibility, join_policy: context.world.join_policy, daypart_profiles: context.world.daypart_profiles, rules: context.world.rules, glossary: context.world.glossary }, null, 2)}</pre></details>}
-            {context && <Panel title="캐릭터 추가" description="World는 저장됐습니다. 지금 캐릭터를 추가하거나 나중에 관리 화면에서 이어갈 수 있습니다.">
-              <button type="button" className={secondaryButtonClass} onClick={() => router.push(`/agents/new?worldId=${encodeURIComponent(context.world.id)}&returnTo=${encodeURIComponent(studioWorldRoute(context.world.id))}`)}>직접 만들기 · 캐릭터 카드 가져오기</button>
-              <button type="button" className={secondaryButtonClass} onClick={() => router.push(PRODUCT_ROUTES.studio)}>나중에 하기</button>
+            {context && <details><summary>{uiText("보존된 이전 World 설정 보기")}</summary><pre className="overflow-auto whitespace-pre-wrap">{JSON.stringify({ visibility: context.world.visibility, join_policy: context.world.join_policy, daypart_profiles: context.world.daypart_profiles, rules: context.world.rules, glossary: context.world.glossary }, null, 2)}</pre></details>}
+            {context && <Panel title={uiText("캐릭터 추가")} description={uiText("World는 저장됐습니다. 지금 캐릭터를 추가하거나 나중에 관리 화면에서 이어갈 수 있습니다.")}>
+              <button type="button" className={secondaryButtonClass} onClick={() => router.push(`/agents/new?worldId=${encodeURIComponent(context.world.id)}&returnTo=${encodeURIComponent(studioWorldRoute(context.world.id))}`)}>{uiText("직접 만들기 · 캐릭터 카드 가져오기")}</button>
+              <button type="button" className={secondaryButtonClass} onClick={() => router.push(PRODUCT_ROUTES.studio)}>{uiText("나중에 하기")}</button>
             </Panel>}
 
             {context ? (
@@ -454,25 +457,23 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
               </>
             ) : null}
 
-            <Panel title="World 아이콘·배너 (선택)" description="앱 안에서 사용할 정사각형 아이콘과 넓은 배너입니다. 저장 후에도 변경할 수 있습니다.">
+            <Panel title={uiText("World 아이콘·배너 (선택)")} description={uiText("앱 안에서 사용할 정사각형 아이콘과 넓은 배너입니다. 저장 후에도 변경할 수 있습니다.")}>
               <div className="flex flex-wrap items-center gap-3">
-                <label className={secondaryButtonClass}>아이콘 선택<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => void handleBanner(event.target.files?.[0] ?? null, "icon")} /></label>
+                <label className={secondaryButtonClass}>{uiText("아이콘 선택")}<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => void handleBanner(event.target.files?.[0] ?? null, "icon")} /></label>
                 {worldIconUrl && (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={worldIconUrl} alt={`${definition.name} 아이콘`} className="size-20 rounded-2xl object-cover" />
+                  <img src={worldIconUrl} alt={uiText("{{value0}} 아이콘", {value0: definition.name})} className="size-20 rounded-2xl object-cover" />
                 )}
-                {context?.world.icon_media_id && <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner("icon")}>아이콘 제거</button>}
+                {context?.world.icon_media_id && <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner("icon")}>{uiText("아이콘 제거")}</button>}
                 <label className={secondaryButtonClass}>
                   {pending === "banner" ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-                  배너 선택
-                  <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => void handleBanner(event.target.files?.[0] ?? null)} />
+                  {uiText("배너 선택")}<input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={!context || pending !== null} onChange={(event) => void handleBanner(event.target.files?.[0] ?? null)} />
                 </label>
                 {context?.world.banner_media_id ? (
                   <button type="button" className={dangerButtonClass} disabled={pending !== null} onClick={() => void handleRemoveBanner()}>
-                    <Trash2 className="size-4" /> 배너 제거
-                  </button>
+                    <Trash2 className="size-4" /> {uiText("배너 제거")}</button>
                 ) : null}
-                {!context ? <span className="text-xs font-bold text-[#98a2b3]">초안을 먼저 저장해 주세요.</span> : null}
+                {!context ? <span className="text-xs font-bold text-[#98a2b3]">{uiText("초안을 먼저 저장해 주세요.")}</span> : null}
               </div>
             </Panel>
           </section>
@@ -482,14 +483,11 @@ export function WorldCreatorClient({ worldId, renderWorldTools, renderMyProfile 
             <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-sm">
               <div className="grid gap-3">
                 <button type="button" className={primaryButtonClass} disabled={pending !== null || definition.name.trim().length < 2} onClick={() => void handleSave()}>
-                  {pending === "save" ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} 초안 저장
-                </button>
+                  {pending === "save" ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} {uiText("초안 저장")}</button>
                 <button type="button" className={secondaryButtonClass} disabled={!context || pending !== null} onClick={() => void handleValidate()}>
-                  <ShieldCheck className="size-4" /> 공개 준비 확인
-                </button>
+                  <ShieldCheck className="size-4" /> {uiText("공개 준비 확인")}</button>
                 <button type="button" className={publishButtonClass} disabled={pending !== null || context?.world.status === "published"} onClick={() => void handlePublish()}>
-                  {pending === "publish" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} World 공개
-                </button>
+                  {pending === "publish" ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} {uiText("World 공개")}</button>
               </div>
               {context ? (
                 <div className="mt-5 space-y-2 border-t border-[#eaecf0] pt-4 font-mono text-[10px] leading-5 text-[#667085]">
@@ -512,22 +510,23 @@ function OptionalSettings({
   definition: WorldDefinition;
   change: <K extends keyof WorldDefinition>(key: K, value: WorldDefinition[K]) => void;
 }) {
+  const uiText = useUiText("worlds");
   return (
-    <Panel title="상세 설정 (선택)" description="비워도 공개할 수 있습니다. 작성할수록 P2가 더 구체적인 캐릭터 일과를 만들 수 있습니다.">
+    <Panel title={uiText("상세 설정 (선택)")} description={uiText("비워도 공개할 수 있습니다. 작성할수록 P2가 더 구체적인 캐릭터 일과를 만들 수 있습니다.")}>
       <div className="space-y-3">
-        <OptionalSection title="장소" count={definition.places.length} onAdd={() => change("places", [...definition.places, emptyPlace()])}>
+        <OptionalSection title={uiText("장소")} count={definition.places.length} onAdd={() => change("places", [...definition.places, emptyPlace()])}>
           {definition.places.map((item, index) => (
             <PlaceEditor key={index} item={item} onChange={(next) => change("places", replaceAt(definition.places, index, next))} onRemove={() => change("places", removeAt(definition.places, index))} />
           ))}
         </OptionalSection>
-        <OptionalSection title="역할·직업" count={definition.roles.length} onAdd={() => change("roles", [...definition.roles, emptyRole()])}>
+        <OptionalSection title={uiText("역할·직업")} count={definition.roles.length} onAdd={() => change("roles", [...definition.roles, emptyRole()])}>
           {definition.roles.map((item, index) => (
             <RoleEditor key={index} item={item} onChange={(next) => change("roles", replaceAt(definition.roles, index, next))} onRemove={() => change("roles", removeAt(definition.roles, index))} />
           ))}
         </OptionalSection>
         <details className={detailsClass}>
-          <summary className={summaryClass}>추가 생성 지침</summary>
-          <textarea className={`${textareaClass} mt-4`} value={definition.additional_generation_guidance} maxLength={1000} onChange={(event) => change("additional_generation_guidance", event.target.value)} placeholder="일과 생성 시 특별히 지켜야 할 세계관 지침" />
+          <summary className={summaryClass}>{uiText("추가 생성 지침")}</summary>
+          <textarea className={`${textareaClass} mt-4`} value={definition.additional_generation_guidance} maxLength={1000} onChange={(event) => change("additional_generation_guidance", event.target.value)} placeholder={uiText("일과 생성 시 특별히 지켜야 할 세계관 지침")} />
         </details>
       </div>
     </Panel>
@@ -535,27 +534,31 @@ function OptionalSettings({
 }
 
 function OptionalSection({ title, count, onAdd, children }: { title: string; count: number; onAdd: () => void; children: ReactNode }) {
+  const uiText = useUiText("worlds");
   return (
     <details className={detailsClass}>
       <summary className={summaryClass}><span>{title} <span className="text-[#98a2b3]">{count}</span></span></summary>
       <div className="mt-4 space-y-4">
         {children}
-        <button type="button" className={smallButtonClass} onClick={onAdd}><Plus className="size-4" /> 항목 추가</button>
+        <button type="button" className={smallButtonClass} onClick={onAdd}><Plus className="size-4" /> {uiText("항목 추가")}</button>
       </div>
     </details>
   );
 }
 
 function PlaceEditor({ item, onChange, onRemove }: { item: WorldPlaceInput; onChange: (item: WorldPlaceInput) => void; onRemove: () => void }) {
-  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label="이름" value={item.name} onChange={(value) => onChange({ ...item, name: value })} /></div><MiniInput label="설명" value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label="이용 가능한 시간대 (쉼표)" values={item.available_dayparts} maxItems={4} allowedValues={DAYPART_KEYS} onChange={(values) => onChange({ ...item, available_dayparts: values as WorldDaypart[] })} /><CommaListMiniInput label="접근 역할 key (쉼표)" values={item.access_role_keys} maxItems={20} onChange={(values) => onChange({ ...item, access_role_keys: values })} /></EditorCard>;
+  const uiText = useUiText("worlds");
+  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label={uiText("이름")} value={item.name} onChange={(value) => onChange({ ...item, name: value })} /></div><MiniInput label={uiText("설명")} value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label={uiText("이용 가능한 시간대 (쉼표)")} values={item.available_dayparts} maxItems={4} allowedValues={DAYPART_KEYS} onChange={(values) => onChange({ ...item, available_dayparts: values as WorldDaypart[] })} /><CommaListMiniInput label={uiText("접근 역할 key (쉼표)")} values={item.access_role_keys} maxItems={20} onChange={(values) => onChange({ ...item, access_role_keys: values })} /></EditorCard>;
 }
 
 function RoleEditor({ item, onChange, onRemove }: { item: WorldRoleInput; onChange: (item: WorldRoleInput) => void; onRemove: () => void }) {
-  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label="이름" value={item.name} onChange={(value) => onChange({ ...item, name: value })} /></div><MiniInput label="설명" value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label="책임 (쉼표)" values={item.responsibilities} maxItems={12} onChange={(values) => onChange({ ...item, responsibilities: values })} /><CommaListMiniInput label="가능 활동 범위 (쉼표)" values={item.allowed_activity_scope} maxItems={12} onChange={(values) => onChange({ ...item, allowed_activity_scope: values })} /><label className="flex items-center gap-2 text-xs font-bold text-[#475467]"><input type="checkbox" checked={item.autonomous_allowed} onChange={(event) => onChange({ ...item, autonomous_allowed: event.target.checked })} /> 자율활동 허용</label></EditorCard>;
+  const uiText = useUiText("worlds");
+  return <EditorCard onRemove={onRemove}><div className="grid gap-3 md:grid-cols-2"><MiniInput label="key" value={item.key} onChange={(value) => onChange({ ...item, key: value })} /><MiniInput label={uiText("이름")} value={item.name} onChange={(value) => onChange({ ...item, name: value })} /></div><MiniInput label={uiText("설명")} value={item.description} onChange={(value) => onChange({ ...item, description: value })} /><CommaListMiniInput label={uiText("책임 (쉼표)")} values={item.responsibilities} maxItems={12} onChange={(values) => onChange({ ...item, responsibilities: values })} /><CommaListMiniInput label={uiText("가능 활동 범위 (쉼표)")} values={item.allowed_activity_scope} maxItems={12} onChange={(values) => onChange({ ...item, allowed_activity_scope: values })} /><label className="flex items-center gap-2 text-xs font-bold text-[#475467]"><input type="checkbox" checked={item.autonomous_allowed} onChange={(event) => onChange({ ...item, autonomous_allowed: event.target.checked })} /> {uiText("자율활동 허용")}</label></EditorCard>;
 }
 
 function EditorCard({ onRemove, children }: { onRemove: () => void; children: ReactNode }) {
-  return <div className="relative space-y-3 rounded-[18px] border border-[#e1e5eb] bg-white p-4"><button type="button" aria-label="항목 삭제" className="absolute right-3 top-3 rounded-full p-1 text-[#98a2b3] hover:bg-[#fff0f0] hover:text-[#d92d20]" onClick={onRemove}><X className="size-4" /></button>{children}</div>;
+  const uiText = useUiText("worlds");
+  return <div className="relative space-y-3 rounded-[18px] border border-[#e1e5eb] bg-white p-4"><button type="button" aria-label={uiText("항목 삭제")} className="absolute right-3 top-3 rounded-full p-1 text-[#98a2b3] hover:bg-[#fff0f0] hover:text-[#d92d20]" onClick={onRemove}><X className="size-4" /></button>{children}</div>;
 }
 
 function MiniInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
@@ -576,16 +579,17 @@ function parseCommaList(value: string, maxItems: number, allowedValues?: readonl
 }
 
 function ReadinessCard({ context }: { context: WorldCreatorContext | null }) {
+  const uiText = useUiText("worlds");
   const readiness = context?.readiness;
   return (
     <div className="rounded-[28px] border border-[#e1e5eb] bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
         {readiness?.ready_for_publish ? <CheckCircle2 className="size-6 text-[#12b76a]" /> : <AlertTriangle className="size-6 text-[#f79009]" />}
-        <div><h2 className="font-black text-[#101828]">공개 준비</h2><p className="text-xs font-extrabold text-[#667085]">{readiness?.ready_for_publish ? "READY" : "DRAFT"}</p></div>
+        <div><h2 className="font-black text-[#101828]">{uiText("공개 준비")}</h2><p className="text-xs font-extrabold text-[#667085]">{readiness?.ready_for_publish ? "READY" : "DRAFT"}</p></div>
       </div>
-      {!context ? <p className="mt-4 text-sm font-medium leading-6 text-[#667085]">이름만으로 초안을 저장할 수 있습니다. 저장 후 필수 설정을 검증합니다.</p> : null}
+      {!context ? <p className="mt-4 text-sm font-medium leading-6 text-[#667085]">{uiText("이름만으로 초안을 저장할 수 있습니다. 저장 후 필수 설정을 검증합니다.")}</p> : null}
       <IssueList issues={readiness?.issues ?? []} />
-      {readiness ? <p className="mt-4 text-xs font-bold text-[#667085]">선택 설정 {readiness.optional_setting_count}개 그룹 · {readiness.quality_tier}</p> : null}
+      {readiness ? <p className="mt-4 text-xs font-bold text-[#667085]">{uiText("선택 설정 {{count}}개 그룹 · {{tier}}", {count: readiness.optional_setting_count, tier: readiness.quality_tier})}</p> : null}
     </div>
   );
 }

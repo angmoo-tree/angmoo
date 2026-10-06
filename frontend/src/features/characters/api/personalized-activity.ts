@@ -1,12 +1,14 @@
 import { apiRequest } from "@/lib/http/api-request";
 
 export type ActivityEngine = "current" | "personalized_graph_v2";
+export type SupportedActivityEngine = Exclude<ActivityEngine, "current">;
 export type EngineScope = "character" | "world" | "global";
 export type ActivityRuntimeStatus = {
   world_id: string;
   world_character_id: string;
   autonomous_enabled: boolean;
   control_mode: string;
+  transition?: { state: "ready" | "pending_settlement" | "needs_preparation" | "pending_conversion"; reason: string | null };
   effective: { engine: ActivityEngine; source: string; version: number };
   policies: Record<EngineScope, { engine: ActivityEngine | null; version: number }>;
   current_state: {
@@ -27,7 +29,7 @@ export function getActivityRuntime(worldId: string, actorId: string, signal?: Ab
   return apiRequest<ActivityRuntimeStatus>(path(worldId, actorId), { signal });
 }
 
-export function setActivityEngine(worldId: string, actorId: string, scope: EngineScope, engine: ActivityEngine | null, expectedVersion: number) {
+export function setActivityEngine(worldId: string, actorId: string, scope: EngineScope, engine: SupportedActivityEngine | null, expectedVersion: number) {
   return apiRequest<ActivityRuntimeStatus>(path(worldId, actorId), {
     method: "PUT", body: { scope, engine, expected_version: expectedVersion },
   });

@@ -114,6 +114,7 @@ export type AgentActivityLogRead = {
 };
 
 export type AgentActivityProfileReadinessRead = {
+  can_view_graph?: boolean;
   ready: boolean;
   source: "legacy_tendency" | "world_community_profile" | "daily_preparation";
   reason_code: string | null;

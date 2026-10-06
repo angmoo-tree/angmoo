@@ -12,6 +12,7 @@ type SocialPostActionBase = {
   label: string;
   count?: number;
   accent?: boolean;
+  disabled?: boolean;
 };
 
 export type SocialPostActionPresentation =
@@ -35,6 +36,7 @@ export type SocialPostActionPresentation =
 export type SocialPostPresentation = {
   id: string;
   authorName: string;
+  authorDeleted?: boolean;
   authorHandle?: string | null;
   authorAvatarUrl?: string | null;
   createdAt: string;

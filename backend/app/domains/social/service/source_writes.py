@@ -18,6 +18,7 @@ from app.domains.social.service.timeline import SocialTimelineService
 from app.domains.social.service.manual_writes import _existing_write, _public_root_post
 from app.domains.social.repository.manual_writes import _candidate
 from app.domains.social.repository.blocks import write_pair_is_blocked as _blocked
+from app.domains.social.repository import manual_feed as thread_queries
 from app.domains.social.utils.source_writes import _request_hash
 
 
@@ -80,6 +81,7 @@ class SocialSourceWriteService:
                 operation="post",
                 post=post,
                 root_post=post,
+                target_post=None,
                 request_key=command.idempotency_key,
                 failure_injector=self._failure_injector,
             )
@@ -158,7 +160,8 @@ class SocialSourceWriteService:
                 target_world_character_id=target.id,
                 operation="reply",
                 post=reply,
-                root_post=parent,
+                root_post=db.get(models.Post, thread_queries.canonical_root_id(db, world_id=command.world_id, post_id=parent.id)),
+                target_post=parent,
                 request_key=command.idempotency_key,
                 failure_injector=self._failure_injector,
             )
@@ -286,6 +289,7 @@ class SocialSourceWriteService:
                 operation=command.operation,
                 post=post,
                 root_post=target_post or post,
+                target_post=target_post,
                 request_key=request_key,
                 failure_injector=self._failure_injector,
             )
@@ -383,7 +387,10 @@ def _owner_reply_target(
     actor_world_character_id: str,
     target_post_id: str,
 ) -> tuple[models.Post, SourceWorldCharacter]:
-    post = _public_root_post(db, world_id=world_id, target_post_id=target_post_id)
+    post = thread_queries.visible_post(db, world_id=world_id, post_id=target_post_id)
+    if post is None or post.author_world_character_id is None or thread_queries.canonical_root_id(db, world_id=world_id, post_id=post.id) is None:
+        from app.domains.social.contracts.writes import SocialWriteNotFoundError
+        raise SocialWriteNotFoundError("reply_target_unavailable")
     target = references.get_world_character(post.author_world_character_id)
     if (
         target is None
@@ -395,17 +402,10 @@ def _owner_reply_target(
     ):
         raise SocialWriteForbiddenError("reply_target_not_autonomous")
     membership = references.get_membership(target.membership_id)
-    if (
-        membership is None
-        or membership.world_id != world_id
-        or membership.status != "active"
-        or _blocked(
-            db,
-            world_id=world_id,
-            actor_id=actor_world_character_id,
-            target_id=target.id,
-        )
-    ):
+    from app.domains.social.policies.owner_target import eligible_owner_target
+    if not eligible_owner_target(target=target, membership=membership,
+        world_id=world_id, actor_id=actor_world_character_id,
+        blocked=_blocked(db, world_id=world_id, actor_id=actor_world_character_id, target_id=target.id)):
         raise SocialWriteForbiddenError("reply_target_blocked")
     return post, target
 
@@ -453,8 +453,7 @@ def _post_snapshot(references: SourceWriteReferences, post: models.Post) -> Soci
         reply_to_post_id=post.reply_to_post_id,
         created_at=post.created_at,
         can_owner_reply=(
-            post.reply_to_post_id is None
-            and author is not None
+            author is not None
             and author.status == "active"
             and author.control_mode == "autonomous"
             and author.activity_runtime_mode == "routine_resident_v1"

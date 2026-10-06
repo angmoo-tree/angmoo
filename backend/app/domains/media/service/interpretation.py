@@ -13,6 +13,8 @@ from app.domains.identity.contracts import CredentialPurpose
 from app.domains.identity.service import media_credentials
 from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.media.contracts import InvalidProfileMediaError
+from app.core.accounting import in_accounting_period
+from app.domains.identity.service.environment import accounting_period, lock_environment_admission
 
 
 def cache_key(asset, model, thinking_level):
@@ -136,13 +138,15 @@ class InterpretationService:
         elif shared is not None and (shared.status == "outcome_unknown" or shared.lease_until is None or shared.lease_until.replace(tzinfo=timezone.utc) <= self.clock()):
             reason = "interpretation_outcome_unknown"
         elif db.scalar(select(func.count()).select_from(InterpretationAttempt).where(
-            InterpretationAttempt.owner_id == owner_id, InterpretationAttempt.quota_day == self.quota_day(self.clock()),
+            InterpretationAttempt.owner_id == owner_id, in_accounting_period(InterpretationAttempt.created_at,
+                accounting_period(db, owner_id, "day", now=self.clock())),
             InterpretationAttempt.status != "released")) >= setting.daily_limit:
             reason = "interpretation_daily_limit_reached"
         return {"allowed": reason is None, "reason": reason, "settings_path": "/settings"}
 
     def admit(self, db, owner_id, asset_id, *, retry_failed=False):
         """Reserve/share a job inside the caller's transaction; never call AI."""
+        lock_environment_admission(db, owner_id)
         if cached := self.cached(db, owner_id, asset_id):
             return cached
         # Lock one owner setting before cache/job/quota reads; all callers use this path.
@@ -175,7 +179,8 @@ class InterpretationService:
                 row.lease_token, row.lease_until = None, self.clock()+timedelta(minutes=5)
             db.flush()
             db.add(InterpretationAttempt(id=uuid4().hex, interpretation_id=row.id, owner_id=owner_id,
-                quota_day=self.quota_day(self.clock()), status="reserved"))
+                quota_day=accounting_period(db, owner_id, "day", now=self.clock()).key,
+                status="reserved", created_at=self.clock()))
             db.flush()
         elif row.status == "failed":
             raise ImagePreparationError(row.error_code or "interpretation_failed")
@@ -237,7 +242,7 @@ class InterpretationService:
             attempt = db.scalar(select(InterpretationAttempt).where(InterpretationAttempt.interpretation_id == identity,
                 InterpretationAttempt.status == "reserved"))
             try:
-                if attempt is None or attempt.quota_day != self.quota_day(self.clock()):
+                if attempt is None:
                     raise ImagePreparationError("interpretation_reservation_expired")
                 material, asset, content = self._validate_current(db, row)
                 model, thinking = row.model, row.thinking_level
@@ -326,8 +331,10 @@ class InterpretationService:
 
 def read_interpretation_usage(db, owner_id, quota_day):
     setting = db.get(InterpretationSetting, owner_id)
+    period = accounting_period(db, owner_id, "day")
     count = db.scalar(select(func.count()).select_from(InterpretationAttempt).where(
-        InterpretationAttempt.owner_id == owner_id, InterpretationAttempt.quota_day == quota_day,
+        InterpretationAttempt.owner_id == owner_id, in_accounting_period(InterpretationAttempt.created_at, period),
         InterpretationAttempt.status != "released"))
     return {"interpretation_reserved_or_used": count,
-        "interpretation_daily_limit": setting.daily_limit if setting else None}
+        "interpretation_daily_limit": setting.daily_limit if setting else None,
+        "allowance_available_at": period.allowance_available_at.isoformat()}

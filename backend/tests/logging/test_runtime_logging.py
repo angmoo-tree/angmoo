@@ -209,12 +209,21 @@ os.environ['DESKTOP_LAUNCH_TOKEN'], os.environ['DESKTOP_ALLOWED_ORIGIN'] = token
 sys.argv = ['sidecar', '--parent-pid', str(os.getpid()), '--data-root', str(root), '--runtime-root', str(root/'runtime'), '--legacy-data-root', str(root/'legacy'), '--launch-id', 'logging-handshake', '--runtime-profile', 'TEST']
 app = FastAPI()
 app.state.runtime_composition = SimpleNamespace(session_factory=lambda: None)
+disposed = []
+app.state.dispose_runtime = lambda: disposed.append(True)
 @app.get('/health')
 async def health():
     return {'status': 'ok'}
 composition.create_public_app = lambda **kwargs: app
 configuration.initialize_local_installation_identity = lambda factory: None
-desktop_sidecar._build_embedded_runtime_config = lambda *args, **kwargs: object()
+(root/'secrets').mkdir()
+(root/'secrets/app-secret').write_text('b' * 64, encoding='utf-8')
+runtime_config = configuration.build_embedded_runtime_config(
+    profile=configuration.RuntimeProfile.TEST, data_root=root,
+    runtime_root=root/'runtime', generation='logging-handshake',
+    desktop_launch_token=token, desktop_allowed_origin=origin,
+)
+desktop_sidecar._build_embedded_runtime_config = lambda *args, **kwargs: runtime_config
 observed = {}
 def client():
     endpoint = root/'runtime/sidecar.endpoint.json'
@@ -235,6 +244,7 @@ watchdog = threading.Timer(15, lambda: os._exit(91))
 watchdog.daemon = True
 watchdog.start()
 observed['exit_code'] = desktop_sidecar.main()
+assert disposed == [True]
 watchdog.cancel()
 observed['endpoint_removed'] = not (root/'runtime/sidecar.endpoint.json').exists()
 print(json.dumps(observed))

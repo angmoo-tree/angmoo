@@ -117,7 +117,7 @@ export function cardMetadataTests() {
     await page.getByRole("button", { name: "이전", exact: true }).click();
     await page.getByLabel("캐릭터 카드 PNG 또는 JSON", { exact: true }).setInputFiles({ name: "broken.png", mimeType: "image/png", buffer: Buffer.from("bad") });
     await page.getByRole("button", { name: "교체하기", exact: true }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "카드 PNG 데이터가 손상" })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: "카드를 읽을 수 없습니다." })).toBeVisible();
     await expect(notice).toBeVisible();
     expect(imports).toBe(1);
     await page.getByRole("button", { name: "취소", exact: true }).click();

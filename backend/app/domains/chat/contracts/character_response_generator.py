@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from dataclasses import dataclass
+from collections.abc import Mapping, Callable
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from app.contracts.activity_thought import ActivityThought
@@ -68,6 +68,7 @@ class CharacterResponseGeneratorRequest:
     social_snapshot: SocialContextSnapshot | None = None
     recall_mode: ChatRecallMode = ChatRecallMode.LEGACY
     recall_interpretation: RecallInterpretationContext | None = None
+    thought_finalizer: Callable[[object], ActivityThought] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if self.recall_interpretation is not None:

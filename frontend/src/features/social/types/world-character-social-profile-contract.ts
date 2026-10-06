@@ -10,10 +10,15 @@ export type WorldCharacterSocialProfileCounts = {
 };
 
 export type WorldCharacterSocialProfilePost = {
+  viewer_like_state?: "liked" | "not_liked" | "unavailable";
+  can_owner_like?: boolean;
+  reaction_world_id?: string | null;
+  reaction_owner_world_character_id?: string | null;
   id: string;
   world_id: string;
   author_world_character_id: string;
   author_name: string;
+  author_deleted?: boolean;
   author_handle: string | null;
   author_avatar_url: string | null;
   title: string;

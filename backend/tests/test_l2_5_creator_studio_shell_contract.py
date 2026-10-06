@@ -148,12 +148,13 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     ):
         assert forbidden not in combined
 
-    assert '<Field label="만드는 방법">' in create_client
+    assert '<Field label={uiText("만드는 방법")}>' in create_client
     assert 'value="external"' in create_client
     assert 'value="card"' in create_client
     assert "counts=" not in create_client
     assert "summarizeCharacterAutonomy(items)" in dashboard
-    assert "자율활동 ON {summary.enabled}" in dashboard
+    assert 'uiText("전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}"' in dashboard
+    assert "enabled: summary.enabled" in dashboard
     assert 'router.push("/agents/new")' in dashboard
     assert (
         'export { AgentsDashboardClient } from "@/features/characters/public";'

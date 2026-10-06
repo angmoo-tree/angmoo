@@ -2,40 +2,50 @@
 from app.config import settings
 from sqlalchemy import delete
 from app.domains.characters.models import CharacterCardSource
+from app.domains.characters.models_import import CharacterDraftImportOrigin
+from app.domains.characters.service.import_snapshots import get_import_snapshot
 from app.domains.characters import schemas
 from app.domains.characters.service.access import _get_owned_character
 from app.domains.characters.service.creator import _draft_read
 from app.domains.characters.service.drafts import _get_owned_draft, claim_edit
 from app.domains.characters.service.media_storage import save_draft_profile_media_bytes
 from app.integrations.media.files import media_url_to_path
+from app.domains.media.contracts import InvalidProfileMediaError
 
 
 def copy_settings(db, user, draft_id, data: schemas.CharacterSettingsCopy, *, workflows):
     draft = _get_owned_draft(db, user, draft_id, workflows=workflows)
     source = _get_owned_character(db, user, data.character_id)
+    origin, configuration = get_import_snapshot(db, source.id)
     if workflows.validate_copy_target is not None:
         workflows.validate_copy_target(db, source.id, draft.target_world_id)
     created_files = []
     try:
         claim_edit(db, draft, data.revision)
-        for field in ("name", "one_liner", "personality", "speech_style", "worldview", "character_background",
-                      "topic_preferences", "safety_rules"):
-            setattr(draft, field, getattr(source, field) or "")
+        draft.name = configuration.profile.display_name
+        draft.one_liner = configuration.profile.intro
+        for field in ("personality", "speech_style", "worldview", "character_background", "topic_preferences", "safety_rules"):
+            setattr(draft, field, getattr(configuration.settings, field))
+        draft_origin = db.get(CharacterDraftImportOrigin, draft.id)
+        if draft_origin is None:
+            db.add(CharacterDraftImportOrigin(draft_id=draft.id, snapshot_id=origin.id))
+        else:
+            draft_origin.snapshot_id = origin.id
         draft.handle = None
         draft.source_kind = "copy"
         db.execute(delete(CharacterCardSource).where(CharacterCardSource.draft_id == draft.id, CharacterCardSource.character_id.is_(None)))
         for kind in ("avatar", "banner"):
             setattr(draft, f"{kind}_temp_url", None)
-            value = getattr(source, f"{kind}_url")
+            value = getattr(configuration.profile, f"{kind}_url")
             if not value:
                 continue
             try:
                 path = media_url_to_path(value).resolve()
-                owned = (settings.media_root_path / "characters" / source.id).resolve()
+                owned = (settings.media_root_path / "characters" / origin.source_character_id).resolve()
                 imported = (settings.media_root_path / "world-package-imports").resolve()
                 if not path.is_relative_to(owned) and not path.is_relative_to(imported):
                     raise ValueError("unmanaged_display_media")
-            except ValueError:
+            except (ValueError, InvalidProfileMediaError):
                 # External URLs and other identities' files are not fetched or copied.
                 continue
             if path.is_file():

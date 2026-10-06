@@ -4,6 +4,7 @@ import hashlib
 import asyncio
 import logging
 from dataclasses import dataclass
+from functools import partial
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
@@ -143,7 +144,8 @@ class MediaRuntime:
     def usage(self, db, owner_id):
         from app.domains.social.service.generation_usage import read_usage
         from app.domains.media.service.interpretation import read_interpretation_usage
-        day = self.quota_day()
+        from app.domains.identity.service.environment import accounting_period
+        day = accounting_period(db, owner_id, "day").key
         return {**read_usage(db, day), **read_interpretation_usage(db, owner_id, day)}
 
     @staticmethod
@@ -209,7 +211,7 @@ class MediaRuntime:
         await self.interpretation.close()
         binding.unregister(self)
 
-    def _reference(self, db, owner_id, character, setting, preferred, *, materialize=True):
+    def _reference(self, db, owner_id, character, setting, preferred, *, materialize=True, prefer_profile=False):
         # Forced OFF does not even inspect card/profile files.
         if not preferred:
             return EffectiveReference(False, reason="disabled")
@@ -218,7 +220,7 @@ class MediaRuntime:
             if asset.scope_kind != "character" or asset.scope_id != character.id:
                 raise ImagePreparationError("reference_character_scope_mismatch")
             return EffectiveReference(True, "override", asset.id, asset.content_hash, revision=asset.revision)
-        card = db.scalar(select(CharacterCardSource).where(CharacterCardSource.owner_id == owner_id,
+        card = None if prefer_profile and character.avatar_url else db.scalar(select(CharacterCardSource).where(CharacterCardSource.owner_id == owner_id,
             CharacterCardSource.character_id == character.id, CharacterCardSource.source_format == "png").order_by(CharacterCardSource.created_at.desc()))
         if card is not None:
             reference = self._reference_asset(db, owner_id, character.id, "image/png", card.source_bytes,
@@ -260,7 +262,7 @@ class MediaRuntime:
                 content_type=prepared.info.content_type, content=pixels, draft=False)
         return EffectiveReference(True, source, row.id if row else None, digest, revision=row.revision if row else None)
 
-    def prepare_intent(self, db, owner_id, character_id, scene, scene_error):
+    def prepare_intent(self, db, owner_id, character_id, scene, scene_error, *, configuration=None):
         from app.domains.media.generation_contracts import compose_positive
         row = db.get(AgentImageGenerationSetting, character_id)
         if row is None or not row.generation_auto_enabled:
@@ -269,38 +271,51 @@ class MediaRuntime:
             return None
         credential = None
         try:
+            if configuration is not None and configuration.character_id != character_id:
+                raise ImagePreparationError("world_configuration_snapshot_scope_invalid")
             if scene_error:
                 raise ImagePreparationError(scene_error)
             if not isinstance(scene, str):
                 raise ImagePreparationError("scene_invalid")
-            if row.generation_provider == "novelai":
-                self._require_novel_validation()
-            positive = compose_positive(style=row.style_prompt, appearance=row.appearance_prompt, scene=scene)
             character = db.get(Character, character_id)
             if character is None or character.owner_id != owner_id or character.deleted_at:
                 raise ImagePreparationError("generation_character_forbidden")
-            profile = next((p for p in json.loads(row.generation_profiles_json).values() if p.get("active")), None)
+            from app.runtime.world_configuration.effective_values import configured_character
+            character = configured_character(character, configuration)
+            provider, model = row.generation_provider, row.generation_model
+            if configuration is not None and configuration.settings.image_model is not None:
+                from app.domains.characters.service.world_image_profiles import select_world_image_profile
+                selected = select_world_image_profile(row, configuration.settings.image_model)
+                provider, model, profile = selected.provider, selected.model, selected.profile
+            else:
+                profile = next((p for p in json.loads(row.generation_profiles_json).values() if p.get("active")), None)
             if profile is None or not profile.get("connection", {}).get("ready"):
                 raise ImagePreparationError("generation_connection_unverified")
+            if provider == "novelai":
+                self._require_novel_validation()
+            style = configuration.settings.image_style if configuration is not None else row.style_prompt
+            appearance = configuration.settings.appearance_prompt if configuration is not None else row.appearance_prompt
+            positive = compose_positive(style=style, appearance=appearance, scene=scene)
             credential = media_credentials.find_credential(db, owner_id=owner_id, character_id=character_id,
-                provider=row.generation_provider, purpose=CredentialPurpose.USER_IMAGE)
-            if row.generation_provider != "comfyui" and (credential is None or not credential.enabled):
+                provider=provider, purpose=CredentialPurpose.USER_IMAGE)
+            if provider != "comfyui" and (credential is None or not credential.enabled):
                 raise ImagePreparationError("generation_key_required")
             if credential and credential.revision != profile.get("credential_revision"):
                 raise ImagePreparationError("generation_key_changed")
             options = profile["options"]
             preferred = bool(profile.get("reference_effective"))
-            reference = self._reference(db, owner_id, character, row, preferred)
-            if row.generation_provider in {"nanogpt", "openrouter"}:
+            reference = self._reference(db, owner_id, character, row, preferred,
+                prefer_profile=configuration is not None)
+            if provider in {"nanogpt", "openrouter"}:
                 endpoint = profile["connection"].get("endpoint")
                 if not endpoint:
                     raise ImagePreparationError("model_capabilities_unverified")
-                validate_api_options(row.generation_provider, endpoint, options)
+                validate_api_options(provider, endpoint, options)
                 if reference.asset_id:
                     from app.integrations.image_api import prepare_api_reference
                     _, pixels = self.assets.read(db, owner_id=owner_id, asset_id=reference.asset_id, digest=reference.digest)
                     prepare_api_reference(endpoint, pixels)
-            if row.generation_provider == "comfyui":
+            if provider == "comfyui":
                 comfy = ComfyOptions.model_validate(options)
                 partner = media_credentials.find_credential(db, owner_id=owner_id, character_id=character_id,
                     provider="comfyui", purpose=CredentialPurpose.COMFY_PARTNER_IMAGE) if comfy.partner_auth else None
@@ -312,24 +327,34 @@ class MediaRuntime:
                 negative = row.negative_prompt if "negative" in workflow.bindings else None
                 options = comfy.model_copy(update={"workflow": workflow, "text_workflow": None}).model_dump(exclude_none=True)
             else:
-                negative = row.negative_prompt if row.generation_provider == "novelai" else None
-            if row.generation_provider == "novelai":
+                negative = row.negative_prompt if provider == "novelai" else None
+            if provider == "novelai":
                 validate_t5_prompt(positive)
                 if negative:
                     validate_t5_prompt(negative)
-            request = GenerationRequest(row.generation_provider, row.generation_model, positive, negative,
+            request = GenerationRequest(provider, model, positive, negative,
                 options, reference, profile["connection"].get("endpoint"),
-                partner_credential_id=partner.id if row.generation_provider == "comfyui" and partner else None,
-                partner_credential_revision=partner.revision if row.generation_provider == "comfyui" and partner else None)
+                partner_credential_id=partner.id if provider == "comfyui" and partner else None,
+                partner_credential_revision=partner.revision if provider == "comfyui" and partner else None,
+                world_id=configuration.world_id if configuration else None,
+                world_character_id=configuration.world_character_id if configuration else None,
+                world_configuration_revision=configuration.revision if configuration else None)
             return request, credential, row.generation_revision, row.generation_daily_limit, None
         except Exception as exc:
             code = str(exc) if isinstance(exc, ImagePreparationError) else "reference_preparation_failed"
             return None, credential, row.generation_revision, row.generation_daily_limit, code
 
-    def admit_post(self, db, *, post, owner_id, character_id, draft):
+    def admit_post(self, db, *, post, owner_id, character_id, draft, input_snapshot=None):
+        from app.domains.identity.service.environment import accounting_period
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        configuration = configuration_for_input(input_snapshot, character_id=character_id)
+        if configuration is not None and (configuration.world_id, configuration.world_character_id, configuration.character_id) != (
+                post.world_id, post.author_world_character_id, post.author_character_id):
+            raise ImagePreparationError("world_configuration_snapshot_scope_invalid")
         return admit(db, post=post, owner_id=owner_id, character_id=character_id,
-            scene=draft._image_prompt, scene_error=draft._image_error, prepare=self.prepare_intent,
-            quota_day=quota_day(datetime.now(timezone.utc)))
+            scene=draft._image_prompt, scene_error=draft._image_error,
+            prepare=partial(self.prepare_intent, configuration=configuration),
+            quota_day=accounting_period(db, owner_id, "day").key)
 
     def authorize_job(self, db, job):
         from app.domains.social.models.posts import Post
@@ -368,6 +393,10 @@ class MediaRuntime:
             raise ImagePreparationError("generation_settings_changed")
         value = json.loads(intent.request_json)
         request = GenerationRequest(**{**value, "reference": EffectiveReference(**value["reference"])})
+        if request.world_configuration_revision is not None and (
+                request.world_id != post.world_id or request.world_character_id != post.author_world_character_id
+                or type(request.world_configuration_revision) is not int or request.world_configuration_revision < 1):
+            raise ImagePreparationError("world_configuration_snapshot_scope_invalid")
         if request.provider == "novelai":
             self._require_novel_validation()
             validate_t5_prompt(request.positive)

@@ -2,12 +2,14 @@
 from __future__ import annotations
 from sqlalchemy.orm import Session
 from app.domains.social.models import posts as models
-from app.domains.social.schemas.manual import ManualSocialFeedRead, ManualSocialPostRead
+from app.domains.social.schemas.manual import ManualSocialFeedRead, ManualSocialPostRead, ManualSocialThreadRead, ManualSocialParentRead
 from app.domains.social.contracts.actors import SocialCharacter
 from app.domains.social.contracts.manual_feed import ManualFeedReferences, ManualFeedWorldCharacter
 from app.domains.social.contracts.writes import SocialWriteConflictError as ManualSocialConflictError, SocialWriteForbiddenError as ManualSocialForbiddenError, SocialWriteNotFoundError as ManualSocialNotFoundError
 from app.domains.social.repository import manual_feed as queries, event_evidence as post_queries
 from app.domains.social.service.post_attachments import media_view
+from app.domains.social.policies.owner_target import eligible_owner_target
+from app.domains.social.contracts.post_authors import WorldPostAuthor
 
 
 def _owner_actor(
@@ -51,15 +53,17 @@ def _post_read(
     like_count: int,
     viewer_world_character_id: str,
     blocked_author_ids: set[str],
+    viewer_liked: bool = False,
+    author_profiles: dict[str, WorldPostAuthor] | None = None,
 ) -> ManualSocialPostRead:
     if post.world_id is None or post.author_world_character_id is None:
         raise ManualSocialConflictError("world_post_scope_missing")
     author = references.get_world_character(post.author_world_character_id)
-    author_character = (
-        references.get_character(author.character_id) if author is not None else None
-    )
-    local_profile = author.local_profile if author is not None else None
-    local_profile = local_profile if isinstance(local_profile, dict) else {}
+    author_character = references.get_character(author.character_id) if author is not None else None
+    profile = (author_profiles or {}).get(post.author_world_character_id)
+    if profile is not None and (profile.world_id != post.world_id or profile.character_id != post.author_character_id
+        or author_character is None or author_character.deleted_at is not None):
+        profile = None
     author_profile_available = _author_profile_available(
         db,
         references=references,
@@ -68,18 +72,15 @@ def _post_read(
         viewer_world_character_id=viewer_world_character_id,
         blocked_author_ids=blocked_author_ids,
     )
+    eligible = eligible_owner_target(target=author, membership=references.get_membership(author.membership_id) if author else None,
+        world_id=post.world_id, actor_id=viewer_world_character_id, blocked=post.author_world_character_id in blocked_author_ids)
     return ManualSocialPostRead(
         id=post.id,
         world_id=post.world_id,
         author_world_character_id=post.author_world_character_id,
-        author_name=post.author_name,
-        author_handle=author_character.handle if author_character is not None else None,
-        author_avatar_url=(
-            str(local_profile.get("avatar_url") or author_character.avatar_url)
-            if author_character is not None
-            and (local_profile.get("avatar_url") or author_character.avatar_url)
-            else None
-        ),
+        author_name=profile.display_name if profile is not None else post.author_name,
+        author_handle=profile.handle if profile is not None else None,
+        author_avatar_url=profile.avatar_url if profile is not None else None,
         title=post.title,
         body=post.body,
         media=[media_view(row) for row in post.media],
@@ -91,13 +92,11 @@ def _post_read(
         author_profile_capability=(
             "available" if author_profile_available else "unavailable"
         ),
-        can_owner_reply=(
-            post.reply_to_post_id is None
-            and author is not None
-            and author.status == "active"
-            and author.control_mode == "autonomous"
-            and author.activity_runtime_mode == "routine_resident_v1"
-        ),
+        can_owner_reply=eligible,
+        viewer_like_state="liked" if viewer_liked else "not_liked",
+        can_owner_like=eligible,
+        reaction_world_id=post.world_id,
+        reaction_owner_world_character_id=viewer_world_character_id,
     )
 
 
@@ -115,10 +114,12 @@ def _post_reads(
 
     author_ids = {post.author_world_character_id for post in posts if post.author_world_character_id}
     references.prepare_authors(world_id=world_id, author_ids=author_ids)
+    author_profiles = references.author_profiles(world_id=world_id, author_ids=author_ids)
     blocked = queries.blocked_authors(db, world_id=world_id, viewer_id=viewer_world_character_id, author_ids=author_ids)
 
-    reply_counts = queries.reply_counts(db, world_id=world_id, post_ids=post_ids)
+    reply_counts = queries.reply_counts(db, world_id=world_id, post_ids=post_ids, viewer_id=viewer_world_character_id)
     like_counts = queries.like_counts(db, post_ids=post_ids)
+    liked = queries.viewer_likes(db, world_id=world_id, viewer_id=viewer_world_character_id, post_ids=post_ids)
     return [
         _post_read(
             db,
@@ -128,6 +129,8 @@ def _post_reads(
             like_count=like_counts.get(post.id, 0),
             viewer_world_character_id=viewer_world_character_id,
             blocked_author_ids=blocked,
+            viewer_liked=post.id in liked,
+            author_profiles=author_profiles,
         )
         for post in posts
     ]
@@ -156,6 +159,8 @@ def list_owner_world_feed(
     actor, _character = _owner_actor(
         references, world_id=world_id, current_user_id=current_user_id
     )
+    # Feed v1 retains public posts; blocking disables profile/reaction
+    # capabilities. The selected-thread v2 reader separately filters replies.
     items = queries.list_visible_posts(db, world_id=world_id, limit=limit)
     return ManualSocialFeedRead(
         world_id=world_id,
@@ -178,28 +183,37 @@ def get_owner_world_post_thread(
     post_id: str,
     current_user_id: str,
     offset: int | None = None,
-) -> ManualSocialFeedRead:
-    """Read one root post and visible replies inside an exact World scope."""
+) -> ManualSocialThreadRead:
+    """The selected post is the stable subtree anchor on every page."""
 
     actor, _character = _owner_actor(
         references, world_id=world_id, current_user_id=current_user_id
     )
-    root = queries.resolve_visible_root(db, world_id=world_id, post_id=post_id)
-    if root is None:
+    selected = queries.visible_post(db, world_id=world_id, post_id=post_id)
+    root_id = queries.canonical_root_id(db, world_id=world_id, post_id=post_id)
+    if selected is None or root_id is None or selected.author_world_character_id in queries.blocked_authors(db,
+        world_id=world_id, viewer_id=actor.id, author_ids={selected.author_world_character_id}):
         raise ManualSocialNotFoundError("post_not_in_world")
     replies, page_offset, next_offset = queries.list_visible_replies(
-        db, world_id=world_id, root=root, offset=offset or 0,
-        target_id=post_id if offset is None else None,
+        db, world_id=world_id, root=selected, offset=offset or 0, viewer_id=actor.id,
     )
-    items = [root, *replies]
+    items = [selected, *replies]
     reads = _post_reads(db, references=references, world_id=world_id,
         posts=items, viewer_world_character_id=actor.id)
-    return ManualSocialFeedRead(
+    references_by_id = []
+    parent_ids = {post.reply_to_post_id for post in items if post.reply_to_post_id}
+    available_parent_ids = queries.visible_parent_ids(db, world_id=world_id, post_ids=parent_ids, viewer_id=actor.id)
+    for parent_id in sorted(parent_ids):
+        references_by_id.append(ManualSocialParentRead(post_id=parent_id,
+            state="available" if parent_id in available_parent_ids else "unavailable"))
+    return ManualSocialThreadRead(
         world_id=world_id,
-        root_post_id=root.id,
-        target_post_id=post_id,
+        root_post_id=root_id,
+        selected_post=reads[0].model_copy(update={"thread_root_post_id": root_id}),
+        parent=next((item for item in references_by_id if item.post_id == selected.reply_to_post_id), None),
+        parent_references=references_by_id,
         page_offset=page_offset,
         next_offset=next_offset,
         owner_world_character_id=actor.id,
-        items=[item.model_copy(update={"thread_root_post_id": root.id}) for item in reads],
+        replies=[item.model_copy(update={"thread_root_post_id": root_id}) for item in reads[1:]],
     )

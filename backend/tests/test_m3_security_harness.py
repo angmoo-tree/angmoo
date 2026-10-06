@@ -120,6 +120,7 @@ def test_security_inventory_access_classes_match_authentication_dependencies() -
             assert dependencies & {
                 "get_current_user",
                 "get_current_user_allow_incomplete",
+                "get_authenticated_user_context_allow_incomplete",
             }, key
 
 
@@ -158,8 +159,22 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         if key.split(" ", 1)[0] in UNSAFE_METHODS
         and metadata["access"] == "public"
     }
-    assert len(session_mutations) == 124
+    assert len(session_mutations) == 134
+    assert {
+        "PUT /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",
+        "DELETE /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/like",
+    } <= session_mutations
+    assert "POST /api/v1/auth/local/environment" in session_mutations
     assert "POST /api/v1/characters/{character_id}/worlds/{world_id}/daily-preparation" in session_mutations
+    assert {
+        "DELETE /api/v1/worlds/{world_id}/chat/threads/{thread_id}",
+        "PATCH /api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile",
+        "PATCH /api/v1/worlds/{world_id}/world-characters/{world_character_id}/settings",
+        "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/activate",
+        "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/deactivate",
+        "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/profile/media",
+        "POST /api/v1/worlds/{world_id}/world-characters/{world_character_id}/run-now",
+    } <= session_mutations
     assert len(local_bot_mutations) == 10
     assert not admin_mutations
     assert preauth_mutations == PREAUTH_MUTATION_ROUTES
@@ -169,6 +184,7 @@ def test_demo_read_only_guard_covers_every_mutation_auth_surface() -> None:
         assert _dependency_names(actual[key]) & {
             "get_current_user",
             "get_current_user_allow_incomplete",
+            "get_authenticated_user_context_allow_incomplete",
         }, key
     for key in local_bot_mutations:
         assert "get_current_local_bot" in _dependency_names(actual[key]), key

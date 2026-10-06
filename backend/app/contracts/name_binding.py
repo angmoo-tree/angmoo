@@ -9,6 +9,12 @@ NAME_BINDING_POLICY = "persona-name-binding-v1"
 class NameBindingError(ValueError):
     """Safe reason code, with no names or source text in the exception."""
 
+    def __init__(self, code: str, *, field_path: str | None = None,
+                 rendered_chars: int | None = None, limit: int | None = None):
+        super().__init__(code)
+        self.code, self.field_path = code, field_path
+        self.rendered_chars, self.limit = rendered_chars, limit
+
 
 @dataclass(frozen=True)
 class NameBindingSnapshot:

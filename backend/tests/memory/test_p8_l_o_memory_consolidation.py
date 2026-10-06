@@ -246,6 +246,9 @@ def _stack(
     provider: FakeProvider | None = None,
 ):
     scope = _seed_world(session)
+    from environment_fixture_support import seed_environment
+    seed_environment(session, scope.owner_id)
+    session.flush()
     reader = FakeSourceReader()
     repository = SqlAlchemyMemoryConsolidationRepository(session)
     initial = MemoryScopeService(repository).get_or_create(scope)

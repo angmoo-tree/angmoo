@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 import hashlib
 import json
@@ -779,7 +779,10 @@ async def generate_text(
     require_tool_call: bool = False,
     sdk_attempts: int | None = None,
     on_request_start: Callable[[int], None] | None = None,
+    on_request_submission: Callable[[ProviderRequest], None] | None = None,
     json_attempt: int | None = None,
+    before_provider_request: Callable[[], Awaitable[None]] | None = None,
+    request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
 ) -> DirectLlmResponse:
     if not _is_google_provider(context.provider):
         raise DirectLlmError(f"direct LLM only supports Google provider: {context.provider}")
@@ -789,10 +792,8 @@ async def generate_text(
     if tools and not adapter.capabilities.tool_calls:
         raise DirectLlmError("native_tool_calls_unsupported")
 
-    async def _invoke(call_order: int, provider_call_order: int) -> Any:
-        if on_request_start is not None:
-            on_request_start(call_order)
-        request = ProviderRequest(
+    def make_request(call_order=None, provider_call_order=None):
+        return ProviderRequest(
             api_key=api_key,
             model=context.model,
             system_prompt=system_prompt,
@@ -806,13 +807,22 @@ async def generate_text(
             tools=tools,
             require_tool_call=require_tool_call,
             sdk_attempts=1 if tools else sdk_attempts,
-            diagnostic_callback=(lambda evidence: tracker._notify("request_config", {
+            diagnostic_callback=(lambda evidence: tracker._notify(
+                "provider_response" if evidence.get("capture_boundary") == "sdk_response" else "request_config", {
                 **evidence, "node": context.node, "lane": context.lane,
                 "call_order_in_run": call_order,
                 "provider_call_order_in_run": provider_call_order,
                 "json_attempt": json_attempt,
             })) if tracker.observer is not None else None,
         )
+    async def _invoke(call_order, provider_call_order, checked_request):
+        # Admission and its final fence have completed. Let the workflow record
+        # this exact physical input without changing the legacy start callback.
+        if on_request_submission is not None:
+            on_request_submission(checked_request)
+        if on_request_start is not None:
+            on_request_start(call_order)
+        request = replace(checked_request, diagnostic_callback=make_request(call_order, provider_call_order).diagnostic_callback)
         if response_mime_type == "application/json":
             return await adapter.generate_json(request)
         return await adapter.generate_text(request)
@@ -824,18 +834,28 @@ async def generate_text(
             call_type="generate_content",
             on_rate_limit_wait=on_rate_limit_wait,
         )
+        async with credential_semaphore:
+            if semaphore is None:
+                return await _submit_once()
+            async with semaphore:
+                return await _submit_once()
+
+    async def _submit_once() -> DirectLlmResponse:
+        # After quota/semaphore waits, before reserving or physically submitting.
+        # Guard failures keep their owner's typed meaning and cannot be retried.
+        if before_provider_request is not None:
+            await before_provider_request()
+        checked_request = make_request()
+        if request_preparer is not None:
+            checked_request = await request_preparer(checked_request)
+            if before_provider_request is not None:
+                await before_provider_request()
         call_order = tracker.next_call_order()
         provider_call_order = tracker.next_provider_call_order()
         started = time.perf_counter()
         try:
-            async with credential_semaphore:
-                if semaphore is None:
-                    async with asyncio.timeout(timeout_seconds):
-                        response = await _invoke(call_order, provider_call_order)
-                else:
-                    async with semaphore:
-                        async with asyncio.timeout(timeout_seconds):
-                            response = await _invoke(call_order, provider_call_order)
+            async with asyncio.timeout(timeout_seconds):
+                response = await _invoke(call_order, provider_call_order, checked_request)
             usage = response.usage.as_direct_llm_usage()
             result = DirectLlmResponse(
                 text=response.text,
@@ -1022,6 +1042,10 @@ def _json_error_diagnostic(
     if isinstance(exc, StructuredOutputValidationError):
         diagnostic["validation_code"] = exc.validation_code
         diagnostic["field_path"] = exc.field_path
+    from app.contracts.name_binding import NameBindingError
+    if isinstance(exc, NameBindingError):
+        diagnostic.update(validation_code=exc.code, field_path=exc.field_path,
+                          rendered_chars=exc.rendered_chars, limit=exc.limit)
     if preview_tail:
         diagnostic["preview_tail"] = preview_tail
     return diagnostic
@@ -1086,6 +1110,9 @@ async def generate_json(
     retry_input_char_limit: int | None = None,
     sdk_attempts: int | None = None,
     before_json_retry: Callable[[int], Awaitable[None]] | None = None,
+    before_provider_request: Callable[[], Awaitable[None]] | None = None,
+    request_preparer: Callable[[ProviderRequest], Awaitable[ProviderRequest]] | None = None,
+    on_request_submission: Callable[[ProviderRequest], None] | None = None,
 ) -> Any:
     if json_retry_policy is not None and (
         should_retry_json_error is not None or retry_max_output_tokens is not None
@@ -1126,6 +1153,13 @@ async def generate_json(
         input_sha256 = hashlib.sha256(
             (system_prompt + "\n" + actual_user_prompt).encode()
         ).hexdigest()
+        def request_submitted(request: ProviderRequest) -> None:
+            nonlocal input_sha256
+            input_sha256 = hashlib.sha256(
+                (request.system_prompt + "\n" + request.user_prompt).encode()
+            ).hexdigest()
+            if on_request_submission is not None:
+                on_request_submission(request)
         def request_started(call_order: int) -> None:
             tracker._notify("json_attempt_input", {
                 "node": context.node, "lane": context.lane,
@@ -1138,6 +1172,8 @@ async def generate_json(
         payload_coerced = False
         last_payload = None
         response = await generate_text(
+            before_provider_request=before_provider_request,
+            request_preparer=request_preparer,
             api_key=api_key,
             context=context,
             tracker=tracker,
@@ -1152,6 +1188,7 @@ async def generate_json(
             on_rate_limit_wait=on_rate_limit_wait,
             sdk_attempts=sdk_attempts,
             on_request_start=request_started,
+            on_request_submission=request_submitted,
             json_attempt=attempt + 1,
         )
         if on_response is not None:

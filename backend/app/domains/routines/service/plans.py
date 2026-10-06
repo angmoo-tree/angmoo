@@ -58,7 +58,7 @@ def _load_scope(
     world = references.get_world(world_id)
     if world is None:
         raise DailyActivityPlanNotFoundError(world_id)
-    return PlanScope(world, membership, world_character, character)
+    return PlanScope(world, membership, world_character, character, references.get_environment(user.id))
 
 
 def _ready_repertoire(
@@ -133,7 +133,7 @@ def prepare_activity_plan(
         user=user,
         lock_for_update=True,
     )
-    target_date = local_activity_date(current, scope.world.timezone)
+    target_date = local_activity_date(current, scope.environment.timezone)
     existing = db.scalar(
         select(models.DailyActivityPlan).where(
             models.DailyActivityPlan.world_character_id == scope.world_character.id,
@@ -150,7 +150,7 @@ def prepare_activity_plan(
         )
 
     repertoire, candidates = _ready_repertoire(references, scope=scope)
-    windows = daypart_windows(target_date, scope.world.timezone)
+    windows = daypart_windows(target_date, scope.environment.timezone)
     history = _selection_history(
         db,
         world_character_id=scope.world_character.id,
@@ -193,7 +193,7 @@ def prepare_activity_plan(
         world_id=scope.world.id,
         world_character_id=scope.world_character.id,
         local_date=target_date,
-        timezone_name=scope.world.timezone,
+        timezone_name=scope.environment.timezone,
         timezone_contract_version=TIMEZONE_CONTRACT_VERSION,
         repertoire_id=repertoire.id,
         world_definition_hash=scope.world.contract_hash,
@@ -317,7 +317,7 @@ def get_activity_plan(
         world_id=world_id,
         user=user,
     )
-    target_date = local_activity_date(current, scope.world.timezone)
+    target_date = local_activity_date(current, scope.environment.timezone)
     plan = db.scalar(
         select(models.DailyActivityPlan).where(
             models.DailyActivityPlan.world_character_id == scope.world_character.id,
@@ -365,7 +365,7 @@ def update_activity_runtime_mode(
             or credential.character_id not in {None, character_id}
         ):
             raise DailyActivityPlanValidationError("credential_required")
-        target_date = local_activity_date(current, scope.world.timezone)
+        target_date = local_activity_date(current, scope.environment.timezone)
         plan = db.scalar(
             select(models.DailyActivityPlan).where(
                 models.DailyActivityPlan.world_character_id

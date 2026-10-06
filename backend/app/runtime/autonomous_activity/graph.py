@@ -152,7 +152,9 @@ def build_autonomous_graph(*, lanes: dict[str, LanePorts], load_context: Node,
                            observe: Callable[..., None] | None = None,
                            prepare: Node | None = None, choose_selection_mode: Node | None = None,
                            combined_select: Node | None = None):
-    combined = combined_select is not None
+    if combined_select is None or prepare is None or choose_selection_mode is None:
+        raise ValueError("combined_selection_ports_missing")
+    combined = True
     builder = StateGraph(ParentState)
 
     def parent(name, callback):
@@ -238,21 +240,14 @@ def build_autonomous_graph(*, lanes: dict[str, LanePorts], load_context: Node,
 
         builder.add_node(f"{lane.capitalize()}ActivityGraph", invoke)
     builder.add_node("RefreshAfterInbox", parent("RefreshAfterInbox", refresh))
-    builder.add_node("RefreshAfterRoutine", parent("RefreshAfterRoutine", refresh))
     builder.add_node("Finalize", parent("Finalize", finalize))
-    if combined:
-        if prepare is None or choose_selection_mode is None:
-            raise ValueError("combined_selection_ports_missing")
-        builder.add_node("PrepareCandidates", parent("PrepareCandidates", prepare))
-        builder.add_node("ChooseSelectionMode", parent("ChooseSelectionMode", choose_selection_mode))
-        builder.add_node("CombinedTargetSelector", parent("CombinedTargetSelector", combined_select))
-        builder.add_node("RefreshAfterFeed", parent("RefreshAfterFeed", refresh))
-        sequence = [START, "LoadContext", "PrepareCandidates", "ChooseSelectionMode", "CombinedTargetSelector",
-                    "InboxActivityGraph", "RefreshAfterInbox", "FeedActivityGraph", "RefreshAfterFeed",
-                    "RoutineActivityGraph", "Finalize", END]
-    else:
-        sequence = [START, "LoadContext", "InboxActivityGraph", "RefreshAfterInbox", "RoutineActivityGraph",
-                    "RefreshAfterRoutine", "FeedActivityGraph", "Finalize", END]
+    builder.add_node("PrepareCandidates", parent("PrepareCandidates", prepare))
+    builder.add_node("ChooseSelectionMode", parent("ChooseSelectionMode", choose_selection_mode))
+    builder.add_node("CombinedTargetSelector", parent("CombinedTargetSelector", combined_select))
+    builder.add_node("RefreshAfterFeed", parent("RefreshAfterFeed", refresh))
+    sequence = [START, "LoadContext", "PrepareCandidates", "ChooseSelectionMode", "CombinedTargetSelector",
+                "InboxActivityGraph", "RefreshAfterInbox", "FeedActivityGraph", "RefreshAfterFeed",
+                "RoutineActivityGraph", "Finalize", END]
     for left, right in zip(sequence, sequence[1:]):
         builder.add_edge(left, right)
     return builder.compile(checkpointer=checkpointer, name="AutonomousActivityGraphV2")

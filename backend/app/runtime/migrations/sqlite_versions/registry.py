@@ -121,8 +121,14 @@ from app.runtime.migrations.sqlite_versions import daily_preparation_v23
 from app.runtime.migrations.sqlite_versions import routine_state_v24
 from app.runtime.migrations.sqlite_versions import topic_request_v25
 from app.runtime.migrations.sqlite_versions import images_v26
+from app.runtime.migrations.sqlite_versions import environment_v27
+from app.runtime.migrations.sqlite_versions import world_configuration_v28
+from app.runtime.migrations.sqlite_versions import world_configuration_v29
 
 MIGRATIONS: dict[int, SqliteMigration] = {
+    28: world_configuration_v29.upgrade,
+    27: world_configuration_v28.upgrade,
+    26: environment_v27.upgrade,
     25: images_v26.upgrade,
     24: topic_request_v25.upgrade,
     23: routine_state_v24.upgrade,
@@ -151,6 +157,9 @@ MIGRATIONS: dict[int, SqliteMigration] = {
 }
 
 MIGRATION_CONTRACTS: dict[int, SqliteMigrationContract] = {
+    28: SqliteMigrationContract(source_version=28, target_version=29, name="world_configuration_v28_recovery", mutable_identity_tables=world_configuration_v29.MUTABLE_IDENTITY_TABLES, capture=world_configuration_v29.capture_delta, verify=world_configuration_v29.verify_delta),
+    27: SqliteMigrationContract(source_version=27, target_version=28, name="world_character_configuration", mutable_identity_tables=world_configuration_v28.MUTABLE_IDENTITY_TABLES, capture=world_configuration_v28.capture_delta, verify=world_configuration_v28.verify_delta),
+    26: SqliteMigrationContract(source_version=26, target_version=27, name="local_environment", mutable_identity_tables=environment_v27.MUTABLE_IDENTITY_TABLES, capture=environment_v27.capture_delta, verify=environment_v27.verify_delta),
     25: SqliteMigrationContract(source_version=25, target_version=26, name="sns_chat_images", mutable_identity_tables=images_v26.MUTABLE_IDENTITY_TABLES, capture=images_v26.capture_delta, verify=images_v26.verify_delta),
     24: SqliteMigrationContract(source_version=24, target_version=25, name="topic_request_names", mutable_identity_tables=topic_request_v25.MUTABLE_IDENTITY_TABLES, capture=topic_request_v25.capture_delta, verify=topic_request_v25.verify_delta),
     23: SqliteMigrationContract(source_version=23, target_version=24, name="routine_state_version", mutable_identity_tables=routine_state_v24.MUTABLE_IDENTITY_TABLES, capture=routine_state_v24.capture_delta, verify=routine_state_v24.verify_delta),
@@ -248,8 +257,19 @@ def migration_contract(source_version: int) -> SqliteMigrationContract:
     return contract
 
 
-def load_sqlite_manifest(version: int) -> SqliteVersionManifest:
+def load_sqlite_manifest(
+    version: int, *, source_manifest_sha256: str | None = None,
+) -> SqliteVersionManifest:
+    """Load a frozen contract, including one explicitly attested v28 source.
+
+    The alternate contract is for source validation only. Migration targets
+    always use the final numbered manifest; unknown source hashes do not
+    broaden the supported schema inventory or contract digest.
+    """
     path = _MANIFEST_ROOT / f"v{version}.json"
+    early_v28_sha256 = "8aa68a2a44e1d6eb40c7e312c55b889a7a0e26a2dca7e546e656b61fea5bf277"
+    if version == 28 and source_manifest_sha256 == early_v28_sha256:
+        path = _MANIFEST_ROOT / "v28_early_world_configuration.json"
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
         manifest = SqliteVersionManifest(
@@ -267,6 +287,8 @@ def load_sqlite_manifest(version: int) -> SqliteVersionManifest:
     if len(manifest.schema_digest) != 64:
         raise SqliteVersionContractError("sqlite_schema_manifest_mismatch")
     if len(manifest.table_inventory) != manifest.canonical_table_count:
+        raise SqliteVersionContractError("sqlite_schema_manifest_mismatch")
+    if path.name == "v28_early_world_configuration.json" and manifest.manifest_sha256 != early_v28_sha256:
         raise SqliteVersionContractError("sqlite_schema_manifest_mismatch")
     return manifest
 

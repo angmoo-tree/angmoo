@@ -26,6 +26,10 @@ class SqlAlchemyPlanReferences:
     def get_character(self, character_id: str) -> Character | None:
         return self._db.get(Character, character_id)
 
+    def get_environment(self, owner_id: str):
+        from app.domains.identity.service.environment import snapshot
+        return snapshot(self._db, owner_id)
+
     def character_contract_hash(self, character: Character) -> str:
         return character_contract_hash(character)
 

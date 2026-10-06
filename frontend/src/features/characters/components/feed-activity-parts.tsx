@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { ActiveAgentSummary,getActiveAgentAvatarRingClassName } from "@/features/characters/components/active-agent-summary";
 import type { AgentActivityMaintenanceRead,AgentDetailRead,AgentFeedCueRead } from "@/features/characters/types/feed-actor";
@@ -14,6 +16,7 @@ import { useEffect,useState } from "react";
 import { createPortal } from "react-dom";
 
 export function MobileActiveAgentTrigger({ agent }: { agent: AgentDetailRead | null }) {
+  const uiText = useUiText("characters");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -39,21 +42,21 @@ export function MobileActiveAgentTrigger({ agent }: { agent: AgentDetailRead | n
         type="button"
         className="absolute inset-0"
         onClick={() => setOpen(false)}
-        aria-label="닫기"
+        aria-label={uiText("닫기")}
       />
       <div className="relative max-h-[78vh] w-full max-w-[430px] overflow-y-auto rounded-[28px] bg-[#f6f7f9] p-3 shadow-[0_20px_60px_rgba(16,24,40,0.24)]">
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="absolute right-5 top-5 z-10 inline-flex size-10 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] shadow-sm"
-          aria-label="닫기"
+          aria-label={uiText("닫기")}
         >
           <X size={20} aria-hidden="true" />
         </button>
         <div className="rounded-[24px] border border-[#eef1f5] bg-white p-5 shadow-[0_12px_28px_rgba(16,24,40,0.05)]">
           <h2 className="mb-5 flex min-w-0 items-center gap-3 pr-12 text-[22px] font-extrabold text-[#101828]">
             <Radio size={22} className="shrink-0 text-[#ff6b6b]" />
-            <span className="truncate">활동 중인 앵무</span>
+            <span className="truncate">{uiText("활동 중인 앵무")}</span>
           </h2>
           <ActiveAgentSummary agent={agent} />
         </div>
@@ -71,7 +74,7 @@ export function MobileActiveAgentTrigger({ agent }: { agent: AgentDetailRead | n
           sizeClassName: "size-11",
           paddingClassName: "p-0.5",
         })}
-        aria-label={`${agent.character.name} 활동 상태 보기`}
+        aria-label={uiText("{{value0}} 활동 상태 보기", {value0: agent.character.name})}
       >
         <ProfileAvatar
           name={agent.character.name}
@@ -158,10 +161,11 @@ export function FeedCueComposer({
   onTopicChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
+  const uiText = useUiText("characters");
   const maintenanceEnabled = Boolean(
     maintenance?.enabled && maintenance.blocks_feed_cues,
   );
-  const maintenanceFeedCueLabel = "점검 중에는 모이를 잠시 멈춰두었습니다.";
+  const maintenanceFeedCueLabel = uiText("점검 중에는 모이를 잠시 멈춰두었습니다.");
   const disabled = !agent || Boolean(cue) || saving || maintenanceEnabled;
   const textareaValue = cue ? cue.topic : topic;
 
@@ -201,7 +205,7 @@ export function FeedCueComposer({
             placeholder={
               maintenanceEnabled
                 ? maintenanceFeedCueLabel
-                : "다음 활동 주제를 적어주세요\n다음 활동엔 꼭 이 모이로 글을 써요"
+                : uiText("다음 활동 주제를 적어주세요 다음 활동엔 꼭 이 모이로 글을 써요")
             }
             className="min-h-[86px] w-full resize-none rounded-[18px] border border-[#e1e5eb] bg-white px-4 py-3 text-[15px] font-medium leading-6 text-[#101828] outline-none transition-colors placeholder:text-[#98a2b3] focus:border-[#ff8a8a] disabled:cursor-not-allowed disabled:bg-[#f3f4f6] disabled:text-[#98a2b3]"
           />
@@ -220,8 +224,7 @@ export function FeedCueComposer({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#1d2939] disabled:cursor-not-allowed disabled:bg-[#c9ced6]"
             >
               <Wheat size={16} />
-              모이 주기
-            </button>
+              {uiText("모이 주기")}</button>
           </div>
         </div>
       </div>

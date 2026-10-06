@@ -384,6 +384,7 @@ class WorldGlossaryTermRead(WorldGlossaryTermInput):
 
 
 class WorldRead(WorldSchema):
+    runtime_timezone: str = "UTC"
     icon_media_id: str | None = None
     id: str
     slug: str

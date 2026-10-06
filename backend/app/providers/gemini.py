@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import math
+from copy import deepcopy
+from dataclasses import dataclass
 from time import monotonic
 from typing import Any
 
@@ -59,9 +61,9 @@ def build_gemini_developer_response_schema(
     source = model.model_json_schema()
     definitions = source.get("$defs", {})
 
-    def convert(value: Any) -> Any:
+    def convert(value: Any, references: tuple[str, ...] = ()) -> Any:
         if isinstance(value, list):
-            return [convert(item) for item in value]
+            return [convert(item, references) for item in value]
         if not isinstance(value, dict):
             return value
 
@@ -71,12 +73,38 @@ def build_gemini_developer_response_schema(
             if not isinstance(reference, str) or not reference.startswith(prefix):
                 raise ValueError(f"unsupported response schema reference: {reference}")
             name = reference[len(prefix) :]
+            if name in references:
+                raise ValueError("recursive response schema reference")
             target = definitions.get(name)
             if not isinstance(target, dict):
                 raise ValueError(f"missing response schema definition: {name}")
-            merged = dict(target)
+            merged = deepcopy(target)
             merged.update({key: item for key, item in value.items() if key != "$ref"})
-            return convert(merged)
+            return convert(merged, (*references, name))
+
+        # JSON Schema values must stay values, not be traversed as schema nodes.
+        value = deepcopy(value)
+        if "const" in value:
+            constant = value.pop("const")
+            if (isinstance(constant, bool) or not isinstance(constant, (str, int, float, type(None)))
+                    or isinstance(constant, float) and not math.isfinite(constant)):
+                raise ValueError("unsupported response schema constant")
+            if "enum" in value and (not isinstance(value["enum"], list) or not any(
+                type(candidate) is not bool and candidate == constant
+                for candidate in value["enum"])):
+                raise ValueError("conflicting response schema const and enum")
+            inferred = "null" if constant is None else ("string" if isinstance(constant, str)
+                else "integer" if isinstance(constant, int) else "number")
+            declared = value.get("type")
+            if declared is not None and inferred not in (declared if isinstance(declared, list) else [declared]):
+                if not (inferred == "integer" and declared == "number"):
+                    raise ValueError("conflicting response schema const and type")
+            value["type"] = declared or inferred
+            if constant is None:
+                value["type"] = "null"
+                value.pop("enum", None)
+            else:
+                value["enum"] = [constant]
 
         variants = value.get("anyOf")
         if isinstance(variants, list):
@@ -87,28 +115,44 @@ def build_gemini_developer_response_schema(
             ]
             has_null = len(non_null) != len(variants)
             if has_null and len(non_null) == 1:
-                converted = convert(non_null[0])
+                converted = convert(non_null[0], references)
                 if not isinstance(converted, dict):
                     raise ValueError("nullable response schema must resolve to an object")
                 converted_type = converted.get("type")
-                if isinstance(converted_type, str):
+                if isinstance(converted_type, str) and "enum" in converted:
+                    # An enum on a type array would also constrain null. Keep
+                    # the unrestricted null alternative separate from it.
+                    metadata = convert({k: v for k, v in value.items() if k != "anyOf"}, references)
+                    return {**metadata, "anyOf": [converted, {"type": "null"}]}
+                elif isinstance(converted_type, str):
                     converted["type"] = [converted_type, "null"]
                 else:
                     raise ValueError(
                         "nullable response schema must have one concrete type"
                     )
-                return converted
+                return {**convert({k: v for k, v in value.items() if k != "anyOf"}, references), **converted}
             raise ValueError("unsupported response schema union")
+
+        if isinstance(value.get("type"), list) and "enum" in value:
+            concrete = [kind for kind in value["type"] if kind != "null"]
+            if len(concrete) != 1 or "null" not in value["type"]:
+                raise ValueError("unsupported response schema enum union")
+            allows_null = None in value["enum"]
+            values = [item for item in value["enum"] if item is not None]
+            if not values and allows_null:
+                return {**convert({k: v for k, v in value.items() if k not in {"type", "enum"}}, references), "type": "null"}
+            leaf = convert({**value, "type": concrete[0], "enum": values}, references)
+            return {"anyOf": [leaf, {"type": "null"}]} if allows_null else leaf
 
         converted: dict[str, Any] = {}
         for key, item in value.items():
             if key == "properties" and isinstance(item, dict):
                 converted[key] = {
-                    property_name: convert(property_schema)
+                    property_name: convert(property_schema, references)
                     for property_name, property_schema in item.items()
                 }
             elif key in _GEMINI_DEVELOPER_SCHEMA_KEYS:
-                converted[key] = convert(item)
+                converted[key] = convert(item, references) if key == "items" else deepcopy(item)
         return converted
 
     converted = convert(source)
@@ -220,9 +264,54 @@ def _finish_reason_from_response(response: Any) -> str | None:
     return value if isinstance(value, str) else "UNKNOWN"
 
 
+def _response_evidence(response: Any) -> dict[str, Any]:
+    """Capture bounded SDK response structure without content or free-text feedback."""
+    candidates = getattr(response, "candidates", None) or []
+    feedback = getattr(response, "prompt_feedback", None)
+
+    def enum_code(value: Any, enum_type: Any) -> str | None:
+        if value is None:
+            return None
+        wire = getattr(value, "value", value)
+        return wire if isinstance(wire, str) and wire in {item.value for item in enum_type} else "UNKNOWN"
+
+    return {
+        "capture_boundary": "sdk_response",
+        "response_evidence_version": 1,
+        "candidate_count": len(candidates),
+        "prompt_feedback_present": feedback is not None,
+        "prompt_block_reason": enum_code(getattr(feedback, "block_reason", None), types.BlockedReason),
+        "candidate_finish_reasons": [
+            enum_code(getattr(candidate, "finish_reason", None), types.FinishReason)
+            for candidate in candidates[:8]
+        ],
+        "candidate_part_counts": [
+            len(getattr(getattr(candidate, "content", None), "parts", None) or [])
+            for candidate in candidates[:8]
+        ],
+        "candidate_text_part_counts": [
+            sum(isinstance(getattr(part, "text", None), str) and bool(part.text.strip())
+                for part in (getattr(getattr(candidate, "content", None), "parts", None) or []))
+            for candidate in candidates[:8]
+        ],
+        "candidate_metadata_truncated": len(candidates) > 8,
+        "parsed_present": getattr(response, "parsed", None) is not None,
+    }
+
+
 def _native_parameters(schema: dict[str, Any]) -> types.Schema:
     """Use the SDK's OpenAPI nullable form; domain validation stays authoritative."""
     def convert(node):
+        variants = node.get("anyOf")
+        if isinstance(variants, list):
+            concrete = [item for item in variants if item.get("type") != "null"]
+            if len(variants) == 2 and len(concrete) == 1:
+                # Native tools use the SDK's OpenAPI nullable flag. Preserve
+                # the same enum/null domain as the JSON response schema.
+                leaf = convert(concrete[0])
+                return {**convert({k: v for k, v in node.items() if k != "anyOf"}),
+                    **leaf, "nullable": True}
+            raise ValueError("native_tool_schema_union_unsupported")
         result = {}
         for key, value in node.items():
             if key == "additionalProperties":
@@ -244,17 +333,33 @@ def _native_parameters(schema: dict[str, Any]) -> types.Schema:
     return types.Schema.model_validate(convert(schema))
 
 
-def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
-    client = genai.Client(
-        api_key=request.api_key,
-        http_options=types.HttpOptions(
-            timeout=max(1, int(request.timeout_seconds * 1000)),
-            retry_options=(
-                types.HttpRetryOptions(attempts=request.sdk_attempts)
-                if request.sdk_attempts is not None else None
-            ),
-        ),
-    )
+@dataclass(frozen=True)
+class PreparedGeminiRequest:
+    contents: Any
+    config: types.GenerateContentConfig
+
+    def count_request(self, model: str) -> dict:
+        contents = [types.Content(role="user", parts=[types.Part.from_text(text=self.contents)])] if isinstance(self.contents, str) else [self.contents]
+        config = self.config.model_dump(mode="json", by_alias=True, exclude_none=True)
+        instruction = config.pop("systemInstruction", None)
+        tools = config.pop("tools", None)
+        tool_config = config.pop("toolConfig", None)
+        config.pop("automaticFunctionCalling", None)
+        result = {"model": "models/" + model.removeprefix("models/"),
+            "contents": [item.model_dump(mode="json", by_alias=True, exclude_none=True) for item in contents],
+            "generationConfig": config}
+        if instruction is not None:
+            result["systemInstruction"] = {"parts": [{"text": instruction}]} if isinstance(instruction, str) else instruction
+        if tools:
+            result["tools"] = tools
+        if tool_config:
+            result["toolConfig"] = tool_config
+        return {"generateContentRequest": result}
+
+
+def prepare_generate_request(request: ProviderRequest) -> PreparedGeminiRequest:
+    if isinstance(request.prepared_request, PreparedGeminiRequest):
+        return request.prepared_request
     config = build_generate_content_config(
         model=request.model,
         system_prompt=request.system_prompt,
@@ -300,6 +405,15 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
                     )
                 )
         contents = types.Content(role="user", parts=parts)
+    return PreparedGeminiRequest(contents, config)
+
+
+def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
+    prepared = prepare_generate_request(request)
+    contents, config = prepared.contents, prepared.config
+    client = genai.Client(api_key=request.api_key, http_options=types.HttpOptions(
+        timeout=max(1, int(request.timeout_seconds * 1000)),
+        retry_options=types.HttpRetryOptions(attempts=request.sdk_attempts) if request.sdk_attempts is not None else None))
     if request.diagnostic_callback is not None:
         try:
             config_values = config.model_dump(by_alias=True, exclude_none=True)
@@ -328,6 +442,11 @@ def _generate_content_sync(request: ProviderRequest) -> ProviderResponse:
         contents=contents,
         config=config,
     )
+    if request.diagnostic_callback is not None:
+        try:
+            request.diagnostic_callback({"model": request.model, **_response_evidence(response)})
+        except Exception:
+            pass  # Missing diagnostics never change response parsing or retry policy.
     return ProviderResponse(
         text=_text_from_response(response),
         parsed=getattr(response, "parsed", None),

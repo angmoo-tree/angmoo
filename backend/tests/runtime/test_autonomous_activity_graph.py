@@ -5,6 +5,22 @@ from app.runtime.autonomous_activity.checkpoints import activity_checkpointer, c
 from app.runtime.autonomous_activity.graph import LanePorts, build_autonomous_graph
 
 
+def selection_ports(lanes):
+    """The supported parent freezes both selections before the Inbox runs."""
+    async def prepare(state):
+        prepared = {}
+        for name in ("inbox", "feed"):
+            loaded = await lanes[name].load_candidates(state)
+            selected = await lanes[name].select({**state, **loaded})
+            prepared[name] = {**loaded, **selected}
+        return {"prepared_lanes": prepared}
+    async def mode(state):
+        return {"selection_mode": "combined"}
+    async def selected(state):
+        return {}
+    return {"prepare": prepare, "choose_selection_mode": mode, "combined_select": selected}
+
+
 def lane_ports(name, calls, *, fail=None):
     async def guard(state):
         assert state["identity"]["world_id"] == "world"
@@ -90,7 +106,7 @@ def test_feed_path_result_storage_failure_reuses_completed_actions(tmp_path):
             lanes["feed"] = replace(lanes["feed"], finalize=feed_final)
             return build_autonomous_graph(
                 lanes=lanes, load_context=load, refresh=load,
-                finalize=finish, checkpointer=saver,
+                finalize=finish, checkpointer=saver, **selection_ports(lanes),
             )
 
         config = checkpoint_config(activity_id="feed-path-result-retry")
@@ -114,8 +130,10 @@ async def _resume(tmp_path):
     async def refresh(state): return {"shared_context": {"mood": "hopeful"}}
     async def final(state): return {"result": {"status": "completed"}}
     def graph(saver):
-        return build_autonomous_graph(lanes={name: lane_ports(name, calls, fail=fail if name == "inbox" else None)
-            for name in ("inbox", "routine", "feed")}, load_context=load, refresh=refresh, finalize=final, checkpointer=saver)
+        lanes = {name: lane_ports(name, calls, fail=fail if name == "inbox" else None)
+            for name in ("inbox", "routine", "feed")}
+        return build_autonomous_graph(lanes=lanes, load_context=load, refresh=refresh, finalize=final,
+            checkpointer=saver, **selection_ports(lanes))
     config = checkpoint_config(activity_id="run-1")
     async with activity_checkpointer(tmp_path) as saver:
         with pytest.raises(RuntimeError, match="simulated_process_exit"):
@@ -147,7 +165,7 @@ def test_reopen_after_each_completed_checkpoint_preserves_prior_results(tmp_path
                     raise RuntimeError("checkpoint_boundary_exit")
                 return await original(state)
             lanes["inbox"] = replace(lanes["inbox"], guard=guard)
-            return build_autonomous_graph(lanes=lanes, load_context=load, refresh=load, finalize=final, checkpointer=saver)
+            return build_autonomous_graph(lanes=lanes, load_context=load, refresh=load, finalize=final, checkpointer=saver, **selection_ports(lanes))
         config = checkpoint_config(activity_id="boundary")
         async with activity_checkpointer(tmp_path) as saver:
             with pytest.raises(RuntimeError, match="checkpoint_boundary_exit"):

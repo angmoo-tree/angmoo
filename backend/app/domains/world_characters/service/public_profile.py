@@ -31,7 +31,9 @@ class WorldCharacterProfileService:
     ) -> tuple[WorldCharacterPublicProfile, ...]:
         self._require_world_access(world_id, current_user_id)
         rows = self.queries.public_profile_rows(self.db, world_id)
-        return tuple(self._snapshot(world_character, character) for world_character, character in rows)
+        values = self.queries.effective_profiles(self.db, world_id=world_id,
+            world_character_ids=[role.id for role, _ in rows])
+        return tuple(self._snapshot(world_character, character, profile=values[world_character.id]) for world_character, character in rows)
 
     def get_for_world(
         self,
@@ -44,7 +46,8 @@ class WorldCharacterProfileService:
         row = self.queries.public_profile_row(self.db, world_id, world_character_id)
         if row is None:
             raise WorldCharacterProfileNotFoundError()
-        return self._snapshot(row[0], row[1])
+        values = self.queries.effective_profiles(self.db, world_id=world_id, world_character_ids=[world_character_id])
+        return self._snapshot(row[0], row[1], profile=values[world_character_id])
 
     def _require_world_access(self, world_id: str, current_user_id: str) -> None:
         world_service.require_world_read_access(
@@ -57,18 +60,15 @@ class WorldCharacterProfileService:
     def _snapshot(
         world_character: WorldCharacter,
         character: CharacterProfileRecord,
+        *, profile,
     ) -> WorldCharacterPublicProfile:
-        local_profile = world_character.local_profile or {}
-        display_name = str(local_profile.get("display_name") or character.name)
-        avatar_value = local_profile.get("avatar_url") or character.avatar_url
-        banner_value = local_profile.get("banner_url") or character.banner_url
-        intro = str(local_profile.get("intro") or character.one_liner or "")
+        display_name, avatar_value, banner_value, intro = profile.display_name, profile.avatar_url, profile.banner_url, profile.intro
         return WorldCharacterPublicProfile(
             world_id=world_character.world_id,
             world_character_id=world_character.id,
             character_id=character.id,
             display_name=display_name,
-            handle=character.handle,
+            handle=profile.handle,
             avatar_url=str(avatar_value) if avatar_value else None,
             banner_url=str(banner_value) if banner_value else None,
             intro=intro,

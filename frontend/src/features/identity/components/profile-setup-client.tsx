@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Check } from "lucide-react";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
@@ -16,6 +18,7 @@ import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "@/config/policy-links"
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => void }) {
+  const uiText = useUiText("identity");
   const router = useRouter();
   const { status: authStatus, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
@@ -46,15 +49,15 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
     event.preventDefault();
     const nickname = displayName.trim();
     if (!nickname) {
-      setError("닉네임을 입력해주세요.");
+      setError(uiText("닉네임을 입력해주세요."));
       return;
     }
     if (!privacyAgreed || !termsAgreed) {
-      setError("개인정보처리방침과 이용약관에 동의해주세요.");
+      setError(uiText("개인정보처리방침과 이용약관에 동의해주세요."));
       return;
     }
     if (requiresTurnstile && !turnstileToken) {
-      setError("보안 확인을 완료해주세요.");
+      setError(uiText("보안 확인을 완료해주세요."));
       return;
     }
 
@@ -88,7 +91,7 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
         router.replace("/login");
         return;
       }
-      setError(err instanceof Error ? err.message : "닉네임을 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("닉네임을 저장하지 못했습니다."));
       if (requiresTurnstile) {
         setTurnstileToken(null);
         setTurnstileResetKey((value) => value + 1);
@@ -108,15 +111,14 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
 
   const handleTurnstileError = useCallback(() => {
     setTurnstileToken(null);
-    setError("보안 확인을 다시 시도해주세요.");
-  }, []);
+    setError(uiText("보안 확인을 다시 시도해주세요."));
+  }, [uiText]);
 
   return (
     <section className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex h-[72px] items-center border-b border-[#eaedf2] bg-white/95 px-5 backdrop-blur-sm md:h-[88px] md:px-9">
         <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-          닉네임 설정
-        </h1>
+          {uiText("닉네임 설정")}</h1>
       </div>
 
       <div className="flex justify-center px-5 py-8 md:px-9">
@@ -126,16 +128,13 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
         >
           <div className="mx-auto w-full max-w-[460px] text-center">
             <p className="text-[20px] font-extrabold text-[#101828]">
-              Angmoo에서 사용할 닉네임을 정해주세요
-            </p>
+              {uiText("Angmoo에서 사용할 닉네임을 정해주세요")}</p>
             <p className="mt-2 text-[14px] font-semibold leading-5 text-[#667085]">
-              Google 이름은 저장하지 않습니다. 여기서 정한 닉네임만 Angmoo에 표시됩니다.
-            </p>
+              {uiText("Google 이름은 저장하지 않습니다. 여기서 정한 닉네임만 Angmoo에 표시됩니다.")}</p>
 
             <label className="mt-7 block text-left">
               <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-                닉네임
-              </span>
+                {uiText("닉네임")}</span>
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
@@ -149,15 +148,15 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
               <AgreementCheckbox
                 checked={privacyAgreed}
                 onChange={setPrivacyAgreed}
-                label="개인정보처리방침에 동의합니다"
-                linkText="개인정보처리방침"
+                label={uiText("개인정보처리방침에 동의합니다")}
+                linkText={uiText("개인정보처리방침")}
                 href={PRIVACY_POLICY_URL}
               />
               <AgreementCheckbox
                 checked={termsAgreed}
                 onChange={setTermsAgreed}
-                label="이용약관에 동의합니다"
-                linkText="이용약관"
+                label={uiText("이용약관에 동의합니다")}
+                linkText={uiText("이용약관")}
                 href={TERMS_OF_SERVICE_URL}
               />
             </div>
@@ -190,7 +189,7 @@ export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => v
               className="mt-7 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#ff6b6b] px-6 text-[17px] font-extrabold text-white shadow-[0_12px_24px_rgba(255,104,104,0.28)] transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Check size={20} aria-hidden="true" />
-              {saving ? "저장 중..." : "시작하기"}
+              {saving ? uiText("저장 중...") : uiText("시작하기")}
             </button>
           </div>
         </form>

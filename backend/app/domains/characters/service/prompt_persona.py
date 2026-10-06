@@ -8,8 +8,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
+from app.contracts.name_binding import NameBindingSnapshot
+from app.contracts.activity_thought import ActivityThought
+from app.contracts.authored_output import finalize_activity_thought
 from app.domains.characters.policies.name_macros import render_names
 from app.domains.characters.policies.authored_names import authored_thought
+from app.contracts.language import PERSONA_LANGUAGE_POLICY
 
 
 PERSONA_INPUT_VERSION = "character-persona-input-v1"
@@ -21,7 +25,7 @@ PERSONA_INTERPRETATION = (
     "detail; for origin, past and affiliation use the separate character background. "
     "Card dialogue examples and fictional backstory are not actual conversations, "
     "events, relationships or memories. Current World time, places, roles, actual "
-    "history and application rules take precedence over character settings."
+    "history and application rules take precedence over character settings. " + PERSONA_LANGUAGE_POLICY
 )
 
 
@@ -67,6 +71,12 @@ def model_persona(source: object) -> dict[str, Any]:
 def request_persona(source: object, binding) -> dict[str, Any]:
     """A new model-facing copy; edit/export APIs continue to use model_persona."""
     return render_persona(model_persona(source), binding)
+
+
+def request_activity_thought(value: object, binding: NameBindingSnapshot, *, recipient_id: str | None = None) -> ActivityThought:
+    """Validate the entire authored name text, then normalize its public thought."""
+    return finalize_activity_thought(value, render=lambda text: authored_thought(
+        text, binding, recipient_id=recipient_id))[0]
 
 
 def render_persona(value: dict, binding) -> dict[str, Any]:

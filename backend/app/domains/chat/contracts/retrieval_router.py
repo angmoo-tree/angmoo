@@ -330,9 +330,13 @@ def retrieval_router_response_schema() -> dict[str, Any]:
     """
 
     nullable_string = {"type": ["string", "null"]}
+    from app.domains.chat.contracts.retrieval_intent import RETRIEVAL_ACTIVITY_KINDS
     return {
         "type": "object",
         "properties": {
+            "activity_kinds": {"type": "array", "maxItems": 8,
+                "items": {"type": "string", "enum": sorted(RETRIEVAL_ACTIVITY_KINDS)},
+                "description": "Exact SNS activity kinds requested by the user, regardless of language. Empty when unspecified."},
             "version": {"type": "string", "enum": [RETRIEVAL_INTENT_VERSION]},
             "decision": {
                 "type": "string",
@@ -393,6 +397,10 @@ def retrieval_router_response_schema() -> dict[str, Any]:
                         "enum": [value.value for value in RetrievalTimeKind],
                     },
                     "expression": nullable_string,
+                    "unit": {"type": ["string", "null"], "enum": ["day", "week", "month", None]},
+                    "offset": {"type": ["integer", "null"], "minimum": -366, "maximum": 0},
+                    "period": {"type": ["string", "null"], "enum": ["morning", None]},
+                    "timezone": nullable_string,
                 },
                 "required": ["kind", "expression"],
             },
@@ -433,7 +441,10 @@ def parse_retrieval_intent_payload(
     if not isinstance(payload, Mapping):
         raise RetrievalContractError("retrieval_router_payload_not_object")
     _reject_forbidden_material(payload)
-    _require_exact_keys(payload, _TOP_LEVEL_KEYS, "retrieval_router_payload")
+    _require_exact_keys(payload, _TOP_LEVEL_KEYS | ({"activity_kinds"} if "activity_kinds" in payload else set()), "retrieval_router_payload")
+    activity_kinds = payload.get("activity_kinds", [])
+    if not isinstance(activity_kinds, list):
+        raise RetrievalContractError("retrieval_activity_kinds_invalid")
 
     version = _required_string(payload.get("version"), "version", maximum=64)
     if version != RETRIEVAL_INTENT_VERSION:
@@ -503,6 +514,7 @@ def parse_retrieval_intent_payload(
         aggregation=aggregation,
         coordination_hint=coordination_hint,
         clarification_slot=clarification_slot,
+        activity_kinds=tuple(activity_kinds),
     )
     if route is RetrievalRoute.BOTH and coordination_hint is None:
         raise RetrievalContractError("retrieval_router_both_coordination_required")
@@ -554,12 +566,14 @@ def _parse_time_scope(value: Any) -> RetrievalTimeMeaning | None:
     if value is None:
         return None
     time_scope = _object(value, "time_scope")
-    _require_exact_keys(time_scope, {"kind", "expression"}, "time_scope")
+    if not {"kind", "expression"} <= set(time_scope) or set(time_scope) - {"kind", "expression", "unit", "offset", "period", "timezone"}:
+        raise RetrievalContractError("retrieval_router_time_scope_keys_invalid")
     kind = _enum(RetrievalTimeKind, time_scope.get("kind"), "time_kind")
     expression = _optional_string(
         time_scope.get("expression"), "time_expression", maximum=96
     )
-    return RetrievalTimeMeaning(kind=kind, expression=expression)
+    return RetrievalTimeMeaning(kind=kind, expression=expression, unit=time_scope.get("unit"),
+        offset=time_scope.get("offset"), period=time_scope.get("period"), timezone=time_scope.get("timezone"))
 
 
 def _parse_aggregation(value: Any) -> RetrievalAggregationMeaning | None:

@@ -6,7 +6,6 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.domains.social.schemas.feed import FeedReactionDecision, FeedCommentDraft
-from app.runtime.social import feed_reaction_provider as provider_module
 from app.runtime.social.world_feed_search import (
     load_ready_search_profile,
     search_world_feed_candidates,
@@ -17,121 +16,35 @@ from social.test_feed_reaction_intent import _engine, _seed
 @pytest.mark.parametrize("social_context_enabled", [False, True])
 @pytest.mark.parametrize("thinking_level", ["medium", "high"])
 def test_direct_reaction_provider_keeps_context_schema_and_call_limits(monkeypatch, social_context_enabled, thinking_level):
+    from social.v2_provider_probe import probe
     engine = _engine()
-    with Session(engine) as db:
-        context, target = _seed(db, with_candidate=True)
-        if social_context_enabled:
-            from relationships.test_social_context import SCOPE, relationship, result
-            from app.domains.relationships.service.social_context import SocialContextService
-            from app.domains.relationships.contracts.social_consumption import SocialContextUse
-            snapshot = SocialContextService(lambda query: result(query, [relationship()])).prepare(SCOPE, labels={"friend": "친구"})
-            context = replace(context, social_context=SocialContextUse(snapshot, lambda: None))
-        profile = load_ready_search_profile(
-            db, world_character_id="world-character-actor"
-        )
-        candidates = search_world_feed_candidates(
-            db,
-            profile=profile,
-            keywords=profile.keywords[:2],
-            allowed_policy_actions=context.activity_policy.allowed_actions,
-            now=context.run_started_at,
-            search_index=context.social_search_index,
-            search_state=context.social_search_state,
-        ).candidates
-        candidate = candidates[0]
-        calls = []
-        credential_contexts = []
-
-        def credential(ctx):
-            credential_contexts.append(ctx)
-            return "fixture"
-
-        async def generate_json(**kwargs):
-            calls.append(kwargs)
-            if len(calls) == 1:
-                return FeedReactionDecision(reason_code="model_abstained")
-            return FeedCommentDraft(
-                text="How did you learn this?",
-                source_post_id=candidate.post_id,
-                interaction_intent="ordinary_comment",
-                comment_purpose="question",
-            )
-
-        monkeypatch.setattr(provider_module, "_api_key", credential)
-        monkeypatch.setattr(provider_module, "generate_json", generate_json)
-        provider = provider_module.DirectFeedReactionProvider(thinking_level=thinking_level)
-        tracker = provider_module.RunLlmTracker(max_calls=3)
-        result = asyncio.run(
-            provider.plan(
-                resident_context=context,
-                profile=profile,
-                candidates=candidates,
-                tracker=tracker,
-                proposal_eligible_indices=frozenset({0}),
-            )
-        )
-        decision = FeedReactionDecision(
-            selected_candidate_index=0,
-            selected_action="comment",
-            interaction_intent="ordinary_comment",
-            comment_purpose="question",
-            reason_code=None,
-            brief="Ask about the source of this note.",
-        )
-        draft = asyncio.run(
-            provider.write_comment(
-                resident_context=context,
-                profile=profile,
-                candidate=candidate,
-                decision=decision,
-                tracker=tracker,
-            )
-        )
-
-        assert result.selected_action is None
-        assert draft.source_post_id == target.id
-        assert len(calls) == 2
-        assert credential_contexts == [context, context]
-        assert all(call["tracker"] is tracker for call in calls)
-        assert [call["max_output_tokens"] for call in calls] == ([4096, 4096] if thinking_level == "high" else [900, 1000])
-        assert [call["thinking_level"] for call in calls] == [thinking_level, thinking_level]
-        assert calls[0]["context"].node == "FeedReactionPlanner"
-        assert calls[0]["context"].lane == "world_keyword_feed"
-        assert calls[1]["context"].node == "ReplyWriter"
-        assert calls[1]["context"].lane == "world_keyword_feed_comment"
-        for call, original_schema in zip(calls, (
-            provider_module.GEMINI_FEED_REACTION_RESPONSE_SCHEMA,
-            provider_module.GEMINI_FEED_COMMENT_RESPONSE_SCHEMA,
-        ), strict=True):
-            from app.contracts.activity_thought_output import LEGACY_SELF_VIEW_FIELDS
-            schema = call["response_schema"]
-            assert schema["properties"]["thought"]["type"] == "string"
-            assert "thought" in schema["required"]
-            assert not set(LEGACY_SELF_VIEW_FIELDS) & schema["properties"].keys()
-            assert {key: value for key, value in schema["properties"].items() if key != "thought"} == {
-                key: value for key, value in original_schema["properties"].items()
-                if key not in LEGACY_SELF_VIEW_FIELDS
-            }
-        assert calls[0]["should_retry_json_error"](None) is False
-        assert "should_retry_json_error" not in calls[1]
-        prompt = json.loads(calls[0]["user_prompt"])
-        assert prompt["candidates"] == [
-            item.model_dump(mode="json") for item in candidates
-        ]
-        assert prompt["rules"]["max_public_action"] == 1
-        assert prompt["rules"]["no_public_ignore"] is True
-        assert prompt["rules"]["comment_intent"][
-            "proposal_eligible_candidate_indices"
-        ] == [0]
-        writer_prompt = json.loads(calls[1]["user_prompt"])
-        assert writer_prompt["requirements"]["source_post_id"] == target.id
-        assert writer_prompt["requirements"]["proposal_schedule"] is None
-        assert writer_prompt["validated_decision"] == {
-            key: value for key, value in decision.model_dump(mode="json").items()
-            if key not in LEGACY_SELF_VIEW_FIELDS
-        }
-        if social_context_enabled:
-            for call in calls:
-                assert snapshot.snapshot_id in call["system_prompt"]
-                assert json.dumps(snapshot.prompt_view(), ensure_ascii=False) in call["system_prompt"]
-            assert [row["lane"] for row in context.social_context.receipts] == ["feed_reaction_planner", "feed_comment_writer"]
+    try:
+        with Session(engine) as db:
+            context, target = _seed(db, with_candidate=True)
+            if social_context_enabled:
+                from relationships.test_social_context import SCOPE, relationship, result
+                from app.domains.relationships.service.social_context import SocialContextService
+                from app.domains.relationships.contracts.social_consumption import SocialContextUse
+                snapshot = SocialContextService(lambda query: result(query, [relationship()])).prepare(SCOPE, labels={"friend": "친구"})
+                context = replace(context, social_context=SocialContextUse(snapshot, lambda: None))
+            calls, tracker, result, written = probe(monkeypatch, context, target, thinking_level=thinking_level)
+            assert len(calls) == 2
+            assert all(call["tracker"] is tracker for call in calls)
+            assert [call["max_output_tokens"] for call in calls] == [4096, 4096]
+            assert [call["thinking_level"] for call in calls] == [thinking_level, thinking_level]
+            assert [call["context"].node for call in calls] == ["FeedActionPlanner", "FeedWriter"]
+            assert result["decisions"][0]["target_id"] == target.id
+            assert written["reply_task_results"][0]["task_id"] == "server-task"
+            assert written["reply_task_results"][0]["body"] == "어떻게 배웠어?"
+            selected = json.loads(calls[0]["user_prompt"])["selected_targets"][0]
+            assert "parent_text" not in selected and selected["text"] == target.body
+            schema = calls[0]["response_schema"]["properties"]["decisions"]["items"]["properties"]
+            assert "proposal_response" not in schema
+            assert "proposal_decision" not in calls[1]["response_schema"]["properties"]["replies"]["items"]["properties"]
+            assert calls[0]["context"].lane == "feed_action_planner" and calls[1]["context"].lane == "feed_writer"
+            if social_context_enabled:
+                assert all(json.loads(call["user_prompt"])["context"]["relationships"] == snapshot.prompt_view() for call in calls)
+            else:
+                assert all("relationships" not in json.loads(call["user_prompt"])["context"] for call in calls)
+    finally:
+        engine.dispose()

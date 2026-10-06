@@ -1,5 +1,6 @@
 import { personalizedActivityTests } from "./personalized-activity-fixture";
 import { recommendationHistoryTests } from "./recommendation-history-fixture";
+import { uiDManualThread, uiDWorldCharacterManagement } from "./continuity-next-fixture";
 import { expect, test, type Page, type Route } from "@playwright/test";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -10,6 +11,12 @@ import type { CharacterDashboardItem } from "../frontend/src/features/characters
 import { presentCharacterRecentActivity } from "../frontend/src/features/characters/utils/character-recent-activity-presentation";
 import type { MessageThreadRead } from "../frontend/src/features/chat/types/chat-contract";
 import type { WorldChatThreadRead } from "../frontend/src/features/chat/types/world-chat-contract";
+
+test.beforeEach(async ({page}, info) => {
+  const origin = new URL(String(info.project.use.baseURL)).origin;
+  await page.route("**/*", route => new URL(route.request().url()).origin === origin
+    ? route.fallback() : route.abort("blockedbyclient"));
+});
 
 // Opt-in real-provider browser Gate. Product workflow and evidence reads execute
 // in an isolated SQLite fixture; only the shell/auth HTTP transport is simulated.
@@ -102,6 +109,8 @@ const OWNER = {
   display_name_updated_at: null,
   display_name_change_available_at: null,
   profile_setup_completed: true,
+  ui_language: "ko",
+  ui_preference_revision: 0,
   feed_content_filter: "all",
   is_admin: true,
 };
@@ -185,13 +194,20 @@ type BackendFixture = {
 async function installBackendFixture(
   page: Page,
   fixture: BackendFixture = {},
-): Promise<{ reads: string[]; writes: string[]; providerCalls: string[] }> {
-  const audit = { reads: [] as string[], writes: [] as string[], providerCalls: [] as string[] };
+): Promise<{ reads: string[]; writes: string[]; providerCalls: string[]; environmentReports: string[] }> {
+  const audit = { reads: [] as string[], writes: [] as string[], providerCalls: [] as string[], environmentReports: [] as string[] };
   let deviceWorldAttempts = 0;
   await page.route("**/api/backend/**", async (route: Route) => {
     const request = route.request();
     const url = new URL(request.url());
     const method = request.method();
+    if (url.pathname === "/api/backend/auth/local/environment") {
+      audit.environmentReports.push(`${method} ${url.pathname}`);
+      return json(route, {installation_id:"synthetic-shell",preferred_language:"ko-KR",
+        memory_search_locale:"ko-KR",timezone:"Asia/Seoul",environment_revision:1,
+        timezone_revision:1,confirmed_at:null,synchronization:"active_owner",
+        lease_expires_at:null,lease_token:"synthetic-only-shell-lease"});
+    }
     if (!["GET", "HEAD"].includes(method)) audit.writes.push(`${method} ${url.pathname}`);
     else audit.reads.push(`${method} ${url.pathname}${url.search}`);
     if (/provider|gemini|openai|anthropic|generate|completion/i.test(url.pathname)) {
@@ -579,8 +595,8 @@ test("Next Phone routes share one centered frame, one scroll owner, and local na
       };
     });
     expect(geometry.documentOverflow).toBe(0);
-    expect(geometry.width).toBeLessThanOrEqual(436);
-    if (viewport.width <= 436) {
+    expect(geometry.width).toBe(Math.min(viewport.width, 960));
+    if (viewport.width <= 960) {
       expect(Math.abs(geometry.width - geometry.documentWidth)).toBeLessThanOrEqual(1);
     } else {
       expect(
@@ -600,11 +616,11 @@ test("wide browser keeps one phone device and exposes multiple launchable Worlds
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "별빛정원 World 열기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "마법학교 World 열기. 실행 가능." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "별빛정원 World 열기. 실행 가능." })).toBeVisible();
   const frame = await page.locator('[data-product-shell="device"]').boundingBox();
   expect(frame).not.toBeNull();
-  expect(frame!.width).toBeLessThanOrEqual(436);
+  expect(frame!.width).toBe(960);
 
   await page.getByRole("link", { name: "설정 열기" }).focus();
   await expect(page.getByRole("link", { name: "설정 열기" })).toBeFocused();
@@ -655,11 +671,13 @@ test("Creator Studio is a wide owner workspace and preserves private and draft W
 
   await page.getByRole("link", { name: "Device Home으로 돌아가기" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "마법학교 World 열기. 실행 가능." })).toBeVisible();
   await expect(page.getByText("비공개 작업실", { exact: true })).toHaveCount(0);
-  // Next dev replays mount effects during this client-side navigation. The
-  // idempotent bootstrap may repeat; no character/provider mutation is allowed.
-  expect(audit.writes).toEqual(Array(3).fill("POST /api/backend/worlds/default-space/ensure"));
+  // Production enters Home twice; Next dev additionally replays one mount.
+  // Keep the exact bootstrap count for the configured runtime and prohibit
+  // character/provider mutations in both modes.
+  const homeEntries = test.info().config.metadata.nextRuntime === "production" ? 2 : 3;
+  expect(audit.writes).toEqual(Array(homeEntries).fill("POST /api/backend/worlds/default-space/ensure"));
   expect(audit.providerCalls).toEqual([]);
 });
 
@@ -676,7 +694,7 @@ test("World App keeps the requested World boundary and never falls back", async 
   await expect(page).toHaveURL(new RegExp(`/worlds/${WORLD_ALPHA.world_id}/feed$`));
   await expect(worldApp).toHaveAttribute("data-world-id", WORLD_ALPHA.world_id);
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "이 World에서 내가 조종할 앵무가 필요해요" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "이 World에서 내가 조종할 캐릭터가 필요해요" })).toHaveCount(0);
 
   await page.goto("/worlds/world-foreign");
   await expect(page.getByRole("heading", { name: "이 World 앱을 열 수 없어요" })).toBeVisible();
@@ -857,7 +875,7 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
       return json(route, {
         items: [worldThread],
         ambiguous_legacy_count: 1,
-        max_threads: 5,
+        max_threads: null,
       });
     }
     if (
@@ -1085,17 +1103,24 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
     "data-thread-id",
     threadId,
   );
-  await expect(page.getByText("말하는 앵무", { exact: true })).toBeVisible();
-  await expect(page.getByText("답하는 앵무", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "친구 앵무의 World 프로필 열기" })).toHaveAttribute(
+    "href", `/worlds/${worldId}/characters/${worldThread.responding.world_character_id}`,
+  );
+  const messages = page.getByRole("list", { name: "대화 메시지", exact: true });
+  await expect(messages.getByText(worldThread.requester.display_name, { exact: true })).toBeVisible();
+  await expect(messages.getByText(worldThread.responding.display_name, { exact: true })).toBeVisible();
   await expect(page.getByText("여기는 어느 World야?", { exact: true })).toBeVisible();
   await expect(page.getByText("World 경계를 기억하고 있어요.", { exact: true })).toBeVisible();
   const modelSelect = page.getByRole("combobox", { name: "응답 모델" });
   await expect(modelSelect).toHaveValue("default");
   await modelSelect.selectOption("gemini-3.5-flash-lite:medium");
   await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite:medium");
+  await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
+  const diagnostics = page.getByRole("dialog", { name: "기억과 진단", exact: true });
   await expect(
-    page.getByText("Gemini 3.5 Flash-Lite (medium)을 이 대화에서 고정해 사용합니다."),
+    diagnostics.getByText("Gemini 3.5 Flash-Lite (medium)을 이 대화에서 고정해 사용합니다."),
   ).toBeVisible();
+  await diagnostics.getByRole("button", { name: "대화상자 닫기", exact: true }).click();
   failNextModelUpdate = true;
   await modelSelect.selectOption("default");
   await expect(modelSelect).toHaveValue("gemini-3.5-flash-lite:medium");
@@ -1105,16 +1130,18 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(modelFailure).toBeVisible();
   await modelFailure.getByRole("button", { name: "다시 시도" }).click();
   await expect(modelSelect).toHaveValue("default");
+  await page.getByRole("button", { name: "기억과 진단 보기", exact: true }).click();
   await expect(
-    page.getByText("기본 모델 Gemini 3.1 Flash-Lite (high)을 다음 답장에 사용합니다."),
+    diagnostics.getByText("기본 모델 Gemini 3.1 Flash-Lite (high)을 다음 답장에 사용합니다."),
   ).toBeVisible();
+  await diagnostics.getByRole("button", { name: "대화상자 닫기", exact: true }).click();
   const composer = page.getByRole("textbox", {
     name: "친구 앵무에게 보낼 메시지",
   });
   await expect(composer).toBeVisible();
   await composer.fill(sentUserMessage.content);
-  await page.getByRole("button", { name: "메시지 보내기" }).click();
   try {
+    await page.getByRole("button", { name: "메시지 보내기" }).click();
     await expect(page.getByText(sentUserMessage.content, { exact: true })).toBeVisible();
     await expect(
       page.getByRole("status", { name: "친구 앵무가 응답을 입력하고 있습니다." }),
@@ -1135,7 +1162,8 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(page.getByText("오늘 SNS 활동", { exact: true })).toBeVisible();
   await expect(page.getByText("오늘 작성한 공개 게시글: 발표 연습을 마쳤어.")).toBeVisible();
   await expect(page.getByText("source_id", { exact: false })).toHaveCount(0);
-  await page.getByRole("button", { name: "닫기" }).click();
+  await page.getByRole("dialog", { name: "이 답변의 근거" })
+    .getByRole("button", { name: "대화상자 닫기", exact: true }).click();
   await expect(page.getByText("Canonical Planner", { exact: false })).toHaveCount(0);
   await expect(page.getByText("Evidence Bundle", { exact: false })).toHaveCount(0);
 
@@ -1594,13 +1622,22 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     }
     if (
       method === "GET" &&
-      url.pathname === `/api/backend/worlds/${worldId}/world-characters`
+      url.pathname === `/api/backend/worlds/${worldId}/character-dashboard`
     ) {
       await json(route, {
-        schema_version: "world-character-profile-list-v1",
+        contract_version: "world-character-dashboard-v1",
         world_id: worldId,
+        summary: { total: 2, enabled: 0, disabled: 1, users: 1 },
         items: [
-          {
+          uiDWorldCharacterManagement({
+            schema_version: "world-character-profile-v1", world_id: worldId,
+            world_character_id: requesterId, character_id: requester.character_id,
+            display_name: requester.display_name, handle: requester.handle,
+            avatar_url: null, banner_url: null, intro: "World user",
+            role_key: requester.role_key, control_mode: "owner_controlled",
+            status: "active", profile_capability: "available",
+          }).item,
+          uiDWorldCharacterManagement({
             schema_version: "world-character-profile-v1",
             world_id: worldId,
             world_character_id: respondingId,
@@ -1611,10 +1648,10 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
             banner_url: null,
             intro: "같은 World에서 활동하는 자율 앵무입니다.",
             role_key: responding.role_key,
-            control_mode: responding.control_mode,
+            control_mode: "autonomous",
             status: "active",
             profile_capability: "available",
-          },
+          }).item,
         ],
       });
       return;
@@ -1622,9 +1659,9 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     if (
       method === "GET" &&
       url.pathname ===
-        `/api/backend/worlds/${worldId}/world-characters/${respondingId}`
+        `/api/backend/worlds/${worldId}/world-characters/${respondingId}/management`
     ) {
-      await json(route, {
+      await json(route, uiDWorldCharacterManagement({
         schema_version: "world-character-profile-v1",
         world_id: worldId,
         world_character_id: respondingId,
@@ -1635,10 +1672,10 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
         banner_url: null,
         intro: "같은 World에서 활동하는 자율 앵무입니다.",
         role_key: responding.role_key,
-        control_mode: responding.control_mode,
+        control_mode: "autonomous",
         status: "active",
         profile_capability: "available",
-      });
+      }));
       return;
     }
     if (
@@ -1730,14 +1767,14 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
     profile.getByRole("paragraph").filter({ hasText: "@ui_d_autonomous" }),
   ).toBeVisible();
   await expect(profile.getByText("같은 World에서 활동하는 자율 앵무입니다.")).toBeVisible();
-  await profile.getByRole("button", { name: "이전 화면으로" }).click();
+  await page.getByRole("button", { name: "World 캐릭터 목록으로 돌아가기" }).click();
   await expect(page.locator('[data-world-social-surface="feed"]')).toBeVisible();
   await authorLinks.first().click();
   await expect(profile).toBeVisible();
-  const activity = profile.locator("[data-world-character-social-activity]");
+  const activity = page.getByRole("region", { name: "현재 World 활동", exact: true });
   await expect(activity).toBeVisible();
-  const metrics = activity.locator("dl");
-  for (const text of ["지저귐", "16", "대꾸", "10", "좋아요", "9", "받은 좋아요", "7"]) {
+  const metrics = profile.locator("dl");
+  for (const text of ["게시글", "16", "답글", "10", "좋아요", "9", "받은 좋아요", "7"]) {
     await expect(metrics).toContainText(text);
   }
   await expect(activity.getByRole("tab")).toHaveCount(3);
@@ -1746,10 +1783,10 @@ test("P8-L-E World social author profile and letter CTA open one exact World Cha
   await expect(activity.getByText("다른 World 비밀 활동")).toHaveCount(0);
   await expect(profile.getByRole("textbox")).toHaveCount(0);
   await expect(
-    profile.getByRole("button", { name: /프로필 수정|자율활동|설정/ }),
-  ).toHaveCount(0);
+    profile.getByRole("button", { name: "프로필 수정", exact: true }),
+  ).toHaveCount(1);
 
-  await activity.getByRole("tab", { name: "대꾸" }).click();
+  await activity.getByRole("tab", { name: "답글" }).click();
   await expect(page).toHaveURL(new RegExp(`\\?tab=replies$`));
   await expect(activity.getByText("CURRENT WORLD REPLIES ACTIVITY")).toBeVisible();
   await activity.getByRole("tab", { name: "좋아요" }).click();
@@ -1832,9 +1869,9 @@ test("P8-L-E letter CTA renders zero and anomalous requester guidance without cr
     if (
       request.method() === "GET" &&
       url.pathname ===
-        `/api/backend/worlds/${worldId}/world-characters/${respondingId}`
+        `/api/backend/worlds/${worldId}/world-characters/${respondingId}/management`
     ) {
-      await json(route, {
+      await json(route, uiDWorldCharacterManagement({
         schema_version: "world-character-profile-v1",
         world_id: worldId,
         world_character_id: respondingId,
@@ -1845,10 +1882,10 @@ test("P8-L-E letter CTA renders zero and anomalous requester guidance without cr
         banner_url: null,
         intro: "requester resolution guidance fixture",
         role_key: responding.role_key,
-        control_mode: responding.control_mode,
+        control_mode: "autonomous",
         status: "active",
         profile_capability: "available",
-      });
+      }));
       return;
     }
     if (
@@ -1885,14 +1922,14 @@ test("P8-L-E letter CTA renders zero and anomalous requester guidance without cr
   });
   await expect(letter).toBeDisabled();
   await expect(
-    page.getByText("이 World에서 조종하는 앵무를 먼저 연결해 주세요."),
+    page.getByText("이 World에서 사용할 사용자 프로필을 먼저 연결해 주세요."),
   ).toBeVisible();
 
   mode = "anomaly";
   await page.reload();
   await expect(letter).toBeDisabled();
   await expect(
-    page.getByText("조종 앵무 identity를 하나로 정리한 뒤 대화를 시작할 수 있어요."),
+    page.getByText("사용자 프로필을 하나로 정리한 뒤 대화를 시작할 수 있어요."),
   ).toBeVisible();
   expect(createCalls).toBe(0);
 });
@@ -2006,7 +2043,7 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
         `/api/backend/worlds/${UI_D_WORLD_ID}/manual-social/posts/${UI_D_ROOT_POST_ID}` &&
       method === "GET"
     ) {
-      await json(route, uiDManualFeed(detailItems));
+      await json(route, uiDManualThread(detailItems[0], detailItems.slice(1)));
       return;
     }
     if (
@@ -2033,10 +2070,9 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   const feedSurface = page.locator('[data-world-social-surface="feed"]');
   await expect(feedSurface).toBeVisible();
   await expect(feedSurface.locator('[data-social-stream="world"]')).toBeVisible();
-  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCSS(
-    "color",
-    "rgb(255, 107, 107)",
-  );
+  await expect(feedSurface.locator("[data-feed-header]").getByRole("heading", { name: "피드", exact: true })).toBeVisible();
+  await expect(feedSurface.getByText("World Feed", { exact: true })).toHaveCount(0);
+  await expect(feedSurface.locator("[data-feed-header] button")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "글 쓰기" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "닫기" })).toHaveCount(0);
   const composer = page.locator("#world-owner-composer");
@@ -2052,7 +2088,7 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   );
   await expect(bodyInput).toHaveAttribute(
     "placeholder",
-    "내가 조종하는 앵무의 말로 이야기를 적어보세요",
+    "내가 조종하는 캐릭터의 말로 이야기를 적어보세요",
   );
   await expect(submitPost).toBeDisabled();
   expect(await titleInput.evaluate((element) => document.activeElement === element)).toBe(false);
@@ -2079,7 +2115,7 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   await page.keyboard.press("Tab");
   await expect(bodyInput).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("첨부 이미지 선택")).toBeFocused();
+  await expect(composer.getByRole("button", { name: "사진 첨부", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(submitPost).toBeFocused();
 
@@ -2117,17 +2153,17 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   await expect(row).toHaveAttribute("data-variant", "feed");
   await expect(row).toHaveCSS("border-bottom-width", "1px");
   await expect(row).toHaveCSS("border-radius", "0px");
-  await expect(row.getByRole("link", { name: "대꾸 1" })).toHaveAttribute(
+  await expect(row.getByRole("link", { name: "답글 1" })).toHaveAttribute(
     "href",
     new RegExp(`/worlds/${UI_D_WORLD_ID}/posts/${UI_D_ROOT_POST_ID}$`),
   );
   const positiveLike = row.getByLabel("좋아요 1", { exact: true });
   await expect(positiveLike).toHaveCount(1);
-  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "currentColor");
+  await expect(positiveLike.locator("svg")).toHaveAttribute("fill", "none");
   expect(await positiveLike.evaluate((element) => element.tagName)).toBe("SPAN");
   expect(await positiveLike.getAttribute("aria-pressed")).toBeNull();
   expect(await positiveLike.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(-1);
-  await expect(zeroReactionRow.getByRole("link", { name: "대꾸 0" })).toBeVisible();
+  await expect(zeroReactionRow.getByRole("link", { name: "답글 0" })).toBeVisible();
   const zeroLike = zeroReactionRow.getByLabel("좋아요 0", { exact: true });
   await expect(zeroLike.locator("svg")).toHaveAttribute("fill", "none");
   expect(await zeroLike.evaluate((element) => element.tagName)).toBe("SPAN");
@@ -2166,11 +2202,11 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
     new RegExp(`/worlds/${UI_D_WORLD_ID}/posts/${UI_D_ROOT_POST_ID}$`),
   );
   await expect(page.locator('[data-world-social-surface="detail"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "게시글과 답글" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "게시글", exact: true })).toBeVisible();
   await expect(page.locator("#world-owner-composer")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "게시하기" })).toHaveCount(0);
   await expect(
-    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("대꾸 1"),
+    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("답글 1"),
   ).toBeVisible();
   await expect(
     page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("좋아요 1"),
@@ -2178,14 +2214,14 @@ test("UI-D Next World social core keeps compact composition, flat rows, exact de
   await expect(
     page.locator('[data-social-post-row="reply-ui-d-next-existing"]').getByLabel("좋아요 0"),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "대꾸 1" })).toBeVisible();
-  await page.getByLabel("UI-D Autonomous의 게시글에 답글").fill("실제 scoped reply");
+  await expect(page.getByRole("heading", { name: "답글 1" })).toBeVisible();
+  await page.getByRole("textbox", { name: "답글", exact: true }).fill("실제 scoped reply");
   await page.getByRole("button", { name: "답글 보내기" }).click();
 
   await expect(page.getByText("UI-D Owner reply arrived.", { exact: false })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "대꾸 2" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "답글 2" })).toBeVisible();
   await expect(
-    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("대꾸 2"),
+    page.locator(`[data-social-post-row="${UI_D_ROOT_POST_ID}"]`).getByLabel("답글 2"),
   ).toBeVisible();
   expect(replyRequestBody).toEqual({ body: "실제 scoped reply" });
   expect(replyIdempotencyKey).toMatch(/^owner-reply-/);
@@ -2308,7 +2344,7 @@ test("runtime outage is presented as degraded without blocking Device Home", asy
   await page.goto("/");
 
   await expect(page.getByText("일부 기능 제한", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "마법학교 World 열기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "마법학교 World 열기. 실행 가능." })).toBeVisible();
   expect(audit.writes).toEqual(["POST /api/backend/worlds/default-space/ensure"]);
   expect(audit.providerCalls).toEqual([]);
 });
@@ -2337,12 +2373,12 @@ test("Next Character dashboard presents production activity JSON as a compact sa
     "recorded",
   );
   await expect(recent).toContainText("게시글 작성");
-  await expect(recent).toContainText("지저귐을 남겼어요.");
+  await expect(recent).toContainText("게시글을 남겼어요.");
   await expect(recent.locator("time")).toHaveAttribute(
     "datetime",
     "2026-08-29T23:15:00Z",
   );
-  await expect(recent).toContainText("08.29 19:15");
+  await expect(recent).toContainText("08. 30. 08:15");
   await expect(resultLink).toHaveAttribute(
     "href",
     "/posts/post-character-ui-e-authoritative",
@@ -2618,7 +2654,7 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
   await page.getByRole("button", { name: "World 목록 다시 시도" }).click();
 
   await expect(
-    page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+    page.getByRole("link", { name: /마법학교 World 열기. 실행 가능./ }),
   ).toBeVisible();
   await expect(page.locator('[data-world-launchability="launchable"]')).toContainText(
     "실행 가능",
@@ -2669,7 +2705,7 @@ test("UI-E Device Home separates runtime state, World launchability, and retry",
       label,
     );
     await expect(
-      page.getByRole("link", { name: /마법학교 World 열기\. 실행 가능\./ }),
+      page.getByRole("link", { name: /마법학교 World 열기. 실행 가능./ }),
     ).toBeVisible();
   }
 
@@ -2879,7 +2915,7 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
   });
 
   await page.goto("/messages");
-  await expect(page.getByRole("heading", { name: "쪽지함" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "채팅함" })).toBeVisible();
   await expect(page.getByText("1/30", { exact: true })).toBeVisible();
   await expect(page.getByText("구조 이동 앵무", { exact: true })).toBeVisible();
   await page.locator('a[href="/messages/thread-p8-l-c"]').click();
@@ -2901,7 +2937,7 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
     "gemini-3.1-flash-lite:medium",
   );
 
-  await page.getByPlaceholder("쪽지를 입력하세요").fill("새 질문");
+  await page.getByPlaceholder("채팅을 입력하세요").fill("새 질문");
   await page.getByRole("button", { name: "보내기" }).click();
   await expect(page.getByText("새 질문", { exact: true })).toBeVisible();
   await expect(page.getByText("답장 중", { exact: true })).toBeVisible();
@@ -2909,10 +2945,10 @@ test("legacy Messages keeps list, thread, retry, model, send, and delete parity"
   await expect(page.getByText("새 질문에 대한 답장", { exact: true })).toBeVisible();
   await expect(page.getByText("답장 중", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "쪽지 내역 삭제" }).click();
+  await page.getByRole("button", { name: "채팅 내역 삭제" }).click();
   await expect(page).toHaveURL(/\/messages$/);
   await expect(
-    page.getByText("아직 나눈 쪽지가 없습니다.", { exact: true }),
+    page.getByText("아직 나눈 채팅이 없습니다.", { exact: true }),
   ).toBeVisible();
 
   expect(calls.filter((call) => call.method !== "GET")).toEqual([

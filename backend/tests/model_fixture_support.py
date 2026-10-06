@@ -64,6 +64,7 @@ from app.domains.operations.models import SiteOperationSetting
 from app.domains.tree.models import TreeComment
 from app.domains.tree.models import TreePost
 from app.domains.identity.models import User
+from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
 from app.domains.chat.models import UserMessagePreference
 from app.domains.world_characters.models import CharacterActiveWorld
 from app.domains.worlds.models import World
@@ -170,6 +171,8 @@ models = SimpleNamespace(
     TreeComment=TreeComment,
     TreePost=TreePost,
     User=User,
+    LocalEnvironment=LocalEnvironment,
+    EnvironmentTimezoneChange=EnvironmentTimezoneChange,
     UserMessagePreference=UserMessagePreference,
     CharacterActiveWorld=CharacterActiveWorld,
     World=World,

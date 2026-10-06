@@ -28,6 +28,7 @@ class RelationshipGraphNodeRead(RelationshipGraphSchema):
     character_id: str
     display_name: str
     is_center: bool = False
+    avatar_url: str | None = None
 
 
 class RelationshipGraphEdgeRead(RelationshipGraphSchema):

@@ -22,11 +22,6 @@ export function DeviceFrame({
       data-product-shell="device"
     >
       <div className={styles.screen}>
-        <div
-          aria-hidden="true"
-          className={styles.titlebarInset}
-          data-device-titlebar-inset="true"
-        />
         {header ? <div className={styles.header}>{header}</div> : null}
         <div className={styles.content} data-device-scroll-owner="true">
           {children}

@@ -80,6 +80,8 @@ class LocalUserSnapshot:
     profile_setup_completed: bool
     feed_content_filter: str
     is_admin: bool
+    ui_language: Literal["ko", "en"] | None = None
+    ui_preference_revision: int = 0
 
 @dataclass(frozen=True)
 class LocalBootstrapStatus:

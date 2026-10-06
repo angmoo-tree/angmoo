@@ -1,182 +1,93 @@
 "use client";
 
-import { Mail, MessageCircle, RotateCcw } from "lucide-react";
+import { Mail, MessageCircle, Network, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { useUiText } from "@/hooks/use-ui-text";
 import { createOrGetWorldChatThread, getWorldChatEntry, WorldChatApiError } from "@/features/chat/api/world-chat-client";
-import { type WorldChatEntryRead } from "@/features/chat/types/world-chat-contract";
+import type { WorldChatEntryRead } from "@/features/chat/types/world-chat-contract";
 import { parseWorldCharacterSocialProfileTab } from "@/features/social/utils/world-character-social-profile";
 import { WorldCharacterSocialProfileActivity } from "@/features/social/components/world-character-social-profile-activity";
-import { type WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
-import { useRuntimeBack, useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
-import { worldCharacterDirectoryRoute, worldCharacterProfileRoute, worldChatThreadRoute } from "@/lib/navigation/product-routes";
-import { getWorldCharacterProfile } from "@/features/characters/api/world-character-profile-client";
+import type { WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
+import { useRuntimeRouter, useRuntimeSearchParams } from "@/hooks/use-runtime-navigation";
+import { relationshipGraphRoute, worldCharacterProfileRoute, worldChatThreadRoute } from "@/lib/navigation/product-routes";
 import type { WorldCharacterPublicProfile } from "@/features/characters/types/world-character-profile";
-import { ProfileStatus, ProfileError } from "@/features/characters/components/world-character-directory";
 import { WorldCharacterProfileCard } from "@/features/characters/components/world-character-profile-card";
 import styles from "@/features/characters/components/world-character-profile.module.css";
-import { Button } from "@/components/ui/button";
-import { LocalMyProfileEditor } from "@/composition/screens/my-profile-editor";
 
-type LoadState = "loading" | "ready" | "error";
-
-export function WorldCharacterProfile({
-  worldCharacterId,
-  worldId,
-}: {
-  worldCharacterId: string;
-  worldId: string;
+export function WorldCharacterProfile({ worldCharacterId, worldId, profile, canViewGraph, onEditProfile }: {
+  worldCharacterId: string; worldId: string; profile: WorldCharacterPublicProfile; canViewGraph: boolean; onEditProfile?: () => void;
 }) {
-  const router = useRuntimeRouter();
-  const goBack = useRuntimeBack(worldCharacterDirectoryRoute(worldId));
-  const searchParams = useRuntimeSearchParams();
-  const activeSocialTab = parseWorldCharacterSocialProfileTab(
-    searchParams.get("tab"),
-  );
-  const [profile, setProfile] = useState<WorldCharacterPublicProfile | null>(null);
+  const uiText = useUiText("shell");
+  const router = useRuntimeRouter(), searchParams = useRuntimeSearchParams();
+  const activeSocialTab = parseWorldCharacterSocialProfileTab(searchParams.get("tab"));
   const [chatEntry, setChatEntry] = useState<WorldChatEntryRead | null>(null);
-  const [state, setState] = useState<LoadState>("loading");
-  const [error, setError] = useState<Error | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatStarting, setChatStarting] = useState(false);
-  const chatStartInFlightRef = useRef(false);
-  const [attempt, setAttempt] = useState(0);
-  const [editing, setEditing] = useState(false);
+  const chatStartInFlight = useRef(false), generation = useRef(0);
+  const releaseLeaveGuard = useProductLeaveGuard(chatStarting);
 
   useEffect(() => {
-    const controller = new AbortController();
-    void Promise.allSettled([
-      getWorldCharacterProfile(worldId, worldCharacterId, {
-        signal: controller.signal,
-      }),
-      getWorldChatEntry(worldId, worldCharacterId, {
-        signal: controller.signal,
-      }),
-    ]).then(([profileResult, entryResult]) => {
-      if (controller.signal.aborted) return;
-      if (profileResult.status === "rejected") {
-        setProfile(null);
-        setError(
-          profileResult.reason instanceof Error
-            ? profileResult.reason
-            : new Error("world_character_profile_unavailable"),
-        );
-        setState("error");
-        return;
-      }
-      setProfile(profileResult.value);
-      setChatEntry(entryResult.status === "fulfilled" ? entryResult.value : null);
-      setChatError(
-        entryResult.status === "rejected"
-          ? "채팅 가능 상태를 확인하지 못했어요. 잠시 후 다시 열어주세요."
-          : null,
-      );
-      setState("ready");
+    const controller = new AbortController(), currentGeneration = ++generation.current;
+    const scope = captureAuthRequestScope();
+    const clear = () => { generation.current += 1; controller.abort(); setChatEntry(null); setChatError(null); setChatStarting(false); };
+    void getWorldChatEntry(worldId, worldCharacterId, { signal: controller.signal }).then(read => {
+      if (!controller.signal.aborted && currentGeneration === generation.current && isCurrentAuthRequestScope(scope)) setChatEntry(read);
+    }).catch(() => {
+      if (!controller.signal.aborted && currentGeneration === generation.current && isCurrentAuthRequestScope(scope)) setChatError("채팅 가능 상태를 확인하지 못했어요. 잠시 후 다시 열어주세요.");
     });
-    return () => controller.abort();
-  }, [attempt, worldCharacterId, worldId]);
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, clear);
+    return () => { generation.current += 1; controller.abort(); window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, clear); };
+  }, [worldCharacterId, worldId]);
 
-  const retry = useCallback(() => {
-    setState("loading");
-    setError(null);
-    setChatError(null);
-    setAttempt((value) => value + 1);
-  }, []);
-
-  const selectSocialTab = useCallback(
-    (tab: WorldCharacterSocialProfileTab) => {
-      const next = new URLSearchParams(searchParams.toString());
-      if (tab === "posts") next.delete("tab");
-      else next.set("tab", tab);
-      const query = next.toString();
-      const pathname = worldCharacterProfileRoute(worldId, worldCharacterId);
-      router.replace(query ? `${pathname}?${query}` : pathname);
-    },
-    [router, searchParams, worldCharacterId, worldId],
-  );
+  const selectSocialTab = useCallback((tab: WorldCharacterSocialProfileTab) => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (tab === "posts") next.delete("tab"); else next.set("tab", tab);
+    const query = next.toString(), pathname = worldCharacterProfileRoute(worldId, worldCharacterId);
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }, [router, searchParams, worldCharacterId, worldId]);
 
   async function startChat() {
-    if (
-      !chatEntry ||
-      chatEntry.create_or_get_capability !== "available" ||
-      !chatEntry.requester ||
-      chatStartInFlightRef.current
-    ) {
-      return;
-    }
-    chatStartInFlightRef.current = true;
-    setChatStarting(true);
-    setChatError(null);
+    if (!chatEntry || chatEntry.create_or_get_capability !== "available" || !chatEntry.requester || chatStartInFlight.current) return;
+    chatStartInFlight.current = true; setChatStarting(true); setChatError(null);
+    const currentGeneration = generation.current, scope = captureAuthRequestScope();
     try {
-      const result = await createOrGetWorldChatThread(worldId, {
-        responding_world_character_id: worldCharacterId,
-        requester_world_character_id: chatEntry.requester.world_character_id,
-      });
-      if (result.thread) {
-        router.push(worldChatThreadRoute(worldId, result.thread.id));
-        return;
-      }
+      const result = await createOrGetWorldChatThread(worldId, { responding_world_character_id: worldCharacterId,
+        requester_world_character_id: chatEntry.requester.world_character_id });
+      if (currentGeneration !== generation.current || !isCurrentAuthRequestScope(scope)) return;
+      if (result.thread) { releaseLeaveGuard(); router.push(worldChatThreadRoute(worldId, result.thread.id)); return; }
       setChatError(resolutionMessage(result.resolution_code));
     } catch (reason) {
-      setChatError(chatStartError(reason));
+      if (currentGeneration === generation.current && isCurrentAuthRequestScope(scope)) setChatError(chatStartError(reason));
     } finally {
-      chatStartInFlightRef.current = false;
-      setChatStarting(false);
+      if (currentGeneration === generation.current) { chatStartInFlight.current = false; setChatStarting(false); }
     }
   }
 
-  if (state === "loading") {
-    return <ProfileStatus title="WorldCharacter 프로필을 불러오는 중" />;
-  }
-  if (state === "error" || !profile) {
-    return <ProfileError error={error} onRetry={retry} />;
-  }
-
-  return (
-    <WorldCharacterProfileCard
-      profile={profile}
-      worldId={worldId}
-      worldCharacterId={worldCharacterId}
-      onBack={goBack}
-      chatAction={chatEntry?.requester?.world_character_id === worldCharacterId ? <Button variant="secondary" onClick={() => setEditing(!editing)}>내 프로필 편집</Button> : chatEntry ? (
-            <button
-              aria-label={`${profile.display_name}와 채팅 시작`}
-              className={styles.letterButton}
-              data-chat-entry-capability={chatEntry.create_or_get_capability}
-              disabled={
-                chatEntry.create_or_get_capability !== "available" || chatStarting
-              }
-              onClick={() => void startChat()}
-              title="채팅 시작"
-              type="button"
-            >
-              {chatStarting ? (
-                <RotateCcw aria-hidden="true" className={styles.spin} size={20} />
-              ) : (
-                <Mail aria-hidden="true" size={20} />
-              )}
-            </button>
-          ) : null}
-      chatNotice={<>{chatEntry && chatEntry.requester?.world_character_id !== worldCharacterId && chatEntry.create_or_get_capability === "unavailable" ? (
-          <div className={styles.chatNotice} role="status">
-            <MessageCircle aria-hidden="true" size={18} />
-            <span>{chatEntryMessage(chatEntry.disabled_reason)}</span>
-          </div>
-        ) : null}
-        {chatError ? (
-          <div className={styles.chatError} role="alert">
-            {chatError}
-          </div>
-        ) : null}</>}
-    >
-      {editing && <LocalMyProfileEditor worldId={worldId} onSaved={retry} />}
-      <WorldCharacterSocialProfileActivity
-        activeTab={activeSocialTab}
-        onTabChange={selectSocialTab}
-        worldCharacterId={worldCharacterId}
-        worldId={worldId}
-      />
-    </WorldCharacterProfileCard>
-  );
+  const isUser = profile.control_mode === "owner_controlled";
+  const actions = <>
+    {canViewGraph ? <LocalProductLink href={relationshipGraphRoute(profile.character_id, worldId)}
+      ariaLabel={uiText("{{value0}}의 관계망 보기", { value0: profile.display_name })} title={uiText("관계망 보기")}
+      className={styles.letterButton} data-profile-action="relationships"><Network aria-hidden="true" size={20} /></LocalProductLink> : null}
+    {!isUser && chatEntry ? <button aria-label={uiText("{{value0}}와 채팅 시작", { value0: profile.display_name })}
+      title={uiText("채팅 시작")} className={styles.letterButton} data-profile-action="mail" data-chat-entry-capability={chatEntry.create_or_get_capability}
+      disabled={chatEntry.create_or_get_capability !== "available" || chatStarting} onClick={() => void startChat()} type="button">
+      {chatStarting ? <RotateCcw aria-hidden="true" className={styles.spin} size={20} /> : <Mail aria-hidden="true" size={20} />}
+    </button> : null}
+    {onEditProfile ? <Button variant="secondary" onClick={onEditProfile} data-profile-action="edit">{uiText(isUser ? "내 프로필 편집" : "프로필 수정")}</Button> : null}
+  </>;
+  const notice = <>
+    {chatEntry && !isUser && chatEntry.create_or_get_capability === "unavailable" ? <div className={styles.chatNotice} role="status">
+      <MessageCircle aria-hidden="true" size={18} /><span>{uiText(chatEntryMessage(chatEntry.disabled_reason))}</span></div> : null}
+    {chatError ? <div className={styles.chatError} role="alert">{uiText(chatError)}</div> : null}
+  </>;
+  return <WorldCharacterSocialProfileActivity activeTab={activeSocialTab} onTabChange={selectSocialTab} worldCharacterId={worldCharacterId} worldId={worldId}
+    renderProfile={metrics => <WorldCharacterProfileCard profile={profile} worldId={worldId} worldCharacterId={worldCharacterId}
+      profileActions={actions} metrics={metrics} chatNotice={notice} />} />;
 }
 
 function chatEntryMessage(reason: WorldChatEntryRead["disabled_reason"]) {

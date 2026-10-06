@@ -1,4 +1,7 @@
 "use client";
+import { requestFailureMessage } from "@/lib/http/error-presentation";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -30,6 +33,7 @@ import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/compositio
 import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
 import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
+import { isStaticLocalProductRouteSupported } from "@/lib/navigation/device-navigation";
 
 type BrowserLocation = {
   pathname: string;
@@ -100,17 +104,16 @@ function StaticWindowRouteMismatch({
   actualRoute: string;
   expectedWindow: string;
 }) {
+  const uiText = useUiText("shell");
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface p-8 text-on-surface">
+    <main className="flex min-h-full items-center justify-center bg-surface p-8 text-on-surface">
       <section className="max-w-xl rounded-[32px] border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-state-running">
           Product window boundary
         </p>
-        <h1 className="mt-3 text-2xl font-black">제품 창 경로를 열지 못했습니다.</h1>
+        <h1 className="mt-3 text-2xl font-black">{uiText("제품 창 경로를 열지 못했습니다.")}</h1>
         <p className="mt-4 text-sm leading-6 text-on-surface-variant">
-          {expectedWindow} 창이 허용하지 않는 경로를 받아 Device Home으로 대체하지
-          않았습니다. 창을 닫고 원래 화면에서 다시 열어주세요.
-        </p>
+          {expectedWindow} {uiText("창이 허용하지 않는 경로를 받아 Device Home으로 대체하지 않았습니다. 창을 닫고 원래 화면에서 다시 열어주세요.")}</p>
         <p className="mt-4 break-all font-mono text-xs text-on-surface-variant">
           {actualRoute}
         </p>
@@ -122,6 +125,7 @@ function StaticWindowRouteMismatch({
 function renderStaticRoute(location: BrowserLocation) {
   const { pathname, search } = location;
   if (pathname === "/ui-foundation") return <SemanticFoundationFixture />;
+  if (!isStaticLocalProductRouteSupported(`${pathname}${search}`)) return <StaticNotFound pathname={pathname} />;
   if (pathname === "/") return <DeviceHomeScreen />;
   if (pathname === "/memory") {
     const params = new URLSearchParams(search);
@@ -312,13 +316,14 @@ function renderStaticRoute(location: BrowserLocation) {
 }
 
 function StaticCanonicalRouteRedirect({ route }: { route: string }) {
+  const uiText = useUiText("shell");
   const router = useRuntimeRouter();
   useEffect(() => {
     router.replace(route);
   }, [route, router]);
   return (
-    <main className="min-h-screen bg-transparent" aria-live="polite">
-      <span className="sr-only">Canonical Angmoo 제품 경로로 이동합니다.</span>
+    <main className="min-h-full bg-transparent" aria-live="polite">
+      <span className="sr-only">{uiText("Canonical Angmoo 제품 경로로 이동합니다.")}</span>
     </main>
   );
 }
@@ -329,6 +334,7 @@ function staticWorldSection(segment: string | undefined): WorldAppSectionId | nu
 }
 
 function StaticFeedRoute() {
+  const uiText = useUiText("shell");
   const [feed, setFeed] = useState<FeedPage>(EMPTY_FEED);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -341,7 +347,7 @@ function StaticFeedRoute() {
       })
       .catch((reason) => {
         if (active) {
-          setError(reason instanceof Error ? reason.message : "게시글을 불러오지 못했습니다.");
+          setError(requestFailureMessage(reason, "게시글을 불러오지 못했어요."));
         }
       })
       .finally(() => {
@@ -356,8 +362,7 @@ function StaticFeedRoute() {
     return (
       <AppShell>
         <section className="px-5 py-8 text-sm font-bold text-on-surface-variant" aria-live="polite">
-          피드를 불러오는 중
-        </section>
+          {uiText("피드를 불러오는 중")}</section>
       </AppShell>
     );
   }
@@ -370,6 +375,7 @@ function StaticFeedRoute() {
 }
 
 function StaticPostRoute({ postId }: { postId: string }) {
+  const uiText = useUiText("shell");
   const [thread, setThread] = useState<PostThreadRead | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -382,7 +388,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
       })
       .catch((reason) => {
         if (active) {
-          setError(reason instanceof Error ? reason.message : "게시글을 불러오지 못했습니다.");
+          setError(requestFailureMessage(reason, "게시글을 불러오지 못했어요."));
         }
       })
       .finally(() => {
@@ -400,8 +406,7 @@ function StaticPostRoute({ postId }: { postId: string }) {
           className="px-5 py-8 text-sm font-bold text-on-surface-variant"
           aria-live="polite"
         >
-          게시글을 불러오는 중
-        </section>
+          {uiText("게시글을 불러오는 중")}</section>
       </AppShell>
     );
   }
@@ -419,22 +424,23 @@ function StaticPostRoute({ postId }: { postId: string }) {
 }
 
 function StaticLoadingScreen() {
+  const uiText = useUiText("shell");
   return (
-    <main className="min-h-screen bg-transparent" aria-live="polite">
-      <span className="sr-only">Angmoo 제품 화면을 준비하고 있습니다.</span>
+    <main className="min-h-full bg-transparent" aria-live="polite">
+      <span className="sr-only">{uiText("Angmoo 제품 화면을 준비하고 있습니다.")}</span>
     </main>
   );
 }
 
 function StaticNotFound({ pathname }: { pathname: string }) {
+  const uiText = useUiText("shell");
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-6 text-center">
-      <div className="max-w-lg rounded-[32px] border border-border-control bg-surface p-8 shadow-summary">
-        <h1 className="text-2xl font-extrabold text-text-strong">지원하지 않는 Angmoo 경로입니다.</h1>
+    <main className="flex min-h-full items-center justify-center bg-canvas px-6 text-center">
+      <div className="w-full min-w-0 max-w-[32rem] rounded-[32px] border border-border-control bg-surface p-8 shadow-summary">
+        <h1 className="text-2xl font-extrabold text-text-strong">{uiText("지원하지 않는 Angmoo 경로입니다.")}</h1>
         <p className="mt-3 break-all text-sm text-text-default">{pathname}</p>
         <Link className="mt-6 inline-flex rounded-full bg-action-primary px-5 py-3 font-bold text-on-action-primary shadow-action transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]" href="/">
-          Device Home으로 돌아가기
-        </Link>
+          {uiText("Device Home으로 돌아가기")}</Link>
       </div>
     </main>
   );

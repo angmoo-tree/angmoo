@@ -31,6 +31,8 @@ from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.domains.world_characters.service import setup_validation as setup_contracts
 from app.runtime.world_characters import cleanup as setup_cleanup
+from app.domains.characters.service.import_snapshots import capture_creation
+from app.runtime.world_characters.creation_configuration import creation_configuration
 
 
 @pytest.fixture(autouse=True)
@@ -883,6 +885,10 @@ def test_world_entry_creates_pending_world_character_without_provider_or_autonom
                 moderation_status="active",
             )
         )
+        db.flush()
+        capture_creation(db, character_id="character-b",
+            configuration=creation_configuration(db, db.get(models.Character, "character-b")),
+            provenance="verified_test_creation_uow")
         db.commit()
     principal: dict[str, models.User | None] = {"user": owner}
     app = _app(engine, principal)
@@ -967,6 +973,10 @@ def test_world_entry_requires_explicit_no_specific_role_selection() -> None:
                 moderation_status="active",
             )
         )
+        db.flush()
+        capture_creation(db, character_id="character-no-role",
+            configuration=creation_configuration(db, db.get(models.Character, "character-no-role")),
+            provenance="verified_test_creation_uow")
         db.commit()
     principal: dict[str, models.User | None] = {"user": owner}
     app = _app(engine, principal)

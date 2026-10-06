@@ -9,9 +9,14 @@ from app.domains.characters.models import Character
 from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
 from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.identity.models import InstallationIdentity
+from app.domains.identity.service.environment import snapshot
 from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.worlds.models import World, WorldMembership
+
+
+def environment(session: Session, command: RetrievalPreflightCommand):
+    return command.environment or snapshot(session, command.owner_id)
 
 
 def installation(

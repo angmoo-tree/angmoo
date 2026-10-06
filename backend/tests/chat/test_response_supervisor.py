@@ -419,3 +419,59 @@ def test_shared_graph_keeps_concurrent_request_sessions_and_observers_separate()
     finally:
         fixture_a.close()
         fixture_b.close()
+
+
+def test_worker_cancellation_isolated_from_concurrent_graph_invocation():
+    fixture_a, fixture_b = (
+        response_session.__wrapped__(),
+        response_session.__wrapped__(),
+    )
+    db_a, db_b = next(fixture_a), next(fixture_b)
+
+    async def run_both():
+        entered, release = asyncio.Event(), asyncio.Event()
+        arrivals = 0
+
+        class OverlappingRouter(_Router):
+            async def route(self, *args, **kwargs):
+                nonlocal arrivals
+                arrivals += 1
+                if arrivals == 2:
+                    entered.set()
+                await release.wait()
+                return await super().route(*args, **kwargs)
+
+        async def cancel(*args):
+            raise asyncio.CancelledError("cancelled_worker")
+
+        workflows, tasks, records, generators = [], [], [], []
+        for db in (db_a, db_b):
+            record = _request(db, RetrievalRoute.CURRENT_CONTEXT)
+            db.commit()
+            generator = _Generator()
+            workflow = _workflow(
+                db, RetrievalRoute.CURRENT_CONTEXT, generator,
+                router=OverlappingRouter(RetrievalRoute.CURRENT_CONTEXT),
+            )
+            if db is db_a:
+                workflow._graph_executor = AfterStepExecutor(ResponseAction.ROUTE, cancel)
+            workflows.append(workflow)
+            records.append(record)
+            generators.append(generator)
+            tasks.append(asyncio.create_task(_collect(workflow.run(_command(record)))))
+        await asyncio.wait_for(entered.wait(), timeout=5)
+        release.set()
+        cancelled, completed = await asyncio.gather(*tasks, return_exceptions=True)
+        assert isinstance(cancelled, asyncio.CancelledError)
+        assert completed[-1].event_type is GenerationEventType.COMPLETED
+        assert workflows[0]._lifecycle.get_request(records[0].request_id).state is ResponseRequestState.CANCELLED
+        assert workflows[1]._lifecycle.get_request(records[1].request_id).state is ResponseRequestState.COMMITTED
+        assert generators[0].requests == []
+        assert len(generators[1].requests) == 1
+        assert current.get() is None
+
+    try:
+        asyncio.run(run_both())
+    finally:
+        fixture_a.close()
+        fixture_b.close()

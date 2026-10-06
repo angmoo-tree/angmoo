@@ -1,5 +1,35 @@
 # L4.5 frontend design reference and provenance
 
+2026-10-05 World post/chat/character management: **ADAPTED** shared Device Home
+management cards, Profile/Status/Settings layout, neutral Network/Mail actions,
+inline statistics and ProfileAvatar. **LOCAL** stored World settings, server-confirmed
+reaction lifetimes, scoped soft deletion and independent activity commands. The
+existing Network icon is reused with profile semantic colors. No new external
+visual assets, fonts or dependencies. Extracting repeated card JSX reduced raw
+color occurrences from 1229 to 1215; the derived design report and explicit policy
+count record that source change without resetting historical preservation files.
+
+2026-10-05 World integration: **ADAPTED** existing global detail/profile/DM anatomy and user-provided reaction/composer
+references. **LOCAL** selected-subtree/owner-reaction contracts, Home-only shell, compact model and Memory/diagnostic
+slots. Feed and Chat photo/Send form one adjacent right group; reply labels are sr-only. Payload-backed viewer state
+replaces the earlier read-only World-like rule. No new hosted assets, fonts, unsupported follow/repost/share or business
+capabilities are imported. Historical stages below keep provenance; these explicit user decisions supersede their changed clauses.
+
+2026-10-04 World SNS list change: **ADAPTED** existing global feed/header/composer anatomy; **LOCAL** neutral
+`components/layout/feed-header` slots and World owner-profile composition. Title/body remain required and the two
+48px photo/publish actions are icon-only with accessible names and busy/focus states. Media retains its actual native
+input/upload/draft behavior through presentation slots. World list shell/context headers, small World name, header
+refresh and unsupported Follow/repost filters are omitted; existing read/retry/pull/write-success refresh remains.
+Detail/other sections and five World navigation destinations are preserved. No new external assets or business API are used.
+Local evidence is recorded in `docs/verification/world-feed-ui-unification-20261004.md`; operating watch and USER CHECK
+are separate from synthetic Next/static checks.
+
+2026-10-04 current change: **LOCAL** responsive viewport, normal OS windows and native route toolbar.
+The user-approved initial 480×850/minimum 480×480, body 960/workspace 1440 contracts replace the decorative
+Phone frame and ratio lock. Existing adoption entries remain historical provenance. No new hosted code,
+asset, font, remote permission or dependency is imported. Browser, real native and operational application
+results are recorded separately in the responsive-shell verification record.
+
 The 2026-09-07 common-UI move retains the existing Local primitive implementation
 and all original adoption classifications. Its current paths are in
 `security/frontend_design_policy.json`: `components/ui`, `styles`, `hooks` and
@@ -746,3 +776,9 @@ UI-E CHARACTER / AUTONOMY / LOCAL-ONLY SURFACES          = FULL PASS; MERGED; PO
 UI-F VISUAL / CROSS-RUNTIME CLOSEOUT                     = IMPLEMENTED; LOCAL TECH PASS; CANONICAL VISUAL 36/36 PASS; EXTERNAL LIFECYCLE PENDING
 ANGMOO LOCAL DESIGN FOUNDATION PASS                    = NOT YET
 ```
+
+### 2026-10-03 SNS 구 실행 지원 종료 상태 — LOCAL
+
+`features/characters/components/personalized-activity-panel.tsx`의 engine 선택과 전환 안내는 **LOCAL** 작성이다. 기존 같은 feature·semantic form/status 토큰·44px control·focus 스타일을 사용한다. 지원되지 않는 current 신규 선택만 제거하며 역사 current/abandoned와 backend의 pending_settlement/needs_preparation/pending_conversion 상태는 표시한다. hosted asset·raw color·별도 route나 static 전용 구현은 추가하지 않는다.
+
+같은 `browser-tests/personalized-activity-fixture.ts`를 Next와 static에서 각 1회 실행했다. 실제 payload의 current/abandoned·준비 필요 상태, V2 쓰기/상속 null·expected_version, OFF 보존·keyboard focus·390px overflow와 control 크기를 확인했다. Windows 로컬 진단 PNG를 검토했으며 고정 Linux pixel baseline 또는 실제 사용자 USER CHECK로 대체하지 않는다. frontend architecture/design checker, lint/typecheck, 일반/static build의 로컬 결과는 `docs/verification/sns-v2-routine-io-retirement-20261002.md`에 기록한다.

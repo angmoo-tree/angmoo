@@ -18,6 +18,7 @@ from app.core.sqlite_concurrency import run_sqlite_session_immediate
 from app.models import Base
 from app.integrations.direct_llm import RunLlmTracker
 from app.domains.routines.contracts.plans import PlanScope
+from app.domains.identity.service.environment import snapshot as environment_snapshot
 from app.domains.routines.service import daily_preparation as store
 from app.domains.routines.service import plans
 from app.domains.social.schemas.feed import WorldFeedCandidateRead
@@ -29,7 +30,7 @@ from app.runtime.autonomous_activity import provider as transport
 from app.runtime.autonomous_activity.combined_lanes import CombinedFeedLane, CombinedInboxLane
 from app.runtime.autonomous_activity.combined_selection import CombinedSelection
 from app.runtime.autonomous_activity.contracts import Candidate
-from app.runtime.resident.langgraph import _execute_planned_action
+from app.runtime.social.planned_actions import _execute_planned_action
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.runtime.social.agent_tools import agent_tool_actions
 from model_fixture_support import models
@@ -51,6 +52,9 @@ def database(path):
 
 def pair(db):
     world, first, original_second = _seed(db, two_characters=True)
+    # The original fixture has an explicit Seoul user calendar. Direct planning
+    # calls below must freeze that same environment instead of defaulting to UTC.
+    assert environment_snapshot(db, first.user.id).timezone == "Asia/Seoul"
     first = SimpleNamespace(character=first.character, world_character=first.world_character,
         user=first.user, membership=first.membership,
         credential=db.scalar(select(models.LlmCredential).where(models.LlmCredential.character_id == first.character.id)))
@@ -76,7 +80,8 @@ def pair(db):
 
 
 def save_plan(db, world, ready, target, now):
-    return store.apply_plan(db, scope=PlanScope(world, ready.membership, ready.world_character, ready.character),
+    return store.apply_plan(db, scope=PlanScope(world, ready.membership, ready.world_character, ready.character,
+        environment_snapshot(db, ready.user.id)),
         output=output(), target_date=target, now=now, source_digest="a" * 64, expected_snapshot={})
 
 
@@ -174,12 +179,15 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
             topic_signature="정원", created_at=now, world_local_datetime=now.isoformat(), age_seconds=0, age_bucket="recent",
             matched_keywords=["정원"], matched_fields=["body"], rank_score=1, allowed_actions=["comment"])
         from app.runtime.relationships.experience_metrics import post_revision
+        relationship, relationship_receipt = feed.relationship_preparation(root.id, second.world_character.id)
         candidate = Candidate(target_id=root.id, counterpart_id=second.world_character.id, source_ids=[root.id],
             source_revisions={root.id: post_revision(root)}, text=root.body, allowed_actions=["comment"],
-            proposal_eligible=True, relationship=feed.relationship(second.world_character.id)).model_dump()
+            proposal_eligible=True, relationship=relationship).model_dump()
         base = dict(identity={"activity_id": feed_ctx.run_id, "contract_version": 2}, shared_context={"current_state": {"version": 0}},
             memories={}, memory_validations={}, generation_mode="combined")
-        feed_state = {**base, "candidates": [candidate], "lane_data": {root.id: {"post_id": root.id}, "_feed": {
+        feed_state = {**base, "candidates": [candidate],
+            "relationship_validation_receipts": {root.id: relationship_receipt} if relationship_receipt else {},
+            "lane_data": {root.id: {"post_id": root.id}, "_feed": {
             "candidates": [raw.model_dump(mode="json")], "cycle_key": "joint-cycle", "observation_ids": [observation.id],
             "claim_tokens": {observation.id: observation.claim_token}}}, "selections": [{"target_id": root.id}]}
         selector = CombinedSelection({"inbox": feed, "feed": feed}, {"inbox": feed.ports(), "feed": feed.ports()})
@@ -201,7 +209,7 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
         inbox = adapter(CombinedInboxLane, context(db, second, "inbox"), second, "inbox")
         state = {**base, "identity": {"activity_id": inbox.ctx.run_id, "contract_version": 2}, **asyncio.run(inbox.load(base))}
         selector = CombinedSelection({"inbox": inbox, "feed": feed}, {"inbox": inbox.ports(), "feed": feed.ports()})
-        selection = asyncio.run(selector.select({**base, "selection_mode": "combined",
+        selection = asyncio.run(selector.select({**base, "identity": state["identity"], "selection_mode": "combined",
             "prepared_lanes": {"inbox": state, "feed": {"candidates": []}}}))
         state.update(selection["prepared_lanes"]["inbox"])
         asyncio.run(generate_and_write(inbox, state))
@@ -224,7 +232,8 @@ def test_v2_original_proposal_acceptance_and_both_daily_plans(tmp_path, monkeypa
         assert asyncio.run(inbox.execute(state))["executions"][0]["status"] == "reused"
         assert db.scalar(select(func.count(models.JointActivity.id))) == 1
         for ready in (first, second)[existing:]:
-            scope = PlanScope(world, ready.membership, ready.world_character, ready.character)
+            scope = PlanScope(world, ready.membership, ready.world_character, ready.character,
+                environment_snapshot(db, ready.user.id))
             local_now = _utc(datetime.combine(target, datetime.min.time()) + timedelta(hours=7))
             source, _, _, allowed = preparation._source(db, scope, local_now)
             assert "evening" not in source["generated_dayparts"]
@@ -263,7 +272,8 @@ def test_late_first_plan_does_not_materialize_an_expired_unlinked_reservation(tm
         joint.target_daypart, joint.eligible_dayparts = "dawn", ["dawn"]
         joint.scheduled_start_at, joint.scheduled_end_at = store.daypart_windows(joint.scheduled_local_date, world.timezone)["dawn"]
         db.commit()
-        scope = PlanScope(world, first.membership, first.world_character, first.character)
+        scope = PlanScope(world, first.membership, first.world_character, first.character,
+            environment_snapshot(db, first.user.id))
         source, _, before, allowed = preparation._source(db, scope, now)
         assert "dawn" in source["generated_dayparts"] and source["confirmed_reservations"] == []
         full = store.compose_generated_plan(new_output(source).daily_plan,

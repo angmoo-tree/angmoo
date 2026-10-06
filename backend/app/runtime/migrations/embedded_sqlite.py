@@ -117,7 +117,17 @@ class SqliteCanonicalUpgradeCoordinator:
                 manifest_sha256=latest.manifest_sha256,
             )
 
-        source_manifest = load_sqlite_manifest(current.schema_version)
+        marker = self._controller.current()
+        source_manifest = load_sqlite_manifest(
+            current.schema_version,
+            source_manifest_sha256=(
+                str(marker["manifest_sha256"])
+                if marker is not None
+                and marker["relative_path"] == relative
+                and int(marker.get("data_version", 0)) == current.schema_version
+                else None
+            ),
+        )
         _validate_database(source_database, source_manifest)
         chain = migration_chain(current.schema_version)
         if not chain:
@@ -144,9 +154,13 @@ class SqliteCanonicalUpgradeCoordinator:
         staging.mkdir(parents=True, exist_ok=False)
         staging_database = staging / "angmoo.sqlite3"
         try:
+            from app.runtime.migrations.canonical_retention import record_creation, record_validated
+            record_creation(staging, relative=final_relative,
+                schema_version=latest.schema_version, manifest_sha256=latest.manifest_sha256)
             _backup_database(source_database, staging_database)
             _apply_chain(staging_database, chain)
             _validate_database(staging_database, latest)
+            record_validated(staging)
             if _database_file_fingerprint(source_database) != source_fingerprint:
                 raise SqliteCanonicalUpgradeError(
                     "sqlite_migration_previous_generation_changed"
@@ -184,6 +198,12 @@ class SqliteCanonicalUpgradeCoordinator:
         latest: SqliteVersionManifest,
     ) -> SqliteCanonicalUpgradeResult:
         generation = Path(relative).name
+        directory = self._paths.canonical / relative
+        newly_created = not directory.exists()
+        if newly_created:
+            from app.runtime.migrations.canonical_retention import record_creation
+            record_creation(directory, relative=relative,
+                schema_version=latest.schema_version, manifest_sha256=latest.manifest_sha256)
         database = SqliteCanonicalDatabase(
             self._data_paths,
             settings=SqliteCanonicalSettings(generation=generation),
@@ -192,6 +212,9 @@ class SqliteCanonicalUpgradeCoordinator:
         database.close()
         if doctor.schema_version != latest.schema_version:
             raise SqliteCanonicalUpgradeError("sqlite_schema_manifest_mismatch")
+        if newly_created:
+            from app.runtime.migrations.canonical_retention import record_validated
+            record_validated(directory)
         self._controller.promote(
             relative,
             manifest_sha256=latest.manifest_sha256,

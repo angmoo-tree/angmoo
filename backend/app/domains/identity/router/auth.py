@@ -389,7 +389,11 @@ def update_me_preferences(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user_allow_incomplete),
 ) -> schemas.UserRead:
-    return auth_service.update_user_preferences(db, user, data)
+    try:
+        return auth_service.update_user_preferences(db, user, data)
+    except auth_service.UserPreferenceConflict as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="ui_preference_revision_conflict") from exc
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)

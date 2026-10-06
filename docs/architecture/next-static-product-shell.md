@@ -40,8 +40,17 @@ The static build intentionally has one physical product entry. `index.html` is
 also emitted as `404.html`; the Tauri asset protocol or preview static server
 must use it as the fallback for dynamic URLs. The client router then resolves
 World, Character, and Post identifiers from `location.pathname`. Internal links
-perform full-document navigation in this profile so direct-open and refresh use
-the same fallback contract.
+perform full-document navigation in the ordinary static browser preview so
+direct-open and refresh use the same fallback contract. In native Tauri,
+`DesktopWindowBridge` owns links: same-kind routes use actual history and the
+shared static resolver; cross-kind routes open/focus the existing singleton
+without changing the source URL. `StaticNavigationBridge` does not intercept
+native links. Reload still restores the deep URL through the same asset fallback.
+
+The 2026-10-04 responsive viewport contract applies to both delivery profiles.
+The static resolver retains screen-owned query normalization/error presentation;
+native address entry/dispatch validates the stricter query contract before
+navigation. Neither path expands supported route families or remote permissions.
 
 The supported ER5 matrix includes:
 

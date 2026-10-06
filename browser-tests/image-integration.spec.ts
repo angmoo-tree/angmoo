@@ -2,8 +2,13 @@ import { test, expect, type Page } from "@playwright/test";
 import { continuityAgentDetail } from "./continuity-fixture";
 import { installBackendFixture, json, uiDWorld, uiDOwnerActor, uiDManualPost, uiDManualFeed } from "./continuity-next-fixture";
 import { readFileSync } from "node:fs";
+import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
-test.use({screenshot:"on"});
+test.use({screenshot:"on", locale:"ko-KR", timezoneId:"Asia/Seoul"});
+test.beforeEach(async ({page}, info) => {
+  const origin = new URL(String(info.project.use.baseURL)).origin;
+  await page.route("**/*", route => new URL(route.request().url()).origin === origin ? route.fallback() : route.abort("blockedbyclient"));
+});
 
 const character="image-fixture-bird";
 const models=[
@@ -21,7 +26,8 @@ async function fixtures(page:Page, staticShell:boolean) {
   let upload=0;
   await page.route(staticShell?"http://127.0.0.1:8080/api/v1/**":"**/api/backend/**",async route=>{
     const request=route.request();const path=new URL(request.url()).pathname.replace(/^\/api\/(backend|v1)/,"");
-    if(path==="/auth/me")return json(route,{id:"local-owner",email:null,display_name:"Local Owner",profile_setup_completed:true,feed_content_filter:"all",is_admin:true});
+    if(path==="/auth/me")return json(route,{id:"local-owner",email:null,display_name:"Local Owner",profile_setup_completed:true,ui_language:"ko",ui_preference_revision:1,feed_content_filter:"all",is_admin:true});
+    if(path==="/auth/local/environment")return json(route,VISUAL_ENVIRONMENT);
     if(path===`/agents/${character}`)return json(route,continuityAgentDetail(character));
     if(path.endsWith("/lore-sources"))return json(route,{items:[]});
     if(path==="/media/catalog")return json(route,{models,quota_timezone:"Asia/Seoul",upload_limit_bytes:10485760});
@@ -93,7 +99,9 @@ test("Comfy samples provide editable bindings and a separate text path without g
 test("common recognition is separate, defaults medium, and usage distinguishes reservations",async({page},info)=>{
   const audit=await fixtures(page,info.project.name==="static");await page.goto("/settings");const panel=page.getByRole("region",{name:"이미지 인식 설정"});
   await expect(panel.getByRole("combobox",{name:"생각 수준"})).toHaveValue("medium");await expect(panel.getByRole("checkbox",{name:"새 이미지 인식 허용"})).not.toBeChecked();
-  await expect(page.getByRole("region",{name:"이미지 사용량과 전체 상한"})).toContainText("전체 생성 예약·시도 2회");
+  const usage=page.getByRole("region",{name:"이미지 사용량과 전체 상한"});
+  await expect(usage.getByText(/^전체 생성 예약·시도\s*2회\s*\/\s*10회$/)).toBeVisible();
+  await expect(usage.getByText(/^공통 인식 예약·시도\s*1회\s*\/\s*4회$/)).toBeVisible();
   await panel.getByLabel("인식용 Gemini API 키").fill("fake-browser-only");await panel.getByRole("spinbutton",{name:"일일 신규 인식 시도 상한"}).fill("4");await panel.getByRole("button",{name:"인식 설정 저장"}).click();
   await expect.poll(()=>audit.writes.length).toBe(1);expect(audit.writes[0].enabled).toBe(false);expect(audit.writes[0].model).toBe("gemini-3.1-flash-lite");
   expect(await page.evaluate(()=>Object.values(localStorage).join(""))).not.toContain("fake-browser-only");
@@ -134,7 +142,7 @@ test("manual SNS submission preserves title body and selected asset without reco
     await expect(composer).toBeVisible();
     const composerBox=await composer.boundingBox();
     expect(composerBox).not.toBeNull();
-    for (const control of [page.getByLabel("제목",{exact:true}),page.getByLabel("내용",{exact:true}),page.getByLabel("첨부 이미지 선택"),page.getByRole("button",{name:"게시하기",exact:true})]) {
+    for (const control of [page.getByLabel("제목",{exact:true}),page.getByLabel("내용",{exact:true}),page.getByRole("button",{name:"사진 첨부",exact:true}),page.getByRole("button",{name:"게시하기",exact:true})]) {
       await expect(control).toBeVisible();
       const box=await control.boundingBox();
       expect(box).not.toBeNull();
@@ -192,7 +200,7 @@ test(`completed ${extension} generation displays original authenticated pixels w
   await page.reload();await expect(image).toBeVisible();
   await expect.poll(()=>image.evaluate((element)=>(element as HTMLImageElement).naturalWidth)).toBe(18);
   const previousBlob=await image.getAttribute("src");
-  await page.getByRole("link",{name:"Device Home",exact:true}).click();
+  await page.locator("[data-feed-header]").getByRole("link",{name:"Angmoo",exact:true}).click();
   if(staticShell) {
     // Static navigation unloads the document; its blob URLs expire with it.
     await expect.poll(()=>page.evaluate(async url=>{try{await fetch(url!);return false;}catch{return true;}},previousBlob)).toBe(true);
@@ -215,7 +223,7 @@ test("NovelAI missing local validation resource prevents activation while preser
   const panel=page.getByRole("region",{name:"SNS 이미지 생성 설정"});
   await expect(panel.getByRole("checkbox",{name:"새 Routine 게시글 자동 이미지 생성 허용"})).toBeDisabled();
   await expect(panel.getByText(/입력 검사에 필요한 파일을 확인할 수 없어/)).toBeVisible();
-  await expect(panel.getByText("연결 상태: 입력 검사 준비 필요 · 생성 비활성화")).toBeVisible();
+  await expect(panel.getByRole("status").filter({hasText:/^연결 상태:/})).toHaveText(/^연결 상태:\s*입력 검사 준비 필요 · 생성 비활성화$/);
   await panel.getByLabel("외형 (선택)").fill("검증 이후 사용할 외형");
   await panel.getByRole("button",{name:"설정 저장",exact:true}).click();
   await expect.poll(()=>audit.writes.length).toBe(1);
@@ -241,7 +249,7 @@ test("NovelAI local preflight permits activation without falsely certifying exac
   await panel.getByLabel("캐릭터 일일 생성 시도 상한",{exact:true}).fill("2");
   await enabled.check();
   await panel.getByRole("button",{name:"연결·입력 확인 및 저장",exact:true}).click();
-  await expect(panel.getByText("연결 상태: Opus 혜택 확인됨")).toBeVisible();
+  await expect(panel.getByRole("status").filter({hasText:/^연결 상태:/})).toHaveText(/^연결 상태:\s*Opus 혜택 확인됨$/);
   expect(audit.writes).toHaveLength(1);
   expect(audit.writes[0].auto_enabled).toBe(true);
   expect(audit.writes[0].reference_enabled).toBe(false);
@@ -260,11 +268,11 @@ test("saved reference state shows actual source preference and the available gen
   });
   await page.goto(`/agents/${character}?tab=settings`);
   const status=page.getByLabel("저장된 참조 적용 상태");
-  await expect(status).toContainText("저장된 참조 선호: ON · 실제 출처: 없음");
+  await expect(status.getByRole("status")).toHaveText(/^저장된 참조 선호:\s*ON\s*· 실제 출처:\s*없음$/);
   await expect(status).toContainText("이번 게시글의 장면만으로 생성");
   for(const [source,label] of [["profile","프로필 이미지"],["card","캐릭터 카드 이미지"],["override","사용자 지정 이미지"]]){
     state={...state,source,applied:true,status:"available",reason:"",generation_path:"reference",scene_only:false};
-    await page.reload();await expect(status).toContainText(`실제 출처: ${label}`);
+    await page.reload();await expect(status.getByRole("status")).toHaveText(new RegExp(`^저장된 참조 선호:\\s*ON\\s*· 실제 출처:\\s*${label}$`));
     await expect(status).not.toContainText("이번 게시글의 장면만으로 생성");
   }
   state={...state,source:"none",applied:false,status:"missing",reason:"comfy_reference_or_text_path_required",generation_path:"unavailable"};

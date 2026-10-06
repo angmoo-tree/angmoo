@@ -1,6 +1,5 @@
 mod desktop_runtime;
 mod launch_mode;
-mod phone_resize;
 mod product_paths;
 mod product_windows;
 mod shutdown_runtime;
@@ -10,8 +9,7 @@ mod world_package_delivery;
 use product_windows::{
     ProductWindowKind, create_phone_window, current_window, open_product_window_impl,
 };
-use tauri::{Manager, WebviewWindow, Window};
-use tauri_runtime::ResizeDirection;
+use tauri::{Manager, WebviewWindow};
 
 #[tauri::command]
 fn desktop_shutdown_status(
@@ -55,47 +53,9 @@ async fn open_product_window(
 }
 
 #[tauri::command]
-fn minimize_product_window(window: WebviewWindow) -> Result<(), String> {
-    current_window(&window)
-        .minimize()
-        .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
 fn close_product_window(window: WebviewWindow) -> Result<(), String> {
     current_window(&window)
         .close()
-        .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-fn start_product_window_drag(window: WebviewWindow) -> Result<(), String> {
-    current_window(&window)
-        .start_dragging()
-        .map_err(|error| error.to_string())
-}
-
-fn parse_phone_resize_direction(value: &str) -> Result<ResizeDirection, String> {
-    match value {
-        "east" => Ok(ResizeDirection::East),
-        "north" => Ok(ResizeDirection::North),
-        "north-east" => Ok(ResizeDirection::NorthEast),
-        "north-west" => Ok(ResizeDirection::NorthWest),
-        "south" => Ok(ResizeDirection::South),
-        "south-east" => Ok(ResizeDirection::SouthEast),
-        "south-west" => Ok(ResizeDirection::SouthWest),
-        "west" => Ok(ResizeDirection::West),
-        _ => Err("unsupported_phone_resize_direction".to_owned()),
-    }
-}
-
-#[tauri::command]
-fn start_product_window_resize(window: Window, direction: String) -> Result<(), String> {
-    if window.label() != "main" {
-        return Err("phone_resize_only".to_owned());
-    }
-    window
-        .start_resize_dragging(parse_phone_resize_direction(&direction)?)
         .map_err(|error| error.to_string())
 }
 
@@ -125,8 +85,12 @@ pub fn run() {
                 product_paths.prepare_runtime_owned_directories()?;
             }
             let phone = create_phone_window(app.handle(), &product_paths)?;
-            window_policy::apply_phone_window_policy(&phone)?;
-            phone_resize::install_phone_aspect_ratio_lock(&phone)?;
+            window_policy::apply_product_window_policy(
+                &phone,
+                window_policy::MAIN_INITIAL_WIDTH,
+                window_policy::MAIN_INITIAL_HEIGHT,
+            )?;
+            phone.show()?;
             if launch_mode.is_contributor_docker_bridge() {
                 desktop_runtime::activate_contributor_bridge(
                     &app.state::<desktop_runtime::DesktopRuntimeState>(),
@@ -141,10 +105,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             open_product_window,
-            minimize_product_window,
             close_product_window,
-            start_product_window_drag,
-            start_product_window_resize,
+            product_windows::validate_product_navigation,
+            product_windows::open_external_product_link,
             desktop_runtime_status,
             retry_desktop_runtime,
             desktop_shutdown_status,
@@ -175,30 +138,4 @@ pub fn run() {
                 _ => {}
             }
         });
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn phone_resize_command_accepts_only_the_eight_native_directions() {
-        let accepted = [
-            ("east", ResizeDirection::East),
-            ("north", ResizeDirection::North),
-            ("north-east", ResizeDirection::NorthEast),
-            ("north-west", ResizeDirection::NorthWest),
-            ("south", ResizeDirection::South),
-            ("south-east", ResizeDirection::SouthEast),
-            ("south-west", ResizeDirection::SouthWest),
-            ("west", ResizeDirection::West),
-        ];
-        for (value, expected) in accepted {
-            assert_eq!(parse_phone_resize_direction(value), Ok(expected));
-        }
-        assert_eq!(
-            parse_phone_resize_direction("maximize"),
-            Err("unsupported_phone_resize_direction".to_owned())
-        );
-    }
 }

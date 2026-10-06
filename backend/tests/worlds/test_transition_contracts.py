@@ -96,32 +96,30 @@ def test_banner_commit_failure_removes_new_file_and_preserves_previous_banner(
     assert world.row_version == original_version
 
 
-@pytest.mark.parametrize("fail_schedule", [False, True])
+@pytest.mark.parametrize("fail_commit", [False, True])
 def test_timezone_update_and_rescheduling_share_one_transaction(
-    world_session, monkeypatch, fail_schedule,
+    world_session, monkeypatch, fail_commit,
 ) -> None:
+    """Preserve the historical node while testing separate runtime metadata."""
     db, owner, world = world_session
     world_id, original_timezone, original_version = world.id, world.timezone, world.row_version
     callbacks, commits = [], []
     event.listen(db, "after_commit", lambda session: commits.append(session))
 
-    def reschedule(session, *, world_id, timezone_name):
-        callbacks.append((session, world_id, timezone_name))
-        assert session is db
-        assert session.in_transaction()
-        assert session.get(models.World, world_id).timezone == "America/New_York"
-        # A cooperating write must commit/roll back with the World mutation.
-        world.banner_alt_text = "schedule applied"
-        session.flush()
-        if fail_schedule:
-            raise RuntimeError("injected schedule failure")
-        return 1
+    def reschedule(*args, **kwargs):
+        callbacks.append((args, kwargs))
+        raise AssertionError("definition metadata must not reschedule runtime")
 
     monkeypatch.setattr(creator, "reschedule_world_autonomy_slots", reschedule)
     arguments = dict(db=db, world_id=world_id, user=owner,
                      data=schemas.WorldUpdate(row_version=original_version, timezone="America/New_York"))
-    if fail_schedule:
-        with pytest.raises(RuntimeError, match="injected schedule failure"):
+    if fail_commit:
+        def fail():
+            db.flush()
+            raise RuntimeError("injected definition commit failure")
+
+        monkeypatch.setattr(db, "commit", fail)
+        with pytest.raises(RuntimeError, match="injected definition commit failure"):
             service.update_world(**arguments)
         assert commits == []
         db.rollback()
@@ -132,10 +130,13 @@ def test_timezone_update_and_rescheduling_share_one_transaction(
         updated = service.update_world(**arguments)
         assert commits == [db]
         assert updated.world.timezone == "America/New_York"
+        assert updated.world.runtime_timezone == "UTC"
         assert world.row_version == original_version + 1
         db.expire_all()
-        assert db.get(models.World, world_id).banner_alt_text == "schedule applied"
-    assert callbacks == [(db, world_id, "America/New_York")]
+        assert db.get(models.World, world_id).banner_alt_text == ""
+    # The detected-environment transaction and future scheduling are exercised
+    # separately in identity/test_environment_admission.py.
+    assert callbacks == []
 
 
 def test_seed_flushes_without_owning_the_callers_commit(world_session) -> None:

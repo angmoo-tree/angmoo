@@ -1,8 +1,11 @@
 """Short installation-wide lock makes cross-character attempt admission atomic."""
 from uuid import uuid4
+from datetime import UTC, datetime
 from sqlalchemy import select, update, func
 from app.domains.social.models.image_intents import ImageGenerationPolicy, ImageGenerationAttempt
 from app.domains.media.contracts import ImagePreparationError
+from app.core.accounting import in_accounting_period
+from app.domains.identity.service.environment import accounting_period, lock_environment_admission
 
 
 def read_installation_limit(db):
@@ -30,13 +33,16 @@ def set_installation_limit(db, value, *, expected_revision=None):
 
 def read_usage(db, quota_day):
     row = db.get(ImageGenerationPolicy, 1)
+    period = accounting_period(db, None, "day")
     count = db.scalar(select(func.count()).select_from(ImageGenerationAttempt).where(
-        ImageGenerationAttempt.quota_day == quota_day, ImageGenerationAttempt.status != "released"))
+        in_accounting_period(ImageGenerationAttempt.created_at, period), ImageGenerationAttempt.status != "released"))
     return {"revision": row.revision if row else 0, "daily_limit": row.daily_limit if row else None,
-        "quota_day": quota_day, "generation_reserved_or_used": count}
+        "quota_day": period.key, "quota_timezone": period.timezone, "generation_reserved_or_used": count,
+        "allowance_available_at": period.allowance_available_at.isoformat()}
 
 
 def reserve_attempt(db, *, job_id, owner_id, character_id, character_limit, quota_day):
+    lock_environment_admission(db, owner_id)
     # A SQLite write lock or PostgreSQL row lock is acquired before both counts.
     if db.execute(update(ImageGenerationPolicy).where(ImageGenerationPolicy.id == 1).values(
         revision=ImageGenerationPolicy.revision)).rowcount != 1:
@@ -44,13 +50,15 @@ def reserve_attempt(db, *, job_id, owner_id, character_id, character_limit, quot
     cap = read_installation_limit(db)
     if not cap or not character_limit:
         raise ImagePreparationError("generation_limits_required")
-    conditions = (ImageGenerationAttempt.quota_day == quota_day, ImageGenerationAttempt.status != "released")
+    now = datetime.now(UTC)
+    period = accounting_period(db, owner_id, "day", now=now)
+    conditions = (in_accounting_period(ImageGenerationAttempt.created_at, period), ImageGenerationAttempt.status != "released")
     total = db.scalar(select(func.count()).select_from(ImageGenerationAttempt).where(*conditions))
     own = db.scalar(select(func.count()).select_from(ImageGenerationAttempt).where(*conditions, ImageGenerationAttempt.character_id == character_id))
     if total >= cap or own >= character_limit:
         raise ImagePreparationError("generation_daily_limit_reached")
     row = ImageGenerationAttempt(id=uuid4().hex, job_id=job_id, owner_id=owner_id, character_id=character_id,
-        quota_day=quota_day, status="reserved")
+        quota_day=period.key, status="reserved", created_at=now)
     db.add(row)
     db.flush()
     return row

@@ -140,6 +140,8 @@ class NotificationRead(BaseModel):
     recipient_user_id: str | None = None
     recipient_character_id: str | None = None
     data: str | None = None
+    actor_deleted: bool = False
+    recipient_deleted: bool = False
     actor_name: str | None = None
     actor_handle: str | None = None
     actor_avatar_url: str | None = None
@@ -204,6 +206,7 @@ class PostMediaRead(BaseModel):
 class PostReference(BaseModel):
     id: str
     author_name: str
+    author_deleted: bool = False
     author_handle: str | None = None
     author_avatar_url: str | None = None
     title: str
@@ -227,7 +230,12 @@ class PostSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     author_name: str
+    author_deleted: bool = False
     author_handle: str | None = None
     author_avatar_url: str | None = None
     title: str
@@ -262,7 +270,12 @@ class PostDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    viewer_like_state: Literal["liked", "not_liked", "unavailable"] = "unavailable"
+    can_owner_like: bool = False
+    reaction_world_id: str | None = None
+    reaction_owner_world_character_id: str | None = None
     author_name: str
+    author_deleted: bool = False
     author_handle: str | None = None
     author_avatar_url: str | None = None
     title: str

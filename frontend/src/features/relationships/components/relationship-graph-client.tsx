@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 import { RelationshipReviewPanel } from "./relationship-review-panel";
 import { relationshipGraphPresentationState } from "@/features/relationships/utils/relationship-graph";
 
@@ -6,6 +10,9 @@ import Link from "next/link";
 import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
 import { useEffect, useMemo, useState } from "react";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT } from "@/lib/runtime/runtime-config";
+import { RelationshipGraphNode } from "./relationship-graph-node";
 
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -48,16 +55,6 @@ function position(index: number, count: number) {
   return { x: 240 + Math.cos(angle) * 145, y: 170 + Math.sin(angle) * 120 };
 }
 
-function graphNodeLabelLines(displayName: string): string[] {
-  const visibleCharacters = Array.from(displayName.replace(/\s+/g, "")).slice(0, 8);
-  if (visibleCharacters.length <= 4) return [visibleCharacters.join("")];
-  const splitAt = Math.ceil(visibleCharacters.length / 2);
-  return [
-    visibleCharacters.slice(0, splitAt).join(""),
-    visibleCharacters.slice(splitAt).join(""),
-  ];
-}
-
 export function RelationshipGraphClient({
   characterId,
   worldId,
@@ -67,13 +64,24 @@ export function RelationshipGraphClient({
   worldId: string;
   provider?: "ladybug";
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("relationships");
   const router = useRouter();
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [depth, setDepth] = useState<1 | 2>(1);
-  const [graph, setGraph] = useState<RelationshipGraphRead | null>(null);
+  const [storedGraph, setGraph] = useState<RelationshipGraphRead | null>(null);
+  const [loadedIdentity, setLoadedIdentity] = useState<string | null>(null);
+  const identity = JSON.stringify([characterId, worldId, user?.id ?? null]);
+  const graph = loadedIdentity === identity && status === "authenticated" ? storedGraph : null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requestVersion, setRequestVersion] = useState(0);
+
+  useEffect(() => {
+    const changed = () => { setGraph(null); setLoading(true); setRequestVersion((value) => value + 1); };
+    window.addEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+    return () => window.removeEventListener(DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, changed);
+  }, []);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -83,26 +91,31 @@ export function RelationshipGraphClient({
     }
     if (status !== "authenticated") return;
     let active = true;
-    void getRelationshipGraph(characterId, worldId, depth, provider)
+    const scope = captureAuthRequestScope();
+    const controller = new AbortController();
+    queueMicrotask(() => { if (active) { setGraph(null); setLoading(true); } });
+    void getRelationshipGraph(characterId, worldId, depth, provider, { signal: controller.signal })
       .then((result) => {
-        if (active) {
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           setGraph(result);
+          setLoadedIdentity(JSON.stringify([characterId, worldId, scope.userId]));
           setError(null);
         }
       })
       .catch((nextError) => {
-        if (active) {
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) {
           const code = nextError instanceof Error ? nextError.message : "relationship_query_failed";
-          setError(ERROR_LABELS[code] ?? code);
+          setError(ERROR_LABELS[code] ?? ERROR_LABELS.relationship_query_failed);
         }
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active && !controller.signal.aborted && isCurrentAuthRequestScope(scope)) setLoading(false);
       });
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [characterId, depth, provider, requestVersion, router, status, worldId]);
+  }, [characterId, depth, provider, requestVersion, router, status, user?.id, worldId]);
 
   const orderedNodes = useMemo(() => {
     if (!graph) return [];
@@ -133,17 +146,15 @@ export function RelationshipGraphClient({
   };
   const degradedDescription =
     graph?.meta.source === "canonical_fallback"
-      ? `LadybugDB projection 대신 Canonical DB의 직접 관계와 근거만 표시합니다.${
-          graph.meta.fallback_reason ? ` 사유: ${graph.meta.fallback_reason}` : ""
-        }`
-      : "LadybugDB가 새 사건을 아직 모두 반영하지 못했습니다. 표시된 관계는 최신 상태가 아닐 수 있습니다.";
+      ? uiText("LadybugDB projection 대신 Canonical DB의 직접 관계와 근거만 표시합니다.{{value0}}", {value0: graph.meta.fallback_reason ? ` 사유: ${graph.meta.fallback_reason}` : ""})
+      : uiText("LadybugDB가 새 사건을 아직 모두 반영하지 못했습니다. 표시된 관계는 최신 상태가 아닐 수 있습니다.");
   const rebuildingDescription =
     graph?.meta.source === "canonical_fallback"
-      ? "LadybugDB 관계망을 다시 구성하는 동안 Canonical DB의 직접 관계와 근거만 표시합니다."
-      : "LadybugDB 관계망을 다시 구성하고 있습니다. 완료될 때까지 표시된 관계는 최신 상태가 아닐 수 있습니다.";
+      ? uiText("LadybugDB 관계망을 다시 구성하는 동안 Canonical DB의 직접 관계와 근거만 표시합니다.")
+      : uiText("LadybugDB 관계망을 다시 구성하고 있습니다. 완료될 때까지 표시된 관계는 최신 상태가 아닐 수 있습니다.");
   const unavailableDescription = graph
-    ? `${STATUS_PRESENTATION[graph.meta.graph_status].label} 상태입니다. 안전한 대체 관계 데이터가 없어 그래프를 표시하지 않습니다.`
-    : "관계망을 지금 조회할 수 없습니다. 잠시 후 다시 시도해주세요.";
+    ? uiText("{{value0}} 상태입니다. 안전한 대체 관계 데이터가 없어 그래프를 표시하지 않습니다.", {value0: uiText(STATUS_PRESENTATION[graph.meta.graph_status].label)})
+    : uiText("관계망을 지금 조회할 수 없습니다. 잠시 후 다시 시도해주세요.");
 
   return (
     <div
@@ -152,23 +163,19 @@ export function RelationshipGraphClient({
     >
       <header className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
         <p className="text-sm font-bold text-state-running">P7 · RELATIONSHIP GRAPH</p>
-        <h1 className="mt-2 text-3xl font-black">World 관계망</h1>
+        <h1 className="mt-2 text-3xl font-black">{uiText("World 관계망")}</h1>
         <p className="mt-3 max-w-3xl text-sm text-on-surface-variant">
-          채팅·SNS에서 실제로 접한 경험과 저장된 기억을 바탕으로 한 관계입니다. 화살표는 AI 캐릭터가 상대를 바라보는 방향이며,
-          반대 방향은 별도의 관계입니다.
-        </p>
+          {uiText("채팅·SNS에서 실제로 접한 경험과 저장된 기억을 바탕으로 한 관계입니다. 화살표는 AI 캐릭터가 상대를 바라보는 방향이며, 반대 방향은 별도의 관계입니다.")}</p>
         {provider === "ladybug" ? (
           <p className="mt-3 rounded-2xl bg-tertiary-container px-4 py-3 text-sm font-bold text-on-tertiary-container">
-            설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.
-          </p>
+            {uiText("설치형 Angmoo의 canonical 관계망 provider는 LadybugDB입니다.")}</p>
         ) : null}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link
             href={`/characters/${characterId}/worlds/${worldId}/autonomy-setup`}
             className="inline-flex min-h-11 items-center rounded-full border border-outline-variant px-4 py-2 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action-dark"
           >
-            활동 준비로 돌아가기
-          </Link>
+            {uiText("활동 준비로 돌아가기")}</Link>
           <Button
             variant="strong"
             onClick={() => {
@@ -178,23 +185,21 @@ export function RelationshipGraphClient({
               setDepth((value) => (value === 1 ? 2 : 1));
             }}
           >
-            {depth === 1 ? "2단계까지 보기" : "직접 관계만 보기"}
+            {depth === 1 ? uiText("2단계까지 보기") : uiText("직접 관계만 보기")}
           </Button>
         </div>
       </header>
 
       {presentationState === "loading" ? (
         <p data-relationship-graph-state="loading" className="rounded-3xl bg-surface-container p-5">
-          관계 근거를 확인하는 중입니다.
-        </p>
+          {uiText("관계 근거를 확인하는 중입니다.")}</p>
       ) : null}
       {presentationState === "failed" ? (
         <InlineError data-relationship-graph-state="failed">
           <div className="space-y-3">
-            <p>{error}</p>
+            <p>{uiText(error ?? "관계망을 지금 조회할 수 없습니다. 잠시 후 다시 시도해주세요.")}</p>
             <Button variant="secondary" onClick={retry}>
-              다시 시도
-            </Button>
+              {uiText("다시 시도")}</Button>
           </div>
         </InlineError>
       ) : null}
@@ -202,7 +207,7 @@ export function RelationshipGraphClient({
       {presentationState === "rebuilding" ? (
         <DegradedPanel
           data-relationship-graph-state="rebuilding"
-          title="관계망을 다시 구성하고 있습니다"
+          title={uiText("관계망을 다시 구성하고 있습니다")}
           description={rebuildingDescription}
         />
       ) : null}
@@ -210,12 +215,11 @@ export function RelationshipGraphClient({
       {presentationState === "degraded" ? (
         <DegradedPanel
           data-relationship-graph-state="degraded"
-          title="제한된 관계 데이터입니다"
+          title={uiText("제한된 관계 데이터입니다")}
           description={degradedDescription}
           action={
             <Button variant="secondary" onClick={retry}>
-              최신 상태 다시 확인
-            </Button>
+              {uiText("최신 상태 다시 확인")}</Button>
           }
         />
       ) : null}
@@ -223,12 +227,11 @@ export function RelationshipGraphClient({
       {presentationState === "unavailable" ? (
         <DegradedPanel
           data-relationship-graph-state="unavailable"
-          title="관계망을 사용할 수 없습니다"
+          title={uiText("관계망을 사용할 수 없습니다")}
           description={unavailableDescription}
           action={
             <Button variant="secondary" onClick={retry}>
-              다시 시도
-            </Button>
+              {uiText("다시 시도")}</Button>
           }
         />
       ) : null}
@@ -236,20 +239,19 @@ export function RelationshipGraphClient({
       {presentationState === "empty" ? (
         <EmptyState
           data-relationship-graph-state="empty"
-          title="아직 관계 근거가 없습니다"
-          description="관찰에 성공한 방향 관계와 사건 근거가 생기면 이곳에 표시됩니다."
+          title={uiText("아직 관계 근거가 없습니다")}
+          description={uiText("관찰에 성공한 방향 관계와 사건 근거가 생기면 이곳에 표시됩니다.")}
           icon={
             graph ? (
               <StatusChip
-                label={STATUS_PRESENTATION[graph.meta.graph_status].label}
+                label={uiText(STATUS_PRESENTATION[graph.meta.graph_status].label)}
                 tone={STATUS_PRESENTATION[graph.meta.graph_status].tone}
               />
             ) : undefined
           }
           action={
             <Button variant="secondary" onClick={retry}>
-              다시 확인
-            </Button>
+              {uiText("다시 확인")}</Button>
           }
         />
       ) : null}
@@ -261,28 +263,28 @@ export function RelationshipGraphClient({
           <section className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-black">방향 관계 지도</h2>
+                <h2 className="text-xl font-black">{uiText("방향 관계 지도")}</h2>
                 <StatusChip
                   className="mt-2"
                   data-relationship-graph-state={
                     presentationState === "ready" ? "ready" : undefined
                   }
-                  label={STATUS_PRESENTATION[graph.meta.graph_status].label}
+                  label={uiText(STATUS_PRESENTATION[graph.meta.graph_status].label)}
                   tone={STATUS_PRESENTATION[graph.meta.graph_status].tone}
                 />
               </div>
               <StatusChip
                 label={
                   graph.meta.source === "ladybug"
-                    ? "LadybugDB 검증 결과"
-                    : "Canonical DB 안전 대체"
+                    ? uiText("LadybugDB 검증 결과")
+                    : uiText("Canonical DB 안전 대체")
                 }
                 tone={graph.meta.source === "ladybug" ? "healthy" : "degraded"}
               />
             </div>
 
             <div className="mt-6 overflow-x-auto" aria-hidden="true">
-              <svg viewBox="0 0 480 340" className="min-w-[480px]" role="img" aria-label="방향 관계 그래프">
+              <svg viewBox="0 0 480 340" className="min-w-[480px]" role="img" aria-label={uiText("방향 관계 그래프")}>
                 <defs>
                   <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
                     <path d="M0,0 L8,4 L0,8 z" className="fill-state-running" />
@@ -297,10 +299,18 @@ export function RelationshipGraphClient({
                   const dy = (end.x-start.x)/length*18;
                   const cx = (start.x+end.x)/2+dx;
                   const cy = (start.y+end.y)/2+dy;
+                  const startRadius = orderedNodes.find((node) => node.world_character_id === edge.actor_world_character_id)?.is_center ? 35 : 29;
+                  const endRadius = orderedNodes.find((node) => node.world_character_id === edge.target_world_character_id)?.is_center ? 35 : 29;
+                  const startDistance = Math.hypot(cx - start.x, cy - start.y) || 1;
+                  const endDistance = Math.hypot(cx - end.x, cy - end.y) || 1;
+                  const startX = start.x + (cx - start.x) / startDistance * startRadius;
+                  const startY = start.y + (cy - start.y) / startDistance * startRadius;
+                  const endX = end.x + (cx - end.x) / endDistance * (endRadius + 4);
+                  const endY = end.y + (cy - end.y) / endDistance * (endRadius + 4);
                   return (
                     <g key={edge.relationship_state_id}>
                     <path
-                      d={`M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`}
+                      d={`M ${startX} ${startY} Q ${cx} ${cy} ${endX} ${endY}`}
                       fill="none"
                       className="stroke-state-running"
                       strokeWidth="2"
@@ -310,53 +320,33 @@ export function RelationshipGraphClient({
                     </g>
                   );
                 })}
-                {orderedNodes.map((node) => {
-                  const point = positions.get(node.world_character_id)!;
-                  const labelLines = graphNodeLabelLines(node.display_name);
-                  return (
-                    <g key={node.world_character_id}>
-                      <circle cx={point.x} cy={point.y} r={node.is_center ? 35 : 29} className={node.is_center ? "fill-action-dark" : "fill-surface-container-high"} />
-                      <text
-                        x={point.x}
-                        y={labelLines.length === 1 ? point.y + 4 : point.y - 3}
-                        textAnchor="middle"
-                        className={node.is_center ? "fill-on-action-dark text-[12px] font-bold" : "fill-on-surface text-[11px] font-bold"}
-                      >
-                        {labelLines.map((line, index) => (
-                          <tspan key={`${node.world_character_id}-label-${index}`} x={point.x} dy={index === 0 ? 0 : 13}>
-                            {line}
-                          </tspan>
-                        ))}
-                      </text>
-                    </g>
-                  );
-                })}
+                {orderedNodes.map((node) => <RelationshipGraphNode key={node.world_character_id} node={node} point={positions.get(node.world_character_id)!} />)}
               </svg>
             </div>
-            {graph.meta.truncated ? <p className="mt-3 text-xs text-on-surface-variant">표시 상한에 따라 일부 관계만 보입니다.</p> : null}
+            {graph.meta.truncated ? <p className="mt-3 text-xs text-on-surface-variant">{uiText("표시 상한에 따라 일부 관계만 보입니다.")}</p> : null}
           </section>
 
           <section className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
-            <h2 className="text-xl font-black">접근 가능한 관계 목록</h2>
+            <h2 className="text-xl font-black">{uiText("접근 가능한 관계 목록")}</h2>
             <div className="mt-5 space-y-3">
-              {graph.edges.length === 0 ? <p className="text-sm text-on-surface-variant">아직 검증된 직접 관계가 없습니다.</p> : null}
+              {graph.edges.length === 0 ? <p className="text-sm text-on-surface-variant">{uiText("아직 검증된 직접 관계가 없습니다.")}</p> : null}
               {graph.edges.map((edge) => {
                 const actor = graph.nodes.find((node) => node.world_character_id === edge.actor_world_character_id);
                 const target = graph.nodes.find((node) => node.world_character_id === edge.target_world_character_id);
                 return (
                   <article key={edge.relationship_state_id} className="rounded-2xl border border-outline-variant p-4">
-                    <h3 className="font-black">{actor?.display_name ?? "알 수 없음"} → {target?.display_name ?? "알 수 없음"}</h3>
-                    <p className="mt-2 font-semibold">{edge.relationship_label ?? "아직 정리된 관계 유형이 없습니다"}</p>
+                    <h3 className="font-black">{actor?.display_name ?? uiText("알 수 없음")} → {target?.display_name ?? uiText("알 수 없음")}</h3>
+                    <p className="mt-2 font-semibold">{edge.relationship_label ?? uiText("아직 정리된 관계 유형이 없습니다")}</p>
                     <details className="mt-2">
-                      <summary className="cursor-pointer text-sm font-bold">상대에 대한 인식 보기</summary>
-                      <p className="mt-2 whitespace-pre-wrap break-words text-sm">{edge.perception ?? "아직 정리된 인식이 없습니다."}</p>
-                      <p className="mt-2 text-xs text-on-surface-variant">인식 변경: {edge.view_updated_at ? new Date(edge.view_updated_at).toLocaleString("ko-KR") : "미작성"}</p>
-                      <p className="mt-1 text-xs text-on-surface-variant">저장 기억 최근 검토: {edge.reviewed_at ? new Date(edge.reviewed_at).toLocaleString("ko-KR") : "미검토"}</p>
+                      <summary className="cursor-pointer text-sm font-bold">{uiText("상대에 대한 인식 보기")}</summary>
+                      <p className="mt-2 whitespace-pre-wrap break-words text-sm">{edge.perception ?? uiText("아직 정리된 인식이 없습니다.")}</p>
+                      <p className="mt-2 text-xs text-on-surface-variant">{uiText("인식 변경:")}{edge.view_updated_at ? formatDate(edge.view_updated_at) : uiText("미작성")}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">{uiText("저장 기억 최근 검토:")}{edge.reviewed_at ? formatDate(edge.reviewed_at) : uiText("미검토")}</p>
                     </details>
                     <p className="mt-2 text-sm text-on-surface-variant">
-                      친숙 {edge.familiarity} · 호감 {edge.affinity} · 신뢰 {edge.trust} · 긴장 {edge.tension}
+                      {uiText("친숙")}{edge.familiarity} {uiText("· 호감")}{edge.affinity} {uiText("· 신뢰")}{edge.trust} {uiText("· 긴장")}{edge.tension}
                     </p>
-                    <p className="mt-1 text-xs text-on-surface-variant">실제 상호작용 {edge.interaction_count}회 · 관계 버전 {edge.relationship_version}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">{uiText("실제 상호작용")}{edge.interaction_count}{uiText("회 · 관계 버전")}{edge.relationship_version}</p>
                   </article>
                 );
               })}
@@ -365,19 +355,18 @@ export function RelationshipGraphClient({
 
           {graph.evidence.length > 0 ? (
             <section className="rounded-[28px] bg-surface-container-lowest p-6 shadow-sm">
-              <h2 className="text-xl font-black">최근 검증된 사건 근거</h2>
+              <h2 className="text-xl font-black">{uiText("최근 검증된 사건 근거")}</h2>
               <div className="mt-5 space-y-3">
                 {graph.evidence.map((event) => (
                   <article key={event.event_id} className="rounded-2xl border border-outline-variant p-4">
                     <p className="font-bold">{event.event_type}</p>
-                    <p className="mt-1 text-xs text-on-surface-variant">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurred_at))}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">{formatDate(event.occurred_at)}</p>
                     {event.root_post_id || event.source_post_id ? (
                       <Link
                         className="mt-2 inline-block text-sm font-bold text-state-running underline"
                         href={worldPostDetailRoute(worldId, event.root_post_id ?? event.source_post_id!)}
                       >
-                        근거 게시글 보기
-                      </Link>
+                        {uiText("근거 게시글 보기")}</Link>
                     ) : null}
                   </article>
                 ))}

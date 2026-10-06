@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page, type TestInfo } from "@playwright/test";
+import { VISUAL_ENVIRONMENT } from "./fixtures/visual-environment.mjs";
 
 const FOUNDATION_ROUTE = "/ui-foundation";
 const FIXTURE_SELECTOR = "[data-ui-foundation-fixture]";
@@ -15,6 +16,8 @@ const OWNER = {
   profile_setup_completed: true,
   feed_content_filter: "all",
   is_admin: false,
+  ui_language: "ko",
+  ui_preference_revision: 1,
 };
 
 type CssState = {
@@ -144,6 +147,12 @@ async function openFoundation(page: Page, testInfo: TestInfo): Promise<void> {
       await route.fulfill({ contentType: "application/json", json: OWNER, status: 200 });
       return;
     }
+    if ((isNextProject && requestUrl.origin === productOrigin && requestUrl.pathname === "/api/backend/auth/local/environment")
+        || (isStaticProject && requestUrl.origin === STATIC_API_ORIGIN && requestUrl.pathname === "/api/v1/auth/local/environment")) {
+      expect(["GET", "POST"]).toContain(route.request().method());
+      await route.fulfill({contentType:"application/json", json:VISUAL_ENVIRONMENT, status:200});
+      return;
+    }
 
     const isProductAsset =
       requestUrl.origin === productOrigin && !requestUrl.pathname.startsWith("/api/");
@@ -165,8 +174,8 @@ async function openFoundation(page: Page, testInfo: TestInfo): Promise<void> {
   });
   const fixtureImage = fixture.locator('img[src="/icon.svg"]');
   await expect(fixtureImage).toBeVisible();
-  expect(
-    await fixtureImage.evaluate(
+  await expect.poll(() =>
+    fixtureImage.evaluate(
       (image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
     ),
   ).toBe(true);

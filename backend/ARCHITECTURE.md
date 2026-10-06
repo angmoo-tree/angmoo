@@ -1,5 +1,71 @@
 # Angmoo Backend Architecture
 
+## World configuration and permanent import origins (2026-10-05)
+
+Characters owns immutable import snapshots and proven origin references. Final
+registration captures a creation baseline in its existing unit of work; formal
+SQLite v28 / Alembic 0106 transition restores verified initial drafts or records a
+distinct legacy transition baseline exactly once. Reads never create or recapture
+an origin. Copies use that basis with new execution identities and initial OFF,
+without copying credentials, memories, relationships, leases or activity history.
+
+Character/account privacy erasure shares the existing deletion unit of work.
+It removes the deleting actors' configuration and origin/draft references, then
+erases an immutable import basis only after no live origin, draft or World
+configuration refers to it. Retained independent Worlds keep their basis and
+settings. This explicit privacy path does not permit ordinary snapshot edits.
+Idle-slot accepted input is cleared with the deleted actor's private settings.
+
+The Characters import service exposes its immutable input/output values from
+`service/import_configuration.py`. Consumers import that narrow typed entry;
+the existing `contracts.py` workflow exports retain their historical surface.
+Field validation, public media validation and deterministic digests stay with
+the import-service values, without storage or runtime dependencies.
+
+Import-profile reads retain sanitized legacy HTTP loopback references to public
+managed media and the shipped `/icon.svg` asset verbatim. External HTTP,
+credentials, query/fragment data and non-public loopback routes remain rejected.
+This read compatibility does not change managed-media ownership on profile writes,
+make the server fetch the URL, or rewrite an immutable payload/digest.
+
+WorldCharacters owns typed profile/persona/activity/model configuration, its
+WorldCharacter revision and saved autonomous intent. Scoped management validates
+local owner, World, active role, media ownership and expected revision. Public
+profile/graph reads use the stored World profile; private settings are owner-only.
+World edits preserve common Character values, import origins and other Worlds.
+
+API dependency factories compose narrow services with Runtime SQLAlchemy, Media
+and Routine adapters. Domain routers do not import concrete runtime workflows.
+Routine keeps existing capacity, readiness, quota, lease and admission authority;
+World ON/OFF controls only new automatic admission. Accepted Chat, SNS, Routine
+and Media jobs keep a validated input snapshot and revision through retry/worker
+execution. A later edit or OFF does not rewrite accepted input or another actor.
+
+World Chat soft deletion uses the same admission fence as create, accept, retry
+and model updates. Nonterminal requests reject deletion; terminal/idempotent
+deletion affects only the thread and preserves separate evidence and World data.
+
+The Runtime Chat graph adapter unwraps LangGraph's `NodeCancelledError` only
+when its original cause is an `asyncio.CancelledError`. It propagates that
+original signal to the response lifecycle owner, which settles cancellation,
+fences and durable checkpoints. The compiled graph remains shared; request
+sessions, observations and cancellation signals remain independent.
+
+사용자 환경은 Identity의 `service/environment.py`가 소유하는 명시적 서비스 계약이다.
+`contracts/environment.py`의 immutable snapshot을 SNS·Chat·기억 작업의 접수 시점에 저장하고,
+각 작업은 재시도·재개에도 같은 snapshot을 사용한다. 환경 전환은 owner 인증·CAS·120초 lease와
+단조 sequence로 보호한다. 환경 history는 인증된 보고 transaction에서 저장하며 quota owner는 그 UTC 보호 범위를 읽는다.
+`routines/service/environment_schedule.py`는 슬롯 claim의 짧은 transaction에서 미래 idle 일정만 제한된 수로 조정한다. 범용 서비스에서 다른 도메인의 내부 저장 모델을 몰래 수정하지 않는다.
+
+`core/calendar.py`는 UTC 순간과 현지 day/month 경계·DST gap/overlap을 계산한다. 기간별 소비 owner는
+`AccountingPeriod`의 보호 구간 합집합에서 원 ID를 한 번 계수한다. 시간대 변경은 새로운 예산을
+부여하지 않으며, legacy 집계와 미확정 예약은 보수적으로 보호한다. 24시간 보존·lease·cooldown은
+현지 달력이 아닌 UTC 경과 시간 계약을 유지한다. World package의 timezone/hash는 바꾸지 않는다.
+
+공통 Unicode scanner와 memory projection profile은 document/query/postcheck가 함께 사용한다.
+원본의 수정·삭제는 after-commit fence로 재검증하며, 새 generation이 검증되기 전에는 preparing 상태다.
+새 projection은 bounded page/cursor로 재개하고 기존 vector profile이나 원문을 재작성하지 않는다.
+
 Angmoo 백엔드는 **업무별 폴더 안에서 HTTP, 업무 흐름, 저장, 입출력 형식을 나누는 FastAPI 애플리케이션**입니다. 게시물 문제는 `social`, 대화 문제는 `chat`, 기억 문제는 `memory`에서 시작합니다. 같은 업무 안에서는 `router`, `service`, `repository`, `models`, `schemas`처럼 역할을 드러내는 이름을 사용합니다.
 
 이 문서는 기능을 추가하거나 버그를 수정할 때 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. 구조 전환의 PR·테스트·설치 결과는 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다. 이 문서에 구조가 설명돼 있다는 사실과 특정 배포판의 검증 완료 여부는 구분합니다.
@@ -436,6 +502,8 @@ Docker 브라우저 실행과 Windows 설치 앱은 같은 업무 코드를 사�
 
 Alembic은 [`alembic/`](alembic/)과 [`alembic.ini`](alembic.ini)를 사용합니다. `env.py`는 같은 Base의 등록된 metadata를 참조합니다. 역사 revision의 본문·ID·연결 그래프는 보존합니다. 별도로 `runtime/migrations`의 embedded SQLite upgrade가 설치 데이터의 버전을 올립니다. ORM 파일 이동만을 이유로 table·constraint·schema version을 변경하지 않습니다.
 
+SQLite v29는 개발 watch 중 먼저 적용된 v28의 복구를 소유합니다. `sqlite_versions/registry.py`는 당시 generation marker의 정확한 manifest SHA와 동결된 초기 v28 계약을 연결하며, 원본의 schema 지문·revision·table inventory·무결성·외래키를 모두 검증합니다. 최종 v28과 v1–v27 manifest는 변경하지 않습니다. `world_configuration_v29.py`는 미공개 staging 복사본에서 nullable 실행 입력 컬럼 2개와 draft origin의 `ON DELETE CASCADE`만 보완합니다. 이미 저장된 World 설정·불변 가져오기 기준·접수 입력·lease·이력을 재생성하지 않습니다. 최종 v28도 같은 검증·승격 경로로 v29가 되며, 다른 schema drift는 거부합니다. Alembic 정의와 ORM의 최종 구조가 같으므로 source revision은 `20261005_0106`으로 유지하고 embedded 버전만 올립니다.
+
 과거 migration이 import하는 몇몇 옛 model/schema helper 경로와 지원 Hosted 확장이 사용하는 최소 alias는 명시적인 호환 계약입니다. 실제 구현은 소유 역할 한곳에 있고 같은 객체를 제공합니다. 새 제품 코드가 이 경로를 사용하지 않습니다. 임시 업무 집합이나 사용자가 없는 전달 서비스를 이런 역사적 호환과 혼동하지 않습니다.
 
 ## 11. 테스트와 구조 검사
@@ -471,6 +539,18 @@ Import inventory는 현재 파일과 의존 관계의 사실이고 import policy
 
 이 문서는 구조·역할·연결·변경 예시를 설명합니다. 세부 API 필드, 모델별 예산 숫자, release 상태는 해당 코드와 상세 계약에서 관리해 중복된 기준이 생기지 않게 합니다.
 
+## World 반응·SNS 보조 출력과 입력 예산 (2026-10-05)
+
+Social의 service/repository가 선택 항목 중심 공개 subtree, 사용자 nested parent, scoped PostLike를 소유한다.
+Relationships는 수동 반응의 audit_only source 기록을 지원 typed port로 같은 Session/UoW에 연결한다.
+World Chat만 대화 개수 quota를 제거하고 tuple/unique/재시도·권한·생성 예산은 유지한다.
+Characters는 전체 이름/매크로 검증을, Routine은 topic300/novelty500 정규화를 소유한다.
+공통 authored-output 값은 thought280과 안전한 receipt를 제공하며 raw tail/Provider reasoning은 저장하지 않는다.
+Chat raw thought finalizer는 생성 port의 선택적 callable이고 DB·prompt에 직렬화하지 않는다.
+SNS 신규 정책/모델 자료는 run 생성 때 고정한다. Provider/integration의 같은 요청 준비 경계에서 공식 계수와
+전송을 연결하고 runtime이 온전한 선택 문맥 제외·기존 fence/장부를 소유한다. 다른 업무는 명시적 opt-in 없이 변하지 않는다.
+옛 run은 저장된 mode/legacy 입력 정책으로 재개하며 실제 계수·품질·비용과 로컬 fake 검증은 구분한다.
+
 ## SNS·Chat 이미지 소유권 (2026-09-30)
 
 `domains/media`가 비공개 asset·공통 인식 설정·분석 캐시·분석 시도를 소유한다. `domains/identity/service/media_credentials.py`는 기존 암호화 scope 규칙으로 목적별 키를 저장하고, `domains/characters/service/generation_settings.py`가 캐릭터별 Provider/model/options/reference 선호와 revision을 소유한다. Provider adapter는 같은 Backend의 `integrations`에 있으며 별도 서버를 추가하지 않는다.
@@ -482,3 +562,15 @@ SNS/Chat·Credentials·World 소유권을 연결하는 SQL과 lifecycle 구성�
 앱 factory는 기존 `configure_chat_services`로 기본 Chat 서비스를 연결한 다음 `configure_chat_image_services`에서 그 앱의 media runtime을 받는 Generation·Evidence 서비스를 조립한다. 기본 서비스의 전역 객체를 바꾸지 않으며 full/public 두 앱 사이에 이미지 collaborator를 공유하지 않는다.
 
 비공개 픽셀은 `MEDIA_ROOT/private-image-assets`에 저장하며 인증된 content endpoint로만 읽는다. 백업은 SQLite, 이 디렉터리와 암호화 secret을 함께 보존해야 한다. World Package는 portable DTO projection을 사용하며 이 설정·키·업로드·분석을 포함하지 않는다. 실제 생성 서비스/ComfyUI 실행 검증은 키 없는 계약 검사와 구분한다.
+
+## SNS 계약 2 실행·입출력·역사 책임 (2026-10-03)
+
+SNS 관계 현재성은 AI에 제공한 순서를 유지하는 입력 해시와 backend 전용 검증 기록을 분리한다. `domains/relationships/contracts`와 `policies`는 scope·참조·사실 digest·legacy 증명을, `service/social_context_validation.py`는 유한 원본 검증을 소유한다. `runtime/graph_projection/relationship_graph_read.py`가 같은 Session에서 SQLite 원본과 기존 membership·차단·observed 사실을 읽는다. guard는 graph를 다시 선정하거나 현재 값을 새 baseline으로 저장하지 않는다.
+
+신규 run의 공통 revision 식별자는 `app/contracts/relationship_currentness.py`에서 공유하며 World Characters와 Relationships의 순환 의존을 만들지 않는다. 검증 기록은 LangGraph/Combined의 hidden 채널에 저장하고 SDK DTO에는 넣지 않는다. SDK 대기 전 읽기를 종료하며, 공개 효과는 기존 SQLite writer 안에서 최종 검증과 함께 커밋한다. 완료 효과를 먼저 재사용하고 기존 lease·source·memory·image·언어/시간대 보호를 유지한다. 구현·검증·legacy 제한은 [관계 원본 재검증 기록](../docs/verification/sns-relationship-currentness-20261004.md)에 있다.
+
+수동/예약 SNS의 지원 진입은 `runtime/autonomous_activity/gateway.py`에 있다. 현재 부모는 계약 2의 Combined 순서를 소유하며 모델 호출 정책·복구 장부·lane wire와 canonical 공개 효과를 분리한다. `runtime/social/planned_actions.py`와 `feed_workflows.py`는 실제 공통 executor/workflow의 소유자다. 퇴역 `runtime/resident/langgraph.py` 또는 전용 Feed Provider를 경유하는 임시 facade를 만들지 않는다.
+
+판단 전용 응답/제안의 의미는 `domains/routines/contracts/reply_writing.py`와 `domains/social/contracts/proposal_plan.py`에 두고 실제 본문·서버 task·일정/공개 제안 결합은 canonical owner에서 검증한다. 모델용 view의 필드 축소는 원천 Candidate·revision·Chat/Memory 입력을 삭제하는 절차가 아니다. 신규 wire 정책과 Routine 출력 정책은 별도 metadata로 생성 시 고정하며 이전 V2/2의 정책 부재는 기존 계약으로 읽는다.
+
+미완료 current/V1의 퇴역은 `runtime/autonomous_activity/retirement.py`가 도메인 `routines/service/legacy_claims.py`와 조립한다. 실제 claim·불확실 효과는 actor별로 보류하고, 지원 정산 이후에만 abandoned/aborted로 종료한다. 성공·역사·원장·기존 보존 정책은 유지한다. current 설정은 승인·하루 준비·scope/revision 확인 후 조건부 전환하며 구 실행을 SDK로 재개하지 않는다. startup은 그 앱의 composition session factory를 사용한다. 상세 계약과 검증 범위는 [실행·검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)에 있다.

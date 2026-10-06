@@ -64,6 +64,8 @@ def test_success_cache_and_monthly_limit_keep_provider_call_count(
 def test_failed_translation_releases_reserved_characters(
     translation_settings, monkeypatch, failure,
 ):
+    # Keep this historical node ID. The v27 accounting contract releases only
+    # confirmed rejection, and conservatively retains unknown provider outcomes.
     calls = []
 
     def fail(request, timeout):
@@ -75,7 +77,9 @@ def test_failed_translation_releases_reserved_characters(
     monkeypatch.setattr(client, "_open_translation_request", fail)
     assert creator._translate_image_prompt_to_english("하늘") == "하늘"
     assert len(calls) == 1
-    assert json.loads(translation_settings.read_text())["chars"] == 0
+    usage = json.loads(translation_settings.read_text())
+    assert usage["chars"] == 2
+    assert next(iter(usage["reservations"].values()))["status"] == "unknown"
     assert "하늘" not in creator._TRANSLATION_CACHE
 
 
@@ -96,10 +100,12 @@ def test_month_rollover_and_exact_limit_preserve_usage_file_semantics(
     translation_settings,
 ):
     translation_settings.write_text('{"month":"2000-01","chars":999}', encoding="utf-8")
-    assert client._reserve_translation_chars(4)
+    reservation = client._reserve_translation_chars(4)
+    assert reservation
     assert not client._reserve_translation_chars(1)
-    assert json.loads(translation_settings.read_text()) == {
-        "month": datetime.now(UTC).strftime("%Y-%m"), "chars": 4,
-    }
-    client._release_translation_chars(9)
+    recorded = json.loads(translation_settings.read_text())
+    assert recorded["month"] == datetime.now(UTC).strftime("%Y-%m")
+    assert recorded["chars"] == 4
+    assert recorded["ledger"]["buckets"]["legacy:utc:2000-01"]["count"] == 999
+    client._release_translation_chars(reservation)
     assert json.loads(translation_settings.read_text())["chars"] == 0

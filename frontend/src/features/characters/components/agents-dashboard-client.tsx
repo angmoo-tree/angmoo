@@ -1,4 +1,8 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import {
   Activity,
@@ -19,20 +23,19 @@ import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { Button, IconButton } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { EmptyState, InlineError } from "@/components/ui/feedback";
-import { ListRow } from "@/components/ui/surfaces";
 import { PageHeader } from "@/components/ui/navigation";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { StatusChip } from "@/components/ui/status";
-import { formatDate, formatHandle } from "@/utils/profile-presentation";
 
 import { activateCharacterAutonomy, deactivateCharacterAutonomy, listCharacterDashboardItems } from "@/features/characters/api/character-dashboard-client";
 import { presentCharacterAutonomy, sortCharactersForDashboard, summarizeCharacterAutonomy } from "@/features/characters/utils/character-dashboard-presentation";
 import { type CharacterAutonomyMutationState, type CharacterDashboardItem } from "@/features/characters/types/character";
 import { presentCharacterRecentActivity } from "@/features/characters/utils/character-recent-activity-presentation";
 import { CHARACTER_AUTONOMY_MUTATION_EVENT, CHARACTERS_CHANGED_EVENT, clearCharacterAutonomyMutationState, clearFirstCharacterWelcomePending, getCharacterAutonomyMutationStates, hasFirstCharacterWelcomePending, setCharacterAutonomyMutationState, type CharacterAutonomyMutationEventDetail } from "@/features/characters/stores/agent-session";
+import { CharacterManagementCard, CharacterManagementMetric as Metric } from "./character-management-card";
 import styles from "./characters-dashboard.module.css";
 
 export function AgentsDashboardClient() {
+  const uiText = useUiText("characters");
   const router = useRouter();
   const { status } = useAuth();
   const [items, setItems] = useState<CharacterDashboardItem[]>([]);
@@ -71,13 +74,13 @@ export function AgentsDashboardClient() {
         setError(
           caught instanceof Error
             ? caught.message
-            : "내 앵무 목록을 불러오지 못했습니다.",
+            : uiText("내 앵무 목록을 불러오지 못했습니다."),
         );
       } finally {
         if (showLoading) setLoading(false);
       }
     },
-    [router, status],
+    [router, status, uiText],
   );
 
   useEffect(() => {
@@ -146,7 +149,7 @@ export function AgentsDashboardClient() {
       setError(
         caught instanceof Error
           ? caught.message
-          : "자율활동 상태를 바꾸지 못했습니다.",
+          : uiText("자율활동 상태를 바꾸지 못했습니다."),
       );
     } finally {
       clearCharacterAutonomyMutationState(characterId);
@@ -159,34 +162,33 @@ export function AgentsDashboardClient() {
     <section className={styles.screen} data-character-dashboard="owner-management">
       <PageHeader
         className={styles.pageHeader}
-        title="내 앵무"
-        subtitle="로컬 소유자의 Character 관리"
+        title={uiText("내 앵무")}
+        subtitle={uiText("로컬 소유자의 Character 관리")}
         actions={
           <div className={styles.headerActions}>
             <IconButton
-              label="내 앵무 새로고침"
+              label={uiText("내 앵무 새로고침")}
               loading={loading}
-              loadingLabel="내 앵무 새로고침 중"
+              loadingLabel={uiText("내 앵무 새로고침 중")}
               onClick={() => void loadCharacters()}
             >
               <RefreshCw size={20} aria-hidden="true" />
             </IconButton>
             <Link href="/agents/new" className={styles.primaryLink}>
               <Plus size={16} aria-hidden="true" />
-              <span>만들기</span>
+              <span>{uiText("만들기")}</span>
             </Link>
           </div>
         }
       />
 
-      {!loading ? (
+      {!loading && error === null ? (
         <p className={styles.summary} data-character-summary>
-          전체 {summary.total} · 자율활동 ON {summary.enabled} · OFF{" "}
-          {summary.disabled} · 외부 연결 {summary.external}
+          {uiText("전체 {{total}} · 자율활동 ON {{enabled}} · OFF {{disabled}} · 외부 연동 {{external}}", {total: summary.total, enabled: summary.enabled, disabled: summary.disabled, external: summary.external})}
         </p>
       ) : null}
 
-      {error ? (
+      {error !== null ? (
         <InlineError className={styles.feedback}>
           <div>
             <p>{error}</p>
@@ -196,28 +198,25 @@ export function AgentsDashboardClient() {
               variant="secondary"
               onClick={() => void loadCharacters()}
             >
-              다시 시도
-            </Button>
+              {uiText("다시 시도")}</Button>
           </div>
         </InlineError>
       ) : null}
 
       {loading ? (
         <p className={styles.loading} role="status">
-          내 앵무를 불러오는 중
-        </p>
+          {uiText("내 앵무를 불러오는 중")}</p>
       ) : null}
 
-      {!loading && items.length === 0 ? (
+      {!loading && error === null && items.length === 0 ? (
         <EmptyState
           className={styles.feedback}
-          title="아직 만든 앵무가 없습니다."
-          description="첫 앵무를 만들면 이곳에서 프로필과 자율활동을 관리할 수 있어요."
+          title={uiText("아직 만든 앵무가 없습니다.")}
+          description={uiText("첫 앵무를 만들면 이곳에서 프로필과 자율활동을 관리할 수 있어요.")}
           icon={<Bird className={styles.emptyIcon} aria-hidden="true" />}
           action={
             <Button onClick={() => router.push("/agents/new")}>
-              첫 앵무 만들기
-            </Button>
+              {uiText("첫 앵무 만들기")}</Button>
           }
         />
       ) : null}
@@ -239,8 +238,8 @@ export function AgentsDashboardClient() {
           if (!open) clearFirstCharacterWelcomePending();
           setShowWelcome(open);
         }}
-        title="Angmoo에 오신 걸 환영해요"
-        description="첫 앵무를 만들어 Angmoo를 시작해볼까요?"
+        title={uiText("Angmoo에 오신 걸 환영해요")}
+        description={uiText("첫 앵무를 만들어 Angmoo를 시작해볼까요?")}
         actions={
           <>
             <Button
@@ -250,8 +249,7 @@ export function AgentsDashboardClient() {
                 setShowWelcome(false);
               }}
             >
-              다음에 만들게요
-            </Button>
+              {uiText("다음에 만들게요")}</Button>
             <Button
               onClick={() => {
                 clearFirstCharacterWelcomePending();
@@ -260,18 +258,16 @@ export function AgentsDashboardClient() {
               }}
             >
               <Plus size={16} aria-hidden="true" />
-              첫 앵무 만들러 가기
-            </Button>
+              {uiText("첫 앵무 만들러 가기")}</Button>
           </>
         }
       >
         <div className={styles.welcomeMeaning}>
           <Bird className={styles.welcomeIcon} aria-hidden="true" />
           <div>
-            <strong>앵무란?</strong>
+            <strong>{uiText("앵무란?")}</strong>
             <p>
-              나를 닮거나 새로운 페르소나로 만들 수 있는 AI Character예요.
-            </p>
+              {uiText("나를 닮거나 새로운 페르소나로 만들 수 있는 AI Character예요.")}</p>
           </div>
         </div>
       </Dialog>
@@ -288,108 +284,49 @@ function CharacterRow({
   mutation: CharacterAutonomyMutationState | null;
   onToggle: () => void;
 }) {
+  const uiText = useUiText("characters");
+  const formatDate = useUiDateFormatter();
   const presentation = presentCharacterAutonomy(item, mutation);
   const isExternal = item.character.execution_mode === "local";
-  const timezone = item.activity_summary.timezone || "Asia/Seoul";
+  const timezone = item.activity_summary.timezone || "UTC";
 
   return (
-    <ListRow
-      className={styles.row}
-      data-character-id={item.character.id}
-      data-character-autonomy-state={presentation.state}
-    >
-      <ProfileAvatar
-        name={item.character.name}
-        avatarUrl={item.character.avatar_url}
-        sizeClassName="size-[58px]"
-        textClassName="text-[22px]"
-      />
-      <article className={styles.rowBody}>
-        <div className={styles.identityActionRow}>
-          <div className={styles.identity}>
-            <div className={styles.statusLine}>
-              <StatusChip label={presentation.label} tone={presentation.tone} />
-            </div>
-            <Link
-              href={`/agents/${item.character.id}`}
-              className={styles.characterName}
-            >
-              {item.character.name}
-            </Link>
-            <p className={styles.handle}>{formatHandle(item.character.handle)}</p>
-            {item.character.one_liner ? (
-              <p className={styles.oneLiner}>{item.character.one_liner}</p>
-            ) : null}
-          </div>
-
-          {isExternal ? (
-            <Link
-              href={`/agents/${item.character.id}?tab=settings&focus=connection`}
-              className={styles.secondaryLink}
-            >
-              연결 설정
-            </Link>
-          ) : (
-            <Button
-              aria-label={`${item.character.name} 자율활동 ${presentation.actionLabel}`}
-              compact
-              disabled={Boolean(mutation)}
-              loading={Boolean(mutation)}
-              loadingLabel={presentation.actionLabel ?? undefined}
-              variant={presentation.actionVariant ?? "secondary"}
-              onClick={onToggle}
-            >
-              {item.settings.auto_enabled ? (
-                <PowerOff size={16} aria-hidden="true" />
-              ) : (
-                <Power size={16} aria-hidden="true" />
-              )}
-              {presentation.actionLabel}
-            </Button>
-          )}
-        </div>
-
-        {isExternal ? (
-          <div className={styles.metrics} data-character-metrics>
-            <Metric label="활동 제어" value="연결된 앱에서 관리" />
-            <Metric label="Angmoo 예약" value="사용하지 않음" />
-          </div>
-        ) : (
-          <>
-            <div className={styles.metrics} data-character-metrics>
-              <Metric
-                label="활동 시간"
-                value={`${item.settings.active_hours_start}–${item.settings.active_hours_end} · ${timezone}`}
-              />
-              <Metric
-                label="다음 활동"
-                value={nextActivityLabel(item, timezone)}
-              />
-              <RecentActivityMetric item={item} timezone={timezone} />
-            </div>
-            <p className={styles.policyLine}>
-              목표 {item.settings.activity_interval_minutes}분 · 글{" "}
-              {item.settings.max_posts_per_day}/일 · 답글{" "}
-              {item.settings.max_comments_per_day}/일
-            </p>
-            {presentation.state === "failed" && item.assigned_slot?.last_error ? (
-              <p className={styles.runtimeError}>
-                최근 실행 오류: {item.assigned_slot.last_error}
-              </p>
-            ) : null}
-          </>
-        )}
-      </article>
-    </ListRow>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className={styles.metric}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
+    <CharacterManagementCard
+      identity={{ id: item.character.id, name: item.character.name, handle: item.character.handle,
+        avatarUrl: item.character.avatar_url, intro: item.character.one_liner }}
+      href={`/agents/${item.character.id}`}
+      linkLabel={uiText("{{value0}}의 프로필 열기", { value0: item.character.name })}
+      autonomyState={presentation.state}
+      status={<StatusChip label={uiText(presentation.label)} tone={presentation.tone} />}
+      action={isExternal ? (
+        <Link href={`/agents/${item.character.id}?tab=settings&focus=connection`} className={styles.secondaryLink}>
+          {uiText("연결 설정")}
+        </Link>
+      ) : (
+        <Button
+          aria-label={uiText("{{value0}} 자율활동 {{value1}}", {value0: item.character.name, value1: uiText(presentation.actionLabel ?? "")})}
+          compact disabled={Boolean(mutation)} loading={Boolean(mutation)}
+          loadingLabel={presentation.actionLabel ? uiText(presentation.actionLabel) : undefined}
+          variant={presentation.actionVariant ?? "secondary"} onClick={onToggle}
+        >
+          {item.settings.auto_enabled ? <PowerOff size={16} aria-hidden="true" /> : <Power size={16} aria-hidden="true" />}
+          {presentation.actionLabel ? uiText(presentation.actionLabel) : null}
+        </Button>
+      )}
+      metrics={isExternal ? <>
+        <Metric label={uiText("활동 제어")} value={uiText("연결된 앱에서 관리")} />
+        <Metric label={uiText("Angmoo 예약")} value={uiText("사용하지 않음")} />
+      </> : <>
+        <Metric label={uiText("활동 시간")} value={`${item.settings.active_hours_start}–${item.settings.active_hours_end} · ${timezone}`} />
+        <Metric label={uiText("다음 활동")} value={nextActivityLabel(item, timezone, formatDate, uiText)} />
+        <RecentActivityMetric item={item} timezone={timezone} />
+      </>}
+      policy={!isExternal ? <>{uiText("목표")}{item.settings.activity_interval_minutes}{uiText("분 · 글")}{" "}
+        {item.settings.max_posts_per_day}{uiText("/일 · 답글")}{" "}{item.settings.max_comments_per_day}{uiText("/일")}</> : null}
+      notice={presentation.state === "failed" && item.assigned_slot?.last_error ? (
+        <p className={styles.runtimeError}>{uiText("최근 실행 오류:")}{item.assigned_slot.last_error}</p>
+      ) : null}
+    />
   );
 }
 
@@ -400,6 +337,8 @@ function RecentActivityMetric({
   item: CharacterDashboardItem;
   timezone: string;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("characters");
   const presentation = presentCharacterRecentActivity(item);
 
   return (
@@ -407,7 +346,7 @@ function RecentActivityMetric({
       className={styles.recentActivity}
       data-character-recent-activity={presentation.state}
     >
-      <span className={styles.recentActivityEyebrow}>최근 결과</span>
+      <span className={styles.recentActivityEyebrow}>{uiText("최근 결과")}</span>
       <div className={styles.recentActivitySummary}>
         <Activity
           aria-hidden="true"
@@ -416,10 +355,10 @@ function RecentActivityMetric({
         />
         <div className={styles.recentActivityCopy}>
           <span className={styles.recentActivityLabel}>
-            {presentation.actionLabel}
+            {uiText(presentation.actionLabel)}
           </span>
           <strong className={styles.recentActivityHeadline}>
-            {presentation.headline}
+            {uiText(presentation.headline)}
           </strong>
         </div>
       </div>
@@ -428,18 +367,18 @@ function RecentActivityMetric({
           <time
             className={styles.recentActivityTime}
             dateTime={presentation.occurredAt}
-            title={`${timezone} 기준`}
+            title={uiText("{{value0}} 기준", {value0: timezone})}
           >
             {formatDate(presentation.occurredAt, timezone)}
           </time>
         ) : null}
         {presentation.targetHref && presentation.targetLabel ? (
           <LocalProductLink
-            ariaLabel={presentation.targetLabel}
+            ariaLabel={uiText(presentation.targetLabel)}
             className={styles.recentActivityLink}
             href={presentation.targetHref}
           >
-            <span>{presentation.targetLabel}</span>
+            <span>{uiText(presentation.targetLabel)}</span>
             <ChevronRight aria-hidden="true" size={16} />
           </LocalProductLink>
         ) : null}
@@ -448,11 +387,11 @@ function RecentActivityMetric({
   );
 }
 
-function nextActivityLabel(item: CharacterDashboardItem, timezone: string) {
-  if (!item.settings.auto_enabled) return "자율활동 꺼짐";
+function nextActivityLabel(item: CharacterDashboardItem, timezone: string, formatDate: (value: string, zone?: string) => string, uiText: (message: string, values?: Record<string,string|number>) => string) {
+  if (!item.settings.auto_enabled) return uiText("자율활동 꺼짐");
   const next = item.activity_summary.next_activity_at;
   if (!item.activity_summary.within_active_hours) {
-    return next ? `휴식 · ${formatDate(next, timezone)}` : "활동 시간 밖 · 예약 없음";
+    return next ? uiText("휴식 · {{time}}", {time: formatDate(next, timezone)}) : uiText("활동 시간 밖 · 예약 없음");
   }
-  return next ? formatDate(next, timezone) : "예약 계산 중";
+  return next ? formatDate(next, timezone) : uiText("예약 계산 중");
 }

@@ -4,7 +4,8 @@ from datetime import UTC, datetime
 import pytest
 from app.core import security
 from app.domains.characters.models import Character, CharacterState
-from app.domains.identity.models import User
+from app.domains.identity.models import InstallationIdentity, User
+from app.domains.identity.models_environment import EnvironmentTimezoneChange, LocalEnvironment
 from app.domains.local_bot import dependencies
 from app.domains.local_bot.constants import MAX_READS_PER_WINDOW
 from app.domains.local_bot.models import (
@@ -30,6 +31,9 @@ def bot_http():
     )
     for model in (
         User,
+        InstallationIdentity,
+        LocalEnvironment,
+        EnvironmentTimezoneChange,
         Character,
         CharacterState,
         AgentLocalKey,

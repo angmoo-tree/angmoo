@@ -48,18 +48,15 @@ export function apiInstantTimestamp(value: string | null) {
   return parseApiInstant(value)?.getTime() ?? Number.NaN;
 }
 
-export function formatDate(value: string, timeZone = "Asia/Seoul") {
+export function formatDate(value: string, timeZone = "UTC", locale = "en") {
   const date = parseApiInstant(value);
   if (!date) return "-";
-  const parts = new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat(locale, {
     timeZone,
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(date);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((item) => item.type === type)?.value ?? "";
-  return `${part("month")}.${part("day")} ${part("hour")}:${part("minute")}`;
+  }).format(date);
 }

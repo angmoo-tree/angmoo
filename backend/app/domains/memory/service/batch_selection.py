@@ -95,7 +95,7 @@ class MemoryBatchSelectionService:
                     candidate.source_id,
                 ):
                     if identity and len(str(identity)) > 8:
-                        text = text.replace(str(identity), "[참여자/근거]")
+                        text = text.replace(str(identity), "[participant/evidence]")
                 sources.append(
                     MemorySelectionSource(
                         f"candidate-{number}",
@@ -121,14 +121,14 @@ class MemoryBatchSelectionService:
                 )
                 validator = getattr(provider, "validate_sources", None)
                 if validator is not None:
-                    validator(tuple(sources))
+                    validator(tuple(sources), environment=batch.environment)
                 repo.record_call(batch, now=self.clock())
                 repo.commit()
                 started = time.monotonic()
                 async with asyncio.timeout(
                     max(0.1, min(timeout, MEMORY_PROVIDER_TIMEOUT_SECONDS))
                 ):
-                    decisions = await provider.select(tuple(sources), timeout=timeout)
+                    decisions = await provider.select(tuple(sources), timeout=timeout, environment=batch.environment)
                 validate_credential = getattr(provider, "validate_credential", None)
                 if validate_credential is not None:
                     validate_credential()

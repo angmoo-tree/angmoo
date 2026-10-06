@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -27,6 +28,9 @@ from app.runtime.search import (
     EmbeddedSocialSearchProjection,
     SqliteFts5SearchIndex,
 )
+
+if TYPE_CHECKING:
+    from app.runtime.migrations.canonical_retention import ServingRetentionOwner
 
 
 class RuntimeConfigurationError(RuntimeError):
@@ -72,6 +76,11 @@ class RuntimeConfig:
     api_docs_enabled: bool = False
     signup_enabled: bool = False
     seed_demo_data: bool = False
+    # An acquired serving-process capability, never an environment preference.
+    # Diagnostics and default factories leave it absent and cannot prune DBs.
+    serving_retention_owner: ServingRetentionOwner | None = field(
+        default=None, repr=False, compare=False,
+    )
 
     def __post_init__(self) -> None:
         if not self.generation.strip():
@@ -202,11 +211,22 @@ class RuntimeComposition:
     memory_recall_projection: EmbeddedMemoryRecallProjection
     memory_recall_service: CanonicalRecallService
     memory_hybrid_runtime: MemoryHybridRuntime
+    generation_use_pin: object | None = None
 
-    def dispose(self) -> None:
-        self.memory_recall_projection.stop()
-        self.social_search_projection.stop()
-        self.engine.dispose()
+    def dispose(self, *, release_pin: bool = True) -> None:
+        stop_error = None
+        try:
+            for projection in (self.memory_recall_projection, self.social_search_projection):
+                try:
+                    projection.stop()
+                except BaseException as exc:
+                    stop_error = stop_error or exc
+        finally:
+            self.engine.dispose()
+            if release_pin and stop_error is None and self.generation_use_pin is not None:
+                self.generation_use_pin.close()
+        if stop_error is not None:
+            raise stop_error
 
 
 def compose_runtime(
@@ -215,35 +235,48 @@ def compose_runtime(
     base_settings: Settings | None = None,
 ) -> RuntimeComposition:
     runtime_settings = settings_from_runtime_config(config, base=base_settings)
-    engine = create_database_engine(runtime_settings.database_url)
-    session_factory = create_session_factory(engine)
-    data_paths = StaticRuntimeDataPath(config.data_paths.root)
-    episode_only = runtime_settings.MEMORY_RECALL_REPRESENTATION == "episode_v1"
-    memory_recall_index = SqliteMemoryRecallIndex(data_paths,
-        settings=MemoryRecallIndexSettings(generation="memory-episode-v1") if episode_only else None)
-    memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve(),
-        fts_policy=runtime_settings.CHAT_HYBRID_FTS_POLICY, episode_only=episode_only)
-    return RuntimeComposition(
-        config=config,
-        settings=runtime_settings,
-        engine=engine,
-        session_factory=session_factory,
-        social_search_projection=EmbeddedSocialSearchProjection(
-            index=SqliteFts5SearchIndex(data_paths),
+    from app.runtime.migrations.canonical_retention import GenerationUsePin
+    pin = GenerationUsePin(config.data_paths.root, f"generations/{config.generation}").acquire()
+    engine = None
+    try:
+        engine = create_database_engine(runtime_settings.database_url)
+        # Sessions/workers keep the engine alive. If shutdown cannot confirm
+        # all workers stopped, retain its OS use lock for that same lifetime.
+        engine._angmoo_generation_use_pin = pin
+        session_factory = create_session_factory(engine)
+        data_paths = StaticRuntimeDataPath(config.data_paths.root)
+        episode_only = runtime_settings.MEMORY_RECALL_REPRESENTATION == "episode_v1"
+        memory_recall_index = SqliteMemoryRecallIndex(data_paths,
+            settings=MemoryRecallIndexSettings(generation="memory-episode-v1") if episode_only else None)
+        memory_hybrid_runtime = MemoryHybridRuntime(session_factory, memory_recall_index, data_paths.resolve(),
+            fts_policy=runtime_settings.CHAT_HYBRID_FTS_POLICY, episode_only=episode_only)
+        return RuntimeComposition(
+            config=config,
+            settings=runtime_settings,
+            engine=engine,
             session_factory=session_factory,
-        ),
-        memory_recall_projection=EmbeddedMemoryRecallProjection(
-            index=memory_recall_index,
-            session_factory=session_factory,
-            episode_only=episode_only,
-        ),
-        memory_recall_service=CanonicalRecallService(
-            SqlAlchemyCanonicalRecallRepository(session_factory),
-            memory_recall_index,
-            hybrid_service=memory_hybrid_runtime.service,
-        ),
-        memory_hybrid_runtime=memory_hybrid_runtime,
-    )
+            social_search_projection=EmbeddedSocialSearchProjection(
+                index=SqliteFts5SearchIndex(data_paths),
+                session_factory=session_factory,
+            ),
+            memory_recall_projection=EmbeddedMemoryRecallProjection(
+                index=memory_recall_index,
+                session_factory=session_factory,
+                episode_only=episode_only,
+            ),
+            memory_recall_service=CanonicalRecallService(
+                SqlAlchemyCanonicalRecallRepository(session_factory),
+                memory_recall_index,
+                hybrid_service=memory_hybrid_runtime.service,
+            ),
+            memory_hybrid_runtime=memory_hybrid_runtime,
+            generation_use_pin=pin,
+        )
+    except BaseException:
+        if engine is not None:
+            engine.dispose()
+        pin.close()
+        raise
 
 
 def initialize_local_installation_identity(

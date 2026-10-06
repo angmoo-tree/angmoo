@@ -3,6 +3,7 @@ from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
 from app.core.ids import length_prefixed_identity_key
+from app.domains.relationships.contracts.social_context import LEGACY_CURRENTNESS
 
 from app.domains.world_characters.service.activity_engines import CONTRACT_VERSION
 FEED_TARGET_LIMIT = 1
@@ -26,13 +27,19 @@ class ActivityIdentity(BaseModel):
     world_id: str
     actor_id: str
     engine: Literal["personalized_graph_v2"] = "personalized_graph_v2"
-    contract_version: Literal[1, 2] = 1
+    contract_version: Literal[1, 2] = CONTRACT_VERSION
     cause: Literal["manual", "scheduled", "recovery"]
     generation_model: str | None = None
     thinking_level: str | None = None
     routine_output_contract: str | None = None
     routine_state_schema_version: int | None = None
     routine_thought_policy: str | None = None
+    social_io_policy: str = "social-io.common.v1"
+    routine_output_policy: str = "routine-split-output.legacy.v1"
+    relationship_validation_policy: str = LEGACY_CURRENTNESS
+    sns_generation_policy: str | None = None
+    sns_input_budget_policy: str | None = None
+    model_budget_revision: str | None = None
 
 
 class Candidate(BaseModel):
@@ -87,6 +94,7 @@ class LaneState(TypedDict, total=False):
     memories: dict[str, dict]
     memory_validations: dict[str, dict]
     image_recall_snapshots: dict[str, dict]
+    relationship_validation_receipts: dict[str, dict]
     decision_context: dict
     decision_input_receipt: dict
     writer_input_receipts: list[dict]

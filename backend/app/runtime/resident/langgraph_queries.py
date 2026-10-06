@@ -21,6 +21,7 @@ from app.domains.routines.policies.resident_clock import (
     _today_kst_window,
 )
 from app.domains.social.models.posts import Post, ProfileFollow
+from app.domains.social.repository.posts import _character_already_replied_to_target
 from app.runtime.resident.context import LangGraphResidentContext
 
 logger = logging.getLogger("app.services.langgraph_resident")
@@ -259,22 +260,3 @@ def _relationship_source_post_available(
         )
         .limit(1)
     )
-
-
-def _character_already_replied_to_target(
-    db: Session, *, character_id: str, post_id: str | None
-) -> bool:
-    if not post_id:
-        return False
-    existing_reply_id = db.scalar(
-        select(Post.id)
-        .where(
-            Post.author_character_id == character_id,
-            Post.reply_to_post_id == post_id,
-            Post.post_type == "reply",
-            Post.deleted_at.is_(None),
-            Post.report_hidden_at.is_(None),
-        )
-        .limit(1)
-    )
-    return existing_reply_id is not None

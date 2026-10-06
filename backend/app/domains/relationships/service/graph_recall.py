@@ -653,11 +653,11 @@ class GraphRecallService:
                 excluded += 1
                 continue
             assert canonical is not None
-            selected = hit
-            if canonical.relationship_version != hit.relationship_version:
+            if _relationship_record(canonical) != _relationship_record(hit):
                 self._gateway.record_stale_edge()
-                selected = canonical
-            accepted.append(_relationship_record(selected))
+            # Projection owns candidate ordering only; SQLite owns every fact,
+            # including independently updated view/perception values.
+            accepted.append(_relationship_record(canonical))
         return tuple(accepted), excluded
 
     def _valid_node_ids(

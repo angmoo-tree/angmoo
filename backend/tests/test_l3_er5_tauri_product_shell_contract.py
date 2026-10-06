@@ -77,108 +77,54 @@ def test_product_sidecar_has_fixed_commands_hash_and_lifecycle_contract() -> Non
 
 
 def test_phone_window_has_no_browser_chrome_and_applies_scaling_policy() -> None:
+    """Approved C07/C08: normal OS caption and independent client geometry."""
     config = json.loads(_read("desktop/src-tauri/tauri.conf.json"))
-    product_windows = _read("desktop/src-tauri/src/product_windows.rs")
+    windows = _read("desktop/src-tauri/src/product_windows.rs")
     policy = _read("desktop/src-tauri/src/window_policy.rs")
-    resize = _read("desktop/src-tauri/src/phone_resize.rs")
-
-    # Product windows are created programmatically so every one receives the
-    # canonical data directory before WebView initialization.  Keep the static
-    # config empty and assert the Phone builder contract at its real owner.
+    host = _read("desktop/src-tauri/src/lib.rs")
     assert config["app"]["windows"] == []
-    for marker in (
-        "ProductWindowKind::Phone.label()",
-        ".inner_size(468.0, 916.0)",
-        ".decorations(false)",
-        ".transparent(true)",
-        ".resizable(true)",
-        ".maximizable(false)",
-        ".shadow(false)",
-    ):
-        assert marker in product_windows
     assert config["app"]["withGlobalTauri"] is True
-    for marker in (
-        "PHONE_TARGET_WIDTH",
-        "PHONE_TARGET_HEIGHT",
-        "phone_bounds_for_monitor",
-        "scale_factor",
-        "set_min_size",
-        "set_max_size",
-        "set_resizable(true)",
-        "set_shadow(false)",
-        "PHONE_MIN_SCALE",
-        "PHONE_MAX_SCALE",
-    ):
+    for marker in ("ProductWindowKind::Phone.label()", "crate::window_policy::MAIN_INITIAL_WIDTH", "crate::window_policy::MAIN_INITIAL_HEIGHT",
+                   ".decorations(true)", ".transparent(false)", ".resizable(true)", ".maximizable(true)"):
+        assert marker in windows
+    for marker in ("product_geometry_for_work_area", "monitor.work_area()", "outer_size()",
+                   "inner_size()", "set_min_size", "set_max_size(None", "set_position", "scale_factor"):
         assert marker in policy
-    for marker in (
-        "DwmSetWindowAttribute",
-        "DWMWA_BORDER_COLOR",
-        "DWMWA_COLOR_NONE",
-        "DWMWA_WINDOW_CORNER_PREFERENCE",
-        "DWMWCP_DONOTROUND_VALUE",
-        "disable_compositor_rounding",
-        "phone_contains_point",
-        "HTNOWHERE",
-        "SetWindowSubclass",
-        "GetWindowSubclass",
-        "RemoveWindowSubclass",
-        "WM_SIZING",
-        "WM_NCHITTEST",
-        "WM_NCDESTROY",
-        "WMSZ_LEFT",
-        "WMSZ_RIGHT",
-        "WMSZ_TOP",
-        "WMSZ_BOTTOM",
-        "WMSZ_TOPLEFT",
-        "WMSZ_TOPRIGHT",
-        "WMSZ_BOTTOMLEFT",
-        "WMSZ_BOTTOMRIGHT",
-        "HTTOPLEFT",
-        "HTTOPRIGHT",
-        "HTBOTTOMLEFT",
-        "HTBOTTOMRIGHT",
-    ):
-        assert marker in resize
-    assert "request_compositor_rounding" not in resize
-    assert "DWMWCP_ROUND_VALUE" not in resize
-    for aliased_region_marker in (
-        "CreateRoundRectRgn",
-        "SetWindowRgn",
-        "DeleteObject",
-    ):
-        assert aliased_region_marker not in resize
-    for scale in ("1.0", "1.25", "1.5"):
-        assert scale in policy
+    assert "mod phone_resize" not in host
+    assert "PHONE_ASPECT_RATIO" not in policy
+    assert not (ROOT / "desktop/src-tauri/src/phone_resize.rs").exists()
+    assert "start_product_window_resize" not in host
 
 
 def test_phone_static_shell_has_no_outer_margin_and_uses_manual_surface_drag() -> None:
+    """Approved C03/C05/C09/C11: shared remaining-height viewport, OS drag."""
     layout = _read("frontend/static-shell/app/layout.tsx")
-    globals_css = _read("frontend/src/styles/globals.css")
     frame = _read("frontend/src/components/ui/device-frame.tsx")
     frame_css = _read("frontend/src/components/ui/device-frame.module.css")
     bridge = _read("frontend/src/composition/providers/desktop-window-bridge.tsx")
-    static_router = _read("frontend/src/composition/static-product-router.tsx")
-
+    viewport = _read("frontend/src/composition/shells/product-viewport.tsx")
+    toolbar = _read("frontend/src/composition/navigation/desktop-navigation-toolbar.tsx")
     assert 'data-angmoo-runtime-profile="tauri-static"' in layout
-    assert 'body[data-angmoo-desktop-window="phone"]' in globals_css
-    assert "background: transparent" in globals_css
-    assert "data-tauri-drag-region" not in frame
-    assert "width: 100vw" in frame_css
-    assert "height: 100dvh" in frame_css
-    assert 'dataset.angmooWindowDrag = "manual"' in bridge
-    assert 'addEventListener("pointerdown", handlePointerDown, true)' in bridge
-    assert "WINDOW_DRAG_INTERACTIVE_SELECTOR" in bridge
-    assert 'invokeDesktopWindowCommand("start_product_window_drag")' in bridge
-    assert "startDesktopWindowResize" in bridge
-    assert "start_product_window_resize" in _read(
-        "desktop/src-tauri/src/lib.rs"
-    )
-    assert "PHONE_RESIZE_EDGE_THICKNESS" in bridge
-    assert "dataset.angmooWindowResize" in bridge
-    assert 'data-window-drag-disabled="true"' in bridge
-    assert "data-tauri-drag-region" not in bridge
-    assert '<main className="min-h-screen bg-transparent" aria-live="polite">' in static_router
-    assert '<p className="mt-3 text-xl font-bold text-[#251818]">제품 화면을 준비하고 있습니다...</p>' not in static_router
+    assert "ProductViewport" in layout
+    assert "DesktopNavigationToolbar" in viewport
+    assert 'data-device-scroll-owner="true"' in frame
+    assert 'data-device-titlebar-inset="true"' not in frame
+    assert "max-width: var(--product-body-max-width)" in frame_css
+    assert "height: 100%" in frame_css
+    assert "border-radius" not in frame_css
+    assert "border:" not in frame_css
+    assert "pointerdown" not in bridge
+    assert "start_product_window_drag" not in bridge
+    assert "installDesktopHistory" in bridge
+    assert 'data-desktop-navigation="true"' in toolbar
+    assert "event.nativeEvent.isComposing" in toolbar
+    windows = _read("desktop/src-tauri/src/product_windows.rs")
+    assert "on_navigation" in windows
+    assert "on_new_window" in windows
+    assert "NewWindowResponse::Deny" in windows
+    assert "validate_external_product_link" in windows
+    capabilities = json.loads(_read("desktop/src-tauri/capabilities/product-shell.json"))
+    assert capabilities["permissions"] == ["core:default"]
 
 
 def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
@@ -194,13 +140,12 @@ def test_wide_windows_use_explicit_route_boundaries_and_single_labels() -> None:
         "validate_product_route",
         "get_webview_window(kind.label())",
         "open_product_window_impl",
-        ".min_inner_size(980.0, 680.0)",
-        ".min_inner_size(900.0, 620.0)",
+        ".min_inner_size(480.0, 480.0)",
     ):
         assert marker in windows
     assert 'invoke("open_product_window"' in desktop_runtime
-    assert "desktopWindowKindForRoute" in bridge
-    assert "targetKind === currentKind" in bridge
+    assert "navigateDesktopProductRoute" in bridge
+    assert "targetKind === state.kind" in desktop_runtime
     world_app = _read("frontend/src/composition/screens/world-app.tsx")
     product_routes = _read("frontend/src/lib/navigation/product-routes.ts")
     assert "relationshipGraphRoute(ownerActor.character_id, worldId)" in world_app
@@ -219,7 +164,8 @@ def test_phone_product_window_allowlist_matches_local_route_capabilities() -> No
     # `/worlds/new` is a Browser compatibility alias for Creator Studio, not a
     # valid dynamic Phone World.  The native boundary must therefore fail closed.
     assert "fn safe_world_id" in windows
-    assert 'value != "new" && safe_segment(value)' in windows
+    assert 'decoded != "new" && safe_decoded_segment(&decoded)' in windows
+    assert "fn decode_route_segment" in windows
 
 
 def test_static_phone_hides_unsupported_links_and_uses_its_scroll_owner() -> None:

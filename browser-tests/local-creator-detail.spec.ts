@@ -19,7 +19,7 @@ test("description and optional background stay separate in character settings", 
     const url = new URL(route.request().url());
     const path = url.pathname.replace(/^\/api\/(backend|v1)/, "");
     if (staticShell && path === "/auth/me") return json(route, { id: "owner", display_name: "Owner", email: null, profile_setup_completed: true,
-      feed_content_filter: "all", is_admin: false, display_name_updated_at: null, display_name_change_available_at: null });
+      feed_content_filter: "all", ui_language: "ko", ui_preference_revision: 0, is_admin: false, display_name_updated_at: null, display_name_change_available_at: null });
     if (path === `/agents/${characterId}`) return json(route, agent);
     if (path === `/agents/${characterId}/persona`) {
       const body = route.request().postDataJSON() as Record<string, string>;

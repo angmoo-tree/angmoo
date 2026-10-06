@@ -1,0 +1,22 @@
+{
+  "world_character_configurations": {
+    "create": "\nCREATE TABLE world_character_configurations (\n\tworld_character_id VARCHAR(64) NOT NULL, \n\tsnapshot_id VARCHAR(36) NOT NULL, \n\tprofile JSON NOT NULL, \n\tsettings JSON NOT NULL, \n\tupdated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (world_character_id), \n\tFOREIGN KEY(snapshot_id) REFERENCES character_import_snapshots (id), \n\tFOREIGN KEY(world_character_id) REFERENCES world_characters (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_world_character_configurations_snapshot_id ON world_character_configurations (snapshot_id)"
+    ]
+  },
+  "character_import_snapshots": {
+    "create": "\nCREATE TABLE character_import_snapshots (\n\tid VARCHAR(36) NOT NULL, \n\tsource_character_id VARCHAR(64) NOT NULL, \n\tkind VARCHAR(24) NOT NULL, \n\tcontract_version INTEGER NOT NULL, \n\tsource_revision VARCHAR(120) NOT NULL, \n\tprovenance VARCHAR(240) NOT NULL, \n\tpayload JSON NOT NULL, \n\tdigest VARCHAR(64) NOT NULL, \n\tcaptured_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, \n\tPRIMARY KEY (id), \n\tUNIQUE (source_character_id), \n\tCONSTRAINT ck_character_import_snapshot_version CHECK (contract_version = 1), \n\tFOREIGN KEY(source_character_id) REFERENCES characters (id), \n\tCONSTRAINT ck_character_import_snapshot_kind CHECK (kind IN ('creation','restored_initial','legacy_transition'))\n)\n\n",
+    "indexes": []
+  },
+  "character_draft_import_origins": {
+    "create": "\nCREATE TABLE character_draft_import_origins (\n\tdraft_id VARCHAR(64) NOT NULL, \n\tsnapshot_id VARCHAR(36) NOT NULL, \n\tPRIMARY KEY (draft_id), \n\tFOREIGN KEY(draft_id) REFERENCES agent_creation_drafts (id) ON DELETE CASCADE, \n\tFOREIGN KEY(snapshot_id) REFERENCES character_import_snapshots (id)\n)\n\n",
+    "indexes": []
+  },
+  "character_import_origins": {
+    "create": "\nCREATE TABLE character_import_origins (\n\tcharacter_id VARCHAR(64) NOT NULL, \n\tsnapshot_id VARCHAR(36) NOT NULL, \n\tPRIMARY KEY (character_id), \n\tFOREIGN KEY(character_id) REFERENCES characters (id), \n\tFOREIGN KEY(snapshot_id) REFERENCES character_import_snapshots (id)\n)\n\n",
+    "indexes": [
+      "CREATE INDEX ix_character_import_origins_snapshot_id ON character_import_origins (snapshot_id)"
+    ]
+  }
+}

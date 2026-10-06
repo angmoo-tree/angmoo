@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { generationProfileValue } from "@/config/generation-profiles";
 import { ArrowLeft, Loader2, RotateCcw, Send, Trash2 } from "lucide-react";
@@ -20,6 +22,7 @@ function asMessageGoogleModel(value: string | undefined, thinking = "high"): Mes
 }
 
 export function MessageThreadClient({ threadId }: { threadId: string }) {
+  const uiText = useUiText("chat");
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const searchParams = useSearchParams();
@@ -29,7 +32,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
   const [retryingMessageId, setRetryingMessageId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "key_required"
-      ? "쪽지를 시작하려면 API key를 등록해주세요."
+      ? uiText("쪽지를 시작하려면 API key를 등록해주세요.")
       : null,
   );
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -55,15 +58,15 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
         if (active) {
           setError(
             err instanceof Error
-              ? err.message
-              : "쪽지를 불러오지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+              ? uiText(err.message)
+              : uiText("쪽지를 불러오지 못했습니다. 잠시 뒤 다시 시도해주세요."),
           );
         }
       });
     return () => {
       active = false;
     };
-  }, [authStatus, router, threadId]);
+  }, [authStatus, router, threadId, uiText]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -98,8 +101,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
     } catch (err) {
       setError(
         err instanceof Error
-          ? err.message
-          : "모델을 바꾸지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("모델을 바꾸지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
     }
   }
@@ -108,7 +111,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
     const trimmed = content.trim();
     if (!thread || !trimmed || busy) return;
     if (trimmed.length > 2000) {
-      setError("쪽지는 2,000자 이하로 입력해주세요.");
+      setError(uiText("쪽지는 2,000자 이하로 입력해주세요."));
       return;
     }
     setPending(true);
@@ -136,8 +139,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
         .catch(() => {
           setError(
             err instanceof Error
-              ? err.message
-              : "현재 선택한 모델이 바쁘거나 응답하지 않습니다. 잠시 뒤 다시 시도하거나 다른 모델로 바꿔서 시도해주세요.",
+              ? uiText(err.message)
+              : uiText("현재 선택한 모델이 바쁘거나 응답하지 않습니다. 잠시 뒤 다시 시도하거나 다른 모델로 바꿔서 시도해주세요."),
           );
         });
     } finally {
@@ -158,8 +161,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
         .catch(() => {
           setError(
             err instanceof Error
-              ? err.message
-              : "현재 선택한 모델이 바쁘거나 응답하지 않습니다. 잠시 뒤 다시 시도하거나 다른 모델로 바꿔서 시도해주세요.",
+              ? uiText(err.message)
+              : uiText("현재 선택한 모델이 바쁘거나 응답하지 않습니다. 잠시 뒤 다시 시도하거나 다른 모델로 바꿔서 시도해주세요."),
           );
         });
     } finally {
@@ -179,8 +182,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
         <Link
           href="/messages"
           className="flex size-10 shrink-0 items-center justify-center rounded-full text-[#667085] transition-colors hover:bg-[#f2f4f7] hover:text-[#101828]"
-          aria-label="쪽지함으로"
-          title="쪽지함으로"
+          aria-label={uiText("쪽지함으로")}
+          title={uiText("쪽지함으로")}
         >
           <ArrowLeft size={21} aria-hidden="true" />
         </Link>
@@ -206,22 +209,22 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
               type="button"
               onClick={() => void handleDelete()}
               className="flex size-10 shrink-0 items-center justify-center rounded-full text-[#98a2b3] transition-colors hover:bg-[#f2f4f7] hover:text-[#667085]"
-              aria-label="쪽지 내역 삭제"
-              title="쪽지 내역 삭제"
+              aria-label={uiText("쪽지 내역 삭제")}
+              title={uiText("쪽지 내역 삭제")}
             >
               <Trash2 size={18} aria-hidden="true" />
             </button>
           </>
         ) : (
-          <div className="text-[15px] font-bold text-[#98a2b3]">쪽지를 불러오는 중입니다.</div>
+          <div className="text-[15px] font-bold text-[#98a2b3]">{uiText("쪽지를 불러오는 중입니다.")}</div>
         )}
       </div>
 
       {thread && thread.world_scope_status !== "resolved" ? (
         <div className="border-b border-state-warning-border bg-state-warning-surface px-4 py-3 text-[13px] font-bold leading-6 text-state-warning md:px-6" role="status">
           {thread.world_scope_status === "quarantined"
-            ? "이 이전 대화는 identity 충돌로 격리됐어요. 임의의 World로 연결하지 않습니다."
-            : "이 이전 대화의 World를 고유하게 확인할 수 없어요. 임의의 World로 연결하지 않고 기존 쪽지 화면에서 표시합니다."}
+            ? uiText("이 이전 대화는 identity 충돌로 격리됐어요. 임의의 World로 연결하지 않습니다.")
+            : uiText("이 이전 대화의 World를 고유하게 확인할 수 없어요. 임의의 World로 연결하지 않고 기존 쪽지 화면에서 표시합니다.")}
         </div>
       ) : null}
 
@@ -259,15 +262,15 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
                     onClick={() => void handleRetry(message.id)}
                     disabled={busy}
                     className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-[13px] font-extrabold text-[#ff6b6b] ring-1 ring-[#ffd7d7] transition-colors hover:bg-[#fff0ef] disabled:cursor-not-allowed disabled:opacity-60"
-                    aria-label="다시 시도"
-                    title="다시 시도"
+                    aria-label={uiText("다시 시도")}
+                    title={uiText("다시 시도")}
                   >
                     {retrying ? (
                       <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                     ) : (
                       <RotateCcw size={14} aria-hidden="true" />
                     )}
-                    <span>{retrying ? "다시 시도 중" : "다시 시도"}</span>
+                    <span>{retrying ? uiText("다시 시도 중") : uiText("다시 시도")}</span>
                   </button>
                 ) : null}
               </div>
@@ -285,7 +288,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
               />
             ) : null}
             <div className="inline-flex items-center gap-2 rounded-[22px] bg-[#f6f7f9] px-4 py-3 text-[15px] font-bold text-[#98a2b3]">
-              <span>답장 중</span>
+              <span>{uiText("답장 중")}</span>
               <span className="inline-flex items-center gap-1" aria-hidden="true">
                 <span className="size-1.5 rounded-full bg-[#98a2b3] animate-bounce" />
                 <span
@@ -319,7 +322,7 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
                 void handleSend();
               }
             }}
-            placeholder="쪽지를 입력하세요"
+            placeholder={uiText("쪽지를 입력하세요")}
             disabled={!thread || busy}
             maxLength={2000}
             rows={3}
@@ -333,9 +336,9 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
               }
               disabled={!thread || busy}
               className="h-9 max-w-[210px] rounded-full border border-[#eaedf2] bg-[#f6f7f9] px-3 text-[13px] font-extrabold text-[#344054] outline-none transition-colors focus:border-[#d0d5dd] focus:bg-[#f6f7f9] disabled:opacity-60"
-              aria-label="모델 선택"
+              aria-label={uiText("모델 선택")}
             >
-              <option value="" disabled>지원 모델을 선택해 주세요</option>
+              <option value="" disabled>{uiText("지원 모델을 선택해 주세요")}</option>
                   {MESSAGE_GOOGLE_GEMINI_MODELS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -347,8 +350,8 @@ export function MessageThreadClient({ threadId }: { threadId: string }) {
               onClick={() => void handleSend()}
               disabled={!thread || busy || !content.trim()}
               className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#ff6b6b] text-white shadow-[0_6px_12px_rgba(255,104,104,0.18)] transition-colors hover:bg-[#ff5252] disabled:cursor-not-allowed disabled:bg-[#d0d5dd] disabled:shadow-none"
-              aria-label="보내기"
-              title="보내기"
+              aria-label={uiText("보내기")}
+              title={uiText("보내기")}
             >
               <Send size={18} aria-hidden="true" />
             </button>

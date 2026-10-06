@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime
 import hashlib
 import json
 from uuid import uuid4
+from app.contracts.environment import EnvironmentSnapshot
 
 from sqlalchemy import case, exists, func, or_, select, update
 from sqlalchemy.orm import Session
@@ -603,6 +604,7 @@ class SqlAlchemyMemoryBatchRepository:
                 run.thinking_level,
                 run.policy_version,
                 run.cutoff_sequence,
+                EnvironmentSnapshot.from_dict(job.environment_snapshot),
             )
         self.session.flush()
         return None

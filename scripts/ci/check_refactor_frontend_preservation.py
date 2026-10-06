@@ -178,6 +178,11 @@ def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str], splits: 
         new = mapped(old, moves)
         target = (root / new).resolve()
         if not target.is_relative_to(root.resolve()) or not target.is_file():
+            if target.is_relative_to(root.resolve()) and not target.exists() and new.endswith(".module.css"):
+                if records is None:
+                    records = product_changes.load(root)
+                if product_changes.frontend_style_retirement_matches(new, original.decode("utf-8"), records):
+                    continue
             errors.append(f"[frontend_stock_missing] {old} -> {new}")
             continue
         # Freeze test bodies, fixtures, visual oracles, dependencies, and public

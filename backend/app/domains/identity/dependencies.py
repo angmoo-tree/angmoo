@@ -49,8 +49,7 @@ def get_current_user_allow_incomplete(
     db: Session = Depends(get_db),
 ) -> models.User:
     context = resolve_authenticated_session_context(request, authorization, db)
-    _ensure_demo_request_allowed(context.user, context.auth_method, request)
-    return context.user
+    return get_authenticated_user_context_allow_incomplete(request, context).user
 
 
 def resolve_authenticated_session_context(
@@ -77,6 +76,15 @@ def resolve_authenticated_session_context(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
+    return context
+
+
+def get_authenticated_user_context_allow_incomplete(
+    request: Request,
+    context: AuthenticatedSessionContext = Depends(resolve_authenticated_session_context),
+) -> AuthenticatedSessionContext:
+    """Retain session identity while applying the canonical user mutation guard."""
+    _ensure_demo_request_allowed(context.user, context.auth_method, request)
     return context
 
 
@@ -232,6 +240,7 @@ __all__ = [
     "get_current_session_for_logout",
     "get_current_user",
     "get_current_user_allow_incomplete",
+    "get_authenticated_user_context_allow_incomplete",
     "get_optional_current_user",
     "resolve_authenticated_session_context",
     "get_db",

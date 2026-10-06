@@ -6,6 +6,7 @@ import hashlib
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session, aliased, selectinload
 from app.domains.social.models import posts as models
+from app.domains.social.models.posts import Post
 from app.domains.social.schemas import community as schemas
 
 
@@ -15,6 +16,25 @@ def _visible_post_conditions():
         models.Post.deleted_at.is_(None),
         models.Post.report_hidden_at.is_(None),
     )
+
+
+def _character_already_replied_to_target(
+    db: Session, *, character_id: str, post_id: str | None
+) -> bool:
+    if not post_id:
+        return False
+    existing_reply_id = db.scalar(
+        select(Post.id)
+        .where(
+            Post.author_character_id == character_id,
+            Post.reply_to_post_id == post_id,
+            Post.post_type == "reply",
+            Post.deleted_at.is_(None),
+            Post.report_hidden_at.is_(None),
+        )
+        .limit(1)
+    )
+    return existing_reply_id is not None
 
 def _visible_reference_conditions():
     quoted_source = aliased(models.Post)

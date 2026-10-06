@@ -19,7 +19,7 @@ def _legacy_approved_preparation(monkeypatch):
     monkeypatch.setattr(settings, "DAILY_PREPARATION_ENABLED", False)
 
 
-def test_parent_real_adapters_respect_slot_and_commit_single_feed_effect(monkeypatch, tmp_path, version=1):
+def test_parent_real_adapters_respect_slot_and_commit_single_feed_effect(monkeypatch, tmp_path, version=2):
     async def scenario():
         with Session(_engine(), expire_on_commit=False) as db:
             ctx, post = _seed(db, with_candidate=True)
@@ -48,7 +48,7 @@ def test_parent_real_adapters_respect_slot_and_commit_single_feed_effect(monkeyp
     asyncio.run(scenario())
 
 
-def test_parent_preserves_completed_paths_and_resumes_busy_settlement(monkeypatch, tmp_path, version=1):
+def test_parent_preserves_completed_paths_and_resumes_busy_settlement(monkeypatch, tmp_path, version=2):
     import sqlite3
     import pytest
     from sqlalchemy.exc import OperationalError
@@ -94,7 +94,7 @@ def test_parent_preserves_completed_paths_and_resumes_busy_settlement(monkeypatc
     asyncio.run(scenario())
 
 
-def test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification(monkeypatch, tmp_path, version=1):
+def test_inbox_planner_final_failure_preserves_feed_effect_and_pending_notification(monkeypatch, tmp_path, version=2):
     from sqlalchemy import func, select
     from app.domains.social.models.posts import Notification, PostLike
     from app.integrations.direct_llm import DirectLlmJsonError

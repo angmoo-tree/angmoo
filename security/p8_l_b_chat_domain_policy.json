@@ -90,16 +90,46 @@
     "replicate"
   ],
   "legacy_message_edges": [
-    ["app.api.v1.routes.messages", "app.models"],
-    ["app.api.v1.routes.messages", "app.schemas"],
-    ["app.api.v1.routes.messages", "app.services.messages"],
-    ["app.models", "app.models.messages"],
-    ["app.schemas", "app.schemas.messages"],
-    ["app.schemas.messages", "app.schemas.community"],
-    ["app.services.messages", "app.models"],
-    ["app.services.messages", "app.schemas"],
-    ["app.services.messages", "app.services.direct_llm"],
-    ["app.services.messages", "app.services.prompt_safety"]
+    [
+      "app.api.v1.routes.messages",
+      "app.models"
+    ],
+    [
+      "app.api.v1.routes.messages",
+      "app.schemas"
+    ],
+    [
+      "app.api.v1.routes.messages",
+      "app.services.messages"
+    ],
+    [
+      "app.models",
+      "app.models.messages"
+    ],
+    [
+      "app.schemas",
+      "app.schemas.messages"
+    ],
+    [
+      "app.schemas.messages",
+      "app.schemas.community"
+    ],
+    [
+      "app.services.messages",
+      "app.models"
+    ],
+    [
+      "app.services.messages",
+      "app.schemas"
+    ],
+    [
+      "app.services.messages",
+      "app.services.direct_llm"
+    ],
+    [
+      "app.services.messages",
+      "app.services.prompt_safety"
+    ]
   ],
   "required_route_operations": [
     "DELETE /api/v1/messages/threads/{thread_id}",
@@ -151,6 +181,7 @@
     "fields": [
       "profile_type",
       "id",
+      "deleted",
       "display_name",
       "handle",
       "avatar_url",

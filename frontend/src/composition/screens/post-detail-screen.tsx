@@ -1,4 +1,11 @@
 "use client";
+import { useOwnerReactions } from "@/features/social/hooks/use-owner-reactions";
+import { applyConfirmedReaction } from "@/features/social/utils/confirmed-reactions";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+
+import { useUiText } from "@/hooks/use-ui-text";
+import { InlineError } from "@/components/ui/feedback";
+
 import { aggregatePostActions,buildReplyTree,DeletePostDialog,type DeleteTarget,mapRepliesById,PostOptionsMenu,PostReferenceCard,ReplyNodeRow,ReportPostDialog,type ReportTarget } from "@/features/social/components/post-detail-parts";
 
 
@@ -8,14 +15,14 @@ ArrowLeft,
 RefreshCw
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect,useMemo,useState } from "react";
+import { useEffect,useMemo,useState,useRef } from "react";
 
 import { listAgents } from "@/features/characters/api/feed-actor";
 import { deleteSocialPost,getSocialPostThread,reportSocialPost } from "@/features/social/api/social-feed-client";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
 import { type PostDetail,type PostReportReason,type PostSummary,type PostThreadRead } from "@/features/social/types/social-feed-contract";
-import { AUTH_CHANGED_EVENT,getStoredUser,type UserRead } from "@/lib/auth/browser-session";
-import { formatDate } from "@/utils/profile-presentation";
+import { AUTH_CHANGED_EVENT,captureAuthRequestScope,isCurrentAuthRequestScope,getStoredUser,type UserRead } from "@/lib/auth/browser-session";
+
 
 const EMPTY_REPLIES: PostSummary[] = [];
 
@@ -28,6 +35,9 @@ export function PostDetailClient({
   initialThread: PostThreadRead | null;
   initialError: string | null;
 }) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("shell");
+  const socialText = useUiText("social");
   const router = useRouter();
   const [thread, setThread] = useState<PostThreadRead | null>(initialThread);
   const [loading, setLoading] = useState(false);
@@ -46,6 +56,10 @@ export function PostDetailClient({
   const [reportNotice, setReportNotice] = useState<string | null>(null);
 
   const post = thread?.post ?? null;
+  const requestGeneration = useRef(0);
+  const reactions = useOwnerReactions(`global:${postId}:${viewer?.id ?? "public"}`, change => {
+    setThread(current => current ? { ...current, post: applyConfirmedReaction(current.post, change), replies: current.replies.map(reply => applyConfirmedReaction(reply, change)) } : current);
+  });
   const replies = thread?.replies ?? EMPTY_REPLIES;
   const repliesById = useMemo(() => mapRepliesById(replies), [replies]);
   const replyTree = useMemo(
@@ -54,17 +68,22 @@ export function PostDetailClient({
   );
 
   async function loadThread() {
+    const generation = ++requestGeneration.current;
+    const authScope = captureAuthRequestScope();
+    const readRevision = reactions.captureReadRevision();
     setLoading(true);
     setError(null);
 
     try {
-      setThread(await getSocialPostThread(postId));
+      const read = await getSocialPostThread(postId);
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setThread({ ...read, post: reactions.reconcilePost(read.post, readRevision), replies: read.replies.map(reply => reactions.reconcilePost(reply, readRevision)) });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "게시글을 불러오지 못했습니다.");
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setError(err instanceof Error ? uiText(err.message) : uiText("게시글을 불러오지 못했습니다."));
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current && isCurrentAuthRequestScope(authScope)) setLoading(false);
     }
   }
+  useEffect(() => () => { ++requestGeneration.current; }, [postId, viewer?.id]);
 
   useEffect(() => {
     const syncViewer = () => setViewer(getStoredUser());
@@ -131,7 +150,7 @@ export function PostDetailClient({
       setDeleteTarget(null);
       await loadThread();
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "글을 삭제하지 못했습니다.");
+      setDeleteError(err instanceof Error ? uiText(err.message) : uiText("글을 삭제하지 못했습니다."));
     } finally {
       setDeletePending(false);
     }
@@ -148,7 +167,7 @@ export function PostDetailClient({
       });
       setReportTarget(null);
       setReportNotice(
-        result.already_reported ? "이미 신고한 글입니다." : "신고가 접수되었습니다.",
+        result.already_reported ? uiText("이미 신고한 글입니다.") : uiText("신고가 접수되었습니다."),
       );
       if (result.report_hidden) {
         if (reportTarget.root) {
@@ -167,31 +186,31 @@ export function PostDetailClient({
         }
       }
     } catch (err) {
-      setReportError(err instanceof Error ? err.message : "신고를 접수하지 못했습니다.");
+      setReportError(err instanceof Error ? uiText(err.message) : uiText("신고를 접수하지 못했습니다."));
     } finally {
       setReportPending(false);
     }
   }
 
   return (
-    <section className="min-h-screen bg-white">
+    <section className="min-h-full bg-white">
       <div className="sticky top-0 z-30 flex min-h-[88px] items-center justify-between gap-3 border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:px-9">
         <Link
           href="/posts"
           className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb]"
-          title="목록"
+          title={uiText("목록")}
         >
           <ArrowLeft size={21} aria-hidden="true" />
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-          {post?.reply_to_post_id ? "대꾸" : "지저귐"}
+          {post?.reply_to_post_id ? uiText("대꾸") : uiText("지저귐")}
         </h1>
         <button
           type="button"
           onClick={loadThread}
           disabled={loading}
           className="inline-flex size-11 items-center justify-center rounded-full border border-[#e1e5eb] bg-white text-[#667085] transition-colors hover:bg-[#f9fafb] disabled:cursor-not-allowed disabled:opacity-60"
-          title="새로고침"
+          title={uiText("새로고침")}
         >
           <RefreshCw size={20} aria-hidden="true" />
         </button>
@@ -199,9 +218,10 @@ export function PostDetailClient({
 
       {error ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#ffd7d7] bg-[#fff5f5] px-5 py-4 text-[15px] font-medium text-[#c24141] md:mx-9">
-          {error}
+          {uiText(error)}
         </div>
       ) : null}
+      {reactions.error ? <InlineError>{socialText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</InlineError> : null}
 
       {reportNotice ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#d9f2e5] bg-[#f0fbf5] px-5 py-4 text-[15px] font-bold text-[#147a45] md:mx-9">
@@ -211,8 +231,7 @@ export function PostDetailClient({
 
       {loading ? (
         <div className="mx-5 mt-6 rounded-[24px] border border-[#eef1f5] bg-white px-6 py-8 text-[16px] font-medium text-[#667085] md:mx-9">
-          게시글을 불러오는 중
-        </div>
+          {uiText("게시글을 불러오는 중")}</div>
       ) : null}
 
       {post ? (
@@ -223,13 +242,13 @@ export function PostDetailClient({
                 href={`/posts/${post.reply_to_post_id}`}
                 className="inline-flex rounded-full bg-[#fff0ef] px-4 py-2 text-[15px] font-extrabold text-[#ff6b6b] transition-colors hover:bg-[#ffe2e2]"
               >
-                원글 보기
-              </Link>
+                {uiText("원글 보기")}</Link>
             </div>
           ) : null}
 
           <SocialPostRow
-            actions={aggregatePostActions(post.id, post.reply_count, post.like_count)}
+            actions={[aggregatePostActions(post.id, post.reply_count, post.like_count)[0], reactions.likeAction(post)]}
+            onAction={() => void reactions.setReaction(post)}
             authorHref={
               post.author_character_id
                 ? `/profiles/characters/${post.author_character_id}`
@@ -281,10 +300,10 @@ export function PostDetailClient({
             reference={
               <>
                 {post.quoted_post ? (
-                  <PostReferenceCard label="인용한 글" post={post.quoted_post} />
+                  <PostReferenceCard label={uiText("인용한 글")} post={post.quoted_post} />
                 ) : null}
                 {post.reposted_post ? (
-                  <PostReferenceCard label="리포스트한 글" post={post.reposted_post} />
+                  <PostReferenceCard label={uiText("리포스트한 글")} post={post.reposted_post} />
                 ) : null}
               </>
             }
@@ -293,9 +312,9 @@ export function PostDetailClient({
 
           <section className="bg-white">
             <h2 className="border-b border-[#eaedf2] px-5 py-5 text-[24px] font-extrabold text-[#101828] md:px-9">
-              대꾸 {post.reply_count}
+              {uiText("답글 {{count}}", {count: post.reply_count})}
             </h2>
-            {replyTree.map((node) => (
+            {replyTree.map(node => (
               <ReplyNodeRow
                 key={node.reply.id}
                 node={node}
@@ -309,6 +328,8 @@ export function PostDetailClient({
                 onDeletePost={(reply) => requestDeletePost(reply, false)}
                 canReportPost={canReportPost}
                 onReportPost={(reply) => requestReportPost(reply, false)}
+                likeAction={reactions.likeAction}
+                onLike={reactions.setReaction}
               />
             ))}
           </section>

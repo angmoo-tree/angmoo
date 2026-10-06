@@ -1,5 +1,7 @@
 # 개인화 SNS V2 실제 구현 구조와 검증 인계
 
+> 2026-10-03 현행 코드 갱신: 아래 2026-09-23의 V1/current 진입과 Inbox → Routine → Feed는 당시 구현·관찰의 역사 기록이다. 현행 지원 실행은 V2/2의 CombinedTargetSelector → InboxDecisionDraft → FeedDecisionDraft → RoutineDecisionDraft이며 공유 gateway/executor/workflow로 이동했다. current/V1 미완료는 재개하지 않고 안전한 포기 절차를 사용한다. 새 wire/출력 정책과 실제 제거·복원·보존 검증은 [최신 구현 기록](../verification/sns-v2-routine-io-retirement-20261002.md)을 따른다. 이 갱신이 과거 실제 AI 관찰·품질 결과를 새 코드의 결과로 바꾸지 않는다.
+
 작성일: 2026-09-23. 대상: `feat/sns-relationship-context`. 구현 시작 HEAD: `737dab337a76fc12512970234632f17da9814235`.
 
 **현재 상태: 코드 구현·로컬 회귀·실제 AI 비교·루멘 World 시범 후 로컬 전역 정책과 코드의 미설정 기본값을 V2로 전환했다. 다음 실제 claim·새/import 대상·활동 누적 USER CHECK와 개발 Gate는 아직 완료하지 않았다.** 이 문서는 실제 구현을 설명한다. 장기간의 개인화 품질까지 검증됐다는 뜻은 아니다.

@@ -1,5 +1,48 @@
 # Angmoo Frontend Architecture
 
+### World management and confirmed reactions (2026-10-05)
+
+Characters owns the scoped dashboard/management clients, DTO validation, shared
+`character-management-card`, World editors and request lifetime. Device Home and
+World lists adapt their existing data to the same display card. Composition owns
+the Profile/Status/Settings panes and the Social stream, Chat letter and permitted
+relationship graph actions; features do not import one another's implementations.
+`components/content/profile-statistics` accepts only display values and links.
+
+Social owns typed server-confirmed reaction events and target updates. Auth/session
+revision, runtime scope and read revision protect both events and delayed reads.
+Background profile refresh preserves loaded cursor chains and the visible anchor.
+Chat owns canonical World deletion, a small scoped confirmation controller and
+late-response guards. The common native Dialog owns centering and focus behavior.
+Relationships renders canonical graph nodes with the common ProfileAvatar and
+accessible names; the graph DTO carries nullable public avatar URLs only.
+
+World profile/settings writes use the explicit World management API and revision.
+They do not invoke global Character update APIs. UI copy uses feature ko/en catalogs;
+World content, persona, model IDs and saved input remain untranslated.
+
+### World Feed presentation ownership (2026-10-04)
+
+`components/layout/feed-header` is a neutral visual slot component, independent of features and data fetching.
+`composition/screens/world-app` supplies the actual World owner/profile route and content-owned list header mode.
+Social owns manual title/body submission, idempotency and composer action layout; Media owns native input, upload,
+preview and draft lifecycle. Their `renderLayout` ReactNode contract is connected only in composition, without a
+cross-feature implementation/type import. Global Feed keeps its actor/Cue/filters/desktop refresh. Backend/API/ORM
+contracts are unchanged by this presentation adaptation.
+
+한글·영어 UI와 감지된 사용자 환경은 `composition/providers/user-environment-provider.tsx`가
+인증 세션과 함께 조립한다. Identity의 환경 API가 저장·CAS·기준 화면 lease를 소유하고,
+공용 `types/user-environment.ts`는 표시에 필요한 DTO만 담는다. 각 기능의 `locales/ko.json`,
+`locales/en.json`과 shell catalog는 `ui-resources.ts`에서 합치고, React provider마다 별도의
+i18next instance를 생성한다. 서버 전역 번역 상태와 DOM 문자열 치환은 사용하지 않는다.
+
+`use-ui-text`, `use-ui-date-formatter`, `use-ui-number-formatter`는 UI 표시만 담당한다.
+원문·페르소나·World package metadata·기술 enum·API 입력값은 번역하지 않는다.
+감지 locale/zone과 저장 UI 선택은 독립이며, 환경 조회·동기화가 준비된 뒤 신규 기본 콘텐츠를
+결정한다. logout·backend 교체·늦은 응답은 세션 revision과 취소 신호로 구분한다.
+공용 JSON 전송의 401 처리는 요청을 접수했던 세션과 runtime에만 적용한다.
+typed HTTP 오류의 status/code/허용된 params/Retry-After를 보존하고 provider 원문은 UI로 넘기지 않는다.
+
 Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고, 여러 기능을 화면에서 조립하는 구조**를 사용한다. Chat을 고칠 때는 Chat 기능을, 여러 화면의 공통 버튼을 고칠 때는 공용 컴포넌트를 찾을 수 있도록 책임을 나누는 것이 목적이다.
 
 이 문서는 [Bulletproof React의 구조 가이드](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)와 [Next.js App Router 예제](https://github.com/alan2207/bulletproof-react/tree/master/apps/nextjs-app)를 바탕으로 코드의 배치·책임·의존 방향과 기존 구현의 소유권을 설명한다. 기능은 `features`, 제품 화면 조립은 `composition`, 공용 영역은 `assets/components/config/hooks/lib/stores/styles/types/utils`로 구분한다. 실제 구현의 단계별 검증·병합 상태는 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
@@ -493,8 +536,23 @@ Next와 static이 공유하는 제품 화면이다. Chat의 thread key와 근거
 응답, child close 명령, host 재시작 후 종료 UI의 초기화를 검사한다. 이 fixture 검증은
 실제 provider 호출이나 설치 데이터의 기억 정리 성공을 의미하지 않는다.
 
+## World 상세·반응·Chat 통합 소유권 (2026-10-05)
+
+Social이 선택한 항목 중심 thread-v2의 decoder·reply/like·viewer invalidation을 소유한다.
+현재 World owner와 Media/Memory 표현은 composition에서 typed callback/ReactNode slot으로 연결한다.
+World Home만 공통 shell header를 사용하고 비홈의 header는 각 콘텐츠가 소유한다.
+Chat은 메시지 scroll·모델 footer·보조 Dialog의 thread/request 수명을 소유하며 Memory 설정을 복제하지 않는다.
+ko/en은 기존 namespace와 안정된 hook을 사용하고 locale 변경은 draft·원본 콘텐츠·mutation identity를 바꾸지 않는다.
+실제 nested reply/like/quota 계약은 Backend가 검증하며 UI가 actor/root/viewer를 추측하지 않는다.
+
 ## SNS·Chat 이미지 화면 (2026-09-30)
 
 `features/media`는 이미지 설정·사용량·선택/미리보기·생성 상태와 자신의 transport/types를 소유한다. Chat와 Social이 Media feature를 직접 import하지 않도록 `composition/screens/world-chat-screen.tsx`와 `world-app.tsx`가 이미지 picker/status를 view slot으로 연결한다. Chat/Social API는 각 소유자가 `attachment_asset_id`를 전달하며 원래 글/메시지 본문을 유지한다.
 
 비공개 이미지 URL은 `useRuntimeMediaUrl`에서 현재 runtime의 인증된 요청으로 blob을 가져온다. Next production과 static export는 동일 컴포넌트와 계약을 사용한다. 인식 불가 안내·미리보기 유지·사용자의 명시적 첨부 제거, 저장된 모델별 참조 OFF와 설정 revision 충돌은 실제 Backend 상태에 따라 표시한다. 원래 채팅/SNS 기능과 기존 이미지 Provider 데이터는 새 화면 추가만으로 제거하지 않는다.
+
+## SNS 실행 지원과 역사 표시 (2026-10-03)
+
+일반 Next 내부 링크의 작성 중 이탈 확인은 composition의 `BrowserNavigationGuard`가 기존 등록된 leave guard를 호출해 처리한다. Native와 static 탐색의 소유자는 그대로 유지하며, 수정 키·초안·첨부·사업 정책을 공통 탐색 계층으로 옮기지 않는다. locale 변경은 같은 route와 actor의 component 수명을 유지한다.
+
+`features/characters`의 personalized activity API/type/panel이 현재 지원 engine 쓰기와 역사 engine 읽기를 구분한다. 신규 입력은 V2 또는 상속 null이고 과거 current·abandoned 및 backend 전환 상태는 그대로 표시한다. 전환 readiness·owner·World·scope/revision·claim 정산은 Backend가 소유한다. UI의 안내 문구나 선택만으로 활동 ON·승인·예약을 변경하지 않는다. Next와 static 모두 같은 소유 컴포넌트를 사용한다. [검증 기록](../docs/verification/sns-v2-routine-io-retirement-20261002.md)과 [LOCAL 디자인 근거](../docs/architecture/frontend-design-reference.md)의 최신 기록을 함께 읽는다.

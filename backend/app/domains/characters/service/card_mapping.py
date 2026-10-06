@@ -29,7 +29,7 @@ def map_card(card: ParsedCard) -> CardMapping:
         if card.version == 3:
             result = result.replace("<char>", replacement).replace("<bot>", replacement)
         if dialogue:
-            result = result.replace("{{user}}", "대화 상대")
+            result = result.replace("{{user}}", "User")
         return result
 
     fields = {

@@ -117,3 +117,18 @@ def build_slot_request_workflows(
         ensure_run_now_available=ensure_run_now_available,
         timezone_reader=timezone_reader,
     )
+
+
+def prepare_resident_slot_assignment(db, *, user_id, character_id, credential_id,
+    heartbeat_interval_seconds, next_tick_at=None, commit=True):
+    """Existing owned slot request without importing the executing worker."""
+    from app.domains.identity.repository import credentials
+    from app.domains.operations.service import maintenance
+    from app.domains.routines.service import slot_requests
+    from app.runtime.routines.activity_policy import activity_timezone
+    return slot_requests.assign_resident_slot(db, user_id=user_id, character_id=character_id,
+        credential_id=credential_id, heartbeat_interval_seconds=heartbeat_interval_seconds,
+        next_tick_at=next_tick_at, commit=commit, workflows=build_slot_request_workflows(db,
+            credential_lookup=credentials.get_credential, default_credential_lookup=credentials.get_default_credential,
+            ensure_auto_ticks_available=maintenance.ensure_auto_ticks_available,
+            ensure_run_now_available=maintenance.ensure_run_now_available, timezone_reader=activity_timezone))

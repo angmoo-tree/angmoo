@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useEffect, useState, type ReactNode } from "react";
 import { DesktopShutdownOverlay } from "@/composition/providers/desktop-shutdown-overlay";
@@ -13,6 +15,7 @@ type GateState =
   | { kind: "waiting"; status: AngmooDesktopRuntimeStatus };
 
 export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
+  const uiText = useUiText("shell");
   const [state, setState] = useState<GateState>({ kind: "checking" });
 
   useEffect(() => {
@@ -72,7 +75,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
     state.kind === "waiting" && state.status.phase === "crashed";
   return (
     <main
-      className="flex min-h-screen w-full items-center justify-center bg-surface-warm px-8 text-text-strong"
+      className="flex min-h-full w-full items-center justify-center bg-surface-warm px-8 text-text-strong"
       aria-live="polite"
       data-desktop-runtime-state={crashed ? "crashed" : "starting"}
     >
@@ -95,11 +98,9 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
               className="mt-6 text-base leading-7 text-text-default"
               style={{ overflowWrap: "normal", wordBreak: "keep-all" }}
             >
-              로컬 엔진 연결이 중단되었습니다. 데이터는 보존되어 있으며 다시
-              시작할 수 있습니다.
-            </p>
+              {uiText("로컬 엔진 연결이 중단되었습니다. 데이터는 보존되어 있으며 다시 시작할 수 있습니다.")}</p>
             <p className="mt-2 break-all text-xs text-state-danger">
-              진단 코드: {state.status.diagnosticCode ?? "sidecar_stopped"}
+              {uiText("진단 코드:")}{state.status.diagnosticCode ?? "sidecar_stopped"}
             </p>
             <button
               className="mt-6 rounded-full bg-action-primary px-6 py-3 font-bold text-on-action-primary shadow-action transition-colors hover:bg-action-primary-hover focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
@@ -112,8 +113,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
               }}
               type="button"
             >
-              로컬 엔진 다시 시작
-            </button>
+              {uiText("로컬 엔진 다시 시작")}</button>
           </>
         ) : (
           <>
@@ -122,8 +122,7 @@ export function DesktopRuntimeGate({ children }: { children: ReactNode }) {
               aria-hidden="true"
             />
             <p className="mt-5 text-base text-text-default">
-              로컬 엔진과 저장된 World를 준비하고 있습니다.
-            </p>
+              {uiText("로컬 엔진과 저장된 World를 준비하고 있습니다.")}</p>
           </>
         )}
       </section>

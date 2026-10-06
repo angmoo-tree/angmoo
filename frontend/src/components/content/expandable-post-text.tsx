@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -21,6 +23,7 @@ export function ExpandablePostText({
   textClassName: string;
   titleClassName?: string;
 }) {
+  const uiText = useUiText("shell");
   const textRef = useRef<HTMLParagraphElement | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [canExpand, setCanExpand] = useState(false);
@@ -75,8 +78,7 @@ export function ExpandablePostText({
           className={styles.expandButton}
           aria-expanded={expanded}
         >
-          더보기
-        </button>
+          {uiText("더보기")}</button>
       ) : null}
     </div>
   );

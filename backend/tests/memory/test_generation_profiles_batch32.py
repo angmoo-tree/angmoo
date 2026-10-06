@@ -35,7 +35,7 @@ def test_compatible_experiences_are_one_call_per_32(memory_session, count):
     sizes = []
 
     class BatchSelector(Selector):
-        async def select(self, sources, *, timeout):
+        async def select(self, sources, *, timeout, environment=None):
             sizes.append(len(sources))
             return await super().select(sources, timeout=timeout)
 
@@ -112,7 +112,7 @@ def test_explicit_retry_regroups_six_failed_pairs_without_duplicating_saved_item
     sizes = []
 
     class RecordingSelector(Selector):
-        async def select(self, sources, *, timeout):
+        async def select(self, sources, *, timeout, environment=None):
             sizes.append(len(sources))
             return await super().select(sources, timeout=timeout)
 

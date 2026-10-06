@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
 from app.domains.identity.service.owner_context import is_claimed_local_owner
+from app.domains.identity.service.environment import snapshot
+from app.domains.identity.service.local_owner import read_ui_language
+from app.domains.worlds.policies.default_content import default_content
 from app.domains.worlds.models import OwnerDefaultWorld, World, WorldMembership
 from app.domains.worlds.service.definition import refresh_world_contract
 from app.domains.worlds.service.foundation import ANGMOO_GLOBAL_WORLD_ID, _new_global_world
@@ -41,6 +44,12 @@ def ensure_default_space(db: Session, *, owner_id: str) -> World:
             world.id = uuid7_string()
             world.slug = f"sns-{world.id}"
             world.name = "SNS"
+            env = snapshot(db, owner_id)
+            language = read_ui_language(db, owner_id) or ("ko" if env.memory_search_locale.split("-")[0] == "ko" else "en")
+            for key, value in default_content(language).items():
+                setattr(world, key, value)
+            world.timezone = env.timezone
+            world.language = language
             world.visibility = "private"
             world.join_policy = "private"
             world.create_idempotency_key = f"default-sns:{owner_id}"

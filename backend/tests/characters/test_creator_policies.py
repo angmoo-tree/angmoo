@@ -14,6 +14,8 @@ from app.domains.characters import exceptions, models, schemas
 from app.domains.characters.service import access, creator, image_quota, mutations
 from app.runtime.characters import creator as creator_runtime
 from app.runtime.characters import management
+from app.domains.identity.models import InstallationIdentity
+from app.domains.identity.models_environment import EnvironmentTimezoneChange, LocalEnvironment
 from app.domains.routines.schemas.runs import UtcInstantResponseModel as old_response_base
 
 
@@ -21,7 +23,8 @@ from app.domains.routines.schemas.runs import UtcInstantResponseModel as old_res
 def engine(tmp_path):
     value = create_engine(f"sqlite:///{tmp_path / 'creator-roles.sqlite3'}")
     for table in (
-        registered_models.User.__table__, models.Character.__table__,
+        registered_models.User.__table__, InstallationIdentity.__table__,
+        LocalEnvironment.__table__, EnvironmentTimezoneChange.__table__, models.Character.__table__,
         models.AgentCreationDraft.__table__,
         models.ProfileImageQuotaReservation.__table__,
         models.ProfileImageCandidate.__table__,

@@ -226,7 +226,7 @@ def _build_first_greeting_writer_prompt() -> str:
 Return only JSON matching the schema.
 
 Rules:
-- Write the post in Korean unless the persona strongly implies another language.
+- Write the post in the persona's explicit speaking language and formal speech examples. Do not infer its speaking language from the language of its description. Use English if no language evidence exists.
 - Use the owner_topic as intent, not as text to copy verbatim.
 - Ground the post in the character persona, speech style, worldview, interests, safety rules, and the community tendency for posting.
 - This is a new root post. Do not write a reply, repost, feed reaction, relationship action, observation, or system note.

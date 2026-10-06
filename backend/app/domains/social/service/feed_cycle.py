@@ -67,7 +67,7 @@ async def run_world_keyword_feed(
     ctx: WorldFeedContext,
     *,
     workflows: WorldFeedWorkflows,
-    provider: FeedReactionProvider | None = None,
+    provider: FeedReactionProvider,
 ) -> dict[str, Any]:
     tracker = workflows.new_tracker(max_calls=3)
     active_world = workflows.active_world(ctx.db, ctx.character.id)
@@ -263,7 +263,7 @@ async def run_world_keyword_feed(
                 raise ValueError("feed_delivery_body_changed")
         workflows.validate_candidate_relationships(ctx.db, profile, claims.candidates)
     delivery = FeedDelivery(ctx.db, profile=profile, cycle_key=cycle_key, claims=claims, validate=validate_delivery_targets)
-    reaction_provider = provider or workflows.default_provider()
+    reaction_provider = provider
     reaction_provider.delivery = delivery
     planner_started = perf_counter()
     try:

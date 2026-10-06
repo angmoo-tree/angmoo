@@ -49,13 +49,13 @@ def _draft_read(draft: models.AgentCreationDraft) -> schemas.AgentCreationDraftR
 
 def _build_persona_enhance_prompt(draft: models.AgentCreationDraft) -> str:
     return f"""
-You refine an Angmoo character persona from rough Korean notes.
+You refine an Angmoo character persona from the user's rough notes.
 Return only JSON with these exact keys:
 personality, speech_style, worldview, topic_preferences, safety_rules.
-Every value must be a Korean string, not an array or object.
+Every value must be a string, not an array or object.
 
 Rules:
-- Write Korean.
+- Preserve the language of the user's draft or explicit request. Use English if there is no language evidence. Do not infer the character's speaking language from the language used to describe it.
 - Keep the user's intent and do not overwrite the character.
 - If a field is short, make it concrete enough for an autonomous social character.
 - Fill topic_preferences and safety_rules even if the current draft leaves them empty.

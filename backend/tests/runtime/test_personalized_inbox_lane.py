@@ -28,7 +28,7 @@ def test_inbox_selects_one_branch_and_preserves_unselected_and_late_notification
             db.add_all([first, second]); db.commit()
             async def guard(state): return {}
             lane = InboxLane(ctx, actor=actor, lane="inbox", tracker=RunLlmTracker(max_calls=3), hybrid_service=None, guard=guard)
-            monkeypatch.setattr(lane, "relationship", lambda _: {})
+            monkeypatch.setattr("app.runtime.autonomous_activity.inputs.relationship_snapshot", lambda *args, **kwargs: None)
             async def select(**kwargs):
                 target = next(c for c in kwargs["candidates"] if source.id in c["source_ids"])
                 return {"selections": [{"target_id": target["target_id"], "memory_query": "past commitments"}]}

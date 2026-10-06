@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { X } from "lucide-react";
 import {
@@ -30,6 +32,7 @@ type ReservedDialogAttributes =
   | "tabIndex"
   | "onCancel"
   | "onClose"
+  | "onClick"
   | "onKeyDown"
   | "onMouseDown";
 
@@ -61,7 +64,7 @@ export function Dialog({
   actions,
   children,
   className,
-  closeLabel = "대화상자 닫기",
+  closeLabel: providedCloseLabel,
   closeOnBackdrop = true,
   closeOnEscape = true,
   closeButtonAttributes,
@@ -72,6 +75,8 @@ export function Dialog({
   open,
   title,
 }: DialogProps) {
+  const uiText = useUiText("shell");
+  const closeLabel = providedCloseLabel ?? uiText("대화상자 닫기");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -94,13 +99,16 @@ export function Dialog({
     triggerRef.current?.focus();
   }, [initialFocusRef, open]);
 
-  useEffect(
-    () => () => {
-      const dialog = dialogRef.current;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    return () => {
       if (dialog?.open) dialog.close();
-    },
-    [],
-  );
+      const trigger = triggerRef.current;
+      queueMicrotask(() => {
+        if (!dialog?.open && trigger?.isConnected) trigger.focus();
+      });
+    };
+  }, []);
 
   function handleBackdrop(event: MouseEvent<HTMLDialogElement>) {
     if (closeOnBackdrop && event.target === event.currentTarget) onOpenChange(false);
@@ -159,10 +167,10 @@ export function Dialog({
         event.preventDefault();
         if (closeOnEscape) onOpenChange(false);
       }}
-      onClose={() => {
-        if (open) onOpenChange(false);
+      onClose={(event) => {
+        if (open && !event.currentTarget.open) onOpenChange(false);
       }}
-      onMouseDown={handleBackdrop}
+      onClick={handleBackdrop}
       onKeyDown={handleKeyDown}
     >
       <div onMouseDown={(event) => event.stopPropagation()}>

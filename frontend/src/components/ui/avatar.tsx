@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { useState, type HTMLAttributes } from "react";
 
@@ -24,9 +26,10 @@ export function Avatar({
   src,
   ...props
 }: AvatarProps) {
+  const uiText = useUiText("shell");
   const [failedSource, setFailedSource] = useState<string | null>(null);
 
-  const label = decorative ? undefined : alt || `${fallback} 프로필`;
+  const label = decorative ? undefined : alt || uiText("{{value0}} 프로필", {value0: fallback});
 
   return (
     <span

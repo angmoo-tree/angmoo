@@ -41,6 +41,12 @@ _changes_spec = importlib.util.spec_from_file_location(
 product_changes = importlib.util.module_from_spec(_changes_spec)
 _changes_spec.loader.exec_module(product_changes)
 
+_sns_spec = importlib.util.spec_from_file_location(
+    "sns_execution_retirement", Path(__file__).with_name("sns_execution_retirement.py")
+)
+sns_execution_retirement = importlib.util.module_from_spec(_sns_spec)
+_sns_spec.loader.exec_module(sns_execution_retirement)
+
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = ROOT / "security/refactor_source_baseline.json"
 INVENTORY = ROOT / "security/refactor_feature_inventory.json"
@@ -227,11 +233,50 @@ def missing_nodes(approved: list[str], current: list[str], moves: dict[str, str]
     return sorted(set(targets.values()) - set(current))
 
 
-def git_bytes(*args: str, root: Path = ROOT) -> bytes:
+_NATIVE_GIT_RUN = subprocess.run
+
+
+def immutable_git_read(args: tuple[str, ...]) -> bool:
+    """Recognize only reads whose complete object/revision inputs are pinned."""
+    sha = r"[0-9a-f]{40}"
+    if len(args) == 3 and args[:2] == ("cat-file", "blob"):
+        return bool(re.fullmatch(sha, args[2]))
+    if len(args) == 2 and args[0] == "show":
+        pinned = re.fullmatch(sha + r"(?:\^\d*)?:.+", args[1])
+        # Historical manifests can be tens of MiB. Keep these out of the
+        # process cache; their parsed candidate/history remains independently
+        # validated, and bounded source-object caching does the useful work.
+        return bool(pinned and ":security/" not in args[1])
+    if args[:2] == ("merge-base", "--is-ancestor") and len(args) == 4:
+        return all(re.fullmatch(sha, value) for value in args[2:])
+    if args and args[0] == "log" and "--" in args:
+        options = args[1:args.index("--")]
+        if any(value.startswith("--") and value not in {"--format=%H", "--reverse", "--diff-filter=A"} for value in options):
+            return False
+        revisions = [value for value in options if not value.startswith("--")]
+        return bool(len(revisions) == 1 and re.fullmatch(sha + r"\.\." + sha, revisions[0]))
+    return False
+
+
+def _read_git(args: tuple[str, ...], root: str | Path) -> bytes:
     result = subprocess.run(["git", *args], cwd=root, capture_output=True)
     if result.returncode:
         raise ValueError("git evidence unavailable; fetch full history: " + result.stderr.decode("utf-8", errors="replace").strip())
     return result.stdout
+
+
+@lru_cache(maxsize=8192)
+def _immutable_git_bytes(args: tuple[str, ...], root: str) -> bytes:
+    return _read_git(args, root)
+
+
+def git_bytes(*args: str, root: Path = ROOT) -> bytes:
+    # Mutable refs, working-tree reads, and injected subprocess readers always
+    # execute again. No candidate file, HEAD, ancestry-to-HEAD or failure is
+    # memoized. Cache identity also includes the absolute repository path.
+    if subprocess.run is _NATIVE_GIT_RUN and immutable_git_read(args):
+        return _immutable_git_bytes(args, str(root.resolve()))
+    return _read_git(args, root)
 
 
 def git_blob(data: bytes) -> str:
@@ -754,11 +799,22 @@ def check_suppressions(snapshots: list[dict], files: dict[str, str], root: Path 
     return errors
 
 
-def check_sources(sources: list[str], files: dict[str, str], root: Path = ROOT) -> list[str]:
+def _retired_chrome_sources(approved_changes: list[dict] | None) -> set[str]:
+    # load() already verifies the committed deletion, exact preimage and
+    # surviving owners. All stock views use the same explicit retirements.
+    return {item["source"] for record in approved_changes or []
+            for field in ("retired_frontend_styles", "retired_native_chrome")
+            for item in record.get(field, [])}
+
+
+def check_sources(sources: list[str], files: dict[str, str], root: Path = ROOT, *, approved_changes: list[dict] | None = None) -> list[str]:
     errors = []
+    retired = _retired_chrome_sources(approved_changes)
     for old, target in mapped_targets(sources, files).items():
         path = (root / target).resolve()
         if not path.is_relative_to(root.resolve()) or not path.is_file():
+            if path.is_relative_to(root.resolve()) and not path.exists() and target in retired:
+                continue
             errors.append(f"source missing without a surviving mapped destination: {old} -> {target}")
         elif old.endswith(".py") and not old.endswith("/__init__.py"):
             tree = ast.parse(path.read_text(encoding="utf-8-sig"))
@@ -796,6 +852,9 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT, 
     symbols_by_text = {}
     assertions_by_text = {}
     removed = product_changes.removed_bindings(approved_changes or [])
+    retired_symbols, retired_modules = sns_execution_retirement.validate(
+        approved_changes or [], root=root, reader=git_bytes)
+    removed.update(retired_symbols)
 
     def memo_symbols(source):
         if source not in symbols_by_text:
@@ -834,10 +893,11 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT, 
                 _, old_symbol = node_function(entry["old"])
                 new_path, new_symbol = node_function(entry.get("new", ""))
                 destination = (root / new_path).resolve()
-                if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or not destination.is_file():
+                retired_destination = new_path in retired_modules and (new_path, new_symbol) in retired_symbols
+                if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or (not destination.is_file() and not retired_destination):
                     errors.append(f"{stage}: unknown or unsafe split symbol: {entry}")
                     continue
-                if new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")) and (new_path, new_symbol) not in removed:
+                if not retired_destination and new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")) and (new_path, new_symbol) not in removed:
                     errors.append(f"{stage}: split destination does not define the mapped symbol: {entry['new']}")
                 consumers, tests = entry.get("direct_consumers", []), entry.get("test_nodes", [])
                 if not consumers or not tests:
@@ -933,7 +993,8 @@ def addition_errors(additions: dict, checkpoint: dict, root: Path = ROOT) -> lis
     return errors
 
 
-def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_targets: dict[str, str], root: Path = ROOT) -> list[str]:
+def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_targets: dict[str, str], root: Path = ROOT,
+                                *, approved_changes: list[dict] | None = None) -> list[str]:
     """A later commit may not omit the source evidence introduced before it.
 
     New uncommitted work is reviewable before capture. Once committed, append its
@@ -941,6 +1002,13 @@ def unrecorded_committed_sources(checkpoint: dict, snapshots: list[dict], file_t
     """
     introduced = set(filter(None, git_bytes("log", "--format=", "--name-only", "--diff-filter=A", f"{checkpoint['commit']}..HEAD", root=root).decode().splitlines()))
     known = set(file_targets.values()).union(*(set(snapshot["tracked_files"]) for snapshot in snapshots))
+    # A formerly introduced engine can leave the source set only after the
+    # closed SNS proof verifies its committed deletion, every moved/retired
+    # binding, current behavior tests and the entire product import closure.
+    # An unrecorded arbitrary deletion remains an introduction failure.
+    _, retired_modules = sns_execution_retirement.validate(
+        approved_changes or [], root=root, reader=git_bytes)
+    known.update(retired_modules)
     # The two metadata documents describe/protect themselves and are introduced
     # by this first support change, not by the frozen source checkpoint.
     metadata = {CHECKPOINT.relative_to(ROOT).as_posix(), ADDITIONS.relative_to(ROOT).as_posix()}
@@ -965,8 +1033,9 @@ def unrecorded_committed_nodes(current: list[str], targets: dict[str, str], root
     return errors
 
 
-def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT) -> list[str]:
+def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT, *, approved_changes: list[dict] | None = None) -> list[str]:
     errors = []
+    retired = _retired_chrome_sources(approved_changes)
     if inventory.get("baseline_commit") != baseline["commit"]:
         errors.append("feature inventory baseline commit differs")
     items = inventory.get("items", [])
@@ -983,6 +1052,8 @@ def check_inventory(inventory: dict, baseline: dict, root: Path = ROOT) -> list[
         for path in item.get("current_paths", []) + item.get("test_paths", []):
             candidate = (root / path).resolve()
             if not candidate.is_relative_to(root.resolve()) or not candidate.exists():
+                if candidate.is_relative_to(root.resolve()) and not candidate.exists() and path in retired:
+                    continue
                 errors.append(f"{item['id']}: missing or unsafe path {path}")
     return errors
 
@@ -998,7 +1069,7 @@ def main() -> int:
     moves = json.loads(MOVES.read_text(encoding="utf-8"))
     checkpoint = json.loads(CHECKPOINT.read_text(encoding="utf-8"))
     additions = json.loads(ADDITIONS.read_text(encoding="utf-8"))
-    errors = check_inventory(inventory, baseline) + checkpoint_errors(checkpoint, baseline_bytes)
+    errors = checkpoint_errors(checkpoint, baseline_bytes)
     asgi_moves = {}
     approved_changes = []
     try:
@@ -1023,9 +1094,10 @@ def main() -> int:
         )
         asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots],
                                         public_retirement=public_retirement)
-        errors.extend(check_sources(sources, moves["files"]))
+        errors.extend(check_sources(sources, moves["files"], approved_changes=approved_changes))
         errors.extend(check_split_evidence(moves, [baseline, *snapshots], approved_changes=approved_changes))
-        errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets))
+        errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets,
+                                                  approved_changes=approved_changes))
         symbol_snapshots = [[f"backend/{path}::{function}" for path, functions in snapshot.get("test_assertions", {}).items() for function in functions]
                             for snapshot in snapshots]
         symbols = mapped_targets(sorted(set().union(*(set(nodes) for nodes in symbol_snapshots))),
@@ -1041,6 +1113,9 @@ def main() -> int:
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
         targets = {}
+    # Authorization is validated before inventory paths are interpreted. A
+    # rejected proof leaves approved_changes empty and missing stock fails.
+    errors.extend(check_inventory(inventory, baseline, approved_changes=approved_changes))
     if args.contracts:
         contracts = current_contracts(asgi_moves)
         contract_snapshots = [{**snapshot, "contracts": product_changes.contracts(snapshot["contracts"], approved_changes)}

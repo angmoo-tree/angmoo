@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { Mail, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -14,6 +16,7 @@ import type { MessageThreadListRead } from "@/features/chat/types/chat-contract"
 import { resolvedLegacyWorldChatRouteParts } from "@/features/chat/utils/legacy-world-route";
 
 export function MessagesClient() {
+  const uiText = useUiText("chat");
   const router = useRouter();
   const { status: authStatus } = useAuth();
   const [threads, setThreads] = useState<MessageThreadListRead | null>(null);
@@ -35,15 +38,15 @@ export function MessagesClient() {
         if (active) {
           setError(
             err instanceof Error
-              ? err.message
-              : "쪽지함을 불러오지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+              ? uiText(err.message)
+              : uiText("쪽지함을 불러오지 못했습니다. 잠시 뒤 다시 시도해주세요."),
           );
         }
       });
     return () => {
       active = false;
     };
-  }, [authStatus, router]);
+  }, [authStatus, router, uiText]);
 
   async function handleDelete(threadId: string) {
     setDeletingId(threadId);
@@ -61,8 +64,8 @@ export function MessagesClient() {
     } catch (err) {
       setError(
         err instanceof Error
-          ? err.message
-          : "쪽지 내역을 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요.",
+          ? uiText(err.message)
+          : uiText("쪽지 내역을 삭제하지 못했습니다. 잠시 뒤 다시 시도해주세요."),
       );
     } finally {
       setDeletingId(null);
@@ -75,10 +78,9 @@ export function MessagesClient() {
     <section className="min-h-screen bg-white">
       <div className="sticky top-0 z-10 flex min-h-[88px] items-center border-b border-[#eaedf2] bg-white/95 px-5 py-4 backdrop-blur-sm md:px-9">
         <div className="min-w-0">
-          <p className="truncate text-[14px] font-bold text-[#ff6b6b]">쪽지</p>
+          <p className="truncate text-[14px] font-bold text-[#ff6b6b]">{uiText("쪽지")}</p>
           <h1 className="text-[28px] font-extrabold text-[#101828] md:text-[30px]">
-            쪽지함
-          </h1>
+            {uiText("쪽지함")}</h1>
           {threads ? (
             <p className="mt-1 text-[13px] font-bold text-[#98a2b3]">
               {items.length}/{threads.max_threads}
@@ -95,12 +97,10 @@ export function MessagesClient() {
 
       {!threads ? (
         <div className="p-8 text-center text-[15px] font-bold text-[#98a2b3]">
-          쪽지함을 불러오는 중입니다.
-        </div>
+          {uiText("쪽지함을 불러오는 중입니다.")}</div>
       ) : items.length === 0 ? (
         <div className="p-8 text-center text-[15px] font-bold text-[#98a2b3]">
-          아직 나눈 쪽지가 없습니다.
-        </div>
+          {uiText("아직 나눈 쪽지가 없습니다.")}</div>
       ) : (
         <div className="divide-y divide-[#eaedf2]">
           {items.map((thread) => (
@@ -127,13 +127,13 @@ export function MessagesClient() {
                     ) : null}
                   </div>
                   <p className="mt-1 line-clamp-1 text-[14px] font-medium text-[#667085]">
-                    {thread.latest_message?.content ?? "새 쪽지를 시작해보세요."}
+                    {thread.latest_message?.content ?? uiText("새 쪽지를 시작해보세요.")}
                   </p>
                   {thread.world_scope_status !== "resolved" ? (
                     <p className="mt-1 text-[12px] font-bold text-state-warning">
                       {thread.world_scope_status === "quarantined"
-                        ? "충돌 대화 격리됨"
-                        : "World 확인 필요"}
+                        ? uiText("충돌 대화 격리됨")
+                        : uiText("World 확인 필요")}
                     </p>
                   ) : null}
                 </div>
@@ -143,8 +143,8 @@ export function MessagesClient() {
                 onClick={() => void handleDelete(thread.id)}
                 disabled={deletingId === thread.id}
                 className="flex size-10 shrink-0 items-center justify-center rounded-full text-[#98a2b3] transition-colors hover:bg-[#fff5f5] hover:text-[#ff6b6b] disabled:opacity-50"
-                aria-label="쪽지 내역 삭제"
-                title="쪽지 내역 삭제"
+                aria-label={uiText("쪽지 내역 삭제")}
+                title={uiText("쪽지 내역 삭제")}
               >
                 {deletingId === thread.id ? (
                   <Mail size={18} aria-hidden="true" />

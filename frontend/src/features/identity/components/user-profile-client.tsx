@@ -1,4 +1,7 @@
 "use client";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import { X } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +25,8 @@ export function UserProfileClient({
   initialProfile: ProfileRead | null;
   initialError: string | null;
 }) {
+  const uiText = useUiText("identity");
+  const formatDate = useUiDateFormatter();
   const [profile, setProfile] = useState<ProfileRead | null>(initialProfile);
   const viewer = useSyncExternalStore(
     subscribeToAuth,
@@ -36,7 +41,7 @@ export function UserProfileClient({
   const isOwnProfile = viewer?.id === userId;
   const nicknameLocked = viewer ? isDisplayNameChangeLocked(viewer) : false;
   const availableText = viewer
-    ? formatDisplayNameAvailableAt(viewer.display_name_change_available_at)
+    ? (viewer.display_name_change_available_at ? formatDate(viewer.display_name_change_available_at) : null)
     : null;
 
   function openEditor() {
@@ -55,7 +60,7 @@ export function UserProfileClient({
     event.preventDefault();
     const nickname = draftName.trim();
     if (!nickname) {
-      setError("닉네임을 입력해주세요.");
+      setError(uiText("닉네임을 입력해주세요."));
       return;
     }
 
@@ -77,7 +82,7 @@ export function UserProfileClient({
       );
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "닉네임을 저장하지 못했습니다.");
+      setError(err instanceof Error ? uiText(err.message) : uiText("닉네임을 저장하지 못했습니다."));
     } finally {
       setSaving(false);
     }
@@ -105,8 +110,7 @@ export function UserProfileClient({
                     onClick={openEditor}
                     className="mt-5 inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#f2f4f7] px-5 text-[14px] font-extrabold text-[#667085] transition-colors hover:bg-[#eaedf2] hover:text-[#101828]"
                   >
-                    프로필 수정
-                  </button>
+                    {uiText("프로필 수정")}</button>
                 ) : null}
               </div>
               <div className="min-w-0">
@@ -120,7 +124,7 @@ export function UserProfileClient({
                   href={`/profiles/users/${userId}/follows?tab=following`}
                   className="transition-colors hover:text-[#101828] hover:underline"
                 >
-                  팔로잉 {profile.following_count}
+                  {uiText("팔로잉")}{profile.following_count}
                 </Link>
               </div>
             </div>
@@ -184,6 +188,7 @@ function NicknameEditModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }) {
+  const uiText = useUiText("identity");
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#101828]/45 px-4 py-6 backdrop-blur-[2px]">
       <form
@@ -196,28 +201,25 @@ function NicknameEditModal({
               type="button"
               onClick={onClose}
               className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#f2f4f7]"
-              title="닫기"
+              title={uiText("닫기")}
             >
               <X size={22} aria-hidden="true" />
             </button>
             <h2 className="truncate text-[20px] font-extrabold text-[#101828]">
-              프로필 수정
-            </h2>
+              {uiText("프로필 수정")}</h2>
           </div>
           <button
             type="submit"
             disabled={saving || locked || !draftName.trim()}
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[#101828] px-5 text-[14px] font-extrabold text-white transition-colors hover:bg-[#344054] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            저장
-          </button>
+            {uiText("저장")}</button>
         </div>
 
         <div className="px-5 py-5 md:px-6">
           <label className="block">
             <span className="mb-2 block text-[15px] font-bold text-[#344054]">
-              닉네임
-            </span>
+              {uiText("닉네임")}</span>
             <input
               value={draftName}
               onChange={(event) => onDraftNameChange(event.target.value)}
@@ -229,14 +231,13 @@ function NicknameEditModal({
           </label>
 
           <p className="mt-3 text-[13px] font-semibold leading-5 text-[#667085]">
-            닉네임은 하루에 한 번만 변경할 수 있습니다.
-          </p>
+            {uiText("닉네임은 하루에 한 번만 변경할 수 있습니다.")}</p>
 
           {locked ? (
             <div className="mt-4 rounded-[18px] border border-[#ffe5c2] bg-[#fff8ed] px-4 py-3 text-[14px] font-bold text-[#b45309]">
               {availableText
-                ? `${availableText} 이후 다시 변경할 수 있습니다.`
-                : "아직 닉네임을 다시 변경할 수 없습니다."}
+                ? uiText("{{value0}} 이후 다시 변경할 수 있습니다.", {value0: availableText})
+                : uiText("아직 닉네임을 다시 변경할 수 없습니다.")}
             </div>
           ) : null}
 
@@ -255,18 +256,6 @@ function isDisplayNameChangeLocked(user: UserRead) {
   if (!user.display_name_change_available_at) return false;
   const availableAt = new Date(user.display_name_change_available_at).getTime();
   return Number.isFinite(availableAt) && availableAt > Date.now();
-}
-
-function formatDisplayNameAvailableAt(value: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat("ko-KR", {
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 }
 
 let cachedUserRaw: string | null = null;

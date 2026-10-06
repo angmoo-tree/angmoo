@@ -15,11 +15,19 @@ from app.domains.characters.models import Character
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.worlds.models import WorldMembership
 from app.runtime.world_characters.composition import public_profile_service
+from app.runtime.social.post_authors import batch_world_post_authors
 
 
 class RuntimeProfileReferences:
     def __init__(self, db: Session) -> None:
         self.db = db
+
+    def author_profiles(self, *, world_id: str, author_ids: set[str]):
+        return batch_world_post_authors(self.db, world_id=world_id, author_ids=author_ids)
+
+    def owner_reaction_references(self):
+        from app.runtime.social.manual_feed_references import RuntimeManualFeedReferences
+        return RuntimeManualFeedReferences(self.db)
 
     def profile(self, query: WorldCharacterSocialProfileQuery) -> ProfileIdentity:
         return public_profile_service(self.db).get_for_world(

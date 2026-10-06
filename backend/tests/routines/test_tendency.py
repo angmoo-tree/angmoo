@@ -365,7 +365,7 @@ def test_tendency_payload_rejects_hidden_feed_seed_interest_injection():
             }
         )
 
-def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
+def test_tendency_prompt_uses_original_name_and_general_character_terms():
     prompt = agent_service._build_tendency_analysis_prompt(
         character=SimpleNamespace(
             id="char-1",
@@ -381,14 +381,16 @@ def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
         )
     )
 
-    assert '"앵무" is the service term' in prompt
-    assert 'refer to this Angmoo persona by its name "키마 린"' in prompt
+    assert 'Use the terms character, post, reply and post topic suggestion' in prompt
+    assert 'refer to this character by its original name "키마 린"' in prompt
     assert 'summary must start with "키마 린"' in prompt
     assert 'action_ranges[].note must start with "키마 린"' in prompt
     assert "feed_seed_interest_criteria" in prompt
     assert "3-6 complete sentences" in prompt
     assert "Do not put action-routing guidance" in prompt
     assert "independent_post_topics must contain exactly 30 items" in prompt
+    assert "Write new visible notes in the admitted memory/search locale: en" in prompt
+    assert "in Korean" not in prompt and "Korean user-facing" not in prompt
     assert 'call this Angmoo persona "앵무" instead of "캐릭터"' not in prompt
     assert 'use "앵무" when referring to the Angmoo persona' not in prompt
 
@@ -1376,7 +1378,8 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
     run = SimpleNamespace(
-        id="run-1", user_id="user-1", character_id="char-1", post_id=None
+        id="run-1", user_id="user-1", character_id="char-1", post_id=None,
+        input_snapshot=None,
     )
     stored: dict[str, object] = {}
 
@@ -1446,7 +1449,8 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: None,
     )
     run = SimpleNamespace(
-        id="run-1", user_id="user-1", character_id="char-1", post_id=None
+        id="run-1", user_id="user-1", character_id="char-1", post_id=None,
+        input_snapshot=None,
     )
     consumed: list[dict[str, object]] = []
 

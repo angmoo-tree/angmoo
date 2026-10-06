@@ -23,6 +23,8 @@ type NetworkAudit = {
   blocked: string[];
   providerCalls: string[];
   writes: string[];
+  environmentReports: string[];
+  documentNavigations: string[];
 };
 
 async function prepareProductSurface(
@@ -32,7 +34,7 @@ async function prepareProductSurface(
   const baseURL = testInfo.project.use.baseURL;
   if (typeof baseURL !== "string") throw new Error("visual project requires baseURL");
   const productOrigin = new URL(baseURL).origin;
-  const audit: NetworkAudit = { blocked: [], providerCalls: [], writes: [] };
+  const audit: NetworkAudit = { blocked: [], providerCalls: [], writes: [], environmentReports: [], documentNavigations: [] };
 
   if (testInfo.project.name === "static-export") {
     await page.addInitScript(
@@ -54,8 +56,12 @@ async function prepareProductSurface(
   page.on("request", (request) => {
     const url = new URL(request.url());
     const method = request.method();
+    if (request.isNavigationRequest() && request.frame() === page.mainFrame())
+      audit.documentNavigations.push(url.pathname);
     if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
-      audit.writes.push(`${method} ${url.pathname}`);
+      if (method === "POST" && /\/auth\/local\/environment$/.test(url.pathname))
+        audit.environmentReports.push(`${method} ${url.pathname}`);
+      else audit.writes.push(`${method} ${url.pathname}`);
     }
     if (/provider|gemini|openai|anthropic|generate|completion/i.test(url.pathname)) {
       audit.providerCalls.push(`${method} ${url.pathname}`);
@@ -96,6 +102,7 @@ async function settleVisualSurface(page: Page): Promise<void> {
 function expectReadOnlyFixture(audit: NetworkAudit, bootstrapCount = 0, staticMode = false): void {
   expect(audit.blocked).toEqual([]);
   expect(audit.providerCalls).toEqual([]);
+  expect(audit.environmentReports.length).toBeLessThanOrEqual(audit.documentNavigations.length);
   expect(audit.writes).toEqual(Array(bootstrapCount).fill(
     `POST /api/${staticMode ? "v1" : "backend"}/worlds/default-space/ensure`,
   ));
@@ -162,7 +169,7 @@ test("UI-F captures the global social media stream at the standard Phone size", 
   await expect(mediaPost).toBeVisible();
   await expect(mediaPost.getByText("더보기", { exact: true })).toBeVisible();
   await expect(mediaPost.getByRole("img", { name: "노란 앵무 Angmoo 로고" })).toBeVisible();
-  await expect(mediaPost.getByLabel("대꾸 2", { exact: true })).toBeVisible();
+  await expect(mediaPost.getByLabel("답글 2", { exact: true })).toBeVisible();
   await expect(mediaPost.getByLabel("좋아요 1", { exact: true })).toBeVisible();
   await expect(mediaPost.getByRole("button", { name: "게시글 메뉴" })).toHaveCount(0);
   await settleVisualSurface(page);

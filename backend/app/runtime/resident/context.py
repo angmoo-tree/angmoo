@@ -38,6 +38,7 @@ class LangGraphResidentContext:
     social_search_state: SocialSearchState = SocialSearchState.UNAVAILABLE
     social_context: SocialContextUse | None = field(default=None, repr=False, compare=False)
     episode_memory_reader: Callable[[str | None], str] | None = field(default=None, repr=False, compare=False)
+    input_snapshot: dict | None = field(default=None, repr=False, compare=False)
 
 
     generation_model: str = field(init=False)
@@ -46,5 +47,10 @@ class LangGraphResidentContext:
     def __post_init__(self) -> None:
         # SQLAlchemy may refresh the credential during a run. Keep this run's
         # model and thinking fixed across all nodes and repair requests.
-        object.__setattr__(self, "generation_model", self.credential.model)
-        object.__setattr__(self, "generation_thinking_level", getattr(self.credential, "thinking_level", "high") or "high")
+        from app.runtime.world_configuration.effective_values import configuration_for_input
+        configuration = configuration_for_input(self.input_snapshot, character_id=self.character.id)
+        model = ((self.input_snapshot or {}).get("_generation_model") or
+            (configuration.settings.generation_model if configuration else None) or self.credential.model)
+        object.__setattr__(self, "generation_model", model)
+        object.__setattr__(self, "generation_thinking_level", (self.input_snapshot or {}).get("_generation_thinking_level") or
+            getattr(self.credential, "thinking_level", "high") or "high")

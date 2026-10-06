@@ -122,6 +122,16 @@ test.describe(`${dataset.label} card upload through Next and isolated contributo
     });
     expect(claim.status(), await claim.text()).toBe(201);
 
+    const currentOwner = await page.request.get(base + "/api/backend/auth/me");
+    expect(currentOwner.status(), await currentOwner.text()).toBe(200);
+    const owner = await currentOwner.json();
+    const preferences = await page.request.patch(base + "/api/backend/auth/me/preferences", {
+      headers: frontOrigin,
+      data: { ui_language: "ko", expected_ui_revision: owner.ui_preference_revision },
+    });
+    expect(preferences.status(), await preferences.text()).toBe(200);
+    expect((await preferences.json()).ui_language).toBe("ko");
+
     const items: CardRecord[] = dataset.records ?? JSON.parse(readFileSync(join(dataset.directory, "manifest.json"), "utf8"));
     for (const record of items) {
       const name = record.name;

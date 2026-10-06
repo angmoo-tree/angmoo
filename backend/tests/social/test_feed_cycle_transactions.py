@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from model_fixture_support import models
 from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.service import feed_cycle
-from app.runtime.social.feed_cycle import RuntimeWorldFeedWorkflows
+from app.runtime.social.feed_workflows import RuntimeWorldFeedWorkflows
 from app.runtime.social import world_feed_actions
 from social.test_feed_reaction_intent import FakeFeedProvider, _engine, _seed
 

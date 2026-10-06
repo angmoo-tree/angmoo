@@ -1,6 +1,15 @@
 "use client";
+import { useProductLeaveGuard } from "@/hooks/use-product-leave-guard";
+import { useUiText } from "@/hooks/use-ui-text";
+import { buildReplyTree } from "../utils/reply-tree";
+import { SocialReplyTree } from "./social-reply-tree";
+import { useOwnerReactions } from "../hooks/use-owner-reactions";
+import { applyConfirmedReaction } from "../utils/confirmed-reactions";
+import { captureAuthRequestScope, isCurrentAuthRequestScope } from "@/lib/auth/browser-session";
+import { useUiDateFormatter } from "@/hooks/use-ui-date-formatter";
 
-import { MessageCircle, RefreshCw } from "lucide-react";
+
+import { ArrowLeft, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
 import {
   type ComponentType,
@@ -15,14 +24,14 @@ import {
 
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 import { worldAppRoute, worldPostDetailRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
+import { formatHandle } from "@/utils/profile-presentation";
 import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
 import { Field, Input, Textarea } from "@/components/ui/form-controls";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { formatDate } from "@/utils/profile-presentation";
 import { createOwnerManualPost, createOwnerManualReply, getManualSocialFeed, getManualSocialPostThread, SocialWriteApiError } from "@/features/social/api/social-write-client";
 import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
-import type { ManualSocialFeedRead, ManualSocialPostRead, SocialOwnerActor } from "@/features/social/types/social-write-contract";
+import type { ManualSocialFeedRead, ManualSocialThreadRead, ManualSocialPostRead, SocialOwnerActor } from "@/features/social/types/social-write-contract";
 import { SocialPostRow } from "@/features/social/components/social-post-row";
 import styles from "./world-social-feed.module.css";
 
@@ -30,7 +39,8 @@ type Props = {
   ownerActor: SocialOwnerActor | null;
   postId?: string;
   worldId: string;
-  renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void }) => ReactNode;
+  feedHeader?: ReactNode;
+  renderImagePicker?: (input: { disabled: boolean; value: { id: string; url: string; allowed: boolean } | null; onChange: (value: { id: string; url: string; allowed: boolean } | null) => void; onBusyChange: (busy: boolean) => void; renderLayout: (slots: { trigger: ReactNode; preview: ReactNode; feedback: ReactNode }) => ReactNode }) => ReactNode;
   imageStatus?: ComponentType<{ worldId: string; postId: string; onCompleted: () => void }>;
 };
 
@@ -61,7 +71,7 @@ type FeedFailure = {
 
 type FeedLoadState =
   | { key: string; status: "loading" }
-  | { key: string; status: "ready"; feed: ManualSocialFeedRead }
+  | { key: string; status: "ready"; feed: ManualSocialFeedRead | ManualSocialThreadRead }
   | { key: string; status: "error"; failure: FeedFailure };
 
 function newIdempotencyKey(operation: "post" | "reply"): string {
@@ -140,12 +150,13 @@ function feedFailure(reason: unknown): FeedFailure {
   };
 }
 
-function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
+function presentManualPost(post: ManualSocialPostRead, formatDate: (value: string) => string): SocialPostPresentation {
   return {
     id: post.id,
     authorAvatarUrl: post.author_avatar_url,
     authorHandle: post.author_handle,
     authorName: post.author_name,
+    authorDeleted: post.author_deleted,
     createdAt: post.created_at,
     timeLabel: formatDate(post.created_at),
     title: post.post_type === "reply" ? "" : post.title,
@@ -157,6 +168,7 @@ function presentManualPost(post: ManualSocialPostRead): SocialPostPresentation {
 function aggregateManualPostActions(
   post: ManualSocialPostRead,
   replyHref?: string,
+  pending = false,
 ): SocialPostActionPresentation[] {
   const actions: SocialPostActionPresentation[] = [];
   if (replyHref) {
@@ -170,15 +182,19 @@ function aggregateManualPostActions(
   }
   actions.push({
     kind: "like",
-    interaction: "metric",
+    interaction: post.can_owner_like && post.reaction_world_id && post.reaction_owner_world_character_id && post.viewer_like_state !== "unavailable" && post.viewer_like_state !== undefined ? "button" : "metric",
     label: "좋아요",
     count: post.like_count,
+    accent: post.viewer_like_state === "liked",
+    disabled: pending,
   });
   return actions;
 }
 
-export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker, imageStatus: ImageStatus }: Props) {
-  const routeKey = `${worldId}:${postId ?? "feed"}`;
+export function WorldSocialFeed({ ownerActor, postId, worldId, feedHeader, renderImagePicker, imageStatus: ImageStatus }: Props) {
+  const formatDate = useUiDateFormatter();
+  const uiText = useUiText("social");
+  const routeKey = `${worldId}:${postId ?? "feed"}:${ownerActor?.world_character_id ?? "none"}`;
   const [loadState, setLoadState] = useState<FeedLoadState>({
     key: routeKey,
     status: "loading",
@@ -191,10 +207,22 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
   const [attachment, setAttachment] = useState<{ id: string; url: string; allowed: boolean } | null>(null);
   const [imageBusy, setImageBusy] = useState(false);
   const [replyBody, setReplyBody] = useState("");
+  useProductLeaveGuard(Boolean(title.trim() || body.trim() || replyBody.trim() || attachment || imageBusy || busy));
   const pendingPostRef = useRef<PendingPost | null>(null);
   const pendingRepliesRef = useRef(new Map<string, PendingReply>());
   const requestGenerationRef = useRef(0);
+  const mutationGenerationRef = useRef(0);
   const replyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const reactions = useOwnerReactions(routeKey, change => {
+    setLoadState(current => {
+      if (current.key !== routeKey || current.status !== "ready") return current;
+      const feed = current.feed;
+      return { ...current, feed: "selected_post" in feed
+        ? { ...feed, selected_post: applyConfirmedReaction(feed.selected_post, change), replies: feed.replies.map(post => applyConfirmedReaction(post, change)) }
+        : { ...feed, items: feed.items.map(post => applyConfirmedReaction(post, change)) } };
+    });
+  }, worldId);
+  const { captureReadRevision, reconcilePost } = reactions;
 
   const currentState = useMemo<FeedLoadState>(
     () =>
@@ -208,6 +236,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     async (signal?: AbortSignal, offset?: number) => {
       if (!ownerActor) return;
       const generation = ++requestGenerationRef.current;
+      const authScope = captureAuthRequestScope();
+      const readRevision = captureReadRevision();
       setLoadState({ key: routeKey, status: "loading" });
       try {
         const result = postId
@@ -220,15 +250,18 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
               ownerWorldCharacterId: ownerActor.world_character_id,
               signal,
             });
-        if (generation !== requestGenerationRef.current || signal?.aborted) return;
-        setLoadState({ key: routeKey, status: "ready", feed: result });
+        if (generation !== requestGenerationRef.current || signal?.aborted || !isCurrentAuthRequestScope(authScope)) return;
+        const feed = "selected_post" in result
+          ? { ...result, selected_post: reconcilePost(result.selected_post, readRevision), replies: result.replies.map(post => reconcilePost(post, readRevision)) }
+          : { ...result, items: result.items.map(post => reconcilePost(post, readRevision)) };
+        setLoadState({ key: routeKey, status: "ready", feed });
       } catch (reason: unknown) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
-        if (generation !== requestGenerationRef.current || signal?.aborted) return;
+        if (generation !== requestGenerationRef.current || signal?.aborted || !isCurrentAuthRequestScope(authScope)) return;
         setLoadState({ key: routeKey, status: "error", failure: feedFailure(reason) });
       }
     },
-    [ownerActor, postId, routeKey, worldId],
+    [ownerActor, postId, routeKey, worldId, captureReadRevision, reconcilePost],
   );
 
   useEffect(() => {
@@ -244,6 +277,13 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     };
   }, [loadFeed, ownerActor]);
 
+  useEffect(() => {
+    const ownedGeneration = ++mutationGenerationRef.current;
+    return () => {
+      mutationGenerationRef.current = ownedGeneration + 1;
+    };
+  }, [routeKey]);
+
   useMobilePullToRefresh({
     enabled: Boolean(ownerActor),
     refreshing: currentState.status === "loading",
@@ -251,14 +291,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
   });
 
   const items = useMemo(
-    () => (currentState.status === "ready" ? currentState.feed.items : []),
+    () => (currentState.status === "ready" ? "selected_post" in currentState.feed ? [currentState.feed.selected_post, ...currentState.feed.replies] : currentState.feed.items : []),
     [currentState],
   );
   const roots = useMemo(
     () => items.filter((item) => item.reply_to_post_id === null),
     [items],
   );
-  const detailRoot = postId ? roots[0] ?? null : null;
+  const detailRoot = postId && currentState.status === "ready" && "selected_post" in currentState.feed ? currentState.feed.selected_post : null;
   const detailReplies = detailRoot ? items.slice(1) : [];
 
   useEffect(() => {
@@ -272,6 +312,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     const nextTitle = title.trim();
     const nextBody = body.trim();
     if (!nextTitle || !nextBody || busy || imageBusy) return;
+    const generation = mutationGenerationRef.current;
+    const authScope = captureAuthRequestScope();
     const previous = pendingPostRef.current;
     const pending =
       previous?.title === nextTitle && previous.body === nextBody && previous.assetId === attachment?.id
@@ -293,20 +335,21 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
         pending.idempotencyKey,
         ownerActor.world_character_id,
       );
+      if (generation !== mutationGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
       pendingPostRef.current = null;
       setTitle("");
       setBody("");
       setAttachment(null);
       setNotice(
         result.replayed
-          ? "같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요."
-          : "게시글을 저장했습니다. 이 쓰기에는 LLM·provider를 호출하지 않았어요.",
+          ? uiText("같은 요청을 안전하게 재사용했습니다. 게시글은 중복 생성되지 않았어요.")
+          : uiText("게시글을 저장했습니다."),
       );
       await loadFeed();
     } catch (reason) {
-      setWriteError(writeErrorMessage(reason));
+      if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setWriteError(writeErrorMessage(reason));
     } finally {
-      setBusy(false);
+      if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setBusy(false);
     }
   }
 
@@ -315,6 +358,8 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
     if (!ownerActor) return;
     const nextBody = replyBody.trim();
     if (!nextBody || busy) return;
+    const generation = mutationGenerationRef.current;
+    const authScope = captureAuthRequestScope();
     const previous = pendingRepliesRef.current.get(rootPostId);
     const pending =
       previous?.body === nextBody
@@ -332,28 +377,39 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
         pending.idempotencyKey,
         ownerActor.world_character_id,
       );
+      if (generation !== mutationGenerationRef.current || !isCurrentAuthRequestScope(authScope)) return;
       pendingRepliesRef.current.delete(rootPostId);
       setReplyBody("");
       setNotice(
         result.replayed
-          ? "같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요."
-          : "답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요.",
+          ? uiText("같은 답글 요청을 안전하게 재사용했습니다. 중복 Inbox는 만들지 않았어요.")
+          : uiText("답글을 저장했습니다. 대상 앵무는 다음 허용 활동에서 관찰하며, 공개 반응은 강제되지 않아요."),
       );
       await loadFeed();
       window.requestAnimationFrame(() => replyTextareaRef.current?.focus());
     } catch (reason) {
-      setWriteError(writeErrorMessage(reason));
+      if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setWriteError(writeErrorMessage(reason));
     } finally {
-      setBusy(false);
+      if (generation === mutationGenerationRef.current && isCurrentAuthRequestScope(authScope)) setBusy(false);
     }
   }
+
+  const publishButton = (
+    <IconButton className={styles.publishButton} type="submit" variant="primary"
+      label={uiText("게시하기")} title={busy ? uiText("저장 중") : uiText("게시하기")}
+      loading={busy} loadingLabel={uiText("저장 중")}
+      disabled={!title.trim() || !body.trim() || imageBusy}>
+      <Send size={22} aria-hidden="true" />
+    </IconButton>
+  );
 
   if (!ownerActor) {
     return (
       <section className={styles.manualFeed}>
+        {!postId ? <div className={styles.feedHeader}>{feedHeader}</div> : null}
         <EmptyState
-          description="Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다."
-          title="이 World에서 내가 조종할 앵무가 필요해요"
+          description={uiText("Creator Studio에서 owner-controlled 앵무를 만든 뒤 이 World에 글과 답글을 남길 수 있습니다.")}
+          title={uiText("이 World에서 내가 조종할 앵무가 필요해요")}
         />
       </section>
     );
@@ -364,33 +420,23 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
       className={styles.manualFeed}
       data-world-social-surface={postId ? "detail" : "feed"}
     >
+      {!postId ? <div className={styles.feedHeader}>{feedHeader}</div> : (
       <header className={styles.contextHeader}>
+        <div className={styles.headerStart}>
+        <Link aria-label={uiText("피드로 돌아가기")} className={styles.backLink} href={`${worldAppRoute(worldId)}/feed`}>
+          <ArrowLeft aria-hidden="true" size={22} />
+        </Link>
         <div className={styles.contextCopy}>
-          <p className={styles.capabilityKicker}>World Feed</p>
-          <h2>{postId ? "게시글과 답글" : "이 World의 이야기"}</h2>
-          <p>
-            {postId
-              ? "현재 World의 공개 thread"
-              : `${ownerActor.profile.display_name}(으)로 직접 쓰기 · provider 호출 없음`}
-          </p>
+          <h2>{uiText("게시글")}</h2>
+        </div>
         </div>
         <div className={styles.headerActions}>
-          {postId ? (
-            <Link className={styles.backLink} href={`${worldAppRoute(worldId)}/feed`}>
-              World Feed
-            </Link>
-          ) : null}
-          <Button
-            aria-label="World Feed 새로고침"
-            compact
-            disabled={currentState.status === "loading"}
-            onClick={() => void loadFeed()}
-            variant="ghost"
-          >
-            <RefreshCw size={18} aria-hidden="true" />
-          </Button>
+          <IconButton label={uiText("새로고침")} onClick={() => void loadFeed()} disabled={currentState.status === "loading"}>
+            <RefreshCw aria-hidden="true" size={22} />
+          </IconButton>
         </div>
       </header>
+      )}
 
       {!postId ? (
         <form
@@ -407,50 +453,53 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
           <div className={styles.composerContent}>
             <div className={styles.composerHeading}>
               <strong>{ownerActor.profile.display_name}</strong>
-              <span>이 World에만 저장되는 직접 작성</span>
+              {ownerActor.profile.handle ? <span>{formatHandle(ownerActor.profile.handle)}</span> : null}
             </div>
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-title">
-              제목
-            </label>
+              {uiText("제목")}</label>
             <Input
               className={styles.composerTitle}
               id="world-owner-post-title"
               maxLength={160}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="오늘 이 World에 남길 이야기의 제목을 적어주세요"
+              placeholder={uiText("오늘 이 World에 남길 이야기의 제목을 적어주세요")}
               required
+              readOnly={busy}
               value={title}
             />
             <label className={styles.visuallyHidden} htmlFor="world-owner-post-body">
-              내용
-            </label>
+              {uiText("내용")}</label>
             <Textarea
               className={styles.composerBody}
               id="world-owner-post-body"
               maxLength={4000}
               onChange={(event) => setBody(event.target.value)}
-              placeholder="내가 조종하는 앵무의 말로 이야기를 적어보세요"
+              placeholder={uiText("내가 조종하는 앵무의 말로 이야기를 적어보세요")}
               required
-              rows={2}
+              readOnly={busy}
+              rows={3}
               value={body}
             />
-            <div className={styles.composerSubmit}>
-              {renderImagePicker?.({ value: attachment, disabled: busy, onChange: setAttachment, onBusyChange: setImageBusy })}
-              <Button
-                disabled={!title.trim() || !body.trim() || imageBusy}
-                loading={busy}
-                loadingLabel="저장 중"
-                type="submit"
-              >
-                게시하기
-              </Button>
-            </div>
+            {renderImagePicker ? renderImagePicker({
+              value: attachment, disabled: busy, onChange: setAttachment, onBusyChange: setImageBusy,
+              renderLayout: ({ trigger, preview, feedback }) => (
+                <>
+                  {preview}
+                  {feedback}
+                  <div className={styles.composerActions}>
+                    {trigger}
+                    {publishButton}
+                  </div>
+                </>
+              ),
+            }) : <div className={`${styles.composerActions} ${styles.submitOnly}`}>{publishButton}</div>}
           </div>
         </form>
       ) : null}
 
       {notice ? <Toast tone="success">{notice}</Toast> : null}
       {writeError ? <InlineError>{writeError}</InlineError> : null}
+      {reactions.error ? <InlineError>{uiText("좋아요를 저장하지 못했습니다. 다시 시도해 주세요.")}</InlineError> : null}
 
       {currentState.status === "loading" ? <WorldFeedLoading /> : null}
       {currentState.status === "error" ? (
@@ -460,14 +509,14 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
         />
       ) : null}
 
-      {currentState.status === "ready" && roots.length === 0 ? (
+      {currentState.status === "ready" && items.length === 0 ? (
         <EmptyState
           description={
             postId
-              ? "게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다."
-              : "자율 앵무 또는 내가 조종하는 앵무의 첫 이야기를 기다리고 있어요."
+              ? uiText("게시글이 제거됐거나 이 World에서 더 이상 공개되지 않습니다.")
+              : uiText("자율 앵무 또는 내가 조종하는 앵무의 첫 이야기를 기다리고 있어요.")
           }
-          title={postId ? "게시글을 찾을 수 없어요" : "아직 공개된 게시글이 없어요"}
+          title={postId ? uiText("게시글을 찾을 수 없어요") : uiText("아직 공개된 게시글이 없어요")}
         />
       ) : null}
 
@@ -481,11 +530,12 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                 : undefined;
             return (
               <div key={post.id}><SocialPostRow
-                actions={aggregateManualPostActions(post, detailHref)}
+                actions={aggregateManualPostActions(post, detailHref, reactions.likeAction(post).disabled)}
+                onAction={() => void reactions.setReaction(post)}
                 authorHref={authorHref}
                 href={detailHref}
                 key={post.id}
-                post={presentManualPost(post)}
+                post={presentManualPost(post, formatDate)}
               />{!post.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={post.id} onCompleted={() => void loadFeed()} /> : null}</div>
             );
           })}
@@ -498,7 +548,9 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
             actions={aggregateManualPostActions(
               detailRoot,
               worldPostDetailRoute(worldId, detailRoot.id),
+              reactions.likeAction(detailRoot).disabled,
             )}
+            onAction={() => void reactions.setReaction(detailRoot)}
             authorHref={
               detailRoot.author_profile_capability === "available"
                 ? worldCharacterProfileRoute(
@@ -507,25 +559,31 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                   )
                 : undefined
             }
-            post={presentManualPost(detailRoot)}
+            post={presentManualPost(detailRoot, formatDate)}
             variant="detail"
           />
           {!detailRoot.media?.length && ImageStatus ? <ImageStatus worldId={worldId} postId={detailRoot.id} onCompleted={() => void loadFeed(undefined, currentState.status === "ready" ? currentState.feed.page_offset ?? 0 : 0)} /> : null}
+          {detailRoot.reply_to_post_id && currentState.feed.schema_version === "owner-manual-social-thread-v2" ? (
+            currentState.feed.parent?.state === "available" ? <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, detailRoot.reply_to_post_id)}>{uiText("부모 게시글 보기")}</Link> : <p className={styles.parentReply}>{uiText("부모 게시글을 볼 수 없습니다.")}</p>
+          ) : null}
           <section aria-labelledby="world-reply-heading" className={styles.replySection}>
-            <h3 id="world-reply-heading">대꾸 {detailRoot.reply_count}</h3>
+            <h3 id="world-reply-heading">{uiText("답글 {{count}}", { count: detailRoot.reply_count })}</h3>
             {detailReplies.length > 0 ? (
               <div className={styles.replyList}>
-                {detailReplies.map((reply) => (
+                <SocialReplyTree nodes={buildReplyTree(detailReplies, detailRoot.id)} renderRow={reply => (
                   <article key={reply.id} id={`world-reply-${reply.id}`} tabIndex={-1}
                     className={reply.id === postId ? styles.targetReply : undefined}
-                    aria-label={reply.id === postId ? "근거가 가리키는 답글" : undefined}>
+                    aria-label={reply.id === postId ? uiText("근거가 가리키는 답글") : undefined}>
                     {reply.reply_to_post_id !== detailRoot.id ? (
+                      currentState.feed.schema_version === "owner-manual-social-thread-v2" && currentState.feed.parent_references.find(parent => parent.post_id === reply.reply_to_post_id)?.state === "unavailable" ?
+                      <p className={styles.parentReply}>{uiText("부모 게시글을 볼 수 없습니다.")}</p> :
                       <Link className={styles.parentReply} href={worldPostDetailRoute(worldId, reply.reply_to_post_id!)}>
-                        {items.find((item) => item.id === reply.reply_to_post_id)?.author_name ?? "이전"} 답글에 대한 대댓글 · 부모 답글 보기
-                      </Link>
+                        {uiText("부모 게시글 보기")}</Link>
                     ) : null}
                   <SocialPostRow
-                    actions={aggregateManualPostActions(reply)}
+                    actions={aggregateManualPostActions(reply, worldPostDetailRoute(worldId, reply.id), reactions.likeAction(reply).disabled)}
+                    onAction={() => void reactions.setReaction(reply)}
+                    href={worldPostDetailRoute(worldId, reply.id)}
                     authorHref={
                       reply.author_profile_capability === "available"
                         ? worldCharacterProfileRoute(
@@ -535,50 +593,33 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
                         : undefined
                     }
                     key={reply.id}
-                    post={presentManualPost(reply)}
+                    post={presentManualPost(reply, formatDate)}
                     variant="reply"
                   />
                   </article>
-                ))}
+                )} />
               </div>
             ) : (
-              <p className={styles.noReplies}>아직 공개된 대꾸가 없어요.</p>
+              <p className={styles.noReplies}>{uiText("아직 공개된 답글이 없어요.")}</p>
             )}
             <div className={styles.threadPages}>
               {(currentState.feed.page_offset ?? 0) > 0 ? (
-                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>이전 답글</Button>
+                <Button onClick={() => void loadFeed(undefined, Math.max(0, (currentState.feed.page_offset ?? 0) - 50))}>{uiText("이전 답글")}</Button>
               ) : null}
               {currentState.feed.next_offset != null ? (
-                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>다음 답글</Button>
+                <Button onClick={() => void loadFeed(undefined, currentState.feed.next_offset!)}>{uiText("다음 답글")}</Button>
               ) : null}
             </div>
           </section>
           {detailRoot.can_owner_reply ? (
-            <form
-              className={styles.replyComposer}
-              onSubmit={(event) => submitReply(event, detailRoot.id)}
-            >
-              <div className={styles.replyComposerHeading}>
-                <MessageCircle size={18} aria-hidden="true" />
-                <strong>{ownerActor.profile.display_name}(으)로 대꾸하기</strong>
-              </div>
-              <Field label={`${detailRoot.author_name}의 게시글에 답글`} required>
-                {(fieldProps) => (
-                  <Textarea
-                    {...fieldProps}
-                    maxLength={1000}
-                    onChange={(event) => setReplyBody(event.target.value)}
-                    placeholder="이 앵무에게 직접 답하기"
-                    ref={replyTextareaRef}
-                    rows={3}
-                    value={replyBody}
-                  />
-                )}
-              </Field>
-              <div className={styles.composerSubmit}>
-                <Button loading={busy} loadingLabel="전송 중" type="submit">
-                  답글 보내기
-                </Button>
+            <form className={`${styles.replyComposer} ${styles.manualComposer}`} onSubmit={(event) => submitReply(event, detailRoot.id)}>
+              <ProfileAvatar avatarUrl={ownerActor.profile.avatar_url} name={ownerActor.profile.display_name} sizeClassName={styles.composerAvatar} textClassName={styles.composerAvatarText} />
+              <div className={styles.composerContent}>
+                <div className={styles.composerHeading}><strong>{ownerActor.profile.display_name}</strong>{ownerActor.profile.handle ? <span>{formatHandle(ownerActor.profile.handle)}</span> : null}</div>
+                <Field label={uiText("답글")} labelVisibility="sr-only" required>
+                  {(fieldProps) => <Textarea {...fieldProps} maxLength={1000} onChange={event => setReplyBody(event.target.value)} ref={replyTextareaRef} rows={3} value={replyBody} readOnly={busy} />}
+                </Field>
+                <div className={styles.composerActions}><IconButton type="submit" variant="primary" className={styles.publishButton} label={uiText("답글 보내기")} title={uiText("답글 보내기")} loading={busy} loadingLabel={uiText("전송 중")} disabled={!replyBody.trim()}><Send size={22} aria-hidden="true" /></IconButton></div>
               </div>
             </form>
           ) : null}
@@ -589,9 +630,10 @@ export function WorldSocialFeed({ ownerActor, postId, worldId, renderImagePicker
 }
 
 function WorldFeedLoading() {
+  const uiText = useUiText("social");
   return (
     <div aria-live="polite" className={styles.loadingState} data-social-feed-loading>
-      <span>World Feed를 불러오는 중</span>
+      <span>{uiText("World Feed를 불러오는 중")}</span>
       <div aria-hidden="true" className={styles.loadingRow} />
       <div aria-hidden="true" className={styles.loadingRow} />
     </div>
@@ -605,10 +647,10 @@ function WorldFeedFailure({
   failure: FeedFailure;
   onRetry: () => void;
 }) {
+  const uiText = useUiText("social");
   const action = failure.retryable ? (
     <Button onClick={onRetry} variant="secondary">
-      다시 시도
-    </Button>
+      {uiText("다시 시도")}</Button>
   ) : undefined;
   if (failure.kind === "offline" || failure.kind === "scope_mismatch") {
     return (
@@ -617,8 +659,8 @@ function WorldFeedFailure({
         description={failure.message}
         title={
           failure.kind === "offline"
-            ? "로컬 runtime에 연결할 수 없어요"
-            : "World 경계를 확인했어요"
+            ? uiText("로컬 runtime에 연결할 수 없어요")
+            : uiText("World 경계를 확인했어요")
         }
       />
     );
@@ -629,10 +671,10 @@ function WorldFeedFailure({
       description={failure.message}
       title={
         failure.kind === "forbidden"
-          ? "이 Feed를 볼 권한이 없어요"
+          ? uiText("이 Feed를 볼 권한이 없어요")
           : failure.kind === "not_found"
-            ? "게시글을 찾을 수 없어요"
-            : "World Feed를 열지 못했어요"
+            ? uiText("게시글을 찾을 수 없어요")
+            : uiText("World Feed를 열지 못했어요")
       }
     />
   );

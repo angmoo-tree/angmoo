@@ -23,6 +23,8 @@
       "auth_sessions",
       "character_active_worlds",
       "character_card_sources",
+      "character_draft_import_origins",
+      "character_import_origins",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -34,6 +36,7 @@
       "chat_retrieval_diagnostics",
       "daily_activity_plan_items",
       "daily_activity_plans",
+      "environment_timezone_changes",
       "graph_projection_outbox",
       "graph_projection_replay_runs",
       "image_interpretation_attempts",
@@ -45,6 +48,7 @@
       "llm_credentials",
       "local_bot_action_quota_buckets",
       "local_bot_read_quota_buckets",
+      "local_environments",
       "media_assets",
       "media_credentials",
       "memory_activation_epochs",
@@ -108,6 +112,7 @@
       "world_activity_repertoires",
       "world_character_activity_states",
       "world_character_blocks",
+      "world_character_configurations",
       "world_character_feed_cursors",
       "world_character_feed_observations",
       "world_character_setup_attempts",
@@ -159,6 +164,9 @@
       "installation_identities",
       "local_owner_bootstrap_challenges",
       "runtime_scheduler_leases"
+    ],
+    "delete_unreferenced_shared_import_basis": [
+      "character_import_snapshots"
     ]
   },
   "character_deletion": {
@@ -182,6 +190,8 @@
       "agent_runs",
       "character_active_worlds",
       "character_card_sources",
+      "character_draft_import_origins",
+      "character_import_origins",
       "character_lore_chunks",
       "character_lore_sources",
       "character_message_settings",
@@ -262,6 +272,7 @@
       "world_activity_repertoires",
       "world_character_activity_states",
       "world_character_blocks",
+      "world_character_configurations",
       "world_character_feed_cursors",
       "world_character_feed_observations",
       "world_character_setup_attempts",
@@ -293,9 +304,11 @@
       "auth_login_throttle_buckets",
       "auth_sessions",
       "community_mutation_quota_buckets",
+      "environment_timezone_changes",
       "image_generation_policy",
       "image_interpretation_settings",
       "installation_identities",
+      "local_environments",
       "local_owner_bootstrap_challenges",
       "lore_parser_leases",
       "memory_batch_profiles",
@@ -318,6 +331,9 @@
       "world_roles",
       "world_rules",
       "worlds"
+    ],
+    "delete_unreferenced_shared_import_basis": [
+      "character_import_snapshots"
     ]
   }
 }

@@ -56,6 +56,14 @@ class OwnerReplyCommand:
 
 
 @dataclass(frozen=True)
+class OwnerLikeCommand:
+    world_id: str
+    current_user_id: str
+    target_post_id: str
+    liked: bool
+
+
+@dataclass(frozen=True)
 class ValidatedAutonomousWriteCommand:
     world_id: str
     actor_world_character_id: str

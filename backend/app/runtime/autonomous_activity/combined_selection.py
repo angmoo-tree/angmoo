@@ -34,7 +34,8 @@ class CombinedSelection:
         for lane, prepared in state["prepared_lanes"].items():
             candidates = prepared.get("candidates", [])
             if len(candidates) > 1 and not prepared.get("preparation_error"):
-                choices[lane] = {"candidates": candidate_previews(candidates),
+                choices[lane] = {"candidates": candidate_previews(candidates, lane=lane,
+                    policy=state.get("identity", {}).get("social_io_policy")),
                     "selection_limit": min(INBOX_TARGET_LIMIT if lane == "inbox" else 1, len(candidates))}
                 preferences = prepared.get("shared_context", {}).get("action_preferences")
                 if preferences is not None:
@@ -42,6 +43,9 @@ class CombinedSelection:
         return {"context": state["shared_context"], "lanes": choices}
 
     async def mode(self, state):
+        from app.contracts.sns_generation import COMBINED_ONLY, read_generation_policies
+        if read_generation_policies(state.get("identity")).sns_generation_policy == COMBINED_ONLY:
+            return {"selection_mode": "combined"}
         size = len(json.dumps(self.request(state), ensure_ascii=False, default=str))
         return {"selection_mode": "split" if size > 56000 else "combined"}
 
@@ -112,7 +116,7 @@ class CombinedSelection:
                 payload=request, schema={"type": "object", "properties": properties,
                     "required": list(properties)},
                 validator=validate, max_tokens=4096, recover_truncation=True,
-                before_json_retry=guard_retry, delivery=delivery)
+                before_json_retry=guard_retry, before_provider_request=guard_retry, delivery=delivery)
             for lane in needed:
                 prepared[lane].update(result[lane])
         except Exception as exc:

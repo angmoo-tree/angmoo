@@ -1,6 +1,7 @@
 import { WORLD_PACKAGE_MEDIA_TYPE } from "@/features/world-packages/config/world-package";
 import type { PreparedWorldPackageExport,PreparedWorldPackageImport,WorldPackageExportPreview,WorldPackageExportRequest,WorldPackageImportResult } from "@/features/world-packages/types/world-package";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
+import { ApiRequestError } from "@/lib/http/error-contract";
 
 
 
@@ -10,10 +11,17 @@ import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 
 
-export class WorldPackageApiError extends Error {
-  constructor(readonly status: number, readonly detail: unknown) {
-    super(worldPackageErrorMessage(status, detail));
+const PERSONA_FIELDS = ["one_liner", "personality", "speech_style", "worldview", "character_background", "topic_preferences", "safety_rules", "persona_summary"] as const;
+type PersonaFieldName = typeof PERSONA_FIELDS[number];
+export type WorldPackagePersonaError = { field: PersonaFieldName; limit: number; actual: number };
+
+export class WorldPackageApiError extends ApiRequestError {
+  readonly fields: WorldPackagePersonaError[];
+
+  constructor(status: number, detail: unknown, retryAfter: string | null = null) {
+    super("The World Package request could not be completed.", status, worldPackageErrorCode(detail), {}, retryAfter);
     this.name = "WorldPackageApiError";
+    this.fields = personaErrorFields(detail);
   }
 }
 
@@ -30,35 +38,28 @@ async function apiResponse<T>(response: Response): Promise<T> {
       typeof payload === "object" && payload !== null && "detail" in payload
         ? (payload as { detail: unknown }).detail
         : payload;
-    throw new WorldPackageApiError(response.status, detail);
+    throw new WorldPackageApiError(response.status, detail, response.headers.get("Retry-After"));
   }
   return payload as T;
 }
 
-function worldPackageErrorMessage(status: number, detail: unknown): string {
-  const code = worldPackageErrorCode(status, detail);
-  if (code === "world_package_persona_invalid" && typeof detail === "object" && detail !== null && "fields" in detail && Array.isArray(detail.fields)) {
-    const labels: Record<string, string> = {one_liner: "한 줄 소개", personality: "성격", speech_style: "말투",
-      worldview: "세계관/배경", topic_preferences: "관심 주제", safety_rules: "피해야 할 행동", persona_summary: "캐릭터 요약"};
-    const fields = detail.fields.filter((item) => item && typeof item.field === "string" && labels[item.field]
-      && Number.isInteger(item.limit) && Number.isInteger(item.actual));
-    return "캐릭터 설정의 길이를 확인해주세요. " + fields.map((item) => `${labels[item.field]}: ${item.actual.toLocaleString()} / ${item.limit.toLocaleString()}자`).join(", ");
-  }
-  if (status >= 500) return "서버가 내보내기 요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.";
-  return code;
+function worldPackageErrorCode(detail: unknown): string | null {
+  const code = typeof detail === "string" ? detail
+    : typeof detail === "object" && detail !== null && "code" in detail ? detail.code : null;
+  return typeof code === "string" && /^world_package_[a-z_]{1,64}$/.test(code) ? code : null;
 }
 
-function worldPackageErrorCode(status: number, detail: unknown) {
-  if (typeof detail === "string") return detail;
-  if (
-    typeof detail === "object" &&
-    detail !== null &&
-    "code" in detail &&
-    typeof (detail as { code?: unknown }).code === "string"
-  ) {
-    return (detail as { code: string }).code;
-  }
-  return `http_${status}`;
+function personaErrorFields(detail: unknown): WorldPackagePersonaError[] {
+  if (worldPackageErrorCode(detail) !== "world_package_persona_invalid"
+    || typeof detail !== "object" || detail === null || !("fields" in detail) || !Array.isArray(detail.fields)) return [];
+  // Keep bounded field names and lengths, never uploaded text or raw validator input.
+  return detail.fields.slice(0, PERSONA_FIELDS.length).flatMap((item: unknown) => {
+    if (!item || typeof item !== "object" || !("field" in item) || !("limit" in item) || !("actual" in item)
+      || !PERSONA_FIELDS.includes(item.field as PersonaFieldName)
+      || typeof item.limit !== "number" || !Number.isSafeInteger(item.limit) || item.limit <= 0
+      || typeof item.actual !== "number" || !Number.isSafeInteger(item.actual) || item.actual < 0) return [];
+    return [{ field: item.field as PersonaFieldName, limit: item.limit, actual: item.actual }];
+  });
 }
 
 function jsonHeaders(extra: HeadersInit = {}) {
@@ -122,7 +123,7 @@ export async function downloadPreparedWorldPackage(
       typeof payload === "object" && payload !== null && "detail" in payload
         ? payload.detail
         : payload;
-    throw new WorldPackageApiError(response.status, detail);
+    throw new WorldPackageApiError(response.status, detail, response.headers.get("Retry-After"));
   }
   return {
     blob: await response.blob(),

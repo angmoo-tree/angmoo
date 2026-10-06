@@ -45,6 +45,7 @@ from app.domains.social.service.posts import get_post_thread
 from app.domains.social.service.topic_metadata import post_topic_signature_for_prompt
 from app.domains.social.service.activity_results import _safe_topic_text, _body_preview
 from app.domains.social.utils.limits import _safe_limit
+from app.domains.social.service.post_authors import enrich_post_authors, read_post_author_profiles
 
 
 class AgentToolReadService:
@@ -84,9 +85,10 @@ class AgentToolReadService:
         posts, next_cursor = post_repository.list_timeline_posts(
             db, limit=effective_limit, cursor=cursor
         )
+        world_profiles = read_post_author_profiles(references=self.workflows.post_author_references(db), posts=posts)
         return schemas.AgentFeedPage(
             items=[
-                self._agent_feed_post_summary(db, post)
+                self._agent_feed_post_summary(db, post, world_profiles=world_profiles)
                 for post in posts
                 if _is_post_public_context_visible(db, post)
             ],
@@ -126,8 +128,9 @@ class AgentToolReadService:
             if next_cursor is None or len(items) >= limit:
                 break
             page_cursor = next_cursor
+        world_profiles = read_post_author_profiles(references=self.workflows.post_author_references(db), posts=items)
         return schemas.AgentFeedPage(
-            items=[self._agent_feed_post_summary(db, post) for post in items],
+            items=[self._agent_feed_post_summary(db, post, world_profiles=world_profiles) for post in items],
             next_cursor=last_scanned_id if len(items) >= limit else None,
         )
 
@@ -155,8 +158,7 @@ class AgentToolReadService:
             followed_user_ids=followed_user_ids,
             followed_character_ids=followed_character_ids,
         )
-        return _neutralize_feed_page_for_agent(
-            schemas.FeedPage(
+        read = schemas.FeedPage(
                 items=[
                     _post_summary(db, post)
                     for post in posts
@@ -164,12 +166,13 @@ class AgentToolReadService:
                 ],
                 next_cursor=next_cursor,
             )
-        )
+        enrich_post_authors(references=self.workflows.post_author_references(db), views=read.items)
+        return _neutralize_feed_page_for_agent(read)
 
     def _agent_feed_post_summary(
-        self, db: Session, post: models.Post
+        self, db: Session, post: models.Post, *, world_profiles=None
     ) -> schemas.AgentFeedPostSummary:
-        author = _post_author_identity(db, post)
+        author = _post_author_identity(db, post, world_profiles=world_profiles)
         return schemas.AgentFeedPostSummary(
             post_id=post.id,
             author=neutralize_context_text(author["name"] or "-"),
@@ -203,7 +206,9 @@ class AgentToolReadService:
             reason="agent_tool_get_thread",
             result=f"Read thread {post_id}.",
         )
-        return _neutralize_post_thread_for_agent(get_post_thread(db, post_id))
+        read = get_post_thread(db, post_id)
+        enrich_post_authors(references=self.workflows.post_author_references(db), views=[read.post, *read.replies])
+        return _neutralize_post_thread_for_agent(read)
 
     def get_agent_tool_profile(
         self, db: Session, session_key: str, profile_type: str, profile_id: str

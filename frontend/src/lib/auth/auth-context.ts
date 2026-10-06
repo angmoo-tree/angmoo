@@ -9,6 +9,7 @@ export type AuthContextValue = {
   status: AuthStatus;
   user: UserRead | null;
   refresh: () => Promise<void>;
+  sessionRevision?: number;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

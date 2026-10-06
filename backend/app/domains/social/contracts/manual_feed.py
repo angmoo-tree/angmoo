@@ -3,6 +3,7 @@ from typing import Protocol
 from app.domains.social.contracts.actors import SocialCharacter
 from app.domains.social.contracts.source_writes import SourceWorldCharacter, SourceMembership
 from app.domains.world_characters.contracts.owner_identity import OwnerControlledIdentitySnapshot
+from app.domains.social.contracts.post_authors import PostAuthorReferences
 
 
 class ManualFeedWorldCharacter(SourceWorldCharacter, Protocol):
@@ -10,7 +11,7 @@ class ManualFeedWorldCharacter(SourceWorldCharacter, Protocol):
     def local_profile(self) -> object | None: ...
 
 
-class ManualFeedReferences(Protocol):
+class ManualFeedReferences(PostAuthorReferences, Protocol):
     def prepare_authors(self, *, world_id: str, author_ids: set[str]) -> None: ...
     def get_owner_identity(self, *, world_id: str, current_user_id: str) -> OwnerControlledIdentitySnapshot: ...
     def get_world_character(self, world_character_id: str) -> ManualFeedWorldCharacter | None: ...

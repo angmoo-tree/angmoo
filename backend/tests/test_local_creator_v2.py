@@ -21,6 +21,9 @@ from app.domains.world_characters.service.owner_identity import OwnerControlledI
 from app.domains.worlds.contracts import NO_SPECIFIC_ROLE_KEY
 from app.domains.worlds.service.default_space import ensure_default_space
 from app.runtime.characters.creator import build_creator_workflows
+from app.domains.identity.schemas import UserPreferencesUpdate
+from app.domains.identity.service.auth import update_user_preferences
+from app.domains.worlds.service.definition import evaluate_world_readiness
 
 
 @pytest.fixture
@@ -56,6 +59,22 @@ def test_default_and_same_profile_identity(db):
     assert (changed.character_id, changed.world_character_id) == (first.character_id, first.world_character_id)
     assert changed.profile.handle == "haru"
     assert changed.profile.background == first.profile.background
+
+
+@pytest.mark.parametrize("language", ["ko", "en"])
+def test_default_space_is_publish_ready_for_both_owner_languages(db, language):
+    session, owner = db
+    update_user_preferences(session, owner, UserPreferencesUpdate(
+        ui_language=language, expected_ui_revision=owner.ui_preference_revision,
+    ))
+    world = ensure_default_space(session, owner_id=owner.id)
+    assert world.language == language
+    assert world.status == "published"
+    assert world.readiness_status == "publish_ready"
+    readiness = evaluate_world_readiness(session, world)
+    assert readiness.ready_for_publish
+    assert readiness.issues == []
+    assert ensure_default_space(session, owner_id=owner.id).id == world.id
 
 
 def test_keyless_registration_is_atomic_off_and_replayed(db, monkeypatch):

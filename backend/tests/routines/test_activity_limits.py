@@ -46,12 +46,22 @@ from app.runtime.characters import management as agent_service
 
 
 def _create_autonomy_capacity_tables(engine) -> None:
+    from app.domains.identity.models import InstallationIdentity
+    from app.domains.identity.models_environment import LocalEnvironment, EnvironmentTimezoneChange
+    from app.domains.characters.models_import import CharacterImportOrigin, CharacterImportSnapshot
+    from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
     for table in (
         models.User.__table__,
+        InstallationIdentity.__table__,
+        LocalEnvironment.__table__,
+        EnvironmentTimezoneChange.__table__,
         models.Character.__table__,
+        CharacterImportSnapshot.__table__,
+        CharacterImportOrigin.__table__,
         models.World.__table__,
         models.WorldMembership.__table__,
         models.WorldCharacter.__table__,
+        WorldCharacterConfiguration.__table__,
         models.CharacterActiveWorld.__table__,
         models.CharacterState.__table__,
         models.Post.__table__,
@@ -83,6 +93,9 @@ def _add_capacity_world(
     world_id: str = "world-routine",
     timezone: str = "Asia/Seoul",
 ) -> models.World:
+    from environment_fixture_support import seed_environment
+    db.flush()
+    seed_environment(db, owner_user_id, timezone)
     world = models.World(
         id=world_id,
         slug=world_id,
@@ -187,11 +200,26 @@ def _add_active_routine_world_character(
     status: str = "active",
 ) -> models.WorldCharacter:
     identifier = world_character_id or f"world-character-{character_id}"
+    character = db.get(models.Character, character_id)
+    world = db.get(models.World, world_id)
+    if world is None:
+        world = _add_capacity_world(db, owner_user_id=character.owner_id, world_id=world_id)
+        db.flush()
+    membership = db.scalar(select(models.WorldMembership).where(
+        models.WorldMembership.world_id == world_id,
+        models.WorldMembership.user_id == character.owner_id,
+    ))
+    if membership is None:
+        membership = models.WorldMembership(id=f"membership-{character_id}", world_id=world_id,
+            user_id=character.owner_id, role="owner" if world.owner_user_id == character.owner_id else "member",
+            status="active", joined_at=datetime.now(UTC))
+        db.add(membership)
+        db.flush()
     world_character = models.WorldCharacter(
         id=identifier,
         world_id=world_id,
         character_id=character_id,
-        membership_id=f"membership-{character_id}",
+        membership_id=membership.id,
         status=status,
         control_mode="autonomous",
         autonomous_enabled=autonomous_enabled,
@@ -208,6 +236,9 @@ def _add_active_routine_world_character(
             ),
         ]
     )
+    db.flush()
+    from app.runtime.world_characters.creation_configuration import initialize_created_world_character
+    initialize_created_world_character(db, character=character, world_character=world_character)
     return world_character
 
 
@@ -868,6 +899,11 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
             slot = db.get(models.AgentSlot, f"angmoo-{index}")
             assert slot is not None
             slot.next_tick_at = due_at
+            from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+            configuration = db.get(WorldCharacterConfiguration, f"world-character-char-sqlite-tick-{index}")
+            configuration.settings = {**configuration.settings,
+                "active_hours_start": f"{(observed_at.hour - 1) % 24:02d}:00",
+                "active_hours_end": f"{(observed_at.hour + 16) % 24:02d}:00"}
         db.commit()
 
     with factory() as db:
@@ -1053,8 +1089,10 @@ def test_tick_resident_slots_staggers_claimed_runs(
     monkeypatch.setattr(
         agent_run_service.slot_recovery,
         "recover_expired_resident_slot_runs",
-        lambda db, *, now, next_tick_at_factory=None: 0,
+        lambda db, *, now, next_tick_at_factory=None, autonomy_reader=None: 0,
     )
+    from app.runtime.routines import world_autonomy
+    monkeypatch.setattr(world_autonomy, "reconcile_world_autonomy", lambda db, **kwargs: 0)
     monkeypatch.setattr(
         agent_run_service.slot_queries,
         "list_agent_slots",
@@ -1156,9 +1194,17 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
 
 def test_activity_policy_keeps_observe_internal_when_setting_disabled() -> None:
     engine = create_engine("sqlite:///:memory:")
+    from app.domains.identity.models_environment import LocalEnvironment
+    models.User.__table__.create(engine)
+    models.Character.__table__.create(engine)
+    LocalEnvironment.__table__.create(engine)
     models.AgentActivitySetting.__table__.create(engine)
 
     with Session(engine) as db:
+        db.add(models.User(id="owner", display_name="Owner"))
+        db.add(models.Character(id="char-1", owner_id="owner", name="Character", handle="character", persona_summary="Synthetic persona"))
+        from environment_fixture_support import seed_environment
+        seed_environment(db, "owner", timezone="Asia/Seoul")
         db.add(
             models.AgentActivitySetting(
                 character_id="char-1",
@@ -2019,7 +2065,7 @@ def test_activation_uses_canonical_initial_schedule(
         assert slot is not None and slot.next_tick_at is not None
         assert slot.next_tick_at.replace(tzinfo=UTC) == expected
         assert observed["character_id"] == character.id
-        assert observed["timezone"] == "Asia/Seoul"
+        assert observed["timezone"] == "UTC"  # No detected environment was supplied.
 
 
 def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(

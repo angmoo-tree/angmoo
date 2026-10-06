@@ -1,3 +1,7 @@
+import { isSupportedProductRoute } from "@/lib/navigation/product-route-validation";
+import { desktopHistoryAvailability } from "@/lib/desktop/desktop-history";
+import { approveProductUnload, confirmProductLeave } from "@/lib/desktop/navigation-guard";
+
 export type AngmooDesktopWindowKind =
   | "memory"
   | "phone"
@@ -8,16 +12,6 @@ export type AngmooDesktopWindowState = {
   kind: AngmooDesktopWindowKind;
   route: string;
 };
-
-export type AngmooPhoneResizeDirection =
-  | "east"
-  | "north"
-  | "north-east"
-  | "north-west"
-  | "south"
-  | "south-east"
-  | "south-west"
-  | "west";
 
 export type AngmooDesktopRuntimeStatus = {
   phase: "starting" | "ready" | "crashed" | "stopped";
@@ -65,7 +59,8 @@ declare global {
 export const DESKTOP_ROUTE_EVENT = "angmoo:desktop-route";
 const DESKTOP_WINDOW_KIND_QUERY = "__angmoo_window_kind";
 const DESKTOP_WINDOW_ROUTE_QUERY = "__angmoo_window_route";
-const DESKTOP_ROUTE_HISTORY_INDEX = "__angmooDesktopRouteHistoryIndex";
+export const DESKTOP_NAVIGATE_EVENT = "angmoo:desktop-navigate";
+export const DESKTOP_NAVIGATION_ERROR_EVENT = "angmoo:desktop-navigation-error";
 const DESKTOP_WINDOW_KINDS = new Set<AngmooDesktopWindowKind>([
   "memory",
   "phone",
@@ -82,21 +77,15 @@ export function isTauriDesktopRuntime() {
 
 export function getDesktopWindowState(): AngmooDesktopWindowState | null {
   if (typeof window === "undefined") return null;
-  if (window.__ANGMOO_DESKTOP_WINDOW__) {
-    return {
-      ...window.__ANGMOO_DESKTOP_WINDOW__,
-      route: canonicalProductRoute(window.__ANGMOO_DESKTOP_WINDOW__.route),
-    };
-  }
   const bootstrap = desktopWindowStateFromBootstrapQuery();
-  if (bootstrap) return bootstrap;
-  if (!isTauriDesktopRuntime()) return null;
-  return {
-    kind: "phone",
-    route: normalizeInternalRoute(
-      `${window.location.pathname}${window.location.search}`,
-    ),
-  };
+  const initial = window.__ANGMOO_DESKTOP_WINDOW__ ?? bootstrap;
+  if (!initial && !isTauriDesktopRuntime()) return null;
+  const kind = initial?.kind ?? "phone";
+  // A document-start initialization script describes the first opening only.
+  // A real deep URL wins on reload; consume the encoded index bootstrap once.
+  const raw = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const route = bootstrap?.route ?? canonicalProductRoute(raw);
+  return { kind, route };
 }
 
 function desktopWindowStateFromBootstrapQuery(): AngmooDesktopWindowState | null {
@@ -112,7 +101,7 @@ function desktopWindowStateFromBootstrapQuery(): AngmooDesktopWindowState | null
   try {
     return {
       kind: kind as AngmooDesktopWindowKind,
-      route: canonicalProductRoute(route),
+      route: validateInternalProductRoute(route),
     };
   } catch {
     return null;
@@ -123,6 +112,7 @@ export function consumeDesktopWindowBootstrapRoute(
   state: AngmooDesktopWindowState,
 ) {
   if (typeof window === "undefined") return;
+  window.__ANGMOO_DESKTOP_WINDOW__ = state;
   const params = new URLSearchParams(window.location.search);
   if (
     !params.has(DESKTOP_WINDOW_KIND_QUERY) &&
@@ -130,7 +120,7 @@ export function consumeDesktopWindowBootstrapRoute(
   ) {
     return;
   }
-  window.history.replaceState(desktopRouteHistoryState(0), "", state.route);
+  window.history.replaceState(window.history.state, "", state.route);
 }
 
 export function desktopWindowKindForRoute(
@@ -161,7 +151,6 @@ export function currentDesktopRoute() {
 export function subscribeDesktopRoute(onStoreChange: () => void) {
   if (typeof window === "undefined") return () => undefined;
   const handlePopState = () => {
-    synchronizeDesktopRouteFromBrowserHistory();
     onStoreChange();
   };
   window.addEventListener(DESKTOP_ROUTE_EVENT, onStoreChange);
@@ -172,82 +161,70 @@ export function subscribeDesktopRoute(onStoreChange: () => void) {
   };
 }
 
-function desktopRouteHistoryIndex() {
-  const state = window.history.state;
-  if (!state || typeof state !== "object") return 0;
-  const value = (state as Record<string, unknown>)[DESKTOP_ROUTE_HISTORY_INDEX];
-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
-    ? value
-    : 0;
-}
-
-function desktopRouteHistoryState(index: number) {
-  const state = window.history.state;
-  return {
-    ...(state && typeof state === "object" ? state : {}),
-    [DESKTOP_ROUTE_HISTORY_INDEX]: index,
-  };
-}
-
-function synchronizeDesktopRouteFromBrowserHistory() {
-  if (!isTauriDesktopRuntime()) return false;
-  const state = getDesktopWindowState();
-  if (!state) return false;
-  const route = canonicalProductRoute(
-    `${window.location.pathname}${window.location.search}`,
-  );
-  if (desktopWindowKindForRoute(route) !== state.kind) return false;
-  window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route };
-  return true;
+export function publishDesktopRoute() {
+  if (isTauriDesktopRuntime()) {
+    const state = getDesktopWindowState();
+    if (state) window.__ANGMOO_DESKTOP_WINDOW__ = state;
+  }
+  window.dispatchEvent(new Event(DESKTOP_ROUTE_EVENT));
 }
 
 export function navigateCurrentDesktopRoute(route: string, replace = false) {
   if (!isTauriDesktopRuntime()) return false;
   const state = getDesktopWindowState();
-  if (!state) return false;
-  const normalized = canonicalProductRoute(route);
-  if (desktopWindowKindForRoute(normalized) !== state.kind) return false;
-  window.__ANGMOO_DESKTOP_WINDOW__ = { ...state, route: normalized };
-  const historyIndex = desktopRouteHistoryIndex();
-  if (replace) {
-    window.history.replaceState(desktopRouteHistoryState(historyIndex), "", normalized);
+  const normalized = validateInternalProductRoute(route);
+  if (!state || desktopWindowKindForRoute(normalized) !== state.kind) return false;
+  if (!replace && normalized === state.route) return true;
+  if (document.documentElement.dataset.angmooRuntimeProfile !== "tauri-static") {
+    window.dispatchEvent(new CustomEvent(DESKTOP_NAVIGATE_EVENT, { detail: { route: normalized, replace } }));
   } else {
-    window.history.pushState(desktopRouteHistoryState(historyIndex + 1), "", normalized);
+    window.history[replace ? "replaceState" : "pushState"](window.history.state, "", normalized);
+    publishDesktopRoute();
   }
-  window.dispatchEvent(new Event(DESKTOP_ROUTE_EVENT));
   return true;
 }
 
 export function navigateBackCurrentDesktopRoute(fallbackRoute: string) {
   if (!isTauriDesktopRuntime()) return false;
-  const state = getDesktopWindowState();
-  if (!state) return false;
-  const fallback = canonicalProductRoute(fallbackRoute);
-  if (desktopWindowKindForRoute(fallback) !== state.kind) return false;
-  if (desktopRouteHistoryIndex() > 0) {
-    window.history.back();
-    return true;
-  }
-  return navigateCurrentDesktopRoute(fallback, true);
+  if (!confirmProductLeave()) return true;
+  if (desktopHistoryAvailability().back) { window.history.back(); return true; }
+  void navigateDesktopProductRoute(fallbackRoute, true, true).catch(reportDesktopNavigationError);
+  return true;
+}
+
+export function reportDesktopNavigationError() {
+  window.dispatchEvent(new Event(DESKTOP_NAVIGATION_ERROR_EVENT));
+}
+
+export function reloadDesktopProductRoute() {
+  if (!confirmProductLeave()) return false;
+  approveProductUnload();
+  window.location.reload();
+  return true;
 }
 
 export async function navigateDesktopProductRoute(
   route: string,
   replace = false,
+  leaveConfirmed = false,
 ): Promise<DesktopProductNavigationResult> {
   if (!isTauriDesktopRuntime()) {
     return { handled: false, mode: "browser" };
   }
   const state = getDesktopWindowState();
   if (!state) throw new Error("desktop_window_state_unavailable");
-  const normalized = canonicalProductRoute(route);
+  const normalized = validateInternalProductRoute(route);
   const targetKind = desktopWindowKindForRoute(normalized);
   if (targetKind === state.kind) {
+    await window.__TAURI__?.core?.invoke?.("validate_product_navigation", { kind: targetKind, route: normalized });
+    if (normalized !== state.route && !leaveConfirmed && !confirmProductLeave()) return { handled: true, mode: "same-window" };
     if (!navigateCurrentDesktopRoute(normalized, replace)) {
       throw new Error("desktop_same_window_navigation_failed");
     }
     return { handled: true, mode: "same-window" };
   }
+  // open_product_window already validates kind/route before creating or
+  // focusing its singleton. Do not perform the same host validation twice.
   if (!(await openDesktopProductWindow(targetKind, normalized))) {
     throw new Error("desktop_cross_window_navigation_failed");
   }
@@ -262,29 +239,17 @@ export async function openDesktopProductWindow(
   if (!invoke) return false;
   await invoke("open_product_window", {
     kind,
-    route: canonicalProductRoute(route),
+    route: validateInternalProductRoute(route),
   });
   return true;
 }
 
 export async function invokeDesktopWindowCommand(
-  command:
-    | "close_product_window"
-    | "minimize_product_window"
-    | "start_product_window_drag",
+  command: "close_product_window",
 ) {
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) return false;
   await invoke(command);
-  return true;
-}
-
-export async function startDesktopWindowResize(
-  direction: AngmooPhoneResizeDirection,
-) {
-  const invoke = window.__TAURI__?.core?.invoke;
-  if (!invoke) return false;
-  await invoke("start_product_window_resize", { direction });
   return true;
 }
 
@@ -302,6 +267,12 @@ export async function retryDesktopRuntime() {
 }
 
 export function normalizeInternalRoute(route: string) {
+  if (route.length > 1024 || !route.startsWith("/") || route.startsWith("//") || Array.from(route).some(ch => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 92)) throw new Error("desktop_route_must_be_internal");
+  const path = route.split(/[?#]/, 1)[0];
+  for (const part of path.split("/")) {
+    const decoded = decodeURIComponent(part);
+    if (decoded === "." || decoded === ".." || Array.from(decoded).some(ch => ch.charCodeAt(0) < 32 || ch === "/" || ch.charCodeAt(0) === 92)) throw new Error("invalid_product_route_segment");
+  }
   const parsed = new URL(route, "http://angmoo.local");
   if (parsed.origin !== "http://angmoo.local") {
     throw new Error("desktop_route_must_be_internal");
@@ -334,4 +305,19 @@ export function canonicalProductRoute(route: string) {
 
 function routePathname(route: string) {
   return new URL(normalizeInternalRoute(route), "http://angmoo.local").pathname;
+}
+
+export function validateInternalProductRoute(route: string) {
+  if (/__angmoo_|(?:api[_-]?key|launch[_-]?token|access[_-]?token)=/i.test(route)) throw new Error("private_product_route");
+  const normalized = canonicalProductRoute(route);
+  const parsed = new URL(normalized, "http://angmoo.local");
+  if (parsed.hash || [...parsed.searchParams.keys()].some(key => key.toLowerCase().startsWith("__angmoo_") || ["apikey", "launchtoken", "accesstoken"].includes(key.toLowerCase().replace(/[_-]/g, "")))) throw new Error("private_product_route");
+  if (!isSupportedProductRoute(normalized)) throw new Error("unsupported_product_route");
+  return normalized;
+}
+
+export async function openExternalProductLink(url: string) {
+  const parsed = new URL(url);
+  if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error("invalid_external_product_link");
+  await window.__TAURI__?.core?.invoke?.("open_external_product_link", { url: parsed.href });
 }

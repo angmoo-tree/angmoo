@@ -193,7 +193,13 @@ class WorldChatThreadRead(BaseModel):
 class WorldChatThreadListRead(BaseModel):
     items: list[WorldChatThreadRead]
     ambiguous_legacy_count: int = 0
-    max_threads: int = 5
+    max_threads: int | None = None
+
+
+class WorldChatThreadDeleteRead(BaseModel):
+    world_id: str
+    thread_id: str
+    outcome: Literal["deleted", "already_deleted"]
 
 
 class WorldChatThreadCreateRead(BaseModel):

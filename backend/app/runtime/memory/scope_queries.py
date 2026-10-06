@@ -39,11 +39,8 @@ def read_scope_presence(session: Session, scope: MemoryScope) -> tuple[str | Non
 
 
 def read_scope_timezone(session: Session, scope: MemoryScope) -> str | None:
-    worlds = Base.metadata.tables["worlds"]
-    zone = session.scalar(
-        select(worlds.c.timezone).where(worlds.c.id == scope.world_id)
-    )
-    return zone
+    from app.domains.identity.service.environment import snapshot
+    return snapshot(session, scope.owner_id).timezone
 
 
 def read_due_batch_configs(session, *, consent, ready_source, now):
@@ -55,6 +52,8 @@ def read_due_batch_configs(session, *, consent, ready_source, now):
     from sqlalchemy import or_, select
     from app.domains.memory.models.batch import MemoryBatchSetting
     from app.domains.memory.models.items import MemoryScopeSettingModel
+    from app.domains.identity.service.environment import installation_snapshot
+    zone = installation_snapshot(session).timezone
     worlds = Base.metadata.tables["worlds"]
     due_slot = (MemoryBatchSetting.schedule_enabled.is_(True)) & (
         MemoryBatchSetting.next_due_at <= now
@@ -71,7 +70,7 @@ def read_due_batch_configs(session, *, consent, ready_source, now):
             MemoryScopeSettingModel.enabled.is_(True),
             or_(
                 due_slot,
-                MemoryBatchSetting.timezone != worlds.c.timezone,
+                MemoryBatchSetting.timezone != zone,
                 ready_source & MemoryBatchSetting.trigger_kind.is_not(None),
             ),
         )

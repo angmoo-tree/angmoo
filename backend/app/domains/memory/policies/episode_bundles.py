@@ -25,6 +25,8 @@ def bundle_manifest_hash(bundle: EpisodeBundle) -> str:
                     for ref, unit in bundle.source_refs().items()],
         "priors": [(p.item_id, p.item_version, p.summary) for p in bundle.prior_episodes],
     }
+    if bundle.environment is not None:
+        manifest["environment"] = bundle.environment.to_dict()
     return hashlib.sha256(json.dumps(manifest, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 

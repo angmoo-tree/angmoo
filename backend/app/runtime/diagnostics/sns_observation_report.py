@@ -108,6 +108,7 @@ def start_session(data_root: Path, *, world_id: str, actor_ids: list[str] | None
                 "source_revision": source_revision or "unknown",
                 "database_relative_path": db_path.relative_to(data_root).as_posix(),
                 "initial_slots": slots, "event_schema_version": SCHEMA_VERSION,
+                "response_evidence_version": 1,
                 "event_limit_bytes": 8192, "session_limit_bytes": 64 * 1024 * 1024,
                 "artifact_limit_bytes": 64 * 1024,
                 "artifact_session_limit_bytes": 16 * 1024 * 1024}
@@ -317,6 +318,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
             continue  # A lane/parent/activity wrapper of the original failure.
         errors.append(item)
     request_events = [item for item in events if item.get("event_type") == "request_config"]
+    response_events = [item for item in events if item.get("event_type") == "provider_response"]
     sqlite_events = [item for item in events if item.get("event_type") == "sqlite_write"]
     artifact_missing = 0
     artifact_truncated = 0
@@ -361,6 +363,20 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                      (item.get("details") or {}).get("call_order")) for item in request_events}
     request_evidence_complete = (call_keys <= request_keys and artifact_missing == 0
         and artifact_truncated == 0) if manifest["schema_version"] >= 3 else "not_recorded_in_schema_version"
+    successful_call_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                            (item.get("details") or {}).get("call_order"))
+        for item in call_events if item.get("event_type") == "llm_call"
+        and (item.get("details") or {}).get("call_type") == "generate_content"
+        and (item.get("details") or {}).get("status") == "ok"}
+    response_keys = {(item.get("activity_id"), item.get("agent_run_id"),
+                      (item.get("details") or {}).get("call_order"))
+        for item in response_events
+        if (item.get("details") or {}).get("capture_boundary") == "sdk_response"
+        and (item.get("details") or {}).get("response_evidence_version") == 1}
+    response_missing_count = len(successful_call_keys - response_keys)
+    response_evidence_complete = (response_missing_count == 0
+        if manifest.get("response_evidence_version") == 1 and manifest["schema_version"] >= 3
+        else "not_recorded_in_session")
     failures_by_node = {(item.get("activity_id"), item.get("agent_run_id"), item.get("node")): item
         for item in call_events if item.get("event_type") == "llm_call"
         and (item.get("details") or {}).get("status") == "error"}
@@ -388,6 +404,13 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     grouped_errors.sort(key=lambda row: (-row["count"], row["first_at"] or ""))
     planner_events = [item for item in call_events
                       if item.get("node") in {"InboxActionPlanner", "FeedActionPlanner", "InboxDecisionDraft", "FeedDecisionDraft", "RoutineDecisionDraft"}]
+    routine_events = [item for item in call_events if item.get("node") == "RoutineActionPlanner"]
+    routine_recovered = {item.get("activity_id") for item in routine_events
+        if item.get("event_type") == "llm_json_attempt"
+        and (item.get("details") or {}).get("status") == "valid"
+        and (item.get("details") or {}).get("json_attempt") == 2}
+    routine_final_failures = {item.get("activity_id") for item in errors
+        if item.get("lane") == "routine" and item.get("node") in {"ActionPlanner", "RoutineActionPlanner"}}
     output_failures = [item for item in planner_events
                        if item.get("event_type") == "llm_json_postprocess_error"]
     draft_failures = [item for item in call_events
@@ -425,7 +448,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     observed_end = min(now, allowed_end)
     ticks = sorted(utc(row["occurred_at"]) for row in events if row.get("event_type") == "heartbeat")
     checkpoints = [utc(manifest["started_at"]), *ticks, observed_end]
-    gaps = [round((right - left).total_seconds()) for left, right in zip(checkpoints, checkpoints[1:])
+    gaps = [(right - left).total_seconds() for left, right in zip(checkpoints, checkpoints[1:])
             if (right - left).total_seconds() > 150]
     window_elapsed = status["window_elapsed"]
     tail_elapsed = status["tail_elapsed"]
@@ -437,6 +460,12 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     effect_statuses = {kind: dict(Counter(row.get("status") or "unknown" for row in effects
         if row.get("kind") == kind)) for kind in ("public_action", "state_receipt", "relationship_metric")}
     coverage = {"session_id": session_id, "exported_at": now.isoformat(),
+                "model_profile_queries": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "models_get" for item in events),
+                "token_count_records": sum(item.get("event_type") == "input_budget" and (item.get("details") or {}).get("operation") == "count_tokens" for item in events),
+                "token_count_physical_calls": sum(item.get("event_type") == "input_budget" and
+                    (item.get("details") or {}).get("operation") == "count_tokens" and
+                    not (item.get("details") or {}).get("cache_hit") for item in events),
+                "auxiliary_normalization_records": sum(item.get("event_type") == "auxiliary_normalization" for item in events),
                 "window_started_at": manifest["started_at"], "window_ends_at": manifest["ends_at"],
                 "tail_ends_at": manifest["tail_ends_at"], "session_state": session_status(data_root, session_id)["state"],
                 "events": len(events), "run_count": len(runs), "error_count": len(errors),
@@ -444,6 +473,12 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                 "planner_retries_scheduled": len(retry_events),
                 "planner_recovered_activities": len(recovered),
                 "planner_final_failures": len(planner_final_failures),
+                "routine_planner_output_failures": sum(item.get("event_type") == "llm_json_postprocess_error" for item in routine_events),
+                "routine_planner_retries_scheduled": sum(item.get("event_type") == "llm_json_attempt" and
+                    (item.get("details") or {}).get("status") == "retry_scheduled" for item in routine_events),
+                "routine_planner_recovered_activities": len(routine_recovered),
+                "routine_planner_final_failures": len(routine_final_failures),
+                "routine_planner_physical_calls": sum(item.get("event_type") == "llm_call" for item in routine_events),
                 "combined_draft_validation_failures": len(draft_failures),
                 "writer_recovered_paths": len(writer_recovered_paths),
                 "damaged_event_lines": damaged, "dropped_events": dropped,
@@ -463,6 +498,9 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                  "artifact_truncated_count": artifact_truncated,
                  "diagnostic_redaction_count": redactions,
                  "request_evidence_count": len(request_events),
+                 "response_evidence_complete": response_evidence_complete,
+                 "response_evidence_count": len(response_events),
+                 "response_evidence_missing_count": response_missing_count,
                  "sqlite_write_event_count": len(sqlite_events),
                  "complete_recording": manifest["schema_version"] in {2, 3} and tail_elapsed
                      and not stopped_early and flush_complete is True and bool(ticks)
@@ -478,6 +516,7 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     _jsonl(destination / "errors.jsonl", errors)
     _jsonl(destination / "calls.jsonl", call_events)
     _jsonl(destination / "request-evidence.jsonl", request_events)
+    _jsonl(destination / "response-evidence.jsonl", response_events)
     _jsonl(destination / "sqlite-writes.jsonl", sqlite_events)
     _jsonl(destination / "effects.jsonl", effects)
     _jsonl(destination / "control.jsonl", [item for item in events if item.get("event_type") in control_types])
@@ -505,6 +544,8 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
     lines.extend(["", "## Request and SQLite diagnostics", "",
         f"- Request evidence complete: {request_evidence_complete}; request records: {len(request_events)}; "
         f"missing artifacts: {artifact_missing}; truncated artifacts: {artifact_truncated}.",
+        f"- Response evidence complete: {response_evidence_complete}; response records: {len(response_events)}; "
+        f"missing successful-call responses: {response_missing_count}.",
         f"- SQLite write events: {len(sqlite_events)}. Count storage retries separately from provider calls.",
         "- Generic provider errors without BadRequest fields leave the rejected argument unconfirmed."])
     for lane, statuses in lane_counts.items():
@@ -519,6 +560,10 @@ def export_session(data_root: Path, session_id: str, *, destination: Path,
                   f"final path failures: {len(planner_final_failures)}",
                   f"- Combined draft validation failures: {len(draft_failures)}; "
                   f"writer-recovered paths: {len(writer_recovered_paths)}. Physical requests remain in calls.jsonl.",
+                  f"- Split Routine: {coverage['routine_planner_physical_calls']} physical requests; "
+                  f"{coverage['routine_planner_output_failures']} output failures; "
+                  f"{coverage['routine_planner_recovered_activities']} recovered activities; "
+                  f"{coverage['routine_planner_final_failures']} final failures.",
                   "", "## Repeated errors", ""])
     for row in grouped_errors:
         lines.append(f"- {row['lane'] or 'parent'} / {row['node'] or 'unknown'} / {row['error']}: "

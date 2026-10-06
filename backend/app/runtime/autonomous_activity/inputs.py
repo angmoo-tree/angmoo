@@ -10,12 +10,19 @@ from app.domains.characters.service.prompt_persona import request_persona, PERSO
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.social_context import SocialContextService
+from app.domains.relationships.contracts.social_context import (
+    RelationshipValidationBinding, SocialContextValidationError,
+)
+from app.domains.relationships.policies.social_context_validation import receipt_for_snapshot
+from app.domains.relationships.service.social_context_validation import SocialContextValidationService
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.world_characters.service.activity_state import read_state
 from app.runtime.graph_projection.relationship_graph_read import SqlAlchemyRelationshipGraphReadGateway
 from app.runtime.social.today_activity import today_social_activity_reader
 from app.config import settings
 from app.runtime.autonomous_activity.contracts import TODAY_LIMIT
+from app.contracts.environment import EnvironmentSnapshot
+from app.core.calendar import local_period
 
 
 def relationship_snapshot(ctx, actor, *, counterpart_id=None):
@@ -29,10 +36,36 @@ def relationship_snapshot(ctx, actor, *, counterpart_id=None):
     return service.prepare(GraphRecallScope(ctx.user_id, actor.world_id, actor.id), labels=labels, counterpart_id=counterpart_id)
 
 
-def shared_input(ctx, actor, world):
+def prepare_relationship(ctx, actor, *, binding):
+    """One selection produces both the unchanged prompt and its durable receipt."""
+    snapshot = relationship_snapshot(ctx, actor, counterpart_id=binding.counterpart_id)
+    scope = GraphRecallScope(ctx.user_id, actor.world_id, actor.id)
+    prompt = snapshot.prompt_view() if snapshot else {}
+    receipt = receipt_for_snapshot(snapshot, scope=scope, binding=binding).to_dict()
+    validate_relationship(ctx, actor, prompt=prompt, receipt=receipt, binding=binding,
+        policy=receipt["revision"])
+    return prompt, receipt, snapshot
+
+
+def validate_relationship(ctx, actor, *, prompt, receipt, binding, policy):
+    service = SocialContextValidationService(SqlAlchemyRelationshipGraphReadGateway(ctx.db, config=settings))
+    return service.validate(scope=GraphRecallScope(ctx.user_id, actor.world_id, actor.id),
+        binding=binding, prompt=prompt, receipt=receipt, policy=policy)
+
+
+class ActivityRelationshipValidationError(SocialContextValidationError):
+    """Stable lane failure code with a content-free internal validation reason."""
+    def __init__(self, reason, *, lane):
+        super().__init__(reason)
+        self.args = ("routine_relationship_changed" if lane == "routine" else "activity_relationship_changed",)
+
+
+def shared_input(ctx, actor, world, *, environment=None):
     now = datetime.now(UTC)
-    local = now.astimezone(ZoneInfo(world.timezone))
-    start = local.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
+    if environment is None:
+        from app.domains.identity.service.environment import snapshot
+        environment = snapshot(ctx.db, ctx.user_id)
+    start, _ = local_period(now, environment.timezone)
     today = today_social_activity_reader(ctx.db).read(owner_id=ctx.user_id, world_id=actor.world_id,
         subject_world_character_id=actor.id, started_at=start, complete_through=now)
     data = asdict(today)
@@ -41,14 +74,19 @@ def shared_input(ctx, actor, world):
     if len(records) > TODAY_LIMIT:
         data["records"] = records[:TODAY_LIMIT]
         data["omitted_records"] = len(records) - TODAY_LIMIT
-    character = ctx.character
+    from app.runtime.autonomous_activity.configuration import configuration_for_activity
+    from app.runtime.world_configuration.effective_values import configured_character
+    configuration = configuration_for_activity(ctx, actor)
+    character = configured_character(ctx.character, configuration)
     from app.runtime.autonomous_activity.name_binding import activity_name_binding
     name_binding = activity_name_binding(ctx)
     state = read_state(ctx.db, world_id=actor.world_id, actor_id=actor.id)
     confirmed = datetime.fromisoformat(state["confirmed_at"]) if state["confirmed_at"] else None
     return {"world_id": actor.world_id, "actor_id": actor.id, "now": now.isoformat(),
-        "world": {"name": world.name, "tagline": world.tagline, "timezone": world.timezone},
-        "world_profile": actor.local_profile or {},
+        "world": {"name": world.name, "tagline": world.tagline, "timezone": environment.timezone},
+        "environment": environment.to_dict(),
+        "world_profile": {**(actor.local_profile or {}), **(configuration.profile.model_dump(mode="json") if configuration else {})},
+        **({"world_configuration_revision": configuration.revision} if configuration else {}),
         "persona": {**request_persona(character, name_binding), "interpretation": PERSONA_INTERPRETATION},
         "current_state": state, "state_elapsed_seconds": max(0, int((now - confirmed).total_seconds())) if confirmed else None,
         "today_activity": data}

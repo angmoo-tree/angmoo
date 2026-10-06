@@ -79,7 +79,7 @@ class RetrievalPolicyResolver:
             thread_id=command.thread_id,
             requester_world_character_id=command.requester_world_character_id,
             responding_world_character_id=command.responding_world_character_id,
-            world_timezone=world.timezone,
+            world_timezone=self.reads.environment(self._session, command).timezone,
             world_language=world.language,
             responding_character_name=responding_character.name,
             memory_enabled=memory_enabled,

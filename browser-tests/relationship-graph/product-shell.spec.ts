@@ -16,6 +16,8 @@ const OWNER = {
   profile_setup_completed: true,
   feed_content_filter: "all",
   is_admin: true,
+  ui_language: "ko",
+  ui_preference_revision: 0,
 };
 
 function graphRead(phase: Exclude<GraphPhase, "provider-error">) {

@@ -16,6 +16,8 @@ from app.domains.social.router import manual_router as manual_social_router
 from app.models import Base
 from app.database import get_db
 from app.domains.world_characters.router.profile import router as world_character_router
+from app.domains.world_characters.configuration_models import WorldCharacterConfiguration
+from app.runtime.world_characters.creation_configuration import initialize_created_world_character
 
 
 def _user(user_id: str) -> models.User:
@@ -383,6 +385,11 @@ def _seed(engine, principal: dict[str, models.User | None]) -> None:
         db.flush()
         db.add_all(world_characters)
         db.flush()
+        characters = {character.id: character for character in (viewer_character, target_character, third_character)}
+        for actor in world_characters:
+            initialize_created_world_character(db, character=characters[actor.character_id], world_character=actor)
+            stored = db.get(WorldCharacterConfiguration, actor.id)
+            stored.profile = {**stored.profile, **actor.local_profile}
         db.add_all(posts)
         db.flush()
         db.add_all(likes)

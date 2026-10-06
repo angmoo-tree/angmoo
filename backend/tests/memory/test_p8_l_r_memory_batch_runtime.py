@@ -41,7 +41,7 @@ class Selector:
         self.calls = 0
         self.fail, self.skip, self.callback = fail, skip, callback
 
-    async def select(self, sources, *, timeout):
+    async def select(self, sources, *, timeout, environment=None):
         self.calls += 1
         if self.callback:
             self.callback()
@@ -162,7 +162,7 @@ def test_failure_preserves_safe_telemetry_but_rolls_back_all_items(memory_sessio
     class TelemetrySelector(Selector):
         usage = SimpleNamespace(input_tokens=100, output_tokens=80, thought_tokens=40)
         finish_reason = "MAX_TOKENS" if failure == "output" else "STOP"
-        async def select(self, sources, *, timeout):
+        async def select(self, sources, *, timeout, environment=None):
             if failure == "output":
                 raise MemoryValidationError("memory_selection_output_incomplete")
             return await super().select(sources, timeout=timeout)

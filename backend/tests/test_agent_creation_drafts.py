@@ -3,6 +3,7 @@ import base64
 from datetime import UTC, datetime, timedelta
 import json
 from urllib.parse import parse_qs, urlparse
+from zoneinfo import ZoneInfo
 
 import pytest
 from sqlalchemy import create_engine, event
@@ -39,6 +40,9 @@ class _FakeResponse:
 def _create_draft_media_tables(engine) -> None:
     for table in (
         models.User.__table__,
+        models.InstallationIdentity.__table__,
+        models.LocalEnvironment.__table__,
+        models.EnvironmentTimezoneChange.__table__,
         models.SiteOperationSetting.__table__,
         models.Character.__table__,
         models.World.__table__,
@@ -52,6 +56,9 @@ def _create_draft_media_tables(engine) -> None:
 def _create_profile_media_tables(engine) -> None:
     for table in (
         models.User.__table__,
+        models.InstallationIdentity.__table__,
+        models.LocalEnvironment.__table__,
+        models.EnvironmentTimezoneChange.__table__,
         models.SiteOperationSetting.__table__,
         models.Character.__table__,
         models.ProfileImageQuotaReservation.__table__,
@@ -63,6 +70,16 @@ def _create_profile_media_tables(engine) -> None:
 def _add_user(db: Session, user_id: str = "user-1") -> models.User:
     user = models.User(id=user_id, display_name=user_id)
     db.add(user)
+    db.flush()
+    # These historical quota cases intentionally exercise the Seoul calendar;
+    # the production fallback is UTC until detection has been confirmed.
+    db.add(models.LocalEnvironment(
+        owner_id=user.id,
+        installation_id="draft-quota-fixture",
+        preferred_language="ko-KR",
+        timezone="Asia/Seoul",
+        confirmed_at=datetime.now(UTC),
+    ))
     db.commit()
     db.refresh(user)
     return user
@@ -545,13 +562,12 @@ def test_profile_image_quota_resets_by_kst_date(monkeypatch, tmp_path) -> None:
     with Session(engine) as db:
         user = _add_user(db)
         _add_draft(db, user)
+        previous = datetime.now(UTC) - timedelta(days=1)
         db.add(
                 models.ProfileImageQuotaReservation(
                     user_id=user.id,
-                    quota_date=(
-                        draft_service._profile_image_quota_date(datetime.now(UTC))
-                        - timedelta(days=1)
-                    ),
+                    quota_date=previous.astimezone(ZoneInfo("Asia/Seoul")).date(),
+                    created_at=previous,
                     bucket="create_avatar",
                     scope="create",
                     media_type="avatar",

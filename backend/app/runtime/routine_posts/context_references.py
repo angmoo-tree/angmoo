@@ -14,6 +14,10 @@ from app.domains.routine_posts.contracts.context import RoutineInteractionSource
 
 
 class SqlAlchemyRoutineContextReferences(SqlAlchemyActivityReferences):
+    def __init__(self, db, *, input_snapshot=None):
+        super().__init__(db)
+        self._input_snapshot = input_snapshot
+
     def get_world(self, world_id: str) -> World | None:
         return self._db.get(World, world_id)
 
@@ -30,7 +34,8 @@ class SqlAlchemyRoutineContextReferences(SqlAlchemyActivityReferences):
         return self._db.get(routines_models.ActivityBeat, beat_id)
 
     def get_activity_setting(self, character_id: str) -> AgentActivitySetting | None:
-        return self._db.get(AgentActivitySetting, character_id)
+        from app.runtime.world_configuration.effective_values import setting_for_input
+        return setting_for_input(self._db.get(AgentActivitySetting, character_id), self._input_snapshot, character_id=character_id)
 
     def default_interaction_source(self) -> RoutineInteractionSource:
         return canonical_interaction_source()

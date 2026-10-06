@@ -1,0 +1,17 @@
+.management { min-width: 0; background: var(--color-surface); color: var(--color-text-default); }
+.header { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--spacing-phone); padding: var(--spacing-section) var(--spacing-phone); border-bottom: 1px solid var(--color-border-default); }
+.headerIdentity { display: flex; min-width: 0; flex: 1 1 220px; align-items: flex-start; gap: var(--spacing-control); }
+.headerActions { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--spacing-control); }
+.pane[hidden] { display: none; }
+.feedback, .readonly { margin: var(--spacing-phone); }
+.feedback p, .scopeNotice { margin: 0; color: var(--color-text-secondary); font-size: var(--text-meta); line-height: 1.6; overflow-wrap: anywhere; }
+.feedback { display: flex; flex-wrap: wrap; gap: var(--spacing-control); align-items: center; }
+.readonly { color: var(--color-text-secondary); font-size: var(--text-body); }
+.settingsForm { display: grid; min-width: 0; gap: var(--spacing-section); padding: var(--spacing-section) var(--spacing-phone); }
+.profileForm { display: grid; min-width: 0; gap: var(--spacing-phone); }
+.fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.fieldset legend { margin-bottom: var(--spacing-phone); color: var(--color-text-strong); font-size: var(--text-section-title); font-weight: 800; }
+.policyFields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--spacing-phone); }
+.formActions { display: flex; min-width: 0; flex-wrap: wrap; justify-content: flex-end; gap: var(--spacing-control); }
+.error { color: var(--color-state-danger); font-size: var(--text-body-small); }
+@media (min-width: 768px) { .header, .settingsForm { padding-inline: 36px; } }

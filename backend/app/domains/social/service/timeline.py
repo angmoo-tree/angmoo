@@ -15,6 +15,7 @@ from app.domains.social.service.visibility import _is_post_public_context_visibl
 from app.domains.social.service.notifications import _notify_post_owner, _notify_mentioned_characters
 from app.domains.characters.service import profile as character_profile
 from app.domains.world_characters.service import social_scope
+from app.domains.social.contracts.post_authors import WorldPostAuthor
 
 
 def _resolve_author_character(
@@ -81,6 +82,21 @@ def create_comment(
 class SocialTimelineService:
     def __init__(self, workflows: SocialWriteWorkflows) -> None:
         self.workflows = workflows
+
+    def _world_post_author(self, db, *, character, world_id, world_character_id, accepted=None):
+        if world_id is None:
+            if accepted is not None:
+                raise PostWorldScopeError("world_scope_pair_required")
+            return None
+        if character is None or world_character_id is None:
+            raise PostWorldScopeError("world_scope_requires_character")
+        if accepted is not None:
+            if (accepted.world_id != world_id or accepted.world_character_id != world_character_id
+                or accepted.character_id != character.id):
+                raise PostWorldScopeError("world_author_snapshot_scope_invalid")
+            return accepted
+        return self.workflows.world_post_author(db, character_id=character.id,
+            world_id=world_id, world_character_id=world_character_id)
 
     def report_post(self,
         db: Session, user: SocialUser, post_id: str, data: schemas.PostReportCreate
@@ -167,6 +183,7 @@ class SocialTimelineService:
         post_info: schemas.PostInfoMetadata | None = None,
         world_id: str | None = None,
         author_world_character_id: str | None = None,
+        author_profile: WorldPostAuthor | None = None,
     ) -> schemas.PostDetail:
         character = None
         if data.author_character_id:
@@ -190,6 +207,10 @@ class SocialTimelineService:
                 )
             except social_scope.WorldCharacterSocialScopeError as exc:
                 raise PostWorldScopeError(str(exc)) from exc
+            author_profile = self._world_post_author(db, character=character, world_id=world_id,
+                world_character_id=author_world_character_id, accepted=author_profile)
+        elif author_profile is not None:
+            raise PostWorldScopeError("world_scope_pair_required")
         post = source_posts.create_post(
             db,
             post_id=f"post-{uuid4().hex[:12]}",
@@ -199,6 +220,7 @@ class SocialTimelineService:
             post_info=post_info,
             world_id=world_id,
             author_world_character_id=author_world_character_id,
+            author_profile=author_profile,
         )
         if character is not None and log_manual_activity:
             result = build_post_created_activity_result(
@@ -232,6 +254,7 @@ class SocialTimelineService:
         *,
         activity_reason: str = "manual_reply",
         enforce_user_quota: bool = True,
+        author_profile: WorldPostAuthor | None = None,
     ) -> schemas.PostDetail:
         parent = post_repository.get_post(db, post_id)
         if parent is None or not _is_post_public_context_visible(db, parent):
@@ -251,6 +274,8 @@ class SocialTimelineService:
             target=parent,
             character=character,
         )
+        author_profile = self._world_post_author(db, character=character, world_id=world_id,
+            world_character_id=author_world_character_id, accepted=author_profile)
         reply = source_posts.create_timeline_post(
             db,
             post_id=f"post-{uuid4().hex[:12]}",
@@ -262,6 +287,7 @@ class SocialTimelineService:
             reply_to_post_id=parent.id,
             world_id=world_id,
             author_world_character_id=author_world_character_id,
+            author_profile=author_profile,
         )
         if character is not None:
             self.workflows.log_activity(
@@ -318,6 +344,8 @@ class SocialTimelineService:
             quote_post_id=quoted.id,
             world_id=world_id,
             author_world_character_id=author_world_character_id,
+            author_profile=self._world_post_author(db, character=character, world_id=world_id,
+                world_character_id=author_world_character_id),
         )
         if character is not None:
             self.workflows.log_activity(
@@ -428,6 +456,8 @@ class SocialTimelineService:
             repost_of_post_id=post.id,
             world_id=world_id,
             author_world_character_id=author_world_character_id,
+            author_profile=self._world_post_author(db, character=character, world_id=world_id,
+                world_character_id=author_world_character_id),
         )
         if character is not None and created:
             self.workflows.log_activity(

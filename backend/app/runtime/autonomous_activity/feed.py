@@ -15,7 +15,7 @@ from app.domains.social.service.world_feed import (
 from app.runtime.autonomous_activity.contracts import Candidate
 from app.runtime.autonomous_activity.social_lane import SocialLane, plain
 from app.runtime.relationships.experience_metrics import post_revision
-from app.runtime.social.world_feed_queries import WorldFeedQueries
+from app.runtime.autonomous_activity.configuration import ActivityFeedQueries
 
 
 class FeedLane(SocialLane):
@@ -23,10 +23,12 @@ class FeedLane(SocialLane):
         self.ctx.db.commit()
 
     def profile(self, *, neutral_weights=True):
-        profile = load_ready_search_profile(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
+        profile = load_ready_search_profile(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
             world_character_id=self.actor.id)
         if profile.imported_world_runtime_locked or not profile.world_character.autonomous_enabled:
             raise ValueError("activity_autonomy_disabled")
+        from app.runtime.autonomous_activity.configuration import character_for_activity
+        profile = replace(profile, character=character_for_activity(self.ctx, self.actor))
         if not neutral_weights:
             return profile
         if profile.explicit_actions is not None:
@@ -51,20 +53,21 @@ class FeedLane(SocialLane):
         self.save_preparation()
         if claim.duplicate_cycle:
             return {"candidates": [], "lane_data": {"duplicate_cycle": True}}
-        search = search_world_feed_candidates(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
+        search = search_world_feed_candidates(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
             profile=profile, keywords=claim.keywords, allowed_policy_actions=self.ctx.activity_policy.allowed_actions,
             now=self.ctx.run_started_at, search_index=self.ctx.social_search_index, search_state=self.ctx.social_search_state)
         claims = claim_feed_observations(self.ctx.db, profile=profile, candidates=search.candidates,
             cycle_key=cycle, run_id=self.ctx.run_id, now=datetime.now(UTC))
         self.save_preparation()
-        candidates, data = [], {}
+        candidates, data, receipts = [], {}, {}
         from app.runtime.activity_proposals.composition import proposal_eligibility
         for candidate in claims.candidates:
             post = self.ctx.db.get(Post, candidate.post_id)
+            relationship, receipts[post.id] = self.relationship_preparation(post.id, post.author_world_character_id)
             candidates.append(Candidate(target_id=post.id, counterpart_id=post.author_world_character_id,
                 source_ids=[post.id], source_revisions={post.id: post_revision(post)},
                 text=f"{post.author_name}: {post.title}\n{post.body}", topic_signature=post.topic_signature,
-                allowed_actions=candidate.allowed_actions, proposal_eligible=proposal_eligibility(self.ctx.db, actor_world_character_id=self.actor.id, target_post_id=post.id, now=datetime.now(UTC)).eligible, relationship=self.relationship(post.author_world_character_id)).model_dump())
+                allowed_actions=candidate.allowed_actions, proposal_eligible=proposal_eligibility(self.ctx.db, actor_world_character_id=self.actor.id, target_post_id=post.id, now=datetime.now(UTC)).eligible, relationship=relationship).model_dump())
             data[post.id] = {"post_id": post.id, "candidate_index": candidate.candidate_index}
         data["_feed"] = {"cycle_key": cycle, "claim": plain(asdict(claim)),
             "candidates": [c.model_dump(mode="json") for c in claims.candidates],
@@ -77,7 +80,7 @@ class FeedLane(SocialLane):
         allocate(candidates)
         if profile.explicit_actions is None:
             shared["action_preferences"] = preferences
-        return {"candidates": candidates, "lane_data": data, "shared_context": shared}
+        return {"candidates": candidates, "lane_data": data, "shared_context": shared, "relationship_validation_receipts": receipts}
 
     def delivery(self, state):
         data = state["lane_data"].get("_feed")
@@ -104,10 +107,7 @@ class FeedLane(SocialLane):
         await super().guard(state)
         data = state.get("lane_data", {}).get("_feed")
         if data and state.get("stage") in {"TargetSelector", "DecisionDraft", "ActionPlanner", "ValidateDraft", "Writer", "Execute"}:
-            for identifier, token in data["claim_tokens"].items():
-                row = self.ctx.db.get(WorldCharacterFeedObservation, identifier, populate_existing=True)
-                if row is None or row.claim_token != token or row.run_id != self.ctx.run_id:
-                    raise ValueError("feed_claim_changed")
+            self.validate_feed_claims(state)
         if data and state.get("stage") == "Execute":
             decisions = {d["target_id"]: d for d in state["decision"]["decisions"]}
             for raw in data["candidates"]:
@@ -117,12 +117,33 @@ class FeedLane(SocialLane):
                 from app.runtime.autonomous_activity.feed_effects import committed
                 if committed(self, state, decision):
                     continue
-                current = revalidate_candidate_actions(self.ctx.db, references=WorldFeedQueries(self.ctx.db),
-                    profile=self.profile(), candidate=WorldFeedCandidateRead.model_validate(raw),
-                    allowed_policy_actions=self.ctx.activity_policy.allowed_actions)
-                if current is None or decision["action"] not in current[1]:
-                    raise ValueError("feed_affordance_changed")
+                self.validate_feed_action(state, raw["post_id"])
         return {}
+
+    def validate_feed_claims(self, state):
+        data = state["lane_data"]["_feed"]
+        for identifier, token in data["claim_tokens"].items():
+            row = self.ctx.db.get(WorldCharacterFeedObservation, identifier, populate_existing=True)
+            if row is None or row.claim_token != token or row.run_id != self.ctx.run_id:
+                raise ValueError("feed_claim_changed")
+
+    def validate_feed_action(self, state, target_id):
+        data = state["lane_data"]["_feed"]
+        raw = next(row for row in data["candidates"] if row["post_id"] == target_id)
+        decision = next(row for row in state["decision"]["decisions"] if row["target_id"] == target_id)
+        current = revalidate_candidate_actions(self.ctx.db, references=ActivityFeedQueries(self.ctx, self.actor),
+            profile=self.profile(), candidate=WorldFeedCandidateRead.model_validate(raw),
+            allowed_policy_actions=self.ctx.activity_policy.allowed_actions)
+        if current is None or decision["action"] not in current[1]:
+            raise ValueError("feed_affordance_changed")
+
+    def effect_relationship_validator(self, state, target_id):
+        validate_relationship = super().effect_relationship_validator(state, target_id)
+        def validate():
+            self.validate_feed_claims(state)
+            self.validate_feed_action(state, target_id)
+            validate_relationship()
+        return validate
 
     async def execute(self, state):
         from app.runtime.autonomous_activity.feed_effects import execute

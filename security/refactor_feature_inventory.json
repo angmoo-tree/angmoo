@@ -1817,7 +1817,7 @@
         "backend/app/domains/social/service/feed_cycle.py",
         "backend/app/domains/social/service/feed_cycle_values.py",
         "backend/app/domains/social/service/feed_cycle_publishing.py",
-        "backend/app/runtime/social/feed_cycle.py",
+        "backend/app/runtime/social/feed_workflows.py",
         "backend/app/api/schemas/first_greeting.py",
         "backend/app/domains/characters/dependencies.py",
         "backend/app/domains/characters/router.py",
@@ -1953,9 +1953,12 @@
         "backend/app/domains/routines/service/writing_prompts.py",
         "backend/app/domains/routines/service/writing_results.py",
         "backend/app/domains/routines/service/writing_tasks.py",
-        "backend/app/runtime/resident/langgraph.py",
+        "backend/app/runtime/social/planned_actions.py",
         "backend/app/runtime/resident/langgraph_queries.py",
-        "backend/app/domains/routines/policies/active_hours.py"
+        "backend/app/domains/routines/policies/active_hours.py",
+        "backend/app/runtime/resident/history.py",
+        "backend/app/runtime/autonomous_activity/llm_context.py",
+        "backend/app/runtime/autonomous_activity/gateway.py"
       ],
       "target_paths": [
         "backend/app/domains/routine_posts/service",
@@ -2598,7 +2601,7 @@
         "backend/app/runtime/social/world_feed_search.py",
         "backend/app/domains/social/service/feed_reaction_validation.py",
         "backend/app/domains/social/contracts/feed_execution.py",
-        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/runtime/autonomous_activity/llm_context.py",
         "backend/app/domains/social/service/feed_reaction_prompts.py",
         "backend/app/domains/routines/repository/feed_history.py",
         "backend/app/domains/social/repository/topic_history.py",

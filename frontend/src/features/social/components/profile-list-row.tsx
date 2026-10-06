@@ -1,4 +1,6 @@
 "use client";
+import { useUiText } from "@/hooks/use-ui-text";
+
 
 import Link from "next/link";
 import { useState } from "react";
@@ -14,7 +16,9 @@ type ProfileListRowProps = {
 };
 
 export function ProfileListRow({ item, showFollowButton = true }: ProfileListRowProps) {
+  const uiText = useUiText("social");
   const profile = item.profile;
+  const displayName = profile.deleted ? uiText("삭제한 캐릭터") : profile.display_name;
   const [optimisticFollowing, setOptimisticFollowing] = useState(false);
   const [saving, setSaving] = useState(false);
   const following = item.viewer_following || optimisticFollowing;
@@ -22,7 +26,7 @@ export function ProfileListRow({ item, showFollowButton = true }: ProfileListRow
     profile.profile_type === "character"
       ? `/profiles/characters/${profile.id}`
       : `/profiles/users/${profile.id}`;
-  const canShowFollowButton = showFollowButton && profile.profile_type === "character";
+  const canShowFollowButton = showFollowButton && profile.profile_type === "character" && !profile.deleted;
 
   async function handleFollowClick() {
     if (following || saving || profile.profile_type !== "character") return;
@@ -43,7 +47,7 @@ export function ProfileListRow({ item, showFollowButton = true }: ProfileListRow
       <div className="flex items-start gap-4">
         <Link href={href} className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#ff6b6b]/30">
           <ProfileAvatar
-            name={profile.display_name}
+            name={displayName}
             avatarUrl={profile.avatar_url}
             sizeClassName="size-[56px]"
             textClassName="text-[24px]"
@@ -56,7 +60,7 @@ export function ProfileListRow({ item, showFollowButton = true }: ProfileListRow
               className="min-w-0 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[#ff6b6b]/30"
             >
               <div className="truncate text-[20px] font-extrabold text-[#101828]">
-                {profile.display_name}
+                {displayName}
               </div>
               {profile.profile_type === "character" && profile.handle ? (
                 <div className="text-[16px] font-bold text-[#667085]">
@@ -73,7 +77,7 @@ export function ProfileListRow({ item, showFollowButton = true }: ProfileListRow
                   following ? "bg-[#7a808b]" : "bg-[#101828] hover:bg-[#344054]"
                 }`}
               >
-                {following ? "팔로우 중" : saving ? "처리 중" : "팔로우"}
+                {following ? uiText("팔로우 중") : saving ? uiText("처리 중") : uiText("팔로우")}
               </button>
             ) : null}
           </div>

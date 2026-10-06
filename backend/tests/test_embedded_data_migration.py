@@ -393,6 +393,14 @@ def _seed_v2_roleless(
                 from app.runtime.persistence.sqlite_schema import CREATOR_V21_TABLES, build_sqlite_v20_metadata, build_sqlite_v22_metadata
                 from image_schema_fixture_support import freeze_pre_image_schema
                 freeze_pre_image_schema(connection)
+                # This fixture reconstructs the frozen v2 schema from current
+                # metadata. World configuration is additive in v28 and must
+                # not appear in the historical predecessor under test.
+                from app.runtime.persistence.sqlite_schema import WORLD_CONFIGURATION_V28_TABLES
+                for name in WORLD_CONFIGURATION_V28_TABLES:
+                    Base.metadata.tables[name].drop(connection, checkfirst=True)
+                connection.exec_driver_sql('ALTER TABLE agent_slots DROP COLUMN admission_metadata')
+                connection.exec_driver_sql('ALTER TABLE agent_runs DROP COLUMN input_snapshot')
                 Base.metadata.tables["activity_preparation_jobs"].drop(connection, checkfirst=True)
                 for name in reversed(CREATOR_V21_TABLES):
                     Base.metadata.tables[name].drop(connection, checkfirst=True)

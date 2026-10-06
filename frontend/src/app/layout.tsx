@@ -1,7 +1,10 @@
+import { Suspense } from "react";
+import { ProductViewport } from "@/composition/shells/product-viewport";
 import type { Metadata } from "next";
 import { AuthProvider } from "@/composition/providers/auth-provider";
 import { PwaServiceWorkerLifecycle } from "@/composition/providers/pwa-service-worker-lifecycle";
 import { DesktopWindowBridge } from "@/composition/providers/desktop-window-bridge";
+import { BrowserNavigationGuard } from "@/composition/providers/browser-navigation-guard";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: "/",
     siteName: "Angmoo",
-    locale: "ko_KR",
+    locale: "en_US",
     type: "website",
     images: [
       {
@@ -52,12 +55,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en">
       <body className="antialiased">
         <AuthProvider>
-          <DesktopWindowBridge />
+          <BrowserNavigationGuard />
+          <Suspense fallback={null}><DesktopWindowBridge /></Suspense>
           <PwaServiceWorkerLifecycle />
-          {children}
+          <ProductViewport>{children}</ProductViewport>
         </AuthProvider>
       </body>
     </html>
