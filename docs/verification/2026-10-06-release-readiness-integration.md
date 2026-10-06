@@ -359,7 +359,13 @@ that file's digest; frozen predecessor, schema, bounds, policy and all other
 fields remain unchanged. The official Memory-batch successor check passes.
 The exact b12e2fd8 architecture, boundary, L4 and complete backend preservation
 checks pass, with 5,415 protected test lineages and all 37 preservation items.
-The complete execution and new lock's final hosted CI remain required.
+The new locked Windows environment passes all 214 existing graph/checkpoint
+and SQLite migration regressions in 356.67 seconds, including contributor
+health after v28 recovery, fixed admitted input, rollback and production
+upgrade preservation. Installed-package compatibility and the unchanged
+license policy pass; official notices cover Python 85 / JavaScript 66 /
+conditional reviews 4. The complete execution and new lock's final hosted
+CI remain required.
 
 ## Preservation and publication boundaries
 
