@@ -2,7 +2,7 @@
 
 검증일: 2026-10-06–07, Windows / PowerShell / Python 3.13 / local Chromium.
 
-**현재 판정: 소스 구현과 격리 회귀 검증 완료. I47의 append-only 보존 검사와 I49 최종 증거 커밋은 아래 Gate 결과가 확정될 때까지 진행 중이다.** 실제 AI 품질, 네이티브 검색 성능, 설치판 검수를 로컬 PASS에 포함하지 않는다.
+**현재 판정: I00–I49 50단계의 로컬 구현·기술 검증 완료 — LOCAL TECH PASS.** 마지막 일반 CLI의 backend/API/ORM/assertion 보존 검사도 종료 코드 0으로 통과했다. 실제 AI 품질, 네이티브 검색 성능, 설치판 검수를 로컬 PASS에 포함하지 않는다.
 
 ## 실행 경계와 기준 보존
 
@@ -39,18 +39,20 @@
 | 증거 ID | 실행과 실제 결과 | 근거 |
 | --- | --- | --- |
 | E-MEM | Memory 전체 **432 PASS / 18 SKIP**, 362초 | `backend/integration-memory-diagnostic-2.log` |
-| E-CHAT | Chat 전체 + autonomous graph + resident dependency + activity limits **893 PASS / 6 SKIP**, 174초 | `backend/integration-chat-runtime-complete-final.log` |
+| E-CHAT | Chat 전체 + autonomous graph + resident dependency + activity limits **893 PASS / 6 SKIP**. 최종 native scope port 수정 후 같은 묶음을 189.55초로 재검증 | `backend/integration-chat-runtime-complete-final.log`, `backend/integration-chat-native-port-final.log` |
 | E-CONTRACT | 공식 startup/restart·v30/historic/parity·native keys·32활동/960턴·private split·명시 준비 **49 PASS**, 182초 | `backend/integration-final-contracts-3.log` |
 | E-AUTO | 실제 SQLite 세션·시간대·ON/OFF·capacity·동시 접수·membership·lease·manual guard **23 PASS**, 152초 | `backend/integration-autonomy-diagnostic-2.log` |
 | E-SCOPE | Chat 삭제·World configuration **33 PASS**, 140초 | `backend/integration-chat-scope-diagnostic-2.log` |
 | E-DIAGNOSTIC | 별도 opt-in의 fake-provider 성능/동시 진단 **8 PASS**, 43초. 일반 회귀에서 skip했던6건도 포함하며 실제 서비스/AI 성능으로 해석하지 않음 | `backend/integration-diagnostic-fake-benchmark.log` |
+| E-LIFE | 기존 World navigation/keyboard/초안·동시 CAS·older GET·runtime 갱신·늦은401·로그아웃 응답 **static 5 PASS**, 7.6초. 카드 분리 후 persona card만 지정하도록 selector 2개를 수정하고 기존 행동 단언을 유지 | `frontend/integration-browser-lifetime-static.log` |
+| E-RETIRE | 고정 410·전후 AST·원래 HTTP frame을 검증하는 정상/거부 10건과 원래 SQLite/replay 2건 **12 PASS**, 4.55초. Chat 실제 생성·route·DI·transaction 보존 증명의 전체 실행도 PASS | `backend/integration-chat-retirement-final-tests.log`, `backend/integration-chat-retirement-final-proof.log` |
 | E-FOUNDATION | 초기 policy/contract/work/apply **48 PASS**; 이후 E-MEM/E-CONTRACT로 통합 재검증 | 초기 기록 및 위 최종 묶음 |
 | E-COMPLETE | 초기 identity/world/media/image/migration 광범위 실행 **894 PASS / 24 SKIP / 11 FAIL**. 11개 최신 metadata count/head/최종 전환 기대는 v30 계약으로 수정 후 E-CONTRACT에서 모두 재검증 | `backend/integration-complete-backend.log`; 전체 PASS로 표기하지 않음 |
 | E-NEXT | World9 + 긴 이름 graph6 + 기존 graph3 + creator11 = **29 PASS**. Memory/graph 보완 **7 PASS**, 영어 생성 **1 PASS**, 실제 crop **1 PASS**, 기존 avatar/profile **5 PASS** | `frontend/integration-browser-next-final-complete.log`, `integration-browser-next-completion.log`, `integration-browser-next-english-complete.log`, `integration-browser-next-crop-final.log`, `integration-browser-avatar-next.log` |
-| E-STATIC | 초기 **54 PASS / 5 FAIL**. 관련 수정 뒤 World/graph/title/무제한 생성 **17 PASS**, 보존 보완 **4 PASS**, 영어/crop **2 PASS**, 기존 avatar/profile **5 PASS** | `frontend/integration-browser-static-complete.log`, `integration-browser-static-final.log`, `integration-browser-static-preservation-complete.log`, `integration-browser-static-english-crop-complete.log`, `integration-browser-avatar-static.log` |
+| E-STATIC | 초기 **54 PASS / 5 FAIL**. 보존 보완 실행은 **4 PASS / 1 FAIL**이며 남은 생성 제목 기대도 수정했다. 최종 World/graph/title/무제한 생성 **17 PASS**, 영어/crop **2 PASS**, 기존 avatar/profile **5 PASS** | `frontend/integration-browser-static-complete.log`, `integration-browser-static-preservation-complete.log`, `integration-browser-static-final.log`, `integration-browser-static-english-crop-complete.log`, `integration-browser-avatar-static.log` |
 | E-FE | 전체 lint **0 errors/0 warnings**, clean tsconfig typecheck PASS, catalog **2609 keys/16 namespaces**, error contracts **53 PASS**, Next production/static build PASS | `frontend/integration-full-lint-complete.log`, `integration-typecheck-clean-complete.log`, `integration-catalog-complete.log`, `integration-next-build-final.log`, `integration-static-build-final.log` |
-| E-ARCH | **1434 modules/6045 internal edges/4194 external imports**, legacy exact edges **0**. Frontend14 features/legacy0. Design **1183 raw colors/35 files/18 surfaces/gap0/screenshot calls40** | `backend/integration-architecture-final.log`; 공식 frontend architecture/design checkers |
-| E-PRESERVE | Exact AST/assertion/API/ORM/frontend hash 변경, append-only source/test introduction | 최종 Gate 및 `security/post_refactor_contract_changes.json`, `security/refactor_backend_additions.json` |
+| E-ARCH | **1434 modules/6045 internal edges/4194 external imports**, legacy exact edges **0**. native scope port 수정 후 공식 generator/checker 재검증 PASS. Frontend14 features/legacy0. Design **1183 raw colors/35 files/18 surfaces/gap0/screenshot calls40** | `backend/integration-architecture-final.log`, `backend/integration-architecture-native-port.log`; 공식 frontend architecture/design checkers |
+| E-PRESERVE | 일반 CLI **5478/5478 protected lineages·37 items PASS, exit 0**. Frontend **324 source files 및 기존 browser assertions/fixtures/assets/locks PASS**. Exact AST/assertion/API/ORM/frontend hash 변경과 append-only source/test introduction 검증 | `backend/integration-preservation-canonical-final.log`, `backend/integration-frontend-preservation-native-port-complete.log`; `security/post_refactor_contract_changes.json`, `security/refactor_backend_additions.json` |
 
 Browser 증거는 `artifacts/world-memory-integration-20261006/`, 기존 avatar suite는 `artifacts/world-character-management-20261005/*-integration-final/`이다. 합성 payload와 로컬 진단 사진이며 사용자 실제 자료가 아니다.
 
@@ -59,6 +61,7 @@ Browser 증거는 `artifacts/world-memory-integration-20261006/`, 기존 avatar 
 - Memory 18건은 필요한 Vec1 확장이 없어 SKIP했다. durable fake index로 privacy/generation/profile/prepare/delete/lifecycle을 검증했지만 네이티브 확장 실행이나 근접 검색 품질을 PASS로 표시하지 않는다. Chat 6건은 `ANGMOO_DIAGNOSTIC_BENCHMARK=1`을 요구하는 진단이며 일반 회귀에서는 SKIP, 별도 fake-only 실행 E-DIAGNOSTIC에서 모두 PASS했다.
 - M-TECH의 문자/UTF-8/추정 token/출력/attempt/timeout 구현 경계는 fake로 확인했다. 실제 Gemini 4모델 capability, 공식 tokenizer, 비용·AI 기억 품질·p95는 **REAL AI NOT MEASURED**다.
 - Windows 구조/동작/overflow/실제 bbox/사진은 host 증거다. 공식 Linux pixel baseline은 덮어쓰지 않았고 **CANONICAL PIXEL NOT RUN**이다.
+- 추가 E-LIFE의 Next production preview 시작은 실행 도구가 `blocked by policy`로 거부했고 상세 이유는 제공되지 않았다. 그 명령을 재시도하지 않았다. 기존 Next E-NEXT는 PASS이며, 추가 수명 검증은 이미 만든 static을 이용해 E-LIFE로 따로 수행했다.
 - I50/I51 보류. **ROLLOUT PENDING / INSTALLED NOT CHECKED / USER CHECK PENDING / Docker·PostgreSQL·PR·remote CI·push·main merge NOT RUN**.
 - Deprecation warnings는 별도 기록했다. 테스트의 skip/xfail 조건이나 역사 단언을 완화하지 않았다.
 
@@ -72,6 +75,10 @@ Browser 증거는 `artifacts/world-memory-integration-20261006/`, 기존 avatar 
 - crop 합성 PNG decode 실패는 유효한 PNG fixture로 수정했고 실제 canvas→WebP, 취소·저장·reload를 두 환경에서 확인했다. static 영어 생성은 실제 완료 heading을 기다린 뒤 fixture를 확인한다.
 - 첫 전체 lint 오류는 생성 `.next-*` 717파일에서만 발생했다. 격리 dist도 일반 Next 생성물처럼 제외하는 제한된 glob을 추가했다. 제품 source 규칙/경고는 억제하지 않고 전체 lint를 다시 실행했다.
 - 기존 browser select→radio 계약·짧은 설명·접힌 provider 정보 기대는 실제 UI에 맞췄다. 무제한 생성·raw metadata·provider 정보·scope·원문 등의 기존 행동 predicate는 보존하고 전후 hash/AST를 append-only로 기록했다.
+- 최종 Backend 보존 검사에서 Chat 실제 서비스 생성의 불변 계약과 충돌했다. 임의 생성자 reader 주입을 제거하고 기존 Chat scope 조회 포트에 직접 키 모델 조회를 선언·연결했다. 원래 composition AST와 동일함을 확인하고 E-CHAT 893건을 재실행했다. 최초 실패에서 표시된 5468개 introduction 오류는 이 선행 검증 중단으로 보호 대상이 비워져 생긴 연쇄 출력이며 별도 정상 결과로 합산하지 않는다.
+- 공용 Chat 키 저장 함수의 계획된 폐기 응답은 고정된 `410 / world_character_settings_required`와 기록된 전후 AST를 함께 검증한다. 원래 함수의 인자·decorator·DI 및 다른 HTTP endpoint/import는 계속 완전히 같아야 한다. 실제 키 쓰기·임의 승인·잘못된 상태/사유·권한 의존성·response model·다른 endpoint·foreign import를 허용하지 않는 보존 계약 테스트 10건을 추가했다. 역사 anchor/checkpoint/path map을 교체하지 않았다.
+- 이어진 전체 검사에서 새 assertion 증거가 collected pytest의 `tests/...` 대신 `backend/tests/...` ID를 사용한 생성 도구 오류를 발견했다. 기존 record는 유지하고 core commit의 동일한 source blob·전후 assertion 17개를 canonical ID로 append했다. source 12개의 Git 원본 검증을 통과했으며 단언·코드·역사 기준을 바꾸지 않았다. 이 수정 전 전체 실행도 FAIL 기록으로 보존한다.
+- canonical ID 보완 후 동일 전체 검증 논리를 immutable Git 읽기 cache로 실행한 진단은 `integration-preservation-canonical-diagnosis.log`에 PASS로 남겼다. 최종 Gate는 별도 일반 CLI `check_refactor_preservation.py --contracts --nodes`이며 `integration-preservation-canonical-final.log`에서 5478/5478·37 items·exit 0을 확인했다. 진단 실행을 일반 CLI의 종료 결과로 대체하지 않았다.
 
 ## 최종 Gate와 로컬 커밋
 
@@ -82,17 +89,29 @@ Browser 증거는 `artifacts/world-memory-integration-20261006/`, 기존 avatar 
 | full lint / typecheck / catalog / error contracts | PASS |
 | Next production / static build | PASS |
 | 격리 SQLite/fake / Next+static 회귀 | 위 증거 범위 PASS; native SKIP 별도 |
-| backend/API/ORM/assertion preservation | PENDING final check |
-| frontend preservation | PENDING final check |
-| diff / 계획 hash / branch / final clean tree | PENDING final metadata commit |
+| backend/API/ORM/assertion preservation | PASS: 일반 CLI protected lineages 5478/5478, items37, exit0 (`backend/integration-preservation-canonical-final.log`) |
+| frontend preservation | PASS: 324 source files, 기존 browser assertions/fixtures/assets/locks 보존. 최종 source 변경 뒤 재실행도 PASS (`backend/integration-frontend-preservation-native-port-complete.log`) |
+| diff / 계획 hash / branch / final clean tree | diff/원본 계획3개 hash/지정 branch PASS. 마지막 metadata 커밋 후 actual HEAD와 clean tree는 아래 `final-closeout.json`에 별도 기록 |
 
 구현 로컬 커밋:
 
 1. `66995f46a6cca642421ed944c43663b7ca8834f4` — backend 키/schema/실제 소비자/private batch32/회귀.
 2. `2b9956766c51a766d3694585839a12fae62948ce` — 공통 UI, World/Memory/생성/관계망, ko/en, browser 검증.
-3. 뒤따르는 로컬 metadata 커밋에 정확한 introduction/contract 변화/보고서를 기록한다. 최종 HEAD는 별도로 확인한다.
+3. `26a2b7d28a6714a8d25280d2c19d5109dd4d900b` — 정확한 introduction/contract 변화·현재 design 측정·통합 보고서. 보고서 최초 introduction도 공식 helper로 기록한다. 최종 Gate 결과는 뒤따르는 로컬 metadata 커밋에 포함하고 최종 HEAD를 별도로 확인한다.
+
+4. `8cfc8dc1f9c397aea08fd66ac65f75bc62479492` — E-LIFE의 기존 테스트 조작 2개를 persona card에 지정했다. 행동 단언은 유지했고 정확한 frontend preimage/postimage를 기록했다. 별도 static 5건으로 검증했다.
+
+5. `4245b9bd707350b3f0a698c0fb850c0eee1a4470` — World Chat native 모델 조회를 기존 scope 포트로 이동해 원래 실제 서비스 생성 계약을 복원했다. 공식 현재 import inventory를 갱신했고 E-CHAT/E-ARCH를 재검증했다.
+
+6. `45357fb93e8e829bd67d54fb861f1baa42b0f931` — 공용 Chat 키 저장 폐기 계약의 고정 410/전후 AST/HTTP frame 증명과 10건의 정상·거부 검증을 추가했다. 원래 durable transaction test 본문은 그대로 복원하고 native key 준비를 같은 caller Session의 fixture로 선언했다. 새 source1/node10을 공식 introduction helper로 기록했다.
+
+7. 최종 metadata 로컬 커밋 — 이 보고서와 기존 두 증거 파일의 append만 포함한다. 검증 후 제품 소스나 테스트 단언을 추가로 변경하지 않았다. 자기 자신의 SHA를 문서에 포함할 수 없으므로 커밋 후 실제 branch/HEAD/clean tree/일반 CLI 종료 결과/계획 hash는 `artifacts/world-memory-integration-20261006/final-closeout.json`에 기록한다. 이 파일과 실행 로그는 ignored 로컬 검증 산출물이다.
 
 증거 변화는 기존 record를 고치지 않고 append했다. backend: source190/definition279/assertion17/API·DTO48/ORM8, introduction45 sources/48 pytest nodes. UI: source78/frontend hash53, introduction22 sources. 공식 helper가 commit의 실제 collection과 source blob을 기록한다. frozen checkpoint/path map/historic migration은 교체하지 않는다.
+
+추가 수명 증거는 source1/frontend hash1, Chat scope 이동은 source6/definition6, Chat 폐기 증명·fixture 정리는 source3/definition1이다. 이 세 추가 변경은 기존 assertion predicate/API/ORM을 바꾸지 않았다. introduction 기록은 보고서 source1과 새 보존 검증 source1/node10도 포함한다. canonical pytest ID 보완 source12/assertion17은 원래 core의 같은 단언이며 새로 바꾼 17개의 단언으로 중복 합산하지 않는다. 총 6개의 신규 contract-change record와 4개의 신규 introduction record를 기존 prefix에 append했다.
+
+시작 HEAD와 JSON 구조를 대조해 contract-change의 기존 165 record와 introduction의 기존 354 record가 각각 현재 171/358 record의 변경 없는 prefix임을 확인했다. 보고서의 I00–I49 50개, 계약 124개, 기술값 7개, 검증 의무 160개의 고유 ID, 원본 단계 68개와 관계망 단계 6개를 따로 확인했다. 이 대응표는 실제 실행 로그와 구현 소유자를 연결하며 160개의 새 독립 테스트가 모두 실행됐다는 뜻이 아니다.
 
 ## 재시작과 재검증 명령
 
@@ -119,6 +138,19 @@ Browser는 `playwright.world-memory-integration.config.ts`의 실제 testMatch�
 새 접수를 중단→진행 작업 정산→이전 input policy 복귀 fixture를 실행했다. schema/data/private 제약 downgrade는 하지 않는다. 실제 사용자 환경 반영과 AI 측정은 I50/I51의 별도 범위다.
 
 <!-- TRACEABILITY: 실제 증거 대응 -->
+
+## R-P01–R-P06 실제 관계망 작업 대응
+
+| 단계 | 실제 소유자/작업 | 증거 |
+| --- | --- | --- |
+| R-P01 | Relationships query/client/review + 기존 DTO/state/source utility + 기존 graph/static/avatar specs의 보존 기준 | E-ARCH/E-NEXT/E-STATIC |
+| R-P02 | 공통 SettingsCard 표시·헤더·review·map·list의 semantic token/anatomy·간결한 도움말 | E-FE/E-NEXT/E-STATIC |
+| R-P03 | feature-owned `graph-layout.ts`·전체 node/name/direction·양방향 관계 목록·실제 bbox 겹침 검사 | world-memory-extra-ui 6cases + 기존 avatar 5cases, 양 환경 |
+| R-P04 | 기존 source/fallback/status 우선순위·scoped graph/review 요청 sequence/AbortSignal/auth/runtime 수명·GET 무호출 | relationship-graph/product-shell 3cases + static provider 상태 + E-LIFE |
+| R-P05 | ko/en × 1/7/20 nodes × 390/480/960/1440px·200%·원문/목록·overflow·안전 avatar·Next/static 실제 수집 | E-NEXT/E-STATIC 및 artifacts/world-memory-integration-20261006 |
+| R-P06 | 공식 architecture/design·catalog/lint/typecheck/build·보존·R-C12/R-T16 대응·로컬 보고 | E-ARCH/E-FE/E-PRESERVE 및 이 통합 보고서 |
+
+관계망 검증 보고는 이 통합 보고서에 포함했다. 별도 계획의 예정 보고서명/예정 config명 대신 실제 수집된 공통 config/spec과 독립 preview/suffix 경로를 기록했다. 공식 pixel/실제 provider/설치판의 미수행 상태는 위 경계와 같다.
 
 ## I00–I49 단계별 실제 구현 대응
 
@@ -171,9 +203,9 @@ Browser는 `playwright.world-memory-integration.config.ts`의 실제 testMatch�
 | I44 | 프로필 banner/avatar·upload/crop·생성 lifecycle | LOCAL IMPLEMENTED | E-FE, E-NEXT, E-STATIC |
 | I45 | Next/static 브라우저·디자인·기능 보존 통합 | LOCAL IMPLEMENTED | E-NEXT, E-STATIC |
 | I46 | 공식 앱 factory·SQLite 기동/health·격리 smoke | LOCAL IMPLEMENTED | E-CONTRACT |
-| I47 | 아키텍처·보존·catalog·lint/typecheck·빌드 | FINAL GATE PENDING | E-ARCH, E-FE, E-PRESERVE |
+| I47 | 아키텍처·보존·catalog·lint/typecheck·빌드 | LOCAL COMPLETE | E-ARCH, E-FE, E-PRESERVE |
 | I48 | 새 접수 정책 연결·구 작업 공존·되돌리기 검증 | LOCAL IMPLEMENTED | E-CONTRACT |
-| I49 | 통합 완료 판정·논리별 로컬 커밋·재시작 보고 | FINAL GATE PENDING | E-PRESERVE |
+| I49 | 통합 완료 판정·논리별 로컬 커밋·재시작 보고 | LOCAL COMPLETE | E-PRESERVE 및 final-closeout.json |
 
 R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner/query/state 보존, 공통 카드 소비, 결정적 지도/방향별 목록, scoped read 수명, 양 환경 ko/en/긴 이름/실제 bbox/기존 avatar 검증과 구조/보고 증거다.
 
@@ -197,18 +229,6 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | M-C14 | I07, I08, I21, I48 | E-AUTO, E-CHAT, E-CONTRACT, E-MEM, E-SCOPE | 전체 E-MEM/E-CONTRACT 및 Memory 소유 source; 실제 AI 품질 별도 |
 | M-C15 | I22, I24 | E-CHAT, E-CONTRACT, E-MEM | 전체 E-MEM/E-CONTRACT 및 Memory 소유 source; 실제 AI 품질 별도 |
 | M-C16 | I10, I17, I46 | E-AUTO, E-CHAT, E-CONTRACT, E-MEM, E-SCOPE | 전체 E-MEM/E-CONTRACT 및 Memory 소유 source; 실제 AI 품질 별도 |
-| R-C01 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C02 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C03 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C04 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C05 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C06 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C07 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C08 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C09 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C10 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C11 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
-| R-C12 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | U-C01 | I31, I34, I45 | E-FE, E-NEXT, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | U-C02 | I31, I34, I45 | E-FE, E-NEXT, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | U-C03 | I31, I34, I45 | E-FE, E-NEXT, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
@@ -305,6 +325,18 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | U-C94 | I04, I09, I14, I23, I39 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | U-C95 | I04, I07, I14, I39 | E-ARCH, E-AUTO, E-CONTRACT, E-FE, E-NEXT, E-SCOPE, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | U-C96 | I04, I09, I10, I15, I21, I30 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-MEM, E-SCOPE | 구현 단계의 실제 owner/source와 위 증거 묶음 |
+| R-C01 | R-P01/R-P04 / I03,I41 | E-ARCH, E-NEXT, E-STATIC | 기존 Relationships query/client/DTO/state/source 및 scoped 읽기 소비자 보존 |
+| R-C02 | R-P02 / I41 | E-ARCH, E-FE, E-NEXT, E-STATIC | 공통 SettingsCard와 relationship-graph-frame의 카드 anatomy/semantic token |
+| R-C03 | R-P02/R-P05 / I41,I45 | E-NEXT, E-STATIC | frame의 헤더→정리→지도→방향별 목록→조건부 근거와 복귀/depth 조작 |
+| R-C04 | R-P02/R-P04 / I41 | E-FE, E-NEXT, E-STATIC | 짧은 안내·보조 provider 정보·정리 상태/이력의 기존 의미 |
+| R-C05 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | graph-layout/node/frame 및 기존 ProfileAvatar·방향별 목록 회귀 |
+| R-C06 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | 결정적 layout·화살표 label 제거·목록의 전체 관계 설명·실제 bbox 검사 |
+| R-C07 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | 관계 목록의 label/perception/지표/상호작용/시각/버전 표시 |
+| R-C08 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | review 상태/예약/시간대/jobs/제외 안내와 조건부 사건 근거 |
+| R-C09 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | 기존 relationship-graph utility 및 graph/static provider 상태 회귀 |
+| R-C10 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC, E-LIFE | scoped graph/review client의 sequence/abort/auth/runtime 수명과 GET 조작 |
+| R-C11 | R-P02–R-P05 / I41,I45 | E-FE, E-NEXT, E-STATIC | ko/en·Next/static·긴 이름·390/480/960/1440px·200% 및 동등 목록 |
+| R-C12 | R-P06 / I47,I49 | E-ARCH, E-FE, E-PRESERVE | 이 보고서의 branch/로컬 커밋·사용자 자료/외부 실행 경계 및 원본 계획 hash |
 
 ## 기술 시작값7개와 실측 경계
 
@@ -350,22 +382,6 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | M-V24 | I10, I17, I39, I40, I46 | E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | test_consolidation_requests / test_episode_schedule_shutdown / test_p8_l_r_memory_batch_api / product-shell Memory controls |
 | M-V25 | I28, I40 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | 전체 E-MEM/E-CONTRACT 및 Memory 소유 source; 실제 AI 품질 별도 |
 | M-V26 | I40, I41, I45 | E-FE, E-NEXT, E-STATIC | 전체 E-MEM/E-CONTRACT 및 Memory 소유 source; 실제 AI 품질 별도 |
-| R-T01 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T02 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T03 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T04 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T05 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T06 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T07 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T08 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T09 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T10 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T11 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T12 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T13 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T14 | I10, I27, I39, I45 | E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T15 | §16 / I03,I41,I45,I47,I49 | scope 밖 / 별도 실행 | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
-| R-T16 | I47, I49 | E-ARCH, E-FE, E-PRESERVE | world-memory-extra-ui + relationship-graph/product-shell + static-product-shell + profile-relationship-avatar; Next/static |
 | U-T01 | I30, I31 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | test_world_key_execution / test_world_character_configuration / 기존 실제 world/chat scope 회귀 |
 | U-T02 | I30, I31 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | test_world_key_execution / test_world_character_configuration / 기존 실제 world/chat scope 회귀 |
 | U-T03 | I30, I31, I34 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | test_world_key_execution / test_world_character_configuration / 기존 실제 world/chat scope 회귀 |
@@ -376,7 +392,6 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | U-T08 | I30, I31, I45 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | test_world_key_execution / test_world_character_configuration / 기존 실제 world/chat scope 회귀 |
 | U-T09 | I30, I31, I34 | E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-STATIC | test_world_key_execution / test_world_character_configuration / 기존 실제 world/chat scope 회귀 |
 | U-T10 | I32, I33, I45 | E-FE, E-NEXT, E-STATIC | world-memory-integration-ui status/profile/sticky ko/en + profile-relationship-avatar Next/static |
-| U-T100 | I04, I05, I06, I08, I09, I10, I14, I15, I21, I30, I39, I40, I45, I46, I47 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-PRESERVE, E-SCOPE, E-STATIC | test_world_credentials / test_world_key_execution / test_world_chat_configuration / test_world_activity_v30 |
 | U-T11 | I32, I41, I45 | E-FE, E-NEXT, E-STATIC | world-memory-integration-ui status/profile/sticky ko/en + profile-relationship-avatar Next/static |
 | U-T12 | I34, I45 | E-FE, E-NEXT, E-STATIC | world-memory-integration-ui status/profile/sticky ko/en + profile-relationship-avatar Next/static |
 | U-T13 | I32, I34, I45 | E-FE, E-NEXT, E-STATIC | world-memory-integration-ui status/profile/sticky ko/en + profile-relationship-avatar Next/static |
@@ -466,6 +481,7 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | U-T97 | I04, I05, I06, I08, I09, I10, I14, I15, I21, I30, I38, I39, I45, I46, I47 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-PRESERVE, E-SCOPE, E-STATIC | test_world_credentials / test_world_key_execution / test_world_chat_configuration / test_world_activity_v30 |
 | U-T98 | I04, I05, I06, I07, I08, I09, I10, I14, I15, I21, I30, I38, I39, I45, I46, I47 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-PRESERVE, E-SCOPE, E-STATIC | test_world_credentials / test_world_key_execution / test_world_chat_configuration / test_world_activity_v30 |
 | U-T99 | I04, I05, I06, I07, I08, I09, I10, I14, I15, I21, I30, I40, I45, I46 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | product-shell Memory owner controls / test_world_embedding_preparation / E-MEM; native Vec1 품질 미측정 |
+| U-T100 | I04, I05, I06, I08, I09, I10, I14, I15, I21, I30, I39, I40, I45, I46, I47 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-PRESERVE, E-SCOPE, E-STATIC | test_world_credentials / test_world_key_execution / test_world_chat_configuration / test_world_activity_v30 |
 | X-T01 | I09, I10, I21, I23, I30, I39 | E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | X-T02 | I02, I09, I14, I15, I21, I30 | E-ARCH, E-AUTO, E-CHAT, E-CONTRACT, E-MEM, E-SCOPE | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | X-T03 | I11, I21, I30, I41 | E-AUTO, E-CHAT, E-CONTRACT, E-FE, E-MEM, E-NEXT, E-SCOPE, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
@@ -484,6 +500,22 @@ R-P01–R-P06도 I03/I41/I45/I47/I49에 포함했다. 실제 Relationships owner
 | X-T16 | I04, I07, I42, I45 | E-ARCH, E-AUTO, E-CONTRACT, E-FE, E-NEXT, E-SCOPE, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | X-T17 | I02, I31, I38, I41, I46 | E-ARCH, E-CONTRACT, E-FE, E-NEXT, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
 | X-T18 | I45, I51 | E-NEXT, E-STATIC | 구현 단계의 실제 owner/source와 위 증거 묶음 |
+| R-T01 | R-P02 / I41,I45,I47 | E-ARCH, E-FE, E-NEXT, E-STATIC | world-memory-extra-ui/card anatomy + 공식 design 검사 |
+| R-T02 | R-P02/R-P05 / I41,I45 | E-NEXT, E-STATIC | world-memory-extra-ui/relationship-graph product shell의 DOM 순서·복귀/depth 조작 |
+| R-T03 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | 기존 relationship-graph/product-shell·static-product-shell의 review 상태/이력 표시 |
+| R-T04 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | 기존 product shell의 depth/retry scoped GET 및 합성 요청 기록 |
+| R-T05 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | world-memory-extra-ui의 중앙 node·방향별 목록 및 기존 graph 회귀 |
+| R-T06 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | ko/en×1/7/20 nodes·실제 bbox pairwise 비겹침·label 목록·overflow |
+| R-T07 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | product shell/extra UI의 전체 label·지표·perception details |
+| R-T08 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | 기존 relationship-graph/product-shell·static-product-shell의 조건부 사건 근거/링크 |
+| R-T09 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC | 기존 graph/static provider 상태·source/fallback 우선순위 회귀 |
+| R-T10 | R-P04/R-P05 / I41,I45 | E-NEXT, E-STATIC, E-LIFE | scoped graph/review 요청 수명 구현·기존 늦은 응답/runtime/avatar 회귀 |
+| R-T11 | R-P02–R-P05 / I41,I45 | E-FE, E-NEXT, E-STATIC | 2609키/16namespace parity 및 두 언어 graph 원문 표시 |
+| R-T12 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | extra UI의 390/480/960/1440px·200%·bbox/overflow와 semantic 관계 목록 |
+| R-T13 | R-P03/R-P05 / I41,I45 | E-NEXT, E-STATIC | profile-relationship-avatar 기존 5건을 두 환경에서 재실행 |
+| R-T14 | R-P04/R-P05 / I10,I27,I39,I45 | E-AUTO, E-CHAT, E-CONTRACT, E-MEM, E-NEXT, E-STATIC | 동일 subject 정리/예약 조회와 native key·memory32·scoped graph consumer |
+| R-T15 | R-P05 / I45 | E-NEXT, E-STATIC | 실제 integration config의 두 환경 spec 수집/실행·기존 graph/static/avatar 회귀 |
+| R-T16 | R-P06 / I47,I49 | E-ARCH, E-FE, E-PRESERVE | 이 보고서의 R 계약/단계/검증 대응·로컬 branch/commit·미수행 경계 |
 
 ## 원본 구현68단계 대응 및 범위 밖 실행
 

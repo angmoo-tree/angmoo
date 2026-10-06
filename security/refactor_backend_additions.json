@@ -31046,6 +31046,53 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "6cee6d4fac745022d3f1df8864d312e7889177e2",
+      "feature_id": "AR-WORLD-EVIDENCE",
+      "reason": "First introduction of the integrated local implementation/verification handoff report; existing snapshots and code/test introductions remain immutable",
+      "tracked_files": {
+        "docs/verification/world-ui-memory-batch32-integration-20261006.md": "8b6f03a8673e656bd7a16fd87641c5778e778326"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "f1a99341718edc516b7f715e08bfca379639afb9",
+      "feature_id": "AR-WORLD-CHAT-RETIREMENT",
+      "reason": "Prove the explicitly requested shared Chat key write retirement with exact committed AST evidence, fixed 410 response, unchanged HTTP frames and ten fail-closed controls.",
+      "tracked_files": {
+        "backend/tests/runtime/test_chat_settings_retirement_contract.py": "e07ac0db54a5294860ab648dfa03115d8307c824"
+      },
+      "test_nodes": [
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[auth-dependency]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[foreign-import]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[global-write]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[other-endpoint]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[response-model]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[wrong-reason]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame[wrong-status]",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_exact_committed_retirement_preserves_the_http_frame",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_unchanged_original_route_requires_no_retirement_record",
+        "tests/runtime/test_chat_settings_retirement_contract.py::test_unsigned_retirement_fails_closed"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_chat_settings_retirement_contract.py": {
+          "signed_change": [],
+          "test_exact_committed_retirement_preserves_the_http_frame": [],
+          "test_unchanged_original_route_requires_no_retirement_record": [],
+          "test_unsigned_retirement_fails_closed": [
+            "pytest.raises(ValueError, match='HTTP endpoint or dependency')"
+          ],
+          "test_arbitrary_approved_changes_cannot_retire_or_change_the_http_frame": [
+            "pytest.raises(ValueError, match='HTTP endpoint or dependency')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_chat_settings_retirement_contract.py": {}
+      }
     }
   ]
 }
